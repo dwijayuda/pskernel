@@ -34,6 +34,7 @@ def psBackendRustLetFunctionResultFixture : PsVerifiedIrModule :=
               (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.natAdd
+                []
                 [
                   PsVerifiedIrExpr.var "value",
                   PsVerifiedIrExpr.var "delta"
@@ -88,6 +89,7 @@ def psBackendRustLetFunctionResultFixture : PsVerifiedIrModule :=
             (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.natAdd
+              []
               [
                 PsVerifiedIrExpr.var "value",
                 PsVerifiedIrExpr.var "offset"

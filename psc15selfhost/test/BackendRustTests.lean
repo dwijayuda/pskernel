@@ -48,6 +48,7 @@ def psBackendRustIntrinsicModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.natAdd
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)
@@ -173,10 +174,12 @@ def psBackendRustStringModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.stringPush
+            []
             [
               PsVerifiedIrExpr.var "value",
               PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.charOfNat
+                []
                 [
                   PsVerifiedIrExpr.literal
                     (PsVerifiedIrLiteral.natural 33)
@@ -196,6 +199,7 @@ def psBackendRustStringModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.stringUtf8ByteSize
+            []
             [PsVerifiedIrExpr.var "value"]
       }
     ]
@@ -231,6 +235,7 @@ def psBackendRustArrayModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.arraySize
+            [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
             [PsVerifiedIrExpr.var "xs"]
       },
       {
@@ -264,6 +269,10 @@ def psBackendRustArrayModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.arrayMap
+            [
+              PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat,
+              PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+            ]
             [
               PsVerifiedIrExpr.var "arrayIdOnly",
               PsVerifiedIrExpr.var "xs"
@@ -306,6 +315,7 @@ def psBackendRustValueModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.natAdd
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.var "one"
@@ -516,6 +526,7 @@ def psBackendRustFunctionStorageModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.natAdd
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)
@@ -618,6 +629,7 @@ def psBackendRustCapturedFunctionStorageModule : PsVerifiedIrModule :=
                   (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
                   (PsVerifiedIrExpr.intrinsic
                     PsVerifiedIrIntrinsic.natAdd
+                    []
                     [
                       PsVerifiedIrExpr.var "x",
                       PsVerifiedIrExpr.var "offset"
@@ -673,6 +685,7 @@ def psBackendRustConstructorFunctionStorageModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.natAdd
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)
@@ -799,6 +812,7 @@ def psBackendRustCapturedConstructorFunctionStorageModule : PsVerifiedIrModule :
                   (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
                   (PsVerifiedIrExpr.intrinsic
                     PsVerifiedIrIntrinsic.natAdd
+                    []
                     [
                       PsVerifiedIrExpr.var "x",
                       PsVerifiedIrExpr.var "offset"
@@ -899,6 +913,7 @@ def psBackendRustFunctionResultModule : PsVerifiedIrModule :=
             (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.natAdd
+              []
               [
                 PsVerifiedIrExpr.var "value",
                 PsVerifiedIrExpr.var "offset"
@@ -994,10 +1009,12 @@ def psBackendRustNestedFunctionResultModule : PsVerifiedIrModule :=
               (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.natAdd
+                []
                 [
                   PsVerifiedIrExpr.var "seed",
                   PsVerifiedIrExpr.intrinsic
                     PsVerifiedIrIntrinsic.natAdd
+                    []
                     [
                       PsVerifiedIrExpr.var "x",
                       PsVerifiedIrExpr.var "y"
@@ -1097,6 +1114,7 @@ def psBackendRustBadIntrinsicArityModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.natAdd
+            []
             [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)]
       }
     ]

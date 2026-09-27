@@ -74,6 +74,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
               [PsVerifiedIrExpr.var "text"])
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.stringUtf8ByteSize
+              []
               [PsVerifiedIrExpr.var "text"])
       },
       {
@@ -152,6 +153,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
               (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.natAdd
+                []
                 [
                   PsVerifiedIrExpr.var "value",
                   PsVerifiedIrExpr.var "offset"
@@ -178,6 +180,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                   ])
                 (PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.natAdd
+                  []
                   [
                     PsVerifiedIrExpr.var "first",
                     PsVerifiedIrExpr.var "second"
@@ -212,6 +215,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                 (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
                 (PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.natAdd
+                  []
                   [
                     PsVerifiedIrExpr.var "value",
                     PsVerifiedIrExpr.var "offset"
@@ -237,12 +241,15 @@ def psBackendDiffModule : PsVerifiedIrModule :=
               [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.arrayPush
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
               [
                 PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.arrayPush
+                  [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                   [
                     PsVerifiedIrExpr.intrinsic
                       PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+                      [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                       [
                         PsVerifiedIrExpr.literal
                           (PsVerifiedIrLiteral.natural 2)
@@ -268,6 +275,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                 (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
                 (PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.natAdd
+                  []
                   [
                     PsVerifiedIrExpr.var "value",
                     PsVerifiedIrExpr.var "offset"
@@ -280,11 +288,16 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                 (PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.arrayMap
                   [
+                    PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat,
+                    PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+                  ]
+                  [
                     PsVerifiedIrExpr.var "addOffset",
                     PsVerifiedIrExpr.var "xs"
                   ])
                 (PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.arrayGetD
+                  [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                   [
                     PsVerifiedIrExpr.var "ys",
                     PsVerifiedIrExpr.literal
@@ -312,6 +325,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
             (PsVerifiedIrIntrinsic.machineIntBinary
               PsVerifiedIrMachineIntegerType.uint8
               PsVerifiedIrIntegerBinaryOp.add)
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.var "y"
@@ -336,6 +350,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
             (PsVerifiedIrIntrinsic.machineIntBinary
               PsVerifiedIrMachineIntegerType.int16
               PsVerifiedIrIntegerBinaryOp.mul)
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.var "y"
@@ -360,6 +375,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
             (PsVerifiedIrIntrinsic.machineIntCompare
               PsVerifiedIrMachineIntegerType.uint32
               PsVerifiedIrIntegerCompareOp.lt)
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.var "y"
@@ -384,6 +400,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
             (PsVerifiedIrIntrinsic.floatBinary
               PsVerifiedIrFloatingType.float32
               PsVerifiedIrFloatBinaryOp.add)
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.var "y"
@@ -408,6 +425,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
             (PsVerifiedIrIntrinsic.floatBinary
               PsVerifiedIrFloatingType.float
               PsVerifiedIrFloatBinaryOp.div)
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.var "y"
@@ -430,6 +448,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.natDiv
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.var "y"
@@ -452,6 +471,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.natMod
+            []
             [
               PsVerifiedIrExpr.var "x",
               PsVerifiedIrExpr.var "y"
@@ -470,9 +490,11 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.charToNat
+            []
             [
               PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.charOfNat
+                []
                 [PsVerifiedIrExpr.var "value"]
             ]
       },
@@ -494,18 +516,21 @@ def psBackendDiffModule : PsVerifiedIrModule :=
           PsVerifiedIrExpr.ifE
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.natLt
+              []
               [
                 PsVerifiedIrExpr.var "x",
                 PsVerifiedIrExpr.var "y"
               ])
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.natAdd
+              []
               [
                 PsVerifiedIrExpr.var "x",
                 PsVerifiedIrExpr.var "y"
               ])
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.natSub
+              []
               [
                 PsVerifiedIrExpr.var "x",
                 PsVerifiedIrExpr.var "y"
@@ -528,9 +553,11 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.intAdd
+            []
             [
               PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.intNeg
+                []
                 [PsVerifiedIrExpr.var "x"],
               PsVerifiedIrExpr.var "y"
             ]
@@ -548,6 +575,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.stringLength
+            []
             [PsVerifiedIrExpr.var "text"]
       },
       {
@@ -567,6 +595,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.stringNext
+            []
             [
               PsVerifiedIrExpr.var "text",
               PsVerifiedIrExpr.var "position"
@@ -589,6 +618,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.stringGet
+            []
             [
               PsVerifiedIrExpr.var "text",
               PsVerifiedIrExpr.var "position"
@@ -611,6 +641,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.stringAtEnd
+            []
             [
               PsVerifiedIrExpr.var "text",
               PsVerifiedIrExpr.var "position"
@@ -637,6 +668,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.stringExtract
+            []
             [
               PsVerifiedIrExpr.var "text",
               PsVerifiedIrExpr.var "begin",
@@ -660,6 +692,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.stringEq
+            []
             [
               PsVerifiedIrExpr.var "left",
               PsVerifiedIrExpr.var "right"
@@ -678,13 +711,16 @@ def psBackendDiffModule : PsVerifiedIrModule :=
         body :=
           PsVerifiedIrExpr.intrinsic
             PsVerifiedIrIntrinsic.stringUtf8ByteSize
+            []
             [
               PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.stringPush
+                []
                 [
                   PsVerifiedIrExpr.var "text",
                   PsVerifiedIrExpr.intrinsic
                     PsVerifiedIrIntrinsic.charOfNat
+                    []
                     [
                       PsVerifiedIrExpr.literal
                         (PsVerifiedIrLiteral.natural 33)
@@ -714,12 +750,15 @@ def psBackendDiffModule : PsVerifiedIrModule :=
               [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.arrayPush
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
               [
                 PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.arrayPush
+                  [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                   [
                     PsVerifiedIrExpr.intrinsic
                       PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+                      [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                       [
                         PsVerifiedIrExpr.literal
                           (PsVerifiedIrLiteral.natural 2)
@@ -735,6 +774,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                 [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.arraySet
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                 [
                   PsVerifiedIrExpr.var "xs",
                   PsVerifiedIrExpr.literal
@@ -744,9 +784,11 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                 ])
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.natAdd
+                []
                 [
                   PsVerifiedIrExpr.intrinsic
                     PsVerifiedIrIntrinsic.arrayGet
+                    [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                     [
                       PsVerifiedIrExpr.var "xs",
                       PsVerifiedIrExpr.literal
@@ -754,6 +796,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                     ],
                   PsVerifiedIrExpr.intrinsic
                     PsVerifiedIrIntrinsic.arrayGet
+                    [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                     [
                       PsVerifiedIrExpr.var "ys",
                       PsVerifiedIrExpr.literal
@@ -783,12 +826,15 @@ def psBackendDiffModule : PsVerifiedIrModule :=
               [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.arrayPush
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
               [
                 PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.arrayPush
+                  [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                   [
                     PsVerifiedIrExpr.intrinsic
                       PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+                      [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                       [
                         PsVerifiedIrExpr.literal
                           (PsVerifiedIrLiteral.natural 2)
@@ -799,6 +845,10 @@ def psBackendDiffModule : PsVerifiedIrModule :=
               ])
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.arrayFoldl
+              [
+                PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat,
+                PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+              ]
               [
                 PsVerifiedIrExpr.lambda
                   [
@@ -814,6 +864,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                   (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
                   (PsVerifiedIrExpr.intrinsic
                     PsVerifiedIrIntrinsic.natAdd
+                    []
                     [
                       PsVerifiedIrExpr.var "acc",
                       PsVerifiedIrExpr.var "value"
@@ -825,6 +876,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                   (PsVerifiedIrLiteral.natural 0),
                 PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.arraySize
+                  [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                   [PsVerifiedIrExpr.var "xs"]
               ])
       },
@@ -850,12 +902,15 @@ def psBackendDiffModule : PsVerifiedIrModule :=
               [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
             (PsVerifiedIrExpr.intrinsic
               PsVerifiedIrIntrinsic.arrayPush
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
               [
                 PsVerifiedIrExpr.intrinsic
                   PsVerifiedIrIntrinsic.arrayPush
+                  [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                   [
                     PsVerifiedIrExpr.intrinsic
                       PsVerifiedIrIntrinsic.arrayEmptyWithCapacity
+                      [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                       [
                         PsVerifiedIrExpr.literal
                           (PsVerifiedIrLiteral.natural 2)
@@ -871,6 +926,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                 [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat])
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.arraySetIfInBounds
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                 [
                   PsVerifiedIrExpr.var "xs",
                   PsVerifiedIrExpr.literal
@@ -880,6 +936,7 @@ def psBackendDiffModule : PsVerifiedIrModule :=
                 ])
               (PsVerifiedIrExpr.intrinsic
                 PsVerifiedIrIntrinsic.arrayGetD
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
                 [
                   PsVerifiedIrExpr.var "ys",
                   PsVerifiedIrExpr.literal

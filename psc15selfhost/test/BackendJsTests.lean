@@ -107,6 +107,12 @@ def main (args : List String) : IO Unit := do
       jsFixtureFunctionDecl "caller" "value" .nat .nat
         (.letE "identity" (.primitive .nat) (.var "value")
           (.call (.var "identity") [] [(.literal (.natural 1))]))] }
+  jsRequireError "eager forward call" { psVerifiedIrModuleEmpty with
+    declarations := [
+      jsFixtureExprDecl "eager" .nat
+        (.call (.var "later") [] [(.literal (.natural 1))]),
+      jsFixtureFunctionDecl "later" "value" .nat .nat (.var "value")
+    ] }
   jsRequireError "call type arguments" { psVerifiedIrModuleEmpty with
     declarations := [identity,
       jsFixtureFunctionDecl "caller" "value" .nat .nat

@@ -60,13 +60,15 @@ requireMarkers("LevelContext", levelContext, [
   'PsLevelAssignment.mk id resolved',
   'let leftValue := psLevelInstantiate context left;',
   'let rightValue := psLevelInstantiate context right;',
-  'let first := psLevelUnifyWithFuel context fuel leftA rightA;',
+  'match leftValue with',
+  'match rightValue with',
   'let first := psLevelUnifyWithFuel context fuel leftA rightA;',
 ]);
 forbidMarkers("LevelContext", levelContext, [
   'List.cons { id := id, value := resolved } context.assignments',
+  'match leftValue, rightValue with',
 ]);
 
 process.stdout.write(
-  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 let/application subset)\n",
+  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 let/application/unary-match subset)\n",
 );

@@ -19,6 +19,7 @@ try {
   const {
     identity: directIdentity,
     choose: directChoose,
+    callIdentity: directCallIdentity,
     renamedLocal: directRenamedLocal,
     ...directValues
   } = direct;
@@ -34,6 +35,7 @@ try {
   assert.equal(directIdentity(37n), 37n);
   assert.equal(directChoose(true), 10n);
   assert.equal(directChoose(false), 20n);
+  assert.equal(directCallIdentity(73n), 73n);
   assert.deepEqual(Object.keys(await import(pathToFileURL(path.join(out, 'empty.mjs')))), []);
   run('tsc', [path.join(out, 'reference.ts'), '--target', 'ES2020', '--module', 'ES2020',
     '--outDir', path.join(out, 'reference'), '--strict', '--skipLibCheck']);
@@ -44,6 +46,7 @@ try {
   const {
     identity: referenceIdentity,
     choose: referenceChoose,
+    callIdentity: referenceCallIdentity,
     ...referenceValues
   } = reference;
   assert.deepEqual(directValues, referenceValues);
@@ -51,6 +54,8 @@ try {
     referenceIdentity(9007199254740993123456789n));
   assert.equal(directChoose(true), referenceChoose(true));
   assert.equal(directChoose(false), referenceChoose(false));
+  assert.equal(directCallIdentity(9007199254740993123456789n),
+    referenceCallIdentity(9007199254740993123456789n));
   console.log('BACKEND_JS_EXECUTION_DIFFERENTIAL: PASS');
 } finally {
   rmSync(out, { recursive: true, force: true });

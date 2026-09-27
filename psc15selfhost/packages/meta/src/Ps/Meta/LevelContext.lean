@@ -124,30 +124,41 @@ def psLevelUnifyWithFuel
       if psLevelStructuralEq leftValue rightValue then
         { context := context, success := true }
       else
-        match leftValue, rightValue with
-        | .mvar id, value =>
-            match psLevelAssign context id value with
+        match leftValue with
+        | .mvar id =>
+            match psLevelAssign context id rightValue with
             | Option.none => { context := context, success := false }
             | Option.some next => { context := next, success := true }
-        | value, .mvar id =>
-            match psLevelAssign context id value with
-            | Option.none => { context := context, success := false }
-            | Option.some next => { context := next, success := true }
-        | .succ leftInner, .succ rightInner =>
-            psLevelUnifyWithFuel context fuel leftInner rightInner
-        | .max leftA leftB, .max rightA rightB =>
-            let first := psLevelUnifyWithFuel context fuel leftA rightA;
-            if first.success then
-              psLevelUnifyWithFuel first.context fuel leftB rightB
-            else
-              first
-        | .imax leftA leftB, .imax rightA rightB =>
-            let first := psLevelUnifyWithFuel context fuel leftA rightA;
-            if first.success then
-              psLevelUnifyWithFuel first.context fuel leftB rightB
-            else
-              first
-        | _, _ => { context := context, success := false }
+        | value =>
+            match rightValue with
+            | .mvar id =>
+                match psLevelAssign context id value with
+                | Option.none => { context := context, success := false }
+                | Option.some next => { context := next, success := true }
+            | .succ rightInner =>
+                match value with
+                | .succ leftInner =>
+                    psLevelUnifyWithFuel context fuel leftInner rightInner
+                | _ => { context := context, success := false }
+            | .max rightA rightB =>
+                match value with
+                | .max leftA leftB =>
+                    let first := psLevelUnifyWithFuel context fuel leftA rightA;
+                    if first.success then
+                      psLevelUnifyWithFuel first.context fuel leftB rightB
+                    else
+                      first
+                | _ => { context := context, success := false }
+            | .imax rightA rightB =>
+                match value with
+                | .imax leftA leftB =>
+                    let first := psLevelUnifyWithFuel context fuel leftA rightA;
+                    if first.success then
+                      psLevelUnifyWithFuel first.context fuel leftB rightB
+                    else
+                      first
+                | _ => { context := context, success := false }
+            | _ => { context := context, success := false }
 
 def psLevelUnify
     (context : PsLevelMetaContext)

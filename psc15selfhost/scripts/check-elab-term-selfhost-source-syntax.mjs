@@ -15,6 +15,7 @@ const required = [
   /let smaller : PsName -> PsName :=\s*psSyntaxNameAppendSegments rest;/,
   /fun \(name : PsName\) =>\s*smaller \(psNameAppendStr name segment\)/,
   /psSyntaxNameAppendSegments\s+rest\s*\(psNameAppendStr PsName\.anonymous first\)/,
+  /def psElabListLength\s*\{α : Type\}\s*:\s*List α -> Nat\s*\| \[\] => 0\s*\| _ :: rest => Nat\.succ \(psElabListLength rest\)/,
 ];
 
 for (const pattern of required) {
@@ -109,10 +110,14 @@ if (!/psElabFindStructureField\s+current\.context\s+typeName\s+current\.term\s+f
 if (/psElabFindStructureField\s+current\.context\s+typeName\s+current\.term\s+fieldName\s+0\s+constructorInfo\.numFields\s+fieldCursor/.test(projectionStep)) {
   throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabProjectionStep old psElabFindStructureField call order");
 }
+if (!/Nat\.beq \(psElabListLength view\.args\) info\.numParams/.test(projectionStep)) {
+  throw new Error("PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX_MISSING: psElabProjectionStep local list length");
+}
 
 const forbidden = [
   /def psSyntaxNameAppendSegments\s*\(name : PsName\)\s*\(segments : List String\)/,
   /psSyntaxNameAppendSegments\s*\(psNameAppendStr name segment\)\s*rest/,
+  /\bList\.length\b/,
 ];
 
 for (const pattern of forbidden) {
@@ -122,5 +127,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe syntax-name/projection/field recursion and explicit Option constructors)\n",
+  "PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe syntax-name/projection/field recursion, local structural list length, and explicit Option constructors)\n",
 );

@@ -15,6 +15,7 @@ const entry = path.join(
   "Bootstrap",
   "SelfHost.lean",
 );
+const tsCompositionModule = "Ps.BackendTs.Compiler";
 
 function moduleSourcePath(moduleName) {
   const parts = moduleName.split(".");
@@ -31,7 +32,7 @@ function moduleSourcePath(moduleName) {
   throw new Error(`PSC2_BOOTSTRAP_ROOT_UNKNOWN_IMPORT: ${moduleName}`);
 }
 
-async function orderedClosure(omittedRootImport) {
+async function orderedClosureFromRootImports(rootImports) {
   const visited = new Set();
   const ordered = [];
 
@@ -46,13 +47,15 @@ async function orderedClosure(omittedRootImport) {
     }
     const source = await readFile(absolute, "utf8");
     for (const moduleName of parseImports(source)) {
-      if (absolute === entry && moduleName === omittedRootImport) continue;
       await visit(moduleSourcePath(moduleName));
     }
     ordered.push(path.relative(root, absolute).replaceAll(path.sep, "/"));
   }
 
-  await visit(entry);
+  for (const moduleName of rootImports) {
+    await visit(moduleSourcePath(moduleName));
+  }
+  ordered.push(path.relative(root, entry).replaceAll(path.sep, "/"));
   return ordered;
 }
 
@@ -61,14 +64,16 @@ const directImports = parseImports(entrySource);
 if (directImports.length === 0) {
   throw new Error("PSC2_BOOTSTRAP_ROOT_NO_IMPORTS");
 }
-if (!directImports.includes("Ps.BackendTs.Compiler")) {
+if (!directImports.includes(tsCompositionModule)) {
   throw new Error("PSC2_BOOTSTRAP_ROOT_MISSING_TS_COMPOSITION");
 }
 
-const baseline = await orderedClosure(undefined);
+const baseline = await orderedClosureFromRootImports(directImports);
 const redundant = [];
 for (const moduleName of directImports) {
-  const candidate = await orderedClosure(moduleName);
+  const candidate = await orderedClosureFromRootImports(
+    directImports.filter((candidateImport) => candidateImport !== moduleName),
+  );
   if (JSON.stringify(candidate) === JSON.stringify(baseline)) {
     redundant.push(moduleName);
   }
@@ -80,6 +85,31 @@ if (redundant.length > 0) {
   );
 }
 
+const compilerOnlyClosure = await orderedClosureFromRootImports([
+  tsCompositionModule,
+]);
+const compilerOnlyStdlib = compilerOnlyClosure.filter((relativePath) =>
+  relativePath.startsWith("stdlib/"),
+);
+if (compilerOnlyStdlib.length > 0) {
+  throw new Error(
+    `PSC2_BOOTSTRAP_ROOT_COMPILER_REQUIRES_STDLIB: ${compilerOnlyStdlib.join(", ")}`,
+  );
+}
+
+const portableLibraryImports = directImports.filter((moduleName) =>
+  moduleName.startsWith("ProofScript."),
+);
+if (portableLibraryImports.length > 0) {
+  throw new Error(
+    [
+      "PSC2_BOOTSTRAP_ROOT_LIBRARY_AGGREGATION:",
+      portableLibraryImports.join(", "),
+      `(compiler-only closure is ${compilerOnlyClosure.length} modules and reaches no stdlib sources)`,
+    ].join(" "),
+  );
+}
+
 process.stdout.write(
-  `PSC2_BOOTSTRAP_ROOT_MINIMALITY: PASS (${directImports.length} direct imports; ${baseline.length} ordered closure modules)\n`,
+  `PSC2_BOOTSTRAP_ROOT_MINIMALITY: PASS (${directImports.length} direct imports; ${baseline.length} ordered closure modules; compiler-only=${compilerOnlyClosure.length})\n`,
 );

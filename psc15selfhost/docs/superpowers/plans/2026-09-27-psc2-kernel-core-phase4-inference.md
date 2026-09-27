@@ -121,13 +121,15 @@ Assert detection and absence behavior through:
 Add direct assertions for:
 
 1. `fvar x` abstracts to `bvar 0`;
-2. unrelated free variables remain unchanged;
+2. an unrelated-target no-op case uses a **closed, bvar-free** expression and remains unchanged;
 3. abstraction under lambda/forall/let bodies uses the increased binder depth;
 4. lambda/forall/let type/value positions use the current depth, not the body depth;
 5. pre-existing `bvar i` with `i >= depth` shifts to `bvar (i + 1)`;
 6. pre-existing `bvar i` with `i < depth` remains unchanged;
 7. metadata/projection/name/level/literal/binder metadata survive unchanged;
 8. for multiple well-scoped fixtures, `psKernelCoreExprInstantiate1 (psKernelCoreExprAbstractFVar e x) (PsKernelCoreExpr.fvar x)` reconstructs `e` structurally.
+
+The closed no-op fixture and the bound-variable-shifting fixtures are deliberately separate: inserting a binder must shift insertion-sensitive loose bound variables even when a particular subtree does not contain the target free variable.
 
 - [ ] **Step 5: Run and verify RED**
 
@@ -160,30 +162,26 @@ test(pskernel-core): add inference binder red gate
 
 **Interfaces:**
 - Consumes: `psKernelCoreNameEq`, existing `PsKernelCoreExpr` constructors, and existing bound-variable substitution/lifting semantics.
-- Produces:
+- Produces the following exact curried trusted definitions:
 
 ```text
 psKernelCoreExprHasFVarName
-  : PsKernelCoreExpr -> PsKernelCoreName -> Bool
+  (expr : PsKernelCoreExpr) : PsKernelCoreName -> Bool
+
+psKernelCoreExprAbstractFVarWorker
+  (expr : PsKernelCoreExpr) : PsKernelCoreName -> Nat -> PsKernelCoreExpr
 
 psKernelCoreExprAbstractFVar
   : PsKernelCoreExpr -> PsKernelCoreName -> PsKernelCoreExpr
 ```
 
-The implementation may expose one trusted worker with fixed signature:
+The expression is the structurally decreasing argument for both recursive traversals. The target name and abstraction depth are curried after it unconditionally; do not start with a Lean-only multi-explicit-argument recursion shape and wait for PSC1 to reject it.
 
-```text
-psKernelCoreExprAbstractFVarWorker
-  : PsKernelCoreExpr -> PsKernelCoreName -> Nat -> PsKernelCoreExpr
-```
-
-For PSC1 recursion acceptance, implement recursive traversals with the expression as the structurally decreasing argument and curry target/depth after that argument whenever the parser/checker requires invariant non-recursive explicit arguments.
-
-- [ ] **Step 1: Implement `psKernelCoreExprHasFVarName` minimally**
+- [ ] **Step 1: Implement `psKernelCoreExprHasFVarName` minimally in the exact curried shape**
 
 Traverse every recursive expression child. Compare only `fvar` names with `psKernelCoreNameEq`; no set/map allocation and no metadata interpretation.
 
-- [ ] **Step 2: Implement capture-safe abstraction worker**
+- [ ] **Step 2: Implement capture-safe abstraction worker in the exact curried shape**
 
 The worker's fixed rules are:
 
@@ -193,6 +191,8 @@ other fvar           -> unchanged
 bvar i, depth <= i   -> bvar (i + 1)
 bvar i, i < depth    -> unchanged
 ```
+
+Use PSC1-supported Nat comparison/construction (for example `Nat.ble depth i` and `Nat.succ i`) rather than introducing new arithmetic helpers solely for this task.
 
 For `lam` / `forallE`:
 

@@ -44,15 +44,15 @@ def psKernelCoreRecursorTarget?
       | PsKernelCoreList.nil => PsKernelCoreOption.some target
       | PsKernelCoreList.cons _ _ => PsKernelCoreOption.none
 
-def psKernelCoreRecursorResultArgsMatch
-    (args : PsKernelCoreList PsKernelCoreExpr) : Nat -> Bool :=
-  match args with
-  | PsKernelCoreList.nil =>
-      fun (_remainingIndices : Nat) => false
-  | PsKernelCoreList.cons head rest =>
-      fun (remainingIndices : Nat) =>
-        match remainingIndices with
-        | Nat.zero =>
+def psKernelCoreRecursorResultArgsMatchCount
+    (remainingIndices : Nat) :
+    PsKernelCoreList PsKernelCoreExpr -> Bool :=
+  match remainingIndices with
+  | Nat.zero =>
+      fun (args : PsKernelCoreList PsKernelCoreExpr) =>
+        match args with
+        | PsKernelCoreList.nil => false
+        | PsKernelCoreList.cons head rest =>
             match head with
             | PsKernelCoreExpr.bvar index =>
                 if Nat.beq index 0 then
@@ -62,14 +62,26 @@ def psKernelCoreRecursorResultArgsMatch
                 else
                   false
             | _ => false
-        | Nat.succ previous =>
+  | Nat.succ previous =>
+      let matchPrevious :
+          PsKernelCoreList PsKernelCoreExpr -> Bool :=
+        psKernelCoreRecursorResultArgsMatchCount previous;
+      fun (args : PsKernelCoreList PsKernelCoreExpr) =>
+        match args with
+        | PsKernelCoreList.nil => false
+        | PsKernelCoreList.cons head rest =>
             match head with
             | PsKernelCoreExpr.bvar index =>
                 if Nat.beq index (Nat.succ previous) then
-                  psKernelCoreRecursorResultArgsMatch rest previous
+                  matchPrevious rest
                 else
                   false
             | _ => false
+
+def psKernelCoreRecursorResultArgsMatch
+    (args : PsKernelCoreList PsKernelCoreExpr)
+    (remainingIndices : Nat) : Bool :=
+  psKernelCoreRecursorResultArgsMatchCount remainingIndices args
 
 def psKernelCoreRecursorCanonicalTypeShapeValid
     (info : PsKernelCoreRecursorInfo) : Bool :=

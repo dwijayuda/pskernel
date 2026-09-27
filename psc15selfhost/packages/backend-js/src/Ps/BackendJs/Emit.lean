@@ -1,62 +1,139 @@
 import Ps.BackendJs.Model
 import Ps.Bridge.Json
 
-def psJsEmitLiteral (value : PsJsLiteral) : String :=
+def psJsNatDecimalWithFuel (fuel : Nat) : Nat -> Except PsJsError String :=
+  match fuel with
+  | Nat.zero =>
+      fun (_value : Nat) => Except.error PsJsError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller : Nat -> Except PsJsError String :=
+        psJsNatDecimalWithFuel remaining;
+      fun (value : Nat) =>
+        if Nat.blt value 10 then
+          Except.ok (psJsonHexDigit value)
+        else
+          match smaller (Nat.div value 10) with
+          | Except.error error => Except.error error
+          | Except.ok prefix =>
+              Except.ok
+                (psJsonConcat2 prefix (psJsonHexDigit (Nat.mod value 10)))
+
+def psJsNatDecimal (value : Nat) : Except PsJsError String :=
+  psJsNatDecimalWithFuel (Nat.succ value) value
+
+def psJsIntDecimal (value : Int) : Except PsJsError String :=
   match value with
-  | PsJsLiteral.natural number => psJsonConcat2 (toString number) "n"
-  | PsJsLiteral.integer number => psJsonConcat2 (toString number) "n"
-  | PsJsLiteral.boolean boolean => if boolean then "true" else "false"
-  | PsJsLiteral.string text => psJsonQuote text
-  | PsJsLiteral.undefined => "undefined"
+  | Int.ofNat number => psJsNatDecimal number
+  | Int.negSucc number =>
+      match psJsNatDecimal (Nat.succ number) with
+      | Except.error error => Except.error error
+      | Except.ok magnitude => Except.ok (psJsonConcat2 "-" magnitude)
 
-def psJsLocalName (index : Nat) : String :=
-  psJsonConcat2 "__psc_js_l_" (toString index)
+def psJsEmitLiteral (value : PsJsLiteral) : Except PsJsError String :=
+  match value with
+  | PsJsLiteral.natural number =>
+      match psJsNatDecimal number with
+      | Except.error error => Except.error error
+      | Except.ok text => Except.ok (psJsonConcat2 text "n")
+  | PsJsLiteral.integer number =>
+      match psJsIntDecimal number with
+      | Except.error error => Except.error error
+      | Except.ok text => Except.ok (psJsonConcat2 text "n")
+  | PsJsLiteral.boolean boolean =>
+      Except.ok (if boolean then "true" else "false")
+  | PsJsLiteral.string text => Except.ok (psJsonQuote text)
+  | PsJsLiteral.undefined => Except.ok "undefined"
 
-def psJsEmitParameterNames (parameters : List Nat) : String :=
+def psJsLocalName (index : Nat) : Except PsJsError String :=
+  match psJsNatDecimal index with
+  | Except.error error => Except.error error
+  | Except.ok text => Except.ok (psJsonConcat2 "__psc_js_l_" text)
+
+def psJsEmitParameterNames (parameters : List Nat) : Except PsJsError String :=
   match parameters with
-  | List.nil => ""
+  | List.nil => Except.ok ""
   | List.cons index rest =>
-      match rest with
-      | List.nil => psJsLocalName index
-      | List.cons _ _ =>
-          psJsonConcat3
-            (psJsLocalName index)
-            ", "
-            (psJsEmitParameterNames rest)
+      match psJsLocalName index with
+      | Except.error error => Except.error error
+      | Except.ok name =>
+          match rest with
+          | List.nil => Except.ok name
+          | List.cons _ _ =>
+              match psJsEmitParameterNames rest with
+              | Except.error error => Except.error error
+              | Except.ok names =>
+                  Except.ok (psJsonConcat3 name ", " names)
 
-def psJsEmitExpr (expr : PsJsExpr) : String :=
+def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
   match expr with
   | PsJsExpr.literal value => psJsEmitLiteral value
   | PsJsExpr.local index => psJsLocalName index
   | PsJsExpr.letE index value body =>
-      let name := psJsLocalName index;
-      let start := psJsonConcat3 "((" name ") => ";
-      let withBody := psJsonConcat3 start (psJsEmitExpr body) ")(";
-      psJsonConcat3 withBody (psJsEmitExpr value) ")"
+      match psJsLocalName index with
+      | Except.error error => Except.error error
+      | Except.ok name =>
+          match psJsEmitExpr body with
+          | Except.error error => Except.error error
+          | Except.ok printedBody =>
+              match psJsEmitExpr value with
+              | Except.error error => Except.error error
+              | Except.ok printedValue =>
+                  let start := psJsonConcat3 "((" name ") => ";
+                  let withBody := psJsonConcat3 start printedBody ")(";
+                  Except.ok (psJsonConcat3 withBody printedValue ")")
   | PsJsExpr.lambda parameters body =>
-      let names := psJsEmitParameterNames parameters;
-      let start := psJsonConcat3 "((" names ") => ";
-      psJsonConcat3 start (psJsEmitExpr body) ")"
+      match psJsEmitParameterNames parameters with
+      | Except.error error => Except.error error
+      | Except.ok names =>
+          match psJsEmitExpr body with
+          | Except.error error => Except.error error
+          | Except.ok printedBody =>
+              let start := psJsonConcat3 "((" names ") => ";
+              Except.ok (psJsonConcat3 start printedBody ")")
   | PsJsExpr.ifE condition thenBranch elseBranch =>
-      let start := psJsonConcat2 "(" (psJsEmitExpr condition);
-      let withThen := psJsonConcat3 start " ? " (psJsEmitExpr thenBranch);
-      let withElse := psJsonConcat3 withThen " : " (psJsEmitExpr elseBranch);
-      psJsonConcat2 withElse ")"
+      match psJsEmitExpr condition with
+      | Except.error error => Except.error error
+      | Except.ok printedCondition =>
+          match psJsEmitExpr thenBranch with
+          | Except.error error => Except.error error
+          | Except.ok printedThen =>
+              match psJsEmitExpr elseBranch with
+              | Except.error error => Except.error error
+              | Except.ok printedElse =>
+                  let start := psJsonConcat2 "(" printedCondition;
+                  let withThen := psJsonConcat3 start " ? " printedThen;
+                  let withElse := psJsonConcat3 withThen " : " printedElse;
+                  Except.ok (psJsonConcat2 withElse ")")
 
-def psJsEmitConstants (constants : List PsJsConstant) : Nat -> String :=
+def psJsEmitConstants (constants : List PsJsConstant) :
+    Nat -> Except PsJsError String :=
   match constants with
-  | List.nil => fun (_index : Nat) => ""
+  | List.nil =>
+      fun (_index : Nat) => Except.ok ""
   | List.cons constant rest =>
-      let smaller : Nat -> String := psJsEmitConstants rest;
+      let smaller : Nat -> Except PsJsError String := psJsEmitConstants rest;
       fun (index : Nat) =>
-        let internalName := psJsonConcat2 "__psc_js_" (toString index);
-        let definition := psJsonConcat3 "const " internalName " = ";
-        let value := psJsonConcat3 definition (psJsEmitExpr constant.body) ";\n";
-        let exportStart := psJsonConcat3 "export { " internalName " as ";
-        let exportLine := psJsonConcat3 exportStart constant.exportName " };\n";
-        psJsonConcat3 value exportLine (smaller (Nat.succ index))
+        match psJsNatDecimal index with
+        | Except.error error => Except.error error
+        | Except.ok indexText =>
+            match psJsEmitExpr constant.body with
+            | Except.error error => Except.error error
+            | Except.ok printedBody =>
+                match smaller (Nat.succ index) with
+                | Except.error error => Except.error error
+                | Except.ok printedRest =>
+                    let internalName := psJsonConcat2 "__psc_js_" indexText;
+                    let definition := psJsonConcat3 "const " internalName " = ";
+                    let value := psJsonConcat3 definition printedBody ";\n";
+                    let exportStart := psJsonConcat3 "export { " internalName " as ";
+                    let exportLine := psJsonConcat3 exportStart constant.exportName " };\n";
+                    Except.ok (psJsonConcat3 value exportLine printedRest)
 
-def psJsEmitTargetModule (module : PsJsModule) : String :=
-  psJsonConcat2
-    "// Generated by ProofScript backend-js (lexical profile).\nexport {};\n"
-    (psJsEmitConstants module.constants 0)
+def psJsEmitTargetModule (module : PsJsModule) : Except PsJsError String :=
+  match psJsEmitConstants module.constants 0 with
+  | Except.error error => Except.error error
+  | Except.ok constants =>
+      Except.ok
+        (psJsonConcat2
+          "// Generated by ProofScript backend-js (lexical profile).\nexport {};\n"
+          constants)

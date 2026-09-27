@@ -167,32 +167,32 @@ def psDecodeStringBodyWithFuel
                   psDecodeStringBodyWithFuel
                     nextFuel
                     rest
-                    (Char.ofNat 34 :: charsRev)
+                    (List.cons (Char.ofNat 34) charsRev)
                 else if psCharCodeEq escaped 92 then
                   psDecodeStringBodyWithFuel
                     nextFuel
                     rest
-                    (Char.ofNat 92 :: charsRev)
+                    (List.cons (Char.ofNat 92) charsRev)
                 else if psCharCodeEq escaped 110 then
                   psDecodeStringBodyWithFuel
                     nextFuel
                     rest
-                    (Char.ofNat 10 :: charsRev)
+                    (List.cons (Char.ofNat 10) charsRev)
                 else if psCharCodeEq escaped 114 then
                   psDecodeStringBodyWithFuel
                     nextFuel
                     rest
-                    (Char.ofNat 13 :: charsRev)
+                    (List.cons (Char.ofNat 13) charsRev)
                 else if psCharCodeEq escaped 116 then
                   psDecodeStringBodyWithFuel
                     nextFuel
                     rest
-                    (Char.ofNat 9 :: charsRev)
+                    (List.cons (Char.ofNat 9) charsRev)
                 else if psCharCodeEq escaped 48 then
                   psDecodeStringBodyWithFuel
                     nextFuel
                     rest
-                    (Char.ofNat 0 :: charsRev)
+                    (List.cons (Char.ofNat 0) charsRev)
                 else if psCharCodeEq escaped 120 then
                   match psDecodeEscapedChar 2 rest with
                   | Option.none =>
@@ -201,7 +201,7 @@ def psDecodeStringBodyWithFuel
                       psDecodeStringBodyWithFuel
                         nextFuel
                         (Prod.snd decoded)
-                        (Prod.fst decoded :: charsRev)
+                        (List.cons (Prod.fst decoded) charsRev)
                 else if psCharCodeEq escaped 117 then
                   match psDecodeEscapedChar 4 rest with
                   | Option.none =>
@@ -210,14 +210,14 @@ def psDecodeStringBodyWithFuel
                       psDecodeStringBodyWithFuel
                         nextFuel
                         (Prod.snd decoded)
-                        (Prod.fst decoded :: charsRev)
+                        (List.cons (Prod.fst decoded) charsRev)
                 else
                   Option.none
           else
             psDecodeStringBodyWithFuel
               nextFuel
               restAfterChar
-              (char :: charsRev)
+              (List.cons char charsRev)
 
 def psDecodeStringLiteral (text : String) : Option String :=
   match String.toList text with

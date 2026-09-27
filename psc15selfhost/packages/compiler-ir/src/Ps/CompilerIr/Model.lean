@@ -116,6 +116,7 @@ inductive PsVerifiedIrIntrinsic where
   | intEq
   | intLe
   | intLt
+  | intRepr
   | boolNot
   | boolAnd
   | boolOr

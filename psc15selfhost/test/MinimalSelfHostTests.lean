@@ -52,7 +52,28 @@ def psTestMinimalSelfHostTypeScript : Bool :=
   | Except.error _ => false
   | Except.ok output => output.contains "answer"
 
-def psTestMinimalSelfHostListFoundation : Bool :=
+def psTestMinimalSelfHostListPreparation : Bool :=
+  match
+      psCompilerPrepareSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostListSource with
+  | Except.error _ => false
+  | Except.ok prepared =>
+      prepared.declarations.length > 0
+        && prepared.canonicalAdmissions.length > 0
+
+def psTestMinimalSelfHostListVerifiedIr : Bool :=
+  match
+      psCompilerPrepareSource
+        PsCompilerSourceKind.lean
+        psMinimalSelfHostListSource with
+  | Except.error _ => false
+  | Except.ok prepared =>
+      match psCompilerVerifiedIrFromPrepared prepared with
+      | Except.error _ => false
+      | Except.ok _ => true
+
+def psTestMinimalSelfHostListTypeScript : Bool :=
   match
       psCompilerTypeScriptSource
         PsCompilerSourceKind.lean
@@ -85,9 +106,21 @@ def main : IO Unit := do
     throw
       (IO.userError
         "PSC2_MINIMAL_SELFHOST_FAIL: TypeScript bootstrap backend")
-  if psTestMinimalSelfHostListFoundation then
-    IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational List construction and match"
+  if psTestMinimalSelfHostListPreparation then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational List preparation"
   else
     throw
       (IO.userError
-        "PSC2_MINIMAL_SELFHOST_FAIL: foundational List construction and match")
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational List preparation")
+  if psTestMinimalSelfHostListVerifiedIr then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational List -> VerifiedIR"
+  else
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational List -> VerifiedIR")
+  if psTestMinimalSelfHostListTypeScript then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: foundational List -> TypeScript"
+  else
+    throw
+      (IO.userError
+        "PSC2_MINIMAL_SELFHOST_FAIL: foundational List -> TypeScript")

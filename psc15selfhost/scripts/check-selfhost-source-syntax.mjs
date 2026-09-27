@@ -113,12 +113,27 @@ requireMarkers("MetaContext", metaContext, [
   'psMetaFindDeclInList id rest',
   'def psMetaFindAssignmentInList\n    (id : Nat)\n    (assignments : List PsMetaAssignment) : Option PsExpr :=\n  match assignments with',
   'psMetaFindAssignmentInList id rest',
+  'def psExprContainsMVar\n    (target : Nat)\n    (expr : PsExpr) : Bool :=\n  match expr with',
+  'def psExprFVarsInContext\n    (localContext : PsLocalContext)\n    (expr : PsExpr) : Bool :=\n  match expr with',
+  'def psMetaInstantiateStep\n    (context : PsMetaContext)\n    (expr : PsExpr) : PsExpr :=\n  match expr with',
+  'def psMetaInstantiateRounds\n    (context : PsMetaContext)\n    (fuel : Nat)\n    (expr : PsExpr) : PsExpr :=\n  match fuel with',
+  '| Nat.zero => expr',
+  '| Nat.succ remaining =>',
+  'psMetaInstantiateRounds\n        context\n        remaining\n        (psMetaInstantiateStep context expr)',
+  'def psExprHasUnresolvedMeta\n    (expr : PsExpr) : Bool :=\n  match expr with',
 ]);
 forbidMarkers("MetaContext", metaContext, [
   'def psMetaFindDeclInList (id : Nat) : List PsMetaVarDecl -> Option PsMetaVarDecl',
   'def psMetaFindAssignmentInList (id : Nat) : List PsMetaAssignment -> Option PsExpr',
+  'def psExprContainsMVar (target : Nat) : PsExpr -> Bool',
+  'def psExprFVarsInContext (localContext : PsLocalContext) : PsExpr -> Bool',
+  'def psMetaInstantiateStep\n    (context : PsMetaContext) : PsExpr -> PsExpr',
+  'def psMetaInstantiateRounds\n    (context : PsMetaContext) :\n    Nat -> PsExpr -> PsExpr',
+  '| remaining + 1, expr =>',
+  'def psExprHasUnresolvedMeta : PsExpr -> Bool',
+  '| expr => expr',
 ]);
 
 process.stdout.write(
-  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 invariant-fuel/let/application/unary-match/no-bool-infix subset)\n",
+  "PSC2_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 explicit-recursion/invariant-fuel/let/application/unary-match/no-bool-infix subset)\n",
 );

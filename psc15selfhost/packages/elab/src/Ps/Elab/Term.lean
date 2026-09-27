@@ -337,7 +337,7 @@ def psElabProjectionReference
                 match resolved with
                 | .local id => PsExpr.fvar id
                 | .global name => PsExpr.constE name [];
-              match psElabResolvedTerm context baseTerm none with
+              match psElabResolvedTerm context baseTerm Option.none with
               | Except.error error => Except.error error
               | Except.ok baseResult =>
                   match

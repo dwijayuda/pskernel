@@ -5,8 +5,6 @@ import ProofScript.Data.Result
 import ProofScript.Data.Except
 import ProofScript.Data.List
 import ProofScript.Data.Array
-import ProofScript.Data.Map
 import ProofScript.Data.Set
 
-import Ps.Compiler.Api
 import Ps.BackendTs.Compiler

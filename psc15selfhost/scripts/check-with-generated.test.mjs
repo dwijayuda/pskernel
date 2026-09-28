@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import {mkdtemp, mkdir, rm, writeFile} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import {pathToFileURL} from 'node:url';
 import {checkGeneratedProjectWithKernel} from './check-with-generated.mjs';
 
 const tempRoot=await mkdtemp(path.join(os.tmpdir(),'psc2-kernel-check-'));
@@ -36,7 +35,7 @@ export function psCompilerAdmissionsSource(_kind,source){
     admissions:[admission],
     format:'proofscript-checked-admissions',
     version:2,
-  })+'\\n');
+  })+String.fromCharCode(10));
 }
 `;
   await writeFile(compilerPath,compilerSource,'utf8');

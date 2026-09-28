@@ -6,20 +6,18 @@ def psJsNatDecimalWithFuel (fuel : Nat) : Nat -> Except PsJsError String :=
   | Nat.zero =>
       fun (_value : Nat) => Except.error PsJsError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller : Nat -> Except PsJsError String :=
-        psJsNatDecimalWithFuel remaining;
       fun (value : Nat) =>
         if Nat.blt value 10 then
           Except.ok (psJsTextHexDigit value)
         else
-          match smaller (Nat.div value 10) with
+          match psJsNatDecimalWithFuel remaining (Nat.div value 10) with
           | Except.error error => Except.error error
           | Except.ok higherDigits =>
               Except.ok
                 (psJsTextConcat2 higherDigits (psJsTextHexDigit (Nat.mod value 10)))
 
 def psJsNatDecimal (value : Nat) : Except PsJsError String :=
-  Except.ok (Int.repr (Int.ofNat value))
+  psJsNatDecimalWithFuel (Nat.succ value) value
 
 def psJsIntDecimal (value : Int) : Except PsJsError String :=
   Except.ok (Int.repr value)

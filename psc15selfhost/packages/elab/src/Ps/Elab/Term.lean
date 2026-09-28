@@ -876,7 +876,7 @@ def psElabLet
   | some name =>
       match declaredType with
       | none =>
-          match elaborate context value none with
+          match elaborate context value Option.none with
           | Except.error error => Except.error error
           | Except.ok valueResult =>
               psElabLetAfterValue
@@ -888,7 +888,7 @@ def psElabLet
                 body
                 expected
       | some sourceType =>
-          match elaborate context sourceType none with
+          match elaborate context sourceType Option.none with
           | Except.error error => Except.error error
           | Except.ok typeResult =>
               match psInferEnsureSort
@@ -902,7 +902,7 @@ def psElabLet
                   match elaborate
                       typeResult.context
                       value
-                      (some typeResult.term) with
+                      (Option.some typeResult.term) with
                   | Except.error error => Except.error error
                   | Except.ok valueResult =>
                       psElabLetAfterValue
@@ -914,16 +914,23 @@ def psElabLet
                         body
                         expected
 
+def psExprApplyManyWorker
+    (arguments : List PsExpr) :
+    PsExpr -> PsExpr :=
+  match arguments with
+  | [] =>
+      fun (fn : PsExpr) =>
+        fn
+  | argument :: rest =>
+      let smaller : PsExpr -> PsExpr :=
+        psExprApplyManyWorker rest;
+      fun (fn : PsExpr) =>
+        smaller (PsExpr.app fn argument)
+
 def psExprApplyMany
     (fn : PsExpr)
     (arguments : List PsExpr) : PsExpr :=
-  match arguments with
-  | [] =>
-      fn
-  | argument :: rest =>
-      psExprApplyMany
-        (PsExpr.app fn argument)
-        rest
+  psExprApplyManyWorker arguments fn
 
 def psElabIf
     (elaborate :
@@ -938,7 +945,7 @@ def psElabIf
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
   let boolType := PsExpr.constE psBoolName [];
-  match elaborate context condition (some boolType) with
+  match elaborate context condition (Option.some boolType) with
   | Except.error error => Except.error error
   | Except.ok conditionResult =>
       let trueTerm := PsExpr.constE psBoolTrueName [];
@@ -958,14 +965,14 @@ def psElabIf
           expected with
       | Except.error error => Except.error error
       | Except.ok thenResult =>
-          let resultType :=
+          let resultType : PsExpr :=
             match expected with
             | some type => type
             | none => thenResult.type;
           match elaborate
               thenResult.context
               elseBranch
-              (some resultType) with
+              (Option.some resultType) with
           | Except.error error => Except.error error
           | Except.ok elseResult =>
               let metaContext := elseResult.context.metaContext;

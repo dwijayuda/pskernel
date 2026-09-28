@@ -94,9 +94,14 @@ export function psCompilerAdmissionsSource(_kind,source){
   ]);
   assert.equal(acceptedBuild.status,0,acceptedBuild.stderr);
   assert.match(acceptedBuild.stdout,/PSC2_KERNEL_CHECK: PASS/);
-  assert.equal(
+  assert.match(
     await readFile(acceptedOutput,'utf8'),
-    'export const compiled = 1;\n',
+    /^export const compiled = 1;\n\/\/# sourceMappingURL=accepted\.js\.map$/,
+  );
+  assert.equal(
+    existsSync(`${acceptedOutput}.map`),
+    true,
+    'accepted build must complete the TypeScript source-map output',
   );
 
   const rejectedOutput=path.join(tempRoot,'rejected.js');
@@ -112,6 +117,11 @@ export function psCompilerAdmissionsSource(_kind,source){
     /PSC2_KERNEL_REJECTED: kernel-rejection at declaration 0/,
   );
   assert.equal(existsSync(rejectedOutput),false,'rejected build must not emit output');
+  assert.equal(
+    existsSync(`${rejectedOutput}.map`),
+    false,
+    'rejected build must not emit source-map output',
+  );
 
   console.log('PSC2_SELFHOST_CLI_KERNEL_CHECK_TESTS: PASS');
 } finally {

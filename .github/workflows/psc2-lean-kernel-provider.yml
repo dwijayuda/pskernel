@@ -12,7 +12,9 @@ on:
       - psc15selfhost/packages/cli/**
       - psc15selfhost/scripts/compile-with-generated.mjs
       - psc15selfhost/scripts/check-with-generated*.mjs
+      - psc15selfhost/scripts/bootstrap-closure-contract*.mjs
       - psc15selfhost/package.json
+      - psc15selfhost/STATUS.md
       - .github/workflows/psc2-lean-kernel-provider.yml
   workflow_dispatch:
 
@@ -44,6 +46,13 @@ jobs:
           npm install --global --ignore-scripts --no-audit --no-fund typescript@5.8.3
           test "$(tsc --version)" = "Version 5.8.3"
           echo "PSC2_TYPESCRIPT_PIN: PASS 5.8.3"
+
+      - name: Bootstrap isolation gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run test:bootstrap-closure-contract
 
       - name: Provider tests
         shell: bash

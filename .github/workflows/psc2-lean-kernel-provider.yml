@@ -41,4 +41,7 @@ jobs:
         run: |
           set -euo pipefail
           cd psc15selfhost
-          lake build psc2_lean_kernel_provider_tests
+          lake build psc2_lean_kernel_provider psc2_lean_kernel_provider_tests
+          lake exe psc2_lean_kernel_provider_tests
+          lake exe psc2_lean_kernel_provider -- --version
+          lake exe psc2_lean_kernel_provider -- --health

@@ -1913,7 +1913,9 @@ def psElabApplyArgsWithFuel
                 match fresh.expr with
                 | PsExpr.mvar id =>
                     List.cons id pendingInstancesRev
-                | _ => pendingInstancesRev;
+                | _ => pendingInstancesRev
+              else
+                pendingInstancesRev;
             psElabApplyArgsWithFuel
               elaborate
               fuel
@@ -2339,10 +2341,6 @@ def psElabNatListAt
           some value
       | nextIndex + 1 =>
           psElabNatListAt rest nextIndex
-
-structure PsElabMatchHypothesesResult where
-  context : PsElabContext
-  hypothesesRev : List PsElabMatchField
 
 def psElabValidateStructuralCall
     (context : PsElabContext)

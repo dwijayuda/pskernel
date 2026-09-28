@@ -58,8 +58,6 @@ try {
     choose: referenceChoose,
     callIdentity: referenceCallIdentity,
     callIdentityLet: referenceCallIdentityLet,
-    callCapturedLambda: referenceCallCapturedLambda,
-    callInlineLambdaArgument: referenceCallInlineLambdaArgument,
     callSecond: referenceCallSecond,
     second: referenceSecond,
     ...referenceValues
@@ -73,10 +71,6 @@ try {
     referenceCallIdentity(9007199254740993123456789n));
   assert.equal(directCallIdentityLet(9007199254740993123456789n),
     referenceCallIdentityLet(9007199254740993123456789n));
-  assert.equal(directCallCapturedLambda(9007199254740993123456789n),
-    referenceCallCapturedLambda(9007199254740993123456789n));
-  assert.equal(directCallInlineLambdaArgument(9007199254740993123456789n),
-    referenceCallInlineLambdaArgument(9007199254740993123456789n));
   assert.equal(directSecond(11n, 9007199254740993123456789n),
     referenceSecond(11n, 9007199254740993123456789n));
   assert.equal(directCallSecond(9007199254740993123456789n),

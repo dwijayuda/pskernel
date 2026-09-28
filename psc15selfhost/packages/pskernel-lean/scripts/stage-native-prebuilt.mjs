@@ -64,13 +64,6 @@ export async function stageNativePrebuilt({
   }
   assertHealth(health);
 
-  const expectedName=executableName(target);
-  if(path.basename(binaryPath)!==expectedName){
-    throw new Error(
-      `provider executable name mismatch for ${target}: expected ${expectedName}`,
-    );
-  }
-
   let sourceStat;
   try{
     sourceStat=await stat(binaryPath);
@@ -82,6 +75,13 @@ export async function stageNativePrebuilt({
   }
   if(!sourceStat.isFile()){
     throw new Error(`provider executable is not a file: ${binaryPath}`);
+  }
+
+  const expectedName=executableName(target);
+  if(path.basename(binaryPath)!==expectedName){
+    throw new Error(
+      `provider executable name mismatch for ${target}: expected ${expectedName}`,
+    );
   }
 
   const bytes=await readFile(binaryPath);

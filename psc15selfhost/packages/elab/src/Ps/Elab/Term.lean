@@ -1039,7 +1039,10 @@ def psExprAppViewAcc
 def psExprAppView (expr : PsExpr) : PsExprAppView :=
   psExprAppViewAcc expr []
 
-def psExprHasConst (target : PsName) : PsExpr -> Bool
+def psExprHasConst
+    (target : PsName)
+    (expr : PsExpr) : Bool :=
+  match expr with
   | .constE name _ => psNameEq name target
   | .app fn argument =>
       psElabBoolOr

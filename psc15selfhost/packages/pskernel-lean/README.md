@@ -48,6 +48,19 @@ PSC canonical admissions JSON
 
 This distinction matters: the provider checks the semantic object produced by PSC rather than checking whether a generated Lean program happens to elaborate.
 
+The self-host CLI now has a host-only integration path:
+
+```text
+PSC source
+  -> generated PSC2 compiler
+  -> canonical admissions
+  -> pskernel-lean native provider
+  -> Lean 4.34 kernel
+  -> accept / reject
+```
+
+The provider is invoked by the host process. No Lean-specific module is imported into the portable semantic compiler closure.
+
 ## Source directories
 
 ```text
@@ -97,26 +110,26 @@ The decoder reuses PSC's canonical name, level, expression, declaration, theorem
 
 Definition reducibility heights require special care: PSC's codec represents the height as an unbounded natural number, while Lean 4.34 stores a regular reducibility height as `UInt32`. The provider rejects values that do not round-trip exactly through `UInt32`; it never truncates them.
 
-## Process interface
+## Native process interface
 
-Build:
+From `psc15selfhost/`:
+
+```text
+npm run check:kernel:lean434:pin
+npm run build:kernel:lean434
+npm run test:kernel:lean434
+```
+
+Direct Lake commands are also available:
 
 ```text
 lake build psc2_lean_kernel_provider
-```
-
-Metadata:
-
-```text
 lake exe psc2_lean_kernel_provider --version
 lake exe psc2_lean_kernel_provider --health
-```
-
-Admission:
-
-```text
 cat admissions.json | lake exe psc2_lean_kernel_provider --check
 ```
+
+On Windows the built executable has the normal `.exe` suffix. The Node adapter resolves the platform-specific default automatically.
 
 Accepted response:
 
@@ -126,6 +139,7 @@ Accepted response:
   "accepted": true,
   "provider": "lean4-cpp",
   "leanVersion": "4.34.0",
+  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
   "profile": "lean4.34-core"
 }
 ```
@@ -138,6 +152,7 @@ Rejected response includes a stable error kind and, when applicable, the declara
   "accepted": false,
   "provider": "lean4-cpp",
   "leanVersion": "4.34.0",
+  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
   "profile": "lean4.34-core",
   "errorKind": "kernel-rejection",
   "declarationIndex": 0,
@@ -146,6 +161,47 @@ Rejected response includes a stable error kind and, when applicable, the declara
 ```
 
 The protocol boundary is text/bytes in and text/bytes out. Host clients must not depend on Lean internal C++ object layouts.
+
+## Self-host CLI integration
+
+After a generated compiler exists, check a project with the Lean provider:
+
+```text
+node packages/cli/bin/psc.mjs check path/to/Main.ps \
+  --kernel lean434 \
+  --compiler dist/bootstrap/packages/compiler/index.js
+```
+
+or, through the workspace bin command:
+
+```text
+npm run psc -- check path/to/Main.ps --kernel lean434
+```
+
+A kernel-gated build is:
+
+```text
+node packages/cli/bin/psc.mjs build path/to/Main.ps \
+  --out dist/app.js \
+  --kernel lean434 \
+  --compiler dist/bootstrap/packages/compiler/index.js
+```
+
+For `build --kernel lean434` the order is deliberately fail-closed:
+
+```text
+flatten project
+  -> generated compiler canonical admissions
+  -> Lean 4.34 provider check
+  -> only if accepted: generated compiler TypeScript output
+  -> tsc / JavaScript output
+```
+
+If Lean rejects the module, code generation is not started and the requested output is not emitted.
+
+A build **without** `--kernel` retains the existing self-host/bootstrap behavior. This keeps `psc fixed-point` independent of the external Lean provider.
+
+The default compiler path is `dist/bootstrap/packages/compiler/index.js`; pass `--compiler` when testing another generated compiler generation.
 
 ## Node host adapter
 
@@ -161,7 +217,7 @@ The adapter:
 - spawns the provider with `--check`,
 - sends canonical admissions on stdin,
 - parses exactly one JSON response,
-- validates protocol, provider identity, Lean version, and `accepted`,
+- validates protocol, provider identity, Lean version, exact Lean source commit, and `accepted`,
 - reports process-start, nonzero-exit, and malformed-output errors as host failures.
 
 `PSC_LEAN_KERNEL_PROVIDER_BIN` may override the binary path. Otherwise the adapter resolves the workspace Lake output automatically and adds `.exe` on Windows.
@@ -232,9 +288,10 @@ The same boundary can be implemented as a native executable/library first and th
 
 ## Gates
 
-The branch CI currently verifies all of the following:
+The branch CI verifies the following provider contract:
 
-- Lean 4.34 provider target builds,
+- the installed Lean toolchain is exactly `4.34.0` at source commit `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`,
+- the Lean 4.34 provider target builds,
 - provider metadata is pinned,
 - PSC Core maps directly to Lean semantic objects,
 - unsupported metas/free variables fail closed,
@@ -244,6 +301,9 @@ The branch CI currently verifies all of the following:
 - a valid definition is accepted by the Lean kernel,
 - a codec-valid but ill-typed definition is rejected by the Lean kernel,
 - stdin/stdout `--check` behavior matches the protocol,
-- the Node host adapter reproduces the same accept/reject results.
+- the Node host adapter reproduces the same accept/reject results,
+- a generated compiler can feed canonical admissions into the real provider,
+- `psc check --kernel lean434` exposes the provider at the self-host CLI boundary,
+- `psc build --kernel lean434` checks before compilation and a rejected build emits no output.
 
 Keep these gates when integrating or refactoring the provider.

@@ -2,10 +2,26 @@ import assert from 'node:assert/strict';
 import {
   checkCanonicalAdmissions,
   defaultLeanKernelProviderBinary,
+  leanKernelProviderCommit,
 } from './node-provider.mjs';
 
 const binaryPath=defaultLeanKernelProviderBinary();
 assert.match(binaryPath,/psc2_lean_kernel_provider(?:\.exe)?$/);
+assert.match(
+  defaultLeanKernelProviderBinary({platform:'linux',env:{}}),
+  /psc2_lean_kernel_provider$/,
+);
+assert.match(
+  defaultLeanKernelProviderBinary({platform:'win32',env:{}}),
+  /psc2_lean_kernel_provider\.exe$/,
+);
+assert.equal(
+  defaultLeanKernelProviderBinary({
+    platform:'linux',
+    env:{PSC_LEAN_KERNEL_PROVIDER_BIN:'/custom/provider'},
+  }),
+  '/custom/provider',
+);
 
 const rootName=value=>({k:'s',p:{k:'a'},v:value});
 const natType={k:'const',ls:[],n:rootName('Nat')};
@@ -34,6 +50,11 @@ const accepted=checkCanonicalAdmissions(
 assert.equal(accepted.protocol,'pskernel-lean/1');
 assert.equal(accepted.provider,'lean4-cpp');
 assert.equal(accepted.leanVersion,'4.34.0');
+assert.equal(
+  accepted.leanCommit,
+  '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
+);
+assert.equal(accepted.leanCommit,leanKernelProviderCommit);
 assert.equal(accepted.accepted,true);
 
 const rejected=checkCanonicalAdmissions(
@@ -41,6 +62,7 @@ const rejected=checkCanonicalAdmissions(
   {binaryPath},
 );
 assert.equal(rejected.protocol,'pskernel-lean/1');
+assert.equal(rejected.leanCommit,leanKernelProviderCommit);
 assert.equal(rejected.accepted,false);
 assert.equal(rejected.errorKind,'kernel-rejection');
 assert.equal(rejected.declarationIndex,0);

@@ -35,6 +35,12 @@ function flattened(entries) {
     .filter(line => !/^\s*import\s/u.test(line)).join('\n')).join('\n\n');
 }
 
+function checkProbeVariant(label, source, timeoutMs = 15000) {
+  const file = path.join(out, `BackendJsProbe-${label}.lean`);
+  writeFileSync(file, flattened([...sources, { source }]));
+  runPsc1(`probe-${label}`, ['check', file], timeoutMs);
+}
+
 try {
   const lean = path.join(out, 'BackendJs.lean');
   const ps = path.join(out, 'BackendJs.ps');
@@ -54,6 +60,34 @@ try {
       index === 0 ? 90000 : 30000,
     );
   }
+
+  checkProbeVariant('trivial', `
+def psJsProbeTrivial (_value : Unit) : String :=
+  "ok"
+`);
+
+  checkProbeVariant('small-ir', `
+def psJsProbeSmallIr (_value : Unit) : String :=
+  let body := PsVerifiedIrExpr.letE
+    "a-b"
+    (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+    (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 42))
+    (PsVerifiedIrExpr.var "a-b");
+  let declaration := PsVerifiedIrDeclaration.mk
+    "answer" List.nil List.nil
+    (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+    body;
+  let module := PsVerifiedIrModule.mk List.nil List.nil List.nil
+    (List.cons declaration List.nil);
+  match psJsEmitModule module with
+  | Except.error _ => "BACKEND_JS_PROBE_ERROR"
+  | Except.ok output => output
+`);
+
+  checkProbeVariant('huge-nat', `
+def psJsProbeHugeNat (_value : Unit) : Nat :=
+  9007199254740993123456789
+`);
 
   writeFileSync(lean, flattened([...sources, { source: probe }]));
   runPsc1('lean-check-with-probe', ['check', lean], 30000);

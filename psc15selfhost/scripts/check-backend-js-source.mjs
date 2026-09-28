@@ -8,14 +8,13 @@ import { collectBackendJsClosure } from './backend-js-closure.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sources = collectBackendJsClosure(root);
 const out = mkdtempSync(path.join(os.tmpdir(), 'psc-js-source-'));
-const phaseTimeoutMs = 90000;
 
-function phase(label, command, args, cwd) {
+function phase(label, command, args, cwd, timeoutMs = 90000) {
   console.log(`BACKEND_JS_SOURCE_PHASE: ${label}: START`);
   const result = spawnSync(command, args, {
     cwd,
     stdio: 'inherit',
-    timeout: phaseTimeoutMs,
+    timeout: timeoutMs,
   });
   if (result.error) {
     const code = result.error.code ?? result.error.message;
@@ -27,8 +26,13 @@ function phase(label, command, args, cwd) {
   console.log(`BACKEND_JS_SOURCE_PHASE: ${label}: PASS`);
 }
 
-function runPsc1(label, args) {
-  phase(label, 'lake', ['exe', 'psc1', ...args], root);
+function runPsc1(label, args, timeoutMs = 90000) {
+  phase(label, 'lake', ['exe', 'psc1', ...args], root, timeoutMs);
+}
+
+function flattened(entries) {
+  return entries.map(({ source }) => source.split(/\r?\n/u)
+    .filter(line => !/^\s*import\s/u.test(line)).join('\n')).join('\n\n');
 }
 
 try {
@@ -39,10 +43,20 @@ try {
   const probeRunner = path.join(out, 'generated-backend-probe.mjs');
   const probe = readFileSync(path.join(root, 'test/BackendJsSelfhostProbe.lean'), 'utf8');
 
-  writeFileSync(lean, [...sources, { source: probe }].map(({ source }) => source.split(/\r?\n/u)
-    .filter(line => !/^\s*import\s/u.test(line)).join('\n')).join('\n\n'));
+  for (let index = 0; index < sources.length; index += 1) {
+    const prefix = sources.slice(0, index + 1);
+    const prefixFile = path.join(out, `BackendJsPrefix${index + 1}.lean`);
+    const relative = path.relative(root, sources[index].file).replaceAll(path.sep, '/');
+    writeFileSync(prefixFile, flattened(prefix));
+    runPsc1(
+      `lean-prefix-${index + 1}:${relative}`,
+      ['check', prefixFile],
+      index === 0 ? 90000 : 30000,
+    );
+  }
 
-  runPsc1('lean-check', ['check', lean]);
+  writeFileSync(lean, flattened([...sources, { source: probe }]));
+  runPsc1('lean-check-with-probe', ['check', lean], 30000);
   runPsc1('lean-to-ps', ['translate', lean, '--to', 'ps', '--out', ps]);
   runPsc1('ps-check', ['check', ps]);
   console.log('BACKEND_JS_PSC1_SOURCE: PASS (Lean and canonical PS admission-ready checks)');

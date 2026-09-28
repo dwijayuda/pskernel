@@ -13,6 +13,7 @@
   "files": [
     "index.mjs",
     "host/node-provider.mjs",
+    "host/prebuilt.mjs",
     "LEAN_SOURCE_PIN.json",
     "README.md",
     "BUILDING.md",

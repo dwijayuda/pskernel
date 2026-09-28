@@ -29,6 +29,18 @@ The external Lean assurance provider in `packages/pskernel-lean` must remain out
 first fixed-point closure as well. It is selected by host orchestration, not imported by
 the portable semantic compiler.
 
+`packages/pskernel-lean` is now also a normal npm workspace package:
+
+```text
+@proofscript/pskernel-lean@4.34.0
+```
+
+Its npm version tracks the Lean semantic version. Future execution variants should keep
+the version out of the package name, for example `@proofscript/pskernel-lean-wasm@4.34.0`.
+Workspace membership does not grant bootstrap membership: the package remains marked
+`bootstrap: false`, `portable: false`, and remains forbidden from the first fixed-point
+closure.
+
 ## Acceptance gates
 
 Do not claim a self-host milestone merely because the architecture compiles on paper or
@@ -91,10 +103,16 @@ Its current host path is:
 PSC source
   -> generated PSC2 compiler
   -> canonical checked-admissions v2
+  -> @proofscript/pskernel-lean public package API
   -> pskernel-lean native process
   -> Lean Environment.addDeclCore / Lean kernel
   -> accept or reject
 ```
+
+The self-host workspace declares `@proofscript/pskernel-lean@4.34.0` as an optional host
+dependency. Host orchestration prefers the installed npm package and, in a zero-install
+repository checkout, falls back only to the local package's public `index.mjs`. It must
+not import `host/node-provider.mjs` as a private implementation path.
 
 The self-host CLI exposes this as:
 
@@ -116,8 +134,15 @@ Current provider documentation:
 
 ```text
 packages/pskernel-lean/README.md
+packages/pskernel-lean/NPM_PACKAGE.md
 packages/pskernel-lean/BUILDING.md
+packages/pskernel-lean/INTEGRATION.md
 ```
+
+The npm API is packageable and is tested from a clean external npm consumer. The package
+does not yet bundle prebuilt native executables for every OS/architecture. Repository
+usage resolves the Lake-built executable; external consumers can provide
+`PSC_LEAN_KERNEL_PROVIDER_BIN` until native platform artifacts are distributed.
 
 The copied Lean `kernel/`, `runtime/`, and `util/` source trees are retained for a later
 standalone C++/WASM provider. The current native provider links through the pinned
@@ -137,7 +162,3 @@ Grow PSC2 upward rather than enlarging the trusted core. Preferred order:
 8. controlled plugin APIs;
 9. Task/async/resource libraries;
 10. InterfaceIR/FFI and broader backend/plugin ecosystem.
-
-Each feature should record its implementation profile, accepted profile, lowering target,
-kernel requirements and backend requirements. Features that can live in libraries or
-elaboration must not be pushed into the kernel for convenience.

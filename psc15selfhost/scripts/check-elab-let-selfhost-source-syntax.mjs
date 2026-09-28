@@ -22,6 +22,7 @@ const block = match[0];
 const required = [
   /match elaborate context value Option\.none with/,
   /match elaborate context sourceType Option\.none with/,
+  /match elaborate\s+typeResult\.context\s+value\s+\(Option\.some typeResult\.term\) with/,
 ];
 for (const pattern of required) {
   if (!pattern.test(block)) {
@@ -34,6 +35,7 @@ for (const pattern of required) {
 const forbidden = [
   /match elaborate context value none with/,
   /match elaborate context sourceType none with/,
+  /match elaborate\s+typeResult\.context\s+value\s+\(some typeResult\.term\) with/,
 ];
 for (const pattern of forbidden) {
   if (pattern.test(block)) {
@@ -44,5 +46,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_LET_SELFHOST_SOURCE_SYNTAX: PASS (explicit Option.none value/type expectations)\n",
+  "PSC2_ELAB_LET_SELFHOST_SOURCE_SYNTAX: PASS (explicit Option.none value/type expectations; explicit Option.some declared-type expectation)\n",
 );

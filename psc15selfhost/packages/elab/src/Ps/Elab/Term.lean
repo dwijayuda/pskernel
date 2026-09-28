@@ -784,7 +784,7 @@ def psElabForall
   match psElabTypedBinders elaborate context binders with
   | Except.error error => Except.error error
   | Except.ok binderResult =>
-      match elaborate binderResult.context body none with
+      match elaborate binderResult.context body Option.none with
       | Except.error error => Except.error error
       | Except.ok bodyResult =>
           match psInferEnsureSort

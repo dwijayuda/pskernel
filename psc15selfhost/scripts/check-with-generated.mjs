@@ -2,12 +2,23 @@ import {existsSync} from 'node:fs';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {checkCanonicalAdmissions} from '../packages/pskernel-lean/host/node-provider.mjs';
 import {packageBySection,parseImports} from './workspace-layout.mjs';
 
 const scriptPath=fileURLToPath(import.meta.url);
 const scriptDir=path.dirname(scriptPath);
 const selfhostRoot=path.resolve(scriptDir,'..');
+
+async function loadLeanKernelProvider(){
+  try{
+    return await import('@proofscript/pskernel-lean');
+  }catch(error){
+    const missingInstalledPackage=
+      error?.code==='ERR_MODULE_NOT_FOUND'&&
+      String(error?.message??'').includes('@proofscript/pskernel-lean');
+    if(!missingInstalledPackage)throw error;
+    return import('../packages/pskernel-lean/index.mjs');
+  }
+}
 
 function stripImports(source){
   return source
@@ -205,6 +216,7 @@ export async function checkGeneratedProjectWithKernel({
     ),
     'admissions',
   );
+  const {checkCanonicalAdmissions}=await loadLeanKernelProvider();
   const result=checkCanonicalAdmissions(
     admissions,
     binaryPath===undefined?{}:{binaryPath},

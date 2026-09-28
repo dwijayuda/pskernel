@@ -1,5 +1,5 @@
 import Ps.BackendJs.Model
-import Ps.Bridge.Json
+import Ps.BackendJs.PortableText
 
 def psJsNatDecimalWithFuel (fuel : Nat) : Nat -> Except PsJsError String :=
   match fuel with
@@ -10,13 +10,13 @@ def psJsNatDecimalWithFuel (fuel : Nat) : Nat -> Except PsJsError String :=
         psJsNatDecimalWithFuel remaining;
       fun (value : Nat) =>
         if Nat.blt value 10 then
-          Except.ok (psJsonHexDigit value)
+          Except.ok (psJsTextHexDigit value)
         else
           match smaller (Nat.div value 10) with
           | Except.error error => Except.error error
           | Except.ok higherDigits =>
               Except.ok
-                (psJsonConcat2 higherDigits (psJsonHexDigit (Nat.mod value 10)))
+                (psJsTextConcat2 higherDigits (psJsTextHexDigit (Nat.mod value 10)))
 
 def psJsNatDecimal (value : Nat) : Except PsJsError String :=
   psJsNatDecimalWithFuel (Nat.succ value) value
@@ -29,26 +29,26 @@ def psJsEmitLiteral (value : PsJsLiteral) : Except PsJsError String :=
   | PsJsLiteral.natural number =>
       match psJsNatDecimal number with
       | Except.error error => Except.error error
-      | Except.ok text => Except.ok (psJsonConcat2 text "n")
+      | Except.ok text => Except.ok (psJsTextConcat2 text "n")
   | PsJsLiteral.integer number =>
       match psJsIntDecimal number with
       | Except.error error => Except.error error
-      | Except.ok text => Except.ok (psJsonConcat2 text "n")
+      | Except.ok text => Except.ok (psJsTextConcat2 text "n")
   | PsJsLiteral.boolean boolean =>
       if boolean then Except.ok "true"
       else Except.ok "false"
-  | PsJsLiteral.string text => Except.ok (psJsonQuote text)
+  | PsJsLiteral.string text => Except.ok (psJsTextQuote text)
   | PsJsLiteral.undefined => Except.ok "undefined"
 
 def psJsLocalName (index : Nat) : Except PsJsError String :=
   match psJsNatDecimal index with
   | Except.error error => Except.error error
-  | Except.ok text => Except.ok (psJsonConcat2 "__psc_js_l_" text)
+  | Except.ok text => Except.ok (psJsTextConcat2 "__psc_js_l_" text)
 
 def psJsGlobalName (index : Nat) : Except PsJsError String :=
   match psJsNatDecimal index with
   | Except.error error => Except.error error
-  | Except.ok text => Except.ok (psJsonConcat2 "__psc_js_" text)
+  | Except.ok text => Except.ok (psJsTextConcat2 "__psc_js_" text)
 
 def psJsEmitParameterNames (parameters : List Nat) : Except PsJsError String :=
   match parameters with
@@ -63,7 +63,7 @@ def psJsEmitParameterNames (parameters : List Nat) : Except PsJsError String :=
               match psJsEmitParameterNames rest with
               | Except.error error => Except.error error
               | Except.ok names =>
-                  Except.ok (psJsonConcat3 name ", " names)
+                  Except.ok (psJsTextConcat3 name ", " names)
 
 def psJsEmitAtomicExpr (expr : PsJsExpr) : Except PsJsError String :=
   match expr with
@@ -80,9 +80,9 @@ def psJsEmitAtomicExpr (expr : PsJsExpr) : Except PsJsError String :=
               match psJsEmitAtomicExpr value with
               | Except.error error => Except.error error
               | Except.ok printedValue =>
-                  let start := psJsonConcat3 "((" name ") => ";
-                  let withBody := psJsonConcat3 start printedBody ")(";
-                  Except.ok (psJsonConcat3 withBody printedValue ")")
+                  let start := psJsTextConcat3 "((" name ") => ";
+                  let withBody := psJsTextConcat3 start printedBody ")(";
+                  Except.ok (psJsTextConcat3 withBody printedValue ")")
   | PsJsExpr.ifE condition thenBranch elseBranch =>
       match psJsEmitAtomicExpr condition with
       | Except.error error => Except.error error
@@ -93,10 +93,10 @@ def psJsEmitAtomicExpr (expr : PsJsExpr) : Except PsJsError String :=
               match psJsEmitAtomicExpr elseBranch with
               | Except.error error => Except.error error
               | Except.ok printedElse =>
-                  let start := psJsonConcat2 "(" printedCondition;
-                  let withThen := psJsonConcat3 start " ? " printedThen;
-                  let withElse := psJsonConcat3 withThen " : " printedElse;
-                  Except.ok (psJsonConcat2 withElse ")")
+                  let start := psJsTextConcat2 "(" printedCondition;
+                  let withThen := psJsTextConcat3 start " ? " printedThen;
+                  let withElse := psJsTextConcat3 withThen " : " printedElse;
+                  Except.ok (psJsTextConcat2 withElse ")")
   | _ => Except.error PsJsError.unsupportedExpression
 
 def psJsEmitAtomicArguments (arguments : List PsJsExpr) : Except PsJsError String :=
@@ -112,7 +112,7 @@ def psJsEmitAtomicArguments (arguments : List PsJsExpr) : Except PsJsError Strin
               match psJsEmitAtomicArguments rest with
               | Except.error error => Except.error error
               | Except.ok printedRest =>
-                  Except.ok (psJsonConcat3 printedArgument ", " printedRest)
+                  Except.ok (psJsTextConcat3 printedArgument ", " printedRest)
 
 def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
   match expr with
@@ -129,9 +129,9 @@ def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
               match psJsEmitExpr value with
               | Except.error error => Except.error error
               | Except.ok printedValue =>
-                  let start := psJsonConcat3 "((" name ") => ";
-                  let withBody := psJsonConcat3 start printedBody ")(";
-                  Except.ok (psJsonConcat3 withBody printedValue ")")
+                  let start := psJsTextConcat3 "((" name ") => ";
+                  let withBody := psJsTextConcat3 start printedBody ")(";
+                  Except.ok (psJsTextConcat3 withBody printedValue ")")
   | PsJsExpr.lambda parameters body =>
       match psJsEmitParameterNames parameters with
       | Except.error error => Except.error error
@@ -139,8 +139,8 @@ def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
           match psJsEmitExpr body with
           | Except.error error => Except.error error
           | Except.ok printedBody =>
-              let start := psJsonConcat3 "((" names ") => ";
-              Except.ok (psJsonConcat3 start printedBody ")")
+              let start := psJsTextConcat3 "((" names ") => ";
+              Except.ok (psJsTextConcat3 start printedBody ")")
   | PsJsExpr.call fn arguments =>
       match fn with
       | PsJsExpr.global index =>
@@ -153,9 +153,9 @@ def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
                   match psJsEmitAtomicArguments arguments with
                   | Except.error error => Except.error error
                   | Except.ok printedArguments =>
-                      let start := psJsonConcat2 "(" printedFn;
-                      let middle := psJsonConcat3 start ")(" printedArguments;
-                      Except.ok (psJsonConcat2 middle ")")
+                      let start := psJsTextConcat2 "(" printedFn;
+                      let middle := psJsTextConcat3 start ")(" printedArguments;
+                      Except.ok (psJsTextConcat2 middle ")")
       | _ => Except.error PsJsError.unsupportedExpression
   | PsJsExpr.ifE condition thenBranch elseBranch =>
       match psJsEmitExpr condition with
@@ -167,10 +167,10 @@ def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
               match psJsEmitExpr elseBranch with
               | Except.error error => Except.error error
               | Except.ok printedElse =>
-                  let start := psJsonConcat2 "(" printedCondition;
-                  let withThen := psJsonConcat3 start " ? " printedThen;
-                  let withElse := psJsonConcat3 withThen " : " printedElse;
-                  Except.ok (psJsonConcat2 withElse ")")
+                  let start := psJsTextConcat2 "(" printedCondition;
+                  let withThen := psJsTextConcat3 start " ? " printedThen;
+                  let withElse := psJsTextConcat3 withThen " : " printedElse;
+                  Except.ok (psJsTextConcat2 withElse ")")
 
 def psJsEmitConstants (constants : List PsJsConstant) :
     Nat -> Except PsJsError String :=
@@ -189,17 +189,17 @@ def psJsEmitConstants (constants : List PsJsConstant) :
                 match smaller (Nat.succ index) with
                 | Except.error error => Except.error error
                 | Except.ok printedRest =>
-                    let definition := psJsonConcat3 "const " internalName " = ";
-                    let value := psJsonConcat3 definition printedBody ";\n";
-                    let exportStart := psJsonConcat3 "export { " internalName " as ";
-                    let exportLine := psJsonConcat3 exportStart constant.exportName " };\n";
-                    Except.ok (psJsonConcat3 value exportLine printedRest)
+                    let definition := psJsTextConcat3 "const " internalName " = ";
+                    let value := psJsTextConcat3 definition printedBody ";\n";
+                    let exportStart := psJsTextConcat3 "export { " internalName " as ";
+                    let exportLine := psJsTextConcat3 exportStart constant.exportName " };\n";
+                    Except.ok (psJsTextConcat3 value exportLine printedRest)
 
 def psJsEmitTargetModule (module : PsJsModule) : Except PsJsError String :=
   match psJsEmitConstants module.constants 0 with
   | Except.error error => Except.error error
   | Except.ok constants =>
       Except.ok
-        (psJsonConcat2
+        (psJsTextConcat2
           "// Generated by ProofScript backend-js (lexical profile).\nexport {};\n"
           constants)

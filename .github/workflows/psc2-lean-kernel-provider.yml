@@ -1,0 +1,44 @@
+name: PSC2 Lean kernel provider
+
+on:
+  push:
+    branches:
+      - psc2/pskernel-lean-provider
+    paths:
+      - psc15selfhost/packages/pskernel-lean/**
+      - psc15selfhost/lakefile.lean
+      - psc15selfhost/lean-toolchain
+      - psc15selfhost/packages/backend-ts/**
+      - psc15selfhost/packages/cli/**
+      - psc15selfhost/scripts/compile-with-generated.mjs
+      - psc15selfhost/package.json
+      - .github/workflows/psc2-lean-kernel-provider.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-provider:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Provider tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake build psc2_lean_kernel_provider_tests

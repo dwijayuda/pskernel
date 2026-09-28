@@ -1,3 +1,4 @@
+import Ps.Bridge.CheckedAdmissions
 import PsKernelLean.Protocol
 import PsKernelLean.Convert
 import PsKernelLean.Prelude
@@ -118,6 +119,96 @@ def testPreludeReplay : IO Unit := do
   for name in required do
     expectTrue s!"prelude declaration {name}" (env.find? name).isSome
 
+def canonicalDecodeFixture : Except PsCheckedAdmissionCodecError String :=
+  let natType := PsExpr.constE psNatName []
+  let definition :=
+    PsDeclaration.definitionDecl
+      (psRootName "decodedDefinition")
+      []
+      natType
+      (PsExpr.lit (PsLiteral.natural 1))
+  let theorem :=
+    PsDeclaration.theoremDecl
+      (psRootName "decodedTheorem")
+      []
+      (PsExpr.sortE PsLevel.zero)
+      (PsExpr.sortE PsLevel.zero)
+  let flagName := psRootName "DecodedFlag"
+  let onName := psNameAppendStr flagName "on"
+  let flagType := PsExpr.constE flagName []
+  let inductive :=
+    PsDeclaration.inductiveDecl
+      (PsInductiveInfo.mk
+        flagName
+        []
+        (PsExpr.sortE (PsLevel.succ PsLevel.zero))
+        0
+        0
+        [onName]
+        false)
+  let constructor :=
+    PsDeclaration.constructorDecl
+      (PsConstructorInfo.mk
+        onName
+        []
+        flagType
+        flagName
+        0
+        0
+        0
+        [])
+  psEncodeCheckedAdmissionsCanonical
+    [definition, theorem, inductive, constructor]
+
+def testCanonicalAdmissionsDecode : IO Unit := do
+  let encoded ←
+    match canonicalDecodeFixture with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "fixture encoding failed"
+  let decoded ← expectOk "canonical admissions decode"
+    (PsKernelLean.decodeCanonicalAdmissions encoded)
+  match decoded.toList with
+  | [Lean.Declaration.defnDecl definition,
+     Lean.Declaration.thmDecl theorem,
+     Lean.Declaration.inductDecl _ 0 [inductive] false] =>
+      expectTrue "decoded definition name"
+        (definition.name == Lean.Name.str Lean.Name.anonymous "decodedDefinition")
+      expectTrue "decoded definition regular height"
+        (match definition.hints with | .regular 1 => true | _ => false)
+      expectTrue "decoded theorem name"
+        (theorem.name == Lean.Name.str Lean.Name.anonymous "decodedTheorem")
+      expectTrue "decoded inductive name"
+        (inductive.name == Lean.Name.str Lean.Name.anonymous "DecodedFlag")
+      match inductive.ctors with
+      | [constructor] =>
+          expectTrue "decoded constructor name"
+            (constructor.name ==
+              Lean.Name.str (Lean.Name.str Lean.Name.anonymous "DecodedFlag") "on")
+      | _ => throw <| IO.userError "decoded constructor count"
+  | _ => throw <| IO.userError "decoded declaration shapes"
+
+def testCanonicalAdmissionsRejectMalformed : IO Unit := do
+  expectErrorKind "malformed json" .malformedRequest
+    (PsKernelLean.decodeCanonicalAdmissions "{")
+  expectErrorKind "wrong format" .malformedRequest
+    (PsKernelLean.decodeCanonicalAdmissions
+      "{\"admissions\":[],\"format\":\"wrong\",\"version\":2}")
+  expectErrorKind "wrong version" .protocolVersion
+    (PsKernelLean.decodeCanonicalAdmissions
+      "{\"admissions\":[],\"format\":\"proofscript-checked-admissions\",\"version\":1}")
+  expectErrorKind "string version" .protocolVersion
+    (PsKernelLean.decodeCanonicalAdmissions
+      "{\"admissions\":[],\"format\":\"proofscript-checked-admissions\",\"version\":\"2\"}")
+  expectErrorKind "unknown admission kind" .malformedRequest
+    (PsKernelLean.decodeCanonicalAdmissions
+      "{\"admissions\":[{\"declaration\":{},\"kind\":\"mystery\"}],\"format\":\"proofscript-checked-admissions\",\"version\":2}")
+  expectErrorKind "malformed structured name" .malformedRequest
+    (PsKernelLean.decodeCanonicalAdmissions
+      "{\"admissions\":[{\"declaration\":{\"h\":{\"h\":\"1\",\"k\":\"regular\"},\"k\":\"definition\",\"lp\":[],\"n\":{\"k\":\"s\"},\"s\":\"safe\",\"t\":{\"k\":\"sort\",\"l\":{\"k\":\"z\"}},\"v\":{\"k\":\"sort\",\"l\":{\"k\":\"z\"}}},\"kind\":\"constant\"}],\"format\":\"proofscript-checked-admissions\",\"version\":2}")
+  expectErrorKind "bad hint height" .malformedRequest
+    (PsKernelLean.decodeCanonicalAdmissions
+      "{\"admissions\":[{\"declaration\":{\"h\":{\"h\":\"01\",\"k\":\"regular\"},\"k\":\"definition\",\"lp\":[],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"bad\"},\"s\":\"safe\",\"t\":{\"k\":\"sort\",\"l\":{\"k\":\"z\"}},\"v\":{\"k\":\"sort\",\"l\":{\"k\":\"z\"}}},\"kind\":\"constant\"}],\"format\":\"proofscript-checked-admissions\",\"version\":2}")
+
 def main : IO Unit := do
   expectEq "providerProtocol" PsKernelLean.providerProtocol "pskernel-lean/1"
   expectEq "providerName" PsKernelLean.providerName "lean4-cpp"
@@ -126,4 +217,6 @@ def main : IO Unit := do
   expectEq "leanVersion" Lean.versionString "4.34.0"
   testCoreConversion
   testPreludeReplay
+  testCanonicalAdmissionsDecode
+  testCanonicalAdmissionsRejectMalformed
   IO.println "PSC2_LEAN_KERNEL_PROVIDER_TESTS: PASS"

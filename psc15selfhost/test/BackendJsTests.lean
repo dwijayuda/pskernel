@@ -57,6 +57,14 @@ def jsDifferentialDeclarations : List PsVerifiedIrDeclaration :=
     jsFixtureFunctionDecl "callIdentityLet" "value" .nat .nat
       (.call (.var "identity") [] [
         (.letE "temporary" (.primitive .nat) (.var "value") (.var "temporary"))]),
+    jsFixtureFunctionDecl "callSecond" "value" .nat .nat
+      (.call (.var "second") [] [(.literal (.natural 11)), (.var "value")]),
+    jsFixtureBinaryFunctionDecl "second" "left" "right" .nat .nat .nat
+      (.var "right")
+  ]
+
+def jsDirectOnlyDeclarations : List PsVerifiedIrDeclaration :=
+  [
     jsFixtureFunctionDecl "callCapturedLambda" "value" .nat .nat
       (.letE "captured" (.primitive .nat) (.var "value")
         (.call
@@ -74,11 +82,7 @@ def jsDifferentialDeclarations : List PsVerifiedIrDeclaration :=
             (.primitive .nat)
             (.var "inner"))
           []
-          [(.var "value")])]),
-    jsFixtureFunctionDecl "callSecond" "value" .nat .nat
-      (.call (.var "second") [] [(.literal (.natural 11)), (.var "value")]),
-    jsFixtureBinaryFunctionDecl "second" "left" "right" .nat .nat .nat
-      (.var "right")
+          [(.var "value")])])
   ]
 
 def jsDifferentialFixtureModule : PsVerifiedIrModule :=
@@ -86,7 +90,7 @@ def jsDifferentialFixtureModule : PsVerifiedIrModule :=
 
 def jsFixtureModule : PsVerifiedIrModule :=
   { psVerifiedIrModuleEmpty with declarations :=
-      jsDifferentialDeclarations ++ [
+      jsDifferentialDeclarations ++ jsDirectOnlyDeclarations ++ [
         jsFixtureExprDecl "renamedLocal" .nat
           (.letE "a-b" (.primitive .nat) (.literal (.natural 3)) (.var "a-b"))
       ] }

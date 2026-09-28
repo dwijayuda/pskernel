@@ -39,7 +39,7 @@
     "test:selfhost-source-syntax:elab-apply-many": "node scripts/check-elab-apply-many-selfhost-source-syntax.mjs",
     "check:selfhost-source-syntax:elab-apply-many": "npm run test:selfhost-source-syntax:elab-apply-many",
     "test:selfhost-source-syntax:elab-if": "node scripts/check-elab-if-selfhost-source-syntax.mjs",
-    "check:selfhost-source-syntax:elab-if": "npm run test:selfhost-source-syntax:elab-if",
+    "check:selfhost-source-syntax:elab-if": "node scripts/check-elab-if-selfhost-source-syntax.mjs",
     "check:selfhost-source-syntax": "node scripts/check-selfhost-source-syntax.mjs && npm run check:selfhost-source-syntax:infer && npm run check:selfhost-source-syntax:synth-instance && npm run check:selfhost-source-syntax:instances && npm run check:selfhost-source-syntax:unify && npm run check:selfhost-source-syntax:elab-context && npm run check:selfhost-source-syntax:elab-literal && npm run check:selfhost-source-syntax:elab-term && npm run check:selfhost-source-syntax:elab-lambda-expected && npm run check:selfhost-source-syntax:elab-lambda && npm run check:selfhost-source-syntax:elab-forall && npm run check:selfhost-source-syntax:elab-let-option-constructors && npm run check:selfhost-source-syntax:elab-apply-many && npm run check:selfhost-source-syntax:elab-if",
     "check:structure-recursor-normalization": "node scripts/check-structure-recursor-normalization.mjs",
     "test:bootstrap-closure-contract": "node scripts/bootstrap-closure-contract-tests.mjs",

@@ -11,6 +11,14 @@ const packageRoot=path.join(workspaceRoot,'packages','pskernel-lean');
 const consumerRoot=await mkdtemp(path.join(os.tmpdir(),'psc2-pskernel-lean-consumer-'));
 const npm=process.platform==='win32'?'npm.cmd':'npm';
 
+const workspaceManifest=JSON.parse(
+  await readFile(path.join(workspaceRoot,'package.json'),'utf8'),
+);
+assert.equal(
+  workspaceManifest.optionalDependencies?.['@proofscript/pskernel-lean'],
+  '4.34.0',
+);
+
 try{
   await writeFile(
     path.join(consumerRoot,'package.json'),

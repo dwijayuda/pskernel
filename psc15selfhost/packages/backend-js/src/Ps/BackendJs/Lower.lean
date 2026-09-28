@@ -1,5 +1,5 @@
 import Ps.CompilerIr.Model
-import Ps.Bridge.Json
+import Ps.BackendJs.PortableText
 import Ps.BackendJs.Model
 
 structure PsJsLocalBinding where
@@ -24,8 +24,8 @@ structure PsJsLoweredParameters where
 
 def psJsNameHead (value : Char) : Bool :=
   let code := Char.toNat value;
-  if psJsonNatInRange code 65 90 then true
-  else if psJsonNatInRange code 97 122 then true
+  if psJsTextNatInRange code 65 90 then true
+  else if psJsTextNatInRange code 97 122 then true
   else if Nat.beq code 95 then true
   else Nat.beq code 36
 
@@ -34,14 +34,14 @@ def psJsNameTail (values : List Char) : Bool :=
   | List.nil => true
   | List.cons value rest =>
       if psJsNameHead value then psJsNameTail rest
-      else if psJsonNatInRange (Char.toNat value) 48 57 then psJsNameTail rest
+      else if psJsTextNatInRange (Char.toNat value) 48 57 then psJsNameTail rest
       else false
 
 def psJsContainsName (values : List String) (name : String) : Bool :=
   match values with
   | List.nil => false
   | List.cons value rest =>
-      if psJsonStringEq value name then true
+      if psJsTextStringEq value name then true
       else psJsContainsName rest name
 
 def psJsReservedNames : List String :=
@@ -56,7 +56,7 @@ def psJsReservedNames : List String :=
 def psJsValidExportName (name : String) : Bool :=
   if psJsContainsName psJsReservedNames name then false
   else
-    match psJsonStringToChars name with
+    match psJsTextStringToChars name with
     | List.nil => false
     | List.cons head tail =>
         if psJsNameHead head then psJsNameTail tail else false
@@ -114,7 +114,7 @@ def psJsLookupLocal (locals : List PsJsLocalBinding)
   match locals with
   | List.nil => Option.none
   | List.cons binding rest =>
-      if psJsonStringEq binding.sourceName name then Option.some binding
+      if psJsTextStringEq binding.sourceName name then Option.some binding
       else psJsLookupLocal rest name
 
 def psJsLookupGlobal (globals : List PsJsGlobalBinding)
@@ -122,7 +122,7 @@ def psJsLookupGlobal (globals : List PsJsGlobalBinding)
   match globals with
   | List.nil => Option.none
   | List.cons binding rest =>
-      if psJsonStringEq binding.sourceName name then Option.some binding
+      if psJsTextStringEq binding.sourceName name then Option.some binding
       else psJsLookupGlobal rest name
 
 def psJsLowerParameterTypes (parameters : List PsVerifiedIrParameter) :

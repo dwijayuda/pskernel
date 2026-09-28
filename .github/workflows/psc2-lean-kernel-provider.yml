@@ -49,13 +49,6 @@ jobs:
           test "$(tsc --version)" = "Version 5.8.3"
           echo "PSC2_TYPESCRIPT_PIN: PASS 5.8.3"
 
-      - name: Install host package dependencies
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          npm install --workspaces=false --ignore-scripts --no-audit --no-fund --package-lock=false
-
       - name: Bootstrap isolation gate
         shell: bash
         run: |

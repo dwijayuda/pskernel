@@ -19,7 +19,7 @@ def psJsNatDecimalWithFuel (fuel : Nat) : Nat -> Except PsJsError String :=
                 (psJsTextConcat2 higherDigits (psJsTextHexDigit (Nat.mod value 10)))
 
 def psJsNatDecimal (value : Nat) : Except PsJsError String :=
-  psJsNatDecimalWithFuel (Nat.succ value) value
+  Except.ok (Int.repr (Int.ofNat value))
 
 def psJsIntDecimal (value : Int) : Except PsJsError String :=
   Except.ok (Int.repr value)

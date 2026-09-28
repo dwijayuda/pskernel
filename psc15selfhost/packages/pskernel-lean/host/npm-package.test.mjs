@@ -20,6 +20,8 @@ assert.equal(manifest.exports?.['./node'],'./host/node-provider.mjs');
 assert.equal(manifest.proofscript?.bootstrap,false);
 assert.equal(manifest.proofscript?.portable,false);
 assert.equal(manifest.proofscript?.role,'external-lean-kernel-provider');
+assert.ok(manifest.files.includes('PREBUILT_MANIFEST.json'));
+assert.ok(manifest.files.includes('prebuilt/'));
 
 const api=await import(pathToFileURL(indexPath).href);
 assert.equal(api.leanKernelProviderVersion,'4.34.0');

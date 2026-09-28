@@ -17,7 +17,9 @@ function run(command, args) {
     stdio: "inherit",
   });
   if (result.error) throw result.error;
-  process.exitCode = result.status ?? 1;
+  const status = result.status ?? 1;
+  process.exitCode = status;
+  return status;
 }
 
 function option(args, name) {
@@ -32,7 +34,7 @@ function usage() {
     "usage:",
     "  psc bootstrap",
     "  psc check <entry.lean|entry.ps> --kernel lean434 [--compiler <compiler.js>]",
-    "  psc build <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>]",
+    "  psc build <entry.lean|entry.ps> --out <output.js|output.ts> [--kernel lean434] [--compiler <compiler.js>]",
     "  psc translate <input.lean|input.ps> --to <lean|ps> [--out <output>] [--compiler <compiler.js>]",
     "  psc emit-lean <input.lean|input.ps> [--out <output.lean>] [--compiler <compiler.js>]",
     "  psc emit-ps <input.lean|input.ps> [--out <output.ps>] [--compiler <compiler.js>]",
@@ -86,16 +88,32 @@ if (!command || command === "--help" || command === "-h") {
 } else if (command === "build") {
   const entry = args[1];
   const output = option(args, "--out");
+  const kernel = option(args, "--kernel");
   const compiler = option(args, "--compiler") ?? defaultCompiler;
 
   if (!entry || !output) throw new Error(usage());
 
-  run(node, [
+  const compileArgs = [
     "scripts/compile-with-generated.mjs",
     compiler,
     entry,
     output,
-  ]);
+  ];
+
+  if (kernel) {
+    const checkStatus = run(node, [
+      "scripts/check-with-generated.mjs",
+      compiler,
+      entry,
+      "--kernel",
+      kernel,
+    ]);
+    if (checkStatus === 0) {
+      run(node, compileArgs);
+    }
+  } else {
+    run(node, compileArgs);
+  }
 } else if (command === "project" && args[1] === "emit") {
   const entry = args[2];
   const target = option(args, "--to");

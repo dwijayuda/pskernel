@@ -12,7 +12,9 @@ on:
       - psc15selfhost/packages/cli/**
       - psc15selfhost/scripts/compile-with-generated.mjs
       - psc15selfhost/scripts/check-with-generated*.mjs
+      - psc15selfhost/scripts/pskernel-lean-package-consumer.test.mjs
       - psc15selfhost/scripts/bootstrap-closure-contract*.mjs
+      - psc15selfhost/scripts/check-workspace.mjs
       - psc15selfhost/package.json
       - psc15selfhost/STATUS.md
       - .github/workflows/psc2-lean-kernel-provider.yml
@@ -61,6 +63,7 @@ jobs:
           cd psc15selfhost
           npm run test:kernel:lean434
           node packages/pskernel-lean/host/npm-package.test.mjs
+          node scripts/pskernel-lean-package-consumer.test.mjs
           node scripts/check-with-generated.test.mjs
           node packages/cli/bin/psc-kernel-provider.test.mjs
 

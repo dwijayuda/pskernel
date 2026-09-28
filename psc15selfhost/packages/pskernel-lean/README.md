@@ -1,102 +1,106 @@
-# PSC2 Lean 4.34 kernel provider
+# `@proofscript/pskernel-lean`
 
-This package is the **Lean-backed kernel provider** for the PSC2 self-host work in `psc15selfhost`.
+Official Lean-backed kernel provider for ProofScript PSC2.
 
-Its job is intentionally narrow:
-
-```text
-canonical PSC core admissions
-        |
-        v
-pskernel-lean provider
-        |
-        v
-official Lean 4.34 kernel admission
-        |
-   accept / reject
-```
-
-It is an assurance/bootstrap provider. It is **not** the portable PSC2 compiler core and it is **not** part of the first fixed-point bootstrap closure.
-
-## Semantic target
-
-The provider is pinned to:
-
-- Lean version: `4.34.0`
-- Lean tag: `v4.34.0`
-- Lean source commit: `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`
-- provider protocol: `pskernel-lean/1`
-- provider profile: `lean4.34-core`
-
-The machine-readable pin is `LEAN_SOURCE_PIN.json`. The workspace `lean-toolchain` is also pinned to `leanprover/lean4:v4.34.0`.
-
-Do not silently change any of these values. A newer Lean version is a new provider profile / conformance decision, not a routine dependency upgrade.
-
-## What is implemented now
-
-The current native provider is written in Lean and compiled against the pinned official Lean 4.34 distribution. Semantic admission is performed through `Lean.Environment.addDeclCore` in a trust-level-0 environment.
-
-The provider does **not** generate `.lean` source and does not ask Lean's parser or elaborator to reinterpret PSC programs. The path is semantic:
+Current package identity:
 
 ```text
-PSC canonical admissions JSON
-  -> PSC canonical decoder
-  -> PSC Core values
-  -> Lean Name / Level / Expr / Declaration values
-  -> Lean kernel environment admission
+@proofscript/pskernel-lean@4.34.0
 ```
 
-This distinction matters: the provider checks the semantic object produced by PSC rather than checking whether a generated Lean program happens to elaborate.
+The package version tracks the Lean semantic baseline. Do not put the Lean version in the package name. A future WebAssembly transport should therefore be named, for example:
 
-The self-host CLI now has a host-only integration path:
+```text
+@proofscript/pskernel-lean-wasm@4.34.0
+```
+
+The native provider is pinned more precisely to:
+
+```text
+Lean version: 4.34.0
+Lean tag:     v4.34.0
+Lean commit:  293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+protocol:     pskernel-lean/1
+profile:      lean4.34-core
+```
+
+`LEAN_SOURCE_PIN.json` is the machine-readable identity. Do not silently change the Lean version or source commit.
+
+## Purpose
+
+This package provides an **external assurance kernel** for PSC2. It accepts PSC canonical checked-admissions and asks the pinned official Lean kernel to accept or reject the corresponding semantic declarations.
 
 ```text
 PSC source
   -> generated PSC2 compiler
-  -> canonical admissions
-  -> pskernel-lean native provider
+  -> canonical checked-admissions v2
+  -> @proofscript/pskernel-lean
   -> Lean 4.34 kernel
   -> accept / reject
 ```
 
-The provider is invoked by the host process. No Lean-specific module is imported into the portable semantic compiler closure.
+It is deliberately **not** part of the first PSC2 fixed-point bootstrap closure. npm workspace membership does not make it part of the portable compiler.
 
-## Source directories
+## Public npm API
 
-```text
-packages/pskernel-lean/
-  provider/       native Lean provider implementation
-  provider-test/  provider semantic tests
-  host/           host-side adapters, currently Node.js
-  kernel/         pinned Lean kernel source copy / standalone-build input
-  runtime/        pinned Lean runtime source copy / standalone-build input
-  util/           pinned Lean util source copy / standalone-build input
+Use the package entry point:
+
+```js
+import {
+  checkCanonicalAdmissions,
+  defaultLeanKernelProviderBinary,
+  leanKernelProviderCommit,
+  leanKernelProviderName,
+  leanKernelProviderProtocol,
+  leanKernelProviderVersion,
+} from '@proofscript/pskernel-lean';
 ```
 
-The copied `kernel/`, `runtime/`, and `util/` trees are **not yet built as a separate standalone C++ library** by the current provider target. Today the provider uses the kernel supplied by the pinned official Lean distribution. A future standalone native/WASM provider may compile these pinned sources behind the same protocol boundary.
+Additional supported exports:
 
-Do not make compiler packages depend directly on these C++ source trees.
+```text
+@proofscript/pskernel-lean/node
+@proofscript/pskernel-lean/metadata
+```
 
-## Prelude ownership
+Consumers should not import `host/node-provider.mjs` by repository-relative path. That file is implementation structure; `index.mjs` / npm `exports` are the package boundary.
 
-The provider reconstructs the PSC2 self-host prelude into an empty Lean environment with trust level 0.
+PSC2 host orchestration prefers the installed package. In a zero-install repository checkout it falls back only to the local package's public `index.mjs`, so development and installed use share the same API.
 
-The PSC prelude contains some forward references. Therefore replay is dependency-aware rather than merely list-order based:
+The self-host workspace declares the package as an optional dependency:
 
-1. Try each pending declaration with the Lean kernel.
-2. Admit successful declarations.
-3. Defer only `unknownConstant` failures.
-4. Fail immediately on every other kernel failure.
-5. Repeat while progress is made.
-6. Fail closed if unresolved declarations remain with no progress.
+```json
+{
+  "optionalDependencies": {
+    "@proofscript/pskernel-lean": "4.34.0"
+  }
+}
+```
 
-This is not an unchecked dependency sorter. Every declaration that enters the environment is still admitted by the Lean kernel.
+It is optional because normal bootstrap/fixed-point operation must remain independent of Lean.
 
-## Canonical input protocol
+## Semantic checking path
 
-`--check` reads one complete canonical admissions document from stdin.
+The provider does **not** generate `.lean` text and does not ask Lean's parser/elaborator to reinterpret PSC source.
 
-The envelope is the existing PSC bridge format:
+The path is direct semantic conversion:
+
+```text
+PSC canonical admissions JSON
+  -> canonical PSC decoder
+  -> PSC Core values
+  -> Lean Name / Level / Expr / Declaration
+  -> Lean.Environment.addDeclCore
+  -> accept / reject
+```
+
+Admission starts from a trust-level-0 empty Lean environment. The provider reconstructs PSC2's own pinned prelude and submits every admitted declaration through the Lean kernel.
+
+Because the PSC prelude contains forward references, replay is dependency-aware: only `unknownConstant` failures are deferred; every other kernel failure is immediately fatal, and unresolved declarations with no progress fail closed.
+
+## Canonical request
+
+`--check` receives one complete checked-admissions v2 document on stdin:
 
 ```json
 {
@@ -106,13 +110,26 @@ The envelope is the existing PSC bridge format:
 }
 ```
 
-The decoder reuses PSC's canonical name, level, expression, declaration, theorem, and inductive encodings. Unsupported or malformed forms fail closed.
+Malformed input, unknown tags, metas/free variables, unsupported Core forms, version mismatches, and non-round-trippable reducibility heights fail closed.
 
-Definition reducibility heights require special care: PSC's codec represents the height as an unbounded natural number, while Lean 4.34 stores a regular reducibility height as `UInt32`. The provider rejects values that do not round-trip exactly through `UInt32`; it never truncates them.
+A successful response includes the exact provider identity:
 
-## Native process interface
+```json
+{
+  "protocol": "pskernel-lean/1",
+  "provider": "lean4-cpp",
+  "leanVersion": "4.34.0",
+  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "profile": "lean4.34-core",
+  "accepted": true
+}
+```
 
-From `psc15selfhost/`:
+Kernel rejection returns `accepted:false` plus a stable `errorKind` and, when applicable, `declarationIndex`.
+
+## Native executable
+
+In this repository, build and test the provider from `psc15selfhost/`:
 
 ```text
 npm run check:kernel:lean434:pin
@@ -120,7 +137,7 @@ npm run build:kernel:lean434
 npm run test:kernel:lean434
 ```
 
-Direct Lake commands are also available:
+Direct commands:
 
 ```text
 lake build psc2_lean_kernel_provider
@@ -129,181 +146,123 @@ lake exe psc2_lean_kernel_provider --health
 cat admissions.json | lake exe psc2_lean_kernel_provider --check
 ```
 
-On Windows the built executable has the normal `.exe` suffix. The Node adapter resolves the platform-specific default automatically.
+The Node adapter finds the repository Lake output automatically. `PSC_LEAN_KERNEL_PROVIDER_BIN` or the `binaryPath` option can override the executable location.
 
-Accepted response:
+### npm distribution status
 
-```json
-{
-  "protocol": "pskernel-lean/1",
-  "accepted": true,
-  "provider": "lean4-cpp",
-  "leanVersion": "4.34.0",
-  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
-  "profile": "lean4.34-core"
-}
-```
+The JavaScript npm package boundary is implemented and tested from a clean external npm consumer.
 
-Rejected response includes a stable error kind and, when applicable, the declaration index:
+The package does **not yet bundle prebuilt native executables for every OS/architecture**. Therefore an external npm installation currently needs either:
 
-```json
-{
-  "protocol": "pskernel-lean/1",
-  "accepted": false,
-  "provider": "lean4-cpp",
-  "leanVersion": "4.34.0",
-  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
-  "profile": "lean4.34-core",
-  "errorKind": "kernel-rejection",
-  "declarationIndex": 0,
-  "message": "..."
-}
-```
+- a compatible provider executable supplied through `PSC_LEAN_KERNEL_PROVIDER_BIN` / `binaryPath`, or
+- a later platform-native distribution package once those artifacts are produced.
 
-The protocol boundary is text/bytes in and text/bytes out. Host clients must not depend on Lean internal C++ object layouts.
+Do not claim that `npm install @proofscript/pskernel-lean` alone already installs a native kernel binary on every platform.
 
-## Self-host CLI integration
+Future prebuilt native packaging and `@proofscript/pskernel-lean-wasm` should preserve the same canonical request/response semantics and JavaScript-facing provider contract.
 
-After a generated compiler exists, check a project with the Lean provider:
+## PSC CLI integration
+
+With a generated PSC2 compiler:
 
 ```text
-node packages/cli/bin/psc.mjs check path/to/Main.ps \
-  --kernel lean434 \
-  --compiler dist/bootstrap/packages/compiler/index.js
+psc check Main.ps --kernel lean434
+psc build Main.ps --out Main.js --kernel lean434
 ```
 
-or, through the workspace bin command:
-
-```text
-npm run psc -- check path/to/Main.ps --kernel lean434
-```
-
-A kernel-gated build is:
-
-```text
-node packages/cli/bin/psc.mjs build path/to/Main.ps \
-  --out dist/app.js \
-  --kernel lean434 \
-  --compiler dist/bootstrap/packages/compiler/index.js
-```
-
-For `build --kernel lean434` the order is deliberately fail-closed:
+The gated build order is fail-closed:
 
 ```text
 flatten project
   -> generated compiler canonical admissions
-  -> Lean 4.34 provider check
-  -> only if accepted: generated compiler TypeScript output
-  -> tsc / JavaScript output
+  -> @proofscript/pskernel-lean check
+  -> only if accepted: TypeScript generation
+  -> JavaScript compilation
 ```
 
-If Lean rejects the module, code generation is not started and the requested output is not emitted.
+If Lean rejects the module, requested code generation must not proceed.
 
-A build **without** `--kernel` retains the existing self-host/bootstrap behavior. This keeps `psc fixed-point` independent of the external Lean provider.
+Builds without `--kernel lean434` keep the existing fixed-point behavior and do not require this package to execute.
 
-The default compiler path is `dist/bootstrap/packages/compiler/index.js`; pass `--compiler` when testing another generated compiler generation.
+## Package / bootstrap boundary
 
-## Node host adapter
+This package is a normal npm workspace under `packages/*`, but its ProofScript metadata remains:
 
-`host/node-provider.mjs` exposes:
+```json
+{
+  "bootstrap": false,
+  "portable": false,
+  "role": "external-lean-kernel-provider"
+}
+```
+
+`bootstrap-closure-contract.mjs` explicitly forbids `pskernel-lean` from the first portable closure.
+
+The long-term architecture remains:
 
 ```text
-checkCanonicalAdmissions(source, options?)
-defaultLeanKernelProviderBinary(options?)
+AdmissionReadyModule
+       |
+       v
+host-selected KernelProvider
+   /          |           \
+  v           v            v
+PSC kernel   Lean native   Lean WASM
+  |            |             |
+  +------------+-------------+
+               |
+         CheckedModule
+               |
+             erasure
+               |
+          VerifiedIR
 ```
 
-The adapter:
+A later provider-neutral `CheckedModule` / `CheckedCore` must be produced only after a selected kernel provider accepts the canonical Core. Do not rename the current codec-valid `AdmissionReadyModule` to `CheckedCore`.
 
-- spawns the provider with `--check`,
-- sends canonical admissions on stdin,
-- parses exactly one JSON response,
-- validates protocol, provider identity, Lean version, exact Lean source commit, and `accepted`,
-- reports process-start, nonzero-exit, and malformed-output errors as host failures.
+## Copied Lean sources
 
-`PSC_LEAN_KERNEL_PROVIDER_BIN` may override the binary path. Otherwise the adapter resolves the workspace Lake output automatically and adds `.exe` on Windows.
-
-## Error boundary
-
-Provider errors are classified separately from ordinary kernel rejection. Current stable categories include:
-
-- protocol/version mismatch,
-- malformed request,
-- unsupported PSC core form,
-- prelude mismatch,
-- provider version mismatch,
-- kernel rejection,
-- provider internal error.
-
-A codec-valid declaration can still be rejected by the kernel. Tests explicitly cover this distinction using a definition whose declared type is `Nat` but whose body is `Sort 0`.
-
-## What this does and does not prove
-
-A successful response means the submitted declarations were accepted by this pinned Lean 4.34 kernel-provider path on top of the provider-owned prelude.
-
-It does **not** by itself prove:
-
-- full equivalence between PSC's own kernel and all Lean 4 behavior,
-- exhaustive compatibility with the complete Lean environment,
-- equivalence of parser/elaborator behavior,
-- exact handling of every deprecated native-reduction path,
-- that PSC2 is already fully independent from Lean.
-
-Do not label codec validation or `AdmissionReadyModule` as `CheckedCore`. A genuine checked artifact must be produced only after a selected kernel provider has accepted the semantic declarations.
-
-## Intended architecture
-
-The long-term boundary remains:
+The package also retains pinned copies of:
 
 ```text
-PSC source
-  -> parser / resolver / elaborator
-  -> canonical PSC Core
-  -> AdmissionReadyModule
-  -> selected KernelProvider
-  -> CheckedModule / CheckedCore
-  -> erasure
-  -> VerifiedIR
-  -> backend
+kernel/
+runtime/
+util/
 ```
 
-Provider implementations may eventually include:
+The current provider executable does not directly build those copies as a standalone library; it links through the pinned official Lean distribution. The copies are retained for a later standalone native/WASM provider behind the same protocol.
 
-- `psc`: the self-hosted PSC kernel,
-- `lean434`: this Lean 4.34 assurance provider,
-- `dual`: require both providers and fail on disagreement.
+Do not expose Lean C++ classes or `lean_object` pointers as the stable PSC API. The stable provider boundary should remain bytes/text in and bytes/text out.
 
-The compiler should depend on the provider protocol/interface, never on Lean-specific APIs.
+## What acceptance proves
 
-## Standalone C++ / WASM next step
+An accepted response means the submitted canonical PSC declarations were accepted by this exact Lean 4.34 provider path on top of the provider-owned PSC2 prelude.
 
-The future standalone provider can compile the pinned Lean 4.34 `kernel` plus the required `runtime`/`util` support and a very small PSC bridge. Keep the public ABI independent of C++ types, conceptually:
+It does **not** prove full Lean frontend equivalence, full PSC/Lean equivalence, or that the future PSC-native kernel is already equivalent to Lean.
 
-```text
-init()
-check(inputBytes) -> outputBytes
-free(pointer)
-```
+## Documentation
 
-The same boundary can be implemented as a native executable/library first and then compiled to WebAssembly. The canonical PSC payload and provider response should remain stable so compiler-side code does not care whether the provider runs as a child process, native library, or WASM module.
+- `NPM_PACKAGE.md` — npm naming, consumption, and distribution contract.
+- `INTEGRATION.md` — semantic and host-provider boundary.
+- `BUILDING.md` — native build/run instructions.
+- `LEAN_SOURCE_PIN.json` — exact Lean identity.
 
-## Gates
+## Required regression gates
 
-The branch CI verifies the following provider contract:
+Keep tests for all of these when changing the package:
 
-- the installed Lean toolchain is exactly `4.34.0` at source commit `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`,
-- the Lean 4.34 provider target builds,
-- provider metadata is pinned,
-- PSC Core maps directly to Lean semantic objects,
-- unsupported metas/free variables fail closed,
-- the PSC2 self-host prelude is accepted from a trust-level-0 environment,
-- PSC's real canonical encoder is compatible with the provider decoder,
-- malformed/version-confused input is rejected,
-- a valid definition is accepted by the Lean kernel,
-- a codec-valid but ill-typed definition is rejected by the Lean kernel,
-- stdin/stdout `--check` behavior matches the protocol,
-- the Node host adapter reproduces the same accept/reject results,
-- a generated compiler can feed canonical admissions into the real provider,
-- `psc check --kernel lean434` exposes the provider at the self-host CLI boundary,
-- `psc build --kernel lean434` checks before compilation and a rejected build emits no output.
-
-Keep these gates when integrating or refactoring the provider.
+- exact Lean version/source commit pin;
+- package manifest and npm exports;
+- clean external npm install/import;
+- normal workspace membership;
+- explicit bootstrap exclusion;
+- PSC Core -> Lean semantic conversion;
+- provider-owned prelude admission at trust level 0;
+- canonical codec compatibility;
+- valid semantic acceptance;
+- codec-valid but ill-typed kernel rejection;
+- stdin/stdout process protocol;
+- Node host adapter;
+- generated compiler -> package -> native provider path;
+- `psc check --kernel lean434`;
+- `psc build --kernel lean434` fail-before-codegen behavior.

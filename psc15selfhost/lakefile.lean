@@ -174,6 +174,8 @@ lean_lib PsKernelLeanProvider where
   srcDir := "packages/pskernel-lean/provider"
   roots := #[
     `PsKernelLean.Error,
+    `PsKernelLean.Convert,
+    `PsKernelLean.Prelude,
     `PsKernelLean.Protocol
   ]
 

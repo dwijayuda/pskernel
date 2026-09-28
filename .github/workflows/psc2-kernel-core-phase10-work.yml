@@ -77,6 +77,13 @@ jobs:
           cd psc15selfhost
           lake env lean --run test/KernelCoreRecursorRejectionTests.lean
 
+      - name: Phase 10 forged minor rejection
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursorForgedMinorRejectionTests.lean
+
       - name: Phase 10 recursor reduction parity
         shell: bash
         run: |

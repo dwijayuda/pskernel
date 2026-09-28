@@ -2,12 +2,16 @@ import Ps.BackendJs.Normalize
 import Ps.BackendJs.Lower
 import Ps.BackendJs.Emit
 
-def psJsAddParameterNames (parameters : List PsVerifiedIrParameter)
-    (locals : List String) : List String :=
+def psJsAddParameterNames (parameters : List PsVerifiedIrParameter) :
+    List String -> List String :=
   match parameters with
-  | List.nil => locals
+  | List.nil =>
+      fun (locals : List String) => locals
   | List.cons parameter rest =>
-      psJsAddParameterNames rest (List.cons parameter.name locals)
+      let smaller : List String -> List String :=
+        psJsAddParameterNames rest;
+      fun (locals : List String) =>
+        smaller (List.cons parameter.name locals)
 
 def psJsHasShadowedGlobalCallWithFuel (fuel : Nat) :
     List String -> PsVerifiedIrExpr -> Bool :=

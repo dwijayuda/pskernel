@@ -1,11 +1,9 @@
 import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { forbiddenBootstrapPackages } from "./bootstrap-closure-contract.mjs";
 
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptsDir, "..");
-const nonWorkspacePackageDirs = new Set(["pskernel-lean"]);
 
 async function exists(file) {
   try {
@@ -20,12 +18,6 @@ async function readJson(file) {
   return JSON.parse(await readFile(file, "utf8"));
 }
 
-for (const packageName of nonWorkspacePackageDirs) {
-  if (!forbiddenBootstrapPackages.has(packageName)) {
-    throw new Error(`PSC1_NON_WORKSPACE_PACKAGE_NOT_FORBIDDEN: ${packageName}`);
-  }
-}
-
 const rootPackage = await readJson(path.join(root, "package.json"));
 const expectedWorkspaces = ["packages/*", "host", "stdlib"];
 for (const workspace of expectedWorkspaces) {
@@ -36,7 +28,7 @@ for (const workspace of expectedWorkspaces) {
 
 const packageDirs = [];
 for (const entry of await readdir(path.join(root, "packages"), { withFileTypes: true })) {
-  if (entry.isDirectory() && !nonWorkspacePackageDirs.has(entry.name)) {
+  if (entry.isDirectory()) {
     packageDirs.push(path.join(root, "packages", entry.name));
   }
 }

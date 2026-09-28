@@ -19,6 +19,14 @@ assert.equal(
   '4.34.0',
 );
 
+const cliManifest=JSON.parse(
+  await readFile(path.join(workspaceRoot,'packages','cli','package.json'),'utf8'),
+);
+assert.equal(
+  cliManifest.optionalDependencies?.['@proofscript/pskernel-lean'],
+  '4.34.0',
+);
+
 try{
   await writeFile(
     path.join(consumerRoot,'package.json'),

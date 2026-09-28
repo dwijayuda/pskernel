@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 export const leanKernelProviderProtocol='pskernel-lean/1';
 export const leanKernelProviderName='lean4-cpp';
 export const leanKernelProviderVersion='4.34.0';
+export const leanKernelProviderCommit='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
 
 const workspaceRoot=fileURLToPath(new URL('../../../',import.meta.url));
 
@@ -76,6 +77,11 @@ export function checkCanonicalAdmissions(
   if(result?.leanVersion!==leanKernelProviderVersion){
     throw new Error(
       `Lean kernel provider version mismatch: ${String(result?.leanVersion)}`,
+    );
+  }
+  if(result?.leanCommit!==leanKernelProviderCommit){
+    throw new Error(
+      `Lean kernel provider commit mismatch: ${String(result?.leanCommit)}`,
     );
   }
   if(typeof result?.accepted!=='boolean'){

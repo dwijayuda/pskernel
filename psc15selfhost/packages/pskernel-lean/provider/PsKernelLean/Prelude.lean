@@ -156,14 +156,15 @@ partial def replayPreludeDeclarations
     (env : Lean.Environment) :
     Except PsKernelLeanError Lean.Environment := do
   let (next, deferred) ← replayPreludePass allDeclarations pending env
-  if deferred.isEmpty then
-    pure next
-  else if deferred.length == pending.length then
-    throw (preludeMismatch
-      ("unresolved PSC2 provider prelude dependencies; first pending declaration: " ++
-        psNameToString (psDeclarationName deferred.head!)))
-  else
-    replayPreludeDeclarations allDeclarations deferred next
+  match deferred with
+  | [] => pure next
+  | first :: _ =>
+      if deferred.length == pending.length then
+        throw (preludeMismatch
+          ("unresolved PSC2 provider prelude dependencies; first pending declaration: " ++
+            psNameToString (psDeclarationName first)))
+      else
+        replayPreludeDeclarations allDeclarations deferred next
 
 def buildLeanPreludeEnvironment : IO (Except PsKernelLeanError Lean.Environment) := do
   let env ← Lean.mkEmptyEnvironment 0

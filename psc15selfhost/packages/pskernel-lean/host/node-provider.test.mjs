@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
-import {checkCanonicalAdmissions} from './node-provider.mjs';
+import {
+  checkCanonicalAdmissions,
+  defaultLeanKernelProviderBinary,
+} from './node-provider.mjs';
 
-const binaryPath=process.env.PSC_LEAN_KERNEL_PROVIDER_BIN;
-assert.ok(binaryPath,'PSC_LEAN_KERNEL_PROVIDER_BIN must point at the built provider');
+const binaryPath=defaultLeanKernelProviderBinary();
+assert.match(binaryPath,/psc2_lean_kernel_provider(?:\.exe)?$/);
 
 const rootName=value=>({k:'s',p:{k:'a'},v:value});
 const natType={k:'const',ls:[],n:rootName('Nat')};

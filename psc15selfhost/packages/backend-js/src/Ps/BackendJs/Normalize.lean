@@ -32,20 +32,26 @@ def psJsWrapLambdaArguments (parameters : List PsVerifiedIrParameter) :
                       inner)
 
 
-def psJsNormalizeExprList
-    (normalize : PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr)
-    (expressions : List PsVerifiedIrExpr) :
+def psJsNormalizeExprList (expressions : List PsVerifiedIrExpr) :
+    (PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr) ->
     Except PsJsError (List PsVerifiedIrExpr) :=
   match expressions with
-  | List.nil => Except.ok List.nil
+  | List.nil =>
+      fun (_normalize : PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr) =>
+        Except.ok List.nil
   | List.cons expression rest =>
-      match normalize expression with
-      | Except.error error => Except.error error
-      | Except.ok normalizedExpression =>
-          match psJsNormalizeExprList normalize rest with
-          | Except.error error => Except.error error
-          | Except.ok normalizedRest =>
-              Except.ok (List.cons normalizedExpression normalizedRest)
+      let smaller :
+          (PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr) ->
+          Except PsJsError (List PsVerifiedIrExpr) :=
+        psJsNormalizeExprList rest;
+      fun (normalize : PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr) =>
+        match normalize expression with
+        | Except.error error => Except.error error
+        | Except.ok normalizedExpression =>
+            match smaller normalize with
+            | Except.error error => Except.error error
+            | Except.ok normalizedRest =>
+                Except.ok (List.cons normalizedExpression normalizedRest)
 
 
 def psJsNormalizeExprWithFuel (fuel : Nat) :
@@ -94,7 +100,7 @@ def psJsNormalizeExprWithFuel (fuel : Nat) :
             match smaller fn with
             | Except.error error => Except.error error
             | Except.ok normalizedFn =>
-                match psJsNormalizeExprList smaller arguments with
+                match psJsNormalizeExprList arguments smaller with
                 | Except.error error => Except.error error
                 | Except.ok normalizedArguments =>
                     match typeArguments with

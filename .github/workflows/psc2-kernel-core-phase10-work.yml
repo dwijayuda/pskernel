@@ -77,42 +77,6 @@ jobs:
           cd psc15selfhost
           lake env lean --run test/KernelCoreRecursorRejectionTests.lean
 
-      - name: Phase 10 recursor reduction diagnostics
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          sed \
-            -e 's/^def main : IO Unit := do$/def psKcRecursorReductionOriginalMain : IO Unit := do/' \
-            -e 's/PSC1Kernel.applyArgs (.const recName \[\])/PSC1Kernel.applyArgs (.const recName [(.succ .zero)])/' \
-            test/KernelCoreRecursorReductionParityTests.lean \
-            > RecursorReductionDiagnostics.generated.lean
-          cat >> RecursorReductionDiagnostics.generated.lean <<'LEAN'
-
-          def psKcRecRedReport (label : String) (value : Bool) : IO Unit := do
-            if value then
-              IO.println (label ++ "=PASS")
-            else
-              IO.println (label ++ "=FAIL")
-
-          def main : IO Unit := do
-            psKcRecRedReport "DIRECT_KERNEL" psKcRecRedDirectKernel
-            psKcRecRedReport "REFERENCE_DIRECT" psRefRecRedDirect
-            psKcRecRedReport "SYNTHETIC_ORDERING" psKcRecRedSyntheticOrdering
-            psKcRecRedReport "MAJOR_WHNF" psKcRecRedMajorWhnf
-            psKcRecRedReport "UNDERAPPLIED" psKcRecRedUnderapplied
-            psKcRecRedReport "WRONG_MAJOR" psKcRecRedWrongMajor
-            psKcRecRedReport "FOREIGN_MAJOR" psKcRecRedForeignMajor
-            psKcRecRedReport "MISSING_RULE" psKcRecRedMissingRule
-            psKcRecRedReport "SHORT_CONSTRUCTOR" psKcRecRedShortConstructor
-            psKcRecRedReport "UNIVERSE_INSTANTIATION" psKcRecRedUniverseInstantiation
-            psKcRecRedReport "UNIVERSE_MISMATCH" psKcRecRedUniverseMismatch
-            psKcRecRedReport "CONFIGURED_RESOURCES" psKcRecRedConfiguredResources
-            psKcRecRedReport "BUDGET" psKcRecRedBudget
-          LEAN
-          lake env lean --run RecursorReductionDiagnostics.generated.lean
-          rm RecursorReductionDiagnostics.generated.lean
-
       - name: Phase 10 recursor reduction parity
         shell: bash
         run: |

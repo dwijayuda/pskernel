@@ -232,6 +232,8 @@ def psTsEmitIntrinsicFromPrinted
       Except.ok ("(" ++ left ++ " <= " ++ right ++ ")")
   | .intLt, [left, right] =>
       Except.ok ("(" ++ left ++ " < " ++ right ++ ")")
+  | .intRepr, [value] =>
+      Except.ok ("(" ++ value ++ ").toString()")
   | .boolNot, [value] =>
       Except.ok ("(!" ++ value ++ ")")
   | .boolAnd, [left, right] =>

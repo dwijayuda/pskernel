@@ -110,12 +110,20 @@ def psJsNormalizeExprWithFuel (fuel : Nat) :
                             normalizedFn typeArguments normalizedArguments)
                     | List.nil =>
                         match normalizedFn with
-                        | PsVerifiedIrExpr.lambda parameters _ body =>
+                        | PsVerifiedIrExpr.lambda parameters resultType body =>
                             match parameters with
                             | List.nil => Except.error PsJsError.unsupportedExpression
-                            | List.cons _ _ =>
-                                psJsWrapLambdaArguments
-                                  parameters normalizedArguments body
+                            | List.cons firstParameter _ =>
+                                match psJsWrapLambdaArguments
+                                  parameters normalizedArguments body with
+                                | Except.error error => Except.error error
+                                | Except.ok application =>
+                                    Except.ok
+                                      (PsVerifiedIrExpr.letE
+                                        firstParameter.name
+                                        resultType
+                                        application
+                                        (PsVerifiedIrExpr.var firstParameter.name))
                         | _ =>
                             Except.ok
                               (PsVerifiedIrExpr.call

@@ -18,6 +18,7 @@ on:
       - psc15selfhost/package.json
       - psc15selfhost/STATUS.md
       - .github/workflows/psc2-lean-kernel-provider.yml
+      - .github/workflows/psc2-lean-kernel-prebuilt.yml
   workflow_dispatch:
 
 permissions:
@@ -66,6 +67,7 @@ jobs:
           node packages/pskernel-lean/host/prebuilt.test.mjs
           node packages/pskernel-lean/scripts/stage-native-prebuilt.test.mjs
           node packages/pskernel-lean/scripts/assemble-prebuilt.test.mjs
+          node packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs
           node packages/pskernel-lean/scripts/packed-consumer-fixture.test.mjs
           node scripts/pskernel-lean-package-consumer.test.mjs
           node scripts/check-with-generated.test.mjs

@@ -1,21 +1,35 @@
 import {spawnSync} from 'node:child_process';
+import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
 
 export const leanKernelProviderProtocol='pskernel-lean/1';
 export const leanKernelProviderName='lean4-cpp';
 export const leanKernelProviderVersion='4.34.0';
 
+const workspaceRoot=fileURLToPath(new URL('../../../',import.meta.url));
+
+export function defaultLeanKernelProviderBinary({
+  platform=process.platform,
+  env=process.env,
+}={}){
+  if(env.PSC_LEAN_KERNEL_PROVIDER_BIN){
+    return env.PSC_LEAN_KERNEL_PROVIDER_BIN;
+  }
+  const executable=platform==='win32'
+    ? 'psc2_lean_kernel_provider.exe'
+    : 'psc2_lean_kernel_provider';
+  return join(workspaceRoot,'.lake','build','bin',executable);
+}
+
 export function checkCanonicalAdmissions(
   source,
   {
-    binaryPath=process.env.PSC_LEAN_KERNEL_PROVIDER_BIN,
+    binaryPath=defaultLeanKernelProviderBinary(),
     maxBuffer=16*1024*1024,
   }={},
 ){
   if(typeof source!=='string'){
     throw new TypeError('Lean kernel provider input must be a string');
-  }
-  if(!binaryPath){
-    throw new Error('Lean kernel provider binary path is required');
   }
 
   const run=spawnSync(binaryPath,['--check'],{

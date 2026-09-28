@@ -21,6 +21,7 @@ if (match === null) {
 const block = match[0];
 const required = [
   /match elaborate context condition \(Option\.some boolType\) with/,
+  /let resultType\s*:\s*PsExpr\s*:=\s*match expected with/,
   /thenResult\.context\s+elseBranch\s+\(Option\.some resultType\) with/,
 ];
 for (const pattern of required) {
@@ -33,6 +34,7 @@ for (const pattern of required) {
 
 const forbidden = [
   /elaborate context condition \(some boolType\)/,
+  /let resultType\s*:=\s*match expected with/,
   /elseBranch\s+\(some resultType\) with/,
 ];
 for (const pattern of forbidden) {
@@ -44,5 +46,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_IF_SELFHOST_SOURCE_SYNTAX: PASS (explicit Option.some condition and else expectations)\n",
+  "PSC2_ELAB_IF_SELFHOST_SOURCE_SYNTAX: PASS (explicit Option.some expectations; typed match result)\n",
 );

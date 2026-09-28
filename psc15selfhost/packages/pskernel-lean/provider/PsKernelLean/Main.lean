@@ -15,6 +15,5 @@ def runProviderCommand (args : List String) : IO Unit := do
 
 end PsKernelLean
 
-def main : IO Unit := do
-  let args ← IO.getArgs
-  PsKernelLean.runProviderCommand args.toList
+def main (args : List String) : IO Unit :=
+  PsKernelLean.runProviderCommand args

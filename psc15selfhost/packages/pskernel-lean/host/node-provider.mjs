@@ -1,39 +1,45 @@
 import {spawnSync} from 'node:child_process';
-import {join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {
+  resolveLeanKernelProviderBinary,
+  verifyLeanKernelPrebuiltBinary,
+} from './prebuilt.mjs';
 
 export const leanKernelProviderProtocol='pskernel-lean/1';
 export const leanKernelProviderName='lean4-cpp';
 export const leanKernelProviderVersion='4.34.0';
 export const leanKernelProviderCommit='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
 
-const workspaceRoot=fileURLToPath(new URL('../../../',import.meta.url));
-
-export function defaultLeanKernelProviderBinary({
-  platform=process.platform,
-  env=process.env,
-}={}){
-  if(env.PSC_LEAN_KERNEL_PROVIDER_BIN){
-    return env.PSC_LEAN_KERNEL_PROVIDER_BIN;
-  }
-  const executable=platform==='win32'
-    ? 'psc2_lean_kernel_provider.exe'
-    : 'psc2_lean_kernel_provider';
-  return join(workspaceRoot,'.lake','build','bin',executable);
+export function defaultLeanKernelProviderBinary(options={}){
+  return resolveLeanKernelProviderBinary(options).binaryPath;
 }
 
 export function checkCanonicalAdmissions(
   source,
-  {
-    binaryPath=defaultLeanKernelProviderBinary(),
-    maxBuffer=16*1024*1024,
-  }={},
+  options={},
 ){
   if(typeof source!=='string'){
     throw new TypeError('Lean kernel provider input must be a string');
   }
 
-  const run=spawnSync(binaryPath,['--check'],{
+  const {
+    binaryPath:explicitBinaryPath,
+    maxBuffer=16*1024*1024,
+    ...resolverOptions
+  }=options;
+  const resolved=explicitBinaryPath
+    ? {binaryPath:explicitBinaryPath,source:'explicit'}
+    : resolveLeanKernelProviderBinary(resolverOptions);
+
+  if(resolved.source==='bundled'){
+    verifyLeanKernelPrebuiltBinary({
+      binaryPath:resolved.binaryPath,
+      target:resolved.target,
+      manifest:resolved.manifest,
+      packageRoot:resolverOptions.packageRoot,
+    });
+  }
+
+  const run=spawnSync(resolved.binaryPath,['--check'],{
     input:source,
     encoding:'utf8',
     maxBuffer,

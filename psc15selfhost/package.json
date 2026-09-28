@@ -90,6 +90,9 @@
     "generation:next": "node scripts/selfhost-generation.mjs",
     "check:ir-neutrality": "node scripts/check-ir-neutrality.mjs"
   },
+  "optionalDependencies": {
+    "@proofscript/pskernel-lean": "4.34.0"
+  },
   "devDependencies": {
     "typescript": "5.8.3"
   }

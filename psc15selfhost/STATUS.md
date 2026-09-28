@@ -11,7 +11,7 @@ self-host source:           generated canonical .ps
 fixed-point backend:        TypeScript -> JavaScript
 semantic compiler:          backend-neutral
 optional extensions:        project, Rust, Wasm
-kernel status:              bounded reference package, not yet compiler authority
+kernel status:              bounded PSC reference + optional Lean 4.34 host assurance; not compiler authority
 ```
 
 The authoritative source entry is:
@@ -24,6 +24,10 @@ The fixed-point import closure is guarded by `scripts/check-bootstrap-closure.mj
 It rejects project tooling, Rust, Wasm and the reference `pskernel` from the first
 compiler generation. Workspace package dependencies are checked as well as Lean source
 imports.
+
+The external Lean assurance provider in `packages/pskernel-lean` must remain outside this
+first fixed-point closure as well. It is selected by host orchestration, not imported by
+the portable semantic compiler.
 
 ## Acceptance gates
 
@@ -68,11 +72,56 @@ This artifact is fail-closed: canonical admissions are revalidated before erasur
 the erasure environment is reconstructed from the bootstrap prelude plus declarations.
 A caller-provided environment cannot be smuggled through this artifact.
 
-This remains deliberately weaker than real kernel admission. The next kernel milestone
-must explicitly adapt the local reference `packages/pskernel` (or another accepted
-provider) to the compiler Core and make erasure consume a genuine checked artifact.
-Until that adapter exists and is gated, do not rename the current boundary to
-`CheckedCore` and do not claim kernel-backed self-hosting.
+This remains deliberately weaker than real kernel admission **inside the portable
+compiler pipeline**. Do not rename the current compiler artifact to `CheckedCore` and do
+not claim that erasure is already gated by a provider-neutral checked artifact.
+
+### External Lean 4.34 assurance provider
+
+`packages/pskernel-lean` now provides a separate native assurance path pinned to Lean
+4.34.0 source commit:
+
+```text
+293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+```
+
+Its current host path is:
+
+```text
+PSC source
+  -> generated PSC2 compiler
+  -> canonical checked-admissions v2
+  -> pskernel-lean native process
+  -> Lean Environment.addDeclCore / Lean kernel
+  -> accept or reject
+```
+
+The self-host CLI exposes this as:
+
+```text
+psc check <entry.ps|entry.lean> --kernel lean434
+psc build <entry.ps|entry.lean> --out <output> --kernel lean434
+```
+
+For the kernel-gated build, Lean acceptance occurs before code generation and rejection
+prevents output emission. Builds without `--kernel lean434`, including the first
+fixed-point path, retain their existing behavior and do not depend on this provider.
+
+This gives PSC2 a real Lean-kernel-backed **external verifier**, but it still does not
+solve the provider-neutral compiler boundary. The later kernel-authority milestone must
+introduce a genuine `CheckedModule` / `CheckedCore` produced by a selected `KernelProvider`
+and make erasure require that artifact.
+
+Current provider documentation:
+
+```text
+packages/pskernel-lean/README.md
+packages/pskernel-lean/BUILDING.md
+```
+
+The copied Lean `kernel/`, `runtime/`, and `util/` source trees are retained for a later
+standalone C++/WASM provider. The current native provider links through the pinned
+official Lean distribution rather than directly building those copies.
 
 ## After the first fixed point
 

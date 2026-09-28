@@ -238,64 +238,101 @@ def psJsLowerLiteral (value : PsVerifiedIrLiteral)
   | PsVerifiedIrLiteral.machineInteger _ _ =>
       Except.error PsJsError.unsupportedExpression
 
+def psJsLowerAtomicExprWithFuel (fuel : Nat) :
+    PsVerifiedIrExpr -> List PsJsLocalBinding -> Nat ->
+    PsVerifiedIrPrimitiveType -> Except PsJsError PsJsLoweredExpr :=
+  match fuel with
+  | Nat.zero =>
+      fun (_body : PsVerifiedIrExpr) =>
+        fun (_locals : List PsJsLocalBinding) =>
+          fun (_nextLocal : Nat) =>
+            fun (_expectedType : PsVerifiedIrPrimitiveType) =>
+              Except.error PsJsError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller :
+          PsVerifiedIrExpr -> List PsJsLocalBinding -> Nat ->
+          PsVerifiedIrPrimitiveType -> Except PsJsError PsJsLoweredExpr :=
+        psJsLowerAtomicExprWithFuel remaining;
+      fun (body : PsVerifiedIrExpr) =>
+        fun (locals : List PsJsLocalBinding) =>
+          fun (nextLocal : Nat) =>
+            fun (expectedType : PsVerifiedIrPrimitiveType) =>
+              match body with
+              | PsVerifiedIrExpr.literal value =>
+                  match psJsLowerLiteral value expectedType with
+                  | Except.error error => Except.error error
+                  | Except.ok lowered =>
+                      Except.ok
+                        (PsJsLoweredExpr.mk (PsJsExpr.literal lowered) nextLocal)
+              | PsVerifiedIrExpr.var name =>
+                  match psJsLookupLocal locals name with
+                  | Option.none => Except.error PsJsError.unsupportedExpression
+                  | Option.some binding =>
+                      if psJsPrimitiveTypeEq binding.type expectedType then
+                        Except.ok
+                          (PsJsLoweredExpr.mk
+                            (PsJsExpr.local binding.index)
+                            nextLocal)
+                      else Except.error PsJsError.literalTypeMismatch
+              | PsVerifiedIrExpr.letE name type value innerBody =>
+                  match type with
+                  | PsVerifiedIrType.primitive localType =>
+                      match smaller value locals nextLocal localType with
+                      | Except.error error => Except.error error
+                      | Except.ok loweredValue =>
+                          let localIndex := loweredValue.nextLocal;
+                          let binding :=
+                            PsJsLocalBinding.mk name localType localIndex;
+                          match smaller
+                            innerBody
+                            (List.cons binding locals)
+                            (Nat.succ localIndex)
+                            expectedType with
+                          | Except.error error => Except.error error
+                          | Except.ok loweredBody =>
+                              Except.ok
+                                (PsJsLoweredExpr.mk
+                                  (PsJsExpr.letE
+                                    localIndex
+                                    loweredValue.expr
+                                    loweredBody.expr)
+                                  loweredBody.nextLocal)
+                  | _ => Except.error PsJsError.unsupportedExpression
+              | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
+                  match smaller
+                    condition
+                    locals
+                    nextLocal
+                    PsVerifiedIrPrimitiveType.bool with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredCondition =>
+                      match smaller
+                        thenBranch
+                        locals
+                        loweredCondition.nextLocal
+                        expectedType with
+                      | Except.error error => Except.error error
+                      | Except.ok loweredThen =>
+                          match smaller
+                            elseBranch
+                            locals
+                            loweredThen.nextLocal
+                            expectedType with
+                          | Except.error error => Except.error error
+                          | Except.ok loweredElse =>
+                              Except.ok
+                                (PsJsLoweredExpr.mk
+                                  (PsJsExpr.ifE
+                                    loweredCondition.expr
+                                    loweredThen.expr
+                                    loweredElse.expr)
+                                  loweredElse.nextLocal)
+              | _ => Except.error PsJsError.unsupportedExpression
+
 def psJsLowerAtomicExpr (body : PsVerifiedIrExpr)
     (locals : List PsJsLocalBinding) (nextLocal : Nat)
     (expectedType : PsVerifiedIrPrimitiveType) : Except PsJsError PsJsLoweredExpr :=
-  match body with
-  | PsVerifiedIrExpr.literal value =>
-      match psJsLowerLiteral value expectedType with
-      | Except.error error => Except.error error
-      | Except.ok lowered =>
-          Except.ok (PsJsLoweredExpr.mk (PsJsExpr.literal lowered) nextLocal)
-  | PsVerifiedIrExpr.var name =>
-      match psJsLookupLocal locals name with
-      | Option.none => Except.error PsJsError.unsupportedExpression
-      | Option.some binding =>
-          if psJsPrimitiveTypeEq binding.type expectedType then
-            Except.ok (PsJsLoweredExpr.mk (PsJsExpr.local binding.index) nextLocal)
-          else Except.error PsJsError.literalTypeMismatch
-  | PsVerifiedIrExpr.letE name type value innerBody =>
-      match type with
-      | PsVerifiedIrType.primitive localType =>
-          match psJsLowerAtomicExpr value locals nextLocal localType with
-          | Except.error error => Except.error error
-          | Except.ok loweredValue =>
-              let localIndex := loweredValue.nextLocal;
-              let binding := PsJsLocalBinding.mk name localType localIndex;
-              match psJsLowerAtomicExpr
-                innerBody
-                (List.cons binding locals)
-                (Nat.succ localIndex)
-                expectedType with
-              | Except.error error => Except.error error
-              | Except.ok loweredBody =>
-                  Except.ok (PsJsLoweredExpr.mk
-                    (PsJsExpr.letE
-                      localIndex
-                      loweredValue.expr
-                      loweredBody.expr)
-                    loweredBody.nextLocal)
-      | _ => Except.error PsJsError.unsupportedExpression
-  | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
-      match psJsLowerAtomicExpr
-        condition locals nextLocal PsVerifiedIrPrimitiveType.bool with
-      | Except.error error => Except.error error
-      | Except.ok loweredCondition =>
-          match psJsLowerAtomicExpr
-            thenBranch locals loweredCondition.nextLocal expectedType with
-          | Except.error error => Except.error error
-          | Except.ok loweredThen =>
-              match psJsLowerAtomicExpr
-                elseBranch locals loweredThen.nextLocal expectedType with
-              | Except.error error => Except.error error
-              | Except.ok loweredElse =>
-                  Except.ok (PsJsLoweredExpr.mk
-                    (PsJsExpr.ifE
-                      loweredCondition.expr
-                      loweredThen.expr
-                      loweredElse.expr)
-                    loweredElse.nextLocal)
-  | _ => Except.error PsJsError.unsupportedExpression
+  psJsLowerAtomicExprWithFuel 4096 body locals nextLocal expectedType
 
 def psJsLowerAtomicArguments (parameterTypes : List PsVerifiedIrPrimitiveType) :
     List PsVerifiedIrExpr -> List PsJsLocalBinding -> Nat ->

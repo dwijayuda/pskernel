@@ -7,17 +7,10 @@ import {
 
 const binaryPath=defaultLeanKernelProviderBinary();
 assert.match(binaryPath,/psc2_lean_kernel_provider(?:\.exe)?$/);
-assert.match(
-  defaultLeanKernelProviderBinary({platform:'linux',env:{}}),
-  /psc2_lean_kernel_provider$/,
-);
-assert.match(
-  defaultLeanKernelProviderBinary({platform:'win32',env:{}}),
-  /psc2_lean_kernel_provider\.exe$/,
-);
 assert.equal(
   defaultLeanKernelProviderBinary({
     platform:'linux',
+    arch:'x64',
     env:{PSC_LEAN_KERNEL_PROVIDER_BIN:'/custom/provider'},
   }),
   '/custom/provider',

@@ -115,31 +115,55 @@ def toLeanPreludeDeclaration
   | .constructorDecl _ => .ok none
   | .recursorDecl _ => .ok none
 
-def addPreludeDeclaration
+inductive PreludeAdmissionAttempt where
+  | admitted (env : Lean.Environment)
+  | deferred
+
+def tryPreludeDeclaration
     (allDeclarations : List PsDeclaration)
     (env : Lean.Environment)
     (declaration : PsDeclaration) :
-    Except PsKernelLeanError Lean.Environment := do
+    Except PsKernelLeanError PreludeAdmissionAttempt := do
   let converted? ← toLeanPreludeDeclaration allDeclarations declaration
   match converted? with
-  | none => pure env
+  | none => pure (.admitted env)
   | some converted =>
       match env.addDeclCore 2000000 20000 converted none true with
-      | .ok next => pure next
+      | .ok next => pure (.admitted next)
+      | .error (.unknownConstant _ _) => pure .deferred
       | .error error =>
           throw (preludeMismatch
             ("Lean 4.34 kernel rejected PSC2 provider prelude declaration " ++
               psNameToString (psDeclarationName declaration) ++
               " (" ++ kernelExceptionSummary error ++ ")"))
 
-def replayPreludeDeclarations
+def replayPreludePass
     (allDeclarations : List PsDeclaration) :
     List PsDeclaration -> Lean.Environment ->
-    Except PsKernelLeanError Lean.Environment
-  | [], env => .ok env
+    Except PsKernelLeanError (Lean.Environment × List PsDeclaration)
+  | [], env => .ok (env, [])
   | declaration :: rest, env => do
-      let next ← addPreludeDeclaration allDeclarations env declaration
-      replayPreludeDeclarations allDeclarations rest next
+      let attempt ← tryPreludeDeclaration allDeclarations env declaration
+      match attempt with
+      | .admitted next =>
+          replayPreludePass allDeclarations rest next
+      | .deferred =>
+          let (next, deferred) ← replayPreludePass allDeclarations rest env
+          pure (next, declaration :: deferred)
+
+partial def replayPreludeDeclarations
+    (allDeclarations pending : List PsDeclaration)
+    (env : Lean.Environment) :
+    Except PsKernelLeanError Lean.Environment := do
+  let (next, deferred) ← replayPreludePass allDeclarations pending env
+  if deferred.isEmpty then
+    pure next
+  else if deferred.length == pending.length then
+    throw (preludeMismatch
+      ("unresolved PSC2 provider prelude dependencies; first pending declaration: " ++
+        psNameToString (psDeclarationName deferred.head!)))
+  else
+    replayPreludeDeclarations allDeclarations deferred next
 
 def buildLeanPreludeEnvironment : IO (Except PsKernelLeanError Lean.Environment) := do
   let env ← Lean.mkEmptyEnvironment 0

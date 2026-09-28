@@ -16,7 +16,8 @@
     "LEAN_SOURCE_PIN.json",
     "README.md",
     "BUILDING.md",
-    "INTEGRATION.md"
+    "INTEGRATION.md",
+    "NPM_PACKAGE.md"
   ],
   "engines": {
     "node": ">=20"

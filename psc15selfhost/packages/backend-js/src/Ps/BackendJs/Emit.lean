@@ -20,7 +20,12 @@ def psJsNatDecimal (value : Nat) : Except PsJsError String :=
   psJsNatDecimalWithFuel (Nat.succ value) value
 
 def psJsIntDecimal (value : Int) : Except PsJsError String :=
-  Except.ok (Int.repr value)
+  match value with
+  | Int.ofNat number => psJsNatDecimal number
+  | Int.negSucc number =>
+      match psJsNatDecimal (Nat.succ number) with
+      | Except.error error => Except.error error
+      | Except.ok text => Except.ok (psJsTextConcat2 "-" text)
 
 def psJsEmitLiteral (value : PsJsLiteral) : Except PsJsError String :=
   match value with

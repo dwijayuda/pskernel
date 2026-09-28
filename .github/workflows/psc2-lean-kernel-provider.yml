@@ -44,6 +44,7 @@ jobs:
           cd psc15selfhost
           npm run test:kernel:lean434
           node scripts/check-with-generated.test.mjs
+          node packages/cli/bin/psc-kernel-provider.test.mjs
 
           version_json="$(lake exe psc2_lean_kernel_provider --version)"
           health_json="$(lake exe psc2_lean_kernel_provider --health)"

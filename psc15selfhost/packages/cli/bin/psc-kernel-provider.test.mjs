@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {mkdtemp, mkdir, rm, writeFile} from 'node:fs/promises';
+import {existsSync} from 'node:fs';
+import {mkdtemp, mkdir, readFile, rm, writeFile} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -26,6 +27,9 @@ export const PsCompilerSourceKind={lean:'lean',proofScript:'proofScript'};
 const exceptTag=Symbol('except');
 const ok=value=>({[exceptTag]:'ok',value});
 export function psCompilerTranslateSource(_from,_to,source){return ok(source);}
+export function psCompilerToTypeScriptSource(_kind,_source){
+  return ok('export const compiled = 1;'+String.fromCharCode(10));
+}
 const rootName=value=>({k:'s',p:{k:'a'},v:value});
 const natType={k:'const',ls:[],n:rootName('Nat')};
 export function psCompilerAdmissionsSource(_kind,source){
@@ -57,6 +61,10 @@ export function psCompilerAdmissionsSource(_kind,source){
   const help=runPsc(['--help']);
   assert.equal(help.status,0,help.stderr);
   assert.match(help.stdout,/psc check <entry\.lean\|entry\.ps> --kernel lean434/);
+  assert.match(
+    help.stdout,
+    /psc build <entry\.lean\|entry\.ps> --out <output\.js\|output\.ts> \[--kernel lean434\]/,
+  );
 
   const accepted=runPsc([
     'check',acceptedEntry,
@@ -76,6 +84,34 @@ export function psCompilerAdmissionsSource(_kind,source){
     `${rejected.stdout}\n${rejected.stderr}`,
     /PSC2_KERNEL_REJECTED: kernel-rejection at declaration 0/,
   );
+
+  const acceptedOutput=path.join(tempRoot,'accepted.js');
+  const acceptedBuild=runPsc([
+    'build',acceptedEntry,
+    '--out',acceptedOutput,
+    '--kernel','lean434',
+    '--compiler',compilerPath,
+  ]);
+  assert.equal(acceptedBuild.status,0,acceptedBuild.stderr);
+  assert.match(acceptedBuild.stdout,/PSC2_KERNEL_CHECK: PASS/);
+  assert.equal(
+    await readFile(acceptedOutput,'utf8'),
+    'export const compiled = 1;\n',
+  );
+
+  const rejectedOutput=path.join(tempRoot,'rejected.js');
+  const rejectedBuild=runPsc([
+    'build',rejectedEntry,
+    '--out',rejectedOutput,
+    '--kernel','lean434',
+    '--compiler',compilerPath,
+  ]);
+  assert.notEqual(rejectedBuild.status,0);
+  assert.match(
+    `${rejectedBuild.stdout}\n${rejectedBuild.stderr}`,
+    /PSC2_KERNEL_REJECTED: kernel-rejection at declaration 0/,
+  );
+  assert.equal(existsSync(rejectedOutput),false,'rejected build must not emit output');
 
   console.log('PSC2_SELFHOST_CLI_KERNEL_CHECK_TESTS: PASS');
 } finally {

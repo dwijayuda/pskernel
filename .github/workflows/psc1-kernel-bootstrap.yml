@@ -1,0 +1,54 @@
+name: PSC1 kernel Lean bootstrap
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - selfhost/kernel-lean-bootstrap
+    paths:
+      - selfhost/packages/kernel/**
+      - selfhost/test/KernelBootstrapTests.lean
+      - selfhost/lakefile.lean
+      - selfhost/check-psc1-source.mjs
+      - docs/selfhost/PSC1_KERNEL_BOOTSTRAP.md
+      - .github/workflows/psc1-kernel-bootstrap.yml
+
+permissions:
+  contents: read
+
+jobs:
+  kernel-bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install final Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify exact Lean identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+      - name: Audit PSC1 portable source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node check-psc1-source.mjs
+      - name: Build kernel bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake build PsKernel psc1_kernel_tests
+      - name: Run kernel bootstrap tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_kernel_tests

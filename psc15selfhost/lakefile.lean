@@ -170,6 +170,13 @@ lean_lib PSC1KernelReferenceFoundations where
     `PSC1Kernel.Expr
   ]
 
+lean_lib PsKernelLeanProvider where
+  srcDir := "packages/pskernel-lean/provider"
+  roots := #[
+    `PsKernelLean.Error,
+    `PsKernelLean.Protocol
+  ]
+
 @[default_target]
 lean_exe psc1 where
   srcDir := "packages/cli/src"
@@ -254,3 +261,11 @@ lean_exe psc2_kernel_core_level_parity_tests where
 lean_exe psc2_kernel_core_expr_parity_tests where
   srcDir := "test"
   root := `KernelCoreExprParityTests
+
+lean_exe psc2_lean_kernel_provider where
+  srcDir := "packages/pskernel-lean/provider"
+  root := `PsKernelLean.Main
+
+lean_exe psc2_lean_kernel_provider_tests where
+  srcDir := "packages/pskernel-lean/provider-test"
+  root := `PsKernelLeanTests

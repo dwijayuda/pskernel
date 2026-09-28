@@ -47,6 +47,38 @@ for (const pattern of forbidden) {
   }
 }
 
+const hasConstMatch = source.match(
+  /def psExprHasConst([\s\S]*?)(?=\ndef psMatchNameEqTarget)/,
+);
+if (hasConstMatch === null) {
+  throw new Error(
+    "PSC2_ELAB_APP_VIEW_SELFHOST_SOURCE_SYNTAX_MISSING: psExprHasConst block",
+  );
+}
+
+const hasConstBlock = hasConstMatch[0];
+const hasConstRequired = [
+  /def psExprHasConst\s*\(target : PsName\)\s*\(expr : PsExpr\) : Bool :=\s*match expr with/,
+];
+for (const pattern of hasConstRequired) {
+  if (!pattern.test(hasConstBlock)) {
+    throw new Error(
+      `PSC2_ELAB_APP_VIEW_SELFHOST_SOURCE_SYNTAX_MISSING: ${pattern}`,
+    );
+  }
+}
+
+const hasConstForbidden = [
+  /def psExprHasConst \(target : PsName\) : PsExpr -> Bool/,
+];
+for (const pattern of hasConstForbidden) {
+  if (pattern.test(hasConstBlock)) {
+    throw new Error(
+      `PSC2_ELAB_APP_VIEW_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: ${pattern}`,
+    );
+  }
+}
+
 process.stdout.write(
-  "PSC2_ELAB_APP_VIEW_SELFHOST_SOURCE_SYNTAX: PASS (expr-recursive worker with post-recursion args accumulator)\n",
+  "PSC2_ELAB_APP_VIEW_SELFHOST_SOURCE_SYNTAX: PASS (expr-recursive app-view worker; explicit structural psExprHasConst match)\n",
 );

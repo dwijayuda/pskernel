@@ -60,6 +60,7 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           npm run test:kernel:lean434
+          node packages/pskernel-lean/host/npm-package.test.mjs
           node scripts/check-with-generated.test.mjs
           node packages/cli/bin/psc-kernel-provider.test.mjs
 

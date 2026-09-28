@@ -245,21 +245,24 @@ def psKernelCoreReduceRecursorPrefixInfo?
   match view.fn with
   | PsKernelCoreExpr.const name levels =>
       match psKernelCoreEnvironmentFind? env name with
-      | PsKernelCoreOption.some (PsKernelCoreConstantInfo.recInfo info) =>
-          if info.k then
-            PsKernelCoreOption.none
-          else if Nat.beq
-              (psKernelCoreExprListSize view.args)
-              (psKernelCoreReduceRecursorMajorIndex info) then
-            if Nat.beq
-                (psKernelCoreReduceLevelListSize levels)
-                (psKernelCoreReduceNameListSize info.base.levelParams) then
-              PsKernelCoreOption.some info
-            else
-              PsKernelCoreOption.none
-          else
-            PsKernelCoreOption.none
-      | _ => PsKernelCoreOption.none
+      | PsKernelCoreOption.none => PsKernelCoreOption.none
+      | PsKernelCoreOption.some constant =>
+          match constant with
+          | PsKernelCoreConstantInfo.recInfo info =>
+              if info.k then
+                PsKernelCoreOption.none
+              else if Nat.beq
+                  (psKernelCoreExprListSize view.args)
+                  (psKernelCoreReduceRecursorMajorIndex info) then
+                if Nat.beq
+                    (psKernelCoreReduceLevelListSize levels)
+                    (psKernelCoreReduceNameListSize info.base.levelParams) then
+                  PsKernelCoreOption.some info
+                else
+                  PsKernelCoreOption.none
+              else
+                PsKernelCoreOption.none
+          | _ => PsKernelCoreOption.none
   | _ => PsKernelCoreOption.none
 
 def psKernelCoreReduceRecursorMajor?
@@ -280,36 +283,38 @@ def psKernelCoreReduceRecursorMajor?
               | PsKernelCoreOption.none => PsKernelCoreOption.none
               | PsKernelCoreOption.some target =>
                   match psKernelCoreEnvironmentFind? env ctorName with
-                  | PsKernelCoreOption.some
-                      (PsKernelCoreConstantInfo.ctorInfo ctor) =>
-                      if psKernelCoreNameEq ctor.induct target then
-                        let majorCount := psKernelCoreExprListSize majorView.args;
-                        if Nat.ble rule.nFields majorCount then
-                          match prefixView.fn with
-                          | PsKernelCoreExpr.const _ recLevels =>
-                              match psKernelCoreExprInstantiateLevelParams
-                                  rule.rhs info.base.levelParams recLevels with
-                              | PsKernelCoreOption.none => PsKernelCoreOption.none
-                              | PsKernelCoreOption.some rhs0 =>
-                                  let fixedCount :=
-                                    Nat.add
-                                      (Nat.add info.numParams info.numMotives)
-                                      info.numMinors;
-                                  let fixedArgs :=
-                                    psKernelCoreReduceExprListTake fixedCount prefixView.args;
-                                  let fieldStart := Nat.sub majorCount rule.nFields;
-                                  let fields :=
-                                    psKernelCoreReduceExprListTake rule.nFields
-                                      (psKernelCoreReduceExprListDrop fieldStart majorView.args);
-                                  let rhs1 := psKernelCoreExprApplyList fixedArgs rhs0;
-                                  PsKernelCoreOption.some
-                                    (psKernelCoreExprApplyList fields rhs1)
-                          | _ => PsKernelCoreOption.none
-                        else
-                          PsKernelCoreOption.none
-                      else
-                        PsKernelCoreOption.none
-                  | _ => PsKernelCoreOption.none
+                  | PsKernelCoreOption.none => PsKernelCoreOption.none
+                  | PsKernelCoreOption.some ctorConstant =>
+                      match ctorConstant with
+                      | PsKernelCoreConstantInfo.ctorInfo ctor =>
+                          if psKernelCoreNameEq ctor.induct target then
+                            let majorCount := psKernelCoreExprListSize majorView.args;
+                            if Nat.ble rule.nFields majorCount then
+                              match prefixView.fn with
+                              | PsKernelCoreExpr.const _ recLevels =>
+                                  match psKernelCoreExprInstantiateLevelParams
+                                      rule.rhs info.base.levelParams recLevels with
+                                  | PsKernelCoreOption.none => PsKernelCoreOption.none
+                                  | PsKernelCoreOption.some rhs0 =>
+                                      let fixedCount :=
+                                        Nat.add
+                                          (Nat.add info.numParams info.numMotives)
+                                          info.numMinors;
+                                      let fixedArgs :=
+                                        psKernelCoreReduceExprListTake fixedCount prefixView.args;
+                                      let fieldStart := Nat.sub majorCount rule.nFields;
+                                      let fields :=
+                                        psKernelCoreReduceExprListTake rule.nFields
+                                          (psKernelCoreReduceExprListDrop fieldStart majorView.args);
+                                      let rhs1 := psKernelCoreExprApplyList fixedArgs rhs0;
+                                      PsKernelCoreOption.some
+                                        (psKernelCoreExprApplyList fields rhs1)
+                              | _ => PsKernelCoreOption.none
+                            else
+                              PsKernelCoreOption.none
+                          else
+                            PsKernelCoreOption.none
+                      | _ => PsKernelCoreOption.none
       | _ => PsKernelCoreOption.none
 
 def psKernelCoreQuotFunctionFromPrefix?

@@ -33,19 +33,19 @@ def psJsWrapLambdaArguments (parameters : List PsVerifiedIrParameter) :
 
 
 def psJsNormalizeExprList
-    (normalize : PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr) :
-    List PsVerifiedIrExpr -> Except PsJsError (List PsVerifiedIrExpr) :=
-  fun (expressions : List PsVerifiedIrExpr) =>
-    match expressions with
-    | List.nil => Except.ok List.nil
-    | List.cons expression rest =>
-        match normalize expression with
-        | Except.error error => Except.error error
-        | Except.ok normalizedExpression =>
-            match psJsNormalizeExprList normalize rest with
-            | Except.error error => Except.error error
-            | Except.ok normalizedRest =>
-                Except.ok (List.cons normalizedExpression normalizedRest)
+    (normalize : PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr)
+    (expressions : List PsVerifiedIrExpr) :
+    Except PsJsError (List PsVerifiedIrExpr) :=
+  match expressions with
+  | List.nil => Except.ok List.nil
+  | List.cons expression rest =>
+      match normalize expression with
+      | Except.error error => Except.error error
+      | Except.ok normalizedExpression =>
+          match psJsNormalizeExprList normalize rest with
+          | Except.error error => Except.error error
+          | Except.ok normalizedRest =>
+              Except.ok (List.cons normalizedExpression normalizedRest)
 
 
 def psJsNormalizeExprWithFuel (fuel : Nat) :

@@ -1,0 +1,306 @@
+name: PSC2 Lean kernel prebuilt distribution
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-native:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            target: linux-x64
+          - runner: ubuntu-24.04-arm
+            target: linux-arm64
+          - runner: macos-15-intel
+            target: darwin-x64
+          - runner: macos-15
+            target: darwin-arm64
+          - runner: windows-2025
+            target: win32-x64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install exact Lean toolchain
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc15selfhost
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build, execute, and stage native provider
+        shell: bash
+        working-directory: psc15selfhost
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          expected_lean_commit='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b'
+          actual_lean_commit="$(lean --githash | tr -d '\r\n')"
+          test "$actual_lean_commit" = "$expected_lean_commit"
+
+          lake build psc2_lean_kernel_provider
+
+          if [[ "$TARGET" == win32-* ]]; then
+            binary='.lake/build/bin/psc2_lean_kernel_provider.exe'
+          else
+            binary='.lake/build/bin/psc2_lean_kernel_provider'
+          fi
+          test -f "$binary"
+
+          health_json="$("$binary" --health)"
+          printf '%s\n' "$health_json" > ".provider-health-${TARGET}.json"
+          node -e '
+            const value=JSON.parse(process.argv[1]);
+            if(value.status!=="ok"||
+               value.protocol!=="pskernel-lean/1"||
+               value.provider!=="lean4-cpp"||
+               value.leanVersion!=="4.34.0"||
+               value.leanCommit!=="293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"||
+               value.profile!=="lean4.34-core")process.exit(1);
+          ' "$health_json"
+
+          valid_request='{"admissions":[{"declaration":{"h":{"h":"1","k":"regular"},"k":"definition","lp":[],"n":{"k":"s","p":{"k":"a"},"v":"matrixAccepted"},"s":"safe","t":{"k":"const","ls":[],"n":{"k":"s","p":{"k":"a"},"v":"Nat"}},"v":{"k":"nat","v":"1"}},"kind":"constant"}],"format":"proofscript-checked-admissions","version":2}'
+          invalid_request='{"admissions":[{"declaration":{"h":{"h":"1","k":"regular"},"k":"definition","lp":[],"n":{"k":"s","p":{"k":"a"},"v":"matrixRejected"},"s":"safe","t":{"k":"const","ls":[],"n":{"k":"s","p":{"k":"a"},"v":"Nat"}},"v":{"k":"sort","l":{"k":"z"}}},"kind":"constant"}],"format":"proofscript-checked-admissions","version":2}'
+          valid_response="$(printf '%s' "$valid_request" | "$binary" --check)"
+          invalid_response="$(printf '%s' "$invalid_request" | "$binary" --check)"
+          node -e '
+            const value=JSON.parse(process.argv[1]);
+            if(value.accepted!==true||value.provider!=="lean4-cpp")process.exit(1);
+          ' "$valid_response"
+          node -e '
+            const value=JSON.parse(process.argv[1]);
+            if(value.accepted!==false||
+               value.errorKind!=="kernel-rejection"||
+               value.declarationIndex!==0)process.exit(1);
+          ' "$invalid_response"
+
+          rm -rf ".prebuilt-stage/${TARGET}"
+          node packages/pskernel-lean/scripts/stage-native-prebuilt.mjs \
+            --target "$TARGET" \
+            --binary "$binary" \
+            --source-commit "$GITHUB_SHA" \
+            --lean-githash "$actual_lean_commit" \
+            --health-json ".provider-health-${TARGET}.json" \
+            --out ".prebuilt-stage/${TARGET}"
+
+      - name: Inspect native dependencies
+        if: runner.os != 'Windows'
+        shell: bash
+        working-directory: psc15selfhost
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          staged=".prebuilt-stage/${TARGET}/psc2_lean_kernel_provider"
+          deps=".provider-dependencies-${TARGET}.txt"
+          if [[ "${{ runner.os }}" == 'Linux' ]]; then
+            ldd "$staged" | tee "$deps"
+          else
+            otool -L "$staged" | tee "$deps"
+          fi
+          if grep -E '(\.lake|\.elan|/home/runner/work|/Users/runner/work)' "$deps"; then
+            echo 'provider has a build-tree/toolchain dynamic dependency' >&2
+            exit 1
+          fi
+
+      - name: Prove standalone native execution
+        if: runner.os != 'Windows'
+        shell: bash
+        working-directory: psc15selfhost
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          staged=".prebuilt-stage/${TARGET}/psc2_lean_kernel_provider"
+          standalone=".standalone/${TARGET}/psc2_lean_kernel_provider"
+          mkdir -p "$(dirname "$standalone")"
+          cp "$staged" "$standalone"
+          chmod +x "$standalone"
+          mv .lake/build .lake/build-hidden
+
+          health_json="$(env PATH=/usr/bin:/bin LD_LIBRARY_PATH= DYLD_LIBRARY_PATH= "$standalone" --health)"
+          node -e '
+            const value=JSON.parse(process.argv[1]);
+            if(value.status!=="ok"||value.leanVersion!=="4.34.0")process.exit(1);
+          ' "$health_json"
+
+          valid_request='{"admissions":[{"declaration":{"h":{"h":"1","k":"regular"},"k":"definition","lp":[],"n":{"k":"s","p":{"k":"a"},"v":"standaloneAccepted"},"s":"safe","t":{"k":"const","ls":[],"n":{"k":"s","p":{"k":"a"},"v":"Nat"}},"v":{"k":"nat","v":"1"}},"kind":"constant"}],"format":"proofscript-checked-admissions","version":2}'
+          invalid_request='{"admissions":[{"declaration":{"h":{"h":"1","k":"regular"},"k":"definition","lp":[],"n":{"k":"s","p":{"k":"a"},"v":"standaloneRejected"},"s":"safe","t":{"k":"const","ls":[],"n":{"k":"s","p":{"k":"a"},"v":"Nat"}},"v":{"k":"sort","l":{"k":"z"}}},"kind":"constant"}],"format":"proofscript-checked-admissions","version":2}'
+          valid_response="$(printf '%s' "$valid_request" | env PATH=/usr/bin:/bin LD_LIBRARY_PATH= DYLD_LIBRARY_PATH= "$standalone" --check)"
+          invalid_response="$(printf '%s' "$invalid_request" | env PATH=/usr/bin:/bin LD_LIBRARY_PATH= DYLD_LIBRARY_PATH= "$standalone" --check)"
+          node -e 'if(JSON.parse(process.argv[1]).accepted!==true)process.exit(1)' "$valid_response"
+          node -e '
+            const value=JSON.parse(process.argv[1]);
+            if(value.accepted!==false||value.errorKind!=="kernel-rejection")process.exit(1);
+          ' "$invalid_response"
+
+      - name: Inspect Windows dependencies and prove standalone execution
+        if: runner.os == 'Windows'
+        shell: pwsh
+        working-directory: psc15selfhost
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $staged = Join-Path ".prebuilt-stage/$env:TARGET" 'psc2_lean_kernel_provider.exe'
+          if (-not (Test-Path $staged -PathType Leaf)) { throw "missing staged provider: $staged" }
+
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
+          if (-not (Test-Path $vswhere -PathType Leaf)) { throw 'vswhere.exe is unavailable' }
+          $install = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $install) { throw 'Visual Studio C++ tools are unavailable' }
+          $msvc = Get-ChildItem (Join-Path $install 'VC/Tools/MSVC') -Directory | Sort-Object Name -Descending | Select-Object -First 1
+          $dumpbin = Join-Path $msvc.FullName 'bin/Hostx64/x64/dumpbin.exe'
+          if (-not (Test-Path $dumpbin -PathType Leaf)) { throw 'dumpbin.exe is unavailable' }
+          $deps = & $dumpbin /DEPENDENTS $staged | Out-String
+          $deps | Write-Host
+          if ($deps -match '(?i)(\.lake|\.elan|lean[^\\\s]*\.dll|libuv[^\\\s]*\.dll|libssl[^\\\s]*\.dll|libcrypto[^\\\s]*\.dll)') {
+            throw 'provider has a non-system Lean/build-tree dependency'
+          }
+
+          $standaloneDir = Join-Path '.standalone' $env:TARGET
+          New-Item -ItemType Directory -Force -Path $standaloneDir | Out-Null
+          $standalone = Join-Path $standaloneDir 'psc2_lean_kernel_provider.exe'
+          Copy-Item $staged $standalone
+          Move-Item '.lake/build' '.lake/build-hidden'
+          $env:PATH = (($env:PATH -split ';') | Where-Object { $_ -notmatch '(?i)(\.elan|\.lake)' }) -join ';'
+          $env:LEAN_PATH = ''
+
+          $health = (& $standalone --health | Out-String).Trim()
+          $healthValue = $health | ConvertFrom-Json
+          if ($healthValue.status -ne 'ok' -or $healthValue.leanVersion -ne '4.34.0') { throw 'standalone health failed' }
+
+          $validRequest = '{"admissions":[{"declaration":{"h":{"h":"1","k":"regular"},"k":"definition","lp":[],"n":{"k":"s","p":{"k":"a"},"v":"standaloneAccepted"},"s":"safe","t":{"k":"const","ls":[],"n":{"k":"s","p":{"k":"a"},"v":"Nat"}},"v":{"k":"nat","v":"1"}},"kind":"constant"}],"format":"proofscript-checked-admissions","version":2}'
+          $invalidRequest = '{"admissions":[{"declaration":{"h":{"h":"1","k":"regular"},"k":"definition","lp":[],"n":{"k":"s","p":{"k":"a"},"v":"standaloneRejected"},"s":"safe","t":{"k":"const","ls":[],"n":{"k":"s","p":{"k":"a"},"v":"Nat"}},"v":{"k":"sort","l":{"k":"z"}}},"kind":"constant"}],"format":"proofscript-checked-admissions","version":2}'
+          $accepted = ($validRequest | & $standalone --check | Out-String).Trim() | ConvertFrom-Json
+          $rejected = ($invalidRequest | & $standalone --check | Out-String).Trim() | ConvertFrom-Json
+          if ($accepted.accepted -ne $true) { throw 'standalone semantic acceptance failed' }
+          if ($rejected.accepted -ne $false -or $rejected.errorKind -ne 'kernel-rejection') { throw 'standalone kernel rejection failed' }
+
+      - name: Upload staged native provider
+        uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-lean-${{ matrix.target }}
+          path: psc15selfhost/.prebuilt-stage/${{ matrix.target }}
+          if-no-files-found: error
+          retention-days: 7
+
+  assemble:
+    needs: build-native
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download native provider artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: pskernel-lean-*
+          path: ${{ runner.temp }}/pskernel-lean-artifacts
+
+      - name: Assemble and verify all five native providers
+        shell: bash
+        working-directory: psc15selfhost
+        env:
+          ARTIFACTS_DIR: ${{ runner.temp }}/pskernel-lean-artifacts
+        run: |
+          set -euo pipefail
+          test "$(find "$ARTIFACTS_DIR" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')" = '5'
+          node packages/pskernel-lean/scripts/assemble-prebuilt.mjs \
+            --artifacts "$ARTIFACTS_DIR" \
+            --package-root packages/pskernel-lean
+          node packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs
+          node packages/pskernel-lean/host/npm-package.test.mjs
+          node packages/pskernel-lean/host/prebuilt.test.mjs
+          node packages/pskernel-lean/scripts/stage-native-prebuilt.test.mjs
+          node packages/pskernel-lean/scripts/assemble-prebuilt.test.mjs
+
+          node --input-type=module <<'NODE'
+          import path from 'node:path';
+          import {
+            loadLeanKernelPrebuiltManifest,
+            supportedLeanKernelProviderTargets,
+            verifyLeanKernelPrebuiltBinary,
+          } from './packages/pskernel-lean/host/prebuilt.mjs';
+          const packageRoot=path.resolve('packages/pskernel-lean');
+          const manifest=loadLeanKernelPrebuiltManifest({packageRoot});
+          for(const target of supportedLeanKernelProviderTargets){
+            const binaryPath=path.resolve(packageRoot,manifest.targets[target].path);
+            verifyLeanKernelPrebuiltBinary({binaryPath,target,manifest,packageRoot});
+          }
+          console.log('PSC2_LEAN_KERNEL_REAL_PREBUILT_DIGESTS: PASS');
+          NODE
+
+      - name: Pack and execute assembled npm package
+        shell: bash
+        working-directory: psc15selfhost
+        run: |
+          set -euo pipefail
+          pack_dir="$RUNNER_TEMP/pskernel-lean-pack"
+          mkdir -p "$pack_dir"
+          (
+            cd packages/pskernel-lean
+            npm pack --json --pack-destination "$pack_dir"
+          ) > "$RUNNER_TEMP/pskernel-lean-pack.json"
+
+          node --input-type=module <<'NODE'
+          import {readFile} from 'node:fs/promises';
+          const [record]=JSON.parse(await readFile(process.env.RUNNER_TEMP+'/pskernel-lean-pack.json','utf8'));
+          const files=record.files.map(file=>file.path).sort();
+          const executables=files.filter(file=>
+            /^prebuilt\/(?:linux-x64|linux-arm64|darwin-x64|darwin-arm64|win32-x64)\/psc2_lean_kernel_provider(?:\.exe)?$/u.test(file),
+          );
+          if(executables.length!==5)throw new Error(`expected five provider executables, got ${executables.length}`);
+          if(!files.includes('PREBUILT_MANIFEST.json'))throw new Error('tarball is missing PREBUILT_MANIFEST.json');
+          for(const forbidden of ['.lake/','kernel/','runtime/','util/']){
+            if(files.some(file=>file===forbidden.slice(0,-1)||file.startsWith(forbidden))){
+              throw new Error(`tarball unexpectedly contains ${forbidden}`);
+            }
+          }
+          console.log('PSC2_LEAN_KERNEL_REAL_TARBALL_SURFACE: PASS');
+          NODE
+
+          tarball="$(node -e "const fs=require('fs'),p=require('path');const [r]=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/pskernel-lean-pack.json','utf8'));process.stdout.write(p.join(process.env.RUNNER_TEMP,'pskernel-lean-pack',r.filename));")"
+          node packages/pskernel-lean/scripts/packed-consumer.test.mjs --tarball "$tarball"
+
+      - name: Commit verified distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'psc2/pskernel-lean-provider'
+          git add \
+            psc15selfhost/packages/pskernel-lean/PREBUILT_MANIFEST.json \
+            psc15selfhost/packages/pskernel-lean/prebuilt
+
+          unexpected="$(git diff --cached --name-only | grep -Ev '^psc15selfhost/packages/pskernel-lean/(PREBUILT_MANIFEST\.json|prebuilt/)' || true)"
+          test -z "$unexpected"
+          if git diff --cached --quiet; then
+            echo 'Verified native provider distribution is already current.'
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'build(psc2): bundle pskernel-lean 4.34.0 native providers'
+          git push origin "HEAD:${GITHUB_REF_NAME}"

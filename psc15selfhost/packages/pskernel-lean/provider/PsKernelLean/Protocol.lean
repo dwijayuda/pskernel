@@ -69,7 +69,10 @@ def decodeRegularHints (value : PsJsonValue) :
   let heightText ← jsonString "definition hint height must be a string" heightValue
   let some height := psCodecNaturalText heightText
     | throw (malformedRequest "invalid definition hint height")
-  pure (.regular height)
+  let height32 := UInt32.ofNat height
+  if UInt32.toNat height32 != height then
+    throw (malformedRequest "definition hint height exceeds UInt32")
+  pure (.regular height32)
 
 def decodeDefinition (value : PsJsonValue) :
     Except PsKernelLeanError Lean.Declaration := do

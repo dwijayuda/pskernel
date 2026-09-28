@@ -227,20 +227,19 @@ Initial declaration support must match the PSC2 bootstrap subset represented by 
 
 ## Prelude and environment policy
 
-Kernel checking must begin from a deterministic, documented environment corresponding to the PSC2 bootstrap prelude assumptions.
+The initial provider MUST check from a fresh trust-level-zero Lean environment created by `Lean.mkEmptyEnvironment`, not from the provider executable's imported `Init`/`Lean` environment.
 
-The provider must not trust a caller-supplied arbitrary environment. Environment construction must be one of:
+Into that empty kernel environment, the provider deterministically replays the PSC2 bootstrap prelude corresponding to `psSelfHostProdPreludeEnvironment`, in declaration order, through the same real Lean kernel admission path used for the module being checked. This includes the foundational PSC declarations and the self-host replacements for `List`, `Option`, `Except`, and `Prod` that are part of the current compiler environment.
 
-1. a provider-owned pinned prelude reconstructed deterministically; or
-2. a provider-owned digest-identified prelude artifact whose exact contents are checked before use.
+The prelude must be represented by a provider-owned, generated-or-checked canonical admissions artifact derived from the PSC2 source-of-truth prelude. The artifact must carry a stable digest. At runtime the provider accepts only its own pinned prelude artifact/digest; callers cannot supply or substitute an arbitrary environment.
 
-The initial implementation should choose the smallest path that faithfully checks the current PSC2 bootstrap declarations.
+This policy avoids silently checking PSC declarations against whatever `Init` happens to provide, whose types or implementation details may differ from the PSC bootstrap prelude even when names overlap.
 
-The provider result must record the provider profile/prelude identity so acceptance cannot silently depend on a mutable host environment.
+Provider acceptance metadata must include the prelude digest/profile so a result identifies both the Lean kernel version and the exact PSC prelude admitted before the user/module declarations.
 
 ## Lean admission path
 
-The native provider must ultimately submit decoded declarations through the real Lean 4.34 checked kernel environment path (`Kernel.Environment` / `addDeclCore` semantics), not a host-side imitation of type checking.
+The native provider must ultimately submit decoded prelude and module declarations through the real Lean 4.34 checked kernel environment path (`Kernel.Environment` / `addDeclCore` semantics), not a host-side imitation of type checking.
 
 The provider may use Lean code as the integration shell for the first milestone because Lean's own C++ kernel and generated runtime support are already correctly linked there. The trusted semantic decision remains the original Lean kernel check.
 
@@ -312,7 +311,7 @@ AdmissionReadyModule
   -> erasure
 ```
 
-For the first external-host integration, the host may enforce the kernel decision before invoking the existing prepared-to-erasure compiler function, because the self-hosted compiler cannot perform native process/WASM calls itself without polluting its portable closure.
+For the first external-host integration, the host enforces the kernel decision before invoking the existing prepared-to-erasure compiler function, because the self-hosted compiler cannot perform native process/WASM calls itself without polluting its portable closure.
 
 A later portable protocol package may introduce an explicit `CheckedModule` token/artifact into the compiler API. Such a token must be unforgeable by ordinary source-level callers or must carry verifiable admission evidence. Do not merely rename `AdmissionReadyModule` to `CheckedModule`.
 
@@ -433,8 +432,9 @@ Existing bootstrap/fixed-point gates must continue to pass without building or i
 
 ### KLP2 — real kernel admission
 
-- positive declarations accepted by Lean 4.34 kernel;
-- negative semantic declarations rejected;
+- PSC bootstrap prelude is replayed into a fresh trust-level-zero environment through the real Lean kernel;
+- positive module declarations are accepted by the Lean 4.34 kernel;
+- negative semantic declarations are rejected;
 - provider does not use Lean parser/elaborator to reinterpret PSC source.
 
 ### KLP3 — PSC2 host integration
@@ -447,7 +447,7 @@ Existing bootstrap/fixed-point gates must continue to pass without building or i
 
 - shared corpus runs through Lean provider and PSC kernel provider;
 - disagreement causes a hard failure;
-- results are recorded with provider/version metadata.
+- results are recorded with provider/version/prelude metadata.
 
 ### KLP5 — WASM provider
 
@@ -471,9 +471,11 @@ The first provider does not need to:
 
 ## Source provenance
 
-The copied `kernel/`, `runtime/`, and `util/` trees are treated as pinned upstream Lean 4.34 reference sources. The implementation must document their upstream version and avoid semantic edits unless a change is explicitly justified and tested.
+The copied `kernel/`, `runtime/`, and `util/` trees are treated as pinned upstream Lean 4.34 reference sources. Their semantic reference is Lean tag `v4.34.0`, commit `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`, matching the repository's established Lean 4.34 conformance work.
 
-The provider should identify itself as Lean 4.34-compatible and, where available, record the exact upstream Lean tag/commit used by the repository's established Lean 4.34 conformance work.
+The implementation must avoid semantic edits to these upstream files unless a change is explicitly justified, documented, and covered by regression tests. Provider-owned wrappers/adapters are preferred.
+
+Provider responses and `--version`/health output must identify Lean `4.34.0`, the upstream commit, the provider protocol version, and the pinned prelude digest.
 
 ## Documentation deliverables
 

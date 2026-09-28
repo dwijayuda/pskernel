@@ -876,7 +876,7 @@ def psElabLet
   | some name =>
       match declaredType with
       | none =>
-          match elaborate context value none with
+          match elaborate context value Option.none with
           | Except.error error => Except.error error
           | Except.ok valueResult =>
               psElabLetAfterValue
@@ -888,7 +888,7 @@ def psElabLet
                 body
                 expected
       | some sourceType =>
-          match elaborate context sourceType none with
+          match elaborate context sourceType Option.none with
           | Except.error error => Except.error error
           | Except.ok typeResult =>
               match psInferEnsureSort

@@ -245,7 +245,7 @@ def psRefRecRedDirect : Bool :=
   | .ok env =>
       let motive : PSC1Kernel.Expr :=
         .lam .anonymous familyExpr (.sort (.succ .zero)) .default
-      let expr := PSC1Kernel.applyArgs (.const recName [])
+      let expr := PSC1Kernel.applyArgs (.const recName [(.succ .zero)])
         [motive, familyExpr, familyExpr, .const off []]
       match PSC1Kernel.whnf (PSC1Kernel.CheckerContext.empty env) expr with
       | .error _ => false

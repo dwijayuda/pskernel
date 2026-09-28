@@ -50,6 +50,7 @@ jobs:
           printf '%s' "$version_json" | grep -F '"status":"version"'
           printf '%s' "$health_json" | grep -F '"status":"ok"'
           printf '%s' "$health_json" | grep -F '"leanVersion":"4.34.0"'
+          printf '%s' "$health_json" | grep -F '"leanCommit":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"'
 
           valid_request='{"admissions":[{"declaration":{"h":{"h":"1","k":"regular"},"k":"definition","lp":[],"n":{"k":"s","p":{"k":"a"},"v":"processAccepted"},"s":"safe","t":{"k":"const","ls":[],"n":{"k":"s","p":{"k":"a"},"v":"Nat"}},"v":{"k":"nat","v":"1"}},"kind":"constant"}],"format":"proofscript-checked-admissions","version":2}'
           invalid_request='{"admissions":[{"declaration":{"h":{"h":"1","k":"regular"},"k":"definition","lp":[],"n":{"k":"s","p":{"k":"a"},"v":"processRejected"},"s":"safe","t":{"k":"const","ls":[],"n":{"k":"s","p":{"k":"a"},"v":"Nat"}},"v":{"k":"sort","l":{"k":"z"}}},"kind":"constant"}],"format":"proofscript-checked-admissions","version":2}'
@@ -60,6 +61,7 @@ jobs:
           printf '%s\n' "$invalid_response"
           printf '%s' "$valid_response" | grep -F '"accepted":true'
           printf '%s' "$valid_response" | grep -F '"provider":"lean4-cpp"'
+          printf '%s' "$valid_response" | grep -F '"leanCommit":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"'
           printf '%s' "$invalid_response" | grep -F '"accepted":false'
           printf '%s' "$invalid_response" | grep -F '"errorKind":"kernel-rejection"'
           printf '%s' "$invalid_response" | grep -F '"declarationIndex":0'

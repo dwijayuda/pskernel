@@ -965,7 +965,7 @@ def psElabIf
           expected with
       | Except.error error => Except.error error
       | Except.ok thenResult =>
-          let resultType :=
+          let resultType : PsExpr :=
             match expected with
             | some type => type
             | none => thenResult.type;

@@ -84,6 +84,13 @@ jobs:
           cd psc15selfhost
           lake env lean --run test/KernelCoreRecursorReductionParityTests.lean
 
+      - name: Phase 10 Eq recursor compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreEqRecursorCompatibilityTests.lean
+
       - name: KernelCore PSC1 source profile
         shell: bash
         run: |

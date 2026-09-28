@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 
 const hostDir=path.dirname(fileURLToPath(import.meta.url));
 const packageRoot=path.resolve(hostDir,'..');
+const workspaceRoot=path.resolve(packageRoot,'../..');
 const manifestPath=path.join(packageRoot,'package.json');
 const indexPath=path.join(packageRoot,'index.mjs');
 
@@ -27,5 +29,13 @@ assert.equal(
 );
 assert.equal(typeof api.checkCanonicalAdmissions,'function');
 assert.equal(typeof api.defaultLeanKernelProviderBinary,'function');
+
+const workspaceCheck=spawnSync(
+  process.execPath,
+  ['scripts/check-workspace.mjs'],
+  {cwd:workspaceRoot,encoding:'utf8'},
+);
+assert.equal(workspaceCheck.status,0,workspaceCheck.stderr);
+assert.match(workspaceCheck.stdout,/PSC1_WORKSPACE_SHAPE: PASS \(21 workspaces\)/u);
 
 process.stdout.write('PSC2_LEAN_KERNEL_NPM_PACKAGE_TESTS: PASS\n');

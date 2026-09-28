@@ -21,6 +21,26 @@ def psHostCompilerTargetKind
   else
     none
 
+def psHostAdmissionErrorTag
+    (error : PsCheckedAdmissionCodecError) : String :=
+  match error with
+  | PsCheckedAdmissionCodecError.universeMetavariable => "admission:universeMetavariable"
+  | PsCheckedAdmissionCodecError.freeVariable => "admission:freeVariable"
+  | PsCheckedAdmissionCodecError.expressionMetavariable => "admission:expressionMetavariable"
+  | PsCheckedAdmissionCodecError.missingConstructor _ => "admission:missingConstructor"
+  | PsCheckedAdmissionCodecError.mismatchedConstructor _ => "admission:mismatchedConstructor"
+  | PsCheckedAdmissionCodecError.unsupportedDeclaration => "admission:unsupportedDeclaration"
+
+def psHostCompilerErrorTag (error : PsCompilerError) : String :=
+  match error with
+  | PsCompilerError.translation _ => "translation"
+  | PsCompilerError.leanFrontend _ => "leanFrontend"
+  | PsCompilerError.proofScriptFrontend _ => "proofScriptFrontend"
+  | PsCompilerError.elaboration _ => "elaboration"
+  | PsCompilerError.admission error => psHostAdmissionErrorTag error
+  | PsCompilerError.preparedAdmissionMismatch => "preparedAdmissionMismatch"
+  | PsCompilerError.erasure _ => "erasure"
+
 def psHostCompilerTranslatedSource
     (inputPath : String)
     (targetText : String) : IO String := do
@@ -73,10 +93,11 @@ def psHostCompilerCheck
     (inputPath : String) : IO Unit := do
   let elaborated ← psHostCompilerElaborateProject inputPath
   match psCompilerCheckElaborated elaborated with
-  | Except.error _ =>
+  | Except.error error =>
       throw
         (IO.userError
-          "PSC2_CHECK_FAILED: elaborated source is not admission-ready")
+          ("PSC2_CHECK_FAILED: elaborated source is not admission-ready (" ++
+            psHostCompilerErrorTag error ++ ")"))
   | Except.ok prepared =>
       IO.println
         ("PSC2_CHECK: PASS (" ++

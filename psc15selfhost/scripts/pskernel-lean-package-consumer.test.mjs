@@ -9,6 +9,7 @@ const scriptsDir=path.dirname(fileURLToPath(import.meta.url));
 const workspaceRoot=path.resolve(scriptsDir,'..');
 const packageRoot=path.join(workspaceRoot,'packages','pskernel-lean');
 const consumerRoot=await mkdtemp(path.join(os.tmpdir(),'psc2-pskernel-lean-consumer-'));
+const packRoot=await mkdtemp(path.join(os.tmpdir(),'psc2-pskernel-lean-pack-'));
 const npm=process.platform==='win32'?'npm.cmd':'npm';
 
 const workspaceManifest=JSON.parse(
@@ -28,6 +29,23 @@ assert.equal(
 );
 
 try{
+  const packed=spawnSync(
+    npm,
+    [
+      'pack',
+      '--json',
+      '--pack-destination',
+      packRoot,
+    ],
+    {cwd:packageRoot,encoding:'utf8'},
+  );
+  assert.equal(packed.status,0,`${packed.stdout}\n${packed.stderr}`);
+  const packResult=JSON.parse(packed.stdout);
+  assert.equal(packResult.length,1);
+  assert.equal(packResult[0].name,'@proofscript/pskernel-lean');
+  assert.equal(packResult[0].version,'4.34.0');
+  const tarball=path.join(packRoot,packResult[0].filename);
+
   await writeFile(
     path.join(consumerRoot,'package.json'),
     JSON.stringify({name:'psc2-kernel-consumer-test',private:true,type:'module'},null,2),
@@ -41,7 +59,7 @@ try{
       '--no-audit',
       '--no-fund',
       '--package-lock=false',
-      packageRoot,
+      tarball,
     ],
     {cwd:consumerRoot,encoding:'utf8'},
   );
@@ -68,6 +86,7 @@ try{
   );
 }finally{
   await rm(consumerRoot,{recursive:true,force:true});
+  await rm(packRoot,{recursive:true,force:true});
 }
 
 const generatedChecker=await readFile(

@@ -84,9 +84,16 @@ def psJsProbeSmallIr (_value : Unit) : String :=
   | Except.ok output => output
 `);
 
-  checkProbeVariant('huge-nat', `
+  checkProbeVariant('huge-nat-chunked', `
 def psJsProbeHugeNat (_value : Unit) : Nat :=
-  9007199254740993123456789
+  let n1 := Nat.add (Nat.mul 9 1000) 7;
+  let n2 := Nat.add (Nat.mul n1 1000) 199;
+  let n3 := Nat.add (Nat.mul n2 1000) 254;
+  let n4 := Nat.add (Nat.mul n3 1000) 740;
+  let n5 := Nat.add (Nat.mul n4 1000) 993;
+  let n6 := Nat.add (Nat.mul n5 1000) 123;
+  let n7 := Nat.add (Nat.mul n6 1000) 456;
+  Nat.add (Nat.mul n7 1000) 789
 `);
 
   writeFileSync(lean, flattened([...sources, { source: probe }]));

@@ -2,6 +2,7 @@ import Ps.Bridge.CheckedAdmissions
 import PsKernelLean.Protocol
 import PsKernelLean.Convert
 import PsKernelLean.Prelude
+import PsKernelLean.Admission
 
 def expectEq (label actual expected : String) : IO Unit := do
   if actual == expected then
@@ -209,6 +210,38 @@ def testCanonicalAdmissionsRejectMalformed : IO Unit := do
     (PsKernelLean.decodeCanonicalAdmissions
       "{\"admissions\":[{\"declaration\":{\"h\":{\"h\":\"01\",\"k\":\"regular\"},\"k\":\"definition\",\"lp\":[],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"bad\"},\"s\":\"safe\",\"t\":{\"k\":\"sort\",\"l\":{\"k\":\"z\"}},\"v\":{\"k\":\"sort\",\"l\":{\"k\":\"z\"}}},\"kind\":\"constant\"}],\"format\":\"proofscript-checked-admissions\",\"version\":2}")
 
+def kernelAdmissionFixture
+    (name : String)
+    (value : PsExpr) : Except PsCheckedAdmissionCodecError String :=
+  psEncodeCheckedAdmissionsCanonical [
+    PsDeclaration.definitionDecl
+      (psRootName name)
+      []
+      (PsExpr.constE psNatName [])
+      value
+  ]
+
+def testKernelAdmission : IO Unit := do
+  let acceptedSource ←
+    match kernelAdmissionFixture "kernelAccepted" (PsExpr.lit (PsLiteral.natural 1)) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "accepted admission fixture encoding failed"
+  let acceptedResult ← PsKernelLean.admitCanonicalAdmissions acceptedSource
+  let acceptedEnv ← expectOk "kernel accepts valid definition" acceptedResult
+  expectTrue "accepted declaration installed"
+    (acceptedEnv.find? (Lean.Name.str Lean.Name.anonymous "kernelAccepted")).isSome
+
+  let rejectedSource ←
+    match kernelAdmissionFixture "kernelRejected" (PsExpr.sortE PsLevel.zero) with
+    | .ok value => pure value
+    | .error _ => throw <| IO.userError "rejected admission fixture encoding failed"
+  let rejectedResult ← PsKernelLean.admitCanonicalAdmissions rejectedSource
+  match rejectedResult with
+  | .ok _ => throw <| IO.userError "kernel must reject ill-typed definition"
+  | .error error =>
+      expectTrue "semantic rejection kind" (error.kind == .kernelRejection)
+      expectTrue "semantic rejection index" (error.declarationIndex == some 0)
+
 def main : IO Unit := do
   expectEq "providerProtocol" PsKernelLean.providerProtocol "pskernel-lean/1"
   expectEq "providerName" PsKernelLean.providerName "lean4-cpp"
@@ -219,4 +252,5 @@ def main : IO Unit := do
   testPreludeReplay
   testCanonicalAdmissionsDecode
   testCanonicalAdmissionsRejectMalformed
+  testKernelAdmission
   IO.println "PSC2_LEAN_KERNEL_PROVIDER_TESTS: PASS"

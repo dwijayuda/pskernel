@@ -41,9 +41,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cd psc15selfhost
-          npm install --ignore-scripts --no-audit --no-fund --workspaces=false
-          node -e "const p=require('./node_modules/typescript/package.json'); if(p.version!=='5.8.3') throw new Error('unexpected TypeScript '+p.version); console.log('PSC2_TYPESCRIPT_PIN: PASS '+p.version)"
+          npm install --global --ignore-scripts --no-audit --no-fund typescript@5.8.3
+          test "$(tsc --version)" = "Version 5.8.3"
+          echo "PSC2_TYPESCRIPT_PIN: PASS 5.8.3"
 
       - name: Provider tests
         shell: bash

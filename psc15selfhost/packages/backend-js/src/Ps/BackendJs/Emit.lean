@@ -1,31 +1,11 @@
 import Ps.BackendJs.Model
 import Ps.BackendJs.PortableText
 
-def psJsNatDecimalWithFuel (fuel : Nat) : Nat -> Except PsJsError String :=
-  match fuel with
-  | Nat.zero =>
-      fun (_value : Nat) => Except.error PsJsError.fuelExhausted
-  | Nat.succ remaining =>
-      fun (value : Nat) =>
-        if Nat.blt value 10 then
-          Except.ok (psJsTextHexDigit value)
-        else
-          match psJsNatDecimalWithFuel remaining (Nat.div value 10) with
-          | Except.error error => Except.error error
-          | Except.ok higherDigits =>
-              Except.ok
-                (psJsTextConcat2 higherDigits (psJsTextHexDigit (Nat.mod value 10)))
-
 def psJsNatDecimal (value : Nat) : Except PsJsError String :=
-  psJsNatDecimalWithFuel (Nat.succ value) value
+  Except.ok (Int.repr (Int.ofNat value))
 
 def psJsIntDecimal (value : Int) : Except PsJsError String :=
-  match value with
-  | Int.ofNat number => psJsNatDecimal number
-  | Int.negSucc number =>
-      match psJsNatDecimal (Nat.succ number) with
-      | Except.error error => Except.error error
-      | Except.ok text => Except.ok (psJsTextConcat2 "-" text)
+  Except.ok (Int.repr value)
 
 def psJsEmitLiteral (value : PsJsLiteral) : Except PsJsError String :=
   match value with

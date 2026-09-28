@@ -3,12 +3,8 @@ import PsKernelLean.Admission
 namespace PsKernelLean
 
 def providerAcceptedJson : String :=
-  "{\"protocol\":" ++ psJsonQuote providerProtocol ++
-  ",\"accepted\":true" ++
-  ",\"provider\":" ++ psJsonQuote providerName ++
-  ",\"leanVersion\":" ++ psJsonQuote providerVersion ++
-  ",\"profile\":" ++ psJsonQuote providerProfile ++
-  "}"
+  "{" ++ providerIdentityJsonFields ++
+  ",\"accepted\":true}"
 
 def providerErrorIndexJson : Option Nat -> String
   | none => ""
@@ -16,11 +12,8 @@ def providerErrorIndexJson : Option Nat -> String
       ",\"declarationIndex\":" ++ toString declarationIndex
 
 def providerRejectedJson (error : PsKernelLeanError) : String :=
-  "{\"protocol\":" ++ psJsonQuote providerProtocol ++
+  "{" ++ providerIdentityJsonFields ++
   ",\"accepted\":false" ++
-  ",\"provider\":" ++ psJsonQuote providerName ++
-  ",\"leanVersion\":" ++ psJsonQuote providerVersion ++
-  ",\"profile\":" ++ psJsonQuote providerProfile ++
   ",\"errorKind\":" ++ psJsonQuote error.kind.code ++
   providerErrorIndexJson error.declarationIndex ++
   ",\"message\":" ++ psJsonQuote error.message ++

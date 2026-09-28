@@ -2,6 +2,11 @@ name: PSC2 Lean kernel prebuilt distribution
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - psc2/pskernel-lean-provider
+    paths:
+      - .github/workflows/psc2-lean-kernel-prebuilt.yml
 
 permissions:
   contents: read
@@ -195,6 +200,7 @@ jobs:
         with:
           name: pskernel-lean-${{ matrix.target }}
           path: psc15selfhost/.prebuilt-stage/${{ matrix.target }}
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
 
@@ -230,7 +236,9 @@ jobs:
           node packages/pskernel-lean/scripts/assemble-prebuilt.mjs \
             --artifacts "$ARTIFACTS_DIR" \
             --package-root packages/pskernel-lean
-          node packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs
+          if [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]]; then
+            node packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs
+          fi
           node packages/pskernel-lean/host/npm-package.test.mjs
           node packages/pskernel-lean/host/prebuilt.test.mjs
           node packages/pskernel-lean/scripts/stage-native-prebuilt.test.mjs

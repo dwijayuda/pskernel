@@ -11,6 +11,7 @@ on:
       - psc15selfhost/packages/backend-ts/**
       - psc15selfhost/packages/cli/**
       - psc15selfhost/scripts/compile-with-generated.mjs
+      - psc15selfhost/scripts/check-with-generated*.mjs
       - psc15selfhost/package.json
       - .github/workflows/psc2-lean-kernel-provider.yml
   workflow_dispatch:
@@ -42,6 +43,7 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           npm run test:kernel:lean434
+          node scripts/check-with-generated.test.mjs
 
           version_json="$(lake exe psc2_lean_kernel_provider --version)"
           health_json="$(lake exe psc2_lean_kernel_provider --health)"

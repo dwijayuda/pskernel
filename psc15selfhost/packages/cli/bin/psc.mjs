@@ -31,6 +31,7 @@ function usage() {
     "",
     "usage:",
     "  psc bootstrap",
+    "  psc check <entry.lean|entry.ps> --kernel lean434 [--compiler <compiler.js>]",
     "  psc build <entry.lean|entry.ps> --out <output.js|output.ts> [--compiler <compiler.js>]",
     "  psc translate <input.lean|input.ps> --to <lean|ps> [--out <output>] [--compiler <compiler.js>]",
     "  psc emit-lean <input.lean|input.ps> [--out <output.lean>] [--compiler <compiler.js>]",
@@ -54,6 +55,20 @@ if (!command || command === "--help" || command === "-h") {
   process.stdout.write(usage() + "\n");
 } else if (command === "bootstrap") {
   run(npm, ["run", "bootstrap"]);
+} else if (command === "check") {
+  const entry = args[1];
+  const kernel = option(args, "--kernel");
+  const compiler = option(args, "--compiler") ?? defaultCompiler;
+
+  if (!entry || !kernel) throw new Error(usage());
+
+  run(node, [
+    "scripts/check-with-generated.mjs",
+    compiler,
+    entry,
+    "--kernel",
+    kernel,
+  ]);
 } else if (command === "selfhost") {
   const compiler = option(args, "--compiler") ?? defaultCompiler;
   const workspace = option(args, "--workspace") ?? defaultWorkspace;

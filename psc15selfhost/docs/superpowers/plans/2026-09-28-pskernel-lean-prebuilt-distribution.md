@@ -263,7 +263,7 @@ Add repository-side assertions (in an existing package test or focused script) t
 
 - [ ] **Step 2: Create native matrix build job**
 
-Use `actions/checkout`, `leanprover/lean-action@v1` (reading the repository's pinned `lean-toolchain`), and Node 22. Each matrix job verifies the exact Lean githash before build, runs `lake build psc2_lean_kernel_provider`, directly executes `--health`, positive admission, and negative admission, stages through Task 2, inspects dynamic dependencies (`ldd`, `otool -L`, Windows equivalent/PowerShell file/runtime inspection), then uploads the staged artifact.
+Use `actions/checkout`, `leanprover/lean-action@v1` with `lake-package-directory: psc15selfhost` and its automatic build/test/lint disabled, then Node 22. The nested Lake directory is explicit because the repository root has no authoritative `lean-toolchain`; the action must read `psc15selfhost/lean-toolchain`. Each matrix job verifies the exact Lean githash before build, runs `lake build psc2_lean_kernel_provider` from `psc15selfhost`, directly executes `--health`, positive admission, and negative admission, stages through Task 2, inspects dynamic dependencies (`ldd`, `otool -L`, Windows equivalent/PowerShell file/runtime inspection), then uploads the staged artifact.
 
 - [ ] **Step 3: Add standalone-runtime proof per matrix target**
 

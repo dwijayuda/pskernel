@@ -15,6 +15,8 @@
     "host/node-provider.mjs",
     "host/prebuilt.mjs",
     "LEAN_SOURCE_PIN.json",
+    "PREBUILT_MANIFEST.json",
+    "prebuilt/",
     "README.md",
     "BUILDING.md",
     "INTEGRATION.md",

@@ -153,6 +153,17 @@ def main (args : List String) : IO Unit := do
     declarations := [identity,
       jsFixtureFunctionDecl "caller" "value" .nat .int
         (.call (.var "identity") [] [(.var "value")])] }
+  jsRequireError "lambda result type mismatch" { psVerifiedIrModuleEmpty with
+    declarations := [
+      jsFixtureFunctionDecl "caller" "value" .nat .nat
+        (.call
+          (.lambda
+            [{ name := "inner", type := .primitive .nat }]
+            (.primitive .int)
+            (.var "inner"))
+          []
+          [(.var "value")])
+    ] }
   jsRequireError "nonprimitive parameter" { psVerifiedIrModuleEmpty with
     declarations := [{ declaration with parameters := [
       { name := "a", type := .function [.primitive .nat] (.primitive .nat) }] }] }

@@ -65,6 +65,7 @@ jobs:
           node packages/pskernel-lean/host/npm-package.test.mjs
           node packages/pskernel-lean/host/prebuilt.test.mjs
           node packages/pskernel-lean/scripts/stage-native-prebuilt.test.mjs
+          node packages/pskernel-lean/scripts/assemble-prebuilt.test.mjs
           node scripts/pskernel-lean-package-consumer.test.mjs
           node scripts/check-with-generated.test.mjs
           node packages/cli/bin/psc-kernel-provider.test.mjs

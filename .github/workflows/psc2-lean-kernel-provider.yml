@@ -50,3 +50,16 @@ jobs:
           printf '%s' "$version_json" | grep -F '"status":"version"'
           printf '%s' "$health_json" | grep -F '"status":"ok"'
           printf '%s' "$health_json" | grep -F '"leanVersion":"4.34.0"'
+
+          valid_request='{"admissions":[{"declaration":{"h":{"h":"1","k":"regular"},"k":"definition","lp":[],"n":{"k":"s","p":{"k":"a"},"v":"processAccepted"},"s":"safe","t":{"k":"const","ls":[],"n":{"k":"s","p":{"k":"a"},"v":"Nat"}},"v":{"k":"nat","v":"1"}},"kind":"constant"}],"format":"proofscript-checked-admissions","version":2}'
+          invalid_request='{"admissions":[{"declaration":{"h":{"h":"1","k":"regular"},"k":"definition","lp":[],"n":{"k":"s","p":{"k":"a"},"v":"processRejected"},"s":"safe","t":{"k":"const","ls":[],"n":{"k":"s","p":{"k":"a"},"v":"Nat"}},"v":{"k":"sort","l":{"k":"z"}}},"kind":"constant"}],"format":"proofscript-checked-admissions","version":2}'
+
+          valid_response="$(printf '%s' "$valid_request" | lake exe psc2_lean_kernel_provider --check)"
+          invalid_response="$(printf '%s' "$invalid_request" | lake exe psc2_lean_kernel_provider --check)"
+          printf '%s\n' "$valid_response"
+          printf '%s\n' "$invalid_response"
+          printf '%s' "$valid_response" | grep -F '"accepted":true'
+          printf '%s' "$valid_response" | grep -F '"provider":"lean4-cpp"'
+          printf '%s' "$invalid_response" | grep -F '"accepted":false'
+          printf '%s' "$invalid_response" | grep -F '"errorKind":"kernel-rejection"'
+          printf '%s' "$invalid_response" | grep -F '"declarationIndex":0'

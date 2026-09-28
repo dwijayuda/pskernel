@@ -21,6 +21,8 @@ on:
       - psc2/kernel-core-phase8-inductive-work
       - psc2/kernel-core-phase9-quot
       - psc2/kernel-core-phase9-quot-work
+      - psc2/kernel-core-phase10-recursor
+      - psc2/kernel-core-phase10-recursor-work
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/KernelCore*.lean
@@ -244,6 +246,41 @@ jobs:
           cd psc15selfhost
           lake env lean --run test/KernelCoreQuotReductionParityTests.lean
 
+      - name: Phase 10 recursor metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursorMetadataTests.lean
+
+      - name: Phase 10 recursor admission parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursorAdmissionParityTests.lean
+
+      - name: Phase 10 recursor rejection matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursorRejectionTests.lean
+
+      - name: Phase 10 direct-constructor iota parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursorReductionParityTests.lean
+
+      - name: Phase 10 Eq direct-iota compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreEqRecursorCompatibilityTests.lean
+
       - name: Bootstrap closure remains isolated
         shell: bash
         run: |
@@ -320,6 +357,13 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           npm run assurance:kernel-core:phase9
+
+      - name: Phase 10 aggregate assurance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run assurance:kernel-core:phase10
 
       - name: Existing PSC2 regression gate
         shell: bash

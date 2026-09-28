@@ -41,8 +41,8 @@ jobs:
         run: |
           set -euo pipefail
           cd psc15selfhost
-          lake build psc2_lean_kernel_provider psc2_lean_kernel_provider_tests
-          lake exe psc2_lean_kernel_provider_tests
+          npm run test:kernel:lean434
+
           version_json="$(lake exe psc2_lean_kernel_provider --version)"
           health_json="$(lake exe psc2_lean_kernel_provider --health)"
           printf '%s\n' "$version_json"
@@ -63,5 +63,3 @@ jobs:
           printf '%s' "$invalid_response" | grep -F '"accepted":false'
           printf '%s' "$invalid_response" | grep -F '"errorKind":"kernel-rejection"'
           printf '%s' "$invalid_response" | grep -F '"declarationIndex":0'
-
-          node packages/pskernel-lean/host/node-provider.test.mjs

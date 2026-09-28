@@ -7,6 +7,25 @@ namespace PsKernelLean
 def preludeMismatch (message : String) : PsKernelLeanError :=
   { kind := .preludeMismatch, message := message }
 
+def kernelExceptionSummary : Lean.Kernel.Exception -> String
+  | .unknownConstant _ name => "unknown-constant:" ++ toString name
+  | .alreadyDeclared _ name => "already-declared:" ++ toString name
+  | .declTypeMismatch _ _ _ => "declaration-type-mismatch"
+  | .declHasMVars _ name _ => "declaration-metavariables:" ++ toString name
+  | .declHasFVars _ name _ => "declaration-free-variables:" ++ toString name
+  | .funExpected _ _ _ => "function-expected"
+  | .typeExpected _ _ _ => "type-expected"
+  | .letTypeMismatch _ _ name _ _ => "let-type-mismatch:" ++ toString name
+  | .exprTypeMismatch _ _ _ _ => "expression-type-mismatch"
+  | .appTypeMismatch _ _ _ _ _ => "application-type-mismatch"
+  | .invalidProj _ _ _ => "invalid-projection"
+  | .thmTypeIsNotProp _ name _ => "theorem-type-not-prop:" ++ toString name
+  | .other message => "other:" ++ message
+  | .deterministicTimeout => "deterministic-timeout"
+  | .excessiveMemory => "excessive-memory"
+  | .deepRecursion => "deep-recursion"
+  | .interrupted => "interrupted"
+
 def findConstructorInfo : List PsDeclaration -> PsName -> Option PsConstructorInfo
   | [], _ => none
   | declaration :: rest, name =>
@@ -107,8 +126,11 @@ def addPreludeDeclaration
   | some converted =>
       match env.addDeclCore 2000000 20000 converted none true with
       | .ok next => pure next
-      | .error _ =>
-          throw (preludeMismatch "Lean 4.34 kernel rejected PSC2 provider prelude")
+      | .error error =>
+          throw (preludeMismatch
+            ("Lean 4.34 kernel rejected PSC2 provider prelude declaration " ++
+              psNameToString (psDeclarationName declaration) ++
+              " (" ++ kernelExceptionSummary error ++ ")"))
 
 def replayPreludeDeclarations
     (allDeclarations : List PsDeclaration) :

@@ -32,6 +32,22 @@ def psJsWrapLambdaArguments (parameters : List PsVerifiedIrParameter) :
                       inner)
 
 
+def psJsNormalizeExprList
+    (normalize : PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr) :
+    List PsVerifiedIrExpr -> Except PsJsError (List PsVerifiedIrExpr) :=
+  fun (expressions : List PsVerifiedIrExpr) =>
+    match expressions with
+    | List.nil => Except.ok List.nil
+    | List.cons expression rest =>
+        match normalize expression with
+        | Except.error error => Except.error error
+        | Except.ok normalizedExpression =>
+            match psJsNormalizeExprList normalize rest with
+            | Except.error error => Except.error error
+            | Except.ok normalizedRest =>
+                Except.ok (List.cons normalizedExpression normalizedRest)
+
+
 def psJsNormalizeExprWithFuel (fuel : Nat) :
     PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr :=
   match fuel with
@@ -78,21 +94,26 @@ def psJsNormalizeExprWithFuel (fuel : Nat) :
             match smaller fn with
             | Except.error error => Except.error error
             | Except.ok normalizedFn =>
-                match typeArguments with
-                | List.cons _ _ =>
-                    Except.ok
-                      (PsVerifiedIrExpr.call
-                        normalizedFn typeArguments arguments)
-                | List.nil =>
-                    match normalizedFn with
-                    | PsVerifiedIrExpr.lambda parameters _ body =>
-                        match parameters with
-                        | List.nil => Except.error PsJsError.unsupportedExpression
-                        | List.cons _ _ =>
-                            psJsWrapLambdaArguments parameters arguments body
-                    | _ =>
+                match psJsNormalizeExprList smaller arguments with
+                | Except.error error => Except.error error
+                | Except.ok normalizedArguments =>
+                    match typeArguments with
+                    | List.cons _ _ =>
                         Except.ok
-                          (PsVerifiedIrExpr.call normalizedFn List.nil arguments)
+                          (PsVerifiedIrExpr.call
+                            normalizedFn typeArguments normalizedArguments)
+                    | List.nil =>
+                        match normalizedFn with
+                        | PsVerifiedIrExpr.lambda parameters _ body =>
+                            match parameters with
+                            | List.nil => Except.error PsJsError.unsupportedExpression
+                            | List.cons _ _ =>
+                                psJsWrapLambdaArguments
+                                  parameters normalizedArguments body
+                        | _ =>
+                            Except.ok
+                              (PsVerifiedIrExpr.call
+                                normalizedFn List.nil normalizedArguments)
         | _ => Except.ok expr
 
 

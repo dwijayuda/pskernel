@@ -63,3 +63,6 @@ jobs:
           printf '%s' "$invalid_response" | grep -F '"accepted":false'
           printf '%s' "$invalid_response" | grep -F '"errorKind":"kernel-rejection"'
           printf '%s' "$invalid_response" | grep -F '"declarationIndex":0'
+
+          PSC_LEAN_KERNEL_PROVIDER_BIN="$PWD/.lake/build/bin/psc2_lean_kernel_provider" \
+            node packages/pskernel-lean/host/node-provider.test.mjs

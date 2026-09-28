@@ -43,5 +43,10 @@ jobs:
           cd psc15selfhost
           lake build psc2_lean_kernel_provider psc2_lean_kernel_provider_tests
           lake exe psc2_lean_kernel_provider_tests
-          lake exe psc2_lean_kernel_provider -- --version
-          lake exe psc2_lean_kernel_provider -- --health
+          version_json="$(lake exe psc2_lean_kernel_provider --version)"
+          health_json="$(lake exe psc2_lean_kernel_provider --health)"
+          printf '%s\n' "$version_json"
+          printf '%s\n' "$health_json"
+          printf '%s' "$version_json" | grep -F '"status":"version"'
+          printf '%s' "$health_json" | grep -F '"status":"ok"'
+          printf '%s' "$health_json" | grep -F '"leanVersion":"4.34.0"'

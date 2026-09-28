@@ -6,6 +6,7 @@ import {
   mkdtemp,
   readFile,
   rm,
+  stat,
   writeFile,
 } from 'node:fs/promises';
 import os from 'node:os';
@@ -78,8 +79,16 @@ try{
     assert.equal(manifest.targets[target].path,expectedPath);
     assert.match(manifest.targets[target].sha256,/^[0-9a-f]{64}$/u);
     const original=await readFile(path.join(artifacts,target,executableName(target)));
-    const assembled=await readFile(path.join(packageRoot,expectedPath));
+    const assembledPath=path.join(packageRoot,expectedPath);
+    const assembled=await readFile(assembledPath);
     assert.deepEqual(assembled,original);
+    if(!target.startsWith('win32-')){
+      assert.equal(
+        (await stat(assembledPath)).mode&0o777,
+        0o755,
+        `${target} provider must be executable after assembly`,
+      );
+    }
   }
   const manifestOnDisk=JSON.parse(
     await readFile(path.join(packageRoot,'PREBUILT_MANIFEST.json'),'utf8'),

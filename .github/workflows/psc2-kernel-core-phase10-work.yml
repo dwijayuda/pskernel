@@ -82,7 +82,9 @@ jobs:
         run: |
           set -euo pipefail
           cd psc15selfhost
-          sed 's/^def main : IO Unit := do$/def psKcRecursorReductionOriginalMain : IO Unit := do/' \
+          sed \
+            -e 's/^def main : IO Unit := do$/def psKcRecursorReductionOriginalMain : IO Unit := do/' \
+            -e 's/PSC1Kernel.applyArgs (.const recName \[\])/PSC1Kernel.applyArgs (.const recName [(.succ .zero)])/' \
             test/KernelCoreRecursorReductionParityTests.lean \
             > RecursorReductionDiagnostics.generated.lean
           cat >> RecursorReductionDiagnostics.generated.lean <<'LEAN'

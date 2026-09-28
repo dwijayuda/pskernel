@@ -170,28 +170,28 @@ def psKernelCoreReduceNameListSize
   | PsKernelCoreList.cons _ rest =>
       Nat.succ (psKernelCoreReduceNameListSize rest)
 
-def psKernelCoreExprListTake
+def psKernelCoreReduceExprListTake
     (count : Nat) :
     PsKernelCoreList PsKernelCoreExpr -> PsKernelCoreList PsKernelCoreExpr :=
   match count with
   | Nat.zero =>
       fun (_items : PsKernelCoreList PsKernelCoreExpr) => PsKernelCoreList.nil
   | Nat.succ remaining =>
-      let takeRemaining := psKernelCoreExprListTake remaining;
+      let takeRemaining := psKernelCoreReduceExprListTake remaining;
       fun (items : PsKernelCoreList PsKernelCoreExpr) =>
         match items with
         | PsKernelCoreList.nil => PsKernelCoreList.nil
         | PsKernelCoreList.cons head rest =>
             PsKernelCoreList.cons head (takeRemaining rest)
 
-def psKernelCoreExprListDrop
+def psKernelCoreReduceExprListDrop
     (count : Nat) :
     PsKernelCoreList PsKernelCoreExpr -> PsKernelCoreList PsKernelCoreExpr :=
   match count with
   | Nat.zero =>
       fun (items : PsKernelCoreList PsKernelCoreExpr) => items
   | Nat.succ remaining =>
-      let dropRemaining := psKernelCoreExprListDrop remaining;
+      let dropRemaining := psKernelCoreReduceExprListDrop remaining;
       fun (items : PsKernelCoreList PsKernelCoreExpr) =>
         match items with
         | PsKernelCoreList.nil => PsKernelCoreList.nil
@@ -296,11 +296,11 @@ def psKernelCoreReduceRecursorMajor?
                                       (Nat.add info.numParams info.numMotives)
                                       info.numMinors;
                                   let fixedArgs :=
-                                    psKernelCoreExprListTake fixedCount prefixView.args;
+                                    psKernelCoreReduceExprListTake fixedCount prefixView.args;
                                   let fieldStart := Nat.sub majorCount rule.nFields;
                                   let fields :=
-                                    psKernelCoreExprListTake rule.nFields
-                                      (psKernelCoreExprListDrop fieldStart majorView.args);
+                                    psKernelCoreReduceExprListTake rule.nFields
+                                      (psKernelCoreReduceExprListDrop fieldStart majorView.args);
                                   let rhs1 := psKernelCoreExprApplyList fixedArgs rhs0;
                                   PsKernelCoreOption.some
                                     (psKernelCoreExprApplyList fields rhs1)
@@ -448,28 +448,32 @@ def psKernelCoreWhnfWithResources
                                                     binaryFn reducedLeft)
                                                   reducedRight)
                                           | PsKernelCoreOption.some leftValue =>
-                                              match psKernelCoreNatLiteralValue? reducedRight with
-                                              | PsKernelCoreOption.none =>
-                                                  PsKernelCoreResult.ok
-                                                    (PsKernelCoreExpr.app
-                                                      (PsKernelCoreExpr.app
-                                                        binaryFn reducedLeft)
-                                                      reducedRight)
-                                              | PsKernelCoreOption.some rightValue =>
-                                                  match psKernelCoreReduceNatBinary
-                                                      resources operation leftValue rightValue with
-                                                  | PsKernelCoreResult.error message =>
-                                                      PsKernelCoreResult.error message
-                                                  | PsKernelCoreResult.ok primitiveResult =>
-                                                      match primitiveResult with
-                                                      | PsKernelCoreOption.none =>
-                                                          PsKernelCoreResult.ok
-                                                            (PsKernelCoreExpr.app
-                                                              (PsKernelCoreExpr.app
-                                                                binaryFn reducedLeft)
-                                                              reducedRight)
-                                                      | PsKernelCoreOption.some result =>
-                                                          PsKernelCoreResult.ok result
+                                              match smaller env lctx arg with
+                                              | PsKernelCoreResult.error message =>
+                                                  PsKernelCoreResult.error message
+                                              | PsKernelCoreResult.ok reducedRight =>
+                                                  match psKernelCoreNatLiteralValue? reducedRight with
+                                                  | PsKernelCoreOption.none =>
+                                                      PsKernelCoreResult.ok
+                                                        (PsKernelCoreExpr.app
+                                                          (PsKernelCoreExpr.app
+                                                            binaryFn reducedLeft)
+                                                          reducedRight)
+                                                  | PsKernelCoreOption.some rightValue =>
+                                                      match psKernelCoreReduceNatBinary
+                                                          resources operation leftValue rightValue with
+                                                      | PsKernelCoreResult.error message =>
+                                                          PsKernelCoreResult.error message
+                                                      | PsKernelCoreResult.ok primitiveResult =>
+                                                          match primitiveResult with
+                                                          | PsKernelCoreOption.none =>
+                                                              PsKernelCoreResult.ok
+                                                                (PsKernelCoreExpr.app
+                                                                  (PsKernelCoreExpr.app
+                                                                    binaryFn reducedLeft)
+                                                                  reducedRight)
+                                                          | PsKernelCoreOption.some result =>
+                                                              PsKernelCoreResult.ok result
                                 else
                                   PsKernelCoreResult.ok
                                     (PsKernelCoreExpr.app reducedFn arg)

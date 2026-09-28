@@ -121,13 +121,13 @@ def testPreludeReplay : IO Unit := do
 
 def canonicalDecodeFixture : Except PsCheckedAdmissionCodecError String :=
   let natType := PsExpr.constE psNatName []
-  let definition :=
+  let definitionDecl :=
     PsDeclaration.definitionDecl
       (psRootName "decodedDefinition")
       []
       natType
       (PsExpr.lit (PsLiteral.natural 1))
-  let theorem :=
+  let theoremDecl :=
     PsDeclaration.theoremDecl
       (psRootName "decodedTheorem")
       []
@@ -136,7 +136,7 @@ def canonicalDecodeFixture : Except PsCheckedAdmissionCodecError String :=
   let flagName := psRootName "DecodedFlag"
   let onName := psNameAppendStr flagName "on"
   let flagType := PsExpr.constE flagName []
-  let inductive :=
+  let inductiveDecl :=
     PsDeclaration.inductiveDecl
       (PsInductiveInfo.mk
         flagName
@@ -146,7 +146,7 @@ def canonicalDecodeFixture : Except PsCheckedAdmissionCodecError String :=
         0
         [onName]
         false)
-  let constructor :=
+  let constructorDecl :=
     PsDeclaration.constructorDecl
       (PsConstructorInfo.mk
         onName
@@ -158,7 +158,7 @@ def canonicalDecodeFixture : Except PsCheckedAdmissionCodecError String :=
         0
         [])
   psEncodeCheckedAdmissionsCanonical
-    [definition, theorem, inductive, constructor]
+    [definitionDecl, theoremDecl, inductiveDecl, constructorDecl]
 
 def testCanonicalAdmissionsDecode : IO Unit := do
   let encoded ←
@@ -168,21 +168,21 @@ def testCanonicalAdmissionsDecode : IO Unit := do
   let decoded ← expectOk "canonical admissions decode"
     (PsKernelLean.decodeCanonicalAdmissions encoded)
   match decoded.toList with
-  | [Lean.Declaration.defnDecl definition,
-     Lean.Declaration.thmDecl theorem,
-     Lean.Declaration.inductDecl _ 0 [inductive] false] =>
+  | [Lean.Declaration.defnDecl definitionInfo,
+     Lean.Declaration.thmDecl theoremInfo,
+     Lean.Declaration.inductDecl _ 0 [inductiveInfo] false] =>
       expectTrue "decoded definition name"
-        (definition.name == Lean.Name.str Lean.Name.anonymous "decodedDefinition")
+        (definitionInfo.name == Lean.Name.str Lean.Name.anonymous "decodedDefinition")
       expectTrue "decoded definition regular height"
-        (match definition.hints with | .regular 1 => true | _ => false)
+        (match definitionInfo.hints with | .regular 1 => true | _ => false)
       expectTrue "decoded theorem name"
-        (theorem.name == Lean.Name.str Lean.Name.anonymous "decodedTheorem")
+        (theoremInfo.name == Lean.Name.str Lean.Name.anonymous "decodedTheorem")
       expectTrue "decoded inductive name"
-        (inductive.name == Lean.Name.str Lean.Name.anonymous "DecodedFlag")
-      match inductive.ctors with
-      | [constructor] =>
+        (inductiveInfo.name == Lean.Name.str Lean.Name.anonymous "DecodedFlag")
+      match inductiveInfo.ctors with
+      | [constructorInfo] =>
           expectTrue "decoded constructor name"
-            (constructor.name ==
+            (constructorInfo.name ==
               Lean.Name.str (Lean.Name.str Lean.Name.anonymous "DecodedFlag") "on")
       | _ => throw <| IO.userError "decoded constructor count"
   | _ => throw <| IO.userError "decoded declaration shapes"

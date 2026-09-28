@@ -85,3 +85,40 @@ jobs:
           printf '%s' "$invalid_response" | grep -F '"accepted":false'
           printf '%s' "$invalid_response" | grep -F '"errorKind":"kernel-rejection"'
           printf '%s' "$invalid_response" | grep -F '"declarationIndex":0'
+
+      - name: PSC2 bootstrap regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run check:workspace
+          npm run check:source:bootstrap
+          npm run check:bootstrap-closure
+          npm run test:bootstrap
+
+      - name: Real generated compiler kernel smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run bootstrap:check
+          npm run bootstrap:emit
+          npm run bootstrap:compiler
+
+          smoke_source="$(pwd)/.kernel-provider-smoke.ps"
+          smoke_output="${RUNNER_TEMP}/psc-kernel-provider-smoke.js"
+          printf 'def kernelProviderSmoke : Nat := 1;\n' > "$smoke_source"
+          trap 'rm -f "$smoke_source"' EXIT
+
+          node packages/cli/bin/psc.mjs check "$smoke_source" \
+            --kernel lean434 \
+            --compiler dist/bootstrap/packages/compiler/index.js
+
+          node packages/cli/bin/psc.mjs build "$smoke_source" \
+            --out "$smoke_output" \
+            --kernel lean434 \
+            --compiler dist/bootstrap/packages/compiler/index.js
+
+          test -f "$smoke_output"
+          test -f "${smoke_output}.map"
+          echo "PSC2_REAL_GENERATED_LEAN_KERNEL_SMOKE: PASS"

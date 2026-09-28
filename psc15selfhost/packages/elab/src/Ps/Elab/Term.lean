@@ -1015,16 +1015,26 @@ structure PsExprAppView where
   head : PsExpr
   args : List PsExpr
 
+def psExprAppViewAccWorker
+    (expr : PsExpr) :
+    List PsExpr -> PsExprAppView :=
+  match expr with
+  | .app fn argument =>
+      let smaller : List PsExpr -> PsExprAppView :=
+        psExprAppViewAccWorker fn;
+      fun (args : List PsExpr) =>
+        smaller (List.cons argument args)
+  | _ =>
+      fun (args : List PsExpr) =>
+        {
+          head := expr
+          args := args
+        }
+
 def psExprAppViewAcc
     (expr : PsExpr)
     (args : List PsExpr) : PsExprAppView :=
-  match expr with
-  | .app fn argument =>
-      psExprAppViewAcc fn (List.cons argument args)
-  | _ => {
-      head := expr
-      args := args
-    }
+  psExprAppViewAccWorker expr args
 
 def psExprAppView (expr : PsExpr) : PsExprAppView :=
   psExprAppViewAcc expr []
@@ -1903,9 +1913,7 @@ def psElabApplyArgsWithFuel
                 match fresh.expr with
                 | PsExpr.mvar id =>
                     List.cons id pendingInstancesRev
-                | _ => pendingInstancesRev
-              else
-                pendingInstancesRev;
+                | _ => pendingInstancesRev;
             psElabApplyArgsWithFuel
               elaborate
               fuel
@@ -2331,6 +2339,10 @@ def psElabNatListAt
           some value
       | nextIndex + 1 =>
           psElabNatListAt rest nextIndex
+
+structure PsElabMatchHypothesesResult where
+  context : PsElabContext
+  hypothesesRev : List PsElabMatchField
 
 def psElabValidateStructuralCall
     (context : PsElabContext)

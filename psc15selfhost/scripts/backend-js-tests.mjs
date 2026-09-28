@@ -22,6 +22,7 @@ try {
     callIdentity: directCallIdentity,
     callIdentityLet: directCallIdentityLet,
     callCapturedLambda: directCallCapturedLambda,
+    callInlineLambdaArgument: directCallInlineLambdaArgument,
     callSecond: directCallSecond,
     second: directSecond,
     renamedLocal: directRenamedLocal,
@@ -42,6 +43,7 @@ try {
   assert.equal(directCallIdentity(73n), 73n);
   assert.equal(directCallIdentityLet(73n), 73n);
   assert.equal(directCallCapturedLambda(73n), 73n);
+  assert.equal(directCallInlineLambdaArgument(73n), 73n);
   assert.equal(directSecond(11n, 73n), 73n);
   assert.equal(directCallSecond(73n), 73n);
   assert.deepEqual(Object.keys(await import(pathToFileURL(path.join(out, 'empty.mjs')))), []);
@@ -57,6 +59,7 @@ try {
     callIdentity: referenceCallIdentity,
     callIdentityLet: referenceCallIdentityLet,
     callCapturedLambda: referenceCallCapturedLambda,
+    callInlineLambdaArgument: referenceCallInlineLambdaArgument,
     callSecond: referenceCallSecond,
     second: referenceSecond,
     ...referenceValues
@@ -72,6 +75,8 @@ try {
     referenceCallIdentityLet(9007199254740993123456789n));
   assert.equal(directCallCapturedLambda(9007199254740993123456789n),
     referenceCallCapturedLambda(9007199254740993123456789n));
+  assert.equal(directCallInlineLambdaArgument(9007199254740993123456789n),
+    referenceCallInlineLambdaArgument(9007199254740993123456789n));
   assert.equal(directSecond(11n, 9007199254740993123456789n),
     referenceSecond(11n, 9007199254740993123456789n));
   assert.equal(directCallSecond(9007199254740993123456789n),

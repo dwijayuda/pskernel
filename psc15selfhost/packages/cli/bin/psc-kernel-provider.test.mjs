@@ -27,7 +27,7 @@ export const PsCompilerSourceKind={lean:'lean',proofScript:'proofScript'};
 const exceptTag=Symbol('except');
 const ok=value=>({[exceptTag]:'ok',value});
 export function psCompilerTranslateSource(_from,_to,source){return ok(source);}
-export function psCompilerToTypeScriptSource(_kind,_source){
+export function psCompilerTypeScriptSource(_kind,_source){
   return ok('export const compiled = 1;'+String.fromCharCode(10));
 }
 const rootName=value=>({k:'s',p:{k:'a'},v:value});

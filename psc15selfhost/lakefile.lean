@@ -176,7 +176,8 @@ lean_lib PsKernelLeanProvider where
     `PsKernelLean.Error,
     `PsKernelLean.Convert,
     `PsKernelLean.Prelude,
-    `PsKernelLean.Protocol
+    `PsKernelLean.Protocol,
+    `PsKernelLean.Admission
   ]
 
 @[default_target]

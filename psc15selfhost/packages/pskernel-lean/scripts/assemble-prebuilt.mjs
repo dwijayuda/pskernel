@@ -1,5 +1,6 @@
 import {createHash} from 'node:crypto';
 import {
+  chmod,
   copyFile,
   mkdir,
   readFile,
@@ -151,7 +152,11 @@ export async function assemblePrebuilt({artifactsDir,packageRoot}){
       const {metadata,binaryPath}=byTarget.get(target);
       const targetDir=path.join(tempPrebuilt,target);
       await mkdir(targetDir,{recursive:true});
-      await copyFile(binaryPath,path.join(targetDir,metadata.executable));
+      const destination=path.join(targetDir,metadata.executable);
+      await copyFile(binaryPath,destination);
+      if(!target.startsWith('win32-')){
+        await chmod(destination,0o755);
+      }
     }
     await writeFile(tempManifest,`${JSON.stringify(manifest,null,2)}\n`);
 

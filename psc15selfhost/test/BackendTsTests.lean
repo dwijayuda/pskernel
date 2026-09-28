@@ -255,6 +255,22 @@ def psBackendTsSharedNumericModule : PsVerifiedIrModule :=
               PsVerifiedIrExpr.var "left",
               PsVerifiedIrExpr.var "right"
             ]
+      },
+      {
+        name := "reprInt"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.intRepr
+            []
+            [PsVerifiedIrExpr.var "value"]
       }
     ]
   }
@@ -265,6 +281,8 @@ def psTestBackendTsSharedNumericIntrinsics : Bool :=
   | Except.ok output =>
       output.contains "(((left + right)) >>> 0)"
         && output.contains "Math.fround((left + right))"
+        && output.contains "export function reprInt(value: bigint): string"
+        && output.contains "return (value).toString();"
 
 def psBackendTsTests : List PsBackendTsNamedTest := [
   { name := "identity module", passed := psTestBackendTsIdentity },

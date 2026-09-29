@@ -70,6 +70,10 @@ emcmake cmake \
   -DCCACHE=OFF \
   -DWFAIL=OFF
 
+# These helper scripts are copied by CMake from a source snapshot whose git
+# executable mode is not preserved inside this repository checkout.
+chmod +x "$lean_build/bin/leanmake" "$lean_build/leanc.sh"
+
 cmake --build "$lean_build" --target make_stdlib -j2
 
 if [[ ! -x "$lean_build/leanc.sh" ]]; then

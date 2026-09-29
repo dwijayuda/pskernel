@@ -23,6 +23,8 @@ on:
       - psc2/kernel-core-phase9-quot-work
       - psc2/kernel-core-phase10-recursor
       - psc2/kernel-core-phase10-recursor-work
+      - psc2/kernel-core-phase11-recursive-inductive
+      - psc2/kernel-core-phase11-recursive-inductive-work
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/KernelCore*.lean
@@ -281,6 +283,27 @@ jobs:
           cd psc15selfhost
           lake env lean --run test/KernelCoreEqRecursorCompatibilityTests.lean
 
+      - name: Phase 11 recursive inductive shape
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursiveInductiveShapeTests.lean
+
+      - name: Phase 11 recursive inductive admission parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursiveInductiveAdmissionParityTests.lean
+
+      - name: Phase 11 recursive inductive rejection matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursiveInductiveRejectionTests.lean
+
       - name: Bootstrap closure remains isolated
         shell: bash
         run: |
@@ -364,6 +387,13 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           npm run assurance:kernel-core:phase10
+
+      - name: Phase 11 aggregate assurance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run assurance:kernel-core:phase11
 
       - name: Existing PSC2 regression gate
         shell: bash

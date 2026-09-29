@@ -14,6 +14,7 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {supportedLeanKernelProviderTargets} from '../host/prebuilt.mjs';
 
+const repositoryFileSizeLimit=100*1024*1024;
 const identity=Object.freeze({
   packageVersion:'4.34.0',
   protocol:'pskernel-lean/1',
@@ -77,6 +78,14 @@ async function loadAndValidateArtifacts(artifactsDir){
     if(metadata.executable!==expectedExecutable||
       path.basename(metadata.executable)!==metadata.executable){
       throw new Error(`staged artifact ${target} executable name mismatch`);
+    }
+    if(!Number.isSafeInteger(metadata.size)||metadata.size<0){
+      throw new Error(`staged artifact ${target} size metadata is invalid`);
+    }
+    if(metadata.size>=repositoryFileSizeLimit){
+      throw new Error(
+        `staged artifact ${target} exceeds repository size limit: ${metadata.size} bytes >= ${repositoryFileSizeLimit}`,
+      );
     }
     const binaryPath=path.join(dir,metadata.executable);
     let binaryStat;

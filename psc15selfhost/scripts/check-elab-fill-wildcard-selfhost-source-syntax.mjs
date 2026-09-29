@@ -8,10 +8,25 @@ if (start < 0 || end < 0) {
   throw new Error("PSC2_ELAB_FILL_WILDCARD_SELFHOST_SOURCE_SYNTAX_SECTION_MISSING");
 }
 const section = source.slice(start, end);
-if (!/let\s+next\s*:\s*List\s+PsElabMatchAlternative\s*:=\s*\n\s*match\s+psElabMatchAlternativeFind/.test(section)) {
-  throw new Error("PSC2_ELAB_FILL_WILDCARD_SELFHOST_SOURCE_SYNTAX_MISSING: typed next match");
+
+const required = [
+  /\(constructors\s*:\s*List\s+PsName\)\s*:\s*\n\s*List\s+PsElabMatchAlternative\s*->\s*\n\s*List\s+PsElabMatchAlternative\s*:=/,
+  /let\s+smaller\s*:\s*\n?\s*List\s+PsElabMatchAlternative\s*->\s*\n?\s*List\s+PsElabMatchAlternative\s*:=\s*\n\s*psElabFillWildcardAlternatives\s+\n?\s*pattern\s+\n?\s*body\s+\n?\s*span\s+\n?\s*rest/,
+  /fun\s*\(alternativesRev\s*:\s*List\s+PsElabMatchAlternative\)\s*=>/,
+  /let\s+next\s*:\s*List\s+PsElabMatchAlternative\s*:=\s*\n\s*match\s+psElabMatchAlternativeFind/,
+  /smaller\s+next/,
+];
+for (const pattern of required) {
+  if (!pattern.test(section)) {
+    throw new Error(`PSC2_ELAB_FILL_WILDCARD_SELFHOST_SOURCE_SYNTAX_MISSING: ${pattern}`);
+  }
 }
+
 if (/let\s+next\s*:=\s*\n\s*match/.test(section)) {
   throw new Error("PSC2_ELAB_FILL_WILDCARD_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: untyped next match");
 }
-console.log("PSC2_ELAB_FILL_WILDCARD_SELFHOST_SOURCE_SYNTAX: PASS (typed local match result)");
+if (/psElabFillWildcardAlternatives\s+\n?\s*pattern\s+\n?\s*body\s+\n?\s*span\s+\n?\s*rest\s+\n?\s*next/.test(section)) {
+  throw new Error("PSC2_ELAB_FILL_WILDCARD_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: direct recursive accumulator update");
+}
+
+console.log("PSC2_ELAB_FILL_WILDCARD_SELFHOST_SOURCE_SYNTAX: PASS (typed local match and invariant-safe accumulator recursion)");

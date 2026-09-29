@@ -1,4 +1,4 @@
-import Ps.KernelCore.Inductive
+import Ps.KernelCore.RecursorCanonical
 
 def psKernelCoreRecursorMajorIndex
     (info : PsKernelCoreRecursorInfo) : Nat :=
@@ -267,13 +267,18 @@ def psKernelCoreRecursorValidateRulesWithResources
                           if Nat.beq ctor.numParams family.numParams then
                             if Nat.beq rule.nFields ctor.numFields then
                               if psKernelCoreBoolEq ctor.isUnsafe family.isUnsafe then
-                                match psKernelCoreRecursorValidateRuleRhsWithResources
-                                    budget resources env info index rule with
-                                | PsKernelCoreResult.error message =>
-                                    PsKernelCoreResult.error message
-                                | PsKernelCoreResult.ok _ =>
-                                    validateRest ruleRest (Nat.succ index)
-                                      budget resources env info family
+                                if psKernelCoreRecursorMinorMatchesConstructor
+                                    info family ctor index then
+                                  match psKernelCoreRecursorValidateRuleRhsWithResources
+                                      budget resources env info index rule with
+                                  | PsKernelCoreResult.error message =>
+                                      PsKernelCoreResult.error message
+                                  | PsKernelCoreResult.ok _ =>
+                                      validateRest ruleRest (Nat.succ index)
+                                        budget resources env info family
+                                else
+                                  PsKernelCoreResult.error
+                                    "recursor minor does not match constructor"
                               else
                                 PsKernelCoreResult.error
                                   "recursor constructor safety does not match inductive"

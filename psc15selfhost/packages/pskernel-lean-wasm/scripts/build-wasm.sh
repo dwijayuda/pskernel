@@ -57,9 +57,14 @@ cd "$workspace_root"
 rm -rf .lake/build "$lean_build" "$provider_obj_dir" "$out_dir"
 mkdir -p "$lean_build" "$provider_obj_dir" "$out_dir"
 
-# Follow Lean's own wasm cross-build architecture.  Stage 0 must be a runnable
+# Follow Lean's own wasm cross-build architecture. Stage 0 must be a runnable
 # native 32-bit compiler so every .olean records wasm32-compatible platform
 # constants; stage 1 is then configured with the Emscripten toolchain.
+#
+# Pass -m32 through CMake's own C/C++ flags as well as Lean's wrappers. This
+# makes CMake's ABI probe see a real 32-bit stage0. Force SSE2 floating-point
+# evaluation so FLT_EVAL_METHOD is 0, which Lean requires for deterministic
+# Float/Float32 semantics on 32-bit x86.
 cmake \
   -S "$lean_source" \
   -B "$lean_build" \
@@ -69,8 +74,10 @@ cmake \
   -DCMAKE_AR="$(command -v emar)" \
   -DCMAKE_TOOLCHAIN_FILE="$emscripten_toolchain" \
   -DSTAGE0_USE_GMP=OFF \
-  -DSTAGE0_LEAN_EXTRA_CXX_FLAGS='-m32' \
-  -DSTAGE0_LEANC_OPTS='-m32' \
+  -DSTAGE0_CMAKE_C_FLAGS='-m32 -msse2 -mfpmath=sse' \
+  -DSTAGE0_CMAKE_CXX_FLAGS='-m32 -msse2 -mfpmath=sse' \
+  -DSTAGE0_LEAN_EXTRA_CXX_FLAGS='-m32 -msse2 -mfpmath=sse' \
+  -DSTAGE0_LEANC_OPTS='-m32 -msse2 -mfpmath=sse' \
   -DSTAGE0_CMAKE_CXX_COMPILER=clang++ \
   -DSTAGE0_CMAKE_C_COMPILER=clang \
   -DSTAGE0_CMAKE_EXECUTABLE_SUFFIX='' \
@@ -98,7 +105,7 @@ if [[ ! -x "$stage0_lake" || ! -x "$stage0_lean" ]]; then
   exit 1
 fi
 
-# Generate the provider closure with the 32-bit native compiler.  Using the
+# Generate the provider closure with the 32-bit native compiler. Using the
 # host x86_64 toolchain here would reintroduce host-width platform constants
 # into the C generated for a wasm32 kernel provider.
 "$stage0_lake" build psc2_lean_kernel_provider
@@ -109,7 +116,7 @@ if [[ ${#provider_c_files[@]} -eq 0 ]]; then
 fi
 
 # Source snapshots copied into this repository do not reliably preserve the
-# executable bit on generated helper scripts.  stage1-configure has created
+# executable bit on generated helper scripts. stage1-configure has created
 # them, so normalize the modes before continuing the ExternalProject build.
 for helper in "$lean_build/stage1/bin/leanmake" "$stage1_leanc"; do
   if [[ -e "$helper" ]]; then
@@ -119,7 +126,7 @@ done
 
 # Build Lean's complete wasm32 runtime/static-library closure through the
 # normal staged target rather than invoking make_stdlib in a direct stage-1
-# build directory.  This avoids the missing <build>/leanc layout seen in CI.
+# build directory. This avoids the missing <build>/leanc layout seen in CI.
 cmake --build "$lean_build" --target stage1 -j2
 
 if [[ ! -f "$stage1_leanc" ]]; then

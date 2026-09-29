@@ -38,7 +38,31 @@ jobs:
       - name: PSC1 source and canonical PS admission
         working-directory: psc15selfhost
         run: PATH=/tmp/psc-ts/node_modules/.bin:$PATH npm run check:backend-js-source
-      - name: Existing regression suites
+      - name: Bootstrap regression
         if: always()
         working-directory: psc15selfhost
-        run: npm test
+        run: npm run test:bootstrap
+      - name: Compiler regression
+        if: always()
+        working-directory: psc15selfhost
+        run: npm run test:regression
+      - name: Extension regression
+        if: always()
+        working-directory: psc15selfhost
+        run: npm run test:extensions
+      - name: Package build
+        if: always()
+        working-directory: psc15selfhost
+        run: npm run build
+      - name: Mirror regression
+        if: always()
+        working-directory: psc15selfhost
+        run: npm run test:mirrors
+      - name: Golden regression
+        if: always()
+        working-directory: psc15selfhost
+        run: npm run test:golden
+      - name: Backend-JS regression
+        if: always()
+        working-directory: psc15selfhost
+        run: npm run test:backend-js

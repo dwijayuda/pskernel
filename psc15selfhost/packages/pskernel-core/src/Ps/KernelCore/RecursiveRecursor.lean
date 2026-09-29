@@ -348,8 +348,8 @@ def psKernelCoreRecursiveRecursorValidateRulesWithResources
                                   budget resources env info family ctor index with
                               | PsKernelCoreResult.error message =>
                                   PsKernelCoreResult.error message
-                              | PsKernelCoreResult.ok matches =>
-                                  if matches then
+                              | PsKernelCoreResult.ok minorMatches =>
+                                  if minorMatches then
                                     match psKernelCoreRecursiveRecursorCheckRuleRhsWithResources
                                         budget resources env info rule with
                                     | PsKernelCoreResult.error message =>

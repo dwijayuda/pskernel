@@ -156,10 +156,10 @@ def psKernelCoreRecursorMinorMatchesConstructor
     Nat.add (Nat.add info.numParams info.numMotives) ruleIndex;
   match psKernelCoreRecursorOpenForalls prefixCount info.base.type 0 with
   | PsKernelCoreOption.none => false
-  | PsKernelCoreOption.some prefix =>
+  | PsKernelCoreOption.some openedPrefix =>
       let paramValues :=
-        psKernelCoreExprListTake info.numParams prefix.values;
-      match psKernelCoreExprListGet prefix.values info.numParams with
+        psKernelCoreExprListTake info.numParams openedPrefix.values;
+      match psKernelCoreExprListGet openedPrefix.values info.numParams with
       | PsKernelCoreOption.none => false
       | PsKernelCoreOption.some motive =>
           match psKernelCoreRecursorInstantiateForallPrefix
@@ -167,7 +167,7 @@ def psKernelCoreRecursorMinorMatchesConstructor
           | PsKernelCoreOption.none => false
           | PsKernelCoreOption.some ctorFields =>
               match psKernelCoreRecursorOpenMatchingFields
-                  ctor.numFields ctorFields prefix.rest prefix.nextSeed with
+                  ctor.numFields ctorFields openedPrefix.rest openedPrefix.nextSeed with
               | PsKernelCoreOption.none => false
               | PsKernelCoreOption.some opened =>
                   let resultHead := psKernelCoreExprAppHead opened.ctorResult;

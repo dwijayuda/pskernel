@@ -61,7 +61,29 @@ jobs:
         run: |
           set -euo pipefail
           cd psc15selfhost
-          lake env lean --run test/KernelCoreRecursorAdmissionDiagnostics.lean
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('test/KernelCoreRecursorAdmissionParityTests.lean').read_text()
+          prefix = source.split('\ndef main : IO Unit := do', 1)[0]
+          diagnostic = prefix + '''
+          
+          def main : IO Unit := do
+            if psKcRecursorAdmissionPositive then
+              IO.println "PHASE10_ADMISSION_POSITIVE=PASS"
+            else
+              IO.println "PHASE10_ADMISSION_POSITIVE=FAIL"
+            if psKcZeroConstructorRecursor then
+              IO.println "PHASE10_ADMISSION_EMPTY=PASS"
+            else
+              IO.println "PHASE10_ADMISSION_EMPTY=FAIL"
+            if psRefRecursorAdmissionPositive then
+              IO.println "PHASE10_ADMISSION_REFERENCE=PASS"
+            else
+              IO.println "PHASE10_ADMISSION_REFERENCE=FAIL"
+          '''
+          Path('/tmp/KernelCoreRecursorAdmissionDiagnostics.lean').write_text(diagnostic)
+          PY
+          lake env lean --run /tmp/KernelCoreRecursorAdmissionDiagnostics.lean
 
       - name: Phase 10 recursor admission
         shell: bash

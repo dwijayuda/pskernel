@@ -1,3 +1,4 @@
+import "./check-elab-match-apply-parameters-selfhost-source-syntax.mjs";
 import fs from "node:fs";
 
 const path = new URL("../packages/elab/src/Ps/Elab/Term.lean", import.meta.url);

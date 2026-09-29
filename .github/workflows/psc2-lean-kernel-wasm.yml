@@ -1,0 +1,33 @@
+name: PSC2 Lean kernel WASM
+
+on:
+  push:
+    branches:
+      - psc2/pskernel-lean-wasm
+    paths:
+      - psc15selfhost/packages/pskernel-lean-wasm/**
+      - psc15selfhost/packages/pskernel-lean/**
+      - psc15selfhost/lakefile.lean
+      - psc15selfhost/lean-toolchain
+      - psc15selfhost/scripts/bootstrap-closure-contract*.mjs
+      - psc15selfhost/scripts/check-workspace.mjs
+      - psc15selfhost/package.json
+      - .github/workflows/psc2-lean-kernel-wasm.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wasm-provider:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: WASM package contract
+        working-directory: psc15selfhost
+        run: node packages/pskernel-lean-wasm/host/package.test.mjs

@@ -36,6 +36,13 @@ jobs:
         with:
           node-version: 22
 
+      - name: Build Phase 12 dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake build PsKernelCore PSC1KernelReferenceFoundations
+
       - name: Phase 12 recursive recursor admission
         shell: bash
         run: |

@@ -166,41 +166,44 @@ def psKernelCoreRecursorMinorMatchesConstructor
               paramValues ctor.base.type with
           | PsKernelCoreOption.none => false
           | PsKernelCoreOption.some ctorFields =>
-              match psKernelCoreRecursorOpenMatchingFields
-                  ctor.numFields ctorFields openedPrefix.rest openedPrefix.nextSeed with
-              | PsKernelCoreOption.none => false
-              | PsKernelCoreOption.some opened =>
-                  let resultHead := psKernelCoreExprAppHead opened.ctorResult;
-                  let resultArgs := psKernelCoreExprAppArgs opened.ctorResult;
-                  match resultHead with
-                  | PsKernelCoreExpr.const familyName resultLevels =>
-                      if psKernelCoreNameEq familyName family.base.name then
-                        if Nat.beq
-                            (psKernelCoreExprListLength resultArgs)
-                            (Nat.add family.numParams family.numIndices) then
-                          let resultParams :=
-                            psKernelCoreExprListTake family.numParams resultArgs;
-                          if psKernelCoreRecursorExprListEq
-                              resultParams paramValues then
-                            let indices :=
-                              psKernelCoreRecursorExprListDrop
-                                family.numParams resultArgs;
-                            let ctorArgs :=
-                              psKernelCoreExprListAppend
-                                paramValues opened.fields;
-                            let ctorHead :=
-                              PsKernelCoreExpr.const ctor.base.name resultLevels;
-                            let major :=
-                              psKernelCoreRecursorApplyArgs ctorHead ctorArgs;
-                            let motiveAtIndices :=
-                              psKernelCoreRecursorApplyArgs motive indices;
-                            let expectedResult :=
-                              PsKernelCoreExpr.app motiveAtIndices major;
-                            psKernelCoreExprEq opened.minorResult expectedResult
+              match openedPrefix.rest with
+              | PsKernelCoreExpr.forallE _ minorType _ _ =>
+                  match psKernelCoreRecursorOpenMatchingFields
+                      ctor.numFields ctorFields minorType openedPrefix.nextSeed with
+                  | PsKernelCoreOption.none => false
+                  | PsKernelCoreOption.some opened =>
+                      let resultHead := psKernelCoreExprAppHead opened.ctorResult;
+                      let resultArgs := psKernelCoreExprAppArgs opened.ctorResult;
+                      match resultHead with
+                      | PsKernelCoreExpr.const familyName resultLevels =>
+                          if psKernelCoreNameEq familyName family.base.name then
+                            if Nat.beq
+                                (psKernelCoreExprListLength resultArgs)
+                                (Nat.add family.numParams family.numIndices) then
+                              let resultParams :=
+                                psKernelCoreExprListTake family.numParams resultArgs;
+                              if psKernelCoreRecursorExprListEq
+                                  resultParams paramValues then
+                                let indices :=
+                                  psKernelCoreRecursorExprListDrop
+                                    family.numParams resultArgs;
+                                let ctorArgs :=
+                                  psKernelCoreExprListAppend
+                                    paramValues opened.fields;
+                                let ctorHead :=
+                                  PsKernelCoreExpr.const ctor.base.name resultLevels;
+                                let major :=
+                                  psKernelCoreRecursorApplyArgs ctorHead ctorArgs;
+                                let motiveAtIndices :=
+                                  psKernelCoreRecursorApplyArgs motive indices;
+                                let expectedResult :=
+                                  PsKernelCoreExpr.app motiveAtIndices major;
+                                psKernelCoreExprEq opened.minorResult expectedResult
+                              else
+                                false
+                            else
+                              false
                           else
                             false
-                        else
-                          false
-                      else
-                        false
-                  | _ => false
+                      | _ => false
+              | _ => false

@@ -48,6 +48,13 @@ jobs:
           cd psc15selfhost
           lake env lean --run test/KernelCoreRecursiveInductiveShapeTests.lean
 
+      - name: Phase 11 recursive admission parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursiveInductiveAdmissionParityTests.lean
+
       - name: KernelCore PSC1 source profile
         shell: bash
         run: |

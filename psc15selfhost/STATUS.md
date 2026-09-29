@@ -139,10 +139,51 @@ packages/pskernel-lean/BUILDING.md
 packages/pskernel-lean/INTEGRATION.md
 ```
 
-The npm API is packageable and is tested from a clean external npm consumer. The package
-does not yet bundle prebuilt native executables for every OS/architecture. Repository
-usage resolves the Lake-built executable; external consumers can provide
-`PSC_LEAN_KERNEL_PROVIDER_BIN` until native platform artifacts are distributed.
+The package now bundles verified native provider executables directly in the npm/repository
+surface for the five Lean-4.34-supported targets:
+
+```text
+linux-x64
+linux-arm64
+darwin-x64
+darwin-arm64
+win32-x64
+```
+
+`PREBUILT_MANIFEST.json` records the exact provider/Lean identity, build source commit,
+per-target byte size, and SHA-256. Runtime resolution validates the bundled file before
+spawning it. There is no install-time download and no consumer requirement for Lean,
+Lake, or a C++ toolchain. The explicit `PSC_LEAN_KERNEL_PROVIDER_BIN` override remains
+available for deliberate custom-provider testing.
+
+The distribution workflow builds each target on its native runner, strips release
+symbols, re-runs provider health plus positive/negative kernel admission after stripping,
+inspects native dependencies, proves standalone execution with the Lake build tree hidden,
+assembles all five artifacts, runs `npm pack`, installs the tarball into a clean consumer,
+and executes the bundled provider. The normal provider workflow separately installs and
+executes the committed npm tarball on all five supported target runners.
+
+Current bundled executable sizes are all below GitHub's 100 MiB per-file repository limit:
+
+```text
+linux-x64     82,330,592 bytes
+linux-arm64   86,053,296 bytes
+darwin-x64    83,802,528 bytes
+darwin-arm64  84,057,432 bytes
+win32-x64     76,361,216 bytes
+```
+
+These binaries are not code-signed/notarized; documentation and releases must not claim
+otherwise. Windows ARM64 remains unsupported for this Lean 4.34 package because the first
+matrix is restricted to official Lean 4.34 host toolchains.
+
+The prebuilt/package milestone is **not by itself permission to merge this branch** into
+`psc2/minimal-selfhost-psc15`. The final merge still requires synchronization with a GREEN
+base revision and fresh post-sync verification, including the real generated PSC2 compiler
+kernel smoke. At the latest checked base revision (`ada1db57a97b4d888996fb5072bbc4a9a9170825`),
+the broader fixed-point remains RED later in `packages/elab/src/Ps/Elab/Term.lean` at
+`psElabMatchAlternativeFind` (`unknownName:none`). Do not import or merge a known-red base
+just to close this provider milestone.
 
 The copied Lean `kernel/`, `runtime/`, and `util/` source trees are retained for a later
 standalone C++/WASM provider. The current native provider links through the pinned

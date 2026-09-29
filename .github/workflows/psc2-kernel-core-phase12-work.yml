@@ -1,0 +1,79 @@
+name: PSC2 KernelCore Phase 12 work
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase12-recursive-recursor
+    paths:
+      - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/test/KernelCoreRecursiveRecursor*.lean
+      - psc15selfhost/test/KernelCoreRecursorAdmissionParityTests.lean
+      - psc15selfhost/test/KernelCoreRecursorForgedMinorRejectionTests.lean
+      - psc15selfhost/test/KernelCoreRecursiveInductiveAdmissionParityTests.lean
+      - psc15selfhost/test/KernelCoreRecursiveInductiveRejectionTests.lean
+      - psc15selfhost/scripts/check-kernel-core-source.mjs
+      - .github/workflows/psc2-kernel-core-phase12-work.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase12-focused:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Phase 12 recursive recursor admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursiveRecursorAdmissionTests.lean
+
+      - name: Phase 10 recursor admission guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursorAdmissionParityTests.lean
+
+      - name: Phase 10 forged-minor guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursorForgedMinorRejectionTests.lean
+
+      - name: Phase 11 recursive admission guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursiveInductiveAdmissionParityTests.lean
+
+      - name: Phase 11 recursive rejection guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursiveInductiveRejectionTests.lean
+
+      - name: KernelCore PSC1 source profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          node scripts/check-kernel-core-source.mjs

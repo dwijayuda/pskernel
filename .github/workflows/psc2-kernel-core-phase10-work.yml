@@ -80,6 +80,16 @@ jobs:
               IO.println "PHASE10_ADMISSION_REFERENCE=PASS"
             else
               IO.println "PHASE10_ADMISSION_REFERENCE=FAIL"
+            if psKernelCoreRecursorMinorMatchesConstructor
+                psKcRecursorInfo psKcRecFamilyInfo psKcRecBaseCtor 0 then
+              IO.println "PHASE10_MINOR_BASE=PASS"
+            else
+              IO.println "PHASE10_MINOR_BASE=FAIL"
+            if psKernelCoreRecursorMinorMatchesConstructor
+                psKcRecursorInfo psKcRecFamilyInfo psKcRecExtraCtor 1 then
+              IO.println "PHASE10_MINOR_EXTRA=PASS"
+            else
+              IO.println "PHASE10_MINOR_EXTRA=FAIL"
           '''
           Path('/tmp/KernelCoreRecursorAdmissionDiagnostics.lean').write_text(diagnostic)
           PY

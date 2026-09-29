@@ -1111,30 +1111,35 @@ def psElabFillWildcardAlternatives
     (pattern : PsSyntaxPattern)
     (body : PsSyntaxTerm)
     (span : PsSourceSpan)
-    (constructors : List PsName)
-    (alternativesRev : List PsElabMatchAlternative) :
+    (constructors : List PsName) :
+    List PsElabMatchAlternative ->
     List PsElabMatchAlternative :=
   match constructors with
   | [] =>
-      alternativesRev
+      fun (alternativesRev : List PsElabMatchAlternative) =>
+        alternativesRev
   | ctorName :: rest =>
-      let next : List PsElabMatchAlternative :=
-        match psElabMatchAlternativeFind ctorName alternativesRev with
-        | some _ => alternativesRev
-        | none =>
-            let alternative : PsElabMatchAlternative := {
-              constructorName := ctorName
-              pattern := pattern
-              body := body
-              span := span
-            };
-            List.cons alternative alternativesRev;
-      psElabFillWildcardAlternatives
-        pattern
-        body
-        span
-        rest
-        next
+      let smaller :
+          List PsElabMatchAlternative ->
+          List PsElabMatchAlternative :=
+        psElabFillWildcardAlternatives
+          pattern
+          body
+          span
+          rest;
+      fun (alternativesRev : List PsElabMatchAlternative) =>
+        let next : List PsElabMatchAlternative :=
+          match psElabMatchAlternativeFind ctorName alternativesRev with
+          | some _ => alternativesRev
+          | none =>
+              let alternative : PsElabMatchAlternative := {
+                constructorName := ctorName
+                pattern := pattern
+                body := body
+                span := span
+              };
+              List.cons alternative alternativesRev;
+        smaller next
 
 def psElabMatchPatternConstructorName
     (inductiveName : PsName)
@@ -1944,7 +1949,6 @@ def psElabApplyArgsWithFuel
             }
           else
             Except.error (PsElabError.infer PsInferError.expectedFunction)
-
 
 def psElabApplyArgs
     (elaborate :

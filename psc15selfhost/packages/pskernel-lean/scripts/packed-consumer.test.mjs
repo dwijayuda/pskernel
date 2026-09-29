@@ -38,9 +38,17 @@ try{
       '--package-lock=false',
       tarball,
     ],
-    {cwd:consumerRoot,encoding:'utf8'},
+    {
+      cwd:consumerRoot,
+      encoding:'utf8',
+      shell:process.platform==='win32',
+    },
   );
-  assert.equal(install.status,0,`${install.stdout}\n${install.stderr}`);
+  assert.equal(
+    install.status,
+    0,
+    `${install.error?.stack??''}\n${install.stdout??''}\n${install.stderr??''}`,
+  );
 
   const consumerScript=path.join(consumerRoot,'consume.mjs');
   await writeFile(consumerScript,`
@@ -102,7 +110,11 @@ process.stdout.write('PSC2_PACKED_LEAN_KERNEL_CONSUMER_INNER: PASS\\n');
     [consumerScript],
     {cwd:consumerRoot,encoding:'utf8',env},
   );
-  assert.equal(consume.status,0,`${consume.stdout}\n${consume.stderr}`);
+  assert.equal(
+    consume.status,
+    0,
+    `${consume.error?.stack??''}\n${consume.stdout??''}\n${consume.stderr??''}`,
+  );
   assert.match(consume.stdout,/PSC2_PACKED_LEAN_KERNEL_CONSUMER_INNER: PASS/u);
 }finally{
   await rm(consumerRoot,{recursive:true,force:true});

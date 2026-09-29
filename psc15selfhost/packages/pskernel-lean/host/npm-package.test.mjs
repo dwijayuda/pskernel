@@ -3,6 +3,11 @@ import {spawnSync} from 'node:child_process';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
+import {
+  loadLeanKernelPrebuiltManifest,
+  supportedLeanKernelProviderTargets,
+  verifyLeanKernelPrebuiltBinary,
+} from './prebuilt.mjs';
 
 const hostDir=path.dirname(fileURLToPath(import.meta.url));
 const packageRoot=path.resolve(hostDir,'..');
@@ -23,6 +28,22 @@ assert.equal(manifest.proofscript?.role,'external-lean-kernel-provider');
 assert.ok(manifest.files.includes('PREBUILT_MANIFEST.json'));
 assert.ok(manifest.files.includes('prebuilt/'));
 
+const prebuiltManifest=loadLeanKernelPrebuiltManifest({packageRoot});
+assert.deepEqual(
+  Object.keys(prebuiltManifest.targets),
+  [...supportedLeanKernelProviderTargets],
+  'committed prebuilt manifest must contain exactly the five supported targets',
+);
+for(const target of supportedLeanKernelProviderTargets){
+  const binaryPath=path.resolve(packageRoot,prebuiltManifest.targets[target].path);
+  verifyLeanKernelPrebuiltBinary({
+    binaryPath,
+    target,
+    manifest:prebuiltManifest,
+    packageRoot,
+  });
+}
+
 const api=await import(pathToFileURL(indexPath).href);
 assert.equal(api.leanKernelProviderVersion,'4.34.0');
 assert.equal(
@@ -41,3 +62,4 @@ assert.equal(workspaceCheck.status,0,workspaceCheck.stderr);
 assert.match(workspaceCheck.stdout,/PSC1_WORKSPACE_SHAPE: PASS \(21 workspaces\)/u);
 
 process.stdout.write('PSC2_LEAN_KERNEL_NPM_PACKAGE_TESTS: PASS\n');
+process.stdout.write('PSC2_LEAN_KERNEL_COMMITTED_PREBUILT_DIGESTS: PASS\n');

@@ -54,12 +54,13 @@ elif ! git apply --reverse --check "$patch_file" >/dev/null 2>&1; then
 fi
 
 # The study snapshot does not preserve executable bits on Lean's helper
-# scripts. ExternalProject copies these permissions into stage0/stage1, and
-# stage0's make_stdlib executes bin/leanmake during its own build. Normalize
-# the source modes before CMake configures either stage.
+# scripts. CMake configure_file preserves source permissions, so repair both
+# leanmake and leanc templates before ExternalProject configures stage0/stage1.
 for helper_source in \
   "$lean_source/stage0/src/bin/leanmake" \
-  "$lean_source/src/bin/leanmake"; do
+  "$lean_source/stage0/src/bin/leanc.in" \
+  "$lean_source/src/bin/leanmake" \
+  "$lean_source/src/bin/leanc.in"; do
   if [[ ! -f "$helper_source" ]]; then
     echo "Lean helper source missing: $helper_source" >&2
     exit 1
@@ -129,9 +130,8 @@ if [[ ${#provider_c_files[@]} -eq 0 ]]; then
   exit 1
 fi
 
-# Source snapshots copied into this repository do not reliably preserve the
-# executable bit on generated helper scripts. stage1-configure has created
-# them, so normalize the modes before continuing the ExternalProject build.
+# Normalize generated target helpers too as defense-in-depth for snapshots or
+# CMake versions that do not preserve source modes through configure_file.
 for helper in "$lean_build/stage1/bin/leanmake" "$stage1_leanc"; do
   if [[ -e "$helper" ]]; then
     chmod +x "$helper"

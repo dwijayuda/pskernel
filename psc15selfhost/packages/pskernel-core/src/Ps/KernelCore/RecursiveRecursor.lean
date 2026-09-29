@@ -225,6 +225,219 @@ def psKernelCoreRecursiveRecursorDirectMinorMatchesWithResources
     PsKernelCoreResult.error
       "parameterized recursive recursor is not supported in direct recursive recursor slice"
 
+structure PsKernelCoreRecursiveRecursorLambdaState where
+  rest : PsKernelCoreExpr
+  values : PsKernelCoreList PsKernelCoreExpr
+  nextSeed : Nat
+
+def psKernelCoreRecursiveRecursorOpenLambdas
+    (count : Nat) :
+    PsKernelCoreExpr -> Nat ->
+    PsKernelCoreOption PsKernelCoreRecursiveRecursorLambdaState :=
+  match count with
+  | Nat.zero =>
+      fun (expr : PsKernelCoreExpr) (seed : Nat) =>
+        let state : PsKernelCoreRecursiveRecursorLambdaState := {
+          rest := expr
+          values := PsKernelCoreList.nil
+          nextSeed := seed
+        };
+        PsKernelCoreOption.some state
+  | Nat.succ remaining =>
+      let openRemaining := psKernelCoreRecursiveRecursorOpenLambdas remaining;
+      fun (expr : PsKernelCoreExpr) (seed : Nat) =>
+        match expr with
+        | PsKernelCoreExpr.lam _ _ body _ =>
+            let fresh := psKernelCoreRecursorFreshFVar seed;
+            let openedBody := psKernelCoreExprInstantiate1 body fresh;
+            match openRemaining openedBody (Nat.succ seed) with
+            | PsKernelCoreOption.none => PsKernelCoreOption.none
+            | PsKernelCoreOption.some state =>
+                let nextState : PsKernelCoreRecursiveRecursorLambdaState := {
+                  rest := state.rest
+                  values := PsKernelCoreList.cons fresh state.values
+                  nextSeed := state.nextSeed
+                };
+                PsKernelCoreOption.some nextState
+        | _ => PsKernelCoreOption.none
+
+structure PsKernelCoreRecursiveRecursorRuleOpenState where
+  ctorResult : PsKernelCoreExpr
+  ruleBody : PsKernelCoreExpr
+  fields : PsKernelCoreList PsKernelCoreRecursiveRecursorField
+  nextSeed : Nat
+
+def psKernelCoreRecursiveRecursorOpenDirectRuleFields
+    (count : Nat) :
+    Nat ->
+    PsKernelCoreResourceConfig ->
+    PsKernelCoreEnvironment ->
+    PsKernelCoreInductiveInfo ->
+    PsKernelCoreList PsKernelCoreLevel ->
+    PsKernelCoreExpr ->
+    PsKernelCoreExpr ->
+    Nat ->
+    Nat ->
+    PsKernelCoreResult String PsKernelCoreRecursiveRecursorRuleOpenState :=
+  match count with
+  | Nat.zero =>
+      fun (_budget : Nat)
+          (_resources : PsKernelCoreResourceConfig)
+          (_env : PsKernelCoreEnvironment)
+          (_family : PsKernelCoreInductiveInfo)
+          (_levels : PsKernelCoreList PsKernelCoreLevel)
+          (ctorExpr : PsKernelCoreExpr)
+          (ruleExpr : PsKernelCoreExpr)
+          (_binderDepth : Nat)
+          (seed : Nat) =>
+        let state : PsKernelCoreRecursiveRecursorRuleOpenState := {
+          ctorResult := ctorExpr
+          ruleBody := ruleExpr
+          fields := PsKernelCoreList.nil
+          nextSeed := seed
+        };
+        PsKernelCoreResult.ok state
+  | Nat.succ remaining =>
+      let openRemaining :=
+        psKernelCoreRecursiveRecursorOpenDirectRuleFields remaining;
+      fun (budget : Nat)
+          (resources : PsKernelCoreResourceConfig)
+          (env : PsKernelCoreEnvironment)
+          (family : PsKernelCoreInductiveInfo)
+          (levels : PsKernelCoreList PsKernelCoreLevel)
+          (ctorExpr : PsKernelCoreExpr)
+          (ruleExpr : PsKernelCoreExpr)
+          (binderDepth : Nat)
+          (seed : Nat) =>
+        match ctorExpr with
+        | PsKernelCoreExpr.forallE _ ctorDomain ctorBody _ =>
+            match ruleExpr with
+            | PsKernelCoreExpr.lam _ ruleDomain ruleBody _ =>
+                if psKernelCoreExprEq ctorDomain ruleDomain then
+                  match psKernelCoreRecursiveFieldShapeWithResources
+                      budget resources env family.base.name levels
+                      family.numParams family.numIndices binderDepth ctorDomain with
+                  | PsKernelCoreResult.error message =>
+                      PsKernelCoreResult.error message
+                  | PsKernelCoreResult.ok recursiveShape =>
+                      let recursiveResult : PsKernelCoreResult String Bool :=
+                        match recursiveShape with
+                        | PsKernelCoreOption.none =>
+                            PsKernelCoreResult.ok false
+                        | PsKernelCoreOption.some shape =>
+                            if Nat.beq shape.argCount 0 then
+                              match shape.indices with
+                              | PsKernelCoreList.nil => PsKernelCoreResult.ok true
+                              | PsKernelCoreList.cons _ _ =>
+                                  PsKernelCoreResult.error
+                                    "indexed recursive rule field is not supported in direct recursive recursor slice"
+                            else
+                              PsKernelCoreResult.error
+                                "functional recursive rule field is not supported in direct recursive recursor slice";
+                      match recursiveResult with
+                      | PsKernelCoreResult.error message =>
+                          PsKernelCoreResult.error message
+                      | PsKernelCoreResult.ok isRecursive =>
+                          let fresh := psKernelCoreRecursorFreshFVar seed;
+                          let openedCtor :=
+                            psKernelCoreExprInstantiate1 ctorBody fresh;
+                          let openedRule :=
+                            psKernelCoreExprInstantiate1 ruleBody fresh;
+                          match openRemaining budget resources env family levels
+                              openedCtor openedRule
+                              (Nat.succ binderDepth) (Nat.succ seed) with
+                          | PsKernelCoreResult.error message =>
+                              PsKernelCoreResult.error message
+                          | PsKernelCoreResult.ok state =>
+                              let fieldInfo : PsKernelCoreRecursiveRecursorField := {
+                                value := fresh
+                                isRecursive := isRecursive
+                              };
+                              let nextState : PsKernelCoreRecursiveRecursorRuleOpenState := {
+                                ctorResult := state.ctorResult
+                                ruleBody := state.ruleBody
+                                fields := PsKernelCoreList.cons fieldInfo state.fields
+                                nextSeed := state.nextSeed
+                              };
+                              PsKernelCoreResult.ok nextState
+                else
+                  PsKernelCoreResult.ok {
+                    ctorResult := ctorExpr
+                    ruleBody := ruleExpr
+                    fields := PsKernelCoreList.nil
+                    nextSeed := seed
+                  }
+            | _ =>
+                PsKernelCoreResult.error
+                  "recursive recursor rule has too few constructor field lambdas"
+        | _ =>
+            PsKernelCoreResult.error
+              "recursive recursor constructor has too few rule fields"
+
+def psKernelCoreRecursiveRecursorDirectCalls
+    (fields : PsKernelCoreList PsKernelCoreRecursiveRecursorField)
+    (recPrefix : PsKernelCoreExpr) : PsKernelCoreList PsKernelCoreExpr :=
+  match fields with
+  | PsKernelCoreList.nil => PsKernelCoreList.nil
+  | PsKernelCoreList.cons field rest =>
+      let restCalls :=
+        psKernelCoreRecursiveRecursorDirectCalls rest recPrefix;
+      if field.isRecursive then
+        PsKernelCoreList.cons
+          (PsKernelCoreExpr.app recPrefix field.value)
+          restCalls
+      else
+        restCalls
+
+def psKernelCoreRecursiveRecursorRuleStructureMatchesWithResources
+    (budget : Nat)
+    (resources : PsKernelCoreResourceConfig)
+    (env : PsKernelCoreEnvironment)
+    (info : PsKernelCoreRecursorInfo)
+    (family : PsKernelCoreInductiveInfo)
+    (ctor : PsKernelCoreConstructorInfo)
+    (ruleIndex : Nat)
+    (rule : PsKernelCoreRecursorRule) : PsKernelCoreResult String Bool :=
+  if Nat.beq family.numParams 0 then
+    if Nat.beq family.numIndices 0 then
+      let fixedCount := Nat.add info.numMotives info.numMinors;
+      match psKernelCoreRecursiveRecursorOpenLambdas fixedCount rule.rhs 0 with
+      | PsKernelCoreOption.none => PsKernelCoreResult.ok false
+      | PsKernelCoreOption.some openedPrefix =>
+          match psKernelCoreExprListGet
+              openedPrefix.values (Nat.add info.numMotives ruleIndex) with
+          | PsKernelCoreOption.none => PsKernelCoreResult.ok false
+          | PsKernelCoreOption.some selectedMinor =>
+              let familyLevels :=
+                psKernelCoreInductiveLevelsFromNames family.base.levelParams;
+              match psKernelCoreRecursiveRecursorOpenDirectRuleFields
+                  ctor.numFields budget resources env family familyLevels
+                  ctor.base.type openedPrefix.rest 0 openedPrefix.nextSeed with
+              | PsKernelCoreResult.error message =>
+                  PsKernelCoreResult.error message
+              | PsKernelCoreResult.ok opened =>
+                  let recLevels :=
+                    psKernelCoreInductiveLevelsFromNames info.base.levelParams;
+                  let recHead := PsKernelCoreExpr.const info.base.name recLevels;
+                  let recPrefix :=
+                    psKernelCoreRecursorApplyArgs openedPrefix.values recHead;
+                  let fieldValues :=
+                    psKernelCoreRecursiveRecursorFieldValues opened.fields;
+                  let recursiveCalls :=
+                    psKernelCoreRecursiveRecursorDirectCalls opened.fields recPrefix;
+                  let branchArgs :=
+                    psKernelCoreExprListAppend fieldValues recursiveCalls;
+                  let expectedBody :=
+                    psKernelCoreRecursorApplyArgs branchArgs selectedMinor;
+                  PsKernelCoreResult.ok
+                    (psKernelCoreExprEq opened.ruleBody expectedBody)
+    else
+      PsKernelCoreResult.error
+        "indexed recursive rule validation is not supported in direct recursive recursor slice"
+  else
+    PsKernelCoreResult.error
+      "parameterized recursive rule validation is not supported in direct recursive recursor slice"
+
 def psKernelCoreRecursiveRecursorFamilySummaryWithResources
     (ctorNames : PsKernelCoreList PsKernelCoreName) :
     Nat ->
@@ -354,13 +567,22 @@ def psKernelCoreRecursiveRecursorValidateRulesWithResources
                                   PsKernelCoreResult.error message
                               | PsKernelCoreResult.ok minorMatches =>
                                   if minorMatches then
-                                    match psKernelCoreRecursiveRecursorCheckRuleRhsWithResources
-                                        budget resources env info rule with
+                                    match psKernelCoreRecursiveRecursorRuleStructureMatchesWithResources
+                                        budget resources env info family ctor index rule with
                                     | PsKernelCoreResult.error message =>
                                         PsKernelCoreResult.error message
-                                    | PsKernelCoreResult.ok _ =>
-                                        validateRest ruleRest (Nat.succ index)
-                                          budget resources env info family
+                                    | PsKernelCoreResult.ok structureMatches =>
+                                        if structureMatches then
+                                          match psKernelCoreRecursiveRecursorCheckRuleRhsWithResources
+                                              budget resources env info rule with
+                                          | PsKernelCoreResult.error message =>
+                                              PsKernelCoreResult.error message
+                                          | PsKernelCoreResult.ok _ =>
+                                              validateRest ruleRest (Nat.succ index)
+                                                budget resources env info family
+                                        else
+                                          PsKernelCoreResult.error
+                                            "recursive recursor rule body is not canonical"
                                   else
                                     PsKernelCoreResult.error
                                       "recursive recursor minor does not match constructor"

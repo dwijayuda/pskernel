@@ -45,3 +45,27 @@ diff --git a/study/lean4-4.34.0/src/CMakeLists.txt b/study/lean4-4.34.0/src/CMak
 +  list(APPEND STDLIBS Leanc)
    list(APPEND STDLIBS Lake LeanChecker)
  endif()
+diff --git a/study/lean4-4.34.0/stage0/src/stdlib.make.in b/study/lean4-4.34.0/stage0/src/stdlib.make.in
+--- a/study/lean4-4.34.0/stage0/src/stdlib.make.in
++++ b/study/lean4-4.34.0/stage0/src/stdlib.make.in
+@@ -199,7 +199,7 @@ $(OUTBIN)/leanir$(EXE): $(OUTARC)/libLeanIR.a
+ 	@echo "[    ] Building $@"
+ # on Windows, must remove file before writing a new one (since the old one may be in use)
+ 	@rm -f $@
+-	"${CMAKE_BINARY_DIR}/leanc.sh" $< ${CMAKE_EXE_LINKER_FLAGS_MAKE} ${LEAN_EXE_LINKER_FLAGS} -o $@
++	"${CMAKE_BINARY_DIR}/leanc.sh" $< ${CMAKE_EXE_LINKER_FLAGS_MAKE} ${LEAN_EXE_LINKER_FLAGS} ${LEANC_OPTS} -o $@
+ 
+ leanir: $(OUTBIN)/leanir$(EXE)
+ 
+diff --git a/study/lean4-4.34.0/src/stdlib.make.in b/study/lean4-4.34.0/src/stdlib.make.in
+--- a/study/lean4-4.34.0/src/stdlib.make.in
++++ b/study/lean4-4.34.0/src/stdlib.make.in
+@@ -199,7 +199,7 @@ $(OUTBIN)/leanir$(EXE): $(OUTARC)/libLeanIR.a
+ 	@echo "[    ] Building $@"
+ # on Windows, must remove file before writing a new one (since the old one may be in use)
+ 	@rm -f $@
+-	"${CMAKE_BINARY_DIR}/leanc.sh" $< ${CMAKE_EXE_LINKER_FLAGS_MAKE} ${LEAN_EXE_LINKER_FLAGS} -o $@
++	"${CMAKE_BINARY_DIR}/leanc.sh" $< ${CMAKE_EXE_LINKER_FLAGS_MAKE} ${LEAN_EXE_LINKER_FLAGS} ${LEANC_OPTS} -o $@
+ 
+ leanir: $(OUTBIN)/leanir$(EXE)
+ 

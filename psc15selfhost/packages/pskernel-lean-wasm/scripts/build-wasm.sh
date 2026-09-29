@@ -53,6 +53,20 @@ elif ! git apply --reverse --check "$patch_file" >/dev/null 2>&1; then
   exit 1
 fi
 
+# The study snapshot does not preserve executable bits on Lean's helper
+# scripts. ExternalProject copies these permissions into stage0/stage1, and
+# stage0's make_stdlib executes bin/leanmake during its own build. Normalize
+# the source modes before CMake configures either stage.
+for helper_source in \
+  "$lean_source/stage0/src/bin/leanmake" \
+  "$lean_source/src/bin/leanmake"; do
+  if [[ ! -f "$helper_source" ]]; then
+    echo "Lean helper source missing: $helper_source" >&2
+    exit 1
+  fi
+  chmod +x "$helper_source"
+done
+
 cd "$workspace_root"
 rm -rf .lake/build "$lean_build" "$provider_obj_dir" "$out_dir"
 mkdir -p "$lean_build" "$provider_obj_dir" "$out_dir"

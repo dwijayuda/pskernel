@@ -17,11 +17,13 @@
 - Lean source commit: `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`.
 - Provider protocol: `pskernel-lean/1`.
 - Provider identity/profile: `lean4-cpp` / `lean4.34-core`.
-- Initial Emscripten pin: `6.0.10`; replace only if the real compatibility build proves it unusable.
+- Current Emscripten compatibility probe pin: `6.0.9`. Keep it exact; do not call the pin verified until the real Lean/WASM build and runtime checks are GREEN.
 - Reuse `PsKernelLean.Error`, `Convert`, `Prelude`, `Protocol`, and `Admission`; do not fork semantics.
 - `bootstrap:false`, `portable:false`; explicitly excluded from the first fixed-point closure.
 - Node WASM first. Browser support is a separate milestone.
 - Consumption must require no Lean/Lake/Emscripten installation and no runtime network fetch.
+- A build that uses the installed x86_64 Lean toolchain directly as the previous stage is only a compatibility probe, not final wasm32 semantic evidence. Before parity/trust claims, generate the wasm32 stage from a target-compatible previous stage. Lean's own cross-build recipe uses a native 32-bit stage0 so generated `.olean`/C platform assumptions match wasm32; use that model (or an equivalently justified target-compatible bootstrap), then run differential gates.
+- Keep buildability and semantic trust separate: permissive linker settings may be used only when every intentionally unresolved runtime symbol is enumerated and tested. Never hide unknown missing symbols merely to produce a `.wasm`.
 
 ## Review Focus
 
@@ -30,6 +32,7 @@
 - Provider identity must exactly match the native provider, including Lean commit/profile.
 - Packed npm consumption must locate `.wasm` relative to the installed package rather than the source checkout.
 - Bootstrap closure must reject accidental imports/dependencies on both native and WASM Lean providers.
+- The final wasm32 build must not inherit host-width assumptions from an x86_64 previous stage or host-generated provider C.
 
 ---
 
@@ -81,15 +84,17 @@
 - Update: `EMSCRIPTEN_PIN.json` only if compatibility evidence requires a different SDK.
 
 **Interfaces:**
-- Produces deterministic `dist/pskernel-lean.wasm` plus JS glue/module needed by Task 4.
+- Produces deterministic `wasm/pskernel-lean.wasm` plus JS glue/module needed by Task 4.
 - Records exact SDK version and build flags.
 
 - [ ] Add a static workflow/build-contract test pinning exact Lean and Emscripten versions and forbidding `latest`/`tot` SDK aliases.
 - [ ] Run RED before the build script/workflow exists.
 - [ ] Add an Ubuntu Node-WASM workflow that installs exact emsdk, verifies `emcc --version`, and builds the provider through Lean's Emscripten-supported runtime closure.
-- [ ] Execute CI. If Emscripten `6.0.10` fails because of a Lean-4.34 runtime incompatibility, diagnose the exact incompatibility and pin the nearest verified working SDK rather than adding permissive fallbacks.
-- [ ] Make the build produce a real `.wasm` and deterministic JS glue, then verify both files are non-empty and no source-checkout absolute paths are embedded in runtime lookup.
-- [ ] Commit the verified pin/build plumbing.
+- [ ] Execute CI and diagnose the first causal incompatibility. Keep the exact `6.0.9` compatibility-probe pin unless evidence requires another exact version; do not add permissive fallbacks.
+- [ ] Make the compatibility probe produce a real `.wasm` and deterministic JS glue, then verify both files are non-empty and no source-checkout absolute paths are embedded in runtime lookup.
+- [ ] Replace the host-x86_64 previous-stage shortcut with a target-compatible wasm32 bootstrap. Prefer Lean's native-32-bit-stage0 -> Emscripten-stage1 recipe with `USE_GMP=OFF`/`MMAP=OFF` and explicit multilib dependencies; provider C must be generated through the same target-compatible assumptions rather than the host `lake build` path.
+- [ ] Re-run the real build and provider health check using the target-compatible bootstrap.
+- [ ] Commit the verified pin/build plumbing only after both compatibility and target-correctness gates are GREEN.
 
 ### Task 4: Node loader and WASM memory/API boundary
 

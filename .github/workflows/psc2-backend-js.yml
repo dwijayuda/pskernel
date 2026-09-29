@@ -55,7 +55,17 @@ jobs:
       - name: Compiler regression
         if: always()
         working-directory: psc15selfhost
-        run: npm run test:regression
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:regression 2>&1 | tee /tmp/psc1-tests.log
+      - name: Upload compiler regression diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-tests-log
+          path: /tmp/psc1-tests.log
+          if-no-files-found: ignore
       - name: Extension regression
         if: always()
         working-directory: psc15selfhost

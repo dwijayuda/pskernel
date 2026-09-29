@@ -1141,6 +1141,40 @@ def psElabFillWildcardAlternatives
               List.cons alternative alternativesRev;
         smaller next
 
+def psElabMatchAlternativeListReverseAux
+    (values : List PsElabMatchAlternative) :
+    List PsElabMatchAlternative ->
+    List PsElabMatchAlternative :=
+  match values with
+  | [] =>
+      fun (acc : List PsElabMatchAlternative) => acc
+  | value :: rest =>
+      let smaller :
+          List PsElabMatchAlternative ->
+          List PsElabMatchAlternative :=
+        psElabMatchAlternativeListReverseAux rest;
+      fun (acc : List PsElabMatchAlternative) =>
+        smaller (List.cons value acc)
+
+def psElabMatchAlternativeListReverse
+    (values : List PsElabMatchAlternative) :
+    List PsElabMatchAlternative :=
+  psElabMatchAlternativeListReverseAux values []
+
+def psElabMatchAlternativesCoverConstructors
+    (alternatives : List PsElabMatchAlternative)
+    (constructors : List PsName) : Bool :=
+  match constructors with
+  | [] => true
+  | constructorName :: rest =>
+      if
+          psElabMatchAlternativeCovered
+            alternatives
+            constructorName then
+        psElabMatchAlternativesCoverConstructors alternatives rest
+      else
+        false
+
 def psElabMatchPatternConstructorName
     (inductiveName : PsName)
     (pattern : PsSyntaxPattern) :
@@ -1175,11 +1209,12 @@ def psElabPrepareMatchAlternatives
     Except PsElabError (List PsElabMatchAlternative) :=
   match entries with
   | [] =>
-      let alternatives := List.reverse alternativesRev;
+      let alternatives :=
+        psElabMatchAlternativeListReverse alternativesRev;
       let exhaustive :=
-        List.all
-          inductiveInfo.constructors
-          (psElabMatchAlternativeCovered alternatives);
+        psElabMatchAlternativesCoverConstructors
+          alternatives
+          inductiveInfo.constructors;
       if exhaustive then
         Except.ok alternatives
       else
@@ -1191,16 +1226,18 @@ def psElabPrepareMatchAlternatives
       let span := Prod.snd payload;
       match pattern with
       | .wildcard _ =>
-          if List.isEmpty rest then
-            Except.ok
-              (List.reverse (psElabFillWildcardAlternatives
-                pattern
-                body
-                span
-                inductiveInfo.constructors
-                alternativesRev))
-          else
-            Except.error PsElabError.matchPatternUnsupported
+          match rest with
+          | [] =>
+              Except.ok
+                (psElabMatchAlternativeListReverse
+                  (psElabFillWildcardAlternatives
+                    pattern
+                    body
+                    span
+                    inductiveInfo.constructors
+                    alternativesRev))
+          | _ :: _ =>
+              Except.error PsElabError.matchPatternUnsupported
       | _ =>
           match psElabMatchPatternConstructorName
               inductiveInfo.name

@@ -20,7 +20,8 @@ if (match === null) {
 
 const block = match[0];
 const required = [
-  /\| \[\] => Option\.none/,
+  /\(alternatives : List PsElabMatchAlternative\)\s*:\s*Option PsElabMatchAlternative\s*:=\s*match alternatives with/,
+  /\| \[\] =>\s*Option\.none/,
   /then\s+Option\.some alternative/,
   /psElabMatchAlternativeFind name rest/,
 ];
@@ -33,7 +34,8 @@ for (const pattern of required) {
 }
 
 const forbidden = [
-  /\| \[\] => none\b/,
+  /List PsElabMatchAlternative -> Option PsElabMatchAlternative\s*\n\s*\|/,
+  /\| \[\] =>\s*none\b/,
   /then\s+some alternative\b/,
 ];
 for (const pattern of forbidden) {
@@ -45,5 +47,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_MATCH_ALTERNATIVE_FIND_SELFHOST_SOURCE_SYNTAX: PASS (explicit Option.none/Option.some with structural list recursion)\n",
+  "PSC2_ELAB_MATCH_ALTERNATIVE_FIND_SELFHOST_SOURCE_SYNTAX: PASS (explicit recursive list parameter, top-level match, and explicit Option constructors)\n",
 );

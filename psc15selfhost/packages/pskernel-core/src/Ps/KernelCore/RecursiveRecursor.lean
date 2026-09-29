@@ -34,12 +34,13 @@ def psKernelCoreRecursiveRecursorOpenDirectFields
           (minorExpr : PsKernelCoreExpr)
           (_binderDepth : Nat)
           (seed : Nat) =>
-        PsKernelCoreResult.ok {
+        let state : PsKernelCoreRecursiveRecursorOpenState := {
           ctorResult := ctorExpr
           minorResult := minorExpr
           fields := PsKernelCoreList.nil
           nextSeed := seed
-        }
+        };
+        PsKernelCoreResult.ok state
   | Nat.succ remaining =>
       let openRemaining :=
         psKernelCoreRecursiveRecursorOpenDirectFields remaining;
@@ -98,13 +99,14 @@ def psKernelCoreRecursiveRecursorOpenDirectFields
                                 value := fresh
                                 isRecursive := isRecursive
                               };
-                              PsKernelCoreResult.ok {
+                              let nextState : PsKernelCoreRecursiveRecursorOpenState := {
                                 ctorResult := state.ctorResult
                                 minorResult := state.minorResult
                                 fields :=
                                   PsKernelCoreList.cons fieldInfo state.fields
                                 nextSeed := state.nextSeed
-                              }
+                              };
+                              PsKernelCoreResult.ok nextState
                 else
                   PsKernelCoreResult.error
                     "recursive recursor minor field domain does not match constructor"

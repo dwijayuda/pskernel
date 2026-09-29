@@ -111,6 +111,20 @@ jobs:
         run: |
           set -euo pipefail
           cd psc15selfhost
+          unset PSC_LEAN_KERNEL_PROVIDER_BIN
+
+          node --input-type=module <<'NODE'
+          import {resolveLeanKernelProviderBinary} from './packages/pskernel-lean/host/prebuilt.mjs';
+          const resolved=resolveLeanKernelProviderBinary();
+          if(resolved.source!=='bundled'){
+            throw new Error(`expected bundled Lean kernel provider, got ${resolved.source}`);
+          }
+          if(resolved.target!=='linux-x64'){
+            throw new Error(`expected linux-x64 bundled provider, got ${resolved.target}`);
+          }
+          console.log(`PSC2_REAL_GENERATED_LEAN_KERNEL_RESOLVER: PASS ${resolved.target}`);
+          NODE
+
           npm run bootstrap:check
           npm run bootstrap:emit
           npm run bootstrap:compiler
@@ -132,3 +146,65 @@ jobs:
           test -f "$smoke_output"
           test -f "${smoke_output}.map"
           echo "PSC2_REAL_GENERATED_LEAN_KERNEL_SMOKE: PASS"
+
+  packed-consumer:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            target: linux-x64
+          - runner: ubuntu-24.04-arm
+            target: linux-arm64
+          - runner: macos-15-intel
+            target: darwin-x64
+          - runner: macos-15
+            target: darwin-arm64
+          - runner: windows-2025
+            target: win32-x64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify committed package and bundled target
+        shell: bash
+        working-directory: psc15selfhost
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          unset PSC_LEAN_KERNEL_PROVIDER_BIN
+
+          node packages/pskernel-lean/host/npm-package.test.mjs
+
+          node --input-type=module <<'NODE'
+          import {resolveLeanKernelProviderBinary} from './packages/pskernel-lean/host/prebuilt.mjs';
+          const resolved=resolveLeanKernelProviderBinary();
+          if(resolved.source!=='bundled'){
+            throw new Error(`expected bundled provider, got ${resolved.source}`);
+          }
+          if(resolved.target!==process.env.TARGET){
+            throw new Error(`expected ${process.env.TARGET}, got ${resolved.target}`);
+          }
+          console.log(`PSC2_PACKED_CONSUMER_RESOLVER: PASS ${resolved.target}`);
+          NODE
+
+      - name: Pack, install, and execute package without provider override
+        shell: bash
+        working-directory: psc15selfhost
+        run: |
+          set -euo pipefail
+          unset PSC_LEAN_KERNEL_PROVIDER_BIN
+          pack_dir="$RUNNER_TEMP/pskernel-lean-packed-consumer"
+          mkdir -p "$pack_dir"
+          (
+            cd packages/pskernel-lean
+            npm pack --json --pack-destination "$pack_dir"
+          ) > "$RUNNER_TEMP/pskernel-lean-packed-consumer.json"
+
+          tarball="$(node -e "const fs=require('fs'),p=require('path');const [r]=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/pskernel-lean-packed-consumer.json','utf8'));process.stdout.write(p.join(process.env.RUNNER_TEMP,'pskernel-lean-packed-consumer',r.filename));")"
+          node packages/pskernel-lean/scripts/packed-consumer.test.mjs --tarball "$tarball"

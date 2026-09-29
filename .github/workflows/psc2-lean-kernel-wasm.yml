@@ -31,3 +31,19 @@ jobs:
       - name: WASM package contract
         working-directory: psc15selfhost
         run: node packages/pskernel-lean-wasm/host/package.test.mjs
+
+      - name: Install exact Lean toolchain
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc15selfhost
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: false
+
+      - name: Lean WASM API contract
+        working-directory: psc15selfhost
+        run: |
+          lake build psc2_lean_kernel_wasm_api_tests
+          lake exe psc2_lean_kernel_wasm_api_tests

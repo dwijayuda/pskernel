@@ -83,9 +83,37 @@ jobs:
           cd psc15selfhost
           lake exe psc2_kernel_core_eq_inductive_tests
 
+      - name: Phase 10 recursor rejection matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursorRejectionTests.lean
+
+      - name: Phase 10 forged minor rejection
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursorForgedMinorRejectionTests.lean
+
+      - name: Phase 10 Eq recursor compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreEqRecursorCompatibilityTests.lean
+
       - name: KernelCore PSC1 source profile
         shell: bash
         run: |
           set -euo pipefail
           cd psc15selfhost
           node scripts/check-kernel-core-source.mjs
+
+      - name: Phase 11 aggregate assurance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run assurance:kernel-core:phase11

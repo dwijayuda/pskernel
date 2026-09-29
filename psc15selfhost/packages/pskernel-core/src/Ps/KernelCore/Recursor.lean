@@ -1,4 +1,4 @@
-import Ps.KernelCore.RecursorCanonical
+import Ps.KernelCore.RecursiveRecursor
 
 def psKernelCoreRecursorMajorIndex
     (info : PsKernelCoreRecursorInfo) : Nat :=
@@ -320,7 +320,55 @@ def psKernelCoreValidateRecursorWithResources
               match targetConstant with
               | PsKernelCoreConstantInfo.inductInfo family =>
                   if psKernelCoreNameEq family.base.name target then
-                    if psKernelCoreInductiveSingleFamilyMetadataValid family then
+                    if family.isRec then
+                      if Nat.beq info.numParams family.numParams then
+                        if Nat.beq info.numIndices family.numIndices then
+                          if Nat.beq info.numMotives 1 then
+                            let ctorCount :=
+                              psKernelCoreRecursorNameListLength family.ctors;
+                            if Nat.beq info.numMinors ctorCount then
+                              if Nat.beq
+                                  (psKernelCoreRecursorRuleListLength info.rules)
+                                  ctorCount then
+                                if info.k then
+                                  PsKernelCoreResult.error
+                                    "K recursors are not supported in this phase"
+                                else if psKernelCoreBoolEq info.isUnsafe family.isUnsafe then
+                                  if psKernelCoreRecursorCanonicalTypeShapeValid info then
+                                    let safety :=
+                                      if info.isUnsafe then
+                                        PsKernelCoreDefinitionSafety.unsafeDef
+                                      else
+                                        PsKernelCoreDefinitionSafety.safe;
+                                    match psKernelCoreAdmissionCheckBaseWithResources
+                                        remaining resources env info.base safety with
+                                    | PsKernelCoreResult.error message =>
+                                        PsKernelCoreResult.error message
+                                    | PsKernelCoreResult.ok _ =>
+                                        psKernelCoreValidateDirectRecursiveRecursorWithResources
+                                          remaining resources env info family
+                                  else
+                                    PsKernelCoreResult.error
+                                      "invalid recursor type shape"
+                                else
+                                  PsKernelCoreResult.error
+                                    "recursor safety does not match inductive"
+                              else
+                                PsKernelCoreResult.error
+                                  "recursor rule count does not match constructors"
+                            else
+                              PsKernelCoreResult.error
+                                "recursor minor count does not match constructors"
+                          else
+                            PsKernelCoreResult.error
+                              "recursor must have exactly one motive"
+                        else
+                          PsKernelCoreResult.error
+                            "recursor index count does not match inductive"
+                      else
+                        PsKernelCoreResult.error
+                          "recursor parameter count does not match inductive"
+                    else if psKernelCoreInductiveSingleFamilyMetadataValid family then
                       if Nat.beq info.numParams family.numParams then
                         if Nat.beq info.numIndices family.numIndices then
                           if Nat.beq info.numMotives 1 then

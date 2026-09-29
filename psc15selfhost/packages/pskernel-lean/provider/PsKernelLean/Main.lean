@@ -1,30 +1,11 @@
-import PsKernelLean.Admission
+import PsKernelLean.Response
 
 namespace PsKernelLean
 
-def providerAcceptedJson : String :=
-  "{" ++ providerIdentityJsonFields ++
-  ",\"accepted\":true}"
-
-def providerErrorIndexJson : Option Nat -> String
-  | none => ""
-  | some declarationIndex =>
-      ",\"declarationIndex\":" ++ toString declarationIndex
-
-def providerRejectedJson (error : PsKernelLeanError) : String :=
-  "{" ++ providerIdentityJsonFields ++
-  ",\"accepted\":false" ++
-  ",\"errorKind\":" ++ psJsonQuote error.kind.code ++
-  providerErrorIndexJson error.declarationIndex ++
-  ",\"message\":" ++ psJsonQuote error.message ++
-  "}"
-
 def runProviderCheck : IO Unit := do
   let source ← (← IO.getStdin).readToEnd
-  let result ← admitCanonicalAdmissions source
-  match result with
-  | .ok _ => IO.println providerAcceptedJson
-  | .error error => IO.println (providerRejectedJson error)
+  let response ← checkCanonicalAdmissionsJson source
+  IO.println response
 
 def runProviderCommand (args : List String) : IO Unit := do
   match args with

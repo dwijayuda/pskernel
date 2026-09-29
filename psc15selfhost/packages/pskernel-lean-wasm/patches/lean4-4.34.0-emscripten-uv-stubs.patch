@@ -32,7 +32,7 @@ index 3ac95b6f2..5619340fc 100644
 diff --git a/study/lean4-4.34.0/src/CMakeLists.txt b/study/lean4-4.34.0/src/CMakeLists.txt
 --- a/study/lean4-4.34.0/src/CMakeLists.txt
 +++ b/study/lean4-4.34.0/src/CMakeLists.txt
-@@ -1,12 +1,12 @@
+@@ -1000,11 +1000,11 @@
  set(
    STDLIBS
    Init

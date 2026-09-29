@@ -1,0 +1,72 @@
+name: Finalize PSC2 Lean kernel prebuilt workflow
+
+on:
+  push:
+    branches:
+      - psc2/pskernel-lean-provider
+    paths:
+      - .github/workflows/cleanup-pskernel-prebuilt-trigger.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/pskernel-lean-provider
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Remove one-shot prebuilt trigger
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+
+          path = Path('.github/workflows/psc2-lean-kernel-prebuilt.yml')
+          text = path.read_text()
+          text = text.replace('# one-shot native matrix attempt 4\n', '', 1)
+          temporary = '''  push:
+            branches:
+              - psc2/pskernel-lean-provider
+            paths:
+              - .github/workflows/psc2-lean-kernel-prebuilt.yml
+          '''
+          if temporary not in text:
+              raise SystemExit('temporary prebuilt push trigger not found')
+          text = text.replace(temporary, '', 1)
+          conditional = '''          if [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]]; then
+            node packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs
+          fi
+          '''
+          if conditional not in text:
+              raise SystemExit('temporary conditional contract gate not found')
+          text = text.replace(
+              conditional,
+              '          node packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs\n',
+              1,
+          )
+          path.write_text(text)
+          PY
+
+          node psc15selfhost/packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs
+          git diff --check
+
+      - name: Commit final manual-only workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/cleanup-pskernel-prebuilt-trigger.yml
+          git add .github/workflows/psc2-lean-kernel-prebuilt.yml
+          test "$(git diff --cached --name-only | wc -l | tr -d ' ')" = '2'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'ci(psc2): make prebuilt distribution manual-only'
+          git push origin HEAD:psc2/pskernel-lean-provider

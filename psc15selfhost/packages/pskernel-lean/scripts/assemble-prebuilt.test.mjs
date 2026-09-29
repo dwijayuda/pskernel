@@ -140,6 +140,21 @@ try{
     /leanVersion mismatch/,
   );
 
+  const oversized=path.join(root,'oversized');
+  await cp(artifacts,oversized,{recursive:true});
+  const oversizedMetadata=JSON.parse(
+    await readFile(path.join(oversized,'linux-x64','artifact.json'),'utf8'),
+  );
+  oversizedMetadata.size=100*1024*1024;
+  await writeFile(
+    path.join(oversized,'linux-x64','artifact.json'),
+    `${JSON.stringify(oversizedMetadata,null,2)}\n`,
+  );
+  await assert.rejects(
+    assemblePrebuilt({artifactsDir:oversized,packageRoot:path.join(root,'oversized-out')}),
+    /repository size limit/,
+  );
+
   const corrupt=path.join(root,'corrupt');
   await cp(artifacts,corrupt,{recursive:true});
   await writeFile(

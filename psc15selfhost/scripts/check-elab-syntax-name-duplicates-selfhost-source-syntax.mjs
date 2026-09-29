@@ -9,10 +9,62 @@ const source = await readFile(
   "utf8",
 );
 
+const oldBlock = `def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
+  | List.nil => false
+  | List.cons name rest =>
+      if psSyntaxNameIsWildcardBinder name then
+        psSyntaxNameListHasDuplicate rest
+      else
+        let coreName := psSyntaxNameToName name;
+        let duplicated :=
+          List.any rest (psSyntaxNameMatchesCore coreName);
+        if duplicated then
+          true
+        else
+          psSyntaxNameListHasDuplicate rest`;
+
+const newBlock = `def psSyntaxNameListContainsCore
+    (coreName : Option PsName)
+    (candidates : List PsSyntaxName) : Bool :=
+  match candidates with
+  | List.nil =>
+      false
+  | List.cons candidate rest =>
+      if psSyntaxNameMatchesCore coreName candidate then
+        true
+      else
+        psSyntaxNameListContainsCore coreName rest
+
+def psSyntaxNameListHasDuplicate
+    (names : List PsSyntaxName) : Bool :=
+  match names with
+  | List.nil =>
+      false
+  | List.cons name rest =>
+      if psSyntaxNameIsWildcardBinder name then
+        psSyntaxNameListHasDuplicate rest
+      else
+        let coreName := psSyntaxNameToName name;
+        if psSyntaxNameListContainsCore coreName rest then
+          true
+        else
+          psSyntaxNameListHasDuplicate rest`;
+
 const match = source.match(
   /def psSyntaxNameListContainsCore([\s\S]*?)(?=\ndef psElabMatchFields)/,
 );
 if (match === null) {
+  if (process.env.PSC2_PATCH_BLOB === "1") {
+    if (!source.includes(oldBlock)) {
+      throw new Error(
+        "PSC2_ELAB_SYNTAX_NAME_DUPLICATES_PATCH_SOURCE_MISMATCH",
+      );
+    }
+    const patched = source.replace(oldBlock, newBlock);
+    process.stdout.write(
+      `PSC2_PATCHED_TERM_BASE64_BEGIN\n${Buffer.from(patched, "utf8").toString("base64")}\nPSC2_PATCHED_TERM_BASE64_END\n`,
+    );
+  }
   throw new Error(
     "PSC2_ELAB_SYNTAX_NAME_DUPLICATES_SELFHOST_SOURCE_SYNTAX_MISSING: structural duplicate-name helper block",
   );

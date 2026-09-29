@@ -140,12 +140,15 @@ def psKernelCoreRecursorExprListEq
               false
 
 def psKernelCoreRecursorApplyArgs
-    (fn : PsKernelCoreExpr)
-    (args : PsKernelCoreList PsKernelCoreExpr) : PsKernelCoreExpr :=
+    (args : PsKernelCoreList PsKernelCoreExpr) :
+    PsKernelCoreExpr -> PsKernelCoreExpr :=
   match args with
-  | PsKernelCoreList.nil => fn
+  | PsKernelCoreList.nil =>
+      fun (fn : PsKernelCoreExpr) => fn
   | PsKernelCoreList.cons arg rest =>
-      psKernelCoreRecursorApplyArgs (PsKernelCoreExpr.app fn arg) rest
+      let applyRest := psKernelCoreRecursorApplyArgs rest;
+      fun (fn : PsKernelCoreExpr) =>
+        applyRest (PsKernelCoreExpr.app fn arg)
 
 def psKernelCoreRecursorMinorMatchesConstructor
     (info : PsKernelCoreRecursorInfo)
@@ -193,9 +196,9 @@ def psKernelCoreRecursorMinorMatchesConstructor
                                 let ctorHead :=
                                   PsKernelCoreExpr.const ctor.base.name resultLevels;
                                 let major :=
-                                  psKernelCoreRecursorApplyArgs ctorHead ctorArgs;
+                                  psKernelCoreRecursorApplyArgs ctorArgs ctorHead;
                                 let motiveAtIndices :=
-                                  psKernelCoreRecursorApplyArgs motive indices;
+                                  psKernelCoreRecursorApplyArgs indices motive;
                                 let expectedResult :=
                                   PsKernelCoreExpr.app motiveAtIndices major;
                                 psKernelCoreExprEq opened.minorResult expectedResult

@@ -42,6 +42,14 @@ const patch=await readFile(path.join(packageRoot,'patches/lean4-4.34.0-emscripte
 assert.match(patch,/src\/CMakeLists\.txt/);
 assert.match(patch,/-  Leanc\n   LeanIR/);
 assert.match(patch,/\+  list\(APPEND STDLIBS Leanc\)/);
+// Lean 4.34's leanir make rule is the one stage0 executable link that omits
+// LEANC_OPTS. A native -m32 stage0 therefore compiles 32-bit libraries but
+// tries to link leanir as host-width. Patch both the frozen stage0 template and
+// the normal stage template so the target-compatible bootstrap stays coherent.
+assert.match(patch,/stage0\/src\/stdlib\.make\.in/);
+assert.match(patch,/src\/stdlib\.make\.in/);
+const leanirLinkFixes=patch.match(/\$\{LEAN_EXE_LINKER_FLAGS\} \$\{LEANC_OPTS\} -o \$@/g)??[];
+assert.ok(leanirLinkFixes.length>=2,'Lean stage0/stage1 leanir links must preserve LEANC_OPTS');
 
 const workflow=await readFile(path.join(repoRoot,'.github/workflows/psc2-lean-kernel-wasm.yml'),'utf8');
 assert.match(workflow,/6\.0\.9/);

@@ -1176,12 +1176,12 @@ def psElabMatchAlternativesCoverConstructors
         false
 
 def psElabMatchPatternConstructorName
-    (inductiveName : PsName)
+    (inductiveInfo : PsName)
     (pattern : PsSyntaxPattern) :
     Except PsElabError PsName :=
   match pattern with
   | .bool value _ =>
-      if psNameEq inductiveName psBoolName then
+      if psNameEq inductiveInfo psBoolName then
         if value then
           Except.ok psBoolTrueName
         else
@@ -1196,72 +1196,95 @@ def psElabMatchPatternConstructorName
       | segment :: rest =>
           match rest with
           | [] =>
-              Except.ok (psNameAppendStr inductiveName segment)
+              Except.ok (psNameAppendStr inductiveInfo segment)
           | _ :: _ =>
               match psSyntaxNameToName syntaxName with
               | none => Except.error PsElabError.matchPatternUnsupported
               | some name => Except.ok name
+
+def psElabPrepareMatchAlternativesWorker
+    (inductiveInfo : PsInductiveInfo)
+    (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) :
+    List PsElabMatchAlternative ->
+    Except PsElabError (List PsElabMatchAlternative) :=
+  match entries with
+  | [] =>
+      fun (alternativesRev : List PsElabMatchAlternative) =>
+        let alternatives :=
+          psElabMatchAlternativeListReverse alternativesRev;
+        let exhaustive :=
+          psElabMatchAlternativesCoverConstructors
+            alternatives
+            inductiveInfo.constructors;
+        if exhaustive then
+          Except.ok alternatives
+        else
+          Except.error PsElabError.matchNonExhaustive
+  | entry :: rest =>
+      let smaller :
+          List PsElabMatchAlternative ->
+          Except PsElabError (List PsElabMatchAlternative) :=
+        psElabPrepareMatchAlternativesWorker
+          inductiveInfo
+          rest;
+      fun (alternativesRev : List PsElabMatchAlternative) =>
+        let pattern := Prod.fst entry;
+        let payload := Prod.snd entry;
+        let body := Prod.fst payload;
+        let span := Prod.snd payload;
+        match pattern with
+        | .wildcard _ =>
+            match rest with
+            | [] =>
+                Except.ok
+                  (psElabMatchAlternativeListReverse
+                    (psElabFillWildcardAlternatives
+                      pattern
+                      body
+                      span
+                      inductiveInfo.constructors
+                      alternativesRev))
+            | _ :: _ =>
+                Except.error PsElabError.matchPatternUnsupported
+        | _ =>
+            match psElabMatchPatternConstructorName
+                inductiveInfo.name
+                pattern with
+            | Except.error error => Except.error error
+            | Except.ok ctorName =>
+                if psElabBoolNot
+                    (psMatchNameListContains
+                      inductiveInfo.constructors
+                      ctorName) then
+                  Except.error
+                    (PsElabError.matchConstructorUnknown ctorName)
+                else
+                  match
+                      psElabMatchAlternativeFind
+                        ctorName
+                        alternativesRev with
+                  | some _ =>
+                      Except.error
+                        (PsElabError.matchDuplicateConstructor ctorName)
+                  | none =>
+                      let alternative : PsElabMatchAlternative := {
+                        constructorName := ctorName
+                        pattern := pattern
+                        body := body
+                        span := span
+                      };
+                      smaller
+                        (List.cons alternative alternativesRev)
 
 def psElabPrepareMatchAlternatives
     (inductiveInfo : PsInductiveInfo)
     (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
     (alternativesRev : List PsElabMatchAlternative) :
     Except PsElabError (List PsElabMatchAlternative) :=
-  match entries with
-  | [] =>
-      let alternatives :=
-        psElabMatchAlternativeListReverse alternativesRev;
-      let exhaustive :=
-        psElabMatchAlternativesCoverConstructors
-          alternatives
-          inductiveInfo.constructors;
-      if exhaustive then
-        Except.ok alternatives
-      else
-        Except.error PsElabError.matchNonExhaustive
-  | entry :: rest =>
-      let pattern := Prod.fst entry;
-      let payload := Prod.snd entry;
-      let body := Prod.fst payload;
-      let span := Prod.snd payload;
-      match pattern with
-      | .wildcard _ =>
-          match rest with
-          | [] =>
-              Except.ok
-                (psElabMatchAlternativeListReverse
-                  (psElabFillWildcardAlternatives
-                    pattern
-                    body
-                    span
-                    inductiveInfo.constructors
-                    alternativesRev))
-          | _ :: _ =>
-              Except.error PsElabError.matchPatternUnsupported
-      | _ =>
-          match psElabMatchPatternConstructorName
-              inductiveInfo.name
-              pattern with
-          | Except.error error => Except.error error
-          | Except.ok ctorName =>
-              if psElabBoolNot (psMatchNameListContains inductiveInfo.constructors ctorName) then
-                Except.error (PsElabError.matchConstructorUnknown ctorName)
-              else
-                match psElabMatchAlternativeFind ctorName alternativesRev with
-                | some _ =>
-                    Except.error
-                      (PsElabError.matchDuplicateConstructor ctorName)
-                | none =>
-                    let alternative : PsElabMatchAlternative := {
-                      constructorName := ctorName
-                      pattern := pattern
-                      body := body
-                      span := span
-                    };
-                    psElabPrepareMatchAlternatives
-                      inductiveInfo
-                      rest
-                      (List.cons alternative alternativesRev)
+  psElabPrepareMatchAlternativesWorker
+    inductiveInfo
+    entries
+    alternativesRev
 
 structure PsElabMatchField where
   id : Nat
@@ -1986,6 +2009,7 @@ def psElabApplyArgsWithFuel
             }
           else
             Except.error (PsElabError.infer PsInferError.expectedFunction)
+
 
 def psElabApplyArgs
     (elaborate :

@@ -31,29 +31,44 @@ jobs:
           from pathlib import Path
 
           path = Path('.github/workflows/psc2-lean-kernel-prebuilt.yml')
-          text = path.read_text()
-          text = text.replace('# one-shot native matrix attempt 4\n', '', 1)
-          temporary = '''  push:
-            branches:
-              - psc2/pskernel-lean-provider
-            paths:
-              - .github/workflows/psc2-lean-kernel-prebuilt.yml
-          '''
-          if temporary not in text:
-              raise SystemExit('temporary prebuilt push trigger not found')
-          text = text.replace(temporary, '', 1)
-          conditional = '''          if [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]]; then
-            node packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs
-          fi
-          '''
-          if conditional not in text:
-              raise SystemExit('temporary conditional contract gate not found')
-          text = text.replace(
-              conditional,
-              '          node packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs\n',
-              1,
+          lines = path.read_text().splitlines(keepends=True)
+
+          marker = '# one-shot native matrix attempt 4\n'
+          if marker not in lines:
+              raise SystemExit('one-shot marker not found')
+          lines.remove(marker)
+
+          trigger = [
+              '  push:\n',
+              '    branches:\n',
+              '      - psc2/pskernel-lean-provider\n',
+              '    paths:\n',
+              '      - .github/workflows/psc2-lean-kernel-prebuilt.yml\n',
+          ]
+          trigger_index = next(
+              (index for index in range(len(lines)) if lines[index:index + len(trigger)] == trigger),
+              None,
           )
-          path.write_text(text)
+          if trigger_index is None:
+              raise SystemExit('temporary prebuilt push trigger not found')
+          del lines[trigger_index:trigger_index + len(trigger)]
+
+          conditional = [
+              '          if [[ "$GITHUB_EVENT_NAME" == \'workflow_dispatch\' ]]; then\n',
+              '            node packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs\n',
+              '          fi\n',
+          ]
+          conditional_index = next(
+              (index for index in range(len(lines)) if lines[index:index + len(conditional)] == conditional),
+              None,
+          )
+          if conditional_index is None:
+              raise SystemExit('temporary conditional contract gate not found')
+          lines[conditional_index:conditional_index + len(conditional)] = [
+              '          node packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs\n',
+          ]
+
+          path.write_text(''.join(lines))
           PY
 
           node psc15selfhost/packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs

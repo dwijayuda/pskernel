@@ -68,7 +68,7 @@ The PSC2 self-host workspace declares:
 
 It is deliberately optional. Ordinary PSC2 bootstrap and fixed-point operation must remain possible without installing or running the Lean provider.
 
-Host orchestration resolves the provider in this order:
+Host orchestration resolves the package boundary in this order:
 
 1. use the installed `@proofscript/pskernel-lean` package when Node can resolve it;
 2. in a zero-install repository checkout, fall back to the local package's public `index.mjs` entry point;
@@ -78,7 +78,7 @@ This preserves a normal npm package boundary while allowing the current reposito
 
 ## Workspace membership is not bootstrap membership
 
-`pskernel-lean` is now a normal `packages/*` npm workspace. This does **not** make it part of PSC2's first fixed-point closure.
+`pskernel-lean` is a normal `packages/*` npm workspace. This does **not** make it part of PSC2's first fixed-point closure.
 
 Its ProofScript package metadata remains:
 
@@ -110,35 +110,64 @@ host-selected KernelProvider
 
 Lean-specific execution must stay on the host/provider side of this boundary.
 
-## Native executable distribution status
+## Native executable distribution
 
-The npm package API exists now, but this package does **not yet ship prebuilt native executables for every supported OS/architecture**.
-
-In this repository, build the native provider with:
+`@proofscript/pskernel-lean@4.34.0` bundles verified native executables directly in the package for:
 
 ```text
-npm run build:kernel:lean434
+linux-x64
+linux-arm64
+darwin-x64
+darwin-arm64
+win32-x64
 ```
 
-The Node adapter then finds the Lake output automatically.
+Supported-platform consumers do not need Lean, Lake, a C++ compiler, an install-time download, or a provider environment variable.
 
-An external npm consumer can currently supply a native provider path with:
+The package-local resolver chooses the provider in this order:
 
-```text
-PSC_LEAN_KERNEL_PROVIDER_BIN=/absolute/path/to/psc2_lean_kernel_provider
-```
+1. explicit `PSC_LEAN_KERNEL_PROVIDER_BIN` / `binaryPath` override;
+2. bundled native executable for `process.platform` + `process.arch`;
+3. source-checkout Lake output as a development fallback;
+4. fail closed for unsupported/missing providers.
 
-or pass `binaryPath` to `checkCanonicalAdmissions`.
+The bundled path is indexed by `PREBUILT_MANIFEST.json`. Before spawn, the adapter validates the package/provider/Lean identity and recomputes SHA-256 against the selected executable.
 
-Do not claim that an npm install alone provides a runnable native kernel until prebuilt platform artifacts are actually packaged.
+Windows ARM64 is not included in the Lean 4.34 matrix. It fails explicitly instead of silently running an x64 executable or downloading another artifact.
 
-A later distribution layer may add platform-specific native packages while preserving this public JavaScript API. The WASM transport should be published separately as `@proofscript/pskernel-lean-wasm` rather than changing the semantics of the native package.
+No install/postinstall script downloads or compiles native code. Installation is side-effect-free.
+
+## Native build and assembly evidence
+
+The distribution workflow builds each target on a native runner rather than cross-compiling the first matrix. Each build:
+
+- verifies Lean `4.34.0` and exact `lean --githash`;
+- builds the provider;
+- strips release symbols;
+- runs `--health` after stripping;
+- runs positive semantic acceptance and negative kernel-rejection fixtures after stripping;
+- inspects dynamic dependencies;
+- proves standalone execution with the repository Lake build tree hidden;
+- stages only the provider executable plus provenance metadata.
+
+Assembly requires exactly five mutually consistent artifacts, verifies their SHA-256 and identity, generates `PREBUILT_MANIFEST.json`, runs `npm pack`, and executes the packed package in a clean consumer before the distribution can be committed.
+
+The normal provider workflow then independently packs, installs, resolves, and executes the **committed package bytes** on all five supported target runners.
+
+The native files are unsigned/not notarized. Do not make a stronger release-signing claim until a later signing milestone implements it.
 
 ## Consumer verification
 
-CI installs this package into a clean temporary npm project and imports it by package name. This verifies that the `files` and `exports` contracts work independently of the monorepo layout.
+CI installs the packed package into a clean temporary npm project and imports it by package name. This verifies that the `files` and `exports` contracts work independently of the monorepo layout.
 
-CI also verifies that PSC2 host orchestration contains the package import boundary and does not reach directly into the provider implementation path.
+For every supported native target, CI also verifies that with `PSC_LEAN_KERNEL_PROVIDER_BIN` unset:
+
+- the resolver selects the package-local target binary;
+- manifest digest verification succeeds;
+- valid canonical admissions are accepted;
+- codec-valid but ill-typed admissions are rejected by the Lean kernel.
+
+CI additionally verifies that PSC2 host orchestration uses the package boundary and does not reach directly into the provider implementation path.
 
 ## Semantic contract
 
@@ -148,6 +177,7 @@ Packaging does not change what acceptance means. `checkCanonicalAdmissions` stil
 - provider identity `lean4-cpp`;
 - Lean version `4.34.0`;
 - exact Lean source commit;
+- provider profile `lean4.34-core`;
 - boolean acceptance result.
 
-See `INTEGRATION.md` for the semantic/trust boundary and `BUILDING.md` for native build instructions.
+See `INTEGRATION.md` for the semantic/trust boundary, `BUILDING.md` for source-build instructions, and `PREBUILT_MANIFEST.json` for the exact committed native artifact set.

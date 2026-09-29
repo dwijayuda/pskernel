@@ -34,6 +34,11 @@ assert.match(build,/lean4-4\.34\.0-emscripten-uv-stubs\.patch/);
 assert.match(build,/pskernel-lean\.wasm/);
 assert.doesNotMatch(build,/emsdk\s+(install|activate)\s+(latest|tot)/);
 
+const patch=await readFile(path.join(packageRoot,'patches/lean4-4.34.0-emscripten-uv-stubs.patch'),'utf8');
+assert.match(patch,/src\/CMakeLists\.txt/);
+assert.match(patch,/-  Leanc\n   LeanIR/);
+assert.match(patch,/\+  list\(APPEND STDLIBS Leanc\)/);
+
 const workflow=await readFile(path.join(repoRoot,'.github/workflows/psc2-lean-kernel-wasm.yml'),'utf8');
 assert.match(workflow,/6\.0\.9/);
 assert.match(workflow,/emcc --version/);

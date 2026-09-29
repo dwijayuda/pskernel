@@ -29,3 +29,19 @@ index 3ac95b6f2..5619340fc 100644
      lean_always_assert(
          false && ("Please build a version of Lean4 with libuv to invoke this.")
      );
+diff --git a/study/lean4-4.34.0/src/CMakeLists.txt b/study/lean4-4.34.0/src/CMakeLists.txt
+--- a/study/lean4-4.34.0/src/CMakeLists.txt
++++ b/study/lean4-4.34.0/src/CMakeLists.txt
+@@ -1,12 +1,12 @@
+ set(
+   STDLIBS
+   Init
+   Std
+   Lean
+-  Leanc
+   LeanIR
+ )
+ if(NOT CMAKE_SYSTEM_NAME MATCHES "Emscripten")
++  list(APPEND STDLIBS Leanc)
+   list(APPEND STDLIBS Lake LeanChecker)
+ endif()

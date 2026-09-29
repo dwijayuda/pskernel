@@ -1118,7 +1118,7 @@ def psElabFillWildcardAlternatives
   | [] =>
       alternativesRev
   | ctorName :: rest =>
-      let next :=
+      let next : List PsElabMatchAlternative :=
         match psElabMatchAlternativeFind ctorName alternativesRev with
         | some _ => alternativesRev
         | none =>

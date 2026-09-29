@@ -24,7 +24,7 @@ assert.equal(leanPin.provider,'lean4-cpp');
 assert.equal(leanPin.profile,'lean4.34-core');
 
 const emscriptenPin=JSON.parse(await readFile(path.join(packageRoot,'EMSCRIPTEN_PIN.json'),'utf8'));
-assert.equal(emscriptenPin.version,'6.0.10');
+assert.equal(emscriptenPin.version,'6.0.9');
 assert.notEqual(emscriptenPin.version,'latest');
 assert.notEqual(emscriptenPin.version,'tot');
 

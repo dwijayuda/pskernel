@@ -1,4 +1,4 @@
-# one-shot native matrix attempt 3
+# one-shot native matrix attempt 4
 name: PSC2 Lean kernel prebuilt distribution
 
 on:
@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Build, execute, and stage native provider
+      - name: Build, strip, execute, and stage native provider
         shell: bash
         working-directory: psc15selfhost
         env:
@@ -65,6 +65,25 @@ jobs:
             binary='.lake/build/bin/psc2_lean_kernel_provider'
           fi
           test -f "$binary"
+
+          if [[ "$TARGET" == win32-* ]]; then
+            if command -v llvm-strip >/dev/null 2>&1; then
+              llvm-strip --strip-all "$binary"
+            elif command -v strip >/dev/null 2>&1; then
+              strip --strip-all "$binary"
+            else
+              echo 'no PE/COFF strip tool is available on the Windows runner' >&2
+              exit 1
+            fi
+          elif [[ "$TARGET" == darwin-* ]]; then
+            strip -S -x "$binary"
+          else
+            strip --strip-all "$binary"
+          fi
+
+          binary_size="$(node -e "process.stdout.write(String(require('fs').statSync(process.argv[1]).size))" "$binary")"
+          echo "PSC2_LEAN_KERNEL_STRIPPED_SIZE: ${TARGET} ${binary_size}"
+          test "$binary_size" -lt 104857600
 
           health_json="$("$binary" --health)"
           printf '%s\n' "$health_json" > ".provider-health-${TARGET}.json"

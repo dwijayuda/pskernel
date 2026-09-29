@@ -34,13 +34,14 @@ Phase 11 adds trusted support for:
 1. one already-bounded single inductive family;
 2. direct recursive constructor fields whose field type is an application of the inductive being declared;
 3. positive functional recursive fields of the form `(x : A) -> ... -> T params indices`, provided every function-domain binder is non-recursive;
-4. uniform recursive uses of the family parameters and universe levels;
-5. rejection of recursive occurrences inside recursive result indices;
-6. rejection of negative recursive occurrences;
-7. rejection of nested recursive occurrences through another type constructor;
-8. final `isRec` and `isReflexive` metadata derived from accepted constructor shapes;
-9. differential tests against the mature `PSC1Kernel` bounded recursive-inductive behavior;
-10. Phase 1–11 aggregate assurance and full existing PSC2 regression execution.
+4. multiple recursive fields in one constructor when each field independently satisfies the same bounded positivity rule;
+5. uniform recursive uses of the family parameters and universe levels;
+6. rejection of recursive occurrences inside recursive result indices;
+7. rejection of negative recursive occurrences;
+8. rejection of nested recursive occurrences through another type constructor;
+9. final `isRec` and `isReflexive` metadata derived from accepted constructor shapes;
+10. differential tests against the mature `PSC1Kernel` bounded recursive-inductive behavior;
+11. Phase 1–11 aggregate assurance and full existing PSC2 regression execution.
 
 ### Explicitly out of scope
 
@@ -246,20 +247,42 @@ The exact storage shape may be simplified during planning if existing Phase-8/10
 
 Important constraint: Phase 11 must not store elaborator-only open local state in the trusted environment. Persisted recursive metadata must be closed/canonical or re-derivable from admitted closed constructor declarations.
 
+### 6.1 Input metadata contract
+
+Incoming Phase-8-style inductive metadata is **not** allowed to assert recursion as trusted fact.
+
+For the Phase-11 admission API:
+
+```text
+input isRec       = false
+input isReflexive = false
+```
+
+are canonical placeholders. If either incoming flag is already `true`, admission fails closed as noncanonical metadata.
+
+After all constructor fields are independently analyzed:
+
+```text
+output isRec       := any accepted recursive field exists
+output isReflexive := any accepted recursive field has functional arguments
+```
+
+This prevents callers from smuggling recursive/reflexive classification across the trust boundary and makes the final flags a product of KernelCore analysis only.
+
 ## 7. Environment/admission behavior
 
 Admission remains transactional/fail-closed.
 
 For a recursive family:
 
-1. validate family/header metadata using the existing Phase-8 path;
+1. validate family/header metadata using the existing Phase-8 path, with incoming `isRec = false` and `isReflexive = false` required as canonical placeholders;
 2. validate constructor universe parameters, safety, ownership, order, field counts, and result shape;
 3. classify each constructor field under the positivity rules above;
 4. reject the entire declaration on any invalid recursive occurrence;
 5. only after all constructors are valid, publish final inductive metadata with `isRec` / `isReflexive` derived from trusted analysis;
 6. preserve the original immutable environment on failure.
 
-Phase 11 must not trust incoming `isRec` / `isReflexive` values as admission authority.
+KernelCore never treats incoming `isRec` / `isReflexive` values as admission authority.
 
 ## 8. PSC1-subset / self-hostability constraints
 
@@ -287,6 +310,7 @@ The mature `PSC1Kernel` remains the semantic reference for this bounded recursiv
 Relevant oracle behavior already supports:
 
 - direct strictly-positive recursive fields;
+- multiple recursive fields;
 - functional recursive fields when each function-domain binder is non-recursive and the final codomain is the same inductive;
 - rejection of negative occurrences;
 - rejection of nested occurrences;
@@ -304,13 +328,13 @@ At minimum:
 
 1. direct recursive field — list-style recursion;
 2. multiple constructors with only one recursive constructor;
-3. multiple direct recursive fields if supported by the bounded reference surface;
+3. multiple direct recursive fields in one constructor;
 4. functional recursive field with one non-recursive argument;
 5. functional recursive field with multiple non-recursive arguments;
 6. indexed recursive family with valid non-recursive indices;
 7. accepted declarations set `isRec = true`;
 8. accepted functional recursive declarations set `isReflexive = true`;
-9. non-recursive Phase-8 declarations remain accepted and retain `isRec = false`.
+9. non-recursive Phase-8 declarations remain accepted and retain `isRec = false` and `isReflexive = false`.
 
 ### Rejection matrix
 
@@ -324,9 +348,10 @@ At minimum:
 6. wrong parameter count;
 7. wrong index arity;
 8. recursive occurrence in constructor metadata not belonging to the admitted family;
-9. forged incoming `isRec` / `isReflexive` flags inconsistent with analyzed fields;
-10. malformed recursive functional chain;
-11. admission failure leaves original environment unchanged.
+9. incoming `isRec = true`;
+10. incoming `isReflexive = true`;
+11. malformed recursive functional chain;
+12. admission failure leaves original environment unchanged.
 
 ### Regression preservation
 
@@ -369,9 +394,9 @@ The acceptance record must pin:
 If all gates are green, it will be valid to claim:
 
 - KernelCore admits a bounded PSC1-self-hostable strictly-positive single-family recursive-inductive surface;
-- direct recursive fields and positive functional recursive fields are supported on the reviewed profile;
+- direct recursive fields, multiple recursive fields, and positive functional recursive fields are supported on the reviewed profile;
 - negative, nested, recursive-index, nonuniform-parameter, and malformed recursive occurrences fail closed;
-- recursive/reflexive metadata is derived from trusted constructor analysis;
+- recursive/reflexive metadata is derived from trusted constructor analysis rather than caller-supplied flags;
 - all Phase 1–11 aggregate gates plus the existing PSC2 regression gate are green on the exact accepted SHA.
 
 ## 13. Explicit non-claims after acceptance
@@ -403,6 +428,6 @@ Mutual/nested inductives should remain later and separately gated.
 
 Phase 11 deliberately adds one missing trusted capability:
 
-> bounded strict positivity for a single recursive inductive family, including direct and positive functional recursive fields, with uniform parameters/universes and fail-closed rejection of negative, nested, recursive-index and malformed occurrences.
+> bounded strict positivity for a single recursive inductive family, including direct, multiple, and positive functional recursive fields, with uniform parameters/universes and fail-closed rejection of negative, nested, recursive-index and malformed occurrences.
 
 It does **not** combine that capability with recursive recursor/IH semantics. This keeps the trusted kernel small, PSC1-self-hostable, reviewable, and aligned with the project rule that complexity stays outside the TCB until the kernel must own it.

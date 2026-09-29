@@ -26,9 +26,22 @@ if [[ "$emcc_version" != *"$expected_emscripten"* ]]; then
   exit 1
 fi
 
-lean_prefix="$(lean --print-prefix)"
-if [[ ! -x "$lean_prefix/bin/lean" ]]; then
-  echo "Lean prefix does not contain bin/lean: $lean_prefix" >&2
+for tool in cmake clang clang++ emcc emar; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "required build tool missing: $tool" >&2
+    exit 1
+  fi
+done
+
+if [[ ! -x /usr/bin/i386-linux-gnu-pkg-config ]]; then
+  echo '32-bit pkg-config wrapper missing: /usr/bin/i386-linux-gnu-pkg-config' >&2
+  exit 1
+fi
+
+emscripten_root="$(cd "$(dirname "$(command -v emcc)")" && pwd)"
+emscripten_toolchain="$emscripten_root/cmake/Modules/Platform/Emscripten.cmake"
+if [[ ! -f "$emscripten_toolchain" ]]; then
+  echo "Emscripten CMake toolchain missing: $emscripten_toolchain" >&2
   exit 1
 fi
 
@@ -44,55 +57,90 @@ cd "$workspace_root"
 rm -rf .lake/build "$lean_build" "$provider_obj_dir" "$out_dir"
 mkdir -p "$lean_build" "$provider_obj_dir" "$out_dir"
 
-# Generate target-independent C for exactly the working native provider closure.
-lake build psc2_lean_kernel_provider
-mapfile -d '' provider_c_files < <(find .lake/build/ir -type f -name '*.c' -print0 | sort -z)
-if [[ ${#provider_c_files[@]} -eq 0 ]]; then
-  echo 'Lake produced no provider C sources' >&2
-  exit 1
-fi
-
-# Cross-build Lean's runtime and static library closure using the installed native
-# Lean 4.34 compiler as the previous stage and Emscripten as the target compiler.
-emcmake cmake \
-  -S "$lean_source/src" \
+# Follow Lean's own wasm cross-build architecture.  Stage 0 must be a runnable
+# native 32-bit compiler so every .olean records wasm32-compatible platform
+# constants; stage 1 is then configured with the Emscripten toolchain.
+cmake \
+  -S "$lean_source" \
   -B "$lean_build" \
   -G 'Unix Makefiles' \
-  -DSTAGE=1 \
-  -DPREV_STAGE="$lean_prefix" \
-  -DPREV_STAGE_CMAKE_EXECUTABLE_SUFFIX='' \
   -DCMAKE_BUILD_TYPE=Release \
-  -DUSE_GITHASH=OFF \
+  -DCMAKE_C_COMPILER_WORKS=1 \
+  -DCMAKE_AR="$(command -v emar)" \
+  -DCMAKE_TOOLCHAIN_FILE="$emscripten_toolchain" \
+  -DSTAGE0_USE_GMP=OFF \
+  -DSTAGE0_LEAN_EXTRA_CXX_FLAGS='-m32' \
+  -DSTAGE0_LEANC_OPTS='-m32' \
+  -DSTAGE0_CMAKE_CXX_COMPILER=clang++ \
+  -DSTAGE0_CMAKE_C_COMPILER=clang \
+  -DSTAGE0_CMAKE_EXECUTABLE_SUFFIX='' \
+  -DSTAGE0_MMAP=OFF \
+  -DSTAGE0_CMAKE_LIBRARY_PATH=/usr/lib/i386-linux-gnu/ \
+  -DSTAGE0_PKG_CONFIG_EXECUTABLE=/usr/bin/i386-linux-gnu-pkg-config \
   -DUSE_GMP=OFF \
   -DUSE_MIMALLOC=OFF \
   -DUSE_LAKE=OFF \
+  -DMMAP=OFF \
   -DLLVM=OFF \
   -DCCACHE=OFF \
-  -DWFAIL=OFF
+  -DWFAIL=OFF \
+  -DLEAN_INSTALL_SUFFIX=-linux_wasm32
 
-# These helper scripts are copied by CMake from a source snapshot whose git
-# executable mode is not preserved inside this repository checkout.
-chmod +x "$lean_build/bin/leanmake" "$lean_build/leanc.sh"
+# This target builds native stage 0 and configures wasm32 stage 1, but does not
+# yet spend the time building the full target stdlib.
+cmake --build "$lean_build" --target stage1-configure -j2
 
-cmake --build "$lean_build" --target make_stdlib -j2
-
-if [[ ! -x "$lean_build/leanc.sh" ]]; then
-  echo "cross leanc wrapper missing: $lean_build/leanc.sh" >&2
+stage0_lake="$lean_build/stage0/bin/lake"
+stage0_lean="$lean_build/stage0/bin/lean"
+stage1_leanc="$lean_build/stage1/leanc.sh"
+if [[ ! -x "$stage0_lake" || ! -x "$stage0_lean" ]]; then
+  echo 'native 32-bit Lean stage0 was not produced' >&2
   exit 1
 fi
+
+# Generate the provider closure with the 32-bit native compiler.  Using the
+# host x86_64 toolchain here would reintroduce host-width platform constants
+# into the C generated for a wasm32 kernel provider.
+"$stage0_lake" build psc2_lean_kernel_provider
+mapfile -d '' provider_c_files < <(find .lake/build/ir -type f -name '*.c' -print0 | sort -z)
+if [[ ${#provider_c_files[@]} -eq 0 ]]; then
+  echo '32-bit stage0 Lake produced no provider C sources' >&2
+  exit 1
+fi
+
+# Source snapshots copied into this repository do not reliably preserve the
+# executable bit on generated helper scripts.  stage1-configure has created
+# them, so normalize the modes before continuing the ExternalProject build.
+for helper in "$lean_build/stage1/bin/leanmake" "$stage1_leanc"; do
+  if [[ -e "$helper" ]]; then
+    chmod +x "$helper"
+  fi
+done
+
+# Build Lean's complete wasm32 runtime/static-library closure through the
+# normal staged target rather than invoking make_stdlib in a direct stage-1
+# build directory.  This avoids the missing <build>/leanc layout seen in CI.
+cmake --build "$lean_build" --target stage1 -j2
+
+if [[ ! -f "$stage1_leanc" ]]; then
+  echo "cross leanc wrapper missing: $stage1_leanc" >&2
+  exit 1
+fi
+chmod +x "$stage1_leanc"
 
 provider_objects=()
 index=0
 for source in "${provider_c_files[@]}"; do
   object="$provider_obj_dir/$index.o"
-  "$lean_build/leanc.sh" -O3 -c "$source" -o "$object"
+  "$stage1_leanc" -O3 -c "$source" -o "$object"
   provider_objects+=("$object")
   index=$((index + 1))
 done
 
-# Task 3 deliberately builds the already-proven CLI transport first. Task 4
-# replaces the JS-facing transport with a memory API without changing semantics.
-"$lean_build/leanc.sh" \
+# Keep the already-proven CLI transport for the first real WASM milestone.
+# The following milestone can replace this with the JS-facing memory API
+# without changing admission semantics.
+"$stage1_leanc" \
   "${provider_objects[@]}" \
   -O3 \
   -sENVIRONMENT=node \

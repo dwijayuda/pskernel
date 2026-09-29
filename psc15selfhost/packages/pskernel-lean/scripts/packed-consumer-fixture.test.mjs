@@ -7,6 +7,7 @@ import {
   mkdir,
   mkdtemp,
   rm,
+  writeFile,
 } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -68,9 +69,16 @@ try{
     const inputDir=path.join(inputsRoot,target);
     await mkdir(inputDir,{recursive:true});
     const inputBinary=path.join(inputDir,executableName(target));
-    await copyFile(nativeBinary,inputBinary);
-    if(!target.startsWith('win32-')){
+    if(target==='linux-x64'){
+      await copyFile(nativeBinary,inputBinary);
       await chmod(inputBinary,0o755);
+      const stripped=spawnSync('strip',['--strip-all',inputBinary],{encoding:'utf8'});
+      assert.equal(stripped.status,0,`${stripped.stdout}\n${stripped.stderr}`);
+    }else{
+      await writeFile(inputBinary,Buffer.from(`synthetic-prebuilt-${target}\n`));
+      if(!target.startsWith('win32-')){
+        await chmod(inputBinary,0o755);
+      }
     }
     await stageNativePrebuilt({
       target,

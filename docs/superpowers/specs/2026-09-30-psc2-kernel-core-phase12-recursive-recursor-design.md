@@ -45,7 +45,13 @@ Adding recursive-field positions or IH counts to recursor metadata would make re
 
 ### Rejected alternative: generate recursive recursors inside KernelCore
 
-Kernel-side generation would remove some supplied-metadata validation work but substantially enlarges the TCB with name generation, binder synthesis, elimination-level policy and rule construction. The project architecture keeps generation/elaboration above the trust boundary; the kernel validates the primitive result.
+Kernel-side declaration generation would remove some supplied-metadata validation work but substantially enlarges the TCB with name generation, binder synthesis, elimination-level policy and environment construction. The project architecture keeps declaration generation/elaboration above the trust boundary; the kernel validates the supplied primitive result.
+
+Transient construction of an expected expression for comparison is allowed where it is the smallest clear validator. That is validation logic, not declaration generation: it is not stored as replacement metadata and never substitutes for validating the supplied declaration.
+
+### Rejected alternative: type-check recursive rules only
+
+Subject preservation alone is not enough for Lean-compatible computation metadata. A recursive rule can have the expected type while calling a different recursor, using the wrong recursive field, or omitting/reordering recursive calls. Phase 12 therefore validates the recursive rule's canonical call structure in addition to checking its type.
 
 ## Trusted architecture
 
@@ -58,6 +64,7 @@ RecursiveInductive.lean
           v
 RecursorCanonical.lean / Recursor.lean
   canonical field + IH validation
+  canonical recursive-call validation
   supplied-recInfo validation
           |
           v
@@ -80,6 +87,24 @@ The required trusted recursive-field description is semantic, not persistent dec
 - recursive result indices.
 
 If additional binder information is required to reconstruct functional IH types, extend the internal Phase-11 field-shape summary rather than re-walking positivity with a second algorithm.
+
+When validating a constructor telescope, fields must be opened with fresh variables in order, and the recursive classifier must run at the same binder depth used to derive each field's IH. Dependent later field domains and recursive result indices therefore see the same previously opened constructor fields as the constructor type itself.
+
+## Recursive-family eligibility and metadata revalidation
+
+The existing Phase-10 target predicate intentionally accepts only non-recursive Phase-8 families. Phase 12 must not weaken it globally.
+
+Recursor validation instead gains a recursive-family path with these requirements:
+
+1. exactly one target family in `all`;
+2. target name matches its declaration;
+3. `numNested = 0`;
+4. constructor list is present, ordered and owned by that family;
+5. each constructor is re-analysed through the existing Phase-11 recursive classifier under the same resource/budget rules;
+6. the re-derived aggregate `isRec` and `isReflexive` values match the stored family metadata;
+7. the target actually has recursive evidence for the recursive Phase-12 path.
+
+This preserves the existing non-recursive Phase-10 path unchanged and prevents a forged `InductiveInfo.isRec` / `isReflexive` pair from authorizing recursive recursor semantics by itself.
 
 ## Canonical minor validation
 
@@ -127,21 +152,45 @@ The validator must independently check:
 
 A forged minor and matching forged rule must not become valid merely because they are self-consistent with each other.
 
+## Canonical recursive-rule validation
+
+For a recursive constructor, validating `rule.rhs` only by its inferred type is insufficient. The trusted validator must also pin the computation rule to the recursive fields derived from the admitted constructor.
+
+After opening the rule's fixed prefix and ordinary constructor-field lambdas, the rule body must represent the selected minor applied in this order:
+
+```text
+minor
+  field_1 ... field_n
+  recursiveCall_1 ... recursiveCall_k
+```
+
+There is exactly one recursive call for each Phase-11-classified recursive field, in recursive-field order.
+
+For a direct recursive field `r`, the canonical recursive call is the same recursor, with the same instantiated recursor universe levels and fixed arguments, applied to that field's recursive indices and then to `r` as major.
+
+For a functional recursive field `r : forall a_1 ... a_m, Family ...`, the argument supplied to the minor is a lambda telescope over `a_1 ... a_m` whose body is that same canonical recursive call applied to `r a_1 ... a_m` with the classifier-derived indices.
+
+Validation may construct this expected recursive-call expression transiently and compare it structurally after the same binder opening/level instantiation discipline used elsewhere in KernelCore. It must not store a generated replacement rule.
+
+This check rejects a type-correct rule that calls another recursor/family, uses the wrong recursive field, has missing/extra recursive calls, or changes their order.
+
+For non-recursive constructors, the accepted Phase-10 rule behavior remains unchanged.
+
 ## Recursive rule validation and provisional self-reference
 
 Mature generated recursive computation rules contain calls to the recursor being defined. Therefore recursive rule-RHS type checking needs a temporary environment in which the already-validated recursor declaration is visible.
 
 The safe admission sequence is:
 
-1. validate target family, constructor ownership, recursor counts, base type shape, universe parameters, safety and canonical recursive minor/IH layout;
+1. validate target family, constructor ownership, recursor counts, base type shape, universe parameters, safety, canonical recursive minor/IH layout and canonical recursive-rule structure;
 2. validate the recursor base type itself against the original environment;
 3. create a **provisional immutable environment** containing the supplied `recInfo`;
-4. validate each rule RHS in that provisional environment;
+4. validate each rule RHS's closedness, levels and inferred type in that provisional environment;
 5. require the inferred rule type to match the independently reconstructed branch result;
 6. if any rule fails, return an error and leave the caller's original environment unchanged;
 7. only on complete success return the environment containing the recursor.
 
-This mirrors the mature oracle's need for recursor self-reference without introducing mutable rollback or partial trusted state.
+Canonical rule-structure validation must not depend on successful recursive reduction of the provisional rule itself; it inspects the supplied syntax against the classifier-derived recursive-call contract. This avoids circularly trusting the computation rule in order to validate that same rule.
 
 ## Recursive iota
 
@@ -176,6 +225,7 @@ At least one fixture must exercise an actual recursive computation beyond a sing
 
 Phase 12 adds dedicated regressions for at least:
 
+- forged recursive-family flags that disagree with classifier-derived metadata;
 - missing IH binder for a recursive field;
 - extra IH binder for a non-recursive field;
 - IHs in the wrong constructor-field order;
@@ -184,7 +234,9 @@ Phase 12 adds dedicated regressions for at least:
 - IH applied to the wrong recursive field;
 - functional IH with missing, extra or wrong argument telescope;
 - recursive minor final result forged to match a forged rule;
+- missing, extra or reordered recursive calls in a rule RHS;
 - rule RHS recursive call targeting the wrong recursor/family;
+- rule RHS recursive call using the wrong recursive field or indices;
 - wrong constructor/rule ownership or order;
 - recursive rule whose type checks only under forged supplied-minor assumptions;
 - failed recursive recursor admission leaving the original environment unchanged.
@@ -196,16 +248,17 @@ Existing Phase-10 forged-minor regressions remain mandatory and must stay green.
 Implementation proceeds in this order:
 
 1. add RED fixture(s) for direct List-like recursive minor/IH admission;
-2. add RED forged-IH rejection fixture;
-3. minimally extend trusted canonical validation until both turn GREEN;
+2. add RED forged-IH and forged recursive-call rejection fixtures;
+3. minimally extend trusted canonical validation until those turn GREEN;
 4. add RED recursive-iota fixture and first verify whether existing reduction already passes once recursive recursor admission is enabled;
 5. add multi-recursive-field fixture;
 6. add functional-recursive fixture;
 7. add indexed-recursive fixture;
-8. add mature `PSC1Kernel` differential checks where the same surface overlaps;
-9. run the actual KernelCore PSC1 source/self-host profile;
-10. add `assurance:kernel-core:phase12` and a focused Phase-12 workflow;
-11. run all Phase-1 through Phase-12 aggregate gates and full `npm run check` before acceptance.
+8. add recursive-family metadata-forgery regression;
+9. add mature `PSC1Kernel` differential checks where the same surface overlaps;
+10. run the actual KernelCore PSC1 source/self-host profile;
+11. add `assurance:kernel-core:phase12` and a focused Phase-12 workflow;
+12. run all Phase-1 through Phase-12 aggregate gates and full `npm run check` before acceptance.
 
 Every trusted-code change must be justified by a failing fixture. If recursive iota becomes green without a `Reduce.lean` change after recursor admission is corrected, keep the reducer unchanged and record that as evidence.
 
@@ -220,7 +273,7 @@ All new trusted source remains within the established PSC1 subset:
 - no custom macros/elaborators;
 - no host `List` / `Option` in trusted KernelCore source;
 - no mutable semantic caches or replay/session state;
-- no recursor generation inside KernelCore.
+- no stored/generated replacement recursor metadata inside KernelCore.
 
 Use existing resource/budget paths for WHNF, checking and DefEq. Do not introduce unbounded trusted recursion.
 
@@ -255,7 +308,7 @@ Phase 12 explicitly does not include:
 - nested inductives;
 - arbitrary higher-order positivity beyond the Phase-11 admitted classifier surface;
 - source-level mutual/nested lowering inside the trusted kernel;
-- general recursor generation inside KernelCore;
+- general recursor declaration generation inside KernelCore;
 - K conversion expansion;
 - structure eta/projection expansion;
 - compiler `CheckedCore` provider cutover;
@@ -266,9 +319,11 @@ Phase 12 explicitly does not include:
 
 Phase 12 is accepted only when the exact implementation head has permanent evidence that:
 
+- recursive-family eligibility is re-derived from admitted constructor shapes rather than trusted from flags alone;
 - recursive minors/IHs are independently tied to admitted constructor shapes;
+- recursive rule RHSs contain exactly the classifier-derived canonical recursive calls;
 - direct, multi-field, functional and indexed recursive recursors pass the bounded positive matrix;
-- forged/missing/misordered IH shapes fail closed;
+- forged/missing/misordered IH or recursive-call shapes fail closed;
 - recursive constructor iota computes through validated rule-RHS recursive calls;
 - all earlier Phase-1 through Phase-11 guarantees remain green;
 - KernelCore remains PSC1-self-host-checkable;

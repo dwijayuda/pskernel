@@ -47,10 +47,11 @@ def psKernelCoreRecursiveDirectShape?
   if psKernelCoreInductiveResultMatches
       target levels numParams numIndices binderDepth expr then
     let args := psKernelCoreExprAppArgs expr;
-    PsKernelCoreOption.some {
+    let shape : PsKernelCoreRecursiveFieldShape := {
       argCount := 0
       indices := psKernelCoreRecursiveExprListDrop numParams args
-    }
+    };
+    PsKernelCoreOption.some shape
   else
     PsKernelCoreOption.none
 
@@ -124,11 +125,12 @@ def psKernelCoreRecursiveFieldShapeFuel
                               | PsKernelCoreOption.none =>
                                   PsKernelCoreResult.ok PsKernelCoreOption.none
                               | PsKernelCoreOption.some shape =>
+                                  let nextShape : PsKernelCoreRecursiveFieldShape := {
+                                    argCount := Nat.succ shape.argCount
+                                    indices := shape.indices
+                                  };
                                   PsKernelCoreResult.ok
-                                    (PsKernelCoreOption.some {
-                                      argCount := Nat.succ shape.argCount
-                                      indices := shape.indices
-                                    })
+                                    (PsKernelCoreOption.some nextShape)
                 | _ =>
                     if psKernelCoreRecursiveHeadIsTarget target reduced then
                       PsKernelCoreResult.error "invalid recursive result"

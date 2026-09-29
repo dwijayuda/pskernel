@@ -94,13 +94,15 @@ def psKernelCoreRecursiveRecursorOpenDirectFields
                           | PsKernelCoreResult.error message =>
                               PsKernelCoreResult.error message
                           | PsKernelCoreResult.ok state =>
+                              let fieldInfo : PsKernelCoreRecursiveRecursorField := {
+                                value := fresh
+                                isRecursive := isRecursive
+                              };
                               PsKernelCoreResult.ok {
                                 ctorResult := state.ctorResult
                                 minorResult := state.minorResult
                                 fields :=
-                                  PsKernelCoreList.cons
-                                    { value := fresh, isRecursive := isRecursive }
-                                    state.fields
+                                  PsKernelCoreList.cons fieldInfo state.fields
                                 nextSeed := state.nextSeed
                               }
                 else

@@ -82,4 +82,53 @@ assert.match(
 );
 assert.match(assembleBlock,/git push/u);
 
+const providerWorkflowPath=path.join(
+  repoRoot,
+  '.github',
+  'workflows',
+  'psc2-lean-kernel-provider.yml',
+);
+const providerWorkflow=await readFile(providerWorkflowPath,'utf8');
+assert.match(providerWorkflow,/permissions:\s*\n\s{2}contents:\s*read\s*\n\s*jobs:/mu);
+
+const packedJobStart=providerWorkflow.search(/^\s{2}packed-consumer:\s*$/mu);
+assert.notEqual(
+  packedJobStart,
+  -1,
+  'normal provider workflow must continuously verify packed consumers',
+);
+const nextTopLevelJob=providerWorkflow.slice(packedJobStart+1)
+  .search(/^\s{2}[a-z0-9-]+:\s*$/mu);
+const packedJob=nextTopLevelJob===-1
+  ? providerWorkflow.slice(packedJobStart)
+  : providerWorkflow.slice(packedJobStart,packedJobStart+1+nextTopLevelJob);
+for(const [runner,target] of expectedPairs){
+  const escapedRunner=runner.replace(/[.*+?^${}()|[\]\\]/gu,'\\$&');
+  const escapedTarget=target.replace(/[.*+?^${}()|[\]\\]/gu,'\\$&');
+  assert.match(
+    packedJob,
+    new RegExp(
+      `-\\s+runner:\\s*${escapedRunner}\\s+target:\\s*${escapedTarget}`,
+      'u',
+    ),
+    `missing packed-consumer matrix pair ${runner} -> ${target}`,
+  );
+}
+assert.doesNotMatch(packedJob,/leanprover\/lean-action|elan-init|lake\s/u);
+assert.match(packedJob,/uses:\s*actions\/setup-node@v4/u);
+assert.match(packedJob,/node-version:\s*22/u);
+assert.match(packedJob,/npm pack/u);
+assert.match(packedJob,/packed-consumer\.test\.mjs/u);
+assert.match(packedJob,/PSC_LEAN_KERNEL_PROVIDER_BIN/u);
+
+const nativeJobStart=providerWorkflow.search(/^\s{2}native-provider:\s*$/mu);
+assert.notEqual(nativeJobStart,-1,'native-provider job is missing');
+const nativeJob=providerWorkflow.slice(nativeJobStart,packedJobStart);
+assert.match(nativeJob,/unset PSC_LEAN_KERNEL_PROVIDER_BIN/u);
+assert.match(nativeJob,/resolveLeanKernelProviderBinary/u);
+assert.match(nativeJob,/source\s*!==\s*['"]bundled['"]/u);
+assert.match(nativeJob,/psc\.mjs check/u);
+assert.match(nativeJob,/psc\.mjs build/u);
+
 process.stdout.write('PSC2_LEAN_KERNEL_PREBUILT_WORKFLOW_CONTRACT: PASS\n');
+process.stdout.write('PSC2_LEAN_KERNEL_PROVIDER_WORKFLOW_CONTRACT: PASS\n');

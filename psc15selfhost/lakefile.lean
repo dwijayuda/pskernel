@@ -180,6 +180,10 @@ lean_lib PsKernelLeanProvider where
     `PsKernelLean.Admission
   ]
 
+lean_lib PsKernelLeanWasmProvider where
+  srcDir := "packages/pskernel-lean-wasm/provider"
+  roots := #[`PsKernelLeanWasm.Api]
+
 @[default_target]
 lean_exe psc1 where
   srcDir := "packages/cli/src"
@@ -272,3 +276,7 @@ lean_exe psc2_lean_kernel_provider where
 lean_exe psc2_lean_kernel_provider_tests where
   srcDir := "packages/pskernel-lean/provider-test"
   root := `PsKernelLeanTests
+
+lean_exe psc2_lean_kernel_wasm_api_tests where
+  srcDir := "packages/pskernel-lean-wasm/provider-test"
+  root := `PsKernelLeanWasmTests

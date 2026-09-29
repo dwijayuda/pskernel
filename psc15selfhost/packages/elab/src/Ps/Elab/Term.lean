@@ -1089,8 +1089,10 @@ structure PsElabMatchAlternative where
   span : PsSourceSpan
 
 def psElabMatchAlternativeFind
-    (name : PsName) :
-    List PsElabMatchAlternative -> Option PsElabMatchAlternative
+    (name : PsName)
+    (alternatives : List PsElabMatchAlternative) :
+    Option PsElabMatchAlternative :=
+  match alternatives with
   | [] => Option.none
   | alternative :: rest =>
       if psNameEq alternative.constructorName name then

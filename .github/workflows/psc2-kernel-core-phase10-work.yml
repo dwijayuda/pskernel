@@ -66,22 +66,8 @@ jobs:
           source = Path('test/KernelCoreRecursorAdmissionParityTests.lean').read_text()
           prefix = source.split('\ndef main : IO Unit := do', 1)[0]
           diagnostic = prefix + '''
-          
-          def psDiagBasePrefix : Bool :=
-            match psKernelCoreRecursorOpenForalls 2 psKcRecursorInfo.base.type 0 with
-            | PsKernelCoreOption.none => false
-            | PsKernelCoreOption.some _ => true
 
-          def psDiagBaseCtorInst : Bool :=
-            match psKernelCoreRecursorOpenForalls 2 psKcRecursorInfo.base.type 0 with
-            | PsKernelCoreOption.none => false
-            | PsKernelCoreOption.some openedPrefix =>
-                let params := psKernelCoreExprListTake 1 openedPrefix.values;
-                match psKernelCoreRecursorInstantiateForallPrefix params psKcRecBaseCtor.base.type with
-                | PsKernelCoreOption.none => false
-                | PsKernelCoreOption.some _ => true
-
-          def psDiagBaseFields : Bool :=
+          def psDiagBaseDomainEq : Bool :=
             match psKernelCoreRecursorOpenForalls 2 psKcRecursorInfo.base.type 0 with
             | PsKernelCoreOption.none => false
             | PsKernelCoreOption.some openedPrefix =>
@@ -89,80 +75,50 @@ jobs:
                 match psKernelCoreRecursorInstantiateForallPrefix params psKcRecBaseCtor.base.type with
                 | PsKernelCoreOption.none => false
                 | PsKernelCoreOption.some ctorFields =>
-                    match psKernelCoreRecursorOpenMatchingFields
-                        1 ctorFields openedPrefix.rest openedPrefix.nextSeed with
-                    | PsKernelCoreOption.none => false
-                    | PsKernelCoreOption.some _ => true
-
-          def psDiagBaseHead : Bool :=
-            match psKernelCoreRecursorOpenForalls 2 psKcRecursorInfo.base.type 0 with
-            | PsKernelCoreOption.none => false
-            | PsKernelCoreOption.some openedPrefix =>
-                let params := psKernelCoreExprListTake 1 openedPrefix.values;
-                match psKernelCoreRecursorInstantiateForallPrefix params psKcRecBaseCtor.base.type with
-                | PsKernelCoreOption.none => false
-                | PsKernelCoreOption.some ctorFields =>
-                    match psKernelCoreRecursorOpenMatchingFields
-                        1 ctorFields openedPrefix.rest openedPrefix.nextSeed with
-                    | PsKernelCoreOption.none => false
-                    | PsKernelCoreOption.some opened =>
-                        match psKernelCoreExprAppHead opened.ctorResult with
-                        | PsKernelCoreExpr.const familyName _ =>
-                            psKernelCoreNameEq familyName psKcRecFamilyInfo.base.name
+                    match ctorFields with
+                    | PsKernelCoreExpr.forallE _ ctorDomain _ _ =>
+                        match openedPrefix.rest with
+                        | PsKernelCoreExpr.forallE _ minorDomain _ _ =>
+                            psKernelCoreExprEq ctorDomain minorDomain
                         | _ => false
+                    | _ => false
 
-          def psDiagBaseParams : Bool :=
+          def psDiagBaseCtorDomainParam : Bool :=
             match psKernelCoreRecursorOpenForalls 2 psKcRecursorInfo.base.type 0 with
             | PsKernelCoreOption.none => false
             | PsKernelCoreOption.some openedPrefix =>
                 let params := psKernelCoreExprListTake 1 openedPrefix.values;
-                match psKernelCoreRecursorInstantiateForallPrefix params psKcRecBaseCtor.base.type with
+                match psKernelCoreExprListGet params 0 with
                 | PsKernelCoreOption.none => false
-                | PsKernelCoreOption.some ctorFields =>
-                    match psKernelCoreRecursorOpenMatchingFields
-                        1 ctorFields openedPrefix.rest openedPrefix.nextSeed with
-                    | PsKernelCoreOption.none => false
-                    | PsKernelCoreOption.some opened =>
-                        let resultArgs := psKernelCoreExprAppArgs opened.ctorResult;
-                        psKernelCoreRecursorExprListEq
-                          (psKernelCoreExprListTake 1 resultArgs) params
-
-          def psDiagBaseFinal : Bool :=
-            match psKernelCoreRecursorOpenForalls 2 psKcRecursorInfo.base.type 0 with
-            | PsKernelCoreOption.none => false
-            | PsKernelCoreOption.some openedPrefix =>
-                let params := psKernelCoreExprListTake 1 openedPrefix.values;
-                match psKernelCoreExprListGet openedPrefix.values 1 with
-                | PsKernelCoreOption.none => false
-                | PsKernelCoreOption.some motive =>
+                | PsKernelCoreOption.some param =>
                     match psKernelCoreRecursorInstantiateForallPrefix params psKcRecBaseCtor.base.type with
                     | PsKernelCoreOption.none => false
                     | PsKernelCoreOption.some ctorFields =>
-                        match psKernelCoreRecursorOpenMatchingFields
-                            1 ctorFields openedPrefix.rest openedPrefix.nextSeed with
-                        | PsKernelCoreOption.none => false
-                        | PsKernelCoreOption.some opened =>
-                            let resultArgs := psKernelCoreExprAppArgs opened.ctorResult;
-                            let indices := psKernelCoreRecursorExprListDrop 1 resultArgs;
-                            let ctorArgs := psKernelCoreExprListAppend params opened.fields;
-                            let major := psKernelCoreRecursorApplyArgs
-                              (PsKernelCoreExpr.const psKcRecBase PsKernelCoreList.nil) ctorArgs;
-                            let expected := PsKernelCoreExpr.app
-                              (psKernelCoreRecursorApplyArgs motive indices) major;
-                            psKernelCoreExprEq opened.minorResult expected
+                        match ctorFields with
+                        | PsKernelCoreExpr.forallE _ ctorDomain _ _ =>
+                            psKernelCoreExprEq ctorDomain param
+                        | _ => false
+
+          def psDiagBaseMinorDomainParam : Bool :=
+            match psKernelCoreRecursorOpenForalls 2 psKcRecursorInfo.base.type 0 with
+            | PsKernelCoreOption.none => false
+            | PsKernelCoreOption.some openedPrefix =>
+                let params := psKernelCoreExprListTake 1 openedPrefix.values;
+                match psKernelCoreExprListGet params 0 with
+                | PsKernelCoreOption.none => false
+                | PsKernelCoreOption.some param =>
+                    match openedPrefix.rest with
+                    | PsKernelCoreExpr.forallE _ minorDomain _ _ =>
+                        psKernelCoreExprEq minorDomain param
+                    | _ => false
 
           def main : IO Unit := do
             if psKcRecursorAdmissionPositive then IO.println "PHASE10_ADMISSION_POSITIVE=PASS" else IO.println "PHASE10_ADMISSION_POSITIVE=FAIL"
-            if psKcZeroConstructorRecursor then IO.println "PHASE10_ADMISSION_EMPTY=PASS" else IO.println "PHASE10_ADMISSION_EMPTY=FAIL"
-            if psRefRecursorAdmissionPositive then IO.println "PHASE10_ADMISSION_REFERENCE=PASS" else IO.println "PHASE10_ADMISSION_REFERENCE=FAIL"
             if psKernelCoreRecursorMinorMatchesConstructor psKcRecursorInfo psKcRecFamilyInfo psKcRecBaseCtor 0 then IO.println "PHASE10_MINOR_BASE=PASS" else IO.println "PHASE10_MINOR_BASE=FAIL"
             if psKernelCoreRecursorMinorMatchesConstructor psKcRecursorInfo psKcRecFamilyInfo psKcRecExtraCtor 1 then IO.println "PHASE10_MINOR_EXTRA=PASS" else IO.println "PHASE10_MINOR_EXTRA=FAIL"
-            if psDiagBasePrefix then IO.println "PHASE10_STAGE_PREFIX=PASS" else IO.println "PHASE10_STAGE_PREFIX=FAIL"
-            if psDiagBaseCtorInst then IO.println "PHASE10_STAGE_CTOR_INST=PASS" else IO.println "PHASE10_STAGE_CTOR_INST=FAIL"
-            if psDiagBaseFields then IO.println "PHASE10_STAGE_FIELDS=PASS" else IO.println "PHASE10_STAGE_FIELDS=FAIL"
-            if psDiagBaseHead then IO.println "PHASE10_STAGE_HEAD=PASS" else IO.println "PHASE10_STAGE_HEAD=FAIL"
-            if psDiagBaseParams then IO.println "PHASE10_STAGE_PARAMS=PASS" else IO.println "PHASE10_STAGE_PARAMS=FAIL"
-            if psDiagBaseFinal then IO.println "PHASE10_STAGE_FINAL=PASS" else IO.println "PHASE10_STAGE_FINAL=FAIL"
+            if psDiagBaseDomainEq then IO.println "PHASE10_DOMAIN_EQ=PASS" else IO.println "PHASE10_DOMAIN_EQ=FAIL"
+            if psDiagBaseCtorDomainParam then IO.println "PHASE10_CTOR_DOMAIN_PARAM=PASS" else IO.println "PHASE10_CTOR_DOMAIN_PARAM=FAIL"
+            if psDiagBaseMinorDomainParam then IO.println "PHASE10_MINOR_DOMAIN_PARAM=PASS" else IO.println "PHASE10_MINOR_DOMAIN_PARAM=FAIL"
           '''
           Path('/tmp/KernelCoreRecursorAdmissionDiagnostics.lean').write_text(diagnostic)
           PY

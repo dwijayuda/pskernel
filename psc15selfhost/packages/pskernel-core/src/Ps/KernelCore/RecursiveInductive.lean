@@ -240,3 +240,194 @@ def psKernelCoreAnalyzeRecursiveConstructorWithResources
     PsKernelCoreResult String PsKernelCoreRecursiveConstructorSummary :=
   psKernelCoreAnalyzeRecursiveConstructorTelescopeFuel
     budget resources env info levels ctor.base.type info.numParams 0
+
+structure PsKernelCoreRecursiveAdmissionState where
+  env : PsKernelCoreEnvironment
+  summary : PsKernelCoreRecursiveConstructorSummary
+
+def psKernelCoreRecursiveValidateConstructorWithResources
+    (budget : Nat)
+    (resources : PsKernelCoreResourceConfig)
+    (info : PsKernelCoreInductiveInfo)
+    (levels : PsKernelCoreList PsKernelCoreLevel)
+    (ctor : PsKernelCoreConstructorInfo) :
+    PsKernelCoreEnvironment -> Nat ->
+    PsKernelCoreResult String PsKernelCoreRecursiveAdmissionState :=
+  fun (workEnv : PsKernelCoreEnvironment) (expectedIndex : Nat) =>
+    if psKernelCoreNameEq ctor.induct info.base.name then
+      if Nat.beq ctor.cidx expectedIndex then
+        if Nat.beq ctor.numParams info.numParams then
+          if psKernelCoreBoolEq ctor.isUnsafe info.isUnsafe then
+            if psKernelCoreInductiveNameListEq
+                ctor.base.levelParams info.base.levelParams then
+              let telescope :=
+                psKernelCoreInductiveSummarizeTelescope ctor.base.type;
+              if Nat.ble info.numParams telescope.binderCount then
+                if Nat.beq
+                    ctor.numFields
+                    (Nat.sub telescope.binderCount info.numParams) then
+                  if psKernelCoreInductiveResultMatches
+                      info.base.name levels info.numParams info.numIndices
+                      telescope.binderCount telescope.result then
+                    match psKernelCoreAnalyzeRecursiveConstructorWithResources
+                        budget resources workEnv info levels ctor with
+                    | PsKernelCoreResult.error message =>
+                        PsKernelCoreResult.error message
+                    | PsKernelCoreResult.ok ctorSummary =>
+                        let safety :=
+                          if ctor.isUnsafe then
+                            PsKernelCoreDefinitionSafety.unsafeDef
+                          else
+                            PsKernelCoreDefinitionSafety.safe;
+                        match psKernelCoreAdmissionCheckBaseWithResources
+                            budget resources workEnv ctor.base safety with
+                        | PsKernelCoreResult.error message =>
+                            PsKernelCoreResult.error message
+                        | PsKernelCoreResult.ok _ =>
+                            let nextEnv :=
+                              psKernelCoreEnvironmentAddUnchecked
+                                workEnv
+                                (PsKernelCoreConstantInfo.ctorInfo ctor);
+                            let state : PsKernelCoreRecursiveAdmissionState := {
+                              env := nextEnv
+                              summary := ctorSummary
+                            };
+                            PsKernelCoreResult.ok state
+                  else
+                    PsKernelCoreResult.error "invalid constructor result"
+                else
+                  PsKernelCoreResult.error "invalid constructor field count"
+              else
+                PsKernelCoreResult.error
+                  "constructor has fewer parameters than declared"
+            else
+              PsKernelCoreResult.error
+                "constructor universe parameters do not match"
+          else
+            PsKernelCoreResult.error "constructor safety does not match inductive"
+        else
+          PsKernelCoreResult.error "constructor parameter count does not match"
+      else
+        PsKernelCoreResult.error "constructor index does not match order"
+    else
+      PsKernelCoreResult.error "constructor does not belong to inductive"
+
+def psKernelCoreRecursiveAddConstructorsWithResources
+    (constructors : PsKernelCoreList PsKernelCoreConstructorInfo) :
+    Nat ->
+    PsKernelCoreResourceConfig ->
+    PsKernelCoreInductiveInfo ->
+    PsKernelCoreList PsKernelCoreLevel ->
+    PsKernelCoreEnvironment ->
+    Nat ->
+    PsKernelCoreRecursiveConstructorSummary ->
+    PsKernelCoreResult String PsKernelCoreRecursiveAdmissionState :=
+  match constructors with
+  | PsKernelCoreList.nil =>
+      fun (_budget : Nat)
+          (_resources : PsKernelCoreResourceConfig)
+          (_info : PsKernelCoreInductiveInfo)
+          (_levels : PsKernelCoreList PsKernelCoreLevel)
+          (workEnv : PsKernelCoreEnvironment)
+          (_index : Nat)
+          (summary : PsKernelCoreRecursiveConstructorSummary) =>
+        let state : PsKernelCoreRecursiveAdmissionState := {
+          env := workEnv
+          summary := summary
+        };
+        PsKernelCoreResult.ok state
+  | PsKernelCoreList.cons ctor rest =>
+      let addRest := psKernelCoreRecursiveAddConstructorsWithResources rest;
+      fun (budget : Nat)
+          (resources : PsKernelCoreResourceConfig)
+          (info : PsKernelCoreInductiveInfo)
+          (levels : PsKernelCoreList PsKernelCoreLevel)
+          (workEnv : PsKernelCoreEnvironment)
+          (index : Nat)
+          (summary : PsKernelCoreRecursiveConstructorSummary) =>
+        match psKernelCoreRecursiveValidateConstructorWithResources
+            budget resources info levels ctor workEnv index with
+        | PsKernelCoreResult.error message =>
+            PsKernelCoreResult.error message
+        | PsKernelCoreResult.ok current =>
+            let nextSummary :=
+              psKernelCoreRecursiveSummaryMerge summary current.summary;
+            addRest budget resources info levels current.env
+              (Nat.succ index) nextSummary
+
+def psKernelCoreAddRecursiveInductiveWithResources
+    (budget : Nat)
+    (resources : PsKernelCoreResourceConfig) :
+    PsKernelCoreEnvironment ->
+    PsKernelCoreInductiveInfo ->
+    PsKernelCoreList PsKernelCoreConstructorInfo ->
+    PsKernelCoreResult String PsKernelCoreEnvironment :=
+  match budget with
+  | Nat.zero =>
+      fun (_env : PsKernelCoreEnvironment)
+          (_info : PsKernelCoreInductiveInfo)
+          (_constructors : PsKernelCoreList PsKernelCoreConstructorInfo) =>
+        PsKernelCoreResult.error "admission budget exhausted"
+  | Nat.succ remaining =>
+      fun (env : PsKernelCoreEnvironment)
+          (info : PsKernelCoreInductiveInfo)
+          (constructors : PsKernelCoreList PsKernelCoreConstructorInfo) =>
+        if psKernelCoreInductiveSingleFamilyMetadataValid info then
+          let ctorNames := psKernelCoreInductiveConstructorNames constructors;
+          if psKernelCoreInductiveNameListEq info.ctors ctorNames then
+            if psKernelCoreNameHasDuplicates info.ctors then
+              PsKernelCoreResult.error "duplicate constructor name"
+            else if psKernelCoreInductiveHeaderShapeValid info then
+              let safety :=
+                if info.isUnsafe then
+                  PsKernelCoreDefinitionSafety.unsafeDef
+                else
+                  PsKernelCoreDefinitionSafety.safe;
+              match psKernelCoreAdmissionCheckBaseWithResources
+                  remaining resources env info.base safety with
+              | PsKernelCoreResult.error message =>
+                  PsKernelCoreResult.error message
+              | PsKernelCoreResult.ok _ =>
+                  let provisionalConstant :=
+                    PsKernelCoreConstantInfo.inductInfo info;
+                  let workEnv :=
+                    psKernelCoreEnvironmentAddUnchecked env provisionalConstant;
+                  let levels :=
+                    psKernelCoreInductiveLevelsFromNames info.base.levelParams;
+                  match psKernelCoreRecursiveAddConstructorsWithResources
+                      constructors remaining resources info levels workEnv 0
+                      psKernelCoreRecursiveSummaryEmpty with
+                  | PsKernelCoreResult.error message =>
+                      PsKernelCoreResult.error message
+                  | PsKernelCoreResult.ok state =>
+                      let finalInfo : PsKernelCoreInductiveInfo := {
+                        base := info.base
+                        numParams := info.numParams
+                        numIndices := info.numIndices
+                        all := info.all
+                        ctors := info.ctors
+                        numNested := info.numNested
+                        isRec := state.summary.isRec
+                        isReflexive := state.summary.isReflexive
+                        isUnsafe := info.isUnsafe
+                      };
+                      let finalConstant :=
+                        PsKernelCoreConstantInfo.inductInfo finalInfo;
+                      PsKernelCoreResult.ok
+                        (psKernelCoreEnvironmentReplaceUnchecked
+                          state.env finalConstant)
+            else
+              PsKernelCoreResult.error "invalid inductive header"
+          else
+            PsKernelCoreResult.error "constructor list does not match metadata"
+        else
+          PsKernelCoreResult.error "unsupported inductive metadata"
+
+def psKernelCoreAddRecursiveInductive
+    (budget : Nat)
+    (env : PsKernelCoreEnvironment)
+    (info : PsKernelCoreInductiveInfo)
+    (constructors : PsKernelCoreList PsKernelCoreConstructorInfo) :
+    PsKernelCoreResult String PsKernelCoreEnvironment :=
+  psKernelCoreAddRecursiveInductiveWithResources
+    budget psKernelCoreResourceConfigDefault env info constructors

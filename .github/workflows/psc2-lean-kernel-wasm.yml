@@ -70,7 +70,19 @@ jobs:
       - name: Build real Lean WASM provider
         shell: bash
         working-directory: psc15selfhost
-        run: bash packages/pskernel-lean-wasm/scripts/build-wasm.sh
+        run: |
+          set -euo pipefail
+          build_log="$RUNNER_TEMP/pskernel-lean-wasm-build.log"
+          if bash packages/pskernel-lean-wasm/scripts/build-wasm.sh >"$build_log" 2>&1; then
+            echo 'Lean WASM build completed. Final output:'
+            tail -n 80 "$build_log"
+          else
+            echo 'Lean WASM build failed. Error-focused excerpts:' >&2
+            grep -nE 'error:|fatal error:|undefined symbol|undefined reference|FAILED:|wasm-ld:|emcc: error|make(\[[0-9]+\])?: \*\*\*|CMake Error' "$build_log" | tail -n 160 >&2 || true
+            echo '--- final 300 build-log lines ---' >&2
+            tail -n 300 "$build_log" >&2
+            exit 1
+          fi
 
       - name: Upload WASM probe artifacts
         uses: actions/upload-artifact@v4

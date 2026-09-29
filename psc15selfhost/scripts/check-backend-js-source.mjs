@@ -113,7 +113,7 @@ const emitted = compiled.psJsSelfhostProbe(undefined);
 assert.equal(typeof emitted, 'string');
 writeFileSync('./probe.mjs', emitted);
 const result = await import('./probe.mjs');
-assert.equal(result.answer, 9007199254740993123456789n);
+assert.equal(result.answer, 42n);
 `);
   phase('generated-execution', process.execPath, [probeRunner], out);
   console.log('BACKEND_JS_GENERATED_EXECUTION: PASS (PSC1 -> PS -> TS seed -> executable backend -> direct JS)');

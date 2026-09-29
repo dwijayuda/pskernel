@@ -177,7 +177,8 @@ lean_lib PsKernelLeanProvider where
     `PsKernelLean.Convert,
     `PsKernelLean.Prelude,
     `PsKernelLean.Protocol,
-    `PsKernelLean.Admission
+    `PsKernelLean.Admission,
+    `PsKernelLean.Response
   ]
 
 lean_lib PsKernelLeanWasmProvider where

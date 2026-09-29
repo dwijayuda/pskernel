@@ -137,7 +137,7 @@ npm run build:kernel:lean434
 npm run test:kernel:lean434
 ```
 
-Direct commands:
+Direct development commands:
 
 ```text
 lake build psc2_lean_kernel_provider
@@ -146,20 +146,40 @@ lake exe psc2_lean_kernel_provider --health
 cat admissions.json | lake exe psc2_lean_kernel_provider --check
 ```
 
-The Node adapter finds the repository Lake output automatically. `PSC_LEAN_KERNEL_PROVIDER_BIN` or the `binaryPath` option can override the executable location.
+For normal installed-package use, the Node adapter resolves the verified bundled native executable automatically. `PSC_LEAN_KERNEL_PROVIDER_BIN` or the `binaryPath` option remains an explicit override for development, assurance experiments, and custom-provider testing.
 
-### npm distribution status
+### npm native distribution
 
-The JavaScript npm package boundary is implemented and tested from a clean external npm consumer.
+`@proofscript/pskernel-lean@4.34.0` bundles native provider executables for:
 
-The package does **not yet bundle prebuilt native executables for every OS/architecture**. Therefore an external npm installation currently needs either:
+```text
+linux-x64
+linux-arm64
+darwin-x64
+darwin-arm64
+win32-x64
+```
 
-- a compatible provider executable supplied through `PSC_LEAN_KERNEL_PROVIDER_BIN` / `binaryPath`, or
-- a later platform-native distribution package once those artifacts are produced.
+A normal supported-platform consumer does not need Lean, Lake, a C++ toolchain, an install-time download, or `PSC_LEAN_KERNEL_PROVIDER_BIN`.
 
-Do not claim that `npm install @proofscript/pskernel-lean` alone already installs a native kernel binary on every platform.
+Runtime selection is fail-closed and ordered as:
 
-Future prebuilt native packaging and `@proofscript/pskernel-lean-wasm` should preserve the same canonical request/response semantics and JavaScript-facing provider contract.
+```text
+1. explicit PSC_LEAN_KERNEL_PROVIDER_BIN / binaryPath override
+2. verified package-local prebuilt for process.platform + process.arch
+3. source-checkout Lake binary development fallback
+4. explicit unsupported/missing-provider failure
+```
+
+`PREBUILT_MANIFEST.json` records the exact package/provider/Lean identity plus the source commit, byte size, and SHA-256 for every bundled target. The adapter validates the target manifest entry and digest before spawning a bundled provider.
+
+The package does not silently emulate another architecture. Windows ARM64 is not part of the Lean 4.34 native matrix and fails as unsupported unless the caller deliberately supplies a custom provider override.
+
+The distribution workflow builds each binary on its native GitHub runner, strips release symbols, re-runs `--health` and positive/negative kernel admissions after stripping, inspects dynamic dependencies, proves standalone execution with the Lake build tree hidden, and only then assembles the npm package. The committed tarball surface is independently installed and executed on all five supported target runners by the provider workflow.
+
+The bundled binaries are currently unsigned/not notarized. Do not claim code signing or notarization until a later release-signing milestone actually implements it.
+
+A future `@proofscript/pskernel-lean-wasm@4.34.0` should preserve the same canonical request/response semantics and JavaScript-facing provider contract.
 
 ## PSC CLI integration
 
@@ -246,6 +266,7 @@ It does **not** prove full Lean frontend equivalence, full PSC/Lean equivalence,
 - `INTEGRATION.md` — semantic and host-provider boundary.
 - `BUILDING.md` — native build/run instructions.
 - `LEAN_SOURCE_PIN.json` — exact Lean identity.
+- `PREBUILT_MANIFEST.json` — committed native artifact identity/digests.
 
 ## Required regression gates
 
@@ -254,6 +275,8 @@ Keep tests for all of these when changing the package:
 - exact Lean version/source commit pin;
 - package manifest and npm exports;
 - clean external npm install/import;
+- five-target packed npm consumer execution;
+- bundled target selection and SHA-256 validation;
 - normal workspace membership;
 - explicit bootstrap exclusion;
 - PSC Core -> Lean semantic conversion;

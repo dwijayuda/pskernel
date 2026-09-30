@@ -1494,6 +1494,76 @@ structure PsElabMatchHypothesesResult where
   context : PsElabContext
   hypothesesRev : List PsElabMatchField
 
+def psElabPushRecursiveHypothesesWorker
+    (expectedType : PsExpr)
+    (fields : List PsElabMatchField)
+    (fieldIndices : List Nat) :
+    PsElabContext ->
+    List PsElabMatchField ->
+    Except PsElabError PsElabMatchHypothesesResult :=
+  match fieldIndices with
+  | [] =>
+      fun (context : PsElabContext) =>
+        fun (hypothesesRev : List PsElabMatchField) =>
+          Except.ok {
+            context := context
+            hypothesesRev := hypothesesRev
+          }
+  | fieldIndex :: rest =>
+      let smaller :
+          PsElabContext ->
+          List PsElabMatchField ->
+          Except PsElabError PsElabMatchHypothesesResult :=
+        psElabPushRecursiveHypothesesWorker
+          expectedType
+          fields
+          rest;
+      fun (context : PsElabContext) =>
+        fun (hypothesesRev : List PsElabMatchField) =>
+          match psElabMatchFieldAt fields fieldIndex with
+          | none => Except.error PsElabError.structuralRecursionInternal
+          | some field =>
+              let hypothesisName :=
+                psNameAppendNum
+                  (psRootName "_ih")
+                  fieldIndex;
+              let pushed :=
+                psLocalPushBinding
+                  context.localContext
+                  hypothesisName
+                  expectedType
+                  PsBinderInfo.explicit;
+              let withLocal :=
+                psElabContextWithLocal
+                  context
+                  pushed.context;
+              let withRecursion : PsElabContext :=
+                match context.structuralRecursion with
+                | none =>
+                    withLocal
+                | some recursion =>
+                    let nextRecursion : PsElabStructuralRecursion := {
+                      functionName := recursion.functionName
+                      explicitParameterIds := recursion.explicitParameterIds
+                      recursiveParameterIndex := recursion.recursiveParameterIndex
+                      calls :=
+                        List.cons
+                          (Prod.mk field.id pushed.id)
+                          recursion.calls
+                    };
+                    psElabContextWithStructuralRecursion
+                      withLocal
+                      (Option.some nextRecursion);
+              let hypothesis : PsElabMatchField := {
+                id := pushed.id
+                name := hypothesisName
+                type := expectedType
+                binder := PsBinderInfo.explicit
+              };
+              smaller
+                withRecursion
+                (List.cons hypothesis hypothesesRev)
+
 def psElabPushRecursiveHypotheses
     (expectedType : PsExpr)
     (fields : List PsElabMatchField)
@@ -1501,59 +1571,12 @@ def psElabPushRecursiveHypotheses
     (context : PsElabContext)
     (hypothesesRev : List PsElabMatchField) :
     Except PsElabError PsElabMatchHypothesesResult :=
-  match fieldIndices with
-  | [] =>
-      Except.ok {
-        context := context
-        hypothesesRev := hypothesesRev
-      }
-  | fieldIndex :: rest =>
-      match psElabMatchFieldAt fields fieldIndex with
-      | none => Except.error PsElabError.structuralRecursionInternal
-      | some field =>
-          let hypothesisName :=
-            psNameAppendNum
-              (psRootName "_ih")
-              fieldIndex;
-          let pushed :=
-            psLocalPushBinding
-              context.localContext
-              hypothesisName
-              expectedType
-              PsBinderInfo.explicit;
-          let withLocal :=
-            psElabContextWithLocal
-              context
-              pushed.context;
-          let withRecursion : PsElabContext :=
-            match context.structuralRecursion with
-            | none =>
-                withLocal
-            | some recursion =>
-                let nextRecursion : PsElabStructuralRecursion := {
-                  functionName := recursion.functionName
-                  explicitParameterIds := recursion.explicitParameterIds
-                  recursiveParameterIndex := recursion.recursiveParameterIndex
-                  calls :=
-                    List.cons
-                      (Prod.mk field.id pushed.id)
-                      recursion.calls
-                };
-                psElabContextWithStructuralRecursion
-                  withLocal
-                  (Option.some nextRecursion);
-          let hypothesis : PsElabMatchField := {
-            id := pushed.id
-            name := hypothesisName
-            type := expectedType
-            binder := PsBinderInfo.explicit
-          };
-          psElabPushRecursiveHypotheses
-            expectedType
-            fields
-            rest
-            withRecursion
-            (List.cons hypothesis hypothesesRev)
+  psElabPushRecursiveHypothesesWorker
+    expectedType
+    fields
+    fieldIndices
+    context
+    hypothesesRev
 
 def psCloseElabMatchFields
     (metaContext : PsMetaContext)

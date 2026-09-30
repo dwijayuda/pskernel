@@ -10,6 +10,8 @@ inductive PsJsError where
 inductive PsJsLiteral where
   | natural (value : Nat)
   | integer (value : Int)
+  | machineNumber (value : Int)
+  | machineBigInt (value : Int)
   | boolean (value : Bool)
   | string (value : String)
   | undefined

@@ -53,6 +53,31 @@ def psJsEmitParameterNames (parameters : List Nat) : Except PsJsError String :=
               | Except.ok names =>
                   Except.ok (psJsTextConcat3 name ", " names)
 
+def psJsEmitNatIntrinsic (operation : PsJsIntrinsic)
+    (left right : String) : String :=
+  match operation with
+  | PsJsIntrinsic.natAdd => psJsTextConcat3 (psJsTextConcat2 "(" left) " + " (psJsTextConcat2 right ")")
+  | PsJsIntrinsic.natSub =>
+      psJsTextConcat3
+        "((__psc_a, __psc_b) => (__psc_a >= __psc_b ? __psc_a - __psc_b : 0n))("
+        (psJsTextConcat3 left ", " right)
+        ")"
+  | PsJsIntrinsic.natMul => psJsTextConcat3 (psJsTextConcat2 "(" left) " * " (psJsTextConcat2 right ")")
+  | PsJsIntrinsic.natDiv =>
+      psJsTextConcat3
+        "((__psc_a, __psc_b) => (__psc_b === 0n ? 0n : __psc_a / __psc_b))("
+        (psJsTextConcat3 left ", " right)
+        ")"
+  | PsJsIntrinsic.natMod =>
+      psJsTextConcat3
+        "((__psc_a, __psc_b) => (__psc_b === 0n ? __psc_a : __psc_a % __psc_b))("
+        (psJsTextConcat3 left ", " right)
+        ")"
+  | PsJsIntrinsic.natEq => psJsTextConcat3 (psJsTextConcat2 "(" left) " === " (psJsTextConcat2 right ")")
+  | PsJsIntrinsic.natNe => psJsTextConcat3 (psJsTextConcat2 "(" left) " !== " (psJsTextConcat2 right ")")
+  | PsJsIntrinsic.natLe => psJsTextConcat3 (psJsTextConcat2 "(" left) " <= " (psJsTextConcat2 right ")")
+  | PsJsIntrinsic.natLt => psJsTextConcat3 (psJsTextConcat2 "(" left) " < " (psJsTextConcat2 right ")")
+
 def psJsEmitAtomicExpr (expr : PsJsExpr) : Except PsJsError String :=
   match expr with
   | PsJsExpr.literal value => psJsEmitLiteral value
@@ -107,6 +132,17 @@ def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
   | PsJsExpr.literal value => psJsEmitLiteral value
   | PsJsExpr.local index => psJsLocalName index
   | PsJsExpr.global index => psJsGlobalName index
+  | PsJsExpr.intrinsic operation arguments =>
+      match arguments with
+      | List.cons left (List.cons right List.nil) =>
+          match psJsEmitExpr left with
+          | Except.error error => Except.error error
+          | Except.ok printedLeft =>
+              match psJsEmitExpr right with
+              | Except.error error => Except.error error
+              | Except.ok printedRight =>
+                  Except.ok (psJsEmitNatIntrinsic operation printedLeft printedRight)
+      | _ => Except.error PsJsError.unsupportedExpression
   | PsJsExpr.letE index value body =>
       match psJsLocalName index with
       | Except.error error => Except.error error

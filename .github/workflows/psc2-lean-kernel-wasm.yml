@@ -67,6 +67,10 @@ jobs:
         working-directory: psc15selfhost
         run: node packages/pskernel-lean-wasm/scripts/build-contract.test.mjs
 
+      - name: WASM differential contract
+        working-directory: psc15selfhost
+        run: node packages/pskernel-lean-wasm/host/differential-contract.test.mjs
+
       - name: Build real Lean WASM provider
         shell: bash
         working-directory: psc15selfhost
@@ -83,6 +87,10 @@ jobs:
             tail -n 300 "$build_log" >&2
             exit 1
           fi
+
+      - name: Native/WASM differential parity
+        working-directory: psc15selfhost
+        run: node packages/pskernel-lean-wasm/host/differential.test.mjs
 
       - name: Upload WASM probe artifacts
         uses: actions/upload-artifact@v4

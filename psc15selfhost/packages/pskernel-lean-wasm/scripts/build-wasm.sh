@@ -200,7 +200,7 @@ for runtime_lib in \
   "$lean_build/lib/lean/libInit.a" \
   "$lean_build/lib/lean/libStd.a" \
   "$lean_build/lib/lean/libLean.a" \
-  "$lean_build/lib/lean/libleancpp.a"; do
+  "$lean_build/lib/temp/libleancpp_1.a"; do
   if [[ ! -s "$runtime_lib" ]]; then
     echo "Emscripten Lean current-source library missing: $runtime_lib" >&2
     exit 1
@@ -274,9 +274,13 @@ for source in "${provider_c_files[@]}"; do
   index=$((index + 1))
 done
 
+# Generated provider main owns initialization of its exact Lean import graph.
+# Use Lean's C++ archive without initialize.cpp so this kernel provider does not
+# eagerly initialize the whole Lean frontend/parser before provider main.
 LEAN_CC="$(command -v em++)" "$wasm_leanc" \
   "${provider_objects[@]}" \
-  -lleancpp \
+  -L"$lean_build/lib/temp" \
+  -lleancpp_1 \
   -lInit \
   -lStd \
   -lLean \

@@ -11,7 +11,7 @@ Current package identity:
 The provider is pinned to the same semantic baseline as the native Lean provider:
 
 ```text
-Lean version:       4.34.0
+Lean 4.34.0
 Lean tag:           v4.34.0
 Lean commit:        293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
 protocol:           pskernel-lean/1

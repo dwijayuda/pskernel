@@ -104,11 +104,15 @@ def psLevelAssign
         if psLevelOccurs context id resolved then
           Option.none
         else
-          Option.some {
-            nextId := context.nextId
-            declarations := context.declarations
-            assignments := List.cons { id := id, value := resolved } context.assignments
-          }
+          let assignment : PsLevelAssignment :=
+            { id := id, value := resolved };
+          let next : PsLevelMetaContext :=
+            {
+              nextId := context.nextId
+              declarations := context.declarations
+              assignments := List.cons assignment context.assignments
+            };
+          Option.some next
   else
     Option.none
 

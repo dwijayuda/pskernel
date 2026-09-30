@@ -1,0 +1,70 @@
+name: PSC2 one-shot apply-args repair
+
+on:
+  push:
+    branches:
+      - psc2/minimal-selfhost-psc15
+    paths:
+      - .github/workflows/psc2-oneoff-repair-apply-args.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/minimal-selfhost-psc15
+          fetch-depth: 0
+
+      - name: Restore exact callback type and self-remove
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          old = '''def psElabApplyArgsWithFuel
+              (elaborate :
+                PsElabContext ->
+                PsSyntaxTerm ->
+                Option PsExpr ->
+                Except PsElabError PsElabApplicationResult)'''
+          new = '''def psElabApplyArgsWithFuel
+              (elaborate :
+                PsElabContext ->
+                PsSyntaxTerm ->
+                Option PsExpr ->
+                Except PsElabError PsElabTermResult)'''
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'expected exactly one broken callback signature, found {count}')
+          path.write_text(text.replace(old, new, 1))
+          PY
+
+          git diff --check
+          git diff -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+
+          python3 - <<'PY'
+          from pathlib import Path
+          text = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean').read_text()
+          expected = '''def psElabApplyArgsWithFuel
+              (elaborate :
+                PsElabContext ->
+                PsSyntaxTerm ->
+                Option PsExpr ->
+                Except PsElabError PsElabTermResult)'''
+          if text.count(expected) != 1:
+              raise SystemExit('restored callback signature not found exactly once')
+          PY
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/psc2-oneoff-repair-apply-args.yml
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git commit -m 'fix(psc2): restore apply-args callback type'
+          git push origin HEAD:psc2/minimal-selfhost-psc15

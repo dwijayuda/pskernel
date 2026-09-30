@@ -16,7 +16,8 @@ def psInstanceListAppend
     (right : List PsInstanceEntry) : List PsInstanceEntry :=
   match left with
   | [] => right
-  | entry :: rest => entry :: psInstanceListAppend rest right
+  | entry :: rest =>
+      List.cons entry (psInstanceListAppend rest right)
 
 def psInstanceIndexAdd
     (index : PsInstanceIndex)
@@ -30,10 +31,13 @@ def psLocalInstanceEntriesFromList
   | declaration :: rest =>
       match declaration with
       | .binding id _ type .instanceImplicit =>
-          {
+          let instanceEntry : PsInstanceEntry := {
             value := PsExpr.fvar id
             type := type
-          } :: psLocalInstanceEntriesFromList rest
+          };
+          List.cons
+            instanceEntry
+            (psLocalInstanceEntriesFromList rest)
       | _ => psLocalInstanceEntriesFromList rest
 
 def psLocalInstanceEntries (context : PsLocalContext) : List PsInstanceEntry :=

@@ -50,8 +50,7 @@ def psJsNormalizeExprWithFuel (fuel : Nat) :
       fun (_expr : PsVerifiedIrExpr) => Except.error PsJsError.fuelExhausted
   | Nat.succ remaining =>
       let smaller : PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr :=
-        fun (innerExpr : PsVerifiedIrExpr) =>
-          psJsNormalizeExprWithFuel remaining innerExpr;
+        psJsNormalizeExprWithFuel remaining;
       fun (expr : PsVerifiedIrExpr) =>
         match expr with
         | PsVerifiedIrExpr.letE name type value body =>

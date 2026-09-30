@@ -485,26 +485,33 @@ def psJsLowerExprWithFuel (fuel : Nat) :
                         | Option.some signature =>
                             if psJsPrimitiveTypeEq signature.resultType expectedType then
                               match arguments with
-                              | List.cons left (List.cons right List.nil) =>
-                                  match smaller
-                                    left globals locals nextLocal signature.argumentType with
-                                  | Except.error error => Except.error error
-                                  | Except.ok loweredLeft =>
-                                      match smaller
-                                        right
-                                        globals
-                                        locals
-                                        loweredLeft.nextLocal
-                                        signature.argumentType with
-                                      | Except.error error => Except.error error
-                                      | Except.ok loweredRight =>
-                                          Except.ok
-                                            (PsJsLoweredExpr.mk
-                                              (PsJsExpr.intrinsic
-                                                signature.operation
-                                                [loweredLeft.expr, loweredRight.expr])
-                                              loweredRight.nextLocal)
-                              | _ => Except.error PsJsError.unsupportedExpression
+                              | List.nil => Except.error PsJsError.unsupportedExpression
+                              | List.cons left restArguments =>
+                                  match restArguments with
+                                  | List.nil => Except.error PsJsError.unsupportedExpression
+                                  | List.cons right trailingArguments =>
+                                      match trailingArguments with
+                                      | List.cons _extra _extras =>
+                                          Except.error PsJsError.unsupportedExpression
+                                      | List.nil =>
+                                          match smaller
+                                            left globals locals nextLocal signature.argumentType with
+                                          | Except.error error => Except.error error
+                                          | Except.ok loweredLeft =>
+                                              match smaller
+                                                right
+                                                globals
+                                                locals
+                                                loweredLeft.nextLocal
+                                                signature.argumentType with
+                                              | Except.error error => Except.error error
+                                              | Except.ok loweredRight =>
+                                                  Except.ok
+                                                    (PsJsLoweredExpr.mk
+                                                      (PsJsExpr.intrinsic
+                                                        signature.operation
+                                                        [loweredLeft.expr, loweredRight.expr])
+                                                      loweredRight.nextLocal)
                             else Except.error PsJsError.literalTypeMismatch
                 | PsVerifiedIrExpr.call fn typeArguments callArguments =>
                     match typeArguments with

@@ -1,0 +1,48 @@
+name: Temporary PSC2 apply-args nextPending fix
+
+on:
+  push:
+    branches:
+      - tmp/psc2-apply-args-recursion-worker-exec-20260930
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Add explicit nextPending type
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          source = path.read_text()
+          old = '                  let nextPending :=\n'
+          new = '                  let nextPending : List Nat :=\n'
+          count = source.count(old)
+          if count != 1:
+              raise SystemExit(f'expected exactly one untyped nextPending binding, found {count}')
+          path.write_text(source.replace(old, new, 1))
+      - name: Verify focused source gates
+        working-directory: psc15selfhost
+        run: |
+          node scripts/check-elab-apply-args-option-selfhost-source-syntax.mjs
+          node scripts/check-elab-apply-args-recursion-selfhost-source-syntax.mjs
+          node scripts/check-elab-apply-args-next-pending-selfhost-source-syntax.mjs
+      - name: Commit source fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix(psc2): type apply-args pending instances"
+          git push origin HEAD:tmp/psc2-apply-args-recursion-worker-exec-20260930

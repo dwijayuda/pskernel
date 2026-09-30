@@ -262,7 +262,7 @@ def psPrintProofScriptTermWithFuel
                           let anonymousExplicit :=
                             match head.kind with
                             | PsSyntaxBinderKind.explicit =>
-                                psStringEq name "_"
+                                name == "_"
                             | _ => false;
                           if anonymousExplicit then
                             Except.ok

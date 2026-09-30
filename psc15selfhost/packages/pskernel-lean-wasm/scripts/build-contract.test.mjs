@@ -146,6 +146,16 @@ assert.match(patch,/lean_uv_event_loop_alive/);
 assert.match(patch,/runtime\/uv\/system\.cpp/);
 assert.match(patch,/lean_uv_os_get_group/);
 
+// Lean 4.34 forces Emscripten LTO in its archived WASM path. On emsdk 6.0.9
+// that path produces typed-WASM signature conflicts between the runtime C++
+// objects and Lean-generated callers (the current RED is the two default-limit
+// getters). Keep this provider on the same source/semantic closure but compile
+// it without LTO so wasm-ld sees the source-level C ABI directly.
+const emscriptenSettingsLine=patch.split('\n').find(line=>line.startsWith('+  set(EMSCRIPTEN_SETTINGS '));
+assert.ok(emscriptenSettingsLine,'compatibility patch must set Emscripten settings');
+assert.match(emscriptenSettingsLine,/-fwasm-exceptions/);
+assert.doesNotMatch(emscriptenSettingsLine,/-flto(?:\s|"|$)/,'Lean WASM provider must disable LTO to preserve typed C ABI');
+
 // Keep the frozen stage0 compatibility hunks while this branch still carries
 // them, but the production WASM provider must not build/link the stage0 closure.
 const sectionFor = marker => {

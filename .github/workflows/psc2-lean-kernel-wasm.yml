@@ -33,6 +33,14 @@ jobs:
         working-directory: psc15selfhost
         run: node packages/pskernel-lean-wasm/host/package.test.mjs
 
+      - name: Bootstrap isolation contract
+        working-directory: psc15selfhost
+        run: node scripts/bootstrap-closure-contract-tests.mjs
+
+      - name: Kernel provider host integration contract
+        working-directory: psc15selfhost
+        run: node scripts/kernel-provider-integration.test.mjs
+
       - name: Lean WASM patch applicability
         shell: bash
         run: git apply --check psc15selfhost/packages/pskernel-lean-wasm/patches/lean4-4.34.0-emscripten-uv-stubs.patch
@@ -103,6 +111,10 @@ jobs:
       - name: Native/WASM differential parity
         working-directory: psc15selfhost
         run: node packages/pskernel-lean-wasm/host/differential.test.mjs
+
+      - name: Packed WASM npm consumer
+        working-directory: psc15selfhost
+        run: node packages/pskernel-lean-wasm/host/npm-package.test.mjs
 
       - name: Upload WASM probe artifacts
         if: always()

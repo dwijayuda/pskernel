@@ -250,38 +250,67 @@ def psLevelInstantiateList
         (psLevelInstantiate context level)
         (psLevelInstantiateList context rest)
 
-def psLevelInstantiateExpr (context : PsLevelMetaContext) : PsExpr -> PsExpr
-  | .bvar index => PsExpr.bvar index
-  | .fvar id => PsExpr.fvar id
-  | .mvar id => PsExpr.mvar id
-  | .sortE level => PsExpr.sortE (psLevelInstantiate context level)
+def psLevelInstantiateExprWorker
+    (expr : PsExpr) : PsLevelMetaContext -> PsExpr :=
+  match expr with
+  | .bvar index =>
+      fun (_context : PsLevelMetaContext) => PsExpr.bvar index
+  | .fvar id =>
+      fun (_context : PsLevelMetaContext) => PsExpr.fvar id
+  | .mvar id =>
+      fun (_context : PsLevelMetaContext) => PsExpr.mvar id
+  | .sortE level =>
+      fun (context : PsLevelMetaContext) =>
+        PsExpr.sortE (psLevelInstantiate context level)
   | .constE name levels =>
-      PsExpr.constE name (psLevelInstantiateList context levels)
+      fun (context : PsLevelMetaContext) =>
+        PsExpr.constE name (psLevelInstantiateList context levels)
   | .app fn arg =>
-      PsExpr.app
-        (psLevelInstantiateExpr context fn)
-        (psLevelInstantiateExpr context arg)
+      let fnWorker : PsLevelMetaContext -> PsExpr :=
+        psLevelInstantiateExprWorker fn;
+      let argWorker : PsLevelMetaContext -> PsExpr :=
+        psLevelInstantiateExprWorker arg;
+      fun (context : PsLevelMetaContext) =>
+        PsExpr.app (fnWorker context) (argWorker context)
   | .lam name type body binder =>
-      PsExpr.lam
-        name
-        (psLevelInstantiateExpr context type)
-        (psLevelInstantiateExpr context body)
-        binder
+      let typeWorker : PsLevelMetaContext -> PsExpr :=
+        psLevelInstantiateExprWorker type;
+      let bodyWorker : PsLevelMetaContext -> PsExpr :=
+        psLevelInstantiateExprWorker body;
+      fun (context : PsLevelMetaContext) =>
+        PsExpr.lam name (typeWorker context) (bodyWorker context) binder
   | .forallE name type body binder =>
-      PsExpr.forallE
-        name
-        (psLevelInstantiateExpr context type)
-        (psLevelInstantiateExpr context body)
-        binder
+      let typeWorker : PsLevelMetaContext -> PsExpr :=
+        psLevelInstantiateExprWorker type;
+      let bodyWorker : PsLevelMetaContext -> PsExpr :=
+        psLevelInstantiateExprWorker body;
+      fun (context : PsLevelMetaContext) =>
+        PsExpr.forallE name (typeWorker context) (bodyWorker context) binder
   | .letE name type value body =>
-      PsExpr.letE
-        name
-        (psLevelInstantiateExpr context type)
-        (psLevelInstantiateExpr context value)
-        (psLevelInstantiateExpr context body)
-  | .lit value => PsExpr.lit value
+      let typeWorker : PsLevelMetaContext -> PsExpr :=
+        psLevelInstantiateExprWorker type;
+      let valueWorker : PsLevelMetaContext -> PsExpr :=
+        psLevelInstantiateExprWorker value;
+      let bodyWorker : PsLevelMetaContext -> PsExpr :=
+        psLevelInstantiateExprWorker body;
+      fun (context : PsLevelMetaContext) =>
+        PsExpr.letE
+          name
+          (typeWorker context)
+          (valueWorker context)
+          (bodyWorker context)
+  | .lit value =>
+      fun (_context : PsLevelMetaContext) => PsExpr.lit value
   | .proj typeName index value =>
-      PsExpr.proj typeName index (psLevelInstantiateExpr context value)
+      let valueWorker : PsLevelMetaContext -> PsExpr :=
+        psLevelInstantiateExprWorker value;
+      fun (context : PsLevelMetaContext) =>
+        PsExpr.proj typeName index (valueWorker context)
+
+def psLevelInstantiateExpr
+    (context : PsLevelMetaContext)
+    (expr : PsExpr) : PsExpr :=
+  psLevelInstantiateExprWorker expr context
 
 def psLevelHasMVar : PsLevel -> Bool
   | .mvar _ => true

@@ -22,6 +22,34 @@ structure PsJsLoweredParameters where
   indexes : List Nat
   nextLocal : Nat
 
+structure PsJsIntrinsicSignature where
+  operation : PsJsIntrinsic
+  argumentType : PsVerifiedIrPrimitiveType
+  resultType : PsVerifiedIrPrimitiveType
+
+def psJsNatIntrinsicSignature
+    (operation : PsVerifiedIrIntrinsic) : Option PsJsIntrinsicSignature :=
+  match operation with
+  | PsVerifiedIrIntrinsic.natAdd =>
+      Option.some (PsJsIntrinsicSignature.mk .natAdd .nat .nat)
+  | PsVerifiedIrIntrinsic.natSub =>
+      Option.some (PsJsIntrinsicSignature.mk .natSub .nat .nat)
+  | PsVerifiedIrIntrinsic.natMul =>
+      Option.some (PsJsIntrinsicSignature.mk .natMul .nat .nat)
+  | PsVerifiedIrIntrinsic.natDiv =>
+      Option.some (PsJsIntrinsicSignature.mk .natDiv .nat .nat)
+  | PsVerifiedIrIntrinsic.natMod =>
+      Option.some (PsJsIntrinsicSignature.mk .natMod .nat .nat)
+  | PsVerifiedIrIntrinsic.natEq =>
+      Option.some (PsJsIntrinsicSignature.mk .natEq .nat .bool)
+  | PsVerifiedIrIntrinsic.natNe =>
+      Option.some (PsJsIntrinsicSignature.mk .natNe .nat .bool)
+  | PsVerifiedIrIntrinsic.natLe =>
+      Option.some (PsJsIntrinsicSignature.mk .natLe .nat .bool)
+  | PsVerifiedIrIntrinsic.natLt =>
+      Option.some (PsJsIntrinsicSignature.mk .natLt .nat .bool)
+  | _ => Option.none
+
 def psJsNameHead (value : Char) : Bool :=
   let code := Char.toNat value;
   if psJsTextNatInRange code 65 90 then true
@@ -447,6 +475,37 @@ def psJsLowerExprWithFuel (fuel : Nat) :
                       locals
                       nextLocal
                       expectedType
+                | PsVerifiedIrExpr.intrinsic operation typeArguments arguments =>
+                    match typeArguments with
+                    | List.cons _typeArgument _restTypeArguments =>
+                        Except.error PsJsError.unsupportedExpression
+                    | List.nil =>
+                        match psJsNatIntrinsicSignature operation with
+                        | Option.none => Except.error PsJsError.unsupportedExpression
+                        | Option.some signature =>
+                            if psJsPrimitiveTypeEq signature.resultType expectedType then
+                              match arguments with
+                              | List.cons left (List.cons right List.nil) =>
+                                  match smaller
+                                    left globals locals nextLocal signature.argumentType with
+                                  | Except.error error => Except.error error
+                                  | Except.ok loweredLeft =>
+                                      match smaller
+                                        right
+                                        globals
+                                        locals
+                                        loweredLeft.nextLocal
+                                        signature.argumentType with
+                                      | Except.error error => Except.error error
+                                      | Except.ok loweredRight =>
+                                          Except.ok
+                                            (PsJsLoweredExpr.mk
+                                              (PsJsExpr.intrinsic
+                                                signature.operation
+                                                [loweredLeft.expr, loweredRight.expr])
+                                              loweredRight.nextLocal)
+                              | _ => Except.error PsJsError.unsupportedExpression
+                            else Except.error PsJsError.literalTypeMismatch
                 | PsVerifiedIrExpr.call fn typeArguments callArguments =>
                     match typeArguments with
                     | List.cons _typeArgument _restTypeArguments =>

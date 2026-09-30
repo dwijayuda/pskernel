@@ -103,7 +103,6 @@ cmake \
   -DSTAGE0_PKG_CONFIG_EXECUTABLE=/usr/bin/i386-linux-gnu-pkg-config \
   -DUSE_GMP=OFF \
   -DUSE_MIMALLOC=OFF \
-  -DUSE_LAKE=OFF \
   -DMMAP=OFF \
   -DLLVM=OFF \
   -DCCACHE=OFF \
@@ -168,6 +167,54 @@ roots = [
 name = "provider"
 root = "PsKernelLean.Main"
 EOF
+
+# Diagnostic matrix for the current bootstrap-parser failure. These probes are
+# intentionally non-fatal: they localize whether stage0 fails on a trivial
+# file, on importing Lean's parser environment, or only on PSC source/modules.
+# Keep the output compact so the CI failure tail contains the causal boundary.
+run_stage0_probe() {
+  local name="$1"
+  shift
+  local log="$provider_overlay/$name.log"
+  echo "PSC2_STAGE0_PARSER_PROBE: BEGIN $name"
+  set +e
+  "$@" >"$log" 2>&1
+  local status=$?
+  set -e
+  if [[ $status -eq 0 ]]; then
+    echo "PSC2_STAGE0_PARSER_PROBE: PASS $name"
+  else
+    echo "PSC2_STAGE0_PARSER_PROBE: FAIL $name status=$status"
+    tail -n 40 "$log" || true
+  fi
+}
+
+cat > "$provider_overlay/Stage0ProbeBasic.lean" <<'EOF'
+def stage0ProbeBasic : Nat := 1
+EOF
+
+cat > "$provider_overlay/Stage0ProbeLean.lean" <<'EOF'
+import Lean
+def stage0ProbeLean : Nat := 1
+EOF
+
+cat > "$provider_overlay/Stage0ProbePs.lean" <<'EOF'
+import Ps.Foundation.Name
+def stage0ProbePs : PsName := PsName.anonymous
+EOF
+
+run_stage0_probe basic "$stage0_lean" "$provider_overlay/Stage0ProbeBasic.lean"
+run_stage0_probe lean_import "$stage0_lean" "$provider_overlay/Stage0ProbeLean.lean"
+run_stage0_probe ps_source "$stage0_lean" "$provider_src/Ps/Foundation/Name.lean"
+
+probe_lib="$provider_overlay/probe-lib"
+mkdir -p "$probe_lib/Ps/Foundation"
+run_stage0_probe ps_name_olean \
+  "$stage0_lean" \
+  -o "$probe_lib/Ps/Foundation/Name.olean" \
+  "$provider_src/Ps/Foundation/Name.lean"
+LEAN_PATH="$probe_lib${LEAN_PATH:+:$LEAN_PATH}" \
+  run_stage0_probe ps_import "$stage0_lean" "$provider_overlay/Stage0ProbePs.lean"
 
 # Generate the provider C closure with the target-width-compatible native
 # stage0 compiler. The TOML overlay is intentionally self-contained and does

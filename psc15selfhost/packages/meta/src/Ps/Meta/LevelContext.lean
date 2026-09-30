@@ -120,8 +120,8 @@ def psLevelUnifyWithFuel
     (context : PsLevelMetaContext) : Nat -> PsLevel -> PsLevel -> PsLevelUnifyResult
   | 0, _, _ => { context := context, success := false }
   | fuel + 1, left, right =>
-      let leftValue := psLevelInstantiate context left
-      let rightValue := psLevelInstantiate context right
+      let leftValue := psLevelInstantiate context left;
+      let rightValue := psLevelInstantiate context right;
       if psLevelStructuralEq leftValue rightValue then
         { context := context, success := true }
       else
@@ -137,13 +137,13 @@ def psLevelUnifyWithFuel
         | .succ leftInner, .succ rightInner =>
             psLevelUnifyWithFuel context fuel leftInner rightInner
         | .max leftA leftB, .max rightA rightB =>
-            let first := psLevelUnifyWithFuel context fuel leftA rightA
+            let first := psLevelUnifyWithFuel context fuel leftA rightA;
             if first.success then
               psLevelUnifyWithFuel first.context fuel leftB rightB
             else
               first
         | .imax leftA leftB, .imax rightA rightB =>
-            let first := psLevelUnifyWithFuel context fuel leftA rightA
+            let first := psLevelUnifyWithFuel context fuel leftA rightA;
             if first.success then
               psLevelUnifyWithFuel first.context fuel leftB rightB
             else

@@ -29,26 +29,27 @@ jobs:
           source = path.read_text()
 
           marker = "\ndef psElabMatchConstructorMinor\n"
-          helper = '''
-def psElabMatchFieldListReverseWorker
-    (fields : List PsElabMatchField) :
-    List PsElabMatchField -> List PsElabMatchField :=
-  match fields with
-  | [] =>
-      fun (acc : List PsElabMatchField) =>
-        acc
-  | field :: rest =>
-      let smaller :
-          List PsElabMatchField -> List PsElabMatchField :=
-        psElabMatchFieldListReverseWorker rest;
-      fun (acc : List PsElabMatchField) =>
-        smaller (List.cons field acc)
-
-def psElabMatchFieldListReverse
-    (fields : List PsElabMatchField) :
-    List PsElabMatchField :=
-  psElabMatchFieldListReverseWorker fields []
-'''
+          helper = "\n".join([
+              "",
+              "def psElabMatchFieldListReverseWorker",
+              "    (fields : List PsElabMatchField) :",
+              "    List PsElabMatchField -> List PsElabMatchField :=",
+              "  match fields with",
+              "  | [] =>",
+              "      fun (acc : List PsElabMatchField) =>",
+              "        acc",
+              "  | field :: rest =>",
+              "      let smaller :",
+              "          List PsElabMatchField -> List PsElabMatchField :=",
+              "        psElabMatchFieldListReverseWorker rest;",
+              "      fun (acc : List PsElabMatchField) =>",
+              "        smaller (List.cons field acc)",
+              "",
+              "def psElabMatchFieldListReverse",
+              "    (fields : List PsElabMatchField) :",
+              "    List PsElabMatchField :=",
+              "  psElabMatchFieldListReverseWorker fields []",
+          ])
 
           if "def psElabMatchFieldListReverseWorker" not in source:
               if marker not in source:

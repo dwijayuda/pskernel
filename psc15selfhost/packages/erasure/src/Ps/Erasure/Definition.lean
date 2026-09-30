@@ -33,6 +33,261 @@ def psErasureAddUniqueString
       else
         base
 
+def psErasureIrExprUsesNameWithFuel :
+    Nat -> PsVerifiedIrExpr -> String -> Bool
+  | 0, _, _ => false
+  | fuel + 1, expr, target =>
+      match expr with
+      | .literal _ => false
+      | .var name => name == target
+      | .intrinsic _ _ arguments =>
+          arguments.any
+            (fun argument =>
+              psErasureIrExprUsesNameWithFuel
+                fuel argument target)
+      | .lambda parameters _ body =>
+          parameters.any
+              (fun parameter => parameter.name == target)
+            || psErasureIrExprUsesNameWithFuel
+                fuel body target
+      | .call fn _ arguments =>
+          psErasureIrExprUsesNameWithFuel fuel fn target
+            || arguments.any
+              (fun argument =>
+                psErasureIrExprUsesNameWithFuel
+                  fuel argument target)
+      | .letE name _ value body =>
+          name == target
+            || psErasureIrExprUsesNameWithFuel
+                fuel value target
+            || psErasureIrExprUsesNameWithFuel
+                fuel body target
+      | .ifE condition thenBranch elseBranch =>
+          psErasureIrExprUsesNameWithFuel
+              fuel condition target
+            || psErasureIrExprUsesNameWithFuel
+                fuel thenBranch target
+            || psErasureIrExprUsesNameWithFuel
+                fuel elseBranch target
+      | .record _ _ fields =>
+          fields.any
+            (fun field =>
+              psErasureIrExprUsesNameWithFuel
+                fuel field.2 target)
+      | .projection _ _ value _ =>
+          psErasureIrExprUsesNameWithFuel
+            fuel value target
+      | .constructor _ _ _ fields =>
+          fields.any
+            (fun field =>
+              psErasureIrExprUsesNameWithFuel
+                fuel field.2 target)
+      | .matchE _ _ scrutinee alternatives =>
+          psErasureIrExprUsesNameWithFuel
+              fuel scrutinee target
+            || alternatives.any
+              (fun alternative =>
+                alternative.2.1.any
+                    (fun binding => binding.name == target)
+                  || psErasureIrExprUsesNameWithFuel
+                    fuel alternative.2.2 target)
+
+def psErasureIrExprUsesName
+    (expr : PsVerifiedIrExpr)
+    (target : String) : Bool :=
+  psErasureIrExprUsesNameWithFuel 4096 expr target
+
+def psErasureParameterNames :
+    List PsVerifiedIrParameter -> List String
+  | [] => []
+  | parameter :: rest =>
+      parameter.name :: psErasureParameterNames rest
+
+def psErasureEtaFreshName
+    (body : PsVerifiedIrExpr)
+    (used : List String) :
+    Nat -> Nat -> String
+  | index, 0 =>
+      "__ps_eta_overflow_" ++ toString index
+  | index, attempts + 1 =>
+      let candidate := "__ps_eta_" ++ toString index
+      if
+          used.contains candidate
+            || psErasureIrExprUsesName body candidate then
+        psErasureEtaFreshName
+          body
+          used
+          (index + 1)
+          attempts
+      else
+        candidate
+
+structure PsErasureEtaState where
+  parametersRev : List PsVerifiedIrParameter
+  argumentsRev : List PsVerifiedIrExpr
+  used : List String
+  nextIndex : Nat
+
+def psErasureBuildEtaState
+    (body : PsVerifiedIrExpr) :
+    List PsVerifiedIrType ->
+    PsErasureEtaState ->
+    PsErasureEtaState
+  | [], state => state
+  | type :: rest, state =>
+      let name :=
+        psErasureEtaFreshName
+          body
+          state.used
+          state.nextIndex
+          4096
+      psErasureBuildEtaState
+        body
+        rest
+        {
+          parametersRev :=
+            { name := name, type := type } ::
+              state.parametersRev
+          argumentsRev :=
+            PsVerifiedIrExpr.var name ::
+              state.argumentsRev
+          used := name :: state.used
+          nextIndex := state.nextIndex + 1
+        }
+
+def psErasureEtaBindLambda :
+    List PsVerifiedIrParameter ->
+    List PsVerifiedIrExpr ->
+    PsVerifiedIrExpr ->
+    Option PsVerifiedIrExpr
+  | [], [], body => some body
+  | parameter :: restParameters,
+    argument :: restArguments,
+    body =>
+      match
+          psErasureEtaBindLambda
+            restParameters
+            restArguments
+            body with
+      | none => none
+      | some inner =>
+          some
+            (PsVerifiedIrExpr.letE
+              parameter.name
+              parameter.type
+              argument
+              inner)
+  | _, _, _ => none
+
+def psErasureEtaMapAlternatives
+    (apply : PsVerifiedIrExpr -> PsVerifiedIrExpr) :
+    List
+      (String ×
+        List PsVerifiedIrMatchBinding ×
+        PsVerifiedIrExpr) ->
+    List
+      (String ×
+        List PsVerifiedIrMatchBinding ×
+        PsVerifiedIrExpr)
+  | [] => []
+  | alternative :: rest =>
+      (alternative.1,
+        alternative.2.1,
+        apply alternative.2.2) ::
+        psErasureEtaMapAlternatives apply rest
+
+def psErasureEtaApplyWithFuel :
+    Nat ->
+    PsVerifiedIrExpr ->
+    List PsVerifiedIrExpr ->
+    PsVerifiedIrExpr
+  | 0, expr, arguments =>
+      PsVerifiedIrExpr.call expr [] arguments
+  | fuel + 1, expr, arguments =>
+      match arguments with
+      | [] => expr
+      | _ =>
+          let apply :=
+            fun body =>
+              psErasureEtaApplyWithFuel
+                fuel body arguments
+          match expr with
+          | .lambda parameters resultType body =>
+              match
+                  psErasureEtaBindLambda
+                    parameters
+                    arguments
+                    body with
+              | some applied => applied
+              | none =>
+                  PsVerifiedIrExpr.call
+                    (PsVerifiedIrExpr.lambda
+                      parameters resultType body)
+                    []
+                    arguments
+          | .letE name type value body =>
+              PsVerifiedIrExpr.letE
+                name
+                type
+                value
+                (apply body)
+          | .ifE condition thenBranch elseBranch =>
+              PsVerifiedIrExpr.ifE
+                condition
+                (apply thenBranch)
+                (apply elseBranch)
+          | .matchE inductiveName typeArguments scrutinee alternatives =>
+              PsVerifiedIrExpr.matchE
+                inductiveName
+                typeArguments
+                scrutinee
+                (psErasureEtaMapAlternatives
+                  apply alternatives)
+          | _ =>
+              PsVerifiedIrExpr.call
+                expr
+                []
+                arguments
+
+def psErasureEtaApply
+    (expr : PsVerifiedIrExpr)
+    (arguments : List PsVerifiedIrExpr) :
+    PsVerifiedIrExpr :=
+  psErasureEtaApplyWithFuel 4096 expr arguments
+
+def psErasureFlattenOpenedDefinition
+    (opened : PsOpenedErasedDefinition) :
+    PsOpenedErasedDefinition :=
+  if
+      opened.typeParameters.isEmpty
+        && opened.parameters.isEmpty then
+    opened
+  else
+    match opened.resultType with
+    | .function etaTypes finalResultType =>
+        match etaTypes with
+        | [] => opened
+        | _ =>
+            let state :=
+              psErasureBuildEtaState
+                opened.body
+                etaTypes
+                {
+                  parametersRev := []
+                  argumentsRev := []
+                  used := psErasureParameterNames opened.parameters
+                  nextIndex := 0
+                }
+            let etaParameters := state.parametersRev.reverse
+            let etaArguments := state.argumentsRev.reverse
+            {
+              typeParameters := opened.typeParameters
+              parameters := opened.parameters ++ etaParameters
+              resultType := finalResultType
+              body := psErasureEtaApply opened.body etaArguments
+            }
+    | _ => opened
+
 structure PsErasureNameState where
   used : List String
   entriesRev : List (PsName × String)
@@ -311,13 +566,15 @@ def psEraseDefinition
               normalizedValue with
         | Except.error error => Except.error error
         | Except.ok opened =>
+            let flattened :=
+              psErasureFlattenOpenedDefinition opened
             Except.ok
               (some {
                 name := outputName
-                typeParameters := opened.typeParameters
-                parameters := opened.parameters
-                resultType := opened.resultType
-                body := opened.body
+                typeParameters := flattened.typeParameters
+                parameters := flattened.parameters
+                resultType := flattened.resultType
+                body := flattened.body
               })
 
 def psEraseDefinitionsLoop

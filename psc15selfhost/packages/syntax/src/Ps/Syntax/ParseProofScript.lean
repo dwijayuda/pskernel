@@ -209,8 +209,29 @@ def psParseProofScriptBinderTypeWithFuel
           PsTokenCursor ->
           Except PsParseError (PsParseResult PsSyntaxTerm) :=
         psParseProofScriptBinderTypeWithFuel remaining;
+      let parseDomain :
+          PsTokenCursor ->
+          Except PsParseError (PsParseResult PsSyntaxTerm) :=
+        fun (domainCursor : PsTokenCursor) =>
+          if psTokenCursorAtText domainCursor "(" then
+            match psTokenCursorAdvance domainCursor with
+            | Option.none =>
+                Except.error (PsParseError.unexpectedEnd "(")
+            | Option.some opening =>
+                match smaller opening.cursor with
+                | Except.error error => Except.error error
+                | Except.ok grouped =>
+                    match psTokenCursorExpectText grouped.cursor ")" with
+                    | Except.error error => Except.error error
+                    | Except.ok close =>
+                        Except.ok {
+                          value := grouped.value
+                          cursor := close.cursor
+                        }
+          else
+            psParseProofScriptSimpleApplication domainCursor;
       fun (cursor : PsTokenCursor) =>
-        match psParseProofScriptSimpleApplication cursor with
+        match parseDomain cursor with
         | Except.error error => Except.error error
         | Except.ok domain =>
             if psTokenCursorAtArrow domain.cursor then

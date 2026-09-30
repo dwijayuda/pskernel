@@ -70,9 +70,9 @@ def psSyntaxNameAppendSegments
 
 def psSyntaxNameToName (name : PsSyntaxName) : Option PsName :=
   match name.segments with
-  | [] => none
+  | [] => Option.none
   | first :: rest =>
-      some
+      Option.some
         (psSyntaxNameAppendSegments
           rest
           (psNameAppendStr PsName.anonymous first))

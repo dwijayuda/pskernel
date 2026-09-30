@@ -39,6 +39,24 @@ def psBinderInfoIsInstance (binder : PsBinderInfo) : Bool :=
   | .instanceImplicit => true
   | _ => false
 
+def psPreparedInstanceArgumentListReverseAux
+    (remaining : List PsPreparedInstanceArgument) :
+    List PsPreparedInstanceArgument -> List PsPreparedInstanceArgument :=
+  match remaining with
+  | List.nil =>
+      fun (acc : List PsPreparedInstanceArgument) => acc
+  | List.cons head tail =>
+      let smaller :
+          List PsPreparedInstanceArgument -> List PsPreparedInstanceArgument :=
+        psPreparedInstanceArgumentListReverseAux tail;
+      fun (acc : List PsPreparedInstanceArgument) =>
+        smaller (List.cons head acc)
+
+def psPreparedInstanceArgumentListReverse
+    (values : List PsPreparedInstanceArgument) :
+    List PsPreparedInstanceArgument :=
+  psPreparedInstanceArgumentListReverseAux values List.nil
+
 def psPrepareInstanceWithFuelWorker
     (remainingFuel : Nat) :
     PsEnvironment ->
@@ -59,7 +77,7 @@ def psPrepareInstanceWithFuelWorker
                   context := context
                   value := value
                   resultType := type
-                  arguments := arguments.reverse
+                  arguments := psPreparedInstanceArgumentListReverse arguments
                   success := false
                 }
   | Nat.succ fuel =>
@@ -106,7 +124,7 @@ def psPrepareInstanceWithFuelWorker
                       context := context
                       value := value
                       resultType := typeValue
-                      arguments := arguments.reverse
+                      arguments := psPreparedInstanceArgumentListReverse arguments
                       success := true
                     }
 

@@ -29,96 +29,12 @@ jobs:
         with:
           node-version: 22
 
-      - name: Build Phase 12 dependencies
+      - name: Phase 1 through Phase 12 aggregate assurance
         shell: bash
         run: |
           set -euo pipefail
           cd psc15selfhost
-          lake build PsKernelCore PSC1KernelReferenceFoundations
-
-      - name: Phase 12 direct recursive recursor admission
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          lake env lean --run test/KernelCoreRecursiveRecursorAdmissionTests.lean
-
-      - name: Phase 12 recursive recursor rejection matrix
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          lake env lean --run test/KernelCoreRecursiveRecursorRejectionTests.lean
-
-      - name: Phase 12 functional recursive recursor admission
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          lake env lean --run test/KernelCoreRecursiveRecursorFunctionalAdmissionTests.lean
-
-      - name: Phase 12 indexed recursive recursor admission
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          lake env lean --run test/KernelCoreRecursiveRecursorIndexedAdmissionTests.lean
-
-      - name: Phase 10 ordinary recursor admission guard
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          lake env lean --run test/KernelCoreRecursorAdmissionParityTests.lean
-
-      - name: Phase 10 forged-minor guard
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          lake env lean --run test/KernelCoreRecursorForgedMinorRejectionTests.lean
-
-      - name: Phase 10 recursor reduction guard
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          lake env lean --run test/KernelCoreRecursorReductionParityTests.lean
-
-      - name: Phase 11 recursive-inductive admission guard
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          lake env lean --run test/KernelCoreRecursiveInductiveAdmissionParityTests.lean
-
-      - name: Phase 11 recursive-inductive rejection guard
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          lake env lean --run test/KernelCoreRecursiveInductiveRejectionTests.lean
-
-      - name: Bootstrap closure remains isolated
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          node scripts/check-bootstrap-closure.mjs
-
-      - name: KernelCore PSC1 source profile
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          node scripts/check-kernel-core-source.mjs
-
-      - name: KernelCore trusted-size report
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd psc15selfhost
-          node scripts/report-kernel-core-size.mjs
+          npm run assurance:kernel-core:phase12
 
       - name: Existing PSC2 full regression gate
         shell: bash

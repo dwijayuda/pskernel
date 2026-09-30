@@ -106,6 +106,14 @@ for(const flag of leanEmscriptenStaticLinkClosure){
 assert.match(build,/for tool in cmake emcc em\+\+ emar lean node/);
 assert.match(build,/LEAN_CC="\$\(command -v em\+\+\)" "\$wasm_leanc" \\\n/);
 
+// Emscripten emits CommonJS Node glue (`require(...)`) for this CLI artifact.
+// This npm package intentionally has `type: module`, so a .js launcher is
+// interpreted as ESM and fails before Lean main runs. Keep the package ESM but
+// mark only the generated launcher as CommonJS with the .cjs extension.
+assert.match(build,/-o "\$out_dir\/pskernel-lean\.cjs"/);
+assert.match(build,/node "\$out_dir\/pskernel-lean\.cjs" --health/);
+assert.doesNotMatch(build,/-o "\$out_dir\/pskernel-lean\.js"/);
+
 const patch=await readFile(path.join(packageRoot,'patches/lean4-4.34.0-emscripten-uv-stubs.patch'),'utf8');
 assert.match(patch,/runtime\/uv\/event_loop\.cpp/);
 assert.match(patch,/lean_uv_event_loop_alive/);
@@ -133,6 +141,8 @@ const workflow=await readFile(path.join(repoRoot,'.github/workflows/psc2-lean-ke
 assert.match(workflow,/6\.0\.9/);
 assert.match(workflow,/emcc --version/);
 assert.match(workflow,/build-wasm\.sh/);
+assert.match(workflow,/wasm\/pskernel-lean\.cjs/);
+assert.doesNotMatch(workflow,/wasm\/pskernel-lean\.js(?:\s|$)/m);
 assert.doesNotMatch(workflow,/dpkg --add-architecture i386/);
 assert.doesNotMatch(workflow,/gcc-multilib/);
 assert.doesNotMatch(workflow,/g\+\+-multilib/);

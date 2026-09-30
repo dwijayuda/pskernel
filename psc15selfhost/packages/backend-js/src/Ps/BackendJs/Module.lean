@@ -2,16 +2,12 @@ import Ps.BackendJs.Normalize
 import Ps.BackendJs.Lower
 import Ps.BackendJs.Emit
 
-def psJsAddParameterNames (parameters : List PsVerifiedIrParameter) :
-    List String -> List String :=
+def psJsAddParameterNames (parameters : List PsVerifiedIrParameter)
+    (locals : List String) : List String :=
   match parameters with
-  | List.nil =>
-      fun (locals : List String) => locals
+  | List.nil => locals
   | List.cons parameter rest =>
-      let smaller : List String -> List String :=
-        psJsAddParameterNames rest;
-      fun (locals : List String) =>
-        smaller (List.cons parameter.name locals)
+      List.cons parameter.name (psJsAddParameterNames rest locals)
 
 def psJsHasShadowedGlobalCallWithFuel (fuel : Nat) :
     List String -> PsVerifiedIrExpr -> Bool :=
@@ -25,18 +21,18 @@ def psJsHasShadowedGlobalCallWithFuel (fuel : Nat) :
       fun (locals : List String) =>
         fun (expr : PsVerifiedIrExpr) =>
           match expr with
-          | PsVerifiedIrExpr.call fn _ _ =>
+          | PsVerifiedIrExpr.call fn _typeArguments _callArguments =>
               match fn with
               | PsVerifiedIrExpr.var name => psJsContainsName locals name
               | _ => false
-          | PsVerifiedIrExpr.letE name _ value body =>
+          | PsVerifiedIrExpr.letE name _type value body =>
               if smaller locals value then true
               else smaller (List.cons name locals) body
           | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
               if smaller locals condition then true
               else if smaller locals thenBranch then true
               else smaller locals elseBranch
-          | PsVerifiedIrExpr.lambda parameters _ body =>
+          | PsVerifiedIrExpr.lambda parameters _resultType body =>
               smaller (psJsAddParameterNames parameters locals) body
           | _ => false
 
@@ -58,7 +54,7 @@ def psJsValidateDeclarationCallTargetsList
   | List.cons declaration rest =>
       match psJsValidateDeclarationCallTargets declaration with
       | Except.error error => Except.error error
-      | Except.ok _ => psJsValidateDeclarationCallTargetsList rest
+      | Except.ok _validated => psJsValidateDeclarationCallTargetsList rest
 
 def psJsHasUnsafeEagerCallWithFuel (fuel : Nat) :
     List String -> List String -> PsVerifiedIrExpr -> Bool :=
@@ -74,44 +70,61 @@ def psJsHasUnsafeEagerCallWithFuel (fuel : Nat) :
         fun (locals : List String) =>
           fun (expr : PsVerifiedIrExpr) =>
             match expr with
-            | PsVerifiedIrExpr.call fn _ _ =>
+            | PsVerifiedIrExpr.call fn _typeArguments _callArguments =>
                 match fn with
                 | PsVerifiedIrExpr.var name =>
                     if psJsContainsName locals name then false
                     else if psJsContainsName initializedGlobals name then false
                     else true
                 | _ => false
-            | PsVerifiedIrExpr.letE name _ value body =>
+            | PsVerifiedIrExpr.letE name _type value body =>
                 if smaller initializedGlobals locals value then true
                 else smaller initializedGlobals (List.cons name locals) body
             | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
                 if smaller initializedGlobals locals condition then true
                 else if smaller initializedGlobals locals thenBranch then true
                 else smaller initializedGlobals locals elseBranch
-            | PsVerifiedIrExpr.lambda _ _ _ => false
+            | PsVerifiedIrExpr.lambda _parameters _resultType _body => false
             | _ => false
 
 def psJsHasUnsafeEagerCall (initializedGlobals : List String)
     (expr : PsVerifiedIrExpr) : Bool :=
   psJsHasUnsafeEagerCallWithFuel 4096 initializedGlobals List.nil expr
 
+def psJsValidateInitializationOrderAuxWithFuel (fuel : Nat) :
+    List PsVerifiedIrDeclaration -> List String -> Except PsJsError Unit :=
+  match fuel with
+  | Nat.zero =>
+      fun (_declarations : List PsVerifiedIrDeclaration) =>
+        fun (_initializedGlobals : List String) =>
+          Except.error PsJsError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller :
+          List PsVerifiedIrDeclaration -> List String -> Except PsJsError Unit :=
+        psJsValidateInitializationOrderAuxWithFuel remaining;
+      fun (declarations : List PsVerifiedIrDeclaration) =>
+        fun (initializedGlobals : List String) =>
+          match declarations with
+          | List.nil => Except.ok Unit.unit
+          | List.cons declaration rest =>
+              match declaration.parameters with
+              | List.nil =>
+                  if psJsHasUnsafeEagerCall initializedGlobals declaration.body then
+                    Except.error PsJsError.unsupportedExpression
+                  else
+                    smaller
+                      rest
+                      (List.cons declaration.name initializedGlobals)
+              | List.cons _parameter _restParameters =>
+                  smaller
+                    rest
+                    (List.cons declaration.name initializedGlobals)
+
 def psJsValidateInitializationOrderAux
-    (declarations : List PsVerifiedIrDeclaration) :
-    List String -> Except PsJsError Unit :=
-  match declarations with
-  | List.nil =>
-      fun (_initializedGlobals : List String) => Except.ok Unit.unit
-  | List.cons declaration rest =>
-      let smaller : List String -> Except PsJsError Unit :=
-        psJsValidateInitializationOrderAux rest;
-      fun (initializedGlobals : List String) =>
-        match declaration.parameters with
-        | List.nil =>
-            if psJsHasUnsafeEagerCall initializedGlobals declaration.body then
-              Except.error PsJsError.unsupportedExpression
-            else smaller (List.cons declaration.name initializedGlobals)
-        | List.cons _ _ =>
-            smaller (List.cons declaration.name initializedGlobals)
+    (declarations : List PsVerifiedIrDeclaration)
+    (initializedGlobals : List String) : Except PsJsError Unit :=
+  psJsValidateInitializationOrderAuxWithFuel
+    4096 declarations initializedGlobals
 
 def psJsValidateInitializationOrder
     (declarations : List PsVerifiedIrDeclaration) : Except PsJsError Unit :=
@@ -119,15 +132,15 @@ def psJsValidateInitializationOrder
 
 def psJsLiteralDeclarationShape (declaration : PsVerifiedIrDeclaration) : Bool :=
   match declaration.typeParameters with
-  | List.cons _ _ => false
+  | List.cons _typeParameter _restTypeParameters => false
   | List.nil =>
       match declaration.parameters with
-      | List.cons _ _ => false
+      | List.cons _parameter _restParameters => false
       | List.nil =>
           match declaration.resultType with
-          | PsVerifiedIrType.primitive _ =>
+          | PsVerifiedIrType.primitive _primitive =>
               match declaration.body with
-              | PsVerifiedIrExpr.literal _ => true
+              | PsVerifiedIrExpr.literal _value => true
               | _ => false
           | _ => false
 
@@ -192,10 +205,12 @@ def psJsLowerLiteralDeclaration
     (declaration : PsVerifiedIrDeclaration) : Except PsJsError PsJsConstant :=
   if psJsValidExportName declaration.name then
     match declaration.typeParameters with
-    | List.cons _ _ => Except.error (PsJsError.unsupportedDeclaration declaration.name)
+    | List.cons _typeParameter _restTypeParameters =>
+        Except.error (PsJsError.unsupportedDeclaration declaration.name)
     | List.nil =>
         match declaration.parameters with
-        | List.cons _ _ => Except.error PsJsError.unsupportedExpression
+        | List.cons _parameter _restParameters =>
+            Except.error PsJsError.unsupportedExpression
         | List.nil =>
             match declaration.resultType with
             | PsVerifiedIrType.primitive primitive =>
@@ -204,39 +219,59 @@ def psJsLowerLiteralDeclaration
                     match psJsLowerBackendLiteral value primitive with
                     | Except.error error => Except.error error
                     | Except.ok lowered =>
-                        Except.ok (PsJsConstant.mk declaration.name (PsJsExpr.literal lowered))
+                        Except.ok
+                          (PsJsConstant.mk
+                            declaration.name
+                            (PsJsExpr.literal lowered))
                 | _ => Except.error PsJsError.unsupportedExpression
             | _ => Except.error PsJsError.literalTypeMismatch
   else Except.error (PsJsError.invalidExportName declaration.name)
 
-def psJsLowerLiteralDeclarations (declarations : List PsVerifiedIrDeclaration) :
-    List String -> Except PsJsError (List PsJsConstant) :=
-  match declarations with
-  | List.nil =>
-      fun (_used : List String) => Except.ok List.nil
-  | List.cons declaration rest =>
-      let smaller : List String -> Except PsJsError (List PsJsConstant) :=
-        psJsLowerLiteralDeclarations rest;
-      fun (used : List String) =>
-        if psJsContainsName used declaration.name then
-          Except.error (PsJsError.duplicateExport declaration.name)
-        else
-          match psJsLowerLiteralDeclaration declaration with
-          | Except.error error => Except.error error
-          | Except.ok lowered =>
-              match smaller (List.cons declaration.name used) with
-              | Except.error error => Except.error error
-              | Except.ok loweredRest => Except.ok (List.cons lowered loweredRest)
+def psJsLowerLiteralDeclarationsWithFuel (fuel : Nat) :
+    List PsVerifiedIrDeclaration -> List String ->
+    Except PsJsError (List PsJsConstant) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_declarations : List PsVerifiedIrDeclaration) =>
+        fun (_used : List String) => Except.error PsJsError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller :
+          List PsVerifiedIrDeclaration -> List String ->
+          Except PsJsError (List PsJsConstant) :=
+        psJsLowerLiteralDeclarationsWithFuel remaining;
+      fun (declarations : List PsVerifiedIrDeclaration) =>
+        fun (used : List String) =>
+          match declarations with
+          | List.nil => Except.ok List.nil
+          | List.cons declaration rest =>
+              if psJsContainsName used declaration.name then
+                Except.error (PsJsError.duplicateExport declaration.name)
+              else
+                match psJsLowerLiteralDeclaration declaration with
+                | Except.error error => Except.error error
+                | Except.ok lowered =>
+                    match smaller
+                      rest
+                      (List.cons declaration.name used) with
+                    | Except.error error => Except.error error
+                    | Except.ok loweredRest =>
+                        Except.ok (List.cons lowered loweredRest)
+
+def psJsLowerLiteralDeclarations (declarations : List PsVerifiedIrDeclaration)
+    (used : List String) : Except PsJsError (List PsJsConstant) :=
+  psJsLowerLiteralDeclarationsWithFuel 4096 declarations used
 
 def psJsLowerLiteralModule (module : PsVerifiedIrModule) : Except PsJsError PsJsModule :=
   match module.imports with
-  | List.cons _ _ => Except.error PsJsError.unsupportedModule
+  | List.cons _import _restImports => Except.error PsJsError.unsupportedModule
   | List.nil =>
       match module.structures with
-      | List.cons _ _ => Except.error PsJsError.unsupportedModule
+      | List.cons _structure _restStructures =>
+          Except.error PsJsError.unsupportedModule
       | List.nil =>
           match module.inductives with
-          | List.cons _ _ => Except.error PsJsError.unsupportedModule
+          | List.cons _inductive _restInductives =>
+              Except.error PsJsError.unsupportedModule
           | List.nil =>
               match psJsLowerLiteralDeclarations module.declarations List.nil with
               | Except.error error => Except.error error
@@ -246,10 +281,10 @@ def psJsEmitNormalizedModule (module : PsVerifiedIrModule) :
     Except PsJsError String :=
   match psJsValidateDeclarationCallTargetsList module.declarations with
   | Except.error error => Except.error error
-  | Except.ok _ =>
+  | Except.ok _validatedTargets =>
       match psJsValidateInitializationOrder module.declarations with
       | Except.error error => Except.error error
-      | Except.ok _ =>
+      | Except.ok _validatedOrder =>
           if psJsAllLiteralDeclarations module.declarations then
             match psJsLowerLiteralModule module with
             | Except.error error => Except.error error

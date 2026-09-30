@@ -63,21 +63,19 @@ def psWhnfDeltaCandidate
     (environment : PsEnvironment)
     (core : PsExpr) : Option PsExpr :=
   match core with
-  | .constE name levels =>
+  | PsExpr.constE name levels =>
       match psEnvironmentFind environment name with
-      | none => Option.none
-      | some declaration =>
-          match psDeclarationValue declaration with
-          | none => Option.none
-          | some value =>
-              let parameters : List PsName :=
-                psDeclarationLevelParams declaration;
+      | Option.none => Option.none
+      | Option.some declaration =>
+          match declaration with
+          | PsDeclaration.definitionDecl _ parameters _ value =>
               if Nat.beq parameters.length levels.length then
                 let instantiated : PsExpr :=
                   psExprInstantiateLevelParams parameters levels value;
                 Option.some instantiated
               else
                 Option.none
+          | _ => Option.none
   | _ => Option.none
 
 def psWhnfWithFuel

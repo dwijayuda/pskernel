@@ -59,6 +59,26 @@ assert.match(building,/host Lean.*C emitter/is);
 const closure=await readFile(path.join(workspaceRoot,'scripts/bootstrap-closure-contract-tests.mjs'),'utf8');
 assert.match(closure,/pskernel-lean-wasm/);
 
+// The WASM kernel provider must not import Lean's umbrella module. `import Lean`
+// pulls shell/frontend initializers into the generated C closure; typed WASM
+// then exposes runtime ABI mismatches that are irrelevant to kernel admission.
+// Keep this boundary on Lean.Environment, which supplies the semantic kernel
+// types and addDeclCore API without depending on Lean.Shell.
+const nativeProviderRoot=path.join(workspaceRoot,'packages/pskernel-lean/provider/PsKernelLean');
+for(const moduleName of ['Convert.lean','Prelude.lean']){
+  const source=await readFile(path.join(nativeProviderRoot,moduleName),'utf8');
+  assert.doesNotMatch(
+    source,
+    /^import Lean$/m,
+    `${moduleName} must not pull the Lean umbrella into the WASM kernel closure`,
+  );
+  assert.match(
+    source,
+    /^import Lean\.Environment$/m,
+    `${moduleName} must import the kernel/environment surface explicitly`,
+  );
+}
+
 const tempRoot=await mkdtemp(path.join(os.tmpdir(),'psc2-lean-wasm-host-'));
 try{
   const launcherPath=path.join(tempRoot,'provider.cjs');

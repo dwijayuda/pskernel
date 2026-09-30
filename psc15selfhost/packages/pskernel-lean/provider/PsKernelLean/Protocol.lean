@@ -1,4 +1,4 @@
-import Lean
+import Lean.Environment
 import Ps.Bridge.Codec
 import PsKernelLean.Convert
 import PsKernelLean.Error

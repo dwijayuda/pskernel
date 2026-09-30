@@ -89,6 +89,10 @@ mkdir -p \
 # sources and emits C, while Emscripten owns every runtime/kernel/object that is
 # shipped in the provider. This avoids mixing the frozen bootstrap generated-C
 # ABI with the current runtime ABI, which WebAssembly correctly rejects.
+#
+# Lean 4.34's Emscripten CMake path forces -pthread unless patched. The provider
+# is deliberately single-threaded: this avoids SharedArrayBuffer/worker runtime
+# dependencies and matches the upstream v4.34 + emsdk 6.0.9 working configuration.
 cmake \
   -S "$lean_source/src" \
   -B "$lean_build" \
@@ -100,6 +104,7 @@ cmake \
   -DSTAGE=1 \
   -DPREV_STAGE="$host_lean_prefix" \
   -DPREV_STAGE_CMAKE_EXECUTABLE_SUFFIX= \
+  -DMULTI_THREAD=OFF \
   -DUSE_GMP=OFF \
   -DUSE_MIMALLOC=OFF \
   -DUSE_LAKE=OFF \
@@ -209,6 +214,10 @@ done
 # (without Lake, which this provider does not use). The final link must use
 # Emscripten's C++ driver because libleancpp/libLean require libc++/C++ ABI
 # symbols; provider C compilation above remains on leanc.
+#
+# Emscripten 6.0.9 keeps the deprecated USE_PTHREADS=0 negation specifically
+# for consumers that need to counter an upstream -pthread. Keep it on the final
+# link as a fail-safe in addition to the Lean CMake patch above.
 LEAN_CC="$(command -v em++)" "$wasm_leanc" \
   "${provider_objects[@]}" \
   -lleancpp \
@@ -219,6 +228,7 @@ LEAN_CC="$(command -v em++)" "$wasm_leanc" \
   -lleanrt \
   -lstdc++ \
   -O3 \
+  -sUSE_PTHREADS=0 \
   -sENVIRONMENT=node \
   -sEXIT_RUNTIME=1 \
   -o "$out_dir/pskernel-lean.cjs"

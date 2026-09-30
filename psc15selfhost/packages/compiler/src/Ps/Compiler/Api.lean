@@ -176,7 +176,7 @@ def psCompilerAdmissionsFromPrepared
   | Except.error error =>
       Except.error error
   | Except.ok _ =>
-      Except.ok (prepared.canonicalAdmissions ++ "\n")
+      Except.ok (String.append prepared.canonicalAdmissions "\n")
 
 def psCompilerAdmissionsFromElaborated
     (elaborated : PsElabModuleResult) :

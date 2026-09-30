@@ -10,7 +10,7 @@ Work session started from `Pasted text(20260930-195252).txt`.
 ## Current HEAD
 
 Verified code snapshot before this documentation commit:
-`469e04c690caa046cea1cf3d1edaec409e7a84af`.
+`c2f76805584e395f63888941c8375efd2908fc74`.
 
 This records the observed parent, not the hash of the commit containing this
 file. Always refresh the target ref before writing: another session is actively
@@ -34,10 +34,15 @@ committing to the same branch. Never force-push it.
 - Concurrent one-shot repair run `36770452365` passed focused/aggregate guards and
   `lake build Ps.Elab.Term`, then committed the exact four Option qualifications
   independently tested in this session as `ffcbff6c`.
-- Local focused and aggregate source gates pass after the `psSyntaxRecordOrderFields`
-  repair. The production patch is exactly four qualified Option constructors.
-- CI run `36771348031` at `469e04c6` is the first fixed-point run for this repair and
-  is still running.
+- Local focused and aggregate source gates pass after the `psElabRecordCandidateForInfo`
+  repair. The production patch qualifies all unqualified Option constructors in
+  that declaration, plus its focused guard.
+- CI run `36772119962` at `3a02d872` passed the source gates and Lean elaborator
+  build, then established the next fixed-point blocker below.
+- Local focused and aggregate source gates pass after the
+  `psElabRecordCandidateFromExpected` repair. Its production patch qualifies all
+  unqualified Option constructors in that declaration, plus its focused guard.
+- CI run `36772867404` at `c2f76805` is queued for the fixed-point probe.
 
 ## Current first blocker
 
@@ -73,20 +78,39 @@ whole-file blob matches the locally tested candidate exactly
 (`de9841c4ffa5777f8c2d00cb35876faf70afaf13`). Do not duplicate that fix.
 
 The `psSyntaxRecordOrderFields` blocker is resolved by `469e04c6`. The next
-post-repair compiler failure is not established yet. Read the real fixed-point
-probe in run `36771348031` before changing another declaration. No fixed-point
-success is claimed.
+post-repair compiler failure is now established by the completed fixed-point
+probe in run `36771348031`, job `110078244227`:
+
+```text
+uncaught exception: PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Term.lean: declaration=psElabRecordCandidateForInfo: unknownName:none
+```
+
+Focused guard `PSC2_ELAB_RECORD_CANDIDATE_INFO_SELFHOST_SOURCE_SYNTAX` was first
+RED on the explicit `Option.none` requirement, then GREEN after the exact
+declaration-only repair. No fixed-point success is claimed.
+
+The next fixed-point blocker is now established by completed CI run
+`36772119962`, job `110080844220`:
+
+```text
+uncaught exception: PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Term.lean: declaration=psElabRecordCandidateFromExpected: unknownName:none
+```
+
+Focused guard `PSC2_ELAB_RECORD_CANDIDATE_EXPECTED_SELFHOST_SOURCE_SYNTAX` was
+first RED on explicit Option values, then GREEN after the exact
+declaration-only repair. No fixed-point success is claimed.
 
 ## Latest CI
 
 - Workflow: `PSC2 minimal kernel`.
-- Run: `36771348031` (push of the ordering repair).
-- Commit: `469e04c690caa046cea1cf3d1edaec409e7a84af`.
+- Run: `36772867404` (push of the expected-candidate repair).
+- Commit: `c2f76805584e395f63888941c8375efd2908fc74`.
 - Job: retrieve `foundational-parity` from the run's jobs endpoint.
-- Result at snapshot: in progress, before the first parity gate completed.
+- Result at snapshot: queued.
 - Pending step: `Bootstrap closure remains isolated` (nested fixed-point probe).
-- Completed equivalent compiler-source run: `36769559573` at `063492ee`, job
-  `110072192231`; failed the probe at `psSyntaxRecordFindField: unknownName:none`.
+- Previous fixed-point run: `36772119962` at `3a02d872`, job `110080844220`; passed
+  source/Lean gates and failed the probe at
+  `psElabRecordCandidateFromExpected: unknownName:none`.
 - Do not mistake successful one-off repair run `36769415636` for fixed-point evidence.
 
 ## Changes made in this Work session
@@ -107,6 +131,12 @@ success is claimed.
   already present in `ffcbff6c`.
 - This session's ordering repair commit is `469e04c6`; no duplicate commit should
   be created if another session reports the same patch.
+- This session's candidate-info repair commit is `3a02d872`; it changes only the
+  candidate-info declaration and the focused source guard. Refresh the branch
+  before any follow-up write.
+- This session's expected-candidate repair commit is `c2f76805`; it changes only
+  the expected-candidate declaration and the focused source guard. Refresh the
+  branch before any follow-up write.
 
 ## Current architecture invariants
 
@@ -121,17 +151,18 @@ success is claimed.
 
 ## Unverified hypotheses
 
-- No declarations beyond `psSyntaxRecordFindField` have been established as the
-  next blocker. Do not mass-rewrite the record section.
+- No declarations beyond `psElabRecordCandidateFromExpected` have been established as
+  the next blocker. Do not mass-rewrite the record section.
 - Passing source guards and Lean compilation does not establish self-hosting.
   No Compiler2/3/4 or parity/fingerprint success is claimed here.
 
 ## Exact next action
 
-1. Refresh the branch and inspect every commit after `469e04c6`.
-2. Read the final result/logs of run `36771348031` (or a newer relevant run).
-3. Find the first actual `PSC1_PROJECT_ELAB_FAILED` declaration/error in that run.
-   Do not repeat the already landed `psSyntaxRecordFindField` fix.
+1. Refresh the branch and inspect every commit after `c2f76805`.
+2. Read the final result/logs of run `36772867404` (or a newer relevant run).
+3. If the fixed-point probe fails, find its first actual `PSC1_PROJECT_ELAB_FAILED`
+   declaration/error. Do not repeat the already landed record-field or
+   record-candidate fixes.
 4. Add the narrow RED guard and normalize only that declaration, then run focused,
    aggregate, Lean/bootstrap and fixed-point checks in order.
 5. Review the exact patch before advancing the ref with a non-forced update.
@@ -166,5 +197,5 @@ npm run fixed-point
   Compare parent/candidate patches and refresh HEAD before updating the ref.
 - No temporary remote branch was created by this Work session. Local generated
   `.lake/` and `lake-manifest.json` from the failed startup were removed.
-- The guard commit changed only two small scripts; no full `Term.lean` transport
-  was performed by this session. Preserve that narrow-edit discipline.
+- Each connector source commit was reviewed as a narrow declaration diff plus its
+  focused guard; preserve that narrow-edit discipline.

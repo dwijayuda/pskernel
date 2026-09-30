@@ -13,10 +13,16 @@ const requiredEntries=[
   'kernel/',
   'LEAN_LICENSE',
   'KERNEL_SOURCE_MANIFEST.json',
+  'host/source-distribution.test.mjs',
 ];
 for(const entry of requiredEntries){
   assert.ok(packageJson.files.includes(entry),`package files must include ${entry}`);
 }
+assert.equal(
+  packageJson.scripts?.['verify:source'],
+  'node host/source-distribution.test.mjs',
+  'verify:source must point at the published source-distribution verifier',
+);
 
 const sourceManifest=JSON.parse(await readFile(path.join(packageRoot,'KERNEL_SOURCE_MANIFEST.json'),'utf8'));
 assert.equal(sourceManifest.leanVersion,'4.34.0');
@@ -50,6 +56,7 @@ for(const file of [
   'kernel/type_checker.cpp',
   'kernel/environment.cpp',
   'provider/PsKernelLean/Admission.lean',
+  'host/source-distribution.test.mjs',
 ]){
   assert.ok(packedFiles.has(file),`npm tarball missing ${file}`);
 }

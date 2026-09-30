@@ -244,3 +244,62 @@ if (/\|\s*none\s*=>/.test(findField) || /\|\s*some\s+/.test(findField) || /=>\s*
 process.stdout.write(
   "PSC2_ELAB_RECORD_FIND_FIELD_SELFHOST_SOURCE_SYNTAX: PASS (structural field lookup; explicit Option constructors)\n",
 );
+
+const orderFieldsStart = source.indexOf("def psSyntaxRecordOrderFields\n");
+const orderFieldsEnd = source.indexOf("\ndef psElabRecordCandidateForInfo\n", orderFieldsStart + 1);
+if (orderFieldsStart < 0 || orderFieldsEnd < 0) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_ORDER_FIELDS_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
+  );
+}
+
+const orderFields = source.slice(orderFieldsStart, orderFieldsEnd);
+if (!/Option \(List PsSyntaxTerm\)\s*:=/.test(orderFields)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_ORDER_FIELDS_SELFHOST_SOURCE_SYNTAX_MISSING: Option List return type",
+  );
+}
+if (!/match\s+names\s+with/.test(orderFields)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_ORDER_FIELDS_SELFHOST_SOURCE_SYNTAX_MISSING: structural names match",
+  );
+}
+if (!/psSyntaxRecordOrderFields\s+fields\s+rest/.test(orderFields)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_ORDER_FIELDS_SELFHOST_SOURCE_SYNTAX_MISSING: structural recursion on rest with invariant fields",
+  );
+}
+if (!/Option\.some\s+\[\]/.test(orderFields)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_ORDER_FIELDS_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.some empty result",
+  );
+}
+if (!/Option\.none/.test(orderFields)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_ORDER_FIELDS_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.none value/pattern",
+  );
+}
+if (!/Option\.some\s+value/.test(orderFields)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_ORDER_FIELDS_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.some field value pattern",
+  );
+}
+if (!/Option\.some\s+values/.test(orderFields)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_ORDER_FIELDS_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.some recursive values pattern",
+  );
+}
+if (!/Option\.some\s+\(List\.cons\s+value\s+values\)/.test(orderFields)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_ORDER_FIELDS_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.some ordered result",
+  );
+}
+if (/\|\s*none\s*=>/.test(orderFields) || /\|\s*some\s+/.test(orderFields) || /=>\s*none\b/.test(orderFields) || /\n\s*some\s+/.test(orderFields)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_ORDER_FIELDS_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: unqualified Option constructor remains",
+  );
+}
+
+process.stdout.write(
+  "PSC2_ELAB_RECORD_ORDER_FIELDS_SELFHOST_SOURCE_SYNTAX: PASS (structural name ordering; explicit Option constructors)\n",
+);

@@ -158,33 +158,69 @@ def psExprContainsMVarWorker
 def psExprContainsMVar (target : Nat) (expr : PsExpr) : Bool :=
   psExprContainsMVarWorker expr target
 
-def psExprFVarsInContext (localContext : PsLocalContext) : PsExpr -> Bool
-  | .fvar id => psLocalContainsId localContext id
+def psExprFVarsInContextWorker
+    (expr : PsExpr) : PsLocalContext -> Bool :=
+  match expr with
+  | .fvar id =>
+      fun (localContext : PsLocalContext) =>
+        psLocalContainsId localContext id
   | .app fn arg =>
-      if psExprFVarsInContext localContext fn then
-        psExprFVarsInContext localContext arg
-      else
-        false
-  | .lam _ type body _ =>
-      if psExprFVarsInContext localContext type then
-        psExprFVarsInContext localContext body
-      else
-        false
-  | .forallE _ type body _ =>
-      if psExprFVarsInContext localContext type then
-        psExprFVarsInContext localContext body
-      else
-        false
-  | .letE _ type value body =>
-      if psExprFVarsInContext localContext type then
-        if psExprFVarsInContext localContext value then
-          psExprFVarsInContext localContext body
+      let fnOk : PsLocalContext -> Bool :=
+        psExprFVarsInContextWorker fn;
+      let argOk : PsLocalContext -> Bool :=
+        psExprFVarsInContextWorker arg;
+      fun (localContext : PsLocalContext) =>
+        if fnOk localContext then
+          argOk localContext
         else
           false
-      else
-        false
-  | .proj _ _ value => psExprFVarsInContext localContext value
-  | _ => true
+  | .lam _ type body _ =>
+      let typeOk : PsLocalContext -> Bool :=
+        psExprFVarsInContextWorker type;
+      let bodyOk : PsLocalContext -> Bool :=
+        psExprFVarsInContextWorker body;
+      fun (localContext : PsLocalContext) =>
+        if typeOk localContext then
+          bodyOk localContext
+        else
+          false
+  | .forallE _ type body _ =>
+      let typeOk : PsLocalContext -> Bool :=
+        psExprFVarsInContextWorker type;
+      let bodyOk : PsLocalContext -> Bool :=
+        psExprFVarsInContextWorker body;
+      fun (localContext : PsLocalContext) =>
+        if typeOk localContext then
+          bodyOk localContext
+        else
+          false
+  | .letE _ type value body =>
+      let typeOk : PsLocalContext -> Bool :=
+        psExprFVarsInContextWorker type;
+      let valueOk : PsLocalContext -> Bool :=
+        psExprFVarsInContextWorker value;
+      let bodyOk : PsLocalContext -> Bool :=
+        psExprFVarsInContextWorker body;
+      fun (localContext : PsLocalContext) =>
+        if typeOk localContext then
+          if valueOk localContext then
+            bodyOk localContext
+          else
+            false
+        else
+          false
+  | .proj _ _ value =>
+      let valueOk : PsLocalContext -> Bool :=
+        psExprFVarsInContextWorker value;
+      fun (localContext : PsLocalContext) =>
+        valueOk localContext
+  | _ =>
+      fun (_localContext : PsLocalContext) => true
+
+def psExprFVarsInContext
+    (localContext : PsLocalContext)
+    (expr : PsExpr) : Bool :=
+  psExprFVarsInContextWorker expr localContext
 
 def psMetaInstantiateStep
     (context : PsMetaContext) : PsExpr -> PsExpr

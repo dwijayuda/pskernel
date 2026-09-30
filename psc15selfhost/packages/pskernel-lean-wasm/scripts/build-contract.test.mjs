@@ -76,6 +76,29 @@ assert.match(build,/packages\/environment\/src\/Ps/);
 assert.match(build,/packages\/bridge\/src\/Ps/);
 assert.match(build,/packages\/pskernel-lean\/provider\/PsKernelLean/);
 
+// The stage0 leanc.sh wrapper contributes compiler/platform flags and -L, but
+// intentionally does not add Lean's toolchain libraries. Mirror Lean 4.34's
+// own Emscripten TOOLCHAIN_STATIC_LINKER_FLAGS exactly for the provider link.
+const finalLinkStart=build.lastIndexOf('"$wasm_leanc" \\\n');
+assert.ok(finalLinkStart>=0,'final WASM provider link invocation must exist');
+const finalLink=build.slice(finalLinkStart);
+const leanEmscriptenStaticLinkClosure=[
+  '-lleancpp',
+  '-lInit',
+  '-lStd',
+  '-lLean',
+  '-lnodefs.js',
+  '-lleanrt',
+  '-lstdc++',
+];
+let previousLinkFlag=-1;
+for(const flag of leanEmscriptenStaticLinkClosure){
+  const index=finalLink.indexOf(flag);
+  assert.ok(index>=0,`final provider link is missing Lean Emscripten flag ${flag}`);
+  assert.ok(index>previousLinkFlag,`Lean Emscripten link flag order drifted at ${flag}`);
+  previousLinkFlag=index;
+}
+
 const patch=await readFile(path.join(packageRoot,'patches/lean4-4.34.0-emscripten-uv-stubs.patch'),'utf8');
 assert.match(patch,/runtime\/uv\/event_loop\.cpp/);
 assert.match(patch,/lean_uv_event_loop_alive/);

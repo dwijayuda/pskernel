@@ -53,30 +53,138 @@ def psJsEmitParameterNames (parameters : List Nat) : Except PsJsError String :=
               | Except.ok names =>
                   Except.ok (psJsTextConcat3 name ", " names)
 
-def psJsEmitNatIntrinsic (operation : PsJsIntrinsic)
-    (left right : String) : String :=
+def psJsEmitUnaryIntrinsic (operation : PsJsIntrinsic)
+    (value : String) : Except PsJsError String :=
   match operation with
-  | PsJsIntrinsic.natAdd => psJsTextConcat3 (psJsTextConcat2 "(" left) " + " (psJsTextConcat2 right ")")
+  | PsJsIntrinsic.intOfNat => Except.ok value
+  | PsJsIntrinsic.intNegSucc =>
+      Except.ok (psJsTextConcat3 "(-(" value " + 1n))")
+  | PsJsIntrinsic.intNeg =>
+      Except.ok (psJsTextConcat3 "(-(" value "))")
+  | PsJsIntrinsic.intRepr =>
+      Except.ok (psJsTextConcat3 "(" value ").toString()")
+  | PsJsIntrinsic.boolNot =>
+      Except.ok (psJsTextConcat3 "(!" value ")")
+  | _ => Except.error PsJsError.unsupportedExpression
+
+def psJsEmitBinaryIntrinsic (operation : PsJsIntrinsic)
+    (left right : String) : Except PsJsError String :=
+  match operation with
+  | PsJsIntrinsic.natAdd =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " + "
+          (psJsTextConcat2 right ")"))
   | PsJsIntrinsic.natSub =>
-      psJsTextConcat3
-        "((__psc_a, __psc_b) => (__psc_a >= __psc_b ? __psc_a - __psc_b : 0n))("
-        (psJsTextConcat3 left ", " right)
-        ")"
-  | PsJsIntrinsic.natMul => psJsTextConcat3 (psJsTextConcat2 "(" left) " * " (psJsTextConcat2 right ")")
+      Except.ok
+        (psJsTextConcat3
+          "((__psc_a, __psc_b) => (__psc_a >= __psc_b ? __psc_a - __psc_b : 0n))("
+          (psJsTextConcat3 left ", " right)
+          ")")
+  | PsJsIntrinsic.natMul =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " * "
+          (psJsTextConcat2 right ")"))
   | PsJsIntrinsic.natDiv =>
-      psJsTextConcat3
-        "((__psc_a, __psc_b) => (__psc_b === 0n ? 0n : __psc_a / __psc_b))("
-        (psJsTextConcat3 left ", " right)
-        ")"
+      Except.ok
+        (psJsTextConcat3
+          "((__psc_a, __psc_b) => (__psc_b === 0n ? 0n : __psc_a / __psc_b))("
+          (psJsTextConcat3 left ", " right)
+          ")")
   | PsJsIntrinsic.natMod =>
-      psJsTextConcat3
-        "((__psc_a, __psc_b) => (__psc_b === 0n ? __psc_a : __psc_a % __psc_b))("
-        (psJsTextConcat3 left ", " right)
-        ")"
-  | PsJsIntrinsic.natEq => psJsTextConcat3 (psJsTextConcat2 "(" left) " === " (psJsTextConcat2 right ")")
-  | PsJsIntrinsic.natNe => psJsTextConcat3 (psJsTextConcat2 "(" left) " !== " (psJsTextConcat2 right ")")
-  | PsJsIntrinsic.natLe => psJsTextConcat3 (psJsTextConcat2 "(" left) " <= " (psJsTextConcat2 right ")")
-  | PsJsIntrinsic.natLt => psJsTextConcat3 (psJsTextConcat2 "(" left) " < " (psJsTextConcat2 right ")")
+      Except.ok
+        (psJsTextConcat3
+          "((__psc_a, __psc_b) => (__psc_b === 0n ? __psc_a : __psc_a % __psc_b))("
+          (psJsTextConcat3 left ", " right)
+          ")")
+  | PsJsIntrinsic.natEq =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " === "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.natNe =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " !== "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.natLe =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " <= "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.natLt =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " < "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.intAdd =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " + "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.intSub =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " - "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.intMul =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " * "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.intEq =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " === "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.intLe =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " <= "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.intLt =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " < "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.boolAnd =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " && "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.boolOr =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " || "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.boolEq =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " === "
+          (psJsTextConcat2 right ")"))
+  | PsJsIntrinsic.boolNe =>
+      Except.ok
+        (psJsTextConcat3
+          (psJsTextConcat2 "(" left)
+          " !== "
+          (psJsTextConcat2 right ")"))
+  | _ => Except.error PsJsError.unsupportedExpression
 
 def psJsEmitAtomicExpr (expr : PsJsExpr) : Except PsJsError String :=
   match expr with
@@ -142,22 +250,26 @@ def psJsEmitExprWithFuel (fuel : Nat) : PsJsExpr -> Except PsJsError String :=
         | PsJsExpr.intrinsic operation intrinsicArguments =>
             match intrinsicArguments with
             | List.nil => Except.error PsJsError.unsupportedExpression
-            | List.cons left restArguments =>
+            | List.cons first restArguments =>
                 match restArguments with
-                | List.nil => Except.error PsJsError.unsupportedExpression
-                | List.cons right trailingArguments =>
+                | List.nil =>
+                    match smaller first with
+                    | Except.error error => Except.error error
+                    | Except.ok printedFirst =>
+                        psJsEmitUnaryIntrinsic operation printedFirst
+                | List.cons second trailingArguments =>
                     match trailingArguments with
-                    | List.cons _extra _extras => Except.error PsJsError.unsupportedExpression
+                    | List.cons _extra _extras =>
+                        Except.error PsJsError.unsupportedExpression
                     | List.nil =>
-                        match smaller left with
+                        match smaller first with
                         | Except.error error => Except.error error
-                        | Except.ok printedLeft =>
-                            match smaller right with
+                        | Except.ok printedFirst =>
+                            match smaller second with
                             | Except.error error => Except.error error
-                            | Except.ok printedRight =>
-                                Except.ok
-                                  (psJsEmitNatIntrinsic
-                                    operation printedLeft printedRight)
+                            | Except.ok printedSecond =>
+                                psJsEmitBinaryIntrinsic
+                                  operation printedFirst printedSecond
         | PsJsExpr.letE index value body =>
             match psJsLocalName index with
             | Except.error error => Except.error error

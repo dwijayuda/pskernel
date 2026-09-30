@@ -34,6 +34,9 @@ def psSynthSuccess
     (value : PsExpr) : PsSynthInstanceResult :=
   { context := context, value := Option.some value }
 
+def psSynthBoolNot (value : Bool) : Bool :=
+  if value then false else true
+
 def psBinderInfoIsInstance (binder : PsBinderInfo) : Bool :=
   match binder with
   | .instanceImplicit => true
@@ -139,7 +142,7 @@ def psTryInstanceCandidate
     (entry : PsInstanceEntry) : PsSynthInstanceResult :=
   let prepared :=
     psPrepareInstance environment localContext original entry;
-  if !prepared.success then
+  if psSynthBoolNot prepared.success then
     psSynthFailure original
   else
     let targetResult :=
@@ -149,7 +152,7 @@ def psTryInstanceCandidate
         prepared.context
         prepared.resultType
         target;
-    if !targetResult.success then
+    if psSynthBoolNot targetResult.success then
       psSynthFailure original
     else
       let solved :=
@@ -157,7 +160,7 @@ def psTryInstanceCandidate
           synthesize
           prepared.arguments
           targetResult.context;
-      if !solved.success then
+      if psSynthBoolNot solved.success then
         psSynthFailure original
       else
         let finalValue :=

@@ -258,13 +258,15 @@ def psInferProjectionType
         | some info =>
             if
                 psInferBoolOr
-                  (psInferBoolNot info.isStructure)
+                  (psInferBoolNot (PsInductiveInfo.isStructure info))
                   (psInferBoolOr
-                    (psInferNatNe info.numIndices 0)
-                    (psInferNatNe (List.length viewArgs) info.numParams)) then
+                    (psInferNatNe (PsInductiveInfo.numIndices info) 0)
+                    (psInferNatNe
+                      (List.length viewArgs)
+                      (PsInductiveInfo.numParams info))) then
               Except.error PsInferError.projectionUnsupported
             else
-              match info.constructors with
+              match PsInductiveInfo.constructors info with
               | List.nil =>
                   Except.error PsInferError.projectionUnsupported
               | List.cons constructorName remainingConstructors =>
@@ -279,8 +281,12 @@ def psInferProjectionType
                       | some constructorInfo =>
                           if
                               psInferBoolOr
-                                (psInferNatNe constructorInfo.numParams info.numParams)
-                                (Nat.ble constructorInfo.numFields index) then
+                                (psInferNatNe
+                                  (PsConstructorInfo.numParams constructorInfo)
+                                  (PsInductiveInfo.numParams info))
+                                (Nat.ble
+                                  (PsConstructorInfo.numFields constructorInfo)
+                                  index) then
                             Except.error PsInferError.projectionUnsupported
                           else
                             match
@@ -288,7 +294,7 @@ def psInferProjectionType
                                   environment
                                   metaContext
                                   localContext
-                                  constructorInfo.type
+                                  (PsConstructorInfo.type constructorInfo)
                                   viewArgs with
                             | Except.error error => Except.error error
                             | Except.ok fieldCursor =>

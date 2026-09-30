@@ -77,6 +77,39 @@ for (const pattern of uniqueForbidden) {
   }
 }
 
+const recordStart = source.indexOf("def psElabRecord\n");
+const recordEnd = source.indexOf("\ndef psElabSyntaxLocalId\n", recordStart + 1);
+if (recordStart < 0 || recordEnd < 0) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX_MISSING: record elaborator block",
+  );
+}
+const record = source.slice(recordStart, recordEnd);
+const recordRequired = [
+  /let\s+candidate\s*:\s*Option PsElabRecordCandidate\s*:=\s*match expected with/,
+  /if\s+psSyntaxRecordFieldsMatch\s+fields\s+found\.fieldNames\s+then\s+Option\.some found\s+else\s+Option\.none/,
+  /psElabResolvedTerm\s+context\s*\(PsExpr\.constE\s+found\.constructorName\s+\[\]\)\s+Option\.none/,
+];
+for (const pattern of recordRequired) {
+  if (!pattern.test(record)) {
+    throw new Error(
+      `PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX_MISSING: psElabRecord ${pattern}`,
+    );
+  }
+}
+const recordForbidden = [
+  /let\s+candidate\s*:=\s*match expected with/,
+  /then\s+some found\s+else\s+none/,
+  /psElabResolvedTerm\s+context\s*\(PsExpr\.constE\s+found\.constructorName\s+\[\]\)\s+none/,
+];
+for (const pattern of recordForbidden) {
+  if (pattern.test(record)) {
+    throw new Error(
+      `PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: psElabRecord ${pattern}`,
+    );
+  }
+}
+
 process.stdout.write(
-  "PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX: PASS (explicit recursive-let sequencing; structural declaration traversal; explicit unique-candidate Option constructors)\n",
+  "PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX: PASS (explicit recursive-let sequencing; structural declaration traversal; explicit unique-candidate Option constructors; typed record-candidate match)\n",
 );

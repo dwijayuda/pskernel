@@ -31,6 +31,18 @@ def psHostAdmissionErrorTag
   | PsCheckedAdmissionCodecError.mismatchedConstructor _ => "admission:mismatchedConstructor"
   | PsCheckedAdmissionCodecError.unsupportedDeclaration => "admission:unsupportedDeclaration"
 
+def psHostErasureErrorTag (error : PsErasureError) : String :=
+  match error with
+  | PsErasureError.fuelExhausted => "fuelExhausted"
+  | PsErasureError.binderMismatch => "binderMismatch"
+  | PsErasureError.looseBoundVariable => "looseBoundVariable"
+  | PsErasureError.unresolvedMetavariable => "unresolvedMetavariable"
+  | PsErasureError.unknownLocal id => "unknownLocal:" ++ toString id
+  | PsErasureError.erasedLocalUsed id => "erasedLocalUsed:" ++ toString id
+  | PsErasureError.unsupportedRuntimeTerm => "unsupportedRuntimeTerm"
+  | PsErasureError.unsupportedApplication => "unsupportedApplication"
+  | PsErasureError.unknownConstant name => "unknownConstant:" ++ psNameToString name
+
 def psHostCompilerErrorTag (error : PsCompilerError) : String :=
   match error with
   | PsCompilerError.translation _ => "translation"
@@ -39,7 +51,7 @@ def psHostCompilerErrorTag (error : PsCompilerError) : String :=
   | PsCompilerError.elaboration _ => "elaboration"
   | PsCompilerError.admission error => psHostAdmissionErrorTag error
   | PsCompilerError.preparedAdmissionMismatch => "preparedAdmissionMismatch"
-  | PsCompilerError.erasure _ => "erasure"
+  | PsCompilerError.erasure error => "erasure:" ++ psHostErasureErrorTag error
 
 def psHostTsEmitErrorTag (error : PsTsEmitError) : String :=
   match error with

@@ -8,6 +8,7 @@ import { collectBackendJsClosure } from './backend-js-closure.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sources = collectBackendJsClosure(root);
 const out = mkdtempSync(path.join(os.tmpdir(), 'psc-js-source-'));
+const canonicalPsDiagnostic = '/tmp/backend-js-source-BackendJs.ps';
 
 function phase(label, command, args, cwd, timeoutMs = 90000) {
   console.log(`BACKEND_JS_SOURCE_PHASE: ${label}: START`);
@@ -90,6 +91,7 @@ def psJsProbeSmallIr (_value : Unit) : String :=
   writeFileSync(lean, flattened([...sources, { source: probe }]));
   runPsc1('lean-check-with-probe', ['check', lean], 30000);
   runPsc1('lean-to-ps', ['translate', lean, '--to', 'ps', '--out', ps]);
+  copyFileSync(ps, canonicalPsDiagnostic);
   runPsc1('ps-check', ['check', ps]);
   console.log('BACKEND_JS_PSC1_SOURCE: PASS (Lean and canonical PS admission-ready checks)');
 

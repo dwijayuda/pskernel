@@ -79,12 +79,14 @@ def psPrintPattern
       let printedNameResult :=
         psPrintSyntaxName name;
       match printedNameResult with
-      | Except.error error => Except.error error
+      | Except.error error =>
+          Except.error error
       | Except.ok printedName =>
           let printedBindersResult :=
             psPrintSyntaxNames binders;
           match printedBindersResult with
-          | Except.error error => Except.error error
+          | Except.error error =>
+              Except.error error
           | Except.ok printedBinders =>
               match printedBinders with
               | List.nil =>
@@ -105,6 +107,23 @@ def psSyntaxTermSimpleForApplication : PsSyntaxTerm -> Bool
   | .unit _ => true
   | _ => false
 
+def psPrintArrowBinder
+    (binder : String) : String :=
+  match binder.toList with
+  | List.cons '('
+      (List.cons '_'
+        (List.cons ' '
+          (List.cons ':'
+            (List.cons ' ' rest)))) =>
+      match rest.reverse with
+      | List.cons ')' reversedInner =>
+          psPrintCommonConcat3
+            "("
+            (String.ofList reversedInner.reverse)
+            ")"
+      | _ => binder
+  | _ => binder
+
 def psPrintArrowChain
     (binders : List String)
     (body : String) : String :=
@@ -112,6 +131,6 @@ def psPrintArrowChain
   | List.nil => body
   | List.cons binder rest =>
       psPrintCommonConcat3
-        binder
+        (psPrintArrowBinder binder)
         " -> "
         (psPrintArrowChain rest body)

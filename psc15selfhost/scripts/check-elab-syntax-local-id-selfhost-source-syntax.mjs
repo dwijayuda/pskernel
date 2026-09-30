@@ -10,7 +10,7 @@ const source = await readFile(
 );
 
 const start = source.indexOf("def psElabSyntaxLocalId\n");
-const end = source.indexOf("\ndef psElabNatListAt\n", start + 1);
+const end = source.indexOf("\ndef psElabNatListAt", start + 1);
 if (start < 0 || end < 0) {
   throw new Error(
     "PSC2_ELAB_SYNTAX_LOCAL_ID_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
@@ -51,40 +51,52 @@ process.stdout.write(
   "PSC2_ELAB_SYNTAX_LOCAL_ID_SELFHOST_SOURCE_SYNTAX: PASS (explicit Option constructors across local-id resolution)\n",
 );
 
-const natListAtStart = source.indexOf("def psElabNatListAt\n");
+const natListAtWorkerStart = source.indexOf("def psElabNatListAtWorker\n");
+const natListAtStart = source.indexOf("\ndef psElabNatListAt\n", natListAtWorkerStart + 1);
 const natListAtEnd = source.indexOf("\ndef psElabValidateStructuralCall\n", natListAtStart + 1);
-if (natListAtStart < 0 || natListAtEnd < 0) {
+if (natListAtWorkerStart < 0 || natListAtStart < 0 || natListAtEnd < 0) {
   throw new Error(
-    "PSC2_ELAB_NAT_LIST_AT_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
+    "PSC2_ELAB_NAT_LIST_AT_SELFHOST_SOURCE_SYNTAX_MISSING: worker/wrapper declaration block",
   );
 }
 
+const natListAtWorker = source.slice(natListAtWorkerStart, natListAtStart);
 const natListAt = source.slice(natListAtStart, natListAtEnd);
-const natListAtRequired = [
+const natListAtBlock = source.slice(natListAtWorkerStart, natListAtEnd);
+
+const workerRequired = [
+  /\(index\s*:\s*Nat\)\s*:\s*\n\s*List Nat\s*->\s*Option Nat\s*:=/,
+  /match\s+index\s+with/,
+  /let smaller\s*:\s*\n?\s*List Nat\s*->\s*Option Nat\s*:=\s*\n?\s*psElabNatListAtWorker nextIndex\s*;/,
+  /fun \(values\s*:\s*List Nat\) =>/,
   /\| \[\] =>\s*Option\.none/,
-  /\| 0 =>\s*Option\.some value/,
-  /\| nextIndex \+ 1 =>\s*psElabNatListAt rest nextIndex/,
+  /\| value :: _ =>\s*Option\.some value/,
+  /\| _ :: rest =>\s*smaller rest/,
 ];
-for (const pattern of natListAtRequired) {
-  if (!pattern.test(natListAt)) {
+for (const pattern of workerRequired) {
+  if (!pattern.test(natListAtWorker)) {
     throw new Error(
       `PSC2_ELAB_NAT_LIST_AT_SELFHOST_SOURCE_SYNTAX_MISSING: ${pattern}`,
     );
   }
 }
 
-const natListAtForbidden = [
-  /=>\s*none\b/,
-  /=>\s*some\s+/,
-];
-for (const pattern of natListAtForbidden) {
-  if (pattern.test(natListAt)) {
-    throw new Error(
-      `PSC2_ELAB_NAT_LIST_AT_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: ${pattern}`,
-    );
-  }
+if (!/psElabNatListAtWorker\s+index\s+values/.test(natListAt)) {
+  throw new Error(
+    "PSC2_ELAB_NAT_LIST_AT_SELFHOST_SOURCE_SYNTAX_MISSING: thin wrapper delegates to worker",
+  );
+}
+if (/psElabNatListAt\s+rest\s+nextIndex/.test(natListAtBlock)) {
+  throw new Error(
+    "PSC2_ELAB_NAT_LIST_AT_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: direct two-argument recursion remains",
+  );
+}
+if (/=>\s*none\b/.test(natListAtBlock) || /=>\s*some\s+/.test(natListAtBlock)) {
+  throw new Error(
+    "PSC2_ELAB_NAT_LIST_AT_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: unqualified Option constructor remains",
+  );
 }
 
 process.stdout.write(
-  "PSC2_ELAB_NAT_LIST_AT_SELFHOST_SOURCE_SYNTAX: PASS (structural Nat-list lookup; explicit Option constructors)\n",
+  "PSC2_ELAB_NAT_LIST_AT_SELFHOST_SOURCE_SYNTAX: PASS (index-recursive worker; values applied post-recursion; explicit Option constructors)\n",
 );

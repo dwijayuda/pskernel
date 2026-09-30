@@ -10,7 +10,7 @@ Work session started from `Pasted text(20260930-195252).txt`.
 ## Current HEAD
 
 Verified code snapshot before this documentation commit:
-`c2f76805584e395f63888941c8375efd2908fc74`.
+`f0e6ef6d438ea441273712fe883640ddc16f00f4`.
 
 This records the observed parent, not the hash of the commit containing this
 file. Always refresh the target ref before writing: another session is actively
@@ -42,7 +42,12 @@ committing to the same branch. Never force-push it.
 - Local focused and aggregate source gates pass after the
   `psElabRecordCandidateFromExpected` repair. Its production patch qualifies all
   unqualified Option constructors in that declaration, plus its focused guard.
-- CI run `36772867404` at `c2f76805` is queued for the fixed-point probe.
+- CI run `36772867404` at `c2f76805` passed source/Lean gates and established the
+  next fixed-point blocker below.
+- Local focused and aggregate source gates pass after the `psElabRecordCandidates`
+  repair. The production patch removes its unsupported generic `List.reverse`
+  call and adds its focused guard.
+- CI run `36773477741` at `f0e6ef6d` is queued for the fixed-point probe.
 
 ## Current first blocker
 
@@ -100,17 +105,28 @@ Focused guard `PSC2_ELAB_RECORD_CANDIDATE_EXPECTED_SELFHOST_SOURCE_SYNTAX` was
 first RED on explicit Option values, then GREEN after the exact
 declaration-only repair. No fixed-point success is claimed.
 
+The next fixed-point blocker is now established by completed CI run
+`36772867404`, job `110083386835`:
+
+```text
+uncaught exception: PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Term.lean: declaration=psElabRecordCandidates: unsupportedTerm
+```
+
+Focused guard `PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX` was first RED
+on the generic `List.reverse`, then GREEN after removing only that call. No
+fixed-point success is claimed.
+
 ## Latest CI
 
 - Workflow: `PSC2 minimal kernel`.
-- Run: `36772867404` (push of the expected-candidate repair).
-- Commit: `c2f76805584e395f63888941c8375efd2908fc74`.
+- Run: `36773477741` (push of the record-candidates repair).
+- Commit: `f0e6ef6d438ea441273712fe883640ddc16f00f4`.
 - Job: retrieve `foundational-parity` from the run's jobs endpoint.
 - Result at snapshot: queued.
 - Pending step: `Bootstrap closure remains isolated` (nested fixed-point probe).
-- Previous fixed-point run: `36772119962` at `3a02d872`, job `110080844220`; passed
+- Previous fixed-point run: `36772867404` at `c2f76805`, job `110083386835`; passed
   source/Lean gates and failed the probe at
-  `psElabRecordCandidateFromExpected: unknownName:none`.
+  `psElabRecordCandidates: unsupportedTerm`.
 - Do not mistake successful one-off repair run `36769415636` for fixed-point evidence.
 
 ## Changes made in this Work session
@@ -137,6 +153,9 @@ declaration-only repair. No fixed-point success is claimed.
 - This session's expected-candidate repair commit is `c2f76805`; it changes only
   the expected-candidate declaration and the focused source guard. Refresh the
   branch before any follow-up write.
+- This session's record-candidates repair commit is `f0e6ef6d`; it changes only
+  the accumulator base case and the focused source guard. Refresh the branch
+  before any follow-up write.
 
 ## Current architecture invariants
 
@@ -151,15 +170,15 @@ declaration-only repair. No fixed-point success is claimed.
 
 ## Unverified hypotheses
 
-- No declarations beyond `psElabRecordCandidateFromExpected` have been established as
+- No declarations beyond `psElabRecordCandidates` have been established as
   the next blocker. Do not mass-rewrite the record section.
 - Passing source guards and Lean compilation does not establish self-hosting.
   No Compiler2/3/4 or parity/fingerprint success is claimed here.
 
 ## Exact next action
 
-1. Refresh the branch and inspect every commit after `c2f76805`.
-2. Read the final result/logs of run `36772867404` (or a newer relevant run).
+1. Refresh the branch and inspect every commit after `f0e6ef6d`.
+2. Read the final result/logs of run `36773477741` (or a newer relevant run).
 3. If the fixed-point probe fails, find its first actual `PSC1_PROJECT_ELAB_FAILED`
    declaration/error. Do not repeat the already landed record-field or
    record-candidate fixes.

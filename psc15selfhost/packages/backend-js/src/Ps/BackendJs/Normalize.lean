@@ -2,49 +2,45 @@ import Ps.CompilerIr.Model
 import Ps.BackendJs.Model
 
 
-def psJsWrapLambdaArguments (parameters : List PsVerifiedIrParameter) :
-    List PsVerifiedIrExpr -> PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr :=
+partial def psJsWrapLambdaArguments
+    (parameters : List PsVerifiedIrParameter)
+    (callArguments : List PsVerifiedIrExpr)
+    (body : PsVerifiedIrExpr) : Except PsJsError PsVerifiedIrExpr :=
   match parameters with
   | List.nil =>
-      fun (callArguments : List PsVerifiedIrExpr) =>
-        fun (body : PsVerifiedIrExpr) =>
-          match callArguments with
-          | List.nil => Except.ok body
-          | List.cons _argument _restArguments =>
-              Except.error PsJsError.unsupportedExpression
+      match callArguments with
+      | List.nil => Except.ok body
+      | List.cons _argument _restArguments =>
+          Except.error PsJsError.unsupportedExpression
   | List.cons parameter restParameters =>
-      fun (callArguments : List PsVerifiedIrExpr) =>
-        fun (body : PsVerifiedIrExpr) =>
-          match callArguments with
-          | List.nil => Except.error PsJsError.unsupportedExpression
-          | List.cons argument restArguments =>
-              match psJsWrapLambdaArguments restParameters restArguments body with
-              | Except.error error => Except.error error
-              | Except.ok inner =>
-                  Except.ok
-                    (PsVerifiedIrExpr.letE
-                      parameter.name
-                      parameter.type
-                      argument
-                      inner)
+      match callArguments with
+      | List.nil => Except.error PsJsError.unsupportedExpression
+      | List.cons argument restArguments =>
+          match psJsWrapLambdaArguments restParameters restArguments body with
+          | Except.error error => Except.error error
+          | Except.ok inner =>
+              Except.ok
+                (PsVerifiedIrExpr.letE
+                  parameter.name
+                  parameter.type
+                  argument
+                  inner)
 
 
-def psJsNormalizeExprList (expressions : List PsVerifiedIrExpr) :
-    (PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr) ->
+def psJsNormalizeExprList
+    (expressions : List PsVerifiedIrExpr)
+    (normalize : PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr) :
     Except PsJsError (List PsVerifiedIrExpr) :=
   match expressions with
-  | List.nil =>
-      fun (_normalize : PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr) =>
-        Except.ok List.nil
+  | List.nil => Except.ok List.nil
   | List.cons expression rest =>
-      fun (normalize : PsVerifiedIrExpr -> Except PsJsError PsVerifiedIrExpr) =>
-        match normalize expression with
-        | Except.error error => Except.error error
-        | Except.ok normalizedExpression =>
-            match psJsNormalizeExprList rest normalize with
-            | Except.error error => Except.error error
-            | Except.ok normalizedRest =>
-                Except.ok (List.cons normalizedExpression normalizedRest)
+      match normalize expression with
+      | Except.error error => Except.error error
+      | Except.ok normalizedExpression =>
+          match psJsNormalizeExprList rest normalize with
+          | Except.error error => Except.error error
+          | Except.ok normalizedRest =>
+              Except.ok (List.cons normalizedExpression normalizedRest)
 
 
 def psJsNormalizeExprWithFuel (fuel : Nat) :

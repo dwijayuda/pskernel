@@ -38,6 +38,19 @@ assert.match(build,/lean4-4\.34\.0-emscripten-uv-stubs\.patch/);
 assert.match(build,/pskernel-lean\.wasm/);
 assert.doesNotMatch(build,/emsdk\s+(install|activate)\s+(latest|tot)/);
 
+// Stage0 Lake is deliberately a bootstrap binary. It must not elaborate the
+// full modern PSC2 lakefile. Build the provider closure from a tiny TOML-only
+// overlay so this cross-build depends only on the provider's actual modules.
+assert.match(build,/provider_overlay/);
+assert.match(build,/lakefile\.toml/);
+assert.match(build,/PsKernelLean\.Main/);
+assert.match(build,/packages\/foundation\/src\/Ps/);
+assert.match(build,/packages\/core\/src\/Ps/);
+assert.match(build,/packages\/environment\/src\/Ps/);
+assert.match(build,/packages\/bridge\/src\/Ps/);
+assert.match(build,/packages\/pskernel-lean\/provider\/PsKernelLean/);
+assert.doesNotMatch(build,/"\$stage0_lake"\s+build\s+psc2_lean_kernel_provider/);
+
 const patch=await readFile(path.join(packageRoot,'patches/lean4-4.34.0-emscripten-uv-stubs.patch'),'utf8');
 assert.match(patch,/src\/CMakeLists\.txt/);
 assert.match(patch,/-  Leanc\n   LeanIR/);

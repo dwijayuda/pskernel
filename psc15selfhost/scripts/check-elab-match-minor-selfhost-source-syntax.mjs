@@ -1,3 +1,4 @@
+// Match patterns may use constructor syntax, but Option values passed to elaboration/helpers must be explicit in the PSC1 bootstrap profile.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

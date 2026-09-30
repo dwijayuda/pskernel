@@ -80,7 +80,7 @@ def psWhnfWithFuel
                     core
       | .app fn arg =>
           let reducedFn :=
-            psWhnfWithFuel environment metaContext localContext fuel fn
+            psWhnfWithFuel environment metaContext localContext fuel fn;
           if psExprAlphaEq reducedFn fn then
             core
           else
@@ -110,9 +110,9 @@ def psDefEqReadOnlyWithEnvFuel
         (psWhnf environment metaContext localContext right)
   | remaining + 1, left, right =>
       let leftValue :=
-        psWhnf environment metaContext localContext left
+        psWhnf environment metaContext localContext left;
       let rightValue :=
-        psWhnf environment metaContext localContext right
+        psWhnf environment metaContext localContext right;
       if psExprAlphaEq leftValue rightValue then
         true
       else

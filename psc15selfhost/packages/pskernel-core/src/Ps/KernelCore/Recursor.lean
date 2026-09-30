@@ -1,4 +1,4 @@
-import Ps.KernelCore.RecursiveRecursor
+import Ps.KernelCore.IndexedRecursiveRecursor
 
 def psKernelCoreRecursorMajorIndex
     (info : PsKernelCoreRecursorInfo) : Nat :=
@@ -345,8 +345,13 @@ def psKernelCoreValidateRecursorWithResources
                                     | PsKernelCoreResult.error message =>
                                         PsKernelCoreResult.error message
                                     | PsKernelCoreResult.ok _ =>
-                                        psKernelCoreValidateDirectRecursiveRecursorWithResources
-                                          remaining resources env info family
+                                        match family.numIndices with
+                                        | Nat.zero =>
+                                            psKernelCoreValidateDirectRecursiveRecursorWithResources
+                                              remaining resources env info family
+                                        | Nat.succ _ =>
+                                            psKernelCoreValidateIndexedRecursiveRecursorWithResources
+                                              remaining resources env info family
                                   else
                                     PsKernelCoreResult.error
                                       "invalid recursor type shape"

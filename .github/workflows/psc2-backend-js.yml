@@ -69,7 +69,17 @@ jobs:
       - name: Extension regression
         if: always()
         working-directory: psc15selfhost
-        run: npm run test:extensions
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:extensions 2>&1 | tee /tmp/psc1-extension-tests.log
+      - name: Upload extension regression diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-extension-tests-log
+          path: /tmp/psc1-extension-tests.log
+          if-no-files-found: ignore
       - name: Package build
         if: always()
         working-directory: psc15selfhost

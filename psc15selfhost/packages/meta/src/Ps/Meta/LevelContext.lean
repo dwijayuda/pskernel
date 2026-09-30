@@ -64,24 +64,24 @@ def psLevelMetaFresh (context : PsLevelMetaContext) : PsLevelFreshResult :=
 
 def psLevelInstantiateWithFuel
     (context : PsLevelMetaContext) : Nat -> PsLevel -> PsLevel
-  | 0, level => level
-  | fuel + 1, level =>
-      match level with
-      | .mvar id =>
-          match psLevelFindAssignment context id with
-          | Option.none => level
-          | Option.some value => psLevelInstantiateWithFuel context fuel value
-      | .succ value =>
-          PsLevel.succ (psLevelInstantiateWithFuel context fuel value)
-      | .max left right =>
-          PsLevel.max
-            (psLevelInstantiateWithFuel context fuel left)
-            (psLevelInstantiateWithFuel context fuel right)
-      | .imax left right =>
-          PsLevel.imax
-            (psLevelInstantiateWithFuel context fuel left)
-            (psLevelInstantiateWithFuel context fuel right)
-      | _ => level
+  | Nat.zero =>
+      fun (level : PsLevel) => level
+  | Nat.succ fuel =>
+      let smaller : PsLevel -> PsLevel :=
+        psLevelInstantiateWithFuel context fuel;
+      fun (level : PsLevel) =>
+        match level with
+        | .mvar id =>
+            match psLevelFindAssignment context id with
+            | Option.none => level
+            | Option.some value => smaller value
+        | .succ value =>
+            PsLevel.succ (smaller value)
+        | .max left right =>
+            PsLevel.max (smaller left) (smaller right)
+        | .imax left right =>
+            PsLevel.imax (smaller left) (smaller right)
+        | _ => level
 
 def psLevelInstantiate (context : PsLevelMetaContext) (level : PsLevel) : PsLevel :=
   psLevelInstantiateWithFuel context (Nat.add context.assignments.length 1) level

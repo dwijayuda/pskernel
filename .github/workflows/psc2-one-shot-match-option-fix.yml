@@ -1,0 +1,63 @@
+name: PSC2 one-shot match Option value fix
+
+on:
+  push:
+    branches:
+      - psc2/minimal-selfhost-psc15
+    paths:
+      - .github/workflows/psc2-one-shot-match-option-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Qualify match Option values
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("psc15selfhost/packages/elab/src/Ps/Elab/Term.lean")
+          source = path.read_text()
+          block_pattern = re.compile(
+              r"def psElabMatch\n[\s\S]*?(?=\ndef psBinderAcceptsExplicitArgument\n)"
+          )
+          match = block_pattern.search(source)
+          if match is None:
+              raise SystemExit("psElabMatch block not found")
+
+          block = match.group(0)
+          block = block.replace(
+              "match elaborate context scrutineeSyntax none with",
+              "match elaborate context scrutineeSyntax Option.none with",
+              1,
+          )
+          block = block.replace(
+              "(some instantiatedExpected)",
+              "(Option.some instantiatedExpected)",
+              1,
+          )
+          updated = source[:match.start()] + block + source[match.end():]
+          path.write_text(updated)
+          PY
+
+          node psc15selfhost/scripts/check-elab-match-selfhost-source-syntax.mjs
+
+          if git diff --quiet -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean; then
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git commit -m "fix(psc2): qualify match Option values"
+          git push origin HEAD:psc2/minimal-selfhost-psc15

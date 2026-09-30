@@ -93,6 +93,16 @@ def psInferExprListLength (values : List PsExpr) : Nat :=
   | List.nil => 0
   | List.cons _ rest => Nat.succ (psInferExprListLength rest)
 
+def psInferNameListLength (values : List PsName) : Nat :=
+  match values with
+  | List.nil => 0
+  | List.cons _ rest => Nat.succ (psInferNameListLength rest)
+
+def psInferLevelListLength (values : List PsLevel) : Nat :=
+  match values with
+  | List.nil => 0
+  | List.cons _ rest => Nat.succ (psInferLevelListLength rest)
+
 def psInferApplyStructureParametersWorker
     (arguments : List PsExpr) :
     PsEnvironment ->
@@ -461,7 +471,9 @@ def psInferTypeWithFuelWorker
             | none => Except.error (PsInferError.unknownConstant name)
             | some declaration =>
                 let parameters := psDeclarationLevelParams declaration;
-                if Nat.beq parameters.length levels.length then
+                if Nat.beq
+                    (psInferNameListLength parameters)
+                    (psInferLevelListLength levels) then
                   Except.ok
                     (psExprInstantiateLevelParams
                       parameters

@@ -13,8 +13,11 @@ assert.notEqual(pin.version,'tot');
 
 const build=await readFile(path.join(here,'build-wasm.sh'),'utf8');
 assert.match(build,/-DCMAKE_TOOLCHAIN_FILE=/);
-assert.match(build,/-DSTAGE0_CMAKE_TOOLCHAIN_FILE="\$emscripten_toolchain"/);
-assert.match(build,/-DSTAGE0_CMAKE_AR="\$\(command -v emar\)"/);
+assert.match(build,/-S "\$lean_source\/src"/);
+assert.match(build,/-DSTAGE=1/);
+assert.match(build,/-DPREV_STAGE="\$host_lean_prefix"/);
+assert.doesNotMatch(build,/STAGE0_CMAKE_TOOLCHAIN_FILE/);
+assert.doesNotMatch(build,/STAGE0_CMAKE_AR/);
 assert.match(build,/-DUSE_GMP=OFF/);
 assert.match(build,/-DUSE_LAKE=OFF/);
 assert.match(build,/-DMMAP=OFF/);
@@ -22,12 +25,10 @@ assert.match(build,/lean4-4\.34\.0-emscripten-uv-stubs\.patch/);
 assert.match(build,/pskernel-lean\.wasm/);
 assert.doesNotMatch(build,/emsdk\s+(install|activate)\s+(latest|tot)/);
 
-// A native i386 stage0 was proven semantically broken in CI: even a trivial
-// `def x : Nat := 1` aborts with `unknown parser category `level``. The WASM
-// provider therefore uses the exact pinned host Lean only as a C emitter and
-// cross-compiles Lean's frozen stage0 runtime/kernel plus the emitted provider
-// C with Emscripten. No runnable target-width Lean compiler or stage1 sysroot
-// is part of this artifact build.
+// A native i386 bootstrap compiler was proven semantically broken in CI. The
+// WASM artifact must instead build Lean 4.34's *current* src/ tree as STAGE=1
+// with Emscripten, using the exact pinned native Lean 4.34 toolchain only as
+// PREV_STAGE. This keeps generated C and the target runtime/kernel on one ABI.
 assert.doesNotMatch(build,/-m32/);
 assert.doesNotMatch(build,/i386-linux-gnu/);
 assert.doesNotMatch(build,/STAGE0_CMAKE_C_FLAGS/);
@@ -35,20 +36,17 @@ assert.doesNotMatch(build,/STAGE0_CMAKE_CXX_FLAGS/);
 assert.doesNotMatch(build,/STAGE0_LEAN_EXTRA_CXX_FLAGS/);
 assert.doesNotMatch(build,/STAGE0_LEANC_OPTS/);
 assert.doesNotMatch(build,/stage1-configure/);
+assert.doesNotMatch(build,/--target stage0(?:\s|$)/);
 assert.doesNotMatch(build,/--target stage1(?:\s|$)/);
 assert.doesNotMatch(build,/target_lean_path/);
 assert.doesNotMatch(build,/stage0\/bin\/lean/);
 assert.doesNotMatch(build,/PSC2_STAGE0_PARSER_PROBE/);
 
-// CMAKE_TOOLCHAIN_FILE arrives at Lean's top-level configure as an
-// UNINITIALIZED cache variable, so Lean puts it in CL_ARGS (stage1) instead of
-// PLATFORM_ARGS (stage0). Pin the same Emscripten toolchain and archiver through
-// STAGE0_ explicitly; otherwise the ExternalProject silently falls back to cc.
-assert.match(build,/cmake --build "\$lean_build" --target stage0 -j2/);
+assert.match(build,/cmake --build "\$lean_build" -j2/);
 assert.match(build,/host_lean=.*command -v lean/);
 assert.match(build,/host_lean_prefix=.*lean --print-prefix/);
 assert.match(build,/host_lean_path=.*lib\/lean/);
-assert.match(build,/wasm_leanc=.*stage0\/leanc\.sh/);
+assert.match(build,/wasm_leanc="\$lean_build\/leanc\.sh"/);
 assert.match(build,/provider_overlay/);
 assert.match(build,/provider_olean_dir/);
 assert.match(build,/provider_c_dir/);
@@ -64,11 +62,11 @@ assert.doesNotMatch(build,/LEAN_CC=.*emcc/);
 assert.doesNotMatch(build,/"\$stage0_lake"\s+build\s+provider/);
 assert.doesNotMatch(build,/\[\[lean_lib\]\]/);
 
-const stage0BuildIndex=build.indexOf('cmake --build "$lean_build" --target stage0 -j2');
+const currentLeanBuildIndex=build.indexOf('cmake --build "$lean_build" -j2');
 const providerCompileIndex=build.indexOf('provider_modules=');
-assert.ok(stage0BuildIndex>=0,'Emscripten stage0 build must exist');
+assert.ok(currentLeanBuildIndex>=0,'current-source Emscripten Lean build must exist');
 assert.ok(providerCompileIndex>=0,'direct provider module compile list must exist');
-assert.ok(stage0BuildIndex<providerCompileIndex,'WASM Lean runtime/kernel must exist before provider C compilation');
+assert.ok(currentLeanBuildIndex<providerCompileIndex,'WASM Lean runtime/kernel must exist before provider C compilation');
 
 assert.match(build,/packages\/foundation\/src\/Ps/);
 assert.match(build,/packages\/core\/src\/Ps/);
@@ -76,7 +74,7 @@ assert.match(build,/packages\/environment\/src\/Ps/);
 assert.match(build,/packages\/bridge\/src\/Ps/);
 assert.match(build,/packages\/pskernel-lean\/provider\/PsKernelLean/);
 
-// The stage0 leanc.sh wrapper contributes compiler/platform flags and -L, but
+// The target leanc.sh wrapper contributes compiler/platform flags and -L, but
 // intentionally does not add Lean's toolchain libraries. Mirror Lean 4.34's
 // own Emscripten TOOLCHAIN_STATIC_LINKER_FLAGS exactly for the provider link.
 const finalLinkStart=build.lastIndexOf('"$wasm_leanc" \\\n');
@@ -114,10 +112,10 @@ assert.match(build,/-o "\$out_dir\/pskernel-lean\.cjs"/);
 assert.match(build,/node "\$out_dir\/pskernel-lean\.cjs" --health/);
 assert.doesNotMatch(build,/-o "\$out_dir\/pskernel-lean\.js"/);
 
-// Health proves the generated launcher can initialize, but run 51 also exposed
-// stage0/generated-C ABI warnings. Require the artifact build itself to execute
-// the actual admission path in WASM: one well-typed declaration must be
-// accepted and one ill-typed declaration must be rejected by the Lean kernel.
+// Health proves the generated launcher can initialize. Require the artifact
+// build itself to execute the actual admission path in WASM: one well-typed
+// declaration must be accepted and one ill-typed declaration must be rejected
+// by the Lean kernel.
 assert.match(build,/PSC2_LEAN_KERNEL_WASM_ACCEPT_SMOKE/);
 assert.match(build,/PSC2_LEAN_KERNEL_WASM_REJECT_SMOKE/);
 const checkInvocations=build.match(/node "\$out_dir\/pskernel-lean\.cjs" --check/g)??[];
@@ -138,10 +136,8 @@ assert.match(patch,/lean_uv_event_loop_alive/);
 assert.match(patch,/runtime\/uv\/system\.cpp/);
 assert.match(patch,/lean_uv_os_get_group/);
 
-// Lean 4.34's frozen stage0 snapshot has stale Emscripten fallback bodies whose
-// signatures disagree with the adjacent headers. The artifact is built from
-// stage0, so patching only src/ is insufficient even if the current sources are
-// corrected. Keep the two stage0 ABI repairs explicit and regression-tested.
+// Keep the frozen stage0 compatibility hunks while this branch still carries
+// them, but the production WASM provider must not build/link the stage0 closure.
 const sectionFor = marker => {
   const start=patch.indexOf(marker);
   assert.ok(start>=0,`compatibility patch is missing ${marker}`);

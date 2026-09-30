@@ -46,3 +46,10 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           lake env lean --run test/CompilerKernelShadowTests.lean
+
+      - name: KernelCore PSC1 source profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          node scripts/check-kernel-core-source.mjs

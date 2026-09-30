@@ -38,7 +38,7 @@ if [[ "$emcc_version" != *"$expected_emscripten"* ]]; then
   exit 1
 fi
 
-for tool in cmake emcc emar lean node; do
+for tool in cmake emcc em++ emar lean node; do
   if ! command -v "$tool" >/dev/null 2>&1; then
     echo "required build tool missing: $tool" >&2
     exit 1
@@ -213,7 +213,9 @@ done
 # library search directory. Use Lean 4.34's own Emscripten
 # TOOLCHAIN_STATIC_LINKER_FLAGS (without Lake, which this provider does not use)
 # so generated Lean C resolves against the exact stage0 runtime/kernel closure.
-"$wasm_leanc" \
+# The final link must use Emscripten's C++ driver because libleancpp/libLean
+# require libc++/C++ ABI symbols; provider C compilation above remains on leanc.
+LEAN_CC="$(command -v em++)" "$wasm_leanc" \
   "${provider_objects[@]}" \
   -lleancpp \
   -lInit \

@@ -1611,27 +1611,39 @@ structure PsElabMatchMinorResult where
   context : PsElabContext
   term : PsExpr
 
+def psElabWildcardBinderNamesWorker
+    (span : PsSourceSpan)
+    (remaining : Nat) :
+    Nat -> List PsSyntaxName :=
+  match remaining with
+  | 0 =>
+      fun (_index : Nat) =>
+        []
+  | nextRemaining + 1 =>
+      let smaller : Nat -> List PsSyntaxName :=
+        psElabWildcardBinderNamesWorker
+          span
+          nextRemaining;
+      fun (index : Nat) =>
+        let segment :=
+          String.Internal.append "_wild" (psNatToString index);
+        let syntaxName : PsSyntaxName := {
+          segments := List.cons segment List.nil
+          span := span
+        };
+        List.cons
+          syntaxName
+          (smaller (Nat.succ index))
+
 def psElabWildcardBinderNames
     (span : PsSourceSpan)
     (index : Nat)
     (remaining : Nat) :
     List PsSyntaxName :=
-  match remaining with
-  | 0 =>
-      []
-  | nextRemaining + 1 =>
-      let segment :=
-        String.Internal.append "_wild" (psNatToString index);
-      let syntaxName : PsSyntaxName := {
-        segments := List.cons segment List.nil
-        span := span
-      };
-      List.cons
-        syntaxName
-        (psElabWildcardBinderNames
-          span
-          (Nat.succ index)
-          nextRemaining)
+  psElabWildcardBinderNamesWorker
+    span
+    remaining
+    index
 
 def psElabMatchConstructorMinor
     (elaborate :

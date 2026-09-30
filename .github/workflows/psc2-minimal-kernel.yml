@@ -29,6 +29,7 @@ on:
       - psc15selfhost/scripts/check-instances-selfhost-source-syntax.mjs
       - psc15selfhost/scripts/check-unify-selfhost-source-syntax.mjs
       - psc15selfhost/scripts/check-elab-context-selfhost-source-syntax.mjs
+      - psc15selfhost/scripts/check-elab-match-fields-selfhost-source-syntax.mjs
       - .github/workflows/psc2-minimal-kernel.yml
   workflow_dispatch:
 

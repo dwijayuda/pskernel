@@ -2547,6 +2547,12 @@ def psElabRecordCandidates
   | [] =>
       candidatesRev
   | declaration :: rest =>
+      let candidates :=
+        psElabRecordCandidates
+          environment
+          fields
+          rest
+          candidatesRev
       match declaration with
       | .inductiveDecl info =>
           match
@@ -2558,29 +2564,13 @@ def psElabRecordCandidates
                   psSyntaxRecordFieldsMatch
                     fields
                     candidate.fieldNames then
-                psElabRecordCandidates
-                  environment
-                  fields
-                  rest
-                  (List.cons candidate candidatesRev)
+                List.cons candidate candidates
               else
-                psElabRecordCandidates
-                  environment
-                  fields
-                  rest
-                  candidatesRev
+                candidates
           | none =>
-              psElabRecordCandidates
-                environment
-                fields
-                rest
-                candidatesRev
+              candidates
       | _ =>
-          psElabRecordCandidates
-            environment
-            fields
-            rest
-            candidatesRev
+          candidates
 
 def psElabUniqueRecordCandidate
     (environment : PsEnvironment)

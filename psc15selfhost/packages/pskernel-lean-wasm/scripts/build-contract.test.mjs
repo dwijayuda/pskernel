@@ -99,6 +99,13 @@ for(const flag of leanEmscriptenStaticLinkClosure){
   previousLinkFlag=index;
 }
 
+// Emscripten 6.0.9 does not automatically pull the C++ runtime when the final
+// link is driven by emcc. Lean's kernel libraries contain C++, and run 49
+// reached the final link then failed on operator new/delete. Keep generated C
+// compilation on leanc/emcc, but force only the final link through em++.
+assert.match(build,/for tool in cmake emcc em\+\+ emar lean node/);
+assert.match(build,/LEAN_CC="\$\(command -v em\+\+\)" "\$wasm_leanc" \\\n/);
+
 const patch=await readFile(path.join(packageRoot,'patches/lean4-4.34.0-emscripten-uv-stubs.patch'),'utf8');
 assert.match(patch,/runtime\/uv\/event_loop\.cpp/);
 assert.match(patch,/lean_uv_event_loop_alive/);

@@ -40,32 +40,36 @@ jobs:
 
           path = Path("psc15selfhost/packages/elab/src/Ps/Elab/Term.lean")
           source = path.read_text()
-          old = '''def psElabNatListAt
-    (values : List Nat)
-    (index : Nat) : Option Nat :=
-  match values with
-  | [] =>
-      none
-  | value :: rest =>
-      match index with
-      | 0 =>
-          some value
-      | nextIndex + 1 =>
-          psElabNatListAt rest nextIndex
-'''
-          new = '''def psElabNatListAt
-    (values : List Nat)
-    (index : Nat) : Option Nat :=
-  match values with
-  | [] =>
-      Option.none
-  | value :: rest =>
-      match index with
-      | 0 =>
-          Option.some value
-      | nextIndex + 1 =>
-          psElabNatListAt rest nextIndex
-'''
+          old = "\n".join([
+              "def psElabNatListAt",
+              "    (values : List Nat)",
+              "    (index : Nat) : Option Nat :=",
+              "  match values with",
+              "  | [] =>",
+              "      none",
+              "  | value :: rest =>",
+              "      match index with",
+              "      | 0 =>",
+              "          some value",
+              "      | nextIndex + 1 =>",
+              "          psElabNatListAt rest nextIndex",
+              "",
+          ])
+          new = "\n".join([
+              "def psElabNatListAt",
+              "    (values : List Nat)",
+              "    (index : Nat) : Option Nat :=",
+              "  match values with",
+              "  | [] =>",
+              "      Option.none",
+              "  | value :: rest =>",
+              "      match index with",
+              "      | 0 =>",
+              "          Option.some value",
+              "      | nextIndex + 1 =>",
+              "          psElabNatListAt rest nextIndex",
+              "",
+          ])
           count = source.count(old)
           if count != 1:
               raise SystemExit(f"expected exactly one psElabNatListAt block, found {count}")

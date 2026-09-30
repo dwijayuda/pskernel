@@ -59,7 +59,7 @@ def psWhnfWithFuel
     (localContext : PsLocalContext) : Nat -> PsExpr -> PsExpr
   | 0, expr => psWhnfCore metaContext localContext expr
   | fuel + 1, expr =>
-      let core := psWhnfCoreWithFuel metaContext localContext fuel expr
+      let core := psWhnfCoreWithFuel metaContext localContext fuel expr;
       match core with
       | .constE name levels =>
           match psEnvironmentFind environment name with

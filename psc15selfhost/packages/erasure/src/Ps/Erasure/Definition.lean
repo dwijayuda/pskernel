@@ -1,12 +1,23 @@
 import Ps.Erasure.Expr
 import Ps.Erasure.Inductive
 import Ps.Erasure.StructureRecursor
+import Ps.Erasure.PrimitiveNat
 
 structure PsOpenedErasedDefinition where
   typeParameters : List PsVerifiedIrTypeParameter
   parameters : List PsVerifiedIrParameter
   resultType : PsVerifiedIrType
   body : PsVerifiedIrExpr
+
+def psEraseNormalizedRuntimeExpr
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
+    (expr : PsExpr) :
+    Except PsErasureError PsVerifiedIrExpr :=
+  match psLowerPrimitiveNat scope expr with
+  | Except.error error => Except.error error
+  | Except.ok normalized =>
+      psEraseRuntimeExpr environment scope normalized
 
 def psErasureAddUniqueString
     (used : List String)
@@ -215,7 +226,7 @@ def psEraseOpenDefinitionWithFuel
               | Except.error error => Except.error error
               | Except.ok resultType =>
                   match
-                      psEraseRuntimeExpr
+                      psEraseNormalizedRuntimeExpr
                         environment
                         scope
                         currentValue with
@@ -236,7 +247,7 @@ def psEraseOpenDefinitionWithFuel
           | Except.error error => Except.error error
           | Except.ok resultType =>
               match
-                  psEraseRuntimeExpr
+                  psEraseNormalizedRuntimeExpr
                     environment
                     scope
                     currentValue with

@@ -2791,15 +2791,15 @@ def psTryElabStructuralSelfCall
     (expected : Option PsExpr) :
     Except PsElabError (Option PsElabTermResult) :=
   match context.structuralRecursion with
-  | none =>
-      Except.ok none
-  | some recursion =>
+  | Option.none =>
+      Except.ok Option.none
+  | Option.some recursion =>
       match fn with
       | .reference sourceName =>
           match psSyntaxNameToName sourceName with
-          | some calledName =>
+          | Option.some calledName =>
               if psElabBoolNot (psNameEq calledName recursion.functionName) then
-                Except.ok none
+                Except.ok Option.none
               else if
                   psElabNatNe
                     (psElabListLength arguments)
@@ -2812,7 +2812,7 @@ def psTryElabStructuralSelfCall
                       recursion
                       0
                       arguments
-                      none with
+                      Option.none with
                 | Except.error error => Except.error error
                 | Except.ok hypothesisId =>
                     match
@@ -2821,10 +2821,10 @@ def psTryElabStructuralSelfCall
                           (PsExpr.fvar hypothesisId)
                           expected with
                     | Except.error error => Except.error error
-                    | Except.ok result => Except.ok (some result)
-          | none => Except.ok none
+                    | Except.ok result => Except.ok (Option.some result)
+          | Option.none => Except.ok Option.none
       | _ =>
-          Except.ok none
+          Except.ok Option.none
 
 def psElabTermWithFuel
     (fuel : Nat)

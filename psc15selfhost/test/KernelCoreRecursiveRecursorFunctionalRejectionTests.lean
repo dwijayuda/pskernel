@@ -73,14 +73,6 @@ def psP12FuncRejCloseForall
     (psKernelCoreExprAbstractFVar body internalName)
     PsKernelCoreBinderInfo.default
 
-def psP12FuncRejCloseForallImplicit
-    (internalName : PsKernelCoreName)
-    (type : PsKernelCoreExpr)
-    (body : PsKernelCoreExpr) : PsKernelCoreExpr :=
-  PsKernelCoreExpr.forallE psP12FuncRejAnon type
-    (psKernelCoreExprAbstractFVar body internalName)
-    PsKernelCoreBinderInfo.implicit
-
 def psP12FuncRejCloseLam
     (internalName : PsKernelCoreName)
     (type : PsKernelCoreExpr)
@@ -151,8 +143,8 @@ def psP12FuncRejExtraIhArgType : PsKernelCoreExpr :=
     (psP12FuncRejCloseForall psP12FuncRejExtraI psP12FuncRejSmallSort
       (PsKernelCoreExpr.app psP12FuncRejMotive psP12FuncRejFieldApp))
 
-def psP12FuncRejWrongBinderIhType : PsKernelCoreExpr :=
-  psP12FuncRejCloseForallImplicit psP12FuncRejArgI psP12FuncRejSmallSort
+def psP12FuncRejWrongDomainIhType : PsKernelCoreExpr :=
+  psP12FuncRejCloseForall psP12FuncRejArgI psP12FuncRejSort1
     (PsKernelCoreExpr.app psP12FuncRejMotive psP12FuncRejFieldApp)
 
 def psP12FuncRejMinorType
@@ -234,7 +226,7 @@ def psP12FuncRejChecks : PsKernelCoreResult String Unit :=
   let canonicalMinor := psP12FuncRejMinorType psP12FuncRejCanonicalIhType;
   let missingMinor := psP12FuncRejMinorType psP12FuncRejMissingIhArgType;
   let extraMinor := psP12FuncRejMinorType psP12FuncRejExtraIhArgType;
-  let wrongBinderMinor := psP12FuncRejMinorType psP12FuncRejWrongBinderIhType;
+  let wrongDomainMinor := psP12FuncRejMinorType psP12FuncRejWrongDomainIhType;
   match psKernelCoreAddRecursiveInductive
       512 startEnv psP12FuncRejFamilyInfo psP12FuncRejConstructors with
   | PsKernelCoreResult.error message =>
@@ -251,15 +243,15 @@ def psP12FuncRejChecks : PsKernelCoreResult String Unit :=
           let extra :=
             psKernelCoreAddRecursor 1024 familyEnv
               (psP12FuncRejRecInfo extraMinor);
-          let wrongBinder :=
+          let wrongDomain :=
             psKernelCoreAddRecursor 1024 familyEnv
-              (psP12FuncRejRecInfo wrongBinderMinor);
+              (psP12FuncRejRecInfo wrongDomainMinor);
           if psP12FuncRejRejected missing then
             if psP12FuncRejRejected extra then
-              if psP12FuncRejRejected wrongBinder then
+              if psP12FuncRejRejected wrongDomain then
                 PsKernelCoreResult.ok Unit.unit
               else
-                PsKernelCoreResult.error "wrong functional IH binder mode was accepted"
+                PsKernelCoreResult.error "wrong functional IH argument domain was accepted"
             else
               PsKernelCoreResult.error "extra functional IH argument was accepted"
           else

@@ -41,13 +41,25 @@ def psMetaSnapshot (context : PsMetaContext) : PsMetaContext :=
 def psMetaRestore (_current : PsMetaContext) (snapshot : PsMetaContext) : PsMetaContext :=
   snapshot
 
-def psMetaFindDeclInList (id : Nat) : List PsMetaVarDecl -> Option PsMetaVarDecl
-  | [] => Option.none
+def psMetaFindDeclInListWorker
+    (declarations : List PsMetaVarDecl) :
+    Nat -> Option PsMetaVarDecl :=
+  match declarations with
+  | [] =>
+      fun (_id : Nat) => Option.none
   | declaration :: rest =>
-      if Nat.beq declaration.id id then
-        Option.some declaration
-      else
-        psMetaFindDeclInList id rest
+      let smaller : Nat -> Option PsMetaVarDecl :=
+        psMetaFindDeclInListWorker rest;
+      fun (id : Nat) =>
+        if Nat.beq declaration.id id then
+          Option.some declaration
+        else
+          smaller id
+
+def psMetaFindDeclInList
+    (id : Nat)
+    (declarations : List PsMetaVarDecl) : Option PsMetaVarDecl :=
+  psMetaFindDeclInListWorker declarations id
 
 def psMetaFindDecl (context : PsMetaContext) (id : Nat) : Option PsMetaVarDecl :=
   psMetaFindDeclInList id context.declarations

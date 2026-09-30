@@ -66,11 +66,11 @@ def psInferAppViewAcc
     (expr : PsExpr)
     (args : List PsExpr) : PsInferAppView :=
   match expr with
-  | .app fn arg =>
+  | PsExpr.app fn arg =>
       psInferAppViewAcc fn (List.cons arg args)
-  | head =>
+  | _ =>
       {
-        head := head
+        head := expr
         args := args
       }
 

@@ -30,14 +30,17 @@ def psLocalInstanceEntriesFromList
   | [] => []
   | declaration :: rest =>
       match declaration with
-      | .binding id _ type .instanceImplicit =>
-          let instanceEntry : PsInstanceEntry := {
-            value := PsExpr.fvar id
-            type := type
-          };
-          List.cons
-            instanceEntry
-            (psLocalInstanceEntriesFromList rest)
+      | PsLocalDecl.binding id _ type binder =>
+          match binder with
+          | PsBinderInfo.instanceImplicit =>
+              let instanceEntry : PsInstanceEntry := {
+                value := PsExpr.fvar id
+                type := type
+              };
+              List.cons
+                instanceEntry
+                (psLocalInstanceEntriesFromList rest)
+          | _ => psLocalInstanceEntriesFromList rest
       | _ => psLocalInstanceEntriesFromList rest
 
 def psLocalInstanceEntries (context : PsLocalContext) : List PsInstanceEntry :=

@@ -86,8 +86,8 @@ def psJsHasUnsafeEagerCallWithFuel (fuel : Nat) :
                 else smaller initializedGlobals (List.cons name locals) body
             | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
                 if smaller initializedGlobals locals condition then true
-                else if smaller initializedGlobals thenBranch then true
-                else smaller initializedGlobals elseBranch
+                else if smaller initializedGlobals locals thenBranch then true
+                else smaller initializedGlobals locals elseBranch
             | PsVerifiedIrExpr.lambda _ _ _ => false
             | _ => false
 

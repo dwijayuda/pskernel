@@ -131,7 +131,7 @@ if (projectionChainMatch === null) {
 const projectionChain = projectionChainMatch[0];
 const projectionChainRequired = [
   /def psElabProjectionChainWorker\s*\(fields : List String\)\s*:\s*PsElabContext ->\s*PsElabTermResult ->\s*Except PsElabError PsElabTermResult :=/,
-  /let smaller : PsElabContext -> PsElabTermResult -> Except PsElabError PsElabTermResult :=\s*psElabProjectionChainWorker rest;/,
+  /let smaller\s*:\s*PsElabContext -> PsElabTermResult -> Except PsElabError PsElabTermResult :=\s*psElabProjectionChainWorker rest;/,
   /fun \(context : PsElabContext\) =>\s*fun \(current : PsElabTermResult\) =>/,
   /smaller projected\.context projected/,
   /def psElabProjectionChain\s*\(context : PsElabContext\)\s*\(current : PsElabTermResult\)\s*\(fields : List String\)[\s\S]*?psElabProjectionChainWorker fields context current/,

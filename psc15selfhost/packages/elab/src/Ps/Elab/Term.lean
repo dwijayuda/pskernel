@@ -427,7 +427,7 @@ def psElabNatural
           | _ =>
               psElabResolvedTerm context natural expected
       | none =>
-          psElabResolvedTerm context natural none
+          psElabResolvedTerm context natural Option.none
 
 def psElabString
     (context : PsElabContext)

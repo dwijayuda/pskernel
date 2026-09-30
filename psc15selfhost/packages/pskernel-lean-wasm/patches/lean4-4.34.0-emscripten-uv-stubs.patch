@@ -124,3 +124,35 @@ diff --git a/study/lean4-4.34.0/src/stdlib.make.in b/study/lean4-4.34.0/src/stdl
  
  leanir: $(OUTBIN)/leanir$(EXE)
  
+diff --git a/study/lean4-4.34.0/src/kernel/init_module.cpp b/study/lean4-4.34.0/src/kernel/init_module.cpp
+--- a/study/lean4-4.34.0/src/kernel/init_module.cpp
++++ b/study/lean4-4.34.0/src/kernel/init_module.cpp
+@@ -4,6 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
+ 
+ Author: Leonardo de Moura
+ */
++#if defined(LEAN_EMSCRIPTEN)
++#include "runtime/stackinfo.h"
++#include "util/init_module.h"
++#endif
+ #include "kernel/init_module.h"
+ #include "kernel/environment.h"
+ #include "kernel/type_checker.h"
+@@ -17,6 +21,18 @@ Author: Leonardo de Moura
+ 
+ namespace lean {
++#if defined(LEAN_EMSCRIPTEN)
++static bool g_pskernel_initialized = false;
++extern "C" LEAN_EXPORT void lean_initialize() {
++    if (g_pskernel_initialized)
++        return;
++    g_pskernel_initialized = true;
++    save_stack_info();
++    initialize_util_module();
++    initialize_kernel_module();
++}
++#endif
++
+ void initialize_kernel_module() {
+     initialize_level();
+     initialize_expr();

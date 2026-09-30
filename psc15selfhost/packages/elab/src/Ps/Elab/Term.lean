@@ -2545,7 +2545,7 @@ def psElabRecordCandidates
     List PsElabRecordCandidate :=
   match declarations with
   | [] =>
-      List.reverse candidatesRev
+      candidatesRev
   | declaration :: rest =>
       match declaration with
       | .inductiveDecl info =>

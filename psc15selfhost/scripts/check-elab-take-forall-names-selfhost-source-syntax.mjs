@@ -380,3 +380,32 @@ if (/\|\s*none\s*=>/.test(candidateExpected) || /\|\s*some\s+/.test(candidateExp
 process.stdout.write(
   "PSC2_ELAB_RECORD_CANDIDATE_EXPECTED_SELFHOST_SOURCE_SYNTAX: PASS (expected-type candidate lookup; explicit Option constructors)\n",
 );
+
+const candidatesStart = source.indexOf("def psElabRecordCandidates\n");
+const candidatesEnd = source.indexOf("\ndef psElabUniqueRecordCandidate\n", candidatesStart + 1);
+if (candidatesStart < 0 || candidatesEnd < 0) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
+  );
+}
+
+const candidates = source.slice(candidatesStart, candidatesEnd);
+if (!/match\s+declarations\s+with/.test(candidates)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX_MISSING: declaration-list match",
+  );
+}
+if (!/psElabRecordCandidates\s+environment\s+fields\s+rest/.test(candidates)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX_MISSING: structural recursion on rest",
+  );
+}
+if (/\bList\.reverse\b/.test(candidates)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: generic List.reverse remains",
+  );
+}
+
+process.stdout.write(
+  "PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX: PASS (structural declaration traversal; no List.reverse)\n",
+);

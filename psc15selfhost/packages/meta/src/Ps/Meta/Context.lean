@@ -109,32 +109,54 @@ def psMetaFresh
     expr := PsExpr.mvar id
   }
 
-def psExprContainsMVar (target : Nat) : PsExpr -> Bool
-  | .mvar id => Nat.beq id target
+def psExprContainsMVarWorker
+    (expr : PsExpr) : Nat -> Bool :=
+  match expr with
+  | .mvar id =>
+      fun (target : Nat) => Nat.beq id target
   | .app fn arg =>
-      if psExprContainsMVar target fn then
-        true
-      else
-        psExprContainsMVar target arg
+      let fnContains : Nat -> Bool := psExprContainsMVarWorker fn;
+      let argContains : Nat -> Bool := psExprContainsMVarWorker arg;
+      fun (target : Nat) =>
+        if fnContains target then
+          true
+        else
+          argContains target
   | .lam _ type body _ =>
-      if psExprContainsMVar target type then
-        true
-      else
-        psExprContainsMVar target body
+      let typeContains : Nat -> Bool := psExprContainsMVarWorker type;
+      let bodyContains : Nat -> Bool := psExprContainsMVarWorker body;
+      fun (target : Nat) =>
+        if typeContains target then
+          true
+        else
+          bodyContains target
   | .forallE _ type body _ =>
-      if psExprContainsMVar target type then
-        true
-      else
-        psExprContainsMVar target body
+      let typeContains : Nat -> Bool := psExprContainsMVarWorker type;
+      let bodyContains : Nat -> Bool := psExprContainsMVarWorker body;
+      fun (target : Nat) =>
+        if typeContains target then
+          true
+        else
+          bodyContains target
   | .letE _ type value body =>
-      if psExprContainsMVar target type then
-        true
-      else if psExprContainsMVar target value then
-        true
-      else
-        psExprContainsMVar target body
-  | .proj _ _ value => psExprContainsMVar target value
-  | _ => false
+      let typeContains : Nat -> Bool := psExprContainsMVarWorker type;
+      let valueContains : Nat -> Bool := psExprContainsMVarWorker value;
+      let bodyContains : Nat -> Bool := psExprContainsMVarWorker body;
+      fun (target : Nat) =>
+        if typeContains target then
+          true
+        else if valueContains target then
+          true
+        else
+          bodyContains target
+  | .proj _ _ value =>
+      let valueContains : Nat -> Bool := psExprContainsMVarWorker value;
+      fun (target : Nat) => valueContains target
+  | _ =>
+      fun (_target : Nat) => false
+
+def psExprContainsMVar (target : Nat) (expr : PsExpr) : Bool :=
+  psExprContainsMVarWorker expr target
 
 def psExprFVarsInContext (localContext : PsLocalContext) : PsExpr -> Bool
   | .fvar id => psLocalContainsId localContext id

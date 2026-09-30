@@ -2369,13 +2369,23 @@ def psElabTakeForallNames
     remaining
     type
 
+def psSyntaxRecordLastSegment
+    (segments : List String) : Option String :=
+  match segments with
+  | [] =>
+      Option.none
+  | first :: rest =>
+      match rest with
+      | [] =>
+          Option.some first
+      | _ :: _ =>
+          psSyntaxRecordLastSegment rest
+
 def psSyntaxRecordFieldName
     (field : Prod PsSyntaxName PsSyntaxTerm) :
     Option String :=
   let syntaxName := Prod.fst field;
-  match List.reverse syntaxName.segments with
-  | [] => none
-  | name :: _ => some name
+  psSyntaxRecordLastSegment syntaxName.segments
 
 def psSyntaxRecordFieldMatchesName
     (name : String)

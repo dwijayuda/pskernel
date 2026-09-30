@@ -65,7 +65,7 @@ assert.match(closure,/pskernel-lean-wasm/);
 // Keep this boundary on Lean.Environment, which supplies the semantic kernel
 // types and addDeclCore API without depending on Lean.Shell.
 const nativeProviderRoot=path.join(workspaceRoot,'packages/pskernel-lean/provider/PsKernelLean');
-for(const moduleName of ['Convert.lean','Prelude.lean']){
+for(const moduleName of ['Convert.lean','Prelude.lean','Protocol.lean']){
   const source=await readFile(path.join(nativeProviderRoot,moduleName),'utf8');
   assert.doesNotMatch(
     source,

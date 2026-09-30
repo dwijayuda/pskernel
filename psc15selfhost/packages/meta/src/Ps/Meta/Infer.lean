@@ -63,19 +63,24 @@ structure PsInferAppView where
   args : List PsExpr
 
 def psInferAppViewAcc
-    (expr : PsExpr)
-    (args : List PsExpr) : PsInferAppView :=
+    (expr : PsExpr) : List PsExpr -> PsInferAppView :=
   match expr with
   | PsExpr.app fn arg =>
-      psInferAppViewAcc fn (List.cons arg args)
+      let smaller : List PsExpr -> PsInferAppView :=
+        psInferAppViewAcc fn;
+      fun (args : List PsExpr) =>
+        smaller (List.cons arg args)
   | _ =>
-      {
-        head := expr
-        args := args
-      }
+      fun (args : List PsExpr) =>
+        {
+          head := expr
+          args := args
+        }
 
 def psInferAppView (expr : PsExpr) : PsInferAppView :=
-  psInferAppViewAcc expr []
+  let worker : List PsExpr -> PsInferAppView :=
+    psInferAppViewAcc expr;
+  worker []
 
 def psInferApplyStructureParameters
     (environment : PsEnvironment)

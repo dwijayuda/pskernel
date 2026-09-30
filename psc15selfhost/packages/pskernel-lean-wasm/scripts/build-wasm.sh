@@ -61,11 +61,11 @@ elif ! git apply --reverse --check "$patch_file" >/dev/null 2>&1; then
 fi
 
 # The study snapshot does not preserve executable bits on Lean's helper scripts.
-# Stage0 is the only target built in this path, so only its bootstrap helpers
-# need their source permissions repaired before configure_file copies them.
+# We configure the current src/ tree directly, so repair the current helper
+# sources before CMake copies them into the target build directory.
 for helper_source in \
-  "$lean_source/stage0/src/bin/leanmake" \
-  "$lean_source/stage0/src/bin/leanc.in"; do
+  "$lean_source/src/bin/leanmake" \
+  "$lean_source/src/bin/leanc.in"; do
   if [[ ! -f "$helper_source" ]]; then
     echo "Lean helper source missing: $helper_source" >&2
     exit 1
@@ -84,27 +84,22 @@ mkdir -p \
   "$provider_obj_dir" \
   "$out_dir"
 
-# Build the frozen Lean bootstrap runtime/kernel directly for wasm32. A forced
-# native i386 stage0 compiler was proven unusable in CI (it cannot parse even a
-# trivial definition), and a full stage1 compiler is unnecessary for this
-# provider. The exact host Lean below is used only to elaborate matching 4.34.0
-# source and emit portable generated C; all shipped runtime/kernel code is
-# compiled by this Emscripten stage0.
-#
-# Lean's top-level CMake classifies command-line CMAKE_* variables before
-# project(), so an untyped CMAKE_TOOLCHAIN_FILE/AR lands in CL_ARGS (stage1)
-# instead of PLATFORM_ARGS (stage0). Forward both explicitly with STAGE0_ so
-# the ExternalProject cannot silently fall back to the host compiler.
+# Build Lean 4.34's current source tree directly for wasm32 as STAGE=1. The
+# exact pinned native Lean toolchain is PREV_STAGE: it elaborates current Lean
+# sources and emits C, while Emscripten owns every runtime/kernel/object that is
+# shipped in the provider. This avoids mixing the frozen bootstrap generated-C
+# ABI with the current runtime ABI, which WebAssembly correctly rejects.
 cmake \
-  -S "$lean_source" \
+  -S "$lean_source/src" \
   -B "$lean_build" \
   -G 'Unix Makefiles' \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_C_COMPILER_WORKS=1 \
   -DCMAKE_AR="$(command -v emar)" \
   -DCMAKE_TOOLCHAIN_FILE="$emscripten_toolchain" \
-  -DSTAGE0_CMAKE_AR="$(command -v emar)" \
-  -DSTAGE0_CMAKE_TOOLCHAIN_FILE="$emscripten_toolchain" \
+  -DSTAGE=1 \
+  -DPREV_STAGE="$host_lean_prefix" \
+  -DPREV_STAGE_CMAKE_EXECUTABLE_SUFFIX= \
   -DUSE_GMP=OFF \
   -DUSE_MIMALLOC=OFF \
   -DUSE_LAKE=OFF \
@@ -114,23 +109,23 @@ cmake \
   -DWFAIL=OFF \
   -DLEAN_INSTALL_SUFFIX=-linux_wasm32
 
-cmake --build "$lean_build" --target stage0 -j2
+cmake --build "$lean_build" -j2
 
-wasm_leanc="$lean_build/stage0/leanc.sh"
+wasm_leanc="$lean_build/leanc.sh"
 if [[ ! -f "$wasm_leanc" ]]; then
-  echo "Emscripten stage0 leanc wrapper missing: $wasm_leanc" >&2
+  echo "Emscripten current-source leanc wrapper missing: $wasm_leanc" >&2
   exit 1
 fi
 chmod +x "$wasm_leanc"
 
 for runtime_lib in \
-  "$lean_build/stage0/lib/lean/libleanrt.a" \
-  "$lean_build/stage0/lib/lean/libInit.a" \
-  "$lean_build/stage0/lib/lean/libStd.a" \
-  "$lean_build/stage0/lib/lean/libLean.a" \
-  "$lean_build/stage0/lib/lean/libleancpp.a"; do
+  "$lean_build/lib/lean/libleanrt.a" \
+  "$lean_build/lib/lean/libInit.a" \
+  "$lean_build/lib/lean/libStd.a" \
+  "$lean_build/lib/lean/libLean.a" \
+  "$lean_build/lib/lean/libleancpp.a"; do
   if [[ ! -s "$runtime_lib" ]]; then
-    echo "Emscripten Lean stage0 library missing: $runtime_lib" >&2
+    echo "Emscripten Lean current-source library missing: $runtime_lib" >&2
     exit 1
   fi
 done
@@ -209,12 +204,11 @@ done
 # later milestone can replace this with the JS-facing memory ABI without
 # changing the kernel admission semantics.
 #
-# leanc.sh intentionally contributes only compiler/platform flags and the Lean
-# library search directory. Use Lean 4.34's own Emscripten
-# TOOLCHAIN_STATIC_LINKER_FLAGS (without Lake, which this provider does not use)
-# so generated Lean C resolves against the exact stage0 runtime/kernel closure.
-# The final link must use Emscripten's C++ driver because libleancpp/libLean
-# require libc++/C++ ABI symbols; provider C compilation above remains on leanc.
+# leanc.sh contributes the target compiler/platform flags and current Lean
+# library search directory. Mirror Lean 4.34's Emscripten static link closure
+# (without Lake, which this provider does not use). The final link must use
+# Emscripten's C++ driver because libleancpp/libLean require libc++/C++ ABI
+# symbols; provider C compilation above remains on leanc.
 LEAN_CC="$(command -v em++)" "$wasm_leanc" \
   "${provider_objects[@]}" \
   -lleancpp \

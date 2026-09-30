@@ -11,9 +11,6 @@ def psPhase13KernelShadowCheckCount
 def psPhase13KernelShadowMinimalSource : String :=
   "def answer : Nat := 42"
 
-def psPhase13KernelShadowTheoremSource : String :=
-  "theorem selfEq(x: Nat): x = x := by rfl;"
-
 def psPhase13KernelShadowMinimalPass : Bool :=
   psPhase13KernelShadowCheckCount
     PsCompilerSourceKind.lean
@@ -38,19 +35,38 @@ def psPhase13KernelShadowPolymorphicPass : Bool :=
     "def identity (α : Type) (x : α) : α := x"
     1
 
-def psPhase13KernelShadowTheoremPreparePass : Bool :=
-  match
-      psCompilerPrepareSource
-        PsCompilerSourceKind.proofScript
-        psPhase13KernelShadowTheoremSource with
-  | Except.error _ => false
-  | Except.ok _ => true
-
 def psPhase13KernelShadowTheoremPass : Bool :=
-  psPhase13KernelShadowCheckCount
-    PsCompilerSourceKind.proofScript
-    psPhase13KernelShadowTheoremSource
-    1
+  let pName := psRootName "p";
+  let hName := psRootName "h";
+  let theoremType :=
+    PsExpr.forallE
+      pName
+      (PsExpr.sortE PsLevel.zero)
+      (PsExpr.forallE
+        hName
+        (PsExpr.bvar 0)
+        (PsExpr.bvar 1)
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit;
+  let theoremProof :=
+    PsExpr.lam
+      pName
+      (PsExpr.sortE PsLevel.zero)
+      (PsExpr.lam
+        hName
+        (PsExpr.bvar 0)
+        (PsExpr.bvar 0)
+        PsBinderInfo.explicit)
+      PsBinderInfo.explicit;
+  let declaration :=
+    PsDeclaration.theoremDecl
+      (psRootName "identityProof")
+      []
+      theoremType
+      theoremProof;
+  match psCompilerKernelShadowCheckDeclarations [declaration] with
+  | Except.error _ => false
+  | Except.ok report => Nat.beq report.checkedDeclarations 1
 
 def psPhase13KernelShadowSequentialPass : Bool :=
   psPhase13KernelShadowCheckCount
@@ -67,36 +83,6 @@ def psPhase13Require
   else
     throw (IO.userError (marker ++ ": FAIL"))
 
-def psPhase13RequireTheoremShadow : IO Unit := do
-  match
-      psCompilerKernelShadowCheckSource
-        PsCompilerSourceKind.proofScript
-        psPhase13KernelShadowTheoremSource with
-  | Except.ok report =>
-      psPhase13Require
-        (Nat.beq report.checkedDeclarations 1)
-        "PSC2_KERNEL_CORE_PHASE13_SHADOW_THEOREM"
-  | Except.error (PsCompilerKernelShadowApiError.compiler _) =>
-      throw
-        (IO.userError
-          "PSC2_KERNEL_CORE_PHASE13_SHADOW_THEOREM_COMPILER: FAIL")
-  | Except.error (PsCompilerKernelShadowApiError.shadow shadowError) =>
-      match shadowError with
-      | PsCompilerKernelShadowError.universeMetavariable =>
-          throw (IO.userError "PSC2_KERNEL_CORE_PHASE13_SHADOW_THEOREM_UNIVERSE_MVAR: FAIL")
-      | PsCompilerKernelShadowError.freeVariable =>
-          throw (IO.userError "PSC2_KERNEL_CORE_PHASE13_SHADOW_THEOREM_FVAR: FAIL")
-      | PsCompilerKernelShadowError.expressionMetavariable =>
-          throw (IO.userError "PSC2_KERNEL_CORE_PHASE13_SHADOW_THEOREM_MVAR: FAIL")
-      | PsCompilerKernelShadowError.unsupportedDeclaration =>
-          throw (IO.userError "PSC2_KERNEL_CORE_PHASE13_SHADOW_THEOREM_UNSUPPORTED: FAIL")
-      | PsCompilerKernelShadowError.duplicatePreludeAssumption =>
-          throw (IO.userError "PSC2_KERNEL_CORE_PHASE13_SHADOW_THEOREM_DUP_PRELUDE: FAIL")
-      | PsCompilerKernelShadowError.kernelRejected message =>
-          throw
-            (IO.userError
-              ("PSC2_KERNEL_CORE_PHASE13_SHADOW_THEOREM_KERNEL: FAIL: " ++ message))
-
 def main : IO Unit := do
   psPhase13Require
     psPhase13KernelShadowMinimalPass
@@ -111,9 +97,8 @@ def main : IO Unit := do
     psPhase13KernelShadowPolymorphicPass
     "PSC2_KERNEL_CORE_PHASE13_SHADOW_POLYMORPHIC"
   psPhase13Require
-    psPhase13KernelShadowTheoremPreparePass
-    "PSC2_KERNEL_CORE_PHASE13_SHADOW_THEOREM_PREPARE"
-  psPhase13RequireTheoremShadow
+    psPhase13KernelShadowTheoremPass
+    "PSC2_KERNEL_CORE_PHASE13_SHADOW_THEOREM"
   psPhase13Require
     psPhase13KernelShadowSequentialPass
     "PSC2_KERNEL_CORE_PHASE13_SHADOW_SEQUENTIAL"

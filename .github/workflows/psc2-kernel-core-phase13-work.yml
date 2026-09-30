@@ -40,12 +40,19 @@ jobs:
           cd psc15selfhost
           lake build PsKernelCore PsCompiler
 
-      - name: Phase 13 minimal KernelCore shadow boundary
+      - name: Phase 13 KernelCore shadow positive matrix
         shell: bash
         run: |
           set -euo pipefail
           cd psc15selfhost
           lake env lean --run test/CompilerKernelShadowTests.lean
+
+      - name: Phase 13 KernelCore shadow rejection matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/CompilerKernelShadowRejectionTests.lean
 
       - name: KernelCore PSC1 source profile
         shell: bash

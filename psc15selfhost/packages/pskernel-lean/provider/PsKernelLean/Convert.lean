@@ -1,4 +1,4 @@
-import Lean
+import Lean.Environment
 import Ps.Core.Declaration
 import PsKernelLean.Error
 

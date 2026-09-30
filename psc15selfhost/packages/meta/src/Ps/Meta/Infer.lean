@@ -34,6 +34,13 @@ def psInferBoolOr (left right : Bool) : Bool :=
 def psInferNatNe (left right : Nat) : Bool :=
   if Nat.beq left right then false else true
 
+def psInferExprListLength
+    (values : List PsExpr) : Nat :=
+  match values with
+  | [] => 0
+  | _ :: rest =>
+      Nat.succ (psInferExprListLength rest)
+
 def psInferEnsureSort
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
@@ -261,7 +268,7 @@ def psInferProjectionType
                   (psInferBoolNot info.isStructure)
                   (psInferBoolOr
                     (psInferNatNe info.numIndices 0)
-                    (psInferNatNe (List.length viewArgs) info.numParams)) then
+                    (psInferNatNe (psInferExprListLength viewArgs) info.numParams)) then
               Except.error PsInferError.projectionUnsupported
             else
               match info.constructors with

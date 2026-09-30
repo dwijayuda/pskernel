@@ -304,7 +304,7 @@ def psInferProjectionTypeWithConstructors
       | List.cons _ _ =>
           Except.error PsInferError.projectionUnsupported
 
-def psInferProjectionTypeWithInfo
+def psInferProjectionTypeWithMetadata
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
     (localContext : PsLocalContext)
@@ -312,12 +312,11 @@ def psInferProjectionTypeWithInfo
     (index : Nat)
     (target : PsExpr)
     (viewArgs : List PsExpr)
-    (info : PsInductiveInfo) :
+    (isStructure : Bool)
+    (numIndices : Nat)
+    (numParams : Nat)
+    (constructors : List PsName) :
     Except PsInferError PsExpr :=
-  let isStructure := info.isStructure;
-  let numIndices := info.numIndices;
-  let numParams := info.numParams;
-  let constructors := info.constructors;
   if psInferBoolNot isStructure then
     Except.error PsInferError.projectionUnsupported
   else if psInferNatNe numIndices 0 then
@@ -335,6 +334,29 @@ def psInferProjectionTypeWithInfo
       viewArgs
       numParams
       constructors
+
+def psInferProjectionTypeWithInfo
+    (environment : PsEnvironment)
+    (metaContext : PsMetaContext)
+    (localContext : PsLocalContext)
+    (typeName : PsName)
+    (index : Nat)
+    (target : PsExpr)
+    (viewArgs : List PsExpr)
+    (info : PsInductiveInfo) :
+    Except PsInferError PsExpr :=
+  psInferProjectionTypeWithMetadata
+    environment
+    metaContext
+    localContext
+    typeName
+    index
+    target
+    viewArgs
+    info.isStructure
+    info.numIndices
+    info.numParams
+    info.constructors
 
 def psInferProjectionType
     (environment : PsEnvironment)

@@ -114,17 +114,15 @@ def psTestComplexApplicationTranslationRoundTrip : Bool :=
 def psTestAnonymousArrowTranslationRoundTrip : Bool :=
   let leanSource :=
     "def applyLater (x : Nat) : (Nat -> Nat) -> Nat := fun f => f x"
-  match psTranslateLeanToProofScript leanSource with
-  | Except.error _ => false
-  | Except.ok proofScript =>
+  match
+      psTranslateLeanToProofScript leanSource,
+      psCanonicalizeLeanSource leanSource with
+  | Except.ok proofScript, Except.ok canonicalLean =>
       (proofScript.contains "(_ :" == false)
         && match psTranslateProofScriptToLean proofScript with
            | Except.error _ => false
-           | Except.ok leanAgain =>
-               match psTranslateLeanToProofScript leanAgain with
-               | Except.error _ => false
-               | Except.ok proofScriptAgain =>
-                   proofScriptAgain == proofScript
+           | Except.ok leanAgain => leanAgain == canonicalLean)
+  | _, _ => false
 
 def main : IO Unit := do
   if psTestAnonymousArrowTranslationRoundTrip then

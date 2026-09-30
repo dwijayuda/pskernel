@@ -57,7 +57,7 @@ def psUnifyLevelLists
     List PsLevel -> List PsLevel -> PsUnifyResult
   | [], [] => psUnifySuccess context
   | left :: leftRest, right :: rightRest =>
-      let unified := psLevelUnify context.levels left right
+      let unified := psLevelUnify context.levels left right;
       if unified.success then
         psUnifyLevelLists
           (psMetaSetLevels context unified.context)

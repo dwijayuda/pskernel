@@ -1,5 +1,6 @@
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {verifyWasmPrebuiltManifest} from './host/prebuilt.mjs';
 
 export const leanKernelProviderProtocol='pskernel-lean/1';
 export const leanKernelProviderName='lean4-cpp';
@@ -11,15 +12,25 @@ const bundledLauncherPath=fileURLToPath(
 );
 
 function providerOptions(options={}){
+  const hasLauncherOverride=Object.prototype.hasOwnProperty.call(options,'launcherPath');
   const {
     launcherPath=bundledLauncherPath,
     nodePath=process.execPath,
     maxBuffer=16*1024*1024,
   }=options;
-  return {launcherPath,nodePath,maxBuffer};
+  return {
+    launcherPath,
+    nodePath,
+    maxBuffer,
+    verifyBundledPrebuilt:!hasLauncherOverride,
+  };
 }
 
 function runProviderCommand(command,options,input){
+  if(options.verifyBundledPrebuilt){
+    verifyWasmPrebuiltManifest();
+  }
+
   const run=spawnSync(options.nodePath,[options.launcherPath,command],{
     input,
     encoding:'utf8',

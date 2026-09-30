@@ -12,6 +12,7 @@ const allowedBootstrapPackages = new Set([
   "foundation",
   "syntax",
   "core",
+  "pskernel-core",
   "environment",
   "meta",
   "elab",
@@ -28,7 +29,6 @@ const forbiddenBootstrapPackages = new Set([
   "backend-rust",
   "backend-wasm",
   "pskernel",
-  "pskernel-core",
 ]);
 
 function sourceForModule(moduleName) {

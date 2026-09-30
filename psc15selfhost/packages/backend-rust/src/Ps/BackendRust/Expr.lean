@@ -826,7 +826,7 @@ def psRustEmitExprWithFuel :
                     (psRustConcat4
                       "("
                       printedFn
-                      ") ("
+                      ")("
                       (psRustConcat2
                         (psRustJoin ", " printedArguments)
                         ")"))

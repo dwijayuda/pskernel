@@ -259,15 +259,27 @@ def psPrintProofScriptTermWithFuel
                           smaller type with
                       | Except.error error => Except.error error
                       | Except.ok printedType =>
-                          let delimiters :=
-                            psPrintBinderDelimiters head.kind;
-                          Except.ok
-                            (psPrintProofScriptConcat5
-                              delimiters.fst
-                              name
-                              " : "
-                              printedType
-                              delimiters.snd);
+                          let anonymousExplicit :=
+                            match head.kind with
+                            | PsSyntaxBinderKind.explicit =>
+                                psStringEq name "_"
+                            | _ => false;
+                          if anonymousExplicit then
+                            Except.ok
+                              (psPrintProofScriptConcat3
+                                "("
+                                printedType
+                                ")")
+                          else
+                            let delimiters :=
+                              psPrintBinderDelimiters head.kind;
+                            Except.ok
+                              (psPrintProofScriptConcat5
+                                delimiters.fst
+                                name
+                                " : "
+                                printedType
+                                delimiters.snd);
           let printedBindersResult :
               Except PsSourcePrintError (List String) :=
             psPrintProofScriptMapBinders printBinder binders;

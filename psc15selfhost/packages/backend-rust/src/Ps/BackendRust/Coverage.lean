@@ -111,6 +111,7 @@ def psRustCoverageIntrinsicName
   | PsVerifiedIrIntrinsic.intEq => "Int.eq"
   | PsVerifiedIrIntrinsic.intLe => "Int.le"
   | PsVerifiedIrIntrinsic.intLt => "Int.lt"
+  | PsVerifiedIrIntrinsic.intRepr => "Int.repr"
   | PsVerifiedIrIntrinsic.boolNot => "Bool.not"
   | PsVerifiedIrIntrinsic.boolAnd => "Bool.and"
   | PsVerifiedIrIntrinsic.boolOr => "Bool.or"
@@ -163,6 +164,7 @@ def psRustCoverageIntrinsicArity
   | PsVerifiedIrIntrinsic.intEq => 2
   | PsVerifiedIrIntrinsic.intLe => 2
   | PsVerifiedIrIntrinsic.intLt => 2
+  | PsVerifiedIrIntrinsic.intRepr => 1
   | PsVerifiedIrIntrinsic.boolNot => 1
   | PsVerifiedIrIntrinsic.boolAnd => 2
   | PsVerifiedIrIntrinsic.boolOr => 2

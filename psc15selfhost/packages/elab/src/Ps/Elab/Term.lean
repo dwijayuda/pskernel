@@ -2586,11 +2586,11 @@ def psElabUniqueRecordCandidate
         environment.declarations
         [] with
   | [] =>
-      none
+      Option.none
   | candidate :: rest =>
       match rest with
-      | [] => some candidate
-      | _ :: _ => none
+      | [] => Option.some candidate
+      | _ :: _ => Option.none
 
 def psElabRecord
     (elaborate :

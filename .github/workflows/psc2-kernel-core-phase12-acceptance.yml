@@ -1,4 +1,4 @@
-# Final Phase-12 acceptance gate after expanded recursive-call rejection coverage.
+# Final Phase-12 acceptance gate after the differential oracle-contract audit.
 name: PSC2 KernelCore Phase 12 acceptance
 
 on:

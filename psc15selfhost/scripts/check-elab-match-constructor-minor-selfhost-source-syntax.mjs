@@ -1,4 +1,5 @@
 // Regression gate: keep constructor-minor source inside the PSC1 bootstrap surface.
+// In particular, avoid generic List.reverse here: unresolved bootstrap names can fall through projection elaboration as unsupportedTerm.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

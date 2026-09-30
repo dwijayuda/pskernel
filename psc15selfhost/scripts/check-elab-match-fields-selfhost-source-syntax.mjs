@@ -242,6 +242,35 @@ if (!/let withRecursion\s*:\s*PsElabContext\s*:=\s*match context\.structuralRecu
   );
 }
 
+const recursiveHypothesesWorkerMatch = source.match(
+  /def psElabPushRecursiveHypothesesWorker([\s\S]*?)(?=\ndef psCloseElabMatchFields)/,
+);
+if (recursiveHypothesesWorkerMatch === null) {
+  throw new Error(
+    "PSC2_ELAB_PUSH_RECURSIVE_HYPOTHESES_SELFHOST_SOURCE_SYNTAX_MISSING: field-index-recursive worker with post-recursion context and hypothesis accumulator",
+  );
+}
+const recursiveHypothesesWorker = recursiveHypothesesWorkerMatch[0];
+for (const pattern of [
+  /def psElabPushRecursiveHypothesesWorker\s*\(expectedType : PsExpr\)\s*\(fields : List PsElabMatchField\)\s*\(fieldIndices : List Nat\)\s*:\s*PsElabContext ->\s*List PsElabMatchField ->\s*Except PsElabError PsElabMatchHypothesesResult :=\s*match fieldIndices with/,
+  /let smaller[\s\S]*?psElabPushRecursiveHypothesesWorker\s+expectedType\s+fields\s+rest/,
+  /fun \(context : PsElabContext\) =>\s*fun \(hypothesesRev : List PsElabMatchField\) =>/,
+  /let withRecursion\s*:\s*PsElabContext\s*:=\s*match context\.structuralRecursion with/,
+  /smaller\s+withRecursion\s*\(List\.cons hypothesis hypothesesRev\)/,
+  /def psElabPushRecursiveHypotheses\s*\(expectedType : PsExpr\)\s*\(fields : List PsElabMatchField\)\s*\(fieldIndices : List Nat\)\s*\(context : PsElabContext\)\s*\(hypothesesRev : List PsElabMatchField\)[\s\S]*?psElabPushRecursiveHypothesesWorker\s+expectedType\s+fields\s+fieldIndices\s+context\s+hypothesesRev/,
+]) {
+  if (!pattern.test(recursiveHypothesesWorker)) {
+    throw new Error(
+      `PSC2_ELAB_PUSH_RECURSIVE_HYPOTHESES_SELFHOST_SOURCE_SYNTAX_MISSING: ${pattern}`,
+    );
+  }
+}
+if (/psElabPushRecursiveHypotheses\s+expectedType\s+fields\s+rest/.test(recursiveHypothesesWorker)) {
+  throw new Error(
+    "PSC2_ELAB_PUSH_RECURSIVE_HYPOTHESES_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: direct recursion changes invariant context and hypothesis accumulator",
+  );
+}
+
 process.stdout.write(
-  "PSC2_ELAB_MATCH_FIELDS_SELFHOST_SOURCE_SYNTAX: PASS (binder-list-recursive worker with post-recursion context/cursor/field accumulator; invariant-safe index-recursive match-field lookup with explicit Option constructors; typed local structural-recursion match)\n",
+  "PSC2_ELAB_MATCH_FIELDS_SELFHOST_SOURCE_SYNTAX: PASS (binder-list-recursive worker with post-recursion context/cursor/field accumulator; invariant-safe index-recursive match-field lookup with explicit Option constructors; typed local structural-recursion match; field-index-recursive hypothesis worker with post-recursion context/accumulator)\n",
 );

@@ -331,23 +331,26 @@ def psInferProjectionTypeWithMetadata
     (constructors : List PsName) :
     Except PsInferError PsExpr :=
   let numArgs := List.length viewArgs;
-  if psInferProjectionMetadataValid
+  let metadataValid :=
+    psInferProjectionMetadataValid
       isStructure
       numIndices
       numArgs
-      numParams then
-    psInferProjectionTypeWithConstructors
-      environment
-      metaContext
-      localContext
-      typeName
-      index
-      target
-      viewArgs
-      numParams
-      constructors
-  else
-    Except.error PsInferError.projectionUnsupported
+      numParams;
+  match metadataValid with
+  | true =>
+      psInferProjectionTypeWithConstructors
+        environment
+        metaContext
+        localContext
+        typeName
+        index
+        target
+        viewArgs
+        numParams
+        constructors
+  | false =>
+      Except.error PsInferError.projectionUnsupported
 
 def psInferProjectionTypeWithInfo
     (environment : PsEnvironment)

@@ -589,24 +589,43 @@ def psJsLowerConstant (globals : List PsJsGlobalBinding)
         | Except.ok body => Except.ok (PsJsConstant.mk declaration.name body)
       else Except.error (PsJsError.invalidExportName declaration.name)
 
+def psJsLowerConstantsWithFuel (fuel : Nat) :
+    List PsJsGlobalBinding -> List PsVerifiedIrDeclaration -> List String ->
+    Except PsJsError (List PsJsConstant) :=
+  match fuel with
+  | Nat.zero =>
+      fun (_globals : List PsJsGlobalBinding) =>
+        fun (_declarations : List PsVerifiedIrDeclaration) =>
+          fun (_used : List String) => Except.error PsJsError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller :
+          List PsJsGlobalBinding -> List PsVerifiedIrDeclaration -> List String ->
+          Except PsJsError (List PsJsConstant) :=
+        psJsLowerConstantsWithFuel remaining;
+      fun (globals : List PsJsGlobalBinding) =>
+        fun (declarations : List PsVerifiedIrDeclaration) =>
+          fun (used : List String) =>
+            match declarations with
+            | List.nil => Except.ok List.nil
+            | List.cons declaration rest =>
+                if psJsContainsName used declaration.name then
+                  Except.error (PsJsError.duplicateExport declaration.name)
+                else
+                  match psJsLowerConstant globals declaration with
+                  | Except.error error => Except.error error
+                  | Except.ok value =>
+                      match smaller
+                        globals
+                        rest
+                        (List.cons declaration.name used) with
+                      | Except.error error => Except.error error
+                      | Except.ok values =>
+                          Except.ok (List.cons value values)
+
 def psJsLowerConstants (globals : List PsJsGlobalBinding)
-    (declarations : List PsVerifiedIrDeclaration) :
-    List String -> Except PsJsError (List PsJsConstant) :=
-  match declarations with
-  | List.nil => fun (_used : List String) => Except.ok List.nil
-  | List.cons declaration rest =>
-      let smaller : List String -> Except PsJsError (List PsJsConstant) :=
-        psJsLowerConstants globals rest;
-      fun (used : List String) =>
-        if psJsContainsName used declaration.name then
-          Except.error (PsJsError.duplicateExport declaration.name)
-        else
-          match psJsLowerConstant globals declaration with
-          | Except.error error => Except.error error
-          | Except.ok value =>
-              match smaller (List.cons declaration.name used) with
-              | Except.error error => Except.error error
-              | Except.ok values => Except.ok (List.cons value values)
+    (declarations : List PsVerifiedIrDeclaration)
+    (used : List String) : Except PsJsError (List PsJsConstant) :=
+  psJsLowerConstantsWithFuel 4096 globals declarations used
 
 def psJsLowerModule (module : PsVerifiedIrModule) : Except PsJsError PsJsModule :=
   match module.imports with

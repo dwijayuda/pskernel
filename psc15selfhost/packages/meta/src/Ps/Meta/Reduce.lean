@@ -35,11 +35,20 @@ def psWhnfCoreWithFuel
             | _ => PsExpr.app reducedFn arg
         | _ => instantiated
 
+def psWhnfCoreApplyFuel
+    (fuel : Nat)
+    (metaContext : PsMetaContext)
+    (localContext : PsLocalContext)
+    (expr : PsExpr) : PsExpr :=
+  let worker : PsExpr -> PsExpr :=
+    psWhnfCoreWithFuel fuel metaContext localContext;
+  worker expr
+
 def psWhnfCore
     (metaContext : PsMetaContext)
     (localContext : PsLocalContext)
     (expr : PsExpr) : PsExpr :=
-  psWhnfCoreWithFuel 256 metaContext localContext expr
+  psWhnfCoreApplyFuel 256 metaContext localContext expr
 
 def psDefEqReadOnly
     (metaContext : PsMetaContext)
@@ -63,7 +72,7 @@ def psWhnfWithFuel
         psWhnfWithFuel remaining environment metaContext localContext;
       fun (expr : PsExpr) =>
         let core :=
-          psWhnfCoreWithFuel remaining metaContext localContext expr;
+          psWhnfCoreApplyFuel remaining metaContext localContext expr;
         match core with
         | .constE name levels =>
             match psEnvironmentFind environment name with
@@ -92,7 +101,9 @@ def psWhnf
     (metaContext : PsMetaContext)
     (localContext : PsLocalContext)
     (expr : PsExpr) : PsExpr :=
-  psWhnfWithFuel 256 environment metaContext localContext expr
+  let worker : PsExpr -> PsExpr :=
+    psWhnfWithFuel 256 environment metaContext localContext;
+  worker expr
 
 def psDefEqReadOnlyWithEnvFuel
     (fuel : Nat)
@@ -164,10 +175,6 @@ def psDefEqReadOnlyWithEnv
     (localContext : PsLocalContext)
     (left : PsExpr)
     (right : PsExpr) : Bool :=
-  psDefEqReadOnlyWithEnvFuel
-    256
-    environment
-    metaContext
-    localContext
-    left
-    right
+  let worker : PsExpr -> PsExpr -> Bool :=
+    psDefEqReadOnlyWithEnvFuel 256 environment metaContext localContext;
+  worker left right

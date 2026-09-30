@@ -34,6 +34,28 @@ const rootIndex=await readFile(path.join(packageRoot,'index.mjs'),'utf8');
 assert.match(rootIndex,/createKernel/);
 assert.match(rootIndex,/checkCanonicalAdmissions/);
 
+// Published package documentation is part of the npm contract. Keep the WASM
+// assurance path explicit about exact pins, bootstrap exclusion, generated
+// artifact names, and the public Node API instead of relying on native-provider
+// documentation that has different distribution/build behavior.
+const readme=await readFile(path.join(packageRoot,'README.md'),'utf8');
+assert.match(readme,/@proofscript\/pskernel-lean-wasm/);
+assert.match(readme,/Lean 4\.34\.0/);
+assert.match(readme,/Emscripten 6\.0\.9/);
+assert.match(readme,/not part of.*bootstrap/is);
+assert.match(readme,/createKernel/);
+assert.match(readme,/checkCanonicalAdmissions/);
+assert.match(readme,/pskernel-lean\.cjs/);
+assert.match(readme,/pskernel-lean\.wasm/);
+
+const building=await readFile(path.join(packageRoot,'BUILDING.md'),'utf8');
+assert.match(building,/6\.0\.9/);
+assert.match(building,/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/);
+assert.match(building,/scripts\/build-wasm\.sh/);
+assert.match(building,/--health/);
+assert.match(building,/--check/);
+assert.match(building,/host Lean.*C emitter/is);
+
 const closure=await readFile(path.join(workspaceRoot,'scripts/bootstrap-closure-contract-tests.mjs'),'utf8');
 assert.match(closure,/pskernel-lean-wasm/);
 

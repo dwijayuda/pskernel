@@ -117,7 +117,7 @@ def psTestAnonymousArrowTranslationRoundTrip : Bool :=
   match psTranslateLeanToProofScript leanSource with
   | Except.error _ => false
   | Except.ok proofScript =>
-      psStringEq (toString (proofScript.contains "(_ :")) "false"
+      (proofScript.contains "(_ :" == false)
         && match psTranslateProofScriptToLean proofScript with
            | Except.error _ => false
            | Except.ok leanAgain =>

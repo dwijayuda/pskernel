@@ -124,3 +124,73 @@ diff --git a/study/lean4-4.34.0/src/stdlib.make.in b/study/lean4-4.34.0/src/stdl
  
  leanir: $(OUTBIN)/leanir$(EXE)
  
+diff --git a/study/lean4-4.34.0/src/runtime/io.cpp b/study/lean4-4.34.0/src/runtime/io.cpp
+--- a/study/lean4-4.34.0/src/runtime/io.cpp
++++ b/study/lean4-4.34.0/src/runtime/io.cpp
+@@ -1258,7 +1258,11 @@ extern "C" LEAN_EXPORT obj_res lean_io_hard_link(b_obj_arg orig, b_obj_arg link) {
+ }
+ 
+ /* createTempFile : IO (Handle × FilePath) */
++#if defined(LEAN_EMSCRIPTEN)
++extern "C" LEAN_EXPORT obj_res lean_io_create_tempfile() {
++#else
+ extern "C" LEAN_EXPORT obj_res lean_io_create_tempfile(lean_object * /* w */) {
++#endif
+     char path[PATH_MAX];
+     size_t base_len = PATH_MAX;
+     int ret = uv_os_tmpdir(path, &base_len);
+@@ -1302,7 +1306,11 @@ extern "C" LEAN_EXPORT obj_res lean_io_create_tempfile(lean_object * /* w */) {
+ }
+ 
+ /* createTempDir : IO FilePath */
++#if defined(LEAN_EMSCRIPTEN)
++extern "C" LEAN_EXPORT obj_res lean_io_create_tempdir() {
++#else
+ extern "C" LEAN_EXPORT obj_res lean_io_create_tempdir(lean_object * /* w */) {
++#endif
+     char path[PATH_MAX];
+     size_t base_len = PATH_MAX;
+     int ret = uv_os_tmpdir(path, &base_len);
+diff --git a/study/lean4-4.34.0/src/library/ir_interpreter.cpp b/study/lean4-4.34.0/src/library/ir_interpreter.cpp
+--- a/study/lean4-4.34.0/src/library/ir_interpreter.cpp
++++ b/study/lean4-4.34.0/src/library/ir_interpreter.cpp
+@@ -1206,3 +1206,7 @@ extern "C" LEAN_EXPORT obj_res lean_run_mod_init_core(b_obj_arg  sym) {
++#if defined(LEAN_EMSCRIPTEN)
++extern "C" LEAN_EXPORT object * lean_run_init(object * env, object * opts, object * decl, object * init_decl) {
++#else
+ extern "C" LEAN_EXPORT object * lean_run_init(object * env, object * opts, object * decl, object * init_decl, object *) {
++#endif
+     return interpreter::with_interpreter<object *>(TO_REF(elab_environment, env), TO_REF(options, opts), TO_REF(name, decl), [&](interpreter & interp) {
+         return interp.run_init(TO_REF(name, decl), TO_REF(name, init_decl));
+diff --git a/study/lean4-4.34.0/src/library/module.cpp b/study/lean4-4.34.0/src/library/module.cpp
+--- a/study/lean4-4.34.0/src/library/module.cpp
++++ b/study/lean4-4.34.0/src/library/module.cpp
+@@ -267,4 +267,10 @@ static std::vector<std::pair<size_t, ptrdiff_t>> read_lib_table_from_buffer(char const * & p) {
++#if defined(LEAN_EMSCRIPTEN)
++extern "C" LEAN_EXPORT object * lean_compacted_region_save(b_obj_arg ofname, b_obj_arg mod, b_obj_arg odata,
++                                                           b_obj_arg odep_regions, obj_arg oprev,
++                                                           uint8 allow_closures_u8) {
++#else
+ extern "C" LEAN_EXPORT object * lean_compacted_region_save(b_obj_arg ofname, b_obj_arg mod, b_obj_arg odata,
+                                                            b_obj_arg odep_regions, obj_arg oprev,
+                                                            uint8 allow_closures_u8, object *) {
++#endif
+     // `mmap` addresses must be page-aligned. The default (non-huge) page size on x86-64 is 4KB;
+@@ -450,2 +456,6 @@ static object * mk_compacted_region(b_obj_arg ofname, object * root,
+ // root to be interpreted as — the C side does no type checking and the caller is responsible for
+ // using a type compatible with what was saved (see `CompactedRegion.read`).
+ // Supports both `v2` and `v3` formats.
++#if defined(LEAN_EMSCRIPTEN)
++extern "C" LEAN_EXPORT object * lean_compacted_region_read(b_obj_arg ofname, b_obj_arg odep_regions) {
++#else
+ extern "C" LEAN_EXPORT object * lean_compacted_region_read(b_obj_arg ofname, b_obj_arg odep_regions, object *) {
++#endif
+@@ -623,2 +633,6 @@ extern "C" LEAN_EXPORT object * lean_compacted_region_read(b_obj_arg ofname, b_obj_arg odep_regions, object *) {
+ }
+ 
++#if defined(LEAN_EMSCRIPTEN)
++extern "C" LEAN_EXPORT obj_res lean_compacted_region_free(obj_arg region) {
++#else
+ extern "C" LEAN_EXPORT obj_res lean_compacted_region_free(obj_arg region, object *) {
++#endif
+     char * buffer = region_buffer(region);

@@ -7,6 +7,8 @@ workspace_root="$(cd "$package_root/../.." && pwd)"
 repo_root="$(cd "$workspace_root/.." && pwd)"
 lean_source="$repo_root/study/lean4-4.34.0"
 lean_build="$workspace_root/.wasm-build/lean4"
+provider_overlay="$workspace_root/.wasm-build/provider-overlay"
+provider_src="$provider_overlay/src"
 provider_obj_dir="$workspace_root/.wasm-build/provider-obj"
 out_dir="$package_root/wasm"
 patch_file="$package_root/patches/lean4-4.34.0-emscripten-uv-stubs.patch"
@@ -69,8 +71,8 @@ for helper_source in \
 done
 
 cd "$workspace_root"
-rm -rf .lake/build "$lean_build" "$provider_obj_dir" "$out_dir"
-mkdir -p "$lean_build" "$provider_obj_dir" "$out_dir"
+rm -rf .lake/build "$lean_build" "$provider_overlay" "$provider_obj_dir" "$out_dir"
+mkdir -p "$lean_build" "$provider_src/Ps" "$provider_src/PsKernelLean" "$provider_obj_dir" "$out_dir"
 
 # Follow Lean's own wasm cross-build architecture. Stage 0 must be a runnable
 # native 32-bit compiler so every .olean records wasm32-compatible platform
@@ -120,13 +122,40 @@ if [[ ! -x "$stage0_lake" || ! -x "$stage0_lean" ]]; then
   exit 1
 fi
 
-# Generate the provider closure with the 32-bit native compiler. Using the
-# host x86_64 toolchain here would reintroduce host-width platform constants
-# into the C generated for a wasm32 kernel provider.
-"$stage0_lake" build psc2_lean_kernel_provider
-mapfile -d '' provider_c_files < <(find .lake/build/ir -type f -name '*.c' -print0 | sort -z)
+# Do not ask bootstrap Lake to elaborate the full modern psc15selfhost
+# lakefile.lean. Stage0 Lake intentionally comes from Lean's frozen bootstrap
+# sources and can lack parser categories used by the current Lake DSL. Instead,
+# construct a tiny TOML-only package containing precisely the source families
+# needed by PsKernelLean.Main. The merged src/Ps tree preserves the original
+# module names while keeping the cross-build independent of the host workspace
+# build description.
+cp -a "$workspace_root/packages/foundation/src/Ps/." "$provider_src/Ps/"
+cp -a "$workspace_root/packages/core/src/Ps/." "$provider_src/Ps/"
+cp -a "$workspace_root/packages/environment/src/Ps/." "$provider_src/Ps/"
+cp -a "$workspace_root/packages/bridge/src/Ps/." "$provider_src/Ps/"
+cp -a "$workspace_root/packages/pskernel-lean/provider/PsKernelLean/." "$provider_src/PsKernelLean/"
+
+cat > "$provider_overlay/lakefile.toml" <<'EOF'
+name = "pskernelLeanWasmBootstrap"
+version = "0.0.0"
+defaultTargets = ["provider"]
+srcDir = "src"
+
+[[lean_exe]]
+name = "provider"
+root = "PsKernelLean.Main"
+EOF
+
+# Generate the provider C closure with the target-width-compatible native
+# stage0 compiler. The TOML overlay is intentionally self-contained and does
+# not contain a lakefile.lean.
+(
+  cd "$provider_overlay"
+  "$stage0_lake" build provider
+)
+mapfile -d '' provider_c_files < <(find "$provider_overlay/.lake/build/ir" -type f -name '*.c' -print0 | sort -z)
 if [[ ${#provider_c_files[@]} -eq 0 ]]; then
-  echo '32-bit stage0 Lake produced no provider C sources' >&2
+  echo '32-bit stage0 Lake produced no provider C sources from the minimal overlay' >&2
   exit 1
 fi
 

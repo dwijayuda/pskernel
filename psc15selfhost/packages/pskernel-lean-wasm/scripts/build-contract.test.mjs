@@ -54,6 +54,17 @@ assert.match(build,/packages\/bridge\/src\/Ps/);
 assert.match(build,/packages\/pskernel-lean\/provider\/PsKernelLean/);
 assert.doesNotMatch(build,/"\$stage0_lake"\s+build\s+psc2_lean_kernel_provider/);
 
+// The bootstrap compiler currently aborts with `unknown parser category level`
+// when Lake starts the provider build. Keep a small direct-Lean probe matrix so
+// the next CI failure identifies whether the defect is stage0 initialization,
+// importing Lean, or importing the first PSC module.
+assert.match(build,/PSC2_STAGE0_PARSER_PROBE/);
+assert.match(build,/Stage0ProbeBasic\.lean/);
+assert.match(build,/Stage0ProbeLean\.lean/);
+assert.match(build,/Stage0ProbePs\.lean/);
+assert.match(build,/import Lean/);
+assert.match(build,/import Ps\.Foundation\.Name/);
+
 const patch=await readFile(path.join(packageRoot,'patches/lean4-4.34.0-emscripten-uv-stubs.patch'),'utf8');
 assert.match(patch,/src\/CMakeLists\.txt/);
 assert.match(patch,/-  Leanc\n   LeanIR/);

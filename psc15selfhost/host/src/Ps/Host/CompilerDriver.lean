@@ -41,6 +41,24 @@ def psHostCompilerErrorTag (error : PsCompilerError) : String :=
   | PsCompilerError.preparedAdmissionMismatch => "preparedAdmissionMismatch"
   | PsCompilerError.erasure _ => "erasure"
 
+def psHostTsEmitErrorTag (error : PsTsEmitError) : String :=
+  match error with
+  | PsTsEmitError.fuelExhausted => "emit:fuelExhausted"
+  | PsTsEmitError.unsupportedIntrinsic => "emit:unsupportedIntrinsic"
+  | PsTsEmitError.intrinsicArity => "emit:intrinsicArity"
+  | PsTsEmitError.unknownStructure name => "emit:unknownStructure:" ++ name
+  | PsTsEmitError.unknownInductive name => "emit:unknownInductive:" ++ name
+  | PsTsEmitError.genericValueUnsupported name => "emit:genericValueUnsupported:" ++ name
+  | PsTsEmitError.targetWordSizeRequired => "emit:targetWordSizeRequired"
+
+def psHostTypeScriptErrorTag
+    (error : PsCompilerTypeScriptError) : String :=
+  match error with
+  | PsCompilerTypeScriptError.compiler compilerError =>
+      "compiler:" ++ psHostCompilerErrorTag compilerError
+  | PsCompilerTypeScriptError.emit emitError =>
+      psHostTsEmitErrorTag emitError
+
 def psHostCompilerTranslatedSource
     (inputPath : String)
     (targetText : String) : IO String := do
@@ -119,10 +137,11 @@ def psHostCompilerTypeScriptSource
     (inputPath : String) : IO String := do
   let elaborated ← psHostCompilerElaborateProject inputPath
   match psCompilerTypeScriptFromElaborated elaborated with
-  | Except.error _ =>
+  | Except.error error =>
       throw
         (IO.userError
-          "PSC2_CLI_TS_EMIT_FAILED: source is outside the executable TypeScript backend subset")
+          ("PSC2_CLI_TS_EMIT_FAILED: source is outside the executable TypeScript backend subset (" ++
+            psHostTypeScriptErrorTag error ++ ")"))
   | Except.ok output =>
       pure output
 

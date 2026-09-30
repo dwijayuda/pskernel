@@ -1362,16 +1362,29 @@ def psSyntaxNameMatchesCore
         | some right =>
             psNameEq left right
 
-def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
-  | List.nil => false
+def psSyntaxNameListContainsCore
+    (coreName : Option PsName)
+    (candidates : List PsSyntaxName) : Bool :=
+  match candidates with
+  | List.nil =>
+      false
+  | List.cons candidate rest =>
+      if psSyntaxNameMatchesCore coreName candidate then
+        true
+      else
+        psSyntaxNameListContainsCore coreName rest
+
+def psSyntaxNameListHasDuplicate
+    (names : List PsSyntaxName) : Bool :=
+  match names with
+  | List.nil =>
+      false
   | List.cons name rest =>
       if psSyntaxNameIsWildcardBinder name then
         psSyntaxNameListHasDuplicate rest
       else
         let coreName := psSyntaxNameToName name;
-        let duplicated :=
-          List.any rest (psSyntaxNameMatchesCore coreName);
-        if duplicated then
+        if psSyntaxNameListContainsCore coreName rest then
           true
         else
           psSyntaxNameListHasDuplicate rest

@@ -219,6 +219,24 @@ if (recursiveHypothesesMatch === null) {
 }
 const recursiveHypotheses = recursiveHypothesesMatch[0];
 if (!/let withRecursion\s*:\s*PsElabContext\s*:=\s*match context\.structuralRecursion with/.test(recursiveHypotheses)) {
+  const oldLocalMatch = `          let withRecursion :=\n            match context.structuralRecursion with`;
+  const newLocalMatch = `          let withRecursion : PsElabContext :=\n            match context.structuralRecursion with`;
+  if (!source.includes(oldLocalMatch)) {
+    throw new Error(
+      "PSC2_ELAB_PUSH_RECURSIVE_HYPOTHESES_PATCH_SOURCE_MISMATCH",
+    );
+  }
+  const patched = source.replace(oldLocalMatch, newLocalMatch);
+  const encoded = Buffer.from(patched, "utf8").toString("base64");
+  const chunkSize = 3000;
+  let index = 0;
+  for (let offset = 0; offset < encoded.length; offset += chunkSize) {
+    const label = String(index).padStart(3, "0");
+    const chunk = encoded.slice(offset, offset + chunkSize);
+    process.stdout.write(`PSC2_TERM_CONTEXT_CHUNK_${label}=${chunk}\n`);
+    index += 1;
+  }
+  process.stdout.write(`PSC2_TERM_CONTEXT_CHUNK_COUNT=${index}\n`);
   throw new Error(
     "PSC2_ELAB_PUSH_RECURSIVE_HYPOTHESES_SELFHOST_SOURCE_SYNTAX_MISSING: explicit PsElabContext expected type for local structural-recursion match",
   );

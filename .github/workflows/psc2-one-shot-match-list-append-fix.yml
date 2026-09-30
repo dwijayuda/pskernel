@@ -33,26 +33,28 @@ jobs:
               index = source.find(marker)
               if index < 0:
                   raise SystemExit("psElabMatch marker not found")
-              helper = '''
-def psElabExprListAppendWorker
-    (values : List PsExpr) :
-    List PsExpr -> List PsExpr :=
-  match values with
-  | [] =>
-      fun (right : List PsExpr) =>
-        right
-  | value :: rest =>
-      let smaller : List PsExpr -> List PsExpr :=
-        psElabExprListAppendWorker rest;
-      fun (right : List PsExpr) =>
-        List.cons value (smaller right)
-
-def psElabExprListAppend
-    (left : List PsExpr)
-    (right : List PsExpr) :
-    List PsExpr :=
-  psElabExprListAppendWorker left right
-'''
+              helper = "\n".join([
+                  "",
+                  "def psElabExprListAppendWorker",
+                  "    (values : List PsExpr) :",
+                  "    List PsExpr -> List PsExpr :=",
+                  "  match values with",
+                  "  | [] =>",
+                  "      fun (right : List PsExpr) =>",
+                  "        right",
+                  "  | value :: rest =>",
+                  "      let smaller : List PsExpr -> List PsExpr :=",
+                  "        psElabExprListAppendWorker rest;",
+                  "      fun (right : List PsExpr) =>",
+                  "        List.cons value (smaller right)",
+                  "",
+                  "def psElabExprListAppend",
+                  "    (left : List PsExpr)",
+                  "    (right : List PsExpr) :",
+                  "    List PsExpr :=",
+                  "  psElabExprListAppendWorker left right",
+                  "",
+              ])
               source = source[:index] + helper + source[index:]
 
           count = source.count("List.append")

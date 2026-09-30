@@ -60,9 +60,16 @@ if (match === null) {
     );
   }
   const patched = source.replace(oldBlock, newBlock);
-  process.stdout.write(
-    `PSC2_PATCHED_TERM_BASE64_BEGIN\n${Buffer.from(patched, "utf8").toString("base64")}\nPSC2_PATCHED_TERM_BASE64_END\n`,
-  );
+  const encoded = Buffer.from(patched, "utf8").toString("base64");
+  const chunkSize = 24000;
+  let index = 0;
+  for (let offset = 0; offset < encoded.length; offset += chunkSize) {
+    const label = String(index).padStart(3, "0");
+    const chunk = encoded.slice(offset, offset + chunkSize);
+    process.stdout.write(`::error title=PSC2_TERM_CHUNK_${label}::${chunk}\n`);
+    index += 1;
+  }
+  process.stdout.write(`::error title=PSC2_TERM_CHUNK_COUNT::${index}\n`);
   throw new Error(
     "PSC2_ELAB_SYNTAX_NAME_DUPLICATES_SELFHOST_SOURCE_SYNTAX_MISSING: structural duplicate-name helper block",
   );

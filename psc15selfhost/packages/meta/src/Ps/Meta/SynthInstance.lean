@@ -55,22 +55,22 @@ def psPrepareInstanceWithFuel
       success := false
     }
   | fuel + 1 =>
-      let typeValue := psWhnf environment context localContext type
+      let typeValue := psWhnf environment context localContext type;
       match typeValue with
       | .forallE _ domain body binder =>
           let kind :=
             if psBinderInfoIsInstance binder then
               PsMetaVarKind.synthetic
             else
-              PsMetaVarKind.natural
-          let fresh := psMetaFresh context localContext domain kind
-          let nextValue := PsExpr.app value fresh.expr
-          let nextType := psExprInstantiate1 body fresh.expr
+              PsMetaVarKind.natural;
+          let fresh := psMetaFresh context localContext domain kind;
+          let nextValue := PsExpr.app value fresh.expr;
+          let nextType := psExprInstantiate1 body fresh.expr;
           let argument : PsPreparedInstanceArgument := {
             expr := fresh.expr
             type := domain
             isInstance := psBinderInfoIsInstance binder
-          }
+          };
           psPrepareInstanceWithFuel
             environment
             localContext
@@ -116,8 +116,8 @@ def psSolvePreparedInstanceArguments
               psSolvePreparedInstanceArguments synthesize rest current
           | Option.none =>
               if argument.isInstance then
-                let targetType := psMetaInstantiate current argument.type
-                let synthesized := synthesize current targetType
+                let targetType := psMetaInstantiate current argument.type;
+                let synthesized := synthesize current targetType;
                 match synthesized.value with
                 | Option.none => { context := current, success := false }
                 | Option.some instanceValue =>
@@ -138,7 +138,7 @@ def psTryInstanceCandidate
     (synthesize : PsMetaContext -> PsExpr -> PsSynthInstanceResult)
     (entry : PsInstanceEntry) : PsSynthInstanceResult :=
   let prepared :=
-    psPrepareInstance environment localContext original entry
+    psPrepareInstance environment localContext original entry;
   if !prepared.success then
     psSynthFailure original
   else
@@ -148,7 +148,7 @@ def psTryInstanceCandidate
         localContext
         prepared.context
         prepared.resultType
-        target
+        target;
     if !targetResult.success then
       psSynthFailure original
     else
@@ -156,12 +156,12 @@ def psTryInstanceCandidate
         psSolvePreparedInstanceArguments
           synthesize
           prepared.arguments
-          targetResult.context
+          targetResult.context;
       if !solved.success then
         psSynthFailure original
       else
         let finalValue :=
-          psMetaInstantiate solved.context prepared.value
+          psMetaInstantiate solved.context prepared.value;
         if psExprHasUnresolvedMeta finalValue then
           psSynthFailure original
         else
@@ -183,7 +183,7 @@ def psTryInstanceCandidates
           original
           target
           synthesize
-          entry
+          entry;
       match attempt.value with
       | Option.some _ => attempt
       | Option.none =>
@@ -211,7 +211,7 @@ def psSynthInstanceWithFuel
             index
             nextContext
             fuel
-            nextTarget
+            nextTarget;
       psTryInstanceCandidates
         environment
         localContext

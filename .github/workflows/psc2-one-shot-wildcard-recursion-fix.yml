@@ -1,0 +1,89 @@
+name: PSC2 one-shot wildcard recursion fix
+
+on:
+  push:
+    branches:
+      - psc2/minimal-selfhost-psc15
+    paths:
+      - .github/workflows/psc2-one-shot-wildcard-recursion-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Normalize wildcard binder recursion
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("psc15selfhost/packages/elab/src/Ps/Elab/Term.lean")
+          source = path.read_text()
+
+          if "def psElabWildcardBinderNamesWorker" in source:
+              raise SystemExit(0)
+
+          pattern = re.compile(
+              r"def psElabWildcardBinderNames\n[\s\S]*?(?=\ndef psElabMatchConstructorMinor)"
+          )
+          replacement = '''def psElabWildcardBinderNamesWorker
+              (span : PsSourceSpan)
+              (remaining : Nat) :
+              Nat -> List PsSyntaxName :=
+            match remaining with
+            | 0 =>
+                fun (_index : Nat) =>
+                  []
+            | nextRemaining + 1 =>
+                let smaller : Nat -> List PsSyntaxName :=
+                  psElabWildcardBinderNamesWorker
+                    span
+                    nextRemaining;
+                fun (index : Nat) =>
+                  let segment :=
+                    String.Internal.append "_wild" (psNatToString index);
+                  let syntaxName : PsSyntaxName := {
+                    segments := List.cons segment List.nil
+                    span := span
+                  };
+                  List.cons
+                    syntaxName
+                    (smaller (Nat.succ index))
+
+          def psElabWildcardBinderNames
+              (span : PsSourceSpan)
+              (index : Nat)
+              (remaining : Nat) :
+              List PsSyntaxName :=
+            psElabWildcardBinderNamesWorker
+              span
+              remaining
+              index
+          '''
+
+          updated, count = pattern.subn(replacement, source, count=1)
+          if count != 1:
+              raise SystemExit(f"expected one wildcard binder definition, replaced {count}")
+          path.write_text(updated)
+          PY
+
+          node psc15selfhost/scripts/check-elab-wildcard-binder-names-selfhost-source-syntax.mjs
+
+          if git diff --quiet -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean; then
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git commit -m "fix(psc2): normalize wildcard binder recursion"
+          git push origin HEAD:psc2/minimal-selfhost-psc15

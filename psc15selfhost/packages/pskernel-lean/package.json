@@ -15,6 +15,7 @@
     "index.mjs",
     "host/node-provider.mjs",
     "host/prebuilt.mjs",
+    "host/source-distribution.test.mjs",
     "provider/",
     "kernel/",
     "LEAN_LICENSE",

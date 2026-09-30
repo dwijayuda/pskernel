@@ -174,14 +174,31 @@ def psP12MultiRuleBody : PsKernelCoreExpr :=
       (PsKernelCoreExpr.app psP12MultiRecPrefix psP12MultiLeft))
     (PsKernelCoreExpr.app psP12MultiRecPrefix psP12MultiRight)
 
+def psP12MultiSwappedCallRuleBody : PsKernelCoreExpr :=
+  PsKernelCoreExpr.app
+    (PsKernelCoreExpr.app
+      (PsKernelCoreExpr.app
+        (PsKernelCoreExpr.app psP12MultiMinor psP12MultiLeft)
+        psP12MultiRight)
+      (PsKernelCoreExpr.app psP12MultiRecPrefix psP12MultiRight))
+    (PsKernelCoreExpr.app psP12MultiRecPrefix psP12MultiLeft)
+
 def psP12MultiRuleRhs : PsKernelCoreExpr :=
   psP12MultiCloseLam psP12MultiMotiveI psP12MultiMotiveType
     (psP12MultiCloseLam psP12MultiMinorI psP12MultiValidMinorType
       (psP12MultiCloseLam psP12MultiLeftI psP12MultiTarget
         (psP12MultiCloseLam psP12MultiRightI psP12MultiTarget psP12MultiRuleBody)))
 
-def psP12MultiRecInfo
-    (minorType : PsKernelCoreExpr) : PsKernelCoreRecursorInfo := {
+def psP12MultiSwappedCallRuleRhs : PsKernelCoreExpr :=
+  psP12MultiCloseLam psP12MultiMotiveI psP12MultiMotiveType
+    (psP12MultiCloseLam psP12MultiMinorI psP12MultiValidMinorType
+      (psP12MultiCloseLam psP12MultiLeftI psP12MultiTarget
+        (psP12MultiCloseLam psP12MultiRightI psP12MultiTarget
+          psP12MultiSwappedCallRuleBody)))
+
+def psP12MultiRecInfoWithRule
+    (minorType : PsKernelCoreExpr)
+    (ruleRhs : PsKernelCoreExpr) : PsKernelCoreRecursorInfo := {
   base := {
     name := psP12MultiRec
     levelParams := PsKernelCoreList.nil
@@ -193,11 +210,15 @@ def psP12MultiRecInfo
   numMotives := 1
   numMinors := 1
   rules := PsKernelCoreList.cons
-    { ctor := psP12MultiNode, nFields := 2, rhs := psP12MultiRuleRhs }
+    { ctor := psP12MultiNode, nFields := 2, rhs := ruleRhs }
     PsKernelCoreList.nil
   k := false
   isUnsafe := false
 }
+
+def psP12MultiRecInfo
+    (minorType : PsKernelCoreExpr) : PsKernelCoreRecursorInfo :=
+  psP12MultiRecInfoWithRule minorType psP12MultiRuleRhs
 
 def psP12MultiRejected
     (result : PsKernelCoreResult String PsKernelCoreEnvironment) : Bool :=
@@ -222,9 +243,16 @@ def psP12MultiChecks : PsKernelCoreResult String Unit :=
           let missing :=
             psKernelCoreAddRecursor
               768 familyEnv (psP12MultiRecInfo psP12MultiMissingMinorType);
+          let swappedCalls :=
+            psKernelCoreAddRecursor 768 familyEnv
+              (psP12MultiRecInfoWithRule
+                psP12MultiValidMinorType psP12MultiSwappedCallRuleRhs);
           if psP12MultiRejected swapped then
             if psP12MultiRejected missing then
-              PsKernelCoreResult.ok Unit.unit
+              if psP12MultiRejected swappedCalls then
+                PsKernelCoreResult.ok Unit.unit
+              else
+                PsKernelCoreResult.error "reordered recursive calls were accepted"
             else
               PsKernelCoreResult.error "missing second IH was accepted"
           else

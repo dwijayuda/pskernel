@@ -1,6 +1,7 @@
 // Regression gate: keep constructor-minor source inside the PSC1 bootstrap surface.
 // In particular, avoid generic List.reverse here: unresolved bootstrap names can fall through projection elaboration as unsupportedTerm.
 // Also keep Option constructors explicit in term position so bootstrap name resolution does not depend on Lean's open constructors.
+// Constructor-pattern `some`/`none` remains valid pattern syntax; this guard only constrains the expected-type value expression.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

@@ -1,12 +1,37 @@
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {readdir,readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const packageRoot=path.resolve(here,'..');
 const npm=process.platform==='win32'?'npm.cmd':'npm';
+const expectedKernelTree='636837af92156cf17226e56106f08eb553bfb961';
+const expectedLeanLicenseBlob='813da297567374691eaae7a88739dbbefd2afdfd';
+
+function gitObjectSha(type,body){
+  const payload=Buffer.isBuffer(body)?body:Buffer.from(body);
+  return createHash('sha1')
+    .update(Buffer.from(`${type} ${payload.length}\0`))
+    .update(payload)
+    .digest();
+}
+
+async function gitFlatTreeSha(root){
+  const entries=(await readdir(root,{withFileTypes:true}))
+    .sort((a,b)=>Buffer.from(a.name).compare(Buffer.from(b.name)));
+  const treeParts=[];
+  for(const entry of entries){
+    assert.equal(entry.isFile(),true,`kernel audit snapshot must stay flat: ${entry.name}`);
+    const body=await readFile(path.join(root,entry.name));
+    treeParts.push(Buffer.from(`100644 ${entry.name}\0`));
+    treeParts.push(gitObjectSha('blob',body));
+  }
+  return gitObjectSha('tree',Buffer.concat(treeParts)).toString('hex');
+}
+
 const packageJson=JSON.parse(await readFile(path.join(packageRoot,'package.json'),'utf8'));
 for(const entry of [
   'provider/',
@@ -20,21 +45,32 @@ for(const entry of [
   assert.ok(packageJson.files.includes(entry),`package files must include ${entry}`);
 }
 assert.equal(packageJson.scripts?.['build:wasm'],'bash scripts/build-wasm.sh');
+assert.equal(packageJson.scripts?.['verify:source'],'node host/source-distribution.test.mjs');
+for(const hook of ['preinstall','install','postinstall']){
+  assert.equal(packageJson.scripts?.[hook],undefined,`${hook} must not compile Lean or WebAssembly`);
+}
 
 const sourceManifest=JSON.parse(await readFile(path.join(packageRoot,'KERNEL_SOURCE_MANIFEST.json'),'utf8'));
 assert.equal(sourceManifest.leanVersion,'4.34.0');
 assert.equal(sourceManifest.leanCommit,'293d5d0c0c3f3dded4688b3ccd6a33939ac5102b');
 assert.equal(sourceManifest.upstreamSourcePath,'src/kernel');
 assert.equal(sourceManifest.packageSourcePath,'kernel');
-assert.equal(sourceManifest.sourceTreeSha,'636837af92156cf17226e56106f08eb553bfb961');
+assert.equal(sourceManifest.sourceTreeSha,expectedKernelTree);
 assert.equal(sourceManifest.license,'Apache-2.0');
 assert.equal(sourceManifest.licenseFile,'LEAN_LICENSE');
 assert.equal(sourceManifest.modified,false);
 
-const license=await readFile(path.join(packageRoot,'LEAN_LICENSE'),'utf8');
-assert.match(license,/Apache License 2\.0/);
-assert.match(license,/Version 2\.0, January 2004/);
-await readFile(path.join(packageRoot,'kernel','type_checker.cpp'),'utf8');
+const license=await readFile(path.join(packageRoot,'LEAN_LICENSE'));
+assert.equal(
+  gitObjectSha('blob',license).toString('hex'),
+  expectedLeanLicenseBlob,
+  'LEAN_LICENSE must be byte-identical to the pinned Lean 4.34 license blob',
+);
+assert.equal(
+  await gitFlatTreeSha(path.join(packageRoot,'kernel')),
+  expectedKernelTree,
+  'kernel/ must be byte-identical to the pinned Lean 4.34 src/kernel Git tree',
+);
 await readFile(path.join(packageRoot,'provider','PsKernelLeanWasm','Api.lean'),'utf8');
 await readFile(path.join(packageRoot,'source','proofscript','foundation','Ps','Foundation','Name.lean'),'utf8');
 await readFile(path.join(packageRoot,'source','proofscript','provider','PsKernelLean','Admission.lean'),'utf8');

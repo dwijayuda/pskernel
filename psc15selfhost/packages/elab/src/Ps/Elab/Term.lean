@@ -2837,7 +2837,7 @@ def psElabTermWithFuel
   | remaining + 1 =>
       match term with
       | .reference name =>
-          match psElabReference context name none with
+          match psElabReference context name Option.none with
           | Except.error error => Except.error error
           | Except.ok reference =>
               match psElabApplyArgs
@@ -2912,9 +2912,9 @@ def psElabTermWithFuel
           | Except.error error => Except.error error
           | Except.ok selfCall =>
               match selfCall with
-              | some result => Except.ok result
-              | none =>
-                  match psElabTermWithFuel remaining context fn none with
+              | Option.some result => Except.ok result
+              | Option.none =>
+                  match psElabTermWithFuel remaining context fn Option.none with
                   | Except.error error => Except.error error
                   | Except.ok elaboratedFn =>
                       match psElabApplyArgs

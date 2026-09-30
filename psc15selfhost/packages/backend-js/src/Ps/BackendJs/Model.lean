@@ -16,10 +16,22 @@ inductive PsJsLiteral where
   | string (value : String)
   | undefined
 
+inductive PsJsIntrinsic where
+  | natAdd
+  | natSub
+  | natMul
+  | natDiv
+  | natMod
+  | natEq
+  | natNe
+  | natLe
+  | natLt
+
 inductive PsJsExpr where
   | literal (value : PsJsLiteral)
   | local (index : Nat)
   | global (index : Nat)
+  | intrinsic (operation : PsJsIntrinsic) (arguments : List PsJsExpr)
   | letE (index : Nat) (value : PsJsExpr) (body : PsJsExpr)
   | lambda (parameters : List Nat) (body : PsJsExpr)
   | call (fn : PsJsExpr) (arguments : List PsJsExpr)

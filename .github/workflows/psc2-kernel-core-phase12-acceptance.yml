@@ -5,14 +5,6 @@ on:
     branches:
       - psc2/kernel-core-phase12-recursive-recursor
     paths:
-      - psc15selfhost/packages/pskernel-core/**
-      - psc15selfhost/test/KernelCore*.lean
-      - psc15selfhost/package.json
-      - psc15selfhost/lakefile.lean
-      - psc15selfhost/check-psc1-source.mjs
-      - psc15selfhost/scripts/check-kernel-core-source.mjs
-      - psc15selfhost/scripts/check-bootstrap-closure.mjs
-      - psc15selfhost/scripts/report-kernel-core-size.mjs
       - .github/workflows/psc2-kernel-core-phase12-acceptance.yml
   workflow_dispatch:
 

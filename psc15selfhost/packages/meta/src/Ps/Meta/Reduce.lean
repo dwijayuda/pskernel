@@ -116,66 +116,75 @@ def psDefEqReadOnlyWithEnvFuel
       if psExprAlphaEq leftValue rightValue then
         true
       else
-        match leftValue, rightValue with
-        | .app leftFn leftArg, .app rightFn rightArg =>
-            psDefEqReadOnlyWithEnvFuel
-                environment
-                metaContext
-                localContext
-                remaining
-                leftFn
-                rightFn
-              && psDefEqReadOnlyWithEnvFuel
-                environment
-                metaContext
-                localContext
-                remaining
-                leftArg
-                rightArg
-        | .lam _ leftType leftBody _,
-          .lam _ rightType rightBody _ =>
-            psDefEqReadOnlyWithEnvFuel
-                environment
-                metaContext
-                localContext
-                remaining
-                leftType
-                rightType
-              && psDefEqReadOnlyWithEnvFuel
-                environment
-                metaContext
-                localContext
-                remaining
-                leftBody
-                rightBody
-        | .forallE _ leftType leftBody _,
-          .forallE _ rightType rightBody _ =>
-            psDefEqReadOnlyWithEnvFuel
-                environment
-                metaContext
-                localContext
-                remaining
-                leftType
-                rightType
-              && psDefEqReadOnlyWithEnvFuel
-                environment
-                metaContext
-                localContext
-                remaining
-                leftBody
-                rightBody
-        | .proj leftType leftIndex leftValue,
-          .proj rightType rightIndex rightValue =>
-            psNameEq leftType rightType
-              && leftIndex == rightIndex
-              && psDefEqReadOnlyWithEnvFuel
-                environment
-                metaContext
-                localContext
-                remaining
-                leftValue
-                rightValue
-        | _, _ => false
+        match leftValue with
+        | .app leftFn leftArg =>
+            match rightValue with
+            | .app rightFn rightArg =>
+                psDefEqReadOnlyWithEnvFuel
+                    environment
+                    metaContext
+                    localContext
+                    remaining
+                    leftFn
+                    rightFn
+                  && psDefEqReadOnlyWithEnvFuel
+                    environment
+                    metaContext
+                    localContext
+                    remaining
+                    leftArg
+                    rightArg
+            | _ => false
+        | .lam _ leftType leftBody _ =>
+            match rightValue with
+            | .lam _ rightType rightBody _ =>
+                psDefEqReadOnlyWithEnvFuel
+                    environment
+                    metaContext
+                    localContext
+                    remaining
+                    leftType
+                    rightType
+                  && psDefEqReadOnlyWithEnvFuel
+                    environment
+                    metaContext
+                    localContext
+                    remaining
+                    leftBody
+                    rightBody
+            | _ => false
+        | .forallE _ leftType leftBody _ =>
+            match rightValue with
+            | .forallE _ rightType rightBody _ =>
+                psDefEqReadOnlyWithEnvFuel
+                    environment
+                    metaContext
+                    localContext
+                    remaining
+                    leftType
+                    rightType
+                  && psDefEqReadOnlyWithEnvFuel
+                    environment
+                    metaContext
+                    localContext
+                    remaining
+                    leftBody
+                    rightBody
+            | _ => false
+        | .proj leftType leftIndex leftValue =>
+            match rightValue with
+            | .proj rightType rightIndex rightValue =>
+                psNameEq leftType rightType
+                  && leftIndex == rightIndex
+                  && psDefEqReadOnlyWithEnvFuel
+                    environment
+                    metaContext
+                    localContext
+                    remaining
+                    leftValue
+                    rightValue
+            | _ => false
+        | _ => false
 
 def psDefEqReadOnlyWithEnv
     (environment : PsEnvironment)

@@ -1,46 +1,41 @@
 import assert from 'node:assert/strict';
-import {existsSync} from 'node:fs';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const build=await readFile(path.join(here,'build-wasm.sh'),'utf8');
-const initializerPath=path.join(here,'kernel-initialize.cpp');
-
-// Generated Lean module initializers call lean_initialize() before walking their
-// own import graph. The WASM provider therefore needs the symbol, but linking
-// Lean's stock initialize.cpp would eagerly initialize the entire Lean umbrella.
-// Require a tiny provider-local implementation that initializes only the C/C++
-// runtime substrate needed by the kernel. Generated Lean code remains
-// responsible for Init/Std/Lean.Environment module initialization.
-assert.equal(
-  existsSync(initializerPath),
-  true,
-  'WASM provider must provide a kernel-only lean_initialize implementation',
+const patch=await readFile(
+  path.join(here,'../patches/lean4-4.34.0-emscripten-uv-stubs.patch'),
+  'utf8',
 );
-const initializer=await readFile(initializerPath,'utf8');
-assert.match(initializer,/extern\s+"C"\s+LEAN_EXPORT\s+void\s+lean_initialize\s*\(\s*\)/u);
-assert.match(initializer,/save_stack_info\s*\(\s*\)/u);
-assert.match(initializer,/initialize_util_module\s*\(\s*\)/u);
-assert.match(initializer,/initialize_kernel_module\s*\(\s*\)/u);
-assert.doesNotMatch(initializer,/initialize_Lean\s*\(/u);
-assert.doesNotMatch(initializer,/initialize_library_/u);
+
+// Every Lean-generated module calls lean_initialize() before walking its own
+// import graph. Linking Lean's stock initialize.cpp would also call
+// initialize_Lean and eagerly root the entire Lean umbrella. Keep libleancpp_1
+// (which excludes initialize.cpp), and provide an Emscripten-only definition in
+// the already-linked kernel init translation unit. That shim initializes only
+// stack/runtime/util + the C++ kernel; generated Lean module initializers remain
+// responsible for Init/Std/Lean.Environment.
+assert.match(
+  patch,
+  /src\/kernel\/init_module\.cpp/u,
+  'compatibility patch must carry the kernel-only initializer shim',
+);
+assert.match(
+  patch,
+  /extern\s+"C"\s+LEAN_EXPORT\s+void\s+lean_initialize\s*\(\s*\)/u,
+);
+assert.match(patch,/save_stack_info\s*\(\s*\)/u);
+assert.match(patch,/initialize_util_module\s*\(\s*\)/u);
+assert.match(patch,/initialize_kernel_module\s*\(\s*\)/u);
+assert.doesNotMatch(patch,/initialize_Lean\s*\(/u);
+assert.doesNotMatch(patch,/initialize_library_/u);
 
 assert.match(
   build,
   /lib\/temp\/libleancpp_1\.a/,
   'WASM provider must verify Lean\'s leancpp archive without initialize.cpp',
-);
-assert.match(
-  build,
-  /kernel-initialize\.cpp/u,
-  'WASM build must compile the kernel-only initializer',
-);
-assert.match(
-  build,
-  /kernel-initialize\.o/u,
-  'WASM build must link the kernel-only initializer object',
 );
 assert.match(
   build,

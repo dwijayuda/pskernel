@@ -2204,7 +2204,7 @@ def psElabApplyArgsWithFuel
       PsElabContext ->
       PsSyntaxTerm ->
       Option PsExpr ->
-      Except PsElabError PsElabApplicationResult)
+      Except PsElabError PsElabTermResult)
     (remainingFuel : Nat)
     (current : PsElabTermResult)
     (arguments : List PsSyntaxTerm)

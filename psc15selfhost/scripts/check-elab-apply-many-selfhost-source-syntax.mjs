@@ -43,7 +43,7 @@ if (wrapperMatch === null) {
 }
 
 const wrapper = wrapperMatch[0];
-if (!/def psExprApplyMany\s*\(fn : PsExpr\)\s*\(arguments : List PsExpr\) : PsExpr :=\s*psExprApplyManyWorker arguments fn/.test(wrapper)) {
+if (!/def psExprApplyMany\s*\(fn : PsExpr\)\s*\(arguments : List PsExpr\)\s*:\s*PsExpr :=\s*psExprApplyManyWorker arguments fn/.test(wrapper)) {
   throw new Error(
     "PSC2_ELAB_APPLY_MANY_SELFHOST_SOURCE_SYNTAX_MISSING: invariant-safe wrapper",
   );

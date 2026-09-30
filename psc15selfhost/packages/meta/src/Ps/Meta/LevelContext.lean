@@ -62,13 +62,14 @@ def psLevelMetaFresh (context : PsLevelMetaContext) : PsLevelFreshResult :=
     level := PsLevel.mvar id
   }
 
-def psLevelInstantiateWithFuelWorker :
-    Nat -> PsLevelMetaContext -> PsLevel -> PsLevel
+def psLevelInstantiateWithFuelWorker
+    (fuel : Nat) : PsLevelMetaContext -> PsLevel -> PsLevel :=
+  match fuel with
   | Nat.zero =>
       fun (_context : PsLevelMetaContext) (level : PsLevel) => level
-  | Nat.succ fuel =>
+  | Nat.succ remaining =>
       let smaller : PsLevelMetaContext -> PsLevel -> PsLevel :=
-        psLevelInstantiateWithFuelWorker fuel;
+        psLevelInstantiateWithFuelWorker remaining;
       fun (context : PsLevelMetaContext) (level : PsLevel) =>
         match level with
         | .mvar id =>

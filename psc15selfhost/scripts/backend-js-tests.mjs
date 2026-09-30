@@ -15,6 +15,7 @@ function run(command, args) {
 try {
   run('lake', ['exe', 'psc2_backend_js_machine_int_tests']);
   run('lake', ['env', 'lean', 'test/BackendJsJ3Tests.lean']);
+  run('lake', ['env', 'lean', 'test/BackendJsJ3NegativeTests.lean']);
   run('lake', ['exe', 'psc2_backend_js_tests', out]);
   run('node', ['--check', path.join(out, 'direct.mjs')]);
   const direct = await import(pathToFileURL(path.join(out, 'direct.mjs')));

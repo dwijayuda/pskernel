@@ -47,6 +47,7 @@ jobs:
           path: |
             /tmp/backend-js-source.log
             /tmp/backend-js-source-BackendJs.ps
+            /tmp/backend-js-source-backend.ts
           if-no-files-found: ignore
       - name: Bootstrap regression
         if: always()

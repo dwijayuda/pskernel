@@ -331,10 +331,13 @@ def psLevelHasMVarWorker (level : PsLevel) : Bool :=
 def psLevelHasMVar (level : PsLevel) : Bool :=
   psLevelHasMVarWorker level
 
-def psLevelListHasMVar : List PsLevel -> Bool
+def psLevelListHasMVarWorker
+    (levels : List PsLevel) : Bool :=
+  match levels with
   | [] => false
   | level :: rest =>
-      if psLevelHasMVar level then
-        true
-      else
-        psLevelListHasMVar rest
+      let smaller : Bool := psLevelListHasMVarWorker rest;
+      if psLevelHasMVar level then true else smaller
+
+def psLevelListHasMVar (levels : List PsLevel) : Bool :=
+  psLevelListHasMVarWorker levels

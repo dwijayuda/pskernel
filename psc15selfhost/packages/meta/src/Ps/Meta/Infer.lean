@@ -254,7 +254,7 @@ def psInferProjectionType
                   (psInferBoolNot info.isStructure)
                   (psInferBoolOr
                     (psInferNatNe info.numIndices 0)
-                    (psInferNatNe view.args.length info.numParams)) then
+                    (psInferNatNe (List.length view.args) info.numParams)) then
               Except.error PsInferError.projectionUnsupported
             else
               match info.constructors with

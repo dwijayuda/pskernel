@@ -207,7 +207,7 @@ def psSynthInstanceWithFuel
   | 0, _ => psSynthFailure context
   | fuel + 1, target =>
       let synthesize :=
-        fun nextContext nextTarget =>
+        fun (nextContext : PsMetaContext) (nextTarget : PsExpr) =>
           psSynthInstanceWithFuel
             environment
             localContext

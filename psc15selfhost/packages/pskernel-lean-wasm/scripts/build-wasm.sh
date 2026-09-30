@@ -141,6 +141,29 @@ version = "0.0.0"
 defaultTargets = ["provider"]
 srcDir = "src"
 
+[[lean_lib]]
+name = "ProviderModules"
+roots = [
+  "Ps.Foundation.Name",
+  "Ps.Core.Builtin",
+  "Ps.Core.Level",
+  "Ps.Core.Expr",
+  "Ps.Core.Declaration",
+  "Ps.Bridge.Json",
+  "Ps.Bridge.CheckedAdmissions",
+  "Ps.Bridge.Codec",
+  "Ps.Environment.Basic",
+  "Ps.Environment.Prelude",
+  "Ps.Environment.SelfHostPrelude",
+  "Ps.Environment.SelfHostProd",
+  "PsKernelLean.Error",
+  "PsKernelLean.Convert",
+  "PsKernelLean.Protocol",
+  "PsKernelLean.Prelude",
+  "PsKernelLean.Admission",
+  "PsKernelLean.Response"
+]
+
 [[lean_exe]]
 name = "provider"
 root = "PsKernelLean.Main"

@@ -2675,19 +2675,34 @@ def psElabSyntaxLocalId
               | .global _ => Option.none
   | _ => Option.none
 
+def psElabNatListAtWorker
+    (index : Nat) :
+    List Nat -> Option Nat :=
+  match index with
+  | 0 =>
+      fun (values : List Nat) =>
+        match values with
+        | [] =>
+            Option.none
+        | value :: _ =>
+            Option.some value
+  | nextIndex + 1 =>
+      let smaller :
+          List Nat -> Option Nat :=
+        psElabNatListAtWorker nextIndex;
+      fun (values : List Nat) =>
+        match values with
+        | [] =>
+            Option.none
+        | _ :: rest =>
+            smaller rest
+
 def psElabNatListAt
     (values : List Nat)
     (index : Nat) : Option Nat :=
-  match values with
-  | [] =>
-      Option.none
-  | value :: rest =>
-      match index with
-      | 0 =>
-          Option.some value
-      | nextIndex + 1 =>
-          psElabNatListAt rest nextIndex
-
+  psElabNatListAtWorker
+    index
+    values
 def psElabValidateStructuralCall
     (context : PsElabContext)
     (recursion : PsElabStructuralRecursion)

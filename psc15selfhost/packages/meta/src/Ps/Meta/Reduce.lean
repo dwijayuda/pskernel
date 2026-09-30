@@ -13,6 +13,8 @@ def psWhnfCoreWithFuel
   | Nat.zero =>
       fun (expr : PsExpr) => psMetaInstantiate metaContext expr
   | Nat.succ remaining =>
+      let smaller : PsExpr -> PsExpr :=
+        psWhnfCoreWithFuel remaining metaContext localContext;
       fun (expr : PsExpr) =>
         let instantiated := psMetaInstantiate metaContext expr;
         match instantiated with
@@ -20,34 +22,33 @@ def psWhnfCoreWithFuel
             match psLocalFindById localContext id with
             | some declaration =>
                 match declaration with
-                | .letDecl _ _ _ value =>
-                    psWhnfCoreWithFuel remaining metaContext localContext value
+                | .letDecl _ _ _ value => smaller value
                 | _ => instantiated
             | none => instantiated
         | .letE _ _ value body =>
-            psWhnfCoreWithFuel
-              remaining
-              metaContext
-              localContext
-              (psExprInstantiate1 body value)
+            smaller (psExprInstantiate1 body value)
         | .app fn arg =>
-            let reducedFn :=
-              psWhnfCoreWithFuel remaining metaContext localContext fn;
+            let reducedFn := smaller fn;
             match reducedFn with
             | .lam _ _ body _ =>
-                psWhnfCoreWithFuel
-                  remaining
-                  metaContext
-                  localContext
-                  (psExprInstantiate1 body arg)
+                smaller (psExprInstantiate1 body arg)
             | _ => PsExpr.app reducedFn arg
         | _ => instantiated
+
+def psWhnfCoreApplyFuel
+    (fuel : Nat)
+    (metaContext : PsMetaContext)
+    (localContext : PsLocalContext)
+    (expr : PsExpr) : PsExpr :=
+  let worker : PsExpr -> PsExpr :=
+    psWhnfCoreWithFuel fuel metaContext localContext;
+  worker expr
 
 def psWhnfCore
     (metaContext : PsMetaContext)
     (localContext : PsLocalContext)
     (expr : PsExpr) : PsExpr :=
-  psWhnfCoreWithFuel 256 metaContext localContext expr
+  psWhnfCoreApplyFuel 256 metaContext localContext expr
 
 def psDefEqReadOnly
     (metaContext : PsMetaContext)
@@ -58,6 +59,25 @@ def psDefEqReadOnly
   let rightValue := psWhnfCore metaContext localContext right;
   psExprAlphaEq leftValue rightValue
 
+def psWhnfDeltaCandidate
+    (environment : PsEnvironment)
+    (core : PsExpr) : Option PsExpr :=
+  match core with
+  | .constE name levels =>
+      match psEnvironmentFind environment name with
+      | none => Option.none
+      | some declaration =>
+          match psDeclarationValue declaration with
+          | none => Option.none
+          | some value =>
+              let parameters := psDeclarationLevelParams declaration;
+              if Nat.beq parameters.length levels.length then
+                Option.some
+                  (psExprInstantiateLevelParams parameters levels value)
+              else
+                Option.none
+  | _ => Option.none
+
 def psWhnfWithFuel
     (fuel : Nat)
     (environment : PsEnvironment)
@@ -67,53 +87,38 @@ def psWhnfWithFuel
   | Nat.zero =>
       fun (expr : PsExpr) => psWhnfCore metaContext localContext expr
   | Nat.succ remaining =>
+      let smaller : PsExpr -> PsExpr :=
+        psWhnfWithFuel remaining environment metaContext localContext;
       fun (expr : PsExpr) =>
         let core :=
-          psWhnfCoreWithFuel remaining metaContext localContext expr;
-        match core with
-        | .constE name levels =>
-            match psEnvironmentFind environment name with
-            | none => core
-            | some declaration =>
-                match psDeclarationValue declaration with
-                | none => core
-                | some value =>
-                    let parameters := psDeclarationLevelParams declaration;
-                    if Nat.beq parameters.length levels.length then
-                      psWhnfWithFuel
-                        remaining
-                        environment
-                        metaContext
-                        localContext
-                        (psExprInstantiateLevelParams parameters levels value)
-                    else
-                      core
-        | .app fn arg =>
-            let reducedFn :=
-              psWhnfWithFuel remaining environment metaContext localContext fn;
-            if psExprAlphaEq reducedFn fn then
-              core
-            else
-              psWhnfWithFuel
-                remaining
-                environment
-                metaContext
-                localContext
-                (PsExpr.app reducedFn arg)
-        | _ => core
+          psWhnfCoreApplyFuel remaining metaContext localContext expr;
+        match psWhnfDeltaCandidate environment core with
+        | some candidate => smaller candidate
+        | none =>
+            match core with
+            | .app fn arg =>
+                let reducedFn := smaller fn;
+                if psExprAlphaEq reducedFn fn then
+                  core
+                else
+                  smaller (PsExpr.app reducedFn arg)
+            | _ => core
 
 def psWhnf
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
     (localContext : PsLocalContext)
     (expr : PsExpr) : PsExpr :=
-  psWhnfWithFuel 256 environment metaContext localContext expr
+  let worker : PsExpr -> PsExpr :=
+    psWhnfWithFuel 256 environment metaContext localContext;
+  worker expr
 
 def psDefEqReadOnlyWithEnvFuel
     (fuel : Nat)
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
-    (localContext : PsLocalContext) : PsExpr -> PsExpr -> Bool :=
+    (localContext : PsLocalContext) :
+    PsExpr -> PsExpr -> Bool :=
   match fuel with
   | Nat.zero =>
       fun (left : PsExpr) =>
@@ -122,10 +127,15 @@ def psDefEqReadOnlyWithEnvFuel
             (psWhnf environment metaContext localContext left)
             (psWhnf environment metaContext localContext right)
   | Nat.succ remaining =>
+      let smaller : PsExpr -> PsExpr -> Bool :=
+        psDefEqReadOnlyWithEnvFuel
+          remaining environment metaContext localContext;
       fun (left : PsExpr) =>
         fun (right : PsExpr) =>
-          let leftValue := psWhnf environment metaContext localContext left;
-          let rightValue := psWhnf environment metaContext localContext right;
+          let leftValue :=
+            psWhnf environment metaContext localContext left;
+          let rightValue :=
+            psWhnf environment metaContext localContext right;
           if psExprAlphaEq leftValue rightValue then
             true
           else
@@ -133,30 +143,24 @@ def psDefEqReadOnlyWithEnvFuel
             | .app leftFn leftArg =>
                 match rightValue with
                 | .app rightFn rightArg =>
-                    if psDefEqReadOnlyWithEnvFuel
-                        remaining environment metaContext localContext leftFn rightFn then
-                      psDefEqReadOnlyWithEnvFuel
-                        remaining environment metaContext localContext leftArg rightArg
+                    if smaller leftFn rightFn then
+                      smaller leftArg rightArg
                     else
                       false
                 | _ => false
             | .lam _ leftType leftBody _ =>
                 match rightValue with
                 | .lam _ rightType rightBody _ =>
-                    if psDefEqReadOnlyWithEnvFuel
-                        remaining environment metaContext localContext leftType rightType then
-                      psDefEqReadOnlyWithEnvFuel
-                        remaining environment metaContext localContext leftBody rightBody
+                    if smaller leftType rightType then
+                      smaller leftBody rightBody
                     else
                       false
                 | _ => false
             | .forallE _ leftType leftBody _ =>
                 match rightValue with
                 | .forallE _ rightType rightBody _ =>
-                    if psDefEqReadOnlyWithEnvFuel
-                        remaining environment metaContext localContext leftType rightType then
-                      psDefEqReadOnlyWithEnvFuel
-                        remaining environment metaContext localContext leftBody rightBody
+                    if smaller leftType rightType then
+                      smaller leftBody rightBody
                     else
                       false
                 | _ => false
@@ -165,8 +169,7 @@ def psDefEqReadOnlyWithEnvFuel
                 | .proj rightType rightIndex rightValue =>
                     if psNameEq leftType rightType then
                       if Nat.beq leftIndex rightIndex then
-                        psDefEqReadOnlyWithEnvFuel
-                          remaining environment metaContext localContext leftValue rightValue
+                        smaller leftValue rightValue
                       else
                         false
                     else
@@ -180,10 +183,6 @@ def psDefEqReadOnlyWithEnv
     (localContext : PsLocalContext)
     (left : PsExpr)
     (right : PsExpr) : Bool :=
-  psDefEqReadOnlyWithEnvFuel
-    256
-    environment
-    metaContext
-    localContext
-    left
-    right
+  let worker : PsExpr -> PsExpr -> Bool :=
+    psDefEqReadOnlyWithEnvFuel 256 environment metaContext localContext;
+  worker left right

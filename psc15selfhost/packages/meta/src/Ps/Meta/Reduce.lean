@@ -50,7 +50,7 @@ def psDefEqReadOnly
     (left : PsExpr)
     (right : PsExpr) : Bool :=
   let leftValue := psWhnfCore metaContext localContext left;
-  let rightValue := psWhnfCore metaContext localContext right
+  let rightValue := psWhnfCore metaContext localContext right;
   psExprAlphaEq leftValue rightValue
 
 def psWhnfWithFuel

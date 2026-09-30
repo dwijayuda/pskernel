@@ -10,16 +10,24 @@ const source = await readFile(
   "utf8",
 );
 
-const match = source.match(
-  /def psElabMatch\n([\s\S]*?)(?=\ndef psBinderAcceptsExplicitArgument\n)/,
-);
-if (match === null) {
+const startMatch = /^def psElabMatch\r?$/m.exec(source);
+if (startMatch === null) {
   throw new Error(
-    "PSC2_ELAB_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: psElabMatch block",
+    "PSC2_ELAB_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: psElabMatch start",
   );
 }
+const afterStart = source.slice(startMatch.index + startMatch[0].length);
+const endMatch = /^def psBinderAcceptsExplicitArgument\b/m.exec(afterStart);
+if (endMatch === null) {
+  throw new Error(
+    "PSC2_ELAB_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: psElabMatch end",
+  );
+}
+const block = source.slice(
+  startMatch.index,
+  startMatch.index + startMatch[0].length + endMatch.index,
+);
 
-const block = match[0];
 const required = [
   /match elaborate context scrutineeSyntax Option\.none with/,
   /\(Option\.some instantiatedExpected\)/,

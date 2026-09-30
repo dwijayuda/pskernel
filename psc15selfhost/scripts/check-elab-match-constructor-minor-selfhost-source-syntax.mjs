@@ -1,5 +1,6 @@
 // Regression gate: keep constructor-minor source inside the PSC1 bootstrap surface.
 // In particular, avoid generic List.reverse here: unresolved bootstrap names can fall through projection elaboration as unsupportedTerm.
+// Also keep Option constructors explicit in term position so bootstrap name resolution does not depend on Lean's open constructors.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -53,6 +54,18 @@ if (/List\.reverse\s+fieldResult\.fieldsRev/.test(block)) {
   );
 }
 
+if (!/\(Option\.some expectedType\)/.test(block)) {
+  throw new Error(
+    "PSC2_ELAB_MATCH_CONSTRUCTOR_MINOR_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.some expected type term",
+  );
+}
+
+if (/\(some expectedType\)/.test(block)) {
+  throw new Error(
+    "PSC2_ELAB_MATCH_CONSTRUCTOR_MINOR_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: bare some in term position depends on unavailable bootstrap name resolution",
+  );
+}
+
 process.stdout.write(
-  "PSC2_ELAB_MATCH_CONSTRUCTOR_MINOR_SELFHOST_SOURCE_SYNTAX: PASS (typed source-binder match; PSC1-local match-field reverse)\n",
+  "PSC2_ELAB_MATCH_CONSTRUCTOR_MINOR_SELFHOST_SOURCE_SYNTAX: PASS (typed source-binder match; PSC1-local match-field reverse; explicit Option.some expected type)\n",
 );

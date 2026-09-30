@@ -1,3 +1,4 @@
+# Retrigger after the match Option source guard was made boundary-safe.
 name: PSC2 one-shot match Option value fix
 
 on:

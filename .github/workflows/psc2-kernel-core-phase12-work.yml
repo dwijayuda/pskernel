@@ -106,6 +106,13 @@ jobs:
           cd psc15selfhost
           lake env lean --run test/KernelCoreRecursiveRecursorReductionTests.lean
 
+      - name: Phase 12 mature-reference parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursiveRecursorReferenceParityTests.lean
+
       - name: Phase 10 recursor admission guard
         shell: bash
         run: |

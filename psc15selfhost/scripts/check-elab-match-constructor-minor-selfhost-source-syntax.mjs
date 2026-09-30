@@ -1,4 +1,4 @@
-// Regression gate: PSC1 self-host match elaboration needs an explicit result type here.
+// Regression gate: keep constructor-minor source inside the PSC1 bootstrap surface.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -34,6 +34,24 @@ if (/let binders\s*:=\s*match sourceBinders with/.test(block)) {
   );
 }
 
+if (!/def psElabMatchFieldListReverseWorker\s*\([\s\S]*?def psElabMatchFieldListReverse\s*\(/.test(source)) {
+  throw new Error(
+    "PSC2_ELAB_MATCH_CONSTRUCTOR_MINOR_SELFHOST_SOURCE_SYNTAX_MISSING: PSC1-local PsElabMatchField reverse helper",
+  );
+}
+
+if (!/let fields\s*:=\s*psElabMatchFieldListReverse\s+fieldResult\.fieldsRev/.test(block)) {
+  throw new Error(
+    "PSC2_ELAB_MATCH_CONSTRUCTOR_MINOR_SELFHOST_SOURCE_SYNTAX_MISSING: constructor minor uses local match-field reverse helper",
+  );
+}
+
+if (/List\.reverse\s+fieldResult\.fieldsRev/.test(block)) {
+  throw new Error(
+    "PSC2_ELAB_MATCH_CONSTRUCTOR_MINOR_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: generic List.reverse in constructor minor bootstrap path",
+  );
+}
+
 process.stdout.write(
-  "PSC2_ELAB_MATCH_CONSTRUCTOR_MINOR_SELFHOST_SOURCE_SYNTAX: PASS (typed source-binder match)\n",
+  "PSC2_ELAB_MATCH_CONSTRUCTOR_MINOR_SELFHOST_SOURCE_SYNTAX: PASS (typed source-binder match; PSC1-local match-field reverse)\n",
 );

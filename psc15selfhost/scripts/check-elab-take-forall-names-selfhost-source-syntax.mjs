@@ -149,36 +149,54 @@ process.stdout.write(
   "PSC2_ELAB_RECORD_HAS_FIELD_SELFHOST_SOURCE_SYNTAX: PASS (local structural traversal; no List.any)\n",
 );
 
-const fieldsMatchStart = source.indexOf("def psSyntaxRecordFieldsMatch\n");
+const fieldsMatchWorkerStart = source.indexOf("def psSyntaxRecordFieldsMatchWorker\n");
+const fieldsMatchStart = source.indexOf("\ndef psSyntaxRecordFieldsMatch\n", fieldsMatchWorkerStart + 1);
 const fieldsMatchEnd = source.indexOf("\ndef psSyntaxRecordFindField\n", fieldsMatchStart + 1);
-if (fieldsMatchStart < 0 || fieldsMatchEnd < 0) {
+if (fieldsMatchWorkerStart < 0 || fieldsMatchStart < 0 || fieldsMatchEnd < 0) {
   throw new Error(
-    "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
+    "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: worker/wrapper declaration block",
   );
 }
 
+const fieldsMatchWorker = source.slice(fieldsMatchWorkerStart, fieldsMatchStart);
 const fieldsMatch = source.slice(fieldsMatchStart, fieldsMatchEnd);
-if (/List\.all/.test(fieldsMatch)) {
+const fieldsMatchBlock = source.slice(fieldsMatchWorkerStart, fieldsMatchEnd);
+if (/List\.all/.test(fieldsMatchBlock)) {
   throw new Error(
     "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: generic List.all remains",
   );
 }
-if (!/match\s+names\s+with/.test(fieldsMatch)) {
+if (!/\(names\s*:\s*List String\)\s*:\s*\n\s*List \(Prod PsSyntaxName PsSyntaxTerm\)\s*->\s*Bool\s*:=/.test(fieldsMatchWorker)) {
   throw new Error(
-    "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: structural name-list traversal",
+    "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: names-recursive worker returns fields closure",
   );
 }
-if (!/psSyntaxRecordHasNamedField\s+fields\s+name/.test(fieldsMatch)) {
+if (!/psSyntaxRecordFieldsMatchWorker\s+rest\s*;/.test(fieldsMatchWorker)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: worker recurses only on rest",
+  );
+}
+if (!/psSyntaxRecordHasNamedField\s+fields\s+name/.test(fieldsMatchWorker)) {
   throw new Error(
     "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: local named-field predicate",
   );
 }
-if (!/psSyntaxRecordFieldsMatch\s+fields\s+rest/.test(fieldsMatch)) {
+if (!/smaller\s+fields/.test(fieldsMatchWorker)) {
   throw new Error(
-    "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: structural recursion on rest with invariant fields",
+    "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: invariant fields applied after structural recursion",
+  );
+}
+if (!/Nat\.beq\s+\(psElabListLength fields\)\s+\(psElabListLength names\)/.test(fieldsMatch)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: wrapper preserves exact field-count check",
+  );
+}
+if (!/psSyntaxRecordFieldsMatchWorker\s+names\s+fields/.test(fieldsMatch)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX_MISSING: wrapper delegates membership check to worker",
   );
 }
 
 process.stdout.write(
-  "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX: PASS (local structural traversal; no List.all)\n",
+  "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX: PASS (names-recursive closure worker; exact count preserved; no List.all)\n",
 );

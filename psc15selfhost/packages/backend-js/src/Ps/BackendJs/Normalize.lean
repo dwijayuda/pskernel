@@ -155,14 +155,15 @@ def psJsNormalizeDeclarations (declarations : List PsVerifiedIrDeclaration) :
           match psJsNormalizeDeclarations rest with
           | Except.error error => Except.error error
           | Except.ok normalizedRest =>
-              let normalized :=
-                PsVerifiedIrDeclaration.mk
-                  declaration.name
-                  declaration.typeParameters
-                  declaration.parameters
-                  declaration.resultType
-                  body;
-              Except.ok (List.cons normalized normalizedRest)
+              Except.ok
+                (List.cons
+                  (PsVerifiedIrDeclaration.mk
+                    declaration.name
+                    declaration.typeParameters
+                    declaration.parameters
+                    declaration.resultType
+                    body)
+                  normalizedRest)
 
 
 def psJsNormalizeModule (module : PsVerifiedIrModule) :

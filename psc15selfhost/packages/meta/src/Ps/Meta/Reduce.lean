@@ -10,7 +10,7 @@ def psWhnfCoreWithFuel
     (localContext : PsLocalContext) : Nat -> PsExpr -> PsExpr
   | 0, expr => psMetaInstantiate metaContext expr
   | fuel + 1, expr =>
-      let instantiated := psMetaInstantiate metaContext expr
+      let instantiated := psMetaInstantiate metaContext expr;
       match instantiated with
       | .fvar id =>
           match psLocalFindById localContext id with

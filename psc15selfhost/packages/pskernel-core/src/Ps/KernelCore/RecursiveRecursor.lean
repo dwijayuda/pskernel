@@ -33,6 +33,12 @@ def psKernelCoreRecursiveRecursorClassifyField
           PsKernelCoreResult.error
             "indexed recursive field is not supported in direct recursive recursor slice"
 
+def psKernelCoreRecursiveRecursorFreshName
+    (seed : Nat) : PsKernelCoreName :=
+  PsKernelCoreName.num
+    (PsKernelCoreName.str PsKernelCoreName.anonymous "_psKernelCoreRecursor")
+    seed
+
 structure PsKernelCoreRecursiveRecursorOpenState where
   ctorResult : PsKernelCoreExpr
   minorResult : PsKernelCoreExpr
@@ -155,7 +161,8 @@ def psKernelCoreRecursiveRecursorFunctionalIhType
           (seed : Nat) =>
         match fieldType with
         | PsKernelCoreExpr.forallE userName domain body binderInfo =>
-            let fresh := psKernelCoreRecursorFreshFVar seed;
+            let freshName := psKernelCoreRecursiveRecursorFreshName seed;
+            let fresh := PsKernelCoreExpr.fvar freshName;
             let openedType := psKernelCoreExprInstantiate1 body fresh;
             let appliedField := PsKernelCoreExpr.app fieldValue fresh;
             match buildRemaining
@@ -165,7 +172,7 @@ def psKernelCoreRecursiveRecursorFunctionalIhType
                 PsKernelCoreOption.some
                   (PsKernelCoreExpr.forallE
                     userName domain
-                    (psKernelCoreExprAbstractFVar inner fresh)
+                    (psKernelCoreExprAbstractFVar inner freshName)
                     binderInfo)
         | _ => PsKernelCoreOption.none
 
@@ -439,7 +446,8 @@ def psKernelCoreRecursiveRecursorFunctionalCall
           (seed : Nat) =>
         match fieldType with
         | PsKernelCoreExpr.forallE userName domain body binderInfo =>
-            let fresh := psKernelCoreRecursorFreshFVar seed;
+            let freshName := psKernelCoreRecursiveRecursorFreshName seed;
+            let fresh := PsKernelCoreExpr.fvar freshName;
             let openedType := psKernelCoreExprInstantiate1 body fresh;
             let appliedField := PsKernelCoreExpr.app fieldValue fresh;
             match buildRemaining
@@ -449,7 +457,7 @@ def psKernelCoreRecursiveRecursorFunctionalCall
                 PsKernelCoreOption.some
                   (PsKernelCoreExpr.lam
                     userName domain
-                    (psKernelCoreExprAbstractFVar inner fresh)
+                    (psKernelCoreExprAbstractFVar inner freshName)
                     binderInfo)
         | _ => PsKernelCoreOption.none
 

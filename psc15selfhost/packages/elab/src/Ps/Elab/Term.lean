@@ -291,7 +291,8 @@ def psElabProjectionChainWorker
         fun (current : PsElabTermResult) =>
           Except.ok current
   | field :: rest =>
-      let smaller : PsElabContext -> PsElabTermResult -> Except PsElabError PsElabTermResult :=
+      let smaller :
+          PsElabContext -> PsElabTermResult -> Except PsElabError PsElabTermResult :=
         psElabProjectionChainWorker rest;
       fun (context : PsElabContext) =>
         fun (current : PsElabTermResult) =>
@@ -929,7 +930,8 @@ def psExprApplyManyWorker
 
 def psExprApplyMany
     (fn : PsExpr)
-    (arguments : List PsExpr) : PsExpr :=
+    (arguments : List PsExpr) :
+    PsExpr :=
   psExprApplyManyWorker arguments fn
 
 def psElabIf
@@ -1876,7 +1878,7 @@ def psElabMatchMinors
       PsElabContext ->
       PsSyntaxTerm ->
       Option PsExpr ->
-      Except PsElabError PsElabTermResult)
+      Except PsElabError PsElabMatchMinorsResult)
     (inductiveInfo : PsInductiveInfo)
     (inductiveLevels : List PsLevel)
     (parameterArgs : List PsExpr)
@@ -2552,7 +2554,7 @@ def psElabRecordCandidates
           environment
           fields
           rest
-          candidatesRev
+          candidatesRev;
       match declaration with
       | .inductiveDecl info =>
           match

@@ -324,7 +324,7 @@ def psMetaFreshLevel (context : PsMetaContext) : PsMetaFreshLevelResult :=
       nextId := context.nextId
       declarations := context.declarations
       assignments := context.assignments
-      levels := fresh.context.levels
+      levels := fresh.context
     }
     level := fresh.level
   }

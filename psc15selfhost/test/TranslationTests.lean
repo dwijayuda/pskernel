@@ -118,10 +118,12 @@ def psTestAnonymousArrowTranslationRoundTrip : Bool :=
       psTranslateLeanToProofScript leanSource,
       psCanonicalizeLeanSource leanSource with
   | Except.ok proofScript, Except.ok canonicalLean =>
-      (proofScript.contains "(_ :" == false)
-        && match psTranslateProofScriptToLean proofScript with
-           | Except.error _ => false
-           | Except.ok leanAgain => leanAgain == canonicalLean)
+      if proofScript.contains "(_ :" then
+        false
+      else
+        match psTranslateProofScriptToLean proofScript with
+        | Except.error _ => false
+        | Except.ok leanAgain => leanAgain == canonicalLean
   | _, _ => false
 
 def main : IO Unit := do

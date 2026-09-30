@@ -1,0 +1,38 @@
+name: PSC2 Lean kernel source distribution
+
+on:
+  push:
+    branches:
+      - psc2/pskernel-lean-provider
+      - psc2/pskernel-lean-wasm
+    paths:
+      - psc15selfhost/packages/pskernel-lean/**
+      - psc15selfhost/packages/pskernel-lean-wasm/**
+      - psc15selfhost/scripts/bootstrap-closure-contract*.mjs
+      - .github/workflows/psc2-lean-kernel-source-distribution.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-distribution:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Native kernel source distribution
+        working-directory: psc15selfhost
+        run: node packages/pskernel-lean/host/source-distribution.test.mjs
+
+      - name: WASM kernel source distribution
+        working-directory: psc15selfhost
+        run: node packages/pskernel-lean-wasm/host/source-distribution.test.mjs
+
+      - name: Bootstrap isolation contract
+        working-directory: psc15selfhost
+        run: node scripts/bootstrap-closure-contract-tests.mjs

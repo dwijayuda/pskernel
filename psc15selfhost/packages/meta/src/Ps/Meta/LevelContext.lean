@@ -312,20 +312,24 @@ def psLevelInstantiateExpr
     (expr : PsExpr) : PsExpr :=
   psLevelInstantiateExprWorker expr context
 
-def psLevelHasMVar : PsLevel -> Bool
+def psLevelHasMVarWorker (level : PsLevel) : Bool :=
+  match level with
   | .mvar _ => true
-  | .succ value => psLevelHasMVar value
+  | .succ value =>
+      let smaller : Bool := psLevelHasMVarWorker value;
+      smaller
   | .max left right =>
-      if psLevelHasMVar left then
-        true
-      else
-        psLevelHasMVar right
+      let leftHas : Bool := psLevelHasMVarWorker left;
+      let rightHas : Bool := psLevelHasMVarWorker right;
+      if leftHas then true else rightHas
   | .imax left right =>
-      if psLevelHasMVar left then
-        true
-      else
-        psLevelHasMVar right
+      let leftHas : Bool := psLevelHasMVarWorker left;
+      let rightHas : Bool := psLevelHasMVarWorker right;
+      if leftHas then true else rightHas
   | _ => false
+
+def psLevelHasMVar (level : PsLevel) : Bool :=
+  psLevelHasMVarWorker level
 
 def psLevelListHasMVar : List PsLevel -> Bool
   | [] => false

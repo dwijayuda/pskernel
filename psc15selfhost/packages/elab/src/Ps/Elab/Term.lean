@@ -2116,7 +2116,7 @@ def psElabApplyArgsWithFuel
                 match elaborate
                     current.context
                     argument
-                    (some domain) with
+                    (Option.some domain) with
                 | Except.error error => Except.error error
                 | Except.ok elaboratedArgument =>
                     let nextTerm :=

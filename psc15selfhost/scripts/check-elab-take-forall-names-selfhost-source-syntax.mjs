@@ -200,3 +200,47 @@ if (!/psSyntaxRecordFieldsMatchWorker\s+names\s+fields/.test(fieldsMatch)) {
 process.stdout.write(
   "PSC2_ELAB_RECORD_FIELDS_MATCH_SELFHOST_SOURCE_SYNTAX: PASS (names-recursive closure worker; exact count preserved; no List.all)\n",
 );
+
+const findFieldStart = source.indexOf("def psSyntaxRecordFindField\n");
+const findFieldEnd = source.indexOf("\ndef psSyntaxRecordOrderFields\n", findFieldStart + 1);
+if (findFieldStart < 0 || findFieldEnd < 0) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_FIND_FIELD_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
+  );
+}
+
+const findField = source.slice(findFieldStart, findFieldEnd);
+if (!/match\s+fields\s+with/.test(findField)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_FIND_FIELD_SELFHOST_SOURCE_SYNTAX_MISSING: structural field-list match",
+  );
+}
+if (!/psSyntaxRecordFindField\s+rest\s+name/.test(findField)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_FIND_FIELD_SELFHOST_SOURCE_SYNTAX_MISSING: structural recursion on rest with invariant name",
+  );
+}
+if (!/Option\.none/.test(findField)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_FIND_FIELD_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.none value/pattern",
+  );
+}
+if (!/Option\.some\s+fieldName/.test(findField)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_FIND_FIELD_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.some field-name pattern",
+  );
+}
+if (!/Option\.some\s+\(Prod\.snd field\)/.test(findField)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_FIND_FIELD_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.some field value",
+  );
+}
+if (/\|\s*none\s*=>/.test(findField) || /\|\s*some\s+/.test(findField) || /=>\s*none\b/.test(findField) || /\n\s*some\s+/.test(findField)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_FIND_FIELD_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: unqualified Option constructor remains",
+  );
+}
+
+process.stdout.write(
+  "PSC2_ELAB_RECORD_FIND_FIELD_SELFHOST_SOURCE_SYNTAX: PASS (structural field lookup; explicit Option constructors)\n",
+);

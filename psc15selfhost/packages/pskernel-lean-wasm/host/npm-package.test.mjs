@@ -70,7 +70,6 @@ try{
   tarballPath=path.join(packageRoot,packed[0].filename);
   assert.equal(existsSync(tarballPath),true,'npm pack must produce the tarball');
 
-  const consumerRoot=path.join(tempRoot,'consumer');
   await writeFile(
     path.join(tempRoot,'package.json'),
     JSON.stringify({private:true,type:'module'},null,2)+'\n',
@@ -96,16 +95,25 @@ try{
     '@proofscript',
     'pskernel-lean-wasm',
   );
-  assert.equal(
-    existsSync(path.join(installedRoot,'wasm','pskernel-lean.cjs')),
-    true,
-    'packed package must contain the generated Node launcher',
-  );
-  assert.equal(
-    existsSync(path.join(installedRoot,'wasm','pskernel-lean.wasm')),
-    true,
-    'packed package must contain the generated WASM module',
-  );
+  for(const [relativePath,label] of [
+    ['wasm/pskernel-lean.cjs','generated Node launcher'],
+    ['wasm/pskernel-lean.wasm','generated WASM module'],
+    ['LEAN_LICENSE','upstream Lean license'],
+    ['KERNEL_SOURCE_MANIFEST.json','kernel source manifest'],
+    ['kernel/type_checker.cpp','vendored Lean kernel source'],
+    ['provider/PsKernelLeanWasm/Api.lean','WASM provider source'],
+    ['source/proofscript/foundation/Ps/Foundation/Name.lean','ProofScript foundation source'],
+    ['source/proofscript/provider/PsKernelLean/Admission.lean','native provider semantic source'],
+    ['scripts/build-wasm.sh','WASM rebuild script'],
+    ['scripts/apply-wasm-abi.mjs','typed-WASM ABI rewrite script'],
+    ['patches/lean4-4.34.0-emscripten-uv-stubs.patch','Lean/Emscripten compatibility patch'],
+  ]){
+    assert.equal(
+      existsSync(path.join(installedRoot,...relativePath.split('/'))),
+      true,
+      `packed package must contain ${label}: ${relativePath}`,
+    );
+  }
 
   const verifyPath=path.join(tempRoot,'verify.mjs');
   await writeFile(verifyPath,`

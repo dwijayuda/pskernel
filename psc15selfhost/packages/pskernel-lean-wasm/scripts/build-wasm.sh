@@ -9,6 +9,8 @@ lean_source="$repo_root/study/lean4-4.34.0"
 lean_build="$workspace_root/.wasm-build/lean4"
 provider_overlay="$workspace_root/.wasm-build/provider-overlay"
 provider_src="$provider_overlay/src"
+provider_olean_dir="$provider_overlay/olean"
+provider_c_dir="$provider_overlay/c"
 provider_obj_dir="$workspace_root/.wasm-build/provider-obj"
 out_dir="$package_root/wasm"
 patch_file="$package_root/patches/lean4-4.34.0-emscripten-uv-stubs.patch"
@@ -72,16 +74,19 @@ done
 
 cd "$workspace_root"
 rm -rf .lake/build "$lean_build" "$provider_overlay" "$provider_obj_dir" "$out_dir"
-mkdir -p "$lean_build" "$provider_src/Ps" "$provider_src/PsKernelLean" "$provider_obj_dir" "$out_dir"
+mkdir -p \
+  "$lean_build" \
+  "$provider_src/Ps" \
+  "$provider_src/PsKernelLean" \
+  "$provider_olean_dir" \
+  "$provider_c_dir" \
+  "$provider_obj_dir" \
+  "$out_dir"
 
-# Follow Lean's own wasm cross-build architecture. Stage 0 must be a runnable
-# native 32-bit compiler so every .olean records wasm32-compatible platform
-# constants; stage 1 is then configured with the Emscripten toolchain.
-#
-# Pass -m32 through CMake's own C/C++ flags as well as Lean's wrappers. This
-# makes CMake's ABI probe see a real 32-bit stage0. Force SSE2 floating-point
-# evaluation so FLT_EVAL_METHOD is 0, which Lean requires for deterministic
-# Float/Float32 semantics on 32-bit x86.
+# Follow Lean's wasm cross-build architecture. Stage0 is a runnable native
+# 32-bit previous-stage compiler; stage1 is configured for Emscripten/wasm32.
+# Matching the previous-stage width to wasm32 prevents host-width platform
+# constants from entering the target .olean/C closure.
 cmake \
   -S "$lean_source" \
   -B "$lean_build" \
@@ -103,75 +108,53 @@ cmake \
   -DSTAGE0_PKG_CONFIG_EXECUTABLE=/usr/bin/i386-linux-gnu-pkg-config \
   -DUSE_GMP=OFF \
   -DUSE_MIMALLOC=OFF \
+  -DUSE_LAKE=OFF \
   -DMMAP=OFF \
   -DLLVM=OFF \
   -DCCACHE=OFF \
   -DWFAIL=OFF \
   -DLEAN_INSTALL_SUFFIX=-linux_wasm32
 
-# This target builds native stage 0 and configures wasm32 stage 1, but does not
-# yet spend the time building the full target stdlib.
+# Build native stage0 and configure wasm32 stage1 first.
 cmake --build "$lean_build" --target stage1-configure -j2
 
-stage0_lake="$lean_build/stage0/bin/lake"
 stage0_lean="$lean_build/stage0/bin/lean"
 stage1_leanc="$lean_build/stage1/leanc.sh"
-if [[ ! -x "$stage0_lake" || ! -x "$stage0_lean" ]]; then
-  echo 'native 32-bit Lean stage0 was not produced' >&2
+target_lean_path="$lean_build/stage1/lib/lean"
+if [[ ! -x "$stage0_lean" ]]; then
+  echo 'native 32-bit Lean stage0 compiler was not produced' >&2
   exit 1
 fi
 
-# Do not ask bootstrap Lake to elaborate the full modern psc15selfhost
-# lakefile.lean. Stage0 Lake intentionally comes from Lean's frozen bootstrap
-# sources and can lack parser categories used by the current Lake DSL. Instead,
-# construct a tiny TOML-only package containing precisely the source families
-# needed by PsKernelLean.Main. The merged src/Ps tree preserves the original
-# module names while keeping the cross-build independent of the host workspace
-# build description.
+# Stage0 is deliberately C_ONLY in Lean's bootstrap. It is a compiler, not a
+# complete current-source .olean sysroot. The provider imports `Lean`, so build
+# the target stage1 stdlib/runtime first. USE_LAKE=OFF keeps this bootstrap on
+# Lean's leanmake path, which itself invokes PREV_STAGE/bin/lean to produce the
+# wasm32-compatible target .oleans and C/runtime libraries.
+cmake --build "$lean_build" --target stage1 -j2
+
+if [[ ! -f "$stage1_leanc" ]]; then
+  echo "cross leanc wrapper missing: $stage1_leanc" >&2
+  exit 1
+fi
+chmod +x "$stage1_leanc"
+if [[ ! -f "$target_lean_path/Lean.olean" ]]; then
+  echo "target Lean sysroot missing: $target_lean_path/Lean.olean" >&2
+  exit 1
+fi
+
+# Stage only the semantic provider sources. The direct compile list below is the
+# same closure already proven by the native Lean provider tests; parser,
+# elaborator, compiler, CLI and backend packages stay outside this artifact.
 cp -a "$workspace_root/packages/foundation/src/Ps/." "$provider_src/Ps/"
 cp -a "$workspace_root/packages/core/src/Ps/." "$provider_src/Ps/"
 cp -a "$workspace_root/packages/environment/src/Ps/." "$provider_src/Ps/"
 cp -a "$workspace_root/packages/bridge/src/Ps/." "$provider_src/Ps/"
 cp -a "$workspace_root/packages/pskernel-lean/provider/PsKernelLean/." "$provider_src/PsKernelLean/"
 
-cat > "$provider_overlay/lakefile.toml" <<'EOF'
-name = "pskernelLeanWasmBootstrap"
-version = "0.0.0"
-defaultTargets = ["provider"]
-srcDir = "src"
-
-[[lean_lib]]
-name = "ProviderModules"
-roots = [
-  "Ps.Foundation.Name",
-  "Ps.Core.Builtin",
-  "Ps.Core.Level",
-  "Ps.Core.Expr",
-  "Ps.Core.Declaration",
-  "Ps.Bridge.Json",
-  "Ps.Bridge.CheckedAdmissions",
-  "Ps.Bridge.Codec",
-  "Ps.Environment.Basic",
-  "Ps.Environment.Prelude",
-  "Ps.Environment.SelfHostPrelude",
-  "Ps.Environment.SelfHostProd",
-  "PsKernelLean.Error",
-  "PsKernelLean.Convert",
-  "PsKernelLean.Protocol",
-  "PsKernelLean.Prelude",
-  "PsKernelLean.Admission",
-  "PsKernelLean.Response"
-]
-
-[[lean_exe]]
-name = "provider"
-root = "PsKernelLean.Main"
-EOF
-
-# Diagnostic matrix for the current bootstrap-parser failure. These probes are
-# intentionally non-fatal: they localize whether stage0 fails on a trivial
-# file, on importing Lean's parser environment, or only on PSC source/modules.
-# Keep the output compact so the CI failure tail contains the causal boundary.
+# Keep compact probes while this bootstrap seam is being proven. Before stage1,
+# importing Lean had no target .olean environment; after stage1 the same native
+# stage0 compiler must succeed when pointed at stage1/lib/lean.
 run_stage0_probe() {
   local name="$1"
   shift
@@ -204,49 +187,64 @@ def stage0ProbePs : PsName := PsName.anonymous
 EOF
 
 run_stage0_probe basic "$stage0_lean" "$provider_overlay/Stage0ProbeBasic.lean"
-run_stage0_probe lean_import "$stage0_lean" "$provider_overlay/Stage0ProbeLean.lean"
-run_stage0_probe ps_source "$stage0_lean" "$provider_src/Ps/Foundation/Name.lean"
+run_stage0_probe lean_import_stage1 \
+  env LEAN_PATH="$target_lean_path" \
+  "$stage0_lean" "$provider_overlay/Stage0ProbeLean.lean"
 
-probe_lib="$provider_overlay/probe-lib"
-mkdir -p "$probe_lib/Ps/Foundation"
-run_stage0_probe ps_name_olean \
-  "$stage0_lean" \
-  -o "$probe_lib/Ps/Foundation/Name.olean" \
-  "$provider_src/Ps/Foundation/Name.lean"
-LEAN_PATH="$probe_lib${LEAN_PATH:+:$LEAN_PATH}" \
-  run_stage0_probe ps_import "$stage0_lean" "$provider_overlay/Stage0ProbePs.lean"
-
-# Generate the provider C closure with the target-width-compatible native
-# stage0 compiler. The TOML overlay is intentionally self-contained and does
-# not contain a lakefile.lean.
-(
-  cd "$provider_overlay"
-  "$stage0_lake" build provider
+# Emit the provider closure directly with the target-width-compatible previous
+# stage compiler. This is the same Lean invocation shape used by lean.mk:
+#   lean -o module.olean -i module.ilean --c=module.c module.lean
+# stage1/lib/lean supplies target-compatible `Lean` imports; provider_olean_dir
+# supplies already-built PSC/provider imports as the list advances.
+provider_modules=(
+  "Ps/Foundation/Name"
+  "PsKernelLean/Error"
+  "Ps/Core/Builtin"
+  "Ps/Core/Level"
+  "Ps/Bridge/Json"
+  "Ps/Core/Expr"
+  "Ps/Core/Declaration"
+  "Ps/Environment/Basic"
+  "Ps/Bridge/CheckedAdmissions"
+  "Ps/Environment/Prelude"
+  "PsKernelLean/Convert"
+  "Ps/Bridge/Codec"
+  "Ps/Environment/SelfHostPrelude"
+  "Ps/Environment/SelfHostProd"
+  "PsKernelLean/Protocol"
+  "PsKernelLean/Prelude"
+  "PsKernelLean/Admission"
+  "PsKernelLean/Response"
+  "PsKernelLean/Main"
 )
-mapfile -d '' provider_c_files < <(find "$provider_overlay/.lake/build/ir" -type f -name '*.c' -print0 | sort -z)
-if [[ ${#provider_c_files[@]} -eq 0 ]]; then
-  echo '32-bit stage0 Lake produced no provider C sources from the minimal overlay' >&2
+
+(
+  cd "$provider_src"
+  export LEAN_PATH="$provider_olean_dir:$target_lean_path"
+  export LEAN_CC="$(command -v emcc)"
+  export LEAN_ABORT_ON_PANIC=1
+  for module in "${provider_modules[@]}"; do
+    source="$module.lean"
+    olean="$provider_olean_dir/$module.olean"
+    ilean="$provider_olean_dir/$module.ilean"
+    c_file="$provider_c_dir/$module.c"
+    c_tmp="$c_file.tmp"
+    mkdir -p "$(dirname "$olean")" "$(dirname "$c_file")"
+    echo "PSC2_PROVIDER_STAGE0_COMPILE: $module"
+    "$stage0_lean" \
+      -o "$olean" \
+      -i "$ilean" \
+      --c="$c_tmp" \
+      "$source"
+    mv "$c_tmp" "$c_file"
+  done
+)
+
+mapfile -d '' provider_c_files < <(find "$provider_c_dir" -type f -name '*.c' -print0 | sort -z)
+if [[ ${#provider_c_files[@]} -ne ${#provider_modules[@]} ]]; then
+  echo "provider C closure incomplete: ${#provider_c_files[@]} of ${#provider_modules[@]} modules" >&2
   exit 1
 fi
-
-# Normalize generated target helpers too as defense-in-depth for snapshots or
-# CMake versions that do not preserve source modes through configure_file.
-for helper in "$lean_build/stage1/bin/leanmake" "$stage1_leanc"; do
-  if [[ -e "$helper" ]]; then
-    chmod +x "$helper"
-  fi
-done
-
-# Build Lean's complete wasm32 runtime/static-library closure through the
-# normal staged target rather than invoking make_stdlib in a direct stage-1
-# build directory. This avoids the missing <build>/leanc layout seen in CI.
-cmake --build "$lean_build" --target stage1 -j2
-
-if [[ ! -f "$stage1_leanc" ]]; then
-  echo "cross leanc wrapper missing: $stage1_leanc" >&2
-  exit 1
-fi
-chmod +x "$stage1_leanc"
 
 provider_objects=()
 index=0
@@ -257,9 +255,9 @@ for source in "${provider_c_files[@]}"; do
   index=$((index + 1))
 done
 
-# Keep the already-proven CLI transport for the first real WASM milestone.
-# The following milestone can replace this with the JS-facing memory API
-# without changing admission semantics.
+# Keep the already-proven CLI transport for the first real WASM milestone. The
+# following milestone can replace this with the JS-facing memory ABI without
+# changing admission semantics.
 "$stage1_leanc" \
   "${provider_objects[@]}" \
   -O3 \

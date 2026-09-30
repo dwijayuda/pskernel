@@ -3,6 +3,7 @@ import Ps.Bridge.CheckedAdmissions
 import Ps.Environment.Prelude
 import Ps.Elab.Declaration
 import Ps.Erasure.Definition
+import Ps.Compiler.KernelShadow
 
 inductive PsCompilerSourceKind where
   | lean
@@ -16,6 +17,10 @@ inductive PsCompilerError where
   | admission (error : PsCheckedAdmissionCodecError)
   | preparedAdmissionMismatch
   | erasure (error : PsErasureError)
+
+inductive PsCompilerKernelShadowApiError where
+  | compiler (error : PsCompilerError)
+  | shadow (error : PsCompilerKernelShadowError)
 
 structure PsCompilerAdmissionReadyModule where
   declarations : List PsDeclaration
@@ -130,6 +135,39 @@ def psCompilerValidatePrepared
         Except.ok Unit.unit
       else
         Except.error PsCompilerError.preparedAdmissionMismatch
+
+def psCompilerKernelShadowCheckPrepared
+    (prepared : PsCompilerAdmissionReadyModule) :
+    Except PsCompilerKernelShadowApiError PsCompilerKernelShadowReport :=
+  match psCompilerValidatePrepared prepared with
+  | Except.error error =>
+      Except.error (PsCompilerKernelShadowApiError.compiler error)
+  | Except.ok _ =>
+      match
+          psCompilerKernelShadowCheckDeclarations
+            prepared.declarations with
+      | Except.error error =>
+          Except.error (PsCompilerKernelShadowApiError.shadow error)
+      | Except.ok report => Except.ok report
+
+def psCompilerKernelShadowCheckElaborated
+    (elaborated : PsElabModuleResult) :
+    Except PsCompilerKernelShadowApiError PsCompilerKernelShadowReport :=
+  match psCompilerPrepareElaborated elaborated with
+  | Except.error error =>
+      Except.error (PsCompilerKernelShadowApiError.compiler error)
+  | Except.ok prepared =>
+      psCompilerKernelShadowCheckPrepared prepared
+
+def psCompilerKernelShadowCheckSource
+    (sourceKind : PsCompilerSourceKind)
+    (source : String) :
+    Except PsCompilerKernelShadowApiError PsCompilerKernelShadowReport :=
+  match psCompilerPrepareSource sourceKind source with
+  | Except.error error =>
+      Except.error (PsCompilerKernelShadowApiError.compiler error)
+  | Except.ok prepared =>
+      psCompilerKernelShadowCheckPrepared prepared
 
 def psCompilerAdmissionsFromPrepared
     (prepared : PsCompilerAdmissionReadyModule) :

@@ -1895,6 +1895,25 @@ def psElabMatchMinors
     constructorNames
     context
 
+def psElabExprListAppendWorker
+    (values : List PsExpr) :
+    List PsExpr -> List PsExpr :=
+  match values with
+  | [] =>
+      fun (right : List PsExpr) =>
+        right
+  | value :: rest =>
+      let smaller : List PsExpr -> List PsExpr :=
+        psElabExprListAppendWorker rest;
+      fun (right : List PsExpr) =>
+        List.cons value (smaller right)
+
+def psElabExprListAppend
+    (left : List PsExpr)
+    (right : List PsExpr) :
+    List PsExpr :=
+  psElabExprListAppendWorker left right
+
 def psElabMatch
     (elaborate :
       PsElabContext ->
@@ -2012,13 +2031,13 @@ def psElabMatch
                                                 instantiatedExpected
                                                 PsBinderInfo.explicit;
                                             let recursorTail :=
-                                              List.append
+                                              psElabExprListAppend
                                                 minors.minors
                                                 (List.cons
                                                   scrutineeResult.term
                                                   List.nil);
                                             let recursorArgs :=
-                                              List.append
+                                              psElabExprListAppend
                                                 typeView.args
                                                 (List.cons
                                                   motive

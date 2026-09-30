@@ -222,40 +222,76 @@ def psExprFVarsInContext
     (expr : PsExpr) : Bool :=
   psExprFVarsInContextWorker expr localContext
 
-def psMetaInstantiateStep
-    (context : PsMetaContext) : PsExpr -> PsExpr
+def psMetaInstantiateStepWorker
+    (expr : PsExpr) : PsMetaContext -> PsExpr :=
+  match expr with
+  | .bvar index =>
+      fun (_context : PsMetaContext) => PsExpr.bvar index
+  | .fvar id =>
+      fun (_context : PsMetaContext) => PsExpr.fvar id
   | .mvar id =>
-      match psMetaFindAssignment context id with
-      | Option.none => PsExpr.mvar id
-      | Option.some value => value
+      fun (context : PsMetaContext) =>
+        match psMetaFindAssignment context id with
+        | Option.none => PsExpr.mvar id
+        | Option.some value => value
+  | .sortE level =>
+      fun (_context : PsMetaContext) => PsExpr.sortE level
+  | .constE name levels =>
+      fun (_context : PsMetaContext) => PsExpr.constE name levels
   | .app fn arg =>
-      PsExpr.app
-        (psMetaInstantiateStep context fn)
-        (psMetaInstantiateStep context arg)
+      let stepFn : PsMetaContext -> PsExpr :=
+        psMetaInstantiateStepWorker fn;
+      let stepArg : PsMetaContext -> PsExpr :=
+        psMetaInstantiateStepWorker arg;
+      fun (context : PsMetaContext) =>
+        PsExpr.app (stepFn context) (stepArg context)
   | .lam name type body binder =>
-      PsExpr.lam
-        name
-        (psMetaInstantiateStep context type)
-        (psMetaInstantiateStep context body)
-        binder
+      let stepType : PsMetaContext -> PsExpr :=
+        psMetaInstantiateStepWorker type;
+      let stepBody : PsMetaContext -> PsExpr :=
+        psMetaInstantiateStepWorker body;
+      fun (context : PsMetaContext) =>
+        PsExpr.lam
+          name
+          (stepType context)
+          (stepBody context)
+          binder
   | .forallE name type body binder =>
-      PsExpr.forallE
-        name
-        (psMetaInstantiateStep context type)
-        (psMetaInstantiateStep context body)
-        binder
+      let stepType : PsMetaContext -> PsExpr :=
+        psMetaInstantiateStepWorker type;
+      let stepBody : PsMetaContext -> PsExpr :=
+        psMetaInstantiateStepWorker body;
+      fun (context : PsMetaContext) =>
+        PsExpr.forallE
+          name
+          (stepType context)
+          (stepBody context)
+          binder
   | .letE name type value body =>
-      PsExpr.letE
-        name
-        (psMetaInstantiateStep context type)
-        (psMetaInstantiateStep context value)
-        (psMetaInstantiateStep context body)
+      let stepType : PsMetaContext -> PsExpr :=
+        psMetaInstantiateStepWorker type;
+      let stepValue : PsMetaContext -> PsExpr :=
+        psMetaInstantiateStepWorker value;
+      let stepBody : PsMetaContext -> PsExpr :=
+        psMetaInstantiateStepWorker body;
+      fun (context : PsMetaContext) =>
+        PsExpr.letE
+          name
+          (stepType context)
+          (stepValue context)
+          (stepBody context)
+  | .lit literal =>
+      fun (_context : PsMetaContext) => PsExpr.lit literal
   | .proj typeName index value =>
-      PsExpr.proj
-        typeName
-        index
-        (psMetaInstantiateStep context value)
-  | expr => expr
+      let stepValue : PsMetaContext -> PsExpr :=
+        psMetaInstantiateStepWorker value;
+      fun (context : PsMetaContext) =>
+        PsExpr.proj typeName index (stepValue context)
+
+def psMetaInstantiateStep
+    (context : PsMetaContext)
+    (expr : PsExpr) : PsExpr :=
+  psMetaInstantiateStepWorker expr context
 
 def psMetaInstantiateRounds
     (context : PsMetaContext) :

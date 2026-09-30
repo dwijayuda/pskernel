@@ -10,7 +10,7 @@ Work session started from `Pasted text(20260930-195252).txt`.
 ## Current HEAD
 
 Verified code snapshot before this documentation commit:
-`ffcbff6c06a12ff0cae906c170d0269e4e6680bf`.
+`469e04c690caa046cea1cf3d1edaec409e7a84af`.
 
 This records the observed parent, not the hash of the commit containing this
 file. Always refresh the target ref before writing: another session is actively
@@ -34,6 +34,10 @@ committing to the same branch. Never force-push it.
 - Concurrent one-shot repair run `36770452365` passed focused/aggregate guards and
   `lake build Ps.Elab.Term`, then committed the exact four Option qualifications
   independently tested in this session as `ffcbff6c`.
+- Local focused and aggregate source gates pass after the `psSyntaxRecordOrderFields`
+  repair. The production patch is exactly four qualified Option constructors.
+- CI run `36771348031` at `469e04c6` is the first fixed-point run for this repair and
+  is still running.
 
 ## Current first blocker
 
@@ -68,17 +72,18 @@ gate GREEN. The identical source fix landed concurrently as `ffcbff6c`; its
 whole-file blob matches the locally tested candidate exactly
 (`de9841c4ffa5777f8c2d00cb35876faf70afaf13`). Do not duplicate that fix.
 
-The next post-repair compiler failure is not established yet. Read the real
-fixed-point probe in newly dispatched run `36770553974` before changing another
-declaration. No fixed-point success is claimed.
+The `psSyntaxRecordOrderFields` blocker is resolved by `469e04c6`. The next
+post-repair compiler failure is not established yet. Read the real fixed-point
+probe in run `36771348031` before changing another declaration. No fixed-point
+success is claimed.
 
 ## Latest CI
 
 - Workflow: `PSC2 minimal kernel`.
-- Run: `36770553974` (workflow-dispatch from the completed concurrent repair).
-- Commit: `ffcbff6c06a12ff0cae906c170d0269e4e6680bf`.
+- Run: `36771348031` (push of the ordering repair).
+- Commit: `469e04c690caa046cea1cf3d1edaec409e7a84af`.
 - Job: retrieve `foundational-parity` from the run's jobs endpoint.
-- Result at snapshot: in progress.
+- Result at snapshot: in progress, before the first parity gate completed.
 - Pending step: `Bootstrap closure remains isolated` (nested fixed-point probe).
 - Completed equivalent compiler-source run: `36769559573` at `063492ee`, job
   `110072192231`; failed the probe at `psSyntaxRecordFindField: unknownName:none`.
@@ -100,6 +105,8 @@ declaration. No fixed-point success is claimed.
 - Candidate source commit `84b456bc` was never attached to a branch: another
   session's repair won the race. Do not cherry-pick it. Its source content is
   already present in `ffcbff6c`.
+- This session's ordering repair commit is `469e04c6`; no duplicate commit should
+  be created if another session reports the same patch.
 
 ## Current architecture invariants
 
@@ -121,8 +128,8 @@ declaration. No fixed-point success is claimed.
 
 ## Exact next action
 
-1. Refresh the branch and inspect every commit after `ffcbff6c`.
-2. Read the final result/logs of run `36770553974` (or a newer relevant run).
+1. Refresh the branch and inspect every commit after `469e04c6`.
+2. Read the final result/logs of run `36771348031` (or a newer relevant run).
 3. Find the first actual `PSC1_PROJECT_ELAB_FAILED` declaration/error in that run.
    Do not repeat the already landed `psSyntaxRecordFindField` fix.
 4. Add the narrow RED guard and normalize only that declaration, then run focused,

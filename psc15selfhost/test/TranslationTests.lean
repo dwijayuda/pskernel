@@ -111,13 +111,12 @@ def psTestComplexApplicationTranslationRoundTrip : Bool :=
                leanAgain == canonicalLean
   | _, _ => false
 
-def psAnonymousArrowLeanSource : String :=
-  "def applyLater (x : Nat) : (Nat -> Nat) -> Nat := fun f => f x"
-
 def psTestAnonymousArrowTranslationRoundTrip : Bool :=
+  let leanSource :=
+    "def applyLater (x : Nat) : (Nat -> Nat) -> Nat := fun f => f x"
   match
-      psTranslateLeanToProofScript psAnonymousArrowLeanSource,
-      psCanonicalizeLeanSource psAnonymousArrowLeanSource with
+      psTranslateLeanToProofScript leanSource,
+      psCanonicalizeLeanSource leanSource with
   | Except.ok proofScript, Except.ok canonicalLean =>
       if proofScript.contains "(_ :" then
         false
@@ -131,38 +130,11 @@ def psTestAnonymousArrowTranslationRoundTrip : Bool :=
                 canonicalLeanAgain == canonicalLean
   | _, _ => false
 
-def psPrintAnonymousArrowDiagnostics : IO Unit := do
-  match
-      psTranslateLeanToProofScript psAnonymousArrowLeanSource,
-      psCanonicalizeLeanSource psAnonymousArrowLeanSource with
-  | Except.error _, _ =>
-      IO.println "PSC1_TRANSLATION_DEBUG: lean-to-ps failed"
-  | _, Except.error _ =>
-      IO.println "PSC1_TRANSLATION_DEBUG: canonical source failed"
-  | Except.ok proofScript, Except.ok canonicalLean =>
-      IO.println ("PSC1_TRANSLATION_DEBUG_PS: " ++ proofScript)
-      IO.println ("PSC1_TRANSLATION_DEBUG_CANONICAL: " ++ canonicalLean)
-      IO.println
-        ("PSC1_TRANSLATION_DEBUG_DEPENDENT_BINDER: " ++
-          toString (proofScript.contains "(_ :"))
-      match psTranslateProofScriptToLean proofScript with
-      | Except.error _ =>
-          IO.println "PSC1_TRANSLATION_DEBUG: ps-to-lean failed"
-      | Except.ok leanAgain =>
-          IO.println ("PSC1_TRANSLATION_DEBUG_LEAN_AGAIN: " ++ leanAgain)
-          match psCanonicalizeLeanSource leanAgain with
-          | Except.error _ =>
-              IO.println "PSC1_TRANSLATION_DEBUG: canonical roundtrip failed"
-          | Except.ok canonicalLeanAgain =>
-              IO.println
-                ("PSC1_TRANSLATION_DEBUG_CANONICAL_AGAIN: " ++ canonicalLeanAgain)
-
 def main : IO Unit := do
   if psTestAnonymousArrowTranslationRoundTrip then
     IO.println
       "PSC1_TRANSLATION_PASS: anonymous arrow .lean <-> .ps"
   else
-    psPrintAnonymousArrowDiagnostics
     throw
       (IO.userError
         "PSC1_TRANSLATION_FAIL: anonymous arrow .lean <-> .ps")

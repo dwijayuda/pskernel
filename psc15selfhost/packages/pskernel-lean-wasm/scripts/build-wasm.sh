@@ -60,6 +60,11 @@ elif ! git apply --reverse --check "$patch_file" >/dev/null 2>&1; then
   exit 1
 fi
 
+# Typed WebAssembly enforces exact function signatures. Apply the small set of
+# Lean-4.34 erased-RealWorld ABI corrections deterministically against the
+# pinned source tree. Native signatures stay in the non-Emscripten branches.
+node "$script_dir/apply-wasm-abi.mjs" "$lean_source"
+
 # The study snapshot does not preserve executable bits on Lean's helper scripts.
 # We configure the current src/ tree directly, so repair the current helper
 # sources before CMake copies them into the target build directory.

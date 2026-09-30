@@ -247,6 +247,10 @@ lean_exe psc1_erasure_tests where
   srcDir := "test"
   root := `ErasureTests
 
+lean_exe psc1_definition_eta_tests where
+  srcDir := "test"
+  root := `DefinitionEtaTests
+
 lean_exe psc2_minimal_selfhost_tests where
   srcDir := "test"
   root := `MinimalSelfHostTests

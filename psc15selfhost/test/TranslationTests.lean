@@ -113,7 +113,8 @@ def psTestComplexApplicationTranslationRoundTrip : Bool :=
 
 def psTestAnonymousArrowTranslationRoundTrip : Bool :=
   let leanSource :=
-    "def applyLater (x : Nat) : (Nat -> Nat) -> Nat := fun f => f x"
+    "def applyLater (x : Nat) : (Nat -> Nat) -> Nat := " ++
+    "fun (f : Nat -> Nat) => f x"
   match
       psTranslateLeanToProofScript leanSource,
       psCanonicalizeLeanSource leanSource with

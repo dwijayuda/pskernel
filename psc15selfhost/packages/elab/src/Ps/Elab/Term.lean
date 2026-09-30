@@ -2479,7 +2479,7 @@ def psElabRecordCandidateForInfo
   if info.isStructure then
     match info.constructors with
     | [] =>
-        none
+        Option.none
     | constructorName :: rest =>
         match rest with
         | [] =>
@@ -2487,28 +2487,28 @@ def psElabRecordCandidateForInfo
                 psEnvironmentFindConstructor
                   environment
                   constructorName with
-            | none => none
-            | some constructorInfo =>
+            | Option.none => Option.none
+            | Option.some constructorInfo =>
                 match
                     psElabDropForallBinders
                       constructorInfo.numParams
                       constructorInfo.type with
-                | none => none
-                | some fieldsType =>
+                | Option.none => Option.none
+                | Option.some fieldsType =>
                     match
                         psElabTakeForallNames
                           constructorInfo.numFields
                           fieldsType with
-                    | none => none
-                    | some fieldNames =>
-                        some {
+                    | Option.none => Option.none
+                    | Option.some fieldNames =>
+                        Option.some {
                           constructorName := constructorName
                           fieldNames := fieldNames
                         }
         | _ :: _ =>
-            none
+            Option.none
   else
-    none
+    Option.none
 
 def psElabRecordCandidateFromExpected
     (context : PsElabContext)

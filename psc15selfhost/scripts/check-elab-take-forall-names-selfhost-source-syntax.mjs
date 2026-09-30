@@ -303,3 +303,46 @@ if (/\|\s*none\s*=>/.test(orderFields) || /\|\s*some\s+/.test(orderFields) || /=
 process.stdout.write(
   "PSC2_ELAB_RECORD_ORDER_FIELDS_SELFHOST_SOURCE_SYNTAX: PASS (structural name ordering; explicit Option constructors)\n",
 );
+const candidateInfoStart = source.indexOf("def psElabRecordCandidateForInfo\n");
+const candidateInfoEnd = source.indexOf("\ndef psElabRecordCandidateFromExpected\n", candidateInfoStart + 1);
+if (candidateInfoStart < 0 || candidateInfoEnd < 0) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATE_INFO_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
+  );
+}
+
+const candidateInfo = source.slice(candidateInfoStart, candidateInfoEnd);
+if (!/if\s+info\.isStructure\s+then/.test(candidateInfo)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATE_INFO_SELFHOST_SOURCE_SYNTAX_MISSING: structure guard",
+  );
+}
+if (!/match\s+info\.constructors\s+with/.test(candidateInfo)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATE_INFO_SELFHOST_SOURCE_SYNTAX_MISSING: constructor-list match",
+  );
+}
+if (!/Option\.none/.test(candidateInfo)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATE_INFO_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.none values",
+  );
+}
+if (!/Option\.some\s+constructorInfo/.test(candidateInfo) || !/Option\.some\s+fieldsType/.test(candidateInfo) || !/Option\.some\s+fieldNames/.test(candidateInfo)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATE_INFO_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.some matched values",
+  );
+}
+if (!/Option\.some\s*\{/.test(candidateInfo)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATE_INFO_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.some candidate value",
+  );
+}
+if (/\|\s*none\s*=>/.test(candidateInfo) || /\|\s*some\s+/.test(candidateInfo) || /=>\s*none\b/.test(candidateInfo) || /\n\s*some\s+/.test(candidateInfo)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATE_INFO_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: unqualified Option constructor remains",
+  );
+}
+
+process.stdout.write(
+  "PSC2_ELAB_RECORD_CANDIDATE_INFO_SELFHOST_SOURCE_SYNTAX: PASS (structure candidate lookup; explicit Option constructors)\n",
+);

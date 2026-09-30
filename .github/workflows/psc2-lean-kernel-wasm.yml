@@ -89,7 +89,7 @@ jobs:
         with:
           name: pskernel-lean-wasm-probe
           path: |
-            psc15selfhost/packages/pskernel-lean-wasm/wasm/pskernel-lean.js
+            psc15selfhost/packages/pskernel-lean-wasm/wasm/pskernel-lean.cjs
             psc15selfhost/packages/pskernel-lean-wasm/wasm/pskernel-lean.wasm
             psc15selfhost/packages/pskernel-lean-wasm/wasm/*.worker.js
           if-no-files-found: error

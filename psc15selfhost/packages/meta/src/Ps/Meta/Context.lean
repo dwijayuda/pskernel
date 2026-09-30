@@ -305,12 +305,15 @@ def psMetaInstantiateRounds
       fun (expr : PsExpr) =>
         smaller (psMetaInstantiateStep context expr)
 
+def psMetaAssignmentListLength
+    (assignments : List PsMetaAssignment) : Nat :=
+  match assignments with
+  | [] => Nat.zero
+  | _ :: rest => Nat.succ (psMetaAssignmentListLength rest)
+
 def psMetaInstantiate (context : PsMetaContext) (expr : PsExpr) : PsExpr :=
-  let value :=
-    psMetaInstantiateRounds
-      context
-      (Nat.add context.assignments.length 1)
-      expr;
+  let fuel := Nat.succ (psMetaAssignmentListLength context.assignments);
+  let value := psMetaInstantiateRounds context fuel expr;
   psLevelInstantiateExpr context.levels value
 
 structure PsMetaFreshLevelResult where

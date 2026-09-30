@@ -2443,15 +2443,15 @@ def psSyntaxRecordFindField
     Option PsSyntaxTerm :=
   match fields with
   | [] =>
-      none
+      Option.none
   | field :: rest =>
       match psSyntaxRecordFieldName field with
-      | some fieldName =>
+      | Option.some fieldName =>
           if psStringEq fieldName name then
-            some (Prod.snd field)
+            Option.some (Prod.snd field)
           else
             psSyntaxRecordFindField rest name
-      | none =>
+      | Option.none =>
           psSyntaxRecordFindField rest name
 
 def psSyntaxRecordOrderFields

@@ -169,8 +169,8 @@ def main (args : List String) : IO Unit := do
       { name := "a", type := .function [.primitive .nat] (.primitive .nat) }] }] }
   jsRequireError "generic" { psVerifiedIrModuleEmpty with
     declarations := [{ declaration with typeParameters := [{name := "T"}] }] }
-  jsRequireError "machine integer" { psVerifiedIrModuleEmpty with
-    declarations := [jsFixtureDecl "machine" .uint8 (.machineInteger .uint8 1)] }
+  jsRequireError "target-sized machine integer" { psVerifiedIrModuleEmpty with
+    declarations := [jsFixtureDecl "machine" .usize (.machineInteger .usize 1)] }
   jsRequireError "import" { psVerifiedIrModuleEmpty with imports := [
     { localName := "x", source := "evil", importedName := "x", type := .unknown }] }
   jsRequireError "structure" { psVerifiedIrModuleEmpty with structures := [

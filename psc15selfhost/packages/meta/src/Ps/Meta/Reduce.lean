@@ -59,6 +59,17 @@ def psDefEqReadOnly
   let rightValue := psWhnfCore metaContext localContext right;
   psExprAlphaEq leftValue rightValue
 
+def psWhnfDeltaInstantiate
+    (parameters : List PsName)
+    (levels : List PsLevel)
+    (value : PsExpr) : Option PsExpr :=
+  if Nat.beq parameters.length levels.length then
+    let instantiated : PsExpr :=
+      psExprInstantiateLevelParams parameters levels value;
+    Option.some instantiated
+  else
+    Option.none
+
 def psWhnfDeltaCandidate
     (environment : PsEnvironment)
     (core : PsExpr) : Option PsExpr :=
@@ -69,12 +80,7 @@ def psWhnfDeltaCandidate
       | Option.some declaration =>
           match declaration with
           | PsDeclaration.definitionDecl _ parameters _ value =>
-              if Nat.beq parameters.length levels.length then
-                let instantiated : PsExpr :=
-                  psExprInstantiateLevelParams parameters levels value;
-                Option.some instantiated
-              else
-                Option.none
+              psWhnfDeltaInstantiate parameters levels value
           | _ => Option.none
   | _ => Option.none
 

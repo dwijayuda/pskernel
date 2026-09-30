@@ -47,7 +47,7 @@ def psJsEmitParameterNames (parameters : List Nat) : Except PsJsError String :=
       | Except.ok name =>
           match rest with
           | List.nil => Except.ok name
-          | List.cons _ _ =>
+          | List.cons _restHead _restTail =>
               match psJsEmitParameterNames rest with
               | Except.error error => Except.error error
               | Except.ok names =>
@@ -87,8 +87,8 @@ def psJsEmitAtomicExpr (expr : PsJsExpr) : Except PsJsError String :=
                   Except.ok (psJsTextConcat2 withElse ")")
   | _ => Except.error PsJsError.unsupportedExpression
 
-def psJsEmitAtomicArguments (arguments : List PsJsExpr) : Except PsJsError String :=
-  match arguments with
+def psJsEmitAtomicArguments (callArguments : List PsJsExpr) : Except PsJsError String :=
+  match callArguments with
   | List.nil => Except.ok ""
   | List.cons argument rest =>
       match psJsEmitAtomicExpr argument with
@@ -96,7 +96,7 @@ def psJsEmitAtomicArguments (arguments : List PsJsExpr) : Except PsJsError Strin
       | Except.ok printedArgument =>
           match rest with
           | List.nil => Except.ok printedArgument
-          | List.cons _ _ =>
+          | List.cons _restHead _restTail =>
               match psJsEmitAtomicArguments rest with
               | Except.error error => Except.error error
               | Except.ok printedRest =>
@@ -129,16 +129,16 @@ def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
           | Except.ok printedBody =>
               let start := psJsTextConcat3 "((" names ") => ";
               Except.ok (psJsTextConcat3 start printedBody ")")
-  | PsJsExpr.call fn arguments =>
+  | PsJsExpr.call fn callArguments =>
       match fn with
       | PsJsExpr.global index =>
-          match arguments with
+          match callArguments with
           | List.nil => Except.error PsJsError.unsupportedExpression
-          | List.cons _ _ =>
+          | List.cons _firstArgument _restArguments =>
               match psJsGlobalName index with
               | Except.error error => Except.error error
               | Except.ok printedFn =>
-                  match psJsEmitAtomicArguments arguments with
+                  match psJsEmitAtomicArguments callArguments with
                   | Except.error error => Except.error error
                   | Except.ok printedArguments =>
                       let start := psJsTextConcat2 "(" printedFn;
@@ -160,28 +160,43 @@ def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
                   let withElse := psJsTextConcat3 withThen " : " printedElse;
                   Except.ok (psJsTextConcat2 withElse ")")
 
-def psJsEmitConstants (constants : List PsJsConstant) :
-    Nat -> Except PsJsError String :=
-  match constants with
-  | List.nil =>
-      fun (_index : Nat) => Except.ok ""
-  | List.cons constant rest =>
-      let smaller : Nat -> Except PsJsError String := psJsEmitConstants rest;
-      fun (index : Nat) =>
-        match psJsGlobalName index with
-        | Except.error error => Except.error error
-        | Except.ok internalName =>
-            match psJsEmitExpr constant.body with
-            | Except.error error => Except.error error
-            | Except.ok printedBody =>
-                match smaller (Nat.succ index) with
-                | Except.error error => Except.error error
-                | Except.ok printedRest =>
-                    let definition := psJsTextConcat3 "const " internalName " = ";
-                    let value := psJsTextConcat3 definition printedBody ";\n";
-                    let exportStart := psJsTextConcat3 "export { " internalName " as ";
-                    let exportLine := psJsTextConcat3 exportStart constant.exportName " };\n";
-                    Except.ok (psJsTextConcat3 value exportLine printedRest)
+def psJsEmitConstantsWithFuel (fuel : Nat) :
+    List PsJsConstant -> Nat -> Except PsJsError String :=
+  match fuel with
+  | Nat.zero =>
+      fun (_constants : List PsJsConstant) =>
+        fun (_index : Nat) => Except.error PsJsError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller : List PsJsConstant -> Nat -> Except PsJsError String :=
+        psJsEmitConstantsWithFuel remaining;
+      fun (constants : List PsJsConstant) =>
+        fun (index : Nat) =>
+          match constants with
+          | List.nil => Except.ok ""
+          | List.cons constant rest =>
+              match psJsGlobalName index with
+              | Except.error error => Except.error error
+              | Except.ok internalName =>
+                  match psJsEmitExpr constant.body with
+                  | Except.error error => Except.error error
+                  | Except.ok printedBody =>
+                      match smaller rest (Nat.succ index) with
+                      | Except.error error => Except.error error
+                      | Except.ok printedRest =>
+                          let definition :=
+                            psJsTextConcat3 "const " internalName " = ";
+                          let value :=
+                            psJsTextConcat3 definition printedBody ";\n";
+                          let exportStart :=
+                            psJsTextConcat3 "export { " internalName " as ";
+                          let exportLine :=
+                            psJsTextConcat3 exportStart constant.exportName " };\n";
+                          Except.ok
+                            (psJsTextConcat3 value exportLine printedRest)
+
+def psJsEmitConstants (constants : List PsJsConstant)
+    (index : Nat) : Except PsJsError String :=
+  psJsEmitConstantsWithFuel 4096 constants index
 
 def psJsEmitTargetModule (module : PsJsModule) : Except PsJsError String :=
   match psJsEmitConstants module.constants 0 with

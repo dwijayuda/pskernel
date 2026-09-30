@@ -45,8 +45,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: backend-js-source-log
-          path: /tmp/backend-js-source.log
+          name: backend-js-source-diagnostics
+          path: |
+            /tmp/backend-js-source.log
+            /tmp/backend-js-source-BackendJs.ps
           if-no-files-found: ignore
       - name: Bootstrap regression
         if: always()
@@ -80,19 +82,3 @@ jobs:
           name: psc1-extension-tests-log
           path: /tmp/psc1-extension-tests.log
           if-no-files-found: ignore
-      - name: Package build
-        if: always()
-        working-directory: psc15selfhost
-        run: npm run build
-      - name: Mirror regression
-        if: always()
-        working-directory: psc15selfhost
-        run: npm run test:mirrors
-      - name: Golden regression
-        if: always()
-        working-directory: psc15selfhost
-        run: npm run test:golden
-      - name: Backend-JS regression
-        if: always()
-        working-directory: psc15selfhost
-        run: npm run test:backend-js

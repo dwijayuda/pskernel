@@ -826,9 +826,10 @@ def psRustEmitExprWithFuel :
                     (psRustConcat4
                       "("
                       printedFn
-                      ")(("
-                      (psRustJoin ", " printedArguments)
-                      "))")
+                      ") ("
+                      (psRustConcat2
+                        (psRustJoin ", " printedArguments)
+                        ")"))
       | PsVerifiedIrExpr.letE name _ value body =>
           match emitNested value with
           | Except.error error =>

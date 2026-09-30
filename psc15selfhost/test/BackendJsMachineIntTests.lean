@@ -60,3 +60,7 @@ def psBackendJsRejectsTargetSizedMachineLiteral : Bool :=
 
 
 #guard psBackendJsRejectsTargetSizedMachineLiteral
+
+
+def main : IO Unit := do
+  IO.println "BACKEND_JS_MACHINE_INT_TESTS: PASS"

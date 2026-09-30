@@ -1876,7 +1876,7 @@ def psElabMatchMinors
       PsElabContext ->
       PsSyntaxTerm ->
       Option PsExpr ->
-      Except PsElabError PsElabTermResult)
+      Except PsElabError PsElabMatchMinorsResult)
     (inductiveInfo : PsInductiveInfo)
     (inductiveLevels : List PsLevel)
     (parameterArgs : List PsExpr)
@@ -2398,7 +2398,14 @@ def psSyntaxRecordHasField
     (fields :
       List (Prod PsSyntaxName PsSyntaxTerm))
     (name : String) : Bool :=
-  List.any fields (psSyntaxRecordFieldMatchesName name)
+  match fields with
+  | [] =>
+      false
+  | field :: rest =>
+      if psSyntaxRecordFieldMatchesName name field then
+        true
+      else
+        psSyntaxRecordHasField rest name
 
 def psSyntaxRecordHasNamedField
     (fields : List (Prod PsSyntaxName PsSyntaxTerm))

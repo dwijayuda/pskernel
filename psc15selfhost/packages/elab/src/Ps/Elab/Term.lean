@@ -2680,11 +2680,11 @@ def psElabNatListAt
     (index : Nat) : Option Nat :=
   match values with
   | [] =>
-      none
+      Option.none
   | value :: rest =>
       match index with
       | 0 =>
-          some value
+          Option.some value
       | nextIndex + 1 =>
           psElabNatListAt rest nextIndex
 

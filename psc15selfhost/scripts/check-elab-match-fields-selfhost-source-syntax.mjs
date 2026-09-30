@@ -140,15 +140,15 @@ if (blockMatch === null) {
   }
   const patched = source.replace(oldBlock, newBlock);
   const encoded = Buffer.from(patched, "utf8").toString("base64");
-  const chunkSize = 24000;
+  const chunkSize = 3000;
   let index = 0;
   for (let offset = 0; offset < encoded.length; offset += chunkSize) {
     const label = String(index).padStart(3, "0");
     const chunk = encoded.slice(offset, offset + chunkSize);
-    process.stdout.write(`::error title=PSC2_TERM_CHUNK_${label}::${chunk}\n`);
+    process.stdout.write(`PSC2_TERM_CHUNK_${label}=${chunk}\n`);
     index += 1;
   }
-  process.stdout.write(`::error title=PSC2_TERM_CHUNK_COUNT::${index}\n`);
+  process.stdout.write(`PSC2_TERM_CHUNK_COUNT=${index}\n`);
   throw new Error(
     "PSC2_ELAB_MATCH_FIELDS_SELFHOST_SOURCE_SYNTAX_MISSING: invariant-safe match-fields worker block",
   );

@@ -91,7 +91,11 @@ This package does not generate Lean source text for Lean's parser/elaborator to 
 
 The WASM build stages only the semantic closure required by the provider. Parser, elaborator, compiler CLI, backends, and other PSC2 bootstrap packages are not linked into the kernel artifact.
 
-The pinned host Lean 4.34 executable is used only as a C emitter for matching Lean source modules. The shipped runtime/kernel is built from the repository's frozen Lean 4.34 stage0 sources with pinned Emscripten 6.0.9.
+The exact pinned native Lean 4.34 toolchain is used only as the previous-stage frontend/C emitter. The shipped wasm32 runtime, kernel, Init, Std, and Lean libraries are rebuilt from Lean 4.34's **current `src/` tree** with pinned Emscripten 6.0.9. No native host object or host runtime library enters the shipped artifact.
+
+An earlier probe that linked current provider-generated C against Lean's frozen stage0 libraries was rejected: typed WebAssembly exposed real ABI mismatches between the frozen bootstrap snapshot and current 4.34 generated C. That mixed-ABI route is not a supported build path.
+
+The current Node milestone uses the exact x86_64 Lean 4.34 installation as the previous-stage frontend. This is a deliberately narrower claim than a general Lean wasm32 compiler/toolchain: runtime acceptance/rejection and native-vs-WASM differential parity are required before the provider is considered semantically verified for PSC kernel use.
 
 ## CLI probes
 
@@ -118,10 +122,12 @@ The CI gate validates all of the following before this package should be treated
 - package and bootstrap-isolation contracts;
 - native Lean API parity tests for the shared semantic provider;
 - exact Emscripten 6.0.9 selection;
-- Lean 4.34 stage0 WebAssembly runtime/kernel build;
+- Lean 4.34 **current-source** WebAssembly runtime/kernel/stdlib build;
 - final C++ link through `em++` with Lean's required static library closure;
 - `--health` execution of the generated artifact;
 - one accepted declaration and one deliberately ill-typed kernel rejection through `--check`;
+- native-vs-WASM differential parity before semantic-completion claims;
+- clean packed-npm consumption before distribution-completion claims;
 - artifact upload of the `.cjs`, `.wasm`, and any generated worker files.
 
-Warnings emitted by the frozen Lean stage0 build are not accepted as proof of correctness by themselves; the runtime admission smoke is the required behavioral gate.
+The current-source Node build is still under verification. A successful link alone is not proof of correctness; runtime admission smoke and differential parity are the required behavioral gates. Browser/single-thread support remains a separate milestone.

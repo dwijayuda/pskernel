@@ -1525,7 +1525,7 @@ def psElabPushRecursiveHypotheses
             psElabContextWithLocal
               context
               pushed.context;
-          let withRecursion :=
+          let withRecursion : PsElabContext :=
             match context.structuralRecursion with
             | none =>
                 withLocal

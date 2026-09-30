@@ -1645,6 +1645,24 @@ def psElabWildcardBinderNames
     remaining
     index
 
+def psElabMatchFieldListReverseWorker
+    (fields : List PsElabMatchField) :
+    List PsElabMatchField -> List PsElabMatchField :=
+  match fields with
+  | [] =>
+      fun (acc : List PsElabMatchField) =>
+        acc
+  | field :: rest =>
+      let smaller :
+          List PsElabMatchField -> List PsElabMatchField :=
+        psElabMatchFieldListReverseWorker rest;
+      fun (acc : List PsElabMatchField) =>
+        smaller (List.cons field acc)
+
+def psElabMatchFieldListReverse
+    (fields : List PsElabMatchField) :
+    List PsElabMatchField :=
+  psElabMatchFieldListReverseWorker fields []
 def psElabMatchConstructorMinor
     (elaborate :
       PsElabContext ->
@@ -1710,7 +1728,7 @@ def psElabMatchConstructorMinor
             | Except.error error => Except.error error
             | Except.ok fieldResult =>
                 let fields :=
-                  List.reverse fieldResult.fieldsRev;
+                  psElabMatchFieldListReverse fieldResult.fieldsRev;
                 match
                     psElabPushRecursiveHypotheses
                       expectedType

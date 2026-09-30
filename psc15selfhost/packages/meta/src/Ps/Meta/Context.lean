@@ -64,13 +64,25 @@ def psMetaFindDeclInList
 def psMetaFindDecl (context : PsMetaContext) (id : Nat) : Option PsMetaVarDecl :=
   psMetaFindDeclInList id context.declarations
 
-def psMetaFindAssignmentInList (id : Nat) : List PsMetaAssignment -> Option PsExpr
-  | [] => Option.none
+def psMetaFindAssignmentInListWorker
+    (assignments : List PsMetaAssignment) :
+    Nat -> Option PsExpr :=
+  match assignments with
+  | [] =>
+      fun (_id : Nat) => Option.none
   | assignment :: rest =>
-      if Nat.beq assignment.id id then
-        Option.some assignment.value
-      else
-        psMetaFindAssignmentInList id rest
+      let smaller : Nat -> Option PsExpr :=
+        psMetaFindAssignmentInListWorker rest;
+      fun (id : Nat) =>
+        if Nat.beq assignment.id id then
+          Option.some assignment.value
+        else
+          smaller id
+
+def psMetaFindAssignmentInList
+    (id : Nat)
+    (assignments : List PsMetaAssignment) : Option PsExpr :=
+  psMetaFindAssignmentInListWorker assignments id
 
 def psMetaFindAssignment (context : PsMetaContext) (id : Nat) : Option PsExpr :=
   psMetaFindAssignmentInList id context.assignments

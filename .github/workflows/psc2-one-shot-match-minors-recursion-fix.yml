@@ -1,0 +1,134 @@
+name: PSC2 one-shot match minors recursion fix
+
+on:
+  push:
+    branches:
+      - psc2/minimal-selfhost-psc15
+    paths:
+      - .github/workflows/psc2-one-shot-match-minors-recursion-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Normalize match minors recursion
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("psc15selfhost/packages/elab/src/Ps/Elab/Term.lean")
+          source = path.read_text()
+
+          if "def psElabMatchMinorsWorker" in source:
+              raise SystemExit(0)
+
+          pattern = re.compile(
+              r"def psElabMatchMinors\n[\s\S]*?(?=\ndef psElabMatch\n)"
+          )
+          replacement = '''def psElabMatchMinorsWorker
+              (elaborate :
+                PsElabContext ->
+                PsSyntaxTerm ->
+                Option PsExpr ->
+                Except PsElabError PsElabTermResult)
+              (inductiveInfo : PsInductiveInfo)
+              (inductiveLevels : List PsLevel)
+              (parameterArgs : List PsExpr)
+              (expectedType : PsExpr)
+              (alternatives : List PsElabMatchAlternative)
+              (constructorNames : List PsName) :
+              PsElabContext ->
+              Except PsElabError PsElabMatchMinorsResult :=
+            match constructorNames with
+            | [] =>
+                fun (context : PsElabContext) =>
+                  Except.ok {
+                    context := context
+                    minors := []
+                  }
+            | ctorName :: rest =>
+                let smaller :
+                    PsElabContext ->
+                    Except PsElabError PsElabMatchMinorsResult :=
+                  psElabMatchMinorsWorker
+                    elaborate
+                    inductiveInfo
+                    inductiveLevels
+                    parameterArgs
+                    expectedType
+                    alternatives
+                    rest;
+                fun (context : PsElabContext) =>
+                  match psElabMatchAlternativeFind ctorName alternatives with
+                  | none => Except.error PsElabError.matchNonExhaustive
+                  | some alternative =>
+                      match psElabMatchMinor
+                          elaborate
+                          context
+                          inductiveInfo
+                          inductiveLevels
+                          parameterArgs
+                          expectedType
+                          alternative with
+                      | Except.error error => Except.error error
+                      | Except.ok minor =>
+                          match smaller minor.context with
+                          | Except.error error => Except.error error
+                          | Except.ok tail =>
+                              Except.ok {
+                                context := tail.context
+                                minors := List.cons minor.term tail.minors
+                              }
+
+          def psElabMatchMinors
+              (elaborate :
+                PsElabContext ->
+                PsSyntaxTerm ->
+                Option PsExpr ->
+                Except PsElabError PsElabTermResult)
+              (inductiveInfo : PsInductiveInfo)
+              (inductiveLevels : List PsLevel)
+              (parameterArgs : List PsExpr)
+              (expectedType : PsExpr)
+              (alternatives : List PsElabMatchAlternative)
+              (context : PsElabContext)
+              (constructorNames : List PsName) :
+              Except PsElabError PsElabMatchMinorsResult :=
+            psElabMatchMinorsWorker
+              elaborate
+              inductiveInfo
+              inductiveLevels
+              parameterArgs
+              expectedType
+              alternatives
+              constructorNames
+              context
+          '''
+
+          updated, count = pattern.subn(replacement, source, count=1)
+          if count != 1:
+              raise SystemExit(f"expected one psElabMatchMinors definition, replaced {count}")
+          path.write_text(updated)
+          PY
+
+          node psc15selfhost/scripts/check-elab-match-minors-selfhost-source-syntax.mjs
+
+          if git diff --quiet -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean; then
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git commit -m "fix(psc2): normalize match minors recursion"
+          git push origin HEAD:psc2/minimal-selfhost-psc15

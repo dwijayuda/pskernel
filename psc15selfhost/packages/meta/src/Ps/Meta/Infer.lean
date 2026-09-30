@@ -309,13 +309,13 @@ def psInferProjectionMetadataValid
     (numIndices : Nat)
     (numArgs : Nat)
     (numParams : Nat) : Bool :=
-  match isStructure with
-  | false => false
-  | true =>
-      if Nat.beq numIndices 0 then
-        Nat.beq numArgs numParams
-      else
-        false
+  if isStructure then
+    if Nat.beq numIndices 0 then
+      Nat.beq numArgs numParams
+    else
+      false
+  else
+    false
 
 def psInferProjectionTypeWithMetadata
     (environment : PsEnvironment)

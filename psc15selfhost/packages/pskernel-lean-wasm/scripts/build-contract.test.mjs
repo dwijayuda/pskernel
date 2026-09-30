@@ -13,6 +13,8 @@ assert.notEqual(pin.version,'tot');
 
 const build=await readFile(path.join(here,'build-wasm.sh'),'utf8');
 assert.match(build,/-DCMAKE_TOOLCHAIN_FILE=/);
+assert.match(build,/-DSTAGE0_CMAKE_TOOLCHAIN_FILE="\$emscripten_toolchain"/);
+assert.match(build,/-DSTAGE0_CMAKE_AR="\$\(command -v emar\)"/);
 assert.match(build,/-DUSE_GMP=OFF/);
 assert.match(build,/-DUSE_LAKE=OFF/);
 assert.match(build,/-DMMAP=OFF/);
@@ -38,6 +40,10 @@ assert.doesNotMatch(build,/target_lean_path/);
 assert.doesNotMatch(build,/stage0\/bin\/lean/);
 assert.doesNotMatch(build,/PSC2_STAGE0_PARSER_PROBE/);
 
+// CMAKE_TOOLCHAIN_FILE arrives at Lean's top-level configure as an
+// UNINITIALIZED cache variable, so Lean puts it in CL_ARGS (stage1) instead of
+// PLATFORM_ARGS (stage0). Pin the same Emscripten toolchain and archiver through
+// STAGE0_ explicitly; otherwise the ExternalProject silently falls back to cc.
 assert.match(build,/cmake --build "\$lean_build" --target stage0 -j2/);
 assert.match(build,/host_lean=.*command -v lean/);
 assert.match(build,/host_lean_prefix=.*lean --print-prefix/);

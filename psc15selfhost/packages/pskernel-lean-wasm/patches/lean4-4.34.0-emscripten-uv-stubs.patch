@@ -176,7 +176,7 @@ diff --git a/study/lean4-4.34.0/src/library/module.cpp b/study/lean4-4.34.0/src/
                                                             uint8 allow_closures_u8, object *) {
 +#endif
      // `mmap` addresses must be page-aligned. The default (non-huge) page size on x86-64 is 4KB;
-@@ -450,2 +456,6 @@ static object * mk_compacted_region(b_obj_arg ofname, object * root,
+@@ -450,4 +456,8 @@ static object * mk_compacted_region(b_obj_arg ofname, object * root,
  // root to be interpreted as — the C side does no type checking and the caller is responsible for
  // using a type compatible with what was saved (see `CompactedRegion.read`).
  // Supports both `v2` and `v3` formats.
@@ -185,7 +185,7 @@ diff --git a/study/lean4-4.34.0/src/library/module.cpp b/study/lean4-4.34.0/src/
 +#else
  extern "C" LEAN_EXPORT object * lean_compacted_region_read(b_obj_arg ofname, b_obj_arg odep_regions, object *) {
 +#endif
-@@ -623,2 +633,6 @@ extern "C" LEAN_EXPORT object * lean_compacted_region_read(b_obj_arg ofname, b_obj_arg odep_regions, object *) {
+@@ -623,4 +633,8 @@ extern "C" LEAN_EXPORT object * lean_compacted_region_read(b_obj_arg ofname, b_obj_arg odep_regions, object *) {
  }
  
 +#if defined(LEAN_EMSCRIPTEN)

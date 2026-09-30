@@ -31,23 +31,59 @@ def psJsNatIntrinsicSignature
     (operation : PsVerifiedIrIntrinsic) : Option PsJsIntrinsicSignature :=
   match operation with
   | PsVerifiedIrIntrinsic.natAdd =>
-      Option.some (PsJsIntrinsicSignature.mk .natAdd .nat .nat)
+      Option.some
+        (PsJsIntrinsicSignature.mk
+          PsJsIntrinsic.natAdd
+          PsVerifiedIrPrimitiveType.nat
+          PsVerifiedIrPrimitiveType.nat)
   | PsVerifiedIrIntrinsic.natSub =>
-      Option.some (PsJsIntrinsicSignature.mk .natSub .nat .nat)
+      Option.some
+        (PsJsIntrinsicSignature.mk
+          PsJsIntrinsic.natSub
+          PsVerifiedIrPrimitiveType.nat
+          PsVerifiedIrPrimitiveType.nat)
   | PsVerifiedIrIntrinsic.natMul =>
-      Option.some (PsJsIntrinsicSignature.mk .natMul .nat .nat)
+      Option.some
+        (PsJsIntrinsicSignature.mk
+          PsJsIntrinsic.natMul
+          PsVerifiedIrPrimitiveType.nat
+          PsVerifiedIrPrimitiveType.nat)
   | PsVerifiedIrIntrinsic.natDiv =>
-      Option.some (PsJsIntrinsicSignature.mk .natDiv .nat .nat)
+      Option.some
+        (PsJsIntrinsicSignature.mk
+          PsJsIntrinsic.natDiv
+          PsVerifiedIrPrimitiveType.nat
+          PsVerifiedIrPrimitiveType.nat)
   | PsVerifiedIrIntrinsic.natMod =>
-      Option.some (PsJsIntrinsicSignature.mk .natMod .nat .nat)
+      Option.some
+        (PsJsIntrinsicSignature.mk
+          PsJsIntrinsic.natMod
+          PsVerifiedIrPrimitiveType.nat
+          PsVerifiedIrPrimitiveType.nat)
   | PsVerifiedIrIntrinsic.natEq =>
-      Option.some (PsJsIntrinsicSignature.mk .natEq .nat .bool)
+      Option.some
+        (PsJsIntrinsicSignature.mk
+          PsJsIntrinsic.natEq
+          PsVerifiedIrPrimitiveType.nat
+          PsVerifiedIrPrimitiveType.bool)
   | PsVerifiedIrIntrinsic.natNe =>
-      Option.some (PsJsIntrinsicSignature.mk .natNe .nat .bool)
+      Option.some
+        (PsJsIntrinsicSignature.mk
+          PsJsIntrinsic.natNe
+          PsVerifiedIrPrimitiveType.nat
+          PsVerifiedIrPrimitiveType.bool)
   | PsVerifiedIrIntrinsic.natLe =>
-      Option.some (PsJsIntrinsicSignature.mk .natLe .nat .bool)
+      Option.some
+        (PsJsIntrinsicSignature.mk
+          PsJsIntrinsic.natLe
+          PsVerifiedIrPrimitiveType.nat
+          PsVerifiedIrPrimitiveType.bool)
   | PsVerifiedIrIntrinsic.natLt =>
-      Option.some (PsJsIntrinsicSignature.mk .natLt .nat .bool)
+      Option.some
+        (PsJsIntrinsicSignature.mk
+          PsJsIntrinsic.natLt
+          PsVerifiedIrPrimitiveType.nat
+          PsVerifiedIrPrimitiveType.bool)
   | _ => Option.none
 
 def psJsNameHead (value : Char) : Bool :=

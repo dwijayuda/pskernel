@@ -67,6 +67,10 @@ jobs:
         working-directory: psc15selfhost
         run: node packages/pskernel-lean-wasm/scripts/build-contract.test.mjs
 
+      - name: WASM single-thread contract
+        working-directory: psc15selfhost
+        run: node packages/pskernel-lean-wasm/scripts/single-thread-contract.test.mjs
+
       - name: WASM differential contract
         working-directory: psc15selfhost
         run: node packages/pskernel-lean-wasm/host/differential-contract.test.mjs

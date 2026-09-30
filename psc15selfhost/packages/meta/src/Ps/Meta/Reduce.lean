@@ -68,7 +68,7 @@ def psWhnfWithFuel
               match psDeclarationValue declaration with
               | none => core
               | some value =>
-                  let parameters := psDeclarationLevelParams declaration
+                  let parameters := psDeclarationLevelParams declaration;
                   if parameters.length == levels.length then
                     psWhnfWithFuel
                       environment

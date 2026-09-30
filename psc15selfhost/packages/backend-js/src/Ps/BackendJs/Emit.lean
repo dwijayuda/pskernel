@@ -134,15 +134,21 @@ def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
   | PsJsExpr.global index => psJsGlobalName index
   | PsJsExpr.intrinsic operation arguments =>
       match arguments with
-      | List.cons left (List.cons right List.nil) =>
-          match psJsEmitExpr left with
-          | Except.error error => Except.error error
-          | Except.ok printedLeft =>
-              match psJsEmitExpr right with
-              | Except.error error => Except.error error
-              | Except.ok printedRight =>
-                  Except.ok (psJsEmitNatIntrinsic operation printedLeft printedRight)
-      | _ => Except.error PsJsError.unsupportedExpression
+      | List.nil => Except.error PsJsError.unsupportedExpression
+      | List.cons left restArguments =>
+          match restArguments with
+          | List.nil => Except.error PsJsError.unsupportedExpression
+          | List.cons right trailingArguments =>
+              match trailingArguments with
+              | List.cons _extra _extras => Except.error PsJsError.unsupportedExpression
+              | List.nil =>
+                  match psJsEmitExpr left with
+                  | Except.error error => Except.error error
+                  | Except.ok printedLeft =>
+                      match psJsEmitExpr right with
+                      | Except.error error => Except.error error
+                      | Except.ok printedRight =>
+                          Except.ok (psJsEmitNatIntrinsic operation printedLeft printedRight)
   | PsJsExpr.letE index value body =>
       match psJsLocalName index with
       | Except.error error => Except.error error

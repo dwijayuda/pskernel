@@ -4,3 +4,4 @@ import Ps.BackendTs.Compiler
 -- Source-profile regressions are validated through that transitive compiler closure.
 -- Duplicate-name source normalization is verified by the focused self-host gate.
 -- Match-fields patch transport is temporary and does not change bootstrap semantics.
+-- Match-fields line-safe transport rerun.

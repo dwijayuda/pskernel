@@ -88,6 +88,11 @@ def psInferAppViewHead (view : PsInferAppView) : PsExpr :=
 def psInferAppViewArgs (view : PsInferAppView) : List PsExpr :=
   view.args
 
+def psInferExprListLength (values : List PsExpr) : Nat :=
+  match values with
+  | List.nil => 0
+  | List.cons _ rest => Nat.succ (psInferExprListLength rest)
+
 def psInferApplyStructureParametersWorker
     (arguments : List PsExpr) :
     PsEnvironment ->
@@ -330,7 +335,7 @@ def psInferProjectionTypeWithMetadata
     (numParams : Nat)
     (constructors : List PsName) :
     Except PsInferError PsExpr :=
-  let numArgs := List.length viewArgs;
+  let numArgs := psInferExprListLength viewArgs;
   let metadataValid :=
     psInferProjectionMetadataValid
       isStructure
@@ -340,24 +345,16 @@ def psInferProjectionTypeWithMetadata
   if psInferBoolNot metadataValid then
     Except.error PsInferError.projectionUnsupported
   else
-    match constructors with
-    | List.nil =>
-        Except.error PsInferError.projectionUnsupported
-    | List.cons constructorName remainingConstructors =>
-        match remainingConstructors with
-        | List.nil =>
-            psInferProjectionTypeWithConstructor
-              environment
-              metaContext
-              localContext
-              typeName
-              index
-              target
-              viewArgs
-              numParams
-              constructorName
-        | List.cons _ _ =>
-            Except.error PsInferError.projectionUnsupported
+    psInferProjectionTypeWithConstructors
+      environment
+      metaContext
+      localContext
+      typeName
+      index
+      target
+      viewArgs
+      numParams
+      constructors
 
 def psInferProjectionTypeWithInfo
     (environment : PsEnvironment)

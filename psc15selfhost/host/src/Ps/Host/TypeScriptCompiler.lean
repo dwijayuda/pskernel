@@ -25,14 +25,14 @@ def psTypeScriptOutputPaths
 
 def psTscExecutable : String :=
   if System.Platform.isWindows then
-    "npx.cmd"
+    "tsc.cmd"
   else
-    "npx"
+    "tsc"
 
 def psTypeScriptVersion : IO String := do
   let output ← IO.Process.output {
     cmd := psTscExecutable
-    args := #["--no-install", "tsc", "--version"]
+    args := #["--version"]
   }
   if output.exitCode != 0 then
     throw
@@ -50,8 +50,6 @@ def psCompileTypeScriptFile
   let output ← IO.Process.output {
     cmd := psTscExecutable
     args := #[
-      "--no-install",
-      "tsc",
       typeScriptPath,
       "--target", "ES2022",
       "--module", "ES2022",

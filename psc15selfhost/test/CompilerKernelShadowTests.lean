@@ -48,24 +48,32 @@ def psPhase13KernelShadowSequentialPass : Bool :=
       "def second : Nat := first")
     2
 
-def psPhase13KernelShadowPositivePass : Bool :=
-  psPhase13KernelShadowMinimalPass
-    && psPhase13KernelShadowProofScriptPass
-    && psPhase13KernelShadowFunctionPass
-    && psPhase13KernelShadowPolymorphicPass
-    && psPhase13KernelShadowTheoremPass
-    && psPhase13KernelShadowSequentialPass
+def psPhase13Require
+    (condition : Bool)
+    (marker : String) : IO Unit := do
+  if condition then
+    IO.println (marker ++ ": PASS")
+  else
+    throw (IO.userError (marker ++ ": FAIL"))
 
 def main : IO Unit := do
-  if psPhase13KernelShadowMinimalPass then
-    IO.println "PSC2_KERNEL_CORE_PHASE13_SHADOW_MINIMAL: PASS"
-  else
-    throw
-      (IO.userError
-        "PSC2_KERNEL_CORE_PHASE13_SHADOW_MINIMAL: FAIL")
-  if psPhase13KernelShadowPositivePass then
-    IO.println "PSC2_KERNEL_CORE_PHASE13_SHADOW_POSITIVE: PASS"
-  else
-    throw
-      (IO.userError
-        "PSC2_KERNEL_CORE_PHASE13_SHADOW_POSITIVE: FAIL")
+  psPhase13Require
+    psPhase13KernelShadowMinimalPass
+    "PSC2_KERNEL_CORE_PHASE13_SHADOW_LEAN_LITERAL"
+  psPhase13Require
+    psPhase13KernelShadowProofScriptPass
+    "PSC2_KERNEL_CORE_PHASE13_SHADOW_PROOFSCRIPT_LITERAL"
+  psPhase13Require
+    psPhase13KernelShadowFunctionPass
+    "PSC2_KERNEL_CORE_PHASE13_SHADOW_FUNCTION"
+  psPhase13Require
+    psPhase13KernelShadowPolymorphicPass
+    "PSC2_KERNEL_CORE_PHASE13_SHADOW_POLYMORPHIC"
+  psPhase13Require
+    psPhase13KernelShadowTheoremPass
+    "PSC2_KERNEL_CORE_PHASE13_SHADOW_THEOREM"
+  psPhase13Require
+    psPhase13KernelShadowSequentialPass
+    "PSC2_KERNEL_CORE_PHASE13_SHADOW_SEQUENTIAL"
+  IO.println "PSC2_KERNEL_CORE_PHASE13_SHADOW_MINIMAL: PASS"
+  IO.println "PSC2_KERNEL_CORE_PHASE13_SHADOW_POSITIVE: PASS"

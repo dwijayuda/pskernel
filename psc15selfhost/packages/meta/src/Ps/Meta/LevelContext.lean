@@ -240,13 +240,23 @@ def psLevelUnify
     (right : PsLevel) : PsLevelUnifyResult :=
   psLevelUnifyWithFuel context 256 left right
 
+def psLevelInstantiateList
+    (context : PsLevelMetaContext)
+    (levels : List PsLevel) : List PsLevel :=
+  match levels with
+  | [] => []
+  | level :: rest =>
+      List.cons
+        (psLevelInstantiate context level)
+        (psLevelInstantiateList context rest)
+
 def psLevelInstantiateExpr (context : PsLevelMetaContext) : PsExpr -> PsExpr
   | .bvar index => PsExpr.bvar index
   | .fvar id => PsExpr.fvar id
   | .mvar id => PsExpr.mvar id
   | .sortE level => PsExpr.sortE (psLevelInstantiate context level)
   | .constE name levels =>
-      PsExpr.constE name (levels.map (psLevelInstantiate context))
+      PsExpr.constE name (psLevelInstantiateList context levels)
   | .app fn arg =>
       PsExpr.app
         (psLevelInstantiateExpr context fn)

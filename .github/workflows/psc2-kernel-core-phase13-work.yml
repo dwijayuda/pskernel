@@ -7,6 +7,7 @@ on:
     paths:
       - psc15selfhost/packages/compiler/**
       - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/packages/meta/**
       - psc15selfhost/packages/backend-ts/**
       - psc15selfhost/test/CompilerKernelShadow*.lean
       - psc15selfhost/package.json

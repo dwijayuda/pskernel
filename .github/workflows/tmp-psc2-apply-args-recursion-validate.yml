@@ -1,0 +1,48 @@
+name: Temporary PSC2 apply-args worker validation
+
+on:
+  push:
+    branches:
+      - tmp/psc2-apply-args-recursion-worker-exec-20260930
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Focused source gates
+        working-directory: psc15selfhost
+        run: |
+          node scripts/check-elab-apply-args-option-selfhost-source-syntax.mjs
+          node scripts/check-elab-apply-args-recursion-selfhost-source-syntax.mjs
+      - name: Lean build
+        working-directory: psc15selfhost
+        run: lake build
+      - name: Bootstrap closure
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          log_file="$(mktemp)"
+          if node scripts/check-bootstrap-closure.mjs >"$log_file" 2>&1; then
+            cat "$log_file"
+          else
+            echo "PSC2_FIXED_POINT_FAILURE_DIAGNOSTICS: BEGIN"
+            grep -E "PSC1_PROJECT_ELAB_FAILED|declaration=|structuralRecursion|unknownName|matchExpectedType|PSC2_FIXED_POINT|Error:" "$log_file" | tail -n 120 || true
+            echo "PSC2_FIXED_POINT_FAILURE_TAIL: BEGIN"
+            tail -n 120 "$log_file"
+            echo "PSC2_FIXED_POINT_FAILURE_TAIL: END"
+            exit 1
+          fi

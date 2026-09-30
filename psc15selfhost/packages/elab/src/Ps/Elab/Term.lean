@@ -2661,19 +2661,19 @@ def psElabSyntaxLocalId
     PsSyntaxTerm -> Option Nat
   | .reference sourceName =>
       match psSyntaxNameToName sourceName with
-      | none => none
-      | some name =>
+      | Option.none => Option.none
+      | Option.some name =>
           match
               psResolveName
                 context.localContext
                 context.environment
                 name with
-          | none => none
-          | some resolved =>
+          | Option.none => Option.none
+          | Option.some resolved =>
               match resolved with
-              | .local id => some id
-              | .global _ => none
-  | _ => none
+              | .local id => Option.some id
+              | .global _ => Option.none
+  | _ => Option.none
 
 def psElabNatListAt
     (values : List Nat)

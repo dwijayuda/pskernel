@@ -62,45 +62,45 @@ def psJsTextStringToChars (value : String) : List Char :=
     0
 
 
-def psJsTextStringOfCharsAcc
-    (chars : List Char) : String -> String :=
+def psJsTextStringOfChars (chars : List Char) : String :=
   match chars with
   | List.nil =>
-      fun (acc : String) => acc
+      ""
   | List.cons head tail =>
-      let smaller : String -> String :=
-        psJsTextStringOfCharsAcc tail;
-      fun (acc : String) =>
-        smaller (String.push acc head)
+      psJsTextConcat2
+        (String.push "" head)
+        (psJsTextStringOfChars tail)
 
 
-def psJsTextStringOfChars (chars : List Char) : String :=
-  psJsTextStringOfCharsAcc chars ""
-
-
-def psJsTextCharListEq
-    (left : List Char) : List Char -> Bool :=
-  match left with
-  | List.nil =>
-      fun (right : List Char) =>
-        match right with
-        | List.nil => true
-        | List.cons _ _ => false
-  | List.cons leftHead leftTail =>
-      let smaller : List Char -> Bool :=
-        psJsTextCharListEq leftTail;
-      fun (right : List Char) =>
-        match right with
-        | List.nil => false
-        | List.cons rightHead rightTail =>
-            if psJsTextCharEq leftHead rightHead then
-              smaller rightTail
-            else
-              false
+def psJsTextCharListEqWithFuel (fuel : Nat) :
+    List Char -> List Char -> Bool :=
+  match fuel with
+  | Nat.zero =>
+      fun (_left : List Char) =>
+        fun (_right : List Char) => false
+  | Nat.succ remaining =>
+      let smaller : List Char -> List Char -> Bool :=
+        psJsTextCharListEqWithFuel remaining;
+      fun (left : List Char) =>
+        fun (right : List Char) =>
+          match left with
+          | List.nil =>
+              match right with
+              | List.nil => true
+              | List.cons _rightHead _rightTail => false
+          | List.cons leftHead leftTail =>
+              match right with
+              | List.nil => false
+              | List.cons rightHead rightTail =>
+                  if psJsTextCharEq leftHead rightHead then
+                    smaller leftTail rightTail
+                  else
+                    false
 
 
 def psJsTextStringEq (left right : String) : Bool :=
-  psJsTextCharListEq
+  psJsTextCharListEqWithFuel
+    (Nat.succ (String.utf8ByteSize left))
     (psJsTextStringToChars left)
     (psJsTextStringToChars right)
 

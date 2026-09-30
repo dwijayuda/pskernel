@@ -123,7 +123,11 @@ def psTestAnonymousArrowTranslationRoundTrip : Bool :=
       else
         match psTranslateProofScriptToLean proofScript with
         | Except.error _ => false
-        | Except.ok leanAgain => leanAgain == canonicalLean
+        | Except.ok leanAgain =>
+            match psCanonicalizeLeanSource leanAgain with
+            | Except.error _ => false
+            | Except.ok canonicalLeanAgain =>
+                canonicalLeanAgain == canonicalLean
   | _, _ => false
 
 def main : IO Unit := do

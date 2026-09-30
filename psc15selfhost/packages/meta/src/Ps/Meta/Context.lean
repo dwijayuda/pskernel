@@ -294,14 +294,16 @@ def psMetaInstantiateStep
   psMetaInstantiateStepWorker expr context
 
 def psMetaInstantiateRounds
-    (context : PsMetaContext) :
-    Nat -> PsExpr -> PsExpr
-  | 0, expr => expr
-  | remaining + 1, expr =>
-      psMetaInstantiateRounds
-        context
-        remaining
-        (psMetaInstantiateStep context expr)
+    (context : PsMetaContext)
+    (rounds : Nat) : PsExpr -> PsExpr :=
+  match rounds with
+  | Nat.zero =>
+      fun (expr : PsExpr) => expr
+  | Nat.succ remaining =>
+      let smaller : PsExpr -> PsExpr :=
+        psMetaInstantiateRounds context remaining;
+      fun (expr : PsExpr) =>
+        smaller (psMetaInstantiateStep context expr)
 
 def psMetaInstantiate (context : PsMetaContext) (expr : PsExpr) : PsExpr :=
   let value :=
@@ -322,7 +324,7 @@ def psMetaFreshLevel (context : PsMetaContext) : PsMetaFreshLevelResult :=
       nextId := context.nextId
       declarations := context.declarations
       assignments := context.assignments
-      levels := fresh.context
+      levels := fresh.context.levels
     }
     level := fresh.level
   }

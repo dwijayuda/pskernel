@@ -212,10 +212,22 @@ def psLevelInstantiateExpr (context : PsLevelMetaContext) : PsExpr -> PsExpr
 def psLevelHasMVar : PsLevel -> Bool
   | .mvar _ => true
   | .succ value => psLevelHasMVar value
-  | .max left right => psLevelHasMVar left || psLevelHasMVar right
-  | .imax left right => psLevelHasMVar left || psLevelHasMVar right
+  | .max left right =>
+      if psLevelHasMVar left then
+        true
+      else
+        psLevelHasMVar right
+  | .imax left right =>
+      if psLevelHasMVar left then
+        true
+      else
+        psLevelHasMVar right
   | _ => false
 
 def psLevelListHasMVar : List PsLevel -> Bool
   | [] => false
-  | level :: rest => psLevelHasMVar level || psLevelListHasMVar rest
+  | level :: rest =>
+      if psLevelHasMVar level then
+        true
+      else
+        psLevelListHasMVar rest

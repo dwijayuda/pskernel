@@ -1,0 +1,78 @@
+name: PSC2 one-shot match-field reverse fix
+
+on:
+  push:
+    branches:
+      - psc2/minimal-selfhost-psc15
+    paths:
+      - .github/workflows/psc2-one-shot-match-field-reverse-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Normalize constructor match-field reverse
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("psc15selfhost/packages/elab/src/Ps/Elab/Term.lean")
+          source = path.read_text()
+
+          marker = "\ndef psElabMatchConstructorMinor\n"
+          helper = '''
+def psElabMatchFieldListReverseWorker
+    (fields : List PsElabMatchField) :
+    List PsElabMatchField -> List PsElabMatchField :=
+  match fields with
+  | [] =>
+      fun (acc : List PsElabMatchField) =>
+        acc
+  | field :: rest =>
+      let smaller :
+          List PsElabMatchField -> List PsElabMatchField :=
+        psElabMatchFieldListReverseWorker rest;
+      fun (acc : List PsElabMatchField) =>
+        smaller (List.cons field acc)
+
+def psElabMatchFieldListReverse
+    (fields : List PsElabMatchField) :
+    List PsElabMatchField :=
+  psElabMatchFieldListReverseWorker fields []
+'''
+
+          if "def psElabMatchFieldListReverseWorker" not in source:
+              if marker not in source:
+                  raise SystemExit("constructor minor marker not found")
+              source = source.replace(marker, helper + marker, 1)
+
+          old = "                let fields :=\n                  List.reverse fieldResult.fieldsRev;"
+          new = "                let fields :=\n                  psElabMatchFieldListReverse fieldResult.fieldsRev;"
+          if new not in source:
+              if old not in source:
+                  raise SystemExit("constructor match-field reverse call not found")
+              source = source.replace(old, new, 1)
+
+          path.write_text(source)
+          PY
+
+          node psc15selfhost/scripts/check-elab-match-constructor-minor-selfhost-source-syntax.mjs
+
+          if git diff --quiet -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean; then
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git commit -m "fix(psc2): normalize constructor match-field reverse"
+          git push origin HEAD:psc2/minimal-selfhost-psc15

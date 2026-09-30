@@ -21,6 +21,17 @@ if (workerStart < 0 || wrapperStart < 0 || wrapperEnd < 0 || workerStart >= wrap
 
 const workerBlock = source.slice(workerStart, wrapperStart);
 const wrapperBlock = source.slice(wrapperStart, wrapperEnd);
+// The callback elaborates one term; only the application worker adds pending
+// instances. A transport edit once changed only the wrapper callback's result.
+const elaborateCallback = /\(elaborate\s*:\s*PsElabContext\s*->\s*PsSyntaxTerm\s*->\s*Option PsExpr\s*->\s*Except PsElabError PsElabTermResult\s*\)/;
+for (const [label, block] of [["worker", workerBlock], ["wrapper", wrapperBlock]]) {
+  if (!elaborateCallback.test(block)) {
+    throw new Error(
+      `PSC2_ELAB_APPLY_ARGS_CALLBACK_TYPE_MISMATCH: ${label} elaborate callback must return PsElabTermResult`,
+    );
+  }
+}
+
 const required = [
   /\(remainingFuel : Nat\)\s*:\s*\n\s*PsElabTermResult ->\s*\n\s*List PsSyntaxTerm ->\s*\n\s*List Nat ->\s*\n\s*Except PsElabError PsElabApplicationResult :=\s*\n\s*match remainingFuel with/,
   /let smaller\s*:\s*\n\s*PsElabTermResult ->\s*\n\s*List PsSyntaxTerm ->\s*\n\s*List Nat ->\s*\n\s*Except PsElabError PsElabApplicationResult :=\s*\n\s*psElabApplyArgsWithFuelWorker elaborate fuel;/,

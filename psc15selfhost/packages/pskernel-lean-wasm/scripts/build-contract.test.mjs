@@ -127,6 +127,10 @@ assert.match(build,/Test\.Bad/);
 assert.match(build,/value\.accepted!==true/);
 assert.match(build,/value\.accepted!==false/);
 assert.match(build,/value\.errorKind!=="kernel-rejection"/);
+const acceptedFixtureLine=build.split('\n').find(line=>line.startsWith('accepted_request='));
+const rejectedFixtureLine=build.split('\n').find(line=>line.startsWith('rejected_request='));
+assert.ok(acceptedFixtureLine?.includes(`'{"protocol"`),'accepted smoke fixture must be literal JSON without shell escape backslashes');
+assert.ok(rejectedFixtureLine?.includes(`'{"protocol"`),'rejected smoke fixture must be literal JSON without shell escape backslashes');
 
 const patch=await readFile(path.join(packageRoot,'patches/lean4-4.34.0-emscripten-uv-stubs.patch'),'utf8');
 assert.match(patch,/runtime\/uv\/event_loop\.cpp/);

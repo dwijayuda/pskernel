@@ -114,6 +114,20 @@ assert.match(build,/-o "\$out_dir\/pskernel-lean\.cjs"/);
 assert.match(build,/node "\$out_dir\/pskernel-lean\.cjs" --health/);
 assert.doesNotMatch(build,/-o "\$out_dir\/pskernel-lean\.js"/);
 
+// Health proves the generated launcher can initialize, but run 51 also exposed
+// stage0/generated-C ABI warnings. Require the artifact build itself to execute
+// the actual admission path in WASM: one well-typed declaration must be
+// accepted and one ill-typed declaration must be rejected by the Lean kernel.
+assert.match(build,/PSC2_LEAN_KERNEL_WASM_ACCEPT_SMOKE/);
+assert.match(build,/PSC2_LEAN_KERNEL_WASM_REJECT_SMOKE/);
+const checkInvocations=build.match(/node "\$out_dir\/pskernel-lean\.cjs" --check/g)??[];
+assert.ok(checkInvocations.length>=2,'WASM build must execute accepted and rejected --check smoke requests');
+assert.match(build,/Test\.True/);
+assert.match(build,/Test\.Bad/);
+assert.match(build,/value\.accepted!==true/);
+assert.match(build,/value\.accepted!==false/);
+assert.match(build,/value\.errorKind!=="kernel-rejection"/);
+
 const patch=await readFile(path.join(packageRoot,'patches/lean4-4.34.0-emscripten-uv-stubs.patch'),'utf8');
 assert.match(patch,/runtime\/uv\/event_loop\.cpp/);
 assert.match(patch,/lean_uv_event_loop_alive/);

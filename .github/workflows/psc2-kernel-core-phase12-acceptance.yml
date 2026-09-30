@@ -29,6 +29,13 @@ jobs:
         with:
           node-version: 22
 
+      - name: Build Phase 12 dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake build PsKernelCore PSC1KernelReferenceFoundations
+
       - name: Phase 1 through Phase 12 aggregate assurance
         shell: bash
         run: |

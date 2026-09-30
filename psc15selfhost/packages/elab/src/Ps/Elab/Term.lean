@@ -2412,13 +2412,30 @@ def psSyntaxRecordHasNamedField
     (name : String) : Bool :=
   psSyntaxRecordHasField fields name
 
+def psSyntaxRecordFieldsMatchWorker
+    (names : List String) :
+    List (Prod PsSyntaxName PsSyntaxTerm) -> Bool :=
+  match names with
+  | [] =>
+      fun (_fields : List (Prod PsSyntaxName PsSyntaxTerm)) =>
+        true
+  | name :: rest =>
+      let smaller :
+          List (Prod PsSyntaxName PsSyntaxTerm) -> Bool :=
+        psSyntaxRecordFieldsMatchWorker rest;
+      fun (fields : List (Prod PsSyntaxName PsSyntaxTerm)) =>
+        if psSyntaxRecordHasNamedField fields name then
+          smaller fields
+        else
+          false
+
 def psSyntaxRecordFieldsMatch
     (fields :
       List (Prod PsSyntaxName PsSyntaxTerm))
     (names : List String) : Bool :=
   psElabBoolAnd
     (Nat.beq (psElabListLength fields) (psElabListLength names))
-    (List.all names (psSyntaxRecordHasNamedField fields))
+    (psSyntaxRecordFieldsMatchWorker names fields)
 
 def psSyntaxRecordFindField
     (fields : List (Prod PsSyntaxName PsSyntaxTerm))

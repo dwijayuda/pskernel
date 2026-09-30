@@ -2324,12 +2324,12 @@ def psElabDropForallBinders
     (type : PsExpr) : Option PsExpr :=
   match remaining with
   | 0 =>
-      some type
+      Option.some type
   | nextRemaining + 1 =>
       match type with
       | .forallE _ _ body _ =>
           psElabDropForallBinders nextRemaining body
-      | _ => none
+      | _ => Option.none
 
 def psElabTakeForallNames
     (remaining : Nat)

@@ -59,33 +59,6 @@ def psDefEqReadOnly
   let rightValue := psWhnfCore metaContext localContext right;
   psExprAlphaEq leftValue rightValue
 
-def psWhnfReductionStep
-    (smaller : PsExpr -> PsExpr)
-    (environment : PsEnvironment)
-    (core : PsExpr) : PsExpr :=
-  match core with
-  | .constE name levels =>
-      match psEnvironmentFind environment name with
-      | none => core
-      | some declaration =>
-          match psDeclarationValue declaration with
-          | none => core
-          | some value =>
-              let parameters := psDeclarationLevelParams declaration;
-              if Nat.beq parameters.length levels.length then
-                smaller
-                  (psExprInstantiateLevelParams
-                    parameters levels value)
-              else
-                core
-  | .app fn arg =>
-      let reducedFn := smaller fn;
-      if psExprAlphaEq reducedFn fn then
-        core
-      else
-        smaller (PsExpr.app reducedFn arg)
-  | _ => core
-
 def psWhnfWithFuel
     (fuel : Nat)
     (environment : PsEnvironment)
@@ -100,7 +73,28 @@ def psWhnfWithFuel
       fun (expr : PsExpr) =>
         let core :=
           psWhnfCoreApplyFuel remaining metaContext localContext expr;
-        psWhnfReductionStep smaller environment core
+        match core with
+        | .constE name levels =>
+            match psEnvironmentFind environment name with
+            | none => core
+            | some declaration =>
+                match psDeclarationValue declaration with
+                | none => core
+                | some value =>
+                    let parameters := psDeclarationLevelParams declaration;
+                    if Nat.beq parameters.length levels.length then
+                      smaller
+                        (psExprInstantiateLevelParams
+                          parameters levels value)
+                    else
+                      core
+        | .app fn arg =>
+            let reducedFn := smaller fn;
+            if psExprAlphaEq reducedFn fn then
+              core
+            else
+              smaller (PsExpr.app reducedFn arg)
+        | _ => core
 
 def psWhnf
     (environment : PsEnvironment)

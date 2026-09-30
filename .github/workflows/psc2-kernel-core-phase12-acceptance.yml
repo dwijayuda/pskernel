@@ -1,3 +1,4 @@
+# Final Phase-12 acceptance gate after expanded recursive-call rejection coverage.
 name: PSC2 KernelCore Phase 12 acceptance
 
 on:

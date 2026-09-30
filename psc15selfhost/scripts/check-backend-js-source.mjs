@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, writeFileSync, copyFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync, copyFileSync, rmSync, existsSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,6 +9,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sources = collectBackendJsClosure(root);
 const out = mkdtempSync(path.join(os.tmpdir(), 'psc-js-source-'));
 const canonicalPsDiagnostic = '/tmp/backend-js-source-BackendJs.ps';
+const generatedTsDiagnostic = '/tmp/backend-js-source-backend.ts';
 
 function phase(label, command, args, cwd, timeoutMs = 90000) {
   console.log(`BACKEND_JS_SOURCE_PHASE: ${label}: START`);
@@ -111,5 +112,9 @@ assert.equal(result.answer, 42n);
   phase('generated-execution', process.execPath, [probeRunner], out);
   console.log('BACKEND_JS_GENERATED_EXECUTION: PASS (PSC1 -> PS -> TS seed -> executable backend -> direct JS)');
 } finally {
+  const generatedTs = path.join(out, 'backend.ts');
+  if (existsSync(generatedTs)) {
+    copyFileSync(generatedTs, generatedTsDiagnostic);
+  }
   rmSync(out, { recursive: true, force: true });
 }

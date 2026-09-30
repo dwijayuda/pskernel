@@ -17,6 +17,11 @@ def psJsEmitLiteral (value : PsJsLiteral) : Except PsJsError String :=
       match psJsIntDecimal number with
       | Except.error error => Except.error error
       | Except.ok text => Except.ok (psJsTextConcat2 text "n")
+  | PsJsLiteral.machineNumber number => psJsIntDecimal number
+  | PsJsLiteral.machineBigInt number =>
+      match psJsIntDecimal number with
+      | Except.error error => Except.error error
+      | Except.ok text => Except.ok (psJsTextConcat2 text "n")
   | PsJsLiteral.boolean boolean =>
       if boolean then Except.ok "true"
       else Except.ok "false"

@@ -134,26 +134,28 @@ def psElabResolvedTerm
 
 def psElabProjectionApplyParameters
     (context : PsElabContext)
-    (parameters : List PsExpr)
-    (cursor : PsExpr) :
+    (parameters : List PsExpr) :
+    PsExpr ->
     Except PsElabError PsExpr :=
   match parameters with
   | [] =>
-      Except.ok cursor
+      fun (cursor : PsExpr) =>
+        Except.ok cursor
   | parameter :: rest =>
-      match
-          psInferEnsureForall
-            context.environment
-            context.metaContext
-            context.localContext
-            cursor with
-      | Except.error error =>
-          Except.error (PsElabError.infer error)
-      | Except.ok forallView =>
-          psElabProjectionApplyParameters
-            context
-            rest
-            (psExprInstantiate1 forallView.body parameter)
+      let smaller : PsExpr -> Except PsElabError PsExpr :=
+        psElabProjectionApplyParameters context rest;
+      fun (cursor : PsExpr) =>
+        match
+            psInferEnsureForall
+              context.environment
+              context.metaContext
+              context.localContext
+              cursor with
+        | Except.error error =>
+            Except.error (PsElabError.infer error)
+        | Except.ok forallView =>
+            smaller
+              (psExprInstantiate1 forallView.body parameter)
 
 def psElabFindStructureField
     (context : PsElabContext)

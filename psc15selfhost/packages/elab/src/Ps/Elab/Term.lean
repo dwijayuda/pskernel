@@ -1816,6 +1816,61 @@ structure PsElabMatchMinorsResult where
   context : PsElabContext
   minors : List PsExpr
 
+def psElabMatchMinorsWorker
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (inductiveInfo : PsInductiveInfo)
+    (inductiveLevels : List PsLevel)
+    (parameterArgs : List PsExpr)
+    (expectedType : PsExpr)
+    (alternatives : List PsElabMatchAlternative)
+    (constructorNames : List PsName) :
+    PsElabContext ->
+    Except PsElabError PsElabMatchMinorsResult :=
+  match constructorNames with
+  | [] =>
+      fun (context : PsElabContext) =>
+        Except.ok {
+          context := context
+          minors := []
+        }
+  | ctorName :: rest =>
+      let smaller :
+          PsElabContext ->
+          Except PsElabError PsElabMatchMinorsResult :=
+        psElabMatchMinorsWorker
+          elaborate
+          inductiveInfo
+          inductiveLevels
+          parameterArgs
+          expectedType
+          alternatives
+          rest;
+      fun (context : PsElabContext) =>
+        match psElabMatchAlternativeFind ctorName alternatives with
+        | none => Except.error PsElabError.matchNonExhaustive
+        | some alternative =>
+            match psElabMatchMinor
+                elaborate
+                context
+                inductiveInfo
+                inductiveLevels
+                parameterArgs
+                expectedType
+                alternative with
+            | Except.error error => Except.error error
+            | Except.ok minor =>
+                match smaller minor.context with
+                | Except.error error => Except.error error
+                | Except.ok tail =>
+                    Except.ok {
+                      context := tail.context
+                      minors := List.cons minor.term tail.minors
+                    }
+
 def psElabMatchMinors
     (elaborate :
       PsElabContext ->
@@ -1830,41 +1885,15 @@ def psElabMatchMinors
     (context : PsElabContext)
     (constructorNames : List PsName) :
     Except PsElabError PsElabMatchMinorsResult :=
-  match constructorNames with
-  | [] =>
-      Except.ok {
-        context := context
-        minors := []
-      }
-  | ctorName :: rest =>
-      match psElabMatchAlternativeFind ctorName alternatives with
-      | none => Except.error PsElabError.matchNonExhaustive
-      | some alternative =>
-          match psElabMatchMinor
-              elaborate
-              context
-              inductiveInfo
-              inductiveLevels
-              parameterArgs
-              expectedType
-              alternative with
-          | Except.error error => Except.error error
-          | Except.ok minor =>
-              match psElabMatchMinors
-                  elaborate
-                  inductiveInfo
-                  inductiveLevels
-                  parameterArgs
-                  expectedType
-                  alternatives
-                  minor.context
-                  rest with
-              | Except.error error => Except.error error
-              | Except.ok tail =>
-                  Except.ok {
-                    context := tail.context
-                    minors := List.cons minor.term tail.minors
-                  }
+  psElabMatchMinorsWorker
+    elaborate
+    inductiveInfo
+    inductiveLevels
+    parameterArgs
+    expectedType
+    alternatives
+    constructorNames
+    context
 
 def psElabMatch
     (elaborate :

@@ -10,7 +10,7 @@ Work session started from `Pasted text(20260930-195252).txt`.
 ## Current HEAD
 
 Verified code snapshot before this documentation commit:
-`17095628375bba41ed2437bfd62cf860259911b9`.
+`3c1318bc37a03990a29f332a9e4b4ca0b94392ae`.
 
 This records the observed parent, not the hash of the commit containing this
 file. Always refresh the target ref before writing: another session is actively
@@ -52,7 +52,11 @@ committing to the same branch. Never force-push it.
 - Local focused and aggregate source gates pass after the invariant-safe
   `psElabRecordCandidates` rewrite. Its guard now requires the post-recursion
   result and unchanged accumulator argument.
-- CI run `36774114226` at `17095628` is queued for the fixed-point probe.
+- CI run `36774114226` at `17095628` stopped in the full source gate on a
+  duplicated transported guard declaration, before Lean or fixed-point work.
+- The guard transport is corrected in `3c1318bc`; the script now has one
+  candidate block plus the invariant assertions. CI run `36774534674` at
+  `3c1318bc` is queued for the fixed-point probe.
 
 ## Current first blocker
 
@@ -132,14 +136,26 @@ The focused guard was extended to require one post-recursion result and an
 unchanged accumulator; it was RED before the rewrite and GREEN afterward. No
 fixed-point success is claimed.
 
+Run `36774114226`, job `110087590655`, did not reach the compiler because the
+transported guard declared `candidatesStart` twice:
+
+```text
+SyntaxError: Identifier 'candidatesStart' has already been declared
+```
+
+Commit `3c1318bc` removes the duplicate block while preserving the concurrent
+robust guard. No fixed-point success is claimed from that run.
+
 ## Latest CI
 
 - Workflow: `PSC2 minimal kernel`.
-- Run: `36774114226` (push of the invariant-safe record-candidates repair).
-- Commit: `17095628375bba41ed2437bfd62cf860259911b9`.
+- Run: `36774534674` (push of the corrected invariant guard transport).
+- Commit: `3c1318bc37a03990a29f332a9e4b4ca0b94392ae`.
 - Job: retrieve `foundational-parity` from the run's jobs endpoint.
 - Result at snapshot: queued.
 - Pending step: `Bootstrap closure remains isolated` (nested fixed-point probe).
+- Previous source-gate run: `36774114226` at `17095628`, job `110087590655`; failed
+  before Lean/fixed-point work on the duplicated guard declaration.
 - Previous fixed-point run: `36773477741` at `f0e6ef6d`, job `110085439674`; passed
   source/Lean gates and failed the probe at
   `psElabRecordCandidates: structuralRecursionInvariantArgument`.
@@ -175,6 +191,8 @@ fixed-point success is claimed.
 - This session's invariant-safe record-candidates repair commit is `17095628`; it
   changes only the worker body and strengthens the focused guard. Refresh the
   branch before any follow-up write.
+- This session's guard transport correction is `3c1318bc`; it removes only the
+  duplicate candidate guard block. Refresh the branch before any follow-up write.
 
 ## Current architecture invariants
 
@@ -196,8 +214,8 @@ fixed-point success is claimed.
 
 ## Exact next action
 
-1. Refresh the branch and inspect every commit after `17095628`.
-2. Read the final result/logs of run `36774114226` (or a newer relevant run).
+1. Refresh the branch and inspect every commit after `3c1318bc`.
+2. Read the final result/logs of run `36774534674` (or a newer relevant run).
 3. If the fixed-point probe fails, find its first actual `PSC1_PROJECT_ELAB_FAILED`
    declaration/error. Do not repeat the already landed record-field or
    record-candidate fixes.

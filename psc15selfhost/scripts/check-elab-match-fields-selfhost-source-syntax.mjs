@@ -209,6 +209,21 @@ if (/psElabMatchFieldAt\s+rest\s+nextIndex/.test(matchFieldAt)) {
   );
 }
 
+const recursiveHypothesesMatch = source.match(
+  /def psElabPushRecursiveHypotheses([\s\S]*?)(?=\ndef psCloseElabMatchFields)/,
+);
+if (recursiveHypothesesMatch === null) {
+  throw new Error(
+    "PSC2_ELAB_PUSH_RECURSIVE_HYPOTHESES_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
+  );
+}
+const recursiveHypotheses = recursiveHypothesesMatch[0];
+if (!/let withRecursion\s*:\s*PsElabContext\s*:=\s*match context\.structuralRecursion with/.test(recursiveHypotheses)) {
+  throw new Error(
+    "PSC2_ELAB_PUSH_RECURSIVE_HYPOTHESES_SELFHOST_SOURCE_SYNTAX_MISSING: explicit PsElabContext expected type for local structural-recursion match",
+  );
+}
+
 process.stdout.write(
-  "PSC2_ELAB_MATCH_FIELDS_SELFHOST_SOURCE_SYNTAX: PASS (binder-list-recursive worker with post-recursion context/cursor/field accumulator; invariant-safe index-recursive match-field lookup with explicit Option constructors)\n",
+  "PSC2_ELAB_MATCH_FIELDS_SELFHOST_SOURCE_SYNTAX: PASS (binder-list-recursive worker with post-recursion context/cursor/field accumulator; invariant-safe index-recursive match-field lookup with explicit Option constructors; typed local structural-recursion match)\n",
 );

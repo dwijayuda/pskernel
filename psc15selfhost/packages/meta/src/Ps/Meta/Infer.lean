@@ -88,6 +88,28 @@ def psInferAppViewHead (view : PsInferAppView) : PsExpr :=
 def psInferAppViewArgs (view : PsInferAppView) : List PsExpr :=
   view.args
 
+def psInferInductiveIsStructure (info : PsInductiveInfo) : Bool :=
+  info.isStructure
+
+def psInferInductiveNumIndices (info : PsInductiveInfo) : Nat :=
+  info.numIndices
+
+def psInferInductiveNumParams (info : PsInductiveInfo) : Nat :=
+  info.numParams
+
+def psInferInductiveConstructors
+    (info : PsInductiveInfo) : List PsName :=
+  info.constructors
+
+def psInferConstructorNumParams (info : PsConstructorInfo) : Nat :=
+  info.numParams
+
+def psInferConstructorNumFields (info : PsConstructorInfo) : Nat :=
+  info.numFields
+
+def psInferConstructorType (info : PsConstructorInfo) : PsExpr :=
+  info.type
+
 def psInferApplyStructureParametersWorker
     (arguments : List PsExpr) :
     PsEnvironment ->
@@ -243,15 +265,15 @@ def psInferProjectionTypeWithInfo
     Except PsInferError PsExpr :=
   if
       psInferBoolOr
-        (psInferBoolNot (PsInductiveInfo.isStructure info))
+        (psInferBoolNot (psInferInductiveIsStructure info))
         (psInferBoolOr
-          (psInferNatNe (PsInductiveInfo.numIndices info) 0)
+          (psInferNatNe (psInferInductiveNumIndices info) 0)
           (psInferNatNe
             (List.length viewArgs)
-            (PsInductiveInfo.numParams info))) then
+            (psInferInductiveNumParams info))) then
     Except.error PsInferError.projectionUnsupported
   else
-    match PsInductiveInfo.constructors info with
+    match psInferInductiveConstructors info with
     | List.nil =>
         Except.error PsInferError.projectionUnsupported
     | List.cons constructorName remainingConstructors =>
@@ -267,10 +289,10 @@ def psInferProjectionTypeWithInfo
                 if
                     psInferBoolOr
                       (psInferNatNe
-                        (PsConstructorInfo.numParams constructorInfo)
-                        (PsInductiveInfo.numParams info))
+                        (psInferConstructorNumParams constructorInfo)
+                        (psInferInductiveNumParams info))
                       (Nat.ble
-                        (PsConstructorInfo.numFields constructorInfo)
+                        (psInferConstructorNumFields constructorInfo)
                         index) then
                   Except.error PsInferError.projectionUnsupported
                 else
@@ -279,7 +301,7 @@ def psInferProjectionTypeWithInfo
                         environment
                         metaContext
                         localContext
-                        (PsConstructorInfo.type constructorInfo)
+                        (psInferConstructorType constructorInfo)
                         viewArgs with
                   | Except.error error => Except.error error
                   | Except.ok fieldCursor =>
@@ -494,4 +516,3 @@ def psInferType
     metaContext
     localContext
     psInferDefaultFuel
-    expr

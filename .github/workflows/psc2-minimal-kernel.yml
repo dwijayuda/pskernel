@@ -33,6 +33,7 @@ on:
       - psc15selfhost/scripts/check-elab-wildcard-binder-names-selfhost-source-syntax.mjs
       - psc15selfhost/scripts/check-elab-match-constructor-minor-selfhost-source-syntax.mjs
       - psc15selfhost/scripts/check-elab-match-minor-selfhost-source-syntax.mjs
+      - psc15selfhost/scripts/check-elab-match-minors-selfhost-source-syntax.mjs
       - .github/workflows/psc2-minimal-kernel.yml
   workflow_dispatch:
 
@@ -105,6 +106,13 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           node scripts/check-elab-match-minor-selfhost-source-syntax.mjs
+
+      - name: Match minors recursion gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          node scripts/check-elab-match-minors-selfhost-source-syntax.mjs
 
       - name: Bootstrap closure remains isolated
         shell: bash

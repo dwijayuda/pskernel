@@ -1,4 +1,5 @@
 // Match patterns may use constructor syntax, but Option values passed to elaboration/helpers must be explicit in the PSC1 bootstrap profile.
+// Keep this guard source-only: it exists to prevent unqualified Option value constructors from re-entering the self-host closure.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

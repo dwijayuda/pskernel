@@ -5,10 +5,10 @@ import {createWasmPrebuiltManifest} from '../host/prebuilt.mjs';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const packageRoot=path.resolve(here,'..');
-const sourceCommit=process.env.PSC_LEAN_WASM_SOURCE_COMMIT;
-if(typeof sourceCommit!=='string'||sourceCommit.length===0){
-  throw new Error('PSC_LEAN_WASM_SOURCE_COMMIT is required to write prebuilt provenance');
-}
+const sourceCommit=
+  process.env.PSC_LEAN_WASM_SOURCE_COMMIT ??
+  process.env.GITHUB_SHA ??
+  'package-local-source';
 
 const manifest=createWasmPrebuiltManifest({packageRoot,sourceCommit});
 await writeFile(

@@ -333,7 +333,7 @@ def psElabProjectionReference
                 baseName with
           | none => Except.error (PsElabError.unknownName baseName)
           | some resolved =>
-              let baseTerm :=
+              let baseTerm : PsExpr :=
                 match resolved with
                 | .local id => PsExpr.fvar id
                 | .global name => PsExpr.constE name [];

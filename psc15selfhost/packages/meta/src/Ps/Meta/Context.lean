@@ -356,31 +356,31 @@ def psMetaAssign (context : PsMetaContext) (id : Nat) (value : PsExpr) : Option 
           else
             Option.none
 
-def psExprHasUnresolvedMeta : PsExpr -> Bool
+def psExprHasUnresolvedMetaWorker
+    (expr : PsExpr) : Bool :=
+  match expr with
   | .mvar _ => true
   | .sortE level => psLevelHasMVar level
   | .constE _ levels => psLevelListHasMVar levels
   | .app fn arg =>
-      if psExprHasUnresolvedMeta fn then
-        true
-      else
-        psExprHasUnresolvedMeta arg
+      let fnHas : Bool := psExprHasUnresolvedMetaWorker fn;
+      let argHas : Bool := psExprHasUnresolvedMetaWorker arg;
+      if fnHas then true else argHas
   | .lam _ type body _ =>
-      if psExprHasUnresolvedMeta type then
-        true
-      else
-        psExprHasUnresolvedMeta body
+      let typeHas : Bool := psExprHasUnresolvedMetaWorker type;
+      let bodyHas : Bool := psExprHasUnresolvedMetaWorker body;
+      if typeHas then true else bodyHas
   | .forallE _ type body _ =>
-      if psExprHasUnresolvedMeta type then
-        true
-      else
-        psExprHasUnresolvedMeta body
+      let typeHas : Bool := psExprHasUnresolvedMetaWorker type;
+      let bodyHas : Bool := psExprHasUnresolvedMetaWorker body;
+      if typeHas then true else bodyHas
   | .letE _ type value body =>
-      if psExprHasUnresolvedMeta type then
-        true
-      else if psExprHasUnresolvedMeta value then
-        true
-      else
-        psExprHasUnresolvedMeta body
-  | .proj _ _ value => psExprHasUnresolvedMeta value
+      let typeHas : Bool := psExprHasUnresolvedMetaWorker type;
+      let valueHas : Bool := psExprHasUnresolvedMetaWorker value;
+      let bodyHas : Bool := psExprHasUnresolvedMetaWorker body;
+      if typeHas then true else if valueHas then true else bodyHas
+  | .proj _ _ value => psExprHasUnresolvedMetaWorker value
   | _ => false
+
+def psExprHasUnresolvedMeta (expr : PsExpr) : Bool :=
+  psExprHasUnresolvedMetaWorker expr

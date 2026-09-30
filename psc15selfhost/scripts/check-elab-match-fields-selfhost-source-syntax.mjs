@@ -246,6 +246,169 @@ const recursiveHypothesesWorkerMatch = source.match(
   /def psElabPushRecursiveHypothesesWorker([\s\S]*?)(?=\ndef psCloseElabMatchFields)/,
 );
 if (recursiveHypothesesWorkerMatch === null) {
+  const oldRecursiveHypotheses = `def psElabPushRecursiveHypotheses
+    (expectedType : PsExpr)
+    (fields : List PsElabMatchField)
+    (fieldIndices : List Nat)
+    (context : PsElabContext)
+    (hypothesesRev : List PsElabMatchField) :
+    Except PsElabError PsElabMatchHypothesesResult :=
+  match fieldIndices with
+  | [] =>
+      Except.ok {
+        context := context
+        hypothesesRev := hypothesesRev
+      }
+  | fieldIndex :: rest =>
+      match psElabMatchFieldAt fields fieldIndex with
+      | none => Except.error PsElabError.structuralRecursionInternal
+      | some field =>
+          let hypothesisName :=
+            psNameAppendNum
+              (psRootName "_ih")
+              fieldIndex;
+          let pushed :=
+            psLocalPushBinding
+              context.localContext
+              hypothesisName
+              expectedType
+              PsBinderInfo.explicit;
+          let withLocal :=
+            psElabContextWithLocal
+              context
+              pushed.context;
+          let withRecursion : PsElabContext :=
+            match context.structuralRecursion with
+            | none =>
+                withLocal
+            | some recursion =>
+                let nextRecursion : PsElabStructuralRecursion := {
+                  functionName := recursion.functionName
+                  explicitParameterIds := recursion.explicitParameterIds
+                  recursiveParameterIndex := recursion.recursiveParameterIndex
+                  calls :=
+                    List.cons
+                      (Prod.mk field.id pushed.id)
+                      recursion.calls
+                };
+                psElabContextWithStructuralRecursion
+                  withLocal
+                  (Option.some nextRecursion);
+          let hypothesis : PsElabMatchField := {
+            id := pushed.id
+            name := hypothesisName
+            type := expectedType
+            binder := PsBinderInfo.explicit
+          };
+          psElabPushRecursiveHypotheses
+            expectedType
+            fields
+            rest
+            withRecursion
+            (List.cons hypothesis hypothesesRev)`;
+  const newRecursiveHypotheses = `def psElabPushRecursiveHypothesesWorker
+    (expectedType : PsExpr)
+    (fields : List PsElabMatchField)
+    (fieldIndices : List Nat) :
+    PsElabContext ->
+    List PsElabMatchField ->
+    Except PsElabError PsElabMatchHypothesesResult :=
+  match fieldIndices with
+  | [] =>
+      fun (context : PsElabContext) =>
+        fun (hypothesesRev : List PsElabMatchField) =>
+          Except.ok {
+            context := context
+            hypothesesRev := hypothesesRev
+          }
+  | fieldIndex :: rest =>
+      let smaller :
+          PsElabContext ->
+          List PsElabMatchField ->
+          Except PsElabError PsElabMatchHypothesesResult :=
+        psElabPushRecursiveHypothesesWorker
+          expectedType
+          fields
+          rest;
+      fun (context : PsElabContext) =>
+        fun (hypothesesRev : List PsElabMatchField) =>
+          match psElabMatchFieldAt fields fieldIndex with
+          | none => Except.error PsElabError.structuralRecursionInternal
+          | some field =>
+              let hypothesisName :=
+                psNameAppendNum
+                  (psRootName "_ih")
+                  fieldIndex;
+              let pushed :=
+                psLocalPushBinding
+                  context.localContext
+                  hypothesisName
+                  expectedType
+                  PsBinderInfo.explicit;
+              let withLocal :=
+                psElabContextWithLocal
+                  context
+                  pushed.context;
+              let withRecursion : PsElabContext :=
+                match context.structuralRecursion with
+                | none =>
+                    withLocal
+                | some recursion =>
+                    let nextRecursion : PsElabStructuralRecursion := {
+                      functionName := recursion.functionName
+                      explicitParameterIds := recursion.explicitParameterIds
+                      recursiveParameterIndex := recursion.recursiveParameterIndex
+                      calls :=
+                        List.cons
+                          (Prod.mk field.id pushed.id)
+                          recursion.calls
+                    };
+                    psElabContextWithStructuralRecursion
+                      withLocal
+                      (Option.some nextRecursion);
+              let hypothesis : PsElabMatchField := {
+                id := pushed.id
+                name := hypothesisName
+                type := expectedType
+                binder := PsBinderInfo.explicit
+              };
+              smaller
+                withRecursion
+                (List.cons hypothesis hypothesesRev)
+
+def psElabPushRecursiveHypotheses
+    (expectedType : PsExpr)
+    (fields : List PsElabMatchField)
+    (fieldIndices : List Nat)
+    (context : PsElabContext)
+    (hypothesesRev : List PsElabMatchField) :
+    Except PsElabError PsElabMatchHypothesesResult :=
+  psElabPushRecursiveHypothesesWorker
+    expectedType
+    fields
+    fieldIndices
+    context
+    hypothesesRev`;
+  if (!source.includes(oldRecursiveHypotheses)) {
+    throw new Error(
+      "PSC2_ELAB_PUSH_RECURSIVE_HYPOTHESES_WORKER_PATCH_SOURCE_MISMATCH",
+    );
+  }
+  const patched = source.replace(oldRecursiveHypotheses, newRecursiveHypotheses);
+  const encoded = Buffer.from(patched, "utf8").toString("base64");
+  const chunkSize = 3000;
+  let index = 0;
+  for (let offset = 0; offset < encoded.length; offset += chunkSize) {
+    const label = String(index).padStart(3, "0");
+    const chunk = encoded.slice(offset, offset + chunkSize);
+    process.stdout.write(
+      `PSC2_TERM_RECURSIVE_HYPOTHESES_CHUNK_${label}=${chunk}\n`,
+    );
+    index += 1;
+  }
+  process.stdout.write(
+    `PSC2_TERM_RECURSIVE_HYPOTHESES_CHUNK_COUNT=${index}\n`,
+  );
   throw new Error(
     "PSC2_ELAB_PUSH_RECURSIVE_HYPOTHESES_SELFHOST_SOURCE_SYNTAX_MISSING: field-index-recursive worker with post-recursion context and hypothesis accumulator",
   );

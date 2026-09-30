@@ -85,6 +85,9 @@ def psInferAppView (expr : PsExpr) : PsInferAppView :=
 def psInferAppViewHead (view : PsInferAppView) : PsExpr :=
   view.head
 
+def psInferAppViewArgs (view : PsInferAppView) : List PsExpr :=
+  view.args
+
 def psInferApplyStructureParametersWorker
     (arguments : List PsExpr) :
     PsEnvironment ->
@@ -244,6 +247,7 @@ def psInferProjectionType
         metaContext
         localContext
         targetType);
+  let viewArgs := psInferAppViewArgs view;
   match psInferAppViewHead view with
   | .constE actualName _ =>
       if psInferBoolNot (psNameEq actualName typeName) then
@@ -257,7 +261,7 @@ def psInferProjectionType
                   (psInferBoolNot info.isStructure)
                   (psInferBoolOr
                     (psInferNatNe info.numIndices 0)
-                    (psInferNatNe (List.length view.args) info.numParams)) then
+                    (psInferNatNe (List.length viewArgs) info.numParams)) then
               Except.error PsInferError.projectionUnsupported
             else
               match info.constructors with
@@ -285,7 +289,7 @@ def psInferProjectionType
                                   metaContext
                                   localContext
                                   constructorInfo.type
-                                  view.args with
+                                  viewArgs with
                             | Except.error error => Except.error error
                             | Except.ok fieldCursor =>
                                 psInferStructureProjectionField

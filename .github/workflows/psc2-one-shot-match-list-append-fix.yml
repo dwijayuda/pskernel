@@ -1,0 +1,75 @@
+name: PSC2 one-shot match list append fix
+
+on:
+  push:
+    branches:
+      - psc2/minimal-selfhost-psc15
+    paths:
+      - .github/workflows/psc2-one-shot-match-list-append-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Replace generic match list append
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("psc15selfhost/packages/elab/src/Ps/Elab/Term.lean")
+          source = path.read_text()
+
+          if "def psElabExprListAppendWorker" not in source:
+              marker = "\ndef psElabMatch\n"
+              index = source.find(marker)
+              if index < 0:
+                  raise SystemExit("psElabMatch marker not found")
+              helper = '''
+def psElabExprListAppendWorker
+    (values : List PsExpr) :
+    List PsExpr -> List PsExpr :=
+  match values with
+  | [] =>
+      fun (right : List PsExpr) =>
+        right
+  | value :: rest =>
+      let smaller : List PsExpr -> List PsExpr :=
+        psElabExprListAppendWorker rest;
+      fun (right : List PsExpr) =>
+        List.cons value (smaller right)
+
+def psElabExprListAppend
+    (left : List PsExpr)
+    (right : List PsExpr) :
+    List PsExpr :=
+  psElabExprListAppendWorker left right
+'''
+              source = source[:index] + helper + source[index:]
+
+          count = source.count("List.append")
+          if count != 2:
+              raise SystemExit(f"expected exactly two List.append calls, found {count}")
+          source = source.replace("List.append", "psElabExprListAppend")
+          path.write_text(source)
+          PY
+
+          node psc15selfhost/scripts/check-elab-match-list-append-selfhost-source-syntax.mjs
+
+          if git diff --quiet -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean; then
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git commit -m "fix(psc2): use local match PsExpr list append"
+          git push origin HEAD:psc2/minimal-selfhost-psc15

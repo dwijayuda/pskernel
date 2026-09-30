@@ -275,7 +275,7 @@ def psElabProjectionStep
                                     typeName
                                     index
                                     current.term)
-                                  none
+                                  Option.none
                 | List.cons _ _ =>
                     Except.error PsElabError.unsupportedTerm
   | _ => Except.error PsElabError.unsupportedTerm

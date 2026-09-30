@@ -131,7 +131,7 @@ def psCompilerValidatePrepared
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
   | Except.ok canonicalAdmissions =>
-      if canonicalAdmissions == prepared.canonicalAdmissions then
+      if psStringEq canonicalAdmissions prepared.canonicalAdmissions then
         Except.ok Unit.unit
       else
         Except.error PsCompilerError.preparedAdmissionMismatch

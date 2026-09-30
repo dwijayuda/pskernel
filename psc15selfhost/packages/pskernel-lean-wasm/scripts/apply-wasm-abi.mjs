@@ -36,6 +36,27 @@ await replaceExact('src/runtime/io.cpp',[
   },
 ]);
 
+// Lean/Shell.lean declares both default-limit externs as (_ : Unit) : Nat.
+// The native runtime definitions omit the Unit argument; ordinary native C
+// calling conventions tolerate that mismatch, but WebAssembly function types
+// do not. Preserve the pinned native definitions and add the ignored Unit
+// object only in the Emscripten build.
+await replaceExact('src/runtime/memory.cpp',[
+  {
+    label:'lean_internal_get_default_max_memory',
+    from:'extern "C" LEAN_EXPORT lean_obj_res lean_internal_get_default_max_memory() {',
+    to:'#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT lean_obj_res lean_internal_get_default_max_memory(obj_arg) {\n#else\nextern "C" LEAN_EXPORT lean_obj_res lean_internal_get_default_max_memory() {\n#endif',
+  },
+]);
+
+await replaceExact('src/runtime/interrupt.cpp',[
+  {
+    label:'lean_internal_get_default_max_heartbeat',
+    from:'extern "C" LEAN_EXPORT obj_res lean_internal_get_default_max_heartbeat() {',
+    to:'#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT obj_res lean_internal_get_default_max_heartbeat(obj_arg) {\n#else\nextern "C" LEAN_EXPORT obj_res lean_internal_get_default_max_heartbeat() {\n#endif',
+  },
+]);
+
 await replaceExact('src/library/ir_interpreter.cpp',[
   {
     label:'lean_run_init',

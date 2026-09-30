@@ -117,10 +117,11 @@ def psPrintArrowBinder
             (List.cons ' ' rest)))) =>
       match rest.reverse with
       | List.cons ')' reversedInner =>
-          psPrintCommonConcat3
-            "("
-            (String.ofList reversedInner.reverse)
-            ")"
+          let inner := String.ofList reversedInner.reverse;
+          if inner.contains " -> " then
+            psPrintCommonConcat3 "(" inner ")"
+          else
+            inner
       | _ => binder
   | _ => binder
 

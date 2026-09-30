@@ -63,7 +63,7 @@ index 3ac95b6f2..5619340fc 100644
 diff --git a/study/lean4-4.34.0/src/CMakeLists.txt b/study/lean4-4.34.0/src/CMakeLists.txt
 --- a/study/lean4-4.34.0/src/CMakeLists.txt
 +++ b/study/lean4-4.34.0/src/CMakeLists.txt
-@@ -177,8 +177,11 @@ if(CMAKE_SYSTEM_NAME MATCHES "Emscripten")
+@@ -177,7 +177,10 @@ if(CMAKE_SYSTEM_NAME MATCHES "Emscripten")
    # From https://emscripten.org/docs/compiling/WebAssembly.html#backends:
    # > The simple and safe thing is to pass all -s flags at both compile and link time.
 -  set(EMSCRIPTEN_SETTINGS "-s ALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -pthread -flto")

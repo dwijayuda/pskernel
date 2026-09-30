@@ -758,7 +758,7 @@ def psEraseRuntimeConstructorFields
     List PsRuntimeConstructorField ->
     List (String × PsVerifiedIrExpr) ->
     Except PsErasureError (List (String × PsVerifiedIrExpr))
-  | [], fieldsRev => Except.ok fieldsRev.reverse
+  | [], fieldsRev => Except.ok []
   | field :: rest, fieldsRev =>
       match arguments[field.sourceIndex]? with
       | none => Except.error PsErasureError.unsupportedApplication
@@ -911,6 +911,193 @@ def psErasureRecursiveCallArguments :
           rest
           index
           recursiveName
+
+def psEraseNatRecSuccessor
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
+    (eraseAt :
+      PsErasureScope ->
+      PsExpr ->
+      Except PsErasureError PsVerifiedIrExpr)
+    (recursiveParameterIndex : Option Nat)
+    (predecessor : PsVerifiedIrExpr)
+    (minor : PsExpr) :
+    Except PsErasureError PsVerifiedIrExpr :=
+  match minor with
+  | .lam predecessorName predecessorType predecessorBody predecessorBinder =>
+      match
+          psErasureClassifyBinder
+            environment
+            scope.localContext
+            predecessorType with
+      | .runtime =>
+          let pushedPredecessor :=
+            psLocalPushBinding
+              scope.localContext
+              predecessorName
+              predecessorType
+              predecessorBinder
+          let predecessorRuntimeName :=
+            psErasureSafeIdentifier
+              ("_psNatPred_" ++ toString pushedPredecessor.id)
+              "_psNatPred"
+          let predecessorScope : PsErasureScope := {
+            localContext := pushedPredecessor.context
+            runtimeLocals :=
+              (pushedPredecessor.id, predecessorRuntimeName) ::
+                scope.runtimeLocals
+            typeLocals := scope.typeLocals
+            erasedLocals := scope.erasedLocals
+            declarationNames := scope.declarationNames
+            runtimeConstructors := scope.runtimeConstructors
+            runtimeRecursors := scope.runtimeRecursors
+            runtimeStructures := scope.runtimeStructures
+            runtimeStructureConstructors :=
+              scope.runtimeStructureConstructors
+            runtimeExpressions := scope.runtimeExpressions
+            currentDefinition := scope.currentDefinition
+          }
+          let openedPredecessorBody :=
+            psExprInstantiate1
+              predecessorBody
+              (PsExpr.fvar pushedPredecessor.id)
+          match openedPredecessorBody with
+          | .lam hypothesisName hypothesisType hypothesisBody hypothesisBinder =>
+              let hypothesisKind :=
+                psErasureClassifyBinder
+                  environment
+                  predecessorScope.localContext
+                  hypothesisType
+              let pushedHypothesis :=
+                psLocalPushBinding
+                  predecessorScope.localContext
+                  hypothesisName
+                  hypothesisType
+                  hypothesisBinder
+              let baseHypothesisScope : PsErasureScope := {
+                localContext := pushedHypothesis.context
+                runtimeLocals := predecessorScope.runtimeLocals
+                typeLocals := predecessorScope.typeLocals
+                erasedLocals :=
+                  pushedHypothesis.id :: predecessorScope.erasedLocals
+                declarationNames := predecessorScope.declarationNames
+                runtimeConstructors := predecessorScope.runtimeConstructors
+                runtimeRecursors := predecessorScope.runtimeRecursors
+                runtimeStructures := predecessorScope.runtimeStructures
+                runtimeStructureConstructors :=
+                  predecessorScope.runtimeStructureConstructors
+                runtimeExpressions := predecessorScope.runtimeExpressions
+                currentDefinition := predecessorScope.currentDefinition
+              }
+              let hypothesisScope :=
+                match hypothesisKind with
+                | .runtime =>
+                    match
+                        predecessorScope.currentDefinition,
+                        recursiveParameterIndex with
+                    | some current, some parameterIndex =>
+                        {
+                          baseHypothesisScope with
+                          runtimeExpressions :=
+                            (pushedHypothesis.id,
+                              PsVerifiedIrExpr.call
+                                (PsVerifiedIrExpr.var current.name)
+                                []
+                                (psErasureRecursiveCallArguments
+                                  current.runtimeParameters
+                                  parameterIndex
+                                  predecessorRuntimeName)) ::
+                              baseHypothesisScope.runtimeExpressions
+                        }
+                    | _, _ => baseHypothesisScope
+                | .proof => baseHypothesisScope
+                | .type => baseHypothesisScope
+              match hypothesisKind with
+              | .type =>
+                  Except.error PsErasureError.unsupportedRuntimeTerm
+              | _ =>
+                  let openedHypothesisBody :=
+                    psExprInstantiate1
+                      hypothesisBody
+                      (PsExpr.fvar pushedHypothesis.id)
+                  match eraseAt hypothesisScope openedHypothesisBody with
+                  | Except.error error => Except.error error
+                  | Except.ok body =>
+                      Except.ok
+                        (PsVerifiedIrExpr.letE
+                          predecessorRuntimeName
+                          (PsVerifiedIrType.primitive
+                            PsVerifiedIrPrimitiveType.nat)
+                          predecessor
+                          body)
+          | _ => Except.error PsErasureError.binderMismatch
+      | _ => Except.error PsErasureError.unsupportedRuntimeTerm
+  | _ => Except.error PsErasureError.binderMismatch
+
+def psEraseNatRecApplication
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
+    (eraseAt :
+      PsErasureScope ->
+      PsExpr ->
+      Except PsErasureError PsVerifiedIrExpr)
+    (view : PsErasureAppView) :
+    Except PsErasureError (Option PsVerifiedIrExpr) :=
+  match view.head with
+  | .constE name _ =>
+      if psNameEq name psNatRecName then
+        match view.args with
+        | [_, zeroMinor, successorMinor, major] =>
+            match eraseAt scope major with
+            | Except.error error => Except.error error
+            | Except.ok loweredMajor =>
+                let recursiveParameterIndex :=
+                  match scope.currentDefinition, loweredMajor with
+                  | some current, PsVerifiedIrExpr.var majorName =>
+                      psErasureFindStringIndex
+                        majorName
+                        current.runtimeParameters
+                        0
+                  | _, _ => none
+                let zeroValue :=
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 0)
+                let oneValue :=
+                  PsVerifiedIrExpr.literal
+                    (PsVerifiedIrLiteral.natural 1)
+                let condition :=
+                  PsVerifiedIrExpr.intrinsic
+                    PsVerifiedIrIntrinsic.natEq
+                    []
+                    [loweredMajor, zeroValue]
+                let predecessor :=
+                  PsVerifiedIrExpr.intrinsic
+                    PsVerifiedIrIntrinsic.natSub
+                    []
+                    [loweredMajor, oneValue]
+                match eraseAt scope zeroMinor with
+                | Except.error error => Except.error error
+                | Except.ok loweredZero =>
+                    match
+                        psEraseNatRecSuccessor
+                          environment
+                          scope
+                          eraseAt
+                          recursiveParameterIndex
+                          predecessor
+                          successorMinor with
+                    | Except.error error => Except.error error
+                    | Except.ok loweredSuccessor =>
+                        Except.ok
+                          (some
+                            (PsVerifiedIrExpr.ifE
+                              condition
+                              loweredZero
+                              loweredSuccessor))
+        | _ => Except.error PsErasureError.unsupportedApplication
+      else
+        Except.ok none
+  | _ => Except.ok none
 
 structure PsOpenMatchHypotheses where
   scope : PsErasureScope
@@ -1281,7 +1468,7 @@ def psEraseRuntimeExprWithFuel
                       | Except.ok (some lowered) => Except.ok lowered
                       | Except.ok none =>
                           match
-                              psEraseRuntimeRecursorApplication
+                              psEraseNatRecApplication
                                 environment
                                 scope
                                 eraseAt
@@ -1290,45 +1477,54 @@ def psEraseRuntimeExprWithFuel
                           | Except.ok (some lowered) => Except.ok lowered
                           | Except.ok none =>
                               match
-                                  psInferType
+                                  psEraseRuntimeRecursorApplication
                                     environment
-                                    psMetaEmpty
-                                    scope.localContext
-                                    view.head with
-                              | Except.error _ =>
-                                  Except.error
-                                    PsErasureError.unsupportedApplication
-                              | Except.ok headType =>
-                                  match erase view.head with
-                                  | Except.error error =>
-                                      Except.error error
-                                  | Except.ok loweredHead =>
-                                      match
-                                          psEraseApplicationArguments
-                                            erase
-                                            environment
-                                            scope
-                                            headType
-                                            view.args
-                                            {
-                                              typeArgumentsRev := []
-                                              runtimeArgumentsRev := []
-                                              remainingType := headType
-                                            } with
+                                    scope
+                                    eraseAt
+                                    view with
+                              | Except.error error => Except.error error
+                              | Except.ok (some lowered) => Except.ok lowered
+                              | Except.ok none =>
+                                  match
+                                      psInferType
+                                        environment
+                                        psMetaEmpty
+                                        scope.localContext
+                                        view.head with
+                                  | Except.error _ =>
+                                      Except.error
+                                        PsErasureError.unsupportedApplication
+                                  | Except.ok headType =>
+                                      match erase view.head with
                                       | Except.error error =>
                                           Except.error error
-                                      | Except.ok applied =>
-                                          let typeArguments :=
-                                            applied.typeArgumentsRev.reverse
-                                          let runtimeArguments :=
-                                            applied.runtimeArgumentsRev.reverse
-                                          psEraseFinishApplication
-                                            environment
-                                            scope
-                                            loweredHead
-                                            typeArguments
-                                            runtimeArguments
-                                            applied.remainingType
+                                      | Except.ok loweredHead =>
+                                          match
+                                              psEraseApplicationArguments
+                                                erase
+                                                environment
+                                                scope
+                                                headType
+                                                view.args
+                                                {
+                                                  typeArgumentsRev := []
+                                                  runtimeArgumentsRev := []
+                                                  remainingType := headType
+                                                } with
+                                          | Except.error error =>
+                                              Except.error error
+                                          | Except.ok applied =>
+                                              let typeArguments :=
+                                                applied.typeArgumentsRev.reverse
+                                              let runtimeArguments :=
+                                                applied.runtimeArgumentsRev.reverse
+                                              psEraseFinishApplication
+                                                environment
+                                                scope
+                                                loweredHead
+                                                typeArguments
+                                                runtimeArguments
+                                                applied.remainingType
       | .lam name type body binder =>
           let kind :=
             psErasureClassifyBinder

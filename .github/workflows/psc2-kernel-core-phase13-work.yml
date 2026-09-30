@@ -71,6 +71,13 @@ jobs:
           cd psc15selfhost
           lake env lean --run test/CompilerKernelShadowNoninterferenceTests.lean
 
+      - name: Phase 13 PSC1 bootstrap compiler source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run bootstrap:check
+
       - name: Phase 1 through Phase 12 inherited assurance
         shell: bash
         run: |

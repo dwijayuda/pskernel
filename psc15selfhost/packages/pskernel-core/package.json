@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "proofscript": {
-    "bootstrap": false,
+    "bootstrap": true,
     "portable": true,
     "sourceRoots": [
       "src"

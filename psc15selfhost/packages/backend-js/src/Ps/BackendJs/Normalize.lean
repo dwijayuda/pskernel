@@ -2,7 +2,7 @@ import Ps.CompilerIr.Model
 import Ps.BackendJs.Model
 
 
-partial def psJsWrapLambdaArguments
+def psJsWrapLambdaArguments
     (parameters : List PsVerifiedIrParameter)
     (callArguments : List PsVerifiedIrExpr)
     (body : PsVerifiedIrExpr) : Except PsJsError PsVerifiedIrExpr :=

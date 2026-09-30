@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+import {mkdtemp,readFile,rm,writeFile} from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {checkCanonicalAdmissions,createKernel} from '../index.mjs';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const packageRoot=path.resolve(here,'..');
@@ -34,5 +36,58 @@ assert.match(rootIndex,/checkCanonicalAdmissions/);
 
 const closure=await readFile(path.join(workspaceRoot,'scripts/bootstrap-closure-contract-tests.mjs'),'utf8');
 assert.match(closure,/pskernel-lean-wasm/);
+
+const tempRoot=await mkdtemp(path.join(os.tmpdir(),'psc2-lean-wasm-host-'));
+try{
+  const launcherPath=path.join(tempRoot,'provider.cjs');
+  await writeFile(launcherPath,`
+const fs=require('node:fs');
+const metadata={
+  protocol:'pskernel-lean/1',
+  provider:'lean4-cpp',
+  leanVersion:'4.34.0',
+  leanCommit:'293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
+};
+const command=process.argv[2];
+if(command==='--health'){
+  process.stdout.write(JSON.stringify({...metadata,status:'ok'}));
+  process.exit(0);
+}
+if(command==='--check'){
+  const source=fs.readFileSync(0,'utf8');
+  if(source.includes('"reject":true')){
+    process.stdout.write(JSON.stringify({...metadata,accepted:false,errorKind:'kernel-rejection',declarationIndex:0}));
+  }else{
+    process.stdout.write(JSON.stringify({...metadata,accepted:true}));
+  }
+  process.exit(0);
+}
+process.exit(2);
+`,'utf8');
+
+  const kernel=await createKernel({launcherPath});
+  assert.equal(kernel.metadata.protocol,'pskernel-lean/1');
+  assert.equal(kernel.metadata.status,'ok');
+
+  const accepted=await kernel.checkCanonicalAdmissions('{"reject":false}');
+  assert.equal(accepted.accepted,true);
+  assert.equal(accepted.provider,'lean4-cpp');
+
+  const rejected=await checkCanonicalAdmissions('{"reject":true}',{launcherPath});
+  assert.equal(rejected.accepted,false);
+  assert.equal(rejected.errorKind,'kernel-rejection');
+  assert.equal(rejected.declarationIndex,0);
+
+  await assert.rejects(
+    ()=>checkCanonicalAdmissions(null,{launcherPath}),
+    /input must be a string/,
+  );
+  await assert.rejects(
+    ()=>createKernel({launcherPath:path.join(tempRoot,'missing.cjs')}),
+    /WASM kernel provider/,
+  );
+}finally{
+  await rm(tempRoot,{recursive:true,force:true});
+}
 
 console.log('PSC2_LEAN_KERNEL_WASM_PACKAGE_CONTRACT: PASS');

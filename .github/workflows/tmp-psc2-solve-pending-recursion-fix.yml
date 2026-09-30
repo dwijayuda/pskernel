@@ -1,0 +1,116 @@
+name: Temporary PSC2 pending-instance recursion fix
+
+on:
+  push:
+    branches:
+      - tmp/psc2-apply-args-recursion-worker-exec-20260930
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Rewrite pending-instance recursion
+        shell: python
+        run: |
+          from pathlib import Path
+
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          source = path.read_text()
+          start = source.index('def psElabSolvePendingInstances\n')
+          end = source.index('\ndef psElabFinishApplication\n', start)
+          replacement = '''def psElabSolvePendingInstancesWorker
+              (pendingInstances : List Nat) :
+              PsElabTermResult ->
+              Except PsElabError PsElabTermResult :=
+            match pendingInstances with
+            | [] =>
+                fun (current : PsElabTermResult) =>
+                  let metaContext := current.context.metaContext;
+                  Except.ok {
+                    context := current.context
+                    term := psMetaInstantiate metaContext current.term
+                    type := psMetaInstantiate metaContext current.type
+                  }
+            | id :: rest =>
+                let smaller :
+                    PsElabTermResult ->
+                    Except PsElabError PsElabTermResult :=
+                  psElabSolvePendingInstancesWorker rest;
+                fun (current : PsElabTermResult) =>
+                  let metaContext := current.context.metaContext;
+                  match psMetaFindAssignment metaContext id with
+                  | some _ =>
+                      smaller current
+                  | none =>
+                      match psMetaFindDecl metaContext id with
+                      | none =>
+                          Except.error PsElabError.implicitApplicationUnsupported
+                      | some declaration =>
+                          let target :=
+                            psMetaInstantiate metaContext declaration.type;
+                          if psExprHasUnresolvedMeta target then
+                            Except.error PsElabError.implicitApplicationUnsupported
+                          else
+                            let synthesized :=
+                              psSynthInstance
+                                current.context.environment
+                                current.context.localContext
+                                current.context.instances
+                                metaContext
+                                target;
+                            match synthesized.value with
+                            | none =>
+                                Except.error PsElabError.implicitApplicationUnsupported
+                            | some value =>
+                                match psMetaAssign
+                                    synthesized.context
+                                    id
+                                    value with
+                                | none =>
+                                    Except.error
+                                      PsElabError.implicitApplicationUnsupported
+                                | some assigned =>
+                                    let assignedResult : PsElabTermResult := {
+                                      context :=
+                                        psElabContextWithMeta
+                                          current.context
+                                          assigned
+                                      term := current.term
+                                      type := current.type
+                                    };
+                                    smaller assignedResult
+
+          def psElabSolvePendingInstances
+              (current : PsElabTermResult)
+              (pendingInstances : List Nat) :
+              Except PsElabError PsElabTermResult :=
+            psElabSolvePendingInstancesWorker
+              pendingInstances
+              current
+          '''
+          path.write_text(source[:start] + replacement + source[end:])
+      - name: Verify focused source gates
+        working-directory: psc15selfhost
+        run: |
+          node scripts/check-elab-apply-args-option-selfhost-source-syntax.mjs
+          node scripts/check-elab-apply-args-recursion-selfhost-source-syntax.mjs
+          node scripts/check-elab-apply-args-next-pending-selfhost-source-syntax.mjs
+          node scripts/check-elab-solve-pending-recursion-selfhost-source-syntax.mjs
+      - name: Commit source fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "fix(psc2): normalize pending-instance recursion"
+          git push origin HEAD:tmp/psc2-apply-args-recursion-worker-exec-20260930

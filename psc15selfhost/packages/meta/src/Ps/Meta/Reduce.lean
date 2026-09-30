@@ -14,9 +14,12 @@ def psWhnfCoreWithFuel
       match instantiated with
       | .fvar id =>
           match psLocalFindById localContext id with
-          | some (.letDecl _ _ _ value) =>
-              psWhnfCoreWithFuel metaContext localContext fuel value
-          | _ => instantiated
+          | some declaration =>
+              match declaration with
+              | .letDecl _ _ _ value =>
+                  psWhnfCoreWithFuel metaContext localContext fuel value
+              | _ => instantiated
+          | none => instantiated
       | .letE _ _ value body =>
           psWhnfCoreWithFuel
             metaContext

@@ -116,6 +116,10 @@ lean_exe psc2_backend_js_tests where
   srcDir := "test"
   root := `BackendJsTests
 
+lean_exe psc2_backend_js_machine_int_tests where
+  srcDir := "test"
+  root := `BackendJsMachineIntTests
+
 lean_lib PsBackendRust where
   srcDir := "packages/backend-rust/src"
   roots := #[

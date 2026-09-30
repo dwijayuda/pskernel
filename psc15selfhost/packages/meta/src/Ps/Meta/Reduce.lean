@@ -70,10 +70,12 @@ def psWhnfDeltaCandidate
           match psDeclarationValue declaration with
           | none => Option.none
           | some value =>
-              let parameters := psDeclarationLevelParams declaration;
+              let parameters : List PsName :=
+                psDeclarationLevelParams declaration;
               if Nat.beq parameters.length levels.length then
-                Option.some
-                  (psExprInstantiateLevelParams parameters levels value)
+                let instantiated : PsExpr :=
+                  psExprInstantiateLevelParams parameters levels value;
+                Option.some instantiated
               else
                 Option.none
   | _ => Option.none

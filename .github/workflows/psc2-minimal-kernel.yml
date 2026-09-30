@@ -30,6 +30,7 @@ on:
       - psc15selfhost/scripts/check-unify-selfhost-source-syntax.mjs
       - psc15selfhost/scripts/check-elab-context-selfhost-source-syntax.mjs
       - psc15selfhost/scripts/check-elab-match-fields-selfhost-source-syntax.mjs
+      - psc15selfhost/scripts/check-elab-wildcard-binder-names-selfhost-source-syntax.mjs
       - .github/workflows/psc2-minimal-kernel.yml
   workflow_dispatch:
 
@@ -81,6 +82,13 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           lake exe psc2_kernel_core_expr_parity_tests
+
+      - name: Wildcard binder Nat rendering gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          node scripts/check-elab-wildcard-binder-names-selfhost-source-syntax.mjs
 
       - name: Bootstrap closure remains isolated
         shell: bash

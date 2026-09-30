@@ -337,20 +337,27 @@ def psInferProjectionTypeWithMetadata
       numIndices
       numArgs
       numParams;
-  match metadataValid with
-  | true =>
-      psInferProjectionTypeWithConstructors
-        environment
-        metaContext
-        localContext
-        typeName
-        index
-        target
-        viewArgs
-        numParams
-        constructors
-  | false =>
-      Except.error PsInferError.projectionUnsupported
+  if psInferBoolNot metadataValid then
+    Except.error PsInferError.projectionUnsupported
+  else
+    match constructors with
+    | List.nil =>
+        Except.error PsInferError.projectionUnsupported
+    | List.cons constructorName remainingConstructors =>
+        match remainingConstructors with
+        | List.nil =>
+            psInferProjectionTypeWithConstructor
+              environment
+              metaContext
+              localContext
+              typeName
+              index
+              target
+              viewArgs
+              numParams
+              constructorName
+        | List.cons _ _ =>
+            Except.error PsInferError.projectionUnsupported
 
 def psInferProjectionTypeWithInfo
     (environment : PsEnvironment)

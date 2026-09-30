@@ -26,6 +26,21 @@ inductive PsJsIntrinsic where
   | natNe
   | natLe
   | natLt
+  | intOfNat
+  | intNegSucc
+  | intNeg
+  | intAdd
+  | intSub
+  | intMul
+  | intEq
+  | intLe
+  | intLt
+  | intRepr
+  | boolNot
+  | boolAnd
+  | boolOr
+  | boolEq
+  | boolNe
 
 inductive PsJsExpr where
   | literal (value : PsJsLiteral)

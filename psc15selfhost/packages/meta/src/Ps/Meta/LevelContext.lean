@@ -90,8 +90,15 @@ def psLevelInstantiateWithFuel
     (level : PsLevel) : PsLevel :=
   psLevelInstantiateWithFuelWorker fuel context level
 
+def psLevelAssignmentListLength
+    (assignments : List PsLevelAssignment) : Nat :=
+  match assignments with
+  | [] => Nat.zero
+  | _ :: rest => Nat.succ (psLevelAssignmentListLength rest)
+
 def psLevelInstantiate (context : PsLevelMetaContext) (level : PsLevel) : PsLevel :=
-  psLevelInstantiateWithFuel context (Nat.add context.assignments.length 1) level
+  let fuel := Nat.succ (psLevelAssignmentListLength context.assignments);
+  psLevelInstantiateWithFuel context fuel level
 
 def psLevelOccursResolved (target : Nat) : PsLevel -> Bool
   | .mvar id => Nat.beq id target

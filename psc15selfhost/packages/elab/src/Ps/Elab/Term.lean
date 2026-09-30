@@ -2527,15 +2527,15 @@ def psElabRecordCandidateFromExpected
           psEnvironmentFindInductive
             context.environment
             typeName with
-      | none => none
-      | some info =>
+      | Option.none => Option.none
+      | Option.some info =>
           if psElabNatNe (psElabListLength view.args) info.numParams then
-            none
+            Option.none
           else
             psElabRecordCandidateForInfo
               context.environment
               info
-  | _ => none
+  | _ => Option.none
 
 def psElabRecordCandidates
     (environment : PsEnvironment)

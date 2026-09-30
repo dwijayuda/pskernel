@@ -346,3 +346,37 @@ if (/\|\s*none\s*=>/.test(candidateInfo) || /\|\s*some\s+/.test(candidateInfo) |
 process.stdout.write(
   "PSC2_ELAB_RECORD_CANDIDATE_INFO_SELFHOST_SOURCE_SYNTAX: PASS (structure candidate lookup; explicit Option constructors)\n",
 );
+
+const candidateExpectedStart = source.indexOf("def psElabRecordCandidateFromExpected\n");
+const candidateExpectedEnd = source.indexOf("\ndef psElabRecordCandidates\n", candidateExpectedStart + 1);
+if (candidateExpectedStart < 0 || candidateExpectedEnd < 0) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATE_EXPECTED_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
+  );
+}
+
+const candidateExpected = source.slice(candidateExpectedStart, candidateExpectedEnd);
+if (!/match\s+view\.head\s+with/.test(candidateExpected) || !/\.constE\s+typeName\s+_/.test(candidateExpected)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATE_EXPECTED_SELFHOST_SOURCE_SYNTAX_MISSING: head view match",
+  );
+}
+if (!/psEnvironmentFindInductive/.test(candidateExpected)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATE_EXPECTED_SELFHOST_SOURCE_SYNTAX_MISSING: inductive lookup",
+  );
+}
+if (!/Option\.none/.test(candidateExpected) || !/Option\.some\s+info/.test(candidateExpected)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATE_EXPECTED_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option values",
+  );
+}
+if (/\|\s*none\s*=>/.test(candidateExpected) || /\|\s*some\s+/.test(candidateExpected) || /=>\s*none\b/.test(candidateExpected) || /\n\s*some\s+/.test(candidateExpected)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATE_EXPECTED_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: unqualified Option constructor remains",
+  );
+}
+
+process.stdout.write(
+  "PSC2_ELAB_RECORD_CANDIDATE_EXPECTED_SELFHOST_SOURCE_SYNTAX: PASS (expected-type candidate lookup; explicit Option constructors)\n",
+);

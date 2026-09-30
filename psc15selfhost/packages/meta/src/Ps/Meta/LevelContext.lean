@@ -100,20 +100,36 @@ def psLevelInstantiate (context : PsLevelMetaContext) (level : PsLevel) : PsLeve
   let fuel := Nat.succ (psLevelAssignmentListLength context.assignments);
   psLevelInstantiateWithFuel context fuel level
 
-def psLevelOccursResolved (target : Nat) : PsLevel -> Bool
-  | .mvar id => Nat.beq id target
-  | .succ value => psLevelOccursResolved target value
+def psLevelOccursResolvedWorker
+    (level : PsLevel) : Nat -> Bool :=
+  match level with
+  | .mvar id =>
+      fun (target : Nat) => Nat.beq id target
+  | .succ value =>
+      let smaller : Nat -> Bool :=
+        psLevelOccursResolvedWorker value;
+      fun (target : Nat) => smaller target
   | .max left right =>
-      if psLevelOccursResolved target left then
-        true
-      else
-        psLevelOccursResolved target right
+      let leftOccurs : Nat -> Bool :=
+        psLevelOccursResolvedWorker left;
+      let rightOccurs : Nat -> Bool :=
+        psLevelOccursResolvedWorker right;
+      fun (target : Nat) =>
+        if leftOccurs target then true else rightOccurs target
   | .imax left right =>
-      if psLevelOccursResolved target left then
-        true
-      else
-        psLevelOccursResolved target right
-  | _ => false
+      let leftOccurs : Nat -> Bool :=
+        psLevelOccursResolvedWorker left;
+      let rightOccurs : Nat -> Bool :=
+        psLevelOccursResolvedWorker right;
+      fun (target : Nat) =>
+        if leftOccurs target then true else rightOccurs target
+  | _ =>
+      fun (_target : Nat) => false
+
+def psLevelOccursResolved
+    (target : Nat)
+    (level : PsLevel) : Bool :=
+  psLevelOccursResolvedWorker level target
 
 def psLevelOccurs (context : PsLevelMetaContext) (target : Nat) (level : PsLevel) : Bool :=
   psLevelOccursResolved target (psLevelInstantiate context level)

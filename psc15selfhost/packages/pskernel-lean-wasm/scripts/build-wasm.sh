@@ -227,14 +227,14 @@ LEAN_CC="$(command -v em++)" "$wasm_leanc" \
   -O3 \
   -sENVIRONMENT=node \
   -sEXIT_RUNTIME=1 \
-  -o "$out_dir/pskernel-lean.js"
+  -o "$out_dir/pskernel-lean.cjs"
 
 if [[ ! -s "$out_dir/pskernel-lean.wasm" ]]; then
   echo 'WASM provider artifact was not produced' >&2
   exit 1
 fi
 
-health_json="$(node "$out_dir/pskernel-lean.js" --health)"
+health_json="$(node "$out_dir/pskernel-lean.cjs" --health)"
 node -e '
   const value=JSON.parse(process.argv[1]);
   if(value.status!=="ok"||value.protocol!=="pskernel-lean/1"||

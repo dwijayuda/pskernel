@@ -127,80 +127,94 @@ def psJsEmitAtomicArguments (callArguments : List PsJsExpr) : Except PsJsError S
               | Except.ok printedRest =>
                   Except.ok (psJsTextConcat3 printedArgument ", " printedRest)
 
+def psJsEmitExprWithFuel (fuel : Nat) : PsJsExpr -> Except PsJsError String :=
+  match fuel with
+  | Nat.zero =>
+      fun (_expr : PsJsExpr) => Except.error PsJsError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller : PsJsExpr -> Except PsJsError String :=
+        psJsEmitExprWithFuel remaining;
+      fun (expr : PsJsExpr) =>
+        match expr with
+        | PsJsExpr.literal value => psJsEmitLiteral value
+        | PsJsExpr.local index => psJsLocalName index
+        | PsJsExpr.global index => psJsGlobalName index
+        | PsJsExpr.intrinsic operation arguments =>
+            match arguments with
+            | List.nil => Except.error PsJsError.unsupportedExpression
+            | List.cons left restArguments =>
+                match restArguments with
+                | List.nil => Except.error PsJsError.unsupportedExpression
+                | List.cons right trailingArguments =>
+                    match trailingArguments with
+                    | List.cons _extra _extras => Except.error PsJsError.unsupportedExpression
+                    | List.nil =>
+                        match smaller left with
+                        | Except.error error => Except.error error
+                        | Except.ok printedLeft =>
+                            match smaller right with
+                            | Except.error error => Except.error error
+                            | Except.ok printedRight =>
+                                Except.ok
+                                  (psJsEmitNatIntrinsic
+                                    operation printedLeft printedRight)
+        | PsJsExpr.letE index value body =>
+            match psJsLocalName index with
+            | Except.error error => Except.error error
+            | Except.ok name =>
+                match smaller body with
+                | Except.error error => Except.error error
+                | Except.ok printedBody =>
+                    match smaller value with
+                    | Except.error error => Except.error error
+                    | Except.ok printedValue =>
+                        let start := psJsTextConcat3 "((" name ") => ";
+                        let withBody := psJsTextConcat3 start printedBody ")(";
+                        Except.ok (psJsTextConcat3 withBody printedValue ")")
+        | PsJsExpr.lambda parameters body =>
+            match psJsEmitParameterNames parameters with
+            | Except.error error => Except.error error
+            | Except.ok names =>
+                match smaller body with
+                | Except.error error => Except.error error
+                | Except.ok printedBody =>
+                    let start := psJsTextConcat3 "((" names ") => ";
+                    Except.ok (psJsTextConcat3 start printedBody ")")
+        | PsJsExpr.call fn callArguments =>
+            match fn with
+            | PsJsExpr.global index =>
+                match callArguments with
+                | List.nil => Except.error PsJsError.unsupportedExpression
+                | List.cons _firstArgument _restArguments =>
+                    match psJsGlobalName index with
+                    | Except.error error => Except.error error
+                    | Except.ok printedFn =>
+                        match psJsEmitAtomicArguments callArguments with
+                        | Except.error error => Except.error error
+                        | Except.ok printedArguments =>
+                            let start := psJsTextConcat2 "(" printedFn;
+                            let middle :=
+                              psJsTextConcat3 start ")(" printedArguments;
+                            Except.ok (psJsTextConcat2 middle ")")
+            | _ => Except.error PsJsError.unsupportedExpression
+        | PsJsExpr.ifE condition thenBranch elseBranch =>
+            match smaller condition with
+            | Except.error error => Except.error error
+            | Except.ok printedCondition =>
+                match smaller thenBranch with
+                | Except.error error => Except.error error
+                | Except.ok printedThen =>
+                    match smaller elseBranch with
+                    | Except.error error => Except.error error
+                    | Except.ok printedElse =>
+                        let start := psJsTextConcat2 "(" printedCondition;
+                        let withThen := psJsTextConcat3 start " ? " printedThen;
+                        let withElse :=
+                          psJsTextConcat3 withThen " : " printedElse;
+                        Except.ok (psJsTextConcat2 withElse ")")
+
 def psJsEmitExpr (expr : PsJsExpr) : Except PsJsError String :=
-  match expr with
-  | PsJsExpr.literal value => psJsEmitLiteral value
-  | PsJsExpr.local index => psJsLocalName index
-  | PsJsExpr.global index => psJsGlobalName index
-  | PsJsExpr.intrinsic operation arguments =>
-      match arguments with
-      | List.nil => Except.error PsJsError.unsupportedExpression
-      | List.cons left restArguments =>
-          match restArguments with
-          | List.nil => Except.error PsJsError.unsupportedExpression
-          | List.cons right trailingArguments =>
-              match trailingArguments with
-              | List.cons _extra _extras => Except.error PsJsError.unsupportedExpression
-              | List.nil =>
-                  match psJsEmitExpr left with
-                  | Except.error error => Except.error error
-                  | Except.ok printedLeft =>
-                      match psJsEmitExpr right with
-                      | Except.error error => Except.error error
-                      | Except.ok printedRight =>
-                          Except.ok (psJsEmitNatIntrinsic operation printedLeft printedRight)
-  | PsJsExpr.letE index value body =>
-      match psJsLocalName index with
-      | Except.error error => Except.error error
-      | Except.ok name =>
-          match psJsEmitExpr body with
-          | Except.error error => Except.error error
-          | Except.ok printedBody =>
-              match psJsEmitExpr value with
-              | Except.error error => Except.error error
-              | Except.ok printedValue =>
-                  let start := psJsTextConcat3 "((" name ") => ";
-                  let withBody := psJsTextConcat3 start printedBody ")(";
-                  Except.ok (psJsTextConcat3 withBody printedValue ")")
-  | PsJsExpr.lambda parameters body =>
-      match psJsEmitParameterNames parameters with
-      | Except.error error => Except.error error
-      | Except.ok names =>
-          match psJsEmitExpr body with
-          | Except.error error => Except.error error
-          | Except.ok printedBody =>
-              let start := psJsTextConcat3 "((" names ") => ";
-              Except.ok (psJsTextConcat3 start printedBody ")")
-  | PsJsExpr.call fn callArguments =>
-      match fn with
-      | PsJsExpr.global index =>
-          match callArguments with
-          | List.nil => Except.error PsJsError.unsupportedExpression
-          | List.cons _firstArgument _restArguments =>
-              match psJsGlobalName index with
-              | Except.error error => Except.error error
-              | Except.ok printedFn =>
-                  match psJsEmitAtomicArguments callArguments with
-                  | Except.error error => Except.error error
-                  | Except.ok printedArguments =>
-                      let start := psJsTextConcat2 "(" printedFn;
-                      let middle := psJsTextConcat3 start ")(" printedArguments;
-                      Except.ok (psJsTextConcat2 middle ")")
-      | _ => Except.error PsJsError.unsupportedExpression
-  | PsJsExpr.ifE condition thenBranch elseBranch =>
-      match psJsEmitExpr condition with
-      | Except.error error => Except.error error
-      | Except.ok printedCondition =>
-          match psJsEmitExpr thenBranch with
-          | Except.error error => Except.error error
-          | Except.ok printedThen =>
-              match psJsEmitExpr elseBranch with
-              | Except.error error => Except.error error
-              | Except.ok printedElse =>
-                  let start := psJsTextConcat2 "(" printedCondition;
-                  let withThen := psJsTextConcat3 start " ? " printedThen;
-                  let withElse := psJsTextConcat3 withThen " : " printedElse;
-                  Except.ok (psJsTextConcat2 withElse ")")
+  psJsEmitExprWithFuel 4096 expr
 
 def psJsEmitConstantsWithFuel (fuel : Nat) :
     List PsJsConstant -> Nat -> Except PsJsError String :=

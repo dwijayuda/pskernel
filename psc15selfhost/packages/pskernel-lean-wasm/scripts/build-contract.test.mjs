@@ -129,6 +129,16 @@ const acceptedFixtureLine=build.split('\n').find(line=>line.startsWith('accepted
 const rejectedFixtureLine=build.split('\n').find(line=>line.startsWith('rejected_request='));
 assert.ok(acceptedFixtureLine?.includes(`'{"protocol"`),'accepted smoke fixture must be literal JSON without shell escape backslashes');
 assert.ok(rejectedFixtureLine?.includes(`'{"protocol"`),'rejected smoke fixture must be literal JSON without shell escape backslashes');
+assert.match(acceptedFixtureLine??'',/"format":"proofscript-checked-admissions"/);
+assert.match(acceptedFixtureLine??'',/"version":2/);
+assert.match(acceptedFixtureLine??'',/"admissions":\[/);
+assert.match(rejectedFixtureLine??'',/"format":"proofscript-checked-admissions"/);
+assert.match(rejectedFixtureLine??'',/"version":2/);
+assert.match(rejectedFixtureLine??'',/"admissions":\[/);
+assert.doesNotMatch(acceptedFixtureLine??'',/ps-canonical-admissions-v2/);
+assert.doesNotMatch(rejectedFixtureLine??'',/ps-canonical-admissions-v2/);
+assert.doesNotMatch(acceptedFixtureLine??'',/"declarations":\[/);
+assert.doesNotMatch(rejectedFixtureLine??'',/"declarations":\[/);
 
 const patch=await readFile(path.join(packageRoot,'patches/lean4-4.34.0-emscripten-uv-stubs.patch'),'utf8');
 assert.match(patch,/runtime\/uv\/event_loop\.cpp/);

@@ -53,19 +53,29 @@ def psUnifyAssign
     psUnifyFailure context
 
 def psUnifyLevelLists
-    (context : PsMetaContext) :
-    List PsLevel -> List PsLevel -> PsUnifyResult
-  | [], [] => psUnifySuccess context
-  | left :: leftRest, right :: rightRest =>
-      let unified := psLevelUnify context.levels left right
-      if unified.success then
-        psUnifyLevelLists
-          (psMetaSetLevels context unified.context)
-          leftRest
-          rightRest
-      else
-        psUnifyFailure context
-  | _, _ => psUnifyFailure context
+    (leftLevels : List PsLevel) :
+    PsMetaContext -> List PsLevel -> PsUnifyResult :=
+  match leftLevels with
+  | List.nil =>
+      fun (context : PsMetaContext) (rightLevels : List PsLevel) =>
+        match rightLevels with
+        | List.nil => psUnifySuccess context
+        | List.cons _ _ => psUnifyFailure context
+  | List.cons left leftRest =>
+      let smaller :
+          PsMetaContext -> List PsLevel -> PsUnifyResult :=
+        psUnifyLevelLists leftRest;
+      fun (context : PsMetaContext) (rightLevels : List PsLevel) =>
+        match rightLevels with
+        | List.nil => psUnifyFailure context
+        | List.cons right rightRest =>
+            let unified := psLevelUnify context.levels left right;
+            if unified.success then
+              smaller
+                (psMetaSetLevels context unified.context)
+                rightRest
+            else
+              psUnifyFailure context
 
 def psUnifyWithFuel
     (environment : PsEnvironment)
@@ -103,7 +113,7 @@ def psUnifyWithFuel
               psUnifyFailure context
         | .constE leftName leftLevels, .constE rightName rightLevels =>
             if psNameEq leftName rightName then
-              psUnifyLevelLists context leftLevels rightLevels
+              psUnifyLevelLists leftLevels context rightLevels
             else
               psUnifyFailure context
         | .app leftFn leftArg, .app rightFn rightArg =>

@@ -138,6 +138,13 @@ jobs:
           cd psc15selfhost
           npm run check:selfhost-source-syntax
 
+      - name: Elaborator source builds under Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake build Ps.Elab.Term
+
       - name: Bootstrap closure remains isolated
         shell: bash
         run: |

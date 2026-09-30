@@ -76,6 +76,7 @@ lean_lib PsErasure where
     `Ps.Erasure.Inductive,
     `Ps.Erasure.Structure,
     `Ps.Erasure.StructureRecursor,
+    `Ps.Erasure.PrimitiveNat,
     `Ps.Erasure.Expr,
     `Ps.Erasure.Definition
   ]

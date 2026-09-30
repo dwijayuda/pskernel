@@ -2703,6 +2703,74 @@ def psElabNatListAt
   psElabNatListAtWorker
     index
     values
+def psElabValidateStructuralCallWorker
+    (arguments : List PsSyntaxTerm) :
+    PsElabContext ->
+    PsElabStructuralRecursion ->
+    Nat ->
+    Option Nat ->
+    Except PsElabError Nat :=
+  match arguments with
+  | [] =>
+      fun (context : PsElabContext) =>
+        fun (recursion : PsElabStructuralRecursion) =>
+          fun (index : Nat) =>
+            fun (hypothesisId : Option Nat) =>
+              match hypothesisId with
+              | Option.some resolvedHypothesisId =>
+                  Except.ok resolvedHypothesisId
+              | Option.none =>
+                  Except.error PsElabError.structuralRecursionInternal
+  | argument :: rest =>
+      let smaller :
+          PsElabContext ->
+          PsElabStructuralRecursion ->
+          Nat ->
+          Option Nat ->
+          Except PsElabError Nat :=
+        psElabValidateStructuralCallWorker rest;
+      fun (context : PsElabContext) =>
+        fun (recursion : PsElabStructuralRecursion) =>
+          fun (index : Nat) =>
+            fun (hypothesisId : Option Nat) =>
+              match psElabSyntaxLocalId context argument with
+              | Option.none =>
+                  if Nat.beq index recursion.recursiveParameterIndex then
+                    Except.error PsElabError.structuralRecursionNotDecreasing
+                  else
+                    Except.error PsElabError.structuralRecursionInvariantArgument
+              | Option.some argumentId =>
+                  if Nat.beq index recursion.recursiveParameterIndex then
+                    match
+                        psElabStructuralRecursionFindCall
+                          recursion.calls
+                          argumentId with
+                    | Option.none =>
+                        Except.error PsElabError.structuralRecursionNotDecreasing
+                    | Option.some nextHypothesisId =>
+                        smaller
+                          context
+                          recursion
+                          (Nat.succ index)
+                          (Option.some nextHypothesisId)
+                  else
+                    match
+                        psElabNatListAt
+                          recursion.explicitParameterIds
+                          index with
+                    | Option.none =>
+                        Except.error PsElabError.structuralRecursionArity
+                    | Option.some originalId =>
+                        if Nat.beq argumentId originalId then
+                          smaller
+                            context
+                            recursion
+                            (Nat.succ index)
+                            hypothesisId
+                        else
+                          Except.error
+                            PsElabError.structuralRecursionInvariantArgument
+
 def psElabValidateStructuralCall
     (context : PsElabContext)
     (recursion : PsElabStructuralRecursion)
@@ -2710,54 +2778,12 @@ def psElabValidateStructuralCall
     (arguments : List PsSyntaxTerm)
     (hypothesisId : Option Nat) :
     Except PsElabError Nat :=
-  match arguments with
-  | [] =>
-      match hypothesisId with
-      | some resolvedHypothesisId =>
-          Except.ok resolvedHypothesisId
-      | none =>
-          Except.error PsElabError.structuralRecursionInternal
-  | argument :: rest =>
-      match psElabSyntaxLocalId context argument with
-      | none =>
-          if Nat.beq index recursion.recursiveParameterIndex then
-            Except.error PsElabError.structuralRecursionNotDecreasing
-          else
-            Except.error PsElabError.structuralRecursionInvariantArgument
-      | some argumentId =>
-          if Nat.beq index recursion.recursiveParameterIndex then
-            match
-                psElabStructuralRecursionFindCall
-                  recursion.calls
-                  argumentId with
-            | none =>
-                Except.error PsElabError.structuralRecursionNotDecreasing
-            | some nextHypothesisId =>
-                psElabValidateStructuralCall
-                  context
-                  recursion
-                  (Nat.succ index)
-                  rest
-                  (some nextHypothesisId)
-          else
-            match
-                psElabNatListAt
-                  recursion.explicitParameterIds
-                  index with
-            | none =>
-                Except.error PsElabError.structuralRecursionArity
-            | some originalId =>
-                if Nat.beq argumentId originalId then
-                  psElabValidateStructuralCall
-                    context
-                    recursion
-                    (Nat.succ index)
-                    rest
-                    hypothesisId
-                else
-                  Except.error
-                    PsElabError.structuralRecursionInvariantArgument
-
+  psElabValidateStructuralCallWorker
+    arguments
+    context
+    recursion
+    index
+    hypothesisId
 def psTryElabStructuralSelfCall
     (context : PsElabContext)
     (fn : PsSyntaxTerm)

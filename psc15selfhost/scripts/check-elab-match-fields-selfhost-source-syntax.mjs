@@ -181,15 +181,21 @@ for (const pattern of forbidden) {
 }
 
 const matchFieldAtMatch = source.match(
-  /def psElabMatchFieldAt([\s\S]*?)(?=\nstructure PsElabMatchHypothesesResult)/,
+  /def psElabMatchFieldAtWorker([\s\S]*?)(?=\nstructure PsElabMatchHypothesesResult)/,
 );
 if (matchFieldAtMatch === null) {
-  throw new Error("PSC2_ELAB_MATCH_FIELD_AT_SELFHOST_SOURCE_SYNTAX_MISSING: declaration");
+  throw new Error(
+    "PSC2_ELAB_MATCH_FIELD_AT_SELFHOST_SOURCE_SYNTAX_MISSING: invariant-safe index-recursive worker",
+  );
 }
 const matchFieldAt = matchFieldAtMatch[0];
 for (const pattern of [
+  /def psElabMatchFieldAtWorker\s*\(index : Nat\)\s*:\s*List PsElabMatchField -> Option PsElabMatchField :=\s*match index with/,
+  /let smaller[\s\S]*?psElabMatchFieldAtWorker\s+nextIndex/,
   /\| \[\] =>\s*Option\.none/,
-  /\| 0 =>\s*Option\.some field/,
+  /Option\.some field/,
+  /smaller\s+rest/,
+  /def psElabMatchFieldAt\s*\(fields : List PsElabMatchField\)\s*\(index : Nat\)\s*:\s*Option PsElabMatchField :=\s*psElabMatchFieldAtWorker\s+index\s+fields/,
 ]) {
   if (!pattern.test(matchFieldAt)) {
     throw new Error(
@@ -197,7 +203,12 @@ for (const pattern of [
     );
   }
 }
+if (/psElabMatchFieldAt\s+rest\s+nextIndex/.test(matchFieldAt)) {
+  throw new Error(
+    "PSC2_ELAB_MATCH_FIELD_AT_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: direct recursion changes structural and invariant arguments",
+  );
+}
 
 process.stdout.write(
-  "PSC2_ELAB_MATCH_FIELDS_SELFHOST_SOURCE_SYNTAX: PASS (binder-list-recursive worker with post-recursion context/cursor/field accumulator; explicit match-field Option constructors)\n",
+  "PSC2_ELAB_MATCH_FIELDS_SELFHOST_SOURCE_SYNTAX: PASS (binder-list-recursive worker with post-recursion context/cursor/field accumulator; invariant-safe index-recursive match-field lookup with explicit Option constructors)\n",
 );

@@ -3,7 +3,35 @@ import Ps.KernelCore.RecursiveInductive
 
 structure PsKernelCoreRecursiveRecursorField where
   value : PsKernelCoreExpr
+  type : PsKernelCoreExpr
+  argCount : Nat
   isRecursive : Bool
+
+structure PsKernelCoreRecursiveRecursorFieldClassification where
+  isRecursive : Bool
+  argCount : Nat
+
+def psKernelCoreRecursiveRecursorClassifyField
+    (shape : PsKernelCoreOption PsKernelCoreRecursiveFieldShape) :
+    PsKernelCoreResult String PsKernelCoreRecursiveRecursorFieldClassification :=
+  match shape with
+  | PsKernelCoreOption.none =>
+      let classification : PsKernelCoreRecursiveRecursorFieldClassification := {
+        isRecursive := false
+        argCount := 0
+      };
+      PsKernelCoreResult.ok classification
+  | PsKernelCoreOption.some recursive =>
+      match recursive.indices with
+      | PsKernelCoreList.nil =>
+          let classification : PsKernelCoreRecursiveRecursorFieldClassification := {
+            isRecursive := true
+            argCount := recursive.argCount
+          };
+          PsKernelCoreResult.ok classification
+      | PsKernelCoreList.cons _ _ =>
+          PsKernelCoreResult.error
+            "indexed recursive field is not supported in direct recursive recursor slice"
 
 structure PsKernelCoreRecursiveRecursorOpenState where
   ctorResult : PsKernelCoreExpr
@@ -64,25 +92,10 @@ def psKernelCoreRecursiveRecursorOpenDirectFields
                   | PsKernelCoreResult.error message =>
                       PsKernelCoreResult.error message
                   | PsKernelCoreResult.ok recursiveShape =>
-                      let isRecursiveResult : PsKernelCoreResult String Bool :=
-                        match recursiveShape with
-                        | PsKernelCoreOption.none =>
-                            PsKernelCoreResult.ok false
-                        | PsKernelCoreOption.some shape =>
-                            if Nat.beq shape.argCount 0 then
-                              match shape.indices with
-                              | PsKernelCoreList.nil =>
-                                  PsKernelCoreResult.ok true
-                              | PsKernelCoreList.cons _ _ =>
-                                  PsKernelCoreResult.error
-                                    "indexed recursive field is not supported in direct recursive recursor slice"
-                            else
-                              PsKernelCoreResult.error
-                                "functional recursive field is not supported in direct recursive recursor slice";
-                      match isRecursiveResult with
+                      match psKernelCoreRecursiveRecursorClassifyField recursiveShape with
                       | PsKernelCoreResult.error message =>
                           PsKernelCoreResult.error message
-                      | PsKernelCoreResult.ok isRecursive =>
+                      | PsKernelCoreResult.ok classification =>
                           let fresh := psKernelCoreRecursorFreshFVar seed;
                           let openedCtor :=
                             psKernelCoreExprInstantiate1 ctorBody fresh;
@@ -97,7 +110,9 @@ def psKernelCoreRecursiveRecursorOpenDirectFields
                           | PsKernelCoreResult.ok state =>
                               let fieldInfo : PsKernelCoreRecursiveRecursorField := {
                                 value := fresh
-                                isRecursive := isRecursive
+                                type := ctorDomain
+                                argCount := classification.argCount
+                                isRecursive := classification.isRecursive
                               };
                               let nextState : PsKernelCoreRecursiveRecursorOpenState := {
                                 ctorResult := state.ctorResult
@@ -116,6 +131,43 @@ def psKernelCoreRecursiveRecursorOpenDirectFields
         | _ =>
             PsKernelCoreResult.error
               "recursive recursor constructor has too few fields"
+
+def psKernelCoreRecursiveRecursorFunctionalIhType
+    (argCount : Nat) :
+    PsKernelCoreExpr ->
+    PsKernelCoreExpr ->
+    PsKernelCoreExpr ->
+    Nat ->
+    PsKernelCoreOption PsKernelCoreExpr :=
+  match argCount with
+  | Nat.zero =>
+      fun (_fieldType : PsKernelCoreExpr)
+          (fieldValue : PsKernelCoreExpr)
+          (motive : PsKernelCoreExpr)
+          (_seed : Nat) =>
+        PsKernelCoreOption.some (PsKernelCoreExpr.app motive fieldValue)
+  | Nat.succ remaining =>
+      let buildRemaining :=
+        psKernelCoreRecursiveRecursorFunctionalIhType remaining;
+      fun (fieldType : PsKernelCoreExpr)
+          (fieldValue : PsKernelCoreExpr)
+          (motive : PsKernelCoreExpr)
+          (seed : Nat) =>
+        match fieldType with
+        | PsKernelCoreExpr.forallE userName domain body binderInfo =>
+            let fresh := psKernelCoreRecursorFreshFVar seed;
+            let openedType := psKernelCoreExprInstantiate1 body fresh;
+            let appliedField := PsKernelCoreExpr.app fieldValue fresh;
+            match buildRemaining
+                openedType appliedField motive (Nat.succ seed) with
+            | PsKernelCoreOption.none => PsKernelCoreOption.none
+            | PsKernelCoreOption.some inner =>
+                PsKernelCoreOption.some
+                  (PsKernelCoreExpr.forallE
+                    userName domain
+                    (psKernelCoreExprAbstractFVar inner fresh)
+                    binderInfo)
+        | _ => PsKernelCoreOption.none
 
 def psKernelCoreRecursiveRecursorConsumeDirectIhs
     (fields : PsKernelCoreList PsKernelCoreRecursiveRecursorField) :
@@ -137,15 +189,17 @@ def psKernelCoreRecursiveRecursorConsumeDirectIhs
         if field.isRecursive then
           match minorExpr with
           | PsKernelCoreExpr.forallE _ ihDomain ihBody _ =>
-              let expectedDomain :=
-                PsKernelCoreExpr.app motive field.value;
-              if psKernelCoreExprEq ihDomain expectedDomain then
-                let fresh := psKernelCoreRecursorFreshFVar seed;
-                consumeRest
-                  (psKernelCoreExprInstantiate1 ihBody fresh)
-                  motive (Nat.succ seed)
-              else
-                PsKernelCoreOption.none
+              match psKernelCoreRecursiveRecursorFunctionalIhType
+                  field.argCount field.type field.value motive seed with
+              | PsKernelCoreOption.none => PsKernelCoreOption.none
+              | PsKernelCoreOption.some expectedDomain =>
+                  if psKernelCoreExprEq ihDomain expectedDomain then
+                    let fresh := psKernelCoreRecursorFreshFVar seed;
+                    consumeRest
+                      (psKernelCoreExprInstantiate1 ihBody fresh)
+                      motive (Nat.succ seed)
+                  else
+                    PsKernelCoreOption.none
           | _ => PsKernelCoreOption.none
         else
           consumeRest minorExpr motive seed
@@ -320,24 +374,10 @@ def psKernelCoreRecursiveRecursorOpenDirectRuleFields
                   | PsKernelCoreResult.error message =>
                       PsKernelCoreResult.error message
                   | PsKernelCoreResult.ok recursiveShape =>
-                      let recursiveResult : PsKernelCoreResult String Bool :=
-                        match recursiveShape with
-                        | PsKernelCoreOption.none =>
-                            PsKernelCoreResult.ok false
-                        | PsKernelCoreOption.some shape =>
-                            if Nat.beq shape.argCount 0 then
-                              match shape.indices with
-                              | PsKernelCoreList.nil => PsKernelCoreResult.ok true
-                              | PsKernelCoreList.cons _ _ =>
-                                  PsKernelCoreResult.error
-                                    "indexed recursive rule field is not supported in direct recursive recursor slice"
-                            else
-                              PsKernelCoreResult.error
-                                "functional recursive rule field is not supported in direct recursive recursor slice";
-                      match recursiveResult with
+                      match psKernelCoreRecursiveRecursorClassifyField recursiveShape with
                       | PsKernelCoreResult.error message =>
                           PsKernelCoreResult.error message
-                      | PsKernelCoreResult.ok isRecursive =>
+                      | PsKernelCoreResult.ok classification =>
                           let fresh := psKernelCoreRecursorFreshFVar seed;
                           let openedCtor :=
                             psKernelCoreExprInstantiate1 ctorBody fresh;
@@ -351,7 +391,9 @@ def psKernelCoreRecursiveRecursorOpenDirectRuleFields
                           | PsKernelCoreResult.ok state =>
                               let fieldInfo : PsKernelCoreRecursiveRecursorField := {
                                 value := fresh
-                                isRecursive := isRecursive
+                                type := ctorDomain
+                                argCount := classification.argCount
+                                isRecursive := classification.isRecursive
                               };
                               let nextState : PsKernelCoreRecursiveRecursorRuleOpenState := {
                                 ctorResult := state.ctorResult
@@ -361,12 +403,13 @@ def psKernelCoreRecursiveRecursorOpenDirectRuleFields
                               };
                               PsKernelCoreResult.ok nextState
                 else
-                  PsKernelCoreResult.ok {
+                  let state : PsKernelCoreRecursiveRecursorRuleOpenState := {
                     ctorResult := ctorExpr
                     ruleBody := ruleExpr
                     fields := PsKernelCoreList.nil
                     nextSeed := seed
-                  }
+                  };
+                  PsKernelCoreResult.ok state
             | _ =>
                 PsKernelCoreResult.error
                   "recursive recursor rule has too few constructor field lambdas"
@@ -374,20 +417,66 @@ def psKernelCoreRecursiveRecursorOpenDirectRuleFields
             PsKernelCoreResult.error
               "recursive recursor constructor has too few rule fields"
 
+def psKernelCoreRecursiveRecursorFunctionalCall
+    (argCount : Nat) :
+    PsKernelCoreExpr ->
+    PsKernelCoreExpr ->
+    PsKernelCoreExpr ->
+    Nat ->
+    PsKernelCoreOption PsKernelCoreExpr :=
+  match argCount with
+  | Nat.zero =>
+      fun (_fieldType : PsKernelCoreExpr)
+          (fieldValue : PsKernelCoreExpr)
+          (recPrefix : PsKernelCoreExpr)
+          (_seed : Nat) =>
+        PsKernelCoreOption.some (PsKernelCoreExpr.app recPrefix fieldValue)
+  | Nat.succ remaining =>
+      let buildRemaining := psKernelCoreRecursiveRecursorFunctionalCall remaining;
+      fun (fieldType : PsKernelCoreExpr)
+          (fieldValue : PsKernelCoreExpr)
+          (recPrefix : PsKernelCoreExpr)
+          (seed : Nat) =>
+        match fieldType with
+        | PsKernelCoreExpr.forallE userName domain body binderInfo =>
+            let fresh := psKernelCoreRecursorFreshFVar seed;
+            let openedType := psKernelCoreExprInstantiate1 body fresh;
+            let appliedField := PsKernelCoreExpr.app fieldValue fresh;
+            match buildRemaining
+                openedType appliedField recPrefix (Nat.succ seed) with
+            | PsKernelCoreOption.none => PsKernelCoreOption.none
+            | PsKernelCoreOption.some inner =>
+                PsKernelCoreOption.some
+                  (PsKernelCoreExpr.lam
+                    userName domain
+                    (psKernelCoreExprAbstractFVar inner fresh)
+                    binderInfo)
+        | _ => PsKernelCoreOption.none
+
 def psKernelCoreRecursiveRecursorDirectCalls
-    (fields : PsKernelCoreList PsKernelCoreRecursiveRecursorField)
-    (recPrefix : PsKernelCoreExpr) : PsKernelCoreList PsKernelCoreExpr :=
+    (fields : PsKernelCoreList PsKernelCoreRecursiveRecursorField) :
+    PsKernelCoreExpr ->
+    Nat ->
+    PsKernelCoreOption (PsKernelCoreList PsKernelCoreExpr) :=
   match fields with
-  | PsKernelCoreList.nil => PsKernelCoreList.nil
+  | PsKernelCoreList.nil =>
+      fun (_recPrefix : PsKernelCoreExpr) (_seed : Nat) =>
+        PsKernelCoreOption.some PsKernelCoreList.nil
   | PsKernelCoreList.cons field rest =>
-      let restCalls :=
-        psKernelCoreRecursiveRecursorDirectCalls rest recPrefix;
-      if field.isRecursive then
-        PsKernelCoreList.cons
-          (PsKernelCoreExpr.app recPrefix field.value)
-          restCalls
-      else
-        restCalls
+      let buildRest := psKernelCoreRecursiveRecursorDirectCalls rest;
+      fun (recPrefix : PsKernelCoreExpr) (seed : Nat) =>
+        match buildRest recPrefix seed with
+        | PsKernelCoreOption.none => PsKernelCoreOption.none
+        | PsKernelCoreOption.some restCalls =>
+            if field.isRecursive then
+              match psKernelCoreRecursiveRecursorFunctionalCall
+                  field.argCount field.type field.value recPrefix seed with
+              | PsKernelCoreOption.none => PsKernelCoreOption.none
+              | PsKernelCoreOption.some call =>
+                  PsKernelCoreOption.some
+                    (PsKernelCoreList.cons call restCalls)
+            else
+              PsKernelCoreOption.some restCalls
 
 def psKernelCoreRecursiveRecursorRuleStructureMatchesWithResources
     (budget : Nat)
@@ -423,14 +512,16 @@ def psKernelCoreRecursiveRecursorRuleStructureMatchesWithResources
                     psKernelCoreRecursorApplyArgs openedPrefix.values recHead;
                   let fieldValues :=
                     psKernelCoreRecursiveRecursorFieldValues opened.fields;
-                  let recursiveCalls :=
-                    psKernelCoreRecursiveRecursorDirectCalls opened.fields recPrefix;
-                  let branchArgs :=
-                    psKernelCoreExprListAppend fieldValues recursiveCalls;
-                  let expectedBody :=
-                    psKernelCoreRecursorApplyArgs branchArgs selectedMinor;
-                  PsKernelCoreResult.ok
-                    (psKernelCoreExprEq opened.ruleBody expectedBody)
+                  match psKernelCoreRecursiveRecursorDirectCalls
+                      opened.fields recPrefix opened.nextSeed with
+                  | PsKernelCoreOption.none => PsKernelCoreResult.ok false
+                  | PsKernelCoreOption.some recursiveCalls =>
+                      let branchArgs :=
+                        psKernelCoreExprListAppend fieldValues recursiveCalls;
+                      let expectedBody :=
+                        psKernelCoreRecursorApplyArgs branchArgs selectedMinor;
+                      PsKernelCoreResult.ok
+                        (psKernelCoreExprEq opened.ruleBody expectedBody)
     else
       PsKernelCoreResult.error
         "indexed recursive rule validation is not supported in direct recursive recursor slice"

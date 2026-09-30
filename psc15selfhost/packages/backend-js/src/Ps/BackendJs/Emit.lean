@@ -139,8 +139,8 @@ def psJsEmitExprWithFuel (fuel : Nat) : PsJsExpr -> Except PsJsError String :=
         | PsJsExpr.literal value => psJsEmitLiteral value
         | PsJsExpr.local index => psJsLocalName index
         | PsJsExpr.global index => psJsGlobalName index
-        | PsJsExpr.intrinsic operation arguments =>
-            match arguments with
+        | PsJsExpr.intrinsic operation intrinsicArguments =>
+            match intrinsicArguments with
             | List.nil => Except.error PsJsError.unsupportedExpression
             | List.cons left restArguments =>
                 match restArguments with

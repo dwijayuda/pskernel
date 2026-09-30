@@ -64,6 +64,13 @@ jobs:
           cd psc15selfhost
           lake env lean --run test/KernelCoreRecursiveRecursorFunctionalAdmissionTests.lean
 
+      - name: Phase 12 functional recursive recursor rejection
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursiveRecursorFunctionalRejectionTests.lean
+
       - name: Phase 12 indexed recursive recursor admission
         shell: bash
         run: |

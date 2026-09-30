@@ -68,7 +68,7 @@ diff --git a/study/lean4-4.34.0/src/CMakeLists.txt b/study/lean4-4.34.0/src/CMak
    # > The simple and safe thing is to pass all -s flags at both compile and link time.
 -  set(EMSCRIPTEN_SETTINGS "-s ALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -pthread -flto")
 -  string(APPEND LEANC_EXTRA_CC_FLAGS " -pthread")
-+  set(EMSCRIPTEN_SETTINGS "-s ALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -flto")
++  set(EMSCRIPTEN_SETTINGS "-s ALLOW_MEMORY_GROWTH=1 -fwasm-exceptions")
 +  if(MULTI_THREAD)
 +    string(APPEND EMSCRIPTEN_SETTINGS " -pthread")
 +    string(APPEND LEANC_EXTRA_CC_FLAGS " -pthread")

@@ -97,6 +97,7 @@ jobs:
         run: node packages/pskernel-lean-wasm/host/differential.test.mjs
 
       - name: Upload WASM probe artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pskernel-lean-wasm-probe
@@ -104,5 +105,6 @@ jobs:
             psc15selfhost/packages/pskernel-lean-wasm/wasm/pskernel-lean.cjs
             psc15selfhost/packages/pskernel-lean-wasm/wasm/pskernel-lean.wasm
             psc15selfhost/packages/pskernel-lean-wasm/wasm/*.worker.js
-          if-no-files-found: error
+            ${{ runner.temp }}/pskernel-lean-wasm-build.log
+          if-no-files-found: warn
           retention-days: 7

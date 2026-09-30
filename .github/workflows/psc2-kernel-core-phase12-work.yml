@@ -71,6 +71,13 @@ jobs:
           cd psc15selfhost
           lake env lean --run test/KernelCoreRecursiveRecursorIndexedAdmissionTests.lean
 
+      - name: Phase 12 multiple recursive fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake env lean --run test/KernelCoreRecursiveRecursorMultiFieldTests.lean
+
       - name: Phase 12 recursive iota
         shell: bash
         run: |

@@ -114,3 +114,37 @@ if (!/psSyntaxRecordLastSegment\s+syntaxName\.segments/.test(fieldName)) {
 process.stdout.write(
   "PSC2_ELAB_RECORD_FIELD_NAME_SELFHOST_SOURCE_SYNTAX: PASS (local structural last-segment helper; no List.reverse; explicit Option values)\n",
 );
+
+const hasFieldStart = source.indexOf("def psSyntaxRecordHasField\n");
+const hasFieldEnd = source.indexOf("\ndef psSyntaxRecordHasNamedField\n", hasFieldStart + 1);
+if (hasFieldStart < 0 || hasFieldEnd < 0) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_HAS_FIELD_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
+  );
+}
+
+const hasField = source.slice(hasFieldStart, hasFieldEnd);
+if (/List\.any/.test(hasField)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_HAS_FIELD_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: generic List.any remains",
+  );
+}
+if (!/match\s+fields\s+with/.test(hasField)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_HAS_FIELD_SELFHOST_SOURCE_SYNTAX_MISSING: structural field-list match",
+  );
+}
+if (!/psSyntaxRecordFieldMatchesName\s+name\s+field/.test(hasField)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_HAS_FIELD_SELFHOST_SOURCE_SYNTAX_MISSING: local field predicate",
+  );
+}
+if (!/psSyntaxRecordHasField\s+rest\s+name/.test(hasField)) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_HAS_FIELD_SELFHOST_SOURCE_SYNTAX_MISSING: structural recursion on rest with invariant name",
+  );
+}
+
+process.stdout.write(
+  "PSC2_ELAB_RECORD_HAS_FIELD_SELFHOST_SOURCE_SYNTAX: PASS (local structural traversal; no List.any)\n",
+);

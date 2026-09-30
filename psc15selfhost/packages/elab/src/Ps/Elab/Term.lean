@@ -1878,7 +1878,7 @@ def psElabMatchMinors
       PsElabContext ->
       PsSyntaxTerm ->
       Option PsExpr ->
-      Except PsElabError PsElabMatchMinorsResult)
+      Except PsElabError PsElabTermResult)
     (inductiveInfo : PsInductiveInfo)
     (inductiveLevels : List PsLevel)
     (parameterArgs : List PsExpr)

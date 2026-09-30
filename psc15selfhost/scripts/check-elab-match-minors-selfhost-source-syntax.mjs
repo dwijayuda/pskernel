@@ -1,3 +1,4 @@
+// Keep changing elaboration context behind the function returned by constructorNames recursion; direct recursion may only vary the structural list.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

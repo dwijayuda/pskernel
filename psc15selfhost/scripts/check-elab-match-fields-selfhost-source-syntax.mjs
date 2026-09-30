@@ -180,6 +180,24 @@ for (const pattern of forbidden) {
   }
 }
 
+const matchFieldAtMatch = source.match(
+  /def psElabMatchFieldAt([\s\S]*?)(?=\nstructure PsElabMatchHypothesesResult)/,
+);
+if (matchFieldAtMatch === null) {
+  throw new Error("PSC2_ELAB_MATCH_FIELD_AT_SELFHOST_SOURCE_SYNTAX_MISSING: declaration");
+}
+const matchFieldAt = matchFieldAtMatch[0];
+for (const pattern of [
+  /\| \[\] =>\s*Option\.none/,
+  /\| 0 =>\s*Option\.some field/,
+]) {
+  if (!pattern.test(matchFieldAt)) {
+    throw new Error(
+      `PSC2_ELAB_MATCH_FIELD_AT_SELFHOST_SOURCE_SYNTAX_MISSING: ${pattern}`,
+    );
+  }
+}
+
 process.stdout.write(
-  "PSC2_ELAB_MATCH_FIELDS_SELFHOST_SOURCE_SYNTAX: PASS (binder-list-recursive worker with post-recursion context/cursor/field accumulator)\n",
+  "PSC2_ELAB_MATCH_FIELDS_SELFHOST_SOURCE_SYNTAX: PASS (binder-list-recursive worker with post-recursion context/cursor/field accumulator; explicit match-field Option constructors)\n",
 );

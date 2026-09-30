@@ -1,3 +1,4 @@
+// List.append is intentionally absent from the PSC1 bootstrap prelude; psElabMatch must stay on the project-local PsExpr-list helper.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

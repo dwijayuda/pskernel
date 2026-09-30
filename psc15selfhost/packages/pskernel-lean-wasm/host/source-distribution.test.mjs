@@ -41,11 +41,16 @@ for(const entry of [
   'patches/',
   'LEAN_LICENSE',
   'KERNEL_SOURCE_MANIFEST.json',
+  'PREBUILT_WASM_MANIFEST.json',
 ]){
   assert.ok(packageJson.files.includes(entry),`package files must include ${entry}`);
 }
-assert.equal(packageJson.scripts?.['build:wasm'],'bash scripts/build-wasm.sh');
+assert.equal(
+  packageJson.scripts?.['build:wasm'],
+  'bash scripts/build-wasm.sh && node scripts/write-prebuilt-manifest.mjs',
+);
 assert.equal(packageJson.scripts?.['verify:source'],'node host/source-distribution.test.mjs');
+assert.equal(packageJson.scripts?.['verify:prebuilt'],'node host/verify-prebuilt.mjs');
 for(const hook of ['preinstall','install','postinstall']){
   assert.equal(packageJson.scripts?.[hook],undefined,`${hook} must not compile Lean or WebAssembly`);
 }
@@ -75,6 +80,9 @@ await readFile(path.join(packageRoot,'provider','PsKernelLeanWasm','Api.lean'),'
 await readFile(path.join(packageRoot,'source','proofscript','foundation','Ps','Foundation','Name.lean'),'utf8');
 await readFile(path.join(packageRoot,'source','proofscript','provider','PsKernelLean','Admission.lean'),'utf8');
 await readFile(path.join(packageRoot,'scripts','build-wasm.sh'),'utf8');
+await readFile(path.join(packageRoot,'scripts','write-prebuilt-manifest.mjs'),'utf8');
+await readFile(path.join(packageRoot,'host','prebuilt.mjs'),'utf8');
+await readFile(path.join(packageRoot,'host','verify-prebuilt.mjs'),'utf8');
 await readFile(path.join(packageRoot,'patches','lean4-4.34.0-emscripten-uv-stubs.patch'),'utf8');
 
 const packed=spawnSync(npm,['pack','--json','--dry-run'],{
@@ -95,6 +103,9 @@ for(const file of [
   'source/proofscript/provider/PsKernelLean/Admission.lean',
   'scripts/build-wasm.sh',
   'scripts/apply-wasm-abi.mjs',
+  'scripts/write-prebuilt-manifest.mjs',
+  'host/prebuilt.mjs',
+  'host/verify-prebuilt.mjs',
   'patches/lean4-4.34.0-emscripten-uv-stubs.patch',
 ]){
   assert.ok(packedFiles.has(file),`npm tarball missing ${file}`);

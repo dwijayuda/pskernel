@@ -33,6 +33,10 @@ jobs:
         working-directory: psc15selfhost
         run: node packages/pskernel-lean-wasm/host/package.test.mjs
 
+      - name: Lean WASM patch applicability
+        shell: bash
+        run: git apply --check psc15selfhost/packages/pskernel-lean-wasm/patches/lean4-4.34.0-emscripten-uv-stubs.patch
+
       - name: Install exact Lean toolchain
         uses: leanprover/lean-action@v1
         with:

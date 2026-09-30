@@ -24,9 +24,10 @@ assert.match(build,/-DSTAGE0_CMAKE_EXECUTABLE_SUFFIX=/);
 assert.match(build,/-DSTAGE0_MMAP=OFF/);
 assert.match(build,/-DSTAGE0_CMAKE_LIBRARY_PATH=\/usr\/lib\/i386-linux-gnu\//);
 assert.match(build,/-DUSE_GMP=OFF/);
+assert.match(build,/-DUSE_LAKE=OFF/);
 assert.match(build,/-DMMAP=OFF/);
 assert.match(build,/stage1-configure/);
-assert.match(build,/stage0\/bin\/lake/);
+assert.match(build,/stage0\/bin\/lean/);
 assert.match(build,/stage1\/leanc\.sh/);
 assert.match(build,/stage0\/src\/bin\/leanmake/);
 assert.match(build,/stage0\/src\/bin\/leanc\.in/);
@@ -38,26 +39,38 @@ assert.match(build,/lean4-4\.34\.0-emscripten-uv-stubs\.patch/);
 assert.match(build,/pskernel-lean\.wasm/);
 assert.doesNotMatch(build,/emsdk\s+(install|activate)\s+(latest|tot)/);
 
-// Stage0 Lake is deliberately a bootstrap binary. It must not elaborate the
-// full modern PSC2 lakefile. Build the provider closure from a tiny TOML-only
-// overlay so this cross-build depends only on the provider's actual modules.
+// Lean stage0 is C_ONLY: it is the previous-stage compiler, not the target
+// current-source .olean sysroot. Build stage1 first, then use the native 32-bit
+// stage0 compiler directly against stage1/lib/lean to emit the provider's C.
+// Do not route the external provider through bootstrap Lake.
 assert.match(build,/provider_overlay/);
-assert.match(build,/lakefile\.toml/);
-assert.match(build,/\[\[lean_lib\]\]/);
-assert.match(build,/ProviderModules/);
-assert.match(build,/PsKernelLean\.Response/);
-assert.match(build,/PsKernelLean\.Main/);
+assert.match(build,/target_lean_path=.*stage1\/lib\/lean/);
+assert.match(build,/provider_olean_dir/);
+assert.match(build,/provider_c_dir/);
+assert.match(build,/provider_modules=/);
+assert.match(build,/PsKernelLean\/Convert/);
+assert.match(build,/PsKernelLean\/Prelude/);
+assert.match(build,/PsKernelLean\/Main/);
+assert.match(build,/LEAN_PATH=.*target_lean_path/);
+assert.match(build,/--c=/);
+assert.doesNotMatch(build,/"\$stage0_lake"\s+build\s+provider/);
+assert.doesNotMatch(build,/\[\[lean_lib\]\]/);
+
+const stage1BuildIndex=build.indexOf('cmake --build "$lean_build" --target stage1 -j2');
+const providerCompileIndex=build.indexOf('provider_modules=');
+assert.ok(stage1BuildIndex>=0,'stage1 target build must exist');
+assert.ok(providerCompileIndex>=0,'direct provider module compile list must exist');
+assert.ok(stage1BuildIndex<providerCompileIndex,'stage1 sysroot must exist before provider compilation');
+
 assert.match(build,/packages\/foundation\/src\/Ps/);
 assert.match(build,/packages\/core\/src\/Ps/);
 assert.match(build,/packages\/environment\/src\/Ps/);
 assert.match(build,/packages\/bridge\/src\/Ps/);
 assert.match(build,/packages\/pskernel-lean\/provider\/PsKernelLean/);
-assert.doesNotMatch(build,/"\$stage0_lake"\s+build\s+psc2_lean_kernel_provider/);
 
-// The bootstrap compiler currently aborts with `unknown parser category level`
-// when Lake starts the provider build. Keep a small direct-Lean probe matrix so
-// the next CI failure identifies whether the defect is stage0 initialization,
-// importing Lean, or importing the first PSC module.
+// Keep the diagnostic matrix until the stage0/stage1 ordering fix is proven in
+// CI. It provides direct evidence that basic/core compilation is distinct from
+// imports requiring the target Lean .olean environment.
 assert.match(build,/PSC2_STAGE0_PARSER_PROBE/);
 assert.match(build,/Stage0ProbeBasic\.lean/);
 assert.match(build,/Stage0ProbeLean\.lean/);

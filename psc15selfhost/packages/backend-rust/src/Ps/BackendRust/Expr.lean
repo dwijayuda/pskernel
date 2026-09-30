@@ -388,6 +388,13 @@ def psRustEmitIntrinsicFromPrinted
               (psRustConcat2 right "))"))
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.intRepr =>
+      match arguments with
+      | List.cons value List.nil =>
+          Except.ok
+            (psRustConcat3 "(" value ").to_string()")
+      | _ =>
+          Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.boolNot =>
       match arguments with
       | List.cons value List.nil =>
@@ -819,10 +826,9 @@ def psRustEmitExprWithFuel :
                     (psRustConcat4
                       "("
                       printedFn
-                      ")("
-                      (psRustConcat2
-                        (psRustJoin ", " printedArguments)
-                        ")"))
+                      ")(("
+                      (psRustJoin ", " printedArguments)
+                      "))")
       | PsVerifiedIrExpr.letE name _ value body =>
           match emitNested value with
           | Except.error error =>

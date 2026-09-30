@@ -2603,7 +2603,7 @@ def psElabRecord
       List (Prod PsSyntaxName PsSyntaxTerm))
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  let candidate :=
+  let candidate : Option PsElabRecordCandidate :=
     match expected with
     | some expectedType =>
         match
@@ -2615,9 +2615,9 @@ def psElabRecord
                 psSyntaxRecordFieldsMatch
                   fields
                   found.fieldNames then
-              some found
+              Option.some found
             else
-              none
+              Option.none
         | none =>
             psElabUniqueRecordCandidate
               context.environment
@@ -2641,7 +2641,7 @@ def psElabRecord
                 (PsExpr.constE
                   found.constructorName
                   [])
-                none with
+                Option.none with
           | Except.error error => Except.error error
           | Except.ok constructor =>
               match

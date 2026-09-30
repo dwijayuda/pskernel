@@ -111,7 +111,29 @@ def psTestComplexApplicationTranslationRoundTrip : Bool :=
                leanAgain == canonicalLean
   | _, _ => false
 
+def psTestAnonymousArrowTranslationRoundTrip : Bool :=
+  let leanSource :=
+    "def applyLater (x : Nat) : (Nat -> Nat) -> Nat := fun f => f x"
+  match psTranslateLeanToProofScript leanSource with
+  | Except.error _ => false
+  | Except.ok proofScript =>
+      psStringEq (toString (proofScript.contains "(_ :")) "false"
+        && match psTranslateProofScriptToLean proofScript with
+           | Except.error _ => false
+           | Except.ok leanAgain =>
+               match psTranslateLeanToProofScript leanAgain with
+               | Except.error _ => false
+               | Except.ok proofScriptAgain =>
+                   proofScriptAgain == proofScript
+
 def main : IO Unit := do
+  if psTestAnonymousArrowTranslationRoundTrip then
+    IO.println
+      "PSC1_TRANSLATION_PASS: anonymous arrow .lean <-> .ps"
+  else
+    throw
+      (IO.userError
+        "PSC1_TRANSLATION_FAIL: anonymous arrow .lean <-> .ps")
   if psTestComplexApplicationTranslationRoundTrip then
     IO.println
       "PSC1_TRANSLATION_PASS: complex application .lean <-> .ps"

@@ -43,6 +43,9 @@ assert.doesNotMatch(build,/emsdk\s+(install|activate)\s+(latest|tot)/);
 // overlay so this cross-build depends only on the provider's actual modules.
 assert.match(build,/provider_overlay/);
 assert.match(build,/lakefile\.toml/);
+assert.match(build,/\[\[lean_lib\]\]/);
+assert.match(build,/ProviderModules/);
+assert.match(build,/PsKernelLean\.Response/);
 assert.match(build,/PsKernelLean\.Main/);
 assert.match(build,/packages\/foundation\/src\/Ps/);
 assert.match(build,/packages\/core\/src\/Ps/);

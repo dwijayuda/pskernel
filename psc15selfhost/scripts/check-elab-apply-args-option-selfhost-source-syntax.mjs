@@ -9,15 +9,17 @@ const source = await readFile(
   "utf8",
 );
 
-const start = source.indexOf("def psElabApplyArgsWithFuel\n");
-const end = source.indexOf("\ndef psElabApplyArgs\n", start);
-if (start < 0 || end < 0) {
+const workerStart = source.indexOf("def psElabApplyArgsWithFuelWorker\n");
+const wrapperStart = source.indexOf("def psElabApplyArgsWithFuel\n");
+const blockStart = workerStart >= 0 ? workerStart : wrapperStart;
+const end = source.indexOf("\ndef psElabApplyArgs\n", wrapperStart + 1);
+if (blockStart < 0 || wrapperStart < 0 || end < 0) {
   throw new Error(
-    "PSC2_ELAB_APPLY_ARGS_OPTION_SELFHOST_SOURCE_SYNTAX_MISSING: psElabApplyArgsWithFuel block",
+    "PSC2_ELAB_APPLY_ARGS_OPTION_SELFHOST_SOURCE_SYNTAX_MISSING: apply-args worker/wrapper block",
   );
 }
 
-const block = source.slice(start, end);
+const block = source.slice(blockStart, end);
 if (!/\(\s*Option\.some\s+domain\s*\)/m.test(block)) {
   throw new Error(
     "PSC2_ELAB_APPLY_ARGS_OPTION_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Option.some domain expectation",

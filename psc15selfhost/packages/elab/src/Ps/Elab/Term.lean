@@ -2460,17 +2460,17 @@ def psSyntaxRecordOrderFields
     Option (List PsSyntaxTerm) :=
   match names with
   | [] =>
-      some []
+      Option.some []
   | name :: rest =>
       match psSyntaxRecordFindField fields name with
-      | none =>
-          none
-      | some value =>
+      | Option.none =>
+          Option.none
+      | Option.some value =>
           match psSyntaxRecordOrderFields fields rest with
-          | none =>
-              none
-          | some values =>
-              some (List.cons value values)
+          | Option.none =>
+              Option.none
+          | Option.some values =>
+              Option.some (List.cons value values)
 
 def psElabRecordCandidateForInfo
     (environment : PsEnvironment)

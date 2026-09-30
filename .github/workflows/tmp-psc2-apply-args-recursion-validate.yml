@@ -27,6 +27,7 @@ jobs:
         run: |
           node scripts/check-elab-apply-args-option-selfhost-source-syntax.mjs
           node scripts/check-elab-apply-args-recursion-selfhost-source-syntax.mjs
+          node scripts/check-elab-apply-args-next-pending-selfhost-source-syntax.mjs
       - name: Lean build
         working-directory: psc15selfhost
         run: lake build

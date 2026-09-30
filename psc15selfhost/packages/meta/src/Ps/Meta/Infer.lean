@@ -231,6 +231,71 @@ def psInferStructureProjectionField
     fieldIndex
     cursor
 
+def psInferProjectionTypeWithInfo
+    (environment : PsEnvironment)
+    (metaContext : PsMetaContext)
+    (localContext : PsLocalContext)
+    (typeName : PsName)
+    (index : Nat)
+    (target : PsExpr)
+    (viewArgs : List PsExpr)
+    (info : PsInductiveInfo) :
+    Except PsInferError PsExpr :=
+  if
+      psInferBoolOr
+        (psInferBoolNot (PsInductiveInfo.isStructure info))
+        (psInferBoolOr
+          (psInferNatNe (PsInductiveInfo.numIndices info) 0)
+          (psInferNatNe
+            (List.length viewArgs)
+            (PsInductiveInfo.numParams info))) then
+    Except.error PsInferError.projectionUnsupported
+  else
+    match PsInductiveInfo.constructors info with
+    | List.nil =>
+        Except.error PsInferError.projectionUnsupported
+    | List.cons constructorName remainingConstructors =>
+        match remainingConstructors with
+        | List.nil =>
+            match
+                psEnvironmentFindConstructor
+                  environment
+                  constructorName with
+            | none =>
+                Except.error PsInferError.projectionUnsupported
+            | some constructorInfo =>
+                if
+                    psInferBoolOr
+                      (psInferNatNe
+                        (PsConstructorInfo.numParams constructorInfo)
+                        (PsInductiveInfo.numParams info))
+                      (Nat.ble
+                        (PsConstructorInfo.numFields constructorInfo)
+                        index) then
+                  Except.error PsInferError.projectionUnsupported
+                else
+                  match
+                      psInferApplyStructureParameters
+                        environment
+                        metaContext
+                        localContext
+                        (PsConstructorInfo.type constructorInfo)
+                        viewArgs with
+                  | Except.error error => Except.error error
+                  | Except.ok fieldCursor =>
+                      psInferStructureProjectionField
+                        environment
+                        metaContext
+                        localContext
+                        typeName
+                        target
+                        4096
+                        index
+                        0
+                        fieldCursor
+        | List.cons _ _ =>
+            Except.error PsInferError.projectionUnsupported
+
 def psInferProjectionType
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
@@ -256,60 +321,15 @@ def psInferProjectionType
         match psEnvironmentFindInductive environment typeName with
         | none => Except.error PsInferError.projectionUnsupported
         | some info =>
-            if
-                psInferBoolOr
-                  (psInferBoolNot (PsInductiveInfo.isStructure info))
-                  (psInferBoolOr
-                    (psInferNatNe (PsInductiveInfo.numIndices info) 0)
-                    (psInferNatNe
-                      (List.length viewArgs)
-                      (PsInductiveInfo.numParams info))) then
-              Except.error PsInferError.projectionUnsupported
-            else
-              match PsInductiveInfo.constructors info with
-              | List.nil =>
-                  Except.error PsInferError.projectionUnsupported
-              | List.cons constructorName remainingConstructors =>
-                  match remainingConstructors with
-                  | List.nil =>
-                      match
-                          psEnvironmentFindConstructor
-                            environment
-                            constructorName with
-                      | none =>
-                          Except.error PsInferError.projectionUnsupported
-                      | some constructorInfo =>
-                          if
-                              psInferBoolOr
-                                (psInferNatNe
-                                  (PsConstructorInfo.numParams constructorInfo)
-                                  (PsInductiveInfo.numParams info))
-                                (Nat.ble
-                                  (PsConstructorInfo.numFields constructorInfo)
-                                  index) then
-                            Except.error PsInferError.projectionUnsupported
-                          else
-                            match
-                                psInferApplyStructureParameters
-                                  environment
-                                  metaContext
-                                  localContext
-                                  (PsConstructorInfo.type constructorInfo)
-                                  viewArgs with
-                            | Except.error error => Except.error error
-                            | Except.ok fieldCursor =>
-                                psInferStructureProjectionField
-                                  environment
-                                  metaContext
-                                  localContext
-                                  typeName
-                                  target
-                                  4096
-                                  index
-                                  0
-                                  fieldCursor
-                  | List.cons _ _ =>
-                      Except.error PsInferError.projectionUnsupported
+            psInferProjectionTypeWithInfo
+              environment
+              metaContext
+              localContext
+              typeName
+              index
+              target
+              viewArgs
+              info
   | _ => Except.error PsInferError.projectionUnsupported
 
 def psInferTypeWithFuel

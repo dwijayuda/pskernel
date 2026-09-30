@@ -1,0 +1,49 @@
+name: PSC2 one-shot constructor Option.some fix
+
+on:
+  push:
+    branches:
+      - psc2/minimal-selfhost-psc15
+    paths:
+      - .github/workflows/psc2-one-shot-constructor-option-some-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Qualify constructor expected Option
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("psc15selfhost/packages/elab/src/Ps/Elab/Term.lean")
+          source = path.read_text()
+          old = "                        (some expectedType) with"
+          new = "                        (Option.some expectedType) with"
+          if new in source:
+              raise SystemExit(0)
+          if source.count(old) != 1:
+              raise SystemExit(f"expected one constructor expected-type Option term, found {source.count(old)}")
+          path.write_text(source.replace(old, new, 1))
+          PY
+
+          node psc15selfhost/scripts/check-elab-match-constructor-minor-selfhost-source-syntax.mjs
+
+          if git diff --quiet -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean; then
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git commit -m "fix(psc2): qualify constructor expected Option.some"
+          git push origin HEAD:psc2/minimal-selfhost-psc15

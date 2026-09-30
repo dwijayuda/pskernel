@@ -45,6 +45,38 @@ if (/\bList\.reverse\b/.test(block)) {
   );
 }
 
+const uniqueStart = source.indexOf("def psElabUniqueRecordCandidate\n");
+const uniqueEnd = source.indexOf("\ndef psElabRecord\n", uniqueStart + 1);
+if (uniqueStart < 0 || uniqueEnd < 0) {
+  throw new Error(
+    "PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX_MISSING: unique candidate block",
+  );
+}
+const unique = source.slice(uniqueStart, uniqueEnd);
+const uniqueRequired = [
+  /\| \[\] =>\s*Option\.none/,
+  /\| candidate :: rest =>\s*match rest with\s*\| \[\] => Option\.some candidate\s*\| _ :: _ => Option\.none/,
+];
+for (const pattern of uniqueRequired) {
+  if (!pattern.test(unique)) {
+    throw new Error(
+      `PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX_MISSING: unique candidate ${pattern}`,
+    );
+  }
+}
+const uniqueForbidden = [
+  /\| \[\] =>\s*none/,
+  /\| \[\] => some candidate/,
+  /\| _ :: _ => none/,
+];
+for (const pattern of uniqueForbidden) {
+  if (pattern.test(unique)) {
+    throw new Error(
+      `PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: unique candidate ${pattern}`,
+    );
+  }
+}
+
 process.stdout.write(
-  "PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX: PASS (explicit recursive-let sequencing; structural declaration traversal)\n",
+  "PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX: PASS (explicit recursive-let sequencing; structural declaration traversal; explicit unique-candidate Option constructors)\n",
 );

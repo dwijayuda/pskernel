@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - psc2/kernel-core-phase13-checkedcore-shadow-work
+      - psc2/kernel-core-phase13-checkedcore-shadow-this-chat
     paths:
       - psc15selfhost/packages/compiler/**
       - psc15selfhost/packages/pskernel-core/**

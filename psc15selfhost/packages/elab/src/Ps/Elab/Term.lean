@@ -162,39 +162,45 @@ def psElabFindStructureField
     (typeName : PsName)
     (target : PsExpr)
     (fieldName : String)
-    (index : Nat)
-    (remaining : Nat)
-    (cursor : PsExpr) :
+    (remaining : Nat) :
+    Nat ->
+    PsExpr ->
     Except PsElabError Nat :=
   match remaining with
   | 0 =>
-      Except.error PsElabError.unsupportedTerm
+      fun (_index : Nat) =>
+        fun (_cursor : PsExpr) =>
+          Except.error PsElabError.unsupportedTerm
   | nextRemaining + 1 =>
-      match
-          psInferEnsureForall
-            context.environment
-            context.metaContext
-            context.localContext
-            cursor with
-      | Except.error error =>
-          Except.error (PsElabError.infer error)
-      | Except.ok forallView =>
-          if
-              psStringEq
-                (psNameLastComponent forallView.name)
-                fieldName then
-            Except.ok index
-          else
-            psElabFindStructureField
-              context
-              typeName
-              target
-              fieldName
-              (Nat.succ index)
-              nextRemaining
-              (psExprInstantiate1
-                forallView.body
-                (PsExpr.proj typeName index target))
+      let smaller : Nat -> PsExpr -> Except PsElabError Nat :=
+        psElabFindStructureField
+          context
+          typeName
+          target
+          fieldName
+          nextRemaining;
+      fun (index : Nat) =>
+        fun (cursor : PsExpr) =>
+          match
+              psInferEnsureForall
+                context.environment
+                context.metaContext
+                context.localContext
+                cursor with
+          | Except.error error =>
+              Except.error (PsElabError.infer error)
+          | Except.ok forallView =>
+              if
+                  psStringEq
+                    (psNameLastComponent forallView.name)
+                    fieldName then
+                Except.ok index
+              else
+                smaller
+                  (Nat.succ index)
+                  (psExprInstantiate1
+                    forallView.body
+                    (PsExpr.proj typeName index target))
 
 def psElabProjectionStep
     (context : PsElabContext)
@@ -252,8 +258,8 @@ def psElabProjectionStep
                                   typeName
                                   current.term
                                   fieldName
-                                  0
                                   constructorInfo.numFields
+                                  0
                                   fieldCursor with
                             | Except.error error => Except.error error
                             | Except.ok index =>

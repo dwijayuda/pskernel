@@ -1,4 +1,5 @@
 // Option constructor patterns stay ordinary match syntax, but Option values passed to helpers must be explicit in the PSC1 bootstrap profile.
+// This guard also serves as the clean-branch verification trigger after the production qualification lands.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

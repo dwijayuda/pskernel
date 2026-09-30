@@ -95,7 +95,17 @@ jobs:
         run: |
           set -euo pipefail
           cd psc15selfhost
-          node scripts/check-bootstrap-closure.mjs
+          log_file="$(mktemp)"
+          if node scripts/check-bootstrap-closure.mjs >"$log_file" 2>&1; then
+            cat "$log_file"
+          else
+            echo "PSC2_FIXED_POINT_FAILURE_DIAGNOSTICS: BEGIN"
+            grep -E "PSC1_PROJECT_ELAB_FAILED|declaration=|structuralRecursion|unknownName|matchExpectedType|PSC2_FIXED_POINT|Error:" "$log_file" | tail -n 120 || true
+            echo "PSC2_FIXED_POINT_FAILURE_TAIL: BEGIN"
+            tail -n 120 "$log_file"
+            echo "PSC2_FIXED_POINT_FAILURE_TAIL: END"
+            exit 1
+          fi
 
       - name: KernelCore PSC1 source profile
         shell: bash

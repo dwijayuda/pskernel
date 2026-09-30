@@ -208,8 +208,20 @@ done
 # Keep the already-proven CLI transport for the first real WASM milestone. A
 # later milestone can replace this with the JS-facing memory ABI without
 # changing the kernel admission semantics.
+#
+# leanc.sh intentionally contributes only compiler/platform flags and the Lean
+# library search directory. Use Lean 4.34's own Emscripten
+# TOOLCHAIN_STATIC_LINKER_FLAGS (without Lake, which this provider does not use)
+# so generated Lean C resolves against the exact stage0 runtime/kernel closure.
 "$wasm_leanc" \
   "${provider_objects[@]}" \
+  -lleancpp \
+  -lInit \
+  -lStd \
+  -lLean \
+  -lnodefs.js \
+  -lleanrt \
+  -lstdc++ \
   -O3 \
   -sENVIRONMENT=node \
   -sEXIT_RUNTIME=1 \

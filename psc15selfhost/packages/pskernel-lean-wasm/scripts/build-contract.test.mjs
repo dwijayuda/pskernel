@@ -82,6 +82,23 @@ assert.match(patch,/lean_uv_event_loop_alive/);
 assert.match(patch,/runtime\/uv\/system\.cpp/);
 assert.match(patch,/lean_uv_os_get_group/);
 
+// Lean 4.34's frozen stage0 snapshot has stale Emscripten fallback bodies whose
+// signatures disagree with the adjacent headers. The artifact is built from
+// stage0, so patching only src/ is insufficient even if the current sources are
+// corrected. Keep the two stage0 ABI repairs explicit and regression-tested.
+const sectionFor = marker => {
+  const start=patch.indexOf(marker);
+  assert.ok(start>=0,`compatibility patch is missing ${marker}`);
+  const next=patch.indexOf('\ndiff --git ',start+1);
+  return patch.slice(start,next<0?patch.length:next);
+};
+const stage0Event=sectionFor('diff --git a/study/lean4-4.34.0/stage0/src/runtime/uv/event_loop.cpp');
+assert.match(stage0Event,/LEAN_EXPORT uint8_t lean_uv_event_loop_alive\(\)/);
+assert.match(stage0Event,/return false;/);
+const stage0System=sectionFor('diff --git a/study/lean4-4.34.0/stage0/src/runtime/uv/system.cpp');
+assert.match(stage0System,/lean_uv_os_get_group\(uint64_t gid\)/);
+assert.match(stage0System,/\(void\)gid;/);
+
 const workflow=await readFile(path.join(repoRoot,'.github/workflows/psc2-lean-kernel-wasm.yml'),'utf8');
 assert.match(workflow,/6\.0\.9/);
 assert.match(workflow,/emcc --version/);

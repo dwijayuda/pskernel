@@ -8,12 +8,17 @@
     ".": "./index.mjs",
     "./node": "./host/node-provider.mjs",
     "./metadata": "./LEAN_SOURCE_PIN.json",
+    "./metadata/kernel-source": "./KERNEL_SOURCE_MANIFEST.json",
     "./package.json": "./package.json"
   },
   "files": [
     "index.mjs",
     "host/node-provider.mjs",
     "host/prebuilt.mjs",
+    "provider/",
+    "kernel/",
+    "LEAN_LICENSE",
+    "KERNEL_SOURCE_MANIFEST.json",
     "LEAN_SOURCE_PIN.json",
     "PREBUILT_MANIFEST.json",
     "prebuilt/",
@@ -22,6 +27,9 @@
     "INTEGRATION.md",
     "NPM_PACKAGE.md"
   ],
+  "scripts": {
+    "verify:source": "node host/source-distribution.test.mjs"
+  },
   "engines": {
     "node": ">=20"
   },

@@ -3,25 +3,59 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 package_root="$(cd "$script_dir/.." && pwd)"
-workspace_root="$(cd "$package_root/../.." && pwd)"
-repo_root="$(cd "$workspace_root/.." && pwd)"
-lean_source="$repo_root/study/lean4-4.34.0"
-lean_build="$workspace_root/.wasm-build/lean4"
-provider_overlay="$workspace_root/.wasm-build/provider-overlay"
-provider_src="$provider_overlay/src"
-provider_olean_dir="$provider_overlay/olean"
-provider_c_dir="$provider_overlay/c"
-provider_obj_dir="$workspace_root/.wasm-build/provider-obj"
-out_dir="$package_root/wasm"
+candidate_workspace_root="$(cd "$package_root/../.." && pwd)"
+candidate_repo_root="$(cd "$candidate_workspace_root/.." && pwd)"
+package_source_root="$package_root/source/proofscript"
 patch_file="$package_root/patches/lean4-4.34.0-emscripten-uv-stubs.patch"
+out_dir="$package_root/wasm"
 
 expected_lean_commit='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b'
 expected_emscripten='6.0.9'
 
+# The same script serves two layouts:
+#   1. the pskernel monorepo, where live PSC sources and study/lean4-4.34.0 exist;
+#   2. an unpacked/installed npm package, where the PSC source snapshot is under
+#      source/proofscript and the full Lean tree is fetched at the exact pin.
+if [[ -d "$candidate_workspace_root/packages/foundation/src/Ps" && \
+      -d "$candidate_repo_root/study/lean4-4.34.0/src/kernel" ]]; then
+  source_mode='monorepo'
+  workspace_root="$candidate_workspace_root"
+  repo_root="$candidate_repo_root"
+  build_root="$workspace_root/.wasm-build"
+  lean_source="$repo_root/study/lean4-4.34.0"
+  foundation_source="$workspace_root/packages/foundation/src/Ps"
+  core_source="$workspace_root/packages/core/src/Ps"
+  environment_source="$workspace_root/packages/environment/src/Ps"
+  bridge_source="$workspace_root/packages/bridge/src/Ps"
+  provider_source="$workspace_root/packages/pskernel-lean/provider/PsKernelLean"
+else
+  source_mode='package'
+  build_root="${PSC_LEAN_WASM_BUILD_ROOT:-$package_root/.wasm-build}"
+  lean_source="${PSC_LEAN_WASM_LEAN_SOURCE:-$package_root/.source-cache/lean4-4.34.0}"
+  foundation_source="$package_source_root/foundation/Ps"
+  core_source="$package_source_root/core/Ps"
+  environment_source="$package_source_root/environment/Ps"
+  bridge_source="$package_source_root/bridge/Ps"
+  provider_source="$package_source_root/provider/PsKernelLean"
+fi
+
+lean_build="$build_root/lean4"
+provider_overlay="$build_root/provider-overlay"
+provider_src="$provider_overlay/src"
+provider_olean_dir="$provider_overlay/olean"
+provider_c_dir="$provider_overlay/c"
+provider_obj_dir="$build_root/provider-obj"
+
+for tool in cmake emcc em++ emar lean node git; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "required build tool missing: $tool" >&2
+    exit 1
+  fi
+done
+
 host_lean="$(command -v lean)"
 host_lean_prefix="$(lean --print-prefix)"
 host_lean_path="$host_lean_prefix/lib/lean"
-
 actual_lean_commit="$($host_lean --githash | tr -d '\r\n')"
 if [[ "$actual_lean_commit" != "$expected_lean_commit" ]]; then
   echo "unexpected Lean commit: $actual_lean_commit" >&2
@@ -38,13 +72,6 @@ if [[ "$emcc_version" != *"$expected_emscripten"* ]]; then
   exit 1
 fi
 
-for tool in cmake emcc em++ emar lean node; do
-  if ! command -v "$tool" >/dev/null 2>&1; then
-    echo "required build tool missing: $tool" >&2
-    exit 1
-  fi
-done
-
 emscripten_root="$(cd "$(dirname "$(command -v emcc)")" && pwd)"
 emscripten_toolchain="$emscripten_root/cmake/Modules/Platform/Emscripten.cmake"
 if [[ ! -f "$emscripten_toolchain" ]]; then
@@ -52,22 +79,66 @@ if [[ ! -f "$emscripten_toolchain" ]]; then
   exit 1
 fi
 
-cd "$repo_root"
-if git apply --check "$patch_file" >/dev/null 2>&1; then
-  git apply "$patch_file"
-elif ! git apply --reverse --check "$patch_file" >/dev/null 2>&1; then
+if [[ "$source_mode" == 'package' ]]; then
+  # The npm package carries the small kernel audit snapshot directly, but a
+  # rebuild needs Lean's complete current source tree. Fetch only the exact
+  # pinned commit; never fall back to a branch, tag tip, or "latest" source.
+  if [[ ! -d "$lean_source/.git" ]]; then
+    rm -rf "$lean_source"
+    mkdir -p "$lean_source"
+    git -C "$lean_source" init -q
+    git -C "$lean_source" remote add origin https://github.com/leanprover/lean4.git
+  elif ! git -C "$lean_source" remote get-url origin >/dev/null 2>&1; then
+    git -C "$lean_source" remote add origin https://github.com/leanprover/lean4.git
+  fi
+  git -C "$lean_source" fetch --depth 1 origin "$expected_lean_commit"
+  git -C "$lean_source" checkout -q --detach FETCH_HEAD
+  git -C "$lean_source" reset -q --hard "$expected_lean_commit"
+  git -C "$lean_source" clean -q -fdx
+  actual_source_commit="$(git -C "$lean_source" rev-parse HEAD)"
+  if [[ "$actual_source_commit" != "$expected_lean_commit" ]]; then
+    echo "unexpected fetched Lean source commit: $actual_source_commit" >&2
+    exit 1
+  fi
+fi
+
+for source_dir in \
+  "$foundation_source" \
+  "$core_source" \
+  "$environment_source" \
+  "$bridge_source" \
+  "$provider_source"; do
+  if [[ ! -d "$source_dir" ]]; then
+    echo "packaged ProofScript source missing: $source_dir" >&2
+    exit 1
+  fi
+done
+
+mkdir -p "$build_root"
+if [[ "$source_mode" == 'monorepo' ]]; then
+  patch_apply_root="$repo_root"
+  patch_to_apply="$patch_file"
+else
+  patch_apply_root="$lean_source"
+  patch_to_apply="$build_root/lean4-4.34.0-emscripten-standalone.patch"
+  sed 's#study/lean4-4.34.0/##g' "$patch_file" > "$patch_to_apply"
+fi
+
+cd "$patch_apply_root"
+if git apply --check "$patch_to_apply" >/dev/null 2>&1; then
+  git apply "$patch_to_apply"
+elif ! git apply --reverse --check "$patch_to_apply" >/dev/null 2>&1; then
   echo "Lean Emscripten compatibility patch neither applies nor is already present" >&2
   exit 1
 fi
 
 # Typed WebAssembly enforces exact function signatures. Apply the small set of
-# Lean-4.34 erased-RealWorld ABI corrections deterministically against the
+# Lean-4.34 erased-RealWorld/Unit ABI corrections deterministically against the
 # pinned source tree. Native signatures stay in the non-Emscripten branches.
 node "$script_dir/apply-wasm-abi.mjs" "$lean_source"
 
-# The study snapshot does not preserve executable bits on Lean's helper scripts.
-# We configure the current src/ tree directly, so repair the current helper
-# sources before CMake copies them into the target build directory.
+# The vendored/study snapshots may not preserve executable bits on Lean helper
+# scripts. Repair the current helper sources before CMake stages them.
 for helper_source in \
   "$lean_source/src/bin/leanmake" \
   "$lean_source/src/bin/leanc.in"; do
@@ -78,8 +149,10 @@ for helper_source in \
   chmod +x "$helper_source"
 done
 
-cd "$workspace_root"
-rm -rf .lake/build "$lean_build" "$provider_overlay" "$provider_obj_dir" "$out_dir"
+if [[ "$source_mode" == 'monorepo' ]]; then
+  rm -rf "$workspace_root/.lake/build"
+fi
+rm -rf "$lean_build" "$provider_overlay" "$provider_obj_dir" "$out_dir"
 mkdir -p \
   "$lean_build" \
   "$provider_src/Ps" \
@@ -90,14 +163,8 @@ mkdir -p \
   "$out_dir"
 
 # Build Lean 4.34's current source tree directly for wasm32 as STAGE=1. The
-# exact pinned native Lean toolchain is PREV_STAGE: it elaborates current Lean
-# sources and emits C, while Emscripten owns every runtime/kernel/object that is
-# shipped in the provider. This avoids mixing the frozen bootstrap generated-C
-# ABI with the current runtime ABI, which WebAssembly correctly rejects.
-#
-# Lean 4.34's Emscripten CMake path forces -pthread unless patched. The provider
-# is deliberately single-threaded: this avoids SharedArrayBuffer/worker runtime
-# dependencies and matches the upstream v4.34 + emsdk 6.0.9 working configuration.
+# exact pinned native Lean 4.34.0 installation is PREV_STAGE and only emits C;
+# no native host object/runtime library enters the WebAssembly artifact.
 cmake \
   -S "$lean_source/src" \
   -B "$lean_build" \
@@ -140,14 +207,14 @@ for runtime_lib in \
   fi
 done
 
-# Stage only the semantic provider sources. This is the same closure already
-# proven by the native provider tests; parser, elaborator, compiler, CLI and
-# backend packages stay outside the final provider artifact.
-cp -a "$workspace_root/packages/foundation/src/Ps/." "$provider_src/Ps/"
-cp -a "$workspace_root/packages/core/src/Ps/." "$provider_src/Ps/"
-cp -a "$workspace_root/packages/environment/src/Ps/." "$provider_src/Ps/"
-cp -a "$workspace_root/packages/bridge/src/Ps/." "$provider_src/Ps/"
-cp -a "$workspace_root/packages/pskernel-lean/provider/PsKernelLean/." "$provider_src/PsKernelLean/"
+# Stage only the semantic provider closure. In the monorepo these are the live
+# sibling sources; in an npm tarball they are the exact source snapshots under
+# source/proofscript/.
+cp -a "$foundation_source/." "$provider_src/Ps/"
+cp -a "$core_source/." "$provider_src/Ps/"
+cp -a "$environment_source/." "$provider_src/Ps/"
+cp -a "$bridge_source/." "$provider_src/Ps/"
+cp -a "$provider_source/." "$provider_src/PsKernelLean/"
 
 provider_modules=(
   "Ps/Foundation/Name"
@@ -171,9 +238,6 @@ provider_modules=(
   "PsKernelLean/Main"
 )
 
-# The host compiler is pinned to the exact same Lean source revision as the
-# wasm runtime. It is only a front-end/C emitter here: no host object or host
-# runtime library enters the WASM artifact.
 (
   cd "$provider_src"
   export LEAN_PATH="$provider_olean_dir:$host_lean_path"
@@ -210,19 +274,6 @@ for source in "${provider_c_files[@]}"; do
   index=$((index + 1))
 done
 
-# Keep the already-proven CLI transport for the first real WASM milestone. A
-# later milestone can replace this with the JS-facing memory ABI without
-# changing the kernel admission semantics.
-#
-# leanc.sh contributes the target compiler/platform flags and current Lean
-# library search directory. Mirror Lean 4.34's Emscripten static link closure
-# (without Lake, which this provider does not use). The final link must use
-# Emscripten's C++ driver because libleancpp/libLean require libc++/C++ ABI
-# symbols; provider C compilation above remains on leanc.
-#
-# Emscripten 6.0.9 keeps the deprecated USE_PTHREADS=0 negation specifically
-# for consumers that need to counter an upstream -pthread. Keep it on the final
-# link as a fail-safe in addition to the Lean CMake patch above.
 LEAN_CC="$(command -v em++)" "$wasm_leanc" \
   "${provider_objects[@]}" \
   -lleancpp \

@@ -33,6 +33,10 @@ jobs:
         working-directory: psc15selfhost
         run: node packages/pskernel-lean-wasm/host/package.test.mjs
 
+      - name: WASM source distribution contract
+        working-directory: psc15selfhost
+        run: node packages/pskernel-lean-wasm/host/source-distribution.test.mjs
+
       - name: Bootstrap isolation contract
         working-directory: psc15selfhost
         run: node scripts/bootstrap-closure-contract-tests.mjs

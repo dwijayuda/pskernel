@@ -8,17 +8,29 @@
     ".": "./index.mjs",
     "./metadata/lean": "./LEAN_SOURCE_PIN.json",
     "./metadata/emscripten": "./EMSCRIPTEN_PIN.json",
+    "./metadata/kernel-source": "./KERNEL_SOURCE_MANIFEST.json",
     "./package.json": "./package.json"
   },
   "files": [
     "index.mjs",
     "host/",
     "wasm/",
+    "provider/",
+    "kernel/",
+    "source/",
+    "scripts/",
+    "patches/",
+    "LEAN_LICENSE",
+    "KERNEL_SOURCE_MANIFEST.json",
     "LEAN_SOURCE_PIN.json",
     "EMSCRIPTEN_PIN.json",
     "README.md",
     "BUILDING.md"
   ],
+  "scripts": {
+    "build:wasm": "bash scripts/build-wasm.sh",
+    "verify:source": "node host/source-distribution.test.mjs"
+  },
   "engines": {
     "node": ">=20"
   },

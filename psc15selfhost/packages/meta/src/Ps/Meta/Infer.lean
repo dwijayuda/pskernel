@@ -82,6 +82,9 @@ def psInferAppView (expr : PsExpr) : PsInferAppView :=
     psInferAppViewAcc expr;
   worker []
 
+def psInferAppViewHead (view : PsInferAppView) : PsExpr :=
+  view.head
+
 def psInferApplyStructureParametersWorker
     (arguments : List PsExpr) :
     PsEnvironment ->
@@ -241,7 +244,7 @@ def psInferProjectionType
         metaContext
         localContext
         targetType);
-  match view.head with
+  match psInferAppViewHead view with
   | .constE actualName _ =>
       if psInferBoolNot (psNameEq actualName typeName) then
         Except.error PsInferError.projectionUnsupported

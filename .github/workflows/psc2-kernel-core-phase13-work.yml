@@ -9,6 +9,7 @@ on:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/packages/backend-ts/**
       - psc15selfhost/test/CompilerKernelShadow*.lean
+      - psc15selfhost/package.json
       - psc15selfhost/scripts/check-kernel-core-source.mjs
       - .github/workflows/psc2-kernel-core-phase13-work.yml
   workflow_dispatch:
@@ -39,7 +40,7 @@ jobs:
         run: |
           set -euo pipefail
           cd psc15selfhost
-          lake build PsKernelCore PsCompiler PsBackendTs
+          lake build PsKernelCore PsCompiler PsBackendTs PSC1KernelReferenceFoundations
 
       - name: Phase 13 KernelCore shadow positive matrix
         shell: bash
@@ -61,6 +62,20 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           lake env lean --run test/CompilerKernelShadowNoninterferenceTests.lean
+
+      - name: Phase 1 through Phase 12 inherited assurance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run assurance:kernel-core:phase12
+
+      - name: Existing minimal self-host guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake exe psc2_minimal_selfhost_tests
 
       - name: KernelCore PSC1 source profile
         shell: bash

@@ -157,6 +157,15 @@ def psP12RForgedRecursiveCall : PsKernelCoreExpr :=
       psP12RMinorNil)
     psP12RMinorCons
 
+def psP12RCanonicalRecursiveCall : PsKernelCoreExpr :=
+  PsKernelCoreExpr.app
+    (PsKernelCoreExpr.app
+      (PsKernelCoreExpr.app
+        (PsKernelCoreExpr.const psP12RRec PsKernelCoreList.nil)
+        psP12RMotive)
+      psP12RMinorNil)
+    psP12RMinorCons
+
 def psP12RConsRule : PsKernelCoreRecursorRule := {
   ctor := psP12RCons
   nFields := 1
@@ -169,7 +178,32 @@ def psP12RConsRule : PsKernelCoreRecursorRule := {
             (PsKernelCoreExpr.app psP12RForgedRecursiveCall psP12RTail)))))
 }
 
-def psP12RRecInfo : PsKernelCoreRecursorInfo := {
+def psP12RMissingRecursiveCallRule : PsKernelCoreRecursorRule := {
+  ctor := psP12RCons
+  nFields := 1
+  rhs := psP12RCloseLam psP12RMotiveI psP12RMotiveType
+    (psP12RCloseLam psP12RMinorNilI psP12RMinorNilType
+      (psP12RCloseLam psP12RMinorConsI psP12RMinorConsType
+        (psP12RCloseLam psP12RTailI psP12RTarget
+          (PsKernelCoreExpr.app psP12RMinorCons psP12RTail))))
+}
+
+def psP12RExtraRecursiveCallRule : PsKernelCoreRecursorRule := {
+  ctor := psP12RCons
+  nFields := 1
+  rhs := psP12RCloseLam psP12RMotiveI psP12RMotiveType
+    (psP12RCloseLam psP12RMinorNilI psP12RMinorNilType
+      (psP12RCloseLam psP12RMinorConsI psP12RMinorConsType
+        (psP12RCloseLam psP12RTailI psP12RTarget
+          (PsKernelCoreExpr.app
+            (PsKernelCoreExpr.app
+              (PsKernelCoreExpr.app psP12RMinorCons psP12RTail)
+              (PsKernelCoreExpr.app psP12RCanonicalRecursiveCall psP12RTail))
+            (PsKernelCoreExpr.app psP12RCanonicalRecursiveCall psP12RTail)))))
+}
+
+def psP12RRecInfoWithConsRule
+    (consRule : PsKernelCoreRecursorRule) : PsKernelCoreRecursorInfo := {
   base := {
     name := psP12RRec
     levelParams := PsKernelCoreList.nil
@@ -181,10 +215,13 @@ def psP12RRecInfo : PsKernelCoreRecursorInfo := {
   numMotives := 1
   numMinors := 2
   rules := PsKernelCoreList.cons psP12RNilRule
-    (PsKernelCoreList.cons psP12RConsRule PsKernelCoreList.nil)
+    (PsKernelCoreList.cons consRule PsKernelCoreList.nil)
   k := false
   isUnsafe := false
 }
+
+def psP12RRecInfo : PsKernelCoreRecursorInfo :=
+  psP12RRecInfoWithConsRule psP12RConsRule
 
 def psP12RFakeRecInfo : PsKernelCoreAxiomInfo := {
   base := {
@@ -195,21 +232,43 @@ def psP12RFakeRecInfo : PsKernelCoreAxiomInfo := {
   isUnsafe := false
 }
 
-def psP12RRejectsWrongRecursiveCall : Bool :=
+def psP12RRejected
+    (result : PsKernelCoreResult String PsKernelCoreEnvironment) : Bool :=
+  match result with
+  | PsKernelCoreResult.error _ => true
+  | PsKernelCoreResult.ok _ => false
+
+def psP12RRejectionChecks : PsKernelCoreResult String Unit :=
   match psKernelCoreAddRecursiveInductive
       256 psKernelCoreEnvironmentEmpty psP12RFamilyInfo psP12RCtors with
-  | PsKernelCoreResult.error _ => false
+  | PsKernelCoreResult.error message =>
+      PsKernelCoreResult.error ("rejection family admission failed: " ++ message)
   | PsKernelCoreResult.ok familyEnv =>
       let forgedEnv :=
         psKernelCoreEnvironmentAddUnchecked familyEnv
           (PsKernelCoreConstantInfo.axiomInfo psP12RFakeRecInfo);
-      match psKernelCoreAddRecursor 512 forgedEnv psP12RRecInfo with
-      | PsKernelCoreResult.error _ => true
-      | PsKernelCoreResult.ok _ => false
+      let wrongTarget := psKernelCoreAddRecursor 512 forgedEnv psP12RRecInfo;
+      let missingCall :=
+        psKernelCoreAddRecursor 512 familyEnv
+          (psP12RRecInfoWithConsRule psP12RMissingRecursiveCallRule);
+      let extraCall :=
+        psKernelCoreAddRecursor 512 familyEnv
+          (psP12RRecInfoWithConsRule psP12RExtraRecursiveCallRule);
+      if psP12RRejected wrongTarget then
+        if psP12RRejected missingCall then
+          if psP12RRejected extraCall then
+            PsKernelCoreResult.ok Unit.unit
+          else
+            PsKernelCoreResult.error "extra recursive call was accepted"
+        else
+          PsKernelCoreResult.error "missing recursive call was accepted"
+      else
+        PsKernelCoreResult.error "forged recursive-call target was accepted"
 
 def main : IO Unit := do
-  if psP12RRejectsWrongRecursiveCall then
-    IO.println "PSC2_KERNEL_CORE_PHASE12_RECURSIVE_RECURSOR_REJECTION: PASS"
-  else
-    throw (IO.userError
-      "PSC2_KERNEL_CORE_PHASE12_RECURSIVE_RECURSOR_REJECTION: FAIL: forged recursive call was accepted")
+  match psP12RRejectionChecks with
+  | PsKernelCoreResult.ok _ =>
+      IO.println "PSC2_KERNEL_CORE_PHASE12_RECURSIVE_RECURSOR_REJECTION: PASS"
+  | PsKernelCoreResult.error message =>
+      throw (IO.userError
+        ("PSC2_KERNEL_CORE_PHASE12_RECURSIVE_RECURSOR_REJECTION: FAIL: " ++ message))

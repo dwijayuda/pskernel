@@ -90,6 +90,11 @@ mkdir -p \
 # provider. The exact host Lean below is used only to elaborate matching 4.34.0
 # source and emit portable generated C; all shipped runtime/kernel code is
 # compiled by this Emscripten stage0.
+#
+# Lean's top-level CMake classifies command-line CMAKE_* variables before
+# project(), so an untyped CMAKE_TOOLCHAIN_FILE/AR lands in CL_ARGS (stage1)
+# instead of PLATFORM_ARGS (stage0). Forward both explicitly with STAGE0_ so
+# the ExternalProject cannot silently fall back to the host compiler.
 cmake \
   -S "$lean_source" \
   -B "$lean_build" \
@@ -98,6 +103,8 @@ cmake \
   -DCMAKE_C_COMPILER_WORKS=1 \
   -DCMAKE_AR="$(command -v emar)" \
   -DCMAKE_TOOLCHAIN_FILE="$emscripten_toolchain" \
+  -DSTAGE0_CMAKE_AR="$(command -v emar)" \
+  -DSTAGE0_CMAKE_TOOLCHAIN_FILE="$emscripten_toolchain" \
   -DUSE_GMP=OFF \
   -DUSE_MIMALLOC=OFF \
   -DUSE_LAKE=OFF \

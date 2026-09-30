@@ -2,23 +2,12 @@ import {existsSync} from 'node:fs';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
+import {checkWithKernelProvider,kernelProviderSpec} from './kernel-provider.mjs';
 import {packageBySection,parseImports} from './workspace-layout.mjs';
 
 const scriptPath=fileURLToPath(import.meta.url);
 const scriptDir=path.dirname(scriptPath);
 const selfhostRoot=path.resolve(scriptDir,'..');
-
-async function loadLeanKernelProvider(){
-  try{
-    return await import('@proofscript/pskernel-lean');
-  }catch(error){
-    const missingInstalledPackage=
-      error?.code==='ERR_MODULE_NOT_FOUND'&&
-      String(error?.message??'').includes('@proofscript/pskernel-lean');
-    if(!missingInstalledPackage)throw error;
-    return import('../packages/pskernel-lean/index.mjs');
-  }
-}
 
 function stripImports(source){
   return source
@@ -192,10 +181,12 @@ export async function checkGeneratedProjectWithKernel({
   entryPath,
   kernel='lean434',
   binaryPath,
+  launcherPath,
+  providerModule,
 }){
-  if(kernel!=='lean434'){
-    throw new Error(`PSC2_KERNEL_PROVIDER: expected lean434, got ${kernel}`);
-  }
+  // Validate the selector before doing project/compiler work so unsupported
+  // providers fail with a stable host-boundary error.
+  kernelProviderSpec(kernel);
 
   const resolvedCompiler=path.resolve(compilerPath);
   const resolvedEntry=path.resolve(entryPath);
@@ -216,10 +207,10 @@ export async function checkGeneratedProjectWithKernel({
     ),
     'admissions',
   );
-  const {checkCanonicalAdmissions}=await loadLeanKernelProvider();
-  const result=checkCanonicalAdmissions(
+  const result=await checkWithKernelProvider(
+    kernel,
     admissions,
-    binaryPath===undefined?{}:{binaryPath},
+    {binaryPath,launcherPath,providerModule},
   );
   if(!result.accepted){
     throw kernelRejectionError(result);
@@ -230,7 +221,7 @@ export async function checkGeneratedProjectWithKernel({
 function usage(){
   return [
     'usage:',
-    '  node scripts/check-with-generated.mjs <compiler.js> <entry.lean|entry.ps> --kernel lean434',
+    '  node scripts/check-with-generated.mjs <compiler.js> <entry.lean|entry.ps> --kernel <lean434|lean434-wasm>',
   ].join('\n');
 }
 

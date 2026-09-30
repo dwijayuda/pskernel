@@ -511,7 +511,7 @@ def psJsLowerExprWithFuel (fuel : Nat) :
                       locals
                       nextLocal
                       expectedType
-                | PsVerifiedIrExpr.intrinsic operation typeArguments arguments =>
+                | PsVerifiedIrExpr.intrinsic operation typeArguments intrinsicArguments =>
                     match typeArguments with
                     | List.cons _typeArgument _restTypeArguments =>
                         Except.error PsJsError.unsupportedExpression
@@ -520,7 +520,7 @@ def psJsLowerExprWithFuel (fuel : Nat) :
                         | Option.none => Except.error PsJsError.unsupportedExpression
                         | Option.some signature =>
                             if psJsPrimitiveTypeEq signature.resultType expectedType then
-                              match arguments with
+                              match intrinsicArguments with
                               | List.nil => Except.error PsJsError.unsupportedExpression
                               | List.cons left restArguments =>
                                   match restArguments with

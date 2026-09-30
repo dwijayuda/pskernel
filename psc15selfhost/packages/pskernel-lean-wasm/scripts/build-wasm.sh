@@ -242,4 +242,20 @@ node -e '
      value.leanCommit!=="293d5d0c0c3f3dded4688b3ccd6a33939ac5102b")process.exit(1);
 ' "$health_json"
 
+accepted_request='{"protocol":"pskernel-lean/1","admissions":{"format":"ps-canonical-admissions-v2","declarations":[{"name":"Test.True","universeParams":[],"type":{"tag":"sort","level":{"tag":"zero"}},"value":null,"builtin":null}]}}'
+accepted_json="$(printf '%s' "$accepted_request" | node "$out_dir/pskernel-lean.cjs" --check)"
+node -e '
+  const value=JSON.parse(process.argv[1]);
+  if(value.accepted!==true)process.exit(1);
+' "$accepted_json"
+echo 'PSC2_LEAN_KERNEL_WASM_ACCEPT_SMOKE: PASS'
+
+rejected_request='{"protocol":"pskernel-lean/1","admissions":{"format":"ps-canonical-admissions-v2","declarations":[{"name":"Test.Bad","universeParams":[],"type":{"tag":"sort","level":{"tag":"zero"}},"value":{"tag":"sort","level":{"tag":"succ","of":{"tag":"zero"}}},"builtin":null}]}}'
+rejected_json="$(printf '%s' "$rejected_request" | node "$out_dir/pskernel-lean.cjs" --check)"
+node -e '
+  const value=JSON.parse(process.argv[1]);
+  if(value.accepted!==false||value.errorKind!=="kernel-rejection")process.exit(1);
+' "$rejected_json"
+echo 'PSC2_LEAN_KERNEL_WASM_REJECT_SMOKE: PASS'
+
 printf 'PSC2_LEAN_KERNEL_WASM_BUILD: PASS %s bytes\n' "$(stat -c '%s' "$out_dir/pskernel-lean.wasm")"

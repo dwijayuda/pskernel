@@ -13,6 +13,7 @@ function run(command, args) {
   assert.equal(result.status, 0, `${command} failed`);
 }
 try {
+  run('lake', ['env', 'lean', 'test/BackendJsMachineIntTests.lean']);
   run('lake', ['exe', 'psc2_backend_js_tests', out]);
   run('node', ['--check', path.join(out, 'direct.mjs')]);
   const direct = await import(pathToFileURL(path.join(out, 'direct.mjs')));

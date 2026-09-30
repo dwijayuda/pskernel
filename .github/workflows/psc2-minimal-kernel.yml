@@ -23,6 +23,7 @@ on:
       - psc15selfhost/package.json
       - psc15selfhost/scripts/check-kernel-core-source.mjs
       - psc15selfhost/scripts/check-bootstrap-closure.mjs
+      - psc15selfhost/scripts/check-*-selfhost-source-syntax.mjs
       - psc15selfhost/scripts/check-selfhost-source-syntax.mjs
       - psc15selfhost/scripts/check-infer-selfhost-source-syntax.mjs
       - psc15selfhost/scripts/check-synth-instance-selfhost-source-syntax.mjs
@@ -129,6 +130,13 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           node scripts/check-elab-match-list-append-selfhost-source-syntax.mjs
+
+      - name: Full selfhost source syntax gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run check:selfhost-source-syntax
 
       - name: Bootstrap closure remains isolated
         shell: bash

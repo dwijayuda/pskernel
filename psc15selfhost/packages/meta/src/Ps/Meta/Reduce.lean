@@ -59,11 +59,26 @@ def psDefEqReadOnly
   let rightValue := psWhnfCore metaContext localContext right;
   psExprAlphaEq leftValue rightValue
 
+def psWhnfSameLength
+    (parameters : List PsName) : List PsLevel -> Bool :=
+  match parameters with
+  | List.nil =>
+      fun (levels : List PsLevel) =>
+        match levels with
+        | List.nil => true
+        | List.cons _ _ => false
+  | List.cons _ rest =>
+      let smaller : List PsLevel -> Bool := psWhnfSameLength rest;
+      fun (levels : List PsLevel) =>
+        match levels with
+        | List.nil => false
+        | List.cons _ levelRest => smaller levelRest
+
 def psWhnfDeltaInstantiate
     (parameters : List PsName)
     (levels : List PsLevel)
     (value : PsExpr) : Option PsExpr :=
-  if Nat.beq parameters.length levels.length then
+  if psWhnfSameLength parameters levels then
     let instantiated : PsExpr :=
       psExprInstantiateLevelParams parameters levels value;
     Option.some instantiated

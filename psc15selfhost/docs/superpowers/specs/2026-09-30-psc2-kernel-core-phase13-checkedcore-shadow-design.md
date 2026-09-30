@@ -126,7 +126,7 @@ Ps.Environment.Prelude
 Ps.KernelCore
 ```
 
-Then `Ps.Compiler.Api` may import `Ps.Compiler.KernelShadow` and expose additive shadow APIs.
+Then `Ps.Compiler.Api` imports `Ps.Compiler.KernelShadow` and exposes additive wrapper APIs.
 
 Dependency direction:
 
@@ -141,9 +141,10 @@ Core / Environment ----+
 KernelCore  -X-> Compiler
 KernelCore  -X-> Elab
 KernelCore  -X-> Bridge
+KernelShadow -X-> Compiler.Api
 ```
 
-No reverse import into KernelCore is allowed.
+No reverse import into KernelCore is allowed. `KernelShadow.lean` must not import `Ps.Compiler.Api`; compiler-level integrity/error wrapping belongs in `Api.lean`.
 
 No new package is required for Phase 13; a compiler-side module is sufficient and keeps the change small.
 
@@ -215,11 +216,9 @@ Projection expressions may be transported structurally, but KernelCore may rejec
 
 Metadata expressions do not exist in compiler `PsExpr`, so the adapter does not invent `mdata`.
 
-## 6. Shadow error model
+## 6. Shadow error ownership
 
-Introduce a compiler-side error type so transport/boundary failures are distinguishable from kernel semantic rejection.
-
-Conceptually:
+The pure adapter/checker module owns errors that can arise without knowing `PsCompilerError`:
 
 ```text
 PsCompilerKernelShadowError
@@ -231,9 +230,21 @@ PsCompilerKernelShadowError
   kernelRejected String
 ```
 
-Exact constructor spelling may follow existing project conventions, but the distinction is required.
+Exact constructor spelling may follow existing project conventions, but the distinctions are required.
 
-The existing `PsCompilerError` does not need to absorb these errors in Phase 13 because the authoritative compile APIs remain unchanged.
+`Ps.Compiler.Api` owns a separate wrapper for convenience APIs that can fail either before or during shadow checking:
+
+```text
+PsCompilerKernelShadowApiError
+  compiler PsCompilerError
+  shadow PsCompilerKernelShadowError
+```
+
+This avoids an import cycle:
+
+- `KernelShadow.lean` does not know `PsCompilerError`;
+- `Api.lean` already owns `PsCompilerError` and may wrap both domains;
+- authoritative compiler APIs do not need to add shadow variants to `PsCompilerError` in Phase 13.
 
 ## 7. Bootstrap-prelude projection
 
@@ -256,7 +267,7 @@ This supports module checking without pretending their computation behavior has 
 
 ## 8. Supported module declaration admission
 
-Process `PsCompilerAdmissionReadyModule.declarations` in source order.
+Process module declarations in source order.
 
 ### 8.1 Definition
 
@@ -299,57 +310,60 @@ Some of these are already rejected by the current canonical admission-ready boun
 
 In particular, inductive/constructor/recursor declarations must not be approximated as checked module declarations.
 
-## 9. Shadow result API
+## 9. Pure shadow checker API
 
-Add additive APIs, conceptually:
+`Ps.Compiler.KernelShadow` should expose a small API independent of `PsCompilerAdmissionReadyModule` and `PsCompilerError`.
 
-```text
-psCompilerKernelShadowCheckPrepared
-    : PsCompilerAdmissionReadyModule
-      -> Except PsCompilerKernelShadowError PsCompilerKernelShadowReport
-
-psCompilerKernelShadowCheckElaborated
-    : PsElabModuleResult
-      -> Except PsCompilerError PsCompilerAdmissionReadyModule
-      -> ...
-
-psCompilerKernelShadowCheckSource
-    : PsCompilerSourceKind
-      -> String
-      -> ...
-```
-
-The implementation should keep the public surface simpler than the conceptual sketch if possible. The required capabilities are:
-
-- check an already prepared module after `psCompilerValidatePrepared` succeeds;
-- convenience entry point from source for tests/users;
-- return enough deterministic data to assert success and declaration count;
-- never change `psCompilerVerifiedIrFromPrepared` behavior.
-
-Recommended report shape:
+Conceptually:
 
 ```text
 PsCompilerKernelShadowReport
   checkedDeclarations : Nat
-  finalEnvironment : PsKernelCoreEnvironment
+
+psCompilerKernelShadowCheckDeclarations
+    : List PsDeclaration
+      -> Except PsCompilerKernelShadowError PsCompilerKernelShadowReport
 ```
 
-If exposing the final environment adds no test value, only the count plus a deterministic success marker is sufficient. YAGNI applies.
+The function builds the projected bootstrap assumption environment, checks supported declarations in order, and returns a deterministic report.
 
-## 10. Prepared-artifact integrity ordering
+Do not expose `PsKernelCoreEnvironment` in the public report unless a test genuinely requires it. Keeping only `checkedDeclarations` avoids making the shadow environment an accidental new compiler interface.
 
-`psCompilerKernelShadowCheckPrepared` must first validate the existing admission-ready artifact with `psCompilerValidatePrepared`.
+## 10. Compiler API wrappers and integrity ordering
 
-Required ordering:
+`Ps.Compiler.Api` adds convenience wrappers after `PsCompilerError`, `PsCompilerAdmissionReadyModule`, and `psCompilerValidatePrepared` are available.
+
+Conceptually:
+
+```text
+psCompilerKernelShadowCheckPrepared
+    : PsCompilerAdmissionReadyModule
+      -> Except PsCompilerKernelShadowApiError PsCompilerKernelShadowReport
+
+psCompilerKernelShadowCheckElaborated
+    : PsElabModuleResult
+      -> Except PsCompilerKernelShadowApiError PsCompilerKernelShadowReport
+
+psCompilerKernelShadowCheckSource
+    : PsCompilerSourceKind
+      -> String
+      -> Except PsCompilerKernelShadowApiError PsCompilerKernelShadowReport
+```
+
+Required prepared ordering:
 
 ```text
 prepared artifact
-  -> existing canonicalAdmissions integrity check
-  -> shadow transport
+  -> psCompilerValidatePrepared
+  -> shadow declaration transport
   -> KernelCore checking
 ```
 
-A forged `canonicalAdmissions` string must therefore fail before any shadow result can be reported.
+If `psCompilerValidatePrepared` fails, return `PsCompilerKernelShadowApiError.compiler error`. If pure shadow checking fails, return `PsCompilerKernelShadowApiError.shadow error`.
+
+A forged `canonicalAdmissions` string must fail before any shadow result can be reported.
+
+`psCompilerKernelShadowCheckElaborated` must go through the same preparation logic as the existing compiler path rather than bypassing canonical-admission generation. `psCompilerKernelShadowCheckSource` must go through the existing parse/elaborate/prepare path.
 
 The shadow checker does not replace the existing admission-ready integrity boundary.
 
@@ -376,7 +390,7 @@ Implementation follows RED -> GREEN TDD.
 
 ### 12.1 First RED fixture
 
-Add a Phase-13 compiler/kernel-shadow test that expects a source-level API capable of checking:
+Add a Phase-13 compiler/kernel-shadow test that imports `Ps.Compiler.Api` and expects the source wrapper to check:
 
 ```lean
 def answer : Nat := 42
@@ -418,7 +432,8 @@ Where creating a malformed `PsCompilerAdmissionReadyModule` directly is needed, 
 For a common prepared module:
 
 ```text
-VerifiedIR before shadow integration == VerifiedIR after shadow integration
+VerifiedIR from existing authoritative path remains byte/structure-equivalent
+whether or not the explicit shadow API is called separately.
 ```
 
 The normal TypeScript bootstrap output should remain green without calling the shadow API.
@@ -442,6 +457,8 @@ RED Phase-13 fixture
 
 Because Phase 13 should not modify trusted KernelCore semantics, the KernelCore trusted-module count should remain 23 unless an independently justified trusted fix is discovered. Any trusted KernelCore source change upgrades the review burden and must be called out explicitly.
 
+The compiler-side adapter itself should remain compatible with the repository's portable PSC1 source profile where practical, but Phase 13 must not silently redefine the existing trusted KernelCore source gate to include compiler adapter code.
+
 ## 14. CI
 
 Add a focused Phase-13 work/acceptance workflow following the established KernelCore phase pattern.
@@ -458,6 +475,7 @@ and run:
 - Phase-13 shadow-provider fixtures;
 - inherited Phase-12 aggregate assurance;
 - existing PSC1 source/self-host gate;
+- minimal self-host regression;
 - final full `npm run check` for permanent acceptance.
 
 Do not weaken or remove earlier gates.
@@ -468,8 +486,8 @@ If all gates pass, it will be supported to say:
 
 - compiler Core names, levels, and the supported closed expression surface can be transported deterministically into KernelCore;
 - the existing bootstrap prelude can be represented as an explicit opaque assumption boundary for shadow checking;
-- module-local ordinary definitions and theorems in the accepted Phase-13 slice are independently admitted by KernelCore;
-- sequential checked module declarations thread through the KernelCore environment;
+- module-local ordinary definitions and theorems in the accepted Phase-13 slice are independently admitted by KernelCore relative to those prelude assumptions;
+- sequential checked module declarations thread through a KernelCore environment;
 - forged prepared artifacts still fail the existing canonical-admission integrity boundary before shadow checking;
 - the established erasure/VerifiedIR/backend path remains unchanged and green;
 - KernelCore remains non-authoritative in Phase 13.
@@ -480,6 +498,7 @@ Phase 13 does **not** establish:
 
 - independent KernelCore certification of `psBootstrapPreludeEnvironment`;
 - trusted inductive/constructor/recursor reconstruction from compiler declarations;
+- trusted semantics for the prelude recursors merely because their types are projected as assumptions;
 - KernelCore checking of every currently elaboratable PSC2 program;
 - provider cutover;
 - `CheckedCore` as the sole source accepted by erasure;

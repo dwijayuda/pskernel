@@ -7,7 +7,8 @@ require proofscriptSelfhost from ".."
 
 lean_lib PsKernelLean where
   srcDir := "../packages/pskernel-lean/provider"
-  roots := #[`PsKernelLean.Main]
+  roots := #[`PsKernelLean.Error, `PsKernelLean.Convert, `PsKernelLean.Protocol,
+    `PsKernelLean.Prelude, `PsKernelLean.Admission, `PsKernelLean.Main]
 
 lean_lib PsLeanChecked where
   srcDir := "../host/src"

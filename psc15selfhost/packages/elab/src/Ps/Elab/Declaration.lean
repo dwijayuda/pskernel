@@ -270,20 +270,37 @@ def psElabBinderArguments
   psElabBinderArgumentsInOrder
     (psElabTypedBinderListReverse bindersRev)
 
+def psCloseElabImplicitBindersWorker
+    (binders : List PsElabTypedBinder) :
+    PsMetaContext -> PsExpr -> PsExpr :=
+  match binders with
+  | List.nil =>
+      fun (_metaContext : PsMetaContext) =>
+        fun (body : PsExpr) => body
+  | List.cons binder rest =>
+      let smaller :
+          PsMetaContext -> PsExpr -> PsExpr :=
+        psCloseElabImplicitBindersWorker rest;
+      fun (metaContext : PsMetaContext) =>
+        fun (body : PsExpr) =>
+          let binderType :=
+            psMetaInstantiate metaContext binder.type;
+          let closed :=
+            PsExpr.forallE
+              binder.name
+              binderType
+              (psExprAbstractFVar binder.id body)
+              PsBinderInfo.implicit;
+          smaller metaContext closed
+
 def psCloseElabImplicitBinders
-    (metaContext : PsMetaContext) :
-    List PsElabTypedBinder -> PsExpr -> PsExpr
-  | [], body => body
-  | binder :: rest, body =>
-      let binderType :=
-        psMetaInstantiate metaContext binder.type;
-      let closed :=
-        PsExpr.forallE
-          binder.name
-          binderType
-          (psExprAbstractFVar binder.id body)
-          PsBinderInfo.implicit;
-      psCloseElabImplicitBinders metaContext rest closed
+    (metaContext : PsMetaContext)
+    (binders : List PsElabTypedBinder)
+    (body : PsExpr) : PsExpr :=
+  psCloseElabImplicitBindersWorker
+    binders
+    metaContext
+    body
 
 def psExprListAlphaEq : List PsExpr -> List PsExpr -> Bool
   | [], [] => true

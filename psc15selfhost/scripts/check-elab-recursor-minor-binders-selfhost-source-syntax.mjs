@@ -31,6 +31,7 @@ const workerRequired = [
   /fun \(_index\s*:\s*Nat\) =>/,
   /fun \(index\s*:\s*Nat\) =>/,
   /fun \(bindersRev\s*:\s*List PsElabTypedBinder\) =>/,
+  /PsElabRecursorMinorsResult\.mk\s+context\s+bindersRev/,
   /psBuildRecursorMinorBindersWorker\s+parameterArgs\s+motiveId\s+rest\s*;/,
   /smaller\s+nextContext\s+\(Nat\.succ index\)/,
 ];
@@ -62,5 +63,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_RECURSOR_MINOR_BINDERS_SELFHOST_SOURCE_SYNTAX: PASS (declaration-list-recursive worker; context/index/binder state applied post-recursion)\n",
+  "PSC2_ELAB_RECURSOR_MINOR_BINDERS_SELFHOST_SOURCE_SYNTAX: PASS (declaration-list-recursive worker; context/index/binder state applied post-recursion; explicit result constructor)\n",
 );

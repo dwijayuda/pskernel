@@ -73,6 +73,7 @@ jobs:
             assert.equal(existsSync(path.join(root,file)),true,`missing ${file}`);
           }
           NODE
+          npm --prefix packages/pskernel-lean-wasm run verify:prebuilt
 
       - name: Bootstrap isolation contract
         working-directory: psc15selfhost

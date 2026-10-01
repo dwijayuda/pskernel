@@ -108,6 +108,32 @@ jobs:
               (bindersRev : List PsElabTypedBinder) : List PsExpr :=
             psElabBinderArgumentsWorker bindersRev List.nil''')
 
+          replace_decl('psCloseElabImplicitBinders', r'''def psCloseElabImplicitBindersWorker
+              (metaContext : PsMetaContext)
+              (binders : List PsElabTypedBinder) : PsExpr -> PsExpr :=
+            match binders with
+            | List.nil =>
+                fun (body : PsExpr) => body
+            | List.cons binder rest =>
+                let smaller : PsExpr -> PsExpr :=
+                  psCloseElabImplicitBindersWorker metaContext rest;
+                fun (body : PsExpr) =>
+                  let binderType :=
+                    psMetaInstantiate metaContext binder.type;
+                  let closed :=
+                    PsExpr.forallE
+                      binder.name
+                      binderType
+                      (psExprAbstractFVar binder.id body)
+                      PsBinderInfo.implicit;
+                  smaller closed
+
+          def psCloseElabImplicitBinders
+              (metaContext : PsMetaContext)
+              (binders : List PsElabTypedBinder)
+              (body : PsExpr) : PsExpr :=
+            psCloseElabImplicitBindersWorker metaContext binders body''')
+
           # PSC1 elaborates match expressions bidirectionally, so local matches
           # without an external expected type need explicit result annotations.
           annotations = [

@@ -1180,25 +1180,26 @@ def psElabStructureDeclaration
     (fields : List (PsSyntaxBinderHead × PsSyntaxTerm))
     (span : PsSourceSpan) :
     Except PsElabError PsElabDeclarationBatchResult :=
-  if fields.isEmpty then
-    Except.error PsElabError.unsupportedTerm
-  else
-    let constructorName : PsSyntaxName := {
-      segments := ["mk"]
-      span := span
-    };
-    let constructor : PsSyntaxInductiveConstructor := {
-      name := constructorName
-      fields := fields
-      span := span
-    };
-    psElabInductiveDeclaration
-      environment
-      name
-      params
-      none
-      [constructor]
-      true
+  match fields with
+  | List.nil =>
+      Except.error PsElabError.unsupportedTerm
+  | List.cons _ _ =>
+      let constructorName : PsSyntaxName :=
+        PsSyntaxName.mk
+          (List.cons "mk" List.nil)
+          span;
+      let constructor : PsSyntaxInductiveConstructor :=
+        PsSyntaxInductiveConstructor.mk
+          constructorName
+          fields
+          span;
+      psElabInductiveDeclaration
+        environment
+        name
+        params
+        Option.none
+        (List.cons constructor List.nil)
+        true
 
 def psElabPartialDeclaration
     (environment : PsEnvironment)

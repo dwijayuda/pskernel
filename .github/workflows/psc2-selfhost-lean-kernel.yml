@@ -1,0 +1,68 @@
+name: PSC2 selfhost with Lean kernel
+on:
+  push:
+    branches: [psc2/selfhost-lean-kernel]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc2-selfhost-lean-kernel-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: psc15selfhost
+        shell: bash
+    env:
+      PSC2_FIXED_POINT_PROBE_ACTIVE: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install pinned Lean toolchain
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build native replay tools
+        run: |
+          set -euo pipefail
+          mkdir -p dist/integration-evidence
+          git rev-parse HEAD | tee dist/integration-evidence/source-commit.txt
+          test "$(lean --githash)" = 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+          lake build psc1 psc2_selfhost_replay_audit 2>&1 | tee dist/integration-evidence/native-build.log
+      - name: Preserve exact sources and native diagnostic executables
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p dist/integration-evidence
+          tar --exclude='./.lake' --exclude='./dist' --exclude='./node_modules' -czf dist/integration-evidence/source-workspace.tar.gz .
+          for binary in psc1 psc2_selfhost_replay_audit; do
+            if test -f ".lake/build/bin/$binary"; then cp ".lake/build/bin/$binary" dist/integration-evidence/; fi
+          done
+      - name: Source guards and manifest isolation
+        run: |
+          set -euo pipefail
+          npm run check:selfhost-source-syntax 2>&1 | tee dist/integration-evidence/source-guards.log
+          npm run test:bootstrap-manifest 2>&1 | tee dist/integration-evidence/source-isolation.log
+      - name: Real parser inventory and native erasure behavior
+        run: |
+          set -euo pipefail
+          node scripts/selfhost-replay-audit.mjs 2>&1 | tee dist/integration-evidence/replay-audit.log
+      - name: Real fixed-point replay
+        run: |
+          set -euo pipefail
+          npm install --prefix /tmp/psc2-lean-integration --no-audit --no-fund typescript@5.8.3
+          export PATH="/tmp/psc2-lean-integration/node_modules/.bin:$PATH"
+          npm run fixed-point 2>&1 | tee dist/integration-evidence/fixed-point.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc2-lean-integration-${{ github.sha }}
+          path: psc15selfhost/dist/integration-evidence/
+          retention-days: 7
+          if-no-files-found: error

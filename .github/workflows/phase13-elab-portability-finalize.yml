@@ -30,12 +30,13 @@ jobs:
         with:
           node-version: 22
 
-      - name: Apply verified portability normalization plus portable Nat rendering
+      - name: Apply verified portability normalization plus portable constructors
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           workflow = Path('.github/workflows/phase13-elab-close-forall-patch.yml').read_text()
           start_marker = "          python3 - <<'PY'\n"
@@ -54,7 +55,36 @@ jobs:
           count = text.count(old)
           if count != 1:
               raise SystemExit(f'expected one wildcard Nat-render target, got {count}')
-          path.write_text(text.replace(old, new, 1))
+          text = text.replace(old, new, 1)
+
+          # PSC1 resolves constructors in patterns, but expression-position Option
+          # constructors in this closure must be explicit. Qualifying them is
+          # semantics-preserving and avoids widening PSC1 name resolution.
+          some_re = re.compile(r'(?<!Option\.)\bsome\b')
+          none_re = re.compile(r'(?<!Option\.)\bnone\b')
+          qualified = []
+          for line in text.splitlines():
+              stripped = line.lstrip()
+              if stripped.startswith('|'):
+                  before, sep, after = line.partition('=>')
+                  if sep:
+                      after = some_re.sub('Option.some', after)
+                      after = none_re.sub('Option.none', after)
+                      line = before + sep + after
+              else:
+                  line = some_re.sub('Option.some', line)
+                  line = none_re.sub('Option.none', line)
+              qualified.append(line)
+          text = '\n'.join(qualified) + ('\n' if text.endswith('\n') else '')
+          path.write_text(text)
+
+          # Diagnostic only: pattern-position constructors are intentionally bare.
+          for line_no, line in enumerate(text.splitlines(), 1):
+              stripped = line.lstrip()
+              if stripped.startswith('|'):
+                  continue
+              if some_re.search(line) or none_re.search(line):
+                  print(f'unqualified Option candidate {line_no}: {line}')
           PY
           git diff --check -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
 

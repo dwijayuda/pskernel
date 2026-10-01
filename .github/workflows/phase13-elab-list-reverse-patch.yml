@@ -1,0 +1,48 @@
+name: Phase 13 elaborator list reverse portability patch
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-work
+    paths:
+      - .github/workflows/phase13-elab-list-reverse-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-work
+
+      - name: Replace host List.reverse with PSC1-native helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          marker = '''def psElabListLength {α : Type}\n    (values : List α) : Nat :=\n  match values with\n  | [] => 0\n  | _ :: rest => Nat.succ (psElabListLength rest)\n'''
+          helper = marker + '''\ndef psElabListReverseAcc {α : Type}\n    (values : List α) : List α -> List α :=\n  match values with\n  | [] =>\n      fun (acc : List α) => acc\n  | head :: tail =>\n      let smaller : List α -> List α :=\n        psElabListReverseAcc tail;\n      fun (acc : List α) =>\n        smaller (List.cons head acc)\n\ndef psElabListReverse {α : Type}\n    (values : List α) : List α :=\n  psElabListReverseAcc values List.nil\n'''
+          if marker not in text:
+              raise SystemExit('psElabListLength marker not found')
+          if 'def psElabListReverseAcc' in text:
+              raise SystemExit('reverse helper already exists')
+          text = text.replace(marker, helper, 1)
+          count = text.count('List.reverse')
+          if count == 0:
+              raise SystemExit('no List.reverse occurrences found')
+          text = text.replace('List.reverse', 'psElabListReverse')
+          path.write_text(text)
+          print(f'replaced {count} List.reverse occurrences')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): use PSC1-native list reverse"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

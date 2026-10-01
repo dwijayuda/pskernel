@@ -86,9 +86,31 @@ if (/\bparameterArgs\.length\b|\bconstructors\.length\b/.test(recursor)) {
   );
 }
 
+const declarationStart = source.indexOf("def psElabInductiveDeclaration\n");
+const declarationEnd = source.indexOf("\ndef psElabStructureDeclaration\n", declarationStart + 1);
+if (declarationStart < 0 || declarationEnd < 0) {
+  throw new Error(
+    "PSC2_ELAB_INDUCTIVE_DECLARATION_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
+  );
+}
+const declaration = source.slice(declarationStart, declarationEnd);
+if (!/let result\s*:\s*Except PsElabError \(Prod PsElabContext PsExpr\)\s*:=\s*match resultType with/.test(declaration)) {
+  throw new Error(
+    "PSC2_ELAB_INDUCTIVE_DECLARATION_SELFHOST_SOURCE_SYNTAX_MISSING: typed result match",
+  );
+}
+if (/let result\s*:=\s*match resultType with/.test(declaration)) {
+  throw new Error(
+    "PSC2_ELAB_INDUCTIVE_DECLARATION_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: untyped result match",
+  );
+}
+
 process.stdout.write(
   "PSC2_ELAB_RECURSOR_MINOR_BINDERS_SELFHOST_SOURCE_SYNTAX: PASS (declaration-list-recursive worker; context/index/binder state applied post-recursion; explicit result constructor)\n",
 );
 process.stdout.write(
   "PSC2_ELAB_INDUCTIVE_RECURSOR_SELFHOST_SOURCE_SYNTAX: PASS (project-owned counts occupy recursor metadata fields; method-style length excluded)\n",
+);
+process.stdout.write(
+  "PSC2_ELAB_INDUCTIVE_DECLARATION_SELFHOST_SOURCE_SYNTAX: PASS (explicit expected type for result-type local match)\n",
 );

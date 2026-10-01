@@ -1,0 +1,37 @@
+name: Phase 13 this-chat bootstrap verify
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+    paths:
+      - psc15selfhost/packages/**
+      - psc15selfhost/scripts/**
+      - psc15selfhost/package.json
+      - .github/workflows/phase13-this-chat-bootstrap-verify.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: PSC1 bootstrap compiler source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run bootstrap:check

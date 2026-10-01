@@ -2485,42 +2485,42 @@ def psElabDropForallBinders
     (type : PsExpr) : Option PsExpr :=
   match remaining with
   | 0 =>
-      some type
+      Option.some type
   | nextRemaining + 1 =>
       match type with
       | .forallE _ _ body _ =>
           psElabDropForallBinders nextRemaining body
-      | _ => none
+      | _ => Option.none
 
 def psElabTakeForallNames
     (remaining : Nat)
     (type : PsExpr) : Option (List String) :=
   match remaining with
   | 0 =>
-      some []
+      Option.some []
   | nextRemaining + 1 =>
       match type with
       | .forallE name _ body _ =>
           match psElabTakeForallNames nextRemaining body with
-          | none => none
-          | some rest =>
-              some (List.cons (psNameLastComponent name) rest)
-      | _ => none
+          | Option.none => Option.none
+          | Option.some rest =>
+              Option.some (List.cons (psNameLastComponent name) rest)
+      | _ => Option.none
 
 def psSyntaxRecordFieldName
     (field : Prod PsSyntaxName PsSyntaxTerm) :
     Option String :=
   let syntaxName := Prod.fst field;
   match psElabListReverse syntaxName.segments with
-  | [] => none
-  | name :: _ => some name
+  | [] => Option.none
+  | name :: _ => Option.some name
 
 def psSyntaxRecordFieldMatchesName
     (name : String)
     (field : Prod PsSyntaxName PsSyntaxTerm) : Bool :=
   match psSyntaxRecordFieldName field with
-  | none => false
-  | some fieldName => psStringEq fieldName name
+  | Option.none => false
+  | Option.some fieldName => psStringEq fieldName name
 
 def psSyntaxRecordHasField
     (fields :
@@ -2547,15 +2547,15 @@ def psSyntaxRecordFindField
     Option PsSyntaxTerm :=
   match fields with
   | [] =>
-      none
+      Option.none
   | field :: rest =>
       match psSyntaxRecordFieldName field with
-      | some fieldName =>
+      | Option.some fieldName =>
           if psStringEq fieldName name then
-            some (Prod.snd field)
+            Option.some (Prod.snd field)
           else
             psSyntaxRecordFindField rest name
-      | none =>
+      | Option.none =>
           psSyntaxRecordFindField rest name
 
 def psSyntaxRecordOrderFields
@@ -2564,17 +2564,17 @@ def psSyntaxRecordOrderFields
     Option (List PsSyntaxTerm) :=
   match names with
   | [] =>
-      some []
+      Option.some []
   | name :: rest =>
       match psSyntaxRecordFindField fields name with
-      | none =>
-          none
-      | some value =>
+      | Option.none =>
+          Option.none
+      | Option.some value =>
           match psSyntaxRecordOrderFields fields rest with
-          | none =>
-              none
-          | some values =>
-              some (List.cons value values)
+          | Option.none =>
+              Option.none
+          | Option.some values =>
+              Option.some (List.cons value values)
 
 def psElabRecordCandidateForInfo
     (environment : PsEnvironment)
@@ -2583,7 +2583,7 @@ def psElabRecordCandidateForInfo
   if info.isStructure then
     match info.constructors with
     | [] =>
-        none
+        Option.none
     | constructorName :: rest =>
         match rest with
         | [] =>
@@ -2591,28 +2591,28 @@ def psElabRecordCandidateForInfo
                 psEnvironmentFindConstructor
                   environment
                   constructorName with
-            | none => none
-            | some constructorInfo =>
+            | Option.none => Option.none
+            | Option.some constructorInfo =>
                 match
                     psElabDropForallBinders
                       constructorInfo.numParams
                       constructorInfo.type with
-                | none => none
-                | some fieldsType =>
+                | Option.none => Option.none
+                | Option.some fieldsType =>
                     match
                         psElabTakeForallNames
                           constructorInfo.numFields
                           fieldsType with
-                    | none => none
-                    | some fieldNames =>
-                        some {
+                    | Option.none => Option.none
+                    | Option.some fieldNames =>
+                        Option.some {
                           constructorName := constructorName
                           fieldNames := fieldNames
                         }
         | _ :: _ =>
-            none
+            Option.none
   else
-    none
+    Option.none
 
 def psElabRecordCandidateFromExpected
     (context : PsElabContext)
@@ -2631,15 +2631,15 @@ def psElabRecordCandidateFromExpected
           psEnvironmentFindInductive
             context.environment
             typeName with
-      | none => none
-      | some info =>
+      | Option.none => Option.none
+      | Option.some info =>
           if psElabNatNe (psElabListLength view.args) info.numParams then
-            none
+            Option.none
           else
             psElabRecordCandidateForInfo
               context.environment
               info
-  | _ => none
+  | _ => Option.none
 
 def psElabRecordCandidates
     (environment : PsEnvironment)
@@ -2657,7 +2657,7 @@ def psElabRecordCandidates
               psElabRecordCandidateForInfo
                 environment
                 info with
-          | some candidate =>
+          | Option.some candidate =>
               if
                   psSyntaxRecordFieldsMatch
                     fields
@@ -2673,7 +2673,7 @@ def psElabRecordCandidates
                   fields
                   rest
                   candidatesRev
-          | none =>
+          | Option.none =>
               psElabRecordCandidates
                 environment
                 fields
@@ -2698,11 +2698,11 @@ def psElabUniqueRecordCandidate
         environment.declarations
         [] with
   | [] =>
-      none
+      Option.none
   | candidate :: rest =>
       match rest with
-      | [] => some candidate
-      | _ :: _ => none
+      | [] => Option.some candidate
+      | _ :: _ => Option.none
 
 def psElabRecord
     (elaborate :
@@ -2717,43 +2717,43 @@ def psElabRecord
     Except PsElabError PsElabTermResult :=
   let candidate :=
     match expected with
-    | some expectedType =>
+    | Option.some expectedType =>
         match
             psElabRecordCandidateFromExpected
               context
               expectedType with
-        | some found =>
+        | Option.some found =>
             if
                 psSyntaxRecordFieldsMatch
                   fields
                   found.fieldNames then
-              some found
+              Option.some found
             else
-              none
-        | none =>
+              Option.none
+        | Option.none =>
             psElabUniqueRecordCandidate
               context.environment
               fields
-    | none =>
+    | Option.none =>
         psElabUniqueRecordCandidate
           context.environment
           fields;
   match candidate with
-  | none => Except.error PsElabError.unsupportedTerm
-  | some found =>
+  | Option.none => Except.error PsElabError.unsupportedTerm
+  | Option.some found =>
       match
           psSyntaxRecordOrderFields
             fields
             found.fieldNames with
-      | none => Except.error PsElabError.unsupportedTerm
-      | some arguments =>
+      | Option.none => Except.error PsElabError.unsupportedTerm
+      | Option.some arguments =>
           match
               psElabResolvedTerm
                 context
                 (PsExpr.constE
                   found.constructorName
                   [])
-                none with
+                Option.none with
           | Except.error error => Except.error error
           | Except.ok constructor =>
               match
@@ -2773,30 +2773,30 @@ def psElabSyntaxLocalId
     PsSyntaxTerm -> Option Nat
   | .reference sourceName =>
       match psSyntaxNameToName sourceName with
-      | none => none
-      | some name =>
+      | Option.none => Option.none
+      | Option.some name =>
           match
               psResolveName
                 context.localContext
                 context.environment
                 name with
-          | none => none
-          | some resolved =>
+          | Option.none => Option.none
+          | Option.some resolved =>
               match resolved with
-              | .local id => some id
-              | .global _ => none
-  | _ => none
+              | .local id => Option.some id
+              | .global _ => Option.none
+  | _ => Option.none
 
 def psElabNatListAt
     (values : List Nat)
     (index : Nat) : Option Nat :=
   match values with
   | [] =>
-      none
+      Option.none
   | value :: rest =>
       match index with
       | 0 =>
-          some value
+          Option.some value
       | nextIndex + 1 =>
           psElabNatListAt rest nextIndex
 
@@ -2810,40 +2810,40 @@ def psElabValidateStructuralCall
   match arguments with
   | [] =>
       match hypothesisId with
-      | some resolvedHypothesisId =>
+      | Option.some resolvedHypothesisId =>
           Except.ok resolvedHypothesisId
-      | none =>
+      | Option.none =>
           Except.error PsElabError.structuralRecursionInternal
   | argument :: rest =>
       match psElabSyntaxLocalId context argument with
-      | none =>
+      | Option.none =>
           if Nat.beq index recursion.recursiveParameterIndex then
             Except.error PsElabError.structuralRecursionNotDecreasing
           else
             Except.error PsElabError.structuralRecursionInvariantArgument
-      | some argumentId =>
+      | Option.some argumentId =>
           if Nat.beq index recursion.recursiveParameterIndex then
             match
                 psElabStructuralRecursionFindCall
                   recursion.calls
                   argumentId with
-            | none =>
+            | Option.none =>
                 Except.error PsElabError.structuralRecursionNotDecreasing
-            | some nextHypothesisId =>
+            | Option.some nextHypothesisId =>
                 psElabValidateStructuralCall
                   context
                   recursion
                   (Nat.succ index)
                   rest
-                  (some nextHypothesisId)
+                  (Option.some nextHypothesisId)
           else
             match
                 psElabNatListAt
                   recursion.explicitParameterIds
                   index with
-            | none =>
+            | Option.none =>
                 Except.error PsElabError.structuralRecursionArity
-            | some originalId =>
+            | Option.some originalId =>
                 if Nat.beq argumentId originalId then
                   psElabValidateStructuralCall
                     context
@@ -2862,15 +2862,15 @@ def psTryElabStructuralSelfCall
     (expected : Option PsExpr) :
     Except PsElabError (Option PsElabTermResult) :=
   match context.structuralRecursion with
-  | none =>
-      Except.ok none
-  | some recursion =>
+  | Option.none =>
+      Except.ok Option.none
+  | Option.some recursion =>
       match fn with
       | .reference sourceName =>
           match psSyntaxNameToName sourceName with
-          | some calledName =>
+          | Option.some calledName =>
               if psElabBoolNot (psNameEq calledName recursion.functionName) then
-                Except.ok none
+                Except.ok Option.none
               else if
                   psElabNatNe
                     (psElabListLength arguments)
@@ -2883,7 +2883,7 @@ def psTryElabStructuralSelfCall
                       recursion
                       0
                       arguments
-                      none with
+                      Option.none with
                 | Except.error error => Except.error error
                 | Except.ok hypothesisId =>
                     match
@@ -2892,10 +2892,10 @@ def psTryElabStructuralSelfCall
                           (PsExpr.fvar hypothesisId)
                           expected with
                     | Except.error error => Except.error error
-                    | Except.ok result => Except.ok (some result)
-          | none => Except.ok none
+                    | Except.ok result => Except.ok (Option.some result)
+          | Option.none => Except.ok Option.none
       | _ =>
-          Except.ok none
+          Except.ok Option.none
 
 def psElabTermWithFuel
     (fuel : Nat)
@@ -2908,7 +2908,7 @@ def psElabTermWithFuel
   | remaining + 1 =>
       match term with
       | .reference name =>
-          match psElabReference context name none with
+          match psElabReference context name Option.none with
           | Except.error error => Except.error error
           | Except.ok reference =>
               match psElabApplyArgs
@@ -2983,9 +2983,9 @@ def psElabTermWithFuel
           | Except.error error => Except.error error
           | Except.ok selfCall =>
               match selfCall with
-              | some result => Except.ok result
-              | none =>
-                  match psElabTermWithFuel remaining context fn none with
+              | Option.some result => Except.ok result
+              | Option.none =>
+                  match psElabTermWithFuel remaining context fn Option.none with
                   | Except.error error => Except.error error
                   | Except.ok elaboratedFn =>
                       match psElabApplyArgs

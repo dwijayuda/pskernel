@@ -36,4 +36,4 @@ jobs:
           cd psc15selfhost
           npm run bootstrap:check
 
-# rerun after recursive-hypotheses typed-match and state-recursion portability fix
+# rerun after match-field closing recursion portability fix

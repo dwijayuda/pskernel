@@ -258,7 +258,51 @@ def psTestMinimalSelfHostProdMatchPreparation : Bool :=
       prepared.declarations.length > 0
         && prepared.canonicalAdmissions.length > 0
 
+def psTestInductiveConstructorTraversal : Bool :=
+  let position := PsSourcePos.mk 0 1 1
+  let span := PsSourceSpan.mk position position
+  let context := psElabContextEmpty psEnvironmentEmpty
+  let inductiveName := psRootName "Traversal"
+  let firstSource :=
+    PsSyntaxInductiveConstructor.mk (PsSyntaxName.mk ["first"] span) [] span
+  let secondSource :=
+    PsSyntaxInductiveConstructor.mk (PsSyntaxName.mk ["second"] span) [] span
+  let invalidSource :=
+    PsSyntaxInductiveConstructor.mk (PsSyntaxName.mk [] span) [] span
+  let priorA :=
+    PsDeclaration.axiomDecl (psRootName "priorA") [] (PsExpr.sortE PsLevel.zero)
+  let priorB :=
+    PsDeclaration.axiomDecl (psRootName "priorB") [] (PsExpr.sortE PsLevel.zero)
+  let ordered :=
+    match psElabInductiveConstructors context [] inductiveName 7
+        [firstSource, secondSource] [priorB, priorA] with
+    | Except.ok [a, b, .constructorDecl first, .constructorDecl second] =>
+        psNameEq (psDeclarationName a) (psRootName "priorA")
+          && psNameEq (psDeclarationName b) (psRootName "priorB")
+          && psNameEq first.name (psNameAppendStr inductiveName "first")
+          && psNameEq second.name (psNameAppendStr inductiveName "second")
+          && first.constructorIndex == 7
+          && second.constructorIndex == 8
+          && first.numFields == 0 && second.numFields == 0
+    | _ => false
+  let empty :=
+    match psElabInductiveConstructors context [] inductiveName 7 [] [priorB, priorA] with
+    | Except.ok [a, b] =>
+        psNameEq (psDeclarationName a) (psRootName "priorA")
+          && psNameEq (psDeclarationName b) (psRootName "priorB")
+    | _ => false
+  let failed :=
+    match psElabInductiveConstructors context [] inductiveName 7
+        [firstSource, invalidSource, secondSource] [priorB, priorA] with
+    | Except.error PsElabError.emptyName => true
+    | _ => false
+  ordered && empty && failed
+
 def main : IO Unit := do
+  if psTestInductiveConstructorTraversal then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: constructor order, indices, accumulated prefix and errors"
+  else
+    throw (IO.userError "PSC2_MINIMAL_SELFHOST_FAIL: constructor traversal contract")
   if psTestMinimalSelfHostPreparation then
     IO.println "PSC2_MINIMAL_SELFHOST_PASS: admission-ready boundary"
   else

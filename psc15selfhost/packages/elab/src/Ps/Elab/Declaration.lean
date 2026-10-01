@@ -566,35 +566,73 @@ def psSetConstructorIndex
           info.recursiveFields)
   | _ => declaration
 
-def psElabInductiveConstructors
+def psElabReverseDeclarationsAcc
+    (declarations : List PsDeclaration) :
+    List PsDeclaration -> List PsDeclaration :=
+  match declarations with
+  | List.nil =>
+      fun (acc : List PsDeclaration) => acc
+  | List.cons declaration rest =>
+      let smaller : List PsDeclaration -> List PsDeclaration :=
+        psElabReverseDeclarationsAcc rest;
+      fun (acc : List PsDeclaration) =>
+        smaller (List.cons declaration acc)
+
+def psElabReverseDeclarations
+    (declarations : List PsDeclaration) : List PsDeclaration :=
+  psElabReverseDeclarationsAcc declarations List.nil
+
+def psElabInductiveConstructorsWorker
     (context : PsElabContext)
     (parameterBindersRev : List PsElabTypedBinder)
-    (inductiveName : PsName) :
+    (inductiveName : PsName)
+    (sources : List PsSyntaxInductiveConstructor) :
     Nat ->
-    List PsSyntaxInductiveConstructor ->
     List PsDeclaration ->
-    Except PsElabError (List PsDeclaration)
-  | _, [], declarationsRev =>
-      Except.ok declarationsRev.reverse
-  | index, source :: rest, declarationsRev =>
-      match psElabInductiveConstructor
+    Except PsElabError (List PsDeclaration) :=
+  match sources with
+  | List.nil =>
+      fun (_index : Nat) =>
+        fun (declarationsRev : List PsDeclaration) =>
+          Except.ok (psElabReverseDeclarations declarationsRev)
+  | List.cons source rest =>
+      let smaller :
+          Nat -> List PsDeclaration -> Except PsElabError (List PsDeclaration) :=
+        psElabInductiveConstructorsWorker
           context
           parameterBindersRev
           inductiveName
-          source with
-      | Except.error error => Except.error error
-      | Except.ok declaration =>
-          psElabInductiveConstructors
-            context
-            parameterBindersRev
-            inductiveName
-            (Nat.succ index)
-            rest
-            (List.cons
-              (psSetConstructorIndex index declaration)
-              declarationsRev)
+          rest;
+      fun (index : Nat) =>
+        fun (declarationsRev : List PsDeclaration) =>
+          match psElabInductiveConstructor
+              context
+              parameterBindersRev
+              inductiveName
+              source with
+          | Except.error error => Except.error error
+          | Except.ok declaration =>
+              smaller
+                (Nat.succ index)
+                (List.cons
+                  (psSetConstructorIndex index declaration)
+                  declarationsRev)
 
-
+def psElabInductiveConstructors
+    (context : PsElabContext)
+    (parameterBindersRev : List PsElabTypedBinder)
+    (inductiveName : PsName)
+    (index : Nat)
+    (sources : List PsSyntaxInductiveConstructor)
+    (declarationsRev : List PsDeclaration) :
+    Except PsElabError (List PsDeclaration) :=
+  psElabInductiveConstructorsWorker
+    context
+    parameterBindersRev
+    inductiveName
+    sources
+    index
+    declarationsRev
 
 def psEnvironmentAddOwnedBootstrapDeclaration
     (environment : PsEnvironment)

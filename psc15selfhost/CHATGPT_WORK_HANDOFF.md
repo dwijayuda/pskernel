@@ -18,48 +18,41 @@ from `Pasted text(20260930-195252).txt`.
 
 ## Current snapshot and first blocker
 
-Base for this repair: `32fc0fffc356805101f2974908e9f710c72ea1b8`.
+Base for this repair: `ec91470f31e53c2ebd7c6d529853b5f3d5ea731a`.
 This is the observed parent, not the commit containing this document.
 
-Latest completed compiler evidence:
-[run 36818860628](https://github.com/dwijayuda/pskernel/actions/runs/36818860628),
-job `110229846743`, commit `ba03754daf66f3235e37118d3f8632d2e2858188`.
-Parity, source guards, and the Lean elaborator build passed. The nested
-fixed-point probe failed with:
+Completed full run `36845211567`, job `110313599959`, passed source guards and
+Lean compilation, and confirmed the prior three-call inductive-constructor
+repair. Its fixed-point probe then stopped at:
 
 ```text
-PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Declaration.lean: declaration=psElabInductiveConstructor: unsupportedTerm
+PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Declaration.lean: declaration=psElabInductiveConstructors: matchPatternUnsupported
 ```
 
-Concurrent `32fc0fff` added the narrow reverse guard. Run `36819272383`, job
-`110231093729`, stopped in the source gate with
-`PSC2_ELAB_INDUCTIVE_CONSTRUCTOR_MISSING: project-owned typed-binder reverse`.
-That run did not reach Lean or the compiler probe.
+The declaration matched index, source list, and accumulated declarations in a
+multi-argument equation. It also varied index/accumulator during recursion and
+called generic reverse. The active normalization keeps its public curried type
+and behavior, using:
 
-The failing declaration still used three generic List methods:
-`fields.bindersRev.reverse`, `parameterArgs.length`, and `source.fields.length`.
-PSC1 treats dotted references as projections; these generic methods are outside
-its bootstrap environment. The active repair normalizes only these three calls
-in `psElabInductiveConstructor`:
-
-- Reuse `psElabTypedBinderListReverse` for recursive-field source order.
-- Reuse `psElabListLength` for the constructor's parameter and field counts.
-- Extend the existing constructor guard with the two count assertions.
-- Import the already-landed binder-arguments guard from the direct source gate,
-  so the local closure check also executes it and its implicit-binder guard.
+- A source-list structural worker with context, parameter binders, and inductive
+  name invariant. Its result accepts index and the declaration accumulator.
+- A local declaration reverse helper, preserving the semantics of nonempty
+  initial accumulators as well as normal empty-accumulator calls.
+- A thin wrapper preserving the original argument order.
+- A focused source guard imported directly by the closure source gate.
+- A runtime regression in `MinimalSelfHostTests.lean` checking starting index 7,
+  constructor order, a two-declaration accumulated prefix, empty input, and
+  propagation of an invalid constructor-name error.
 
 ## Current repair verification
 
-- Existing reverse guard observed RED on the parent source.
-- Extended count guard observed RED before the production edit.
-- Focused constructor guard: GREEN after the three replacements.
-- `npm run check:selfhost-source-syntax`: GREEN.
-- `node scripts/check-bootstrap-closure.mjs`: GREEN locally; 54 ordered modules,
-  12 allowed packages, one direct root import.
+- Focused source guard observed RED before the production rewrite.
+- Focused and aggregate source gates: GREEN after the rewrite.
+- Local bootstrap closure: GREEN, 54 modules/12 packages/one direct root import.
 - `git diff --check`: GREEN.
-- Official Lean and fixed-point CI for this repair are pending.
-- A local closure pass does not run the CI-only nested fixed-point probe.
-  No Compiler2/3/4 or parity/fingerprint success is claimed.
+- Native runtime regression, official Lean build, and fixed-point CI are pending.
+  Do not claim the new runtime test passed until its CI output is observed.
+- No Compiler2/3/4 or parity/fingerprint success is claimed.
 
 ## Confirmed progress in this Work session
 
@@ -69,6 +62,7 @@ in `psElabInductiveConstructor`:
 | Typed-binder reverse in structural-recursion discovery | `eb75a18d` | Run `36813972553` advanced to constructor-name selection |
 | Explicit PsName type for constructor-name local match | `4eea0276` | Run `36814537484` advanced to binder arguments |
 | Explicit binder-to-expression mapping after typed reversal | Concurrent `3065721e` | Later runs advanced beyond binder arguments |
+| Typed field reversal and parameter/field counts in inductive constructors | `ec91470f` | Run `36845211567` advanced to constructor-list traversal |
 
 The two concurrent source repairs exactly matched this session's tested files:
 
@@ -123,10 +117,11 @@ Old unattached semicolon blobs are also obsolete.
 
 ```sh
 cd psc15selfhost
-node scripts/check-elab-inductive-constructor-names-selfhost-source-syntax.mjs
+node scripts/check-elab-inductive-constructors-selfhost-source-syntax.mjs
 npm run check:selfhost-source-syntax
 node scripts/check-bootstrap-closure.mjs
 lake build Ps.Elab.Declaration
+lake exe psc2_minimal_selfhost_tests
 npm run fixed-point
 ```
 

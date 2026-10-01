@@ -20,7 +20,7 @@ assert.match(build,/-DMULTI_THREAD=OFF/);
 // in strict configurations. Single-thread mode must come from the patched Lean
 // CMake graph omitting -pthread when MULTI_THREAD=OFF, not from an explicit
 // deprecated `-sUSE_PTHREADS=0` off-switch at the final provider link.
-const finalLinkStart=build.lastIndexOf('LEAN_CC="$(command -v em++)" "$wasm_leanc" \\\n');
+const finalLinkStart=build.lastIndexOf('LEAN_CC="$(command -v em++)" "$stage1_leanc" \\\n');
 assert.ok(finalLinkStart>=0,'final WASM provider link invocation must exist');
 const finalLink=build.slice(finalLinkStart,build.indexOf('\n\n',finalLinkStart));
 assert.doesNotMatch(finalLink,/USE_PTHREADS/);

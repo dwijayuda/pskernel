@@ -1113,7 +1113,7 @@ def psElabInductiveDeclaration
                       name := name
                       levelParams := []
                       type := inductiveType
-                      numParams := parameterArgs.length
+                      numParams := psElabListLength parameterArgs
                       numIndices := 0
                       constructors := constructorNames
                       isStructure := isStructure

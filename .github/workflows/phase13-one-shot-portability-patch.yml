@@ -1,0 +1,42 @@
+name: Phase 13 one-shot portability patch
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-work
+    paths:
+      - .github/workflows/phase13-one-shot-portability-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-work
+
+      - name: Curry lambda-expected recursion for PSC1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64
+          from pathlib import Path
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          start_marker = 'def psElabLambdaExpectedBody\n'
+          end_marker = '\ndef psElabLambdaBodyExpected\n'
+          start = text.index(start_marker)
+          end = text.index(end_marker, start)
+          new = base64.b64decode('ZGVmIHBzRWxhYkxhbWJkYUV4cGVjdGVkQm9keVdvcmtlcgogICAgKGJpbmRlcnMgOiBMaXN0IFBzRWxhYlR5cGVkQmluZGVyKSA6CiAgICBQc0VsYWJDb250ZXh0IC0+CiAgICBQc0V4cHIgLT4KICAgIEV4Y2VwdCBQc0VsYWJFcnJvciAoUHJvZCBQc0VsYWJDb250ZXh0IFBzRXhwcikgOj0KICBtYXRjaCBiaW5kZXJzIHdpdGgKICB8IFtdID0+CiAgICAgIGZ1biAoY29udGV4dCA6IFBzRWxhYkNvbnRleHQpCiAgICAgICAgICAoZXhwZWN0ZWRUeXBlIDogUHNFeHByKSA9PgogICAgICAgIEV4Y2VwdC5vawogICAgICAgICAgKFByb2QubWsKICAgICAgICAgICAgY29udGV4dAogICAgICAgICAgICAocHNNZXRhSW5zdGFudGlhdGUKICAgICAgICAgICAgICBjb250ZXh0Lm1ldGFDb250ZXh0CiAgICAgICAgICAgICAgZXhwZWN0ZWRUeXBlKSkKICB8IGJpbmRlciA6OiByZXN0ID0+CiAgICAgIGxldCBzbWFsbGVyIDoKICAgICAgICAgIFBzRWxhYkNvbnRleHQgLT4KICAgICAgICAgIFBzRXhwciAtPgogICAgICAgICAgRXhjZXB0IFBzRWxhYkVycm9yIChQcm9kIFBzRWxhYkNvbnRleHQgUHNFeHByKSA6PQogICAgICAgIHBzRWxhYkxhbWJkYUV4cGVjdGVkQm9keVdvcmtlciByZXN0OwogICAgICBmdW4gKGNvbnRleHQgOiBQc0VsYWJDb250ZXh0KQogICAgICAgICAgKGV4cGVjdGVkVHlwZSA6IFBzRXhwcikgPT4KICAgICAgICBtYXRjaAogICAgICAgICAgICBwc0luZmVyRW5zdXJlRm9yYWxsCiAgICAgICAgICAgICAgY29udGV4dC5lbnZpcm9ubWVudAogICAgICAgICAgICAgIGNvbnRleHQubWV0YUNvbnRleHQKICAgICAgICAgICAgICBjb250ZXh0LmxvY2FsQ29udGV4dAogICAgICAgICAgICAgIGV4cGVjdGVkVHlwZSB3aXRoCiAgICAgICAgfCBFeGNlcHQuZXJyb3IgZXJyb3IgPT4KICAgICAgICAgICAgRXhjZXB0LmVycm9yIChQc0VsYWJFcnJvci5pbmZlciBlcnJvcikKICAgICAgICB8IEV4Y2VwdC5vayBmb3JhbGxWaWV3ID0+CiAgICAgICAgICAgIGxldCB1bmlmaWVkIDo9CiAgICAgICAgICAgICAgcHNVbmlmeQogICAgICAgICAgICAgICAgY29udGV4dC5lbnZpcm9ubWVudAogICAgICAgICAgICAgICAgY29udGV4dC5sb2NhbENvbnRleHQKICAgICAgICAgICAgICAgIGNvbnRleHQubWV0YUNvbnRleHQKICAgICAgICAgICAgICAgIGJpbmRlci50eXBlCiAgICAgICAgICAgICAgICBmb3JhbGxWaWV3LmRvbWFpbjsKICAgICAgICAgICAgaWYgcHNFbGFiQm9vbE5vdCB1bmlmaWVkLnN1Y2Nlc3MgdGhlbgogICAgICAgICAgICAgIEV4Y2VwdC5lcnJvciBQc0VsYWJFcnJvci50eXBlTWlzbWF0Y2gKICAgICAgICAgICAgZWxzZQogICAgICAgICAgICAgIGxldCBuZXh0Q29udGV4dCA6PQogICAgICAgICAgICAgICAgcHNFbGFiQ29udGV4dFdpdGhNZXRhCiAgICAgICAgICAgICAgICAgIGNvbnRleHQKICAgICAgICAgICAgICAgICAgdW5pZmllZC5jb250ZXh0OwogICAgICAgICAgICAgIGxldCBuZXh0RXhwZWN0ZWQgOj0KICAgICAgICAgICAgICAgIHBzRXhwckluc3RhbnRpYXRlMQogICAgICAgICAgICAgICAgICAocHNNZXRhSW5zdGFudGlhdGUKICAgICAgICAgICAgICAgICAgICB1bmlmaWVkLmNvbnRleHQKICAgICAgICAgICAgICAgICAgICBmb3JhbGxWaWV3LmJvZHkpCiAgICAgICAgICAgICAgICAgIChQc0V4cHIuZnZhciBiaW5kZXIuaWQpOwogICAgICAgICAgICAgIHNtYWxsZXIgbmV4dENvbnRleHQgbmV4dEV4cGVjdGVkCgpkZWYgcHNFbGFiTGFtYmRhRXhwZWN0ZWRCb2R5CiAgICAoY29udGV4dCA6IFBzRWxhYkNvbnRleHQpCiAgICAoYmluZGVycyA6IExpc3QgUHNFbGFiVHlwZWRCaW5kZXIpCiAgICAoZXhwZWN0ZWRUeXBlIDogUHNFeHByKSA6CiAgICBFeGNlcHQgUHNFbGFiRXJyb3IgKFByb2QgUHNFbGFiQ29udGV4dCBQc0V4cHIpIDo9CiAgcHNFbGFiTGFtYmRhRXhwZWN0ZWRCb2R5V29ya2VyIGJpbmRlcnMgY29udGV4dCBleHBlY3RlZFR5cGUK').decode()
+          path.write_text(text[:start] + new + text[end:])
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): curry lambda expectation recursion for PSC1"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

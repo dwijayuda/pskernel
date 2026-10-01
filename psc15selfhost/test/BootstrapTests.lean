@@ -1675,7 +1675,14 @@ def psTestBasicMatchDeclarationShape
            | PsExpr.constE name levels =>
                psNameEq name recName
                  && levels.length == 1
-                 && view.args.length == 4
+                 && match view.args with
+                    | [_motive, leftMinor, rightMinor, major] =>
+                        psExprAlphaEq leftMinor (PsExpr.lit (PsLiteral.natural 1))
+                          && psExprAlphaEq rightMinor (PsExpr.lit (PsLiteral.natural 2))
+                          && psExprAlphaEq major
+                            (PsExpr.constE
+                              (psNameAppendStr (psTestName "Choice") "left") [])
+                    | _ => false
            | _ => false
   | _ => false
 

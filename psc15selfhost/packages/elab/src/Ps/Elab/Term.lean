@@ -61,6 +61,17 @@ def psElabListLength {α : Type}
   | [] => 0
   | _ :: rest => Nat.succ (psElabListLength rest)
 
+def psElabListAppend {α : Type}
+    (values : List α) : List α -> List α :=
+  match values with
+  | List.nil =>
+      fun (tail : List α) => tail
+  | List.cons head rest =>
+      let smaller : List α -> List α :=
+        psElabListAppend rest;
+      fun (tail : List α) =>
+        List.cons head (smaller tail)
+
 def psElabListReverseAcc {α : Type}
     (values : List α) : List α -> List α :=
   match values with
@@ -2074,13 +2085,13 @@ def psElabMatchBuildRecursor
       instantiatedExpected
       PsBinderInfo.explicit;
   let recursorTail :=
-    List.append
+    psElabListAppend
       minors.minors
       (List.cons
         scrutineeResult.term
         List.nil);
   let recursorArgs :=
-    List.append
+    psElabListAppend
       parameterArgs
       (List.cons
         motive

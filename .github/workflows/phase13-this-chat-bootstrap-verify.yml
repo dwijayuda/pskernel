@@ -29,6 +29,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: PSC1 elaborator regression suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run test:regression
       - name: PSC1 bootstrap compiler source gate
         shell: bash
         run: |

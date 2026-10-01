@@ -186,7 +186,12 @@ cmake \
   -DWFAIL=OFF \
   -DLEAN_INSTALL_SUFFIX=-linux_wasm32
 
-cmake --build "$lean_build" -j2
+# Build only the static pieces the provider consumes. The default ALL graph
+# continues into Lean's shell/shared targets, where stock initialize.cpp and our
+# kernel-only lean_initialize shim intentionally collide. The provider links
+# libleancpp_1, which excludes stock initialize.cpp, so these three targets are
+# the complete and conflict-free prerequisite set.
+cmake --build "$lean_build" --target make_stdlib leanrt leancpp_1 -j2
 
 wasm_leanc="$lean_build/leanc.sh"
 if [[ ! -f "$wasm_leanc" ]]; then

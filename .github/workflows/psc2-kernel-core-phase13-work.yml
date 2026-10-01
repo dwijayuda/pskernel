@@ -1,4 +1,4 @@
-# Re-run focused Phase 13 after replacing host List.reverse with the PSC1-native helper.
+# Re-run focused Phase 13 after currying psCloseElabForallBinders for PSC1 structural recursion.
 name: PSC2 KernelCore Phase 13 work
 
 on:

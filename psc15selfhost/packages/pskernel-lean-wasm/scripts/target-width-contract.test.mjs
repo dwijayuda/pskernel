@@ -18,6 +18,8 @@ assert.doesNotMatch(build,/-S "\$lean_source\/src"/,'direct src/ stage1 build by
 assert.match(build,/-DSTAGE0_USE_GMP=OFF/);
 assert.match(build,/-DSTAGE0_LEAN_EXTRA_CXX_FLAGS=['"]?-m32/);
 assert.match(build,/-DSTAGE0_LEANC_OPTS=['"]?-m32/);
+assert.doesNotMatch(build,/-DSTAGE0_CMAKE_C_FLAGS=/,'match Lean 4.34 WASM bootstrap: do not override stage0 global C flags');
+assert.doesNotMatch(build,/-DSTAGE0_CMAKE_CXX_FLAGS=/,'match Lean 4.34 WASM bootstrap: do not override stage0 global C++ flags');
 assert.match(build,/-DSTAGE0_CMAKE_CXX_COMPILER=clang\+\+/);
 assert.match(build,/-DSTAGE0_CMAKE_C_COMPILER=clang/);
 assert.match(build,/-DSTAGE0_CMAKE_EXECUTABLE_SUFFIX=['"]?['"]?/);
@@ -30,6 +32,7 @@ assert.match(build,/stage1_build="\$lean_build\/stage1"/);
 assert.match(build,/stage1_lean_path="\$stage1_build\/lib\/lean"/);
 assert.match(build,/stage1_leanc="\$stage1_build\/leanc\.sh"/);
 assert.match(build,/if \[\[ ! -x "\$stage0_lean" \]\]/,'stage0 readiness must require the runnable compiler, not nonexistent stage0 oleans');
+assert.match(build,/"\$stage0_lean" --deps "\$lean_source\/src\/Lean\.lean"/,'stage0 must prove its frontend/parser initialization before the expensive stage1 stdlib build');
 assert.doesNotMatch(build,/stage0_lean_path\/Lean\.olean/,'stage0 C_ONLY build must not be treated as an olean sysroot');
 assert.match(build,/stage1_lean_path\/Lean\.olean/,'provider compile must require the wasm32 stage1 olean sysroot');
 assert.match(build,/LEAN_PATH="\$provider_olean_dir:\$stage1_lean_path"/,'provider imports must resolve against target-width stage1 oleans');

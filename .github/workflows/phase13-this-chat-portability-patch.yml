@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
-      - name: Reshape match preparation for PSC1
+      - name: Reshape match parameter application for PSC1
         shell: bash
         run: |
           set -euo pipefail
@@ -25,109 +25,48 @@ jobs:
           from pathlib import Path
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
-          start_marker = 'def psElabPrepareMatchAlternatives\n'
-          end_marker = '\nstructure PsElabMatchField where\n'
+          start_marker = 'def psElabMatchApplyParameters\n'
+          end_marker = '\ndef psSyntaxNameIsWildcardBinder\n'
           start = text.index(start_marker)
           end = text.index(end_marker, start)
           old = text[start:end]
-          if 'List.all' not in old or 'psElabPrepareMatchAlternatives' not in old:
-              raise SystemExit('unexpected psElabPrepareMatchAlternatives source shape')
-          new = '''def psElabMatchAlternativesCoverAllWorker
-              (constructors : List PsName) :
-              List PsElabMatchAlternative -> Bool :=
-            match constructors with
+          if 'psElabMatchApplyParameters' not in old or 'parameter :: rest' not in old:
+              raise SystemExit('unexpected psElabMatchApplyParameters source shape')
+          new = '''def psElabMatchApplyParametersWorker
+              (parameters : List PsExpr) :
+              PsElabContext ->
+              PsExpr ->
+              Except PsElabError PsExpr :=
+            match parameters with
             | [] =>
-                fun (_alternatives : List PsElabMatchAlternative) => true
-            | ctorName :: rest =>
-                let smaller : List PsElabMatchAlternative -> Bool :=
-                  psElabMatchAlternativesCoverAllWorker rest;
-                fun (alternatives : List PsElabMatchAlternative) =>
-                  if psElabMatchAlternativeCovered alternatives ctorName then
-                    smaller alternatives
-                  else
-                    false
-
-          def psElabMatchAlternativesCoverAll
-              (alternatives : List PsElabMatchAlternative)
-              (constructors : List PsName) : Bool :=
-            psElabMatchAlternativesCoverAllWorker constructors alternatives
-
-          def psElabPrepareMatchAlternativesWorker
-              (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) :
-              PsInductiveInfo ->
-              List PsElabMatchAlternative ->
-              Except PsElabError (List PsElabMatchAlternative) :=
-            match entries with
-            | [] =>
-                fun (inductiveInfo : PsInductiveInfo) =>
-                  fun (alternativesRev : List PsElabMatchAlternative) =>
-                    let alternatives := psElabListReverse alternativesRev;
-                    let exhaustive :=
-                      psElabMatchAlternativesCoverAll
-                        alternatives
-                        inductiveInfo.constructors;
-                    if exhaustive then
-                      Except.ok alternatives
-                    else
-                      Except.error PsElabError.matchNonExhaustive
-            | entry :: rest =>
+                fun (_context : PsElabContext) =>
+                  fun (cursor : PsExpr) => Except.ok cursor
+            | parameter :: rest =>
                 let smaller :
-                    PsInductiveInfo ->
-                    List PsElabMatchAlternative ->
-                    Except PsElabError (List PsElabMatchAlternative) :=
-                  psElabPrepareMatchAlternativesWorker rest;
-                fun (inductiveInfo : PsInductiveInfo) =>
-                  fun (alternativesRev : List PsElabMatchAlternative) =>
-                    let pattern := Prod.fst entry;
-                    let payload := Prod.snd entry;
-                    let body := Prod.fst payload;
-                    let span := Prod.snd payload;
-                    match pattern with
-                    | .wildcard _ =>
-                        match rest with
-                        | [] =>
-                            Except.ok
-                              (psElabListReverse (psElabFillWildcardAlternatives
-                                pattern
-                                body
-                                span
-                                inductiveInfo.constructors
-                                alternativesRev))
-                        | _ :: _ =>
-                            Except.error PsElabError.matchPatternUnsupported
-                    | _ =>
-                        match psElabMatchPatternConstructorName
-                            inductiveInfo.name
-                            pattern with
-                        | Except.error error => Except.error error
-                        | Except.ok ctorName =>
-                            if psElabBoolNot (psMatchNameListContains inductiveInfo.constructors ctorName) then
-                              Except.error (PsElabError.matchConstructorUnknown ctorName)
-                            else
-                              match psElabMatchAlternativeFind ctorName alternativesRev with
-                              | some _ =>
-                                  Except.error
-                                    (PsElabError.matchDuplicateConstructor ctorName)
-                              | none =>
-                                  let alternative : PsElabMatchAlternative := {
-                                    constructorName := ctorName
-                                    pattern := pattern
-                                    body := body
-                                    span := span
-                                  };
-                                  smaller
-                                    inductiveInfo
-                                    (List.cons alternative alternativesRev)
+                    PsElabContext ->
+                    PsExpr ->
+                    Except PsElabError PsExpr :=
+                  psElabMatchApplyParametersWorker rest;
+                fun (context : PsElabContext) =>
+                  fun (cursor : PsExpr) =>
+                    match psInferEnsureForall
+                        context.environment
+                        context.metaContext
+                        context.localContext
+                        cursor with
+                    | Except.error error =>
+                        Except.error (PsElabError.infer error)
+                    | Except.ok forallView =>
+                        smaller
+                          context
+                          (psExprInstantiate1 forallView.body parameter)
 
-          def psElabPrepareMatchAlternatives
-              (inductiveInfo : PsInductiveInfo)
-              (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
-              (alternativesRev : List PsElabMatchAlternative) :
-              Except PsElabError (List PsElabMatchAlternative) :=
-            psElabPrepareMatchAlternativesWorker
-              entries
-              inductiveInfo
-              alternativesRev
+          def psElabMatchApplyParameters
+              (context : PsElabContext)
+              (parameters : List PsExpr)
+              (cursor : PsExpr) :
+              Except PsElabError PsExpr :=
+            psElabMatchApplyParametersWorker parameters context cursor
           '''
           path.write_text(text[:start] + new + text[end:])
           PY
@@ -135,5 +74,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "fix(elab): make match preparation PSC1 portable"
+          git commit -m "fix(elab): make match parameter application PSC1 portable"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

@@ -45,7 +45,7 @@ def psEraseApplicationArguments
                     rest
                     {
                       typeArgumentsRev :=
-                        erasedType :: state.typeArgumentsRev
+                        List.cons erasedType state.typeArgumentsRev
                       runtimeArgumentsRev :=
                         state.runtimeArgumentsRev
                       remainingType := state.remainingType
@@ -72,7 +72,7 @@ def psEraseApplicationArguments
                       typeArgumentsRev :=
                         state.typeArgumentsRev
                       runtimeArgumentsRev :=
-                        erasedArgument :: state.runtimeArgumentsRev
+                        List.cons erasedArgument state.runtimeArgumentsRev
                       remainingType := state.remainingType
                     }
       | _ => Except.error PsErasureError.unsupportedApplication
@@ -940,8 +940,7 @@ def psOpenMatchMinorHypotheses
                   runtimeConstructors := state.scope.runtimeConstructors
                   runtimeRecursors := state.scope.runtimeRecursors
                   runtimeStructures := state.scope.runtimeStructures
-                  runtimeStructureConstructors :=
-                    state.scope.runtimeStructureConstructors
+                  runtimeStructureConstructors := state.scope.runtimeStructureConstructors
                   runtimeExpressions := state.scope.runtimeExpressions
                   currentDefinition := state.scope.currentDefinition
                 }

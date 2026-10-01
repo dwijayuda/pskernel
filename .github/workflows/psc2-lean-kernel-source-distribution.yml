@@ -57,6 +57,32 @@ jobs:
           stripped_size="$(stat -c '%s' "$RUNNER_TEMP/psc2_lean_kernel_provider.stripped")"
           echo "PSC2_LEAN_KERNEL_NATIVE_BASELINE_SIZE: raw=${raw_size} stripped=${stripped_size}"
 
+      - name: Probe Lean native kernel-only link inputs
+        working-directory: psc15selfhost/packages/pskernel-lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean_prefix="$(lean --print-prefix)"
+          echo "PSC2_LEAN_KERNEL_NATIVE_SYSROOT: $lean_prefix"
+          test -s "$lean_prefix/lib/lean/libleancpp.a"
+          if [[ -x "$lean_prefix/bin/llvm-ar" ]]; then
+            lean_ar="$lean_prefix/bin/llvm-ar"
+          else
+            lean_ar="$(command -v ar)"
+          fi
+          echo "PSC2_LEAN_KERNEL_NATIVE_AR: $lean_ar"
+          "$lean_ar" t "$lean_prefix/lib/lean/libleancpp.a" > "$RUNNER_TEMP/leancpp-members.txt"
+          echo '--- initialize-like libleancpp members ---'
+          grep -Ei '(^|[/_.-])initialize([/_.-]|$)|init' "$RUNNER_TEMP/leancpp-members.txt" | tail -n 80 || true
+          printf 'int main(void){return 0;}\n' > "$RUNNER_TEMP/lean-link-probe.c"
+          set +e
+          leanc -v "$RUNNER_TEMP/lean-link-probe.c" -o "$RUNNER_TEMP/lean-link-probe"             > "$RUNNER_TEMP/leanc-probe.out" 2>&1
+          probe_status=$?
+          set -e
+          echo "PSC2_LEAN_KERNEL_NATIVE_LEANC_PROBE_STATUS: $probe_status"
+          sed -n '1,12p' "$RUNNER_TEMP/leanc-probe.out"
+          grep -F -- '-lLake' "$RUNNER_TEMP/leanc-probe.out"
+
       - name: Native package-local prebuilt verification
         working-directory: psc15selfhost/packages/pskernel-lean
         run: npm run verify:prebuilt

@@ -138,6 +138,12 @@ jobs:
             exit 1
           fi
 
+      - name: Generate and verify WASM prebuilt manifest
+        working-directory: psc15selfhost
+        run: |
+          node packages/pskernel-lean-wasm/scripts/write-prebuilt-manifest.mjs
+          node packages/pskernel-lean-wasm/host/verify-prebuilt.mjs
+
       - name: Native/WASM differential parity
         working-directory: psc15selfhost
         run: node packages/pskernel-lean-wasm/host/differential.test.mjs
@@ -155,6 +161,7 @@ jobs:
             psc15selfhost/packages/pskernel-lean-wasm/wasm/pskernel-lean.cjs
             psc15selfhost/packages/pskernel-lean-wasm/wasm/pskernel-lean.wasm
             psc15selfhost/packages/pskernel-lean-wasm/wasm/*.worker.js
+            psc15selfhost/packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json
             ${{ runner.temp }}/pskernel-lean-wasm-build.log
           if-no-files-found: warn
           retention-days: 7

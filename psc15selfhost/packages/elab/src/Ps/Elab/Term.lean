@@ -1839,7 +1839,7 @@ def psElabMatchConstructorMinor
                     match elaborate
                         hypotheses.context
                         body
-                        (some expectedType) with
+                        (Option.some expectedType) with
                     | Except.error error => Except.error error
                     | Except.ok bodyResult =>
                         let metaContext := bodyResult.context.metaContext;

@@ -12,12 +12,12 @@ def psErasureAddUniqueString
     (used : List String)
     (base : String) :
     Nat -> String
-  | 0 => base ++ "_overflow"
+  | 0 => String.Internal.append base "_overflow"
   | attempts + 1 =>
       if used.contains base then
         psErasureAddUniqueString
           used
-          (base ++ "_")
+          (String.Internal.append base "_")
           attempts
       else
         base

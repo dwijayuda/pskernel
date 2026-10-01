@@ -2497,19 +2497,23 @@ def psElabDropForallBinders
 
 
 def psElabTakeForallNames
-    (remaining : Nat)
-    (type : PsExpr) : Option (List String) :=
+    (remaining : Nat) : PsExpr -> Option (List String) :=
   match remaining with
   | 0 =>
-      Option.some []
+      fun (_type : PsExpr) =>
+        Option.some []
   | nextRemaining + 1 =>
-      match type with
-      | .forallE name _ body _ =>
-          match psElabTakeForallNames nextRemaining body with
-          | Option.none => Option.none
-          | Option.some rest =>
-              Option.some (List.cons (psNameLastComponent name) rest)
-      | _ => Option.none
+      let smaller : PsExpr -> Option (List String) :=
+        psElabTakeForallNames nextRemaining;
+      fun (type : PsExpr) =>
+        match type with
+        | .forallE name _ body _ =>
+            match smaller body with
+            | Option.none => Option.none
+            | Option.some rest =>
+                Option.some (List.cons (psNameLastComponent name) rest)
+        | _ => Option.none
+
 
 def psSyntaxRecordFieldName
     (field : Prod PsSyntaxName PsSyntaxTerm) :

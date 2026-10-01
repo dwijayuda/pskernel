@@ -1,0 +1,8 @@
+{
+  "toolchain": "leanprover/lean4:v4.34.0",
+  "version": "4.34.0",
+  "tag": "v4.34.0",
+  "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "providerProtocol": "pskernel-lean/1",
+  "providerProfile": "lean4.34-core"
+}

@@ -71,8 +71,7 @@ if (recursorStart < 0 || recursorEnd < 0) {
 }
 const recursor = source.slice(recursorStart, recursorEnd);
 const recursorRequired = [
-  /psElabListLength\s+parameterArgs/,
-  /psElabListLength\s+constructors/,
+  /PsRecursorInfo\.mk\s+recursorName\s+\(List\.cons universeName List\.nil\)\s+recursorType\s+\(List\.cons inductiveInfo\.name List\.nil\)\s+\(psElabListLength parameterArgs\)\s+0\s+1\s+\(psElabListLength constructors\)/,
 ];
 for (const pattern of recursorRequired) {
   if (!pattern.test(recursor)) {
@@ -91,5 +90,5 @@ process.stdout.write(
   "PSC2_ELAB_RECURSOR_MINOR_BINDERS_SELFHOST_SOURCE_SYNTAX: PASS (declaration-list-recursive worker; context/index/binder state applied post-recursion; explicit result constructor)\n",
 );
 process.stdout.write(
-  "PSC2_ELAB_INDUCTIVE_RECURSOR_SELFHOST_SOURCE_SYNTAX: PASS (project-owned parameter and constructor counts; method-style length excluded)\n",
+  "PSC2_ELAB_INDUCTIVE_RECURSOR_SELFHOST_SOURCE_SYNTAX: PASS (project-owned counts occupy recursor metadata fields; method-style length excluded)\n",
 );

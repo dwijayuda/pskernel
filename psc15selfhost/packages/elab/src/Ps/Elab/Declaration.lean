@@ -859,50 +859,79 @@ structure PsElabRecursorMinorsResult where
   context : PsElabContext
   bindersRev : List PsElabTypedBinder
 
-def psBuildRecursorMinorBinders
+def psBuildRecursorMinorBindersWorker
     (parameterArgs : List PsExpr)
-    (motiveId : Nat) :
-    List PsDeclaration ->
+    (motiveId : Nat)
+    (declarations : List PsDeclaration) :
     PsElabContext ->
     Nat ->
     List PsElabTypedBinder ->
-    Except PsElabError PsElabRecursorMinorsResult
-  | [], context, _, bindersRev =>
-      Except.ok {
-        context := context
-        bindersRev := bindersRev
-      }
-  | declaration :: rest, context, index, bindersRev =>
-      match psBuildInductiveMinorType
-          context
+    Except PsElabError PsElabRecursorMinorsResult :=
+  match declarations with
+  | List.nil =>
+      fun (context : PsElabContext) =>
+        fun (_index : Nat) =>
+          fun (bindersRev : List PsElabTypedBinder) =>
+            Except.ok
+              (PsElabRecursorMinorsResult.mk
+                context
+                bindersRev)
+  | List.cons declaration rest =>
+      let smaller :
+          PsElabContext ->
+          Nat ->
+          List PsElabTypedBinder ->
+          Except PsElabError PsElabRecursorMinorsResult :=
+        psBuildRecursorMinorBindersWorker
           parameterArgs
           motiveId
-          declaration with
-      | Except.error error => Except.error error
-      | Except.ok minorType =>
-          let minorName :=
-            psNameAppendNum (psRootName "_minor") index;
-          let pushed :=
-            psLocalPushBinding
-              context.localContext
-              minorName
-              minorType
-              PsBinderInfo.explicit;
-          let nextContext :=
-            psElabContextWithLocal context pushed.context;
-          psBuildRecursorMinorBinders
-            parameterArgs
-            motiveId
-            rest
-            nextContext
-            (Nat.succ index)
-            (List.cons
-              (PsElabTypedBinder.mk
-                pushed.id
-                minorName
-                minorType
-                PsBinderInfo.explicit)
-              bindersRev)
+          rest;
+      fun (context : PsElabContext) =>
+        fun (index : Nat) =>
+          fun (bindersRev : List PsElabTypedBinder) =>
+            match psBuildInductiveMinorType
+                context
+                parameterArgs
+                motiveId
+                declaration with
+            | Except.error error => Except.error error
+            | Except.ok minorType =>
+                let minorName :=
+                  psNameAppendNum (psRootName "_minor") index;
+                let pushed :=
+                  psLocalPushBinding
+                    context.localContext
+                    minorName
+                    minorType
+                    PsBinderInfo.explicit;
+                let nextContext :=
+                  psElabContextWithLocal context pushed.context;
+                smaller
+                  nextContext
+                  (Nat.succ index)
+                  (List.cons
+                    (PsElabTypedBinder.mk
+                      pushed.id
+                      minorName
+                      minorType
+                      PsBinderInfo.explicit)
+                    bindersRev)
+
+def psBuildRecursorMinorBinders
+    (parameterArgs : List PsExpr)
+    (motiveId : Nat)
+    (declarations : List PsDeclaration)
+    (context : PsElabContext)
+    (index : Nat)
+    (bindersRev : List PsElabTypedBinder) :
+    Except PsElabError PsElabRecursorMinorsResult :=
+  psBuildRecursorMinorBindersWorker
+    parameterArgs
+    motiveId
+    declarations
+    context
+    index
+    bindersRev
 
 def psBuildInductiveRecursor
     (context : PsElabContext)

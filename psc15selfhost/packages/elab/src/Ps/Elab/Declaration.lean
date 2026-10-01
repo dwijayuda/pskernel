@@ -1040,8 +1040,8 @@ def psElabInductiveDeclaration
     (isStructure : Bool) :
     Except PsElabError PsElabDeclarationBatchResult :=
   match psSyntaxNameToName nameSyntax with
-  | none => Except.error PsElabError.emptyName
-  | some name =>
+  | Option.none => Except.error PsElabError.emptyName
+  | Option.some name =>
       let initial := psElabContextEmpty environment;
       match psElabTypedBinders
           psElabDeclarationTermCallback
@@ -1051,16 +1051,16 @@ def psElabInductiveDeclaration
       | Except.ok parameters =>
           let result : Except PsElabError (Prod PsElabContext PsExpr) :=
             match resultType with
-            | none =>
+            | Option.none =>
                 Except.ok
                   (Prod.mk
                     parameters.context
                     (PsExpr.sortE (PsLevel.succ PsLevel.zero)))
-            | some sourceType =>
+            | Option.some sourceType =>
                 match psElabTerm
                     parameters.context
                     sourceType
-                    none with
+                    Option.none with
                 | Except.error error => Except.error error
                 | Except.ok elaborated =>
                     match psInferEnsureSort
@@ -1125,10 +1125,10 @@ def psElabInductiveDeclaration
                         environment
                         inductiveDeclaration;
                     match withInductiveResult with
-                    | none =>
+                    | Option.none =>
                         Except.error
                           (PsElabError.duplicateDeclaration name)
-                    | some withInductive =>
+                    | Option.some withInductive =>
                         let constructorContext :=
                           psElabContextWithEnvironment
                             headerContext
@@ -1224,7 +1224,8 @@ def psElabPartialDeclaration
                 binderResult.context
                 typeSyntax
                 none with
-          | Except.error error => Except.error error
+          | Except.error error =>
+              Except.error error
           | Except.ok typeResult =>
               match
                   psInferEnsureSort

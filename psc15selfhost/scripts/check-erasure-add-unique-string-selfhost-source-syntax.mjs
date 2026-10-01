@@ -1,4 +1,5 @@
 import "./check-erasure-core-module-sequencing-selfhost-source-syntax.mjs";
+import "./check-erasure-application-arguments-cons-selfhost-source-syntax.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

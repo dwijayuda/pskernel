@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Qualify Option constructors in psElabIf
+      - name: Make psElabIf PSC1-bidirectional
         shell: bash
         run: |
           set -euo pipefail
@@ -46,6 +46,10 @@ jobs:
               (
                   "thenResult.context\n              elseBranch\n              (some resultType) with",
                   "thenResult.context\n              elseBranch\n              (Option.some resultType) with",
+              ),
+              (
+                  "| Except.ok thenResult =>\n          let resultType :=\n            match expected with",
+                  "| Except.ok thenResult =>\n          let resultType : PsExpr :=\n            match expected with",
               ),
           ]
           for old, new in replacements:
@@ -72,5 +76,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "fix(elab): qualify Option constructors for PSC1"
+          git commit -m "fix(elab): make if elaboration PSC1-portable"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

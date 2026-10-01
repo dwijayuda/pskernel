@@ -2027,6 +2027,21 @@ def psElabMatchMinors
     alternatives
     context
 
+def psRecursorInfoNumParams (info : PsRecursorInfo) : Nat :=
+  info.numParams
+
+def psRecursorInfoNumIndices (info : PsRecursorInfo) : Nat :=
+  info.numIndices
+
+def psRecursorInfoNumMotives (info : PsRecursorInfo) : Nat :=
+  info.numMotives
+
+def psRecursorInfoNumMinors (info : PsRecursorInfo) : Nat :=
+  info.numMinors
+
+def psRecursorInfoLevelParams (info : PsRecursorInfo) : List PsName :=
+  info.levelParams
+
 def psElabMatch
     (elaborate :
       PsElabContext ->
@@ -2082,14 +2097,14 @@ def psElabMatch
                             if
                                 psElabBoolOr
                                   (psElabNatNe
-                                    recInfo.numParams
+                                    (psRecursorInfoNumParams recInfo)
                                     inductiveInfo.numParams)
                                   (psElabBoolOr
-                                    (psElabNatNe recInfo.numIndices 0)
+                                    (psElabNatNe (psRecursorInfoNumIndices recInfo) 0)
                                     (psElabBoolOr
-                                      (psElabNatNe recInfo.numMotives 1)
+                                      (psElabNatNe (psRecursorInfoNumMotives recInfo) 1)
                                       (psElabNatNe
-                                        recInfo.numMinors
+                                        (psRecursorInfoNumMinors recInfo)
                                         (psElabListLength inductiveInfo.constructors)))) then
                               Except.error
                                 PsElabError.matchRecursorUnsupported
@@ -2115,13 +2130,13 @@ def psElabMatch
                                       Except.error (PsElabError.infer error)
                                   | Except.ok resultLevel =>
                                       let recursorLevels :=
-                                        if Nat.beq (psElabListLength recInfo.levelParams) 0 then
+                                        if Nat.beq (psElabListLength (psRecursorInfoLevelParams recInfo)) 0 then
                                           []
-                                        else if Nat.beq (psElabListLength recInfo.levelParams) 1 then
+                                        else if Nat.beq (psElabListLength (psRecursorInfoLevelParams recInfo)) 1 then
                                           List.cons resultLevel List.nil
                                         else
                                           [];
-                                      if Nat.blt 1 (psElabListLength recInfo.levelParams) then
+                                      if Nat.blt 1 (psElabListLength (psRecursorInfoLevelParams recInfo)) then
                                         Except.error
                                           PsElabError.matchRecursorLevels
                                       else

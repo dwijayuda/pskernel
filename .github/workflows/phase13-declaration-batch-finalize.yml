@@ -59,7 +59,7 @@ jobs:
               exec(compile(script, f'phase13-typed-batch-{index}.py', 'exec'), namespace, namespace)
           PY
 
-      - name: Normalize ordinary declaration batch result to PSC1
+      - name: Normalize declaration batch tail to PSC1
         shell: bash
         run: |
           set -euo pipefail
@@ -69,21 +69,30 @@ jobs:
 
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean')
           text = path.read_text()
-          pattern = re.compile(
+
+          batch_pattern = re.compile(
               r'^def psElabDeclarationBatch\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
               re.MULTILINE | re.DOTALL,
           )
-          matches = list(pattern.finditer(text))
-          if len(matches) != 1:
-              raise SystemExit(f'expected one psElabDeclarationBatch, got {len(matches)}')
-          block = matches[0].group(0)
-          old = 'Except.ok { declarations := [result.declaration] }'
-          new = 'Except.ok (PsElabDeclarationBatchResult.mk (List.cons result.declaration List.nil))'
-          count = block.count(old)
-          if count != 1:
-              raise SystemExit(f'expected one ordinary declaration batch result, got {count}')
-          block = block.replace(old, new, 1)
-          text = text[:matches[0].start()] + block + text[matches[0].end():]
+          batch_matches = list(batch_pattern.finditer(text))
+          if len(batch_matches) != 1:
+              raise SystemExit(f'expected one psElabDeclarationBatch, got {len(batch_matches)}')
+          block = batch_matches[0].group(0)
+          old_batch = 'Except.ok { declarations := [result.declaration] }'
+          new_batch = 'Except.ok (PsElabDeclarationBatchResult.mk (List.cons result.declaration List.nil))'
+          batch_count = block.count(old_batch)
+          if batch_count != 1:
+              raise SystemExit(f'expected one ordinary declaration batch result, got {batch_count}')
+          block = block.replace(old_batch, new_batch, 1)
+          text = text[:batch_matches[0].start()] + block + text[batch_matches[0].end():]
+
+          old_reverse = 'psElabAppendDeclarations declarations.reverse declarationsRev'
+          new_reverse = 'psElabAppendDeclarations (psElabListReverse declarations) declarationsRev'
+          reverse_count = text.count(old_reverse)
+          if reverse_count != 1:
+              raise SystemExit(f'expected one batch reverse target, got {reverse_count}')
+          text = text.replace(old_reverse, new_reverse, 1)
+
           path.write_text(text)
           PY
           git diff --check -- \

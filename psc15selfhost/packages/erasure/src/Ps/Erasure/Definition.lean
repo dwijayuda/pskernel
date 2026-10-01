@@ -81,189 +81,224 @@ def psErasureDeclarationNames
       (PsErasureNameState.mk List.nil List.nil);
   psErasureReverseDeclarationNamesAcc state.entriesRev List.nil
 
+def psErasureReverseTypeParametersAcc
+    (parameters : List PsVerifiedIrTypeParameter) :
+    List PsVerifiedIrTypeParameter -> List PsVerifiedIrTypeParameter :=
+  match parameters with
+  | List.nil =>
+      fun (acc : List PsVerifiedIrTypeParameter) => acc
+  | List.cons parameter rest =>
+      let smaller : List PsVerifiedIrTypeParameter -> List PsVerifiedIrTypeParameter :=
+        psErasureReverseTypeParametersAcc rest;
+      fun (acc : List PsVerifiedIrTypeParameter) =>
+        smaller (List.cons parameter acc)
+
+def psErasureReverseParametersAcc
+    (parameters : List PsVerifiedIrParameter) :
+    List PsVerifiedIrParameter -> List PsVerifiedIrParameter :=
+  match parameters with
+  | List.nil =>
+      fun (acc : List PsVerifiedIrParameter) => acc
+  | List.cons parameter rest =>
+      let smaller : List PsVerifiedIrParameter -> List PsVerifiedIrParameter :=
+        psErasureReverseParametersAcc rest;
+      fun (acc : List PsVerifiedIrParameter) =>
+        smaller (List.cons parameter acc)
+
+def psErasureAppendRuntimeParameter
+    (parameters : List String)
+    (name : String) : List String :=
+  match parameters with
+  | List.nil => List.cons name List.nil
+  | List.cons parameter rest =>
+      List.cons parameter (psErasureAppendRuntimeParameter rest name)
+
 def psEraseOpenDefinitionWithFuel
-    (environment : PsEnvironment) :
-    Nat ->
+    (environment : PsEnvironment)
+    (fuel : Nat) :
     PsErasureScope ->
     PsExpr ->
     PsExpr ->
     Nat ->
     List PsVerifiedIrTypeParameter ->
     List PsVerifiedIrParameter ->
-    Except PsErasureError PsOpenedErasedDefinition
-  | 0, _, _, _, _, _, _ =>
-      Except.error PsErasureError.fuelExhausted
-  | fuel + 1,
-    scope,
-    currentType,
-    currentValue,
-    typeIndex,
-    typeParametersRev,
-    parametersRev =>
-      match currentType with
-      | .forallE typeName domain typeBody binder =>
-          match currentValue with
-          | .lam valueName _ valueBody _ =>
-              let kind :=
-                psErasureClassifyBinder
-                  environment
-                  scope.localContext
-                  domain
-              let pushed :=
-                psLocalPushBinding
-                  scope.localContext
-                  typeName
-                  domain
-                  binder
-              let openedVariable := PsExpr.fvar pushed.id
-              let nextType :=
-                psExprInstantiate1 typeBody openedVariable
-              let nextValue :=
-                psExprInstantiate1 valueBody openedVariable
-              match kind with
-              | .type =>
-                  let parameterName :=
-                    "T" ++ toString typeIndex
-                  let nextScope : PsErasureScope := {
-                    localContext := pushed.context
-                    runtimeLocals := scope.runtimeLocals
-                    typeLocals :=
-                      (pushed.id, parameterName) ::
+    Except PsErasureError PsOpenedErasedDefinition :=
+  match fuel with
+  | Nat.zero =>
+      fun (_scope : PsErasureScope)
+          (_currentType : PsExpr)
+          (_currentValue : PsExpr)
+          (_typeIndex : Nat)
+          (_typeParametersRev : List PsVerifiedIrTypeParameter)
+          (_parametersRev : List PsVerifiedIrParameter) =>
+        Except.error PsErasureError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller :
+          PsErasureScope ->
+          PsExpr ->
+          PsExpr ->
+          Nat ->
+          List PsVerifiedIrTypeParameter ->
+          List PsVerifiedIrParameter ->
+          Except PsErasureError PsOpenedErasedDefinition :=
+        psEraseOpenDefinitionWithFuel environment remaining;
+      fun (scope : PsErasureScope)
+          (currentType : PsExpr)
+          (currentValue : PsExpr)
+          (typeIndex : Nat)
+          (typeParametersRev : List PsVerifiedIrTypeParameter)
+          (parametersRev : List PsVerifiedIrParameter) =>
+        match currentType with
+        | PsExpr.forallE typeName domain typeBody binder =>
+            match currentValue with
+            | PsExpr.lam valueName _ valueBody _ =>
+                let kind :=
+                  psErasureClassifyBinder
+                    environment
+                    scope.localContext
+                    domain;
+                let pushed :=
+                  psLocalPushBinding
+                    scope.localContext
+                    typeName
+                    domain
+                    binder;
+                let openedVariable := PsExpr.fvar pushed.id;
+                let nextType :=
+                  psExprInstantiate1 typeBody openedVariable;
+                let nextValue :=
+                  psExprInstantiate1 valueBody openedVariable;
+                match kind with
+                | PsErasedBinderKind.type =>
+                    let parameterName :=
+                      String.Internal.append "T" (psNatToString typeIndex);
+                    let nextScope : PsErasureScope :=
+                      PsErasureScope.mk
+                        pushed.context
+                        scope.runtimeLocals
+                        (List.cons (Prod.mk pushed.id parameterName) scope.typeLocals)
+                        (List.cons pushed.id scope.erasedLocals)
+                        scope.declarationNames
+                        scope.runtimeConstructors
+                        scope.runtimeRecursors
+                        scope.runtimeStructures
+                        scope.runtimeStructureConstructors
+                        scope.runtimeExpressions
+                        scope.currentDefinition;
+                    smaller
+                      nextScope
+                      nextType
+                      nextValue
+                      (Nat.succ typeIndex)
+                      (List.cons
+                        (PsVerifiedIrTypeParameter.mk parameterName)
+                        typeParametersRev)
+                      parametersRev
+                | PsErasedBinderKind.proof =>
+                    let nextScope : PsErasureScope :=
+                      PsErasureScope.mk
+                        pushed.context
+                        scope.runtimeLocals
                         scope.typeLocals
-                    erasedLocals :=
-                      pushed.id :: scope.erasedLocals
-                    declarationNames := scope.declarationNames
-                    runtimeConstructors := scope.runtimeConstructors
-                    runtimeRecursors := scope.runtimeRecursors
-                    runtimeStructures := scope.runtimeStructures
-                    runtimeStructureConstructors := scope.runtimeStructureConstructors
-                    runtimeExpressions := scope.runtimeExpressions
-                    currentDefinition := scope.currentDefinition
-                  }
-                  psEraseOpenDefinitionWithFuel
-                    environment
-                    fuel
-                    nextScope
-                    nextType
-                    nextValue
-                    (typeIndex + 1)
-                    ({ name := parameterName } ::
-                      typeParametersRev)
-                    parametersRev
-              | .proof =>
-                  let nextScope : PsErasureScope := {
-                    localContext := pushed.context
-                    runtimeLocals := scope.runtimeLocals
-                    typeLocals := scope.typeLocals
-                    erasedLocals :=
-                      pushed.id :: scope.erasedLocals
-                    declarationNames := scope.declarationNames
-                    runtimeConstructors := scope.runtimeConstructors
-                    runtimeRecursors := scope.runtimeRecursors
-                    runtimeStructures := scope.runtimeStructures
-                    runtimeStructureConstructors := scope.runtimeStructureConstructors
-                    runtimeExpressions := scope.runtimeExpressions
-                    currentDefinition := scope.currentDefinition
-                  }
-                  psEraseOpenDefinitionWithFuel
-                    environment
-                    fuel
-                    nextScope
-                    nextType
-                    nextValue
-                    typeIndex
-                    typeParametersRev
-                    parametersRev
-              | .runtime =>
-                  let parameterName :=
-                    psErasureSafeIdentifier
-                      (psNameToString valueName)
-                      "arg"
-                  match
-                      psEraseRuntimeType
-                        environment
-                        scope
-                        domain with
-                  | Except.error error => Except.error error
-                  | Except.ok parameterType =>
-                      let nextScope : PsErasureScope := {
-                        localContext := pushed.context
-                        runtimeLocals :=
-                          (pushed.id, parameterName) ::
-                            scope.runtimeLocals
-                        typeLocals := scope.typeLocals
-                        erasedLocals := scope.erasedLocals
-                        declarationNames := scope.declarationNames
-                        runtimeConstructors := scope.runtimeConstructors
-                        runtimeRecursors := scope.runtimeRecursors
-                        runtimeStructures := scope.runtimeStructures
-                        runtimeStructureConstructors := scope.runtimeStructureConstructors
-                        runtimeExpressions := scope.runtimeExpressions
-                        currentDefinition :=
+                        (List.cons pushed.id scope.erasedLocals)
+                        scope.declarationNames
+                        scope.runtimeConstructors
+                        scope.runtimeRecursors
+                        scope.runtimeStructures
+                        scope.runtimeStructureConstructors
+                        scope.runtimeExpressions
+                        scope.currentDefinition;
+                    smaller
+                      nextScope
+                      nextType
+                      nextValue
+                      typeIndex
+                      typeParametersRev
+                      parametersRev
+                | PsErasedBinderKind.runtime =>
+                    let parameterName :=
+                      psErasureSafeIdentifier
+                        (psNameToString valueName)
+                        "arg";
+                    match
+                        psEraseRuntimeType
+                          environment
+                          scope
+                          domain with
+                    | Except.error error => Except.error error
+                    | Except.ok parameterType =>
+                        let nextCurrentDefinition : Option PsErasureCurrentDefinition :=
                           match scope.currentDefinition with
-                          | none => none
-                          | some current =>
-                              some {
-                                current with
-                                runtimeParameters :=
-                                  current.runtimeParameters ++
-                                    [parameterName]
-                              }
-                      }
-                      psEraseOpenDefinitionWithFuel
-                        environment
-                        fuel
-                        nextScope
-                        nextType
-                        nextValue
-                        typeIndex
-                        typeParametersRev
-                        ({
-                          name := parameterName
-                          type := parameterType
-                        } :: parametersRev)
-          | _ =>
-              match
-                  psEraseRuntimeType
-                    environment
-                    scope
-                    currentType with
-              | Except.error error => Except.error error
-              | Except.ok resultType =>
-                  match
-                      psEraseRuntimeExpr
-                        environment
-                        scope
-                        currentValue with
-                  | Except.error error => Except.error error
-                  | Except.ok body =>
-                      Except.ok {
-                        typeParameters := typeParametersRev.reverse
-                        parameters := parametersRev.reverse
-                        resultType := resultType
-                        body := body
-                      }
-      | _ =>
-          match
-              psEraseRuntimeType
-                environment
-                scope
-                currentType with
-          | Except.error error => Except.error error
-          | Except.ok resultType =>
-              match
-                  psEraseRuntimeExpr
-                    environment
-                    scope
-                    currentValue with
-              | Except.error error => Except.error error
-              | Except.ok body =>
-                  Except.ok {
-                    typeParameters := typeParametersRev.reverse
-                    parameters := parametersRev.reverse
-                    resultType := resultType
-                    body := body
-                  }
+                          | Option.none => Option.none
+                          | Option.some current =>
+                              Option.some
+                                (PsErasureCurrentDefinition.mk
+                                  current.name
+                                  (psErasureAppendRuntimeParameter current.runtimeParameters parameterName));
+                        let nextScope : PsErasureScope :=
+                          PsErasureScope.mk
+                            pushed.context
+                            (List.cons (Prod.mk pushed.id parameterName) scope.runtimeLocals)
+                            scope.typeLocals
+                            scope.erasedLocals
+                            scope.declarationNames
+                            scope.runtimeConstructors
+                            scope.runtimeRecursors
+                            scope.runtimeStructures
+                            scope.runtimeStructureConstructors
+                            scope.runtimeExpressions
+                            nextCurrentDefinition;
+                        smaller
+                          nextScope
+                          nextType
+                          nextValue
+                          typeIndex
+                          typeParametersRev
+                          (List.cons
+                            (PsVerifiedIrParameter.mk parameterName parameterType)
+                            parametersRev)
+            | _ =>
+                match
+                    psEraseRuntimeType
+                      environment
+                      scope
+                      currentType with
+                | Except.error error => Except.error error
+                | Except.ok resultType =>
+                    match
+                        psEraseRuntimeExpr
+                          environment
+                          scope
+                          currentValue with
+                    | Except.error error => Except.error error
+                    | Except.ok body =>
+                        Except.ok
+                          (PsOpenedErasedDefinition.mk
+                            (psErasureReverseTypeParametersAcc typeParametersRev List.nil)
+                            (psErasureReverseParametersAcc parametersRev List.nil)
+                            resultType
+                            body)
+        | _ =>
+            match
+                psEraseRuntimeType
+                  environment
+                  scope
+                  currentType with
+            | Except.error error => Except.error error
+            | Except.ok resultType =>
+                match
+                    psEraseRuntimeExpr
+                      environment
+                      scope
+                      currentValue with
+                | Except.error error => Except.error error
+                | Except.ok body =>
+                    Except.ok
+                      (PsOpenedErasedDefinition.mk
+                        (psErasureReverseTypeParametersAcc typeParametersRev List.nil)
+                        (psErasureReverseParametersAcc parametersRev List.nil)
+                        resultType
+                        body)
 
 def psEraseOpenDefinition
     (environment : PsEnvironment)

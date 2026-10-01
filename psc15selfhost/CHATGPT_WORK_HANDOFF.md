@@ -18,32 +18,34 @@ from `Pasted text(20260930-195252).txt`.
 
 ## Current snapshot and first blocker
 
-Base head for this repair: `92955f7e6778b4a730507b7b77a92a45b726a204`.
-Canonical run `36889927006`, job `110462670772`, passed source gates,
+Base head for this repair: `7cbe096e22fe1da1680b42d280bf857c8e30b27d`.
+Canonical run `36890710202`, job `110465319673`, passed source gates,
 the official Lean elaborator build, and emitted:
 
 ```text
 PSC2_FIXED_POINT_RUNTIME_REGRESSIONS: PASS
 ```
 
-That confirms the new naming regression (collisions, skipped axioms, included
-declaration variants, order, existing state, and empty input). Parsing advanced
-past the worker/wrapper and now fails in `psErasureDeclarationNames`:
+The expanded erasure-naming regression, including public output order and empty
+input, is now native-verified. Parsing advanced to the definition-opening
+function:
 
 ```text
-PSC1_PROJECT_PARSE_FAILED: packages/erasure/src/Ps/Erasure/Definition.lean: 70:3: expected ';', got 'state'
+PSC1_PROJECT_PARSE_FAILED: packages/erasure/src/Ps/Erasure/Definition.lean: 112:15: expected ';', got 'let'
 ```
 
-This repair normalizes only that wrapper and its required reverse helper.
-`psErasureReverseDeclarationNamesAcc` is structurally recursive on the entries
-list and applies the accumulator after recursion. The wrapper builds the initial
-state with `PsErasureNameState.mk`, terminates its let with a semicolon, and uses
-the local reverse helper to retain source order.
+This repair normalizes only `psEraseOpenDefinitionWithFuel` and required list
+helpers. Fuel is explicit and structurally recursive; scope, current type/value,
+index, and parameter accumulators are applied after the recursive closure. Type,
+proof, and runtime branches preserve their scope fields and transitions. Matches,
+records, strings, Nat increments, list reversal, and runtime-parameter append use
+explicit PSC1-compatible operations. Public argument order is unchanged.
 
-The expanded focused guard was RED before the source repair and GREEN afterward;
-aggregate source gates and local closure checks pass. The naming regression now
-also checks public output order and empty input. Its expanded CI result and the
-fresh fixed-point replay are pending. No erasure self-compilation claim yet.
+The focused guard was RED on the old declaration and GREEN on the repair.
+Aggregate source gates and local closure checks pass. New native regressions
+exercise type/proof/runtime binder erasure, type/runtime parameter order, and the
+one-versus-two-step fuel boundary. Their CI result and fresh fixed-point replay
+are still pending; erasure self-compilation is not yet proven.
 
 All concurrent Declaration repairs and their guards remain intact. The earlier
 local recursor-minor draft was set aside because `4dcf65ff` already supplied the
@@ -75,12 +77,12 @@ and related Option/recursion repairs remain present. Do not repeat them.
 The closure probe runs `lake exe psc2_minimal_selfhost_tests` before fixed-point
 compilation and emits `PSC2_FIXED_POINT_RUNTIME_REGRESSIONS: PASS` on success.
 That marker was observed in canonical runs `36846906468`, `36885530518`,
-`36888982066`, and `36889927006`.
+`36888982066`, `36889927006`, and `36890710202`.
 It includes the constructor-traversal regression covering output order,
 nonzero constructor indices, an existing reversed accumulator, empty input,
 and error propagation. Run `36889927006` also verifies the new erasure naming
-state traversal regression. The expanded public-order regression still needs a
-fresh canonical replay.
+state traversal regression. Run `36890710202` verifies its expanded public-order
+and empty-input checks. The new definition-opening tests are pending.
 
 ## Exact next action
 
@@ -97,7 +99,7 @@ fresh canonical replay.
 
 ```sh
 cd psc15selfhost
-node scripts/check-erasure-declaration-names-selfhost-source-syntax.mjs
+node scripts/check-erasure-open-definition-selfhost-source-syntax.mjs
 npm run check:selfhost-source-syntax
 node scripts/check-bootstrap-closure.mjs
 lake build Ps.Elab.Declaration

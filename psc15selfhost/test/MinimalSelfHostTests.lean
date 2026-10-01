@@ -326,7 +326,45 @@ def psTestErasureDeclarationNames : Bool :=
     && publicNames == ["item", "item_", "item__", "Choice"]
     && (psErasureDeclarationNames []).isEmpty
 
+def psTestOpenDefinitionBinderErasure : Bool :=
+  let source :=
+    "def keep (a : Type) (b : Type) (p : Prop) (h : p) (x : a) (y : b) : a := x"
+  match psCompilerVerifiedIrSource PsCompilerSourceKind.lean source with
+  | Except.error _ => false
+  | Except.ok ir =>
+      ir.declarations.any fun declaration =>
+        declaration.name == "keep"
+          && declaration.typeParameters.map (fun parameter => parameter.name) == ["T0", "T1"]
+          && declaration.parameters.map (fun parameter => parameter.name) == ["x", "y"]
+          && (match declaration.resultType, declaration.body with
+              | .typeParameter "T0", .var "x" => true
+              | _, _ => false)
+
+def psTestOpenDefinitionFuelBoundary : Bool :=
+  let natType := PsExpr.constE psNatName []
+  let scope := psErasureScopeEmpty []
+  let type := PsExpr.forallE (psRootName "x") natType natType .explicit
+  let value := PsExpr.lam (psRootName "x") natType (PsExpr.bvar 0) .explicit
+  let exhausted :=
+    match psEraseOpenDefinitionWithFuel psBootstrapPreludeEnvironment 1
+        scope type value 0 [] [] with
+    | Except.error PsErasureError.fuelExhausted => true
+    | _ => false
+  let completed :=
+    match psEraseOpenDefinitionWithFuel psBootstrapPreludeEnvironment 2
+        scope type value 0 [] [] with
+    | Except.ok opened =>
+        opened.typeParameters.isEmpty
+          && opened.parameters.map (fun parameter => parameter.name) == ["x"]
+          && (match opened.body with | .var "x" => true | _ => false)
+    | Except.error _ => false
+  exhausted && completed
+
 def main : IO Unit := do
+  if psTestOpenDefinitionBinderErasure && psTestOpenDefinitionFuelBoundary then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: type/proof/runtime binder erasure, parameter order and fuel boundary"
+  else
+    throw (IO.userError "PSC2_MINIMAL_SELFHOST_FAIL: open-definition erasure contract")
   if psTestErasureDeclarationNames then
     IO.println "PSC2_MINIMAL_SELFHOST_PASS: erasure naming collisions, skipped axioms, order and existing state"
   else

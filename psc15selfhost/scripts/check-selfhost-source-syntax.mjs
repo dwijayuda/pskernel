@@ -5,6 +5,7 @@ import "./check-elab-binder-arguments-selfhost-source-syntax.mjs";
 import "./check-elab-inductive-constructors-selfhost-source-syntax.mjs";
 import "./check-elab-wrap-recursive-hypotheses-selfhost-source-syntax.mjs";
 import "./check-erasure-declaration-names-selfhost-source-syntax.mjs";
+import "./check-erasure-open-definition-selfhost-source-syntax.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

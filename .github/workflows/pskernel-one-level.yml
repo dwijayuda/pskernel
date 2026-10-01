@@ -31,9 +31,18 @@ jobs:
       - name: Build current seed compiler
         run: lake build psc1
       - name: Install locked TypeScript
-        run: npm install --no-save --ignore-scripts --package-lock=false typescript@5.8.3
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pskernel-one-tools" --ignore-scripts --no-audit --no-fund typescript@5.8.3
+          echo "TSC=$RUNNER_TEMP/pskernel-one-tools/node_modules/.bin/tsc" >> "$GITHUB_ENV"
       - name: Generated Nat recursor regression
-        run: node scripts/pskernel-one-nat-runtime.mjs
+        run: |
+          lake exe pskernel_one_nat_boundary_tests
+          node scripts/pskernel-one-nat-runtime.mjs
+      - name: Existing compiler regression and alternate backend builds
+        run: |
+          lake exe psc1_backend_ts_tests
+          lake exe psc2_minimal_selfhost_tests
+          lake build PsBackendRust PsBackendWasm
       - name: Source and canonical PS profile
         run: node scripts/pskernel-one-profile.mjs
       - name: Actual TypeScript emission

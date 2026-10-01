@@ -16,9 +16,12 @@ function command(bin, args) {
 command(psc, ['check', source]);
 const ts = path.join(out, 'fixture.ts');
 fs.writeFileSync(ts, command(psc, ['typescript', source]));
-command(process.env.TSC ?? 'npx', process.env.TSC
-  ? [ts, '--target', 'ES2022', '--module', 'ES2022', '--strict', '--noEmitOnError']
-  : ['--no-install', 'tsc', ts, '--target', 'ES2022', '--module', 'ES2022', '--strict', '--noEmitOnError']);
+function compile(ts) {
+  command(process.env.TSC ?? 'npx', process.env.TSC
+    ? [ts, '--target', 'ES2022', '--module', 'ES2022', '--strict', '--noEmitOnError']
+    : ['--no-install', 'tsc', ts, '--target', 'ES2022', '--module', 'ES2022', '--strict', '--noEmitOnError']);
+}
+compile(ts);
 const m = await import(pathToFileURL(path.join(out, 'fixture.js')));
 for (let n = 0n; n <= 32n; n++) {
   assert.equal(m.oneNatIdentity(n), n);
@@ -27,4 +30,7 @@ for (let n = 0n; n <= 32n; n++) {
   assert.equal(m.oneNatLarge(9007199254740993n, n), 9007199254740993n + n);
 }
 assert.equal(m.oneNatIdentity(10000n), 10000n);
-console.log('PSKERNEL_ONE_NAT_RUNTIME: PASS (133 generated results, bigint and captured arguments)');
+compile(path.join(out, 'direct.ts'));
+const direct = await import(pathToFileURL(path.join(out, 'direct.js')));
+assert.equal(direct.nestedNatRec, 110n);
+console.log('PSKERNEL_ONE_NAT_RUNTIME: PASS (134 generated results, bigint, captured arguments, nested recursor)');

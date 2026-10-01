@@ -268,3 +268,7 @@ lean_lib PsKernelOne where
 lean_exe pskernel_one_level_tests where
   srcDir := "packages/pskernel-one/test"
   root := `LevelTests
+
+lean_exe pskernel_one_nat_boundary_tests where
+  srcDir := "packages/pskernel-one/test"
+  root := `NatRecBoundaryTests

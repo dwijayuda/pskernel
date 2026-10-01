@@ -194,8 +194,8 @@ def emitFlags (tag : String) (flags : Array String) : IO Unit := do
 
 def main (args : List String) : IO UInt32 := do
   match args with
-  | [prefix] =>
-      let root := FilePath.mk prefix
+  | [sysroot] =>
+      let root := FilePath.mk sysroot
       emitFlags "internal-link" (getInternalLinkerFlags root)
       emitFlags "link" (getLinkerFlags root true)
       return 0

@@ -11,7 +11,7 @@ const source = await readFile(
 
 const workerStart = source.indexOf("def psCloseElabImplicitBindersWorker\n");
 const wrapperStart = source.indexOf("\ndef psCloseElabImplicitBinders\n", workerStart + 1);
-const end = source.indexOf("\ndef psExprListAlphaEq ", wrapperStart + 1);
+const end = source.indexOf("\ndef psExprListAlphaEq", wrapperStart + 1);
 if (workerStart < 0 || wrapperStart < 0 || end < 0) {
   throw new Error(
     "PSC2_ELAB_CLOSE_IMPLICIT_BINDERS_SELFHOST_SOURCE_SYNTAX_MISSING: worker/wrapper declaration block",

@@ -78,9 +78,7 @@ jobs:
               raise SystemExit(f'expected one psElabDeclarationBatch, got {len(matches)}')
           block = matches[0].group(0)
           old = 'Except.ok { declarations := [result.declaration] }'
-          new = '''Except.ok
-            (PsElabDeclarationBatchResult.mk
-              (List.cons result.declaration List.nil))'''
+          new = 'Except.ok (PsElabDeclarationBatchResult.mk (List.cons result.declaration List.nil))'
           count = block.count(old)
           if count != 1:
               raise SystemExit(f'expected one ordinary declaration batch result, got {count}')

@@ -49,7 +49,7 @@ if (/def psExprListAlphaEq\s*:\s*List PsExpr -> List PsExpr -> Bool/.test(alphaB
 }
 
 const directStart = source.indexOf("def psElabIsDirectRecursiveField\n");
-const directEnd = source.indexOf("\ndef psElabContainerRecursiveName\n", directStart + 1);
+const directEnd = source.indexOf("\ndef psElabContainerRecursiveName", directStart + 1);
 if (directStart < 0 || directEnd < 0) {
   throw new Error("PSC2_ELAB_DIRECT_RECURSIVE_FIELD_MISSING: declaration block");
 }

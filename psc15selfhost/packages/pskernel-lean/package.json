@@ -33,7 +33,9 @@
     "scripts/build-native.mjs",
     "PROOFSCRIPT_SOURCE_MANIFEST.json",
     "lakefile.lean",
-    "lean-toolchain"
+    "lean-toolchain",
+    "scripts/build-native-slim.mjs",
+    "scripts/native-slim-differential.test.mjs"
   ],
   "scripts": {
     "build:kernel": "node scripts/build-native.mjs",

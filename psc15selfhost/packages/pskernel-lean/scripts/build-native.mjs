@@ -17,6 +17,7 @@ function run(command,args,options={}){
     cwd:packageRoot,
     encoding:'utf8',
     windowsHide:true,
+    maxBuffer:64*1024*1024,
     ...options,
   });
   assert.equal(
@@ -29,7 +30,7 @@ function run(command,args,options={}){
 
 assert.equal(run('lean',['--githash']).stdout.trim(),expectedCommit,'Lean source commit must match package pin');
 assert.equal(run('lean',['--short-version']).stdout.trim(),expectedVersion,'Lean version must match package pin');
-run('lake',['build','psc2_lean_kernel_provider']);
+run(process.execPath,[path.join(here,'build-native-slim.mjs')]);
 
 const health=JSON.parse(run(binaryPath,['--health']).stdout.trim());
 assert.equal(health.status,'ok');

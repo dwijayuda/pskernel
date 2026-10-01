@@ -62,6 +62,8 @@ const requiredEntries=[
   'host/verify-prebuilt.mjs',
   'source/',
   'scripts/build-native.mjs',
+  'scripts/build-native-slim.mjs',
+  'scripts/native-slim-differential.test.mjs',
   'PROOFSCRIPT_SOURCE_MANIFEST.json',
   'lakefile.lean',
   'lean-toolchain',
@@ -128,6 +130,8 @@ await readFile(path.join(packageRoot,'provider','PsKernelLean','Admission.lean')
 await readFile(path.join(packageRoot,'source','proofscript','foundation','Ps','Foundation','Name.lean'),'utf8');
 await readFile(path.join(packageRoot,'source','proofscript','provider','PsKernelLean','Admission.lean'),'utf8');
 await readFile(path.join(packageRoot,'scripts','build-native.mjs'),'utf8');
+await readFile(path.join(packageRoot,'scripts','build-native-slim.mjs'),'utf8');
+await readFile(path.join(packageRoot,'scripts','native-slim-differential.test.mjs'),'utf8');
 await readFile(path.join(packageRoot,'host','verify-prebuilt.mjs'),'utf8');
 await readFile(path.join(packageRoot,'lakefile.lean'),'utf8');
 assert.equal((await readFile(path.join(packageRoot,'lean-toolchain'),'utf8')).trim(),'leanprover/lean4:v4.34.0');
@@ -151,6 +155,8 @@ for(const file of [
   'source/proofscript/provider/PsKernelLean/Admission.lean',
   'PROOFSCRIPT_SOURCE_MANIFEST.json',
   'scripts/build-native.mjs',
+  'scripts/build-native-slim.mjs',
+  'scripts/native-slim-differential.test.mjs',
   'host/source-distribution.test.mjs',
   'host/verify-prebuilt.mjs',
   'lakefile.lean',

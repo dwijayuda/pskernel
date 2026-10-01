@@ -4,7 +4,9 @@
 
 ## Architecture
 
-The target runtime and kernel must be built from Lean 4.34.0's current `src/` tree with Emscripten as a `STAGE=1` build. The exact native Lean 4.34.0 installation is the previous-stage compiler (`PREV_STAGE`) and is used as the host Lean C emitter for current Lean and provider modules; its native object files are never linked into the WebAssembly artifact.
+The build configures Lean from its top-level staged CMake project. The installed x86_64 Lean 4.34.0 toolchain is used for exact pin checks only; it must not emit provider C intended for wasm32. A freshly built, runnable native i386 stage0 is the host Lean C emitter. Stage1 uses Emscripten to rebuild the runtime, kernel and standard libraries from Lean 4.34.0's current `src/` tree. No native host object or library is linked into the WebAssembly artifact.
+
+Stage0 is a C-only bootstrap and is not an installed `.olean` sysroot. Following Lean's `src/lean.mk.in`, the build creates empty `Init/`, `Std/` and `Lean/` output directories in the future stage1 sysroot so dependency enumeration can resolve package roots before any `.olean` files exist. No placeholder or host `.olean` files are installed. With `LEAN_PATH` restricted to that target sysroot, the build first requires `stage0/bin/lean --deps src/Lean.lean` to succeed, then builds stage1's `make_stdlib`, `leanrt`, and `leancpp_1` targets. Provider imports resolve against the wasm32-compatible stage1 `.olean` sysroot; native i386 stage0 emits their C, and stage1's `leanc.sh` compiles it to WebAssembly. The final kernel-only link excludes the stock global initializer and preserves the provider's generated import initialization graph.
 
 This split is intentional. The frozen stage0 generated-C snapshot contains bootstrap ABI assumptions that are tolerated by native builds but conflict with WebAssembly's typed function signatures. Linking current provider-generated C against that frozen stage0 closure is therefore forbidden.
 
@@ -16,19 +18,23 @@ The build expects:
 
 - exact Lean 4.34.0 / commit `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b` on `PATH`;
 - Emscripten 6.0.9 (`emcc`, `em++`, and `emar`);
-- Git, CMake, Make, Node.js, and standard Unix build tools.
+- Clang (`clang`, `clang++`), Git, CMake, Make, Node.js, and standard Unix build tools;
+- an x86_64 Linux host capable of building and running i386 executables, with `gcc-multilib`, `g++-multilib`, `libuv1-dev:i386`, `libssl-dev:i386`, and `pkgconf:i386`;
+- `/usr/bin/i386-linux-gnu-pkg-config`; `objcopy` is also required by the scalar-literal regression.
 
-CI installs these exact versions before invoking the package build.
+CI installs these prerequisites before invoking the package build. Native stage0 uses Lean's `STAGE0_LEAN_EXTRA_CXX_FLAGS` and `STAGE0_LEANC_OPTS` with `-m32 -msse2 -mfpmath=sse`. Do not replace that plumbing with global `STAGE0_CMAKE_C_FLAGS` or `STAGE0_CMAKE_CXX_FLAGS`.
 
 ## Build in the pskernel checkout
 
 From `psc15selfhost/` run:
 
-```text
-packages/pskernel-lean-wasm/scripts/build-wasm.sh
+```bash
+PSC_LEAN_WASM_SOURCE_COMMIT="$(git rev-parse HEAD)" \
+  npm --prefix packages/pskernel-lean-wasm run build:wasm
+node packages/pskernel-lean-wasm/host/verify-prebuilt.mjs
 ```
 
-The script uses the live sibling PSC semantic sources and the checked-in `study/lean4-4.34.0` tree.
+The `build:wasm` command runs `scripts/build-wasm.sh` and then `scripts/write-prebuilt-manifest.mjs`. The build uses the live sibling PSC semantic sources and the checked-in `study/lean4-4.34.0` tree. Calling the shell script directly does not generate the manifest; generate and verify it before invoking the default Node API or packing the package.
 
 ## Build from the npm package
 
@@ -58,13 +64,16 @@ Expected generated files are:
 ```text
 wasm/pskernel-lean.cjs
 wasm/pskernel-lean.wasm
+PREBUILT_WASM_MANIFEST.json
 ```
 
-inside the installed package, or under `packages/pskernel-lean-wasm/wasm/` in the monorepo.
+relative to the package root, including `packages/pskernel-lean-wasm/` in the monorepo. The manifest records the launcher/module sizes and SHA-256 digests, exact toolchain identities, and source identifier. `PSC_LEAN_WASM_SOURCE_COMMIT` overrides the source identifier; CI otherwise uses `GITHUB_SHA`, and a standalone rebuild defaults to `package-local-source`. This metadata is an integrity/traceability record, not a signed provenance attestation.
 
 ### Typed-WASM ABI normalization
 
-Lean 4.34 contains several native-runtime signatures whose dummy `IO.RealWorld` or `Unit` arguments do not exactly match the generated C call shape. Native ABIs tolerate these historical mismatches, but WebAssembly function types do not. `scripts/apply-wasm-abi.mjs` therefore performs exact, fail-closed rewrites only for the Emscripten build.
+Lean 4.34 contains several native-runtime signatures whose dummy `IO.RealWorld` or `Unit` arguments do not exactly match the generated C call shape. Native ABIs tolerate these historical mismatches, but WebAssembly function types do not. `scripts/apply-wasm-abi.mjs` therefore performs exact, fail-closed runtime-signature rewrites guarded by `LEAN_EMSCRIPTEN`.
+
+The same script corrects `LEAN_SCALAR_PTR_LITERAL` in both runtime headers to select its layout by `UINTPTR_MAX == UINT32_MAX`. Native i386 stage0, like wasm32, must store all eight scalar bytes in two pointer-sized slots. Testing only `LEAN_EMSCRIPTEN` truncated compact Name hashes in native i386 bootstrap initialization. This width correction does not define Emscripten runtime behavior for native stage0.
 
 For runtime translation units that do not import Lean's C++ convenience aliases, ignored object arguments must use the public C ABI type `lean_obj_arg` from `lean/lean.h`. In particular, the Emscripten variants of `lean_internal_get_default_max_memory` and `lean_internal_get_default_max_heartbeat` use `lean_obj_arg`; using the shorter `obj_arg` alias is invalid in those files and is rejected by the real cross-build.
 
@@ -74,6 +83,12 @@ Verify the source-carrying npm contract without rebuilding Lean:
 
 ```text
 npm run verify:source
+```
+
+Verify bundled artifact integrity after building:
+
+```text
+npm run verify:prebuilt
 ```
 
 Runtime identity:
@@ -90,7 +105,7 @@ printf '%s' "$REQUEST_JSON" | node wasm/pskernel-lean.cjs --check
 
 The build is not considered successful from compilation alone. `--health` must identify protocol `pskernel-lean/1`, provider `lean4-cpp`, Lean 4.34.0 and the exact commit. The build script must also execute one accepted canonical admission and one deliberately ill-typed admission that returns `accepted: false` with `kernel-rejection`.
 
-The host adapter and CI are fail-closed: a missing launcher, malformed output, identity mismatch, startup exception, or unexpected admission result fails the gate.
+The host adapter and CI are fail-closed: a missing launcher, malformed output, identity mismatch, startup exception, or unexpected admission result fails the gate. Completion also requires native/WASM differential parity and a fresh npm install of the packed tarball, including health, acceptance, and an actual kernel rejection. Host-mock tests and a successful link are not substitutes for those runtime gates.
 
 ## Bootstrap isolation
 

@@ -83,6 +83,8 @@ const result = await checkCanonicalAdmissions(canonicalAdmissionsJson);
 
 For development or tests, `createKernel` and `checkCanonicalAdmissions` accept an explicit `launcherPath` option. Production default resolution points to the bundled `wasm/pskernel-lean.cjs` beside the package entry point.
 
+The bundled launcher and WASM module are verified against `PREBUILT_WASM_MANIFEST.json` before each default invocation, including checks made through an existing kernel handle. An omitted or `undefined` `launcherPath` still selects the bundled provider and does not disable verification. A genuinely external development launcher is an intentional override; its reported provider identity is still checked.
+
 The host adapter fails closed when the launcher cannot start, exits nonzero, returns malformed JSON, reports the wrong protocol/provider/Lean identity, fails health, or omits the boolean `accepted` result.
 
 ## Kernel semantics
@@ -91,11 +93,11 @@ This package does not generate Lean source text for Lean's parser/elaborator to 
 
 The WASM build stages only the semantic closure required by the provider. Parser, elaborator, compiler CLI, backends, and other PSC2 bootstrap packages are not linked into the kernel artifact.
 
-The exact pinned native Lean 4.34 toolchain is used only as the previous-stage frontend/C emitter. The shipped wasm32 runtime, kernel, Init, Std, and Lean libraries are rebuilt from Lean 4.34's **current `src/` tree** with pinned Emscripten 6.0.9. No native host object or host runtime library enters the shipped artifact.
+The installed x86_64 Lean 4.34 toolchain is used for exact pin checks only. A freshly built native i386 stage0 is the previous-stage frontend/C emitter, and provider imports use the target-width stage1 `.olean` sysroot. The shipped wasm32 runtime, kernel, Init, Std, and Lean libraries are rebuilt from Lean 4.34's **current `src/` tree** with pinned Emscripten 6.0.9. No native host object or host runtime library enters the shipped artifact.
 
 An earlier probe that linked current provider-generated C against Lean's frozen stage0 libraries was rejected: typed WebAssembly exposed real ABI mismatches between the frozen bootstrap snapshot and current 4.34 generated C. That mixed-ABI route is not a supported build path.
 
-The current Node milestone uses the exact x86_64 Lean 4.34 installation as the previous-stage frontend. This is a deliberately narrower claim than a general Lean wasm32 compiler/toolchain: runtime acceptance/rejection and native-vs-WASM differential parity are required before the provider is considered semantically verified for PSC kernel use.
+The current Node milestone builds a single-threaded wasm32 kernel provider, not a general Lean wasm32 compiler/toolchain: runtime acceptance/rejection and native-vs-WASM differential parity are required before the provider is considered semantically verified for PSC kernel use.
 
 ## CLI probes
 
@@ -126,8 +128,9 @@ The CI gate validates all of the following before this package should be treated
 - final C++ link through `em++` with Lean's required static library closure;
 - `--health` execution of the generated artifact;
 - one accepted declaration and one deliberately ill-typed kernel rejection through `--check`;
+- prebuilt manifest generation and size/digest/identity verification;
 - native-vs-WASM differential parity before semantic-completion claims;
 - clean packed-npm consumption before distribution-completion claims;
 - artifact upload of the `.cjs`, `.wasm`, and any generated worker files.
 
-The current-source Node build is still under verification. A successful link alone is not proof of correctness; runtime admission smoke and differential parity are the required behavioral gates. Browser/single-thread support remains a separate milestone.
+The current-source Node build is still under verification. A successful link alone is not proof of correctness; runtime admission smoke and differential parity are the required behavioral gates. Browser and in-process transport support remain separate milestones.

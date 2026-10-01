@@ -34,23 +34,23 @@ assert.doesNotMatch(patch,/initialize_library_/u);
 
 // Do not build Lean's full ALL graph. The stock initialize.cpp target and the
 // kernel-only shim both define lean_initialize, so building shell/shared targets
-// would deliberately collide. The provider needs only the generated stdlib,
-// runtime archive, and leancpp archive without initialize.cpp.
+// would deliberately collide. In the staged bootstrap these prerequisites live
+// in the configured wasm32 stage1 build directory.
 assert.match(
   build,
-  /cmake\s+--build\s+"\$lean_build"\s+--target\s+make_stdlib\s+leanrt\s+leancpp_1\s+-j2/u,
-  'WASM build must stop at the static kernel/provider prerequisites',
+  /cmake\s+--build\s+"\$stage1_build"\s+--target\s+make_stdlib\s+leanrt\s+leancpp_1\s+-j2/u,
+  'WASM stage1 build must stop at the static kernel/provider prerequisites',
 );
 assert.doesNotMatch(
   build,
-  /cmake\s+--build\s+"\$lean_build"\s+-j2/u,
-  'WASM build must not invoke the full default Lean ALL graph',
+  /cmake\s+--build\s+"\$stage1_build"\s+-j2/u,
+  'WASM stage1 build must not invoke the full default Lean ALL graph',
 );
 
 assert.match(
   build,
-  /lib\/temp\/libleancpp_1\.a/,
-  'WASM provider must verify Lean\'s leancpp archive without initialize.cpp',
+  /stage1_build\/lib\/temp\/libleancpp_1\.a|\$stage1_build\/lib\/temp\/libleancpp_1\.a/u,
+  'WASM provider must verify Lean\'s stage1 leancpp archive without initialize.cpp',
 );
 assert.match(
   build,

@@ -26,6 +26,7 @@ const required = [
   /let resultTypeIsSortOne\s*:\s*Bool\s*:=\s*match instantiatedResultType with/,
   /numParams := psElabListLength parameterArgs/,
   /match withInductiveResult with\s*\| Option\.none =>[\s\S]*?\| Option\.some withInductive =>/,
+  /Except\.ok\s*\(PsElabDeclarationBatchResult\.mk\s*\(psElabAppendDeclarations/,
 ];
 
 for (const pattern of required) {
@@ -42,6 +43,7 @@ const forbidden = [
   /\n\s+none\s+with/,
   /let resultTypeIsSortOne\s*:=/,
   /parameterArgs\.length\b/,
+  /Except\.ok\s*\{/,
 ];
 for (const pattern of forbidden) {
   if (pattern.test(block)) {
@@ -52,5 +54,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_INDUCTIVE_DECLARATION_SELFHOST_SOURCE_SYNTAX: PASS (explicit Option constructors, typed local matches, and project-owned list counts across inductive declaration elaboration)\n",
+  "PSC2_ELAB_INDUCTIVE_DECLARATION_SELFHOST_SOURCE_SYNTAX: PASS (explicit Option constructors, typed local matches, project-owned list counts, and explicit batch-result construction)\n",
 );

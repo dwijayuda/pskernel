@@ -1049,7 +1049,7 @@ def psElabInductiveDeclaration
           params with
       | Except.error error => Except.error error
       | Except.ok parameters =>
-          let result :=
+          let result : Except PsElabError (Prod PsElabContext PsExpr) :=
             match resultType with
             | none =>
                 Except.ok

@@ -18,7 +18,7 @@ assert.doesNotMatch(build,/-S "\$lean_source\/src"/);
 assert.match(build,/-DSTAGE0_USE_GMP=OFF/);
 assert.doesNotMatch(build,/-DSTAGE0_CMAKE_C_FLAGS=/,'match Lean 4.34 WASM bootstrap: do not override stage0 global C flags');
 assert.doesNotMatch(build,/-DSTAGE0_CMAKE_CXX_FLAGS=/,'match Lean 4.34 WASM bootstrap: do not override stage0 global C++ flags');
-assert.match(build,/-DSTAGE0_LEAN_EXTRA_CXX_FLAGS='-m32 -msse2 -mfpmath=sse'/);
+assert.match(build,/-DSTAGE0_LEAN_EXTRA_CXX_FLAGS='-m32 -msse2 -mfpmath=sse -DLEAN_DEFAULT_THREAD_STACK_SIZE=8388608'/);
 assert.match(build,/-DSTAGE0_LEANC_OPTS='-m32 -msse2 -mfpmath=sse'/);
 assert.match(build,/-DSTAGE0_CMAKE_CXX_COMPILER=clang\+\+/);
 assert.match(build,/-DSTAGE0_CMAKE_C_COMPILER=clang/);

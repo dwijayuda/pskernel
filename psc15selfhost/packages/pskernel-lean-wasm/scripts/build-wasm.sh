@@ -172,6 +172,9 @@ mkdir -p \
 # recipe: target width belongs in Lean's own compile/link knobs, not global CMake
 # C/C++ flags. Force SSE2 floating evaluation on i386 for deterministic
 # FLT_EVAL_METHOD=0 semantics.
+# Lean's native default reserves 1 GiB per thread, exhausting i386 address
+# space when elaboration starts worker threads. Use Lean's existing 8 MiB
+# 32-bit default via its supported override, scoped only to native stage0.
 cmake \
   -S "$lean_source" \
   -B "$lean_build" \
@@ -181,7 +184,7 @@ cmake \
   -DCMAKE_AR="$(command -v emar)" \
   -DCMAKE_TOOLCHAIN_FILE="$emscripten_toolchain" \
   -DSTAGE0_USE_GMP=OFF \
-  -DSTAGE0_LEAN_EXTRA_CXX_FLAGS='-m32 -msse2 -mfpmath=sse' \
+  -DSTAGE0_LEAN_EXTRA_CXX_FLAGS='-m32 -msse2 -mfpmath=sse -DLEAN_DEFAULT_THREAD_STACK_SIZE=8388608' \
   -DSTAGE0_LEANC_OPTS='-m32 -msse2 -mfpmath=sse' \
   -DSTAGE0_CMAKE_CXX_COMPILER=clang++ \
   -DSTAGE0_CMAKE_C_COMPILER=clang \

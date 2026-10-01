@@ -52,5 +52,7 @@ assert.match(rewrite,/uint8 allow_closures_u8\) \{/);
 await import('./scalar-literal-contract.test.mjs');
 // Execute UInt32 boxing/exit-code regressions at both native pointer widths.
 await import('./shell-exit-code-contract.test.mjs');
+// Native i386 workers must fit their finite address space.
+await import('./thread-stack-contract.test.mjs');
 
 console.log('PSC2_LEAN_KERNEL_WASM_ABI_CONTRACT: PASS');

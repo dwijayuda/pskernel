@@ -1,0 +1,173 @@
+name: Phase 13 declaration portability finalize
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-work
+    paths:
+      - .github/workflows/phase13-declaration-portability-finalize.yml
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-work
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply current Phase 13 term portability candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/phase13-term-portability-finalize.yml').read_text()
+          start_marker = "          python3 - <<'PY'\n"
+          end_marker = "\n          PY\n"
+          pos = 0
+          scripts = []
+          while True:
+              try:
+                  start = workflow.index(start_marker, pos) + len(start_marker)
+              except ValueError:
+                  break
+              end = workflow.index(end_marker, start)
+              lines = workflow[start:end].splitlines()
+              scripts.append('\n'.join(line[10:] if line.startswith('          ') else line for line in lines))
+              pos = end + len(end_marker)
+          if len(scripts) < 2:
+              raise SystemExit(f'expected at least two embedded transforms, got {len(scripts)}')
+          namespace = {'__name__': '__main__'}
+          for index, script in enumerate(scripts[:2], 1):
+              exec(compile(script, f'phase13-term-transform-{index}.py', 'exec'), namespace, namespace)
+          PY
+
+      - name: Normalize declaration list operations to PSC1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean')
+          text = path.read_text()
+
+          def replace_decl(name, replacement):
+              global text
+              pattern = re.compile(
+                  rf'^def {re.escape(name)}\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+                  re.MULTILINE | re.DOTALL,
+              )
+              matches = list(pattern.finditer(text))
+              if len(matches) != 1:
+                  raise SystemExit(f'expected one declaration {name}, got {len(matches)}')
+              text = text[:matches[0].start()] + replacement.rstrip() + '\n\n' + text[matches[0].end():]
+
+          # Dotted host-list APIs are not part of the PSC1 bootstrap environment.
+          replacements = {
+              'bindersRev.reverse': 'psElabListReverse bindersRev',
+              'fields.bindersRev.reverse': 'psElabListReverse fields.bindersRev',
+              'declarationsRev.reverse': 'psElabListReverse declarationsRev',
+              'view.args.length': 'psElabListLength view.args',
+              'parameterArgs.length': 'psElabListLength parameterArgs',
+              'source.fields.length': 'psElabListLength source.fields',
+              'constructors.length': 'psElabListLength constructors',
+          }
+          for old, new in replacements.items():
+              text = text.replace(old, new)
+
+          replace_decl('psElabBinderArguments', r'''def psElabBinderArgumentsWorker
+              (bindersRev : List PsElabTypedBinder) : List PsExpr -> List PsExpr :=
+            match bindersRev with
+            | List.nil =>
+                fun (arguments : List PsExpr) => arguments
+            | List.cons binder rest =>
+                let smaller : List PsExpr -> List PsExpr :=
+                  psElabBinderArgumentsWorker rest;
+                fun (arguments : List PsExpr) =>
+                  smaller (List.cons (psElabBinderArgument binder) arguments)
+
+          def psElabBinderArguments
+              (bindersRev : List PsElabTypedBinder) : List PsExpr :=
+            psElabBinderArgumentsWorker bindersRev List.nil''')
+
+          # Replace List.isEmpty-style method syntax in the structure path without
+          # adding another bootstrap primitive.
+          structure_pattern = re.compile(
+              r'^def psElabStructureDeclaration\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+              re.MULTILINE | re.DOTALL,
+          )
+          matches = list(structure_pattern.finditer(text))
+          if len(matches) != 1:
+              raise SystemExit(f'expected one psElabStructureDeclaration, got {len(matches)}')
+          block = matches[0].group(0)
+          old = '  if fields.isEmpty then\n'
+          new = '  match fields with\n  | List.nil =>\n'
+          if block.count(old) != 1:
+              raise SystemExit(f'expected one fields.isEmpty, got {block.count(old)}')
+          block = block.replace(old, new, 1)
+          # Re-indent the previous else branch as the nonempty match arm.
+          marker = '    Except.error PsElabError.unsupportedTerm\n  else\n'
+          replacement = '      Except.error PsElabError.unsupportedTerm\n  | List.cons _ _ =>\n'
+          if block.count(marker) != 1:
+              raise SystemExit('expected structure empty/else marker')
+          block = block.replace(marker, replacement, 1)
+          text = text[:matches[0].start()] + block + text[matches[0].end():]
+
+          # Expression-position Option constructors must be explicit in PSC1.
+          some_re = re.compile(r'(?<!Option\.)\bsome\b')
+          none_re = re.compile(r'(?<!Option\.)\bnone\b')
+          qualified = []
+          for line in text.splitlines():
+              stripped = line.lstrip()
+              if stripped.startswith('|'):
+                  before, sep, after = line.partition('=>')
+                  if sep:
+                      after = some_re.sub('Option.some', after)
+                      after = none_re.sub('Option.none', after)
+                      line = before + sep + after
+              else:
+                  line = some_re.sub('Option.some', line)
+                  line = none_re.sub('Option.none', line)
+              qualified.append(line)
+          text = '\n'.join(qualified) + ('\n' if text.endswith('\n') else '')
+          path.write_text(text)
+          PY
+          git diff --check -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean
+
+      - name: Verify PSC1 bootstrap compiler source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run bootstrap:check
+
+      - name: Commit only after full PSC1 bootstrap gate passes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            psc15selfhost/packages/elab/src/Ps/Elab/Term.lean \
+            psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean
+          git diff --cached --check
+          git commit -m "fix(elab): close Phase 13 PSC1 portability"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

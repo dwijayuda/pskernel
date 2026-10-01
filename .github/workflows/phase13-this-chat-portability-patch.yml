@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
-      - name: Qualify match Option expressions for PSC1
+      - name: Expand singleton recursor level list for PSC1
         shell: bash
         run: |
           set -euo pipefail
@@ -30,23 +30,16 @@ jobs:
           start = text.index(start_marker)
           end = text.index(end_marker, start)
           old = text[start:end]
-          first = 'match elaborate context scrutineeSyntax none with'
-          second = '(some instantiatedExpected)'
-          if first not in old or second not in old:
-              raise SystemExit('unexpected psElabMatch source shape')
-          new = old.replace(
-              first,
-              'match elaborate context scrutineeSyntax Option.none with',
-              1)
-          new = new.replace(
-              second,
-              '(Option.some instantiatedExpected)',
-              1)
+          needle = '                                          [resultLevel]\n'
+          replacement = '                                          List.cons resultLevel List.nil\n'
+          if old.count(needle) != 1:
+              raise SystemExit(f'unexpected psElabMatch singleton list shape: count={old.count(needle)}')
+          new = old.replace(needle, replacement, 1)
           path.write_text(text[:start] + new + text[end:])
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "fix(elab): qualify match Option expressions"
+          git commit -m "fix(elab): expand match recursor level singleton"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

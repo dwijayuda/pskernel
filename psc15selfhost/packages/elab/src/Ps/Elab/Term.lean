@@ -954,7 +954,7 @@ def psElabLet
   | some name =>
       match declaredType with
       | none =>
-          match elaborate context value none with
+          match elaborate context value Option.none with
           | Except.error error => Except.error error
           | Except.ok valueResult =>
               psElabLetAfterValue
@@ -980,7 +980,7 @@ def psElabLet
                   match elaborate
                       typeResult.context
                       value
-                      (some typeResult.term) with
+                      (Option.some typeResult.term) with
                   | Except.error error => Except.error error
                   | Except.ok valueResult =>
                       psElabLetAfterValue

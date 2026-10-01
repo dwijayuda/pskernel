@@ -39,18 +39,12 @@ jobs:
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
           replacements = [
-              (
-                  "match elaborate context condition (some boolType) with",
-                  "match elaborate context condition (Option.some boolType) with",
-              ),
-              (
-                  "thenResult.context\n              elseBranch\n              (some resultType) with",
-                  "thenResult.context\n              elseBranch\n              (Option.some resultType) with",
-              ),
-              (
-                  "| Except.ok thenResult =>\n          let resultType :=\n            match expected with",
-                  "| Except.ok thenResult =>\n          let resultType : PsExpr :=\n            match expected with",
-              ),
+              ("match elaborate context condition (some boolType) with",
+               "match elaborate context condition (Option.some boolType) with"),
+              ("thenResult.context\n              elseBranch\n              (some resultType) with",
+               "thenResult.context\n              elseBranch\n              (Option.some resultType) with"),
+              ("| Except.ok thenResult =>\n          let resultType :=\n            match expected with",
+               "| Except.ok thenResult =>\n          let resultType : PsExpr :=\n            match expected with"),
               (
                   "def psExprAppViewAcc\n"
                   "    (expr : PsExpr)\n"
@@ -137,6 +131,23 @@ jobs:
                   "    (target : PsName)\n"
                   "    (expr : PsExpr) : Bool :=\n"
                   "  psExprHasConstWorker expr target\n",
+              ),
+              (
+                  "def psMatchNameListContains (names : List PsName) (target : PsName) : Bool :=\n"
+                  "  List.any names (psMatchNameEqTarget target)\n",
+                  "def psMatchNameListContains\n"
+                  "    (names : List PsName) : PsName -> Bool :=\n"
+                  "  match names with\n"
+                  "  | [] =>\n"
+                  "      fun (_target : PsName) => false\n"
+                  "  | name :: rest =>\n"
+                  "      let smaller : PsName -> Bool :=\n"
+                  "        psMatchNameListContains rest;\n"
+                  "      fun (target : PsName) =>\n"
+                  "        if psNameEq name target then\n"
+                  "          true\n"
+                  "        else\n"
+                  "          smaller target\n",
               ),
           ]
           for old, new in replacements:

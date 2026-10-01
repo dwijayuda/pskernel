@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
-      - name: Give match constructor binders an expected type for PSC1
+      - name: Qualify match constructor expected Option for PSC1
         shell: bash
         run: |
           set -euo pipefail
@@ -30,10 +30,10 @@ jobs:
           start = text.index(start_marker)
           end = text.index(end_marker, start)
           old = text[start:end]
-          needle = '      let binders :=\n        match sourceBinders with\n'
-          replacement = '      let binders : List PsSyntaxName :=\n        match sourceBinders with\n'
+          needle = '                        (some expectedType) with\n'
+          replacement = '                        (Option.some expectedType) with\n'
           if needle not in old:
-              raise SystemExit('unexpected psElabMatchConstructorMinor binder source shape')
+              raise SystemExit('unexpected psElabMatchConstructorMinor expected Option source shape')
           new = old.replace(needle, replacement, 1)
           path.write_text(text[:start] + new + text[end:])
           PY
@@ -41,5 +41,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "fix(elab): type match constructor binders for PSC1"
+          git commit -m "fix(elab): qualify match constructor expected Option"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

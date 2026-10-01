@@ -77,18 +77,20 @@ jobs:
           if len(worker_matches) != 1:
               raise SystemExit(f'expected one recursor-minor worker, got {len(worker_matches)}')
           worker = worker_matches[0].group(0)
-          old_worker = '''Except.ok {
-                        context := context
-                        bindersRev := bindersRev
-                      }'''
-          new_worker = '''Except.ok
+          worker_record = re.compile(
+              r'Except\.ok\s*\{\s*context\s*:=\s*context\s*bindersRev\s*:=\s*bindersRev\s*\}',
+              re.DOTALL,
+          )
+          worker, worker_count = worker_record.subn(
+              '''Except.ok
                         (PsElabRecursorMinorsResult.mk
                           context
-                          bindersRev)'''
-          worker_count = worker.count(old_worker)
+                          bindersRev)''',
+              worker,
+              count=1,
+          )
           if worker_count != 1:
               raise SystemExit(f'expected one recursor-minor record result, got {worker_count}')
-          worker = worker.replace(old_worker, new_worker, 1)
           text = text[:worker_matches[0].start()] + worker + text[worker_matches[0].end():]
 
           inductive_pattern = re.compile(
@@ -99,25 +101,18 @@ jobs:
           if len(inductive_matches) != 1:
               raise SystemExit(f'expected one inductive declaration elaborator, got {len(inductive_matches)}')
           block = inductive_matches[0].group(0)
-          old_batch = '''Except.ok {
-                                      declarations :=
-                                        psElabAppendDeclarations
-                                          (List.cons
-                                            inductiveDeclaration
-                                            constructorDeclarations)
-                                          (List.cons recursor List.nil)
-                                    }'''
-          new_batch = '''Except.ok
-                                      (PsElabDeclarationBatchResult.mk
-                                        (psElabAppendDeclarations
-                                          (List.cons
-                                            inductiveDeclaration
-                                            constructorDeclarations)
-                                          (List.cons recursor List.nil)))'''
-          batch_count = block.count(old_batch)
+          batch_record = re.compile(
+              r'Except\.ok\s*\{\s*declarations\s*:=\s*'
+              r'(psElabAppendDeclarations\s*'
+              r'\(List\.cons\s*inductiveDeclaration\s*constructorDeclarations\)\s*'
+              r'\(List\.cons\s*recursor\s*List\.nil\))\s*\}',
+              re.DOTALL,
+          )
+          def batch_replacement(match):
+              return 'Except.ok\n                                    (PsElabDeclarationBatchResult.mk\n                                      ' + match.group(1) + ')'
+          block, batch_count = batch_record.subn(batch_replacement, block, count=1)
           if batch_count != 1:
               raise SystemExit(f'expected one inductive batch record result, got {batch_count}')
-          block = block.replace(old_batch, new_batch, 1)
           text = text[:inductive_matches[0].start()] + block + text[inductive_matches[0].end():]
 
           path.write_text(text)

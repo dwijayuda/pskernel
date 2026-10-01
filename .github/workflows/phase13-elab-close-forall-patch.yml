@@ -24,36 +24,37 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
-          old = '''def psExprApplyMany
-    (fn : PsExpr)
-    (arguments : List PsExpr) : PsExpr :=
-  match arguments with
-  | [] =>
-      fn
-  | argument :: rest =>
-      psExprApplyMany
-        (PsExpr.app fn argument)
-        rest
-'''
-          new = '''def psExprApplyManyWorker
-    (arguments : List PsExpr) : PsExpr -> PsExpr :=
-  match arguments with
-  | [] =>
-      fun (fn : PsExpr) => fn
-  | argument :: rest =>
-      let smaller : PsExpr -> PsExpr :=
-        psExprApplyManyWorker rest;
-      fun (fn : PsExpr) =>
-        smaller (PsExpr.app fn argument)
-
-def psExprApplyMany
-    (fn : PsExpr)
-    (arguments : List PsExpr) : PsExpr :=
-  psExprApplyManyWorker arguments fn
-'''
+          old = (
+              "def psExprApplyMany\n"
+              "    (fn : PsExpr)\n"
+              "    (arguments : List PsExpr) : PsExpr :=\n"
+              "  match arguments with\n"
+              "  | [] =>\n"
+              "      fn\n"
+              "  | argument :: rest =>\n"
+              "      psExprApplyMany\n"
+              "        (PsExpr.app fn argument)\n"
+              "        rest\n"
+          )
+          new = (
+              "def psExprApplyManyWorker\n"
+              "    (arguments : List PsExpr) : PsExpr -> PsExpr :=\n"
+              "  match arguments with\n"
+              "  | [] =>\n"
+              "      fun (fn : PsExpr) => fn\n"
+              "  | argument :: rest =>\n"
+              "      let smaller : PsExpr -> PsExpr :=\n"
+              "        psExprApplyManyWorker rest;\n"
+              "      fun (fn : PsExpr) =>\n"
+              "        smaller (PsExpr.app fn argument)\n"
+              "\n"
+              "def psExprApplyMany\n"
+              "    (fn : PsExpr)\n"
+              "    (arguments : List PsExpr) : PsExpr :=\n"
+              "  psExprApplyManyWorker arguments fn\n"
+          )
           count = text.count(old)
           if count != 1:
               raise SystemExit(f'expected exactly one psExprApplyMany block, got {count}')

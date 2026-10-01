@@ -7,12 +7,6 @@ on:
         description: Successful PSC2 Lean kernel WASM workflow run ID
         required: true
         type: string
-  push:
-    branches:
-      - psc2/pskernel-lean-wasm
-    paths:
-      - .github/workflows/psc2-lean-kernel-wasm-promote.yml
-
 permissions:
   actions: read
   contents: write
@@ -27,11 +21,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "run_id=${{ inputs.run_id }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "run_id=36916202568" >> "$GITHUB_OUTPUT"
-          fi
+          echo "run_id=${{ inputs.run_id }}" >> "$GITHUB_OUTPUT"
       - name: Validate source run
         env:
           GH_TOKEN: ${{ github.token }}

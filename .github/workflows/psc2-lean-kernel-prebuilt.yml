@@ -8,6 +8,7 @@ on:
     paths:
       - psc15selfhost/packages/pskernel-lean/scripts/build-native.mjs
       - psc15selfhost/packages/pskernel-lean/scripts/build-native-slim.mjs
+      - psc15selfhost/packages/pskernel-lean/scripts/prebuilt-workflow.test.mjs
       - psc15selfhost/packages/pskernel-lean/source/proofscript/**
       - psc15selfhost/packages/pskernel-lean/PROOFSCRIPT_SOURCE_MANIFEST.json
       - psc15selfhost/packages/pskernel-lean/lean-toolchain

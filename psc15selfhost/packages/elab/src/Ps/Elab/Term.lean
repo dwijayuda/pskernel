@@ -829,25 +829,24 @@ def psElabLambda
 
 def psCloseElabForallBinders
     (metaContext : PsMetaContext)
-    (binders : List PsElabTypedBinder)
-    (body : PsExpr) :
-    PsExpr :=
+    (binders : List PsElabTypedBinder) :
+    PsExpr -> PsExpr :=
   match binders with
   | [] =>
-      body
+      fun (body : PsExpr) => body
   | binder :: rest =>
-      let binderType :=
-        psMetaInstantiate metaContext binder.type;
-      let closedBody :=
-        PsExpr.forallE
-          binder.name
-          binderType
-          (psExprAbstractFVar binder.id body)
-          binder.binder;
-      psCloseElabForallBinders
-        metaContext
-        rest
-        closedBody
+      let smaller : PsExpr -> PsExpr :=
+        psCloseElabForallBinders metaContext rest;
+      fun (body : PsExpr) =>
+        let binderType :=
+          psMetaInstantiate metaContext binder.type;
+        let closedBody :=
+          PsExpr.forallE
+            binder.name
+            binderType
+            (psExprAbstractFVar binder.id body)
+            binder.binder;
+        smaller closedBody
 
 def psElabForall
     (elaborate :

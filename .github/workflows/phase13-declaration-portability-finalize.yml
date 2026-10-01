@@ -82,13 +82,13 @@ jobs:
 
           # Dotted host-list APIs are not part of the PSC1 bootstrap environment.
           replacements = [
-              ('fields.bindersRev.reverse', 'psElabListReverse fields.bindersRev'),
-              ('bindersRev.reverse', 'psElabListReverse bindersRev'),
-              ('declarationsRev.reverse', 'psElabListReverse declarationsRev'),
-              ('view.args.length', 'psElabListLength view.args'),
-              ('parameterArgs.length', 'psElabListLength parameterArgs'),
-              ('source.fields.length', 'psElabListLength source.fields'),
-              ('constructors.length', 'psElabListLength constructors'),
+              ('fields.bindersRev.reverse', '(psElabListReverse fields.bindersRev)'),
+              ('bindersRev.reverse', '(psElabListReverse bindersRev)'),
+              ('declarationsRev.reverse', '(psElabListReverse declarationsRev)'),
+              ('view.args.length', '(psElabListLength view.args)'),
+              ('parameterArgs.length', '(psElabListLength parameterArgs)'),
+              ('source.fields.length', '(psElabListLength source.fields)'),
+              ('constructors.length', '(psElabListLength constructors)'),
           ]
           for old, new in replacements:
               text = text.replace(old, new)

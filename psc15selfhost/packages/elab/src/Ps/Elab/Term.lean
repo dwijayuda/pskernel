@@ -1170,8 +1170,24 @@ def psMatchNameEqTarget
     (name : PsName) : Bool :=
   psNameEq name target
 
-def psMatchNameListContains (names : List PsName) (target : PsName) : Bool :=
-  List.any names (psMatchNameEqTarget target)
+def psMatchNameListContainsWorker
+    (names : List PsName) : PsName -> Bool :=
+  match names with
+  | [] =>
+      fun (_target : PsName) => false
+  | name :: rest =>
+      let smaller : PsName -> Bool :=
+        psMatchNameListContainsWorker rest;
+      fun (target : PsName) =>
+        if psNameEq name target then
+          true
+        else
+          smaller target
+
+def psMatchNameListContains
+    (names : List PsName)
+    (target : PsName) : Bool :=
+  psMatchNameListContainsWorker names target
 
 structure PsElabMatchAlternative where
   constructorName : PsName

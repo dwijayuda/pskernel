@@ -1,11 +1,26 @@
 {
   "name": "@proofscript/pskernel-core",
-  "version": "0.0.0-dev",
+  "version": "0.1.0-design.0",
   "private": true,
+  "description": "New independent Lean-compatible PSC kernel: design and package contract only; no proof checker yet",
   "type": "module",
+  "license": "UNLICENSED",
+  "exports": {
+    "./metadata": "./metadata.mjs"
+  },
+  "files": [
+    "metadata.mjs",
+    "CAPABILITIES.json",
+    "ARCHITECTURE.md",
+    "README.md",
+    "MIGRATION.md"
+  ],
+  "scripts": {
+    "test": "node --test test/package.test.mjs"
+  },
   "proofscript": {
     "bootstrap": false,
-    "portable": true,
+    "portable": false,
     "sourceRoots": [
       "src"
     ],
@@ -13,6 +28,6 @@
       "test"
     ],
     "outDir": "dist",
-    "role": "minimal-trusted-kernel"
+    "role": "independent-kernel-design"
   }
 }

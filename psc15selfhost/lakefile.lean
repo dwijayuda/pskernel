@@ -159,7 +159,7 @@ lean_lib PsElab where
   ]
 
 lean_lib PsKernelCore where
-  srcDir := "packages/pskernel-core/src"
+  srcDir := "packages/pskernel-core.old/src"
   roots := #[`Ps.KernelCore]
 
 lean_lib PSC1KernelReferenceFoundations where

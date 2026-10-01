@@ -20,6 +20,7 @@ export const forbiddenBootstrapPackageNames = Object.freeze([
   "backend-wasm",
   "pskernel",
   "pskernel-core",
+  "pskernel-core.old",
   "pskernel-lean",
 ]);
 
@@ -66,6 +67,7 @@ export function assertBootstrapPolicyWellFormed() {
     "backend-wasm",
     "pskernel",
     "pskernel-core",
+    "pskernel-core.old",
     "pskernel-lean",
   ]) {
     if (!forbiddenBootstrapPackages.has(packageName)) {

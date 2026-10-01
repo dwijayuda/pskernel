@@ -6,7 +6,8 @@ import { spawnSync } from "node:child_process";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
-const sourceRoot = path.join(root, "packages", "pskernel-core", "src");
+// Compatibility command: continue testing the preserved legacy sources, not the new design package.
+const sourceRoot = path.join(root, "packages", "pskernel-core.old", "src");
 const modulePrefix = "Ps.KernelCore";
 
 const files = [];

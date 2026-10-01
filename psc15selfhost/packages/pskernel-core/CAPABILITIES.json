@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "package": "@proofscript/pskernel-core",
+  "packageVersion": "0.1.0-design.0",
+  "status": "design-only",
+  "canCheckProofs": false,
+  "canAuthorizeEmission": false,
+  "selfHosted": false,
+  "leanCompatibilityVerified": false,
+  "target": {
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "profile": "lean4.34-proof-core",
+    "profileStatus": "proposed-not-implemented"
+  },
+  "legacyPackage": "@proofscript/pskernel-core.old",
+  "excludedTrustFeatures": [
+    "unchecked-admission",
+    "sorryAx",
+    "arbitrary-axioms",
+    "trusted-native-evaluation",
+    "silent-provider-fallback"
+  ],
+  "evidence": {
+    "proofChecking": [],
+    "differentialReplay": [],
+    "selfHosting": [],
+    "sizeComparison": []
+  }
+}

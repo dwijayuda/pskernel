@@ -3,7 +3,9 @@ export const packageBySection = new Map([
   ["Foundation", "foundation"],
   ["Syntax", "syntax"],
   ["Core", "core"],
-  ["KernelCore", "pskernel-core"],
+  // Preserve the old module namespace without resolving it to the new kernel.
+  ["KernelCore", "pskernel-core.old"],
+  ["Kernel", "pskernel-core"],
   ["Environment", "environment"],
   ["Project", "project"],
   ["Meta", "meta"],

@@ -36,4 +36,4 @@ jobs:
           cd psc15selfhost
           npm run bootstrap:check
 
-# rerun after wildcard-binder remaining-only recursion rewrite
+# rerun after giving match-constructor binders an explicit List PsSyntaxName expected type

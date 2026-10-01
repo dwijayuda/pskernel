@@ -1108,28 +1108,62 @@ def psExprAppViewAcc
 def psExprAppView (expr : PsExpr) : PsExprAppView :=
   psExprAppViewAcc expr []
 
-def psExprHasConst (target : PsName) : PsExpr -> Bool
-  | .constE name _ => psNameEq name target
+def psExprHasConstWorker
+    (expr : PsExpr) : PsName -> Bool :=
+  match expr with
+  | .constE name _ =>
+      fun (target : PsName) => psNameEq name target
   | .app fn argument =>
-      psElabBoolOr
-        (psExprHasConst target fn)
-        (psExprHasConst target argument)
+      let fnContains : PsName -> Bool :=
+        psExprHasConstWorker fn;
+      let argumentContains : PsName -> Bool :=
+        psExprHasConstWorker argument;
+      fun (target : PsName) =>
+        psElabBoolOr
+          (fnContains target)
+          (argumentContains target)
   | .lam _ type body _ =>
-      psElabBoolOr
-        (psExprHasConst target type)
-        (psExprHasConst target body)
+      let typeContains : PsName -> Bool :=
+        psExprHasConstWorker type;
+      let bodyContains : PsName -> Bool :=
+        psExprHasConstWorker body;
+      fun (target : PsName) =>
+        psElabBoolOr
+          (typeContains target)
+          (bodyContains target)
   | .forallE _ type body _ =>
-      psElabBoolOr
-        (psExprHasConst target type)
-        (psExprHasConst target body)
+      let typeContains : PsName -> Bool :=
+        psExprHasConstWorker type;
+      let bodyContains : PsName -> Bool :=
+        psExprHasConstWorker body;
+      fun (target : PsName) =>
+        psElabBoolOr
+          (typeContains target)
+          (bodyContains target)
   | .letE _ type value body =>
-      psElabBoolOr
-        (psExprHasConst target type)
-        (psElabBoolOr
-          (psExprHasConst target value)
-          (psExprHasConst target body))
-  | .proj _ _ value => psExprHasConst target value
-  | _ => false
+      let typeContains : PsName -> Bool :=
+        psExprHasConstWorker type;
+      let valueContains : PsName -> Bool :=
+        psExprHasConstWorker value;
+      let bodyContains : PsName -> Bool :=
+        psExprHasConstWorker body;
+      fun (target : PsName) =>
+        psElabBoolOr
+          (typeContains target)
+          (psElabBoolOr
+            (valueContains target)
+            (bodyContains target))
+  | .proj _ _ value =>
+      let valueContains : PsName -> Bool :=
+        psExprHasConstWorker value;
+      fun (target : PsName) => valueContains target
+  | _ =>
+      fun (_target : PsName) => false
+
+def psExprHasConst
+    (target : PsName)
+    (expr : PsExpr) : Bool :=
+  psExprHasConstWorker expr target
 
 def psMatchNameEqTarget
     (target : PsName)

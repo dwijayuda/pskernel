@@ -302,14 +302,31 @@ def psCloseElabImplicitBinders
     metaContext
     body
 
-def psExprListAlphaEq : List PsExpr -> List PsExpr -> Bool
-  | [], [] => true
-  | left :: leftRest, right :: rightRest =>
-      if psExprAlphaEq left right then
-        psExprListAlphaEq leftRest rightRest
-      else
-        false
-  | _, _ => false
+def psExprListAlphaEqWorker
+    (left : List PsExpr) :
+    List PsExpr -> Bool :=
+  match left with
+  | List.nil =>
+      fun (right : List PsExpr) =>
+        match right with
+        | List.nil => true
+        | List.cons _ _ => false
+  | List.cons leftExpr leftRest =>
+      let smaller : List PsExpr -> Bool :=
+        psExprListAlphaEqWorker leftRest;
+      fun (right : List PsExpr) =>
+        match right with
+        | List.nil => false
+        | List.cons rightExpr rightRest =>
+            if psExprAlphaEq leftExpr rightExpr then
+              smaller rightRest
+            else
+              false
+
+def psExprListAlphaEq
+    (left : List PsExpr)
+    (right : List PsExpr) : Bool :=
+  psExprListAlphaEqWorker left right
 
 def psElabIsDirectRecursiveField
     (context : PsElabContext)

@@ -65,6 +65,36 @@ jobs:
               raise SystemExit(f'expected one recursor-level singleton target, got {count}')
           text = text.replace(old, new, 1)
 
+          # List.append is not part of the PSC1 bootstrap environment. Keep the
+          # bootstrap surface small by using a local structural helper instead.
+          helper_marker = '\ndef psSyntaxNameAppendSegments\n'
+          if text.count(helper_marker) != 1:
+              raise SystemExit('expected one helper insertion marker')
+          helper = '\n'.join([
+              '',
+              'def psElabListAppend {α : Type}',
+              '    (left : List α) : List α -> List α :=',
+              '  match left with',
+              '  | [] =>',
+              '      fun (right : List α) => right',
+              '  | head :: tail =>',
+              '      let smaller : List α -> List α :=',
+              '        psElabListAppend tail;',
+              '      fun (right : List α) =>',
+              '        List.cons head (smaller right)',
+              '',
+          ])
+          text = text.replace(helper_marker, helper + helper_marker, 1)
+
+          match_start = text.index('def psElabMatch\n')
+          match_end = text.index('\ndef psBinderAcceptsExplicitArgument\n', match_start)
+          match_block = text[match_start:match_end]
+          append_count = match_block.count('List.append')
+          if append_count != 2:
+              raise SystemExit(f'expected two List.append uses in psElabMatch, got {append_count}')
+          match_block = match_block.replace('List.append', 'psElabListAppend')
+          text = text[:match_start] + match_block + text[match_end:]
+
           # PSC1 resolves constructors in patterns, but expression-position Option
           # constructors in this closure must be explicit. Qualifying them is
           # semantics-preserving and avoids widening PSC1 name resolution.

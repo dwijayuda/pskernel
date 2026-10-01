@@ -1,0 +1,353 @@
+name: Phase 13 record portability finalize
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-work
+    paths:
+      - .github/workflows/phase13-record-portability-finalize.yml
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-work
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply current Phase 13 portability candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/phase13-elab-portability-finalize.yml').read_text()
+          start_marker = "          python3 - <<'PY'\n"
+          end_marker = "\n          PY\n"
+          start = workflow.index(start_marker) + len(start_marker)
+          end = workflow.index(end_marker, start)
+          lines = workflow[start:end].splitlines()
+          script = '\n'.join(line[10:] if line.startswith('          ') else line for line in lines)
+          namespace = {'__name__': '__main__'}
+          exec(compile(script, 'phase13-elab-portability-finalize.py', 'exec'), namespace, namespace)
+          PY
+
+      - name: Normalize record and structural helpers to PSC1 recursion
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+
+          def replace_decl(name, replacement):
+              global text
+              pattern = re.compile(
+                  rf'^def {re.escape(name)}\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+                  re.MULTILINE | re.DOTALL,
+              )
+              matches = list(pattern.finditer(text))
+              if len(matches) != 1:
+                  raise SystemExit(f'expected one declaration {name}, got {len(matches)}')
+              text = text[:matches[0].start()] + replacement.rstrip() + '\n\n' + text[matches[0].end():]
+
+          replace_decl('psElabDropForallBinders', r'''def psElabDropForallBindersWorker
+              (remaining : Nat) : PsExpr -> Option PsExpr :=
+            match remaining with
+            | 0 =>
+                fun (type : PsExpr) => Option.some type
+            | nextRemaining + 1 =>
+                let smaller : PsExpr -> Option PsExpr :=
+                  psElabDropForallBindersWorker nextRemaining;
+                fun (type : PsExpr) =>
+                  match type with
+                  | .forallE _ _ body _ => smaller body
+                  | _ => Option.none
+
+          def psElabDropForallBinders
+              (remaining : Nat)
+              (type : PsExpr) : Option PsExpr :=
+            psElabDropForallBindersWorker remaining type''')
+
+          replace_decl('psElabTakeForallNames', r'''def psElabTakeForallNamesWorker
+              (remaining : Nat) : PsExpr -> Option (List String) :=
+            match remaining with
+            | 0 =>
+                fun (_type : PsExpr) => Option.some List.nil
+            | nextRemaining + 1 =>
+                let smaller : PsExpr -> Option (List String) :=
+                  psElabTakeForallNamesWorker nextRemaining;
+                fun (type : PsExpr) =>
+                  match type with
+                  | .forallE name _ body _ =>
+                      match smaller body with
+                      | none => Option.none
+                      | some rest =>
+                          Option.some (List.cons (psNameLastComponent name) rest)
+                  | _ => Option.none
+
+          def psElabTakeForallNames
+              (remaining : Nat)
+              (type : PsExpr) : Option (List String) :=
+            psElabTakeForallNamesWorker remaining type''')
+
+          replace_decl('psSyntaxRecordHasField', r'''def psSyntaxRecordHasFieldWorker
+              (fields : List (Prod PsSyntaxName PsSyntaxTerm)) : String -> Bool :=
+            match fields with
+            | [] =>
+                fun (_name : String) => false
+            | field :: rest =>
+                let smaller : String -> Bool :=
+                  psSyntaxRecordHasFieldWorker rest;
+                fun (name : String) =>
+                  if psSyntaxRecordFieldMatchesName name field then
+                    true
+                  else
+                    smaller name
+
+          def psSyntaxRecordHasField
+              (fields : List (Prod PsSyntaxName PsSyntaxTerm))
+              (name : String) : Bool :=
+            psSyntaxRecordHasFieldWorker fields name''')
+
+          replace_decl('psSyntaxRecordFieldsMatch', r'''def psSyntaxRecordAllNamesPresent
+              (names : List String) :
+              List (Prod PsSyntaxName PsSyntaxTerm) -> Bool :=
+            match names with
+            | [] =>
+                fun (_fields : List (Prod PsSyntaxName PsSyntaxTerm)) => true
+            | name :: rest =>
+                let smaller : List (Prod PsSyntaxName PsSyntaxTerm) -> Bool :=
+                  psSyntaxRecordAllNamesPresent rest;
+                fun (fields : List (Prod PsSyntaxName PsSyntaxTerm)) =>
+                  if psSyntaxRecordHasNamedField fields name then
+                    smaller fields
+                  else
+                    false
+
+          def psSyntaxRecordFieldsMatch
+              (fields : List (Prod PsSyntaxName PsSyntaxTerm))
+              (names : List String) : Bool :=
+            psElabBoolAnd
+              (Nat.beq (psElabListLength fields) (psElabListLength names))
+              (psSyntaxRecordAllNamesPresent names fields)''')
+
+          replace_decl('psSyntaxRecordFindField', r'''def psSyntaxRecordFindFieldWorker
+              (fields : List (Prod PsSyntaxName PsSyntaxTerm)) :
+              String -> Option PsSyntaxTerm :=
+            match fields with
+            | [] =>
+                fun (_name : String) => Option.none
+            | field :: rest =>
+                let smaller : String -> Option PsSyntaxTerm :=
+                  psSyntaxRecordFindFieldWorker rest;
+                fun (name : String) =>
+                  match psSyntaxRecordFieldName field with
+                  | some fieldName =>
+                      if psStringEq fieldName name then
+                        Option.some (Prod.snd field)
+                      else
+                        smaller name
+                  | none => smaller name
+
+          def psSyntaxRecordFindField
+              (fields : List (Prod PsSyntaxName PsSyntaxTerm))
+              (name : String) : Option PsSyntaxTerm :=
+            psSyntaxRecordFindFieldWorker fields name''')
+
+          replace_decl('psSyntaxRecordOrderFields', r'''def psSyntaxRecordOrderFieldsWorker
+              (names : List String) :
+              List (Prod PsSyntaxName PsSyntaxTerm) -> Option (List PsSyntaxTerm) :=
+            match names with
+            | [] =>
+                fun (_fields : List (Prod PsSyntaxName PsSyntaxTerm)) =>
+                  Option.some List.nil
+            | name :: rest =>
+                let smaller :
+                    List (Prod PsSyntaxName PsSyntaxTerm) -> Option (List PsSyntaxTerm) :=
+                  psSyntaxRecordOrderFieldsWorker rest;
+                fun (fields : List (Prod PsSyntaxName PsSyntaxTerm)) =>
+                  match psSyntaxRecordFindField fields name with
+                  | none => Option.none
+                  | some value =>
+                      match smaller fields with
+                      | none => Option.none
+                      | some values => Option.some (List.cons value values)
+
+          def psSyntaxRecordOrderFields
+              (fields : List (Prod PsSyntaxName PsSyntaxTerm))
+              (names : List String) : Option (List PsSyntaxTerm) :=
+            psSyntaxRecordOrderFieldsWorker names fields''')
+
+          replace_decl('psElabRecordCandidates', r'''def psElabRecordCandidatesWorker
+              (declarations : List PsDeclaration) :
+              PsEnvironment ->
+              List (Prod PsSyntaxName PsSyntaxTerm) ->
+              List PsElabRecordCandidate ->
+              List PsElabRecordCandidate :=
+            match declarations with
+            | [] =>
+                fun (_environment : PsEnvironment) =>
+                  fun (_fields : List (Prod PsSyntaxName PsSyntaxTerm)) =>
+                    fun (candidatesRev : List PsElabRecordCandidate) =>
+                      psElabListReverse candidatesRev
+            | declaration :: rest =>
+                let smaller :
+                    PsEnvironment ->
+                    List (Prod PsSyntaxName PsSyntaxTerm) ->
+                    List PsElabRecordCandidate ->
+                    List PsElabRecordCandidate :=
+                  psElabRecordCandidatesWorker rest;
+                fun (environment : PsEnvironment) =>
+                  fun (fields : List (Prod PsSyntaxName PsSyntaxTerm)) =>
+                    fun (candidatesRev : List PsElabRecordCandidate) =>
+                      match declaration with
+                      | .inductiveDecl info =>
+                          match psElabRecordCandidateForInfo environment info with
+                          | some candidate =>
+                              if psSyntaxRecordFieldsMatch fields candidate.fieldNames then
+                                smaller
+                                  environment
+                                  fields
+                                  (List.cons candidate candidatesRev)
+                              else
+                                smaller environment fields candidatesRev
+                          | none => smaller environment fields candidatesRev
+                      | _ => smaller environment fields candidatesRev
+
+          def psElabRecordCandidates
+              (environment : PsEnvironment)
+              (fields : List (Prod PsSyntaxName PsSyntaxTerm))
+              (declarations : List PsDeclaration)
+              (candidatesRev : List PsElabRecordCandidate) :
+              List PsElabRecordCandidate :=
+            psElabRecordCandidatesWorker
+              declarations environment fields candidatesRev''')
+
+          replace_decl('psElabNatListAt', r'''def psElabNatListAtWorker
+              (values : List Nat) : Nat -> Option Nat :=
+            match values with
+            | [] =>
+                fun (_index : Nat) => Option.none
+            | value :: rest =>
+                let smaller : Nat -> Option Nat := psElabNatListAtWorker rest;
+                fun (index : Nat) =>
+                  match index with
+                  | 0 => Option.some value
+                  | nextIndex + 1 => smaller nextIndex
+
+          def psElabNatListAt
+              (values : List Nat)
+              (index : Nat) : Option Nat :=
+            psElabNatListAtWorker values index''')
+
+          replace_decl('psElabValidateStructuralCall', r'''def psElabValidateStructuralCallWorker
+              (arguments : List PsSyntaxTerm) :
+              PsElabContext ->
+              PsElabStructuralRecursion ->
+              Nat ->
+              Option Nat ->
+              Except PsElabError Nat :=
+            match arguments with
+            | [] =>
+                fun (_context : PsElabContext) =>
+                  fun (_recursion : PsElabStructuralRecursion) =>
+                    fun (_index : Nat) =>
+                      fun (hypothesisId : Option Nat) =>
+                        match hypothesisId with
+                        | some resolvedHypothesisId => Except.ok resolvedHypothesisId
+                        | none => Except.error PsElabError.structuralRecursionInternal
+            | argument :: rest =>
+                let smaller :
+                    PsElabContext ->
+                    PsElabStructuralRecursion ->
+                    Nat ->
+                    Option Nat ->
+                    Except PsElabError Nat :=
+                  psElabValidateStructuralCallWorker rest;
+                fun (context : PsElabContext) =>
+                  fun (recursion : PsElabStructuralRecursion) =>
+                    fun (index : Nat) =>
+                      fun (hypothesisId : Option Nat) =>
+                        match psElabSyntaxLocalId context argument with
+                        | none =>
+                            if Nat.beq index recursion.recursiveParameterIndex then
+                              Except.error PsElabError.structuralRecursionNotDecreasing
+                            else
+                              Except.error PsElabError.structuralRecursionInvariantArgument
+                        | some argumentId =>
+                            if Nat.beq index recursion.recursiveParameterIndex then
+                              match psElabStructuralRecursionFindCall recursion.calls argumentId with
+                              | none =>
+                                  Except.error PsElabError.structuralRecursionNotDecreasing
+                              | some nextHypothesisId =>
+                                  smaller
+                                    context
+                                    recursion
+                                    (Nat.succ index)
+                                    (Option.some nextHypothesisId)
+                            else
+                              match psElabNatListAt recursion.explicitParameterIds index with
+                              | none =>
+                                  Except.error PsElabError.structuralRecursionArity
+                              | some originalId =>
+                                  if Nat.beq argumentId originalId then
+                                    smaller
+                                      context
+                                      recursion
+                                      (Nat.succ index)
+                                      hypothesisId
+                                  else
+                                    Except.error
+                                      PsElabError.structuralRecursionInvariantArgument
+
+          def psElabValidateStructuralCall
+              (context : PsElabContext)
+              (recursion : PsElabStructuralRecursion)
+              (index : Nat)
+              (arguments : List PsSyntaxTerm)
+              (hypothesisId : Option Nat) :
+              Except PsElabError Nat :=
+            psElabValidateStructuralCallWorker
+              arguments context recursion index hypothesisId''')
+
+          path.write_text(text)
+          PY
+          git diff --check -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+
+      - name: Verify PSC1 bootstrap compiler source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run bootstrap:check
+
+      - name: Commit only after full PSC1 bootstrap gate passes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): close Phase 13 PSC1 portability"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
-      - name: Isolate PsExprAppView projections for PSC1
+      - name: Isolate PsRecursorInfo projections for PSC1
         shell: bash
         run: |
           set -euo pipefail
@@ -26,25 +26,33 @@ jobs:
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
 
-          anchor = '''def psExprAppView (expr : PsExpr) : PsExprAppView :=\n  psExprAppViewAcc expr []\n\n'''
-          accessors = '''def psExprAppViewHead (view : PsExprAppView) : PsExpr :=\n  view.head\n\ndef psExprAppViewArgs (view : PsExprAppView) : List PsExpr :=\n  view.args\n\n'''
-          if text.count(anchor) != 1:
-              raise SystemExit(f'unexpected psExprAppView anchor count={text.count(anchor)}')
-          if 'def psExprAppViewHead ' in text or 'def psExprAppViewArgs ' in text:
-              raise SystemExit('PsExprAppView accessors already exist')
-          text = text.replace(anchor, anchor + accessors, 1)
+          anchor = '''def psElabMatchMinors\n    (elaborate :\n'''
+          start = text.index(anchor)
+          match_start = text.index('\ndef psElabMatch\n', start)
+          accessors = '''\ndef psRecursorInfoNumParams (info : PsRecursorInfo) : Nat :=\n  info.numParams\n\ndef psRecursorInfoNumIndices (info : PsRecursorInfo) : Nat :=\n  info.numIndices\n\ndef psRecursorInfoNumMotives (info : PsRecursorInfo) : Nat :=\n  info.numMotives\n\ndef psRecursorInfoNumMinors (info : PsRecursorInfo) : Nat :=\n  info.numMinors\n\ndef psRecursorInfoLevelParams (info : PsRecursorInfo) : List PsName :=\n  info.levelParams\n'''
+          if 'def psRecursorInfoNumParams ' in text:
+              raise SystemExit('PsRecursorInfo accessors already exist')
+          text = text[:match_start] + accessors + text[match_start:]
 
-          start_marker = 'def psElabMatch\n'
-          end_marker = '\ndef psBinderAcceptsExplicitArgument'
-          start = text.index(start_marker)
-          end = text.index(end_marker, start)
+          start = text.index('def psElabMatch\n')
+          end = text.index('\ndef psBinderAcceptsExplicitArgument', start)
           old = text[start:end]
-          if old.count('typeView.head') != 1:
-              raise SystemExit(f'unexpected typeView.head count={old.count("typeView.head")}')
-          if old.count('typeView.args') != 3:
-              raise SystemExit(f'unexpected typeView.args count={old.count("typeView.args")}')
-          new = old.replace('typeView.head', '(psExprAppViewHead typeView)')
-          new = new.replace('typeView.args', '(psExprAppViewArgs typeView)')
+          expected = {
+              'recInfo.numParams': 1,
+              'recInfo.numIndices': 1,
+              'recInfo.numMotives': 1,
+              'recInfo.numMinors': 1,
+              'recInfo.levelParams': 3,
+          }
+          for needle, count in expected.items():
+              actual = old.count(needle)
+              if actual != count:
+                  raise SystemExit(f'unexpected {needle} count={actual}, expected={count}')
+          new = old.replace('recInfo.numParams', '(psRecursorInfoNumParams recInfo)')
+          new = new.replace('recInfo.numIndices', '(psRecursorInfoNumIndices recInfo)')
+          new = new.replace('recInfo.numMotives', '(psRecursorInfoNumMotives recInfo)')
+          new = new.replace('recInfo.numMinors', '(psRecursorInfoNumMinors recInfo)')
+          new = new.replace('recInfo.levelParams', '(psRecursorInfoLevelParams recInfo)')
           text = text[:start] + new + text[end:]
           path.write_text(text)
           PY
@@ -52,5 +60,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "refactor(elab): isolate match app-view projections"
+          git commit -m "refactor(elab): isolate match recursor-info projections"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

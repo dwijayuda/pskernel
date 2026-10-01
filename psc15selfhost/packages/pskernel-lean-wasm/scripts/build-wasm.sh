@@ -203,10 +203,10 @@ cmake \
 cmake --build "$lean_build" --target stage1-configure -j2
 
 stage0_lean="$lean_build/stage0/bin/lean"
-stage0_lean_path="$lean_build/stage0/lib/lean"
+stage1_lean_path="$stage1_build/lib/lean"
 stage1_leanc="$stage1_build/leanc.sh"
-if [[ ! -x "$stage0_lean" || ! -f "$stage0_lean_path/Lean.olean" ]]; then
-  echo 'native 32-bit Lean stage0 was not produced with its sysroot' >&2
+if [[ ! -x "$stage0_lean" ]]; then
+  echo 'native 32-bit Lean stage0 compiler was not produced' >&2
   exit 1
 fi
 
@@ -220,7 +220,9 @@ done
 
 # Keep the newer kernel-only/static closure: do not build Lean's default ALL
 # graph, which enters shell/shared targets and collides with the provider's
-# intentionally minimal Emscripten lean_initialize shim.
+# intentionally minimal Emscripten lean_initialize shim. Stage1 make_stdlib is
+# also where Lean 4.34 creates the wasm32-compatible .olean sysroot; stage0 is
+# C_ONLY and intentionally has no installed Lean.olean tree of its own.
 cmake --build "$stage1_build" --target make_stdlib leanrt leancpp_1 -j2
 
 if [[ ! -f "$stage1_leanc" ]]; then
@@ -228,6 +230,10 @@ if [[ ! -f "$stage1_leanc" ]]; then
   exit 1
 fi
 chmod +x "$stage1_leanc"
+if [[ ! -f "$stage1_lean_path/Lean.olean" ]]; then
+  echo "wasm32 Lean stage1 olean sysroot missing: $stage1_lean_path/Lean.olean" >&2
+  exit 1
+fi
 
 for runtime_lib in \
   "$stage1_build/lib/lean/libleanrt.a" \
@@ -272,13 +278,13 @@ provider_modules=(
   "PsKernelLean/Main"
 )
 
-# Emit provider oleans/C with the runnable native 32-bit compiler. Using the
-# installed x86_64 Lean here is unsound for wasm32 compiler-emitted platform
-# objects (notably compact literals), even though the resulting C later passes
-# through the target leanc wrapper.
+# Emit provider oleans/C with the runnable native 32-bit compiler, resolving
+# imports against the wasm32 stage1 olean sysroot. Using installed x86_64 Lean
+# here is unsound for compiler-emitted platform objects (notably compact
+# literals), even though the resulting C later passes through target leanc.
 (
   cd "$provider_src"
-  export LEAN_PATH="$provider_olean_dir:$stage0_lean_path"
+  export LEAN_PATH="$provider_olean_dir:$stage1_lean_path"
   export LEAN_ABORT_ON_PANIC=1
   for module in "${provider_modules[@]}"; do
     source="$module.lean"

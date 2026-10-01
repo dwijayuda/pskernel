@@ -319,6 +319,36 @@ def psEraseTypedIntrinsic
               typeArguments
               runtimeArguments)
 
+-- A first-order, constant-motive Nat.rec is an ordinary value fold. Do not
+-- substitute calls to the enclosing definition for its induction hypothesis:
+-- recursors may be nested below other expressions in that definition.
+def psEraseNatRecursorApplication
+    (environment : PsEnvironment)
+    (scope : PsErasureScope)
+    (erase : PsExpr -> Except PsErasureError PsVerifiedIrExpr)
+    (arguments : List PsExpr) :
+    Except PsErasureError (Option PsVerifiedIrExpr) :=
+  match arguments with
+  | [motive, initial, step, count] =>
+      match motive with
+      | PsExpr.lam _ _ result _ =>
+          if psExprAlphaEq result (psExprLiftBVars 1 0 result) then
+            match psEraseRuntimeType environment scope result with
+            | Except.error error => Except.error error
+            | Except.ok resultType =>
+                match resultType with
+                | PsVerifiedIrType.function _ _ =>
+                    Except.error PsErasureError.unsupportedRuntimeTerm
+                | _ =>
+                    match psEraseMappedIntrinsic erase
+                        PsVerifiedIrIntrinsic.natRec [initial, step, count] with
+                    | Except.error error => Except.error error
+                    | Except.ok value => Except.ok (Option.some value)
+          else
+            Except.error PsErasureError.unsupportedRuntimeTerm
+      | _ => Except.error PsErasureError.unsupportedRuntimeTerm
+  | _ => Except.error PsErasureError.unsupportedApplication
+
 def psErasePrimitiveApplication
     (environment : PsEnvironment)
     (scope : PsErasureScope)
@@ -341,7 +371,19 @@ def psErasePrimitiveApplication
             | Except.ok result => Except.ok (some result)
           else
             Except.error PsErasureError.unsupportedApplication
-      if text == "Int.ofNat" then
+      if psNameEq name psNatRecName then
+        psEraseNatRecursorApplication environment scope erase view.args
+      else if psNameEq name psNatSuccName then
+        match view.args with
+        | [value] =>
+            match erase value with
+            | Except.error error => Except.error error
+            | Except.ok lowered =>
+                Except.ok (Option.some
+                  (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natAdd []
+                    [lowered, PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)]))
+        | _ => Except.error PsErasureError.unsupportedApplication
+      else if text == "Int.ofNat" then
         if view.args.length == 1 then
           match
               psEraseMappedIntrinsic
@@ -1222,7 +1264,10 @@ def psEraseRuntimeExprWithFuel
               match psErasureLookupName scope.declarationNames name with
               | some known => Except.ok (PsVerifiedIrExpr.var known)
               | none =>
-                  if psNameEq name psBoolTrueName then
+                  if psNameEq name psNatZeroName then
+                    Except.ok
+                      (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0))
+                  else if psNameEq name psBoolTrueName then
                     Except.ok
                       (PsVerifiedIrExpr.literal
                         (PsVerifiedIrLiteral.bool true))

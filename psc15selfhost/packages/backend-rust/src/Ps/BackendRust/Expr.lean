@@ -193,6 +193,8 @@ def psRustEmitIntrinsicFromPrinted
               right)
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.natRec =>
+      Except.error PsRustEmitError.unsupportedIntrinsic
   | PsVerifiedIrIntrinsic.natAdd =>
       match arguments with
       | List.cons left (List.cons right List.nil) =>

@@ -187,6 +187,13 @@ def psTsEmitIntrinsicFromPrinted
       Except.ok (psTsEmitFloatBinary type floatOperation left right)
   | (.floatCompare _ floatOperation), [left, right] =>
       Except.ok (psTsEmitFloatCompare floatOperation left right)
+  | .natRec, [initial, step, count] =>
+      Except.ok
+        ("(<T>(__ps_z: T, __ps_s: (__ps_i: bigint, __ps_h: T) => T, " ++
+          "__ps_n: bigint): T => { let __ps_a = __ps_z; " ++
+          "for (let __ps_i = 0n; __ps_i < __ps_n; __ps_i += 1n) { " ++
+          "__ps_a = __ps_s(__ps_i, __ps_a); } return __ps_a; })(" ++
+          initial ++ ", " ++ step ++ ", " ++ count ++ ")")
   | .natAdd, [left, right] =>
       Except.ok ("(" ++ left ++ " + " ++ right ++ ")")
   | .natSub, [left, right] =>

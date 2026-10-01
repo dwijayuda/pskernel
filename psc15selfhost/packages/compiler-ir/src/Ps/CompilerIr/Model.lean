@@ -98,6 +98,7 @@ inductive PsVerifiedIrIntrinsic where
   | floatCompare
       (type : PsVerifiedIrFloatingType)
       (operation : PsVerifiedIrFloatCompareOp)
+  | natRec
   | natAdd
   | natSub
   | natMul

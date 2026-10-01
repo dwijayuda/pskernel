@@ -6,6 +6,7 @@ import Ps.BackendRust.Identifier
 inductive PsRustEmitError where
   | fuelExhausted
   | intrinsicArity
+  | unsupportedIntrinsic
   | externalImportUnsupported
   | genericValueUnsupported (name : String)
   | functionResultUnsupported (name : String)

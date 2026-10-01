@@ -93,6 +93,7 @@ def psRustCoverageIntrinsicName
   | PsVerifiedIrIntrinsic.machineIntCompare _ _ => "MachineInt.compare"
   | PsVerifiedIrIntrinsic.floatBinary _ _ => "Float.binary"
   | PsVerifiedIrIntrinsic.floatCompare _ _ => "Float.compare"
+  | PsVerifiedIrIntrinsic.natRec => "Nat.rec"
   | PsVerifiedIrIntrinsic.natAdd => "Nat.add"
   | PsVerifiedIrIntrinsic.natSub => "Nat.sub"
   | PsVerifiedIrIntrinsic.natMul => "Nat.mul"
@@ -145,6 +146,7 @@ def psRustCoverageIntrinsicArity
   | PsVerifiedIrIntrinsic.machineIntCompare _ _ => 2
   | PsVerifiedIrIntrinsic.floatBinary _ _ => 2
   | PsVerifiedIrIntrinsic.floatCompare _ _ => 2
+  | PsVerifiedIrIntrinsic.natRec => 3
   | PsVerifiedIrIntrinsic.natAdd => 2
   | PsVerifiedIrIntrinsic.natSub => 2
   | PsVerifiedIrIntrinsic.natMul => 2

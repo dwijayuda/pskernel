@@ -17,8 +17,8 @@ export function assertFinishApplicationAppend(source) {
   const helper = source.match(/^def psErasureAppendRuntimeArgument\b[\s\S]*?(?=^def |^structure )/m)?.[0];
   if (!helper || !/\(arguments : List PsVerifiedIrExpr\)/.test(helper) ||
       !/match arguments with/.test(helper) ||
-      !/\| \[\] => fun argument => List\.cons argument List\.nil/.test(helper) ||
-      !/let smaller : PsVerifiedIrExpr -> List PsVerifiedIrExpr :=\s*psErasureAppendRuntimeArgument rest;\s*fun argument => List\.cons head \(smaller argument\)/.test(helper)) {
+      !/\| \[\] => fun \(argument : PsVerifiedIrExpr\) => List\.cons argument List\.nil/.test(helper) ||
+      !/let smaller : PsVerifiedIrExpr -> List PsVerifiedIrExpr :=\s*psErasureAppendRuntimeArgument rest;\s*fun \(argument : PsVerifiedIrExpr\) => List\.cons head \(smaller argument\)/.test(helper)) {
     throw new Error("PSC2_ERASURE_FINISH_APPLICATION_APPEND_MISSING: order-preserving list-recursive helper");
   }
   if (/List\.append|\+\+/.test(helper)) throw new Error("PSC2_ERASURE_FINISH_APPLICATION_APPEND_FORBIDDEN: generic append helper");

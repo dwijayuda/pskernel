@@ -9,11 +9,11 @@ def psErasureAppendRuntimeArgument
     (arguments : List PsVerifiedIrExpr) :
     PsVerifiedIrExpr -> List PsVerifiedIrExpr :=
   match arguments with
-  | [] => fun argument => List.cons argument List.nil
+  | [] => fun (argument : PsVerifiedIrExpr) => List.cons argument List.nil
   | head :: rest =>
       let smaller : PsVerifiedIrExpr -> List PsVerifiedIrExpr :=
         psErasureAppendRuntimeArgument rest;
-      fun argument => List.cons head (smaller argument)
+      fun (argument : PsVerifiedIrExpr) => List.cons head (smaller argument)
 
 def psEraseApplicationArguments
     (erase :
@@ -1301,8 +1301,7 @@ def psEraseRuntimeExprWithFuel
                                     PsErasureError.unsupportedApplication
                               | Except.ok headType =>
                                   match erase view.head with
-                                  | Except.error error =>
-                                      Except.error error
+                                  | Except.error error => Except.error error
                                   | Except.ok loweredHead =>
                                       match
                                           psEraseApplicationArguments

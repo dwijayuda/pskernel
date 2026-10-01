@@ -1,0 +1,47 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const source = await readFile(
+  path.join(root, "packages/erasure/src/Ps/Erasure/Expr.lean"),
+  "utf8",
+);
+
+const match = source.match(
+  /def psEraseApplicationArguments[\s\S]*?(?=\ndef psEraseFinishApplicationWithFuel)/,
+);
+if (match === null) {
+  throw new Error(
+    "PSC2_ERASURE_APPLICATION_ARGUMENTS_CONS_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
+  );
+}
+
+const block = match[0];
+const required = [
+  /typeArgumentsRev :=\s*List\.cons erasedType state\.typeArgumentsRev/,
+  /runtimeArgumentsRev :=\s*List\.cons erasedArgument state\.runtimeArgumentsRev/,
+];
+for (const pattern of required) {
+  if (!pattern.test(block)) {
+    throw new Error(
+      `PSC2_ERASURE_APPLICATION_ARGUMENTS_CONS_SELFHOST_SOURCE_SYNTAX_MISSING: ${pattern}`,
+    );
+  }
+}
+
+const forbidden = [
+  /erasedType\s*::\s*state\.typeArgumentsRev/,
+  /erasedArgument\s*::\s*state\.runtimeArgumentsRev/,
+];
+for (const pattern of forbidden) {
+  if (pattern.test(block)) {
+    throw new Error(
+      `PSC2_ERASURE_APPLICATION_ARGUMENTS_CONS_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: ${pattern}`,
+    );
+  }
+}
+
+process.stdout.write(
+  "PSC2_ERASURE_APPLICATION_ARGUMENTS_CONS_SELFHOST_SOURCE_SYNTAX: PASS (explicit List.cons for erased argument accumulation)\n",
+);

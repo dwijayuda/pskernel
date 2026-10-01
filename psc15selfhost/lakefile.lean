@@ -254,3 +254,8 @@ lean_exe psc2_kernel_core_level_parity_tests where
 lean_exe psc2_kernel_core_expr_parity_tests where
   srcDir := "test"
   root := `KernelCoreExprParityTests
+
+-- Host-only diagnostics; this executable is not a portable bootstrap module.
+lean_exe psc2_selfhost_replay_audit where
+  srcDir := "scripts"
+  root := `SelfhostReplayAudit

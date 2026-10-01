@@ -6,17 +6,22 @@ import { packageBySection, parseImports } from "./workspace-layout.mjs";
 
 // Diagnostic host tooling: never substitute this audit for the real fixed point.
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-function lake(args) {
-  const result = spawnSync("lake", args, { cwd: root, encoding: "utf8", stdio: "inherit" });
-  if (result.error) throw result.error;
+function run(command, args) {
+  const result = spawnSync(command, args, {
+    cwd: root, encoding: "utf8", stdio: "inherit", timeout: 300000,
+  });
+  if (result.error) {
+    throw new Error(`PSC2_FIXED_POINT_AUDIT_COMMAND_FAILED: ${result.error.message}`, { cause: result.error });
+  }
   return result.status ?? 1;
 }
 export async function auditSelfhostReplay() {
-  if (lake(["build", "Ps.Erasure.Expr", "Ps.Host.ProjectCompiler"]) !== 0) {
+  if (run("lake", ["build", "Ps.Erasure.Expr", "Ps.Host.ProjectCompiler", "psc2_selfhost_replay_audit"]) !== 0) {
     throw new Error("PSC2_FIXED_POINT_AUDIT_LEAN_BUILD_FAILED");
   }
-  const script = "scripts/SelfhostReplayAudit.lean";
-  if (lake(["env", "lean", "--run", script, "--behavior"]) !== 0) {
+  const executable = path.join(root, ".lake", "build", "bin",
+    process.platform === "win32" ? "psc2_selfhost_replay_audit.exe" : "psc2_selfhost_replay_audit");
+  if (run(executable, ["--behavior"]) !== 0) {
     throw new Error("PSC2_FIXED_POINT_ERASURE_BEHAVIOR_FAILED");
   }
   const config = JSON.parse(await readFile(path.join(root, "psconfig.json"), "utf8"));
@@ -33,7 +38,7 @@ export async function auditSelfhostReplay() {
     }
   }
   await visit(config.entry);
-  const status = lake(["env", "lean", "--run", script, ...[...visited].sort()]);
+  const status = run(executable, [...visited].sort());
   // A known parse failure is diagnostic. The unchanged real bootstrap check
   // still gates success and reports its first exact replay failure afterward.
   console.log(`PSC2_FIXED_POINT_PARSE_AUDIT_EXIT: ${status}`);

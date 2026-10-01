@@ -2560,11 +2560,31 @@ def psTestRecordLiteralRejected (body : String) : Bool :=
       | Except.error PsElabError.unsupportedTerm => true
       | _ => false
 
+def psTestRecordInference (ambiguous : Bool) : Bool :=
+  let otherStructure :=
+    if ambiguous then
+      "structure OtherPair where\n  left : Nat\n  right : Nat\n\n"
+    else
+      ""
+  let source :=
+    otherStructure ++
+    psTestRecordLiteralSource
+      "let value := { right := 2, left := 1 }; value"
+  match psParseLeanSource source with
+  | Except.error _ => false
+  | Except.ok sourceModule =>
+      match psElabModule psBootstrapPreludeEnvironment sourceModule with
+      | Except.ok _ => !ambiguous
+      | Except.error PsElabError.unsupportedTerm => ambiguous
+      | Except.error _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
 
 def psBootstrapTestCases : List PsNamedTest := [
+  { name := "record inference finds unique candidate", passed := psTestRecordInference false },
+  { name := "record inference rejects ambiguous candidates", passed := psTestRecordInference true },
   { name := "record literal reorders fields", passed := psTestRecordLiteralFieldOrder },
   { name := "record literal rejects missing field", passed := psTestRecordLiteralRejected "{ left := 1 }" },
   { name := "record literal rejects unknown field", passed := psTestRecordLiteralRejected "{ left := 1, third := 2 }" },

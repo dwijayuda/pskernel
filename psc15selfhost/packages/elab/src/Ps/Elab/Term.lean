@@ -2733,7 +2733,7 @@ def psElabRecord
       List (Prod PsSyntaxName PsSyntaxTerm))
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  let candidate :=
+  let candidate : Option PsElabRecordCandidate :=
     match expected with
     | Option.some expectedType =>
         match

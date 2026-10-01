@@ -2481,16 +2481,20 @@ structure PsElabRecordCandidate where
   fieldNames : List String
 
 def psElabDropForallBinders
-    (remaining : Nat)
-    (type : PsExpr) : Option PsExpr :=
+    (remaining : Nat) : PsExpr -> Option PsExpr :=
   match remaining with
   | 0 =>
-      Option.some type
+      fun (type : PsExpr) =>
+        Option.some type
   | nextRemaining + 1 =>
-      match type with
-      | .forallE _ _ body _ =>
-          psElabDropForallBinders nextRemaining body
-      | _ => Option.none
+      let smaller : PsExpr -> Option PsExpr :=
+        psElabDropForallBinders nextRemaining;
+      fun (type : PsExpr) =>
+        match type with
+        | .forallE _ _ body _ =>
+            smaller body
+        | _ => Option.none
+
 
 def psElabTakeForallNames
     (remaining : Nat)

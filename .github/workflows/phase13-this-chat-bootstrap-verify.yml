@@ -36,4 +36,4 @@ jobs:
           cd psc15selfhost
           npm run bootstrap:check
 
-# rerun after match-field closing recursion portability fix
+# rerun after replacing host toString with PSC1-compatible psNatToString

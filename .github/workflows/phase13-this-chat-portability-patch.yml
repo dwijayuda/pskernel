@@ -26,24 +26,21 @@ jobs:
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
           start_marker = 'def psElabMatch\n'
-          end_marker = '\ndef psBinderAcceptsExplicitArgument\n'
+          end_marker = '\ndef psBinderAcceptsExplicitArgument'
           start = text.index(start_marker)
           end = text.index(end_marker, start)
           old = text[start:end]
-          checks = [
-            'match elaborate context scrutineeSyntax none with',
-            '                                              (some instantiatedExpected)\n',
-          ]
-          for needle in checks:
-              if needle not in old:
-                  raise SystemExit(f'unexpected psElabMatch source shape: missing {needle!r}')
+          first = 'match elaborate context scrutineeSyntax none with'
+          second = '(some instantiatedExpected)'
+          if first not in old or second not in old:
+              raise SystemExit('unexpected psElabMatch source shape')
           new = old.replace(
-              'match elaborate context scrutineeSyntax none with',
+              first,
               'match elaborate context scrutineeSyntax Option.none with',
               1)
           new = new.replace(
-              '                                              (some instantiatedExpected)\n',
-              '                                              (Option.some instantiatedExpected)\n',
+              second,
+              '(Option.some instantiatedExpected)',
               1)
           path.write_text(text[:start] + new + text[end:])
           PY

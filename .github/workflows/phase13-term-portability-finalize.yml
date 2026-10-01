@@ -186,6 +186,26 @@ jobs:
           PY
           git diff --check -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
 
+      - name: Normalize structural-recursion binder reverse to PSC1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean')
+          text = path.read_text()
+          old = 'psElabExplicitParameterIds bindersRev.reverse;'
+          new = 'psElabExplicitParameterIds (psElabListReverse bindersRev);'
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'expected one structural-recursion reverse target, got {count}')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          git diff --check -- \
+            psc15selfhost/packages/elab/src/Ps/Elab/Term.lean \
+            psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean
+
       - name: Verify PSC1 bootstrap compiler source gate
         shell: bash
         run: |
@@ -199,7 +219,9 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git add \
+            psc15selfhost/packages/elab/src/Ps/Elab/Term.lean \
+            psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean
           git diff --cached --check
           git commit -m "fix(elab): close Phase 13 PSC1 portability"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

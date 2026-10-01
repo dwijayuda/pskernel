@@ -35,6 +35,31 @@ split localized the old `psElabMatch: unsupportedTerm` failure to the two
 unavailable append calls. The existing dual-source match regression checks the
 constructor-branch order and the final scrutinee argument.
 
+## Portable recursion and expected types
+
+PSC1 requires every explicit non-recursive argument to remain unchanged in a
+structural recursive call. For a traversal that updates an accumulator, context,
+index, or fuel-dependent state, recurse on the structural input and return a
+function over the changing state. Bind that smaller function once before the
+state lambdas. Keep static arguments and public call order unchanged; use a thin
+wrapper when the worker needs a different argument order.
+
+Every lambda binder must have an explicit type in portable source, even when
+Lean can infer it. An omitted type fails parsing before declaration checking.
+The record-candidate worker exposed this requirement directly.
+
+A `match` used in a let-bound value may also need a declared result type. For
+example, record candidate selection uses
+`let candidate : Option PsElabRecordCandidate := ...`; application elaboration
+uses `let nextPending : List Nat := ...`. Supply the actual result type rather
+than extending inference or changing branches.
+
+Unqualified option constructors used as terms are not available merely because
+Lean accepts them. Use `Option.some` and `Option.none`. Likewise, replace missing
+`List.any` and `List.all` with explicit source helpers that preserve their
+short-circuit behavior. Record regressions cover field ordering, invalid field
+sets, unique inference, and ambiguity rejection.
+
 ## Reusable host executable
 
 The branch bootstrap verifier retains the Lean-built `psc1` executable for one

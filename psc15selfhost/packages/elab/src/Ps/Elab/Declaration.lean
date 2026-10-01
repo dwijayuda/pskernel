@@ -229,7 +229,7 @@ def psElabInductiveConstructorNames
   match sources with
   | List.nil => List.nil
   | List.cons source rest =>
-      let currentName :=
+      let currentName : PsName :=
         match
             psSyntaxConstructorCoreName
               inductiveName

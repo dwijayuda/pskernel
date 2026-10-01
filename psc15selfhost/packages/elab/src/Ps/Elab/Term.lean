@@ -72,6 +72,28 @@ def psElabListAppend {α : Type}
       fun (tail : List α) =>
         List.cons head (smaller tail)
 
+def psElabListAny {α : Type}
+    (values : List α) : (α -> Bool) -> Bool :=
+  match values with
+  | List.nil =>
+      fun (_predicate : α -> Bool) => false
+  | List.cons head rest =>
+      let smaller : (α -> Bool) -> Bool :=
+        psElabListAny rest;
+      fun (predicate : α -> Bool) =>
+        if predicate head then true else smaller predicate
+
+def psElabListAll {α : Type}
+    (values : List α) : (α -> Bool) -> Bool :=
+  match values with
+  | List.nil =>
+      fun (_predicate : α -> Bool) => true
+  | List.cons head rest =>
+      let smaller : (α -> Bool) -> Bool :=
+        psElabListAll rest;
+      fun (predicate : α -> Bool) =>
+        if predicate head then smaller predicate else false
+
 def psElabListReverseAcc {α : Type}
     (values : List α) : List α -> List α :=
   match values with
@@ -2534,7 +2556,7 @@ def psSyntaxRecordHasField
     (fields :
       List (Prod PsSyntaxName PsSyntaxTerm))
     (name : String) : Bool :=
-  List.any fields (psSyntaxRecordFieldMatchesName name)
+  psElabListAny fields (psSyntaxRecordFieldMatchesName name)
 
 def psSyntaxRecordHasNamedField
     (fields : List (Prod PsSyntaxName PsSyntaxTerm))
@@ -2547,7 +2569,7 @@ def psSyntaxRecordFieldsMatch
     (names : List String) : Bool :=
   psElabBoolAnd
     (Nat.beq (psElabListLength fields) (psElabListLength names))
-    (List.all names (psSyntaxRecordHasNamedField fields))
+    (psElabListAll names (psSyntaxRecordHasNamedField fields))
 
 def psSyntaxRecordFindField
     (fields : List (Prod PsSyntaxName PsSyntaxTerm))

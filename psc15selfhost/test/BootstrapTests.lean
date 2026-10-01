@@ -2526,11 +2526,49 @@ def psTestTwoArgumentEquationDefinition : Bool :=
       | Except.ok _ => true
       | Except.error _ => false
 
+def psTestRecordLiteralSource (body : String) : String :=
+  "structure PairNat where\n  left : Nat\n  right : Nat\n\n" ++
+  "def pair : PairNat := " ++ body ++ "\n"
+
+def psTestRecordLiteralFieldOrder : Bool :=
+  match psParseLeanSource
+      (psTestRecordLiteralSource "{ right := 2, left := 1 }") with
+  | Except.error _ => false
+  | Except.ok sourceModule =>
+      match psElabModule psBootstrapPreludeEnvironment sourceModule with
+      | Except.error _ => false
+      | Except.ok result =>
+          match result.declarations.reverse with
+          | PsDeclaration.definitionDecl _ _ _ value :: _ =>
+              let view := psExprAppView value
+              match view.head with
+              | PsExpr.constE name _ =>
+                  psNameEq name (psNameAppendStr (psRootName "PairNat") "mk")
+                    && match view.args with
+                       | [left, right] =>
+                           psExprAlphaEq left (PsExpr.lit (PsLiteral.natural 1))
+                             && psExprAlphaEq right (PsExpr.lit (PsLiteral.natural 2))
+                       | _ => false
+              | _ => false
+          | _ => false
+
+def psTestRecordLiteralRejected (body : String) : Bool :=
+  match psParseLeanSource (psTestRecordLiteralSource body) with
+  | Except.error _ => false
+  | Except.ok sourceModule =>
+      match psElabModule psBootstrapPreludeEnvironment sourceModule with
+      | Except.error PsElabError.unsupportedTerm => true
+      | _ => false
+
 structure PsNamedTest where
   name : String
   passed : Bool
 
 def psBootstrapTestCases : List PsNamedTest := [
+  { name := "record literal reorders fields", passed := psTestRecordLiteralFieldOrder },
+  { name := "record literal rejects missing field", passed := psTestRecordLiteralRejected "{ left := 1 }" },
+  { name := "record literal rejects unknown field", passed := psTestRecordLiteralRejected "{ left := 1, third := 2 }" },
+  { name := "record literal rejects duplicate field", passed := psTestRecordLiteralRejected "{ left := 1, left := 2 }" },
   { name := "dual-source core elaboration", passed := psTestDualSourceCoreElaboration },
   { name := "dual-source binder kinds elaboration", passed := psTestDualSourceBinderKindsElaboration },
   { name := "dual-source simple parse", passed := psTestDualSourceSimpleParse },

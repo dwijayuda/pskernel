@@ -1878,7 +1878,7 @@ def psElabMatchMinor
     Except PsElabError PsElabMatchMinorResult :=
   match alternative.pattern with
   | .bool _ _ =>
-      match elaborate context alternative.body (some expectedType) with
+      match elaborate context alternative.body (Option.some expectedType) with
       | Except.error error => Except.error error
       | Except.ok bodyResult =>
           Except.ok {
@@ -1896,7 +1896,7 @@ def psElabMatchMinor
         alternative.constructorName
         alternative.body
         span
-        none
+        Option.none
   | .constructor _ binders span =>
       psElabMatchConstructorMinor
         elaborate
@@ -1908,7 +1908,7 @@ def psElabMatchMinor
         alternative.constructorName
         alternative.body
         span
-        (some binders)
+        (Option.some binders)
 
 structure PsElabMatchMinorsResult where
   context : PsElabContext

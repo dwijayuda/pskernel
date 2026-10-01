@@ -288,7 +288,7 @@ def psEraseSelectedArguments
               match psEraseSelectedArguments erase arguments rest with
               | Except.error error => Except.error error
               | Except.ok erasedRest =>
-                  Except.ok (erased :: erasedRest)
+                  Except.ok (List.cons erased erasedRest)
 
 def psEraseSelectedTypeArguments
     (environment : PsEnvironment)
@@ -311,7 +311,7 @@ def psEraseSelectedTypeArguments
                     rest with
               | Except.error error => Except.error error
               | Except.ok erasedRest =>
-                  Except.ok (erased :: erasedRest)
+                  Except.ok (List.cons erased erasedRest)
 
 def psEraseTypedIntrinsic
     (environment : PsEnvironment)

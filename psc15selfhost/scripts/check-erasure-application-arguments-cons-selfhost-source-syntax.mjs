@@ -1,6 +1,7 @@
 import "./check-erasure-finish-application-sequencing-selfhost-source-syntax.mjs";
 import "./check-erasure-finish-application-cons-selfhost-source-syntax.mjs";
 import "./check-erasure-selected-arguments-index-selfhost-source-syntax.mjs";
+import "./check-erasure-selected-arguments-cons-selfhost-source-syntax.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

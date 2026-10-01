@@ -2036,7 +2036,7 @@ def psElabMatch
   match expected with
   | none => Except.error PsElabError.matchExpectedType
   | some expectedType =>
-      match elaborate context scrutineeSyntax none with
+      match elaborate context scrutineeSyntax Option.none with
       | Except.error error => Except.error error
       | Except.ok scrutineeResult =>
           let scrutineeType :=
@@ -2158,7 +2158,7 @@ def psElabMatch
                                             psElabResolvedTerm
                                               minors.context
                                               recursorTerm
-                                              (some instantiatedExpected)
+                                              (Option.some instantiatedExpected)
           | _ =>
               Except.error PsElabError.matchScrutineeUnsupported
 

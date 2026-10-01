@@ -186,7 +186,7 @@ jobs:
           PY
           git diff --check -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
 
-      - name: Normalize structural-recursion binder reverse to PSC1
+      - name: Normalize declaration source shape to PSC1
         shell: bash
         run: |
           set -euo pipefail
@@ -195,12 +195,22 @@ jobs:
 
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean')
           text = path.read_text()
-          old = 'psElabExplicitParameterIds bindersRev.reverse;'
-          new = 'psElabExplicitParameterIds (psElabListReverse bindersRev);'
-          count = text.count(old)
-          if count != 1:
-              raise SystemExit(f'expected one structural-recursion reverse target, got {count}')
-          path.write_text(text.replace(old, new, 1))
+
+          old_reverse = 'psElabExplicitParameterIds bindersRev.reverse;'
+          new_reverse = 'psElabExplicitParameterIds (psElabListReverse bindersRev);'
+          reverse_count = text.count(old_reverse)
+          if reverse_count != 1:
+              raise SystemExit(f'expected one structural-recursion reverse target, got {reverse_count}')
+          text = text.replace(old_reverse, new_reverse, 1)
+
+          old_current = '      let currentName :=\n        match'
+          new_current = '      let currentName : PsName :=\n        match'
+          current_count = text.count(old_current)
+          if current_count != 1:
+              raise SystemExit(f'expected one constructor-name match target, got {current_count}')
+          text = text.replace(old_current, new_current, 1)
+
+          path.write_text(text)
           PY
           git diff --check -- \
             psc15selfhost/packages/elab/src/Ps/Elab/Term.lean \

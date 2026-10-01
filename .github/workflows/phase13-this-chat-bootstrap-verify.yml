@@ -36,4 +36,4 @@ jobs:
           cd psc15selfhost
           npm run bootstrap:check
 
-# rerun after wildcard-fill expected-type and recursion portability fix
+# rerun after match-preparation higher-order and recursion portability fix

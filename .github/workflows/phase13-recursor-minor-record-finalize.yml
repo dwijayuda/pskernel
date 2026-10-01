@@ -58,7 +58,7 @@ jobs:
               exec(compile(script, f'phase13-declaration-recursion-{index}.py', 'exec'), namespace, namespace)
           PY
 
-      - name: Make recursor-minor result construction explicit
+      - name: Make ambiguous result construction explicit
         shell: bash
         run: |
           set -euo pipefail
@@ -68,27 +68,58 @@ jobs:
 
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean')
           text = path.read_text()
-          pattern = re.compile(
+
+          worker_pattern = re.compile(
               r'^def psBuildRecursorMinorBindersWorker\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
               re.MULTILINE | re.DOTALL,
           )
-          matches = list(pattern.finditer(text))
-          if len(matches) != 1:
-              raise SystemExit(f'expected one recursor-minor worker, got {len(matches)}')
-          block = matches[0].group(0)
-          old = '''Except.ok {
+          worker_matches = list(worker_pattern.finditer(text))
+          if len(worker_matches) != 1:
+              raise SystemExit(f'expected one recursor-minor worker, got {len(worker_matches)}')
+          worker = worker_matches[0].group(0)
+          old_worker = '''Except.ok {
                         context := context
                         bindersRev := bindersRev
                       }'''
-          new = '''Except.ok
+          new_worker = '''Except.ok
                         (PsElabRecursorMinorsResult.mk
                           context
                           bindersRev)'''
-          count = block.count(old)
-          if count != 1:
-              raise SystemExit(f'expected one recursor-minor record result, got {count}')
-          block = block.replace(old, new, 1)
-          text = text[:matches[0].start()] + block + text[matches[0].end():]
+          worker_count = worker.count(old_worker)
+          if worker_count != 1:
+              raise SystemExit(f'expected one recursor-minor record result, got {worker_count}')
+          worker = worker.replace(old_worker, new_worker, 1)
+          text = text[:worker_matches[0].start()] + worker + text[worker_matches[0].end():]
+
+          inductive_pattern = re.compile(
+              r'^def psElabInductiveDeclaration\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+              re.MULTILINE | re.DOTALL,
+          )
+          inductive_matches = list(inductive_pattern.finditer(text))
+          if len(inductive_matches) != 1:
+              raise SystemExit(f'expected one inductive declaration elaborator, got {len(inductive_matches)}')
+          block = inductive_matches[0].group(0)
+          old_batch = '''Except.ok {
+                                      declarations :=
+                                        psElabAppendDeclarations
+                                          (List.cons
+                                            inductiveDeclaration
+                                            constructorDeclarations)
+                                          (List.cons recursor List.nil)
+                                    }'''
+          new_batch = '''Except.ok
+                                      (PsElabDeclarationBatchResult.mk
+                                        (psElabAppendDeclarations
+                                          (List.cons
+                                            inductiveDeclaration
+                                            constructorDeclarations)
+                                          (List.cons recursor List.nil)))'''
+          batch_count = block.count(old_batch)
+          if batch_count != 1:
+              raise SystemExit(f'expected one inductive batch record result, got {batch_count}')
+          block = block.replace(old_batch, new_batch, 1)
+          text = text[:inductive_matches[0].start()] + block + text[inductive_matches[0].end():]
+
           path.write_text(text)
           PY
           git diff --check -- \

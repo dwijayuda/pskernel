@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
-      - name: Reshape duplicate binder detection for PSC1
+      - name: Reshape match field elaboration for PSC1
         shell: bash
         run: |
           set -euo pipefail
@@ -25,52 +25,88 @@ jobs:
           from pathlib import Path
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
-          start_marker = 'def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool\n'
-          end_marker = '\ndef psElabMatchFields\n'
+          start_marker = 'def psElabMatchFields\n'
+          end_marker = '\ndef psElabMatchFieldAt\n'
           start = text.index(start_marker)
           end = text.index(end_marker, start)
           old = text[start:end]
-          if 'List.any rest' not in old or 'psSyntaxNameListHasDuplicate rest' not in old:
-              raise SystemExit('unexpected psSyntaxNameListHasDuplicate source shape')
-          new = '''def psSyntaxNameListMatchesCoreWorker
-              (candidates : List PsSyntaxName) :
-              Option PsName -> Bool :=
-            match candidates with
+          if 'psElabMatchFields' not in old or 'binderSyntax :: rest' not in old:
+              raise SystemExit('unexpected psElabMatchFields source shape')
+          new = '''def psElabMatchFieldsWorker
+              (binderSyntaxes : List PsSyntaxName) :
+              PsElabContext ->
+              PsName ->
+              PsExpr ->
+              List PsElabMatchField ->
+              Except PsElabError PsElabMatchFieldsResult :=
+            match binderSyntaxes with
             | [] =>
-                fun (_coreName : Option PsName) => false
-            | candidate :: rest =>
-                let smaller : Option PsName -> Bool :=
-                  psSyntaxNameListMatchesCoreWorker rest;
-                fun (coreName : Option PsName) =>
-                  if psSyntaxNameMatchesCore coreName candidate then
-                    true
-                  else
-                    smaller coreName
+                fun (context : PsElabContext) =>
+                  fun (_inductiveName : PsName) =>
+                    fun (_cursor : PsExpr) =>
+                      fun (fieldsRev : List PsElabMatchField) =>
+                        Except.ok {
+                          context := context
+                          fieldsRev := fieldsRev
+                        }
+            | binderSyntax :: rest =>
+                let smaller :
+                    PsElabContext ->
+                    PsName ->
+                    PsExpr ->
+                    List PsElabMatchField ->
+                    Except PsElabError PsElabMatchFieldsResult :=
+                  psElabMatchFieldsWorker rest;
+                fun (context : PsElabContext) =>
+                  fun (inductiveName : PsName) =>
+                    fun (cursor : PsExpr) =>
+                      fun (fieldsRev : List PsElabMatchField) =>
+                        match psInferEnsureForall
+                            context.environment
+                            context.metaContext
+                            context.localContext
+                            cursor with
+                        | Except.error error =>
+                            Except.error (PsElabError.infer error)
+                        | Except.ok forallView =>
+                            match psSyntaxNameToName binderSyntax with
+                            | none => Except.error PsElabError.emptyName
+                            | some binderName =>
+                                let pushed :=
+                                  psLocalPushBinding
+                                    context.localContext
+                                    binderName
+                                    forallView.domain
+                                    forallView.binder;
+                                let nextContext :=
+                                  psElabContextWithLocal context pushed.context;
+                                let field : PsElabMatchField := {
+                                  id := pushed.id
+                                  name := binderName
+                                  type := forallView.domain
+                                  binder := forallView.binder
+                                };
+                                smaller
+                                  nextContext
+                                  inductiveName
+                                  (psExprInstantiate1
+                                    forallView.body
+                                    (PsExpr.fvar pushed.id))
+                                  (List.cons field fieldsRev)
 
-          def psSyntaxNameListMatchesCore
-              (coreName : Option PsName)
-              (candidates : List PsSyntaxName) : Bool :=
-            psSyntaxNameListMatchesCoreWorker candidates coreName
-
-          def psSyntaxNameListHasDuplicateWorker
-              (names : List PsSyntaxName) : Bool :=
-            match names with
-            | [] => false
-            | name :: rest =>
-                let smaller : Bool :=
-                  psSyntaxNameListHasDuplicateWorker rest;
-                if psSyntaxNameIsWildcardBinder name then
-                  smaller
-                else
-                  let coreName := psSyntaxNameToName name;
-                  if psSyntaxNameListMatchesCore coreName rest then
-                    true
-                  else
-                    smaller
-
-          def psSyntaxNameListHasDuplicate
-              (names : List PsSyntaxName) : Bool :=
-            psSyntaxNameListHasDuplicateWorker names
+          def psElabMatchFields
+              (context : PsElabContext)
+              (inductiveName : PsName)
+              (cursor : PsExpr)
+              (binderSyntaxes : List PsSyntaxName)
+              (fieldsRev : List PsElabMatchField) :
+              Except PsElabError PsElabMatchFieldsResult :=
+            psElabMatchFieldsWorker
+              binderSyntaxes
+              context
+              inductiveName
+              cursor
+              fieldsRev
           '''
           path.write_text(text[:start] + new + text[end:])
           PY
@@ -78,5 +114,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "fix(elab): make duplicate binder detection PSC1 portable"
+          git commit -m "fix(elab): make match field elaboration PSC1 portable"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

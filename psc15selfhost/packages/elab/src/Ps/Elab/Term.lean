@@ -1108,6 +1108,12 @@ def psExprAppViewAcc
 def psExprAppView (expr : PsExpr) : PsExprAppView :=
   psExprAppViewAcc expr []
 
+def psExprAppViewHead (view : PsExprAppView) : PsExpr :=
+  view.head
+
+def psExprAppViewArgs (view : PsExprAppView) : List PsExpr :=
+  view.args
+
 def psExprHasConstWorker
     (expr : PsExpr) : PsName -> Bool :=
   match expr with
@@ -2046,7 +2052,7 @@ def psElabMatch
               scrutineeResult.context.localContext
               scrutineeResult.type;
           let typeView := psExprAppView scrutineeType;
-          match typeView.head with
+          match (psExprAppViewHead typeView) with
           | .constE inductiveName inductiveLevels =>
               match psEnvironmentFindInductive
                   scrutineeResult.context.environment
@@ -2056,7 +2062,7 @@ def psElabMatch
               | some inductiveInfo =>
                   if psElabNatNe inductiveInfo.numIndices 0 then
                     Except.error PsElabError.matchInductiveUnsupported
-                  else if psElabNatNe (psElabListLength typeView.args) inductiveInfo.numParams then
+                  else if psElabNatNe (psElabListLength (psExprAppViewArgs typeView)) inductiveInfo.numParams then
                     Except.error PsElabError.matchParameterArity
                   else
                     match psElabPrepareMatchAlternatives
@@ -2123,7 +2129,7 @@ def psElabMatch
                                             elaborate
                                             inductiveInfo
                                             inductiveLevels
-                                            typeView.args
+                                            (psExprAppViewArgs typeView)
                                             instantiatedExpected
                                             alternatives
                                             scrutineeResult.context
@@ -2145,7 +2151,7 @@ def psElabMatch
                                                   List.nil);
                                             let recursorArgs :=
                                               List.append
-                                                typeView.args
+                                                (psExprAppViewArgs typeView)
                                                 (List.cons
                                                   motive
                                                   recursorTail);

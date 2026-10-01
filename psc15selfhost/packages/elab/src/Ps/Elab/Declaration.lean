@@ -76,7 +76,7 @@ def psElabStructuralRecursionFromSource
                   match resolution with
                   | .local scrutineeId =>
                       let explicitParameterIds :=
-                        psElabExplicitParameterIds bindersRev.reverse;
+                        psElabExplicitParameterIds (psElabListReverse bindersRev);
                       match
                           psElabFindNatIndex
                             scrutineeId
@@ -257,7 +257,7 @@ def psElabBinderArgument
 
 def psElabBinderArguments
     (bindersRev : List PsElabTypedBinder) : List PsExpr :=
-  bindersRev.reverse.map psElabBinderArgument
+  (psElabListReverse bindersRev).map psElabBinderArgument
 
 def psCloseElabImplicitBinders
     (metaContext : PsMetaContext) :
@@ -466,7 +466,7 @@ def psElabInductiveConstructor
                 fields.context
                 inductiveName
                 parameterArgs
-                fields.bindersRev.reverse
+                (psElabListReverse fields.bindersRev)
                 0
                 [] with
           | Except.error error => Except.error error
@@ -528,7 +528,7 @@ def psElabInductiveConstructors
     List PsDeclaration ->
     Except PsElabError (List PsDeclaration)
   | _, [], declarationsRev =>
-      Except.ok declarationsRev.reverse
+      Except.ok (psElabListReverse declarationsRev)
   | index, source :: rest, declarationsRev =>
       match psElabInductiveConstructor
           context
@@ -1248,7 +1248,7 @@ def psPrependBatchReverse
     (declarations : List PsDeclaration)
     (declarationsRev : List PsDeclaration) :
     List PsDeclaration :=
-  psElabAppendDeclarations declarations.reverse declarationsRev
+  psElabAppendDeclarations (psElabListReverse declarations) declarationsRev
 
 def psElabDeclarations
     (environment : PsEnvironment) :
@@ -1258,7 +1258,7 @@ def psElabDeclarations
   | [], declarationsRev =>
       Except.ok {
         environment := environment
-        declarations := declarationsRev.reverse
+        declarations := (psElabListReverse declarationsRev)
       }
   | source :: rest, declarationsRev =>
       match psElabDeclarationBatch environment source with

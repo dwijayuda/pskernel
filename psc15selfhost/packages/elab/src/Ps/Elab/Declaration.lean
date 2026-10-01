@@ -1161,14 +1161,13 @@ def psElabInductiveDeclaration
                                 | Except.error error =>
                                     Except.error error
                                 | Except.ok recursor =>
-                                    Except.ok {
-                                      declarations :=
-                                        psElabAppendDeclarations
+                                    Except.ok
+                                      (PsElabDeclarationBatchResult.mk
+                                        (psElabAppendDeclarations
                                           (List.cons
                                             inductiveDeclaration
                                             constructorDeclarations)
-                                          (List.cons recursor List.nil)
-                                    }
+                                          (List.cons recursor List.nil)))
               else
                   Except.error PsElabError.unsupportedTerm
 

@@ -2674,47 +2674,34 @@ def psElabRecordCandidateFromExpected
 def psElabRecordCandidates
     (environment : PsEnvironment)
     (fields : List (Prod PsSyntaxName PsSyntaxTerm))
-    (declarations : List PsDeclaration)
-    (candidatesRev : List PsElabRecordCandidate) :
-    List PsElabRecordCandidate :=
+    (declarations : List PsDeclaration) :
+    List PsElabRecordCandidate -> List PsElabRecordCandidate :=
   match declarations with
   | [] =>
-      psElabListReverse candidatesRev
+      fun candidatesRev => psElabListReverse candidatesRev
   | declaration :: rest =>
-      match declaration with
-      | .inductiveDecl info =>
-          match
-              psElabRecordCandidateForInfo
-                environment
-                info with
-          | Option.some candidate =>
-              if
-                  psSyntaxRecordFieldsMatch
-                    fields
-                    candidate.fieldNames then
-                psElabRecordCandidates
+      let smaller :
+          List PsElabRecordCandidate -> List PsElabRecordCandidate :=
+        psElabRecordCandidates environment fields rest;
+      fun candidatesRev =>
+        match declaration with
+        | .inductiveDecl info =>
+            match
+                psElabRecordCandidateForInfo
                   environment
-                  fields
-                  rest
-                  (List.cons candidate candidatesRev)
-              else
-                psElabRecordCandidates
-                  environment
-                  fields
-                  rest
-                  candidatesRev
-          | Option.none =>
-              psElabRecordCandidates
-                environment
-                fields
-                rest
-                candidatesRev
-      | _ =>
-          psElabRecordCandidates
-            environment
-            fields
-            rest
-            candidatesRev
+                  info with
+            | Option.some candidate =>
+                if
+                    psSyntaxRecordFieldsMatch
+                      fields
+                      candidate.fieldNames then
+                  smaller (List.cons candidate candidatesRev)
+                else
+                  smaller candidatesRev
+            | Option.none =>
+                smaller candidatesRev
+        | _ =>
+            smaller candidatesRev
 
 def psElabUniqueRecordCandidate
     (environment : PsEnvironment)

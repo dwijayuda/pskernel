@@ -2112,7 +2112,7 @@ def psElabMatch
                                         if Nat.beq (psElabListLength recInfo.levelParams) 0 then
                                           []
                                         else if Nat.beq (psElabListLength recInfo.levelParams) 1 then
-                                          [resultLevel]
+                                          List.cons resultLevel List.nil
                                         else
                                           [];
                                       if Nat.blt 1 (psElabListLength recInfo.levelParams) then

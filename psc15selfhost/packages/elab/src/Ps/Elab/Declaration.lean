@@ -1084,7 +1084,7 @@ def psElabInductiveDeclaration
                 psMetaInstantiate
                   headerContext.metaContext
                   openResultType;
-              let resultTypeIsSortOne :=
+              let resultTypeIsSortOne : Bool :=
                 match instantiatedResultType with
                 | PsExpr.sortE level =>
                     match level with
@@ -1217,7 +1217,8 @@ def psElabPartialDeclaration
             psElabDeclarationTermCallback
             initial
             binders with
-      | Except.error error => Except.error error
+      | Except.error error =>
+          Except.error error
       | Except.ok binderResult =>
           match
               psElabTerm

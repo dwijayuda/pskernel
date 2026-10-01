@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!-- Mirrored from https://djvelleman.github.io/HTPIwL/Appendix.html by HTTrack Website Copier/3.x [XR&CO], Fri, 25 Sep 2026 19:31:40 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+<head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Appendix – How To Prove It with Lean</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="Chap8.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-27c261d06b905028a18691de25d09dde.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="HTPIwLstyles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="Appendix.html">Appendix</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="index.html">How To Prove It with Lean</a> 
+        <div class="sidebar-tools-main">
+    <a href="How-To-Prove-It-with-Lean.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="index-2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="Chap1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Sentential Logic</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="Chap2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Quantificational Logic</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="IntroLean.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction to Lean</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="Chap3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Proofs</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="Chap4.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Relations</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="Chap5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Functions</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="Chap6.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Mathematical Induction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="Chap7.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Number Theory</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="Chap8.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Infinite Sets</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="Appendix.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Appendix</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">In This Chapter</h2>
+   
+  <ul class="collapse">
+  <li><a href="#tactics-used" id="toc-tactics-used" class="nav-link active" data-scroll-target="#tactics-used">Tactics Used</a></li>
+  <li><a href="#summary-of-proof-techniques-in-lean" id="toc-summary-of-proof-techniques-in-lean" class="nav-link" data-scroll-target="#summary-of-proof-techniques-in-lean">Summary of Proof Techniques in Lean</a></li>
+  <li><a href="#transitioning-to-standard-lean" id="toc-transitioning-to-standard-lean" class="nav-link" data-scroll-target="#transitioning-to-standard-lean">Transitioning to Standard Lean</a></li>
+  <li><a href="#typing-symbols" id="toc-typing-symbols" class="nav-link" data-scroll-target="#typing-symbols">Typing Symbols</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+<div class="hidden">
+$$
+\newcommand{\setmin}{\mathbin{\backslash}}
+\newcommand{\symmdiff}{\mathbin{∆}}
+$$
+</div>
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Appendix</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="tactics-used" class="level2">
+<h2 class="anchored" data-anchor-id="tactics-used">Tactics Used</h2>
+<p>Tactics marked with an asterisk (*) are defined in the file <code>HTPIDefs.lean</code> in the HTPI Lean Package that accompanies this book. They will not work without that file. The others are standard Lean tactics or are defined in Lean’s mathematics library, <code>mathlib</code>.</p>
+<div style="margin: 0% 10%">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Tactic</th>
+<th style="text-align: left;">Where Introduced</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><code>apply</code></td>
+<td style="text-align: left;"><a href="Chap3.html#proofs-involving-negations-and-conditionals">Sections 3.1 &amp; 3.2</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>apply?</code></td>
+<td style="text-align: left;"><a href="Chap3.html#existence-and-uniqueness-proofs">Section 3.6</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>assume</code>*</td>
+<td style="text-align: left;"><a href="IntroLean.html#a-first-example">Introduction to Lean: A First Example</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>bicond_neg</code>*</td>
+<td style="text-align: left;"><a href="IntroLean.html#tactic-mode">Introduction to Lean: Tactic Mode</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>by_cases</code></td>
+<td style="text-align: left;"><a href="Chap3.html#proofs-involving-disjunctions">Section 3.5</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>by_cases on</code>*</td>
+<td style="text-align: left;"><a href="Chap3.html#proofs-involving-disjunctions">Section 3.5</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>by_contra</code></td>
+<td style="text-align: left;"><a href="Chap3.html#proofs-involving-negations-and-conditionals">Sections 3.1 &amp; 3.2</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>by_induc</code>*</td>
+<td style="text-align: left;"><a href="Chap6.html#proof-by-mathematical-induction">Section 6.1</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>by_strong_induc</code>*</td>
+<td style="text-align: left;"><a href="Chap6.html#strong-induction">Section 6.4</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>conditional</code>*</td>
+<td style="text-align: left;"><a href="IntroLean.html#tactic-mode">Introduction to Lean: Tactic Mode</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>contradict</code>*</td>
+<td style="text-align: left;"><a href="Chap3.html#proofs-involving-negations-and-conditionals">Sections 3.1 &amp; 3.2</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>contrapos</code>*</td>
+<td style="text-align: left;"><a href="IntroLean.html#a-first-example">Introduction to Lean: A First Example</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>decide</code></td>
+<td style="text-align: left;"><a href="Chap6.html#proof-by-mathematical-induction">Section 6.1</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>define</code>*</td>
+<td style="text-align: left;"><a href="IntroLean.html#types">Introduction to Lean: Types</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>demorgan</code>*</td>
+<td style="text-align: left;"><a href="IntroLean.html#tactic-mode">Introduction to Lean: Tactic Mode</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>disj_syll</code>*</td>
+<td style="text-align: left;"><a href="Chap3.html#proofs-involving-disjunctions">Section 3.5</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>double_neg</code>*</td>
+<td style="text-align: left;"><a href="IntroLean.html#tactic-mode">Introduction to Lean: Tactic Mode</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>exact</code></td>
+<td style="text-align: left;"><a href="Chap3.html#existence-and-uniqueness-proofs">Section 3.6</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>exists_unique</code>*</td>
+<td style="text-align: left;"><a href="Chap3.html#existence-and-uniqueness-proofs">Section 3.6</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>fix</code>*</td>
+<td style="text-align: left;"><a href="Chap3.html#proofs-involving-quantifiers">Section 3.3</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>have</code></td>
+<td style="text-align: left;"><a href="IntroLean.html#a-first-example">Introduction to Lean: A First Example</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>linarith</code></td>
+<td style="text-align: left;"><a href="Chap6.html#proof-by-mathematical-induction">Section 6.1</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>obtain</code>*</td>
+<td style="text-align: left;"><a href="Chap3.html#proofs-involving-quantifiers">Section 3.3</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>or_left</code>*</td>
+<td style="text-align: left;"><a href="Chap3.html#proofs-involving-disjunctions">Section 3.5</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>or_right</code>*</td>
+<td style="text-align: left;"><a href="Chap3.html#proofs-involving-disjunctions">Section 3.5</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>push Not</code></td>
+<td style="text-align: left;"><a href="Chap8.html#equinumerous-sets">Section 8.1</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>quant_neg</code>*</td>
+<td style="text-align: left;"><a href="Chap3.html#proofs-involving-quantifiers">Section 3.3</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>rel</code></td>
+<td style="text-align: left;"><a href="Chap6.html#recursion">Section 6.3</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>rewrite</code></td>
+<td style="text-align: left;"><a href="Chap3.html#existence-and-uniqueness-proofs">Section 3.6</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>rfl</code></td>
+<td style="text-align: left;"><a href="Chap3.html#more-examples-of-proofs">Section 3.7</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>ring</code></td>
+<td style="text-align: left;"><a href="Chap3.html#more-examples-of-proofs">Section 3.7</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>rw</code></td>
+<td style="text-align: left;"><a href="Chap3.html#more-examples-of-proofs">Section 3.7</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>set</code></td>
+<td style="text-align: left;"><a href="Chap4.html#equivalence-relations">Section 4.5</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>show</code>*</td>
+<td style="text-align: left;"><a href="IntroLean.html#a-first-example">Introduction to Lean: A First Example</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><code>trivial</code></td>
+<td style="text-align: left;"><a href="Chap7.html#prime-factorization">Section 7.2</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="summary-of-proof-techniques-in-lean" class="level2">
+<h2 class="anchored" data-anchor-id="summary-of-proof-techniques-in-lean">Summary of Proof Techniques in Lean</h2>
+<section id="to-prove-a-goal-of-the-form" class="level3">
+<h3 class="anchored" data-anchor-id="to-prove-a-goal-of-the-form">To Prove a Goal of the Form …</h3>
+<section id="p" class="level4">
+<h4 class="anchored" data-anchor-id="p"><code>¬P</code></h4>
+<p>The tactic <code>by_contra h</code> will initiate a proof by contradiction by introducing the new given <code>h : P</code> and setting the goal to be <code>False</code>. (See also the tactics for reexpressing negative statements under the <a href="#reex">Reexpressing Statements</a> heading below. There is also further information about <a href="#contrad">proof by contradiction</a> below.)</p>
+</section>
+<section id="p-q" class="level4">
+<h4 class="anchored" data-anchor-id="p-q"><code>P → Q</code></h4>
+<p>The tactic <code>assume h : P</code> will introduce the new given <code>h : P</code> and set the goal to be <code>Q</code>. (See also the <code>contrapos</code> tactic under the <a href="#reex">Reexpressing Statements</a> heading below.)</p>
+</section>
+<section id="p-q-1" class="level4">
+<h4 class="anchored" data-anchor-id="p-q-1"><code>P ∧ Q</code></h4>
+<p>If you have <code>h1 : P</code> and <code>h2 : Q</code>, then <code>And.intro h1 h2</code> is a proof of <code>P ∧ Q</code>. If you have <code>h : P</code>, then the tactic <code>apply And.intro h</code> will set the goal to be <code>Q</code>, and if you have <code>h : Q</code>, then <code>apply And.intro _ h</code> will set the goal to be <code>P</code>. If you don’t already have a proof of either <code>P</code> or <code>Q</code>, then <code>apply And.intro</code> will set <code>P</code> and <code>Q</code> as separate goals.</p>
+</section>
+<section id="p-q-2" class="level4">
+<h4 class="anchored" data-anchor-id="p-q-2"><code>P ∨ Q</code></h4>
+<p>If you have <code>h : P</code>, then <code>Or.intro_left Q h</code> is a proof of <code>P ∨ Q</code>. Usually there is no need to specify <code>Q</code>, and <code>Or.inl h</code> will be recognized as a proof of <code>P ∨ Q</code>. Similarly, if you have <code>h : Q</code>, then <code>Or.intro_right P h</code> and <code>Or.inr h</code> are proofs of <code>P ∨ Q</code>.</p>
+<p>If you don’t already have a proof of either <code>P</code> or <code>Q</code>, then the tactic <code>apply Or.inl</code> will set the goal to be <code>P</code>, and <code>apply Or.inr</code> will set the goal to be <code>Q</code>. Also, the tactic <code>or_left with h</code> will introduce the new given <code>h : ¬Q</code> and set the goal to be <code>P</code>, and <code>or_right with h</code> will introduce the new given <code>h : ¬P</code> and set the goal to be <code>Q</code>.</p>
+<p>Proof by cases is sometimes useful for proving disjunctions. There is further information about <a href="#cases">proof by cases</a> below.</p>
+</section>
+<section id="p-q-3" class="level4">
+<h4 class="anchored" data-anchor-id="p-q-3"><code>P ↔︎ Q</code></h4>
+<p>If you have <code>h1 : P → Q</code> and <code>h2 : Q → P</code>, then <code>Iff.intro h1 h2</code> is a proof of <code>P ↔︎ Q</code>. If you have <code>h : P → Q</code>, then the tactic <code>apply Iff.intro h</code> will set the goal to be <code>Q → P</code>, and if you have <code>h : Q → P</code>, then <code>apply Iff.intro _ h</code> will set the goal to be <code>P → Q</code>. If you don’t already have a proof of either <code>P → Q</code> or <code>Q → P</code>, then <code>apply Iff.intro</code> will set <code>P → Q</code> and <code>Q → P</code> as separate goals.</p>
+<p>If <code>P</code> and <code>Q</code> are definitionally equal, then the tactic <code>rfl</code> will prove <code>P ↔︎ Q</code>.</p>
+</section>
+<section id="x-u-p-x" class="level4">
+<h4 class="anchored" data-anchor-id="x-u-p-x"><code>∀ (x : U), P x</code></h4>
+<p>The tactic <code>fix x : U</code> will introduce the new variable <code>x : U</code> and set the goal to be <code>P x</code>.</p>
+</section>
+<section id="x-u-p-x-1" class="level4">
+<h4 class="anchored" data-anchor-id="x-u-p-x-1"><code>∃ (x : U), P x</code></h4>
+<p>If you have <code>a : U</code> and <code>h : P a</code>, then <code>Exists.intro a h</code> is a proof of <code>∃ (x : U), P x</code>. If you have <code>a : U</code> but you don’t have a proof of <code>P a</code>, then the tactic <code>apply Exists.intro a</code> will set the goal to be <code>P a</code>.</p>
+</section>
+<section id="x-u-p-x-2" class="level4">
+<h4 class="anchored" data-anchor-id="x-u-p-x-2"><code>∃! (x : U), P x</code></h4>
+<p>The tactic <code>exists_unique</code> will set <code>∃ (x : U), P x</code> and <code>∀ (x_1 x_2 : U), P x_1 → P x_2 → x_1 = x_2</code> as separate goals.</p>
+</section>
+<section id="n-nat-p-n" class="level4">
+<h4 class="anchored" data-anchor-id="n-nat-p-n"><code>∀ (n : Nat), P n</code></h4>
+<p>The tactic <code>by_induc</code> will set <code>P 0</code> and <code>∀ (n : Nat), P n → P (n + 1)</code> as separate goals. (If the goal is <code>∀ n ≥ k, P n</code>, then the <code>by_induc</code> tactic will use <code>k</code> as the base case rather than <code>0</code>.) The tactic <code>by_strong_induc</code> will set the goal to be <code>∀ (n : Nat), (∀ n_1 &lt; n, P n_1) → P n</code>.</p>
+</section>
+</section>
+<section id="to-use-a-given-of-the-form" class="level3">
+<h3 class="anchored" data-anchor-id="to-use-a-given-of-the-form">To Use a Given of the Form …</h3>
+<section id="h-p" class="level4">
+<h4 class="anchored" data-anchor-id="h-p"><code>h : ¬P</code></h4>
+<p>If you also have <code>h1 : P</code>, then <code>h h1</code> is a proof of <code>False</code> and <code>absurd h1 h</code> will be recognized as a proof of any statement. If your goal is <code>False</code>, then <code>contradict h</code> will set the goal to be <code>P</code>. (See also the tactics for reexpressing negative statements under the <a href="#reex">Reexpressing Statements</a> heading below. There is also further information about <a href="#contrad">proof by contradiction</a> below.)</p>
+</section>
+<section id="h-p-q" class="level4">
+<h4 class="anchored" data-anchor-id="h-p-q"><code>h : P → Q</code></h4>
+<p>If you also have <code>h1 : P</code>, then <code>h h1</code> is a proof of <code>Q</code>. (See also the <code>contrapos</code> tactic under the <a href="#reex">Reexpressing Statements</a> heading below.)</p>
+</section>
+<section id="h-p-q-1" class="level4">
+<h4 class="anchored" data-anchor-id="h-p-q-1"><code>h : P ∧ Q</code></h4>
+<p><code>h.left</code> is a proof of <code>P</code>, and <code>h.right</code> is a proof of <code>Q</code>.</p>
+</section>
+<section id="h-p-q-2" class="level4">
+<h4 class="anchored" data-anchor-id="h-p-q-2"><code>h : P ∨ Q</code></h4>
+<p>The tactic <code>by_cases on h</code> will initiate a proof by cases; in case 1, <code>h</code> will be changed to <code>h : P</code>, and in case 2 it will be changed to <code>h : Q</code>. If you want to preserve the original <code>h</code>, then <code>by_cases on h with h1</code> will introduce new givens <code>h1 : P</code> in case 1 and <code>h1 : Q</code> in case 2; <code>by_cases on h with h1, h2</code> will will introduce new givens <code>h1 : P</code> in case 1 and <code>h2 : Q</code> in case 2. (There is further information about <a href="#cases">proof by cases</a> below.)</p>
+<p>If you have <code>h1 : ¬P</code>, then <code>disj_syll h h1</code> will change <code>h</code> to <code>h : Q</code>; if you want to preserve the original <code>h</code>, then <code>disj_syll h h1 with h2</code> will introduce the new given <code>h2 : Q</code>. Similarly, if you have <code>h1 : ¬Q</code>, then <code>disj_syll h h1</code> will change <code>h</code> to <code>h : P</code>, and <code>disj_syll h h1 with h2</code> will introduce the new given <code>h2 : P</code>.</p>
+</section>
+<section id="h-p-q-3" class="level4">
+<h4 class="anchored" data-anchor-id="h-p-q-3"><code>h : P ↔︎ Q</code></h4>
+<p><code>h.ltr</code> is a proof of <code>P → Q</code> and <code>h.rtl</code> is a proof of <code>Q → P</code>. (See also the <code>rewrite</code> tactic under the <a href="#reex">Reexpressing Statements</a> heading below.)</p>
+</section>
+<section id="h-x-u-p-x" class="level4">
+<h4 class="anchored" data-anchor-id="h-x-u-p-x"><code>h : ∀ (x : U), P x</code></h4>
+<p>If you have <code>a : U</code>, then <code>h a</code> is a proof of <code>P a</code>.</p>
+</section>
+<section id="h-x-u-p-x-1" class="level4">
+<h4 class="anchored" data-anchor-id="h-x-u-p-x-1"><code>h : ∃ (x : U), P x</code></h4>
+<p>The tactic <code>obtain (a : U) (h1 : P a) from h</code> will introduce both the new object <code>a : U</code> and the new given <code>h1 : P a</code>.</p>
+</section>
+<section id="h-x-u-p-x-2" class="level4">
+<h4 class="anchored" data-anchor-id="h-x-u-p-x-2"><code>h : ∃! (x : U), P x</code></h4>
+<p>The tactic <code>obtain (a : U) (h1 : P a)</code> <code>(h2 : ∀ (x_1 x_2 : U), P x_1 → P x_2 → x_1 = x_2)</code> <code>from h</code> will introduce the new object <code>a : U</code> and new givens <code>h1 : P a</code> and <code>h2 : ∀ (x_1 x_2 : U), P x_1 → P x_2 → x_1 = x_2</code>.</p>
+</section>
+</section>
+<section id="other-techniques-that-can-be-used-in-any-proof" class="level3">
+<h3 class="anchored" data-anchor-id="other-techniques-that-can-be-used-in-any-proof">Other Techniques That Can Be Used in Any Proof</h3>
+<section id="contrad" class="level4">
+<h4 class="anchored" data-anchor-id="contrad">Proof by Contradiction</h4>
+<p>The tactic <code>by_contra h</code> will introduce a new given <code>h</code> that is the negation of the goal, and set the goal to be <code>False</code>. Usually you will complete a proof by contradiction by proving contradictory statements <code>h1 : Q</code> and <code>h2 : ¬Q</code>. Once you have proven such contradictory statements, either <code>h2 h1</code> or <code>absurd h1 h2</code> can be used as a proof of <code>False</code>.</p>
+<p>If you are doing a proof by contradiction (so your goal is <code>False</code>) and you plan to complete the proof by contradicting some hypothesis <code>h1</code>, then the tactic <code>contradict h1</code> will set the goal to be the negation of <code>h1</code>.</p>
+<p>The tactic <code>contradict h1 with h</code> is shorthand for <code>by_contra h; contradict h1</code>.</p>
+</section>
+<section id="cases" class="level4">
+<h4 class="anchored" data-anchor-id="cases">Proof by Cases</h4>
+<p>If you have <code>h : P ∨ Q</code>, then the tactic <code>by_cases on h</code> will break your proof into two cases based on <code>h</code>. In case 1, <code>h</code> will be changed to <code>h : P</code>, and in case 2, it will be changed to <code>h : Q</code>. The tactic <code>by_cases on h with h1</code> will introduce new givens <code>h1 : P</code> in case 1 and <code>h1 : Q</code> in case 2. The tactic <code>by cases on h with h1, h2</code> will introduce new givens <code>h1 : P</code> in case 1 and <code>h2 : Q</code> in case 2.</p>
+<p>Another way to initiate a proof by cases is with the tactic <code>by_cases h : P</code>, which will introduce the new givens <code>h : P</code> in case 1 and <code>h : ¬P</code> in case 2.</p>
+</section>
+</section>
+<section id="working-backwards" class="level3">
+<h3 class="anchored" data-anchor-id="working-backwards">Working Backwards</h3>
+<p>If the expression <code>t _</code> would prove the goal if the blank were replaced with a proof of some statement <code>P</code>, then the tactic <code>apply t</code> will set the goal to be <code>P</code>. More generally, if <code>t _ _ ... _</code> would prove the goal if the blanks were replaced with proofs of several statements, then <code>apply t</code> will set all of those statements to be separate goals. The expression <code>t</code> can also contain blanks within it that will generate additional goals. For example, if the goal is <code>P ∧ Q</code> and you have <code>h : Q</code>, then <code>apply And.intro _ h</code> will set the goal to be <code>P</code>.</p>
+</section>
+<section id="making-assertions" class="level3">
+<h3 class="anchored" data-anchor-id="making-assertions">Making Assertions</h3>
+<p>If <code>t</code> is a term-mode proof of a statement <code>P</code>, then the tactic <code>have h : P := t</code> will introduce the new given <code>h : P</code>. If you want to give a tactic-mode proof to justify <code>h</code>, then you can write <code>have h : P := by</code> and then write a tactic-mode proof of <code>P</code>. The tactic-mode proof should be indented to set it off from the surrounding proof.</p>
+<p>If <code>t</code> is a term-mode proof of a statement <code>P</code> and <code>P</code> is the goal, then the tactic <code>show P from t</code> will complete the proof. The tactic <code>exact t</code> will also complete the proof.</p>
+</section>
+<section id="reex" class="level3">
+<h3 class="anchored" data-anchor-id="reex">Reexpressing Statements</h3>
+<p>All of the tactics in this section apply by default to the goal; they can be applied to a given <code>h</code> by adding <code>at h</code>.</p>
+<p>If <code>t</code> is a proof of <code>a = b</code>, then the tactic <code>rewrite [t]</code> will replace <code>a</code> anywhere it appears with <code>b</code>, and <code>rewrite [←t]</code> will replace <code>b</code> with <code>a</code>. Similarly, if <code>t</code> is a proof of <code>P ↔︎ Q</code>, then <code>rewrite [t]</code> will replace <code>P</code> with <code>Q</code> and <code>rewrite [←t]</code> will replace <code>Q</code> with <code>P</code>. If <code>t</code> contains blanks, Lean will try to fill them in to produce a proof that can be used as a rewriting rule; as with the <code>apply</code> tactic, blanks at the end of a proof can be left out. You can put a list of rewriting rules in the brackets (for example, <code>rewrite [t1, ←t2, t3]</code>), and the replacements will be performed one after another.</p>
+<p>The tactic <code>rw</code> is the same as <code>rewrite</code>, except that after doing the rewriting, it tries to prove the goal by using the <code>rfl</code> tactic (see <a href="#easy">Easy Proofs</a> below).</p>
+<p>The tactic <code>define</code> will write out the definition of a statement. If you want to define just a subexpression of the statement, then you can write <code>define : [subexpression]</code>. For example, if the goal is <code>x ∈ A ∩ B → x ∈ C</code>, then <code>define : x ∈ A ∩ B</code> will change the goal to <code>x ∈ A ∧ x ∈ B → x ∈ C</code>.</p>
+<p>The tactics <code>contrapos</code>, <code>demorgan</code>, <code>conditional</code>, <code>double_neg</code>, <code>bicond_neg</code>, and <code>quant_neg</code> rewrite statements by applying various logical laws; for details, see the tables about laws of <a href="IntroLean.html#prop-tacs">sentential</a> and <a href="Chap3.html#quantneg-tac">quantificational</a> logic. As with the <code>define</code> tactic, you can add <code>: [subexpression]</code> to apply the law to the subexpression. For example, if the goal is <code>P ∧ (Q → ¬R)</code>, then the tactic <code>contrapos : Q → ¬R</code> will change it to <code>P ∧ (R → ¬Q)</code>.</p>
+<p>If the goal is a negative statement, then the tactic <code>push Not</code> will apply multiple laws about negations to “push” the negation as far as possible into the statement.</p>
+<p>If <code>e</code> is an expression of type <code>U</code>, and you want to give it the name <code>n</code> in your proof, then the tactic <code>set n : U := e</code> will introduce the variable <code>n</code> to stand for <code>e</code>.</p>
+</section>
+<section id="easy" class="level3">
+<h3 class="anchored" data-anchor-id="easy">Easy Proofs</h3>
+<p>The tactic <code>rfl</code> proves statements of the form <code>a = a'</code> or <code>a ↔︎ a'</code>, if <code>a</code> and <code>a'</code> are definitionally equal.</p>
+<p>The tactic <code>decide</code> proves statements that can be verified to be true by means of a calculation.</p>
+<p>The tactic <code>trivial</code> proves some “obviously” true statements.</p>
+<p>There is some overlap among these tactics; for example, all three could be used to prove <code>2 + 2 = 4</code>.</p>
+</section>
+<section id="algebra" class="level3">
+<h3 class="anchored" data-anchor-id="algebra">Algebra</h3>
+<p>The tactic <code>ring</code> will try to prove a goal that is an equation by combining algebraic laws involving addition, subtraction, multiplication, and exponentiation with natural number exponents.</p>
+<p>The tactic <code>linarith</code> will try to combine givens that are linear equations or inequalities to prove a goal that is a linear equation or equality, or to prove the goal <code>False</code> if the givens contradict each other.</p>
+<p>If <code>t</code> is a proof of a statement asserting a relationship between two quantities, then the tactic <code>rel [t]</code> will try to prove a goal that can be obtained from that relationship by applying the same operation to both sides. The tactic will try to find a theorem in Lean’s library that says that the operation preserves the relationship, and if the theorem requires auxiliary positivity facts, it will try to prove those facts as well.</p>
+</section>
+<section id="calculational-proofs" class="level3">
+<h3 class="anchored" data-anchor-id="calculational-proofs">Calculational Proofs</h3>
+<p>If <code>P</code>, <code>Q</code>, <code>R</code>, and <code>S</code> are statements, then you can prove <code>P ↔︎ S</code> by proving <code>P ↔︎ Q</code>, <code>Q ↔︎ R</code>, and <code>R ↔︎ S</code>. Such proofs can conveniently be written as calculational proofs. We often use calculational proofs with the <code>have</code> and <code>show</code> tactics. For example, we might write:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode lean code-with-copy"><code class="sourceCode lean"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>  <span class="kw">have</span> h : P ↔ S :=</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">calc</span> P</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>      _ ↔ Q := [proof of P ↔ Q]</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>      _ ↔ R := [proof of Q ↔ R]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>      _ ↔ S := [proof of R ↔ S]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The proofs of the individual lines can be either term-mode proofs or tactic-mode proofs (introduced with <code>by</code>). Calculational proofs can also be used to string together equations or inequalities to prove an equation or inequality.</p>
+</section>
+</section>
+<section id="transitioning-to-standard-lean" class="level2">
+<h2 class="anchored" data-anchor-id="transitioning-to-standard-lean">Transitioning to Standard Lean</h2>
+<p>If you want to continue to use Lean to write mathematical proofs, you may want to learn more about Lean. A good place to start is the <a href="https://leanprover-community.github.io/index.html">Lean Community website</a>. The resources there use “standard” Lean, which is somewhat different from the Lean in this book.</p>
+<p>In a few cases we have used notation in this book that differs from standard Lean notation. For example, if <code>h</code> is a proof of <code>P ↔︎ Q</code>, then we have used <code>h.ltr</code> and <code>h.rtl</code> to denote proofs of the left-to-right and right-to-left directions of the biconditional. The standard Lean notation for these is <code>h.mp</code> and <code>h.mpr</code>, respectively (“mp” and “mpr” stand for “modus ponens” and “modus ponens reverse”). As explained at the end of <a href="Chap5.html#closures">Section 5.4</a>, the notations <code>Pred U</code> and <code>Rel A B</code> denote the types <code>U → Prop</code> and <code>A → B → Prop</code>, respectively. Although <code>Rel</code> is standard notation (defined in Lean’s math library <code>mathlib</code>), <code>Pred</code> is not; the notation <code>BinRel A</code> is also not standard Lean. In place of <code>Pred U</code> you should use <code>U → Prop</code>, and in place of <code>BinRel A</code> you should use <code>Rel A A</code>.</p>
+<p>However, the biggest difference between the Lean in this book and standard Lean is that the tactics marked with an asterisk in the table above are not a part of standard Lean. If you want to learn to write proofs in standard Lean, you’ll need to learn replacements for those tactics. We discuss some such replacements below. Some of these replacements are built into Lean, and some are defined in <code>mathlib</code>.</p>
+<ul>
+<li><span class="lrg"><code>assume</code>, <code>fix</code></span></li>
+</ul>
+<p>If you are proving <code>P → Q</code> and you want to begin by assuming <code>h : P</code>, in standard Lean you would begin your proof by writing <code>intro h</code>. You don’t need to specify that <code>h</code> is an identifier for the assumption <code>P</code>; Lean will figure that out on its own.</p>
+<p>If you are proving <code>∀ (x : U), P x</code> and you want to begin by introducing the variable <code>x</code> to stand for an arbitrary object of type <code>U</code>, in standard Lean you would begin your proof by writing <code>intro x</code>. Again, you don’t need to specify the type of <code>x</code>, because Lean will figure it out.</p>
+<p>Thus, the tactic <code>intro</code> does the job of both <code>assume</code> and <code>fix</code>. Furthermore, you can introduce multiple assumptions or objects with a single use of the <code>intro</code> tactic: <code>intro a b c</code> is equivalent to <code>intro a; intro b; intro c</code>.</p>
+<ul>
+<li><span class="lrg"><code>bicond_neg</code>, <code>demorgan</code>, <code>double_neg</code>, <code>quant_neg</code></span></li>
+</ul>
+<p>We have mostly used these tactics to reexpress negative statements as more useful positive statements. The tactic <code>push Not</code> can be used for this purpose.</p>
+<ul>
+<li><span class="lrg"><code>by_cases on</code></span></li>
+</ul>
+<p>If you have <code>h : P ∨ Q</code>, then you can break your proof into cases by using the tactic <code>rcases h with hP | hQ</code>. In case 1, <code>h : P ∨ Q</code> will be replaced by <code>hP : P</code>, and in case 2 it will be replaced by <code>hQ : Q</code>. In both cases, you have to prove the original goal.</p>
+<p>Note that <code>by_cases h : P</code> is standard Lean; it is only the use of <code>on</code> after <code>by_cases</code> that is nonstandard.</p>
+<ul>
+<li><span class="lrg"><code>by_induc</code>, <code>by_strong_induc</code></span></li>
+</ul>
+<p>We saw in Section 7.2 that if you are proving a statement of the form <code>∀ (l : List U), ...</code>, then you can begin a proof by induction on the length of <code>l</code> by using the tactic <code>apply List.rec</code>. Similarly, if you are proving <code>∀ (n : Nat), ...</code>, you can begin a proof by induction by using the tactic <code>apply Nat.recAux</code>. For strong induction, you can use <code>apply Nat.strongRec</code>.</p>
+<p>There is also a tactic <code>induction</code> that you may want to learn about.</p>
+<ul>
+<li><span class="lrg"><code>conditional</code></span></li>
+</ul>
+<p>The commands <code>#check @imp_iff_not_or</code> and <code>#check @not_imp</code> produce the results</p>
+<div class="ind">
+<pre><code>@imp_iff_not_or : ∀ {a b : Prop}, a → b ↔ ¬a ∨ b
+@not_imp : ∀ {a b : Prop}, ¬(a → b) ↔ a ∧ ¬b</code></pre>
+</div>
+<p>Thus, <code>rewrite [imp_iff_not_or]</code> will convert a statement of the form <code>P → Q</code> into <code>¬P ∨ Q</code>, and <code>rewrite [←imp_iff_not_or]</code> will go in the other direction. Similarly, <code>rewrite [not_imp]</code> will convert a statement of the form <code>¬(P → Q)</code> into <code>P ∧ ¬Q</code>, and <code>rewrite [←not_imp]</code> will go in the other direction.</p>
+<ul>
+<li><span class="lrg"><code>contradict</code></span></li>
+</ul>
+<p>Suppose your goal is <code>False</code> (as it would be if you are doing a proof by contradiction), and you have <code>h : ¬P</code>. Recall that Lean treats <code>¬P</code> as meaning the same thing as <code>P → False</code>, and therefore <code>h _</code> will prove the goal, if the blank is filled in with a proof of <code>P</code>. It follows that <code>apply h</code> will set <code>P</code> as the goal. In other words, in this situation <code>apply h</code> has the same effect as <code>contradict h</code>.</p>
+<p>You could also get the same effect with the tactic <code>suffices hP : P from h hP</code>. Think of this as meaning “it would suffice now to prove <code>P</code>, because if <code>hP</code> were a proof of <code>P</code>, then <code>h hP</code> would prove the goal.” Lean therefore sets <code>P</code> to be the goal.</p>
+<p>Similarly, in a proof by contradiction, if you have <code>h : P</code>, then <code>suffices hnP : ¬P from hnP h</code> will set <code>¬P</code> as the goal.</p>
+<p>Yet another possibility is <code>contrapose! h</code>. (This is a variant on the <code>contrapose!</code> tactic, discussed in the next section.)</p>
+<ul>
+<li><span class="lrg"><code>contrapos</code></span></li>
+</ul>
+<p>If your goal is a conditional statement, then the tactics <code>contrapose</code> and <code>contrapose!</code> will replace the goal with its contrapositive (<code>contrapose!</code> also uses <code>push Not</code> to try to simplify the negated statements that arise when forming a contrapositive). You may also find the theorem <code>not_imp_not</code> useful:</p>
+<div class="ind">
+<pre><code>@not_imp_not : ∀ {a b : Prop}, ¬a → ¬b ↔ b → a</code></pre>
+</div>
+<ul>
+<li><span class="lrg"><code>define</code></span></li>
+</ul>
+<p>The tactic <code>whnf</code> (which stands for “weak head normal form”) is similar to <code>define</code>, although it sometimes produces results that are a little confusing.</p>
+<p>Another way to write out definitions is to prove a lemma stating the definition and then use that lemma as a rewriting rule in the <code>rewrite</code> tactic. See, for example, the use of the theorem <code>inv_def</code> in <a href="Chap4.html#relations">Section 4.2</a>.</p>
+<ul>
+<li><span class="lrg"><code>disj_syll</code></span></li>
+</ul>
+<p>The following theorems can be useful:</p>
+<div id="resolves" class="ind">
+<pre><code>@Or.resolve_left : ∀ {a b : Prop}, a ∨ b → ¬a → b
+@Or.resolve_right : ∀ {a b : Prop}, a ∨ b → ¬b → a
+@Or.neg_resolve_left : ∀ {a b : Prop}, ¬a ∨ b → a → b
+@Or.neg_resolve_right : ∀ {a b : Prop}, a ∨ ¬b → b → a</code></pre>
+</div>
+<p>For example, if you have <code>h1 : P ∨ Q</code> and <code>h2 : ¬P</code>, then <code>Or.resolve_left h1 h2</code> is a proof of <code>Q</code>.</p>
+<ul>
+<li><span class="lrg"><code>exists_unique</code></span></li>
+</ul>
+<p>If your goal is <code>∃! (x : U), P x</code> and you think that <code>a</code> is the unique value of <code>x</code> that makes <code>P x</code> true, then you can use the tactic <code>apply ExistsUnique.intro a</code>. This will leave you with two goals to prove, <code>P a</code> and <code>∀ (y : U), P y → y = a</code>.</p>
+<ul>
+<li><span class="lrg"><code>obtain</code></span></li>
+</ul>
+<p>If you have <code>h : ∃ (x : U), P x</code>, then the tactic <code>obtain ⟨u, h1⟩ := h</code> will introduce both <code>u : U</code> and <code>h1 : P u</code> into the tactic state. Note that <code>u</code> and <code>h1</code> must be enclosed in angle brackets, <code>⟨ ⟩</code>. To enter those brackets, type <code>\&lt;</code> and <code>\&gt;</code>.</p>
+<p>If you have <code>h : ∃! (x : U), P x</code>, then <code>obtain ⟨u, h1, h2⟩ := h</code> will also introduce <code>u : U</code> and <code>h1 : P u</code> into the tactic state. In addition, it will introduce <code>h2</code> as an identifier for a statement that is equivalent to <code>∀ (y : U), P y → y = u</code>. (Unfortunately, the statement introduced is more complicated.)</p>
+<p>You may also find the theorems <code>ExistsUnique.exists</code> and <code>ExistsUnique.unique</code> useful:</p>
+<div class="ind">
+<pre><code>@ExistsUnique.exists : ∀ {α : Sort u_1} {p : α → Prop},
+              (∃! (x : α), p x) → ∃ (x : α), p x
+@ExistsUnique.unique : ∀ {α : Sort u_1} {p : α → Prop},
+              (∃! (x : α), p x) → ∀ {y₁ y₂ : α}, p y₁ → p y₂ → y₁ = y₂</code></pre>
+</div>
+<ul>
+<li><span class="lrg"><code>or_left</code>, <code>or_right</code></span></li>
+</ul>
+<p>If your goal is <code>P ∨ Q</code>, then the tactics <code>or_left</code> and <code>or_right</code> let you assume that one of <code>P</code> and <code>Q</code> is false and prove the other. One way to do that in standard Lean is to use proof by cases. For example, to assume <code>P</code> is false and prove <code>Q</code> you might proceed as follows:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode lean code-with-copy"><code class="sourceCode lean"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- Goal is P ∨ Q</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">by_cases</span> hP : P</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  · <span class="co">-- Case 1. hP : P</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">exact</span> Or.inl hP</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">done</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  · <span class="co">-- Case 2. hP : ¬P</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">apply</span> Or.inr</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">--We now have hP : ¬P, and goal is Q</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="sc">**</span><span class="wa">done</span><span class="sc">::</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Another possibility is to use one of the <a href="#resolves">theorems</a> <code>Or.resolve_left</code>, <code>Or.resolve_right</code>, <code>Or.neg_resolve_left</code>, or <code>Or.neg_resolve_right</code> (described under <code>disj_syll</code> above) to convert the goal to an implication.</p>
+<ul>
+<li><span class="lrg"><code>show</code></span></li>
+</ul>
+<p>There is a <code>show</code> tactic in standard Lean, but it works a little differently from the <code>show</code> tactic we have used in this book. When our goal was a statement <code>P</code> and we had an expression <code>t</code> that was a proof of <code>P</code>, we usually completed the proof by writing <code>show P from t</code>. In standard Lean you can complete the proof by writing <code>exact t</code>, as explained near the end of <a href="Chap3.html#existence-and-uniqueness-proofs">Section 3.6</a>.</p>
+</section>
+<section id="typing-symbols" class="level2">
+<h2 class="anchored" data-anchor-id="typing-symbols">Typing Symbols</h2>
+<div style="margin: 0% 10%">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Symbol</th>
+<th style="text-align: center;">How To Type It</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;"><code>¬</code></td>
+<td style="text-align: center;"><code>\not</code> or <code>\n</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>∧</code></td>
+<td style="text-align: center;"><code>\and</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>∨</code></td>
+<td style="text-align: center;"><code>\or</code> or <code>\v</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>→</code></td>
+<td style="text-align: center;"><code>\to</code> or <code>\r</code> or <code>\imp</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>↔︎</code></td>
+<td style="text-align: center;"><code>\iff</code> or <code>\lr</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>∀</code></td>
+<td style="text-align: center;"><code>\forall</code> or <code>\all</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>∃</code></td>
+<td style="text-align: center;"><code>\exists</code> or <code>\ex</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>⦃</code></td>
+<td style="text-align: center;"><code>\{{</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>⦄</code></td>
+<td style="text-align: center;"><code>\}}</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>=</code></td>
+<td style="text-align: center;"><code>=</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>≠</code></td>
+<td style="text-align: center;"><code>\ne</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>∈</code></td>
+<td style="text-align: center;"><code>\in</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>∉</code></td>
+<td style="text-align: center;"><code>\notin</code> or <code>\inn</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>⊆</code></td>
+<td style="text-align: center;"><code>\sub</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>⊈</code></td>
+<td style="text-align: center;"><code>\subn</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>∪</code></td>
+<td style="text-align: center;"><code>\union</code> or <code>\cup</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>∩</code></td>
+<td style="text-align: center;"><code>\inter</code> or <code>\cap</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>⋃₀</code></td>
+<td style="text-align: center;"><code>\U0</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>⋂₀</code></td>
+<td style="text-align: center;"><code>\I0</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>\</code></td>
+<td style="text-align: center;"><code>\\</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>∆</code></td>
+<td style="text-align: center;"><code>\symmdiff</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>∅</code></td>
+<td style="text-align: center;"><code>\emptyset</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>𝒫</code></td>
+<td style="text-align: center;"><code>\powerset</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>·</code></td>
+<td style="text-align: center;"><code>\.</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>←</code></td>
+<td style="text-align: center;"><code>\leftarrow</code> or <code>\l</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>↑</code></td>
+<td style="text-align: center;"><code>\uparrow</code> or <code>\u</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>ℕ</code></td>
+<td style="text-align: center;"><code>\N</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>ℤ</code></td>
+<td style="text-align: center;"><code>\Z</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>ℚ</code></td>
+<td style="text-align: center;"><code>\Q</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>ℝ</code></td>
+<td style="text-align: center;"><code>\R</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>ℂ</code></td>
+<td style="text-align: center;"><code>\C</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>≤</code></td>
+<td style="text-align: center;"><code>\le</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>≥</code></td>
+<td style="text-align: center;"><code>\ge</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>∣</code></td>
+<td style="text-align: center;"><code>\|</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>×</code></td>
+<td style="text-align: center;"><code>\times</code> or <code>\x</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>∘</code></td>
+<td style="text-align: center;"><code>\comp</code> or <code>\circ</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>≡</code></td>
+<td style="text-align: center;"><code>\==</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>∼</code></td>
+<td style="text-align: center;"><code>\sim</code> or <code>\~</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>ₛ</code></td>
+<td style="text-align: center;"><code>\_s</code></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><code>⟨</code></td>
+<td style="text-align: center;"><code>\&lt;</code></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><code>⟩</code></td>
+<td style="text-align: center;"><code>\&gt;</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="Chap8.html" class="pagination-link" aria-label="Infinite Sets">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Infinite Sets</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2023-2025 Daniel J. Velleman.<br>Short excerpts from Daniel J. Velleman, <a href="https://doi.org/10.1017/9781108539890"><i>How To Prove It: A Structured Approach, 3rd Edition</i></a><br>© Daniel J. Velleman 2019, published by Cambridge University Press, reprinted with permission.</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body>
+<!-- Mirrored from https://djvelleman.github.io/HTPIwL/Appendix.html by HTTrack Website Copier/3.x [XR&CO], Fri, 25 Sep 2026 19:31:40 GMT -->
+</html>

@@ -1,0 +1,5 @@
+Plan self-review completed 2026-09-27.
+
+Coverage checked against docs/superpowers/specs/2026-09-27-psc2-minimal-kernel-design.md.
+Phase 1 intentionally covers only package isolation, Name, Level, Expr, substitution/instantiation, source discipline, differential parity, and size reporting.
+Later spec requirements (environment/declarations, infer/WHNF/defeq, Quot, inductives, K7/K8 corpora, compiler integration) remain explicitly deferred to later independently reviewable phases.

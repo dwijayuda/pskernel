@@ -1,0 +1,26 @@
+{
+  "name": "@proofscript/compiler-next",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": true,
+    "portable": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "testRoots": [
+      "test"
+    ],
+    "outDir": "dist",
+    "role": "compiler-api"
+  },
+  "dependencies": {
+    "@proofscript/syntax-next": "0.0.0-dev",
+    "@proofscript/bridge-next": "0.0.0-dev",
+    "@proofscript/environment-next": "0.0.0-dev",
+    "@proofscript/elab-next": "0.0.0-dev",
+    "@proofscript/erasure-next": "0.0.0-dev",
+    "@proofscript/backend-ts-next": "0.0.0-dev"
+  }
+}

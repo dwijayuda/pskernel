@@ -1,0 +1,141 @@
+name: Full Std adaptive replay
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "test/**"
+      - "oracle/replay-probe/DependencyExport.lean"
+      - "scripts/adaptive-root-oracle.mjs"
+      - "scripts/batch-replay-worker.mjs"
+      - ".github/workflows/full-std-batch.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: full-std-adaptive-main-v3
+  cancel-in-progress: true
+
+jobs:
+  std-hot:
+    name: Hot Std roots ${{ matrix.start }}-${{ matrix.end }}
+    if: github.event_name == 'push' && !contains(github.event.head_commit.message, '[full-std]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - { start: 16484, end: 16499, count: 16 }
+          - { start: 18843, end: 18858, count: 16 }
+          - { start: 20000, end: 20014, count: 15 }
+          - { start: 22640, end: 22655, count: 16 }
+          - { start: 25000, end: 25014, count: 15 }
+          - { start: 27515, end: 27530, count: 16 }
+          - { start: 33015, end: 33030, count: 16 }
+          - { start: 36452, end: 36467, count: 16 }
+          - { start: 37609, end: 37624, count: 16 }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - name: Verify formerly hot Std leaf
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 ${{ matrix.start }} ${{ matrix.count }} ${{ matrix.count }} 1
+
+  std-range:
+    name: Std roots ${{ matrix.start }}-${{ matrix.end }}
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-std]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        include:
+          - { start: 0, end: 2499, count: 2500 }
+          - { start: 2500, end: 4999, count: 2500 }
+          - { start: 5000, end: 7499, count: 2500 }
+          - { start: 7500, end: 9999, count: 2500 }
+          - { start: 10000, end: 12499, count: 2500 }
+          - { start: 12500, end: 14999, count: 2500 }
+          - { start: 15000, end: 17499, count: 2500 }
+          - { start: 17500, end: 19999, count: 2500 }
+          - { start: 20000, end: 22499, count: 2500 }
+          - { start: 22500, end: 24999, count: 2500 }
+          - { start: 25000, end: 27499, count: 2500 }
+          - { start: 27500, end: 29999, count: 2500 }
+          - { start: 30000, end: 32499, count: 2500 }
+          - { start: 32500, end: 34999, count: 2500 }
+          - { start: 35000, end: 37499, count: 2500 }
+          - { start: 37500, end: 39999, count: 2500 }
+          - { start: 40000, end: 42499, count: 2500 }
+          - { start: 42500, end: 44999, count: 2500 }
+          - { start: 45000, end: 47499, count: 2500 }
+          - { start: 47500, end: 49999, count: 2500 }
+          - { start: 50000, end: 52499, count: 2500 }
+          - { start: 52500, end: 54999, count: 2500 }
+          - { start: 55000, end: 57499, count: 2500 }
+          - { start: 57500, end: 59999, count: 2500 }
+          - { start: 60000, end: 62499, count: 2500 }
+          - { start: 62500, end: 64999, count: 2500 }
+          - { start: 65000, end: 67499, count: 2500 }
+          - { start: 67500, end: 69999, count: 2500 }
+          - { start: 70000, end: 72499, count: 2500 }
+          - { start: 72500, end: 74999, count: 2500 }
+          - { start: 75000, end: 77499, count: 2500 }
+          - { start: 77500, end: 79999, count: 2500 }
+          - { start: 80000, end: 82499, count: 2500 }
+          - { start: 82500, end: 84999, count: 2500 }
+          - { start: 85000, end: 87499, count: 2500 }
+          - { start: 87500, end: 89999, count: 2500 }
+          - { start: 90000, end: 92499, count: 2500 }
+          - { start: 92500, end: 94999, count: 2500 }
+          - { start: 95000, end: 97499, count: 2500 }
+          - { start: 97500, end: 99999, count: 2500 }
+          - { start: 100000, end: 102499, count: 2500 }
+          - { start: 102500, end: 104999, count: 2500 }
+          - { start: 105000, end: 107499, count: 2500 }
+          - { start: 107500, end: 109999, count: 2500 }
+          - { start: 110000, end: 112499, count: 2500 }
+          - { start: 112500, end: 114028, count: 1529 }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - name: Verify adaptive dependency-closed Std root interval
+        run: node scripts/adaptive-root-oracle.mjs Std 114029 ${{ matrix.start }} ${{ matrix.count }} 500 1
+
+  std-complete:
+    name: Full Std 114,029-root coverage
+    if: always() && (github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-std]'))
+    needs: [std-range]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every Std range
+        run: |
+          test "${{ needs.std-range.result }}" = "success"
+          echo "Full Std coverage PASS: 114,029 / 114,029 direct roots"

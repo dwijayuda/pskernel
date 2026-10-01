@@ -1,0 +1,29 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "types": [
+      "node"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@proofscript/language-service": [
+        "../language-service/dist/src/index.d.ts"
+      ],
+      "lean-ts-kernel": [
+        "../../dist/src/index.d.ts"
+      ],
+      "@proofscript/environment/node": [
+        "../environment/dist/src/node.d.ts"
+      ],
+      "@proofscript/project/node": [
+        "../project/dist/src/node.d.ts"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ]
+}

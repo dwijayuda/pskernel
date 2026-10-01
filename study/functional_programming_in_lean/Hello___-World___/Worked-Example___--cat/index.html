@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html>
+  
+<!-- Mirrored from https://lean-lang.org/functional_programming_in_lean/Hello___-World___/Worked-Example___--cat/ by HTTrack Website Copier/3.x [XR&CO], Wed, 23 Sep 2026 18:47:59 GMT -->
+<!-- Added by HTTrack --><meta http-equiv="content-type" content="text/html;charset=UTF-8" /><!-- /Added by HTTrack -->
+<head><script>
+(function () {
+  const canonical = "Hello___-World___/Worked-Example___--cat/index.html";
+  const loc = window.location;
+  const path = loc.pathname;
+
+  // Normalize the path by which the page was accessed to the directory form
+  // that canonical URLs use
+  let dir = path;
+  if (dir.endsWith("https://lean-lang.org/index.html")) {
+    dir = dir.slice(0, -"index.html".length);
+  } else if (dir.endsWith(".html")) {
+    dir = dir.slice(0, -".html".length) + "/";
+  } else if (!dir.endsWith("/")) {
+    dir = dir + "/";
+  }
+
+  // The prefix depends on where the site is served from, so compare only the
+  // final segments, modulo case. Leave any other URL as it is.
+  if (dir.slice(-canonical.length).toLowerCase() !== canonical.toLowerCase()) return;
+
+  // The final segments did match, so redirect to the correct location,
+  // taking into account that we might be served from a different root.
+  const target = dir.slice(0, -canonical.length) + canonical;
+  if (target !== path) {
+    loc.replace(target + loc.search + loc.hash);
+  }
+})();
+</script>
+    <script>
+      (function(){
+  const {protocol:proto, host:hostName, pathname:path, search:srch, hash:hsh} = window.location;
+  if (!(path.endsWith("/") || path.endsWith(".html"))) {
+    window.location.replace(`${proto}//${hostName}${path}/${srch}${hsh}`);
+  }
+})()</script>
+    <script>
+      // Enable TypeScript checking.
+// @ts-check
+
+// Applies a saved table-of-contents width before the first paint.
+//
+// This is a tiny inline counterpart to toc-resize.js: it runs in the page head so that
+// returning desktop readers do not see the default width flash to their saved width.
+// It only records the width in the --verso-toc-user-width custom property; the
+// stylesheet clamps it and ignores it on mobile, and toc-resize.js then takes over the
+// interactive resizing. Keep the storage key in sync with toc-resize.js.
+
+(function () {
+    try {
+        const saved = localStorage.getItem("verso-toc-width");
+        // Parse to a number (as toc-resize.js does) and write that back, so a stored
+        // value with stray whitespace becomes a valid length rather than `" 420 px"`.
+        const width = saved === null ? NaN : Number(saved);
+        if (Number.isFinite(width)) {
+            document.documentElement.style.setProperty("--verso-toc-user-width", `${width}px`);
+        }
+    } catch (_) {
+        // Leave the default width in place when local storage is unavailable.
+    }
+})();
+</script>
+    <base href=""><meta charset="utf-8">
+    <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <title>Worked Example:  cat</title><link rel="stylesheet" href="../../book.css">
+    <link rel="stylesheet" href="../../verso-vars.css">
+    <script src="../../../../cdn.jsdelivr.net/npm/marked%4011.1.1/marked.min.js" integrity="sha384-zbcZAIxlvJtNE3Dp5nxLXdXtXyxwOdnILY1TDPVmKFhl4r4nSUG1r8bcFXGVa4Te" crossorigin="anonymous"></script>
+    <script defer="defer" src="../../-verso-search/elasticlunr.min.js"></script>
+    <script defer="defer" src="../../-verso-search/fuzzysort.min.js"></script>
+    <script defer="defer" src="../../-verso-search/searchIndex.js"></script>
+    <script defer="defer" src="../../-verso-search/search-config.js"></script>
+    <script type="module" src="../../-verso-search/search-init.js"></script>
+    <link rel="stylesheet" href="../../-verso-search/search-box.css">
+    <link rel="stylesheet" href="../../-verso-search/search-page.css">
+    <link rel="stylesheet" href="../../-verso-search/search-highlight.css">
+    <link rel="stylesheet" href="../../-verso-search/domain-display.css">
+    <script src="../../-verso-search/search-highlight.js" defer="defer"></script>
+    <script src="../../toc-resize.js" defer="defer"></script>
+    <script src="../../-verso-data/katex/katex.js"></script>
+    <script src="../../-verso-data/katex/math.js"></script>
+    <script src="../../-verso-data/popper.min.js"></script>
+    <script src="../../-verso-data/tippy-bundle.umd.min.js"></script>
+    <link rel="stylesheet" href="../../-verso-data/tippy-border.css">
+    <link rel="stylesheet" href="../../-verso-data/katex/katex.css">
+    <style>
+div.paragraph > .eval-steps:not(:first-child), div.paragraph > .eval-steps:not(:first-child) > * {
+  margin-top: 0.5rem;
+}
+
+div.paragraph > .eval-steps:not(:last-child), div.paragraph > .eval-steps:not(:last-child) > * {
+  margin-bottom: 0.5rem;
+}
+
+.eval-steps .hl.lean.block {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.eval-steps .hl.lean.block:not(:last-child)::after {
+  content: "⟹";
+  display: block;
+  margin-left: 1em;
+  font-size: 175%;
+}
+
+</style><style>
+.shell-commands {
+
+}
+.shell-commands > * {
+  display: block;
+  white-space: pre;
+}
+.shell-commands .command::before {
+  content: "$ ";
+  font-weight: 600;
+}
+
+div.paragraph > .shell-commands:not(:first-child) {
+  margin-top: 0.5rem;
+}
+
+div.paragraph > .shell-commands:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+</style><style>
+.eq-steps .hl.lean.block {
+  background-color: #f6f7f6;
+  padding: 1rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+.eq-steps .reason {
+  font-style: italic;
+  margin-left: 2.5em;
+  display: flex;
+}
+.eq-steps .reason::before {
+  content: "={";
+  font-family: var(--verso-code-font-family);
+  font-style: normal;
+  font-weight: 600;
+  margin-right: 0.5em;
+  align-self: center;
+}
+.eq-steps .reason > p {
+  margin: 0;
+  max-width: 25em;
+  align-self: center;
+}
+.eq-steps .reason::after {
+  content: "}=";
+  font-family: var(--verso-code-font-family);
+  font-style: normal;
+  font-weight: 600;
+  margin-left: 1em;
+  align-self: center;
+}
+</style><style>/static/theme.css</style><style>
+.example-file {
+  white-space: normal;
+  font-family: var(--verso-structure-font-family);
+  margin: 1rem;
+  width: fit-content;
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+
+  /* These are necessary for the container to behave nicely on mobile */
+  overflow-x: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.example-file::before {
+  counter-reset: linenumber;
+}
+.example-file > .line {
+  display: block;
+  white-space: pre;
+  counter-increment: linenumber;
+  font-family: var(--verso-code-font-family);
+}
+.example-file > .line::before {
+  -webkit-user-select: none;
+  display: inline-block;
+  content: counter(linenumber);
+  border-right: 1px solid #ddd;
+  width: 2em;
+  padding-right: 0.25em;
+  margin-right: 0.25em;
+  font-family: var(--verso-code-font-family);
+  text-align: right;
+}
+.example-file > .line::after {
+  -webkit-user-select: none;
+  display: inline-block;
+  content: "⏎";
+  opacity: 0;
+}
+.example-file > .line:hover::after {
+  opacity: 1;
+}
+.example-file > .line:hover, .example-file > .line:hover::before {
+  background-color: #eee;
+}
+.example-file > .empty {
+  display: block;
+  white-space: pre;
+  font-family: var(--verso-code-font-family);
+  font-style: italic;
+}
+.example-file > .empty::before {
+  -webkit-user-select: none;
+  display: inline-block;
+  content: "";
+  border-right: 1px solid #ddd;
+  width: 2em;
+  padding-right: 0.25em;
+  margin-right: 0.25em;
+  font-family: var(--verso-code-font-family);
+  text-align: right;
+}
+</style><style>
+.shell-command {
+
+}
+.shell-command.block > * {
+  display: block;
+  white-space: pre;
+}
+.shell-command .command .prompt {
+  font-weight: 600;
+}
+
+div.paragraph > .shell-command:not(:first-child) {
+  margin-top: 0.5rem;
+}
+
+div.paragraph > .shell-command:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+</style><style>/static/fonts/source-code-pro/source-code-pro.css</style><style>
+.namedocs {
+  position: relative;
+  border: solid 1px #98B2C0;
+  border-radius: .5rem;
+  padding-top: var(--verso--box-padding);
+  margin-top: var(--verso--box-vertical-margin);
+  margin-bottom: var(--verso--box-vertical-margin);
+}
+
+.namedocs .text {
+  /* Causes margins on child elements to collapse inside the element, such
+     that the margins don't extend into parent with the background color.
+     The effect is that weird borders in the definition box don't happen anymore. */
+  display: flow-root;
+  /* Add a padding. this is the same as the margin applied to the first and last child.
+     The effect is that the padding looks the same size on all sides. */
+  padding: 0 var(--verso--box-padding);
+  border-top: 1px solid #98B2C0;
+}
+
+.namedocs .text > pre {
+  overflow-x: auto;
+}
+
+.namedocs .signature {
+  font-family: var(--verso-code-font-family);
+  margin-top: 0 !important;
+  margin-left: var(--verso--box-padding) !important;
+  margin-bottom: .75rem !important;
+}
+
+.namedocs .label {
+  display: block;
+  font-size: small;
+  font-family: var(--verso-structure-font-family);
+  position: absolute;
+  top: -0.65rem;
+  left: 1rem;
+  background: #fff;
+  padding: 0 .5rem .125rem;
+  border: 1px solid #98B2C0;
+  border-radius: 1rem;
+  color: #555;
+}
+
+.namedocs .docstring-section {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.namedocs .docstring-section-label {
+  font-size: inherit;
+  font-weight: bold;
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.namedocs > .text .constructor {
+  padding-top: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.namedocs > .text .constructor::before {
+  content: '| ';
+  display: block;
+  font-family: var(--verso-code-font-family);
+  font-weight: bold;
+  float: left;
+  width: 0.5rem;
+  white-space: pre;
+}
+
+.namedocs > .text .constructor .name-and-type {
+  padding-left: 0.5rem;
+  float: left;
+  margin-top: 0;
+  max-width: calc(100% - 1rem);
+}
+.namedocs > .text .constructor .docs {
+  clear: both;
+  padding-left: 1rem;
+}
+
+/* These margins work together with the padding on .text */
+.namedocs .text > :first-child {
+  margin-top: var(--verso--box-padding);
+}
+.namedocs .text > :last-child {
+  margin-bottom: var(--verso--box-padding);
+}
+
+.namedocs .methods td, .namedocs .fields td {
+  vertical-align: top;
+}
+.namedocs .inheritance {
+  vertical-align: top;
+  font-size: smaller;
+  font-family: var(--verso-structure-font-family);
+}
+.namedocs .inheritance ol {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+.namedocs .inheritance ol li {
+  list-style-type: none;
+  display: inline-block;
+}
+.namedocs .inheritance ol li::after {
+  content: " > "
+}
+.namedocs .inheritance ol li:last-child::after {
+  content: "";
+}
+
+.namedocs .extends {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+.namedocs .extends li {
+  list-style-type: none;
+  display: inline-block;
+}
+
+.namedocs .extends li label {
+  padding-right: 1rem;
+}
+
+.namedocs .subdocs .name-and-type {
+  font-size: 1rem;
+  margin-left: 0;
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0.5rem;
+}
+
+.namedocs .subdocs .docs {
+  margin-left: 1.5rem;
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0.5rem;
+}
+
+.namedocs:has(input[data-parent-idx]) [data-inherited-from] {
+  transition-property: opacity, display;
+  transition-duration: 0.4s;
+  transition-behavior: allow-discrete;
+  @starting-style { opacity: 0 !important; }
+}
+
+#this-page-items .tactic-name { font-weight: bold; }
+.namedocs:has(input[data-parent-idx="0"]) [data-inherited-from="0"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="0"]:checked) [data-inherited-from="0"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="0"]:checked):has(.inheritance[data-inherited-from="0"]:hover) [data-inherited-from]:not([data-inherited-from="0"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="1"]) [data-inherited-from="1"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="1"]:checked) [data-inherited-from="1"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="1"]:checked):has(.inheritance[data-inherited-from="1"]:hover) [data-inherited-from]:not([data-inherited-from="1"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="2"]) [data-inherited-from="2"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="2"]:checked) [data-inherited-from="2"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="2"]:checked):has(.inheritance[data-inherited-from="2"]:hover) [data-inherited-from]:not([data-inherited-from="2"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="3"]) [data-inherited-from="3"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="3"]:checked) [data-inherited-from="3"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="3"]:checked):has(.inheritance[data-inherited-from="3"]:hover) [data-inherited-from]:not([data-inherited-from="3"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="4"]) [data-inherited-from="4"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="4"]:checked) [data-inherited-from="4"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="4"]:checked):has(.inheritance[data-inherited-from="4"]:hover) [data-inherited-from]:not([data-inherited-from="4"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="5"]) [data-inherited-from="5"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="5"]:checked) [data-inherited-from="5"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="5"]:checked):has(.inheritance[data-inherited-from="5"]:hover) [data-inherited-from]:not([data-inherited-from="5"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="6"]) [data-inherited-from="6"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="6"]:checked) [data-inherited-from="6"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="6"]:checked):has(.inheritance[data-inherited-from="6"]:hover) [data-inherited-from]:not([data-inherited-from="6"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="7"]) [data-inherited-from="7"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="7"]:checked) [data-inherited-from="7"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="7"]:checked):has(.inheritance[data-inherited-from="7"]:hover) [data-inherited-from]:not([data-inherited-from="7"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="8"]) [data-inherited-from="8"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="8"]:checked) [data-inherited-from="8"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="8"]:checked):has(.inheritance[data-inherited-from="8"]:hover) [data-inherited-from]:not([data-inherited-from="8"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="9"]) [data-inherited-from="9"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="9"]:checked) [data-inherited-from="9"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="9"]:checked):has(.inheritance[data-inherited-from="9"]:hover) [data-inherited-from]:not([data-inherited-from="9"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="10"]) [data-inherited-from="10"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="10"]:checked) [data-inherited-from="10"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="10"]:checked):has(.inheritance[data-inherited-from="10"]:hover) [data-inherited-from]:not([data-inherited-from="10"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="11"]) [data-inherited-from="11"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="11"]:checked) [data-inherited-from="11"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="11"]:checked):has(.inheritance[data-inherited-from="11"]:hover) [data-inherited-from]:not([data-inherited-from="11"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="12"]) [data-inherited-from="12"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="12"]:checked) [data-inherited-from="12"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="12"]:checked):has(.inheritance[data-inherited-from="12"]:hover) [data-inherited-from]:not([data-inherited-from="12"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="13"]) [data-inherited-from="13"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="13"]:checked) [data-inherited-from="13"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="13"]:checked):has(.inheritance[data-inherited-from="13"]:hover) [data-inherited-from]:not([data-inherited-from="13"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="14"]) [data-inherited-from="14"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="14"]:checked) [data-inherited-from="14"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="14"]:checked):has(.inheritance[data-inherited-from="14"]:hover) [data-inherited-from]:not([data-inherited-from="14"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="15"]) [data-inherited-from="15"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="15"]:checked) [data-inherited-from="15"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="15"]:checked):has(.inheritance[data-inherited-from="15"]:hover) [data-inherited-from]:not([data-inherited-from="15"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="16"]) [data-inherited-from="16"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="16"]:checked) [data-inherited-from="16"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="16"]:checked):has(.inheritance[data-inherited-from="16"]:hover) [data-inherited-from]:not([data-inherited-from="16"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="17"]) [data-inherited-from="17"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="17"]:checked) [data-inherited-from="17"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="17"]:checked):has(.inheritance[data-inherited-from="17"]:hover) [data-inherited-from]:not([data-inherited-from="17"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="18"]) [data-inherited-from="18"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="18"]:checked) [data-inherited-from="18"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="18"]:checked):has(.inheritance[data-inherited-from="18"]:hover) [data-inherited-from]:not([data-inherited-from="18"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="19"]) [data-inherited-from="19"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="19"]:checked) [data-inherited-from="19"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="19"]:checked):has(.inheritance[data-inherited-from="19"]:hover) [data-inherited-from]:not([data-inherited-from="19"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="20"]) [data-inherited-from="20"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="20"]:checked) [data-inherited-from="20"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="20"]:checked):has(.inheritance[data-inherited-from="20"]:hover) [data-inherited-from]:not([data-inherited-from="20"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="21"]) [data-inherited-from="21"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="21"]:checked) [data-inherited-from="21"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="21"]:checked):has(.inheritance[data-inherited-from="21"]:hover) [data-inherited-from]:not([data-inherited-from="21"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="22"]) [data-inherited-from="22"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="22"]:checked) [data-inherited-from="22"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="22"]:checked):has(.inheritance[data-inherited-from="22"]:hover) [data-inherited-from]:not([data-inherited-from="22"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="23"]) [data-inherited-from="23"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="23"]:checked) [data-inherited-from="23"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="23"]:checked):has(.inheritance[data-inherited-from="23"]:hover) [data-inherited-from]:not([data-inherited-from="23"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="24"]) [data-inherited-from="24"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="24"]:checked) [data-inherited-from="24"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="24"]:checked):has(.inheritance[data-inherited-from="24"]:hover) [data-inherited-from]:not([data-inherited-from="24"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="25"]) [data-inherited-from="25"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="25"]:checked) [data-inherited-from="25"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="25"]:checked):has(.inheritance[data-inherited-from="25"]:hover) [data-inherited-from]:not([data-inherited-from="25"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="26"]) [data-inherited-from="26"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="26"]:checked) [data-inherited-from="26"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="26"]:checked):has(.inheritance[data-inherited-from="26"]:hover) [data-inherited-from]:not([data-inherited-from="26"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="27"]) [data-inherited-from="27"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="27"]:checked) [data-inherited-from="27"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="27"]:checked):has(.inheritance[data-inherited-from="27"]:hover) [data-inherited-from]:not([data-inherited-from="27"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="28"]) [data-inherited-from="28"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="28"]:checked) [data-inherited-from="28"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="28"]:checked):has(.inheritance[data-inherited-from="28"]:hover) [data-inherited-from]:not([data-inherited-from="28"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="29"]) [data-inherited-from="29"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="29"]:checked) [data-inherited-from="29"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="29"]:checked):has(.inheritance[data-inherited-from="29"]:hover) [data-inherited-from]:not([data-inherited-from="29"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="30"]) [data-inherited-from="30"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="30"]:checked) [data-inherited-from="30"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="30"]:checked):has(.inheritance[data-inherited-from="30"]:hover) [data-inherited-from]:not([data-inherited-from="30"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="31"]) [data-inherited-from="31"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="31"]:checked) [data-inherited-from="31"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="31"]:checked):has(.inheritance[data-inherited-from="31"]:hover) [data-inherited-from]:not([data-inherited-from="31"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="32"]) [data-inherited-from="32"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="32"]:checked) [data-inherited-from="32"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="32"]:checked):has(.inheritance[data-inherited-from="32"]:hover) [data-inherited-from]:not([data-inherited-from="32"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="33"]) [data-inherited-from="33"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="33"]:checked) [data-inherited-from="33"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="33"]:checked):has(.inheritance[data-inherited-from="33"]:hover) [data-inherited-from]:not([data-inherited-from="33"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="34"]) [data-inherited-from="34"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="34"]:checked) [data-inherited-from="34"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="34"]:checked):has(.inheritance[data-inherited-from="34"]:hover) [data-inherited-from]:not([data-inherited-from="34"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="35"]) [data-inherited-from="35"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="35"]:checked) [data-inherited-from="35"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="35"]:checked):has(.inheritance[data-inherited-from="35"]:hover) [data-inherited-from]:not([data-inherited-from="35"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="36"]) [data-inherited-from="36"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="36"]:checked) [data-inherited-from="36"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="36"]:checked):has(.inheritance[data-inherited-from="36"]:hover) [data-inherited-from]:not([data-inherited-from="36"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="37"]) [data-inherited-from="37"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="37"]:checked) [data-inherited-from="37"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="37"]:checked):has(.inheritance[data-inherited-from="37"]:hover) [data-inherited-from]:not([data-inherited-from="37"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="38"]) [data-inherited-from="38"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="38"]:checked) [data-inherited-from="38"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="38"]:checked):has(.inheritance[data-inherited-from="38"]:hover) [data-inherited-from]:not([data-inherited-from="38"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="39"]) [data-inherited-from="39"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="39"]:checked) [data-inherited-from="39"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="39"]:checked):has(.inheritance[data-inherited-from="39"]:hover) [data-inherited-from]:not([data-inherited-from="39"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="40"]) [data-inherited-from="40"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="40"]:checked) [data-inherited-from="40"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="40"]:checked):has(.inheritance[data-inherited-from="40"]:hover) [data-inherited-from]:not([data-inherited-from="40"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="41"]) [data-inherited-from="41"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="41"]:checked) [data-inherited-from="41"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="41"]:checked):has(.inheritance[data-inherited-from="41"]:hover) [data-inherited-from]:not([data-inherited-from="41"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="42"]) [data-inherited-from="42"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="42"]:checked) [data-inherited-from="42"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="42"]:checked):has(.inheritance[data-inherited-from="42"]:hover) [data-inherited-from]:not([data-inherited-from="42"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="43"]) [data-inherited-from="43"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="43"]:checked) [data-inherited-from="43"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="43"]:checked):has(.inheritance[data-inherited-from="43"]:hover) [data-inherited-from]:not([data-inherited-from="43"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="44"]) [data-inherited-from="44"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="44"]:checked) [data-inherited-from="44"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="44"]:checked):has(.inheritance[data-inherited-from="44"]:hover) [data-inherited-from]:not([data-inherited-from="44"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="45"]) [data-inherited-from="45"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="45"]:checked) [data-inherited-from="45"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="45"]:checked):has(.inheritance[data-inherited-from="45"]:hover) [data-inherited-from]:not([data-inherited-from="45"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="46"]) [data-inherited-from="46"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="46"]:checked) [data-inherited-from="46"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="46"]:checked):has(.inheritance[data-inherited-from="46"]:hover) [data-inherited-from]:not([data-inherited-from="46"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="47"]) [data-inherited-from="47"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="47"]:checked) [data-inherited-from="47"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="47"]:checked):has(.inheritance[data-inherited-from="47"]:hover) [data-inherited-from]:not([data-inherited-from="47"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="48"]) [data-inherited-from="48"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="48"]:checked) [data-inherited-from="48"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="48"]:checked):has(.inheritance[data-inherited-from="48"]:hover) [data-inherited-from]:not([data-inherited-from="48"]) {
+  opacity: 0.5;
+}
+.namedocs:has(input[data-parent-idx="49"]) [data-inherited-from="49"] {
+  display: none;
+  opacity: 0;
+}
+.namedocs:has(input[data-parent-idx="49"]:checked) [data-inherited-from="49"] {
+  display: block;
+  transform: none;
+  opacity: 1;
+}
+.namedocs:has(input[data-parent-idx="49"]:checked):has(.inheritance[data-inherited-from="49"]:hover) [data-inherited-from]:not([data-inherited-from="49"]) {
+  opacity: 0.5;
+}
+</style><style>
+table.tabular {
+  margin: auto;
+  border-spacing: 1rem;
+}
+table.tabular.left-align {
+  margin-right: auto;
+  margin-left: 0;
+}
+table.tabular.center-align {
+  margin: auto;
+}
+table.tabular.right-align {
+  margin-left auto;
+  margin-right: 0;
+}
+table.tabular td, table.tabular th {
+  text-align: left;
+  vertical-align: top;
+}
+table.tabular td > p:first-child, table.tabular th > p:first-child {
+  margin-top: 0;
+}
+table.tabular td > p:last-child, table.tabular th > p:first-child {
+  margin-bottom: 0;
+}
+</style><style>/static/fonts/source-serif/source-serif-text.css</style><style>/static/fonts/source-sans/source-sans-3.css</style><style>
+a.technical-term {
+  color: inherit;
+  text-decoration: currentcolor underline dotted;
+}
+a.technical-term:hover {
+  text-decoration: currentcolor underline solid;
+}
+/* Highlight the clicked term */
+.def-technical-term:target {
+  background-color: var(--verso-selected-color);
+  outline: auto;
+}
+</style><style>
+.shell-command {
+
+}
+.shell-command.inline > * {
+  display: inline;
+  white-space: pre;
+}
+.shell-command.inline .command::before {
+  content: "$ ";
+  font-weight: 600;
+}
+</style><style>/static/fonts/noto-sans-mono/noto-sans-mono.css</style><style>
+.interaction {
+  overflow-x: auto;
+}
+.interaction > * {
+  display: inline;
+  white-space: pre;
+}
+.interaction .command::before {
+  content: "$ ";
+  font-weight: 600;
+}
+.interaction .input {
+  font-weight: 600;
+  color: #0000c0;
+}
+
+div.paragraph > .interaction:not(:first-child) {
+  margin-top: 0.5rem;
+}
+
+div.paragraph > .interaction:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+</style><style>
+div.paragraph > .eq-steps:not(:first-child) {
+  margin-top: 0.5rem;
+}
+
+div.paragraph > .eq-steps:not(:last-child) {
+  margin-bottom: 0.5rem;
+}
+</style><style>
+
+.hl.lean {
+  white-space: pre;
+  font-weight: normal;
+  font-style: normal;
+  font-size: inherit;
+}
+
+.hl.lean .keyword {
+  color: var(--verso-code-keyword-color,);
+  font-weight: var(--verso-code-keyword-weight, bold);
+  font-style: var(--verso-code-keyword-style, normal);
+  font-family: var(--verso-code-keyword-font-family,);
+}
+
+.hl.lean .const {
+  color: var(--verso-code-const-color,);
+  font-weight: var(--verso-code-const-weight, normal);
+  font-style: var(--verso-code-const-style, normal);
+  font-family: var(--verso-code-const-font-family,);
+}
+
+.hl.lean .var {
+  color: var(--verso-code-var-color,);
+  font-weight: var(--verso-code-var-weight, normal);
+  font-style: var(--verso-code-var-style, italic);
+  font-family: var(--verso-code-var-font-family,);
+
+  position: relative;
+}
+
+.hl.lean .literal, .hl.lean .unknown {
+  color: var(--verso-code-color,);
+  font-weight: normal;
+  font-style: normal;
+  font-family: var(--verso-code-font-family,);
+}
+
+/* These lexically-classified token kinds default to the `.unknown` appearance. The rule follows
+   `.const` so it wins for the `anon-ctor` tokens, which also carry the `const` class. */
+.hl.lean .anon-ctor,
+.hl.lean .number,
+.hl.lean .char,
+.hl.lean .comment,
+.hl.lean .punctuation,
+.hl.lean .delim,
+.hl.lean .wildcard {
+  color: var(--verso-code-color,);
+  font-weight: normal;
+  font-style: normal;
+  font-family: var(--verso-code-font-family,);
+}
+
+.hover-container {
+  width: 0;
+  height: 0;
+  position: relative;
+  display: inline;
+}
+
+.hl.lean a {
+  color: inherit;
+  text-decoration: currentcolor underline dotted;
+}
+
+.hl.lean a:hover {
+  text-decoration: currentcolor underline solid;
+}
+
+/* Links inside tooltips show their underline only when hovered. */
+.tippy-box .hl.lean a {
+  text-decoration: none;
+}
+
+.hl.lean .hover-info {
+  white-space: normal;
+}
+
+.hl.lean .token .hover-info {
+  display: none;
+  position: absolute;
+  color: var(--verso-tooltip-color, black);
+  background-color: var(--verso-tooltip-bg-color, #e5e5e5);
+  border: 1px solid var(--verso-tooltip-border-color, black);
+  padding: 0.5rem;
+  z-index: 300;
+}
+
+.hl.lean .hover-info.messages {
+  max-height: 10rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  padding: 0 0.5rem 0 0;
+  display: block;
+}
+
+.hl.lean .hover-info code {
+  white-space: pre-wrap;
+  background: none;
+}
+
+.hl.lean .hover-info code:not(.verso-message) {
+  color: var(--verso-tooltip-color, black);
+}
+
+.hl.lean .hover-info.messages > code {
+  padding: 0.5rem;
+  display: block;
+  width: fit-content;
+}
+
+.hl.lean .hover-info.messages > code:only-child {
+  margin: 0;
+}
+
+.hl.lean .hover-info.messages > code {
+  margin: 0.1rem;
+}
+
+.hl.lean .hover-info.messages > code:not(:first-child) {
+  margin-top: 0rem;
+}
+
+.hl.lean {
+}
+
+.hl.lean.block {
+  display: block;
+}
+
+.hl.lean.inline {
+  display: inline;
+  white-space: pre-wrap;
+}
+
+.hl.lean * {
+}
+
+.hl.lean .token {
+  transition: all 0.25s; /* Slight fade for highlights */
+}
+
+@media (hover: hover) {
+  /* Hovered content nested in a collapsed tactic region keeps its plain background: the
+     region's proof state is the tooltip that appears there, and its label is what
+     highlights. `:where` keeps the exclusion out of the specificity computation. */
+  .hl.lean .token.binding-hl,
+  .hl.lean :is(.literal, .token.typed, .token[data-verso-hover]):hover:not(:where(.tactic:has(> .tactic-toggle:not(:checked)) > label *)) {
+    background-color: var(--verso-code-hover-bg-color, #eeeeee);
+    border-radius: 2px;
+    transition: none;
+  }
+
+  /* Within a hovered message span, token hover backgrounds are removed so the span's own
+     hover background shows across the whole span. The exception is a hovered documented
+     token, which keeps its background because its tooltip is the one shown. */
+  .hl.lean .has-info:hover .token.binding-hl:not(:hover),
+  .hl.lean .has-info:hover .token.binding-hl:not([data-verso-hover]),
+  .hl.lean .has-info:hover .literal:hover:not([data-verso-hover]),
+  .hl.lean .has-info:hover .token.typed:hover:not([data-verso-hover]) {
+    background-color: transparent;
+  }
+}
+
+
+.hl.lean .has-info .token:not(.tactic-state):not(.tactic-state *), .hl.lean .has-info .inter-text:not(.tactic-state):not(.tactic-state *) {
+  text-decoration-style: wavy;
+  text-decoration-line: underline;
+  text-decoration-thickness: from-font;
+  text-decoration-skip-ink: none;
+}
+
+/*
+The underline color comes from the nearest enclosing message span: each severity's span rule
+sets `--verso--region-indicator-color`, which inherits, so a region nested inside one of
+another severity keeps its own indicator color.
+*/
+.hl.lean .has-info :not(.tactic-state):not(.tactic-state *) {
+  text-decoration-color: var(--verso--region-indicator-color);
+}
+
+.hl.lean .has-info .hover-info {
+  display: none;
+  position: absolute;
+  transform: translate(0.25rem, 0.3rem);
+  color: var(--verso-tooltip-color, black);
+  border: 1px solid var(--verso-tooltip-border-color, black);
+  padding: 0.5rem;
+  z-index: 400;
+  text-align: left;
+}
+
+.hl.lean .has-info.error {
+  --verso--region-indicator-color: var(--verso-error-indicator-color, #ff0000);
+  --verso--region-hover-color: var(--verso-code-error-hover-color, currentcolor);
+  --verso--region-hover-bg-color: var(--verso-code-error-hover-bg-color, #ffb3b3);
+  color: var(--verso-code-error-color, currentcolor);
+  background-color: var(--verso-code-error-bg-color, transparent);
+}
+
+/*
+The hover highlight follows the tooltip: a message span highlights only when its own tooltip
+is the one that appears. When a hovered nested message span, a hovered documented token, or
+a hovered collapsed tactic label shows its own tooltip instead, the message span does not
+highlight. A span nested in a collapsed tactic region likewise stays plain, because hovering
+it shows the region's proof state; `:where` keeps that exclusion out of the specificity
+computation.
+
+The hover colors come from `--verso--region-hover-color` and `--verso--region-hover-bg-color`,
+which each severity's span rule sets. This keeps the hover conditions in this one rule, and
+because the properties inherit, a region nested inside one of another severity keeps its own
+hover colors.
+*/
+@media (hover: hover) {
+  .hl.lean .has-info:hover:not(:has(.has-info:hover)):not(:has([data-verso-hover]:hover)):not(:has(.tactic > label:hover + .tactic-toggle:not(:checked))):not(:where(.tactic:has(> .tactic-toggle:not(:checked)) > label *)) {
+    color: var(--verso--region-hover-color, currentcolor);
+    background-color: var(--verso--region-hover-bg-color, transparent);
+  }
+}
+
+.hl.lean .hover-info.messages > code.error {
+  background-color: var(--verso-tooltip-error-bg-color, #e5e5e5);
+  border-left: 0.2rem solid var(--verso-tooltip-error-border-color, #ffb3b3);
+}
+
+/*
+A tooltip that shows only messages of the box's own severity leaves severity styling to the
+box itself. When messages of several severities share the tooltip, or a `mixed` tooltip
+combines messages with other content (such as documentation), each message keeps its
+severity accent to distinguish them.
+*/
+.tippy-box .hl.lean.mixed > .hover-info.messages {
+  margin-bottom: 0.5rem;
+}
+
+.tippy-box[data-theme~='error'] .hl.lean:not(.mixed) .hover-info.messages:not(:has(> code.warning)):not(:has(> code.information)) > code.error {
+  background: none;
+  border: none;
+}
+
+.error .verso-message, .error .verso-message .token, .error .verso-message label {
+  color: var(--verso-message-error-color, #cc0000);
+}
+
+.error .verso-message .case-label:has(input[type="checkbox"])::before {
+  background-color: var(--verso-message-error-color, #cc0000) !important;
+}
+
+.hl.lean .has-info.warning {
+  --verso--region-indicator-color: var(--verso-warning-indicator-color, #e7a71d);
+  --verso--region-hover-color: var(--verso-code-warning-hover-color, currentcolor);
+  --verso--region-hover-bg-color: var(--verso-code-warning-hover-bg-color, #ffd580);
+  color: var(--verso-code-warning-color, currentcolor);
+  background-color: var(--verso-code-warning-bg-color, transparent);
+}
+
+.hl.lean .hover-info.messages > code.warning {
+  background-color: var(--verso-tooltip-warning-bg-color, #e5e5e5);
+  border-left: 0.2rem solid var(--verso-tooltip-warning-border-color, #ffd580);
+}
+
+.lean-output {
+  border-left: 0.2em solid transparent;
+  padding: 0 0 0 0.5em;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.lean-output.error {
+  border-color: var(--verso-output-error-color, var(--verso-error-indicator-color, #ff0000));
+}
+
+.lean-output.information {
+  border-color: var(--verso-output-info-color, var(--verso-info-indicator-color, #4777ff));
+}
+
+.lean-output.warning {
+  border-color: var(--verso-output-warning-color, var(--verso-warning-indicator-color, #e7a71d));
+}
+
+.tippy-box[data-theme~='warning'] .hl.lean:not(.mixed) .hover-info.messages:not(:has(> code.error)):not(:has(> code.information)) > code.warning {
+  background: none;
+  border: none;
+}
+
+.warning .verso-message, .warning .verso-message .token, .warning .verso-message label {
+  color: var(--verso-message-warning-color, black);
+}
+
+.warning .verso-message .case-label:has(input[type="checkbox"])::before {
+  background-color: var(--verso-message-warning-color, black) !important;
+}
+
+
+.hl.lean .has-info.information {
+  --verso--region-indicator-color: var(--verso-info-indicator-color, #4777ff);
+  --verso--region-hover-color: var(--verso-code-info-hover-color, currentcolor);
+  --verso--region-hover-bg-color: var(--verso-code-info-hover-bg-color, #4777ff);
+  color: var(--verso-code-info-color, currentcolor);
+  background-color: var(--verso-code-info-bg-color, transparent);
+}
+
+
+.hl.lean .hover-info.messages > code.information {
+  background-color: var(--verso-tooltip-info-bg-color, #e5e5e5);
+  border-left: 0.2rem solid var(--verso-tooltip-info-border-color, #4777ff);
+}
+
+.tippy-box[data-theme~='info'] .hl.lean:not(.mixed) .hover-info.messages:not(:has(> code.error)):not(:has(> code.warning)) > code.information {
+  background: none;
+  border: none;
+}
+
+.information .verso-message, .information .verso-message .token, .information .verso-message label {
+  color: var(--verso-message-info-color, black);
+}
+
+.information .verso-message .case-label:has(input[type="checkbox"])::before {
+  background-color: var(--verso-message-info-color, black) !important;
+}
+
+.hl.lean div.docstring {
+  font-family: var(--verso-text-font-family, sans-serif);
+  white-space: normal;
+  max-width: calc(min(40rem, 90vw));
+  width: max-content;
+}
+
+.hl.lean div.docstring > :last-child {
+  margin-bottom: 0;
+}
+
+.hl.lean div.docstring > :first-child {
+  margin-top: 0;
+}
+
+.hl.lean .hover-info .sep {
+  display: block;
+  width: auto;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0;
+  height: 1px;
+  border-top: 1px solid var(--verso-tooltip-separator-color, #ccc);
+}
+
+.hl.lean code {
+  font-family: var(--verso-code-font-family);
+}
+
+.hl.lean .tactic-state {
+  display: none;
+  position: relative;
+  width: fit-content;
+  border: 1px solid var(--verso-tactic-state-border-color, #888888);
+  border-radius: 0.1rem;
+  padding: 0.5rem;
+  font-family: sans-serif;
+  color: var(--verso-tactic-state-color, black);
+  background-color: var(--verso-tactic-state-bg-color, white);
+}
+
+.hl.lean.popup .tactic-state {
+  position: static;
+  display: block;
+  width: auto;
+  border: none;
+  padding: 0.5rem;
+  font-family: sans-serif;
+  background-color: var(--verso-tactic-state-bg-color, white);
+}
+
+
+.hl.lean .tactic {
+  position: relative;
+  display: inline;
+  vertical-align: top;
+  /* Without these, mobile Safari will start making font sizes inconsistent when its text size adjustment feature is triggered.*/
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.hl.lean .tactic:has(> .tactic-toggle:checked) {
+  display: inline-grid;
+  grid-template-columns: 1fr;
+}
+
+.hl.lean .tactic-toggle:checked ~ .tactic-state {
+  display: inline-block;
+  vertical-align: top;
+  grid-row: 2;
+  justify-self: start;
+}
+
+.hl.lean .tactic > label {
+  position: relative;
+  grid-row: 1;
+  display: inline;
+}
+
+@media (hover: hover) {
+  /* Highlight a region on hover only when its own toggle is unchecked, and only the innermost
+     hovered region: `label:hover` bubbles to ancestor labels, so suppress the highlight on a region
+     whose label contains a more deeply nested hovered tactic label. The region's proof state is the
+     tooltip for everything else in its label, so the label keeps its highlight while any of that
+     content is hovered. */
+  .hl.lean .tactic:has(> .tactic-toggle:not(:checked)) > label:hover:not(:has(.tactic > label:hover)) {
+    background-color: var(--verso-code-hover-bg-color, #eeeeee);
+  }
+}
+
+.hl.lean .tactic-toggle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  z-index: -10;
+}
+
+.hl.lean .tactic > label::after {
+  content: "";
+  border: 1px solid var(--verso-tactic-toggle-color, #bbbbbb);
+  /* These need to be em, not rem, to scale with the font */
+  border-radius: 1em;
+  height: 0.25em;
+  vertical-align: middle;
+  width: 0.6em;
+  margin-left: 0.1em;
+  margin-right: 0.1em;
+  display: inline-block;
+  transition: all 0.5s;
+}
+
+/*
+@media (hover: hover) {
+  .hl.lean .tactic > label:hover::after {
+    border: 1px solid #aaaaaa;
+    background-color: #aaaaaa;
+    transition: all 0.5s;
+  }
+}
+*/
+
+.hl.lean .tactic > label:has(+ .tactic-toggle:checked)::after {
+  border: 1px solid var(--verso-tactic-toggle-checked-color, #999999);
+  background-color: var(--verso-tactic-toggle-checked-color, #999999);
+  transition: all 0.5s;
+}
+
+.hl.lean .tactic-state .goal + .goal {
+  margin-top: 1.5em;
+}
+
+/*
+Some CSS frameworks customize details/summary in ways not compatible with Verso's output.
+*/
+
+.hl.lean details {
+  display: block !important;
+  margin: 0;
+}
+
+.hl.lean details summary {
+  display: list-item !important;
+  margin: 0;
+}
+
+.hl.lean details summary:focus {
+  outline: none;
+  outline-offset: none;
+  color: inherit;
+}
+
+.hl.lean ul > li {
+  margin-bottom: 0;
+}
+
+.hl.lean details summary::marker {
+  display: inline !important;
+}
+
+.hl.lean details > summary:first-of-type {
+  list-style-type: disclosure-closed;
+  list-style-position: inside;
+}
+
+.hl.lean details[open] > summary:first-of-type {
+  list-style-type: disclosure-open;
+}
+
+.hl.lean details summary::before, .hl.lean details summary::after {
+  content: "" !important;
+  background: none;
+  display: none;
+}
+
+.hl.lean .tactic-state summary {
+  /* These need to be em, not rem, to scale with the font */
+  margin-left: -0.5em;
+}
+
+.hl.lean .tactic-state details {
+  /* These need to be em, not rem, to scale with the font */
+  padding-left: 0.5em;
+}
+
+.hl.lean .case-label {
+  display: block;
+  position: relative;
+}
+
+.hl.lean .case-label input[type="checkbox"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  z-index: -10;
+}
+
+.hl.lean .case-label:has(input[type="checkbox"])::before {
+  display: inline-block;
+  background-color: currentcolor;
+  content: ' ';
+  transition: ease 0.2s;
+  margin-right: 0.7em;
+  clip-path: polygon(100% 0, 0 0, 50% 100%);
+  width: 0.6em;
+  height: 0.6em;
+  vertical-align: middle;
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]:not(:checked))::before {
+  transform: rotate(-90deg);
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]) {
+
+}
+
+.hl.lean .case-label:has(input[type="checkbox"]:checked) {
+
+}
+
+
+.hl.lean .labeled-case > :not(:first-child) {
+  max-height: 0px;
+  display: block;
+  overflow: hidden;
+  transition: max-height 0.1s ease-in;
+  /* These need to be em, not rem, to scale with the font */
+  margin-left: 0.5em;
+  margin-top: 0.1em;
+}
+
+.hl.lean .labeled-case:has(.case-label input[type="checkbox"]:checked) > :not(:first-child) {
+  max-height: 100%;
+}
+
+
+.hl.lean .goal-name::before {
+  font-style: normal;
+  content: "case ";
+}
+
+.hl.lean .goal-name {
+  font-style: italic;
+  font-family: var(--verso-code-font-family);
+  color: inherit;
+}
+
+.hl.lean .hypotheses {
+  display: table;
+}
+
+.hl.lean .hypothesis {
+  display: table-row;
+}
+
+.hl.lean .hypothesis > * {
+  display: table-cell;
+}
+
+
+.hl.lean .hypotheses .colon {
+  text-align: center;
+  /* This needs to be em, not rem, to scale with the font */
+  min-width: 1em;
+}
+
+.hl.lean .hypotheses .name {
+  text-align: right;
+}
+
+.hl.lean .hypotheses .name,
+.hl.lean .hypotheses .type,
+.hl.lean .conclusion .type {
+  font-family: var(--verso-code-font-family);
+}
+
+.tippy-box {
+  /* Without these, mobile Safari will start making font sizes inconsistent when its text size adjustment feature is triggered.*/
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/*
+Tippy's stylesheet paints each arrow's fill triangle with the arrow element's `color` (its
+placement-specific `::before` rules use `border-color: initial`, which is `currentcolor`),
+and its border extension paints the outline triangle with the box's border color. Setting
+`color` on the arrow therefore matches it to the tooltip background for every placement.
+*/
+.tippy-box[data-theme~='lean'] {
+  background-color: var(--verso-tooltip-bg-color, #e5e5e5);
+  color: var(--verso-tooltip-color, black);
+  border: 1px solid var(--verso-tooltip-border-color, black);
+}
+.tippy-box[data-theme~='lean'] > .tippy-arrow {
+  color: var(--verso-tooltip-bg-color, #e5e5e5);
+}
+
+.tippy-box[data-theme~='message'][data-placement^='top'] > .tippy-arrow::before {
+  border-width: 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='top'] > .tippy-arrow::after {
+  bottom: -11px;
+  border-width: 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='bottom'] > .tippy-arrow::before {
+  border-width: 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='bottom'] > .tippy-arrow::after {
+  top: -11px;
+  border-width: 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='left'] > .tippy-arrow::before {
+  border-width: 11px 0 11px 11px;
+}
+.tippy-box[data-theme~='message'][data-placement^='left'] > .tippy-arrow::after {
+  right: -11px;
+  border-width: 11px 0 11px 11px;
+}
+
+.tippy-box[data-theme~='message'][data-placement^='right'] > .tippy-arrow::before {
+  border-width: 11px 11px 11px 0;
+}
+.tippy-box[data-theme~='message'][data-placement^='right'] > .tippy-arrow::after {
+  left: -11px;
+  border-width: 11px 11px 11px 0;
+}
+
+
+
+.tippy-box[data-theme~='warning'] {
+  background-color: var(--verso-tooltip-warning-bg-color, #e5e5e5);
+  color: var(--verso-tooltip-warning-color, black);
+  border: 3px solid var(--verso-tooltip-warning-border-color, #ffd580);
+}
+.tippy-box[data-theme~='warning'] > .tippy-arrow {
+  color: var(--verso-tooltip-warning-bg-color, #e5e5e5);
+}
+
+.tippy-box[data-theme~='error'] {
+  background-color: var(--verso-tooltip-error-bg-color, #e5e5e5);
+  color: var(--verso-tooltip-error-color, black);
+  border: 3px solid var(--verso-tooltip-error-border-color, #ffb3b3);
+}
+.tippy-box[data-theme~='error'] > .tippy-arrow {
+  color: var(--verso-tooltip-error-bg-color, #e5e5e5);
+}
+
+.tippy-box[data-theme~='info'] {
+  background-color: var(--verso-tooltip-info-bg-color, #e5e5e5);
+  color: var(--verso-tooltip-info-color, black);
+  border: 3px solid var(--verso-tooltip-info-border-color, #4777ff);
+}
+.tippy-box[data-theme~='info'] > .tippy-arrow {
+  color: var(--verso-tooltip-info-bg-color, #e5e5e5);
+}
+
+.tippy-box[data-theme~='tactic'] {
+  background-color: var(--verso-tactic-state-bg-color, white);
+  color: var(--verso-tactic-state-color, black);
+  border: 1px solid var(--verso-tactic-state-border-color, #888888);
+}
+.tippy-box[data-theme~='tactic'] > .tippy-arrow {
+  color: var(--verso-tactic-state-bg-color, white);
+}
+
+.extra-doc-links {
+  list-style-type: none;
+  margin-left: 0;
+  padding: 0;
+}
+
+.extra-doc-links > li {
+  display: inline-block;
+}
+
+.extra-doc-links > li:not(:last-child)::after {
+  content: '|';
+  display: inline-block;
+  margin: 0 0.25em;
+}
+
+.verso-message .trace {
+  display: block;
+}
+
+.verso-message .trace > summary::marker {
+  color: var(--verso-text-color, black);
+}
+
+.verso-message .trace-children {
+  margin: 0;
+  padding: 0;
+}
+
+.verso-message .trace-children > li {
+  list-style-type: none;
+  margin-left: 1.5em;
+}
+
+.verso-message .trace-children > li:not(:has(.trace)) {
+  margin-left: 0;
+}
+
+.verso-message .trace-class {
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+}
+
+.verso-message .text {
+  white-space: pre-wrap;
+}
+
+</style><script>
+      
+window.onload = async () => {
+
+    // Don't show hovers inside of closed tactic states
+    function blockedByTactic(elem) {
+      let parent = elem.parentNode;
+      while (parent && "classList" in parent) {
+        if (parent.classList.contains("tactic")) {
+          const toggle = parent.querySelector(":scope > input.tactic-toggle");
+          if (toggle) {
+            return !toggle.checked;
+          }
+        }
+        parent = parent.parentNode;
+      }
+      return false;
+    }
+
+    // The innermost element under the pointer, used to show only the most specific hover
+    let hoverTarget = null;
+    document.addEventListener('mouseover', (e) => { hoverTarget = e.target; }, true);
+
+    // Visible tippy references; a tooltip is blocked while an unrelated one is visible
+    const visibleTippies = new Set();
+    function blockedByTippy(elem) {
+      for (const ref of visibleTippies) {
+        if (!ref.contains(elem) && !elem.contains(ref)) return true;
+      }
+      return false;
+    }
+
+    // Whether the element's tooltip would have content to show. Content nested in a
+    // collapsed tactic region is covered by the region's proof-state tooltip, whether or
+    // not a tippy instance is currently attached to it.
+    function showsContent(el) {
+      if (!el._tippy) return false;
+      if (el.classList.contains('tactic')) {
+        const toggle = el.querySelector(':scope > input.tactic-toggle');
+        return !!toggle && !toggle.checked;
+      }
+      return (!!el.querySelector('.hover-info') || 'versoHover' in el.dataset) &&
+        !blockedByTactic(el);
+    }
+
+    // The nearest enclosing element whose tooltip has content
+    function innermostShowable(el) {
+      while (el && el.nodeType === Node.ELEMENT_NODE) {
+        if (showsContent(el)) return el;
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    // Binding highlights via event delegation with cached lookups
+    const bindingCache = new Map(); // context+binding -> [token elements]
+    let highlightedTokens = [];
+    function getBindingTokens(context, binding) {
+      const key = context + "\0" + binding;
+      let tokens = bindingCache.get(key);
+      if (!tokens) {
+        tokens = [];
+        for (const example of document.querySelectorAll(".hl.lean")) {
+          if (example.dataset.leanContext == context) {
+            for (const tok of example.querySelectorAll(".token[data-binding=\"" + CSS.escape(binding) + "\"]")) {
+              tokens.push(tok);
+            }
+          }
+        }
+        bindingCache.set(key, tokens);
+      }
+      return tokens;
+    }
+    for (const container of document.querySelectorAll(".hl.lean")) {
+      container.addEventListener("mouseover", (event) => {
+        const c = event.target.closest(".token");
+        if (!c || !c.dataset.binding || c.dataset.binding === "" || !container.contains(c)) return;
+        if (blockedByTactic(c)) return;
+        const tokens = getBindingTokens(container.dataset.leanContext, c.dataset.binding);
+        for (const tok of tokens) {
+          tok.classList.add("binding-hl");
+        }
+        highlightedTokens = tokens;
+      });
+      container.addEventListener("mouseout", (event) => {
+        const c = event.target.closest(".token");
+        if (!c || !container.contains(c)) return;
+        for (const tok of highlightedTokens) {
+          tok.classList.remove("binding-hl");
+        }
+        highlightedTokens = [];
+      });
+    }
+    /* Render docstrings */
+    if ('undefined' !== typeof marked) {
+        for (const d of document.querySelectorAll("code.docstring, pre.docstring")) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement("div");
+            rendered.classList.add("docstring");
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+        }
+    }
+    // Add hovers
+    const versoDocData = await (fetch("../../-verso-docs.json").then((resp) => resp.json()));
+
+    function hideParentTooltips(element) {
+      let parent = element.parentElement;
+      while (parent) {
+        const tippyInstance = parent._tippy;
+        if (tippyInstance) {
+          tippyInstance.hide();
+        }
+        parent = parent.parentElement;
+      }
+    }
+
+    function hideDescendantTooltips(element) {
+      for (const ref of visibleTippies) {
+        if (ref !== element && element.contains(ref)) {
+          ref._tippy.hide();
+        }
+      }
+    }
+
+    // Renders the documentation for a hover ID from the doc table
+    function docHoverContent(hoverId) {
+      const info = document.createElement('span');
+      info.className = 'hover-info';
+      info.style.display = 'block';
+      const data = versoDocData[hoverId];
+      if (data) {
+        info.innerHTML = data;
+        /* Render docstrings - TODO server-side */
+        if ('undefined' !== typeof marked) {
+          for (const d of info.querySelectorAll('code.docstring, pre.docstring')) {
+            const str = d.innerText;
+            const html = marked.parse(str);
+            const rendered = document.createElement('div');
+            rendered.classList.add('docstring');
+            rendered.innerHTML = html;
+            d.parentNode.replaceChild(rendered, d);
+          }
+        }
+      } else {
+        info.innerHTML = 'Failed to load doc ID: ' + hoverId;
+      }
+      return info;
+    }
+
+
+
+
+    const defaultTippyProps = {
+      /* DEBUG -- remove the space: * /
+      onHide(any) { return false; },
+      trigger: "click",
+      // */
+      /* theme: "lean", */
+      maxWidth: "none",
+      appendTo: () => document.body,
+      interactive: true,
+      delay: [100, null],
+      /* ignoreAttributes: true, */
+      followCursor: 'initial',
+      onShow(inst) {
+        const ref = inst.reference;
+        if (ref.className == 'tactic') {
+          const toggle = ref.querySelector(":scope > input.tactic-toggle");
+          if (toggle && toggle.checked) {
+            return false;
+          }
+        } else if (ref.querySelector(".hover-info") || "versoHover" in ref.dataset) {
+          if (blockedByTactic(ref)) { return false };
+        } else { // Nothing to show here!
+          return false;
+        }
+        // Show only the most specific hover under the pointer
+        if (hoverTarget && ref.contains(hoverTarget) && innermostShowable(hoverTarget) !== ref) {
+          return false;
+        }
+        hideParentTooltips(ref);
+        hideDescendantTooltips(ref);
+        if (blockedByTippy(ref)) { return false; }
+      },
+      onShown(inst) { visibleTippies.add(inst.reference); },
+      onHidden(inst) { visibleTippies.delete(inst.reference); },
+      content (tgt) {
+        const content = document.createElement("span");
+        if (tgt.className == 'tactic') {
+          const state = tgt.querySelector(":scope > .tactic-state").cloneNode(true);
+          state.style.display = "block";
+          content.appendChild(state);
+          content.style.display = "block";
+          content.className = "hl lean popup";
+        } else {
+          content.className = "hl lean";
+          content.style.display = "block";
+          content.style.maxHeight = "300px";
+          content.style.overflowY = "auto";
+          content.style.overflowX = "hidden";
+          // Messages come from the inline hover-info; documentation comes from the doc
+          // table. An element with both (a message span sharing a documented token's
+          // extent) shows both in one tooltip.
+          const hoverId = tgt.dataset.versoHover;
+          const hoverInfo = tgt.querySelector(".hover-info");
+          if (hoverInfo) {
+            content.appendChild(hoverInfo.cloneNode(true));
+          }
+          if (hoverId) {
+            // TODO stop doing an implicit conversion from string to number here
+            content.appendChild(docHoverContent(hoverId));
+          }
+          if (hoverInfo && hoverId) {
+            content.classList.add('mixed');
+          }
+          const extraLinks = tgt.dataset['versoLinks'] || tgt.parentElement.dataset['versoLinks'];
+          if (extraLinks) {
+            try {
+              const extras = JSON.parse(extraLinks);
+              const links = document.createElement('ul');
+              links.className = 'extra-doc-links';
+              extras.forEach((l) => {
+                const li = document.createElement('li');
+                li.innerHTML = "<a href=\"" + l['href'] + "\" title=\"" + l.long + "\">" + l.short + "</a>";
+                links.appendChild(li);
+              });
+              content.appendChild(links);
+            } catch (error) {
+              console.error(error);
+            }
+          }
+        }
+        return content;
+      }
+    };
+
+
+    document.querySelectorAll('.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'lean');
+    });
+    document.querySelectorAll('.hl.lean .has-info.warning').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'warning message');
+    });
+    document.querySelectorAll('.hl.lean .has-info.information').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'info message');
+    });
+    document.querySelectorAll('.hl.lean .has-info.error').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'error message');
+    });
+    document.querySelectorAll('.hl.lean .tactic').forEach(element => {
+      element.setAttribute('data-tippy-theme', 'tactic');
+    });
+    // Skip tokens inside closed tactics — they interfere with tactic tippys
+    const closedTactics = new Set();
+    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
+      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
+      if (toggle && !toggle.checked) closedTactics.add(tactic);
+    });
+    function isInsideClosedTactic(el) {
+      const tactic = el.closest('.tactic');
+      return tactic && tactic !== el && closedTactics.has(tactic);
+    }
+
+    const tokenSelector = '.hl.lean .const.token, .hl.lean .keyword.token, .hl.lean .literal.token, .hl.lean .option.token, .hl.lean .var.token, .hl.lean .typed.token, .hl.lean .has-info, .hl.lean .tactic, .hl.lean .level-var, .hl.lean .level-const, .hl.lean .level-op, .hl.lean .sort';
+    tippy(Array.from(document.querySelectorAll(tokenSelector)).filter(el => !isInsideClosedTactic(el)), defaultTippyProps);
+
+    // Create/destroy token tippys when tactic checkbox toggles
+    const tacticTippySelector = '.const.token, .keyword.token, .literal.token, .option.token, .var.token, .typed.token, .has-info, .level-var, .level-const, .level-op, .sort';
+    document.querySelectorAll('.hl.lean .tactic').forEach(tactic => {
+      const toggle = tactic.querySelector(':scope > input.tactic-toggle');
+      if (toggle) toggle.addEventListener('change', () => {
+        if (toggle.checked) {
+          closedTactics.delete(tactic);
+          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
+            if (!el._tippy) {
+              tippy(el, defaultTippyProps);
+            }
+          });
+        } else {
+          closedTactics.add(tactic);
+          tactic.querySelectorAll(tacticTippySelector).forEach(el => {
+            if (el._tippy) el._tippy.destroy();
+          });
+        }
+        // The toggle changes which element's tooltip belongs to the pointer's position,
+        // but the pointer stays put, so no hover event announces the change. Show the
+        // right tooltip once the click that flipped the toggle has hidden the old one.
+        setTimeout(() => {
+          if (hoverTarget && hoverTarget.isConnected) {
+            const showable = innermostShowable(hoverTarget);
+            if (showable && showable._tippy) showable._tippy.show();
+          }
+        }, 0);
+      });
+  });
+}
+</script>
+    <script defer="defer" data-domain="lean-lang.org" src="../../../../plausible.io/js/script.outbound-links.js"></script>
+    </head>
+  <body>
+    <header>
+      <div class="header-logo-wrapper">
+        <a href="#" id="logo"><img src="../../static/lean_logo.svg"></a></div>
+      <div class="header-title-wrapper">
+        <a href="#" class="header-title"><h1>
+            Functional Programming in Lean</h1>
+          </a></div>
+      </header>
+    <label for="toggle-toc" id="toggle-toc-click"><span class="line line1"></span><span class="line line2"></span><span class="line line3"></span></label><div class="with-toc">
+      <div class="toc-backdrop" onclick="document.getElementById('toggle-toc-click')?.click()"></div>
+      <nav id="toc">
+        <input type="checkbox" id="toggle-toc"><div class="first">
+          <a href="#" class="toc-title"><h1>
+              Functional Programming in Lean</h1>
+            </a><div class="split-tocs">
+            <div class="split-toc book">
+              <div class="title">
+                <label for="--verso-manual-toc-----bookRoot" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-----bookRoot"></label><span class="">Table of Contents</span></div>
+              <table><tr class="unnumbered"><td class="num"><td><a href="../../Introduction/index.html#Functional-Programming-in-Lean--Introduction">Introduction</a></td></tr><tr class="unnumbered"><td class="num"><td><a href="../../Acknowledgments/index.html#Functional-Programming-in-Lean--Acknowledgments">Acknowledgments</a></td></tr><tr class="numbered"><td class="num">1.</td><td><a href="../../Getting-to-Know-Lean/index.html#getting-to-know">Getting to Know Lean</a></td></tr><tr class="current numbered"><td class="num">2.</td><td><a href="../index.html#hello-world">Hello, World!</a></td></tr><tr class="unnumbered"><td class="num"><td><a href="../../Interlude___-Propositions___-Proofs___-and-Indexing/index.html#props-proofs-indexing">Interlude: Propositions, Proofs, and Indexing</a></td></tr><tr class="numbered"><td class="num">3.</td><td><a href="../../Overloading-and-Type-Classes/index.html#type-classes">Overloading and Type Classes</a></td></tr><tr class="numbered"><td class="num">4.</td><td><a href="../../Monads/index.html#monads">Monads</a></td></tr><tr class="numbered"><td class="num">5.</td><td><a href="../../Functors___-Applicative-Functors___-and-Monads/index.html#Functional-Programming-in-Lean--Functors___-Applicative-Functors___-and-Monads">Functors, Applicative Functors, and Monads</a></td></tr><tr class="numbered"><td class="num">6.</td><td><a href="../../Monad-Transformers/index.html#Functional-Programming-in-Lean--Monad-Transformers">Monad Transformers</a></td></tr><tr class="numbered"><td class="num">7.</td><td><a href="../../Programming-with-Dependent-Types/index.html#dependent-types">Programming with Dependent Types</a></td></tr><tr class="unnumbered"><td class="num"><td><a href="../../Interlude___-Tactics___-Induction___-and-Proofs/index.html#tactics-induction-proofs">Interlude: Tactics, Induction, and Proofs</a></td></tr><tr class="numbered"><td class="num">8.</td><td><a href="../../Programming___-Proving___-and-Performance/index.html#Functional-Programming-in-Lean--Programming___-Proving___-and-Performance">Programming, Proving, and Performance</a></td></tr><tr class="numbered"><td class="num">9.</td><td><a href="../../Next-Steps/index.html#next-steps">Next Steps</a></td></tr></table></div>
+            <div class="split-toc">
+              <div class="title">
+                <label for="--verso-manual-toc-hello-world" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-hello-world" checked="checked"></label><span class="number">2.</span> <span class=""><a href="../index.html#hello-world">Hello, World!</a></span></div>
+              <table><tr class="numbered"><td class="num">2.1.</td><td><a href="../Running-a-Program/index.html#running-a-program">Running a Program</a></td></tr><tr class="numbered"><td class="num">2.2.</td><td><a href="../Step-By-Step/index.html#step-by-step">Step By Step</a></td></tr><tr class="numbered"><td class="num">2.3.</td><td><a href="../Starting-a-Project/index.html#starting-a-project">Starting a Project</a></td></tr><tr class="current numbered"><td class="num">2.4.</td><td><a href="index.html#example-cat">Worked Example: <code>cat</code></a></td></tr><tr class="numbered"><td class="num">2.5.</td><td><a href="../Additional-Conveniences/index.html#hello-world-conveniences">Additional Conveniences</a></td></tr><tr class="numbered"><td class="num">2.6.</td><td><a href="../Summary/index.html#hello-world-summary">Summary</a></td></tr></table></div>
+            <div class="split-toc">
+              <div class="title">
+                <label for="--verso-manual-toc-example-cat" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-example-cat" checked="checked"></label><span class="number">2.4.</span> <span class="current"><a href="index.html#example-cat">Worked Example: <code>cat</code></a></span></div>
+              <table><tr class="numbered"><td class="num">2.4.1.</td><td><a href="index.html#example-cat-start">Getting Started</a></td></tr><tr class="numbered"><td class="num">2.4.2.</td><td><a href="index.html#example-cat-streams">Concatenating Streams</a></td></tr><tr class="numbered"><td class="num">2.4.3.</td><td><a href="index.html#example-cat-running">Meow!</a></td></tr><tr class="numbered"><td class="num">2.4.4.</td><td><a href="index.html#example-cat-exercise">Exercise</a></td></tr></table></div>
+            </div>
+          </div>
+        <div class="last">
+          <ul id="meta-links">
+            <li>
+              <a href="https://github.com/leanprover/fp-lean">Source Code</a></li>
+            <li>
+              <a href="https://github.com/leanprover/fp-lean/issues">Report Issues</a></li>
+            </ul>
+          </div>
+        </nav>
+      <div class="toc-resize-handle"></div>
+      <main><div class="content-wrapper">
+          <nav class="prev-next-buttons">
+            <a class="local-button active" href="../Starting-a-Project/index.html#starting-a-project" rel="prev" title="2.3. Starting a Project"><span class="arrow">←</span><span class="where">2.3. Starting a Project</span></a><a class="local-button active" href="../Additional-Conveniences/index.html#hello-world-conveniences" rel="next" title="2.5. Additional Conveniences"><span class="where">2.5. Additional Conveniences</span><span class="arrow">→</span></a></nav>
+          <section>
+            <h1>
+              2.4. Worked Example: <code>cat</code><span class="permalink-widget inline"><a href="../../find/index17cb.html?domain=Verso.Genre.Manual.section&amp;name=example-cat" title="Permalink">🔗</a></span></h1>
+            <p>
+              The standard Unix utility <code>cat</code> takes a number of command-line options, followed by zero or more input files.
+If no files are provided, or if one of them is a dash (<code>-</code>), then it takes the standard input as the corresponding input instead of reading a file.
+The contents of the inputs are written, one after the other, to the standard output.
+If a specified input file does not exist, this is noted on standard error, but <code>cat</code> continues concatenating the remaining inputs.
+A non-zero exit code is returned if any of the input files do not exist.</p>
+            <p>
+              This section describes a simplified version of <code>cat</code>, called <code>feline</code>.
+Unlike commonly-used versions of <code>cat</code>, <code>feline</code> has no command-line options for features such as numbering lines, indicating non-printing characters, or displaying help text.
+Furthermore, it cannot read more than once from a standard input that's associated with a terminal device.</p>
+            <p>
+              To get the most benefit from this section, follow along yourself.
+It's OK to copy-paste the code examples, but it's even better to type them in by hand.
+This makes it easier to learn the mechanical process of typing in code, recovering from mistakes, and interpreting feedback from the compiler.</p>
+            <section>
+              <h2 id="example-cat-start">
+                2.4.1. Getting Started<span class="permalink-widget inline"><a href="../../find/indexb4b2.html?domain=Verso.Genre.Manual.section&amp;name=example-cat-start" title="Permalink">🔗</a></span></h2>
+              <p>
+                The first step in implementing <code>feline</code> is to create a package and decide how to organize the code.
+In this case, because the program is so simple, all the code will be placed in <code>Main.lean</code>.
+The first step is to run <code>lake new feline</code>.
+Edit the Lakefile to remove the library, and delete the generated library code and the reference to it from <code>Main.lean</code>.
+Once this has been done, <code>lakefile.toml</code> should contain:</p>
+              <div class="example-file">
+                File: <code>lakefile.toml</code><code class="line">name = "feline"</code><code class="line">version = "0.1.0"</code><code class="line">defaultTargets = ["feline"]</code><code class="line"></code><code class="line">[[lean_exe]]</code><code class="line">name = "feline"</code><code class="line">root = "Main"</code></div>
+              <p>
+                and <code>Main.lean</code> should contain something like:</p>
+              <div class="example-file">
+                File: <code>Main.lean</code><code class="line">def main : IO Unit :=</code><code class="line">  IO.println s!"Hello, cats!"</code></div>
+              <p>
+                Alternatively, running <code>lake new feline exe</code> instructs <code>lake</code> to use a template that does not include a library section, making it unnecessary to edit the file.</p>
+              <p>
+                Ensure that the code can be built by running <span class="shell-command inline"><code class="command">lake build</code></span>.</p>
+              </section>
+            <section>
+              <h2 id="example-cat-streams">
+                2.4.2. Concatenating Streams<span class="permalink-widget inline"><a href="../../find/index6271.html?domain=Verso.Genre.Manual.section&amp;name=example-cat-streams" title="Permalink">🔗</a></span></h2>
+              <p>
+                Now that the basic skeleton of the program has been built, it's time to actually enter the code.
+A proper implementation of <code>cat</code> can be used with infinite IO streams, such as <code>/dev/random</code>, which means that it can't read its input into memory before outputting it.
+Furthermore, it should not work one character at a time, as this leads to frustratingly slow performance.
+Instead, it's better to read contiguous blocks of data all at once, directing the data to the standard output one block at a time.</p>
+              <p>
+                The first step is to decide how big of a block to read.
+For the sake of simplicity, this implementation uses a conservative 20 kilobyte block.
+<code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Fixed-Precision-Integers/#USize___ofBitVec" title="Documentation for USize in Lean Language Reference"><span class="const token" data-binding="const-USize" data-verso-hover="341">USize</span></a></code> is analogous to <code>size_t</code> in C—it's an unsigned integer type that is big enough to represent all valid array sizes.</p>
+              <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-19">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-bufsize" data-verso-hover="342" id="bufsize">bufsize</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-31">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Fixed-Precision-Integers/#USize___ofBitVec" title="Documentation for USize in Lean Language Reference"><span class="const token" data-binding="const-USize" data-verso-hover="341">USize</span></a><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-39">:=</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="343">20</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term_*_»-42">*</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="343">1024</span></code><section>
+                <h3 id="streams">
+                  2.4.2.1. Streams<span class="permalink-widget inline"><a href="../../find/indexa0d2.html?domain=Verso.Genre.Manual.section&amp;name=streams" title="Permalink">🔗</a></span></h3>
+                <p>
+                  The main work of <code>feline</code> is done by <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span></code>, which reads input one block at a time, dumping the result to standard output, until the end of the input has been reached.
+The end of the input is indicated by <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Stream___mk" title="Documentation for IO.FS.Stream.read in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Stream.read" data-verso-hover="345">read</span></a></code> returning an empty byte array:</p>
+                <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.partial-92">partial</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-100">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-109">(</span><span class="var token" data-binding="var-_uniq.90" data-verso-hover="308">stream</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-109">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Stream___mk" title="Documentation for IO.FS.Stream in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Stream" data-verso-hover="316">IO.FS.Stream</span></a><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-109">)</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-133">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/The-Unit-Type/#Unit" title="Documentation for Unit in Lean Language Reference"><span class="const token" data-binding="const-Unit" data-verso-hover="197">Unit</span></a><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-143">:=</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Functors___-Monads-and--do--Notation/Syntax/#Lean___Parser___Term___do" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.do-146">do</span></a><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doLetArrow-151">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.100" data-verso-hover="346">buf</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.doIdDecl-155">←</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.90" data-verso-hover="308">stream</span><span class="built-in delim token" data-binding="">.</span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Stream___mk" title="Documentation for IO.FS.Stream.read in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Stream.read" data-verso-hover="345">read</span></a><span class="inter-text"> </span><a href="index.html#bufsize" title="Definition of example"><span class="const token" data-binding="const-bufsize" data-verso-hover="342">bufsize</span></a><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doIf-185">if</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.100" data-verso-hover="346">buf</span><span class="built-in delim token" data-binding="">.</span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Byte-Arrays/#ByteArray___isEmpty" title="Documentation for ByteArray.isEmpty in Lean Language Reference"><span class="const token" data-binding="const-ByteArray.isEmpty" data-verso-hover="347">isEmpty</span></a><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doIf-185">then</span><span class="inter-text">
+    </span><a href="https://lean-lang.org/doc/reference/4.26.0/Functors___-Monads-and--do--Notation/#Pure___mk" title="Documentation for Pure.pure in Lean Language Reference"><span class="const token" data-binding="const-Pure.pure" data-verso-hover="326">pure</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-214">(</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.tuple-214">)</span><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doIf-185">else</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doLetArrow-254">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.260" data-verso-hover="308">stdout</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.doIdDecl-258">←</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___getStdout" title="Documentation for IO.getStdout in Lean Language Reference"><span class="const token" data-binding="const-IO.getStdout" data-verso-hover="310">IO.getStdout</span></a><span class="inter-text">
+    </span><span class="var token" data-binding="var-_uniq.260" data-verso-hover="308">stdout</span><span class="built-in delim token" data-binding="">.</span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Stream___mk" title="Documentation for IO.FS.Stream.write in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Stream.write" data-verso-hover="348">write</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.100" data-verso-hover="346">buf</span><span class="inter-text">
+    </span><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.90" data-verso-hover="308">stream</span></code><p>
+                  The <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span></code> function is declared <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.partial-92">partial</span></code>, because it calls itself recursively on input that is not immediately smaller than an argument.
+When a function is declared to be partial, Lean does not require a proof that it terminates.
+On the other hand, partial functions are also much less amenable to proofs of correctness, because allowing infinite loops in Lean's logic would make it unsound.
+However, there is no way to prove that <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span></code> terminates, because infinite input (such as from <code>/dev/random</code>) would mean that it does not, in fact, terminate.
+In cases like this, there is no alternative to declaring the function <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.partial-92">partial</span></code>.</p>
+                <p>
+                  The type <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Stream___mk" title="Documentation for IO.FS.Stream in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Stream" data-verso-hover="316">IO.FS.Stream</span></a></code> represents a POSIX stream.
+Behind the scenes, it is represented as a structure that has one field for each POSIX stream operation.
+Each operation is represented as an IO action that provides the corresponding operation:</p>
+                <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.structureTk-57">structure</span><span class="inter-text"> </span><span class="const token" data-binding="const-Str.Stream" data-verso-hover="349" id="Str___Stream">Stream</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.structure-57">where</span><span class="inter-text">
+  </span><span class="const token" data-binding="const-Str.Stream.flush" data-verso-hover="350" id="Str___Stream___flush">flush</span><span class="inter-text">   </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-90">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/The-Unit-Type/#Unit" title="Documentation for Unit in Lean Language Reference"><span class="const token" data-binding="const-Unit" data-verso-hover="197">Unit</span></a><span class="inter-text">
+  </span><span class="const token" data-binding="const-Str.Stream.read" data-verso-hover="351" id="Str___Stream___read">read</span><span class="inter-text">    </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-110">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Fixed-Precision-Integers/#USize___ofBitVec" title="Documentation for USize in Lean Language Reference"><span class="const token" data-binding="const-USize" data-verso-hover="341">USize</span></a><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-Lean.Parser.Term.arrow-112">→</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Byte-Arrays/#ByteArray___mk" title="Documentation for ByteArray in Lean Language Reference"><span class="const token" data-binding="const-ByteArray" data-verso-hover="352">ByteArray</span></a><span class="inter-text">
+  </span><span class="const token" data-binding="const-Str.Stream.write" data-verso-hover="353" id="Str___Stream___write">write</span><span class="inter-text">   </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-145">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Byte-Arrays/#ByteArray___mk" title="Documentation for ByteArray in Lean Language Reference"><span class="const token" data-binding="const-ByteArray" data-verso-hover="352">ByteArray</span></a><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-Lean.Parser.Term.arrow-147">→</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/The-Unit-Type/#Unit" title="Documentation for Unit in Lean Language Reference"><span class="const token" data-binding="const-Unit" data-verso-hover="197">Unit</span></a><span class="inter-text">
+  </span><span class="const token" data-binding="const-Str.Stream.getLine" data-verso-hover="354" id="Str___Stream___getLine">getLine</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-179">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Strings/#String___ofByteArray" title="Documentation for String in Lean Language Reference"><span class="const token" data-binding="const-String" data-verso-hover="9">String</span></a><span class="inter-text">
+  </span><span class="const token" data-binding="const-Str.Stream.putStr" data-verso-hover="355" id="Str___Stream___putStr">putStr</span><span class="inter-text">  </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-201">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Strings/#String___ofByteArray" title="Documentation for String in Lean Language Reference"><span class="const token" data-binding="const-String" data-verso-hover="9">String</span></a><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-Lean.Parser.Term.arrow-203">→</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/The-Unit-Type/#Unit" title="Documentation for Unit in Lean Language Reference"><span class="const token" data-binding="const-Unit" data-verso-hover="197">Unit</span></a><span class="inter-text">
+  </span><span class="const token" data-binding="const-Str.Stream.isTty" data-verso-hover="356" id="Str___Stream___isTty">isTty</span><span class="inter-text">   </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-232">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#BaseIO" title="Documentation for BaseIO in Lean Language Reference"><span class="const token" data-binding="const-BaseIO" data-verso-hover="357">BaseIO</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Booleans/#Bool___false" title="Documentation for Bool in Lean Language Reference"><span class="const token" data-binding="const-Bool" data-verso-hover="47">Bool</span></a></code><p>
+                  The type <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#BaseIO" title="Documentation for BaseIO in Lean Language Reference"><span class="const token" data-binding="const-BaseIO" data-verso-hover="357">BaseIO</span></a></code> is a variant of <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a></code> that rules out run-time errors.
+The Lean compiler contains <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a></code> actions (such as <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___getStdout" title="Documentation for IO.getStdout in Lean Language Reference"><span class="const token" data-binding="const-IO.getStdout" data-verso-hover="310">IO.getStdout</span></a></code>, which is called in <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span></code>) to get streams that represent standard input, standard output, and standard error.
+These are <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a></code> actions rather than ordinary definitions because Lean allows these standard POSIX streams to be replaced in a process, which makes it easier to do things like capturing the output from a program into a string by writing a custom <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Stream___mk" title="Documentation for IO.FS.Stream in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Stream" data-verso-hover="316">IO.FS.Stream</span></a></code>.</p>
+                <p>
+                  The control flow in <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span></code> is essentially a <code>while</code> loop.
+When <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span></code> is called, if the stream has reached the end of the file, <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Functors___-Monads-and--do--Notation/#Pure___mk" title="Documentation for Pure.pure in Lean Language Reference"><span class="const token" data-binding="const-Pure.pure" data-verso-hover="326">pure</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-214">(</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.tuple-214">)</span></code> terminates the function by returning the constructor for <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/The-Unit-Type/#Unit" title="Documentation for Unit in Lean Language Reference"><span class="const token" data-binding="const-Unit" data-verso-hover="197">Unit</span></a></code>.
+If the stream has not yet reached the end of the file, one block is read, and its contents are written to <code class="hl lean inline" data-lean-context="examples"><span class="var token" data-binding="var-_uniq.260" data-verso-hover="308">stdout</span></code>, after which <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span></code> calls itself directly.
+The recursive calls continue until <code class="hl lean inline" data-lean-context="examples"><span class="var token" data-binding="var-_uniq.90" data-verso-hover="308">stream</span><span class="built-in delim token" data-binding="">.</span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Stream___mk" title="Documentation for IO.FS.Stream.read in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Stream.read" data-verso-hover="345">read</span></a></code> returns an empty byte array, which indicates the end of the file.</p>
+                <p>
+                  When an <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">if</span></code> expression occurs as a statement in a <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">do</span></code>, as in <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span></code>, each branch of the <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">if</span></code> is implicitly provided with a <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">do</span></code>.
+In other words, the sequence of steps following the <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">else</span></code> are treated as a sequence of <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a></code> actions to be executed, just as if they had a <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">do</span></code> at the beginning.
+Names introduced with <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">let</span></code> in the branches of the <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">if</span></code> are visible only in their own branches, and are not in scope outside of the <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">if</span></code>.</p>
+                <p>
+                  There is no danger of running out of stack space while calling <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span></code> because the recursive call happens as the very last step in the function, and its result is returned directly rather than being manipulated or computed with.
+This kind of recursion is called <em>tail recursion</em>, and it is described in more detail <a href="../../Programming___-Proving___-and-Performance/Tail-Recursion/index.html#tail-recursion">later in this book</a>.
+Because the compiled code does not need to retain any state, the Lean compiler can compile the recursive call to a jump.</p>
+                <p>
+                  If <code>feline</code> only redirected standard input to standard output, then <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span></code> would be sufficient.
+However, it also needs to be able to open files that are provided as command-line arguments and emit their contents.
+When its argument is the name of a file that exists, <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-fileStream" data-verso-hover="358">fileStream</span></code> returns a stream that reads the file's contents.
+When the argument is not a file, <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-fileStream" data-verso-hover="358">fileStream</span></code> emits an error and returns <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Optional-Values/#Option___none" title="Documentation for Option.none in Lean Language Reference"><span class="const token" data-binding="const-Option.none" data-verso-hover="159">none</span></a></code>.</p>
+                <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-392">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-fileStream" data-verso-hover="358">fileStream</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-407">(</span><span class="var token" data-binding="var-_uniq.308" data-verso-hover="359">filename</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-407">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#System___FilePath___mk" title="Documentation for System.FilePath in Lean Language Reference"><span class="const token" data-binding="const-System.FilePath" data-verso-hover="360">System.FilePath</span></a><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-407">)</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-436">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-441">(</span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Optional-Values/#Option___none" title="Documentation for Option in Lean Language Reference"><span class="const token" data-binding="const-Option" data-verso-hover="156">Option</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Stream___mk" title="Documentation for IO.FS.Stream in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Stream" data-verso-hover="316">IO.FS.Stream</span></a><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.paren-441">)</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-463">:=</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Functors___-Monads-and--do--Notation/Syntax/#Lean___Parser___Term___do" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.do-466">do</span></a><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doLetArrow-499">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.362" data-verso-hover="361">fileExists</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.doIdDecl-503">←</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.308" data-verso-hover="359">filename</span><span class="built-in delim token" data-binding="">.</span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#System___FilePath___pathExists" title="Documentation for System.FilePath.pathExists in Lean Language Reference"><span class="const token" data-binding="const-System.FilePath.pathExists" data-verso-hover="362">pathExists</span></a><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doIf-540">if</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Booleans/#Bool___not" title="Documentation for Bool.not in Lean Language Reference"><span class="const token" data-binding="const-Bool.not" data-verso-hover="118">not</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.362" data-verso-hover="361">fileExists</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doIf-540">then</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doLetArrow-599">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.435" data-verso-hover="308">stderr</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.doIdDecl-603">←</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___getStderr" title="Documentation for IO.getStderr in Lean Language Reference"><span class="const token" data-binding="const-IO.getStderr" data-verso-hover="363">IO.getStderr</span></a><span class="inter-text">
+    </span><span class="var token" data-binding="var-_uniq.435" data-verso-hover="308">stderr</span><span class="built-in delim token" data-binding="">.</span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Stream___putStrLn" title="Documentation for IO.FS.Stream.putStrLn in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Stream.putStrLn" data-verso-hover="311">putStrLn</span></a><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-termS!_-647">s!</span><span class="literal string interpolation token" data-binding="">"File not found: {</span><span class="var token" data-binding="var-_uniq.308" data-verso-hover="359">filename</span><span class="literal string interpolation token" data-binding="">}"</span><span class="inter-text">
+    </span><a href="https://lean-lang.org/doc/reference/4.26.0/Functors___-Monads-and--do--Notation/#Pure___mk" title="Documentation for Pure.pure in Lean Language Reference"><span class="const token" data-binding="const-Pure.pure" data-verso-hover="326">pure</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Optional-Values/#Option___none" title="Documentation for Option.none in Lean Language Reference"><span class="const token" data-binding="const-Option.none" data-verso-hover="159">none</span></a><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doIf-540">else</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doLetArrow-703">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.550" data-verso-hover="364">handle</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.doIdDecl-707">←</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Handle___mk" title="Documentation for IO.FS.Handle.mk in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Handle.mk" data-verso-hover="365">IO.FS.Handle.mk</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.308" data-verso-hover="359">filename</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Mode___read" title="Documentation for IO.FS.Mode.read in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Mode.read" data-verso-hover="366">IO.FS.Mode.read</span></a><span class="inter-text">
+    </span><a href="https://lean-lang.org/doc/reference/4.26.0/Functors___-Monads-and--do--Notation/#Pure___mk" title="Documentation for Pure.pure in Lean Language Reference"><span class="const token" data-binding="const-Pure.pure" data-verso-hover="326">pure</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-768">(</span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Optional-Values/#Option___none" title="Documentation for Option.some in Lean Language Reference"><span class="const token" data-binding="const-Option.some" data-verso-hover="160">some</span></a><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.hygienicLParen-774">(</span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Stream___ofHandle" title="Documentation for IO.FS.Stream.ofHandle in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Stream.ofHandle" data-verso-hover="367">IO.FS.Stream.ofHandle</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.550" data-verso-hover="364">handle</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.paren-774">)</span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.paren-768">)</span></code><p>
+                  Opening a file as a stream takes two steps.
+First, a file handle is created by opening the file in read mode.
+A Lean file handle tracks an underlying file descriptor.
+When there are no references to the file handle value, a finalizer closes the file descriptor.
+Second, the file handle is given the same interface as a POSIX stream using <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Stream___ofHandle" title="Documentation for IO.FS.Stream.ofHandle in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Stream.ofHandle" data-verso-hover="367">IO.FS.Stream.ofHandle</span></a></code>, which fills each field of the <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___FS___Stream___mk" title="Documentation for IO.FS.Stream in Lean Language Reference"><span class="const token" data-binding="const-IO.FS.Stream" data-verso-hover="316">Stream</span></a></code> structure with the corresponding <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a></code> action that works on file handles.</p>
+                </section>
+              <section>
+                <h3 id="handling-input">
+                  2.4.2.2. Handling Input<span class="permalink-widget inline"><a href="../../find/index011c.html?domain=Verso.Genre.Manual.section&amp;name=handling-input" title="Permalink">🔗</a></span></h3>
+                <p>
+                  The main loop of <code>feline</code> is another tail-recursive function, called <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-process" data-verso-hover="368">process</span></code>.
+In order to return a non-zero exit code if any of the inputs could not be read, <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-process" data-verso-hover="368">process</span></code> takes an argument <code class="hl lean inline" data-lean-context="examples"><span class="var token" data-binding="var-_uniq.786" data-verso-hover="369">exitCode</span></code> that represents the current exit code for the whole program.
+Additionally, it takes a list of input files to be processed.</p>
+                <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-1153">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-process" data-verso-hover="368">process</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-1165">(</span><span class="var token" data-binding="var-_uniq.786" data-verso-hover="369">exitCode</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-1165">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Fixed-Precision-Integers/#UInt32___ofBitVec" title="Documentation for UInt32 in Lean Language Reference"><span class="const token" data-binding="const-UInt32" data-verso-hover="370">UInt32</span></a><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-1165">)</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-1185">(</span><span class="var token" data-binding="var-_uniq.789" data-verso-hover="371">args</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-1185">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Linked-Lists/#List___nil" title="Documentation for List in Lean Language Reference"><span class="const token" data-binding="const-List" data-verso-hover="38">List</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Strings/#String___ofByteArray" title="Documentation for String in Lean Language Reference"><span class="const token" data-binding="const-String" data-verso-hover="9">String</span></a><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-1185">)</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-1206">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Fixed-Precision-Integers/#UInt32___ofBitVec" title="Documentation for UInt32 in Lean Language Reference"><span class="const token" data-binding="const-UInt32" data-verso-hover="370">UInt32</span></a><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-1218">:=</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Functors___-Monads-and--do--Notation/Syntax/#Lean___Parser___Term___do" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.do-1221">do</span></a><span class="inter-text">
+  </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doMatch-1226">match</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.789" data-verso-hover="371">args</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doMatch-1226">with</span><span class="inter-text">
+  </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1244">|</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-1246">[</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-1246">]</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1244">=&gt;</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Functors___-Monads-and--do--Notation/#Pure___mk" title="Documentation for Pure.pure in Lean Language Reference"><span class="const token" data-binding="const-Pure.pure" data-verso-hover="326">pure</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.786" data-verso-hover="369">exitCode</span><span class="inter-text">
+  </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1244">|</span><span class="inter-text"> </span><span class="literal string token" data-binding="" data-verso-hover="372">"-"</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term_::_»-1270">::</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.881" data-verso-hover="371">args</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1244">=&gt;</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doLetArrow-1289">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.929" data-verso-hover="308">stdin</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.doIdDecl-1293">←</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#IO___getStdin" title="Documentation for IO.getStdin in Lean Language Reference"><span class="const token" data-binding="const-IO.getStdin" data-verso-hover="309">IO.getStdin</span></a><span class="inter-text">
+    </span><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.929" data-verso-hover="308">stdin</span><span class="inter-text">
+    </span><span class="const token" data-binding="const-process" data-verso-hover="368">process</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.786" data-verso-hover="369">exitCode</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.881" data-verso-hover="371">args</span><span class="inter-text">
+  </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1244">|</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.973" data-verso-hover="46">filename</span><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-«term_::_»-1360">::</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.974" data-verso-hover="371">args</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1244">=&gt;</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doLetArrow-1384">let</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.981" data-verso-hover="373">stream</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.doIdDecl-1388">←</span><span class="inter-text"> </span><span class="const token" data-binding="const-fileStream" data-verso-hover="358">fileStream</span><span class="inter-text"> </span><span class="const anon-ctor token" data-binding="const-System.FilePath.mk" data-verso-hover="374">⟨</span><span class="var token" data-binding="var-_uniq.973" data-verso-hover="46">filename</span><span class="const anon-ctor token" data-binding="const-System.FilePath.mk" data-verso-hover="374">⟩</span><span class="inter-text">
+    </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doMatch-1429">match</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.981" data-verso-hover="373">stream</span><span class="inter-text"> </span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.doMatch-1429">with</span><span class="inter-text">
+    </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1451">|</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Optional-Values/#Option___none" title="Documentation for Option.none in Lean Language Reference"><span class="const token" data-binding="const-Option.none" data-verso-hover="159">none</span></a><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1451">=&gt;</span><span class="inter-text">
+      </span><span class="const token" data-binding="const-process" data-verso-hover="368">process</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="369">1</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.974" data-verso-hover="371">args</span><span class="inter-text">
+    </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1451">|</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Optional-Values/#Option___none" title="Documentation for Option.some in Lean Language Reference"><span class="const token" data-binding="const-Option.some" data-verso-hover="160">some</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1026" data-verso-hover="308">stream</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1451">=&gt;</span><span class="inter-text">
+      </span><span class="const token" data-binding="const-dump" data-verso-hover="344">dump</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1026" data-verso-hover="308">stream</span><span class="inter-text">
+      </span><span class="const token" data-binding="const-process" data-verso-hover="368">process</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.786" data-verso-hover="369">exitCode</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.974" data-verso-hover="371">args</span></code><p>
+                  Just as with <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">if</span></code>, each branch of a <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">match</span></code> that is used as a statement in a <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">do</span></code> is implicitly provided with its own <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">do</span></code>.</p>
+                <p>
+                  There are three possibilities.
+One is that no more files remain to be processed, in which case <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-process" data-verso-hover="368">process</span></code> returns the error code unchanged.
+Another is that the specified filename is <code class="hl lean inline" data-lean-context="examples"><span class="literal string token" data-binding="" data-verso-hover="372">"-"</span></code>, in which case <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-process" data-verso-hover="368">process</span></code> dumps the contents of the standard input and then processes the remaining filenames.
+The final possibility is that an actual filename was specified.
+In this case, <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-fileStream" data-verso-hover="358">fileStream</span></code> is used to attempt to open the file as a POSIX stream.
+Its argument is encased in <code>⟨ ... ⟩</code> because a <code class="hl lean inline" data-lean-context="examples"><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Files___-File-Handles___-and-Streams/#System___FilePath___mk" title="Documentation for System.FilePath in Lean Language Reference"><span class="const token" data-binding="const-System.FilePath" data-verso-hover="360">FilePath</span></a></code> is a single-field structure that contains a string.
+If the file could not be opened, it is skipped, and the recursive call to <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-process" data-verso-hover="368">process</span></code> sets the exit code to <code class="hl lean inline" data-lean-context="examples"><span class="literal number token" data-binding="" data-verso-hover="369">1</span></code>.
+If it could, then it is dumped, and the recursive call to <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-process" data-verso-hover="368">process</span></code> leaves the exit code unchanged.</p>
+                <p>
+                  <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-process" data-verso-hover="368">process</span></code> does not need to be marked <code class="hl lean inline" data-lean-context="examples"><span class="keyword token" data-binding="">partial</span></code> because it is structurally recursive.
+Each recursive call is provided with the tail of the input list, and all Lean lists are finite.
+Thus, <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-process" data-verso-hover="368">process</span></code> does not introduce any non-termination.</p>
+                </section>
+              <section>
+                <h3 id="example-cat-main">
+                  2.4.2.3. Main<span class="permalink-widget inline"><a href="../../find/index3623.html?domain=Verso.Genre.Manual.section&amp;name=example-cat-main" title="Permalink">🔗</a></span></h3>
+                <p>
+                  The final step is to write the <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-main" data-verso-hover="375">main</span></code> action.
+Unlike prior examples, <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-main" data-verso-hover="375">main</span></code> in <code>feline</code> is a function.
+In Lean, <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-main" data-verso-hover="375">main</span></code> can have one of three types:</p>
+                <ul>
+                  <li>
+                    <p>
+                      <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Main1.main" data-verso-hover="306" id="Main1___main">main</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-937">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/The-Unit-Type/#Unit" title="Documentation for Unit in Lean Language Reference"><span class="const token" data-binding="const-Unit" data-verso-hover="197">Unit</span></a></code> corresponds to programs that cannot read their command-line arguments and always indicate success with an exit code of <code class="hl lean inline" data-lean-context="examples"><span class="literal number token" data-binding="" data-verso-hover="369">0</span></code>,</p>
+                    </li>
+                  <li>
+                    <p>
+                      <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Main2.main" data-verso-hover="376" id="Main2___main">main</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-993">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Fixed-Precision-Integers/#UInt32___ofBitVec" title="Documentation for UInt32 in Lean Language Reference"><span class="const token" data-binding="const-UInt32" data-verso-hover="370">UInt32</span></a></code> corresponds to <code>int main(void)</code> in C, for programs without arguments that return exit codes, and</p>
+                    </li>
+                  <li>
+                    <p>
+                      <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Main3.main" data-verso-hover="377" id="Main3___main">main</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-1050">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Linked-Lists/#List___nil" title="Documentation for List in Lean Language Reference"><span class="const token" data-binding="const-List" data-verso-hover="38">List</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Strings/#String___ofByteArray" title="Documentation for String in Lean Language Reference"><span class="const token" data-binding="const-String" data-verso-hover="9">String</span></a><span class="inter-text"> </span><span class="punctuation operator token" data-binding="kw-occ-Lean.Parser.Term.arrow-1052">→</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Fixed-Precision-Integers/#UInt32___ofBitVec" title="Documentation for UInt32 in Lean Language Reference"><span class="const token" data-binding="const-UInt32" data-verso-hover="370">UInt32</span></a></code> corresponds to <code>int main(int argc, char **argv)</code> in C, for programs that take arguments and signal success or failure.</p>
+                    </li>
+                  </ul>
+                <p>
+                  If no arguments were provided, <code>feline</code> should read from standard input as if it were called with a single <code class="hl lean inline" data-lean-context="examples"><span class="literal string token" data-binding="" data-verso-hover="372">"-"</span></code> argument.
+Otherwise, the arguments should be processed one after the other.</p>
+                <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-1589">def</span><span class="inter-text"> </span><span class="const token" data-binding="const-main" data-verso-hover="375">main</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-1598">(</span><span class="var token" data-binding="var-_uniq.1356" data-verso-hover="371">args</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-1598">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Linked-Lists/#List___nil" title="Documentation for List in Lean Language Reference"><span class="const token" data-binding="const-List" data-verso-hover="38">List</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Strings/#String___ofByteArray" title="Documentation for String in Lean Language Reference"><span class="const token" data-binding="const-String" data-verso-hover="9">String</span></a><span class="punctuation bracket token" data-binding="kw-occ-Lean.Parser.Term.explicitBinder-1598">)</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.typeSpec-1619">:</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/IO/Logical-Model/#IO" title="Documentation for IO in Lean Language Reference"><span class="const token" data-binding="const-IO" data-verso-hover="2">IO</span></a><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Basic-Types/Fixed-Precision-Integers/#UInt32___ofBitVec" title="Documentation for UInt32 in Lean Language Reference"><span class="const token" data-binding="const-UInt32" data-verso-hover="370">UInt32</span></a><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Command.declValSimple-1631">:=</span><span class="inter-text">
+  </span><a href="https://lean-lang.org/doc/reference/4.26.0/Terms/Pattern-Matching/#Lean___Parser___Term___match" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.match-1636" data-verso-hover="112">match</span></a><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1356" data-verso-hover="371">args</span><span class="inter-text"> </span><a href="https://lean-lang.org/doc/reference/4.26.0/Terms/Pattern-Matching/#Lean___Parser___Term___match" title="Documentation for syntax in Lean Language Reference"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Term.match-1636" data-verso-hover="112">with</span></a><span class="inter-text">
+  </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1654">|</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-1656">[</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-1656">]</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1654">=&gt;</span><span class="inter-text"> </span><span class="const token" data-binding="const-process" data-verso-hover="368">process</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="369">0</span><span class="inter-text"> </span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-1672">[</span><span class="literal string token" data-binding="" data-verso-hover="372">"-"</span><span class="punctuation bracket token" data-binding="kw-occ-«term[_]»-1672">]</span><span class="inter-text">
+  </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1654">|</span><span class="inter-text"> </span><span class="wildcard token" data-binding="">_</span><span class="inter-text"> </span><span class="built-in delim token" data-binding="kw-occ-Lean.Parser.Term.matchAlts-1654">=&gt;</span><span class="inter-text">  </span><span class="const token" data-binding="const-process" data-verso-hover="368">process</span><span class="inter-text"> </span><span class="literal number token" data-binding="" data-verso-hover="369">0</span><span class="inter-text"> </span><span class="var token" data-binding="var-_uniq.1356" data-verso-hover="371">args</span></code></section>
+              </section>
+            <section>
+              <h2 id="example-cat-running">
+                2.4.3. Meow!<span class="permalink-widget inline"><a href="../../find/index4cf2.html?domain=Verso.Genre.Manual.section&amp;name=example-cat-running" title="Permalink">🔗</a></span></h2>
+              <div class="paragraph">
+                <p>
+                  To check whether <code>feline</code> works, the first step is to build it with <span class="shell-command inline"><code class="command">lake build</code></span>.
+First off, when called without arguments, it should emit what it receives from standard input.
+Check that</p>
+                <div class="shell-command block">
+                  <code class="command"><code class="prompt">$ </code>echo "It works!" | lake exe feline
+</code></div>
+                <p>
+                  emits <code>It works!</code>.</p>
+                </div>
+              <div class="paragraph">
+                <p>
+                  Secondly, when called with files as arguments, it should print them.
+If the file <code>test1.txt</code> contains</p>
+                <div class="example-file">
+                  File: <code>test1.txt</code><code class="line">It's time to find a warm spot</code></div>
+                <p>
+                  and <code>test2.txt</code> contains</p>
+                <div class="example-file">
+                  File: <code>test2.txt</code><code class="line">and curl up!</code></div>
+                <p>
+                  then the command</p>
+                <div class="shell-command block">
+                  <code class="command"><code class="prompt">$ </code>lake exe feline test1.txt test2.txt</code></div>
+                <p>
+                  should emit</p>
+                <pre>It's time to find a warm spot
+and curl up!
+</pre></div>
+              <p>
+                Finally, the <code>-</code> argument should be handled appropriately.</p>
+              <div class="shell-command block">
+                <code class="command"><code class="prompt">$ </code>echo "and purr" | lake exe feline test1.txt - test2.txt
+</code></div>
+              <p>
+                should yield</p>
+              <pre>It's time to find a warm spot
+and purr
+and curl up!
+</pre></section>
+            <section>
+              <h2 id="example-cat-exercise">
+                2.4.4. Exercise<span class="permalink-widget inline"><a href="../../find/index1356.html?domain=Verso.Genre.Manual.section&amp;name=example-cat-exercise" title="Permalink">🔗</a></span></h2>
+              <p>
+                Extend <code>feline</code> with support for usage information.
+The extended version should accept a command-line argument <code>--help</code> that causes documentation about the available command-line options to be written to standard output.
+</p>
+              </section>
+            </section>
+          <nav class="prev-next-buttons">
+            <a class="local-button active" href="../Starting-a-Project/index.html#starting-a-project" rel="prev" title="2.3. Starting a Project"><span class="arrow">←</span><span class="where">2.3. Starting a Project</span></a><a class="local-button active" href="../Additional-Conveniences/index.html#hello-world-conveniences" rel="next" title="2.5. Additional Conveniences"><span class="where">2.5. Additional Conveniences</span><span class="arrow">→</span></a></nav>
+          </div>
+        </main></div>
+    </body>
+  
+<!-- Mirrored from https://lean-lang.org/functional_programming_in_lean/Hello___-World___/Worked-Example___--cat/ by HTTrack Website Copier/3.x [XR&CO], Wed, 23 Sep 2026 18:47:59 GMT -->
+</html>
+

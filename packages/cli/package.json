@@ -1,0 +1,38 @@
+{
+  "name": "pskernel-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "pskernel": "./dist/bin/pskernel.js",
+    "psc": "./dist/bin/psc.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node dist/test/cli.test.js && node dist/bin/pskernel.js --help && node dist/bin/psc.js --help"
+  },
+  "dependencies": {
+    "lean-ts-kernel": "file:../..",
+    "@proofscript/module": "file:../module",
+    "@proofscript/syntax": "file:../syntax",
+    "@proofscript/backend-ts": "file:../backend-ts",
+    "@proofscript/compiler-ir": "file:../compiler-ir",
+    "@proofscript/elab": "file:../elab",
+    "@proofscript/compiler": "file:../compiler",
+    "@proofscript/environment": "file:../environment",
+    "@proofscript/checked-core": "file:../checked-core",
+    "@proofscript/project": "file:../project"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "typescript": "5.8.3"
+  },
+  "description": "ProofScript developer CLI (psc) plus low-level pskernel replay/module commands.",
+  "proofscript": {
+    "status": "verified-only+runtime-package-subpaths+runtime-lock-closure+runtime-dependency-policy+source-ffi-assurance+dual-source-ds5-persistent-artifacts+source-roots+checked-module-cache",
+    "phase": "A",
+    "trust": "untrusted-support",
+    "futureName": "@proofscript/cli",
+    "sourceLanguage": "typescript"
+  }
+}

@@ -1,0 +1,74 @@
+name: Regenerate Lean 4.34 oracle fixtures
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - lean-toolchain
+      - oracle/replay-probe/**
+      - scripts/generate-oracle-fixtures.sh
+      - scripts/*-oracle.mjs
+      - package.json
+      - .github/workflows/regenerate-oracle-fixtures.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lean434-oracle-fixtures-main
+  cancel-in-progress: true
+
+jobs:
+  regenerate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install pinned Lean toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - name: Compile dependency exporter
+        run: lean oracle/replay-probe/DependencyExport.lean
+      - name: Regenerate pinned corpora
+        run: bash scripts/generate-oracle-fixtures.sh
+      - name: Build TypeScript kernel
+        run: npm run build
+      - name: Verify generated corpora
+        run: |
+          npm run oracle:primitive
+          npm run oracle:init
+          npm run oracle:text-foundation
+          npm run oracle:std-parsec
+          npm run oracle:std-sat-cnf
+          npm run oracle:std-byteslice
+          npm run oracle:lean-rbmap
+          npm run oracle:lean-persistentarray
+          npm run oracle:lean-persistenthashmap
+          npm run oracle:lean-rbmap-full
+      - name: Commit generated fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "$(git status --porcelain -- oracle/fixtures)" ]]; then
+            echo "Fixtures already canonical."
+            exit 0
+          fi
+          git add oracle/fixtures
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "test: regenerate Lean 4.34 oracle fixtures"
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main

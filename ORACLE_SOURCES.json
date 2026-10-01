@@ -1,0 +1,60 @@
+{
+  "lean": "4.34.0",
+  "files": [
+    {
+      "source": "lean434",
+      "path": "src/kernel/type_checker.cpp",
+      "sha256": "5312a8f02318d6e3fe7eca68bf3525d5f3558fa98f5737612b52cac2e588c447"
+    },
+    {
+      "source": "lean434",
+      "path": "src/kernel/type_checker.h",
+      "sha256": "251e5910586972445d0ebd317a056e27d8f124515f19ae7865560526fa7935b0"
+    },
+    {
+      "source": "lean434",
+      "path": "src/kernel/inductive.cpp",
+      "sha256": "ad549d9a85bf75ea0405cd84f2c6759651c193474f7865ffc823d1467a79c7d6"
+    },
+    {
+      "source": "lean434",
+      "path": "src/kernel/declaration.cpp",
+      "sha256": "1d4751c0a2a1e0663cc08dfb00941164c7fb61b16f885c2722cf24422b2ca454"
+    },
+    {
+      "source": "lean434",
+      "path": "src/kernel/environment.cpp",
+      "sha256": "6748cf9368a16b7e4fd8546accc78f98874fb69323934b21c796e722dad136b2"
+    },
+    {
+      "source": "lean434",
+      "path": "src/kernel/level.cpp",
+      "sha256": "7cb927c6fabd9fb843f548443494d3673a08074e26fe32b679e80f4664fc7f25"
+    },
+    {
+      "source": "lean434",
+      "path": "src/kernel/expr.cpp",
+      "sha256": "cb02c18964aca67289b8c1d64864355bb5c10fc93d55bd3c3c9646776af9c592"
+    },
+    {
+      "source": "lean434",
+      "path": "src/kernel/quot.cpp",
+      "sha256": "500621538bfa97cd63ebf0c4b0e111b69232f5d4fa34aa56b5f6482599782627"
+    },
+    {
+      "source": "lean434",
+      "path": "src/Init/Prelude.lean",
+      "sha256": "2a3163bdd830cd31f1f1bc9bc79ea6bdad6a3b2c6f334166792bbc73631f3b10"
+    },
+    {
+      "source": "lean4lean",
+      "path": "Lean4Lean/Primitive.lean",
+      "sha256": "0bafbbd0fffd0e56034b205bfacb9985c908d56d3d4cee4379059777d5f83c2e"
+    },
+    {
+      "source": "lean4lean",
+      "path": "Lean4Lean/TypeChecker.lean",
+      "sha256": "32a426fb2cd092d2cc973866ac91adb44b3b91c463891b78c21d95c864fbf808"
+    }
+  ]
+}

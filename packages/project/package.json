@@ -1,0 +1,31 @@
+{
+  "name": "@proofscript/project",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "npm-oriented ProofScript project graph, cache and build orchestration.",
+  "proofscript": {
+    "status": "runtime-package-subpaths+runtime-dependency-policy+dual-source-node-resolver+module-graph-mvp",
+    "phase": "D",
+    "trust": "untrusted-support",
+    "sourceLanguage": "typescript"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    },
+    "./node": {
+      "types": "./dist/src/node.d.ts",
+      "import": "./dist/src/node.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node dist/test/index.test.js"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3",
+    "@types/node": "22.15.3"
+  }
+}

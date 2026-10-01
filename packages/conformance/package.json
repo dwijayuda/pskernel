@@ -1,0 +1,33 @@
+{
+  "name": "@proofscript/conformance",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "Reusable pskernel conformance runner for accept/reject corpora such as Lean Kernel Arena.",
+  "proofscript": {
+    "status": "mvp",
+    "phase": "A",
+    "trust": "test-only",
+    "sourceLanguage": "typescript"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "bin": {
+    "pskernel-conformance": "./dist/bin/pskernel-conformance.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node dist/test/conformance.test.js"
+  },
+  "dependencies": {
+    "lean-ts-kernel": "file:../.."
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "typescript": "5.8.3"
+  }
+}

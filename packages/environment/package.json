@@ -1,0 +1,34 @@
+{
+  "name": "@proofscript/environment",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "Shared Lean 4.34 environment replay/provider boundary for ProofScript compiler and tooling.",
+  "proofscript": {
+    "status": "lean434-prelude-provider-mvp",
+    "phase": "B",
+    "trust": "untrusted-support",
+    "sourceLanguage": "typescript"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    },
+    "./node": {
+      "types": "./dist/src/node.d.ts",
+      "import": "./dist/src/node.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node dist/test/index.test.js"
+  },
+  "dependencies": {
+    "lean-ts-kernel": "file:../.."
+  },
+  "devDependencies": {
+    "@types/node": "22.15.3",
+    "typescript": "5.8.3"
+  }
+}

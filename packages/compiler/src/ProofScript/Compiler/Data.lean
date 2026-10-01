@@ -1,0 +1,23 @@
+structure PsSourcePos where
+  offset : Nat
+  line : Nat
+  column : Nat
+
+structure PsSourceSpan where
+  start : PsSourcePos
+  stop : PsSourcePos
+
+inductive PsDiagnosticSeverity where
+  | error
+  | warning
+  | info
+
+structure PsDiagnostic where
+  severity : PsDiagnosticSeverity
+  message : String
+  startOffset : Nat
+  endOffset : Nat
+
+def psBootstrapVersion : Nat := 1
+
+def psIdentityNat (value : Nat) : Nat := value

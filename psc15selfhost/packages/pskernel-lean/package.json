@@ -1,0 +1,43 @@
+{
+  "name": "@proofscript/pskernel-lean",
+  "version": "4.34.0",
+  "description": "Official Lean kernel provider for ProofScript PSC2, pinned to Lean 4.34.0 semantics",
+  "type": "module",
+  "private": false,
+  "exports": {
+    ".": "./index.mjs",
+    "./node": "./host/node-provider.mjs",
+    "./metadata": "./LEAN_SOURCE_PIN.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.mjs",
+    "host/node-provider.mjs",
+    "host/prebuilt.mjs",
+    "LEAN_SOURCE_PIN.json",
+    "PREBUILT_MANIFEST.json",
+    "prebuilt/",
+    "README.md",
+    "BUILDING.md",
+    "INTEGRATION.md",
+    "NPM_PACKAGE.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "proofscript": {
+    "bootstrap": false,
+    "portable": false,
+    "sourceRoots": [
+      "provider"
+    ],
+    "testRoots": [
+      "provider-test"
+    ],
+    "outDir": "dist",
+    "role": "external-lean-kernel-provider"
+  }
+}

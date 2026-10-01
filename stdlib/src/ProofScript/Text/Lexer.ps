@@ -1,0 +1,71 @@
+structure SourceSpan where {
+  start : String.Pos.Raw;
+  stop : String.Pos.Raw;
+};
+
+function rawPos(byteIdx : Nat) : String.Pos.Raw :=
+  String.Pos.Raw.mk(byteIdx);
+
+function rawPosByteIdx(pos : String.Pos.Raw) : Nat :=
+  String.Pos.Raw.byteIdx(pos);
+
+function natInRange(n : Nat, lower : Nat, upper : Nat) : Bool :=
+  if (lower <= n) {
+    if (n <= upper) { true } else { false }
+  } else {
+    false
+  };
+
+function isAsciiDigit(c : Char) : Bool :=
+  natInRange(Char.toNat(c), 48, 57);
+
+function isAsciiLower(c : Char) : Bool :=
+  natInRange(Char.toNat(c), 97, 122);
+
+function isAsciiUpper(c : Char) : Bool :=
+  natInRange(Char.toNat(c), 65, 90);
+
+function isAsciiIdentifierStart(c : Char) : Bool :=
+  let n : Nat := Char.toNat(c);
+  isAsciiLower(c) || isAsciiUpper(c) || n == 95;
+
+function isAsciiIdentifierRest(c : Char) : Bool :=
+  isAsciiIdentifierStart(c) || isAsciiDigit(c);
+
+function isAsciiWhitespace(c : Char) : Bool :=
+  let n : Nat := Char.toNat(c);
+  n == 32 || n == 9 || n == 10 || n == 13;
+
+function sourceSpan(start : String.Pos.Raw, stop : String.Pos.Raw) : SourceSpan :=
+  { start := start, stop := stop : SourceSpan };
+
+function nextSpan(s : String, start : String.Pos.Raw) : SourceSpan :=
+  sourceSpan(start, String.Internal.next(s, start));
+
+function spanByteLength(span : SourceSpan) : Nat :=
+  rawPosByteIdx(span.stop) - rawPosByteIdx(span.start);
+
+function sliceSpan(s : String, span : SourceSpan) : String :=
+  String.Internal.extract(s, span.start, span.stop);
+
+function scanIdentifier2(s : String, start : String.Pos.Raw) : SourceSpan :=
+  if (String.Internal.atEnd(s, start)) {
+    sourceSpan(start, start)
+  } else {
+    let first : Char := String.Internal.get(s, start);
+    if (isAsciiIdentifierStart(first)) {
+      let afterFirst : String.Pos.Raw := String.Internal.next(s, start);
+      if (String.Internal.atEnd(s, afterFirst)) {
+        sourceSpan(start, afterFirst)
+      } else {
+        let second : Char := String.Internal.get(s, afterFirst);
+        if (isAsciiIdentifierRest(second)) {
+          sourceSpan(start, String.Internal.next(s, afterFirst))
+        } else {
+          sourceSpan(start, afterFirst)
+        }
+      }
+    } else {
+      sourceSpan(start, start)
+    }
+  };

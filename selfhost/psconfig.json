@@ -1,0 +1,15 @@
+{
+  "languageVersion": "0.7",
+  "entry": "packages/compiler/src/Ps/Compiler.lean",
+  "sourceRoots": [
+    "packages",
+    "stdlib"
+  ],
+  "runtimeDependencies": {},
+  "compilerOptions": {
+    "outDir": "dist",
+    "emitTypeScript": true,
+    "declaration": true,
+    "sourceMap": true
+  }
+}

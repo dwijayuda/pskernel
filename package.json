@@ -1,0 +1,75 @@
+{
+  "name": "lean-ts-kernel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run test:outer && npm run test:kernel",
+    "check": "npm run test && node scripts/anti-drift.mjs && npm run check:packages && node scripts/oracle-fingerprint.mjs",
+    "replay": "npm run build --silent && node scripts/replay.mjs",
+    "oracle:official": "node scripts/official-oracle.mjs",
+    "check:oracle": "npm run check && npm run oracle:official && npm run oracle:primitive && npm run oracle:defeq && npm run oracle:adversarial",
+    "oracle:primitive": "npm run build --silent && node scripts/primitive-closure-oracle.mjs",
+    "oracle:defeq": "npm run build --silent && node scripts/defeq-differential.mjs",
+    "oracle:init": "npm run build --silent && node scripts/init-prelude-oracle.mjs",
+    "check:corpus": "npm run check:oracle && npm run oracle:init && npm run oracle:std-parsec && npm run oracle:std-sat-cnf && npm run oracle:std-byteslice && npm run oracle:lean-rbmap && npm run oracle:lean-persistentarray && npm run oracle:lean-persistenthashmap",
+    "oracle:std-parsec": "npm run build --silent && node scripts/std-parsec-oracle.mjs",
+    "oracle:std-sat-cnf": "npm run build --silent && node scripts/std-sat-cnf-oracle.mjs",
+    "oracle:std-byteslice": "npm run build --silent && node scripts/std-byteslice-oracle.mjs",
+    "oracle:lean-rbmap": "npm run build --silent && node scripts/lean-rbmap-oracle.mjs",
+    "oracle:adversarial": "node scripts/adversarial-oracle.mjs",
+    "oracle:lean-rbmap-full": "npm run build --silent && node scripts/lean-rbmap-full-oracle.mjs",
+    "check:large-corpus": "npm run oracle:lean-rbmap-full",
+    "oracle:lean-persistentarray": "npm run build --silent && node scripts/lean-persistentarray-oracle.mjs",
+    "oracle:lean-persistenthashmap": "npm run build --silent && node scripts/lean-persistenthashmap-oracle.mjs",
+    "generate:fixtures": "bash scripts/generate-oracle-fixtures.sh",
+    "oracle:arena": "npm run build --silent && node scripts/arena-static-oracle.mjs",
+    "oracle:std-full": "npm run build --silent && node scripts/full-std-oracle.mjs",
+    "test:syntax": "tsc -p packages/syntax/tsconfig.json && node packages/syntax/dist/test/syntax.test.js && node packages/syntax/dist/test/v061-conformance.test.js",
+    "test:packages": "npm run test:syntax && tsc -p packages/browser/tsconfig.json && node packages/browser/dist/test/index.test.js && tsc -p packages/pretty/tsconfig.json && node packages/pretty/dist/test/index.test.js && tsc -p packages/meta/tsconfig.json && node packages/meta/dist/test/index.test.js && tsc -p packages/environment/tsconfig.json && node packages/environment/dist/test/index.test.js && tsc -p packages/checked-core/tsconfig.json && node packages/checked-core/dist/test/index.test.js && tsc -p packages/tactic/tsconfig.json && node packages/tactic/dist/test/index.test.js && tsc -p packages/elab/tsconfig.json && node packages/elab/dist/test/index.test.js && tsc -p packages/compiler-ir/tsconfig.json && node packages/compiler-ir/dist/test/index.test.js && tsc -p packages/erasure/tsconfig.json && node packages/erasure/dist/test/index.test.js && tsc -p packages/runtime/tsconfig.json && node packages/runtime/dist/test/index.test.js && tsc -p packages/backend-ts/tsconfig.json && node packages/backend-ts/dist/test/index.test.js && tsc -p packages/compiler/tsconfig.json && node packages/compiler/dist/test/index.test.js && tsc -p packages/project/tsconfig.json && node packages/project/dist/test/index.test.js && tsc -p packages/language-service/tsconfig.json && node packages/language-service/dist/test/index.test.js && tsc -p packages/lsp/tsconfig.json && node packages/lsp/dist/test/index.test.js && tsc -p packages/module/tsconfig.json && tsc -p packages/cli/tsconfig.json && node packages/cli/dist/test/cli.test.js",
+    "check:packages": "node scripts/package-map-check.mjs && npm run check:source-shape && npm run check:vscode && npm run check:architecture",
+    "test:package-integration": "node scripts/package-integration-smoke.mjs",
+    "check:source-shape": "node scripts/source-shape-check.mjs",
+    "check:vscode": "node scripts/vscode-shape-check.mjs && node editors/vscode/test/smoke.mjs",
+    "check:architecture": "node scripts/proofscript-architecture-check.mjs",
+    "build:src": "tsc -p tsconfig.src.json",
+    "test:outer": "npm run build:src && npm run test:packages && npm run test:package-integration && npm run check:packages",
+    "check:oracle-syntax": "node --check scripts/module-stream-oracle.mjs && node --check scripts/full-std-oracle.mjs && node --check scripts/std-hot-oracle.mjs && node --check scripts/std-bisect-oracle.mjs && node --check scripts/std-bisect-oracle-test.mjs && node --check scripts/adaptive-root-oracle.mjs && node --check scripts/kernel-study-regression-matrix.mjs && node --check scripts/official-oracle.mjs && node --check scripts/defeq-differential.mjs && node --check scripts/adversarial-oracle.mjs && node --check scripts/native-oracle-smoke.mjs",
+    "oracle:std-probe": "npm run build --silent && node scripts/adaptive-root-oracle.mjs Std 114029 0 250 100 10",
+    "oracle:std-range": "npm run build --silent && node scripts/adaptive-root-oracle.mjs Std 114029",
+    "oracle:std-hot": "npm run build --silent && node scripts/std-hot-oracle.mjs",
+    "oracle:std-bisect": "npm run build --silent && node scripts/std-bisect-oracle.mjs",
+    "test:oracle-tools": "node scripts/std-bisect-oracle-test.mjs && node scripts/lean-native-evaluator-test.mjs && npm run test:kernel-study-matrix",
+    "oracle:native-smoke": "npm run build --silent && node scripts/native-oracle-smoke.mjs",
+    "test:kernel-study-matrix": "node scripts/kernel-study-regression-matrix.mjs",
+    "oracle:init-canonical": "npm run build --silent && node scripts/module-stream-oracle.mjs Init.Prelude",
+    "test:kernel": "npm run check:oracle-syntax && npm run build && npm run test:oracle-tools && node dist/test/all.test.js",
+    "check:kernel-oracle": "npm run oracle:official && npm run oracle:primitive && npm run oracle:defeq && npm run oracle:adversarial",
+    "check:kernel-corpus": "npm run check:kernel-oracle && npm run oracle:init && npm run oracle:std-parsec && npm run oracle:std-sat-cnf && npm run oracle:std-byteslice && npm run oracle:lean-rbmap && npm run oracle:lean-persistentarray && npm run oracle:lean-persistenthashmap",
+    "oracle:text-foundation": "npm run build --silent && tsc -p packages/environment/tsconfig.json && node scripts/text-foundation-oracle.mjs",
+    "oracle:selfhost-foundation": "npm run build --silent && tsc -p packages/environment/tsconfig.json && node scripts/selfhost-foundation-oracle.mjs"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  },
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    },
+    "./lean4export": {
+      "types": "./dist/src/integration/lean4export.d.ts",
+      "import": "./dist/src/integration/lean4export.js"
+    },
+    "./native": {
+      "types": "./dist/src/kernel/reduction/native.d.ts",
+      "import": "./dist/src/kernel/reduction/native.js"
+    }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}

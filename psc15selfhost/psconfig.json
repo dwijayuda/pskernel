@@ -1,0 +1,16 @@
+{
+  "languageVersion": "0.7",
+  "implementationProfile": "PSC1",
+  "acceptedLanguageProfile": "PSC2-bootstrap",
+  "entry": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+  "sourceRoots": [
+    "packages"
+  ],
+  "runtimeDependencies": {},
+  "compilerOptions": {
+    "outDir": "dist",
+    "emitTypeScript": true,
+    "declaration": true,
+    "sourceMap": true
+  }
+}

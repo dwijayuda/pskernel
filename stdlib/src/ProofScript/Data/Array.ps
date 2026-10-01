@@ -1,0 +1,92 @@
+import ProofScript.Data.Option
+
+function arrayEmptyWithCapacity {α : Type}
+(capacity : Nat) : Array(α) :=
+  Array.emptyWithCapacity(capacity);
+
+function arraySize {α : Type}
+(xs : Array(α)) : Nat :=
+  Array.size(xs);
+
+function arrayPush {α : Type}
+(xs : Array(α), value : α) : Array(α) :=
+  Array.push(xs, value);
+
+function arrayGet {α : Type}
+(xs : Array(α), index : Nat, h : index < Array.size(xs)) : α :=
+  Array.getInternal(xs, index, h);
+
+function arrayGetD {α : Type}
+(xs : Array(α), index : Nat, fallback : α) : α :=
+  Array.getD(xs, index, fallback);
+
+function arraySet {α : Type}
+(xs : Array(α), index : Nat, value : α, h : index < Array.size(xs)) :
+Array(α) :=
+  Array.setIfInBounds(xs, index, value);
+
+function arraySetIfInBounds {α : Type}
+(xs : Array(α), index : Nat, value : α) : Array(α) :=
+  Array.setIfInBounds(xs, index, value);
+
+function arrayMap {α : Type}{β : Type}
+(f : α -> β, xs : Array(α)) : Array(β) :=
+  Array.map(f, xs);
+
+function arrayFoldl {α : Type}{β : Type}
+(f : β -> α -> β, init : β, xs : Array(α)) : β :=
+  Array.foldl(f, init, xs, 0, Array.size(xs));
+
+function arrayGet? {α : Type}
+(xs : Array(α), index : Nat) : PsOption(α) :=
+  Prod.snd(
+    arrayFoldl(
+      fun (state : Prod(Nat, PsOption(α))) (value : α) =>
+        let current : Nat := Prod.fst(state);
+        let found : PsOption(α) := Prod.snd(state);
+        if (current == index) {
+          Prod.mk(current + 1, PsOption.some(value))
+        } else {
+          Prod.mk(current + 1, found)
+        },
+      Prod.mk(0, PsOption.none),
+      xs
+    )
+  );
+
+function arrayFindStep {α : Type}
+(predicate : α -> Bool, found : PsOption(α), value : α) : PsOption(α) :=
+  match found with {
+    | .none =>
+      if (predicate(value)) {
+        PsOption.some(value)
+      } else {
+        PsOption.none
+      };
+    | .some existing => found;
+  };
+
+function arrayFind? {α : Type}
+(predicate : α -> Bool, xs : Array(α)) : PsOption(α) :=
+  arrayFoldl(
+    fun (found : PsOption(α)) (value : α) =>
+      arrayFindStep(predicate, found, value),
+    PsOption.none,
+    xs
+  );
+
+function arrayAny {α : Type}
+(predicate : α -> Bool, xs : Array(α)) : Bool :=
+  arrayFoldl(
+    fun (found : Bool) (value : α) => found || predicate(value),
+    false,
+    xs
+  );
+
+function arrayAll {α : Type}
+(predicate : α -> Bool, xs : Array(α)) : Bool :=
+  arrayFoldl(
+    fun (accepted : Bool) (value : α) => accepted && predicate(value),
+    true,
+    xs
+  );

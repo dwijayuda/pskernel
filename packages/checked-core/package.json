@@ -1,0 +1,29 @@
+{
+  "name": "@proofscript/checked-core",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "Kernel-admitted dependent core boundary shared by ProofScript elaboration and compilation.",
+  "proofscript": {
+    "status": "replayable-runtime-externals+admission-codec-v2",
+    "phase": "B",
+    "trust": "untrusted-boundary",
+    "sourceLanguage": "typescript"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node dist/test/index.test.js"
+  },
+  "dependencies": {
+    "lean-ts-kernel": "file:../.."
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  }
+}

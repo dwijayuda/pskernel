@@ -1,0 +1,30 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "types": [],
+    "baseUrl": ".",
+    "paths": {
+      "@proofscript/syntax": [
+        "../syntax/dist/src/index.d.ts"
+      ],
+      "@proofscript/elab": [
+        "../elab/dist/src/index.d.ts"
+      ],
+      "lean-ts-kernel": [
+        "../../dist/src/index.d.ts"
+      ],
+      "@proofscript/checked-core": [
+        "../checked-core/dist/src/index.d.ts"
+      ],
+      "@proofscript/project": [
+        "../project/dist/src/index.d.ts"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ]
+}

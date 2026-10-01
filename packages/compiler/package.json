@@ -1,0 +1,40 @@
+{
+  "name": "@proofscript/compiler",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "description": "Orchestrates verified compilation from kernel-admitted checked core through erasure, compiler IR, TypeScript, and JavaScript.",
+  "proofscript": {
+    "status": "checked-core-to-js-generic-structure+structural-recursion-mvp",
+    "phase": "C",
+    "trust": "untrusted-support",
+    "sourceLanguage": "typescript+lean+proofscript-bootstrap",
+    "portableSourceRoots": [
+      "src/ProofScript"
+    ],
+    "pairedSources": true,
+    "bootstrapBuild": "../../selfhost/lakefile.lean",
+    "futureArtifactRoot": "dist/proofscript"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build --silent && node dist/test/index.test.js",
+    "build:lean-bootstrap": "cd ../../selfhost && lake build ProofScriptCompiler"
+  },
+  "dependencies": {
+    "lean-ts-kernel": "file:../..",
+    "@proofscript/checked-core": "file:../checked-core",
+    "@proofscript/erasure": "file:../erasure",
+    "@proofscript/compiler-ir": "file:../compiler-ir",
+    "@proofscript/backend-ts": "file:../backend-ts"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  }
+}

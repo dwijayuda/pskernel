@@ -1,0 +1,719 @@
+name: PSC1 Lean bootstrap
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - selfhost/psc1-lean-bootstrap
+      - backend/wasm3-owned
+      - integrate/wasm3-owned
+      - backend/wasm3-gc-adts
+      - integrate/wasm3-gc-adts
+    paths:
+      - selfhost/**
+      - docs/selfhost/PSC1_LEAN_BOOTSTRAP.md
+      - docs/selfhost/WASM3_BACKEND.md
+      - docs/plans/07_SELF_HOSTING_FOUNDATION.md
+      - .github/workflows/psc1-lean-bootstrap.yml
+      - packages/syntax/**
+      - packages/elab/**
+      - packages/checked-core/**
+      - packages/erasure/**
+      - packages/compiler-ir/**
+      - packages/backend-ts/**
+      - selfhost/packages/backend-wasm/**
+      - selfhost/packages/compiler-ir/**
+      - packages/compiler/**
+      - packages/cli/**
+      - package.json
+      - package-lock.json
+
+permissions:
+  contents: read
+
+jobs:
+  lean-bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify bootstrap toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+
+      - name: Check self-host host scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check selfhost/packages/cli/bin/psc.mjs
+          node --check selfhost/scripts/bootstrap-project.mjs
+          node --check selfhost/scripts/compile-with-generated.mjs
+          node --check selfhost/scripts/translate-with-generated.mjs
+          node --check selfhost/scripts/reemit-project-with-generated.mjs
+          node --check selfhost/scripts/compare-source-workspaces.mjs
+          node --check selfhost/scripts/emit-project-with-generated.mjs
+          node --check selfhost/scripts/selfhost-generation.mjs
+          node --check selfhost/scripts/build-current.mjs
+          node --check selfhost/scripts/build-auto.mjs
+          node --check selfhost/scripts/compare-selfhost.mjs
+          node --check selfhost/scripts/check-workspace.mjs
+          node --check selfhost/scripts/check-ir-neutrality.mjs
+          node --check selfhost/scripts/clean.mjs
+          node selfhost/scripts/check-workspace.mjs
+
+      - name: Audit portable PSC1 source profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node check-psc1-source.mjs
+
+      - name: Enforce target-neutral shared compiler IR
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          node scripts/check-ir-neutrality.mjs
+
+      - name: Build compiler with Lake
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake build
+
+      - name: Run owned WebAssembly backend target-lowering tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_tests
+
+      - name: Validate owned WebAssembly binary in Node
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc1-wasm-bytes.txt
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const csv=readFileSync('/tmp/psc1-wasm-bytes.txt','utf8').trim();
+          const bytes=Uint8Array.from(csv.split(',').map(Number));
+          if (!WebAssembly.validate(bytes)) {
+            throw new Error('PSC1_WASM_VALIDATE_FAILED');
+          }
+          const {instance}=await WebAssembly.instantiate(bytes);
+          if (instance.exports.addU32(20, 22) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_U32_RESULT');
+          }
+          if (instance.exports.addF32(20.5, 21.5) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_F32_RESULT');
+          }
+          if (instance.exports.addThenOne(20, 21) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_DIRECT_CALL_RESULT');
+          }
+          if (instance.exports.selectU32(1, 42, 7) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_IF_TRUE_RESULT');
+          }
+          if (instance.exports.selectU32(0, 42, 7) !== 7) {
+            throw new Error('PSC1_WASM_RUNTIME_IF_FALSE_RESULT');
+          }
+          if (instance.exports.letPlusOne(41) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_LET_RESULT');
+          }
+          if (instance.exports.pointX(42, 7) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_STRUCT_RESULT');
+          }
+          if (instance.exports.smallSigned(-123) !== -123) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_PACKED_I16_RESULT');
+          }
+          if (instance.exports.smallUnsigned(65535) !== 65535) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_PACKED_U16_RESULT');
+          }
+          if (instance.exports.someValue(42) !== 42) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_INDUCTIVE_SOME_RESULT');
+          }
+          if (instance.exports.noneValue() !== 0) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_INDUCTIVE_NONE_RESULT');
+          }
+          if (instance.exports.listLengthTwo() !== 2) {
+            throw new Error('PSC1_WASM_RUNTIME_GC_RECURSIVE_ADT_RESULT');
+          }
+          console.log('PSC1_BACKEND_WASM_NODE_RUNTIME: PASS');
+          NODE
+
+      - name: Probe real compiler source readiness
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+
+          echo "PSC1_COMPILER_PROJECT_CHECK: packages/compiler/src/Ps/Compiler.lean"
+          lake exe psc1 check packages/compiler/src/Ps/Compiler.lean
+
+          sources=(
+            packages/foundation/src/Ps/Foundation/Diagnostic.lean
+            packages/syntax/src/Ps/Syntax/Ast.lean
+            packages/syntax/src/Ps/Syntax/Translate.lean
+            packages/elab/src/Ps/Elab/Declaration.lean
+            packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean
+            packages/erasure/src/Ps/Erasure/Definition.lean
+            packages/backend-ts/src/Ps/BackendTs/Module.lean
+            packages/compiler/src/Ps/Compiler/Api.lean
+          )
+
+          for source in "${sources[@]}"; do
+            echo "PSC1_COMPILER_SOURCE_CHECK: ${source}"
+            lake exe psc1 check "${source}"
+            output="/tmp/psc1-$(basename "${source}" .lean).ps"
+            lake exe psc1 translate "${source}" --to ps > "${output}"
+            test -s "${output}"
+          done
+
+          echo "PSC1_COMPILER_SOURCE_READINESS: PASS"
+
+      - name: Run Lean-hosted compiler smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1
+
+      - name: Run CLI parity smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          cd selfhost
+          cat > /tmp/psc1-cli.lean <<'EOF'
+          def idNat (x : Nat) : Nat := x
+          EOF
+          cat > /tmp/psc1-cli.ps <<'EOF'
+          def idNat(x : Nat) : Nat := x;
+          EOF
+          lake exe psc1 check /tmp/psc1-cli.lean
+          lake exe psc1 check /tmp/psc1-cli.ps
+          lake exe psc1 emit-lean /tmp/psc1-cli.ps > /tmp/psc1-cli-emitted.lean
+          lake exe psc1 translate /tmp/psc1-cli.lean --to ps > /tmp/psc1-cli-translated.ps
+          lake exe psc1 emit-ps /tmp/psc1-cli.lean --out /tmp/psc1-cli-output.ps
+          lake exe psc1 translate /tmp/psc1-cli.ps --to lean --out /tmp/psc1-cli-output.lean
+          grep -q 'def idNat' /tmp/psc1-cli-emitted.lean
+          grep -q 'def idNat' /tmp/psc1-cli-translated.ps
+          grep -q 'def idNat' /tmp/psc1-cli-output.ps
+          grep -q 'def idNat' /tmp/psc1-cli-output.lean
+          rm -f /tmp/psc1-cli.js /tmp/psc1-cli.d.ts /tmp/psc1-cli.js.map
+          lake exe psc1 build /tmp/psc1-cli.lean --out /tmp/psc1-cli.ts
+          test -f /tmp/psc1-cli.js
+          test -f /tmp/psc1-cli.d.ts
+          test -f /tmp/psc1-cli.js.map
+          echo "PSC1_CLI_PARITY_SMOKE: PASS"
+
+
+          cat > /tmp/psc1-do.lean <<'EOF'
+          def compilerPure {A : Type} (value : A) : A := value
+          def compilerBind {A : Type} {B : Type} (value : A) (next : A -> B) : B :=
+            next value
+          def doValue : Nat :=
+            do
+              let value : Nat <- compilerPure 7;
+              return value
+          EOF
+          cat > /tmp/psc1-do.ps <<'EOF'
+          def compilerPure{A : Type}(value : A) : A := value;
+          def compilerBind{A : Type}{B : Type}(value : A)(next : A -> B) : B := next(value);
+          def doValue : Nat := do { let value : Nat <- compilerPure(7); return value; };
+          EOF
+          lake exe psc1 typescript /tmp/psc1-do.lean > /tmp/psc1-do-lean.ts
+          lake exe psc1 typescript /tmp/psc1-do.ps > /tmp/psc1-do-ps.ts
+          cmp /tmp/psc1-do-lean.ts /tmp/psc1-do-ps.ts
+          grep -q 'export const doValue: bigint = compilerBind' /tmp/psc1-do-lean.ts
+          echo "PSC1_DO_DESUGARING: PASS"
+
+
+          rm -rf /tmp/psc1-project
+          mkdir -p /tmp/psc1-project
+          cat > /tmp/psc1-project/Lib.lean <<'EOF'
+          def idNat (x : Nat) : Nat := x
+          EOF
+          cat > /tmp/psc1-project/Main.ps <<'EOF'
+          import Lib;
+          def two : Nat := idNat(2);
+          EOF
+          lake exe psc1 check /tmp/psc1-project/Main.ps
+          lake exe psc1 typescript /tmp/psc1-project/Main.ps > /tmp/psc1-project/Main.ts
+          grep -q 'export function idNat' /tmp/psc1-project/Main.ts
+          grep -q 'export const two' /tmp/psc1-project/Main.ts
+          lake exe psc1 build /tmp/psc1-project/Main.ps --out /tmp/psc1-project/Main.ts
+          test -f /tmp/psc1-project/Main.js
+          echo "PSC1_PROJECT_IMPORTS: PASS"
+
+
+      - name: Run Lean bootstrap collections composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          cd selfhost
+          lake exe psc1 check stdlib/SELFHOST-COLLECTIONS.lean
+          lake exe psc1 typescript stdlib/SELFHOST-COLLECTIONS.lean > /tmp/psc1-collections.ts
+          grep -q 'export type Option' /tmp/psc1-collections.ts
+          grep -q 'export interface Prod' /tmp/psc1-collections.ts
+          grep -q 'export type Result' /tmp/psc1-collections.ts
+          grep -q 'export type List' /tmp/psc1-collections.ts
+          grep -q 'export type Map' /tmp/psc1-collections.ts
+          grep -q 'export interface Set' /tmp/psc1-collections.ts
+          grep -q 'export function listLength' /tmp/psc1-collections.ts
+          grep -q 'export function mapInsert' /tmp/psc1-collections.ts
+          grep -q 'export function setInsert' /tmp/psc1-collections.ts
+          grep -q 'export function arrayGetOption' /tmp/psc1-collections.ts
+          grep -q 'export function arraySet' /tmp/psc1-collections.ts
+          grep -q 'export function arrayAny' /tmp/psc1-collections.ts
+          grep -q 'export function arrayAll' /tmp/psc1-collections.ts
+          grep -q 'export function arrayFindOption' /tmp/psc1-collections.ts
+          rm -f /tmp/psc1-collections.js /tmp/psc1-collections.d.ts /tmp/psc1-collections.js.map
+          lake exe psc1 build stdlib/SELFHOST-COLLECTIONS.lean --out /tmp/psc1-collections.ts
+          test -f /tmp/psc1-collections.js
+          test -f /tmp/psc1-collections.d.ts
+          test -f /tmp/psc1-collections.js.map
+          cp /tmp/psc1-collections.js /tmp/psc1-collections.mjs
+          node --input-type=module <<'NODE'
+          const m = await import('file:///tmp/psc1-collections.mjs');
+          if (m.collectionArraySize !== 2n) throw new Error('arraySize');
+          if (m.collectionArrayGetIsSome !== true || m.collectionArrayGetValue !== 2n) {
+            throw new Error('arrayGetOption');
+          }
+          if (m.collectionArrayMissingIsSome !== false) throw new Error('arrayGetOption missing');
+          if (m.collectionArraySet[0] !== 3n || m.collectionArraySet[1] !== 2n) {
+            throw new Error('arraySet');
+          }
+          if (m.collectionArrayMapped[0] !== 1n || m.collectionArrayMapped[1] !== 2n) {
+            throw new Error('arrayMap');
+          }
+          if (m.collectionArrayFolded !== 3n) throw new Error('arrayFoldl');
+          if (m.collectionArrayAny !== true) throw new Error('arrayAny');
+          if (m.collectionArrayAll !== true) throw new Error('arrayAll');
+          if (m.collectionArrayFoundIsSome !== true || m.collectionArrayFoundValue !== 2n) {
+            throw new Error('arrayFindOption');
+          }
+          console.log('PSC1_COLLECTIONS_RUNTIME: PASS');
+          NODE
+          echo "PSC1_COLLECTIONS_COMPOSITION: PASS"
+
+      - name: Run portable JSON composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          cd selfhost
+          lake exe psc1 typescript stdlib/SELFHOST-JSON.lean > /tmp/psc1-json.ts
+          grep -q 'export type JsonError' /tmp/psc1-json.ts
+          grep -q 'export type JsonValue' /tmp/psc1-json.ts
+          grep -q 'export function jsonParse' /tmp/psc1-json.ts
+          grep -q 'export function jsonEncodeCanonical' /tmp/psc1-json.ts
+          grep -q 'export const selfhostJsonCanonical' /tmp/psc1-json.ts
+          rm -f /tmp/psc1-json.js /tmp/psc1-json.d.ts /tmp/psc1-json.js.map
+          lake exe psc1 build stdlib/SELFHOST-JSON.lean --out /tmp/psc1-json.ts
+          test -f /tmp/psc1-json.js
+          test -f /tmp/psc1-json.d.ts
+          test -f /tmp/psc1-json.js.map
+          cp /tmp/psc1-json.js /tmp/psc1-json.mjs
+          node --input-type=module <<'NODE'
+          const m = await import('file:///tmp/psc1-json.mjs');
+          if (m.selfhostJsonCanonical.error !== undefined) {
+            throw new Error('selfhostJsonCanonical');
+          }
+          if (m.selfhostJsonCanonical.value !== '{"a":[true,"x\\ny"],"m":null,"z":2}') {
+            throw new Error('canonical JSON output');
+          }
+          if (m.selfhostJsonAIsSome !== true) {
+            throw new Error('JSON object lookup');
+          }
+          NODE
+          echo "PSC1_JSON_COMPOSITION: PASS"
+
+      - name: Run concrete compiler effect composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          cd selfhost
+          lake exe psc1 check stdlib/SELFHOST-EFFECT.lean
+          lake exe psc1 typescript stdlib/SELFHOST-EFFECT.lean > /tmp/psc1-effect.ts
+          lake exe psc1 translate stdlib/SELFHOST-EFFECT.lean --to ps > stdlib/SELFHOST-EFFECT.generated.ps
+          lake exe psc1 check stdlib/SELFHOST-EFFECT.generated.ps
+          lake exe psc1 typescript stdlib/SELFHOST-EFFECT.generated.ps > /tmp/psc1-effect-ps.ts
+          cmp /tmp/psc1-effect.ts /tmp/psc1-effect-ps.ts
+          grep -q 'export interface CompilerM' /tmp/psc1-effect.ts
+          grep -q 'export function compilerBind' /tmp/psc1-effect.ts
+          grep -q 'export function compilerRollback' /tmp/psc1-effect.ts
+          grep -q 'export const effectRecovered' /tmp/psc1-effect.ts
+          grep -q 'export const effectSetFive' /tmp/psc1-effect.ts
+          grep -q 'export const effectWithReader' /tmp/psc1-effect.ts
+          grep -q 'export const effectFailureAlias' /tmp/psc1-effect.ts
+          grep -q 'export const effectCommitted' /tmp/psc1-effect.ts
+          grep -q 'export const effectWhenTrue' /tmp/psc1-effect.ts
+          grep -q 'export const effectUnlessFalse' /tmp/psc1-effect.ts
+          rm -f /tmp/psc1-effect.js /tmp/psc1-effect.d.ts /tmp/psc1-effect.js.map
+          lake exe psc1 build stdlib/SELFHOST-EFFECT.lean --out /tmp/psc1-effect.ts
+          test -f /tmp/psc1-effect.js
+          test -f /tmp/psc1-effect.d.ts
+          test -f /tmp/psc1-effect.js.map
+          cp /tmp/psc1-effect.js /tmp/psc1-effect.mjs
+          node --input-type=module <<'NODE'
+          const m = await import('file:///tmp/psc1-effect.mjs');
+          const context = { label: 'outer' };
+          const state = { count: 0n };
+          const setResult = m.effectSetFive.run(context, state);
+          if (setResult.value.snd.count !== 5n) throw new Error('effectSetFive');
+          const readerResult = m.effectWithReader.run(context, state);
+          if (readerResult.value.fst !== 'inner') throw new Error('effectWithReader');
+          const failureResult = m.effectFailureAlias.run(context, state);
+          if (failureResult.error !== 'failed-alias') throw new Error('effectFailureAlias');
+          const commitResult = m.effectCommitted.run(context, state);
+          if (commitResult.value.snd.count !== 0n) throw new Error('effectCommitted');
+          const whenTrue = m.effectWhenTrue.run(context, state);
+          if (whenTrue.value.snd.count !== 1n) throw new Error('effectWhenTrue');
+          const whenFalse = m.effectWhenFalse.run(context, state);
+          if (whenFalse.value.snd.count !== 0n) throw new Error('effectWhenFalse');
+          const unlessTrue = m.effectUnlessTrue.run(context, state);
+          if (unlessTrue.value.snd.count !== 0n) throw new Error('effectUnlessTrue');
+          const unlessFalse = m.effectUnlessFalse.run(context, state);
+          if (unlessFalse.value.snd.count !== 1n) throw new Error('effectUnlessFalse');
+          const recovered = m.effectRunRecovered(context, state);
+          if (recovered.value.fst !== 7n || recovered.value.snd.count !== 0n) {
+            throw new Error('effectRollbackRecovered');
+          }
+          console.log('PSC1_EFFECT_RUNTIME: PASS');
+          NODE
+          echo "PSC1_EFFECT_COMPOSITION: PASS"
+
+      - name: Run bootstrap semantic tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_tests
+
+      - name: Run source translation tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_translation_tests
+
+      - name: Run checked-admission bridge tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_bridge_tests
+
+
+      - name: Run pskernel String bridge acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          npx tsc -p packages/environment/tsconfig.json
+          npx tsc -p packages/checked-core/tsconfig.json
+          cd selfhost
+          lake exe psc1_bridge_host_tests
+
+      - name: Run Lean-native TypeScript backend tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_backend_ts_tests
+
+      - name: Run Lean-native erasure pipeline tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          lake exe psc1_erasure_tests
+
+      - name: Run Lean-native dual-source TypeScript to JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          cd selfhost
+          cat > /tmp/psc1-native.lean <<'EOF'
+          def idNat (x : Nat) : Nat := x
+          EOF
+          cat > /tmp/psc1-native.ps <<'EOF'
+          def idNat(x : Nat) : Nat := x;
+          EOF
+          lake exe psc1 typescript /tmp/psc1-native.lean > /tmp/psc1-native-lean.ts
+          lake exe psc1 typescript /tmp/psc1-native.ps > /tmp/psc1-native-ps.ts
+          cmp /tmp/psc1-native-lean.ts /tmp/psc1-native-ps.ts
+          rm -f /tmp/psc1-native-lean.js /tmp/psc1-native-lean.d.ts /tmp/psc1-native-lean.js.map
+          lake exe psc1 build /tmp/psc1-native.lean --out /tmp/psc1-native-lean.ts
+          test -f /tmp/psc1-native-lean.js
+          test -f /tmp/psc1-native-lean.d.ts
+          test -f /tmp/psc1-native-lean.js.map
+          grep -q 'export function idNat' /tmp/psc1-native-lean.js
+          grep -q 'declare function idNat' /tmp/psc1-native-lean.d.ts
+          echo "PSC1_LEAN_NATIVE_TSC_PIPELINE: PASS"
+
+          cat > /tmp/psc1-adt.lean <<'EOF'
+          inductive Maybe (α : Type) where
+            | none
+            | some (value : α)
+
+          def present : Maybe Nat := Maybe.some 1
+          def getOrZero (m : Maybe Nat) : Nat :=
+            match m with
+            | Maybe.none => 0
+            | Maybe.some value => value
+          EOF
+          cat > /tmp/psc1-adt.ps <<'EOF'
+          inductive Maybe(α : Type) where {
+            | none;
+            | some(value : α);
+          };
+          def present : Maybe(Nat) := Maybe.some(1);
+          def getOrZero(m : Maybe(Nat)) : Nat :=
+            match m with {
+              | Maybe.none => 0;
+              | Maybe.some value => value;
+            };
+          EOF
+          lake exe psc1 typescript /tmp/psc1-adt.lean > /tmp/psc1-adt-lean.ts
+          lake exe psc1 typescript /tmp/psc1-adt.ps > /tmp/psc1-adt-ps.ts
+          cmp /tmp/psc1-adt-lean.ts /tmp/psc1-adt-ps.ts
+          rm -f /tmp/psc1-adt-lean.js /tmp/psc1-adt-lean.d.ts /tmp/psc1-adt-lean.js.map
+          lake exe psc1 build /tmp/psc1-adt.lean --out /tmp/psc1-adt-lean.ts
+          test -f /tmp/psc1-adt-lean.js
+          test -f /tmp/psc1-adt-lean.d.ts
+          test -f /tmp/psc1-adt-lean.js.map
+          grep -q 'export const Maybe' /tmp/psc1-adt-lean.js
+          grep -q 'export function getOrZero' /tmp/psc1-adt-lean.js
+          echo "PSC1_LEAN_NATIVE_ADT_TSC_PIPELINE: PASS"
+
+
+          cat > /tmp/psc1-structure.lean <<'EOF'
+          structure User where
+            age : Nat
+
+          def user : User := User.mk 33
+          def ageOf (u : User) : Nat := u.age
+          EOF
+          cat > /tmp/psc1-structure.ps <<'EOF'
+          structure User where {
+            age : Nat;
+          };
+          def user : User := User.mk(33);
+          def ageOf(u : User) : Nat := u.age;
+          EOF
+          lake exe psc1 typescript /tmp/psc1-structure.lean > /tmp/psc1-structure-lean.ts
+          lake exe psc1 typescript /tmp/psc1-structure.ps > /tmp/psc1-structure-ps.ts
+          cmp /tmp/psc1-structure-lean.ts /tmp/psc1-structure-ps.ts
+          rm -f /tmp/psc1-structure-lean.js /tmp/psc1-structure-lean.d.ts /tmp/psc1-structure-lean.js.map
+          lake exe psc1 build /tmp/psc1-structure.lean --out /tmp/psc1-structure-lean.ts
+          test -f /tmp/psc1-structure-lean.js
+          test -f /tmp/psc1-structure-lean.d.ts
+          test -f /tmp/psc1-structure-lean.js.map
+          grep -q 'export const user' /tmp/psc1-structure-lean.js
+          grep -q 'export function ageOf' /tmp/psc1-structure-lean.js
+          grep -q 'readonly age' /tmp/psc1-structure-lean.d.ts
+          echo "PSC1_LEAN_NATIVE_STRUCTURE_TSC_PIPELINE: PASS"
+
+
+          cat > /tmp/psc1-recursive.lean <<'EOF'
+          inductive ListR (α : Type) where
+            | nil
+            | cons (head : α) (tail : ListR α)
+
+          def lengthR (xs : ListR Nat) : Nat :=
+            match xs with
+            | ListR.nil => 0
+            | ListR.cons head tail => lengthR tail
+          EOF
+          cat > /tmp/psc1-recursive.ps <<'EOF'
+          inductive ListR(α : Type) where {
+            | nil;
+            | cons(head : α)(tail : ListR(α));
+          };
+          def lengthR(xs : ListR(Nat)) : Nat :=
+            match xs with {
+              | ListR.nil => 0;
+              | ListR.cons head tail => lengthR(tail);
+            };
+          EOF
+          lake exe psc1 typescript /tmp/psc1-recursive.lean > /tmp/psc1-recursive-lean.ts
+          lake exe psc1 typescript /tmp/psc1-recursive.ps > /tmp/psc1-recursive-ps.ts
+          cmp /tmp/psc1-recursive-lean.ts /tmp/psc1-recursive-ps.ts
+          rm -f /tmp/psc1-recursive-lean.js /tmp/psc1-recursive-lean.d.ts /tmp/psc1-recursive-lean.js.map
+          lake exe psc1 build /tmp/psc1-recursive.lean --out /tmp/psc1-recursive-lean.ts
+          test -f /tmp/psc1-recursive-lean.js
+          test -f /tmp/psc1-recursive-lean.d.ts
+          test -f /tmp/psc1-recursive-lean.js.map
+          grep -q 'export function lengthR' /tmp/psc1-recursive-lean.js
+          grep -q 'lengthR(tail)' /tmp/psc1-recursive-lean.js
+          echo "PSC1_LEAN_NATIVE_RECURSION_TSC_PIPELINE: PASS"
+
+
+          cat > /tmp/psc1-int.lean <<'EOF'
+          def intOne : Int := 1
+          def intCalc (x : Int) : Int :=
+            Int.sub (Int.add x (Int.ofNat 2)) (Int.neg (Int.ofNat 3))
+          EOF
+          cat > /tmp/psc1-int.ps <<'EOF'
+          def intOne : Int := 1;
+          def intCalc(x : Int) : Int :=
+            Int.sub(Int.add(x, Int.ofNat(2)), Int.neg(Int.ofNat(3)));
+          EOF
+          lake exe psc1 typescript /tmp/psc1-int.lean > /tmp/psc1-int-lean.ts
+          lake exe psc1 typescript /tmp/psc1-int.ps > /tmp/psc1-int-ps.ts
+          cmp /tmp/psc1-int-lean.ts /tmp/psc1-int-ps.ts
+          rm -f /tmp/psc1-int-lean.js /tmp/psc1-int-lean.d.ts /tmp/psc1-int-lean.js.map
+          lake exe psc1 build /tmp/psc1-int.lean --out /tmp/psc1-int-lean.ts
+          test -f /tmp/psc1-int-lean.js
+          test -f /tmp/psc1-int-lean.d.ts
+          test -f /tmp/psc1-int-lean.js.map
+          grep -q 'export const intOne' /tmp/psc1-int-lean.js
+          grep -q 'export function intCalc' /tmp/psc1-int-lean.js
+          echo "PSC1_LEAN_NATIVE_INT_TSC_PIPELINE: PASS"
+
+
+          cat > /tmp/psc1-partial.lean <<'EOF'
+          partial def loop (n : Nat) : Nat := loop n
+          EOF
+          cat > /tmp/psc1-partial.ps <<'EOF'
+          partial def loop(n : Nat) : Nat := loop(n);
+          EOF
+          lake exe psc1 typescript /tmp/psc1-partial.lean > /tmp/psc1-partial-lean.ts
+          lake exe psc1 typescript /tmp/psc1-partial.ps > /tmp/psc1-partial-ps.ts
+          cmp /tmp/psc1-partial-lean.ts /tmp/psc1-partial-ps.ts
+          rm -f /tmp/psc1-partial-lean.js /tmp/psc1-partial-lean.d.ts /tmp/psc1-partial-lean.js.map
+          lake exe psc1 build /tmp/psc1-partial.lean --out /tmp/psc1-partial-lean.ts
+          test -f /tmp/psc1-partial-lean.js
+          test -f /tmp/psc1-partial-lean.d.ts
+          test -f /tmp/psc1-partial-lean.js.map
+          grep -q 'export function loop' /tmp/psc1-partial-lean.js
+          grep -q 'loop(n)' /tmp/psc1-partial-lean.js
+          if lake exe psc1 check /tmp/psc1-partial.lean; then
+            echo "partial def unexpectedly passed certification-oriented check" >&2
+            exit 1
+          fi
+          if lake exe psc1 admissions /tmp/psc1-partial.lean > /tmp/psc1-partial-admissions.json; then
+            echo "partial def unexpectedly emitted checked admissions" >&2
+            exit 1
+          fi
+          echo "PSC1_LEAN_NATIVE_PARTIAL_TSC_PIPELINE: PASS"
+
+      - name: Run dual-source admission pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd selfhost
+          cat > /tmp/psc1-sample.lean <<'EOF'
+          def idNat (x : Nat) : Nat := x
+          EOF
+          cat > /tmp/psc1-sample.ps <<'EOF'
+          def idNat(x : Nat) : Nat := x;
+          EOF
+          lake exe psc1 admissions /tmp/psc1-sample.lean > /tmp/lean-admissions.json
+          lake exe psc1 admissions /tmp/psc1-sample.ps > /tmp/ps-admissions.json
+          cmp /tmp/lean-admissions.json /tmp/ps-admissions.json
+          node -e "JSON.parse(require('node:fs').readFileSync('/tmp/lean-admissions.json','utf8'))"
+          grep -q '"format":"proofscript-checked-admissions"' /tmp/lean-admissions.json
+          echo "PSC1_ADMISSIONS_PIPELINE: PASS"
+
+
+      - name: Replay Lean admissions through pskernel to JavaScript
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          npx tsc -p packages/environment/tsconfig.json
+          npx tsc -p packages/checked-core/tsconfig.json
+          npx tsc -p packages/compiler-ir/tsconfig.json
+          npx tsc -p packages/erasure/tsconfig.json
+          npx tsc -p packages/backend-ts/tsconfig.json
+          npx tsc -p packages/compiler/tsconfig.json
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync} from 'node:fs';
+          import {
+            admitCheckedCoreAdmissions,
+            decodeCheckedCoreAdmissions,
+          } from './packages/checked-core/dist/src/index.js';
+          import {
+            createLeanEnvironmentProvider,
+            requireLeanEnvironment,
+          } from './packages/environment/dist/src/node.js';
+          import {compileCheckedCore} from './packages/compiler/dist/src/index.js';
+
+          const payload=JSON.parse(
+            readFileSync('/tmp/lean-admissions.json','utf8'),
+          );
+          const admissions=decodeCheckedCoreAdmissions(payload);
+          const base=requireLeanEnvironment(createLeanEnvironmentProvider());
+          const checked=admitCheckedCoreAdmissions(base,admissions);
+          const compiled=compileCheckedCore(checked,'psc1-sample.ts');
+
+          writeFileSync('/tmp/psc1-sample.ts',compiled.typeScript);
+          writeFileSync('/tmp/psc1-sample.js',compiled.emitted.javascript);
+
+          if(!compiled.typeScript.includes('export function idNat')){
+            throw new Error('PSC1_TS_OUTPUT_MISSING_IDNAT');
+          }
+          if(!compiled.emitted.javascript.includes('export function idNat')){
+            throw new Error('PSC1_JS_OUTPUT_MISSING_IDNAT');
+          }
+          console.log('PSC1_VERIFIED_TS_JS_PIPELINE: PASS');
+          NODE
+
+
+
+
+  psc0-compatibility:
+    # This lane measures the currently implemented TS frontend/compiler against
+    # the PSC1-constrained Lean source. It is deliberately non-blocking while
+    # the Lean-hosted implementation moves ahead of PSC0 feature coverage.
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build current PSC0 packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          npm run test:packages
+
+      - name: Probe current PSC0 compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          node packages/cli/dist/bin/psc.js check -p selfhost
+          node packages/cli/dist/bin/psc.js build -p selfhost
+          node packages/cli/dist/bin/psc.js translate \
+            selfhost/src/ProofScript/Compiler/Data.lean --to ps \
+            > /tmp/Data.ps
+          node packages/cli/dist/bin/psc.js check /tmp/Data.ps

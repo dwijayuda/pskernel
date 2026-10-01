@@ -1,0 +1,281 @@
+import {
+  Environment,
+  Kernel,
+  addInductive,
+  appView,
+  nameEq,
+  nameKey,
+  nameToString,
+  type AxiomInfo,
+  type BinderInfo,
+  type DefinitionInfo,
+  type InductiveDecl,
+  type InductiveInfo,
+  type Name,
+  type TheoremInfo,
+} from 'lean-ts-kernel';
+import {
+  validateCheckedCoreExternal,
+  type CheckedCoreExternal,
+  type CheckedCoreExternalBinding,
+} from './external.js';
+
+export type CheckedCoreDeclaration=DefinitionInfo|TheoremInfo;
+
+export interface CheckedCoreStructureField {
+  readonly name:string;
+  readonly index:number;
+  readonly binderInfo:BinderInfo;
+}
+
+export interface CheckedCoreStructure {
+  readonly name:Name;
+  readonly constructor:Name;
+  readonly fields:readonly CheckedCoreStructureField[];
+}
+
+export interface CheckedCoreClass extends CheckedCoreStructure {}
+
+export interface CheckedCoreInstance {
+  readonly name:Name;
+  readonly className:Name;
+  readonly anonymous:boolean;
+}
+
+export type CheckedCoreAdmission =
+  | {
+      readonly kind:'constant';
+      readonly declaration:CheckedCoreDeclaration;
+    }
+  | {
+      readonly kind:'external';
+      readonly declaration:AxiomInfo;
+      readonly binding:CheckedCoreExternalBinding;
+    }
+  | {
+      readonly kind:'inductive';
+      readonly declaration:InductiveDecl;
+    }
+  | {
+      readonly kind:'structure';
+      readonly declaration:InductiveDecl;
+      readonly structure:CheckedCoreStructure;
+    }
+  | {
+      readonly kind:'class';
+      readonly declaration:InductiveDecl;
+      readonly structure:CheckedCoreClass;
+    }
+  | {
+      readonly kind:'instance';
+      readonly declaration:DefinitionInfo;
+      readonly instance:CheckedCoreInstance;
+    };
+
+export interface CheckedCoreModule {
+  readonly kind:'proofscript-checked-core';
+  readonly environment:Environment;
+  readonly admissions:readonly CheckedCoreAdmission[];
+  readonly declarations:readonly CheckedCoreDeclaration[];
+  readonly definitions:readonly DefinitionInfo[];
+  readonly theorems:readonly TheoremInfo[];
+  readonly inductiveDeclarations:readonly InductiveDecl[];
+  readonly inductives:readonly InductiveInfo[];
+  readonly structures:readonly CheckedCoreStructure[];
+  readonly classes:readonly CheckedCoreClass[];
+  readonly instances:readonly CheckedCoreInstance[];
+  readonly externals:readonly CheckedCoreExternal[];
+}
+
+function validateStructure(
+  environment:Environment,
+  structure:CheckedCoreStructure,
+):void {
+  const inductive=environment.find(structure.name);
+  if(
+    inductive?.kind!=='inductive'
+    ||inductive.ctors.length!==1
+    ||!nameEq(inductive.ctors[0]!,structure.constructor)
+  ){
+    throw new Error(
+      "checked-core structure invariant: '"+nameToString(structure.name)+
+      "' is not the expected single-constructor inductive",
+    );
+  }
+  const constructor=environment.find(structure.constructor);
+  if(
+    constructor?.kind!=='constructor'
+    ||!nameEq(constructor.induct,structure.name)
+    ||constructor.numFields!==structure.fields.length
+  ){
+    throw new Error(
+      "checked-core structure invariant: constructor metadata mismatch for '"+
+      nameToString(structure.constructor)+"'",
+    );
+  }
+
+  let cursor=constructor.type;
+  for(let index=0;index<constructor.numParams;index+=1){
+    if(cursor.kind!=='forall'){
+      throw new Error('checked-core structure invariant: missing parameter binder');
+    }
+    cursor=cursor.body;
+  }
+  for(let index=0;index<structure.fields.length;index+=1){
+    const field=structure.fields[index]!;
+    if(
+      cursor.kind!=='forall'
+      ||field.index!==index
+      ||nameToString(cursor.name)!==field.name
+      ||cursor.binderInfo!==field.binderInfo
+    ){
+      throw new Error(
+        "checked-core structure invariant: field metadata mismatch at index "+
+        index,
+      );
+    }
+    cursor=cursor.body;
+  }
+}
+
+
+function validateInstance(
+  classes:readonly CheckedCoreClass[],
+  declaration:DefinitionInfo,
+  instance:CheckedCoreInstance,
+):void {
+  if(!nameEq(declaration.name,instance.name)){
+    throw new Error('checked-core instance invariant: declaration/name mismatch');
+  }
+  if(!classes.some((item)=>nameEq(item.name,instance.className))){
+    throw new Error(
+      "checked-core instance invariant: class '"+nameToString(instance.className)+
+      "' was not admitted before instance '"+nameToString(instance.name)+"'",
+    );
+  }
+
+  let target=declaration.type;
+  while(target.kind==='forall')target=target.body;
+  const view=appView(target);
+  if(
+    view.fn.kind!=='const'
+    ||!nameEq(view.fn.name,instance.className)
+  ){
+    throw new Error(
+      "checked-core instance invariant: declaration '"+nameToString(instance.name)+
+      "' does not return class '"+nameToString(instance.className)+"'",
+    );
+  }
+}
+
+/**
+ * Replay the complete frontend result through pskernel in source admission
+ * order. Structure field metadata is accepted only after it is checked against
+ * the constructor generated by pskernel.
+ */
+export function admitCheckedCoreAdmissions(
+  baseEnvironment:Environment,
+  admissions:readonly CheckedCoreAdmission[],
+):CheckedCoreModule {
+  const environment=baseEnvironment.clone();
+  const kernel=new Kernel(environment);
+  const declarations:CheckedCoreDeclaration[]=[];
+  const definitions:DefinitionInfo[]=[];
+  const theorems:TheoremInfo[]=[];
+  const inductiveDeclarations:InductiveDecl[]=[];
+  const inductives:InductiveInfo[]=[];
+  const structures:CheckedCoreStructure[]=[];
+  const classes:CheckedCoreClass[]=[];
+  const instances:CheckedCoreInstance[]=[];
+  const externals:CheckedCoreExternal[]=[];
+
+  for(const admission of admissions){
+    if(
+      admission.kind==='inductive'
+      ||admission.kind==='structure'
+      ||admission.kind==='class'
+    ){
+      addInductive(environment,admission.declaration);
+      inductiveDeclarations.push(admission.declaration);
+      for(const type of admission.declaration.types){
+        const info=environment.find(type.name);
+        if(info?.kind!=='inductive'){
+          throw new Error(
+            'checked-core invariant: missing admitted inductive '+
+            nameKey(type.name),
+          );
+        }
+        inductives.push(info);
+      }
+      if(admission.kind==='structure'||admission.kind==='class'){
+        validateStructure(environment,admission.structure);
+        structures.push(admission.structure);
+        if(admission.kind==='class'){
+          classes.push(admission.structure);
+        }
+      }
+      continue;
+    }
+
+    if(admission.kind==='external'){
+      const external={
+        declaration:admission.declaration,
+        binding:admission.binding,
+      };
+      validateCheckedCoreExternal(external,environment);
+      kernel.addAxiom(admission.declaration);
+      externals.push(external);
+      continue;
+    }
+
+    if(admission.kind==='instance'){
+      validateInstance(classes,admission.declaration,admission.instance);
+      kernel.addDefinition(admission.declaration);
+      declarations.push(admission.declaration);
+      definitions.push(admission.declaration);
+      instances.push(admission.instance);
+      continue;
+    }
+
+    const declaration=admission.declaration;
+    if(declaration.kind==='definition'){
+      kernel.addDefinition(declaration);
+      definitions.push(declaration);
+    }else{
+      kernel.addTheorem(declaration);
+      theorems.push(declaration);
+    }
+    declarations.push(declaration);
+  }
+
+  return {
+    kind:'proofscript-checked-core',
+    environment,
+    admissions:[...admissions],
+    declarations,
+    definitions,
+    theorems,
+    inductiveDeclarations,
+    inductives,
+    structures,
+    classes,
+    instances,
+    externals,
+  };
+}
+
+export function admitCheckedCoreModule(
+  baseEnvironment:Environment,
+  declarations:readonly CheckedCoreDeclaration[],
+):CheckedCoreModule {
+  return admitCheckedCoreAdmissions(
+    baseEnvironment,
+    declarations.map((declaration)=>({
+      kind:'constant' as const,
+      declaration,
+    })),
+  );
+}
+
+export * from './codec-admissions.js';
+export * from './external.js';

@@ -1,0 +1,65 @@
+name: Phase 13 reshape match-alternative recursion
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+    paths:
+      - .github/workflows/phase13-this-chat-altfind-recursion-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+      - name: Reshape match-alternative lookup recursion for PSC1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          start_marker = 'def psElabMatchAlternativeFind\n'
+          end_marker = '\ndef psElabMatchAlternativeCovered\n'
+          start = text.index(start_marker)
+          end = text.index(end_marker, start)
+          old = text[start:end]
+          required = 'psElabMatchAlternativeFind name rest'
+          if required not in old:
+              raise SystemExit('unexpected psElabMatchAlternativeFind source shape')
+          new = '\n'.join([
+              'def psElabMatchAlternativeFindWorker',
+              '    (alternatives : List PsElabMatchAlternative) :',
+              '    PsName -> Option PsElabMatchAlternative :=',
+              '  match alternatives with',
+              '  | [] =>',
+              '      fun (_name : PsName) => Option.none',
+              '  | alternative :: rest =>',
+              '      let smaller : PsName -> Option PsElabMatchAlternative :=',
+              '        psElabMatchAlternativeFindWorker rest;',
+              '      fun (name : PsName) =>',
+              '        if psNameEq alternative.constructorName name then',
+              '          Option.some alternative',
+              '        else',
+              '          smaller name',
+              '',
+              'def psElabMatchAlternativeFind',
+              '    (name : PsName)',
+              '    (alternatives : List PsElabMatchAlternative) :',
+              '    Option PsElabMatchAlternative :=',
+              '  psElabMatchAlternativeFindWorker alternatives name',
+          ]) + '\n'
+          path.write_text(text[:start] + new + text[end:])
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): reshape match-alternative recursion for PSC1"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

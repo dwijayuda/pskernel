@@ -24,8 +24,10 @@ export function checkCanonicalAdmissions(
   const {
     binaryPath:explicitBinaryPath,
     maxBuffer=16*1024*1024,
+    timeoutMs=60000,
     ...resolverOptions
   }=options;
+  if(!Number.isSafeInteger(timeoutMs)||timeoutMs<=0)throw new TypeError('timeoutMs must be a positive integer');
   const resolved=explicitBinaryPath
     ? {binaryPath:explicitBinaryPath,source:'explicit'}
     : resolveLeanKernelProviderBinary(resolverOptions);
@@ -44,6 +46,8 @@ export function checkCanonicalAdmissions(
     encoding:'utf8',
     maxBuffer,
     windowsHide:true,
+    timeout:timeoutMs,
+    killSignal:'SIGKILL',
   });
 
   if(run.error){
@@ -89,6 +93,9 @@ export function checkCanonicalAdmissions(
     throw new Error(
       `Lean kernel provider commit mismatch: ${String(result?.leanCommit)}`,
     );
+  }
+  if(result?.profile!=='lean4.34-core'){
+    throw new Error('Lean kernel provider profile mismatch');
   }
   if(typeof result?.accepted!=='boolean'){
     throw new Error('Lean kernel provider result is missing boolean accepted');

@@ -23,12 +23,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install pinned Lean toolchain
+      - name: Install pinned Lean and TypeScript toolchains
         run: |
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm install --prefix /tmp/psc2-lean-integration --no-audit --no-fund typescript@5.8.3
+          echo /tmp/psc2-lean-integration/node_modules/.bin >> "$GITHUB_PATH"
       - name: Build native replay tools
+        id: native
         run: |
           set -euo pipefail
           mkdir -p dist/integration-evidence
@@ -44,6 +47,13 @@ jobs:
             lake exe psc2_lean_kernel_provider_tests
             .lake/build/bin/psc2_lean_checked_seed --test
           ) 2>&1 | tee dist/integration-evidence/lean-checked-native.log
+      - name: Checked host tests including real generated program execution
+        run: |
+          set -euo pipefail
+          test -x lean-checked/.lake/build/bin/psc2_lean_checked_seed
+          node --test scripts/checked-*.test.mjs 2>&1 | tee dist/integration-evidence/checked-host-tests.log
+          PSC_LEAN_KERNEL_PROVIDER_BIN="$PWD/lean-checked/.lake/build/bin/psc2_lean_kernel_provider" \
+            node packages/pskernel-lean/host/node-provider.test.mjs 2>&1 | tee dist/integration-evidence/real-node-provider.log
       - name: Preserve exact sources and native diagnostic executables
         if: always()
         run: |
@@ -57,6 +67,7 @@ jobs:
             if test -f "lean-checked/.lake/build/bin/$binary"; then cp "lean-checked/.lake/build/bin/$binary" dist/integration-evidence/; fi
           done
       - name: Source guards and manifest isolation
+        id: guards
         run: |
           set -euo pipefail
           npm run check:selfhost-source-syntax 2>&1 | tee dist/integration-evidence/source-guards.log
@@ -65,12 +76,15 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/selfhost-replay-audit.mjs 2>&1 | tee dist/integration-evidence/replay-audit.log
-      - name: Real fixed-point replay
+      - name: Real Lean-checked fixed-point target
         run: |
           set -euo pipefail
-          npm install --prefix /tmp/psc2-lean-integration --no-audit --no-fund typescript@5.8.3
-          export PATH="/tmp/psc2-lean-integration/node_modules/.bin:$PATH"
-          npm run fixed-point 2>&1 | tee dist/integration-evidence/fixed-point.log
+          npm --prefix lean-checked run fixed-point 2>&1 | tee dist/integration-evidence/checked-fixed-point.log
+      - name: Independent compiler-only fixed-point diagnostic
+        if: ${{ !cancelled() && steps.native.outcome == 'success' && steps.guards.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          npm run fixed-point 2>&1 | tee dist/integration-evidence/compiler-only-fixed-point.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

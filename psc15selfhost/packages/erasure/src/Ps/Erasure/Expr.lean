@@ -165,7 +165,7 @@ def psEraseFinishApplicationWithFuel
                   let nextScope : PsErasureScope := {
                     localContext := pushed.context
                     runtimeLocals :=
-                      List.cons (pushed.id, parameterName) scope.runtimeLocals
+                      List.cons (Prod.mk pushed.id parameterName) scope.runtimeLocals
                     typeLocals := scope.typeLocals
                     erasedLocals := scope.erasedLocals
                     declarationNames := scope.declarationNames
@@ -186,10 +186,9 @@ def psEraseFinishApplicationWithFuel
                     (psExprInstantiate1
                       body
                       (PsExpr.fvar pushed.id))
-                    (List.cons {
-                      name := parameterName
-                      type := parameterType
-                    } parametersRev)
+                    (List.cons
+                      (PsVerifiedIrParameter.mk parameterName parameterType)
+                      parametersRev)
                     (psErasureAppendRuntimeArgument
                       runtimeArguments
                       (PsVerifiedIrExpr.var parameterName))

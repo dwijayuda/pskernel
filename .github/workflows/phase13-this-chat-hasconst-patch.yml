@@ -1,0 +1,100 @@
+name: Phase 13 curry psExprHasConst recursion
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+    paths:
+      - .github/workflows/phase13-this-chat-hasconst-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+      - name: Reshape psExprHasConst recursion for PSC1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          start_marker = 'def psExprHasConst (target : PsName) : PsExpr -> Bool\n'
+          end_marker = '\ndef psMatchNameEqTarget\n'
+          start = text.index(start_marker)
+          end = text.index(end_marker, start)
+          old = text[start:end]
+          if 'psExprHasConst target fn' not in old:
+              raise SystemExit('unexpected psExprHasConst source shape')
+          new = '\n'.join([
+              'def psExprHasConstWorker',
+              '    (expr : PsExpr) : PsName -> Bool :=',
+              '  match expr with',
+              '  | .constE name _ =>',
+              '      fun (target : PsName) => psNameEq name target',
+              '  | .app fn argument =>',
+              '      let fnContains : PsName -> Bool :=',
+              '        psExprHasConstWorker fn;',
+              '      let argumentContains : PsName -> Bool :=',
+              '        psExprHasConstWorker argument;',
+              '      fun (target : PsName) =>',
+              '        psElabBoolOr',
+              '          (fnContains target)',
+              '          (argumentContains target)',
+              '  | .lam _ type body _ =>',
+              '      let typeContains : PsName -> Bool :=',
+              '        psExprHasConstWorker type;',
+              '      let bodyContains : PsName -> Bool :=',
+              '        psExprHasConstWorker body;',
+              '      fun (target : PsName) =>',
+              '        psElabBoolOr',
+              '          (typeContains target)',
+              '          (bodyContains target)',
+              '  | .forallE _ type body _ =>',
+              '      let typeContains : PsName -> Bool :=',
+              '        psExprHasConstWorker type;',
+              '      let bodyContains : PsName -> Bool :=',
+              '        psExprHasConstWorker body;',
+              '      fun (target : PsName) =>',
+              '        psElabBoolOr',
+              '          (typeContains target)',
+              '          (bodyContains target)',
+              '  | .letE _ type value body =>',
+              '      let typeContains : PsName -> Bool :=',
+              '        psExprHasConstWorker type;',
+              '      let valueContains : PsName -> Bool :=',
+              '        psExprHasConstWorker value;',
+              '      let bodyContains : PsName -> Bool :=',
+              '        psExprHasConstWorker body;',
+              '      fun (target : PsName) =>',
+              '        psElabBoolOr',
+              '          (typeContains target)',
+              '          (psElabBoolOr',
+              '            (valueContains target)',
+              '            (bodyContains target))',
+              '  | .proj _ _ value =>',
+              '      let valueContains : PsName -> Bool :=',
+              '        psExprHasConstWorker value;',
+              '      fun (target : PsName) => valueContains target',
+              '  | _ =>',
+              '      fun (_target : PsName) => false',
+              '',
+              'def psExprHasConst',
+              '    (target : PsName)',
+              '    (expr : PsExpr) : Bool :=',
+              '  psExprHasConstWorker expr target',
+          ]) + '\n'
+          path.write_text(text[:start] + new + text[end:])
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): reshape const search recursion for PSC1"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

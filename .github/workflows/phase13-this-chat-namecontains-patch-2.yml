@@ -1,0 +1,62 @@
+name: Phase 13 replace List.any in name contains v2
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+    paths:
+      - .github/workflows/phase13-this-chat-namecontains-patch-2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+      - name: Replace higher-order List.any with PSC1 structural recursion
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          start_marker = 'def psMatchNameListContains (names : List PsName) (target : PsName) : Bool :=\n'
+          end_marker = '\nstructure PsElabMatchAlternative where\n'
+          start = text.index(start_marker)
+          end = text.index(end_marker, start)
+          old = text[start:end]
+          if 'List.any names (psMatchNameEqTarget target)' not in old:
+              raise SystemExit('unexpected psMatchNameListContains source shape')
+          new = '\n'.join([
+              'def psMatchNameListContainsWorker',
+              '    (names : List PsName) : PsName -> Bool :=',
+              '  match names with',
+              '  | [] =>',
+              '      fun (_target : PsName) => false',
+              '  | name :: rest =>',
+              '      let smaller : PsName -> Bool :=',
+              '        psMatchNameListContainsWorker rest;',
+              '      fun (target : PsName) =>',
+              '        if psNameEq name target then',
+              '          true',
+              '        else',
+              '          smaller target',
+              '',
+              'def psMatchNameListContains',
+              '    (names : List PsName)',
+              '    (target : PsName) : Bool :=',
+              '  psMatchNameListContainsWorker names target',
+          ]) + '\n'
+          path.write_text(text[:start] + new + text[end:])
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): make match-name contains PSC1 portable"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

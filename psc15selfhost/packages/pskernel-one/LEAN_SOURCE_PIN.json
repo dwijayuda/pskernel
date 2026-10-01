@@ -1,0 +1,22 @@
+{
+  "schema": "pskernel-one-lean-pin/1",
+  "repository": "https://github.com/leanprover/lean4",
+  "version": "4.34.0",
+  "tag": "v4.34.0",
+  "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "toolchain": "leanprover/lean4:v4.34.0",
+  "verifiedAgainst": [
+    "upstream git/ref/tags/v4.34.0",
+    "ORACLE_LOCK.json",
+    "psc15selfhost/lean-toolchain",
+    "psc2/pskernel-lean-wasm@4dece7df:packages/pskernel-lean/LEAN_SOURCE_PIN.json"
+  ],
+  "sourceVerification": {
+    "src/kernel/level.cpp": {
+      "sha256": "7cb927c6fabd9fb843f548443494d3673a08074e26fe32b679e80f4664fc7f25",
+      "bytes": 18351,
+      "upstreamByteComparison": true
+    }
+  },
+  "pinConflicts": []
+}

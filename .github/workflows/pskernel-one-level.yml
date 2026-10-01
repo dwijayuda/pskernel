@@ -55,6 +55,8 @@ jobs:
             node scripts/pskernel-one-emit-probe.mjs
             exit 1
           }
+      - name: Actual generated foundation tsc and semantic execution
+        run: node scripts/pskernel-one-runtime.mjs
       - name: Save small seed for local reproduction
         if: always()
         uses: actions/upload-artifact@v4

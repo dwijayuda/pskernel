@@ -1,0 +1,284 @@
+{
+  "observedAt": "2026-10-02 Asia/Jakarta",
+  "repository": "dwijayuda/pskernel",
+  "initialOpenPRs": [
+    {
+      "number": 46,
+      "title": "PSC2 KernelCore Phase 2 semantic substrate",
+      "url": "https://github.com/dwijayuda/pskernel/pull/46"
+    },
+    {
+      "number": 36,
+      "title": "Selfhost: unblock Rust compiler census source checks",
+      "url": "https://github.com/dwijayuda/pskernel/pull/36"
+    },
+    {
+      "number": 21,
+      "title": "feat(wasm): add GC structures, inductives, match, and recursive ADTs",
+      "url": "https://github.com/dwijayuda/pskernel/pull/21"
+    },
+    {
+      "number": 18,
+      "title": "Start PSC1-constrained kernel in Lean",
+      "url": "https://github.com/dwijayuda/pskernel/pull/18"
+    },
+    {
+      "number": 17,
+      "title": "Add proof-backed formal soundness co-signer",
+      "url": "https://github.com/dwijayuda/pskernel/pull/17"
+    },
+    {
+      "number": 16,
+      "title": "Integrate completed kernel assurance into main",
+      "url": "https://github.com/dwijayuda/pskernel/pull/16"
+    },
+    {
+      "number": 15,
+      "title": "Use pinned Lean Kernel Arena as release assurance gate",
+      "url": "https://github.com/dwijayuda/pskernel/pull/15"
+    },
+    {
+      "number": 1,
+      "title": "Kernel Lean 4.34 parity hardening",
+      "url": "https://github.com/dwijayuda/pskernel/pull/1"
+    },
+    {
+      "number": 13,
+      "title": "Remove per-shard forced GC from canonical replay",
+      "url": "https://github.com/dwijayuda/pskernel/pull/13"
+    },
+    {
+      "number": 12,
+      "title": "Optimize canonical MData equality-id lookup",
+      "url": "https://github.com/dwijayuda/pskernel/pull/12"
+    },
+    {
+      "number": 11,
+      "title": "Fix canonical replay GC cadence",
+      "url": "https://github.com/dwijayuda/pskernel/pull/11"
+    },
+    {
+      "number": 2,
+      "title": "WIP: add ProofScript WebAssembly backend foundation",
+      "url": "https://github.com/dwijayuda/pskernel/pull/2"
+    },
+    {
+      "number": 10,
+      "title": "Prepare canonical Full Lean replay wrapper",
+      "url": "https://github.com/dwijayuda/pskernel/pull/10"
+    },
+    {
+      "number": 8,
+      "title": "CI: keep SH1 text fixture regeneration tree clean",
+      "url": "https://github.com/dwijayuda/pskernel/pull/8"
+    },
+    {
+      "number": 6,
+      "title": "Integration check: Lean 4.34 kernel hardening + current main",
+      "url": "https://github.com/dwijayuda/pskernel/pull/6"
+    },
+    {
+      "number": 5,
+      "title": "feat: add ProofScript PSX full-stack web foundation",
+      "url": "https://github.com/dwijayuda/pskernel/pull/5"
+    }
+  ],
+  "recentCommits": {
+    "psc2/minimal-selfhost-psc15": [
+      {
+        "sha": "90d02086146fce06df6d0a720e50f340adcbf52a",
+        "message": "docs(psc2): record self-host research, verified fixes and parser backlog",
+        "date": "2026-10-01T19:07:43Z"
+      },
+      {
+        "sha": "a309f2c8562045f045c3fbd7ef840edf7a6e0c1e",
+        "message": "fix(psc2): give runtime argument helper PSC1 typed lambda binders",
+        "date": "2026-10-01T18:58:30Z"
+      },
+      {
+        "sha": "a678e186b76aafea5adca02204a3b14479a353ac",
+        "message": "test(psc2): compile and bound self-host replay diagnostics",
+        "date": "2026-10-01T18:49:29Z"
+      }
+    ],
+    "psc2/kernel-core-phase12-recursive-recursor": [
+      {
+        "sha": "b33e63ed6df2ad10a4a350b19af504fca45655f2",
+        "message": "docs(pskernel-core): finalize Phase 12 acceptance evidence",
+        "date": "2026-09-30T08:55:46Z"
+      },
+      {
+        "sha": "5a33460e6987736516f1b4ab87ad373977daec5d",
+        "message": "ci(pskernel-core): rerun Phase 12 acceptance after oracle audit",
+        "date": "2026-09-30T08:33:05Z"
+      },
+      {
+        "sha": "a6097e5ee0281993cc7b8b64c3252a72f94ea882",
+        "message": "docs(pskernel-core): record Phase 12 acceptance",
+        "date": "2026-09-30T08:05:42Z"
+      }
+    ],
+    "psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2": [
+      {
+        "sha": "ffbd1cccfd8f44dc83e32c4c5cf064aa271ae0eb",
+        "message": "Use portable list length in inductive declaration metadata",
+        "date": "2026-10-01T19:55:00Z"
+      },
+      {
+        "sha": "9b1f88a5d639c6c35eca71caaa5231c91bcc7d90",
+        "message": "Make expression-list equality explicitly structurally recursive",
+        "date": "2026-10-01T19:52:58Z"
+      },
+      {
+        "sha": "7fec3301c7b34a60c17c4c6b7e5a7ae40cfa0517",
+        "message": "Close implicit binders through an explicit portable worker",
+        "date": "2026-10-01T19:50:52Z"
+      }
+    ],
+    "psc2/pskernel-core": [
+      {
+        "sha": "71951ebe241033abaaf4afe875d378fd8b49f13b",
+        "message": "docs(psc15): record split selfhost and kernel ownership",
+        "date": "2026-09-26T23:24:30Z"
+      },
+      {
+        "sha": "72f32ac718ae75725ca3d63aa28477bccf897927",
+        "message": "feat(pskernel-core): add minimal expression representation",
+        "date": "2026-09-26T23:13:57Z"
+      },
+      {
+        "sha": "ef7e9bddf0ec47f8c8408ff0ff46bbcf60d182c0",
+        "message": "test(pskernel-core): run expression parity RED target",
+        "date": "2026-09-26T23:12:45Z"
+      }
+    ],
+    "psc2/pskernel-lean-provider": [
+      {
+        "sha": "88b18bbcec82bad02cb3db8ee5b5b96cae91ae86",
+        "message": "docs(psc2): document bundled provider usage and source builds",
+        "date": "2026-09-29T04:36:21Z"
+      },
+      {
+        "sha": "d10abd7bc5bf99d58362f53e53b98733e2f62f7c",
+        "message": "docs(psc2): document pskernel-lean native npm distribution",
+        "date": "2026-09-29T04:35:32Z"
+      },
+      {
+        "sha": "52c058e47884534eca978960f2fef4d2c0367d95",
+        "message": "docs(psc2): document bundled pskernel-lean binaries",
+        "date": "2026-09-29T04:34:34Z"
+      }
+    ],
+    "psc2/pskernel-lean-wasm": [
+      {
+        "sha": "4dece7df717152e90c8c54009c4aec0709b85a8a",
+        "message": "fix(psc2): bound native i386 bootstrap thread stacks\n\nRun #116 passed the real stage0 frontend probe, then failed creating\nworkers while compiling Init/Prelude.lean. Lean's native default reserves\n1 GiB per thread, which exhausts native i386 virtual address space.\n\nUse the existing LEAN_DEFAULT_THREAD_STACK_SIZE=8388608 override only in\nSTAGE0_LEAN_EXTRA_CXX_FLAGS, matching Lean's 8 MiB 32-bit default without\npretending native stage0 is Emscripten or disabling worker threads.\nPreserve exact pins, width/SSE flags, kernel-only linking and runtime gates.\n\nUpdate the exact build-flags contract and add native32/native64 pthread\nregressions to the pre-build ABI gate. Under a 256 MiB address-space\nbudget the old default must fail with EAGAIN, while the stage0 override\nand original Emscripten default must start and join four workers.\n\nLocal native64 fixtures reproduced the failure and passed the override;\nactual native32 threading and the complete Prelude/sysroot build remain\nmandatory CI evidence.",
+        "date": "2026-10-01T19:41:49Z"
+      },
+      {
+        "sha": "cef0b5af75c5a12fa224e8003d0e28e063e965c2",
+        "message": "fix(psc2): decode native32 shell exit codes as UInt32\n\nRun #115 reached the frontend probe without the previous missing-Init\nerror, but still returned failure silently. The pinned shell decodes\nIO UInt32 and EIO UInt32 statuses with generic pointer unboxing. UInt32\nis heap-boxed on i386, so this returns shifted address bits, not status.\n\nNormalize both stage0/current shell.cpp through exact fail-closed source\nrewrites. Use get_io_result<object_ref> plus lean_unbox_uint32 for normal\nreturns, preserving IO errors and reference ownership, and the typed\ndecoder for early option exits. Keep the real --deps gate; retain its\nstdout and exact failure status instead of discarding diagnostics.\n\nAdd native32/native64 executable boxing regressions from both pinned\nheaders before the expensive bootstrap, plus rewrite drift/idempotence\nand failure-output checks. Local native64 and isolated Clang wasm32\nfixtures reproduce/preserve the expected behavior; this container cannot\nexecute ELF i386, so actual native32 and frontend validation require CI.",
+        "date": "2026-10-01T19:05:37Z"
+      },
+      {
+        "sha": "8a85d2670e055b6ae3b9ae03aadf7ff10a8babd2",
+        "message": "docs(psc2): align wasm rebuild guide with staged bootstrap\n\nReplace obsolete x86_64 C-emitter guidance with the native i386 stage0\nand wasm32 stage1 sysroot architecture. Document empty target package\nroots for the early dependency probe, pinned multilib prerequisites,\nscalar-literal normalization, and preserved kernel-only linking.\n\nUse the package build:wasm wrapper in monorepo instructions so the\nprebuilt manifest is generated, then explicitly verify it. Explain\nsource-commit recording and bundled API integrity behavior without\nclaiming signed provenance or completed runtime verification.\n\nRetain the mandatory health, acceptance, kernel-rejection, exact parity,\nand clean installed-consumer criteria. Browser/in-process work remains\noutside this milestone.",
+        "date": "2026-10-01T18:27:00Z"
+      }
+    ]
+  },
+  "historicalRuns": {
+    "psc2/minimal-selfhost-psc15": [
+      {
+        "id": 36910864466,
+        "sha": "a309f2c8562045f045c3fbd7ef840edf7a6e0c1e",
+        "status": "completed",
+        "conclusion": "failure",
+        "name": "PSC2 minimal kernel"
+      },
+      {
+        "id": 36909732210,
+        "sha": "a678e186b76aafea5adca02204a3b14479a353ac",
+        "status": "completed",
+        "conclusion": "failure",
+        "name": "PSC2 minimal kernel"
+      },
+      {
+        "id": 36908256451,
+        "sha": "b6ce9c8780226dc8cfa42a9eca81dfe262835255",
+        "status": "completed",
+        "conclusion": "failure",
+        "name": "PSC2 minimal kernel"
+      }
+    ],
+    "psc2/kernel-core-phase12-recursive-recursor": [
+      {
+        "id": 36690404216,
+        "sha": "5a33460e6987736516f1b4ab87ad373977daec5d",
+        "status": "completed",
+        "conclusion": "success",
+        "name": "PSC2 KernelCore Phase 12 acceptance"
+      },
+      {
+        "id": 36685682651,
+        "sha": "4308230eba25f8c5d81e9bf6acc771f789a2a998",
+        "status": "completed",
+        "conclusion": "success",
+        "name": "PSC2 KernelCore Phase 12 acceptance"
+      },
+      {
+        "id": 36685273030,
+        "sha": "27731b835ff5dd0187d1db0db7b6ae3f78b07f16",
+        "status": "completed",
+        "conclusion": "success",
+        "name": "PSC2 KernelCore Phase 12 work"
+      }
+    ],
+    "psc2/pskernel-lean-provider": [
+      {
+        "id": 36522373312,
+        "sha": "88b18bbcec82bad02cb3db8ee5b5b96cae91ae86",
+        "status": "completed",
+        "conclusion": "failure",
+        "name": "PSC2 Lean kernel provider"
+      },
+      {
+        "id": 36522312789,
+        "sha": "d10abd7bc5bf99d58362f53e53b98733e2f62f7c",
+        "status": "completed",
+        "conclusion": "failure",
+        "name": "PSC2 Lean kernel provider"
+      },
+      {
+        "id": 36522239786,
+        "sha": "52c058e47884534eca978960f2fef4d2c0367d95",
+        "status": "completed",
+        "conclusion": "failure",
+        "name": "PSC2 Lean kernel provider"
+      }
+    ],
+    "psc2/pskernel-lean-wasm": [
+      {
+        "id": 36916202672,
+        "sha": "4dece7df717152e90c8c54009c4aec0709b85a8a",
+        "status": "completed",
+        "conclusion": "success",
+        "name": "PSC2 Lean kernel source distribution"
+      },
+      {
+        "id": 36916202568,
+        "sha": "4dece7df717152e90c8c54009c4aec0709b85a8a",
+        "status": "completed",
+        "conclusion": "success",
+        "name": "PSC2 Lean kernel WASM"
+      },
+      {
+        "id": 36911755821,
+        "sha": "cef0b5af75c5a12fa224e8003d0e28e063e965c2",
+        "status": "completed",
+        "conclusion": "success",
+        "name": "PSC2 Lean kernel source distribution"
+      }
+    ]
+  }
+}

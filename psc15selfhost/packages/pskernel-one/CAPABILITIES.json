@@ -1,0 +1,601 @@
+{
+  "schema": "pskernel-one-capabilities/1",
+  "target": "full pinned Lean kernel",
+  "releaseEligible": false,
+  "defaultCutover": false,
+  "scope": "Initial source-derived index, pending complete function-level surface audit; not a parity claim",
+  "capabilities": [
+    {
+      "id": "names",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/util/name.cpp"
+        ],
+        "functions": "name; operator==",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Structured anonymous/string/numeric names; structural identity",
+      "implementation": {
+        "status": "partial",
+        "module": "Ps.KernelOne.Name"
+      },
+      "canonicalRepresentation": "internal ADT only",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": "packages/pskernel-one/test/LevelTests.lean",
+        "negative": "packages/pskernel-one/test/LevelTests.lean",
+        "differential": "Lean.Kernel.isDefEq (C++), 157 cases",
+        "mutation": "two semantic mutants killed in run 36926591540",
+        "generated": "scripts/pskernel-one-runtime.mjs: blocking real tsc gate"
+      },
+      "evidence": {
+        "native": "run 36926591540, job 110585326710, head 5e3ddf9b: 13 focused + 144 ordered pairs; C++ reference",
+        "generated": "Actual PSC .ps emission succeeds; tsc 5.8.3 rejects function-returning call convention; execution blocked"
+      },
+      "limitations": "Name structure boundary; more direct cases pending",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "universes",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/level.cpp"
+        ],
+        "functions": "normalize; is_equivalent; mk_max; mk_imax",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Pinned level operations and comparison",
+      "implementation": {
+        "status": "partial",
+        "module": "Ps.KernelOne.Level"
+      },
+      "canonicalRepresentation": "internal ADT only",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": "packages/pskernel-one/test/LevelTests.lean",
+        "negative": "packages/pskernel-one/test/LevelTests.lean",
+        "differential": "Lean.Kernel.isDefEq (C++), 157 cases",
+        "mutation": "two semantic mutants killed in run 36926591540",
+        "generated": "scripts/pskernel-one-runtime.mjs: blocking real tsc gate"
+      },
+      "evidence": {
+        "native": "run 36926591540, job 110585326710, head 5e3ddf9b: 13 focused + 144 ordered pairs; C++ reference",
+        "generated": "Actual PSC .ps emission succeeds; tsc 5.8.3 rejects function-returning call convention; execution blocked"
+      },
+      "limitations": "157 native cases cover finite max laws plus Unicode/numeric-name boundaries; offsets, successors over max and nested imax congruence incomplete.",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "expression-scope",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/expr.cpp",
+          "src/kernel/instantiate.cpp",
+          "src/kernel/abstract.cpp"
+        ],
+        "functions": "expr; instantiate; abstract",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "All expression constructors, scope, capture avoidance, closedness",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": "No expression representation yet",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "typing",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/type_checker.cpp"
+        ],
+        "functions": "infer_type; infer; check; ensure_sort; ensure_pi",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Dependent function, application, lambda, sort, let and projection checking",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": null,
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "conversion",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/type_checker.cpp"
+        ],
+        "functions": "is_def_eq_core; whnf_core; lazy_delta_reduction",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Pinned reduction and definitional equality, not generic conversion laws",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": null,
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "proof-irrelevance",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/type_checker.cpp"
+        ],
+        "functions": "is_def_eq_proof_irrel; is_prop",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Proof irrelevance on well-typed propositions",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": null,
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "universes-data-prop",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/type_checker.cpp"
+        ],
+        "functions": "infer_pi; infer_sort",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Impredicative Prop and pinned data universe rules; no assumed cumulativity",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": null,
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "opacity-safety",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/type_checker.cpp",
+          "src/kernel/environment.cpp"
+        ],
+        "functions": "unfold_definition; add_definition; add_opaque; add_mutual",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Definition/theorem opacity, reducibility and safe/unsafe/partial policy",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": "Safe-only release policy must not masquerade as Lean equivalence",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "eta",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/type_checker.cpp"
+        ],
+        "functions": "try_eta_expansion; try_eta_struct; is_def_eq_unit_like",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Function/structure eta and unit-like cases under pinned side conditions",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": null,
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "inductive-admission",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/inductive.cpp"
+        ],
+        "functions": "add_inductive_fn",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Strict positivity, parameters, indices and universe constraints",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": "Phase12 is a bounded reference only; not linked as authority",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "mutual-nested",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/inductive.cpp"
+        ],
+        "functions": "add_inductive_fn",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Mutual and nested forms; establish exact kernel/elaborator boundary",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": "Detailed boundary review pending",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "recursors",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/inductive.cpp",
+          "src/kernel/type_checker.cpp"
+        ],
+        "functions": "add_inductive_fn; reduce_recursor",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Derive or independently validate constructors, recursors, motives, IHs and iota rules",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": "Caller-provided rules must never be trusted",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "quotients",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/quot.cpp",
+          "src/kernel/type_checker.cpp"
+        ],
+        "functions": "environment::add_quot; quotient reduction",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Pinned primitive quotient declarations and computation",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": null,
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "literals-builtins",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/type_checker.cpp"
+        ],
+        "functions": "reduce_nat; try_string_lit_expansion; initialize_type_checker",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Exact primitive/literal reduction surface and builtin identity",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": "Function-by-function enumeration pending",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "native-evaluation-boundary",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/type_checker.cpp"
+        ],
+        "functions": "Lean.reduceNat; Lean.reduceBool handling",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Pin trust boundary for compiler-backed native reductions",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": "Must not silently delegate owned checking; capability/security policy unresolved",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "declaration-admission",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/environment.cpp",
+          "src/kernel/declaration.h"
+        ],
+        "functions": "environment::add; add_axiom; add_definition; add_theorem; add_opaque; add_mutual; lean_add_decl",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "All seven declaration kinds and exact failure semantics",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": "No public admission API yet",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "transaction-dependencies",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/environment.cpp"
+        ],
+        "functions": "environment::add; check_constant_val; check_name",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Immutable admission, validated dependencies, duplicate rejection",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": null,
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "malformed-transport",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/environment.cpp",
+          "src/kernel/type_checker.cpp"
+        ],
+        "functions": "check_no_metavar_no_fvar; checker entry points",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Malformed/forged input fails closed; transport cannot silently drop declarations",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": "Provider transport and CheckedModule seal absent",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "resources",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/runtime/interrupt.cpp",
+          "src/kernel/environment.cpp"
+        ],
+        "functions": "scope_max_heartbeat; scope_max_rec_depth; lean_add_decl",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Separate Accepted/Rejected/UnsupportedFeature/ResourceExhausted/InternalFailure",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": "No resource-outcome API; internal Bool helpers are not provider decisions",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    },
+    {
+      "id": "prelude-policy",
+      "reference": {
+        "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "paths": [
+          "src/kernel/environment.cpp"
+        ],
+        "functions": "add_axiom; check_constant_val",
+        "review": "entry-point map; only level semantics and environment admission closely read"
+      },
+      "expectedBehavior": "Admit derived prelude; explicit foundational assumptions and axiom dependencies",
+      "implementation": {
+        "status": "missing",
+        "module": null
+      },
+      "canonicalRepresentation": "not implemented",
+      "providerTransport": "not implemented",
+      "tests": {
+        "positive": null,
+        "negative": null,
+        "differential": null
+      },
+      "evidence": {
+        "native": "pending",
+        "generated": "not verified"
+      },
+      "limitations": "No assumed shadow prelude ported",
+      "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
+    }
+  ]
+}

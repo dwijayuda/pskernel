@@ -1,0 +1,20 @@
+{
+  "schema": "pskernel-one-size/1",
+  "profile": "level-slice-v1",
+  "measurement": "source checkpoint before complete kernel; no global-minimum or reduction claim",
+  "modules": 4,
+  "bytes": 13734,
+  "nonblankNonLineCommentLines": 381,
+  "externalExplicitImports": [],
+  "compilerBuiltinRuntime": [
+    "Nat",
+    "Bool",
+    "String",
+    "Char",
+    "String.Pos.Raw",
+    "String.Internal"
+  ],
+  "generatedArtifactBytes": null,
+  "memoryMeasurements": null,
+  "runtimeMeasurements": null
+}

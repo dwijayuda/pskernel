@@ -1,0 +1,116 @@
+{
+  "schema": "pskernel-one-evidence/1",
+  "branch": "psc2/pskernel-one",
+  "compilerBaseline": "90d02086146fce06df6d0a720e50f340adcbf52a",
+  "leanPin": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "scope": "Initial Name/Level semantic slice and narrow Nat.rec compiler prerequisite; not a declaration checker",
+  "milestones": {
+    "M0": "initial audit and contract; full source audit incomplete",
+    "M1": "incomplete",
+    "M2": "blocked by generated TypeScript call arity",
+    "M3": "not implemented",
+    "M4": "not reached",
+    "M5": "incomplete",
+    "M6": "no cutover"
+  },
+  "ciRuns": [
+    {
+      "run": 36923917657,
+      "job": 110576413455,
+      "head": "712d7cc78674eb8e5939c316c5128c6bcdc40ebc",
+      "conclusion": "failure",
+      "scope": "intended semantic RED",
+      "exactFailure": "LEVEL_PARITY: max-reassociation: one=false, lean=true"
+    },
+    {
+      "run": 36924352252,
+      "job": 110577869409,
+      "head": "37a8565014784273b3f5cce9f7f3e6e10f225cff",
+      "conclusion": "failure",
+      "scope": "native154 and source checks passed; emission blocked by Nat.rec"
+    },
+    {
+      "run": 36926591540,
+      "job": 110585326710,
+      "head": "5e3ddf9b4d4247fb334c3f0e136b1a191b51ba10",
+      "conclusion": "success",
+      "scope": "native157, mutation2, tamper4, Nat boundary positive+negative4, generated Nat134, existing regression, source48 and TS emission; excludes whole-foundation tsc"
+    }
+  ],
+  "finalRuntimeGateCI": {
+    "status": "not yet run at record creation"
+  },
+  "downloadedSeed": {
+    "run": 36926591540,
+    "artifact": 11194650381,
+    "zipSha256": "6279c34400e14837db401db38b443c87753387becfd188335d4d1db461f38bb6",
+    "executableSha256": "f5f5a1a66af9fa42ec7467684e0f349b308503d15dffb09a3eea8be98fb89356",
+    "fullDiagnosticArtifact": 11193549174,
+    "fullDiagnosticZipSha256": "ace14cd748aa9c66b8d1c81ea650b724072bd0fc398f110c8d0fea28b8878a8a",
+    "retentionDays": 7
+  },
+  "local": {
+    "nativeBuild": "blocked: official Lean startup failed to locate application",
+    "sourceCompiler": "downloaded exact CI seed, not rebuilt locally",
+    "node": "v24.19.0",
+    "typescript": "Version 5.8.3",
+    "sourceInputSha256": "02aa101e545533f79c80ee71a112f7be0c692a218f702d57b888881bee4ef6c2",
+    "sourceCheckDeclarations": 48,
+    "canonicalPSCheckDeclarations": 48,
+    "typescriptEmission": "passed",
+    "wholeFoundationRuntime": {
+      "schema": "pskernel-one-level-runtime/1",
+      "status": "tsc-failed",
+      "tscExitStatus": 1,
+      "signal": null,
+      "error": null,
+      "results": 0,
+      "sourceSha256": "e121ce2d4d4d2d865e48ddf3e5296a6fd2978f5d78bdf8dada01abb896abc754",
+      "node": "v24.19.0"
+    },
+    "diagnostics": "tsc-blocker.txt",
+    "artifacts": [
+      {
+        "path": "dist/pskernel-one/KernelOne.lean",
+        "bytes": 13661,
+        "sha256": "02aa101e545533f79c80ee71a112f7be0c692a218f702d57b888881bee4ef6c2"
+      },
+      {
+        "path": "dist/pskernel-one/KernelOne.ps",
+        "bytes": 12307,
+        "sha256": "ffbf53a40e6e2781c920b1c699264b4db1bac05b6b38b0c668775649e2484a09"
+      },
+      {
+        "path": "dist/pskernel-one/KernelOne.ts",
+        "bytes": 31442,
+        "sha256": "e121ce2d4d4d2d865e48ddf3e5296a6fd2978f5d78bdf8dada01abb896abc754"
+      },
+      {
+        "path": "docs/pskernel-one/tsc-blocker.txt",
+        "bytes": 3194,
+        "sha256": "0821bfb65477411af7241b9c200d583c350b08ff6c96085e4a2f52334f62d18f"
+      }
+    ],
+    "otherPassedCommands": [
+      "node scripts/check-workspace.mjs",
+      "node scripts/check-bootstrap-closure.mjs",
+      "node scripts/check-ir-neutrality.mjs",
+      "node scripts/pskernel-one-tamper.mjs",
+      "git diff --check"
+    ],
+    "qualification": "Bootstrap-closure gate includes explicitly labeled compiler/tsc doubles for 14 source-isolation cases; these are not real generation evidence"
+  },
+  "nextBlocker": {
+    "fixture": "packages/pskernel-one/test/FunctionResultBlocker.lean",
+    "symptom": "oneTreeEqual(left) returns a function; generated oneTreeUse invokes it with two arguments",
+    "diagnostics": [
+      "TS2322",
+      "TS2554"
+    ],
+    "attemptedEncoding": "explicit portable wrappers reproduce overapplication after erasure eta expansion; removed"
+  },
+  "defaultProviderChanged": false,
+  "publicAdmissionProviderImplemented": false,
+  "combinedFixedPointVerified": false,
+  "fullProfileConformanceVerified": false
+}

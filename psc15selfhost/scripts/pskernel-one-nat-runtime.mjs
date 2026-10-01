@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const out = path.join(root, 'dist/pskernel-one/nat');
 fs.mkdirSync(out, {recursive: true});
@@ -15,7 +16,13 @@ function command(bin, args) {
 }
 command(psc, ['check', source]);
 const ts = path.join(out, 'fixture.ts');
-fs.writeFileSync(ts, command(psc, ['typescript', source]));
+const fromLean = command(psc, ['typescript', source]);
+const canonical = path.join(out, 'fixture.ps');
+command(psc, ['translate', source, '--to', 'ps', '--out', canonical]);
+command(psc, ['check', canonical]);
+const fromPS = command(psc, ['typescript', canonical]);
+assert.equal(fromPS, fromLean, 'Canonical PS and Lean must emit identical TypeScript');
+fs.writeFileSync(ts, fromPS);
 function compile(ts) {
   command(process.env.TSC ?? 'npx', process.env.TSC
     ? [ts, '--target', 'ES2022', '--module', 'ES2022', '--strict', '--noEmitOnError']
@@ -33,4 +40,10 @@ assert.equal(m.oneNatIdentity(10000n), 10000n);
 compile(path.join(out, 'direct.ts'));
 const direct = await import(pathToFileURL(path.join(out, 'direct.js')));
 assert.equal(direct.nestedNatRec, 110n);
+const sha = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+const files = [source, canonical, ts, path.join(out, 'fixture.js'), path.join(out, 'direct.ts'), path.join(out, 'direct.js')];
+fs.writeFileSync(path.join(out, 'results.json'), JSON.stringify({schema: 'pskernel-one-nat-runtime/1',
+  results: 134, compilerSha256: sha(psc), node: process.version,
+  typescript: command(process.env.TSC ?? 'npx', process.env.TSC ? ['--version'] : ['--no-install', 'tsc', '--version']).trim(),
+  artifacts: files.map(file => ({path: path.relative(root, file), sha256: sha(file), bytes: fs.statSync(file).size}))}, null, 2) + '\n');
 console.log('PSKERNEL_ONE_NAT_RUNTIME: PASS (134 generated results, bigint, captured arguments, nested recursor)');

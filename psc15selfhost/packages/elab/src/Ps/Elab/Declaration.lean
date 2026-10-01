@@ -1359,7 +1359,9 @@ def psElabDeclarationBatch
       match psElabDeclaration environment source with
       | Except.error error => Except.error error
       | Except.ok result =>
-          Except.ok { declarations := [result.declaration] }
+          Except.ok
+            (PsElabDeclarationBatchResult.mk
+              (List.cons result.declaration List.nil))
 
 def psPrependBatchReverse
     (declarations : List PsDeclaration)

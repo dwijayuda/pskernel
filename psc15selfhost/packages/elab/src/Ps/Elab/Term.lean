@@ -1595,11 +1595,11 @@ def psElabMatchFieldAt
     (index : Nat) : Option PsElabMatchField :=
   match fields with
   | [] =>
-      none
+      Option.none
   | field :: rest =>
       match index with
       | 0 =>
-          some field
+          Option.some field
       | nextIndex + 1 =>
           psElabMatchFieldAt rest nextIndex
 

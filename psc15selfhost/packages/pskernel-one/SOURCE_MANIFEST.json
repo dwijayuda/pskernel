@@ -1,0 +1,36 @@
+{
+  "schema": "pskernel-one-source/1",
+  "profile": "level-slice-v1",
+  "files": [
+    {
+      "path": "src/Ps/KernelOne/Data.lean",
+      "bytes": 302,
+      "sha256": "2ffd9dbfa17b2d7b4ef57de4fd449437cacecba0999b80251a94112aab7fe459",
+      "imports": []
+    },
+    {
+      "path": "src/Ps/KernelOne/Name.lean",
+      "bytes": 3426,
+      "sha256": "07dc91c4b9b113df108d6547f296a4efb11440559ad332e31f8aecfa3dd934b9",
+      "imports": [
+        "import Ps.KernelOne.Data"
+      ]
+    },
+    {
+      "path": "src/Ps/KernelOne/Level.lean",
+      "bytes": 10088,
+      "sha256": "35460994fbbd94f3f7b89f0e74806eeb1d3ce152a777babd541430d61464bb5c",
+      "imports": [
+        "import Ps.KernelOne.Name"
+      ]
+    },
+    {
+      "path": "src/Ps/KernelOne.lean",
+      "bytes": 26,
+      "sha256": "ca03fa0e1727c50d349f8c6b4ce7836380ac844b16882efb33f4c2a76baa66fd",
+      "imports": [
+        "import Ps.KernelOne.Level"
+      ]
+    }
+  ]
+}

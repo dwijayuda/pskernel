@@ -28,3 +28,19 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Pinned native reference and owned level tests
         run: lake exe pskernel_one_level_tests
+      - name: Build current seed compiler
+        run: lake build psc1
+      - name: Source and canonical PS profile
+        run: node scripts/pskernel-one-profile.mjs
+      - name: Actual TypeScript emission
+        run: node scripts/pskernel-one-profile.mjs --emit
+      - name: Save exact seed and diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-one-evidence-${{ github.sha }}
+          retention-days: 7
+          path: |
+            psc15selfhost/.lake/build/bin/psc1
+            psc15selfhost/.lake/build/bin/pskernel_one_level_tests
+            psc15selfhost/dist/pskernel-one/

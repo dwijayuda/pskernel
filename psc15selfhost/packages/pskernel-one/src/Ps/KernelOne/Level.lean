@@ -183,30 +183,42 @@ def psKernelOneLevelNormalize
         (psKernelOneLevelNormalize left)
         (psKernelOneLevelNormalize right)
 
-def psKernelOneLevelEquivalentNormalized
+-- A max node denotes the join of all its leaves: grouping, order, and
+-- duplicate occurrences do not affect that join. Compare both inclusions;
+-- one inclusion alone would unsoundly identify max u v with u.
+-- Leaves use structural equality after the existing normalization. This is
+-- deliberately incomplete for offset subsumption and nested imax congruence.
+def psKernelOneLevelMaxContains
+    (target : PsKernelOneLevel)
+    (tree : PsKernelOneLevel) : Bool :=
+  match tree with
+  | PsKernelOneLevel.max left right =>
+      if psKernelOneLevelMaxContains target left then
+        true
+      else
+        psKernelOneLevelMaxContains target right
+  | _ => psKernelOneLevelEq target tree
+
+def psKernelOneLevelMaxSubset
     (left : PsKernelOneLevel) : PsKernelOneLevel -> Bool :=
   match left with
   | PsKernelOneLevel.max leftA leftB =>
-      let equivalentA : PsKernelOneLevel -> Bool :=
-        psKernelOneLevelEquivalentNormalized leftA;
-      let equivalentB : PsKernelOneLevel -> Bool :=
-        psKernelOneLevelEquivalentNormalized leftB;
+      let subsetA : PsKernelOneLevel -> Bool :=
+        psKernelOneLevelMaxSubset leftA;
+      let subsetB : PsKernelOneLevel -> Bool :=
+        psKernelOneLevelMaxSubset leftB;
       fun (right : PsKernelOneLevel) =>
-        if psKernelOneLevelEq left right then
-          true
-        else
-          match right with
-          | PsKernelOneLevel.max rightA rightB =>
-              if equivalentA rightA then
-                equivalentB rightB
-              else if equivalentA rightB then
-                equivalentB rightA
-              else
-                false
-          | _ => false
+        if subsetA right then subsetB right else false
   | _ =>
       fun (right : PsKernelOneLevel) =>
-        psKernelOneLevelEq left right
+        psKernelOneLevelMaxContains left right
+
+def psKernelOneLevelEquivalentNormalized
+    (left right : PsKernelOneLevel) : Bool :=
+  if psKernelOneLevelMaxSubset left right then
+    psKernelOneLevelMaxSubset right left
+  else
+    false
 
 def psKernelOneLevelEquivalent
     (left right : PsKernelOneLevel) : Bool :=

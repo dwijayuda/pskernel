@@ -5,8 +5,9 @@ Work branch: `psc2/pskernel-one`. Compiler baseline:
 before the final runtime gate is `5e3ddf9b4d4247fb334c3f0e136b1a191b51ba10`.
 The final required runtime gate was tested at
 `c6714ba0f5aad54b3ec155b6181fe48d29429b40`. Use `git rev-parse HEAD` for the final
-documentation-only evidence commit containing this file. That follow-up does not
-change implementation, tests, manifests or workflows and is not a new green run.
+evidence commit containing this file. Follow-ups change documentation and remove
+one redundant trailing blank line from the Nat test fixture. They do not change
+semantics, manifests or workflows and are not a new green run.
 `EVIDENCE.json` and `CI_RUNTIME_GATE.json` contain the completed gate result.
 
 ## RESEARCH VERIFIED

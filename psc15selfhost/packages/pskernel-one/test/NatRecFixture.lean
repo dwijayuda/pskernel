@@ -17,4 +17,3 @@ def oneNatLarge (base : Nat) (n : Nat) : Nat :=
   match n with
   | Nat.zero => base
   | Nat.succ k => Nat.succ (oneNatLarge base k)
-

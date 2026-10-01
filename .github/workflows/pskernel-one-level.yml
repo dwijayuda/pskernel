@@ -28,6 +28,10 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Pinned native reference and owned level tests
         run: lake exe pskernel_one_level_tests
+      - name: Semantic mutation and source tamper tests
+        run: |
+          node scripts/pskernel-one-mutations.mjs
+          node scripts/pskernel-one-tamper.mjs
       - name: Build current seed compiler
         run: lake build psc1
       - name: Install locked TypeScript

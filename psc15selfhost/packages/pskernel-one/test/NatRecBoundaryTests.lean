@@ -36,9 +36,16 @@ def main : IO Unit := do
   -- hypothesis must be the fold accumulator, not a recursive enclosing call.
   let nested := PsVerifiedIrExpr.intrinsic .natAdd [] [.literal (.natural 100), value]
   let ir : PsVerifiedIrModule := {
-    imports := [], structures := [], inductives := [],
-    declarations := [{name := "nestedNatRec", typeParameters := [], parameters := [],
-      resultType := .primitive .nat, body := nested}]
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [{
+      name := "nestedNatRec"
+      typeParameters := []
+      parameters := []
+      resultType := .primitive .nat
+      body := nested
+    }]
   }
   let text ← match psTsEmitModule ir with
     | .ok text => pure text

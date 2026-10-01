@@ -1,0 +1,137 @@
+name: Phase 13 lambda split portability patch
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-work
+    paths:
+      - .github/workflows/phase13-lambda-split-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-work
+
+      - name: Split psElabLambda into PSC1-friendly helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          start_marker = 'def psElabLambda\n'
+          end_marker = '\ndef psCloseElabForallBinders\n'
+          start = text.index(start_marker)
+          end = text.index(end_marker, start)
+          new = '''def psElabLambdaFinish
+              (outerContext : PsElabContext)
+              (bindersRev : List PsElabTypedBinder)
+              (expected : Option PsExpr)
+              (bodyResult : PsElabTermResult) :
+              Except PsElabError PsElabTermResult :=
+            let metaContext := bodyResult.context.metaContext;
+            let openTerm :=
+              psMetaInstantiate metaContext bodyResult.term;
+            let openType :=
+              psMetaInstantiate metaContext bodyResult.type;
+            let closed :=
+              psCloseElabTypedBinders
+                metaContext
+                bindersRev
+                openTerm
+                openType;
+            let finalContext :=
+              psElabContextWithMeta outerContext metaContext;
+            let finalResult :=
+              PsElabTermResult.mk
+                finalContext
+                (Prod.fst closed)
+                (Prod.snd closed);
+            psElabFinalizeExpected finalResult expected
+
+          def psElabLambdaAfterPrepared
+              (elaborate :
+                PsElabContext ->
+                PsSyntaxTerm ->
+                Option PsExpr ->
+                Except PsElabError PsElabTermResult)
+              (outerContext : PsElabContext)
+              (bindersRev : List PsElabTypedBinder)
+              (body : PsSyntaxTerm)
+              (expected : Option PsExpr)
+              (preparedContext : PsElabContext)
+              (bodyExpected : Option PsExpr) :
+              Except PsElabError PsElabTermResult :=
+            match elaborate preparedContext body bodyExpected with
+            | Except.error error => Except.error error
+            | Except.ok bodyResult =>
+                psElabLambdaFinish
+                  outerContext
+                  bindersRev
+                  expected
+                  bodyResult
+
+          def psElabLambdaAfterBinders
+              (elaborate :
+                PsElabContext ->
+                PsSyntaxTerm ->
+                Option PsExpr ->
+                Except PsElabError PsElabTermResult)
+              (outerContext : PsElabContext)
+              (body : PsSyntaxTerm)
+              (expected : Option PsExpr)
+              (binderResult : PsElabTypedBindersResult) :
+              Except PsElabError PsElabTermResult :=
+            let orderedBinders := List.reverse binderResult.bindersRev;
+            match
+                psElabLambdaBodyExpected
+                  binderResult.context
+                  orderedBinders
+                  expected with
+            | Except.error error => Except.error error
+            | Except.ok prepared =>
+                psElabLambdaAfterPrepared
+                  elaborate
+                  outerContext
+                  binderResult.bindersRev
+                  body
+                  expected
+                  (Prod.fst prepared)
+                  (Prod.snd prepared)
+
+          def psElabLambda
+              (elaborate :
+                PsElabContext ->
+                PsSyntaxTerm ->
+                Option PsExpr ->
+                Except PsElabError PsElabTermResult)
+              (context : PsElabContext)
+              (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+              (body : PsSyntaxTerm)
+              (expected : Option PsExpr) :
+              Except PsElabError PsElabTermResult :=
+            match psElabTypedBinders elaborate context binders with
+            | Except.error error => Except.error error
+            | Except.ok binderResult =>
+                psElabLambdaAfterBinders
+                  elaborate
+                  context
+                  body
+                  expected
+                  binderResult
+          '''
+          path.write_text(text[:start] + new + text[end:])
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): split lambda elaboration for PSC1"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

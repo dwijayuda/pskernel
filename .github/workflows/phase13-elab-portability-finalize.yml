@@ -86,14 +86,19 @@ jobs:
           ])
           text = text.replace(helper_marker, helper + helper_marker, 1)
 
-          match_start = text.index('def psElabMatch\n')
-          match_end = text.index('\ndef psBinderAcceptsExplicitArgument\n', match_start)
-          match_block = text[match_start:match_end]
+          match_pattern = re.compile(
+              r'^def psElabMatch\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+              re.MULTILINE | re.DOTALL,
+          )
+          matches = list(match_pattern.finditer(text))
+          if len(matches) != 1:
+              raise SystemExit(f'expected one psElabMatch declaration, got {len(matches)}')
+          match_block = matches[0].group(0)
           append_count = match_block.count('List.append')
           if append_count != 2:
               raise SystemExit(f'expected two List.append uses in psElabMatch, got {append_count}')
           match_block = match_block.replace('List.append', 'psElabListAppend')
-          text = text[:match_start] + match_block + text[match_end:]
+          text = text[:matches[0].start()] + match_block + text[matches[0].end():]
 
           # PSC1 resolves constructors in patterns, but expression-position Option
           # constructors in this closure must be explicit. Qualifying them is

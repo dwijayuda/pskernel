@@ -513,7 +513,7 @@ def psElabInductiveConstructor
                 fields.context
                 inductiveName
                 parameterArgs
-                fields.bindersRev.reverse
+                (psElabTypedBinderListReverse fields.bindersRev)
                 0
                 [] with
           | Except.error error => Except.error error
@@ -543,8 +543,8 @@ def psElabInductiveConstructor
                       constructorType
                       inductiveName
                       0
-                      parameterArgs.length
-                      source.fields.length
+                      (psElabListLength parameterArgs)
+                      (psElabListLength source.fields)
                       recursiveFields))
 
 

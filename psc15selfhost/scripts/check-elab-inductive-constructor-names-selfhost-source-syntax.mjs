@@ -74,6 +74,16 @@ const inductiveConstructorBlock = source.slice(
   inductiveConstructorStart,
   inductiveConstructorEnd,
 );
+if (!/PsConstructorInfo\.mk[\s\S]*?\(psElabListLength parameterArgs\)\s+\(psElabListLength source\.fields\)\s+recursiveFields/.test(inductiveConstructorBlock)) {
+  throw new Error(
+    "PSC2_ELAB_INDUCTIVE_CONSTRUCTOR_MISSING: project-owned parameter and field counts",
+  );
+}
+if (/\bparameterArgs\.length\b|\bsource\.fields\.length\b/.test(inductiveConstructorBlock)) {
+  throw new Error(
+    "PSC2_ELAB_INDUCTIVE_CONSTRUCTOR_FORBIDDEN: method-style parameter or field counts",
+  );
+}
 if (!/psElabRecursiveFieldIndices\s+fields\.context\s+inductiveName\s+parameterArgs\s+\(psElabTypedBinderListReverse fields\.bindersRev\)/.test(inductiveConstructorBlock)) {
   throw new Error(
     "PSC2_ELAB_INDUCTIVE_CONSTRUCTOR_MISSING: project-owned typed-binder reverse",
@@ -95,5 +105,5 @@ process.stdout.write(
   "PSC2_ELAB_DIRECT_RECURSIVE_FIELD_SELFHOST_SOURCE_SYNTAX: PASS (project-owned list length; method-style length excluded)\n",
 );
 process.stdout.write(
-  "PSC2_ELAB_INDUCTIVE_CONSTRUCTOR_SELFHOST_SOURCE_SYNTAX: PASS (project-owned typed-binder reverse; method-style reverse excluded)\n",
+  "PSC2_ELAB_INDUCTIVE_CONSTRUCTOR_SELFHOST_SOURCE_SYNTAX: PASS (project-owned typed-binder reverse and list counts; generic list methods excluded)\n",
 );

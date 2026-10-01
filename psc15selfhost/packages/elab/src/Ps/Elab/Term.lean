@@ -2042,6 +2042,22 @@ def psRecursorInfoNumMinors (info : PsRecursorInfo) : Nat :=
 def psRecursorInfoLevelParams (info : PsRecursorInfo) : List PsName :=
   info.levelParams
 
+def psElabMatchRecursorLevels
+    (recInfo : PsRecursorInfo)
+    (resultLevel : PsLevel) :
+    Except PsElabError (List PsLevel) :=
+  let recursorLevels :=
+    if Nat.beq (psElabListLength (psRecursorInfoLevelParams recInfo)) 0 then
+      []
+    else if Nat.beq (psElabListLength (psRecursorInfoLevelParams recInfo)) 1 then
+      List.cons resultLevel List.nil
+    else
+      [];
+  if Nat.blt 1 (psElabListLength (psRecursorInfoLevelParams recInfo)) then
+    Except.error PsElabError.matchRecursorLevels
+  else
+    Except.ok recursorLevels
+
 def psElabMatch
     (elaborate :
       PsElabContext ->
@@ -2129,17 +2145,9 @@ def psElabMatch
                                   | Except.error error =>
                                       Except.error (PsElabError.infer error)
                                   | Except.ok resultLevel =>
-                                      let recursorLevels :=
-                                        if Nat.beq (psElabListLength (psRecursorInfoLevelParams recInfo)) 0 then
-                                          []
-                                        else if Nat.beq (psElabListLength (psRecursorInfoLevelParams recInfo)) 1 then
-                                          List.cons resultLevel List.nil
-                                        else
-                                          [];
-                                      if Nat.blt 1 (psElabListLength (psRecursorInfoLevelParams recInfo)) then
-                                        Except.error
-                                          PsElabError.matchRecursorLevels
-                                      else
+                                      match psElabMatchRecursorLevels recInfo resultLevel with
+                                      | Except.error error => Except.error error
+                                      | Except.ok recursorLevels =>
                                         match psElabMatchMinors
                                             elaborate
                                             inductiveInfo

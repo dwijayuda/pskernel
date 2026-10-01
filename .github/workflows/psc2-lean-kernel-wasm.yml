@@ -53,6 +53,10 @@ jobs:
         working-directory: psc15selfhost
         run: node scripts/kernel-provider-integration.test.mjs
 
+      - name: WASM target-width bootstrap contract
+        working-directory: psc15selfhost
+        run: node packages/pskernel-lean-wasm/scripts/target-width-contract.test.mjs
+
       - name: Lean WASM patch applicability
         shell: bash
         run: git apply --check psc15selfhost/packages/pskernel-lean-wasm/patches/lean4-4.34.0-emscripten-uv-stubs.patch

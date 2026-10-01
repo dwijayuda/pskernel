@@ -1590,18 +1590,24 @@ def psElabMatchFields
     cursor
     fieldsRev
 
+def psElabMatchFieldAtWorker
+    (fields : List PsElabMatchField) :
+    Nat -> Option PsElabMatchField :=
+  match fields with
+  | [] =>
+      fun (_index : Nat) => Option.none
+  | field :: rest =>
+      let smaller : Nat -> Option PsElabMatchField :=
+        psElabMatchFieldAtWorker rest;
+      fun (index : Nat) =>
+        match index with
+        | 0 => Option.some field
+        | nextIndex + 1 => smaller nextIndex
+
 def psElabMatchFieldAt
     (fields : List PsElabMatchField)
     (index : Nat) : Option PsElabMatchField :=
-  match fields with
-  | [] =>
-      Option.none
-  | field :: rest =>
-      match index with
-      | 0 =>
-          Option.some field
-      | nextIndex + 1 =>
-          psElabMatchFieldAt rest nextIndex
+  psElabMatchFieldAtWorker fields index
 
 structure PsElabMatchHypothesesResult where
   context : PsElabContext

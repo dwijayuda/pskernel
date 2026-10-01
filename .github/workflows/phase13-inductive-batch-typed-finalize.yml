@@ -1,0 +1,157 @@
+name: Phase 13 typed inductive batch portability
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-work
+    paths:
+      - .github/workflows/phase13-inductive-batch-typed-finalize.yml
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-work
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 5 --retry-all-errors --retry-delay 2 -sSf \
+            https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply current Phase 13 Declaration recursion candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/phase13-declaration-recursion-finalize.yml').read_text()
+          start_marker = "          python3 - <<'PY'\n"
+          end_marker = "\n          PY\n"
+          pos = 0
+          scripts = []
+          while True:
+              try:
+                  start = workflow.index(start_marker, pos) + len(start_marker)
+              except ValueError:
+                  break
+              end = workflow.index(end_marker, start)
+              lines = workflow[start:end].splitlines()
+              scripts.append('\n'.join(line[10:] if line.startswith('          ') else line for line in lines))
+              pos = end + len(end_marker)
+          if len(scripts) < 2:
+              raise SystemExit(f'expected two Declaration transforms, got {len(scripts)}')
+          namespace = {'__name__': '__main__'}
+          for index, script in enumerate(scripts[:2], 1):
+              exec(compile(script, f'phase13-declaration-recursion-{index}.py', 'exec'), namespace, namespace)
+          PY
+
+      - name: Make recursor-minor and inductive-batch results explicit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean')
+          text = path.read_text()
+
+          worker_pattern = re.compile(
+              r'^def psBuildRecursorMinorBindersWorker\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+              re.MULTILINE | re.DOTALL,
+          )
+          worker_matches = list(worker_pattern.finditer(text))
+          if len(worker_matches) != 1:
+              raise SystemExit(f'expected one recursor-minor worker, got {len(worker_matches)}')
+          worker = worker_matches[0].group(0)
+          worker_record = re.compile(
+              r'Except\.ok\s*\{\s*context\s*:=\s*context\s*bindersRev\s*:=\s*bindersRev\s*\}',
+              re.DOTALL,
+          )
+          worker, worker_count = worker_record.subn(
+              '''Except.ok
+                        (PsElabRecursorMinorsResult.mk
+                          context
+                          bindersRev)''',
+              worker,
+              count=1,
+          )
+          if worker_count != 1:
+              raise SystemExit(f'expected one recursor-minor record result, got {worker_count}')
+          text = text[:worker_matches[0].start()] + worker + text[worker_matches[0].end():]
+
+          inductive_pattern = re.compile(
+              r'^def psElabInductiveDeclaration\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+              re.MULTILINE | re.DOTALL,
+          )
+          inductive_matches = list(inductive_pattern.finditer(text))
+          if len(inductive_matches) != 1:
+              raise SystemExit(f'expected one inductive declaration elaborator, got {len(inductive_matches)}')
+          block = inductive_matches[0].group(0)
+          batch_record = re.compile(
+              r'(?P<indent>^[ \t]*)Except\.ok\s*\{\s*declarations\s*:=\s*'
+              r'psElabAppendDeclarations\s*'
+              r'\(List\.cons\s*inductiveDeclaration\s*constructorDeclarations\)\s*'
+              r'\(List\.cons\s*recursor\s*List\.nil\)\s*\}',
+              re.MULTILINE | re.DOTALL,
+          )
+          batch_matches = list(batch_record.finditer(block))
+          if len(batch_matches) != 1:
+              raise SystemExit(f'expected one inductive batch record result, got {len(batch_matches)}')
+          match = batch_matches[0]
+          indent = match.group('indent')
+          inner = indent + '  '
+          deeper = inner + '  '
+          replacement = (
+              indent + 'let batch : PsElabDeclarationBatchResult := {\n' +
+              inner + 'declarations :=\n' +
+              deeper + 'psElabAppendDeclarations\n' +
+              deeper + '  (List.cons\n' +
+              deeper + '    inductiveDeclaration\n' +
+              deeper + '    constructorDeclarations)\n' +
+              deeper + '  (List.cons recursor List.nil)\n' +
+              indent + '};\n' +
+              indent + 'Except.ok batch'
+          )
+          block = block[:match.start()] + replacement + block[match.end():]
+          text = text[:inductive_matches[0].start()] + block + text[inductive_matches[0].end():]
+
+          path.write_text(text)
+          PY
+          git diff --check -- \
+            psc15selfhost/packages/elab/src/Ps/Elab/Term.lean \
+            psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean
+
+      - name: Verify PSC1 bootstrap compiler source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run bootstrap:check
+
+      - name: Commit only after full PSC1 bootstrap gate passes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            psc15selfhost/packages/elab/src/Ps/Elab/Term.lean \
+            psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean
+          git diff --cached --check
+          git commit -m "fix(elab): close Phase 13 PSC1 portability"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

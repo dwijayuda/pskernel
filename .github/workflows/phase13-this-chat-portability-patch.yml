@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
-      - name: Reshape match field lookup recursion for PSC1
+      - name: Reshape recursive hypotheses for PSC1
         shell: bash
         run: |
           set -euo pipefail
@@ -25,31 +25,101 @@ jobs:
           from pathlib import Path
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
-          start_marker = 'def psElabMatchFieldAt\n'
-          end_marker = '\nstructure PsElabMatchHypothesesResult where\n'
+          start_marker = 'def psElabPushRecursiveHypotheses\n'
+          end_marker = '\ndef psCloseElabMatchFields\n'
           start = text.index(start_marker)
           end = text.index(end_marker, start)
           old = text[start:end]
-          if 'psElabMatchFieldAt rest nextIndex' not in old:
-              raise SystemExit('unexpected psElabMatchFieldAt source shape')
-          new = '''def psElabMatchFieldAtWorker
-              (fields : List PsElabMatchField) :
-              Nat -> Option PsElabMatchField :=
-            match fields with
+          if 'let withRecursion :=' not in old or 'psElabPushRecursiveHypotheses' not in old:
+              raise SystemExit('unexpected psElabPushRecursiveHypotheses source shape')
+          new = '''def psElabPushRecursiveHypothesesWorker
+              (fieldIndices : List Nat) :
+              PsExpr ->
+              List PsElabMatchField ->
+              PsElabContext ->
+              List PsElabMatchField ->
+              Except PsElabError PsElabMatchHypothesesResult :=
+            match fieldIndices with
             | [] =>
-                fun (_index : Nat) => Option.none
-            | field :: rest =>
-                let smaller : Nat -> Option PsElabMatchField :=
-                  psElabMatchFieldAtWorker rest;
-                fun (index : Nat) =>
-                  match index with
-                  | 0 => Option.some field
-                  | nextIndex + 1 => smaller nextIndex
+                fun (_expectedType : PsExpr) =>
+                  fun (_fields : List PsElabMatchField) =>
+                    fun (context : PsElabContext) =>
+                      fun (hypothesesRev : List PsElabMatchField) =>
+                        Except.ok {
+                          context := context
+                          hypothesesRev := hypothesesRev
+                        }
+            | fieldIndex :: rest =>
+                let smaller :
+                    PsExpr ->
+                    List PsElabMatchField ->
+                    PsElabContext ->
+                    List PsElabMatchField ->
+                    Except PsElabError PsElabMatchHypothesesResult :=
+                  psElabPushRecursiveHypothesesWorker rest;
+                fun (expectedType : PsExpr) =>
+                  fun (fields : List PsElabMatchField) =>
+                    fun (context : PsElabContext) =>
+                      fun (hypothesesRev : List PsElabMatchField) =>
+                        match psElabMatchFieldAt fields fieldIndex with
+                        | none => Except.error PsElabError.structuralRecursionInternal
+                        | some field =>
+                            let hypothesisName :=
+                              psNameAppendNum
+                                (psRootName "_ih")
+                                fieldIndex;
+                            let pushed :=
+                              psLocalPushBinding
+                                context.localContext
+                                hypothesisName
+                                expectedType
+                                PsBinderInfo.explicit;
+                            let withLocal :=
+                              psElabContextWithLocal
+                                context
+                                pushed.context;
+                            let withRecursion : PsElabContext :=
+                              match context.structuralRecursion with
+                              | none =>
+                                  withLocal
+                              | some recursion =>
+                                  let nextRecursion : PsElabStructuralRecursion := {
+                                    functionName := recursion.functionName
+                                    explicitParameterIds := recursion.explicitParameterIds
+                                    recursiveParameterIndex := recursion.recursiveParameterIndex
+                                    calls :=
+                                      List.cons
+                                        (Prod.mk field.id pushed.id)
+                                        recursion.calls
+                                  };
+                                  psElabContextWithStructuralRecursion
+                                    withLocal
+                                    (Option.some nextRecursion);
+                            let hypothesis : PsElabMatchField := {
+                              id := pushed.id
+                              name := hypothesisName
+                              type := expectedType
+                              binder := PsBinderInfo.explicit
+                            };
+                            smaller
+                              expectedType
+                              fields
+                              withRecursion
+                              (List.cons hypothesis hypothesesRev)
 
-          def psElabMatchFieldAt
+          def psElabPushRecursiveHypotheses
+              (expectedType : PsExpr)
               (fields : List PsElabMatchField)
-              (index : Nat) : Option PsElabMatchField :=
-            psElabMatchFieldAtWorker fields index
+              (fieldIndices : List Nat)
+              (context : PsElabContext)
+              (hypothesesRev : List PsElabMatchField) :
+              Except PsElabError PsElabMatchHypothesesResult :=
+            psElabPushRecursiveHypothesesWorker
+              fieldIndices
+              expectedType
+              fields
+              context
+              hypothesesRev
           '''
           path.write_text(text[:start] + new + text[end:])
           PY
@@ -57,5 +127,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "fix(elab): make match field lookup PSC1 portable"
+          git commit -m "fix(elab): make recursive hypotheses PSC1 portable"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

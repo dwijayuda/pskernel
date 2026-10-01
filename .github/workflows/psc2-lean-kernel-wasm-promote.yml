@@ -1,0 +1,85 @@
+name: PSC2 Lean kernel WASM promote prebuilt
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful PSC2 Lean kernel WASM workflow run ID
+        required: true
+        type: string
+  push:
+    branches:
+      - psc2/pskernel-lean-wasm
+    paths:
+      - .github/workflows/psc2-lean-kernel-wasm-promote.yml
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select source run
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "run_id=${{ inputs.run_id }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_id=36916202568" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Validate source run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ steps.source.outputs.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_json="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID")"
+          [[ "$(jq -r .name <<<"$run_json")" == "PSC2 Lean kernel WASM" ]]
+          [[ "$(jq -r .conclusion <<<"$run_json")" == "success" ]]
+          echo "head_sha=$(jq -r .head_sha <<<"$run_json")" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-lean-wasm-probe
+          path: promoted-artifact
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.source.outputs.run_id }}
+      - name: Promote verified package bytes
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_root="packages/pskernel-lean-wasm"
+          manifest_path="$(find ../promoted-artifact -type f -path '*/packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json' -print -quit)"
+          test -n "$manifest_path"
+          src_root="$(dirname "$manifest_path")"
+          test -s "$src_root/wasm/pskernel-lean.cjs"
+          test -s "$src_root/wasm/pskernel-lean.wasm"
+          manifest_commit="$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[1],'utf8')).sourceCommit)" "$manifest_path")"
+          [[ "$manifest_commit" == "$head_sha" ]]
+          mkdir -p "$package_root/wasm"
+          cp "$src_root/wasm/pskernel-lean.cjs" "$package_root/wasm/"
+          cp "$src_root/wasm/pskernel-lean.wasm" "$package_root/wasm/"
+          cp "$manifest_path" "$package_root/PREBUILT_WASM_MANIFEST.json"
+          node "$package_root/host/verify-prebuilt.mjs"
+          node "$package_root/host/npm-package.test.mjs"
+      - name: Commit promoted prebuilt
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add psc15selfhost/packages/pskernel-lean-wasm/wasm/pskernel-lean.cjs
+          git add psc15selfhost/packages/pskernel-lean-wasm/wasm/pskernel-lean.wasm
+          git add psc15selfhost/packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json
+          if git diff --cached --quiet; then
+            echo "prebuilt already matches source run"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(psc2): promote verified wasm prebuilt [skip ci]"
+          git push origin HEAD:psc2/pskernel-lean-wasm

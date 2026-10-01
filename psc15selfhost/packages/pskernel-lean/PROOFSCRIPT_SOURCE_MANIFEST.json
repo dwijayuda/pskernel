@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "packageName": "@proofscript/pskernel-lean",
+  "snapshotRoot": "source/proofscript",
+  "sourceRevision": "4dece7df717152e90c8c54009c4aec0709b85a8a",
+  "sourceTreeSha": "95d005a94af0a66b74b396e9c7132dae20c76302",
+  "components": {
+    "foundation": "5cb363c31d7cec6dece85cb6178c0518f409f172",
+    "core": "c5da6d2c0b86ec448f9d2edb84f6a18b79a6222c",
+    "environment": "a5ff5e512ddf6752a6933c66735e9bd24247b707",
+    "bridge": "e7f20d7ce10612f261fb3563a76819652209c2b7",
+    "provider": "9e2278fd0853c6c32b129b2be838d44dc26e74e2"
+  }
+}

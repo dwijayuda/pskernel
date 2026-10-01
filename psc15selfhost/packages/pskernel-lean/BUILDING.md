@@ -1,6 +1,6 @@
 # Building and using the PSC2 Lean 4.34 kernel provider
 
-This document covers both the bundled native distribution and source development for `psc15selfhost/packages/pskernel-lean`.
+This document covers the bundled native distribution and a self-contained source rebuild from `psc15selfhost/packages/pskernel-lean`. The package carries the exact ProofScript semantic source closure under `source/proofscript/`, a package-local `lakefile.lean`, and the exact `lean-toolchain` pin.
 
 The provider uses the pinned official Lean 4.34 toolchain and calls the real Lean kernel through `Lean.Environment.addDeclCore`. The copied `kernel/`, `runtime/`, and `util/` source trees are retained for a later standalone C++/WASM provider; they are not compiled directly by this build.
 
@@ -81,26 +81,28 @@ npm run check:kernel:lean434:pin
 
 ## 4. Build the native provider from source
 
-From `psc15selfhost/`:
+From this package directory, including from an unpacked npm tarball:
 
 ```text
-npm run build:kernel:lean434
+npm run build:kernel
 ```
 
-Equivalent Lake command:
+`build:kernel` verifies the exact Lean 4.34.0 source commit, builds the provider from the frozen `source/proofscript/` closure using this package's `lakefile.lean`, and executes health, acceptance, and real kernel-rejection smoke tests.
+
+Equivalent direct Lake command:
 
 ```text
 lake build psc2_lean_kernel_provider
 ```
 
-Development output locations are normally:
+Package-local output locations are:
 
 ```text
 .lake/build/bin/psc2_lean_kernel_provider
 .lake/build/bin/psc2_lean_kernel_provider.exe   # Windows
 ```
 
-These source-build paths are development fallbacks. Normal installed-package use prefers the bundled provider.
+From the monorepo root, `npm run build:kernel:lean434` remains a development convenience. Normal installed-package use still prefers the bundled provider.
 
 ## 5. Run provider tests
 
@@ -295,11 +297,19 @@ The workflow is manual-only in its committed form. Do not add an uncontrolled ge
 
 ### Bundled provider is reported missing or corrupt
 
+From the package folder verify the current platform prebuilt with:
+
+```text
+npm run verify:prebuilt
+```
+
 Inspect:
 
 ```text
-packages/pskernel-lean/PREBUILT_MANIFEST.json
-packages/pskernel-lean/prebuilt/<target>/
+PREBUILT_MANIFEST.json
+prebuilt/<target>/
+PROOFSCRIPT_SOURCE_MANIFEST.json
+source/proofscript/
 ```
 
 A checksum mismatch is intentionally fatal. Do not bypass digest validation. Rebuild the distribution through the verified prebuilt workflow if package bytes need replacement.
@@ -355,3 +365,10 @@ The following are intentionally separate milestones:
 - native code-signing/notarization for public release artifacts.
 
 Those should reuse the same canonical admissions/provider-response boundary rather than changing PSC compiler semantics for each execution mechanism.
+
+
+## 14. Package-local source snapshot
+
+`PROOFSCRIPT_SOURCE_MANIFEST.json` records the Git-tree identity of `source/proofscript/`. The snapshot contains the exact Foundation, Core, Environment, Bridge, and `PsKernelLean` provider sources needed by the standalone package build. CI recomputes the Git tree from packaged bytes and fails if it drifts.
+
+The upstream Lean kernel audit snapshot remains separately identified by `KERNEL_SOURCE_MANIFEST.json`. The ProofScript source manifest and Lean kernel source manifest serve different provenance boundaries and neither may be silently rewritten.

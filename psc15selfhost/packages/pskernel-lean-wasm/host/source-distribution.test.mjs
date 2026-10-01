@@ -19,6 +19,26 @@ function gitObjectSha(type,body){
     .digest();
 }
 
+
+async function gitTreeSha(root){
+  const entries=(await readdir(root,{withFileTypes:true}))
+    .sort((a,b)=>Buffer.from(a.name).compare(Buffer.from(b.name)));
+  const treeParts=[];
+  for(const entry of entries){
+    const entryPath=path.join(root,entry.name);
+    if(entry.isFile()){
+      treeParts.push(Buffer.from(`100644 ${entry.name}\0`));
+      treeParts.push(gitObjectSha('blob',await readFile(entryPath)));
+    }else if(entry.isDirectory()){
+      treeParts.push(Buffer.from(`40000 ${entry.name}\0`));
+      treeParts.push(Buffer.from(await gitTreeSha(entryPath),'hex'));
+    }else{
+      throw new Error(`unsupported source snapshot entry: ${entryPath}`);
+    }
+  }
+  return gitObjectSha('tree',Buffer.concat(treeParts)).toString('hex');
+}
+
 async function gitFlatTreeSha(root){
   const entries=(await readdir(root,{withFileTypes:true}))
     .sort((a,b)=>Buffer.from(a.name).compare(Buffer.from(b.name)));
@@ -42,6 +62,7 @@ for(const entry of [
   'LEAN_LICENSE',
   'KERNEL_SOURCE_MANIFEST.json',
   'PREBUILT_WASM_MANIFEST.json',
+  'PROOFSCRIPT_SOURCE_MANIFEST.json',
 ]){
   assert.ok(packageJson.files.includes(entry),`package files must include ${entry}`);
 }
@@ -49,6 +70,7 @@ assert.equal(
   packageJson.scripts?.['build:wasm'],
   'bash scripts/build-wasm.sh && node scripts/write-prebuilt-manifest.mjs',
 );
+assert.equal(packageJson.scripts?.['build:kernel'],'npm run build:wasm');
 assert.equal(packageJson.scripts?.['verify:source'],'node host/source-distribution.test.mjs');
 assert.equal(packageJson.scripts?.['verify:prebuilt'],'node host/verify-prebuilt.mjs');
 for(const hook of ['preinstall','install','postinstall']){
@@ -76,6 +98,26 @@ assert.equal(
   expectedKernelTree,
   'kernel/ must be byte-identical to the pinned Lean 4.34 src/kernel Git tree',
 );
+const proofscriptManifest=JSON.parse(
+  await readFile(path.join(packageRoot,'PROOFSCRIPT_SOURCE_MANIFEST.json'),'utf8'),
+);
+assert.equal(proofscriptManifest.schemaVersion,1);
+assert.equal(proofscriptManifest.packageName,'@proofscript/pskernel-lean-wasm');
+assert.equal(proofscriptManifest.snapshotRoot,'source/proofscript');
+assert.equal(proofscriptManifest.sourceTreeSha,'71674320ac440364efdad6842289e42e0a19010e');
+assert.equal(
+  await gitTreeSha(path.join(packageRoot,'source','proofscript')),
+  proofscriptManifest.sourceTreeSha,
+  'WASM ProofScript source snapshot must match its recorded Git tree',
+);
+assert.equal(
+  await gitTreeSha(path.join(packageRoot,'source','proofscript','provider')),
+  proofscriptManifest.components.provider,
+);
+assert.equal(
+  await gitTreeSha(path.join(packageRoot,'source','proofscript','wasm-provider')),
+  proofscriptManifest.components['wasm-provider'],
+);
 await readFile(path.join(packageRoot,'provider','PsKernelLeanWasm','Api.lean'),'utf8');
 await readFile(path.join(packageRoot,'source','proofscript','foundation','Ps','Foundation','Name.lean'),'utf8');
 await readFile(path.join(packageRoot,'source','proofscript','provider','PsKernelLean','Admission.lean'),'utf8');
@@ -97,6 +139,7 @@ const packedFiles=new Set(report[0].files.map(file=>file.path));
 for(const file of [
   'LEAN_LICENSE',
   'KERNEL_SOURCE_MANIFEST.json',
+  'PROOFSCRIPT_SOURCE_MANIFEST.json',
   'kernel/type_checker.cpp',
   'provider/PsKernelLeanWasm/Api.lean',
   'source/proofscript/foundation/Ps/Foundation/Name.lean',

@@ -30,9 +30,11 @@ From `psc15selfhost/` run:
 
 ```bash
 PSC_LEAN_WASM_SOURCE_COMMIT="$(git rev-parse HEAD)" \
-  npm --prefix packages/pskernel-lean-wasm run build:wasm
-node packages/pskernel-lean-wasm/host/verify-prebuilt.mjs
+  npm --prefix packages/pskernel-lean-wasm run build:kernel
+npm --prefix packages/pskernel-lean-wasm run verify:prebuilt
 ```
+
+`build:kernel` is the package-uniform alias for `build:wasm`. Both execute the same pinned build and manifest generation.
 
 The `build:wasm` command runs `scripts/build-wasm.sh` and then `scripts/write-prebuilt-manifest.mjs`. The build uses the live sibling PSC semantic sources and the checked-in `study/lean4-4.34.0` tree. Calling the shell script directly does not generate the manifest; generate and verify it before invoking the default Node API or packing the package.
 
@@ -110,3 +112,10 @@ The host adapter and CI are fail-closed: a missing launcher, malformed output, i
 ## Bootstrap isolation
 
 This package is an external assurance provider. It must not be added to PSC2's minimal self-host dependency closure, and the PSC2 fixed-point build must continue to work without Lean, Emscripten, or this package installed.
+
+
+## Checked-in prebuilt
+
+The package distribution carries `wasm/pskernel-lean.cjs`, `wasm/pskernel-lean.wasm`, and `PREBUILT_WASM_MANIFEST.json`. The committed prebuilt is promoted only from a successful full WASM workflow whose runtime acceptance, genuine kernel rejection, native/WASM differential parity, manifest verification, and fresh packed npm consumer have all passed.
+
+`PROOFSCRIPT_SOURCE_MANIFEST.json` independently identifies the exact `source/proofscript/` Git tree used for package-local source rebuilds.

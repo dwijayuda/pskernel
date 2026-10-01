@@ -117,7 +117,7 @@ A successful response identifies the exact provider and Lean revision. A semanti
 
 ## Build and verification
 
-See [`BUILDING.md`](./BUILDING.md) for the exact source build, pinned toolchain requirements, generated artifacts, and verification commands.
+See [`BUILDING.md`](./BUILDING.md) for the exact source build, pinned toolchain requirements, checked-in prebuilt artifacts, and verification commands. `npm run build:kernel` rebuilds the package-local WASM provider; `npm run verify:prebuilt` verifies the bundled bytes.
 
 The CI gate validates all of the following before this package should be treated as usable:
 
@@ -133,4 +133,4 @@ The CI gate validates all of the following before this package should be treated
 - clean packed-npm consumption before distribution-completion claims;
 - artifact upload of the `.cjs`, `.wasm`, and any generated worker files.
 
-The current-source Node build is still under verification. A successful link alone is not proof of correctness; runtime admission smoke and differential parity are the required behavioral gates. Browser and in-process transport support remain separate milestones.
+The current Node prebuilt has passed the full build, health, acceptance, genuine kernel-rejection, prebuilt-integrity, native/WASM differential, and fresh packed-npm consumer gates. The checked-in `wasm/` bytes are verified against `PREBUILT_WASM_MANIFEST.json`. Browser and in-process transport support remain separate milestones.

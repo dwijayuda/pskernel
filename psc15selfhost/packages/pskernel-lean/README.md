@@ -129,15 +129,16 @@ Kernel rejection returns `accepted:false` plus a stable `errorKind` and, when ap
 
 ## Native executable
 
-In this repository, build and test the provider from `psc15selfhost/`:
+The package is self-contained for source rebuilding. From `packages/pskernel-lean/` or an unpacked npm tarball:
 
 ```text
-npm run check:kernel:lean434:pin
-npm run build:kernel:lean434
-npm run test:kernel:lean434
+npm run build:kernel
+npm run verify:prebuilt
 ```
 
-Direct development commands:
+The source build uses the frozen `source/proofscript/` closure, package-local `lakefile.lean`, and exact `lean-toolchain` pin. It verifies health, valid acceptance, and a genuine kernel rejection after building.
+
+Direct development commands remain available:
 
 ```text
 lake build psc2_lean_kernel_provider
@@ -145,6 +146,8 @@ lake exe psc2_lean_kernel_provider --version
 lake exe psc2_lean_kernel_provider --health
 cat admissions.json | lake exe psc2_lean_kernel_provider --check
 ```
+
+From the monorepo root, the existing `npm run build:kernel:lean434` and provider tests remain additional integration gates.
 
 For normal installed-package use, the Node adapter resolves the verified bundled native executable automatically. `PSC_LEAN_KERNEL_PROVIDER_BIN` or the `binaryPath` option remains an explicit override for development, assurance experiments, and custom-provider testing.
 
@@ -240,9 +243,11 @@ PSC kernel   Lean native   Lean WASM
 
 A later provider-neutral `CheckedModule` / `CheckedCore` must be produced only after a selected kernel provider accepts the canonical Core. Do not rename the current codec-valid `AdmissionReadyModule` to `CheckedCore`.
 
-## Copied Lean sources
+## Source carried by the package
 
-The package also retains pinned copies of:
+`source/proofscript/` contains the exact ProofScript semantic source closure used by the standalone native provider build. `PROOFSCRIPT_SOURCE_MANIFEST.json` records its Git-tree identity.
+
+The package also retains pinned Lean copies of:
 
 ```text
 kernel/

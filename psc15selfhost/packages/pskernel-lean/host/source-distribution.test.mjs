@@ -19,6 +19,26 @@ function gitObjectSha(type,body){
     .digest();
 }
 
+
+async function gitTreeSha(root){
+  const entries=(await readdir(root,{withFileTypes:true}))
+    .sort((a,b)=>Buffer.from(a.name).compare(Buffer.from(b.name)));
+  const treeParts=[];
+  for(const entry of entries){
+    const entryPath=path.join(root,entry.name);
+    if(entry.isFile()){
+      treeParts.push(Buffer.from(`100644 ${entry.name}\0`));
+      treeParts.push(gitObjectSha('blob',await readFile(entryPath)));
+    }else if(entry.isDirectory()){
+      treeParts.push(Buffer.from(`40000 ${entry.name}\0`));
+      treeParts.push(Buffer.from(await gitTreeSha(entryPath),'hex'));
+    }else{
+      throw new Error(`unsupported source snapshot entry: ${entryPath}`);
+    }
+  }
+  return gitObjectSha('tree',Buffer.concat(treeParts)).toString('hex');
+}
+
 async function gitFlatTreeSha(root){
   const entries=(await readdir(root,{withFileTypes:true}))
     .sort((a,b)=>Buffer.from(a.name).compare(Buffer.from(b.name)));
@@ -39,15 +59,24 @@ const requiredEntries=[
   'LEAN_LICENSE',
   'KERNEL_SOURCE_MANIFEST.json',
   'host/source-distribution.test.mjs',
+  'host/verify-prebuilt.mjs',
+  'source/',
+  'scripts/build-native.mjs',
+  'PROOFSCRIPT_SOURCE_MANIFEST.json',
+  'lakefile.lean',
+  'lean-toolchain',
 ];
 for(const entry of requiredEntries){
   assert.ok(packageJson.files.includes(entry),`package files must include ${entry}`);
 }
+assert.equal(packageJson.scripts?.['build:kernel'],'node scripts/build-native.mjs');
+assert.equal(packageJson.scripts?.['build:native'],'node scripts/build-native.mjs');
 assert.equal(
   packageJson.scripts?.['verify:source'],
   'node host/source-distribution.test.mjs',
   'verify:source must point at the published source-distribution verifier',
 );
+assert.equal(packageJson.scripts?.['verify:prebuilt'],'node host/verify-prebuilt.mjs');
 for(const hook of ['preinstall','install','postinstall']){
   assert.equal(packageJson.scripts?.[hook],undefined,`${hook} must not compile or mutate the provider package`);
 }
@@ -73,7 +102,35 @@ assert.equal(
   expectedKernelTree,
   'kernel/ must be byte-identical to the pinned Lean 4.34 src/kernel Git tree',
 );
+const proofscriptManifest=JSON.parse(
+  await readFile(path.join(packageRoot,'PROOFSCRIPT_SOURCE_MANIFEST.json'),'utf8'),
+);
+assert.equal(proofscriptManifest.schemaVersion,1);
+assert.equal(proofscriptManifest.packageName,'@proofscript/pskernel-lean');
+assert.equal(proofscriptManifest.snapshotRoot,'source/proofscript');
+assert.equal(proofscriptManifest.sourceTreeSha,'95d005a94af0a66b74b396e9c7132dae20c76302');
+assert.equal(
+  await gitTreeSha(path.join(packageRoot,'source','proofscript')),
+  proofscriptManifest.sourceTreeSha,
+  'ProofScript source snapshot must match its recorded Git tree',
+);
+assert.equal(
+  await gitTreeSha(path.join(packageRoot,'provider')),
+  proofscriptManifest.components.provider,
+  'provider/ must match the frozen provider source tree',
+);
+assert.equal(
+  await gitTreeSha(path.join(packageRoot,'source','proofscript','provider')),
+  proofscriptManifest.components.provider,
+  'source/proofscript/provider must match provider/',
+);
 await readFile(path.join(packageRoot,'provider','PsKernelLean','Admission.lean'),'utf8');
+await readFile(path.join(packageRoot,'source','proofscript','foundation','Ps','Foundation','Name.lean'),'utf8');
+await readFile(path.join(packageRoot,'source','proofscript','provider','PsKernelLean','Admission.lean'),'utf8');
+await readFile(path.join(packageRoot,'scripts','build-native.mjs'),'utf8');
+await readFile(path.join(packageRoot,'host','verify-prebuilt.mjs'),'utf8');
+await readFile(path.join(packageRoot,'lakefile.lean'),'utf8');
+assert.equal((await readFile(path.join(packageRoot,'lean-toolchain'),'utf8')).trim(),'leanprover/lean4:v4.34.0');
 
 const packed=spawnSync(npm,['pack','--json','--dry-run'],{
   cwd:packageRoot,
@@ -90,7 +147,14 @@ for(const file of [
   'kernel/type_checker.cpp',
   'kernel/environment.cpp',
   'provider/PsKernelLean/Admission.lean',
+  'source/proofscript/foundation/Ps/Foundation/Name.lean',
+  'source/proofscript/provider/PsKernelLean/Admission.lean',
+  'PROOFSCRIPT_SOURCE_MANIFEST.json',
+  'scripts/build-native.mjs',
   'host/source-distribution.test.mjs',
+  'host/verify-prebuilt.mjs',
+  'lakefile.lean',
+  'lean-toolchain',
 ]){
   assert.ok(packedFiles.has(file),`npm tarball missing ${file}`);
 }

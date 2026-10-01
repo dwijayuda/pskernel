@@ -2342,7 +2342,7 @@ def psElabApplyArgsWithFuelWorker
                     term := PsExpr.app current.term fresh.expr
                     type := psExprInstantiate1 body fresh.expr
                   };
-                  let nextPending :=
+                  let nextPending : List Nat :=
                     if psBinderIsInstanceImplicit binder then
                       match fresh.expr with
                       | PsExpr.mvar id =>

@@ -209,9 +209,9 @@ const flagGroups=new Map([
   ['internal-link',[]],
   ['link',[]],
 ]);
-for(const line of flagsRun.stdout.split(/\\r?\\n/u)){
+for(const line of flagsRun.stdout.split(/\r?\n/u)){
   if(line.length===0)continue;
-  const tab=line.indexOf('\\t');
+  const tab=line.indexOf('\t');
   assert.ok(tab>0,`unexpected native toolchain flag line: ${line}`);
   const tag=line.slice(0,tab);
   const value=line.slice(tab+1);

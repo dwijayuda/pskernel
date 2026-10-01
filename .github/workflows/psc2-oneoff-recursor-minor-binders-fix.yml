@@ -1,0 +1,171 @@
+name: PSC2 one-shot recursor minor binder recursion repair
+
+on:
+  push:
+    branches:
+      - psc2/minimal-selfhost-psc15
+    paths:
+      - .github/workflows/psc2-oneoff-recursor-minor-binders-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: psc2/minimal-selfhost-psc15
+
+      - name: Refuse stale branch state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin psc2/minimal-selfhost-psc15
+          test "$(git rev-parse origin/psc2/minimal-selfhost-psc15)" = "$GITHUB_SHA"
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Normalize recursor minor binder recursion
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean")
+          source = path.read_text()
+          start = source.index("def psBuildRecursorMinorBinders\n")
+          end = source.index("\ndef psBuildInductiveRecursor\n", start)
+          old = source[start:end]
+          required_old = [
+              "  | [], context, _, bindersRev =>",
+              "  | declaration :: rest, context, index, bindersRev =>",
+              "          psBuildRecursorMinorBinders\n            parameterArgs\n            motiveId\n            rest\n            nextContext",
+          ]
+          missing = [marker for marker in required_old if marker not in old]
+          if missing:
+              raise SystemExit(f"unexpected recursor-minor-binder source shape: {missing}")
+
+          new = '''def psBuildRecursorMinorBindersWorker
+              (parameterArgs : List PsExpr)
+              (motiveId : Nat)
+              (declarations : List PsDeclaration) :
+              PsElabContext ->
+              Nat ->
+              List PsElabTypedBinder ->
+              Except PsElabError PsElabRecursorMinorsResult :=
+            match declarations with
+            | List.nil =>
+                fun (context : PsElabContext) =>
+                  fun (_index : Nat) =>
+                    fun (bindersRev : List PsElabTypedBinder) =>
+                      Except.ok
+                        (PsElabRecursorMinorsResult.mk
+                          context
+                          bindersRev)
+            | List.cons declaration rest =>
+                let smaller :
+                    PsElabContext ->
+                    Nat ->
+                    List PsElabTypedBinder ->
+                    Except PsElabError PsElabRecursorMinorsResult :=
+                  psBuildRecursorMinorBindersWorker
+                    parameterArgs
+                    motiveId
+                    rest;
+                fun (context : PsElabContext) =>
+                  fun (index : Nat) =>
+                    fun (bindersRev : List PsElabTypedBinder) =>
+                      match psBuildInductiveMinorType
+                          context
+                          parameterArgs
+                          motiveId
+                          declaration with
+                      | Except.error error => Except.error error
+                      | Except.ok minorType =>
+                          let minorName :=
+                            psNameAppendNum (psRootName "_minor") index;
+                          let pushed :=
+                            psLocalPushBinding
+                              context.localContext
+                              minorName
+                              minorType
+                              PsBinderInfo.explicit;
+                          let nextContext :=
+                            psElabContextWithLocal context pushed.context;
+                          smaller
+                            nextContext
+                            (Nat.succ index)
+                            (List.cons
+                              (PsElabTypedBinder.mk
+                                pushed.id
+                                minorName
+                                minorType
+                                PsBinderInfo.explicit)
+                              bindersRev)
+
+          def psBuildRecursorMinorBinders
+              (parameterArgs : List PsExpr)
+              (motiveId : Nat)
+              (declarations : List PsDeclaration)
+              (context : PsElabContext)
+              (index : Nat)
+              (bindersRev : List PsElabTypedBinder) :
+              Except PsElabError PsElabRecursorMinorsResult :=
+            psBuildRecursorMinorBindersWorker
+              parameterArgs
+              motiveId
+              declarations
+              context
+              index
+              bindersRev
+          '''
+          path.write_text(source[:start] + new + source[end:])
+          PY
+
+      - name: Recursor minor binder regression gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          node scripts/check-elab-recursor-minor-binders-selfhost-source-syntax.mjs
+
+      - name: Full selfhost source syntax gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run check:selfhost-source-syntax
+
+      - name: Declaration builds under Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          lake build Ps.Elab.Declaration
+
+      - name: Commit repair and self-remove
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin psc2/minimal-selfhost-psc15
+          test "$(git rev-parse origin/psc2/minimal-selfhost-psc15)" = "$GITHUB_SHA"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/psc2-oneoff-recursor-minor-binders-fix.yml
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean
+          git commit -m "fix(psc2): normalize recursor minor binder recursion"
+          git push origin HEAD:psc2/minimal-selfhost-psc15

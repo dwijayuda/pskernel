@@ -18,32 +18,33 @@ from `Pasted text(20260930-195252).txt`.
 
 ## Current snapshot and first blocker
 
-Base head for this repair: `35b9bdaa7883024e769e999b4337f41784f14ae4`.
-Canonical run `36891839146`, job `110469106433`, passed source gates,
+Base head for this repair: `e2de612d5b3e03fa5dd772bd36755c1494ba1183`.
+Canonical run `36892711469`, job `110472017908`, passed source gates,
 the official Lean elaborator build, and emitted:
 
 ```text
 PSC2_FIXED_POINT_RUNTIME_REGRESSIONS: PASS
 ```
 
-That verifies the definition-opening rewrite's type/proof/runtime binder tests,
-parameter order, and one-versus-two-step fuel boundary. Parsing advanced to
-`psEraseDefinition`:
+That also verifies proof-valued definitions are excluded from runtime IR.
+Parsing advanced to the nested Except/Option pattern in `psEraseDefinitionsLoop`:
 
 ```text
-PSC1_PROJECT_PARSE_FAILED: packages/erasure/src/Ps/Erasure/Definition.lean: 336:5: expected ';', got 'let'
+PSC1_PROJECT_PARSE_FAILED: packages/erasure/src/Ps/Erasure/Definition.lean: 395:23: expected '=>', got '('
 ```
 
-This repair normalizes only `psEraseDefinition`. Its output-name match has an
-explicit String type and separator; Option, scope, current-definition, and
-VerifiedIR result values use explicit constructors. All ten carried scope fields
-are preserved, with only currentDefinition initialized for the definition.
+This repair normalizes only that traversal and its required output reverse helper.
+The worker recurses on the declaration list with invariant environment/scope;
+its output accumulator is applied afterward. Definition and partial-definition
+branches match Except first, then Option. Errors return unchanged, omitted
+results preserve the accumulator, and retained results are reversed into source
+order at completion. The public wrapper keeps the original argument order.
 
 The focused guard was RED before the source change and GREEN afterward.
-Aggregate source gates and local closure checks pass. The binder regression now
-also verifies a proof-valued definition is omitted from runtime IR. Its expanded
-native result and fresh fixed-point replay are pending. Erasure self-compilation
-is not yet proven.
+Aggregate source gates and local closure checks pass. A new native traversal test
+covers definition/partial branches, skipped axioms, source order, an existing
+reversed prefix, empty input, and mid-list error propagation. Its native result
+and fresh fixed-point replay are pending; erasure self-compilation is not proven.
 
 All concurrent Declaration repairs and their guards remain intact. The earlier
 local recursor-minor draft was set aside because `4dcf65ff` already supplied the
@@ -78,6 +79,7 @@ and related Option/recursion repairs remain present. Do not repeat them.
 | Naming traversal structural worker | `92955f7e` | Run `36889927006` passed naming regressions and advanced to public wrapper |
 | Source-order output through local reversal | `7cbe096e` | Run `36890710202` passed public-order regression and advanced to definition opening |
 | Definition-opening fuel recursion | `35b9bdaa` | Run `36891839146` passed binder/fuel regressions and advanced to single-definition erasure |
+| Explicit single-definition erasure constructors | `e2de612d` | Run `36892711469` passed proof-omission regression and advanced to definition-list traversal |
 
 These are parser/runtime milestones, not proof that the entire erasure module
 has passed PSC1 elaboration or reached fixed point.
@@ -87,13 +89,14 @@ has passed PSC1 elaboration or reached fixed point.
 The closure probe runs `lake exe psc2_minimal_selfhost_tests` before fixed-point
 compilation and emits `PSC2_FIXED_POINT_RUNTIME_REGRESSIONS: PASS` on success.
 That marker was observed in canonical runs `36846906468`, `36885530518`,
-`36888982066`, `36889927006`, `36890710202`, and `36891839146`.
+`36888982066`, `36889927006`, `36890710202`, `36891839146`, and `36892711469`.
 It includes the constructor-traversal regression covering output order,
 nonzero constructor indices, an existing reversed accumulator, empty input,
 and error propagation. Run `36889927006` also verifies the new erasure naming
 state traversal regression. Run `36890710202` verifies its expanded public-order
 and empty-input checks. Run `36891839146` verifies the definition-opening
-binder and fuel tests. The added proof-valued-definition check is pending.
+binder and fuel tests. Run `36892711469` verifies the proof-valued-definition
+omission check. The new definition-list traversal test is pending.
 
 ## Exact next action
 
@@ -110,7 +113,7 @@ binder and fuel tests. The added proof-valued-definition check is pending.
 
 ```sh
 cd psc15selfhost
-node scripts/check-erasure-definition-selfhost-source-syntax.mjs
+node scripts/check-erasure-definitions-loop-selfhost-source-syntax.mjs
 npm run check:selfhost-source-syntax
 node scripts/check-bootstrap-closure.mjs
 lake build Ps.Erasure.Definition

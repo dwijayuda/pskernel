@@ -361,7 +361,37 @@ def psTestOpenDefinitionFuelBoundary : Bool :=
     | Except.error _ => false
   exhausted && completed
 
+def psTestErasureDefinitionTraversal : Bool :=
+  let environment := psBootstrapPreludeEnvironment
+  let scope := psErasureScopeEmpty []
+  let natType := PsExpr.constE psNatName []
+  let first := PsDeclaration.definitionDecl (psRootName "first") [] natType (.lit (.natural 1))
+  let second := PsDeclaration.partialDecl (psRootName "second") [] natType (.lit (.natural 2))
+  let skipped := PsDeclaration.axiomDecl (psRootName "skipped") [] natType
+  let bad := PsDeclaration.definitionDecl (psRootName "bad") [] natType (.fvar 999)
+  let priorA := PsVerifiedIrDeclaration.mk "priorA" [] [] (.primitive .nat) (.literal (.natural 0))
+  let priorB := PsVerifiedIrDeclaration.mk "priorB" [] [] (.primitive .nat) (.literal (.natural 0))
+  let ordered :=
+    match psEraseDefinitionsLoop environment scope [first, skipped, second] [priorB, priorA] with
+    | Except.ok declarations =>
+        declarations.map (fun declaration => declaration.name) == ["priorA", "priorB", "first", "second"]
+    | Except.error _ => false
+  let empty :=
+    match psEraseDefinitionsLoop environment scope [] [priorB, priorA] with
+    | Except.ok declarations =>
+        declarations.map (fun declaration => declaration.name) == ["priorA", "priorB"]
+    | Except.error _ => false
+  let failed :=
+    match psEraseDefinitionsLoop environment scope [first, bad, second] [] with
+    | Except.error (.unknownLocal 999) => true
+    | _ => false
+  ordered && empty && failed
+
 def main : IO Unit := do
+  if psTestErasureDefinitionTraversal then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: erasure traversal order, partial definitions, skipped axioms, prefix and errors"
+  else
+    throw (IO.userError "PSC2_MINIMAL_SELFHOST_FAIL: erasure definition traversal")
   if psTestOpenDefinitionBinderErasure && psTestOpenDefinitionFuelBoundary then
     IO.println "PSC2_MINIMAL_SELFHOST_PASS: type/proof/runtime binder erasure, parameter order and fuel boundary"
   else

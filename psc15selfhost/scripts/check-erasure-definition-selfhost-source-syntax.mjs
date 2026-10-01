@@ -7,7 +7,7 @@ const source = await readFile(
   path.join(root, "packages/erasure/src/Ps/Erasure/Definition.lean"),
   "utf8",
 );
-const match = source.match(/def psEraseDefinition\n[\s\S]*?(?=\ndef psEraseDefinitionsLoop\n)/);
+const match = source.match(/def psEraseDefinition\n[\s\S]*?(?=\ndef psErasureReverseIrDeclarationsAcc\n|\ndef psEraseDefinitionsLoop\n)/);
 if (match === null) throw new Error("PSC2_ERASURE_DEFINITION_MISSING: declaration");
 const block = match[0];
 for (const pattern of [

@@ -2678,12 +2678,13 @@ def psElabRecordCandidates
     List PsElabRecordCandidate -> List PsElabRecordCandidate :=
   match declarations with
   | [] =>
-      fun candidatesRev => psElabListReverse candidatesRev
+      fun (candidatesRev : List PsElabRecordCandidate) =>
+        psElabListReverse candidatesRev
   | declaration :: rest =>
       let smaller :
           List PsElabRecordCandidate -> List PsElabRecordCandidate :=
         psElabRecordCandidates environment fields rest;
-      fun candidatesRev =>
+      fun (candidatesRev : List PsElabRecordCandidate) =>
         match declaration with
         | .inductiveDecl info =>
             match

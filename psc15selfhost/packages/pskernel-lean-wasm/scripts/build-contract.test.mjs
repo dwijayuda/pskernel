@@ -30,8 +30,8 @@ assert.match(build,/-DUSE_LAKE=OFF/);
 assert.match(build,/-DMMAP=OFF/);
 assert.match(build,/--target stage1-configure -j2/);
 assert.match(build,/stage0_lean="\$lean_build\/stage0\/bin\/lean"/);
-assert.match(build,/stage0_lean_path="\$lean_build\/stage0\/lib\/lean"/);
 assert.match(build,/stage1_build="\$lean_build\/stage1"/);
+assert.match(build,/stage1_lean_path="\$stage1_build\/lib\/lean"/);
 assert.match(build,/stage1_leanc="\$stage1_build\/leanc\.sh"/);
 assert.doesNotMatch(build,/-DPREV_STAGE="\$host_lean_prefix"/);
 assert.match(build,/lean4-4\.34\.0-emscripten-uv-stubs\.patch/);
@@ -46,9 +46,10 @@ assert.ok(build.includes(targetedLeanBuild),'targeted wasm32 stage1 static build
 assert.doesNotMatch(build,/cmake --build "\$stage1_build" -j2/);
 assert.doesNotMatch(build,/cmake --build "\$lean_build" --target stage1(?:\s|$)/);
 
-// Installed x86_64 Lean verifies the exact pin only. Provider C and oleans must
-// come from the runnable native i386 stage0 so compiler-emitted platform
-// constants match wasm32.
+// Installed x86_64 Lean verifies the exact pin only. Provider C must be emitted
+// by the runnable native i386 stage0, but imports must resolve against the
+// wasm32 stage1 .olean sysroot produced by target make_stdlib. Stage0 itself is
+// C_ONLY and is therefore not an olean sysroot.
 assert.match(build,/host_lean=.*command -v lean/);
 assert.match(build,/actual_lean_commit=.*host_lean --githash/);
 assert.match(build,/provider_overlay/);
@@ -58,7 +59,9 @@ assert.match(build,/provider_modules=/);
 assert.match(build,/PsKernelLean\/Convert/);
 assert.match(build,/PsKernelLean\/Prelude/);
 assert.match(build,/PsKernelLean\/Main/);
-assert.match(build,/LEAN_PATH="\$provider_olean_dir:\$stage0_lean_path"/);
+assert.match(build,/stage1_lean_path\/Lean\.olean/);
+assert.doesNotMatch(build,/stage0_lean_path\/Lean\.olean/);
+assert.match(build,/LEAN_PATH="\$provider_olean_dir:\$stage1_lean_path"/);
 assert.match(build,/"\$stage0_lean" \\\n/);
 assert.match(build,/--c=/);
 assert.doesNotMatch(build,/"\$host_lean" \\\n\s+-o /,'x86_64 host Lean must not emit provider C');
@@ -67,10 +70,13 @@ assert.doesNotMatch(build,/LEAN_CC=.*emcc/);
 assert.doesNotMatch(build,/\[\[lean_lib\]\]/);
 
 const targetLeanBuildIndex=build.indexOf(targetedLeanBuild);
+const targetSysrootCheckIndex=build.indexOf('stage1_lean_path/Lean.olean');
 const providerCompileIndex=build.indexOf('provider_modules=');
 assert.ok(targetLeanBuildIndex>=0,'target wasm32 static build must exist');
+assert.ok(targetSysrootCheckIndex>=0,'target wasm32 olean sysroot check must exist');
 assert.ok(providerCompileIndex>=0,'direct provider module compile list must exist');
-assert.ok(targetLeanBuildIndex<providerCompileIndex,'WASM Lean runtime/kernel must exist before provider C compilation');
+assert.ok(targetLeanBuildIndex<targetSysrootCheckIndex,'stage1 make_stdlib must run before checking target oleans');
+assert.ok(targetSysrootCheckIndex<providerCompileIndex,'target olean sysroot must be verified before provider C compilation');
 
 assert.match(build,/packages\/foundation\/src\/Ps/);
 assert.match(build,/packages\/core\/src\/Ps/);

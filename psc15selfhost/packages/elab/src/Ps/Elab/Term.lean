@@ -715,6 +715,82 @@ def psElabLambdaBodyExpected
               (Prod.fst prepared)
               (Option.some (Prod.snd prepared)))
 
+def psElabLambdaFinish
+    (outerContext : PsElabContext)
+    (bindersRev : List PsElabTypedBinder)
+    (expected : Option PsExpr)
+    (bodyResult : PsElabTermResult) :
+    Except PsElabError PsElabTermResult :=
+  let metaContext := bodyResult.context.metaContext;
+  let openTerm :=
+    psMetaInstantiate metaContext bodyResult.term;
+  let openType :=
+    psMetaInstantiate metaContext bodyResult.type;
+  let closed :=
+    psCloseElabTypedBinders
+      metaContext
+      bindersRev
+      openTerm
+      openType;
+  let finalContext :=
+    psElabContextWithMeta outerContext metaContext;
+  let finalResult :=
+    PsElabTermResult.mk
+      finalContext
+      (Prod.fst closed)
+      (Prod.snd closed);
+  psElabFinalizeExpected finalResult expected
+
+def psElabLambdaAfterPrepared
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (outerContext : PsElabContext)
+    (bindersRev : List PsElabTypedBinder)
+    (body : PsSyntaxTerm)
+    (expected : Option PsExpr)
+    (preparedContext : PsElabContext)
+    (bodyExpected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  match elaborate preparedContext body bodyExpected with
+  | Except.error error => Except.error error
+  | Except.ok bodyResult =>
+      psElabLambdaFinish
+        outerContext
+        bindersRev
+        expected
+        bodyResult
+
+def psElabLambdaAfterBinders
+    (elaborate :
+      PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult)
+    (outerContext : PsElabContext)
+    (body : PsSyntaxTerm)
+    (expected : Option PsExpr)
+    (binderResult : PsElabTypedBindersResult) :
+    Except PsElabError PsElabTermResult :=
+  let orderedBinders := List.reverse binderResult.bindersRev;
+  match
+      psElabLambdaBodyExpected
+        binderResult.context
+        orderedBinders
+        expected with
+  | Except.error error => Except.error error
+  | Except.ok prepared =>
+      psElabLambdaAfterPrepared
+        elaborate
+        outerContext
+        binderResult.bindersRev
+        body
+        expected
+        (Prod.fst prepared)
+        (Prod.snd prepared)
+
 def psElabLambda
     (elaborate :
       PsElabContext ->
@@ -729,37 +805,12 @@ def psElabLambda
   match psElabTypedBinders elaborate context binders with
   | Except.error error => Except.error error
   | Except.ok binderResult =>
-      match
-          psElabLambdaBodyExpected
-            binderResult.context
-            (List.reverse binderResult.bindersRev)
-            expected with
-      | Except.error error => Except.error error
-      | Except.ok prepared =>
-          match elaborate (Prod.fst prepared) body (Prod.snd prepared) with
-          | Except.error error => Except.error error
-          | Except.ok bodyResult =>
-              let metaContext := bodyResult.context.metaContext;
-              let openTerm :=
-                psMetaInstantiate metaContext bodyResult.term;
-              let openType :=
-                psMetaInstantiate metaContext bodyResult.type;
-              let closed :=
-                psCloseElabTypedBinders
-                  metaContext
-                  binderResult.bindersRev
-                  openTerm
-                  openType;
-              let outerContext :=
-                psElabContextWithMeta context metaContext;
-              let finalResult : PsElabTermResult := {
-                context := outerContext
-                term := Prod.fst closed
-                type := Prod.snd closed
-              };
-              psElabFinalizeExpected
-                finalResult
-                expected
+      psElabLambdaAfterBinders
+        elaborate
+        context
+        body
+        expected
+        binderResult
 
 def psCloseElabForallBinders
     (metaContext : PsMetaContext)

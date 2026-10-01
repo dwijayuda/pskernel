@@ -1,0 +1,116 @@
+name: Phase 13 recursor-minor result portability
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-work
+    paths:
+      - .github/workflows/phase13-recursor-minor-record-finalize.yml
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-work
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply current Phase 13 Declaration candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/phase13-declaration-recursion-finalize.yml').read_text()
+          start_marker = "          python3 - <<'PY'\n"
+          end_marker = "\n          PY\n"
+          pos = 0
+          scripts = []
+          while True:
+              try:
+                  start = workflow.index(start_marker, pos) + len(start_marker)
+              except ValueError:
+                  break
+              end = workflow.index(end_marker, start)
+              lines = workflow[start:end].splitlines()
+              scripts.append('\n'.join(line[10:] if line.startswith('          ') else line for line in lines))
+              pos = end + len(end_marker)
+          if len(scripts) < 2:
+              raise SystemExit(f'expected two Declaration transforms, got {len(scripts)}')
+          namespace = {'__name__': '__main__'}
+          for index, script in enumerate(scripts[:2], 1):
+              exec(compile(script, f'phase13-declaration-recursion-{index}.py', 'exec'), namespace, namespace)
+          PY
+
+      - name: Make recursor-minor result construction explicit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean')
+          text = path.read_text()
+          pattern = re.compile(
+              r'^def psBuildRecursorMinorBindersWorker\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+              re.MULTILINE | re.DOTALL,
+          )
+          matches = list(pattern.finditer(text))
+          if len(matches) != 1:
+              raise SystemExit(f'expected one recursor-minor worker, got {len(matches)}')
+          block = matches[0].group(0)
+          old = '''Except.ok {
+                        context := context
+                        bindersRev := bindersRev
+                      }'''
+          new = '''Except.ok
+                        (PsElabRecursorMinorsResult.mk
+                          context
+                          bindersRev)'''
+          count = block.count(old)
+          if count != 1:
+              raise SystemExit(f'expected one recursor-minor record result, got {count}')
+          block = block.replace(old, new, 1)
+          text = text[:matches[0].start()] + block + text[matches[0].end():]
+          path.write_text(text)
+          PY
+          git diff --check -- \
+            psc15selfhost/packages/elab/src/Ps/Elab/Term.lean \
+            psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean
+
+      - name: Verify PSC1 bootstrap compiler source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run bootstrap:check
+
+      - name: Commit only after full PSC1 bootstrap gate passes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            psc15selfhost/packages/elab/src/Ps/Elab/Term.lean \
+            psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean
+          git diff --cached --check
+          git commit -m "fix(elab): close Phase 13 PSC1 portability"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

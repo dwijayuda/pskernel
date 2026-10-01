@@ -247,6 +247,31 @@ def psEraseMappedIntrinsic
       Except.ok
         (PsVerifiedIrExpr.intrinsic operation [] erased)
 
+def psErasureExprListAtWorker
+    (index : Nat) :
+    List PsExpr -> Option PsExpr :=
+  match index with
+  | 0 =>
+      fun (values : List PsExpr) =>
+        match values with
+        | [] => Option.none
+        | value :: _ => Option.some value
+  | nextIndex + 1 =>
+      let smaller :
+          List PsExpr -> Option PsExpr :=
+        psErasureExprListAtWorker nextIndex;
+      fun (values : List PsExpr) =>
+        match values with
+        | [] => Option.none
+        | _ :: rest => smaller rest
+
+def psErasureExprListAt
+    (values : List PsExpr)
+    (index : Nat) : Option PsExpr :=
+  psErasureExprListAtWorker
+    index
+    values
+
 def psEraseSelectedArguments
     (erase :
       PsExpr -> Except PsErasureError PsVerifiedIrExpr)
@@ -254,7 +279,7 @@ def psEraseSelectedArguments
     List Nat -> Except PsErasureError (List PsVerifiedIrExpr)
   | [] => Except.ok []
   | index :: rest =>
-      match arguments[index]? with
+      match psErasureExprListAt arguments index with
       | none => Except.error PsErasureError.unsupportedApplication
       | some argument =>
           match erase argument with
@@ -272,7 +297,7 @@ def psEraseSelectedTypeArguments
     List Nat -> Except PsErasureError (List PsVerifiedIrType)
   | [] => Except.ok []
   | index :: rest =>
-      match arguments[index]? with
+      match psErasureExprListAt arguments index with
       | none => Except.error PsErasureError.unsupportedApplication
       | some argument =>
           match psEraseRuntimeType environment scope argument with

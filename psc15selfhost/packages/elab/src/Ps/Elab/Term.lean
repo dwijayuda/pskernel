@@ -1410,27 +1410,41 @@ structure PsElabMatchFieldsResult where
   context : PsElabContext
   fieldsRev : List PsElabMatchField
 
+def psElabMatchApplyParametersWorker
+    (parameters : List PsExpr) :
+    PsElabContext ->
+    PsExpr ->
+    Except PsElabError PsExpr :=
+  match parameters with
+  | [] =>
+      fun (_context : PsElabContext) =>
+        fun (cursor : PsExpr) => Except.ok cursor
+  | parameter :: rest =>
+      let smaller :
+          PsElabContext ->
+          PsExpr ->
+          Except PsElabError PsExpr :=
+        psElabMatchApplyParametersWorker rest;
+      fun (context : PsElabContext) =>
+        fun (cursor : PsExpr) =>
+          match psInferEnsureForall
+              context.environment
+              context.metaContext
+              context.localContext
+              cursor with
+          | Except.error error =>
+              Except.error (PsElabError.infer error)
+          | Except.ok forallView =>
+              smaller
+                context
+                (psExprInstantiate1 forallView.body parameter)
+
 def psElabMatchApplyParameters
     (context : PsElabContext)
     (parameters : List PsExpr)
     (cursor : PsExpr) :
     Except PsElabError PsExpr :=
-  match parameters with
-  | [] =>
-      Except.ok cursor
-  | parameter :: rest =>
-      match psInferEnsureForall
-          context.environment
-          context.metaContext
-          context.localContext
-          cursor with
-      | Except.error error =>
-          Except.error (PsElabError.infer error)
-      | Except.ok forallView =>
-          psElabMatchApplyParameters
-            context
-            rest
-            (psExprInstantiate1 forallView.body parameter)
+  psElabMatchApplyParametersWorker parameters context cursor
 
 def psSyntaxNameIsWildcardBinder
     (name : PsSyntaxName) : Bool :=

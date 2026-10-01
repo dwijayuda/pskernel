@@ -1784,7 +1784,7 @@ def psElabMatchConstructorMinor
       Except.error
         (PsElabError.matchConstructorUnknown constructorName)
   | some ctorInfo =>
-      let binders :=
+      let binders : List PsSyntaxName :=
         match sourceBinders with
         | some values => values
         | none =>

@@ -1702,24 +1702,31 @@ def psElabPushRecursiveHypotheses
     context
     hypothesesRev
 
+def psCloseElabMatchFieldsWorker
+    (fields : List PsElabMatchField) :
+    PsMetaContext -> PsExpr -> PsExpr :=
+  match fields with
+  | [] =>
+      fun (_metaContext : PsMetaContext) =>
+        fun (term : PsExpr) => term
+  | field :: rest =>
+      let smaller : PsMetaContext -> PsExpr -> PsExpr :=
+        psCloseElabMatchFieldsWorker rest;
+      fun (metaContext : PsMetaContext) =>
+        fun (term : PsExpr) =>
+          let closed :=
+            PsExpr.lam
+              field.name
+              (psMetaInstantiate metaContext field.type)
+              (psExprAbstractFVar field.id term)
+              field.binder;
+          smaller metaContext closed
+
 def psCloseElabMatchFields
     (metaContext : PsMetaContext)
     (fields : List PsElabMatchField)
     (term : PsExpr) : PsExpr :=
-  match fields with
-  | [] =>
-      term
-  | field :: rest =>
-      let closed :=
-        PsExpr.lam
-          field.name
-          (psMetaInstantiate metaContext field.type)
-          (psExprAbstractFVar field.id term)
-          field.binder;
-      psCloseElabMatchFields
-        metaContext
-        rest
-        closed
+  psCloseElabMatchFieldsWorker fields metaContext term
 
 structure PsElabMatchMinorResult where
   context : PsElabContext

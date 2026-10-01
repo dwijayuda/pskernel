@@ -1026,10 +1026,10 @@ def psBuildInductiveRecursor
               (List.cons universeName List.nil)
               recursorType
               (List.cons inductiveInfo.name List.nil)
-              parameterArgs.length
+              (psElabListLength parameterArgs)
               0
               1
-              constructors.length))
+              (psElabListLength constructors)))
 
 def psElabInductiveDeclaration
     (environment : PsEnvironment)

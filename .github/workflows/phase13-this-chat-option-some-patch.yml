@@ -1,0 +1,47 @@
+name: Phase 13 qualify Option.some in psElabIf
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+    paths:
+      - .github/workflows/phase13-this-chat-option-some-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+
+      - name: Qualify Option.some in psElabIf for PSC1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          replacements = {
+              'match elaborate context condition (some boolType) with':
+                  'match elaborate context condition (Option.some boolType) with',
+              '              (some resultType) with':
+                  '              (Option.some resultType) with',
+          }
+          for old, new in replacements.items():
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'expected exactly one occurrence of {old!r}, got {count}')
+              text = text.replace(old, new, 1)
+          path.write_text(text)
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): qualify if Option arguments for PSC1"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

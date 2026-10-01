@@ -18,7 +18,7 @@ jobs:
         with:
           ref: psc2/kernel-core-phase13-checkedcore-shadow-work
 
-      - name: Qualify current failing Option.none argument
+      - name: Qualify current failing Option.none arguments
         shell: bash
         run: |
           set -euo pipefail
@@ -29,13 +29,13 @@ jobs:
           old = 'match elaborate context sourceType none with'
           new = 'match elaborate context sourceType Option.none with'
           count = text.count(old)
-          if count != 1:
-              raise SystemExit(f'expected exactly one current RED site, found {count}')
-          path.write_text(text.replace(old, new, 1))
+          if count != 2:
+              raise SystemExit(f'expected exactly two equivalent RED sites, found {count}')
+          path.write_text(text.replace(old, new))
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "fix(elab): qualify typed binder optional expectation"
+          git commit -m "fix(elab): qualify optional type expectations"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

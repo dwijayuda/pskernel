@@ -36,4 +36,4 @@ jobs:
           cd psc15selfhost
           npm run bootstrap:check
 
-# rerun after match-minors constructor-list-only recursion rewrite
+# rerun after qualifying psElabMatch Option expression constructors

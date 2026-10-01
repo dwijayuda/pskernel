@@ -323,7 +323,7 @@ def psElabIsDirectRecursiveField
   match view.head with
   | .constE name _ =>
       if psNameEq name inductiveName then
-        if Nat.beq view.args.length parameterArgs.length then
+        if Nat.beq (psElabListLength view.args) (psElabListLength parameterArgs) then
           psExprListAlphaEq view.args parameterArgs
         else
           false
@@ -521,8 +521,8 @@ def psElabInductiveConstructor
                       constructorType
                       inductiveName
                       0
-                      parameterArgs.length
-                      source.fields.length
+                      (psElabListLength parameterArgs)
+                      (psElabListLength source.fields)
                       recursiveFields))
 
 
@@ -935,10 +935,10 @@ def psBuildInductiveRecursor
               (List.cons universeName List.nil)
               recursorType
               (List.cons inductiveInfo.name List.nil)
-              parameterArgs.length
+              (psElabListLength parameterArgs)
               0
               1
-              constructors.length))
+              (psElabListLength constructors)))
 
 def psElabInductiveDeclaration
     (environment : PsEnvironment)
@@ -1022,7 +1022,7 @@ def psElabInductiveDeclaration
                       name := name
                       levelParams := []
                       type := inductiveType
-                      numParams := parameterArgs.length
+                      numParams := (psElabListLength parameterArgs)
                       numIndices := 0
                       constructors := constructorNames
                       isStructure := isStructure

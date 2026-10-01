@@ -293,7 +293,6 @@ LEAN_CC="$(command -v em++)" "$wasm_leanc" \
   -lleanrt \
   -lstdc++ \
   -O3 \
-  -sUSE_PTHREADS=0 \
   -sENVIRONMENT=node \
   -sEXIT_RUNTIME=1 \
   -o "$out_dir/pskernel-lean.cjs"

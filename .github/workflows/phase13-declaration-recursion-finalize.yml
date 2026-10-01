@@ -58,7 +58,7 @@ jobs:
               exec(compile(script, f'phase13-declaration-candidate-{index}.py', 'exec'), namespace, namespace)
           PY
 
-      - name: Normalize expression-list alpha equality to PSC1 recursion
+      - name: Normalize declaration recursion to PSC1
         shell: bash
         run: |
           set -euo pipefail
@@ -68,14 +68,20 @@ jobs:
 
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean')
           text = path.read_text()
-          pattern = re.compile(
-              r'^def psExprListAlphaEq\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
-              re.MULTILINE | re.DOTALL,
-          )
-          matches = list(pattern.finditer(text))
-          if len(matches) != 1:
-              raise SystemExit(f'expected one psExprListAlphaEq declaration, got {len(matches)}')
-          replacement = r'''def psExprListAlphaEqWorker
+
+          def replace_decl(name, replacement):
+              global text
+              pattern = re.compile(
+                  rf'^def {re.escape(name)}\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+                  re.MULTILINE | re.DOTALL,
+              )
+              matches = list(pattern.finditer(text))
+              if len(matches) != 1:
+                  raise SystemExit(f'expected one declaration {name}, got {len(matches)}')
+              match = matches[0]
+              text = text[:match.start()] + replacement.rstrip() + '\n\n' + text[match.end():]
+
+          replace_decl('psExprListAlphaEq', r'''def psExprListAlphaEqWorker
               (left : List PsExpr) : List PsExpr -> Bool :=
             match left with
             | List.nil =>
@@ -98,9 +104,62 @@ jobs:
           def psExprListAlphaEq
               (left : List PsExpr)
               (right : List PsExpr) : Bool :=
-            psExprListAlphaEqWorker left right'''
-          match = matches[0]
-          text = text[:match.start()] + replacement.rstrip() + '\n\n' + text[match.end():]
+            psExprListAlphaEqWorker left right''')
+
+          replace_decl('psElabInductiveConstructors', r'''def psElabInductiveConstructorsWorker
+              (context : PsElabContext)
+              (parameterBindersRev : List PsElabTypedBinder)
+              (inductiveName : PsName)
+              (sources : List PsSyntaxInductiveConstructor) :
+              Nat ->
+              List PsDeclaration ->
+              Except PsElabError (List PsDeclaration) :=
+            match sources with
+            | List.nil =>
+                fun (_index : Nat) =>
+                  fun (declarationsRev : List PsDeclaration) =>
+                    Except.ok (psElabListReverse declarationsRev)
+            | List.cons source rest =>
+                let smaller :
+                    Nat ->
+                    List PsDeclaration ->
+                    Except PsElabError (List PsDeclaration) :=
+                  psElabInductiveConstructorsWorker
+                    context
+                    parameterBindersRev
+                    inductiveName
+                    rest;
+                fun (index : Nat) =>
+                  fun (declarationsRev : List PsDeclaration) =>
+                    match psElabInductiveConstructor
+                        context
+                        parameterBindersRev
+                        inductiveName
+                        source with
+                    | Except.error error => Except.error error
+                    | Except.ok declaration =>
+                        smaller
+                          (Nat.succ index)
+                          (List.cons
+                            (psSetConstructorIndex index declaration)
+                            declarationsRev)
+
+          def psElabInductiveConstructors
+              (context : PsElabContext)
+              (parameterBindersRev : List PsElabTypedBinder)
+              (inductiveName : PsName)
+              (index : Nat)
+              (sources : List PsSyntaxInductiveConstructor)
+              (declarationsRev : List PsDeclaration) :
+              Except PsElabError (List PsDeclaration) :=
+            psElabInductiveConstructorsWorker
+              context
+              parameterBindersRev
+              inductiveName
+              sources
+              index
+              declarationsRev''')
+
           path.write_text(text)
           PY
           git diff --check -- \

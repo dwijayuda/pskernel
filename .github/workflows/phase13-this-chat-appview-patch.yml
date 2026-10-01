@@ -1,0 +1,64 @@
+name: Phase 13 curry psExprAppViewAcc
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+    paths:
+      - .github/workflows/phase13-this-chat-appview-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+
+      - name: Curry application-view accumulator for PSC1 structural recursion
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          old = '''def psExprAppViewAcc
+    (expr : PsExpr)
+    (args : List PsExpr) : PsExprAppView :=
+  match expr with
+  | .app fn argument =>
+      psExprAppViewAcc fn (List.cons argument args)
+  | _ => {
+      head := expr
+      args := args
+    }
+'''
+          new = '''def psExprAppViewAcc
+    (expr : PsExpr) : List PsExpr -> PsExprAppView :=
+  match expr with
+  | .app fn argument =>
+      let smaller : List PsExpr -> PsExprAppView :=
+        psExprAppViewAcc fn;
+      fun (args : List PsExpr) =>
+        smaller (List.cons argument args)
+  | _ =>
+      fun (args : List PsExpr) => {
+        head := expr
+        args := args
+      }
+'''
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'expected exactly one psExprAppViewAcc block, got {count}')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): curry app-view accumulator for PSC1"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

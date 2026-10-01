@@ -167,7 +167,9 @@ mkdir -p \
 # Follow Lean 4.34's own WASM cross-build architecture. Stage0 must be a
 # runnable native 32-bit compiler so the generated oleans/C encode target-width
 # platform constants; stage1 is then the actual Emscripten wasm32 build.
-# Force SSE2 floating evaluation on i386 so Float/Float32 keep deterministic
+# Keep the native stage0 flag plumbing aligned with Lean 4.34's archived WASM
+# recipe: target width belongs in Lean's own compile/link knobs, not global CMake
+# C/C++ flags. Force SSE2 floating evaluation on i386 for deterministic
 # FLT_EVAL_METHOD=0 semantics.
 cmake \
   -S "$lean_source" \
@@ -178,8 +180,6 @@ cmake \
   -DCMAKE_AR="$(command -v emar)" \
   -DCMAKE_TOOLCHAIN_FILE="$emscripten_toolchain" \
   -DSTAGE0_USE_GMP=OFF \
-  -DSTAGE0_CMAKE_C_FLAGS='-m32 -msse2 -mfpmath=sse' \
-  -DSTAGE0_CMAKE_CXX_FLAGS='-m32 -msse2 -mfpmath=sse' \
   -DSTAGE0_LEAN_EXTRA_CXX_FLAGS='-m32 -msse2 -mfpmath=sse' \
   -DSTAGE0_LEANC_OPTS='-m32 -msse2 -mfpmath=sse' \
   -DSTAGE0_CMAKE_CXX_COMPILER=clang++ \
@@ -209,6 +209,15 @@ if [[ ! -x "$stage0_lean" ]]; then
   echo 'native 32-bit Lean stage0 compiler was not produced' >&2
   exit 1
 fi
+
+# Prove the freshly built stage0 frontend is internally initialized before
+# spending time in stage1 make_stdlib. This is the exact parser/dependency path
+# stage1 relies on and catches bootstrap/link regressions at their true boundary.
+if ! "$stage0_lean" --deps "$lean_source/src/Lean.lean" >/dev/null; then
+  echo 'native 32-bit Lean stage0 frontend cannot parse src/Lean.lean' >&2
+  exit 1
+fi
+echo 'PSC2_LEAN_KERNEL_WASM_STAGE0_FRONTEND: PASS'
 
 # stage1-configure has materialized the target helper scripts. Normalize modes
 # because vendored/source snapshots do not reliably preserve executable bits.

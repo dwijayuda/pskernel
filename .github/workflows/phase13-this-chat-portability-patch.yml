@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
-      - name: Qualify match field lookup Option constructors for PSC1
+      - name: Reshape match field lookup recursion for PSC1
         shell: bash
         run: |
           set -euo pipefail
@@ -30,15 +30,32 @@ jobs:
           start = text.index(start_marker)
           end = text.index(end_marker, start)
           old = text[start:end]
-          if '\n      none\n' not in old or '\n          some field\n' not in old:
+          if 'psElabMatchFieldAt rest nextIndex' not in old:
               raise SystemExit('unexpected psElabMatchFieldAt source shape')
-          new = old.replace('\n      none\n', '\n      Option.none\n', 1)
-          new = new.replace('\n          some field\n', '\n          Option.some field\n', 1)
+          new = '''def psElabMatchFieldAtWorker
+              (fields : List PsElabMatchField) :
+              Nat -> Option PsElabMatchField :=
+            match fields with
+            | [] =>
+                fun (_index : Nat) => Option.none
+            | field :: rest =>
+                let smaller : Nat -> Option PsElabMatchField :=
+                  psElabMatchFieldAtWorker rest;
+                fun (index : Nat) =>
+                  match index with
+                  | 0 => Option.some field
+                  | nextIndex + 1 => smaller nextIndex
+
+          def psElabMatchFieldAt
+              (fields : List PsElabMatchField)
+              (index : Nat) : Option PsElabMatchField :=
+            psElabMatchFieldAtWorker fields index
+          '''
           path.write_text(text[:start] + new + text[end:])
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "fix(elab): qualify match field Option returns"
+          git commit -m "fix(elab): make match field lookup PSC1 portable"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

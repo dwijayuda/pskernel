@@ -453,7 +453,7 @@ def psElabCharacter
       let term :=
         PsExpr.app
           (PsExpr.constE psCharOfNatName [])
-          (PsExpr.lit (PsLiteral.natural value.toNat));
+          (PsExpr.lit (PsLiteral.natural (Char.toNat value)));
       psElabResolvedTerm context term expected
 
 def psElabUnit

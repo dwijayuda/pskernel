@@ -1,4 +1,4 @@
-# Re-run focused Phase 13 after the Option.none portability fix.
+# Re-run focused Phase 13 after the typed-binder recursion portability fix.
 name: PSC2 KernelCore Phase 13 work
 
 on:

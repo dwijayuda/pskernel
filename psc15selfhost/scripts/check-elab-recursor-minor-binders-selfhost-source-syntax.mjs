@@ -62,6 +62,34 @@ for (const pattern of forbidden) {
   }
 }
 
+const recursorStart = source.indexOf("def psBuildInductiveRecursor\n");
+const recursorEnd = source.indexOf("\ndef psElabInductiveDeclaration\n", recursorStart + 1);
+if (recursorStart < 0 || recursorEnd < 0) {
+  throw new Error(
+    "PSC2_ELAB_INDUCTIVE_RECURSOR_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
+  );
+}
+const recursor = source.slice(recursorStart, recursorEnd);
+const recursorRequired = [
+  /psElabListLength\s+parameterArgs/,
+  /psElabListLength\s+constructors/,
+];
+for (const pattern of recursorRequired) {
+  if (!pattern.test(recursor)) {
+    throw new Error(
+      `PSC2_ELAB_INDUCTIVE_RECURSOR_SELFHOST_SOURCE_SYNTAX_MISSING: ${pattern}`,
+    );
+  }
+}
+if (/\bparameterArgs\.length\b|\bconstructors\.length\b/.test(recursor)) {
+  throw new Error(
+    "PSC2_ELAB_INDUCTIVE_RECURSOR_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: method-style list length",
+  );
+}
+
 process.stdout.write(
   "PSC2_ELAB_RECURSOR_MINOR_BINDERS_SELFHOST_SOURCE_SYNTAX: PASS (declaration-list-recursive worker; context/index/binder state applied post-recursion; explicit result constructor)\n",
+);
+process.stdout.write(
+  "PSC2_ELAB_INDUCTIVE_RECURSOR_SELFHOST_SOURCE_SYNTAX: PASS (project-owned parameter and constructor counts; method-style length excluded)\n",
 );

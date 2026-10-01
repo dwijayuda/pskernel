@@ -1474,19 +1474,45 @@ def psSyntaxNameMatchesCore
         | some right =>
             psNameEq left right
 
-def psSyntaxNameListHasDuplicate : List PsSyntaxName -> Bool
-  | List.nil => false
-  | List.cons name rest =>
-      if psSyntaxNameIsWildcardBinder name then
-        psSyntaxNameListHasDuplicate rest
-      else
-        let coreName := psSyntaxNameToName name;
-        let duplicated :=
-          List.any rest (psSyntaxNameMatchesCore coreName);
-        if duplicated then
+def psSyntaxNameListMatchesCoreWorker
+    (candidates : List PsSyntaxName) :
+    Option PsName -> Bool :=
+  match candidates with
+  | [] =>
+      fun (_coreName : Option PsName) => false
+  | candidate :: rest =>
+      let smaller : Option PsName -> Bool :=
+        psSyntaxNameListMatchesCoreWorker rest;
+      fun (coreName : Option PsName) =>
+        if psSyntaxNameMatchesCore coreName candidate then
           true
         else
-          psSyntaxNameListHasDuplicate rest
+          smaller coreName
+
+def psSyntaxNameListMatchesCore
+    (coreName : Option PsName)
+    (candidates : List PsSyntaxName) : Bool :=
+  psSyntaxNameListMatchesCoreWorker candidates coreName
+
+def psSyntaxNameListHasDuplicateWorker
+    (names : List PsSyntaxName) : Bool :=
+  match names with
+  | [] => false
+  | name :: rest =>
+      let smaller : Bool :=
+        psSyntaxNameListHasDuplicateWorker rest;
+      if psSyntaxNameIsWildcardBinder name then
+        smaller
+      else
+        let coreName := psSyntaxNameToName name;
+        if psSyntaxNameListMatchesCore coreName rest then
+          true
+        else
+          smaller
+
+def psSyntaxNameListHasDuplicate
+    (names : List PsSyntaxName) : Bool :=
+  psSyntaxNameListHasDuplicateWorker names
 
 def psElabMatchFields
     (context : PsElabContext)

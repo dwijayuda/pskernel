@@ -22,6 +22,35 @@ if (/let currentName\s*:=/.test(block)) {
   throw new Error("PSC2_ELAB_CONSTRUCTOR_NAMES_FORBIDDEN: untyped constructor-name match");
 }
 
+const alphaStart = source.indexOf("def psExprListAlphaEq");
+const alphaEnd = source.indexOf("\ndef psElabIsDirectRecursiveField\n", alphaStart + 1);
+if (alphaStart < 0 || alphaEnd < 0) {
+  throw new Error("PSC2_ELAB_EXPR_LIST_ALPHA_EQ_MISSING: declaration block");
+}
+
+const alphaBlock = source.slice(alphaStart, alphaEnd);
+const alphaRequired = [
+  /def psExprListAlphaEqWorker\s*\(left : List PsExpr\)\s*:\s*List PsExpr -> Bool :=\s*match left with/,
+  /\| List\.nil =>\s*fun \(right : List PsExpr\) =>\s*match right with/,
+  /\| List\.cons leftExpr leftRest =>\s*let smaller : List PsExpr -> Bool :=\s*psExprListAlphaEqWorker leftRest;/,
+  /if psExprAlphaEq leftExpr rightExpr then\s*smaller rightRest/,
+  /def psExprListAlphaEq\s*\(left : List PsExpr\)\s*\(right : List PsExpr\) : Bool :=\s*psExprListAlphaEqWorker left right/,
+];
+for (const pattern of alphaRequired) {
+  if (!pattern.test(alphaBlock)) {
+    throw new Error(`PSC2_ELAB_EXPR_LIST_ALPHA_EQ_MISSING: ${pattern}`);
+  }
+}
+
+if (/def psExprListAlphaEq\s*:\s*List PsExpr -> List PsExpr -> Bool/.test(alphaBlock)) {
+  throw new Error(
+    "PSC2_ELAB_EXPR_LIST_ALPHA_EQ_FORBIDDEN: multi-argument equation recursion",
+  );
+}
+
 process.stdout.write(
   "PSC2_ELAB_CONSTRUCTOR_NAMES: PASS (explicit PsName result type for constructor-name selection)\n",
+);
+process.stdout.write(
+  "PSC2_ELAB_EXPR_LIST_ALPHA_EQ_SELFHOST_SOURCE_SYNTAX: PASS (left-list-recursive worker; right list applied post-recursion)\n",
 );

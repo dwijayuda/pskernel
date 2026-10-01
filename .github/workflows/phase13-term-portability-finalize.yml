@@ -1,0 +1,205 @@
+name: Phase 13 term portability finalize
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-work
+    paths:
+      - .github/workflows/phase13-term-portability-finalize.yml
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-work
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply current Phase 13 record-match candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/phase13-record-match-finalize.yml').read_text()
+          start_marker = "          python3 - <<'PY'\n"
+          end_marker = "\n          PY\n"
+          pos = 0
+          scripts = []
+          while True:
+              try:
+                  start = workflow.index(start_marker, pos) + len(start_marker)
+              except ValueError:
+                  break
+              end = workflow.index(end_marker, start)
+              lines = workflow[start:end].splitlines()
+              scripts.append('\n'.join(line[10:] if line.startswith('          ') else line for line in lines))
+              pos = end + len(end_marker)
+          if len(scripts) < 2:
+              raise SystemExit(f'expected at least two embedded transforms, got {len(scripts)}')
+          namespace = {'__name__': '__main__'}
+          for index, script in enumerate(scripts[:2], 1):
+              exec(compile(script, f'phase13-record-match-transform-{index}.py', 'exec'), namespace, namespace)
+          PY
+
+      - name: Normalize top-level term recursion to PSC1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          pattern = re.compile(
+              r'^def psElabTermWithFuel\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+              re.MULTILINE | re.DOTALL,
+          )
+          matches = list(pattern.finditer(text))
+          if len(matches) != 1:
+              raise SystemExit(f'expected one psElabTermWithFuel declaration, got {len(matches)}')
+          replacement = r'''def psElabTermWithFuelWorker
+              (fuel : Nat) :
+              PsElabContext ->
+              PsSyntaxTerm ->
+              Option PsExpr ->
+              Except PsElabError PsElabTermResult :=
+            match fuel with
+            | 0 =>
+                fun (_context : PsElabContext) =>
+                  fun (_term : PsSyntaxTerm) =>
+                    fun (_expected : Option PsExpr) =>
+                      Except.error PsElabError.fuelExhausted
+            | remaining + 1 =>
+                let smaller :
+                    PsElabContext ->
+                    PsSyntaxTerm ->
+                    Option PsExpr ->
+                    Except PsElabError PsElabTermResult :=
+                  psElabTermWithFuelWorker remaining;
+                fun (context : PsElabContext) =>
+                  fun (term : PsSyntaxTerm) =>
+                    fun (expected : Option PsExpr) =>
+                      match term with
+                      | .reference name =>
+                          match psElabReference context name Option.none with
+                          | Except.error error => Except.error error
+                          | Except.ok reference =>
+                              match psElabApplyArgs
+                                  smaller
+                                  reference
+                                  List.nil
+                                  List.nil with
+                              | Except.error error => Except.error error
+                              | Except.ok application =>
+                                  psElabFinishApplication application expected
+                      | .natural literalText _ =>
+                          psElabNatural context literalText expected
+                      | .string literalText _ =>
+                          psElabString context literalText expected
+                      | .character literalText _ =>
+                          psElabCharacter context literalText expected
+                      | .unit _ =>
+                          psElabUnit context expected
+                      | .record fields _ =>
+                          psElabRecord smaller context fields expected
+                      | .bool value _ =>
+                          psElabBool context value expected
+                      | .lambda binders body _ =>
+                          psElabLambda smaller context binders body expected
+                      | .forallE binders body _ =>
+                          psElabForall smaller context binders body expected
+                      | .letE name declaredType value body _ =>
+                          psElabLet
+                            smaller
+                            context
+                            name
+                            declaredType
+                            value
+                            body
+                            expected
+                      | .ifE condition thenBranch elseBranch _ =>
+                          psElabIf
+                            smaller
+                            context
+                            condition
+                            thenBranch
+                            elseBranch
+                            expected
+                      | .matchE scrutinee alternatives _ =>
+                          psElabMatch
+                            smaller
+                            context
+                            scrutinee
+                            alternatives
+                            expected
+                      | .app fn args _ =>
+                          match psTryElabStructuralSelfCall
+                              context
+                              fn
+                              args
+                              expected with
+                          | Except.error error => Except.error error
+                          | Except.ok selfCall =>
+                              match selfCall with
+                              | some result => Except.ok result
+                              | none =>
+                                  match smaller context fn Option.none with
+                                  | Except.error error => Except.error error
+                                  | Except.ok elaboratedFn =>
+                                      match psElabApplyArgs
+                                          smaller
+                                          elaboratedFn
+                                          args
+                                          List.nil with
+                                      | Except.error error => Except.error error
+                                      | Except.ok application =>
+                                          psElabFinishApplication application expected
+
+          def psElabTermWithFuel
+              (fuel : Nat)
+              (context : PsElabContext)
+              (term : PsSyntaxTerm)
+              (expected : Option PsExpr) :
+              Except PsElabError PsElabTermResult :=
+            psElabTermWithFuelWorker fuel context term expected'''
+          match = matches[0]
+          text = text[:match.start()] + replacement.rstrip() + '\n\n' + text[match.end():]
+          path.write_text(text)
+          PY
+          git diff --check -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+
+      - name: Verify PSC1 bootstrap compiler source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run bootstrap:check
+
+      - name: Commit only after full PSC1 bootstrap gate passes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): close Phase 13 PSC1 portability"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

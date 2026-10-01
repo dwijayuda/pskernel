@@ -115,7 +115,7 @@ def psEraseFinishApplicationWithFuel
                 localContext := pushed.context
                 runtimeLocals := scope.runtimeLocals
                 typeLocals := scope.typeLocals
-                erasedLocals := pushed.id :: scope.erasedLocals
+                erasedLocals := List.cons pushed.id scope.erasedLocals
                 declarationNames := scope.declarationNames
                 runtimeConstructors := scope.runtimeConstructors
                 runtimeRecursors := scope.runtimeRecursors
@@ -153,7 +153,7 @@ def psEraseFinishApplicationWithFuel
                   let nextScope : PsErasureScope := {
                     localContext := pushed.context
                     runtimeLocals :=
-                      (pushed.id, parameterName) :: scope.runtimeLocals
+                      List.cons (pushed.id, parameterName) scope.runtimeLocals
                     typeLocals := scope.typeLocals
                     erasedLocals := scope.erasedLocals
                     declarationNames := scope.declarationNames
@@ -174,10 +174,10 @@ def psEraseFinishApplicationWithFuel
                     (psExprInstantiate1
                       body
                       (PsExpr.fvar pushed.id))
-                    ({
+                    (List.cons {
                       name := parameterName
                       type := parameterType
-                    } :: parametersRev)
+                    } parametersRev)
                     (runtimeArguments ++
                       [PsVerifiedIrExpr.var parameterName])
       | _ =>

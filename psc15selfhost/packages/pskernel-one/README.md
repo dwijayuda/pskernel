@@ -34,7 +34,7 @@ it only establishes emission. The separate runtime command invokes real `tsc`
 and currently fails on the function-returning call-convention blocker. No
 generated kernel execution or fixed point is claimed. `PSC1` selects an
 explicit seed executable; its SHA-256 is recorded. `TSC` selects an installed real
-TypeScript compiler for the Nat runtime test (pinned CI version 5.8.3).
+TypeScript compiler for both runtime tests (pinned CI version 5.8.3).
 
 `SOURCE_MANIFEST.json`, `LEAN_SOURCE_PIN.json`, `CAPABILITIES.json` and `SIZE.json`
 are the initial machine-readable contract. Source changes require an explicit

@@ -26,12 +26,12 @@
         "positive": "packages/pskernel-one/test/LevelTests.lean",
         "negative": "packages/pskernel-one/test/LevelTests.lean",
         "differential": "Lean.Kernel.isDefEq (C++), 157 cases",
-        "mutation": "two semantic mutants killed in run 36926591540",
+        "mutation": "two semantic mutants killed in run 36928091750",
         "generated": "scripts/pskernel-one-runtime.mjs: blocking real tsc gate"
       },
       "evidence": {
-        "native": "run 36926591540, job 110585326710, head 5e3ddf9b: 13 focused + 144 ordered pairs; C++ reference",
-        "generated": "Actual PSC .ps emission succeeds; tsc 5.8.3 rejects function-returning call convention; execution blocked"
+        "native": "run 36928091750, job 110590278084, head c6714ba0: 13 focused + 144 ordered pairs; C++ reference",
+        "generated": "run 36928091750 at c6714ba0: actual PSC canonical .ps emission succeeds; real tsc 5.8.3 fails TS2554/TS2322; zero full-foundation runtime cases"
       },
       "limitations": "Name structure boundary; more direct cases pending",
       "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
@@ -57,12 +57,12 @@
         "positive": "packages/pskernel-one/test/LevelTests.lean",
         "negative": "packages/pskernel-one/test/LevelTests.lean",
         "differential": "Lean.Kernel.isDefEq (C++), 157 cases",
-        "mutation": "two semantic mutants killed in run 36926591540",
+        "mutation": "two semantic mutants killed in run 36928091750",
         "generated": "scripts/pskernel-one-runtime.mjs: blocking real tsc gate"
       },
       "evidence": {
-        "native": "run 36926591540, job 110585326710, head 5e3ddf9b: 13 focused + 144 ordered pairs; C++ reference",
-        "generated": "Actual PSC .ps emission succeeds; tsc 5.8.3 rejects function-returning call convention; execution blocked"
+        "native": "run 36928091750, job 110590278084, head c6714ba0: 13 focused + 144 ordered pairs; C++ reference",
+        "generated": "run 36928091750 at c6714ba0: actual PSC canonical .ps emission succeeds; real tsc 5.8.3 fails TS2554/TS2322; zero full-foundation runtime cases"
       },
       "limitations": "157 native cases cover finite max laws plus Unicode/numeric-name boundaries; offsets, successors over max and nested imax congruence incomplete.",
       "resources": "No checked budget or resumability guarantee; native runtime stack may exhaust"
@@ -192,7 +192,7 @@
         "paths": [
           "src/kernel/type_checker.cpp"
         ],
-        "functions": "infer_pi; infer_sort",
+        "functions": "infer_pi; infer_type_core",
         "review": "entry-point map; only level semantics and environment admission closely read"
       },
       "expectedBehavior": "Impredicative Prop and pinned data universe rules; no assumed cumulativity",
@@ -427,7 +427,7 @@
         "paths": [
           "src/kernel/type_checker.cpp"
         ],
-        "functions": "Lean.reduceNat; Lean.reduceBool handling",
+        "functions": "reduce_native; initialize_type_checker",
         "review": "entry-point map; only level semantics and environment admission closely read"
       },
       "expectedBehavior": "Pin trust boundary for compiler-backed native reductions",
@@ -516,7 +516,7 @@
           "src/kernel/environment.cpp",
           "src/kernel/type_checker.cpp"
         ],
-        "functions": "check_no_metavar_no_fvar; checker entry points",
+        "functions": "check_no_metavar_no_fvar; infer_type_core",
         "review": "entry-point map; only level semantics and environment admission closely read"
       },
       "expectedBehavior": "Malformed/forged input fails closed; transport cannot silently drop declarations",

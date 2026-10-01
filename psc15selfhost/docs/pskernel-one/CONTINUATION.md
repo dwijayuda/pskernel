@@ -3,8 +3,11 @@
 Work branch: `psc2/pskernel-one`. Compiler baseline:
 `90d02086146fce06df6d0a720e50f340adcbf52a`. The implementation snapshot verified
 before the final runtime gate is `5e3ddf9b4d4247fb334c3f0e136b1a191b51ba10`.
-Use `git rev-parse HEAD` for the exact final record/test commit, which contains
-this file. `EVIDENCE.json` records subsequent exact-head CI results when available.
+The final required runtime gate was tested at
+`c6714ba0f5aad54b3ec155b6181fe48d29429b40`. Use `git rev-parse HEAD` for the final
+documentation-only evidence commit containing this file. That follow-up does not
+change implementation, tests, manifests or workflows and is not a new green run.
+`EVIDENCE.json` and `CI_RUNTIME_GATE.json` contain the completed gate result.
 
 ## RESEARCH VERIFIED
 
@@ -22,7 +25,9 @@ full-surface source audit is incomplete, so M0 is an initial checkpoint.
 - `bc19bbd7`, `564e072d`: runtime, boundary, mutation and tamper harnesses.
 - `5e3ddf9b`: name width/Unicode cases, smaller closure, emission diagnostics.
 
-Subsequent test/record commit adds the real full-closure tsc/runtime gate,
+- `c6714ba0`: real full-closure tsc/runtime gate and initial audit records.
+
+That commit adds the real full-closure tsc/runtime gate,
 canonical-PS Nat fixture parity, minimized function-result blocker and these
 research artifacts. No protected branch merge, force-push, release, npm publish,
 default cutover or provider replacement was performed. Connector commits were
@@ -57,6 +62,25 @@ That green run did **not** yet run full-foundation tsc: the new required gate
 exposes the blocker below. Earlier intermediate CI failures (npm workspace
 installation, host-fixture layout and anonymous test callback names) are retained
 in history and not relabeled as semantic failures or successes.
+
+CURRENT REQUIRED GATE: run `36928091750`, job `110590278084`, at full SHA
+`c6714ba0f5aad54b3ec155b6181fe48d29429b40` completed with **failure**. All preceding
+steps above passed again, including newly checked exact TypeScript equality from
+the Nat fixture's handwritten `.lean` and generated canonical `.ps`. The required
+full-foundation `tsc` step failed with TS2554 and TS2322. Zero generated foundation
+cases executed. This RED gate intentionally prevents an emission-only success
+from being treated as executable-kernel evidence; it is an unresolved defect.
+
+GitHub reports these artifact digests for this run (not downloaded locally):
+
+- Seed artifact `11195071159`, SHA-256
+  `261b6a33531a7b8006881466e84263bd8a6581f5c240c69521e6bba0b84f6d52`.
+- Diagnostic artifact `11194946266`, SHA-256
+  `67575d56bac32882e4b77f1e5cab11f6af87071564d38f5a93c66a548a302ca2`.
+
+Artifacts expire 2026-10-08. Committed scripts and the minimal fixture remain the
+durable reproduction source. `tsc-blocker.txt` preserves the local diagnostic;
+the completed CI log independently reports the same error classes and arity.
 
 Local gates also passed: `check-workspace.mjs`, `check-bootstrap-closure.mjs`
 (54 compiler-only modules; 14 source-isolation cases use labeled compiler/tsc

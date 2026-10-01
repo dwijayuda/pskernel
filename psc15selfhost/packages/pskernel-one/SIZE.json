@@ -16,5 +16,10 @@
   ],
   "generatedArtifactBytes": null,
   "memoryMeasurements": null,
-  "runtimeMeasurements": null
+  "runtimeMeasurements": null,
+  "uncompiledGeneratedTypeScript": {
+    "bytes": 31442,
+    "sha256": "e121ce2d4d4d2d865e48ddf3e5296a6fd2978f5d78bdf8dada01abb896abc754",
+    "status": "emitted by downloaded CI seed; real tsc failed; not an executable artifact"
+  }
 }

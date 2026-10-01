@@ -1,0 +1,49 @@
+{
+  "run": 36928091750,
+  "job": 110590278084,
+  "head": "c6714ba0f5aad54b3ec155b6181fe48d29429b40",
+  "conclusion": "failure",
+  "status": "completed",
+  "url": "https://github.com/dwijayuda/pskernel/actions/runs/36928091750",
+  "claims": {
+    "nativeCases": 157,
+    "killedSemanticMutants": 2,
+    "tamperCases": 4,
+    "NatBoundaryNegativeCases": 4,
+    "generatedNatResults": 134,
+    "canonicalNatTsEquality": "passed",
+    "kernelSourceDeclarations": 48,
+    "canonicalPSSourceDeclarations": 48,
+    "typescriptEmission": "passed",
+    "wholeFoundationTsc": "failed",
+    "wholeFoundationExecutedCases": 0,
+    "compilerRegressions": "passed",
+    "rustAndWasmBackendBuilds": "passed"
+  },
+  "failure": {
+    "step": "Actual generated foundation tsc and semantic execution",
+    "diagnostics": [
+      "TS2554: Expected 1 arguments, but got 2.",
+      "TS2322: returned function is not assignable to boolean"
+    ],
+    "fixture": "packages/pskernel-one/test/FunctionResultBlocker.lean"
+  },
+  "artifacts": [
+    {
+      "id": 11195071159,
+      "name": "pskernel-one-seed-c6714ba0f5aad54b3ec155b6181fe48d29429b40",
+      "bytes": 1703396,
+      "digest": "sha256:261b6a33531a7b8006881466e84263bd8a6581f5c240c69521e6bba0b84f6d52",
+      "expiresAt": "2026-10-08T21:22:32Z",
+      "provenance": "GitHub artifact metadata; not locally downloaded"
+    },
+    {
+      "id": 11194946266,
+      "name": "pskernel-one-evidence-c6714ba0f5aad54b3ec155b6181fe48d29429b40",
+      "bytes": 36573850,
+      "digest": "sha256:67575d56bac32882e4b77f1e5cab11f6af87071564d38f5a93c66a548a302ca2",
+      "expiresAt": "2026-10-08T21:22:34Z",
+      "provenance": "GitHub artifact metadata; not locally downloaded"
+    }
+  ]
+}

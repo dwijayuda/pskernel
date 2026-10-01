@@ -160,6 +160,49 @@ jobs:
               index
               declarationsRev''')
 
+          replace_decl('psWrapRecursiveHypotheses', r'''def psWrapRecursiveHypothesesWorker
+              (motiveId : Nat)
+              (fieldArgs : List PsExpr)
+              (fieldIndices : List Nat) :
+              PsExpr -> Except PsElabError PsExpr :=
+            match fieldIndices with
+            | List.nil =>
+                fun (body : PsExpr) => Except.ok body
+            | List.cons fieldIndex rest =>
+                let smaller : PsExpr -> Except PsElabError PsExpr :=
+                  psWrapRecursiveHypothesesWorker
+                    motiveId
+                    fieldArgs
+                    rest;
+                fun (body : PsExpr) =>
+                  match psElabExprAt fieldArgs fieldIndex with
+                  | none => Except.error PsElabError.unsupportedTerm
+                  | some recursiveValue =>
+                      match smaller body with
+                      | Except.error error => Except.error error
+                      | Except.ok inner =>
+                          Except.ok
+                            (PsExpr.forallE
+                              (psNameAppendNum
+                                (psRootName "_ih")
+                                fieldIndex)
+                              (PsExpr.app
+                                (PsExpr.fvar motiveId)
+                                recursiveValue)
+                              inner
+                              PsBinderInfo.explicit)
+
+          def psWrapRecursiveHypotheses
+              (motiveId : Nat)
+              (fieldArgs : List PsExpr)
+              (fieldIndices : List Nat)
+              (body : PsExpr) : Except PsElabError PsExpr :=
+            psWrapRecursiveHypothesesWorker
+              motiveId
+              fieldArgs
+              fieldIndices
+              body''')
+
           path.write_text(text)
           PY
           git diff --check -- \

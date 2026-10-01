@@ -1,4 +1,4 @@
-# Re-run focused Phase 13 after splitting lambda elaboration into PSC1-shaped helpers.
+# Re-run focused Phase 13 after replacing host List.reverse with the PSC1-native helper.
 name: PSC2 KernelCore Phase 13 work
 
 on:

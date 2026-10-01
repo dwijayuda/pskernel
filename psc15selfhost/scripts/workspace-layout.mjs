@@ -3,7 +3,9 @@ export const packageBySection = new Map([
   ["Foundation", "foundation"],
   ["Syntax", "syntax"],
   ["Core", "core"],
-  ["KernelCore", "pskernel-core"],
+  // Preserve the legacy namespace; the new independent kernel owns Ps.Kernel.
+  ["KernelCore", "pskernel-core.old"],
+  ["Kernel", "pskernel-core"],
   ["Environment", "environment"],
   ["Project", "project"],
   ["Meta", "meta"],

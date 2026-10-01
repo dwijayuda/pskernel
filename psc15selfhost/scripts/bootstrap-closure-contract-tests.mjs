@@ -24,27 +24,12 @@ function assertThrowsWithPrefix(action, prefix, label) {
 }
 
 const expectedAllowed = [
-  "bootstrap",
-  "foundation",
-  "syntax",
-  "core",
-  "environment",
-  "meta",
-  "elab",
-  "bridge",
-  "compiler-ir",
-  "erasure",
-  "compiler",
-  "backend-ts",
+  "bootstrap", "foundation", "syntax", "core", "environment", "meta",
+  "elab", "bridge", "compiler-ir", "erasure", "compiler", "backend-ts",
 ];
 const expectedForbidden = [
-  "stdlib",
-  "project",
-  "backend-rust",
-  "backend-wasm",
-  "pskernel",
-  "pskernel-core",
-  "pskernel-lean",
+  "stdlib", "project", "backend-rust", "backend-wasm", "pskernel",
+  "pskernel-core", "pskernel-core.old", "pskernel-lean",
 ];
 
 assertBootstrapPolicyWellFormed();

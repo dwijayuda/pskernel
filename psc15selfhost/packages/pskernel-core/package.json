@@ -1,18 +1,33 @@
 {
   "name": "@proofscript/pskernel-core",
-  "version": "0.0.0-dev",
+  "version": "0.1.0-design.0",
   "private": true,
+  "description": "Independent PSC kernel design scaffold; no proof checker is implemented or exported",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/metadata.d.ts",
+      "import": "./src/metadata.mjs"
+    }
+  },
+  "files": [
+    "src/metadata.mjs",
+    "src/metadata.d.ts",
+    "README.md",
+    "ARCHITECTURE.md"
+  ],
+  "scripts": {
+    "test": "node --test test/package.test.mjs"
+  },
+  "dependencies": {},
   "proofscript": {
     "bootstrap": false,
-    "portable": true,
-    "sourceRoots": [
-      "src"
-    ],
-    "testRoots": [
-      "test"
-    ],
+    "portable": false,
+    "targetPortable": true,
+    "sourceRoots": ["src"],
+    "testRoots": ["test"],
     "outDir": "dist",
-    "role": "minimal-trusted-kernel"
+    "role": "independent-kernel-design",
+    "authoritative": false
   }
 }

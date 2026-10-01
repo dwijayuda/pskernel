@@ -158,8 +158,9 @@ lean_lib PsElab where
     `Ps.Elab.Declaration
   ]
 
+-- Legacy source/tests only; the new pskernel-core has no checking implementation yet.
 lean_lib PsKernelCore where
-  srcDir := "packages/pskernel-core/src"
+  srcDir := "packages/pskernel-core.old/src"
   roots := #[`Ps.KernelCore]
 
 lean_lib PSC1KernelReferenceFoundations where

@@ -1,4 +1,4 @@
-# Re-run focused Phase 13 after qualifying psElabForall Option.none for PSC1.
+# Re-run focused Phase 13 after qualifying psElabLet Option values for PSC1.
 name: PSC2 KernelCore Phase 13 work
 
 on:

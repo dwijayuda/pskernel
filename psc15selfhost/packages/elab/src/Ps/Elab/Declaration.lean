@@ -255,9 +255,18 @@ def psElabBinderArgument
     (binder : PsElabTypedBinder) : PsExpr :=
   PsExpr.fvar binder.id
 
+def psElabBinderArgumentsInOrder
+    (binders : List PsElabTypedBinder) : List PsExpr :=
+  match binders with
+  | List.nil => List.nil
+  | List.cons binder rest =>
+      List.cons
+        (psElabBinderArgument binder)
+        (psElabBinderArgumentsInOrder rest)
+
 def psElabBinderArguments
     (bindersRev : List PsElabTypedBinder) : List PsExpr :=
-  (psElabListReverse bindersRev).map psElabBinderArgument
+  psElabBinderArgumentsInOrder (psElabListReverse bindersRev)
 
 def psCloseElabImplicitBinders
     (metaContext : PsMetaContext) :

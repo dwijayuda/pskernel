@@ -55,25 +55,33 @@ def psElabBoolAnd (left right : Bool) : Bool :=
 def psElabNatNe (left right : Nat) : Bool :=
   if Nat.beq left right then false else true
 
+def psElabListLength {α : Type}
+    (values : List α) : Nat :=
+  match values with
+  | [] => 0
+  | _ :: rest => Nat.succ (psElabListLength rest)
+
 def psSyntaxNameAppendSegments
-    (name : PsName)
-    (segments : List String) : PsName :=
+    (segments : List String) :
+    PsName -> PsName :=
   match segments with
   | [] =>
-      name
+      fun (name : PsName) =>
+        name
   | segment :: rest =>
-      psSyntaxNameAppendSegments
-        (psNameAppendStr name segment)
-        rest
+      let smaller : PsName -> PsName :=
+        psSyntaxNameAppendSegments rest;
+      fun (name : PsName) =>
+        smaller (psNameAppendStr name segment)
 
 def psSyntaxNameToName (name : PsSyntaxName) : Option PsName :=
   match name.segments with
-  | [] => none
+  | [] => Option.none
   | first :: rest =>
-      some
+      Option.some
         (psSyntaxNameAppendSegments
-          (psNameAppendStr PsName.anonymous first)
-          rest)
+          rest
+          (psNameAppendStr PsName.anonymous first))
 
 def psElabResultWithMeta
     (result : PsElabTermResult)
@@ -132,65 +140,73 @@ def psElabResolvedTerm
 
 def psElabProjectionApplyParameters
     (context : PsElabContext)
-    (parameters : List PsExpr)
-    (cursor : PsExpr) :
+    (parameters : List PsExpr) :
+    PsExpr ->
     Except PsElabError PsExpr :=
   match parameters with
   | [] =>
-      Except.ok cursor
+      fun (cursor : PsExpr) =>
+        Except.ok cursor
   | parameter :: rest =>
-      match
-          psInferEnsureForall
-            context.environment
-            context.metaContext
-            context.localContext
-            cursor with
-      | Except.error error =>
-          Except.error (PsElabError.infer error)
-      | Except.ok forallView =>
-          psElabProjectionApplyParameters
-            context
-            rest
-            (psExprInstantiate1 forallView.body parameter)
+      let smaller : PsExpr -> Except PsElabError PsExpr :=
+        psElabProjectionApplyParameters context rest;
+      fun (cursor : PsExpr) =>
+        match
+            psInferEnsureForall
+              context.environment
+              context.metaContext
+              context.localContext
+              cursor with
+        | Except.error error =>
+            Except.error (PsElabError.infer error)
+        | Except.ok forallView =>
+            smaller
+              (psExprInstantiate1 forallView.body parameter)
 
 def psElabFindStructureField
     (context : PsElabContext)
     (typeName : PsName)
     (target : PsExpr)
     (fieldName : String)
-    (index : Nat)
-    (remaining : Nat)
-    (cursor : PsExpr) :
+    (remaining : Nat) :
+    Nat ->
+    PsExpr ->
     Except PsElabError Nat :=
   match remaining with
   | 0 =>
-      Except.error PsElabError.unsupportedTerm
+      fun (_index : Nat) =>
+        fun (_cursor : PsExpr) =>
+          Except.error PsElabError.unsupportedTerm
   | nextRemaining + 1 =>
-      match
-          psInferEnsureForall
-            context.environment
-            context.metaContext
-            context.localContext
-            cursor with
-      | Except.error error =>
-          Except.error (PsElabError.infer error)
-      | Except.ok forallView =>
-          if
-              psStringEq
-                (psNameLastComponent forallView.name)
-                fieldName then
-            Except.ok index
-          else
-            psElabFindStructureField
-              context
-              typeName
-              target
-              fieldName
-              (Nat.succ index)
-              nextRemaining
-              (psExprInstantiate1
-                forallView.body
-                (PsExpr.proj typeName index target))
+      let smaller : Nat -> PsExpr -> Except PsElabError Nat :=
+        psElabFindStructureField
+          context
+          typeName
+          target
+          fieldName
+          nextRemaining;
+      fun (index : Nat) =>
+        fun (cursor : PsExpr) =>
+          match
+              psInferEnsureForall
+                context.environment
+                context.metaContext
+                context.localContext
+                cursor with
+          | Except.error error =>
+              Except.error (PsElabError.infer error)
+          | Except.ok forallView =>
+              if
+                  psStringEq
+                    (psNameLastComponent forallView.name)
+                    fieldName then
+                Except.ok index
+              else
+                smaller
+                  (Nat.succ index)
+                  (psExprInstantiate1
+                    forallView.body
+                    (PsExpr.proj typeName index target))
 
 def psElabProjectionStep
     (context : PsElabContext)
@@ -212,7 +228,7 @@ def psElabProjectionStep
           let projectionInvalid :=
             if info.isStructure then
               if Nat.beq info.numIndices 0 then
-                if Nat.beq (List.length view.args) info.numParams then
+                if Nat.beq (psElabListLength view.args) info.numParams then
                   false
                 else
                   true
@@ -248,8 +264,8 @@ def psElabProjectionStep
                                   typeName
                                   current.term
                                   fieldName
-                                  0
                                   constructorInfo.numFields
+                                  0
                                   fieldCursor with
                             | Except.error error => Except.error error
                             | Except.ok index =>
@@ -259,27 +275,37 @@ def psElabProjectionStep
                                     typeName
                                     index
                                     current.term)
-                                  none
+                                  Option.none
                 | List.cons _ _ =>
                     Except.error PsElabError.unsupportedTerm
   | _ => Except.error PsElabError.unsupportedTerm
+
+def psElabProjectionChainWorker
+    (fields : List String) :
+    PsElabContext ->
+    PsElabTermResult ->
+    Except PsElabError PsElabTermResult :=
+  match fields with
+  | [] =>
+      fun (_context : PsElabContext) =>
+        fun (current : PsElabTermResult) =>
+          Except.ok current
+  | field :: rest =>
+      let smaller : PsElabContext -> PsElabTermResult -> Except PsElabError PsElabTermResult :=
+        psElabProjectionChainWorker rest;
+      fun (context : PsElabContext) =>
+        fun (current : PsElabTermResult) =>
+          match psElabProjectionStep context current field with
+          | Except.error error => Except.error error
+          | Except.ok projected =>
+              smaller projected.context projected
 
 def psElabProjectionChain
     (context : PsElabContext)
     (current : PsElabTermResult)
     (fields : List String) :
     Except PsElabError PsElabTermResult :=
-  match fields with
-  | [] =>
-      Except.ok current
-  | field :: rest =>
-      match psElabProjectionStep context current field with
-      | Except.error error => Except.error error
-      | Except.ok projected =>
-          psElabProjectionChain
-            projected.context
-            projected
-            rest
+  psElabProjectionChainWorker fields context current
 
 def psElabProjectionReference
     (context : PsElabContext)
@@ -307,11 +333,11 @@ def psElabProjectionReference
                 baseName with
           | none => Except.error (PsElabError.unknownName baseName)
           | some resolved =>
-              let baseTerm :=
+              let baseTerm : PsExpr :=
                 match resolved with
                 | .local id => PsExpr.fvar id
                 | .global name => PsExpr.constE name [];
-              match psElabResolvedTerm context baseTerm none with
+              match psElabResolvedTerm context baseTerm Option.none with
               | Except.error error => Except.error error
               | Except.ok baseResult =>
                   match
@@ -401,7 +427,7 @@ def psElabNatural
           | _ =>
               psElabResolvedTerm context natural expected
       | none =>
-          psElabResolvedTerm context natural none
+          psElabResolvedTerm context natural Option.none
 
 def psElabString
     (context : PsElabContext)
@@ -1407,15 +1433,15 @@ def psElabMatchConstructorMinor
       if psElabBoolNot (psNameEq ctorInfo.inductiveName inductiveInfo.name) then
         Except.error
           (PsElabError.matchConstructorUnknown constructorName)
-      else if psElabNatNe ctorInfo.numParams (List.length parameterArgs) then
+      else if psElabNatNe ctorInfo.numParams (psElabListLength parameterArgs) then
         Except.error PsElabError.matchParameterArity
-      else if psElabNatNe ctorInfo.numFields (List.length binders) then
+      else if psElabNatNe ctorInfo.numFields (psElabListLength binders) then
         Except.error
           (PsElabError.matchConstructorArity constructorName)
       else if psSyntaxNameListHasDuplicate binders then
         Except.error
           (PsElabError.matchConstructorArity constructorName)
-      else if psElabNatNe (List.length ctorInfo.levelParams) (List.length inductiveLevels) then
+      else if psElabNatNe (psElabListLength ctorInfo.levelParams) (psElabListLength inductiveLevels) then
         Except.error PsElabError.matchRecursorLevels
       else
         let ctorType :=
@@ -1611,7 +1637,7 @@ def psElabMatch
               | some inductiveInfo =>
                   if psElabNatNe inductiveInfo.numIndices 0 then
                     Except.error PsElabError.matchInductiveUnsupported
-                  else if psElabNatNe (List.length typeView.args) inductiveInfo.numParams then
+                  else if psElabNatNe (psElabListLength typeView.args) inductiveInfo.numParams then
                     Except.error PsElabError.matchParameterArity
                   else
                     match psElabPrepareMatchAlternatives
@@ -1639,7 +1665,7 @@ def psElabMatch
                                       (psElabNatNe recInfo.numMotives 1)
                                       (psElabNatNe
                                         recInfo.numMinors
-                                        (List.length inductiveInfo.constructors)))) then
+                                        (psElabListLength inductiveInfo.constructors)))) then
                               Except.error
                                 PsElabError.matchRecursorUnsupported
                             else
@@ -1664,13 +1690,13 @@ def psElabMatch
                                       Except.error (PsElabError.infer error)
                                   | Except.ok resultLevel =>
                                       let recursorLevels :=
-                                        if Nat.beq (List.length recInfo.levelParams) 0 then
+                                        if Nat.beq (psElabListLength recInfo.levelParams) 0 then
                                           []
-                                        else if Nat.beq (List.length recInfo.levelParams) 1 then
+                                        else if Nat.beq (psElabListLength recInfo.levelParams) 1 then
                                           [resultLevel]
                                         else
                                           [];
-                                      if Nat.blt 1 (List.length recInfo.levelParams) then
+                                      if Nat.blt 1 (psElabListLength recInfo.levelParams) then
                                         Except.error
                                           PsElabError.matchRecursorLevels
                                       else
@@ -2001,7 +2027,7 @@ def psSyntaxRecordFieldsMatch
       List (Prod PsSyntaxName PsSyntaxTerm))
     (names : List String) : Bool :=
   psElabBoolAnd
-    (Nat.beq (List.length fields) (List.length names))
+    (Nat.beq (psElabListLength fields) (psElabListLength names))
     (List.all names (psSyntaxRecordHasNamedField fields))
 
 def psSyntaxRecordFindField
@@ -2096,7 +2122,7 @@ def psElabRecordCandidateFromExpected
             typeName with
       | none => none
       | some info =>
-          if psElabNatNe (List.length view.args) info.numParams then
+          if psElabNatNe (psElabListLength view.args) info.numParams then
             none
           else
             psElabRecordCandidateForInfo
@@ -2336,8 +2362,8 @@ def psTryElabStructuralSelfCall
                 Except.ok none
               else if
                   psElabNatNe
-                    (List.length arguments)
-                    (List.length recursion.explicitParameterIds) then
+                    (psElabListLength arguments)
+                    (psElabListLength recursion.explicitParameterIds) then
                 Except.error PsElabError.structuralRecursionArity
               else
                 match

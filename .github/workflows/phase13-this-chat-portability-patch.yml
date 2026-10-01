@@ -1,0 +1,95 @@
+name: Phase 13 this-chat portability patch
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+    paths:
+      - .github/workflows/phase13-this-chat-portability-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+      - name: Reshape wildcard alternative fill for PSC1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          start_marker = 'def psElabFillWildcardAlternatives\n'
+          end_marker = '\ndef psElabMatchPatternConstructorName\n'
+          start = text.index(start_marker)
+          end = text.index(end_marker, start)
+          old = text[start:end]
+          if 'let next :=' not in old or 'psElabFillWildcardAlternatives' not in old:
+              raise SystemExit('unexpected psElabFillWildcardAlternatives source shape')
+          new = '''def psElabFillWildcardAlternativesWorker
+              (constructors : List PsName) :
+              PsSyntaxPattern ->
+              PsSyntaxTerm ->
+              PsSourceSpan ->
+              List PsElabMatchAlternative ->
+              List PsElabMatchAlternative :=
+            match constructors with
+            | [] =>
+                fun (_pattern : PsSyntaxPattern) =>
+                  fun (_body : PsSyntaxTerm) =>
+                    fun (_span : PsSourceSpan) =>
+                      fun (alternativesRev : List PsElabMatchAlternative) =>
+                        alternativesRev
+            | ctorName :: rest =>
+                let smaller :
+                    PsSyntaxPattern ->
+                    PsSyntaxTerm ->
+                    PsSourceSpan ->
+                    List PsElabMatchAlternative ->
+                    List PsElabMatchAlternative :=
+                  psElabFillWildcardAlternativesWorker rest;
+                fun (pattern : PsSyntaxPattern) =>
+                  fun (body : PsSyntaxTerm) =>
+                    fun (span : PsSourceSpan) =>
+                      fun (alternativesRev : List PsElabMatchAlternative) =>
+                        let next : List PsElabMatchAlternative :=
+                          match psElabMatchAlternativeFind ctorName alternativesRev with
+                          | some _ => alternativesRev
+                          | none =>
+                              let alternative : PsElabMatchAlternative := {
+                                constructorName := ctorName
+                                pattern := pattern
+                                body := body
+                                span := span
+                              };
+                              List.cons alternative alternativesRev;
+                        smaller pattern body span next
+
+          def psElabFillWildcardAlternatives
+              (pattern : PsSyntaxPattern)
+              (body : PsSyntaxTerm)
+              (span : PsSourceSpan)
+              (constructors : List PsName)
+              (alternativesRev : List PsElabMatchAlternative) :
+              List PsElabMatchAlternative :=
+            psElabFillWildcardAlternativesWorker
+              constructors
+              pattern
+              body
+              span
+              alternativesRev
+          '''
+          path.write_text(text[:start] + new + text[end:])
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): make wildcard fill PSC1 portable"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

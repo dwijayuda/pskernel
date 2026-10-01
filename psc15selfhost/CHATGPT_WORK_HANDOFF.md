@@ -18,34 +18,32 @@ from `Pasted text(20260930-195252).txt`.
 
 ## Current snapshot and first blocker
 
-Base head for this repair: `7cbe096e22fe1da1680b42d280bf857c8e30b27d`.
-Canonical run `36890710202`, job `110465319673`, passed source gates,
+Base head for this repair: `35b9bdaa7883024e769e999b4337f41784f14ae4`.
+Canonical run `36891839146`, job `110469106433`, passed source gates,
 the official Lean elaborator build, and emitted:
 
 ```text
 PSC2_FIXED_POINT_RUNTIME_REGRESSIONS: PASS
 ```
 
-The expanded erasure-naming regression, including public output order and empty
-input, is now native-verified. Parsing advanced to the definition-opening
-function:
+That verifies the definition-opening rewrite's type/proof/runtime binder tests,
+parameter order, and one-versus-two-step fuel boundary. Parsing advanced to
+`psEraseDefinition`:
 
 ```text
-PSC1_PROJECT_PARSE_FAILED: packages/erasure/src/Ps/Erasure/Definition.lean: 112:15: expected ';', got 'let'
+PSC1_PROJECT_PARSE_FAILED: packages/erasure/src/Ps/Erasure/Definition.lean: 336:5: expected ';', got 'let'
 ```
 
-This repair normalizes only `psEraseOpenDefinitionWithFuel` and required list
-helpers. Fuel is explicit and structurally recursive; scope, current type/value,
-index, and parameter accumulators are applied after the recursive closure. Type,
-proof, and runtime branches preserve their scope fields and transitions. Matches,
-records, strings, Nat increments, list reversal, and runtime-parameter append use
-explicit PSC1-compatible operations. Public argument order is unchanged.
+This repair normalizes only `psEraseDefinition`. Its output-name match has an
+explicit String type and separator; Option, scope, current-definition, and
+VerifiedIR result values use explicit constructors. All ten carried scope fields
+are preserved, with only currentDefinition initialized for the definition.
 
-The focused guard was RED on the old declaration and GREEN on the repair.
-Aggregate source gates and local closure checks pass. New native regressions
-exercise type/proof/runtime binder erasure, type/runtime parameter order, and the
-one-versus-two-step fuel boundary. Their CI result and fresh fixed-point replay
-are still pending; erasure self-compilation is not yet proven.
+The focused guard was RED before the source change and GREEN afterward.
+Aggregate source gates and local closure checks pass. The binder regression now
+also verifies a proof-valued definition is omitted from runtime IR. Its expanded
+native result and fresh fixed-point replay are pending. Erasure self-compilation
+is not yet proven.
 
 All concurrent Declaration repairs and their guards remain intact. The earlier
 local recursor-minor draft was set aside because `4dcf65ff` already supplied the
@@ -72,17 +70,30 @@ equivalent worker and wrapper.
 Earlier record-selection, syntax-local-ID, Nat lookup, structural-call validation,
 and related Option/recursion repairs remain present. Do not repeat them.
 
+## Erasure parse and runtime progress
+
+| Repair | Commit | Canonical evidence |
+| --- | --- | --- |
+| Direct unique-name string append | `fe412138` | Run `36888982066` advanced to naming traversal |
+| Naming traversal structural worker | `92955f7e` | Run `36889927006` passed naming regressions and advanced to public wrapper |
+| Source-order output through local reversal | `7cbe096e` | Run `36890710202` passed public-order regression and advanced to definition opening |
+| Definition-opening fuel recursion | `35b9bdaa` | Run `36891839146` passed binder/fuel regressions and advanced to single-definition erasure |
+
+These are parser/runtime milestones, not proof that the entire erasure module
+has passed PSC1 elaboration or reached fixed point.
+
 ## Runtime regression evidence
 
 The closure probe runs `lake exe psc2_minimal_selfhost_tests` before fixed-point
 compilation and emits `PSC2_FIXED_POINT_RUNTIME_REGRESSIONS: PASS` on success.
 That marker was observed in canonical runs `36846906468`, `36885530518`,
-`36888982066`, `36889927006`, and `36890710202`.
+`36888982066`, `36889927006`, `36890710202`, and `36891839146`.
 It includes the constructor-traversal regression covering output order,
 nonzero constructor indices, an existing reversed accumulator, empty input,
 and error propagation. Run `36889927006` also verifies the new erasure naming
 state traversal regression. Run `36890710202` verifies its expanded public-order
-and empty-input checks. The new definition-opening tests are pending.
+and empty-input checks. Run `36891839146` verifies the definition-opening
+binder and fuel tests. The added proof-valued-definition check is pending.
 
 ## Exact next action
 
@@ -99,10 +110,10 @@ and empty-input checks. The new definition-opening tests are pending.
 
 ```sh
 cd psc15selfhost
-node scripts/check-erasure-open-definition-selfhost-source-syntax.mjs
+node scripts/check-erasure-definition-selfhost-source-syntax.mjs
 npm run check:selfhost-source-syntax
 node scripts/check-bootstrap-closure.mjs
-lake build Ps.Elab.Declaration
+lake build Ps.Erasure.Definition
 lake exe psc2_minimal_selfhost_tests
 npm run fixed-point
 ```

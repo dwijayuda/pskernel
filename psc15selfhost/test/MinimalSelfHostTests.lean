@@ -328,11 +328,12 @@ def psTestErasureDeclarationNames : Bool :=
 
 def psTestOpenDefinitionBinderErasure : Bool :=
   let source :=
-    "def keep (a : Type) (b : Type) (p : Prop) (h : p) (x : a) (y : b) : a := x"
+    "def keep (a : Type) (b : Type) (p : Prop) (h : p) (x : a) (y : b) : a := x\n" ++
+    "def proofIdentity (p : Prop) (h : p) : p := h"
   match psCompilerVerifiedIrSource PsCompilerSourceKind.lean source with
   | Except.error _ => false
   | Except.ok ir =>
-      ir.declarations.any fun declaration =>
+      ir.declarations.length == 1 && ir.declarations.any fun declaration =>
         declaration.name == "keep"
           && declaration.typeParameters.map (fun parameter => parameter.name) == ["T0", "T1"]
           && declaration.parameters.map (fun parameter => parameter.name) == ["x", "y"]

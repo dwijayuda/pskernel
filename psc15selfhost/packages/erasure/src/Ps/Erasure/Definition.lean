@@ -322,24 +322,31 @@ def psEraseDefinition
     (type value : PsExpr) :
     Except PsErasureError (Option PsVerifiedIrDeclaration) :=
   if psErasureIsProp environment psLocalEmpty type then
-    Except.ok none
+    Except.ok Option.none
   else
-    let outputName :=
+    let outputName : String :=
       match psErasureLookupName
           scope.declarationNames
           name with
-      | some known => known
-      | none =>
+      | Option.some known => known
+      | Option.none =>
           psErasureSafeIdentifier
             (psNameToString name)
-            "decl"
-    let definitionScope : PsErasureScope := {
-      scope with
-      currentDefinition := some {
-        name := outputName
-        runtimeParameters := []
-      }
-    }
+            "decl";
+    let definitionScope : PsErasureScope :=
+      PsErasureScope.mk
+        scope.localContext
+        scope.runtimeLocals
+        scope.typeLocals
+        scope.erasedLocals
+        scope.declarationNames
+        scope.runtimeConstructors
+        scope.runtimeRecursors
+        scope.runtimeStructures
+        scope.runtimeStructureConstructors
+        scope.runtimeExpressions
+        (Option.some
+          (PsErasureCurrentDefinition.mk outputName List.nil));
     match psLowerStructureRecursors environment value with
     | Except.error error => Except.error error
     | Except.ok normalizedValue =>
@@ -352,13 +359,13 @@ def psEraseDefinition
         | Except.error error => Except.error error
         | Except.ok opened =>
             Except.ok
-              (some {
-                name := outputName
-                typeParameters := opened.typeParameters
-                parameters := opened.parameters
-                resultType := opened.resultType
-                body := opened.body
-              })
+              (Option.some
+                (PsVerifiedIrDeclaration.mk
+                  outputName
+                  opened.typeParameters
+                  opened.parameters
+                  opened.resultType
+                  opened.body))
 
 def psEraseDefinitionsLoop
     (environment : PsEnvironment)

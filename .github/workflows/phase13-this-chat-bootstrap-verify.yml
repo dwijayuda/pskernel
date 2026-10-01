@@ -36,4 +36,4 @@ jobs:
           cd psc15selfhost
           npm run bootstrap:check
 
-# rerun after duplicate-binder recursion and higher-order portability fix
+# rerun after match-field state recursion portability fix

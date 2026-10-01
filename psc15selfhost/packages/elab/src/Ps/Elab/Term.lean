@@ -2926,104 +2926,113 @@ def psTryElabStructuralSelfCall
           Except.ok Option.none
 
 def psElabTermWithFuel
-    (fuel : Nat)
-    (context : PsElabContext)
-    (term : PsSyntaxTerm)
-    (expected : Option PsExpr) :
+    (fuel : Nat) :
+    PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
     Except PsElabError PsElabTermResult :=
   match fuel with
-  | 0 => Except.error PsElabError.fuelExhausted
+  | 0 =>
+      fun (_context : PsElabContext) =>
+        fun (_term : PsSyntaxTerm) =>
+          fun (_expected : Option PsExpr) =>
+            Except.error PsElabError.fuelExhausted
   | remaining + 1 =>
-      match term with
-      | .reference name =>
-          match psElabReference context name Option.none with
-          | Except.error error => Except.error error
-          | Except.ok reference =>
-              match psElabApplyArgs
-                  (psElabTermWithFuel remaining)
-                  reference
-                  []
-                  [] with
-              | Except.error error => Except.error error
-              | Except.ok application =>
-                  psElabFinishApplication application expected
-      | .natural text _ =>
-          psElabNatural context text expected
-      | .string text _ =>
-          psElabString context text expected
-      | .character text _ =>
-          psElabCharacter context text expected
-      | .unit _ =>
-          psElabUnit context expected
-      | .record fields _ =>
-          psElabRecord
-            (psElabTermWithFuel remaining)
-            context
-            fields
-            expected
-      | .bool value _ =>
-          psElabBool context value expected
-      | .lambda binders body _ =>
-          psElabLambda
-            (psElabTermWithFuel remaining)
-            context
-            binders
-            body
-            expected
-      | .forallE binders body _ =>
-          psElabForall
-            (psElabTermWithFuel remaining)
-            context
-            binders
-            body
-            expected
-      | .letE name declaredType value body _ =>
-          psElabLet
-            (psElabTermWithFuel remaining)
-            context
-            name
-            declaredType
-            value
-            body
-            expected
-      | .ifE condition thenBranch elseBranch _ =>
-          psElabIf
-            (psElabTermWithFuel remaining)
-            context
-            condition
-            thenBranch
-            elseBranch
-            expected
-      | .matchE scrutinee alternatives _ =>
-          psElabMatch
-            (psElabTermWithFuel remaining)
-            context
-            scrutinee
-            alternatives
-            expected
-      | .app fn args _ =>
-          match
-              psTryElabStructuralSelfCall
-                context
-                fn
-                args
-                expected with
-          | Except.error error => Except.error error
-          | Except.ok selfCall =>
-              match selfCall with
-              | Option.some result => Except.ok result
-              | Option.none =>
-                  match psElabTermWithFuel remaining context fn Option.none with
-                  | Except.error error => Except.error error
-                  | Except.ok elaboratedFn =>
-                      match psElabApplyArgs
-                          (psElabTermWithFuel remaining)
-                          elaboratedFn
-                          args
-                          [] with
-                      | Except.error error => Except.error error
-                      | Except.ok application =>
-                          psElabFinishApplication application expected
+      let smaller :
+          PsElabContext -> PsSyntaxTerm -> Option PsExpr ->
+          Except PsElabError PsElabTermResult :=
+        psElabTermWithFuel remaining;
+      fun (context : PsElabContext) =>
+        fun (term : PsSyntaxTerm) =>
+          fun (expected : Option PsExpr) =>
+            match term with
+            | .reference name =>
+                match psElabReference context name Option.none with
+                | Except.error error => Except.error error
+                | Except.ok reference =>
+                    match psElabApplyArgs
+                        smaller
+                        reference
+                        []
+                        [] with
+                    | Except.error error => Except.error error
+                    | Except.ok application =>
+                        psElabFinishApplication application expected
+            | .natural text _ =>
+                psElabNatural context text expected
+            | .string text _ =>
+                psElabString context text expected
+            | .character text _ =>
+                psElabCharacter context text expected
+            | .unit _ =>
+                psElabUnit context expected
+            | .record fields _ =>
+                psElabRecord
+                  smaller
+                  context
+                  fields
+                  expected
+            | .bool value _ =>
+                psElabBool context value expected
+            | .lambda binders body _ =>
+                psElabLambda
+                  smaller
+                  context
+                  binders
+                  body
+                  expected
+            | .forallE binders body _ =>
+                psElabForall
+                  smaller
+                  context
+                  binders
+                  body
+                  expected
+            | .letE name declaredType value body _ =>
+                psElabLet
+                  smaller
+                  context
+                  name
+                  declaredType
+                  value
+                  body
+                  expected
+            | .ifE condition thenBranch elseBranch _ =>
+                psElabIf
+                  smaller
+                  context
+                  condition
+                  thenBranch
+                  elseBranch
+                  expected
+            | .matchE scrutinee alternatives _ =>
+                psElabMatch
+                  smaller
+                  context
+                  scrutinee
+                  alternatives
+                  expected
+            | .app fn args _ =>
+                match
+                    psTryElabStructuralSelfCall
+                      context
+                      fn
+                      args
+                      expected with
+                | Except.error error => Except.error error
+                | Except.ok selfCall =>
+                    match selfCall with
+                    | Option.some result => Except.ok result
+                    | Option.none =>
+                        match smaller context fn Option.none with
+                        | Except.error error => Except.error error
+                        | Except.ok elaboratedFn =>
+                            match psElabApplyArgs
+                                smaller
+                                elaboratedFn
+                                args
+                                [] with
+                            | Except.error error => Except.error error
+                            | Except.ok application =>
+                                psElabFinishApplication application expected
 
 def psElabTerm
     (context : PsElabContext)

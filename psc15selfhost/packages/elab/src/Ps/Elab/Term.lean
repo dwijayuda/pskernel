@@ -631,54 +631,66 @@ def psCloseElabTypedBinders
     Prod PsExpr PsExpr :=
   psCloseElabTypedBindersWorker binders metaContext value type
 
+def psElabLambdaExpectedBodyWorker
+    (binders : List PsElabTypedBinder) :
+    PsElabContext ->
+    PsExpr ->
+    Except PsElabError (Prod PsElabContext PsExpr) :=
+  match binders with
+  | [] =>
+      fun (context : PsElabContext)
+          (expectedType : PsExpr) =>
+        Except.ok
+          (Prod.mk
+            context
+            (psMetaInstantiate
+              context.metaContext
+              expectedType))
+  | binder :: rest =>
+      let smaller :
+          PsElabContext ->
+          PsExpr ->
+          Except PsElabError (Prod PsElabContext PsExpr) :=
+        psElabLambdaExpectedBodyWorker rest;
+      fun (context : PsElabContext)
+          (expectedType : PsExpr) =>
+        match
+            psInferEnsureForall
+              context.environment
+              context.metaContext
+              context.localContext
+              expectedType with
+        | Except.error error =>
+            Except.error (PsElabError.infer error)
+        | Except.ok forallView =>
+            let unified :=
+              psUnify
+                context.environment
+                context.localContext
+                context.metaContext
+                binder.type
+                forallView.domain;
+            if psElabBoolNot unified.success then
+              Except.error PsElabError.typeMismatch
+            else
+              let nextContext :=
+                psElabContextWithMeta
+                  context
+                  unified.context;
+              let nextExpected :=
+                psExprInstantiate1
+                  (psMetaInstantiate
+                    unified.context
+                    forallView.body)
+                  (PsExpr.fvar binder.id);
+              smaller nextContext nextExpected
+
 def psElabLambdaExpectedBody
     (context : PsElabContext)
-    (binders : List PsElabTypedBinder) :
-    PsExpr ->
-    Except PsElabError (Prod PsElabContext PsExpr)
-  | expectedType =>
-      match binders with
-      | [] =>
-          Except.ok
-            (Prod.mk
-              context
-              (psMetaInstantiate
-                context.metaContext
-                expectedType))
-      | binder :: rest =>
-          match
-              psInferEnsureForall
-                context.environment
-                context.metaContext
-                context.localContext
-                expectedType with
-          | Except.error error =>
-              Except.error (PsElabError.infer error)
-          | Except.ok forallView =>
-              let unified :=
-                psUnify
-                  context.environment
-                  context.localContext
-                  context.metaContext
-                  binder.type
-                  forallView.domain;
-              if psElabBoolNot unified.success then
-                Except.error PsElabError.typeMismatch
-              else
-                let nextContext :=
-                  psElabContextWithMeta
-                    context
-                    unified.context;
-                let nextExpected :=
-                  psExprInstantiate1
-                    (psMetaInstantiate
-                      unified.context
-                      forallView.body)
-                    (PsExpr.fvar binder.id);
-                psElabLambdaExpectedBody
-                  nextContext
-                  rest
-                  nextExpected
+    (binders : List PsElabTypedBinder)
+    (expectedType : PsExpr) :
+    Except PsElabError (Prod PsElabContext PsExpr) :=
+  psElabLambdaExpectedBodyWorker binders context expectedType
 
 def psElabLambdaBodyExpected
     (context : PsElabContext)

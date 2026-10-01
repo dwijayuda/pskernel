@@ -1223,6 +1223,45 @@ def psElabMatchAlternativeCovered
   | some _ => true
   | none => false
 
+def psElabFillWildcardAlternativesWorker
+    (constructors : List PsName) :
+    PsSyntaxPattern ->
+    PsSyntaxTerm ->
+    PsSourceSpan ->
+    List PsElabMatchAlternative ->
+    List PsElabMatchAlternative :=
+  match constructors with
+  | [] =>
+      fun (_pattern : PsSyntaxPattern) =>
+        fun (_body : PsSyntaxTerm) =>
+          fun (_span : PsSourceSpan) =>
+            fun (alternativesRev : List PsElabMatchAlternative) =>
+              alternativesRev
+  | ctorName :: rest =>
+      let smaller :
+          PsSyntaxPattern ->
+          PsSyntaxTerm ->
+          PsSourceSpan ->
+          List PsElabMatchAlternative ->
+          List PsElabMatchAlternative :=
+        psElabFillWildcardAlternativesWorker rest;
+      fun (pattern : PsSyntaxPattern) =>
+        fun (body : PsSyntaxTerm) =>
+          fun (span : PsSourceSpan) =>
+            fun (alternativesRev : List PsElabMatchAlternative) =>
+              let next : List PsElabMatchAlternative :=
+                match psElabMatchAlternativeFind ctorName alternativesRev with
+                | some _ => alternativesRev
+                | none =>
+                    let alternative : PsElabMatchAlternative := {
+                      constructorName := ctorName
+                      pattern := pattern
+                      body := body
+                      span := span
+                    };
+                    List.cons alternative alternativesRev;
+              smaller pattern body span next
+
 def psElabFillWildcardAlternatives
     (pattern : PsSyntaxPattern)
     (body : PsSyntaxTerm)
@@ -1230,27 +1269,12 @@ def psElabFillWildcardAlternatives
     (constructors : List PsName)
     (alternativesRev : List PsElabMatchAlternative) :
     List PsElabMatchAlternative :=
-  match constructors with
-  | [] =>
-      alternativesRev
-  | ctorName :: rest =>
-      let next :=
-        match psElabMatchAlternativeFind ctorName alternativesRev with
-        | some _ => alternativesRev
-        | none =>
-            let alternative : PsElabMatchAlternative := {
-              constructorName := ctorName
-              pattern := pattern
-              body := body
-              span := span
-            };
-            List.cons alternative alternativesRev;
-      psElabFillWildcardAlternatives
-        pattern
-        body
-        span
-        rest
-        next
+  psElabFillWildcardAlternativesWorker
+    constructors
+    pattern
+    body
+    span
+    alternativesRev
 
 def psElabMatchPatternConstructorName
     (inductiveName : PsName)

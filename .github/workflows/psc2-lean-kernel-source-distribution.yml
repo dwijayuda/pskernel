@@ -44,6 +44,19 @@ jobs:
         working-directory: psc15selfhost/packages/pskernel-lean
         run: npm run build:kernel
 
+      - name: Measure current native package-local binary
+        working-directory: psc15selfhost/packages/pskernel-lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          binary='.lake/build/bin/psc2_lean_kernel_provider'
+          test -f "$binary"
+          raw_size="$(stat -c '%s' "$binary")"
+          cp "$binary" "$RUNNER_TEMP/psc2_lean_kernel_provider.stripped"
+          strip --strip-all "$RUNNER_TEMP/psc2_lean_kernel_provider.stripped"
+          stripped_size="$(stat -c '%s' "$RUNNER_TEMP/psc2_lean_kernel_provider.stripped")"
+          echo "PSC2_LEAN_KERNEL_NATIVE_BASELINE_SIZE: raw=${raw_size} stripped=${stripped_size}"
+
       - name: Native package-local prebuilt verification
         working-directory: psc15selfhost/packages/pskernel-lean
         run: npm run verify:prebuilt

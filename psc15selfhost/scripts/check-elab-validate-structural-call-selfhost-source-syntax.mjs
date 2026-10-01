@@ -1,3 +1,4 @@
+import "./check-elab-declaration-structural-recursion-selfhost-source-syntax.mjs";
 import "./check-elab-try-structural-self-call-selfhost-source-syntax.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";

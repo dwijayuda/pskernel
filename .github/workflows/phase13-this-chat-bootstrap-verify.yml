@@ -35,3 +35,5 @@ jobs:
           set -euo pipefail
           cd psc15selfhost
           npm run bootstrap:check
+
+# rerun after psExprHasConst recursion fix

@@ -288,14 +288,25 @@ def psCloseElabImplicitBinders
             PsBinderInfo.implicit;
         smaller closed
 
-def psExprListAlphaEq : List PsExpr -> List PsExpr -> Bool
-  | [], [] => true
-  | left :: leftRest, right :: rightRest =>
-      if psExprAlphaEq left right then
-        psExprListAlphaEq leftRest rightRest
-      else
-        false
-  | _, _ => false
+def psExprListAlphaEq
+    (leftValues : List PsExpr) : List PsExpr -> Bool :=
+  match leftValues with
+  | List.nil =>
+      fun (rightValues : List PsExpr) =>
+        match rightValues with
+        | List.nil => true
+        | List.cons _ _ => false
+  | List.cons left leftRest =>
+      let smaller : List PsExpr -> Bool :=
+        psExprListAlphaEq leftRest;
+      fun (rightValues : List PsExpr) =>
+        match rightValues with
+        | List.nil => false
+        | List.cons right rightRest =>
+            if psExprAlphaEq left right then
+              smaller rightRest
+            else
+              false
 
 def psElabIsDirectRecursiveField
     (context : PsElabContext)

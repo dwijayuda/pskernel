@@ -1742,7 +1742,7 @@ def psElabWildcardBinderNames
       []
   | nextRemaining + 1 =>
       let segment :=
-        String.Internal.append "_wild" (toString index);
+        String.Internal.append "_wild" (psNatToString index);
       let syntaxName : PsSyntaxName := {
         segments := List.cons segment List.nil
         span := span

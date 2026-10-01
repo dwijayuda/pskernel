@@ -61,12 +61,14 @@ jobs:
           count = block.count(needle)
           if count != 1:
               raise SystemExit(f'expected one projection-head fallback, got {count}')
-          replacement = '''| _ =>
-      Except.error
-        (PsElabError.unknownName
-          (psNameAppendStr
-            (psRootName "__diag_projection_head")
-            fieldName))'''
+          replacement = '\n'.join([
+              '| _ =>',
+              '      Except.error',
+              '        (PsElabError.unknownName',
+              '          (psNameAppendStr',
+              '            (psRootName "__diag_projection_head")',
+              '            fieldName))',
+          ])
           block = block.replace(needle, replacement, 1)
           path.write_text(text[:start] + block + text[end:])
           PY

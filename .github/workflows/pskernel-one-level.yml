@@ -1,0 +1,30 @@
+name: pskernel-one level slice
+on:
+  push:
+    branches: [psc2/pskernel-one]
+    paths:
+      - psc15selfhost/packages/pskernel-one/**
+      - psc15selfhost/scripts/pskernel-one-*.mjs
+      - psc15selfhost/lakefile.lean
+      - .github/workflows/pskernel-one-level.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  level:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: psc15selfhost
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Pinned native reference and owned level tests
+        run: lake exe pskernel_one_level_tests

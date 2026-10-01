@@ -259,3 +259,12 @@ lean_exe psc2_kernel_core_expr_parity_tests where
 lean_exe psc2_selfhost_replay_audit where
   srcDir := "scripts"
   root := `SelfhostReplayAudit
+
+-- Separate owned-kernel workstream; excluded from compiler bootstrap imports.
+lean_lib PsKernelOne where
+  srcDir := "packages/pskernel-one/src"
+  roots := #[`Ps.KernelOne]
+
+lean_exe pskernel_one_level_tests where
+  srcDir := "packages/pskernel-one/test"
+  root := `LevelTests

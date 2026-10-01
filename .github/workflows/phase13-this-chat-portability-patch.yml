@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
-      - name: Reshape match field closing recursion for PSC1
+      - name: Use portable Nat formatting for wildcard binders
         shell: bash
         run: |
           set -euo pipefail
@@ -25,44 +25,21 @@ jobs:
           from pathlib import Path
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
-          start_marker = 'def psCloseElabMatchFields\n'
-          end_marker = '\nstructure PsElabMatchMinorResult where\n'
+          start_marker = 'def psElabWildcardBinderNames\n'
+          end_marker = '\ndef psElabMatchConstructorMinor\n'
           start = text.index(start_marker)
           end = text.index(end_marker, start)
           old = text[start:end]
-          if 'psCloseElabMatchFields' not in old or 'field :: rest' not in old:
-              raise SystemExit('unexpected psCloseElabMatchFields source shape')
-          new = '''def psCloseElabMatchFieldsWorker
-              (fields : List PsElabMatchField) :
-              PsMetaContext -> PsExpr -> PsExpr :=
-            match fields with
-            | [] =>
-                fun (_metaContext : PsMetaContext) =>
-                  fun (term : PsExpr) => term
-            | field :: rest =>
-                let smaller : PsMetaContext -> PsExpr -> PsExpr :=
-                  psCloseElabMatchFieldsWorker rest;
-                fun (metaContext : PsMetaContext) =>
-                  fun (term : PsExpr) =>
-                    let closed :=
-                      PsExpr.lam
-                        field.name
-                        (psMetaInstantiate metaContext field.type)
-                        (psExprAbstractFVar field.id term)
-                        field.binder;
-                    smaller metaContext closed
-
-          def psCloseElabMatchFields
-              (metaContext : PsMetaContext)
-              (fields : List PsElabMatchField)
-              (term : PsExpr) : PsExpr :=
-            psCloseElabMatchFieldsWorker fields metaContext term
-          '''
+          needle = 'String.Internal.append "_wild" (toString index)'
+          replacement = 'String.Internal.append "_wild" (psNatToString index)'
+          if needle not in old:
+              raise SystemExit('unexpected psElabWildcardBinderNames source shape')
+          new = old.replace(needle, replacement, 1)
           path.write_text(text[:start] + new + text[end:])
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "fix(elab): make match field closing PSC1 portable"
+          git commit -m "fix(elab): use portable Nat string conversion"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

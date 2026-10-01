@@ -26,35 +26,39 @@ structure PsErasureNameState where
   used : List String
   entriesRev : List (PsName × String)
 
-def psBuildErasureDeclarationNames :
-    List PsDeclaration ->
-    PsErasureNameState ->
-    PsErasureNameState
-  | [], state => state
-  | declaration :: rest, state =>
-      let sourceName :=
-        match declaration with
-        | .definitionDecl name _ _ _ => some name
-        | .partialDecl name _ _ _ => some name
-        | .theoremDecl name _ _ _ => some name
-        | .inductiveDecl info => some info.name
-        | _ => none
-      match sourceName with
-      | none =>
-          psBuildErasureDeclarationNames rest state
-      | some name =>
-          let raw :=
-            psErasureSafeIdentifier
-              (psNameToString name)
-              "decl"
-          let candidate :=
-            psErasureAddUniqueString state.used raw 4096
-          psBuildErasureDeclarationNames
-            rest
-            {
-              used := candidate :: state.used
-              entriesRev := (name, candidate) :: state.entriesRev
-            }
+def psBuildErasureDeclarationNamesWorker
+    (declarations : List PsDeclaration) :
+    PsErasureNameState -> PsErasureNameState :=
+  match declarations with
+  | List.nil =>
+      fun (state : PsErasureNameState) => state
+  | List.cons declaration rest =>
+      let smaller : PsErasureNameState -> PsErasureNameState :=
+        psBuildErasureDeclarationNamesWorker rest;
+      fun (state : PsErasureNameState) =>
+        let sourceName : Option PsName :=
+          match declaration with
+          | PsDeclaration.definitionDecl name _ _ _ => Option.some name
+          | PsDeclaration.partialDecl name _ _ _ => Option.some name
+          | PsDeclaration.theoremDecl name _ _ _ => Option.some name
+          | PsDeclaration.inductiveDecl info => Option.some info.name
+          | _ => Option.none;
+        match sourceName with
+        | Option.none => smaller state
+        | Option.some name =>
+            let raw :=
+              psErasureSafeIdentifier (psNameToString name) "decl";
+            let candidate :=
+              psErasureAddUniqueString state.used raw 4096;
+            smaller
+              (PsErasureNameState.mk
+                (List.cons candidate state.used)
+                (List.cons (Prod.mk name candidate) state.entriesRev))
+
+def psBuildErasureDeclarationNames
+    (declarations : List PsDeclaration)
+    (state : PsErasureNameState) : PsErasureNameState :=
+  psBuildErasureDeclarationNamesWorker declarations state
 
 def psErasureDeclarationNames
     (declarations : List PsDeclaration) :

@@ -298,7 +298,36 @@ def psTestInductiveConstructorTraversal : Bool :=
     | _ => false
   ordered && empty && failed
 
+def psTestErasureDeclarationNames : Bool :=
+  let type := PsExpr.sortE PsLevel.zero
+  let name := psRootName "item"
+  let prior := psRootName "prior"
+  let initial := PsErasureNameState.mk ["item"] [(prior, "item")]
+  let sources :=
+    [ PsDeclaration.definitionDecl name [] type type,
+      PsDeclaration.axiomDecl (psRootName "skip") [] type,
+      PsDeclaration.partialDecl name [] type type,
+      PsDeclaration.theoremDecl name [] type type,
+      PsDeclaration.inductiveDecl
+        (PsInductiveInfo.mk (psRootName "Choice") [] type 0 0 [] false) ]
+  let result := psBuildErasureDeclarationNames sources initial
+  let names := result.entriesRev.map Prod.snd
+  let ordered :=
+    names == ["Choice", "item___", "item__", "item_", "item"]
+      && result.used == names
+  let preserved :=
+    match result.entriesRev.reverse with
+    | (first, _) :: _ => psNameEq first prior
+    | _ => false
+  let empty := psBuildErasureDeclarationNames [] initial
+  ordered && preserved && empty.used == initial.used
+    && empty.entriesRev.length == 1
+
 def main : IO Unit := do
+  if psTestErasureDeclarationNames then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: erasure naming collisions, skipped axioms, order and existing state"
+  else
+    throw (IO.userError "PSC2_MINIMAL_SELFHOST_FAIL: erasure declaration naming")
   if psTestInductiveConstructorTraversal then
     IO.println "PSC2_MINIMAL_SELFHOST_PASS: constructor order, indices, accumulated prefix and errors"
   else

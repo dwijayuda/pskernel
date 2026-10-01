@@ -1092,15 +1092,18 @@ structure PsExprAppView where
   args : List PsExpr
 
 def psExprAppViewAcc
-    (expr : PsExpr)
-    (args : List PsExpr) : PsExprAppView :=
+    (expr : PsExpr) : List PsExpr -> PsExprAppView :=
   match expr with
   | .app fn argument =>
-      psExprAppViewAcc fn (List.cons argument args)
-  | _ => {
-      head := expr
-      args := args
-    }
+      let smaller : List PsExpr -> PsExprAppView :=
+        psExprAppViewAcc fn;
+      fun (args : List PsExpr) =>
+        smaller (List.cons argument args)
+  | _ =>
+      fun (args : List PsExpr) => {
+        head := expr
+        args := args
+      }
 
 def psExprAppView (expr : PsExpr) : PsExprAppView :=
   psExprAppViewAcc expr []

@@ -1195,15 +1195,26 @@ structure PsElabMatchAlternative where
   body : PsSyntaxTerm
   span : PsSourceSpan
 
-def psElabMatchAlternativeFind
-    (name : PsName) :
-    List PsElabMatchAlternative -> Option PsElabMatchAlternative
-  | [] => Option.none
+def psElabMatchAlternativeFindWorker
+    (alternatives : List PsElabMatchAlternative) :
+    PsName -> Option PsElabMatchAlternative :=
+  match alternatives with
+  | [] =>
+      fun (_name : PsName) => Option.none
   | alternative :: rest =>
-      if psNameEq alternative.constructorName name then
-        Option.some alternative
-      else
-        psElabMatchAlternativeFind name rest
+      let smaller : PsName -> Option PsElabMatchAlternative :=
+        psElabMatchAlternativeFindWorker rest;
+      fun (name : PsName) =>
+        if psNameEq alternative.constructorName name then
+          Option.some alternative
+        else
+          smaller name
+
+def psElabMatchAlternativeFind
+    (name : PsName)
+    (alternatives : List PsElabMatchAlternative) :
+    Option PsElabMatchAlternative :=
+  psElabMatchAlternativeFindWorker alternatives name
 
 def psElabMatchAlternativeCovered
     (alternatives : List PsElabMatchAlternative)

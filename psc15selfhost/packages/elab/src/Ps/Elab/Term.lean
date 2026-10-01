@@ -1198,10 +1198,10 @@ structure PsElabMatchAlternative where
 def psElabMatchAlternativeFind
     (name : PsName) :
     List PsElabMatchAlternative -> Option PsElabMatchAlternative
-  | [] => none
+  | [] => Option.none
   | alternative :: rest =>
       if psNameEq alternative.constructorName name then
-        some alternative
+        Option.some alternative
       else
         psElabMatchAlternativeFind name rest
 

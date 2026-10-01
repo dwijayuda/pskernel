@@ -36,4 +36,4 @@ jobs:
           cd psc15selfhost
           npm run bootstrap:check
 
-# rerun after qualifying match-constructor expected expression as Option.some
+# rerun after qualifying match-minor Option expression constructors

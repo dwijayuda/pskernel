@@ -76,7 +76,8 @@ def psElabStructuralRecursionFromSource
                   match resolution with
                   | .local scrutineeId =>
                       let explicitParameterIds :=
-                        psElabExplicitParameterIds bindersRev.reverse;
+                        psElabExplicitParameterIds
+                          (psElabTypedBinderListReverse bindersRev);
                       match
                           psElabFindNatIndex
                             scrutineeId

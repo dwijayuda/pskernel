@@ -1,257 +1,148 @@
 # ChatGPT Work Handoff
 
-Updated: 2026-10-01 (Asia/Jakarta). This file is the continuation record for the
-Work session started from `Pasted text(20260930-195252).txt`.
+Updated: 2026-10-01 (Asia/Jakarta). Continuation of the Work session started
+from `Pasted text(20260930-195252).txt`.
 
-## Branch
+## Scope and shared branch
 
-`psc2/minimal-selfhost-psc15` in `dwijayuda/pskernel`.
+- Repository: `dwijayuda/pskernel`.
+- Target branch: `psc2/minimal-selfhost-psc15`. Do not merge to main.
+- Write only `psc15selfhost/`. Do not change `psc2selfhost/` or `.github/`.
+- PSC1-compatible `.lean`; official Lean 4.34.0 bootstrap; TS/JS generation 1.
+- Keep the target-neutral semantic/IR boundary and the distinction between
+  AdmissionReadyModule and kernel-backed CheckedCore. Rust/Wasm and kernel
+  provider integration remain outside the first fixed-point closure.
+- Never weaken structural-recursion safety or expand the bootstrap language.
+- Another session writes this branch. Refresh before every ref update, inspect
+  intervening changes, preserve concurrent guards, and never force-push.
 
-## Current HEAD
+## Confirmed term recursion repair
 
-Verified code snapshot before this documentation commit:
-`3c1318bc37a03990a29f332a9e4b4ca0b94392ae`.
+Verified source snapshot: `e3ae2d211af4701d9dcbf0088dde777e54ec6b5d`.
+This is the source repair commit, not the commit containing this document.
 
-This records the observed parent, not the hash of the commit containing this
-file. Always refresh the target ref before writing: another session is actively
-committing to the same branch. Never force-push it.
-
-## Last verified GREEN
-
-- Local `npm run check:selfhost-source-syntax`, including the new callback guard.
-- Local `node scripts/check-elab-take-forall-names-selfhost-source-syntax.mjs`:
-  take-forall names, record last segment, record has-field, record fields-match.
-- Local `node scripts/check-selfhost-source-syntax.mjs` and
-  `node scripts/check-bootstrap-closure.mjs`.
-- The local fixed-point command passed its workspace, PSC1 bootstrap source,
-  layout, self-host prelude/foundation, syntax, structure-recursor, closure,
-  semantic-boundary, manifest, command-graph, root-minimality and IR-neutrality
-  prerequisites before encountering the local Lean execution limitation below.
-- Closure remains 54 ordered modules, 12 allowed packages, one direct root import.
-- CI run `36769814153` at `967723ea` passed Boundary, Name, Level, Expr,
-  focused match gates, full source syntax, and **Elaborator source builds under Lean**.
-  Its fixed-point probe then failed at `psSyntaxRecordFindField: unknownName:none`.
-- Concurrent one-shot repair run `36770452365` passed focused/aggregate guards and
-  `lake build Ps.Elab.Term`, then committed the exact four Option qualifications
-  independently tested in this session as `ffcbff6c`.
-- Local focused and aggregate source gates pass after the `psElabRecordCandidateForInfo`
-  repair. The production patch qualifies all unqualified Option constructors in
-  that declaration, plus its focused guard.
-- CI run `36772119962` at `3a02d872` passed the source gates and Lean elaborator
-  build, then established the next fixed-point blocker below.
-- Local focused and aggregate source gates pass after the
-  `psElabRecordCandidateFromExpected` repair. Its production patch qualifies all
-  unqualified Option constructors in that declaration, plus its focused guard.
-- CI run `36772867404` at `c2f76805` passed source/Lean gates and established the
-  next fixed-point blocker below.
-- Local focused and aggregate source gates pass after the `psElabRecordCandidates`
-  repair. The production patch removes its unsupported generic `List.reverse`
-  call and adds its focused guard.
-- CI run `36773477741` at `f0e6ef6d` passed source/Lean gates and established the
-  structural recursion blocker below.
-- Local focused and aggregate source gates pass after the invariant-safe
-  `psElabRecordCandidates` rewrite. Its guard now requires the post-recursion
-  result and unchanged accumulator argument.
-- CI run `36774114226` at `17095628` stopped in the full source gate on a
-  duplicated transported guard declaration, before Lean or fixed-point work.
-- The guard transport is corrected in `3c1318bc`; the script now has one
-  candidate block plus the invariant assertions. CI run `36774534674` at
-  `3c1318bc` is queued for the fixed-point probe.
-
-## Current first blocker
-
-The original record-fields source-profile failure is resolved by concurrent
-commit `88ccf31e7883e0e9ee522016f441462343c9ab41`.
-
-That commit also accidentally changed the `psElabApplyArgsWithFuel` callback
-return type to `PsElabApplicationResult`. CI run `36768894493`, job
-`110069929973`, failed in `Term.lean:2214:4` and `2231:4` with:
+Latest completed compiler evidence before this repair:
+[run 36791293062](https://github.com/dwijayuda/pskernel/actions/runs/36791293062),
+job `110144548718`, commit `76ebc69dc73342e39e19e9dd0c5b2ef39e9aafbe`.
+Boundary/Name/Level/Expr parity, full source syntax, and the Lean elaborator
+build passed. `Bootstrap closure remains isolated` ran the nested fixed-point
+probe and failed with:
 
 ```text
-Application type mismatch: The argument elaborate
-has type PsElabContext -> PsSyntaxTerm -> Option PsExpr -> Except PsElabError PsElabApplicationResult
-but is expected to have type PsElabContext -> PsSyntaxTerm -> Option PsExpr -> Except PsElabError PsElabTermResult
+PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Term.lean: declaration=psElabTermWithFuel: structuralRecursionArity
 ```
 
-Concurrent commit `063ef4401d68e4b65b18718fcea8f5504811da67` restored the correct
-callback. This session independently reproduced the failure and prepared the same
-repair, then discarded its duplicate after refreshing the branch. The record
-traversal and exact field-count check were preserved.
+Root cause: the declaration had four explicit parameters, while its recursive
+callbacks supplied only `remaining`. PSC1 checks recursive calls against the
+number of declared parameters. Its supported pattern recurses over fuel to
+produce a function, then supplies the varying state to that result.
 
-The next actual failure is now established by completed CI run `36769559573`,
-job `110072192231`, step **Bootstrap closure remains isolated**:
+This repair keeps only `fuel` as the declared parameter of
+`psElabTermWithFuel`. Both branches return a function of context, term, and
+expected type. The successor branch binds a typed `smaller` callback from the
+single recursive call, then uses it at the eight callback sites and the direct
+application-head elaboration site. The public curried type, fuel exhaustion,
+and term dispatch behavior are preserved. No other declaration is changed.
+
+Concurrent commit `89164ee0` added the matching recursion guard. It was adopted
+without modification; this session's duplicate guard was discarded. Concurrent
+repair `e3ae2d21` then landed exactly the tested source: its Term.lean blob SHA
+`566e0281c95eb7e47a35878c906ae4344f97eb0f` matches the local candidate. No duplicate
+source commit was created. One-shot run `36813480889` passed, including the
+Lean build, before committing the repair and removing its temporary workflow.
+
+## Verification of this repair
+
+- The concurrent focused guard was observed RED on the unchanged source,
+  reporting the missing fuel-only declaration signature.
+- The focused guard is GREEN on the repair.
+- `npm run check:selfhost-source-syntax`: GREEN.
+- `node scripts/check-bootstrap-closure.mjs`: GREEN locally; 54 ordered modules,
+  12 allowed packages, one direct root import. A local pass does not run the
+  CI-only nested fixed-point probe.
+- `git diff --check`: GREEN.
+- Official Lean build: GREEN in one-shot run `36813480889`.
+- Full fixed-point run `36813544281`, job `110213588016`, passed all source
+  guards and Lean compilation, then advanced beyond Term.lean to the new
+  Declaration.lean blocker below. No Compiler2/3/4 or fingerprint success is claimed.
+
+## Current first blocker and active repair
+
+Completed full run `36813544281` at `e3ae2d21`, job `110213588016`, establishes:
 
 ```text
-uncaught exception: PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Term.lean: declaration=psSyntaxRecordFindField: unknownName:none
+PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Declaration.lean: declaration=psElabStructuralRecursionFromSource: unsupportedTerm
 ```
 
-Run `36769814153` confirmed the same exact failure. Concurrent guard `28362a4d`
-was observed RED locally. Four Option qualifications made it and the aggregate
-gate GREEN. The identical source fix landed concurrently as `ffcbff6c`; its
-whole-file blob matches the locally tested candidate exactly
-(`de9841c4ffa5777f8c2d00cb35876faf70afaf13`). Do not duplicate that fix.
+The declaration uses `bindersRev.reverse`. PSC1 treats this dotted reference as a
+projection, but generic List.reverse is outside the bootstrap environment. The
+existing `psElabTypedBinderListReverse` helper in Term.lean is already compatible
+and preserves source-order binders.
 
-The `psSyntaxRecordOrderFields` blocker is resolved by `469e04c6`. The next
-post-repair compiler failure is now established by the completed fixed-point
-probe in run `36771348031`, job `110078244227`:
+The active repair replaces only that expression with
+`psElabTypedBinderListReverse bindersRev`, still passed to
+`psElabExplicitParameterIds`. It adds
+`check-elab-structural-recursion-source-selfhost-source-syntax.mjs` and imports it
+from the direct source gate so both the aggregate and closure paths run it.
+The guard requires reversal before ID extraction and forbids generic reverse
+in this one declaration.
 
-```text
-uncaught exception: PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Term.lean: declaration=psElabRecordCandidateForInfo: unknownName:none
-```
+- Focused source guard: RED on the prior expression, GREEN on the replacement.
+- Aggregate source gate and local bootstrap closure check: GREEN.
+- `git diff --check`: GREEN.
+- CI for this Declaration.lean repair is pending. Do not infer the next blocker.
 
-Focused guard `PSC2_ELAB_RECORD_CANDIDATE_INFO_SELFHOST_SOURCE_SYNTAX` was first
-RED on the explicit `Option.none` requirement, then GREEN after the exact
-declaration-only repair. No fixed-point success is claimed.
+## Previously resolved blockers
 
-The next fixed-point blocker is now established by completed CI run
-`36772119962`, job `110080844220`:
+The prior handoff was stale. Concurrent commits after `1c1e753a` resolved the
+record-candidate semicolon, unique-candidate Option constructors, typed record
+candidate selection, syntax-local-ID Option constructors, Nat-list lookup
+recursion, structural-call validation recursion, structural-self-call Option
+constructors, and term-with-fuel Option constructors. These are all present
+in the base snapshot; do not repeat those repairs.
 
-```text
-uncaught exception: PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Term.lean: declaration=psElabRecordCandidateFromExpected: unknownName:none
-```
+Earlier fixes from this Work session remain present:
 
-Focused guard `PSC2_ELAB_RECORD_CANDIDATE_EXPECTED_SELFHOST_SOURCE_SYNTAX` was
-first RED on explicit Option values, then GREEN after the exact
-declaration-only repair. No fixed-point success is claimed.
+- `967723ea`: apply-args callback type regression guard.
+- `469e04c6`, `3a02d872`, `c2f76805`: record order/candidate Option qualifications.
+- `f0e6ef6d`, `17095628`: record candidate traversal/recursion normalization.
+- `3c1318bc`: removal of an accidentally duplicated transported guard.
+- Concurrent `545d19b6` supplied the previously pending record-candidate
+  semicolon. The old unattached semicolon blobs are obsolete.
 
-The next fixed-point blocker is now established by completed CI run
-`36772867404`, job `110083386835`:
-
-```text
-uncaught exception: PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Term.lean: declaration=psElabRecordCandidates: unsupportedTerm
-```
-
-Focused guard `PSC2_ELAB_RECORD_CANDIDATES_SELFHOST_SOURCE_SYNTAX` was first RED
-on the generic `List.reverse`, then GREEN after removing only that call. No
-fixed-point success is claimed.
-
-The same declaration then failed the structural recursion invariant in completed
-CI run `36773477741`, job `110085439674`:
-
-```text
-uncaught exception: PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Term.lean: declaration=psElabRecordCandidates: structuralRecursionInvariantArgument
-```
-
-The focused guard was extended to require one post-recursion result and an
-unchanged accumulator; it was RED before the rewrite and GREEN afterward. No
-fixed-point success is claimed.
-
-Run `36774114226`, job `110087590655`, did not reach the compiler because the
-transported guard declared `candidatesStart` twice:
-
-```text
-SyntaxError: Identifier 'candidatesStart' has already been declared
-```
-
-Commit `3c1318bc` removes the duplicate block while preserving the concurrent
-robust guard. No fixed-point success is claimed from that run.
-
-## Latest CI
-
-- Workflow: `PSC2 minimal kernel`.
-- Run: `36774534674` (push of the corrected invariant guard transport).
-- Commit: `3c1318bc37a03990a29f332a9e4b4ca0b94392ae`.
-- Job: retrieve `foundational-parity` from the run's jobs endpoint.
-- Result at snapshot: queued.
-- Pending step: `Bootstrap closure remains isolated` (nested fixed-point probe).
-- Previous source-gate run: `36774114226` at `17095628`, job `110087590655`; failed
-  before Lean/fixed-point work on the duplicated guard declaration.
-- Previous fixed-point run: `36773477741` at `f0e6ef6d`, job `110085439674`; passed
-  source/Lean gates and failed the probe at
-  `psElabRecordCandidates: structuralRecursionInvariantArgument`.
-- Do not mistake successful one-off repair run `36769415636` for fixed-point evidence.
-
-## Changes made in this Work session
-
-- `967723ea52034ff957661cb9b3f8df59870ae453` — guard worker and wrapper callback
-  types in `check-elab-apply-args-recursion-selfhost-source-syntax.mjs`; import
-  that guard from the direct source gate used by the closure check.
-- RED observed against `88ccf31e`:
-  `PSC2_ELAB_APPLY_ARGS_CALLBACK_TYPE_MISMATCH: wrapper elaborate callback must return PsElabTermResult`.
-- GREEN observed after the exact one-line repair, then again on the concurrent
-  repair and on the integrated guard commit.
-- Preserved concurrent commits `88ccf31e`, `3990c74b`, `063ef440`, and `063492ee`;
-  this session did not modify `.github/` or create another implementation branch.
-- Also preserved concurrent `28362a4d` (record lookup guard), `39122d75`
-  (one-shot repair), and `ffcbff6c` (record lookup fix and workflow self-removal).
-- Candidate source commit `84b456bc` was never attached to a branch: another
-  session's repair won the race. Do not cherry-pick it. Its source content is
-  already present in `ffcbff6c`.
-- This session's ordering repair commit is `469e04c6`; no duplicate commit should
-  be created if another session reports the same patch.
-- This session's candidate-info repair commit is `3a02d872`; it changes only the
-  candidate-info declaration and the focused source guard. Refresh the branch
-  before any follow-up write.
-- This session's expected-candidate repair commit is `c2f76805`; it changes only
-  the expected-candidate declaration and the focused source guard. Refresh the
-  branch before any follow-up write.
-- This session's record-candidates repair commit is `f0e6ef6d`; it changes only
-  the accumulator base case and the focused source guard. Refresh the branch
-  before any follow-up write.
-- This session's invariant-safe record-candidates repair commit is `17095628`; it
-  changes only the worker body and strengthens the focused guard. Refresh the
-  branch before any follow-up write.
-- This session's guard transport correction is `3c1318bc`; it removes only the
-  duplicate candidate guard block. Refresh the branch before any follow-up write.
-
-## Current architecture invariants
-
-- PSC1-compatible `.lean` implementation; official Lean 4.34.0 bootstrap.
-- TS/JS only required for generation 1; target-neutral semantic/IR boundary.
-- AdmissionReadyModule remains distinct from real kernel-backed CheckedCore.
-- Rust/Wasm, project tooling and kernel-provider integration remain outside the
-  first fixed-point closure.
-- No weakening structural-recursion safety or expanding the bootstrap language.
-- Only `psc15selfhost/` is project-write scope. Do not modify `psc2selfhost/`.
-- Do not merge to main. Preserve narrow existing regression gates.
-
-## Unverified hypotheses
-
-- No declarations beyond `psElabRecordCandidates` have been established as
-  the next blocker. Do not mass-rewrite the record section.
-- Passing source guards and Lean compilation does not establish self-hosting.
-  No Compiler2/3/4 or parity/fingerprint success is claimed here.
+Do not reuse unattached candidates `84b456bc` or `4b2f6bdd`. The former duplicates
+an already landed repair; the latter contains incorrectly escaped guard regexes.
 
 ## Exact next action
 
-1. Refresh the branch and inspect every commit after `3c1318bc`.
-2. Read the final result/logs of run `36774534674` (or a newer relevant run).
-3. If the fixed-point probe fails, find its first actual `PSC1_PROJECT_ELAB_FAILED`
-   declaration/error. Do not repeat the already landed record-field or
-   record-candidate fixes.
-4. Add the narrow RED guard and normalize only that declaration, then run focused,
-   aggregate, Lean/bootstrap and fixed-point checks in order.
-5. Review the exact patch before advancing the ref with a non-forced update.
-6. Commit each meaningful fix and refresh this handoff after 1–3 fixes.
+1. Refresh the branch and inspect any changes after this document's parent.
+2. Read the newest `PSC2 minimal kernel` run for the source repair commit.
+3. If it fails, read the complete log tail. The workflow summary filter can omit
+   `PSC1_PROJECT_PARSE_FAILED`; check both parse and elaboration failures.
+4. Work on the first actual declaration/error only. Add a narrow RED regression
+   guard, make the minimal compatible change, then run the focused and aggregate
+   source gates, Lean build, and fixed-point probe.
+5. Review the exact candidate patch and verify transported blob hashes before a
+   non-forced ref update. Never replace a remote guard with a stale local file.
+6. Update this handoff after meaningful changes and with actual CI results.
 
-## Commands / gates to run next
+## Commands and execution notes
 
 ```sh
-git fetch origin psc2/minimal-selfhost-psc15
-git log --oneline HEAD..origin/psc2/minimal-selfhost-psc15
-# Integrate concurrent commits only after inspecting their patches.
 cd psc15selfhost
-node scripts/check-elab-apply-args-recursion-selfhost-source-syntax.mjs
-node scripts/check-elab-take-forall-names-selfhost-source-syntax.mjs
+node scripts/check-elab-term-with-fuel-selfhost-source-syntax.mjs
 npm run check:selfhost-source-syntax
 node scripts/check-bootstrap-closure.mjs
 lake build Ps.Elab.Term
 npm run fixed-point
 ```
 
-## Important warnings
+The scratch checkout was recreated at
+`/workspace/scratch/e40ced7be9b3/pskernel`. It is disposable; use the branch as
+the durable source of truth. Git CLI reads work; authenticated GitHub connector
+blob/tree/commit APIs with non-forced `update_ref` are available for writes.
 
-- Work's local official Lean binary cannot locate its executable:
-  `error: failed to locate application`; Lake auto-detection reports
-  `could not detect the configuration of the Lake installation`. Explicit
-  `LEAN_SYSROOT` / `LAKE_HOME` does not cure Lean's own failure. This is a local
-  execution limitation, not compiler evidence. Use the official-Lean CI run.
-- Local `npm run fixed-point` therefore stopped at `build:lake`; generation and
-  parity were not reached locally. Do not report this as a source/compiler RED.
-- Git reads work locally; Git CLI push has no credentials. Authenticated GitHub
-  connector tree/commit APIs and non-forced `update_ref` were used for the guard.
-  Compare parent/candidate patches and refresh HEAD before updating the ref.
-- No temporary remote branch was created by this Work session. Local generated
-  `.lake/` and `lake-manifest.json` from the failed startup were removed.
-- Each connector source commit was reviewed as a narrow declaration diff plus its
-  focused guard; preserve that narrow-edit discipline.
+This refreshed local environment has no Lean/Lake executable. In the previous
+local environment the official binary reported `failed to locate application`;
+setting `LEAN_SYSROOT`/`LAKE_HOME` did not resolve it. Use CI for official-Lean and
+fixed-point evidence, and do not label an environment failure as compiler RED.

@@ -39,4 +39,7 @@ try{
   await rm(tempRoot,{recursive:true,force:true});
 }
 
+// Exercise integrity through both public API entry points, not only the verifier.
+await import('./prebuilt-api.test.mjs');
+
 console.log('PSC2_LEAN_KERNEL_WASM_PREBUILT_INTEGRITY: PASS');

@@ -12,7 +12,6 @@ const bundledLauncherPath=fileURLToPath(
 );
 
 function providerOptions(options={}){
-  const hasLauncherOverride=Object.prototype.hasOwnProperty.call(options,'launcherPath');
   const {
     launcherPath=bundledLauncherPath,
     nodePath=process.execPath,
@@ -22,7 +21,9 @@ function providerOptions(options={}){
     launcherPath,
     nodePath,
     maxBuffer,
-    verifyBundledPrebuilt:!hasLauncherOverride,
+    // An absent/undefined option still resolves to the bundled artifact.
+    // Select integrity checking from the effective launcher, not key presence.
+    verifyBundledPrebuilt:launcherPath===bundledLauncherPath,
   };
 }
 

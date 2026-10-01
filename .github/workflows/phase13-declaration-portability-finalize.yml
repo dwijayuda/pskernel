@@ -58,7 +58,7 @@ jobs:
               exec(compile(script, f'phase13-term-transform-{index}.py', 'exec'), namespace, namespace)
           PY
 
-      - name: Normalize declaration list operations to PSC1
+      - name: Normalize declaration list operations and matches to PSC1
         shell: bash
         run: |
           set -euo pipefail
@@ -81,16 +81,16 @@ jobs:
               text = text[:matches[0].start()] + replacement.rstrip() + '\n\n' + text[matches[0].end():]
 
           # Dotted host-list APIs are not part of the PSC1 bootstrap environment.
-          replacements = {
-              'bindersRev.reverse': 'psElabListReverse bindersRev',
-              'fields.bindersRev.reverse': 'psElabListReverse fields.bindersRev',
-              'declarationsRev.reverse': 'psElabListReverse declarationsRev',
-              'view.args.length': 'psElabListLength view.args',
-              'parameterArgs.length': 'psElabListLength parameterArgs',
-              'source.fields.length': 'psElabListLength source.fields',
-              'constructors.length': 'psElabListLength constructors',
-          }
-          for old, new in replacements.items():
+          replacements = [
+              ('fields.bindersRev.reverse', 'psElabListReverse fields.bindersRev'),
+              ('bindersRev.reverse', 'psElabListReverse bindersRev'),
+              ('declarationsRev.reverse', 'psElabListReverse declarationsRev'),
+              ('view.args.length', 'psElabListLength view.args'),
+              ('parameterArgs.length', 'psElabListLength parameterArgs'),
+              ('source.fields.length', 'psElabListLength source.fields'),
+              ('constructors.length', 'psElabListLength constructors'),
+          ]
+          for old, new in replacements:
               text = text.replace(old, new)
 
           replace_decl('psElabBinderArguments', r'''def psElabBinderArgumentsWorker
@@ -108,6 +108,22 @@ jobs:
               (bindersRev : List PsElabTypedBinder) : List PsExpr :=
             psElabBinderArgumentsWorker bindersRev List.nil''')
 
+          # PSC1 elaborates match expressions bidirectionally, so local matches
+          # without an external expected type need explicit result annotations.
+          annotations = [
+              ('      let currentName :=\n        match',
+               '      let currentName : PsName :=\n        match'),
+              ('          let result :=\n            match resultType with',
+               '          let result : Except PsElabError (Prod PsElabContext PsExpr) :=\n            match resultType with'),
+              ('              let resultTypeIsSortOne :=\n                match instantiatedResultType with',
+               '              let resultTypeIsSortOne : Bool :=\n                match instantiatedResultType with'),
+          ]
+          for old, new in annotations:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'expected one declaration match annotation target, got {count}: {old!r}')
+              text = text.replace(old, new, 1)
+
           # Replace List.isEmpty-style method syntax in the structure path without
           # adding another bootstrap primitive.
           structure_pattern = re.compile(
@@ -123,7 +139,6 @@ jobs:
           if block.count(old) != 1:
               raise SystemExit(f'expected one fields.isEmpty, got {block.count(old)}')
           block = block.replace(old, new, 1)
-          # Re-indent the previous else branch as the nonempty match arm.
           marker = '    Except.error PsElabError.unsupportedTerm\n  else\n'
           replacement = '      Except.error PsElabError.unsupportedTerm\n  | List.cons _ _ =>\n'
           if block.count(marker) != 1:

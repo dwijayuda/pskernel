@@ -104,13 +104,18 @@ jobs:
           block = inductive_matches[0].group(0)
           batch_record = re.compile(
               r'Except\.ok\s*\{\s*declarations\s*:=\s*'
-              r'(psElabAppendDeclarations\s*'
+              r'psElabAppendDeclarations\s*'
               r'\(List\.cons\s*inductiveDeclaration\s*constructorDeclarations\)\s*'
-              r'\(List\.cons\s*recursor\s*List\.nil\))\s*\}',
+              r'\(List\.cons\s*recursor\s*List\.nil\)\s*\}',
               re.DOTALL,
           )
-          def batch_replacement(match):
-              return 'Except.ok\n                                    (PsElabDeclarationBatchResult.mk\n                                      ' + match.group(1) + ')'
+          batch_replacement = '''Except.ok
+                                    (PsElabDeclarationBatchResult.mk
+                                      (psElabAppendDeclarations
+                                        (List.cons
+                                          inductiveDeclaration
+                                          constructorDeclarations)
+                                        (List.cons recursor List.nil)))'''
           block, batch_count = batch_record.subn(batch_replacement, block, count=1)
           if batch_count != 1:
               raise SystemExit(f'expected one inductive batch record result, got {batch_count}')

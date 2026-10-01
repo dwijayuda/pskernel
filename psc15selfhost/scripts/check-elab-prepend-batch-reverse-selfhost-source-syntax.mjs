@@ -44,3 +44,5 @@ for (const pattern of forbidden) {
 process.stdout.write(
   "PSC2_ELAB_PREPEND_BATCH_REVERSE_SELFHOST_SOURCE_SYNTAX: PASS (project-owned declaration reversal; generic reverse excluded)\n",
 );
+
+await import("./check-elab-declarations-selfhost-source-syntax.mjs");

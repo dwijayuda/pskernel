@@ -1,44 +1,31 @@
+import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const source = await readFile(
-  path.join(root, "packages/erasure/src/Ps/Erasure/Expr.lean"),
-  "utf8",
-);
-
-const match = source.match(
-  /def psEraseFinishApplicationWithFuel[\s\S]*?(?=\ndef psEraseFinishApplication)/,
-);
-if (match === null) {
-  throw new Error(
-    "PSC2_ERASURE_FINISH_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
-  );
-}
-
-const block = match[0];
-const required = [
-  /let pushed :=\s*psLocalPushBinding\s+scope\.localContext\s+name\s+domain\s+binder;/,
-  /let nextScope : PsErasureScope := \{[\s\S]*?currentDefinition := scope\.currentDefinition\s*\};\s*psEraseFinishApplicationWithFuel/,
-  /let parameterName :=\s*psErasureSafeIdentifier[\s\S]*?\("arg\$" \+\+ toString pushed\.id\);/,
-  /let body :=\s*if runtimeArguments\.isEmpty then[\s\S]*?runtimeArguments;\s*match parametersRev\.reverse with/,
-];
-for (const pattern of required) {
-  if (!pattern.test(block)) {
-    throw new Error(
-      `PSC2_ERASURE_FINISH_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX_MISSING: ${pattern}`,
-    );
+export function assertFinishApplicationSequencing(source) {
+  const block = source.match(/^def psEraseFinishApplicationWithFuel\b[\s\S]*?(?=^def psEraseFinishApplication\b)/m)?.[0];
+  if (!block) throw new Error("PSC2_ERASURE_FINISH_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block");
+  const pushed = /psLocalPushBinding\s+scope\.localContext\s+name\s+domain\s+binder;/g;
+  const scopes = /let nextScope : PsErasureScope := \{[^;]*?currentDefinition := scope\.currentDefinition\s*\};\s*psEraseFinishApplicationWithFuel/g;
+  const name = /let parameterName :=\s*psErasureSafeIdentifier[^;]*?;\s*let nextScope : PsErasureScope :=/;
+  const body = /let body :=\s*if runtimeArguments\.isEmpty then[^;]*?runtimeArguments;\s*match parametersRev\.reverse with/;
+  if ((block.match(pushed) ?? []).length !== 2 || (block.match(scopes) ?? []).length !== 2 ||
+      !name.test(block) || !body.test(block)) {
+    throw new Error("PSC2_ERASURE_FINISH_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX_MISSING: six sequenced locals");
   }
+  return block;
 }
 
-const pushedCount = (block.match(/psLocalPushBinding\s+scope\.localContext\s+name\s+domain\s+binder;/g) ?? []).length;
-if (pushedCount !== 2) {
-  throw new Error(
-    `PSC2_ERASURE_FINISH_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX_MISSING: expected two sequenced pushed bindings, got ${pushedCount}`,
-  );
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const source = await readFile(path.join(root, "packages/erasure/src/Ps/Erasure/Expr.lean"), "utf8");
+const block = assertFinishApplicationSequencing(source);
+// Each original terminator must remain independently protected. The guard does
+// not require the obsolete infix spelling of the parameter-name expression.
+const terminators = [...block.matchAll(/;/g)].map((match) => match.index);
+assert.equal(terminators.length, 6);
+for (const index of terminators) {
+  const broken = block.slice(0, index) + block.slice(index + 1);
+  assert.throws(() => assertFinishApplicationSequencing(source.replace(block, broken)), /SEQUENCING.*MISSING/);
 }
-
-process.stdout.write(
-  "PSC2_ERASURE_FINISH_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX: PASS (explicit local let sequencing across proof/runtime/final application branches)\n",
-);
+process.stdout.write("PSC2_ERASURE_FINISH_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX: PASS (six sequenced locals; six missing-terminator mutation checks)\n");

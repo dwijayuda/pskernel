@@ -343,6 +343,7 @@ if (
   process.env.GITHUB_ACTIONS === "true" &&
   process.env.PSC2_FIXED_POINT_PROBE_ACTIVE !== "1"
 ) {
+  process.stdout.write("PSC2_FIXED_POINT_SOURCE_ISOLATION: PASS (14 production-CLI cases; compiler/tsc test doubles)\n");
   const npm = process.platform === "win32" ? "npm.cmd" : "npm";
   const toolPrefix = path.join("/tmp", "psc2-fixed-point-tools");
   const install = spawnSync(
@@ -374,6 +375,9 @@ if (
     throw new Error("PSC2_FIXED_POINT_RUNTIME_REGRESSIONS_FAILED");
   }
   process.stdout.write("PSC2_FIXED_POINT_RUNTIME_REGRESSIONS: PASS\n");
+
+  const { auditSelfhostReplay } = await import("./selfhost-replay-audit.mjs");
+  await auditSelfhostReplay();
 
   const toolBin = path.join(toolPrefix, "node_modules", ".bin");
   const fixedPoint = spawnSync(

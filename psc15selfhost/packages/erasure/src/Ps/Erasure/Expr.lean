@@ -5,6 +5,16 @@ structure PsErasureAppliedArguments where
   runtimeArgumentsRev : List PsVerifiedIrExpr
   remainingType : PsExpr
 
+def psErasureAppendRuntimeArgument
+    (arguments : List PsVerifiedIrExpr) :
+    PsVerifiedIrExpr -> List PsVerifiedIrExpr :=
+  match arguments with
+  | [] => fun argument => List.cons argument List.nil
+  | head :: rest =>
+      let smaller : PsVerifiedIrExpr -> List PsVerifiedIrExpr :=
+        psErasureAppendRuntimeArgument rest;
+      fun argument => List.cons head (smaller argument)
+
 def psEraseApplicationArguments
     (erase :
       PsExpr -> Except PsErasureError PsVerifiedIrExpr)
@@ -148,8 +158,10 @@ def psEraseFinishApplicationWithFuel
                       binder;
                   let parameterName :=
                     psErasureSafeIdentifier
-                      (psNameToString name ++ "$" ++ toString pushed.id)
-                      ("arg$" ++ toString pushed.id);
+                      (String.Internal.append
+                        (String.Internal.append (psNameToString name) "$")
+                        (toString pushed.id))
+                      (String.Internal.append "arg$" (toString pushed.id));
                   let nextScope : PsErasureScope := {
                     localContext := pushed.context
                     runtimeLocals :=
@@ -178,8 +190,9 @@ def psEraseFinishApplicationWithFuel
                       name := parameterName
                       type := parameterType
                     } parametersRev)
-                    (runtimeArguments ++
-                      [PsVerifiedIrExpr.var parameterName])
+                    (psErasureAppendRuntimeArgument
+                      runtimeArguments
+                      (PsVerifiedIrExpr.var parameterName))
       | _ =>
           let body :=
             if runtimeArguments.isEmpty then

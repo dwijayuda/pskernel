@@ -343,7 +343,9 @@ def psElabIsDirectRecursiveField
   match view.head with
   | .constE name _ =>
       if psNameEq name inductiveName then
-        if Nat.beq view.args.length parameterArgs.length then
+        if Nat.beq
+            (psElabListLength view.args)
+            (psElabListLength parameterArgs) then
           psExprListAlphaEq view.args parameterArgs
         else
           false

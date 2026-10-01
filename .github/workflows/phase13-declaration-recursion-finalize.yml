@@ -203,6 +203,80 @@ jobs:
               fieldIndices
               body''')
 
+          replace_decl('psBuildRecursorMinorBinders', r'''def psBuildRecursorMinorBindersWorker
+              (parameterArgs : List PsExpr)
+              (motiveId : Nat)
+              (declarations : List PsDeclaration) :
+              PsElabContext ->
+              Nat ->
+              List PsElabTypedBinder ->
+              Except PsElabError PsElabRecursorMinorsResult :=
+            match declarations with
+            | List.nil =>
+                fun (context : PsElabContext) =>
+                  fun (_index : Nat) =>
+                    fun (bindersRev : List PsElabTypedBinder) =>
+                      Except.ok {
+                        context := context
+                        bindersRev := bindersRev
+                      }
+            | List.cons declaration rest =>
+                let smaller :
+                    PsElabContext ->
+                    Nat ->
+                    List PsElabTypedBinder ->
+                    Except PsElabError PsElabRecursorMinorsResult :=
+                  psBuildRecursorMinorBindersWorker
+                    parameterArgs
+                    motiveId
+                    rest;
+                fun (context : PsElabContext) =>
+                  fun (index : Nat) =>
+                    fun (bindersRev : List PsElabTypedBinder) =>
+                      match psBuildInductiveMinorType
+                          context
+                          parameterArgs
+                          motiveId
+                          declaration with
+                      | Except.error error => Except.error error
+                      | Except.ok minorType =>
+                          let minorName :=
+                            psNameAppendNum (psRootName "_minor") index;
+                          let pushed :=
+                            psLocalPushBinding
+                              context.localContext
+                              minorName
+                              minorType
+                              PsBinderInfo.explicit;
+                          let nextContext :=
+                            psElabContextWithLocal context pushed.context;
+                          smaller
+                            nextContext
+                            (Nat.succ index)
+                            (List.cons
+                              (PsElabTypedBinder.mk
+                                pushed.id
+                                minorName
+                                minorType
+                                PsBinderInfo.explicit)
+                              bindersRev)
+
+          def psBuildRecursorMinorBinders
+              (parameterArgs : List PsExpr)
+              (motiveId : Nat)
+              (declarations : List PsDeclaration)
+              (context : PsElabContext)
+              (index : Nat)
+              (bindersRev : List PsElabTypedBinder) :
+              Except PsElabError PsElabRecursorMinorsResult :=
+            psBuildRecursorMinorBindersWorker
+              parameterArgs
+              motiveId
+              declarations
+              context
+              index
+              bindersRev''')
+
           path.write_text(text)
           PY
           git diff --check -- \

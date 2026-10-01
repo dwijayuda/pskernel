@@ -36,4 +36,4 @@ jobs:
           cd psc15selfhost
           npm run bootstrap:check
 
-# rerun after match-field Option constructor qualification
+# rerun after match-field lookup recursion portability fix

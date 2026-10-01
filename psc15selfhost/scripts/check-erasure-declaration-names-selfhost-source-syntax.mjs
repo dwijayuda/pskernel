@@ -8,7 +8,7 @@ const source = await readFile(
   "utf8",
 );
 const match = source.match(
-  /def psBuildErasureDeclarationNamesWorker[\s\S]*?(?=\ndef psErasureDeclarationNames\n)/,
+  /def psBuildErasureDeclarationNamesWorker[\s\S]*?(?=\ndef psErasureReverseDeclarationNamesAcc\n|\ndef psErasureDeclarationNames\n)/,
 );
 if (match === null) {
   throw new Error("PSC2_ERASURE_DECLARATION_NAMES_MISSING: structural worker and wrapper");
@@ -40,6 +40,27 @@ if (/\| \[\], state =>|\| declaration :: rest, state =>|\| \.(?:definition|parti
   throw new Error("PSC2_ERASURE_DECLARATION_NAMES_FORBIDDEN: multi-argument equations or implicit constructors");
 }
 
+const ordered = source.match(
+  /def psErasureReverseDeclarationNamesAcc[\s\S]*?(?=\ndef psEraseOpenDefinitionWithFuel\n)/,
+);
+if (ordered === null) {
+  throw new Error("PSC2_ERASURE_DECLARATION_NAMES_MISSING: ordered-output reverse helper");
+}
+for (const pattern of [
+  /\(entries : List \(PsName × String\)\) :\s*List \(PsName × String\) -> List \(PsName × String\) :=\s*match entries with/,
+  /\| List\.nil =>\s*fun \(acc : List \(PsName × String\)\) => acc/,
+  /psErasureReverseDeclarationNamesAcc rest;\s*fun \(acc : List \(PsName × String\)\) =>\s*smaller \(List\.cons entry acc\)/,
+  /psBuildErasureDeclarationNames\s+declarations\s*\(PsErasureNameState\.mk List\.nil List\.nil\);/,
+  /psErasureReverseDeclarationNamesAcc state\.entriesRev List\.nil/,
+]) {
+  if (!pattern.test(ordered[0])) {
+    throw new Error(`PSC2_ERASURE_DECLARATION_NAMES_MISSING: ${pattern}`);
+  }
+}
+if (/\.reverse\b|\bused :=|\bentriesRev :=/.test(ordered[0])) {
+  throw new Error("PSC2_ERASURE_DECLARATION_NAMES_FORBIDDEN: generic reverse or implicit state constructor");
+}
+
 process.stdout.write(
-  "PSC2_ERASURE_DECLARATION_NAMES: PASS (declaration-list recursion; state applied afterward; typed name match and explicit constructors)\n",
+  "PSC2_ERASURE_DECLARATION_NAMES: PASS (declaration-list recursion; typed name match; explicit constructors; ordered output through local reverse)\n",
 );

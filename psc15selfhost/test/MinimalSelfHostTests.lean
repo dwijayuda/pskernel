@@ -320,8 +320,11 @@ def psTestErasureDeclarationNames : Bool :=
     | (first, _) :: _ => psNameEq first prior
     | _ => false
   let empty := psBuildErasureDeclarationNames [] initial
+  let publicNames := (psErasureDeclarationNames sources).map Prod.snd
   ordered && preserved && empty.used == initial.used
     && empty.entriesRev.length == 1
+    && publicNames == ["item", "item_", "item__", "Choice"]
+    && (psErasureDeclarationNames []).isEmpty
 
 def main : IO Unit := do
   if psTestErasureDeclarationNames then

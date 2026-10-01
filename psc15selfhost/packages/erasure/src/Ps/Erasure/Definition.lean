@@ -60,14 +60,26 @@ def psBuildErasureDeclarationNames
     (state : PsErasureNameState) : PsErasureNameState :=
   psBuildErasureDeclarationNamesWorker declarations state
 
+def psErasureReverseDeclarationNamesAcc
+    (entries : List (PsName × String)) :
+    List (PsName × String) -> List (PsName × String) :=
+  match entries with
+  | List.nil =>
+      fun (acc : List (PsName × String)) => acc
+  | List.cons entry rest =>
+      let smaller : List (PsName × String) -> List (PsName × String) :=
+        psErasureReverseDeclarationNamesAcc rest;
+      fun (acc : List (PsName × String)) =>
+        smaller (List.cons entry acc)
+
 def psErasureDeclarationNames
     (declarations : List PsDeclaration) :
     List (PsName × String) :=
   let state :=
     psBuildErasureDeclarationNames
       declarations
-      { used := [], entriesRev := [] }
-  state.entriesRev.reverse
+      (PsErasureNameState.mk List.nil List.nil);
+  psErasureReverseDeclarationNamesAcc state.entriesRev List.nil
 
 def psEraseOpenDefinitionWithFuel
     (environment : PsEnvironment) :

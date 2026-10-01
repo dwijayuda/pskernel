@@ -43,6 +43,7 @@ for package in Init Std Lean; do
 done
 [[ "$LEAN_PATH" == "$PROBE_LIB" ]]
 if [[ "$PROBE_FAIL" == 1 ]]; then
+  echo 'simulated stdout diagnostic'
   echo 'simulated frontend failure' >&2
   exit 7
 fi
@@ -64,10 +65,13 @@ printf '%s\\n' "$PROBE_LIB/Init.olean" "$PROBE_LIB/Std.olean" "$PROBE_LIB/Lean/E
   assert.ifError(success.error);
   assert.equal(success.status,0,success.stderr);
   assert.ok(success.stdout.includes(pass));
+  assert.ok(success.stdout.includes(`${lib}/Init.olean`),'keep dependency output in the build log');
   for(const pkg of ['Init','Std','Lean']) assert.deepEqual(await readdir(path.join(lib,pkg)),[]);
   assert.deepEqual((await readdir(lib)).sort(),['Init','Lean','Std']);
   const broken=run(probe,{PROBE_FAIL:'1'});
-  assert.notEqual(broken.status,0);
+  assert.equal(broken.status,7);
+  assert.match(broken.stdout,/simulated stdout diagnostic/);
+  assert.match(broken.stderr,/exit=7/);
   assert.match(broken.stderr,/simulated frontend failure/);
   assert.match(broken.stderr,/native 32-bit Lean stage0 frontend cannot parse/);
   assert.ok(!broken.stdout.includes(pass));

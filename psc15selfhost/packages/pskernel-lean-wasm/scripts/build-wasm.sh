@@ -138,6 +138,7 @@ fi
 # Lean-4.34 erased-RealWorld/Unit ABI corrections deterministically against the
 # pinned source tree. Native signatures stay in the non-Emscripten branches.
 node "$script_dir/apply-wasm-abi.mjs" "$lean_source"
+node "$script_dir/apply-shell-exit-code.mjs" "$lean_source"
 
 # The vendored/study snapshots may not preserve executable bits on Lean helper
 # scripts. Repair the current helper sources before CMake stages them.
@@ -218,11 +219,15 @@ mkdir -p "$stage1_lean_path/Init" "$stage1_lean_path/Std" "$stage1_lean_path/Lea
 # Prove the freshly built stage0 frontend is internally initialized before
 # spending time in stage1 make_stdlib. This is the exact parser/dependency path
 # stage1 relies on and catches bootstrap/link regressions at their true boundary.
-if ! LEAN_PATH="$stage1_lean_path" "$stage0_lean" --deps "$lean_source/src/Lean.lean" >/dev/null; then
-  echo 'native 32-bit Lean stage0 frontend cannot parse src/Lean.lean' >&2
-  exit 1
+# Keep dependency output and the exact process status in the build log.
+# Otherwise a successful parser with a broken shell exit decoder looks silent.
+if LEAN_PATH="$stage1_lean_path" "$stage0_lean" --deps "$lean_source/src/Lean.lean"; then
+  echo 'PSC2_LEAN_KERNEL_WASM_STAGE0_FRONTEND: PASS'
+else
+  stage0_status=$?
+  echo "native 32-bit Lean stage0 frontend cannot parse src/Lean.lean (exit=$stage0_status)" >&2
+  exit "$stage0_status"
 fi
-echo 'PSC2_LEAN_KERNEL_WASM_STAGE0_FRONTEND: PASS'
 
 # stage1-configure has materialized the target helper scripts. Normalize modes
 # because vendored/source snapshots do not reliably preserve executable bits.

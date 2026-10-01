@@ -52,3 +52,5 @@ for (const pattern of forbidden) {
 process.stdout.write(
   "PSC2_ELAB_DECLARATIONS_SELFHOST_SOURCE_SYNTAX: PASS (source-list-recursive worker; environment/accumulator applied post-recursion; explicit module result; local declaration reverse)\n",
 );
+
+await import("./check-erasure-add-unique-string-selfhost-source-syntax.mjs");

@@ -45,6 +45,40 @@ def psCheckedSeedRun (emit : Bool) (kind : PsCompilerSourceKind) : IO Unit := do
         IO.println ("{" ++ PsKernelLean.providerIdentityJsonFields ++
           ",\"accepted\":true,\"admissions\":" ++ psJsonQuote admissions ++ "}")
 
+-- Two-phase host protocol used when the selected checker is external to the
+-- native seed (for example pskernel-lean-wasm). The source is read once and the
+-- prepared Lean value remains alive while the host checks its canonical
+-- admissions. Erasure/emission runs only after the host replies `emit`.
+def psCheckedSeedSession
+    (kind : PsCompilerSourceKind)
+    (sourcePath : String) : IO Unit := do
+  let source ← IO.FS.readFile sourcePath
+  let .ok prepared := psCompilerPrepareSource kind source
+    | throw (IO.userError "PSC2_CHECKED_PREPARE_FAILED")
+  let .ok admissions := psCompilerAdmissionsFromPrepared prepared
+    | throw (IO.userError "PSC2_CHECKED_PREPARED_INTEGRITY_FAILED")
+  let stdout ← IO.getStdout
+  stdout.putStrLn
+    ("{\"phase\":\"prepared\",\"admissions\":" ++ psJsonQuote admissions ++ "}")
+  stdout.flush
+  let command ← (← IO.getStdin).getLine
+  if command.trim == "checked" then
+    stdout.putStrLn "{\"phase\":\"checked\"}"
+    stdout.flush
+  else if command.trim == "emit" then
+    let .ok currentAdmissions := psCompilerAdmissionsFromPrepared prepared
+      | throw (IO.userError "PSC2_CHECKED_PREPARED_INTEGRITY_FAILED")
+    if currentAdmissions != admissions then
+      throw (IO.userError "PSC2_CHECKED_PAYLOAD_CHANGED")
+    match psCompilerTypeScriptFromPrepared prepared with
+    | .error _ => throw (IO.userError "PSC2_CHECKED_EMISSION_FAILED")
+    | .ok output =>
+        stdout.putStrLn
+          ("{\"phase\":\"emitted\",\"typescript\":" ++ psJsonQuote output ++ "}")
+        stdout.flush
+  else
+    throw (IO.userError "PSC2_CHECKED_SEED_SESSION_COMMAND")
+
 def main (args : List String) : IO Unit := do
   match args with
   | ["--test"] => psCheckedSeedTests
@@ -52,4 +86,6 @@ def main (args : List String) : IO Unit := do
   | ["--check-ps"] => psCheckedSeedRun false .proofScript
   | ["--emit-lean"] => psCheckedSeedRun true .lean
   | ["--emit-ps"] => psCheckedSeedRun true .proofScript
-  | _ => throw (IO.userError "usage: psc2_lean_checked_seed --test|--check-lean|--check-ps|--emit-lean|--emit-ps (source on stdin)")
+  | ["--session-lean", sourcePath] => psCheckedSeedSession .lean sourcePath
+  | ["--session-ps", sourcePath] => psCheckedSeedSession .proofScript sourcePath
+  | _ => throw (IO.userError "usage: psc2_lean_checked_seed --test|--check-lean|--check-ps|--emit-lean|--emit-ps|--session-lean <file>|--session-ps <file>")

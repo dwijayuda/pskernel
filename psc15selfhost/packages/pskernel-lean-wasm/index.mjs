@@ -6,6 +6,7 @@ export const leanKernelProviderProtocol='pskernel-lean/1';
 export const leanKernelProviderName='lean4-cpp';
 export const leanKernelProviderVersion='4.34.0';
 export const leanKernelProviderCommit='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
+export const leanKernelProviderProfile='lean4.34-core';
 
 const bundledLauncherPath=fileURLToPath(
   new URL('./wasm/pskernel-lean.cjs',import.meta.url),
@@ -16,11 +17,16 @@ function providerOptions(options={}){
     launcherPath=bundledLauncherPath,
     nodePath=process.execPath,
     maxBuffer=16*1024*1024,
+    timeoutMs=60000,
   }=options;
+  if(!Number.isSafeInteger(timeoutMs)||timeoutMs<=0){
+    throw new TypeError('timeoutMs must be a positive integer');
+  }
   return {
     launcherPath,
     nodePath,
     maxBuffer,
+    timeoutMs,
     // An absent/undefined option still resolves to the bundled artifact.
     // Select integrity checking from the effective launcher, not key presence.
     verifyBundledPrebuilt:launcherPath===bundledLauncherPath,
@@ -36,6 +42,8 @@ function runProviderCommand(command,options,input){
     input,
     encoding:'utf8',
     maxBuffer:options.maxBuffer,
+    timeout:options.timeoutMs,
+    killSignal:'SIGKILL',
     windowsHide:true,
   });
 
@@ -83,6 +91,11 @@ function verifyProviderIdentity(result){
   if(result?.leanCommit!==leanKernelProviderCommit){
     throw new Error(
       `Lean WASM kernel provider commit mismatch: ${String(result?.leanCommit)}`,
+    );
+  }
+  if(result?.profile!==leanKernelProviderProfile){
+    throw new Error(
+      `Lean WASM kernel provider profile mismatch: ${String(result?.profile)}`,
     );
   }
   return result;

@@ -30,15 +30,28 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           npm install --prefix /tmp/psc2-lean-integration --no-audit --no-fund typescript@5.8.3
           echo /tmp/psc2-lean-integration/node_modules/.bin >> "$GITHUB_PATH"
+      - name: Verify imported Lean WASM provider and execute real admission
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean-wasm/host/verify-prebuilt.mjs
+          node --input-type=module <<'NODE' | tee dist-wasm-provider.log
+          import { createKernel } from './packages/pskernel-lean-wasm/index.mjs';
+          const kernel = await createKernel({ timeoutMs: 60000 });
+          const request = JSON.stringify({format:'proofscript-checked-admissions',version:2,admissions:[]});
+          const result = await kernel.checkCanonicalAdmissions(request);
+          if (!result.accepted || result.profile !== 'lean4.34-core') throw new Error('WASM kernel smoke failed');
+          console.log('PSC2_LEAN_WASM_INTEGRATION: PASS');
+          NODE
       - name: Build native replay tools
         id: native
         run: |
           set -euo pipefail
           mkdir -p dist/integration-evidence
+          mv -f dist-wasm-provider.log dist/integration-evidence/wasm-provider.log
           git rev-parse HEAD | tee dist/integration-evidence/source-commit.txt
           test "$(lean --githash)" = 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
           lake build psc1 psc2_selfhost_replay_audit 2>&1 | tee dist/integration-evidence/native-build.log
-      - name: Build and test real Lean-checked seed
+      - name: Build and test real native Lean alternative and checked seed
         run: |
           set -euo pipefail
           (
@@ -47,7 +60,7 @@ jobs:
             lake exe psc2_lean_kernel_provider_tests
             .lake/build/bin/psc2_lean_checked_seed --test
           ) 2>&1 | tee dist/integration-evidence/lean-checked-native.log
-      - name: Checked host tests including real generated program execution
+      - name: Checked host tests with WASM default and native alternative
         run: |
           set -euo pipefail
           test -x lean-checked/.lake/build/bin/psc2_lean_checked_seed
@@ -59,7 +72,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/integration-evidence
-          tar --exclude='*/.lake' --exclude='./dist' --exclude='*/node_modules' --exclude='*/prebuilt' --exclude='*/prebuilts' -czf dist/integration-evidence/source-workspace.tar.gz .
+          tar --exclude='*/.lake' --exclude='./dist' --exclude='*/node_modules' --exclude='*/prebuilt' --exclude='*/prebuilts' \
+            --exclude='./packages/pskernel-lean-wasm/wasm' --exclude='./packages/pskernel-lean-wasm/source' \
+            --exclude='./packages/pskernel-lean-wasm/kernel' \
+            -czf dist/integration-evidence/source-workspace.tar.gz .
           for binary in psc1 psc2_selfhost_replay_audit; do
             if test -f ".lake/build/bin/$binary"; then cp ".lake/build/bin/$binary" dist/integration-evidence/; fi
           done
@@ -76,10 +92,15 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/selfhost-replay-audit.mjs 2>&1 | tee dist/integration-evidence/replay-audit.log
-      - name: Real Lean-checked fixed-point target
+      - name: Real WASM-checked fixed-point target
         run: |
           set -euo pipefail
           npm --prefix lean-checked run fixed-point 2>&1 | tee dist/integration-evidence/checked-fixed-point.log
+      - name: Native Lean checked-profile smoke
+        if: ${{ !cancelled() && steps.native.outcome == 'success' && steps.guards.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          node scripts/checked-selfhost.mjs bootstrap --kernel lean434 2>&1 | tee dist/integration-evidence/native-alternative-bootstrap.log
       - name: Independent compiler-only fixed-point diagnostic
         if: ${{ !cancelled() && steps.native.outcome == 'success' && steps.guards.outcome == 'success' }}
         run: |

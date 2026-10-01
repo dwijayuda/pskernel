@@ -2,23 +2,52 @@
 
 Work branch: `psc2/selfhost-lean-kernel`, based on compiler checkpoint `90d02086146fce06df6d0a720e50f340adcbf52a`.
 
-This work continues compiler self-hosting with `@proofscript/pskernel-lean` as the checked profile's required kernel. It does not modify the separate `pskernel-one` workstream or claim a completed compiler fixed point.
+This work continues compiler self-hosting with `@proofscript/pskernel-lean-wasm` as the temporary default checked provider and `@proofscript/pskernel-lean` as an explicit native alternative. It does not modify the separate `pskernel-one` workstream and does not claim a completed compiler fixed point.
 
 ## Boundaries
 
-The twelve-package portable compiler closure remains unchanged. The original compiler-only `npm run fixed-point` and root CLI remain diagnostic/development paths; they are not silently relabeled as kernel checked. This directory supplies a separate Lake project and checked CLI. The imported provider package is the exact subtree `134d2a9d9866e14fb9c41e4dabbae4050310c367` from provider checkpoint `88b18bbcec82bad02cb3db8ee5b5b96cae91ae86`, with a narrowly hardened Node adapter (timeout and profile validation). No older compiler/resolver implementation is imported from that branch.
+The twelve-package portable compiler closure remains unchanged. Both Lean providers are host/toolchain dependencies outside that closure. The original compiler-only `npm run fixed-point` remains a diagnostic/development path and is not silently relabeled as kernel checked.
 
-Pinned checking identity: Lean 4.34.0, commit `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`, protocol `pskernel-lean/1`, provider `lean4-cpp`, profile `lean4.34-core`. TypeScript is pinned to 5.8.3. CI verifies the native Lean commit before building.
+The native provider snapshot comes from `psc2/pskernel-lean-provider` checkpoint `88b18bbcec82bad02cb3db8ee5b5b96cae91ae86`. The WASM package snapshot comes from `psc2/pskernel-lean-wasm` checkpoint `d6bd812e42b28893e60d52efa9b8a5d17f78e44f`; its real build, prebuilt verification, runtime admission, native/WASM differential parity, and packed npm consumer all passed in workflow run `36916202568`. The integration branch does not wholesale-merge either provider branch: only provider package snapshots and narrowly reviewed host integration are carried here.
 
-The native seed parses and prepares once, revalidates canonical admissions, calls the real provider, then erases the same immutable Lean prepared value. The generated-JavaScript host path prepares once, freezes the semantic graph, associates successful admission with a private session handle, revalidates its canonical encoding, and emits from the same prepared object. No check-then-filesystem-reread operation is used for emission.
+Both providers identify the same pinned semantic implementation:
 
-Only homogeneous `.lean` or `.ps` source projects are supported by this checked loader. Missing `.ps` imports must not fall back to `.lean` siblings. Generated workspaces reuse the manifest-aware resolver, including exact file-set/hash and real-path validation. The native checked path receives that same bounded in-memory snapshot instead of using the old native project resolver.
+```text
+Lean 4.34.0
+commit   293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+protocol pskernel-lean/1
+provider lean4-cpp
+profile  lean4.34-core
+```
 
-This host session is an integrity boundary for a trusted selected compiler and provider; it is not a sandbox against arbitrary malicious host/compiler JavaScript or a replacement of all portable compiler APIs with a universal CheckedCore type. The original low-level preparation/emission APIs remain available. Kernel acceptance is relative to the provider-owned prelude and declared assumptions, and does not prove erasure or backend correctness.
+The execution selector is recorded separately in every checked build receipt. Native and WASM are therefore alternative transports/executions of the same Lean semantic provider, not two independent logical kernels.
+
+## Default and alternative kernels
+
+```text
+lean434-wasm   @proofscript/pskernel-lean-wasm   default
+lean434        @proofscript/pskernel-lean        native alternative
+```
+
+There is no automatic fallback. If the selected provider is missing, malformed, times out, reports a mismatched identity, or rejects the declarations, the checked build fails.
+
+The WASM adapter verifies its bundled manifest before default execution, validates the full provider/profile identity, and applies a mandatory process timeout. The native adapter retains its verified package/prebuilt selection and source-checkout development binary path.
+
+## Prepare once, check, then emit
+
+Generated JavaScript compilers already use an in-memory prepared-session boundary: prepare one module, freeze it, encode its admissions, invoke the selected kernel, then emit from the exact same prepared object.
+
+The native bootstrap seed now has a two-phase session protocol. It reads and prepares the flattened source once, returns canonical admissions, and waits. The Node host invokes the selected provider (WASM by default). Only after successful acceptance does the host send `emit`; the still-live seed then erases and emits from the same prepared Lean value. This avoids using the native provider merely because the seed itself is native.
+
+The seed's existing `--test` path continues to exercise the native provider as an independent alternative/regression. Linking that test support into the bootstrap executable is not evidence that the production WASM-selected session called it.
+
+## Source identity
+
+Only homogeneous `.lean` or `.ps` projects are accepted by this checked loader. Missing `.ps` imports cannot fall back to `.lean` siblings. Generated workspaces reuse the manifest-aware resolver, including file-set/hash and real-path validation. The checked seed receives the same bounded in-memory flattened snapshot rather than the older parent-directory resolver behavior.
 
 ## Commands
 
-Run from `psc15selfhost/`, with the pinned Lean toolchain and `tsc` 5.8.3 available:
+Run from `psc15selfhost/` with the pinned Lean toolchain and TypeScript 5.8.3 available:
 
 ```sh
 npm --prefix lean-checked run build
@@ -26,18 +55,24 @@ npm --prefix lean-checked test
 node lean-checked/psc.mjs --help
 ```
 
-Before a full generated compiler exists, explicitly select the native checked seed:
+Default WASM-checked build:
 
 ```sh
-printf 'def answer: Nat := 42;\n' > /tmp/psc2-checked-answer.ps
-node lean-checked/psc.mjs build /tmp/psc2-checked-answer.ps \
+node lean-checked/psc.mjs build Main.ps \
   --seed lean-checked/.lake/build/bin/psc2_lean_checked_seed \
-  --out dist/checked-example/answer.js
+  --out dist/checked-example/main.js
 ```
 
-On Windows the native executable has an `.exe` suffix. The current integration workflow validates Linux; it is not new cross-platform release evidence.
+Explicit native alternative:
 
-Once the generated compiler has actually been built, omitted `--compiler` selects `dist/lean-checked/bootstrap/packages/compiler/index.js`. It never silently selects a native or unchecked fallback. `--kernel lean434` is the checked profile's only currently supported kernel selector and is the default. `pskernel-one` can be integrated through a separately reviewed provider selection later.
+```sh
+node lean-checked/psc.mjs build Main.ps \
+  --seed lean-checked/.lake/build/bin/psc2_lean_checked_seed \
+  --kernel lean434 \
+  --out dist/checked-example/main.js
+```
+
+The generated compiler defaults to `dist/lean-checked/bootstrap/packages/compiler/index.js` when available. It never silently selects an unchecked compiler or a different kernel.
 
 ## Checked generation target
 
@@ -45,18 +80,20 @@ Once the generated compiler has actually been built, omitted `--compiler` select
 npm --prefix lean-checked run fixed-point
 ```
 
-The command preserves the existing bootstrap prerequisite gates, checks the complete handwritten compiler closure with the native checked seed, emits canonical `.ps`, checks/emits the first JS compiler, and uses generated compiler generations to produce two further checked generations. Outputs live under `dist/lean-checked/{bootstrap,selfhost,repeat}`. It compares the existing canonical source and exact TypeScript compiler outputs. It does not count a standalone receipt inspection as an executed fixed point.
+This defaults to `lean434-wasm`. To exercise the native alternative explicitly:
 
-This complete target is still blocked by compiler-source compatibility. Its command graph being implemented is not evidence of completed generated-compiler execution. The current parser inventory must remain visible and a failing full target must fail CI.
+```sh
+node scripts/checked-selfhost.mjs fixed-point --kernel lean434
+```
+
+The command preserves the existing bootstrap prerequisite gates, checks the complete handwritten compiler closure, emits canonical `.ps`, builds the first JS compiler, and uses generated compiler generations to produce later checked generations. Outputs live under `dist/lean-checked/{bootstrap,selfhost,repeat}` and are compared using the repository's canonical source and exact TypeScript equality rules.
+
+The full target is still blocked by compiler-source compatibility. Provider integration being green is not fixed-point evidence. The current replay frontier must remain visible and a failing full target must fail CI.
 
 ## Artifacts and trust
 
-Each successful checked build stores `.ts`, `.js`, `.d.ts`, `.js.map`, the checked canonical `.admissions.json`, and a `.checked.json` audit record binding source, compiler, admissions and emitted hashes. Kernel rejection occurs before output staging. `tsc` writes into staging with `--noEmitOnError`; final outputs are promoted only after success, and the receipt is written last. Existing outputs may remain after a failed new build and must be interpreted using their recorded hashes.
+Each successful checked build stores `.ts`, `.js`, `.d.ts`, `.js.map`, canonical `.admissions.json`, and a `.checked.json` audit record binding source, compiler, semantic provider identity, selected execution provider, admissions and emitted hashes. Receipts are provenance records, not signed certificates or portable proof objects.
 
-Audit receipts are identities/provenance records, not signed certificates or portable proof objects. A generation integrity check must not be presented as fresh kernel checking. `verify-selfhost` checks recorded identities and exact parity; only the full `fixed-point` invocation that rebuilt every generation can emit `PSC2_LEAN_CHECKED_FIXED_POINT: PASS`.
+Kernel acceptance proves only that the selected pinned Lean provider accepted the submitted canonical declarations under its provider-owned prelude. It does not prove erasure or backend correctness. Native/WASM agreement is useful execution/differential assurance but is not independence of kernel semantics.
 
-## Evidence discipline
-
-The native seed tests include real frontend acceptance, real post-admission erasure/TypeScript emission, forged prepared encoding rejection, and a codec-valid ill-typed declaration rejected by the real kernel. The Node suite contains both real native-seed -> kernel -> tsc -> JS tests and explicitly bounded host/transport tests using doubles. No test-double result establishes full generated-compiler correctness.
-
-The integration CI independently retains native build/tests, Node execution tests, source guards, whole-closure parser inventory, checked fixed-point failure and compiler-only replay diagnostics as artifacts. Read the exact completed run/head rather than inferring self-host success from an earlier passing component.
+Only a real invocation that rebuilt and kernel-checked all configured generations and passed the comparisons may emit `PSC2_LEAN_CHECKED_FIXED_POINT: PASS`.

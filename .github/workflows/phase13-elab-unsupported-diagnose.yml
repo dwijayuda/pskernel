@@ -1,0 +1,82 @@
+name: Phase 13 unsupported-term diagnosis
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-work
+    paths:
+      - .github/workflows/phase13-elab-unsupported-diagnose.yml
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-work
+
+      - name: Install Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply current Phase 13 portability candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          workflow = Path('.github/workflows/phase13-elab-portability-finalize.yml').read_text()
+          start_marker = "          python3 - <<'PY'\n"
+          end_marker = "\n          PY\n"
+          start = workflow.index(start_marker) + len(start_marker)
+          end = workflow.index(end_marker, start)
+          lines = workflow[start:end].splitlines()
+          script = '\n'.join(line[10:] if line.startswith('          ') else line for line in lines)
+          namespace = {'__name__': '__main__'}
+          exec(compile(script, 'phase13-portability-finalize.py', 'exec'), namespace, namespace)
+          PY
+
+      - name: Tag unsupportedTerm return sites without committing
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          needle = 'Except.error PsElabError.unsupportedTerm'
+          out = []
+          count = 0
+          for line_no, line in enumerate(text.splitlines(), 1):
+              if needle in line:
+                  count += 1
+                  marker = f'__diag_unsupported_{count}'
+                  print(f'{marker}: line {line_no}: {line.strip()}')
+                  line = line.replace(
+                      needle,
+                      f'Except.error (PsElabError.unknownName (psRootName "{marker}"))',
+                  )
+              out.append(line)
+          if count == 0:
+              raise SystemExit('no unsupportedTerm sites found to instrument')
+          path.write_text('\n'.join(out) + ('\n' if text.endswith('\n') else ''))
+          print(f'instrumented {count} unsupportedTerm sites')
+          PY
+          git diff --check -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+
+      - name: Run PSC1 bootstrap compiler source gate diagnostically
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc15selfhost
+          npm run bootstrap:check

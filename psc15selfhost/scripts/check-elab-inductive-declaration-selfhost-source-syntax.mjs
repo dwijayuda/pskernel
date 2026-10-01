@@ -23,6 +23,7 @@ const required = [
   /match psSyntaxNameToName nameSyntax with\s*\| Option\.none => Except\.error PsElabError\.emptyName\s*\| Option\.some name =>/,
   /match resultType with\s*\| Option\.none =>[\s\S]*?\| Option\.some sourceType =>/,
   /psElabTerm\s+parameters\.context\s+sourceType\s+Option\.none/,
+  /let resultTypeIsSortOne\s*:\s*Bool\s*:=\s*match instantiatedResultType with/,
   /match withInductiveResult with\s*\| Option\.none =>[\s\S]*?\| Option\.some withInductive =>/,
 ];
 
@@ -38,6 +39,7 @@ const forbidden = [
   /\| none =>/,
   /\| some\s+/,
   /\n\s+none\s+with/,
+  /let resultTypeIsSortOne\s*:=/,
 ];
 for (const pattern of forbidden) {
   if (pattern.test(block)) {
@@ -48,5 +50,5 @@ for (const pattern of forbidden) {
 }
 
 process.stdout.write(
-  "PSC2_ELAB_INDUCTIVE_DECLARATION_SELFHOST_SOURCE_SYNTAX: PASS (explicit Option constructors across inductive declaration elaboration)\n",
+  "PSC2_ELAB_INDUCTIVE_DECLARATION_SELFHOST_SOURCE_SYNTAX: PASS (explicit Option constructors and typed local matches across inductive declaration elaboration)\n",
 );

@@ -45,7 +45,7 @@ jobs:
           exec(compile(script, 'phase13-portability-finalize.py', 'exec'), namespace, namespace)
           PY
 
-      - name: Tag unsupportedTerm return sites without committing
+      - name: Identify projection receiver that is not a structure
         shell: bash
         run: |
           set -euo pipefail
@@ -54,23 +54,21 @@ jobs:
 
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
-          needle = 'Except.error PsElabError.unsupportedTerm'
-          out = []
-          count = 0
-          for line_no, line in enumerate(text.splitlines(), 1):
-              if needle in line:
-                  count += 1
-                  marker = f'__diag_unsupported_{count}'
-                  print(f'{marker}: line {line_no}: {line.strip()}')
-                  line = line.replace(
-                      needle,
-                      f'Except.error (PsElabError.unknownName (psRootName "{marker}"))',
-                  )
-              out.append(line)
-          if count == 0:
-              raise SystemExit('no unsupportedTerm sites found to instrument')
-          path.write_text('\n'.join(out) + ('\n' if text.endswith('\n') else ''))
-          print(f'instrumented {count} unsupportedTerm sites')
+          start = text.index('def psElabProjectionStep\n')
+          end = text.index('\ndef psElabProjectionChainWorker\n', start)
+          block = text[start:end]
+          needle = '| _ => Except.error PsElabError.unsupportedTerm'
+          count = block.count(needle)
+          if count != 1:
+              raise SystemExit(f'expected one projection-head fallback, got {count}')
+          replacement = '''| _ =>
+      Except.error
+        (PsElabError.unknownName
+          (psNameAppendStr
+            (psRootName "__diag_projection_head")
+            fieldName))'''
+          block = block.replace(needle, replacement, 1)
+          path.write_text(text[:start] + block + text[end:])
           PY
           git diff --check -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
 

@@ -18,7 +18,7 @@ permissions:
 jobs:
   source-distribution:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -26,9 +26,27 @@ jobs:
         with:
           node-version: 22
 
+      - name: Install exact Lean toolchain for package-local native rebuild
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc15selfhost/packages/pskernel-lean
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: false
+
       - name: Native kernel source distribution
         working-directory: psc15selfhost
         run: node packages/pskernel-lean/host/source-distribution.test.mjs
+
+      - name: Native package-local source build
+        working-directory: psc15selfhost/packages/pskernel-lean
+        run: npm run build:kernel
+
+      - name: Native package-local prebuilt verification
+        working-directory: psc15selfhost/packages/pskernel-lean
+        run: npm run verify:prebuilt
 
       - name: WASM kernel source distribution
         working-directory: psc15selfhost

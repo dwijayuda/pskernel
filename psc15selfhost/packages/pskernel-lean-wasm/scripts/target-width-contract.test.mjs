@@ -54,4 +54,7 @@ for(const required of [
   assert.ok(workflow.includes(required),`WASM workflow is missing target-width prerequisite: ${required}`);
 }
 
+// Exercise the early probe with empty target roots and failing compilers.
+await import('./frontend-probe-contract.test.mjs');
+
 console.log('PSC2_LEAN_KERNEL_WASM_TARGET_WIDTH_CONTRACT: PASS');

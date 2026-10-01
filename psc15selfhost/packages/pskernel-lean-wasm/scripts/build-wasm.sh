@@ -210,10 +210,15 @@ if [[ ! -x "$stage0_lean" ]]; then
   exit 1
 fi
 
+# As in Lean's src/lean.mk.in, --deps resolves a package by its output
+# directory even before its .olean files have been built. stage0 is C_ONLY;
+# prepare the future stage1 package roots without inventing/copying oleans.
+mkdir -p "$stage1_lean_path/Init" "$stage1_lean_path/Std" "$stage1_lean_path/Lean"
+
 # Prove the freshly built stage0 frontend is internally initialized before
 # spending time in stage1 make_stdlib. This is the exact parser/dependency path
 # stage1 relies on and catches bootstrap/link regressions at their true boundary.
-if ! "$stage0_lean" --deps "$lean_source/src/Lean.lean" >/dev/null; then
+if ! LEAN_PATH="$stage1_lean_path" "$stage0_lean" --deps "$lean_source/src/Lean.lean" >/dev/null; then
   echo 'native 32-bit Lean stage0 frontend cannot parse src/Lean.lean' >&2
   exit 1
 fi

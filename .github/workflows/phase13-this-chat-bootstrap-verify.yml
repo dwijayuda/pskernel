@@ -36,4 +36,4 @@ jobs:
           cd psc15selfhost
           npm run bootstrap:check
 
-# rerun after PSC1-portable psElabMatchMinors recursion rewrite
+# rerun after expanding psElabMatch singleton recursor level list

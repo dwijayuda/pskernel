@@ -85,4 +85,16 @@ await replaceExact('src/library/module.cpp',[
   },
 ]);
 
+// Compact literals serialize eight scalar bytes into pointer-sized slots.
+// Native i386 stage0 needs the same two-slot layout as wasm32. Selecting only
+// LEAN_EMSCRIPTEN truncates compact Name hashes before parser initialization.
+// Keep the 64-bit layout and all runtime platform guards unchanged.
+for(const header of ['stage0/src/include/lean/lean.h','src/include/lean/lean.h']){
+  await replaceExact(header,[{
+    label:'target-width scalar pointer literals',
+    from:'#ifdef LEAN_EMSCRIPTEN\n#define LEAN_SCALAR_PTR_LITERAL',
+    to:'#if UINTPTR_MAX == UINT32_MAX\n#define LEAN_SCALAR_PTR_LITERAL',
+  }]);
+}
+
 console.log('PSC2_LEAN_KERNEL_WASM_ABI_REWRITE: PASS');

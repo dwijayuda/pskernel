@@ -48,4 +48,7 @@ assert.match(
 );
 assert.match(rewrite,/uint8 allow_closures_u8\) \{/);
 
+// Compile the scalar-literal regression before the expensive stage0 build.
+await import('./scalar-literal-contract.test.mjs');
+
 console.log('PSC2_LEAN_KERNEL_WASM_ABI_CONTRACT: PASS');

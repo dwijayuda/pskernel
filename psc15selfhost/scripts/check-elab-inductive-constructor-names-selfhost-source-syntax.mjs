@@ -48,9 +48,29 @@ if (/def psExprListAlphaEq\s*:\s*List PsExpr -> List PsExpr -> Bool/.test(alphaB
   );
 }
 
+const directStart = source.indexOf("def psElabIsDirectRecursiveField\n");
+const directEnd = source.indexOf("\ndef psElabContainerRecursiveName\n", directStart + 1);
+if (directStart < 0 || directEnd < 0) {
+  throw new Error("PSC2_ELAB_DIRECT_RECURSIVE_FIELD_MISSING: declaration block");
+}
+const directBlock = source.slice(directStart, directEnd);
+if (!/Nat\.beq\s*\(psElabListLength view\.args\)\s*\(psElabListLength parameterArgs\)/.test(directBlock)) {
+  throw new Error(
+    "PSC2_ELAB_DIRECT_RECURSIVE_FIELD_MISSING: project-owned list length comparison",
+  );
+}
+if (/\bview\.args\.length\b|\bparameterArgs\.length\b/.test(directBlock)) {
+  throw new Error(
+    "PSC2_ELAB_DIRECT_RECURSIVE_FIELD_FORBIDDEN: method-style list length",
+  );
+}
+
 process.stdout.write(
   "PSC2_ELAB_CONSTRUCTOR_NAMES: PASS (explicit PsName result type for constructor-name selection)\n",
 );
 process.stdout.write(
   "PSC2_ELAB_EXPR_LIST_ALPHA_EQ_SELFHOST_SOURCE_SYNTAX: PASS (left-list-recursive worker; right list applied post-recursion)\n",
+);
+process.stdout.write(
+  "PSC2_ELAB_DIRECT_RECURSIVE_FIELD_SELFHOST_SOURCE_SYNTAX: PASS (project-owned list length; method-style length excluded)\n",
 );

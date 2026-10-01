@@ -992,16 +992,21 @@ def psElabLet
                         body
                         expected
 
+def psExprApplyManyWorker
+    (arguments : List PsExpr) : PsExpr -> PsExpr :=
+  match arguments with
+  | [] =>
+      fun (fn : PsExpr) => fn
+  | argument :: rest =>
+      let smaller : PsExpr -> PsExpr :=
+        psExprApplyManyWorker rest;
+      fun (fn : PsExpr) =>
+        smaller (PsExpr.app fn argument)
+
 def psExprApplyMany
     (fn : PsExpr)
     (arguments : List PsExpr) : PsExpr :=
-  match arguments with
-  | [] =>
-      fn
-  | argument :: rest =>
-      psExprApplyMany
-        (PsExpr.app fn argument)
-        rest
+  psExprApplyManyWorker arguments fn
 
 def psElabIf
     (elaborate :

@@ -1,0 +1,60 @@
+name: Phase 13 replace List.any in name contains
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+    paths:
+      - .github/workflows/phase13-this-chat-namecontains-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2
+      - name: Replace higher-order List.any with PSC1 structural recursion
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          old = '''def psMatchNameListContains (names : List PsName) (target : PsName) : Bool :=
+  List.any names (psMatchNameEqTarget target)
+'''
+          new = '''def psMatchNameListContainsWorker
+    (names : List PsName) : PsName -> Bool :=
+  match names with
+  | [] =>
+      fun (_target : PsName) => false
+  | name :: rest =>
+      let smaller : PsName -> Bool :=
+        psMatchNameListContainsWorker rest;
+      fun (target : PsName) =>
+        if psNameEq name target then
+          true
+        else
+          smaller target
+
+def psMatchNameListContains
+    (names : List PsName)
+    (target : PsName) : Bool :=
+  psMatchNameListContainsWorker names target
+'''
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'expected exactly one psMatchNameListContains block, got {count}')
+          path.write_text(text.replace(old, new, 1))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): make match-name contains PSC1 portable"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-this-chat-2

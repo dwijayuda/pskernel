@@ -585,35 +585,51 @@ def psElabTypedBinders
     Except PsElabError PsElabTypedBindersResult :=
   psElabTypedBindersAcc binders elaborate context []
 
+def psCloseElabTypedBindersWorker
+    (binders : List PsElabTypedBinder) :
+    PsMetaContext ->
+    PsExpr ->
+    PsExpr ->
+    Prod PsExpr PsExpr :=
+  match binders with
+  | [] =>
+      fun (_metaContext : PsMetaContext)
+          (value : PsExpr)
+          (type : PsExpr) =>
+        Prod.mk value type
+  | binder :: rest =>
+      let smaller :
+          PsMetaContext ->
+          PsExpr ->
+          PsExpr ->
+          Prod PsExpr PsExpr :=
+        psCloseElabTypedBindersWorker rest;
+      fun (metaContext : PsMetaContext)
+          (value : PsExpr)
+          (type : PsExpr) =>
+        let binderType :=
+          psMetaInstantiate metaContext binder.type;
+        let closedValue :=
+          PsExpr.lam
+            binder.name
+            binderType
+            (psExprAbstractFVar binder.id value)
+            binder.binder;
+        let closedType :=
+          PsExpr.forallE
+            binder.name
+            binderType
+            (psExprAbstractFVar binder.id type)
+            binder.binder;
+        smaller metaContext closedValue closedType
+
 def psCloseElabTypedBinders
     (metaContext : PsMetaContext)
     (binders : List PsElabTypedBinder)
     (value : PsExpr)
     (type : PsExpr) :
     Prod PsExpr PsExpr :=
-  match binders with
-  | [] =>
-      Prod.mk value type
-  | binder :: rest =>
-      let binderType :=
-        psMetaInstantiate metaContext binder.type;
-      let closedValue :=
-        PsExpr.lam
-          binder.name
-          binderType
-          (psExprAbstractFVar binder.id value)
-          binder.binder;
-      let closedType :=
-        PsExpr.forallE
-          binder.name
-          binderType
-          (psExprAbstractFVar binder.id type)
-          binder.binder;
-      psCloseElabTypedBinders
-        metaContext
-        rest
-        closedValue
-        closedType
+  psCloseElabTypedBindersWorker binders metaContext value type
 
 def psElabLambdaExpectedBody
     (context : PsElabContext)

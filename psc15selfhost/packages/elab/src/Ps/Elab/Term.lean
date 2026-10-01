@@ -2058,6 +2058,44 @@ def psElabMatchRecursorLevels
   else
     Except.ok recursorLevels
 
+def psElabMatchBuildRecursor
+    (scrutineeResult : PsElabTermResult)
+    (scrutineeType : PsExpr)
+    (parameterArgs : List PsExpr)
+    (instantiatedExpected : PsExpr)
+    (minors : PsElabMatchMinorsResult)
+    (recursorName : PsName)
+    (recursorLevels : List PsLevel) :
+    Except PsElabError PsElabTermResult :=
+  let motive :=
+    PsExpr.lam
+      (psRootName "_match")
+      scrutineeType
+      instantiatedExpected
+      PsBinderInfo.explicit;
+  let recursorTail :=
+    List.append
+      minors.minors
+      (List.cons
+        scrutineeResult.term
+        List.nil);
+  let recursorArgs :=
+    List.append
+      parameterArgs
+      (List.cons
+        motive
+        recursorTail);
+  let recursorTerm :=
+    psExprApplyMany
+      (PsExpr.constE
+        recursorName
+        recursorLevels)
+      recursorArgs;
+  psElabResolvedTerm
+    minors.context
+    recursorTerm
+    (Option.some instantiatedExpected)
+
 def psElabMatch
     (elaborate :
       PsElabContext ->
@@ -2160,34 +2198,14 @@ def psElabMatch
                                         | Except.error error =>
                                             Except.error error
                                         | Except.ok minors =>
-                                            let motive :=
-                                              PsExpr.lam
-                                                (psRootName "_match")
-                                                scrutineeType
-                                                instantiatedExpected
-                                                PsBinderInfo.explicit;
-                                            let recursorTail :=
-                                              List.append
-                                                minors.minors
-                                                (List.cons
-                                                  scrutineeResult.term
-                                                  List.nil);
-                                            let recursorArgs :=
-                                              List.append
-                                                (psExprAppViewArgs typeView)
-                                                (List.cons
-                                                  motive
-                                                  recursorTail);
-                                            let recursorTerm :=
-                                              psExprApplyMany
-                                                (PsExpr.constE
-                                                  recursorName
-                                                  recursorLevels)
-                                                recursorArgs;
-                                            psElabResolvedTerm
-                                              minors.context
-                                              recursorTerm
-                                              (Option.some instantiatedExpected)
+                                            psElabMatchBuildRecursor
+                                              scrutineeResult
+                                              scrutineeType
+                                              (psExprAppViewArgs typeView)
+                                              instantiatedExpected
+                                              minors
+                                              recursorName
+                                              recursorLevels
           | _ =>
               Except.error PsElabError.matchScrutineeUnsupported
 

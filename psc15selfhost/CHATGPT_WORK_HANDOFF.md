@@ -66,7 +66,7 @@ Lean build, before committing the repair and removing its temporary workflow.
   guards and Lean compilation, then advanced beyond Term.lean to the new
   Declaration.lean blocker below. No Compiler2/3/4 or fingerprint success is claimed.
 
-## Current first blocker and active repair
+## Confirmed binder order repair
 
 Completed full run `36813544281` at `e3ae2d21`, job `110213588016`, establishes:
 
@@ -79,7 +79,7 @@ projection, but generic List.reverse is outside the bootstrap environment. The
 existing `psElabTypedBinderListReverse` helper in Term.lean is already compatible
 and preserves source-order binders.
 
-The active repair replaces only that expression with
+Commit `eb75a18d7b9e61af1fc03e29337705717babed7f` replaces only that expression with
 `psElabTypedBinderListReverse bindersRev`, still passed to
 `psElabExplicitParameterIds`. It adds
 `check-elab-structural-recursion-source-selfhost-source-syntax.mjs` and imports it
@@ -90,7 +90,36 @@ in this one declaration.
 - Focused source guard: RED on the prior expression, GREEN on the replacement.
 - Aggregate source gate and local bootstrap closure check: GREEN.
 - `git diff --check`: GREEN.
-- CI for this Declaration.lean repair is pending. Do not infer the next blocker.
+- CI run `36813972553`, job `110214900503`, passed source guards and Lean
+  compilation, then advanced to the constructor-name match below.
+
+## Current first blocker and active repair
+
+Completed full run `36813972553` at `eb75a18d`, job `110214900503`, establishes:
+
+```text
+PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Declaration.lean: declaration=psElabInductiveConstructorNames: matchExpectedType
+```
+
+The active source repair adds `: PsName` to `let currentName := match ...` in
+that declaration. PSC1 needs the expected result type to elaborate this local
+match. The new `check-elab-inductive-constructor-names-selfhost-source-syntax.mjs`
+is imported by the direct source gate. It was RED before the annotation and
+GREEN afterward.
+
+Concurrent commits `6803b377`, `b8ba8ce1`, and `b818702b` added a second binder
+reverse guard and a one-shot repair for the already resolved previous blocker.
+That guard expected a new helper named `psElabReverseTypedBindersAcc`, so it
+failed on the existing implementation. This session reproduced the failure and
+prepared a guard alignment. Concurrent `8866690e` landed the equivalent guard
+alignment first; this session discarded its duplicate. `2515d1e8` removed the
+failed one-shot workflow. Preserve both commits. The helper implementation is
+also guarded by the existing lambda source gate.
+
+Base for the constructor-name annotation:
+`2515d1e8d46787697d1a30858d8df516bae1dfe8`.
+Focused guards, aggregate source gate, local closure check, and diff whitespace
+check all pass. Official Lean/fixed-point CI for this repair is pending.
 
 ## Previously resolved blockers
 

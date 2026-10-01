@@ -1,5 +1,6 @@
 import "./check-elab-apply-args-recursion-selfhost-source-syntax.mjs";
 import "./check-elab-structural-recursion-source-selfhost-source-syntax.mjs";
+import "./check-elab-inductive-constructor-names-selfhost-source-syntax.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

@@ -18,41 +18,43 @@ from `Pasted text(20260930-195252).txt`.
 
 ## Current snapshot and first blocker
 
-Base for this repair: `ec91470f31e53c2ebd7c6d529853b5f3d5ea731a`.
+Base for this repair: `954eefd2a6f31907e8529ac64c9f6977b98e1e94`.
 This is the observed parent, not the commit containing this document.
 
-Completed full run `36845211567`, job `110313599959`, passed source guards and
-Lean compilation, and confirmed the prior three-call inductive-constructor
-repair. Its fixed-point probe then stopped at:
+Full run `36846157136`, job `110316681414`, passed source guards and Lean
+compilation, and the self-compiler advanced beyond constructor-list traversal.
+It then failed with:
 
 ```text
-PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Declaration.lean: declaration=psElabInductiveConstructors: matchPatternUnsupported
+PSC1_PROJECT_ELAB_FAILED: packages/elab/src/Ps/Elab/Declaration.lean: declaration=psWrapRecursiveHypotheses: matchConstructorUnknown:PsExpr.body
 ```
 
-The declaration matched index, source list, and accumulated declarations in a
-multi-argument equation. It also varied index/accumulator during recursion and
-called generic reverse. The active normalization keeps its public curried type
-and behavior, using:
+The declaration used multi-argument equations for index list and body. PSC1
+interpreted the `body` pattern as an expression constructor. This repair makes
+indices and body explicit parameters, then matches only the index list. The
+recursive call still passes unchanged motive ID, field arguments, and body.
+No new worker or altered hypothesis ordering is needed.
 
-- A source-list structural worker with context, parameter binders, and inductive
-  name invariant. Its result accepts index and the declaration accumulator.
-- A local declaration reverse helper, preserving the semantics of nonempty
-  initial accumulators as well as normal empty-accumulator calls.
-- A thin wrapper preserving the original argument order.
-- A focused source guard imported directly by the closure source gate.
-- A runtime regression in `MinimalSelfHostTests.lean` checking starting index 7,
-  constructor order, a two-declaration accumulated prefix, empty input, and
-  propagation of an invalid constructor-name error.
+A focused source guard is imported by the direct closure source gate. It was
+RED before the signature/match normalization and GREEN afterward. Aggregate
+source checks, local closure, JavaScript syntax check, and diff whitespace pass.
 
-## Current repair verification
+## Runtime regression evidence
 
-- Focused source guard observed RED before the production rewrite.
-- Focused and aggregate source gates: GREEN after the rewrite.
-- Local bootstrap closure: GREEN, 54 modules/12 packages/one direct root import.
-- `git diff --check`: GREEN.
-- Native runtime regression, official Lean build, and fixed-point CI are pending.
-  Do not claim the new runtime test passed until its CI output is observed.
-- No Compiler2/3/4 or parity/fingerprint success is claimed.
+`954eefd2` added a native test to `MinimalSelfHostTests.lean` for constructor
+traversal: source order, starting index 7, a two-declaration accumulated prefix,
+empty input, and invalid-name error propagation. The failing CI log truncates
+earlier output, so this test's result was not directly visible in run
+`36846157136`. Do not claim it passed from that log.
+
+The existing CI-only closure probe now runs `lake exe psc2_minimal_selfhost_tests`
+before fixed-point compilation and emits
+`PSC2_FIXED_POINT_RUNTIME_REGRESSIONS: PASS` on success. That marker survives the
+existing workflow's failure-summary filter. This changes only the verification
+script inside psc15selfhost; the canonical fixed-point command remains unchanged.
+
+Official Lean/runtime and fixed-point confirmation for this repair are pending.
+No Compiler2/3/4 or parity/fingerprint success is claimed.
 
 ## Confirmed progress in this Work session
 
@@ -63,6 +65,7 @@ and behavior, using:
 | Explicit PsName type for constructor-name local match | `4eea0276` | Run `36814537484` advanced to binder arguments |
 | Explicit binder-to-expression mapping after typed reversal | Concurrent `3065721e` | Later runs advanced beyond binder arguments |
 | Typed field reversal and parameter/field counts in inductive constructors | `ec91470f` | Run `36845211567` advanced to constructor-list traversal |
+| Structural constructor traversal with ordered accumulator reversal | `954eefd2` | Run `36846157136` advanced to recursive-hypothesis wrapping |
 
 The two concurrent source repairs exactly matched this session's tested files:
 
@@ -117,7 +120,7 @@ Old unattached semicolon blobs are also obsolete.
 
 ```sh
 cd psc15selfhost
-node scripts/check-elab-inductive-constructors-selfhost-source-syntax.mjs
+node scripts/check-elab-wrap-recursive-hypotheses-selfhost-source-syntax.mjs
 npm run check:selfhost-source-syntax
 node scripts/check-bootstrap-closure.mjs
 lake build Ps.Elab.Declaration

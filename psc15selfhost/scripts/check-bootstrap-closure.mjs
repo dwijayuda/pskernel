@@ -362,6 +362,19 @@ if (
     throw new Error("PSC2_FIXED_POINT_EVIDENCE_TOOL_INSTALL_FAILED");
   }
 
+  // Emit a retained marker before self-compilation: the CI failure summary
+  // keeps PSC2_FIXED_POINT lines, but can otherwise hide earlier runtime tests.
+  const runtime = spawnSync(
+    "lake",
+    ["exe", "psc2_minimal_selfhost_tests"],
+    { cwd: root, stdio: "inherit", encoding: "utf8" },
+  );
+  if (runtime.error) throw runtime.error;
+  if (runtime.status !== 0) {
+    throw new Error("PSC2_FIXED_POINT_RUNTIME_REGRESSIONS_FAILED");
+  }
+  process.stdout.write("PSC2_FIXED_POINT_RUNTIME_REGRESSIONS: PASS\n");
+
   const toolBin = path.join(toolPrefix, "node_modules", ".bin");
   const fixedPoint = spawnSync(
     npm,

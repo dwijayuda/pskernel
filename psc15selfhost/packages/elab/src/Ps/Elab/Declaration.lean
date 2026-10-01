@@ -783,10 +783,12 @@ def psElabAppendDeclarations
 
 def psWrapRecursiveHypotheses
     (motiveId : Nat)
-    (fieldArgs : List PsExpr) :
-    List Nat -> PsExpr -> Except PsElabError PsExpr
-  | [], body => Except.ok body
-  | fieldIndex :: rest, body =>
+    (fieldArgs : List PsExpr)
+    (indices : List Nat)
+    (body : PsExpr) : Except PsElabError PsExpr :=
+  match indices with
+  | List.nil => Except.ok body
+  | List.cons fieldIndex rest =>
       match psElabExprAt fieldArgs fieldIndex with
       | none => Except.error PsElabError.unsupportedTerm
       | some recursiveValue =>

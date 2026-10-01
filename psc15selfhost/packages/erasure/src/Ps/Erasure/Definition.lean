@@ -428,9 +428,9 @@ def psEraseCoreModuleWithRuntimePrelude
     (declarations : List PsDeclaration) :
     Except PsErasureError PsVerifiedIrModule :=
   let runtimeDeclarations :=
-    List.append runtimePreludeDeclarations declarations
-  let names := psErasureDeclarationNames runtimeDeclarations
-  let baseScope := psErasureScopeEmpty names
+    List.append runtimePreludeDeclarations declarations;
+  let names := psErasureDeclarationNames runtimeDeclarations;
+  let baseScope := psErasureScopeEmpty names;
   match
       psPrepareRuntimeStructures
         environment

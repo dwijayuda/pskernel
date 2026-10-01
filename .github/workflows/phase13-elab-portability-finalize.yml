@@ -51,6 +51,17 @@ jobs:
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
 
+          def replace_decl(name, replacement):
+              global text
+              pattern = re.compile(
+                  rf'^def {re.escape(name)}\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+                  re.MULTILINE | re.DOTALL,
+              )
+              matches = list(pattern.finditer(text))
+              if len(matches) != 1:
+                  raise SystemExit(f'expected one declaration {name}, got {len(matches)}')
+              text = text[:matches[0].start()] + replacement.rstrip() + '\n\n' + text[matches[0].end():]
+
           old = 'String.Internal.append "_wild" (toString index)'
           new = 'String.Internal.append "_wild" (psNatToString index)'
           count = text.count(old)
@@ -99,6 +110,178 @@ jobs:
               raise SystemExit(f'expected two List.append uses in psElabMatch, got {append_count}')
           match_block = match_block.replace('List.append', 'psElabListAppend')
           text = text[:matches[0].start()] + match_block + text[matches[0].end():]
+
+          replace_decl('psElabApplyArgsWithFuel', r'''def psElabApplyArgsWithFuelWorker
+              (remainingFuel : Nat) :
+              (PsElabContext -> PsSyntaxTerm -> Option PsExpr -> Except PsElabError PsElabTermResult) ->
+              PsElabTermResult ->
+              List PsSyntaxTerm ->
+              List Nat ->
+              Except PsElabError PsElabApplicationResult :=
+            match remainingFuel with
+            | 0 =>
+                fun (_elaborate : PsElabContext -> PsSyntaxTerm -> Option PsExpr -> Except PsElabError PsElabTermResult) =>
+                  fun (_current : PsElabTermResult) =>
+                    fun (_arguments : List PsSyntaxTerm) =>
+                      fun (_pendingInstancesRev : List Nat) =>
+                        Except.error PsElabError.fuelExhausted
+            | fuel + 1 =>
+                let smaller := psElabApplyArgsWithFuelWorker fuel;
+                fun (elaborate : PsElabContext -> PsSyntaxTerm -> Option PsExpr -> Except PsElabError PsElabTermResult) =>
+                  fun (current : PsElabTermResult) =>
+                    fun (arguments : List PsSyntaxTerm) =>
+                      fun (pendingInstancesRev : List Nat) =>
+                        let currentType : PsExpr :=
+                          psWhnf
+                            current.context.environment
+                            current.context.metaContext
+                            current.context.localContext
+                            current.type;
+                        match currentType with
+                        | PsExpr.forallE _ domain body binder =>
+                            if psBinderAcceptsExplicitArgument binder then
+                              match arguments with
+                              | [] =>
+                                  Except.ok {
+                                    result := current
+                                    pendingInstancesRev := pendingInstancesRev
+                                  }
+                              | argument :: rest =>
+                                  match elaborate current.context argument (Option.some domain) with
+                                  | Except.error error => Except.error error
+                                  | Except.ok elaboratedArgument =>
+                                      let nextTerm :=
+                                        PsExpr.app current.term elaboratedArgument.term;
+                                      let nextType :=
+                                        psExprInstantiate1 body elaboratedArgument.term;
+                                      let nextResult : PsElabTermResult := {
+                                        context := elaboratedArgument.context
+                                        term := nextTerm
+                                        type := nextType
+                                      };
+                                      smaller
+                                        elaborate
+                                        nextResult
+                                        rest
+                                        pendingInstancesRev
+                            else if
+                                psElabBoolAnd
+                                  (psBinderIsStrictImplicit binder)
+                                  (psSyntaxTermListIsEmpty arguments) then
+                              Except.ok {
+                                result := current
+                                pendingInstancesRev := pendingInstancesRev
+                              }
+                            else
+                              let kind : PsMetaVarKind :=
+                                if psBinderIsInstanceImplicit binder then
+                                  PsMetaVarKind.synthetic
+                                else
+                                  PsMetaVarKind.natural;
+                              let fresh :=
+                                psMetaFresh
+                                  current.context.metaContext
+                                  current.context.localContext
+                                  domain
+                                  kind;
+                              let nextContext :=
+                                psElabContextWithMeta current.context fresh.context;
+                              let nextResult : PsElabTermResult := {
+                                context := nextContext
+                                term := PsExpr.app current.term fresh.expr
+                                type := psExprInstantiate1 body fresh.expr
+                              };
+                              let nextPending : List Nat :=
+                                if psBinderIsInstanceImplicit binder then
+                                  match fresh.expr with
+                                  | PsExpr.mvar id => List.cons id pendingInstancesRev
+                                  | _ => pendingInstancesRev
+                                else
+                                  pendingInstancesRev;
+                              smaller elaborate nextResult arguments nextPending
+                        | _ =>
+                            if psSyntaxTermListIsEmpty arguments then
+                              Except.ok {
+                                result := current
+                                pendingInstancesRev := pendingInstancesRev
+                              }
+                            else
+                              Except.error
+                                (PsElabError.infer PsInferError.expectedFunction)
+
+          def psElabApplyArgsWithFuel
+              (elaborate :
+                PsElabContext ->
+                PsSyntaxTerm ->
+                Option PsExpr ->
+                Except PsElabError PsElabTermResult)
+              (remainingFuel : Nat)
+              (current : PsElabTermResult)
+              (arguments : List PsSyntaxTerm)
+              (pendingInstancesRev : List Nat) :
+              Except PsElabError PsElabApplicationResult :=
+            psElabApplyArgsWithFuelWorker
+              remainingFuel
+              elaborate
+              current
+              arguments
+              pendingInstancesRev''')
+
+          replace_decl('psElabSolvePendingInstances', r'''def psElabSolvePendingInstancesWorker
+              (pendingInstances : List Nat) :
+              PsElabTermResult -> Except PsElabError PsElabTermResult :=
+            match pendingInstances with
+            | [] =>
+                fun (current : PsElabTermResult) =>
+                  let metaContext := current.context.metaContext;
+                  Except.ok {
+                    context := current.context
+                    term := psMetaInstantiate metaContext current.term
+                    type := psMetaInstantiate metaContext current.type
+                  }
+            | id :: rest =>
+                let smaller : PsElabTermResult -> Except PsElabError PsElabTermResult :=
+                  psElabSolvePendingInstancesWorker rest;
+                fun (current : PsElabTermResult) =>
+                  let metaContext := current.context.metaContext;
+                  match psMetaFindAssignment metaContext id with
+                  | some _ => smaller current
+                  | none =>
+                      match psMetaFindDecl metaContext id with
+                      | none =>
+                          Except.error PsElabError.implicitApplicationUnsupported
+                      | some declaration =>
+                          let target := psMetaInstantiate metaContext declaration.type;
+                          if psExprHasUnresolvedMeta target then
+                            Except.error PsElabError.implicitApplicationUnsupported
+                          else
+                            let synthesized :=
+                              psSynthInstance
+                                current.context.environment
+                                current.context.localContext
+                                current.context.instances
+                                metaContext
+                                target;
+                            match synthesized.value with
+                            | none =>
+                                Except.error PsElabError.implicitApplicationUnsupported
+                            | some value =>
+                                match psMetaAssign synthesized.context id value with
+                                | none =>
+                                    Except.error PsElabError.implicitApplicationUnsupported
+                                | some assigned =>
+                                    let assignedResult : PsElabTermResult := {
+                                      context := psElabContextWithMeta current.context assigned
+                                      term := current.term
+                                      type := current.type
+                                    };
+                                    smaller assignedResult
+
+          def psElabSolvePendingInstances
+              (current : PsElabTermResult)
+              (pendingInstances : List Nat) :
+              Except PsElabError PsElabTermResult :=
+            psElabSolvePendingInstancesWorker pendingInstances current''')
 
           # PSC1 resolves constructors in patterns, but expression-position Option
           # constructors in this closure must be explicit. Qualifying them is

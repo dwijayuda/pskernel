@@ -192,6 +192,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Declaration.lean')
           text = path.read_text()
@@ -209,6 +210,34 @@ jobs:
           if current_count != 1:
               raise SystemExit(f'expected one constructor-name match target, got {current_count}')
           text = text.replace(old_current, new_current, 1)
+
+          pattern = re.compile(
+              r'^def psElabBinderArguments\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+              re.MULTILINE | re.DOTALL,
+          )
+          matches = list(pattern.finditer(text))
+          if len(matches) != 1:
+              raise SystemExit(f'expected one psElabBinderArguments declaration, got {len(matches)}')
+          replacement = r'''def psElabBinderArgumentsWorker
+              (bindersRev : List PsElabTypedBinder) :
+              List PsExpr -> List PsExpr :=
+            match bindersRev with
+            | List.nil =>
+                fun (arguments : List PsExpr) => arguments
+            | List.cons binder rest =>
+                let smaller : List PsExpr -> List PsExpr :=
+                  psElabBinderArgumentsWorker rest;
+                fun (arguments : List PsExpr) =>
+                  smaller
+                    (List.cons
+                      (psElabBinderArgument binder)
+                      arguments)
+
+          def psElabBinderArguments
+              (bindersRev : List PsElabTypedBinder) : List PsExpr :=
+            psElabBinderArgumentsWorker bindersRev List.nil'''
+          match = matches[0]
+          text = text[:match.start()] + replacement.rstrip() + '\n\n' + text[match.end():]
 
           path.write_text(text)
           PY

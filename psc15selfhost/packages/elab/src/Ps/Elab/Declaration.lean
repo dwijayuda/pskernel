@@ -1367,7 +1367,9 @@ def psPrependBatchReverse
     (declarations : List PsDeclaration)
     (declarationsRev : List PsDeclaration) :
     List PsDeclaration :=
-  psElabAppendDeclarations declarations.reverse declarationsRev
+  psElabAppendDeclarations
+    (psElabReverseDeclarations declarations)
+    declarationsRev
 
 def psElabDeclarations
     (environment : PsEnvironment) :

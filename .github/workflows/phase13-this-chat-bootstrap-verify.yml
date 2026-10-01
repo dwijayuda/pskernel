@@ -36,4 +36,11 @@ jobs:
           cd psc15selfhost
           npm run bootstrap:check
 
-# rerun after isolating psElabMatch PsRecursorInfo projections
+      - name: Retain Lean-built PSC1 for local source diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-lean-bootstrap-${{ github.sha }}
+          path: psc15selfhost/.lake/build/bin/psc1
+          if-no-files-found: warn
+          retention-days: 1

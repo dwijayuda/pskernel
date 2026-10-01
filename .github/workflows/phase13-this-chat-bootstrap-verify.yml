@@ -36,4 +36,4 @@ jobs:
           cd psc15selfhost
           npm run bootstrap:check
 
-# rerun after giving match-constructor binders an explicit List PsSyntaxName expected type
+# rerun after qualifying match-constructor expected expression as Option.some

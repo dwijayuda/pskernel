@@ -1514,6 +1514,68 @@ def psSyntaxNameListHasDuplicate
     (names : List PsSyntaxName) : Bool :=
   psSyntaxNameListHasDuplicateWorker names
 
+def psElabMatchFieldsWorker
+    (binderSyntaxes : List PsSyntaxName) :
+    PsElabContext ->
+    PsName ->
+    PsExpr ->
+    List PsElabMatchField ->
+    Except PsElabError PsElabMatchFieldsResult :=
+  match binderSyntaxes with
+  | [] =>
+      fun (context : PsElabContext) =>
+        fun (_inductiveName : PsName) =>
+          fun (_cursor : PsExpr) =>
+            fun (fieldsRev : List PsElabMatchField) =>
+              Except.ok {
+                context := context
+                fieldsRev := fieldsRev
+              }
+  | binderSyntax :: rest =>
+      let smaller :
+          PsElabContext ->
+          PsName ->
+          PsExpr ->
+          List PsElabMatchField ->
+          Except PsElabError PsElabMatchFieldsResult :=
+        psElabMatchFieldsWorker rest;
+      fun (context : PsElabContext) =>
+        fun (inductiveName : PsName) =>
+          fun (cursor : PsExpr) =>
+            fun (fieldsRev : List PsElabMatchField) =>
+              match psInferEnsureForall
+                  context.environment
+                  context.metaContext
+                  context.localContext
+                  cursor with
+              | Except.error error =>
+                  Except.error (PsElabError.infer error)
+              | Except.ok forallView =>
+                  match psSyntaxNameToName binderSyntax with
+                  | none => Except.error PsElabError.emptyName
+                  | some binderName =>
+                      let pushed :=
+                        psLocalPushBinding
+                          context.localContext
+                          binderName
+                          forallView.domain
+                          forallView.binder;
+                      let nextContext :=
+                        psElabContextWithLocal context pushed.context;
+                      let field : PsElabMatchField := {
+                        id := pushed.id
+                        name := binderName
+                        type := forallView.domain
+                        binder := forallView.binder
+                      };
+                      smaller
+                        nextContext
+                        inductiveName
+                        (psExprInstantiate1
+                          forallView.body
+                          (PsExpr.fvar pushed.id))
+                        (List.cons field fieldsRev)
+
 def psElabMatchFields
     (context : PsElabContext)
     (inductiveName : PsName)
@@ -1521,46 +1583,12 @@ def psElabMatchFields
     (binderSyntaxes : List PsSyntaxName)
     (fieldsRev : List PsElabMatchField) :
     Except PsElabError PsElabMatchFieldsResult :=
-  match binderSyntaxes with
-  | [] =>
-      Except.ok {
-        context := context
-        fieldsRev := fieldsRev
-      }
-  | binderSyntax :: rest =>
-      match psInferEnsureForall
-          context.environment
-          context.metaContext
-          context.localContext
-          cursor with
-      | Except.error error =>
-          Except.error (PsElabError.infer error)
-      | Except.ok forallView =>
-          match psSyntaxNameToName binderSyntax with
-          | none => Except.error PsElabError.emptyName
-          | some binderName =>
-              let pushed :=
-                psLocalPushBinding
-                  context.localContext
-                  binderName
-                  forallView.domain
-                  forallView.binder;
-              let nextContext :=
-                psElabContextWithLocal context pushed.context;
-              let field : PsElabMatchField := {
-                id := pushed.id
-                name := binderName
-                type := forallView.domain
-                binder := forallView.binder
-              };
-              psElabMatchFields
-                nextContext
-                inductiveName
-                (psExprInstantiate1
-                  forallView.body
-                  (PsExpr.fvar pushed.id))
-                rest
-                (List.cons field fieldsRev)
+  psElabMatchFieldsWorker
+    binderSyntaxes
+    context
+    inductiveName
+    cursor
+    fieldsRev
 
 def psElabMatchFieldAt
     (fields : List PsElabMatchField)

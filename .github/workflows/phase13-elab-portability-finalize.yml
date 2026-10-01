@@ -50,11 +50,19 @@ jobs:
 
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
+
           old = 'String.Internal.append "_wild" (toString index)'
           new = 'String.Internal.append "_wild" (psNatToString index)'
           count = text.count(old)
           if count != 1:
               raise SystemExit(f'expected one wildcard Nat-render target, got {count}')
+          text = text.replace(old, new, 1)
+
+          old = '[resultLevel]'
+          new = 'List.cons resultLevel List.nil'
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'expected one recursor-level singleton target, got {count}')
           text = text.replace(old, new, 1)
 
           # PSC1 resolves constructors in patterns, but expression-position Option

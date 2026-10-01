@@ -1,0 +1,125 @@
+name: Phase 13 one-shot portability patch
+
+on:
+  push:
+    branches:
+      - psc2/kernel-core-phase13-checkedcore-shadow-work
+    paths:
+      - .github/workflows/phase13-one-shot-portability-patch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: psc2/kernel-core-phase13-checkedcore-shadow-work
+
+      - name: Curry typed-binder recursion for PSC1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
+          text = path.read_text()
+          start_marker = 'def psElabTypedBindersAcc\n'
+          end_marker = '\ndef psElabTypedBinders\n'
+          start = text.index(start_marker)
+          end = text.index(end_marker, start)
+          old = text[start:end]
+          if old.count('psElabTypedBindersAcc') != 2:
+              raise SystemExit('unexpected typed-binder worker shape')
+          new = '''def psElabTypedBindersAcc
+    (entries : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
+    (PsElabContext ->
+      PsSyntaxTerm ->
+      Option PsExpr ->
+      Except PsElabError PsElabTermResult) ->
+    PsElabContext ->
+    List PsElabTypedBinder ->
+    Except PsElabError PsElabTypedBindersResult :=
+  match entries with
+  | [] =>
+      fun (_elaborate :
+            PsElabContext ->
+            PsSyntaxTerm ->
+            Option PsExpr ->
+            Except PsElabError PsElabTermResult)
+          (context : PsElabContext)
+          (bindersRev : List PsElabTypedBinder) =>
+        Except.ok {
+          context := context
+          bindersRev := bindersRev
+        }
+  | List.cons entry rest =>
+      let smaller :
+          (PsElabContext ->
+            PsSyntaxTerm ->
+            Option PsExpr ->
+            Except PsElabError PsElabTermResult) ->
+          PsElabContext ->
+          List PsElabTypedBinder ->
+          Except PsElabError PsElabTypedBindersResult :=
+        psElabTypedBindersAcc rest;
+      fun (elaborate :
+            PsElabContext ->
+            PsSyntaxTerm ->
+            Option PsExpr ->
+            Except PsElabError PsElabTermResult)
+          (context : PsElabContext)
+          (bindersRev : List PsElabTypedBinder) =>
+        let head := Prod.fst entry;
+        let sourceType := Prod.snd entry;
+        match psSyntaxNameToName head.name with
+        | none => Except.error PsElabError.emptyName
+        | some name =>
+            match elaborate context sourceType Option.none with
+            | Except.error error => Except.error error
+            | Except.ok typeResult =>
+                match psInferEnsureSort
+                    typeResult.context.environment
+                    typeResult.context.metaContext
+                    typeResult.context.localContext
+                    typeResult.type with
+                | Except.error error =>
+                    Except.error (PsElabError.infer error)
+                | Except.ok _ =>
+                    let binder := psElabBinderKindToCore head.kind;
+                    let pushed :=
+                      psLocalPushBinding
+                        typeResult.context.localContext
+                        name
+                        typeResult.term
+                        binder;
+                    let nextContext :=
+                      psElabContextWithLocal
+                        typeResult.context
+                        pushed.context;
+                    let binderEntry : PsElabTypedBinder := {
+                      id := pushed.id
+                      name := name
+                      type := typeResult.term
+                      binder := binder
+                    };
+                    smaller
+                      elaborate
+                      nextContext
+                      (List.cons binderEntry bindersRev)
+'''
+          text = text[:start] + new + text[end:]
+          old_call = 'psElabTypedBindersAcc elaborate context binders []'
+          new_call = 'psElabTypedBindersAcc binders elaborate context []'
+          if text.count(old_call) != 1:
+              raise SystemExit(f'expected wrapper call once, found {text.count(old_call)}')
+          path.write_text(text.replace(old_call, new_call, 1))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
+          git diff --cached --check
+          git commit -m "fix(elab): curry typed binder recursion for PSC1"
+          git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

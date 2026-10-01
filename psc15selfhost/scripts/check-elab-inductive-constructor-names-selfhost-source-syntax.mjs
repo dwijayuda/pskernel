@@ -65,6 +65,26 @@ if (/\bview\.args\.length\b|\bparameterArgs\.length\b/.test(directBlock)) {
   );
 }
 
+const inductiveConstructorStart = source.indexOf("def psElabInductiveConstructor\n");
+const inductiveConstructorEnd = source.indexOf("\ndef psSetConstructorIndex\n", inductiveConstructorStart + 1);
+if (inductiveConstructorStart < 0 || inductiveConstructorEnd < 0) {
+  throw new Error("PSC2_ELAB_INDUCTIVE_CONSTRUCTOR_MISSING: declaration block");
+}
+const inductiveConstructorBlock = source.slice(
+  inductiveConstructorStart,
+  inductiveConstructorEnd,
+);
+if (!/psElabRecursiveFieldIndices\s+fields\.context\s+inductiveName\s+parameterArgs\s+\(psElabTypedBinderListReverse fields\.bindersRev\)/.test(inductiveConstructorBlock)) {
+  throw new Error(
+    "PSC2_ELAB_INDUCTIVE_CONSTRUCTOR_MISSING: project-owned typed-binder reverse",
+  );
+}
+if (/\bfields\.bindersRev\.reverse\b/.test(inductiveConstructorBlock)) {
+  throw new Error(
+    "PSC2_ELAB_INDUCTIVE_CONSTRUCTOR_FORBIDDEN: method-style typed-binder reverse",
+  );
+}
+
 process.stdout.write(
   "PSC2_ELAB_CONSTRUCTOR_NAMES: PASS (explicit PsName result type for constructor-name selection)\n",
 );
@@ -73,4 +93,7 @@ process.stdout.write(
 );
 process.stdout.write(
   "PSC2_ELAB_DIRECT_RECURSIVE_FIELD_SELFHOST_SOURCE_SYNTAX: PASS (project-owned list length; method-style length excluded)\n",
+);
+process.stdout.write(
+  "PSC2_ELAB_INDUCTIVE_CONSTRUCTOR_SELFHOST_SOURCE_SYNTAX: PASS (project-owned typed-binder reverse; method-style reverse excluded)\n",
 );

@@ -1,4 +1,4 @@
-name: Phase 13 elaborator forall Option portability patch
+name: Phase 13 elaborator let Option portability patch
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
         with:
           ref: psc2/kernel-core-phase13-checkedcore-shadow-work
 
-      - name: Qualify forall body expected Option
+      - name: Qualify let elaboration Option values
         shell: bash
         run: |
           set -euo pipefail
@@ -27,16 +27,22 @@ jobs:
 
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
-          old = '      match elaborate binderResult.context body none with\n'
-          new = '      match elaborate binderResult.context body Option.none with\n'
-          count = text.count(old)
-          if count != 1:
-              raise SystemExit(f'expected exactly one psElabForall bare-none call, got {count}')
-          path.write_text(text.replace(old, new, 1))
+          replacements = [
+            ('          match elaborate context value none with\n',
+             '          match elaborate context value Option.none with\n'),
+            ('                      (some typeResult.term) with\n',
+             '                      (Option.some typeResult.term) with\n'),
+          ]
+          for old, new in replacements:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'expected exactly one occurrence of {old!r}, got {count}')
+              text = text.replace(old, new, 1)
+          path.write_text(text)
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "fix(elab): qualify forall Option for PSC1"
+          git commit -m "fix(elab): qualify let Options for PSC1"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

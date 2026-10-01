@@ -6,8 +6,8 @@ private def nat : PsExpr := .constE psNatName []
 private def motive (result : PsExpr) : PsExpr :=
   .lam PsName.anonymous nat result .explicit
 private def step : PsExpr :=
-  .lam PsName.anonymous nat
-    (.lam PsName.anonymous nat
+  .lam (psRootName "k") nat
+    (.lam (psRootName "ih") nat
       (.app (.app (.constE psNatAddName []) (.bvar 1)) (.bvar 0)) .explicit) .explicit
 
 def main : IO Unit := do

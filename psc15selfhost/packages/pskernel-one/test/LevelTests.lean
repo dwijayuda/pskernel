@@ -46,7 +46,11 @@ def main : IO Unit := do
     ("imax-zero", .imax u .zero, .zero, true),
     ("imax-not-max", .imax u v, .max u v, false),
     ("zero-identity", .max .zero (.max u v), .max v u, true),
-    ("name-boundary", param "a.b", .param (.str (.str .anonymous "a") "b"), false)
+    ("name-boundary", param "a.b", .param (.str (.str .anonymous "a") "b"), false),
+    ("unicode-equal", param "a𝄞", param "a𝄞", true),
+    ("unicode-different", param "a𝄞", param "a𝄢", false),
+    ("numeric-name-width", .param (.num .anonymous 9007199254740992),
+      .param (.num .anonymous 9007199254740993), false)
   ]
   for (label, left, right, expected) in cases do
     checkCase env label left right expected

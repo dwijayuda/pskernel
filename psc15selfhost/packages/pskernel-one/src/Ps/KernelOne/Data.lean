@@ -5,7 +5,3 @@ inductive PsKernelOneOption (alpha : Type) where
 inductive PsKernelOneList (alpha : Type) where
   | nil
   | cons (head : alpha) (tail : PsKernelOneList alpha)
-
-inductive PsKernelOneResult (error : Type) (ok : Type) where
-  | error (value : error)
-  | ok (value : ok)

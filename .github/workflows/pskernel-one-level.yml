@@ -50,7 +50,18 @@ jobs:
       - name: Source and canonical PS profile
         run: node scripts/pskernel-one-profile.mjs
       - name: Actual TypeScript emission
-        run: node scripts/pskernel-one-profile.mjs --emit
+        run: |
+          node scripts/pskernel-one-profile.mjs --emit || {
+            node scripts/pskernel-one-emit-probe.mjs
+            exit 1
+          }
+      - name: Save small seed for local reproduction
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-one-seed-${{ github.sha }}
+          retention-days: 7
+          path: psc15selfhost/.lake/build/bin/psc1
       - name: Save exact seed and diagnostic evidence
         if: always()
         uses: actions/upload-artifact@v4

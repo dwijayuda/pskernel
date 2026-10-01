@@ -4,8 +4,8 @@
   "files": [
     {
       "path": "src/Ps/KernelOne/Data.lean",
-      "bytes": 302,
-      "sha256": "2ffd9dbfa17b2d7b4ef57de4fd449437cacecba0999b80251a94112aab7fe459",
+      "bytes": 194,
+      "sha256": "dfa14747412c05e2bb6b3278be1fbd4af4c3dc5efc9371443b21eb654a6b4cfa",
       "imports": []
     },
     {

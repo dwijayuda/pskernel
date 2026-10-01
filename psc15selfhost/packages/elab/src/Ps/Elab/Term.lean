@@ -61,6 +61,21 @@ def psElabListLength {α : Type}
   | [] => 0
   | _ :: rest => Nat.succ (psElabListLength rest)
 
+def psElabListReverseAcc {α : Type}
+    (values : List α) : List α -> List α :=
+  match values with
+  | [] =>
+      fun (acc : List α) => acc
+  | head :: tail =>
+      let smaller : List α -> List α :=
+        psElabListReverseAcc tail;
+      fun (acc : List α) =>
+        smaller (List.cons head acc)
+
+def psElabListReverse {α : Type}
+    (values : List α) : List α :=
+  psElabListReverseAcc values List.nil
+
 def psSyntaxNameAppendSegments
     (segments : List String) :
     PsName -> PsName :=
@@ -774,7 +789,7 @@ def psElabLambdaAfterBinders
     (expected : Option PsExpr)
     (binderResult : PsElabTypedBindersResult) :
     Except PsElabError PsElabTermResult :=
-  let orderedBinders := List.reverse binderResult.bindersRev;
+  let orderedBinders := psElabListReverse binderResult.bindersRev;
   match
       psElabLambdaBodyExpected
         binderResult.context
@@ -1203,7 +1218,7 @@ def psElabPrepareMatchAlternatives
     Except PsElabError (List PsElabMatchAlternative) :=
   match entries with
   | [] =>
-      let alternatives := List.reverse alternativesRev;
+      let alternatives := psElabListReverse alternativesRev;
       let exhaustive :=
         List.all
           inductiveInfo.constructors
@@ -1221,7 +1236,7 @@ def psElabPrepareMatchAlternatives
       | .wildcard _ =>
           if List.isEmpty rest then
             Except.ok
-              (List.reverse (psElabFillWildcardAlternatives
+              (psElabListReverse (psElabFillWildcardAlternatives
                 pattern
                 body
                 span
@@ -1564,7 +1579,7 @@ def psElabMatchConstructorMinor
             | Except.error error => Except.error error
             | Except.ok fieldResult =>
                 let fields :=
-                  List.reverse fieldResult.fieldsRev;
+                  psElabListReverse fieldResult.fieldsRev;
                 match
                     psElabPushRecursiveHypotheses
                       expectedType
@@ -2100,7 +2115,7 @@ def psSyntaxRecordFieldName
     (field : Prod PsSyntaxName PsSyntaxTerm) :
     Option String :=
   let syntaxName := Prod.fst field;
-  match List.reverse syntaxName.segments with
+  match psElabListReverse syntaxName.segments with
   | [] => none
   | name :: _ => some name
 
@@ -2238,7 +2253,7 @@ def psElabRecordCandidates
     List PsElabRecordCandidate :=
   match declarations with
   | [] =>
-      List.reverse candidatesRev
+      psElabListReverse candidatesRev
   | declaration :: rest =>
       match declaration with
       | .inductiveDecl info =>

@@ -30,320 +30,614 @@ jobs:
         with:
           node-version: 22
 
-      - name: Make Phase 13 elaborator PSC1-portable
+      - name: Normalize Phase 13 elaborator to the PSC1 subset
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
+          import re
+
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
-          replacements = [
-              ("match elaborate context condition (some boolType) with",
-               "match elaborate context condition (Option.some boolType) with"),
-              ("thenResult.context\n              elseBranch\n              (some resultType) with",
-               "thenResult.context\n              elseBranch\n              (Option.some resultType) with"),
-              ("| Except.ok thenResult =>\n          let resultType :=\n            match expected with",
-               "| Except.ok thenResult =>\n          let resultType : PsExpr :=\n            match expected with"),
-              (
-                  "def psExprAppViewAcc\n"
-                  "    (expr : PsExpr)\n"
-                  "    (args : List PsExpr) : PsExprAppView :=\n"
-                  "  match expr with\n"
-                  "  | .app fn argument =>\n"
-                  "      psExprAppViewAcc fn (List.cons argument args)\n"
-                  "  | _ => {\n"
-                  "      head := expr\n"
-                  "      args := args\n"
-                  "    }\n",
-                  "def psExprAppViewAcc\n"
-                  "    (expr : PsExpr) : List PsExpr -> PsExprAppView :=\n"
-                  "  match expr with\n"
-                  "  | .app fn argument =>\n"
-                  "      let smaller : List PsExpr -> PsExprAppView :=\n"
-                  "        psExprAppViewAcc fn;\n"
-                  "      fun (args : List PsExpr) =>\n"
-                  "        smaller (List.cons argument args)\n"
-                  "  | _ =>\n"
-                  "      fun (args : List PsExpr) => {\n"
-                  "        head := expr\n"
-                  "        args := args\n"
-                  "      }\n",
-              ),
-              (
-                  "def psExprHasConst (target : PsName) : PsExpr -> Bool\n"
-                  "  | .constE name _ => psNameEq name target\n"
-                  "  | .app fn argument =>\n"
-                  "      psElabBoolOr\n"
-                  "        (psExprHasConst target fn)\n"
-                  "        (psExprHasConst target argument)\n"
-                  "  | .lam _ type body _ =>\n"
-                  "      psElabBoolOr\n"
-                  "        (psExprHasConst target type)\n"
-                  "        (psExprHasConst target body)\n"
-                  "  | .forallE _ type body _ =>\n"
-                  "      psElabBoolOr\n"
-                  "        (psExprHasConst target type)\n"
-                  "        (psExprHasConst target body)\n"
-                  "  | .letE _ type value body =>\n"
-                  "      psElabBoolOr\n"
-                  "        (psExprHasConst target type)\n"
-                  "        (psElabBoolOr\n"
-                  "          (psExprHasConst target value)\n"
-                  "          (psExprHasConst target body))\n"
-                  "  | .proj _ _ value => psExprHasConst target value\n"
-                  "  | _ => false\n",
-                  "def psExprHasConstWorker\n"
-                  "    (expr : PsExpr) : PsName -> Bool :=\n"
-                  "  match expr with\n"
-                  "  | .constE name _ =>\n"
-                  "      fun (target : PsName) => psNameEq name target\n"
-                  "  | .app fn argument =>\n"
-                  "      let left : PsName -> Bool := psExprHasConstWorker fn;\n"
-                  "      let right : PsName -> Bool := psExprHasConstWorker argument;\n"
-                  "      fun (target : PsName) => psElabBoolOr (left target) (right target)\n"
-                  "  | .lam _ type body _ =>\n"
-                  "      let left : PsName -> Bool := psExprHasConstWorker type;\n"
-                  "      let right : PsName -> Bool := psExprHasConstWorker body;\n"
-                  "      fun (target : PsName) => psElabBoolOr (left target) (right target)\n"
-                  "  | .forallE _ type body _ =>\n"
-                  "      let left : PsName -> Bool := psExprHasConstWorker type;\n"
-                  "      let right : PsName -> Bool := psExprHasConstWorker body;\n"
-                  "      fun (target : PsName) => psElabBoolOr (left target) (right target)\n"
-                  "  | .letE _ type value body =>\n"
-                  "      let typeHas : PsName -> Bool := psExprHasConstWorker type;\n"
-                  "      let valueHas : PsName -> Bool := psExprHasConstWorker value;\n"
-                  "      let bodyHas : PsName -> Bool := psExprHasConstWorker body;\n"
-                  "      fun (target : PsName) =>\n"
-                  "        psElabBoolOr (typeHas target) (psElabBoolOr (valueHas target) (bodyHas target))\n"
-                  "  | .proj _ _ value =>\n"
-                  "      let valueHas : PsName -> Bool := psExprHasConstWorker value;\n"
-                  "      fun (target : PsName) => valueHas target\n"
-                  "  | _ => fun (_target : PsName) => false\n"
-                  "\n"
-                  "def psExprHasConst\n"
-                  "    (target : PsName)\n"
-                  "    (expr : PsExpr) : Bool :=\n"
-                  "  psExprHasConstWorker expr target\n",
-              ),
-              (
-                  "def psMatchNameListContains (names : List PsName) (target : PsName) : Bool :=\n"
-                  "  List.any names (psMatchNameEqTarget target)\n",
-                  "def psMatchNameListContains\n"
-                  "    (names : List PsName) : PsName -> Bool :=\n"
-                  "  match names with\n"
-                  "  | [] => fun (_target : PsName) => false\n"
-                  "  | name :: rest =>\n"
-                  "      let smaller : PsName -> Bool := psMatchNameListContains rest;\n"
-                  "      fun (target : PsName) =>\n"
-                  "        if psNameEq name target then true else smaller target\n",
-              ),
-              (
-                  "def psElabMatchAlternativeFind\n"
-                  "    (name : PsName) :\n"
-                  "    List PsElabMatchAlternative -> Option PsElabMatchAlternative\n"
-                  "  | [] => none\n"
-                  "  | alternative :: rest =>\n"
-                  "      if psNameEq alternative.constructorName name then\n"
-                  "        some alternative\n"
-                  "      else\n"
-                  "        psElabMatchAlternativeFind name rest\n",
-                  "def psElabMatchAlternativeFindWorker\n"
-                  "    (alternatives : List PsElabMatchAlternative) :\n"
-                  "    PsName -> Option PsElabMatchAlternative :=\n"
-                  "  match alternatives with\n"
-                  "  | [] => fun (_name : PsName) => Option.none\n"
-                  "  | alternative :: rest =>\n"
-                  "      let smaller : PsName -> Option PsElabMatchAlternative :=\n"
-                  "        psElabMatchAlternativeFindWorker rest;\n"
-                  "      fun (name : PsName) =>\n"
-                  "        if psNameEq alternative.constructorName name then\n"
-                  "          Option.some alternative\n"
-                  "        else smaller name\n"
-                  "\n"
-                  "def psElabMatchAlternativeFind\n"
-                  "    (name : PsName)\n"
-                  "    (alternatives : List PsElabMatchAlternative) :\n"
-                  "    Option PsElabMatchAlternative :=\n"
-                  "  psElabMatchAlternativeFindWorker alternatives name\n",
-              ),
-              (
-                  "def psElabFillWildcardAlternatives\n"
-                  "    (pattern : PsSyntaxPattern)\n"
-                  "    (body : PsSyntaxTerm)\n"
-                  "    (span : PsSourceSpan)\n"
-                  "    (constructors : List PsName)\n"
-                  "    (alternativesRev : List PsElabMatchAlternative) :\n"
-                  "    List PsElabMatchAlternative :=\n"
-                  "  match constructors with\n"
-                  "  | [] =>\n"
-                  "      alternativesRev\n"
-                  "  | ctorName :: rest =>\n"
-                  "      let next :=\n"
-                  "        match psElabMatchAlternativeFind ctorName alternativesRev with\n"
-                  "        | some _ => alternativesRev\n"
-                  "        | none =>\n"
-                  "            let alternative : PsElabMatchAlternative := {\n"
-                  "              constructorName := ctorName\n"
-                  "              pattern := pattern\n"
-                  "              body := body\n"
-                  "              span := span\n"
-                  "            };\n"
-                  "            List.cons alternative alternativesRev;\n"
-                  "      psElabFillWildcardAlternatives\n"
-                  "        pattern body span rest next\n",
-                  "def psElabFillWildcardAlternativesWorker\n"
-                  "    (constructors : List PsName) :\n"
-                  "    PsSyntaxPattern -> PsSyntaxTerm -> PsSourceSpan ->\n"
-                  "    List PsElabMatchAlternative -> List PsElabMatchAlternative :=\n"
-                  "  match constructors with\n"
-                  "  | [] =>\n"
-                  "      fun (_pattern : PsSyntaxPattern) => fun (_body : PsSyntaxTerm) =>\n"
-                  "        fun (_span : PsSourceSpan) => fun (alternativesRev : List PsElabMatchAlternative) =>\n"
-                  "          alternativesRev\n"
-                  "  | ctorName :: rest =>\n"
-                  "      let smaller := psElabFillWildcardAlternativesWorker rest;\n"
-                  "      fun (pattern : PsSyntaxPattern) => fun (body : PsSyntaxTerm) =>\n"
-                  "        fun (span : PsSourceSpan) => fun (alternativesRev : List PsElabMatchAlternative) =>\n"
-                  "          let next : List PsElabMatchAlternative :=\n"
-                  "            match psElabMatchAlternativeFind ctorName alternativesRev with\n"
-                  "            | some _ => alternativesRev\n"
-                  "            | none =>\n"
-                  "                let alternative : PsElabMatchAlternative := {\n"
-                  "                  constructorName := ctorName\n"
-                  "                  pattern := pattern\n"
-                  "                  body := body\n"
-                  "                  span := span\n"
-                  "                };\n"
-                  "                List.cons alternative alternativesRev;\n"
-                  "          smaller pattern body span next\n"
-                  "\n"
-                  "def psElabFillWildcardAlternatives\n"
-                  "    (pattern : PsSyntaxPattern)\n"
-                  "    (body : PsSyntaxTerm)\n"
-                  "    (span : PsSourceSpan)\n"
-                  "    (constructors : List PsName)\n"
-                  "    (alternativesRev : List PsElabMatchAlternative) :\n"
-                  "    List PsElabMatchAlternative :=\n"
-                  "  psElabFillWildcardAlternativesWorker constructors pattern body span alternativesRev\n",
-              ),
-              (
-                  "def psElabPrepareMatchAlternatives\n"
-                  "    (inductiveInfo : PsInductiveInfo)\n"
-                  "    (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))\n"
-                  "    (alternativesRev : List PsElabMatchAlternative) :\n"
-                  "    Except PsElabError (List PsElabMatchAlternative) :=\n"
-                  "  match entries with\n"
-                  "  | [] =>\n"
-                  "      let alternatives := psElabListReverse alternativesRev;\n"
-                  "      let exhaustive :=\n"
-                  "        List.all\n"
-                  "          inductiveInfo.constructors\n"
-                  "          (psElabMatchAlternativeCovered alternatives);\n"
-                  "      if exhaustive then\n"
-                  "        Except.ok alternatives\n"
-                  "      else\n"
-                  "        Except.error PsElabError.matchNonExhaustive\n"
-                  "  | entry :: rest =>\n"
-                  "      let pattern := Prod.fst entry;\n"
-                  "      let payload := Prod.snd entry;\n"
-                  "      let body := Prod.fst payload;\n"
-                  "      let span := Prod.snd payload;\n"
-                  "      match pattern with\n"
-                  "      | .wildcard _ =>\n"
-                  "          if List.isEmpty rest then\n"
-                  "            Except.ok\n"
-                  "              (psElabListReverse (psElabFillWildcardAlternatives\n"
-                  "                pattern body span inductiveInfo.constructors alternativesRev))\n"
-                  "          else\n"
-                  "            Except.error PsElabError.matchPatternUnsupported\n"
-                  "      | _ =>\n"
-                  "          match psElabMatchPatternConstructorName inductiveInfo.name pattern with\n"
-                  "          | Except.error error => Except.error error\n"
-                  "          | Except.ok ctorName =>\n"
-                  "              if psElabBoolNot (psMatchNameListContains inductiveInfo.constructors ctorName) then\n"
-                  "                Except.error (PsElabError.matchConstructorUnknown ctorName)\n"
-                  "              else\n"
-                  "                match psElabMatchAlternativeFind ctorName alternativesRev with\n"
-                  "                | some _ =>\n"
-                  "                    Except.error (PsElabError.matchDuplicateConstructor ctorName)\n"
-                  "                | none =>\n"
-                  "                    let alternative : PsElabMatchAlternative := {\n"
-                  "                      constructorName := ctorName\n"
-                  "                      pattern := pattern\n"
-                  "                      body := body\n"
-                  "                      span := span\n"
-                  "                    };\n"
-                  "                    psElabPrepareMatchAlternatives\n"
-                  "                      inductiveInfo rest (List.cons alternative alternativesRev)\n",
-                  "def psElabAllMatchAlternativesCovered\n"
-                  "    (constructors : List PsName) : List PsElabMatchAlternative -> Bool :=\n"
-                  "  match constructors with\n"
-                  "  | [] => fun (_alternatives : List PsElabMatchAlternative) => true\n"
-                  "  | ctorName :: rest =>\n"
-                  "      let smaller : List PsElabMatchAlternative -> Bool :=\n"
-                  "        psElabAllMatchAlternativesCovered rest;\n"
-                  "      fun (alternatives : List PsElabMatchAlternative) =>\n"
-                  "        if psElabMatchAlternativeCovered alternatives ctorName then\n"
-                  "          smaller alternatives\n"
-                  "        else false\n"
-                  "\n"
-                  "def psElabPrepareMatchAlternativesWorker\n"
-                  "    (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) :\n"
-                  "    PsInductiveInfo -> List PsElabMatchAlternative ->\n"
-                  "    Except PsElabError (List PsElabMatchAlternative) :=\n"
-                  "  match entries with\n"
-                  "  | [] =>\n"
-                  "      fun (inductiveInfo : PsInductiveInfo) => fun (alternativesRev : List PsElabMatchAlternative) =>\n"
-                  "        let alternatives : List PsElabMatchAlternative := psElabListReverse alternativesRev;\n"
-                  "        if psElabAllMatchAlternativesCovered inductiveInfo.constructors alternatives then\n"
-                  "          Except.ok alternatives\n"
-                  "        else Except.error PsElabError.matchNonExhaustive\n"
-                  "  | entry :: rest =>\n"
-                  "      let smaller := psElabPrepareMatchAlternativesWorker rest;\n"
-                  "      fun (inductiveInfo : PsInductiveInfo) => fun (alternativesRev : List PsElabMatchAlternative) =>\n"
-                  "        let pattern := Prod.fst entry;\n"
-                  "        let payload := Prod.snd entry;\n"
-                  "        let body := Prod.fst payload;\n"
-                  "        let span := Prod.snd payload;\n"
-                  "        match pattern with\n"
-                  "        | .wildcard _ =>\n"
-                  "            match rest with\n"
-                  "            | [] =>\n"
-                  "                Except.ok (psElabListReverse (psElabFillWildcardAlternatives\n"
-                  "                  pattern body span inductiveInfo.constructors alternativesRev))\n"
-                  "            | _ :: _ => Except.error PsElabError.matchPatternUnsupported\n"
-                  "        | _ =>\n"
-                  "            match psElabMatchPatternConstructorName inductiveInfo.name pattern with\n"
-                  "            | Except.error error => Except.error error\n"
-                  "            | Except.ok ctorName =>\n"
-                  "                if psElabBoolNot (psMatchNameListContains inductiveInfo.constructors ctorName) then\n"
-                  "                  Except.error (PsElabError.matchConstructorUnknown ctorName)\n"
-                  "                else\n"
-                  "                  match psElabMatchAlternativeFind ctorName alternativesRev with\n"
-                  "                  | some _ => Except.error (PsElabError.matchDuplicateConstructor ctorName)\n"
-                  "                  | none =>\n"
-                  "                      let alternative : PsElabMatchAlternative := {\n"
-                  "                        constructorName := ctorName\n"
-                  "                        pattern := pattern\n"
-                  "                        body := body\n"
-                  "                        span := span\n"
-                  "                      };\n"
-                  "                      smaller inductiveInfo (List.cons alternative alternativesRev)\n"
-                  "\n"
-                  "def psElabPrepareMatchAlternatives\n"
-                  "    (inductiveInfo : PsInductiveInfo)\n"
-                  "    (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))\n"
-                  "    (alternativesRev : List PsElabMatchAlternative) :\n"
-                  "    Except PsElabError (List PsElabMatchAlternative) :=\n"
-                  "  psElabPrepareMatchAlternativesWorker entries inductiveInfo alternativesRev\n",
-              ),
-          ]
-          for old, new in replacements:
+
+          def replace_once(old, new):
+              global text
               count = text.count(old)
               if count != 1:
-                  raise SystemExit(f'expected exactly one portability target, got {count}: {old!r}')
+                  raise SystemExit(f'expected exactly one text target, got {count}: {old!r}')
               text = text.replace(old, new, 1)
+
+          def replace_decl(name, replacement):
+              global text
+              pattern = re.compile(
+                  rf'^def {re.escape(name)}\b.*?(?=^(?:def|structure|inductive)\s|\Z)',
+                  re.MULTILINE | re.DOTALL,
+              )
+              matches = list(pattern.finditer(text))
+              if len(matches) != 1:
+                  raise SystemExit(f'expected one declaration {name}, got {len(matches)}')
+              text = text[:matches[0].start()] + replacement.rstrip() + '\n\n' + text[matches[0].end():]
+
+          replace_once(
+              'match elaborate context condition (some boolType) with',
+              'match elaborate context condition (Option.some boolType) with',
+          )
+          replace_once(
+              'thenResult.context\n              elseBranch\n              (some resultType) with',
+              'thenResult.context\n              elseBranch\n              (Option.some resultType) with',
+          )
+          replace_once(
+              '| Except.ok thenResult =>\n          let resultType :=\n            match expected with',
+              '| Except.ok thenResult =>\n          let resultType : PsExpr :=\n            match expected with',
+          )
+
+          replace_decl('psExprAppViewAcc', r'''def psExprAppViewAcc
+              (expr : PsExpr) : List PsExpr -> PsExprAppView :=
+            match expr with
+            | .app fn argument =>
+                let smaller : List PsExpr -> PsExprAppView :=
+                  psExprAppViewAcc fn;
+                fun (args : List PsExpr) =>
+                  smaller (List.cons argument args)
+            | _ =>
+                fun (args : List PsExpr) => {
+                  head := expr
+                  args := args
+                }''')
+
+          replace_decl('psExprHasConst', r'''def psExprHasConstWorker
+              (expr : PsExpr) : PsName -> Bool :=
+            match expr with
+            | .constE name _ =>
+                fun (target : PsName) => psNameEq name target
+            | .app fn argument =>
+                let left : PsName -> Bool := psExprHasConstWorker fn;
+                let right : PsName -> Bool := psExprHasConstWorker argument;
+                fun (target : PsName) =>
+                  psElabBoolOr (left target) (right target)
+            | .lam _ type body _ =>
+                let left : PsName -> Bool := psExprHasConstWorker type;
+                let right : PsName -> Bool := psExprHasConstWorker body;
+                fun (target : PsName) =>
+                  psElabBoolOr (left target) (right target)
+            | .forallE _ type body _ =>
+                let left : PsName -> Bool := psExprHasConstWorker type;
+                let right : PsName -> Bool := psExprHasConstWorker body;
+                fun (target : PsName) =>
+                  psElabBoolOr (left target) (right target)
+            | .letE _ type value body =>
+                let typeHas : PsName -> Bool := psExprHasConstWorker type;
+                let valueHas : PsName -> Bool := psExprHasConstWorker value;
+                let bodyHas : PsName -> Bool := psExprHasConstWorker body;
+                fun (target : PsName) =>
+                  psElabBoolOr
+                    (typeHas target)
+                    (psElabBoolOr (valueHas target) (bodyHas target))
+            | .proj _ _ value =>
+                let valueHas : PsName -> Bool := psExprHasConstWorker value;
+                fun (target : PsName) => valueHas target
+            | _ =>
+                fun (_target : PsName) => false
+
+          def psExprHasConst
+              (target : PsName)
+              (expr : PsExpr) : Bool :=
+            psExprHasConstWorker expr target''')
+
+          replace_decl('psMatchNameListContains', r'''def psMatchNameListContains
+              (names : List PsName) : PsName -> Bool :=
+            match names with
+            | [] =>
+                fun (_target : PsName) => false
+            | name :: rest =>
+                let smaller : PsName -> Bool :=
+                  psMatchNameListContains rest;
+                fun (target : PsName) =>
+                  if psNameEq name target then true else smaller target''')
+
+          replace_decl('psElabMatchAlternativeFind', r'''def psElabMatchAlternativeFindWorker
+              (alternatives : List PsElabMatchAlternative) :
+              PsName -> Option PsElabMatchAlternative :=
+            match alternatives with
+            | [] =>
+                fun (_name : PsName) => Option.none
+            | alternative :: rest =>
+                let smaller : PsName -> Option PsElabMatchAlternative :=
+                  psElabMatchAlternativeFindWorker rest;
+                fun (name : PsName) =>
+                  if psNameEq alternative.constructorName name then
+                    Option.some alternative
+                  else
+                    smaller name
+
+          def psElabMatchAlternativeFind
+              (name : PsName)
+              (alternatives : List PsElabMatchAlternative) :
+              Option PsElabMatchAlternative :=
+            psElabMatchAlternativeFindWorker alternatives name''')
+
+          replace_decl('psElabFillWildcardAlternatives', r'''def psElabFillWildcardAlternativesWorker
+              (constructors : List PsName) :
+              PsSyntaxPattern ->
+              PsSyntaxTerm ->
+              PsSourceSpan ->
+              List PsElabMatchAlternative ->
+              List PsElabMatchAlternative :=
+            match constructors with
+            | [] =>
+                fun (_pattern : PsSyntaxPattern) =>
+                  fun (_body : PsSyntaxTerm) =>
+                    fun (_span : PsSourceSpan) =>
+                      fun (alternativesRev : List PsElabMatchAlternative) =>
+                        alternativesRev
+            | ctorName :: rest =>
+                let smaller :
+                    PsSyntaxPattern ->
+                    PsSyntaxTerm ->
+                    PsSourceSpan ->
+                    List PsElabMatchAlternative ->
+                    List PsElabMatchAlternative :=
+                  psElabFillWildcardAlternativesWorker rest;
+                fun (pattern : PsSyntaxPattern) =>
+                  fun (body : PsSyntaxTerm) =>
+                    fun (span : PsSourceSpan) =>
+                      fun (alternativesRev : List PsElabMatchAlternative) =>
+                        let next : List PsElabMatchAlternative :=
+                          match psElabMatchAlternativeFind ctorName alternativesRev with
+                          | some _ => alternativesRev
+                          | none =>
+                              let alternative : PsElabMatchAlternative := {
+                                constructorName := ctorName
+                                pattern := pattern
+                                body := body
+                                span := span
+                              };
+                              List.cons alternative alternativesRev;
+                        smaller pattern body span next
+
+          def psElabFillWildcardAlternatives
+              (pattern : PsSyntaxPattern)
+              (body : PsSyntaxTerm)
+              (span : PsSourceSpan)
+              (constructors : List PsName)
+              (alternativesRev : List PsElabMatchAlternative) :
+              List PsElabMatchAlternative :=
+            psElabFillWildcardAlternativesWorker
+              constructors pattern body span alternativesRev''')
+
+          replace_decl('psElabPrepareMatchAlternatives', r'''def psElabAllMatchAlternativesCovered
+              (constructors : List PsName) :
+              List PsElabMatchAlternative -> Bool :=
+            match constructors with
+            | [] =>
+                fun (_alternatives : List PsElabMatchAlternative) => true
+            | ctorName :: rest =>
+                let smaller : List PsElabMatchAlternative -> Bool :=
+                  psElabAllMatchAlternativesCovered rest;
+                fun (alternatives : List PsElabMatchAlternative) =>
+                  if psElabMatchAlternativeCovered alternatives ctorName then
+                    smaller alternatives
+                  else
+                    false
+
+          def psElabPrepareMatchAlternativesWorker
+              (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) :
+              PsInductiveInfo ->
+              List PsElabMatchAlternative ->
+              Except PsElabError (List PsElabMatchAlternative) :=
+            match entries with
+            | [] =>
+                fun (inductiveInfo : PsInductiveInfo) =>
+                  fun (alternativesRev : List PsElabMatchAlternative) =>
+                    let alternatives : List PsElabMatchAlternative :=
+                      psElabListReverse alternativesRev;
+                    if psElabAllMatchAlternativesCovered
+                        inductiveInfo.constructors alternatives then
+                      Except.ok alternatives
+                    else
+                      Except.error PsElabError.matchNonExhaustive
+            | entry :: rest =>
+                let smaller :
+                    PsInductiveInfo ->
+                    List PsElabMatchAlternative ->
+                    Except PsElabError (List PsElabMatchAlternative) :=
+                  psElabPrepareMatchAlternativesWorker rest;
+                fun (inductiveInfo : PsInductiveInfo) =>
+                  fun (alternativesRev : List PsElabMatchAlternative) =>
+                    let pattern := Prod.fst entry;
+                    let payload := Prod.snd entry;
+                    let body := Prod.fst payload;
+                    let span := Prod.snd payload;
+                    match pattern with
+                    | .wildcard _ =>
+                        match rest with
+                        | [] =>
+                            Except.ok
+                              (psElabListReverse
+                                (psElabFillWildcardAlternatives
+                                  pattern body span
+                                  inductiveInfo.constructors
+                                  alternativesRev))
+                        | _ :: _ =>
+                            Except.error PsElabError.matchPatternUnsupported
+                    | _ =>
+                        match psElabMatchPatternConstructorName
+                            inductiveInfo.name pattern with
+                        | Except.error error => Except.error error
+                        | Except.ok ctorName =>
+                            if psElabBoolNot
+                                (psMatchNameListContains
+                                  inductiveInfo.constructors ctorName) then
+                              Except.error
+                                (PsElabError.matchConstructorUnknown ctorName)
+                            else
+                              match psElabMatchAlternativeFind
+                                  ctorName alternativesRev with
+                              | some _ =>
+                                  Except.error
+                                    (PsElabError.matchDuplicateConstructor ctorName)
+                              | none =>
+                                  let alternative : PsElabMatchAlternative := {
+                                    constructorName := ctorName
+                                    pattern := pattern
+                                    body := body
+                                    span := span
+                                  };
+                                  smaller
+                                    inductiveInfo
+                                    (List.cons alternative alternativesRev)
+
+          def psElabPrepareMatchAlternatives
+              (inductiveInfo : PsInductiveInfo)
+              (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
+              (alternativesRev : List PsElabMatchAlternative) :
+              Except PsElabError (List PsElabMatchAlternative) :=
+            psElabPrepareMatchAlternativesWorker
+              entries inductiveInfo alternativesRev''')
+
+          replace_decl('psElabMatchApplyParameters', r'''def psElabMatchApplyParametersWorker
+              (parameters : List PsExpr) :
+              PsElabContext -> PsExpr -> Except PsElabError PsExpr :=
+            match parameters with
+            | [] =>
+                fun (_context : PsElabContext) =>
+                  fun (cursor : PsExpr) => Except.ok cursor
+            | parameter :: rest =>
+                let smaller :
+                    PsElabContext -> PsExpr -> Except PsElabError PsExpr :=
+                  psElabMatchApplyParametersWorker rest;
+                fun (context : PsElabContext) =>
+                  fun (cursor : PsExpr) =>
+                    match psInferEnsureForall
+                        context.environment
+                        context.metaContext
+                        context.localContext
+                        cursor with
+                    | Except.error error =>
+                        Except.error (PsElabError.infer error)
+                    | Except.ok forallView =>
+                        smaller
+                          context
+                          (psExprInstantiate1 forallView.body parameter)
+
+          def psElabMatchApplyParameters
+              (context : PsElabContext)
+              (parameters : List PsExpr)
+              (cursor : PsExpr) :
+              Except PsElabError PsExpr :=
+            psElabMatchApplyParametersWorker parameters context cursor''')
+
+          replace_decl('psSyntaxNameListHasDuplicate', r'''def psSyntaxNameListContainsCore
+              (names : List PsSyntaxName) : Option PsName -> Bool :=
+            match names with
+            | [] =>
+                fun (_coreName : Option PsName) => false
+            | candidate :: rest =>
+                let smaller : Option PsName -> Bool :=
+                  psSyntaxNameListContainsCore rest;
+                fun (coreName : Option PsName) =>
+                  if psSyntaxNameMatchesCore coreName candidate then
+                    true
+                  else
+                    smaller coreName
+
+          def psSyntaxNameListHasDuplicate
+              (names : List PsSyntaxName) : Bool :=
+            match names with
+            | [] => false
+            | name :: rest =>
+                if psSyntaxNameIsWildcardBinder name then
+                  psSyntaxNameListHasDuplicate rest
+                else
+                  let coreName : Option PsName := psSyntaxNameToName name;
+                  if psSyntaxNameListContainsCore rest coreName then
+                    true
+                  else
+                    psSyntaxNameListHasDuplicate rest''')
+
+          replace_decl('psElabMatchFields', r'''def psElabMatchFieldsWorker
+              (binderSyntaxes : List PsSyntaxName) :
+              PsElabContext ->
+              PsExpr ->
+              List PsElabMatchField ->
+              Except PsElabError PsElabMatchFieldsResult :=
+            match binderSyntaxes with
+            | [] =>
+                fun (context : PsElabContext) =>
+                  fun (_cursor : PsExpr) =>
+                    fun (fieldsRev : List PsElabMatchField) =>
+                      Except.ok {
+                        context := context
+                        fieldsRev := fieldsRev
+                      }
+            | binderSyntax :: rest =>
+                let smaller :
+                    PsElabContext ->
+                    PsExpr ->
+                    List PsElabMatchField ->
+                    Except PsElabError PsElabMatchFieldsResult :=
+                  psElabMatchFieldsWorker rest;
+                fun (context : PsElabContext) =>
+                  fun (cursor : PsExpr) =>
+                    fun (fieldsRev : List PsElabMatchField) =>
+                      match psInferEnsureForall
+                          context.environment
+                          context.metaContext
+                          context.localContext
+                          cursor with
+                      | Except.error error =>
+                          Except.error (PsElabError.infer error)
+                      | Except.ok forallView =>
+                          match psSyntaxNameToName binderSyntax with
+                          | none => Except.error PsElabError.emptyName
+                          | some binderName =>
+                              let pushed :=
+                                psLocalPushBinding
+                                  context.localContext
+                                  binderName
+                                  forallView.domain
+                                  forallView.binder;
+                              let nextContext :=
+                                psElabContextWithLocal context pushed.context;
+                              let field : PsElabMatchField := {
+                                id := pushed.id
+                                name := binderName
+                                type := forallView.domain
+                                binder := forallView.binder
+                              };
+                              smaller
+                                nextContext
+                                (psExprInstantiate1
+                                  forallView.body
+                                  (PsExpr.fvar pushed.id))
+                                (List.cons field fieldsRev)
+
+          def psElabMatchFields
+              (context : PsElabContext)
+              (_inductiveName : PsName)
+              (cursor : PsExpr)
+              (binderSyntaxes : List PsSyntaxName)
+              (fieldsRev : List PsElabMatchField) :
+              Except PsElabError PsElabMatchFieldsResult :=
+            psElabMatchFieldsWorker binderSyntaxes context cursor fieldsRev''')
+
+          replace_decl('psElabMatchFieldAt', r'''def psElabMatchFieldAtWorker
+              (fields : List PsElabMatchField) : Nat -> Option PsElabMatchField :=
+            match fields with
+            | [] =>
+                fun (_index : Nat) => Option.none
+            | field :: rest =>
+                let smaller : Nat -> Option PsElabMatchField :=
+                  psElabMatchFieldAtWorker rest;
+                fun (index : Nat) =>
+                  match index with
+                  | 0 => Option.some field
+                  | nextIndex + 1 => smaller nextIndex
+
+          def psElabMatchFieldAt
+              (fields : List PsElabMatchField)
+              (index : Nat) : Option PsElabMatchField :=
+            psElabMatchFieldAtWorker fields index''')
+
+          replace_decl('psElabPushRecursiveHypotheses', r'''def psElabPushRecursiveHypothesesWorker
+              (fieldIndices : List Nat) :
+              PsExpr ->
+              List PsElabMatchField ->
+              PsElabContext ->
+              List PsElabMatchField ->
+              Except PsElabError PsElabMatchHypothesesResult :=
+            match fieldIndices with
+            | [] =>
+                fun (_expectedType : PsExpr) =>
+                  fun (_fields : List PsElabMatchField) =>
+                    fun (context : PsElabContext) =>
+                      fun (hypothesesRev : List PsElabMatchField) =>
+                        Except.ok {
+                          context := context
+                          hypothesesRev := hypothesesRev
+                        }
+            | fieldIndex :: rest =>
+                let smaller :
+                    PsExpr ->
+                    List PsElabMatchField ->
+                    PsElabContext ->
+                    List PsElabMatchField ->
+                    Except PsElabError PsElabMatchHypothesesResult :=
+                  psElabPushRecursiveHypothesesWorker rest;
+                fun (expectedType : PsExpr) =>
+                  fun (fields : List PsElabMatchField) =>
+                    fun (context : PsElabContext) =>
+                      fun (hypothesesRev : List PsElabMatchField) =>
+                        match psElabMatchFieldAt fields fieldIndex with
+                        | none =>
+                            Except.error PsElabError.structuralRecursionInternal
+                        | some field =>
+                            let hypothesisName :=
+                              psNameAppendNum (psRootName "_ih") fieldIndex;
+                            let pushed :=
+                              psLocalPushBinding
+                                context.localContext
+                                hypothesisName
+                                expectedType
+                                PsBinderInfo.explicit;
+                            let withLocal :=
+                              psElabContextWithLocal context pushed.context;
+                            let withRecursion : PsElabContext :=
+                              match context.structuralRecursion with
+                              | none => withLocal
+                              | some recursion =>
+                                  let nextRecursion : PsElabStructuralRecursion := {
+                                    functionName := recursion.functionName
+                                    explicitParameterIds := recursion.explicitParameterIds
+                                    recursiveParameterIndex := recursion.recursiveParameterIndex
+                                    calls :=
+                                      List.cons
+                                        (Prod.mk field.id pushed.id)
+                                        recursion.calls
+                                  };
+                                  psElabContextWithStructuralRecursion
+                                    withLocal
+                                    (Option.some nextRecursion);
+                            let hypothesis : PsElabMatchField := {
+                              id := pushed.id
+                              name := hypothesisName
+                              type := expectedType
+                              binder := PsBinderInfo.explicit
+                            };
+                            smaller
+                              expectedType
+                              fields
+                              withRecursion
+                              (List.cons hypothesis hypothesesRev)
+
+          def psElabPushRecursiveHypotheses
+              (expectedType : PsExpr)
+              (fields : List PsElabMatchField)
+              (fieldIndices : List Nat)
+              (context : PsElabContext)
+              (hypothesesRev : List PsElabMatchField) :
+              Except PsElabError PsElabMatchHypothesesResult :=
+            psElabPushRecursiveHypothesesWorker
+              fieldIndices expectedType fields context hypothesesRev''')
+
+          replace_decl('psCloseElabMatchFields', r'''def psCloseElabMatchFieldsWorker
+              (fields : List PsElabMatchField) : PsMetaContext -> PsExpr -> PsExpr :=
+            match fields with
+            | [] =>
+                fun (_metaContext : PsMetaContext) => fun (term : PsExpr) => term
+            | field :: rest =>
+                let smaller : PsMetaContext -> PsExpr -> PsExpr :=
+                  psCloseElabMatchFieldsWorker rest;
+                fun (metaContext : PsMetaContext) =>
+                  fun (term : PsExpr) =>
+                    let closed :=
+                      PsExpr.lam
+                        field.name
+                        (psMetaInstantiate metaContext field.type)
+                        (psExprAbstractFVar field.id term)
+                        field.binder;
+                    smaller metaContext closed
+
+          def psCloseElabMatchFields
+              (metaContext : PsMetaContext)
+              (fields : List PsElabMatchField)
+              (term : PsExpr) : PsExpr :=
+            psCloseElabMatchFieldsWorker fields metaContext term''')
+
+          replace_decl('psElabWildcardBinderNames', r'''def psElabWildcardBinderNamesWorker
+              (remaining : Nat) : PsSourceSpan -> Nat -> List PsSyntaxName :=
+            match remaining with
+            | 0 =>
+                fun (_span : PsSourceSpan) => fun (_index : Nat) => []
+            | nextRemaining + 1 =>
+                let smaller : PsSourceSpan -> Nat -> List PsSyntaxName :=
+                  psElabWildcardBinderNamesWorker nextRemaining;
+                fun (span : PsSourceSpan) =>
+                  fun (index : Nat) =>
+                    let segment :=
+                      String.Internal.append "_wild" (toString index);
+                    let syntaxName : PsSyntaxName := {
+                      segments := List.cons segment List.nil
+                      span := span
+                    };
+                    List.cons syntaxName (smaller span (Nat.succ index))
+
+          def psElabWildcardBinderNames
+              (span : PsSourceSpan)
+              (index : Nat)
+              (remaining : Nat) :
+              List PsSyntaxName :=
+            psElabWildcardBinderNamesWorker remaining span index''')
+
+          replace_decl('psElabMatchMinors', r'''def psElabMatchMinorsWorker
+              (constructorNames : List PsName) :
+              (PsElabContext -> PsSyntaxTerm -> Option PsExpr -> Except PsElabError PsElabTermResult) ->
+              PsInductiveInfo ->
+              List PsLevel ->
+              List PsExpr ->
+              PsExpr ->
+              List PsElabMatchAlternative ->
+              PsElabContext ->
+              Except PsElabError PsElabMatchMinorsResult :=
+            match constructorNames with
+            | [] =>
+                fun (_elaborate : PsElabContext -> PsSyntaxTerm -> Option PsExpr -> Except PsElabError PsElabTermResult) =>
+                  fun (_inductiveInfo : PsInductiveInfo) =>
+                    fun (_inductiveLevels : List PsLevel) =>
+                      fun (_parameterArgs : List PsExpr) =>
+                        fun (_expectedType : PsExpr) =>
+                          fun (_alternatives : List PsElabMatchAlternative) =>
+                            fun (context : PsElabContext) =>
+                              Except.ok { context := context, minors := [] }
+            | ctorName :: rest =>
+                let smaller := psElabMatchMinorsWorker rest;
+                fun (elaborate : PsElabContext -> PsSyntaxTerm -> Option PsExpr -> Except PsElabError PsElabTermResult) =>
+                  fun (inductiveInfo : PsInductiveInfo) =>
+                    fun (inductiveLevels : List PsLevel) =>
+                      fun (parameterArgs : List PsExpr) =>
+                        fun (expectedType : PsExpr) =>
+                          fun (alternatives : List PsElabMatchAlternative) =>
+                            fun (context : PsElabContext) =>
+                              match psElabMatchAlternativeFind ctorName alternatives with
+                              | none => Except.error PsElabError.matchNonExhaustive
+                              | some alternative =>
+                                  match psElabMatchMinor
+                                      elaborate context inductiveInfo inductiveLevels
+                                      parameterArgs expectedType alternative with
+                                  | Except.error error => Except.error error
+                                  | Except.ok minor =>
+                                      match smaller
+                                          elaborate inductiveInfo inductiveLevels
+                                          parameterArgs expectedType alternatives minor.context with
+                                      | Except.error error => Except.error error
+                                      | Except.ok tail =>
+                                          Except.ok {
+                                            context := tail.context
+                                            minors := List.cons minor.term tail.minors
+                                          }
+
+          def psElabMatchMinors
+              (elaborate : PsElabContext -> PsSyntaxTerm -> Option PsExpr -> Except PsElabError PsElabTermResult)
+              (inductiveInfo : PsInductiveInfo)
+              (inductiveLevels : List PsLevel)
+              (parameterArgs : List PsExpr)
+              (expectedType : PsExpr)
+              (alternatives : List PsElabMatchAlternative)
+              (context : PsElabContext)
+              (constructorNames : List PsName) :
+              Except PsElabError PsElabMatchMinorsResult :=
+            psElabMatchMinorsWorker constructorNames
+              elaborate inductiveInfo inductiveLevels parameterArgs
+              expectedType alternatives context''')
+
+          replace_once(
+              '      let binders :=\n        match sourceBinders with',
+              '      let binders : List PsSyntaxName :=\n        match sourceBinders with',
+          )
+          text = text.replace('(some expectedType)', '(Option.some expectedType)')
+          text = text.replace('(some binders)', '(Option.some binders)')
+
           path.write_text(text)
           PY
           git diff --check -- psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
@@ -363,5 +657,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "fix(elab): make Phase 13 bootstrap closure PSC1-portable"
+          git commit -m "fix(elab): normalize Phase 13 match helpers for PSC1"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

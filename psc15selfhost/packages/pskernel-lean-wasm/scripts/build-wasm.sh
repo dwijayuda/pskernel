@@ -40,29 +40,31 @@ else
 fi
 
 lean_build="$build_root/lean4"
+stage1_build="$lean_build/stage1"
 provider_overlay="$build_root/provider-overlay"
 provider_src="$provider_overlay/src"
 provider_olean_dir="$provider_overlay/olean"
 provider_c_dir="$provider_overlay/c"
 provider_obj_dir="$build_root/provider-obj"
 
-for tool in cmake emcc em++ emar lean node git; do
+for tool in cmake clang clang++ emcc em++ emar lean node git; do
   if ! command -v "$tool" >/dev/null 2>&1; then
     echo "required build tool missing: $tool" >&2
     exit 1
   fi
 done
+if [[ ! -x /usr/bin/i386-linux-gnu-pkg-config ]]; then
+  echo '32-bit pkg-config wrapper missing: /usr/bin/i386-linux-gnu-pkg-config' >&2
+  exit 1
+fi
 
+# The installed Lean toolchain is used only to verify the exact source/compiler
+# pin. It must not emit provider C for wasm32: Lean's own 4.34 WASM recipe uses
+# a runnable native 32-bit stage0 so platform constants match the wasm32 target.
 host_lean="$(command -v lean)"
-host_lean_prefix="$(lean --print-prefix)"
-host_lean_path="$host_lean_prefix/lib/lean"
 actual_lean_commit="$($host_lean --githash | tr -d '\r\n')"
 if [[ "$actual_lean_commit" != "$expected_lean_commit" ]]; then
   echo "unexpected Lean commit: $actual_lean_commit" >&2
-  exit 1
-fi
-if [[ ! -f "$host_lean_path/Lean.olean" ]]; then
-  echo "host Lean sysroot missing: $host_lean_path/Lean.olean" >&2
   exit 1
 fi
 
@@ -162,20 +164,30 @@ mkdir -p \
   "$provider_obj_dir" \
   "$out_dir"
 
-# Build Lean 4.34's current source tree directly for wasm32 as STAGE=1. The
-# exact pinned native Lean 4.34.0 installation is PREV_STAGE and only emits C;
-# no native host object/runtime library enters the WebAssembly artifact.
+# Follow Lean 4.34's own WASM cross-build architecture. Stage0 must be a
+# runnable native 32-bit compiler so the generated oleans/C encode target-width
+# platform constants; stage1 is then the actual Emscripten wasm32 build.
+# Force SSE2 floating evaluation on i386 so Float/Float32 keep deterministic
+# FLT_EVAL_METHOD=0 semantics.
 cmake \
-  -S "$lean_source/src" \
+  -S "$lean_source" \
   -B "$lean_build" \
   -G 'Unix Makefiles' \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_C_COMPILER_WORKS=1 \
   -DCMAKE_AR="$(command -v emar)" \
   -DCMAKE_TOOLCHAIN_FILE="$emscripten_toolchain" \
-  -DSTAGE=1 \
-  -DPREV_STAGE="$host_lean_prefix" \
-  -DPREV_STAGE_CMAKE_EXECUTABLE_SUFFIX= \
+  -DSTAGE0_USE_GMP=OFF \
+  -DSTAGE0_CMAKE_C_FLAGS='-m32 -msse2 -mfpmath=sse' \
+  -DSTAGE0_CMAKE_CXX_FLAGS='-m32 -msse2 -mfpmath=sse' \
+  -DSTAGE0_LEAN_EXTRA_CXX_FLAGS='-m32 -msse2 -mfpmath=sse' \
+  -DSTAGE0_LEANC_OPTS='-m32 -msse2 -mfpmath=sse' \
+  -DSTAGE0_CMAKE_CXX_COMPILER=clang++ \
+  -DSTAGE0_CMAKE_C_COMPILER=clang \
+  -DSTAGE0_CMAKE_EXECUTABLE_SUFFIX='' \
+  -DSTAGE0_MMAP=OFF \
+  -DSTAGE0_CMAKE_LIBRARY_PATH=/usr/lib/i386-linux-gnu/ \
+  -DSTAGE0_PKG_CONFIG_EXECUTABLE=/usr/bin/i386-linux-gnu-pkg-config \
   -DMULTI_THREAD=OFF \
   -DUSE_GMP=OFF \
   -DUSE_MIMALLOC=OFF \
@@ -186,28 +198,45 @@ cmake \
   -DWFAIL=OFF \
   -DLEAN_INSTALL_SUFFIX=-linux_wasm32
 
-# Build only the static pieces the provider consumes. The default ALL graph
-# continues into Lean's shell/shared targets, where stock initialize.cpp and our
-# kernel-only lean_initialize shim intentionally collide. The provider links
-# libleancpp_1, which excludes stock initialize.cpp, so these three targets are
-# the complete and conflict-free prerequisite set.
-cmake --build "$lean_build" --target make_stdlib leanrt leancpp_1 -j2
+# Build the runnable native i386 compiler and configure wasm32 stage1 first.
+# This is the target-width boundary Lean's own archived WASM CI recipe requires.
+cmake --build "$lean_build" --target stage1-configure -j2
 
-wasm_leanc="$lean_build/leanc.sh"
-if [[ ! -f "$wasm_leanc" ]]; then
-  echo "Emscripten current-source leanc wrapper missing: $wasm_leanc" >&2
+stage0_lean="$lean_build/stage0/bin/lean"
+stage0_lean_path="$lean_build/stage0/lib/lean"
+stage1_leanc="$stage1_build/leanc.sh"
+if [[ ! -x "$stage0_lean" || ! -f "$stage0_lean_path/Lean.olean" ]]; then
+  echo 'native 32-bit Lean stage0 was not produced with its sysroot' >&2
   exit 1
 fi
-chmod +x "$wasm_leanc"
+
+# stage1-configure has materialized the target helper scripts. Normalize modes
+# because vendored/source snapshots do not reliably preserve executable bits.
+for helper in "$stage1_build/bin/leanmake" "$stage1_leanc"; do
+  if [[ -e "$helper" ]]; then
+    chmod +x "$helper"
+  fi
+done
+
+# Keep the newer kernel-only/static closure: do not build Lean's default ALL
+# graph, which enters shell/shared targets and collides with the provider's
+# intentionally minimal Emscripten lean_initialize shim.
+cmake --build "$stage1_build" --target make_stdlib leanrt leancpp_1 -j2
+
+if [[ ! -f "$stage1_leanc" ]]; then
+  echo "cross leanc wrapper missing: $stage1_leanc" >&2
+  exit 1
+fi
+chmod +x "$stage1_leanc"
 
 for runtime_lib in \
-  "$lean_build/lib/lean/libleanrt.a" \
-  "$lean_build/lib/lean/libInit.a" \
-  "$lean_build/lib/lean/libStd.a" \
-  "$lean_build/lib/lean/libLean.a" \
-  "$lean_build/lib/temp/libleancpp_1.a"; do
+  "$stage1_build/lib/lean/libleanrt.a" \
+  "$stage1_build/lib/lean/libInit.a" \
+  "$stage1_build/lib/lean/libStd.a" \
+  "$stage1_build/lib/lean/libLean.a" \
+  "$stage1_build/lib/temp/libleancpp_1.a"; do
   if [[ ! -s "$runtime_lib" ]]; then
-    echo "Emscripten Lean current-source library missing: $runtime_lib" >&2
+    echo "Emscripten Lean target library missing: $runtime_lib" >&2
     exit 1
   fi
 done
@@ -243,9 +272,13 @@ provider_modules=(
   "PsKernelLean/Main"
 )
 
+# Emit provider oleans/C with the runnable native 32-bit compiler. Using the
+# installed x86_64 Lean here is unsound for wasm32 compiler-emitted platform
+# objects (notably compact literals), even though the resulting C later passes
+# through the target leanc wrapper.
 (
   cd "$provider_src"
-  export LEAN_PATH="$provider_olean_dir:$host_lean_path"
+  export LEAN_PATH="$provider_olean_dir:$stage0_lean_path"
   export LEAN_ABORT_ON_PANIC=1
   for module in "${provider_modules[@]}"; do
     source="$module.lean"
@@ -254,8 +287,8 @@ provider_modules=(
     c_file="$provider_c_dir/$module.c"
     c_tmp="$c_file.tmp"
     mkdir -p "$(dirname "$olean")" "$(dirname "$c_file")"
-    echo "PSC2_PROVIDER_HOST_C_EMIT: $module"
-    "$host_lean" \
+    echo "PSC2_PROVIDER_STAGE0_C_EMIT: $module"
+    "$stage0_lean" \
       -o "$olean" \
       -i "$ilean" \
       --c="$c_tmp" \
@@ -274,17 +307,17 @@ provider_objects=()
 index=0
 for source in "${provider_c_files[@]}"; do
   object="$provider_obj_dir/$index.o"
-  "$wasm_leanc" -O3 -c "$source" -o "$object"
+  "$stage1_leanc" -O3 -c "$source" -o "$object"
   provider_objects+=("$object")
   index=$((index + 1))
 done
 
 # Generated provider main owns initialization of its exact Lean import graph.
-# Use Lean's C++ archive without initialize.cpp so this kernel provider does not
-# eagerly initialize the whole Lean frontend/parser before provider main.
-LEAN_CC="$(command -v em++)" "$wasm_leanc" \
+# Use Lean's C++ archive without stock initialize.cpp so this kernel provider
+# does not eagerly initialize the whole Lean frontend/parser before main.
+LEAN_CC="$(command -v em++)" "$stage1_leanc" \
   "${provider_objects[@]}" \
-  -L"$lean_build/lib/temp" \
+  -L"$stage1_build/lib/temp" \
   -lleancpp_1 \
   -lInit \
   -lStd \

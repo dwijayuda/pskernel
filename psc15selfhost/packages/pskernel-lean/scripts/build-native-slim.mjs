@@ -157,15 +157,13 @@ for(let index=0;index<cFiles.length;index++){
 const shim=path.join(buildRoot,'minimal-initialize.cpp');
 const shimObject=path.join(objRoot,'minimal-initialize.o');
 writeFileSync(shim,`
-#include <lean/lean.h>
-
 namespace lean {
-LEAN_EXPORT void save_stack_info(bool main = true);
-LEAN_EXPORT void initialize_util_module();
-LEAN_EXPORT void initialize_kernel_module();
+void save_stack_info(bool main = true);
+void initialize_util_module();
+void initialize_kernel_module();
 
 static bool g_pskernel_native_initialized = false;
-extern "C" LEAN_EXPORT void lean_initialize() {
+extern "C" void lean_initialize() {
     if (g_pskernel_native_initialized)
         return;
     g_pskernel_native_initialized = true;

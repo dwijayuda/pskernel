@@ -110,7 +110,7 @@ def psEraseFinishApplicationWithFuel
                   scope.localContext
                   name
                   domain
-                  binder
+                  binder;
               let nextScope : PsErasureScope := {
                 localContext := pushed.context
                 runtimeLocals := scope.runtimeLocals
@@ -124,7 +124,7 @@ def psEraseFinishApplicationWithFuel
                   scope.runtimeStructureConstructors
                 runtimeExpressions := scope.runtimeExpressions
                 currentDefinition := scope.currentDefinition
-              }
+              };
               psEraseFinishApplicationWithFuel
                 environment
                 nextScope
@@ -145,11 +145,11 @@ def psEraseFinishApplicationWithFuel
                       scope.localContext
                       name
                       domain
-                      binder
+                      binder;
                   let parameterName :=
                     psErasureSafeIdentifier
                       (psNameToString name ++ "$" ++ toString pushed.id)
-                      ("arg$" ++ toString pushed.id)
+                      ("arg$" ++ toString pushed.id);
                   let nextScope : PsErasureScope := {
                     localContext := pushed.context
                     runtimeLocals :=
@@ -164,7 +164,7 @@ def psEraseFinishApplicationWithFuel
                       scope.runtimeStructureConstructors
                     runtimeExpressions := scope.runtimeExpressions
                     currentDefinition := scope.currentDefinition
-                  }
+                  };
                   psEraseFinishApplicationWithFuel
                     environment
                     nextScope
@@ -188,7 +188,7 @@ def psEraseFinishApplicationWithFuel
               PsVerifiedIrExpr.call
                 fn
                 typeArguments
-                runtimeArguments
+                runtimeArguments;
           match parametersRev.reverse with
           | [] => Except.ok body
           | parameters =>

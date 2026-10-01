@@ -42,7 +42,12 @@ assert.doesNotMatch(build,/target_lean_path/);
 assert.doesNotMatch(build,/stage0\/bin\/lean/);
 assert.doesNotMatch(build,/PSC2_STAGE0_PARSER_PROBE/);
 
-assert.match(build,/cmake --build "\$lean_build" -j2/);
+// Build only the static prerequisites consumed by the kernel provider. The
+// default Lean ALL graph continues into shell/shared targets and would combine
+// stock initialize.cpp with the Emscripten-only kernel initializer shim.
+const targetedLeanBuild='cmake --build "$lean_build" --target make_stdlib leanrt leancpp_1 -j2';
+assert.ok(build.includes(targetedLeanBuild),'targeted current-source Emscripten Lean build must exist');
+assert.doesNotMatch(build,/cmake --build "\$lean_build" -j2/);
 assert.match(build,/host_lean=.*command -v lean/);
 assert.match(build,/host_lean_prefix=.*lean --print-prefix/);
 assert.match(build,/host_lean_path=.*lib\/lean/);
@@ -62,7 +67,7 @@ assert.doesNotMatch(build,/LEAN_CC=.*emcc/);
 assert.doesNotMatch(build,/"\$stage0_lake"\s+build\s+provider/);
 assert.doesNotMatch(build,/\[\[lean_lib\]\]/);
 
-const currentLeanBuildIndex=build.indexOf('cmake --build "$lean_build" -j2');
+const currentLeanBuildIndex=build.indexOf(targetedLeanBuild);
 const providerCompileIndex=build.indexOf('provider_modules=');
 assert.ok(currentLeanBuildIndex>=0,'current-source Emscripten Lean build must exist');
 assert.ok(providerCompileIndex>=0,'direct provider module compile list must exist');
@@ -75,13 +80,15 @@ assert.match(build,/packages\/bridge\/src\/Ps/);
 assert.match(build,/packages\/pskernel-lean\/provider\/PsKernelLean/);
 
 // The target leanc.sh wrapper contributes compiler/platform flags and -L, but
-// intentionally does not add Lean's toolchain libraries. Mirror Lean 4.34's
-// own Emscripten TOOLCHAIN_STATIC_LINKER_FLAGS exactly for the provider link.
+// intentionally does not add Lean's toolchain libraries. Mirror the static
+// closure required by the kernel-only provider. Use libleancpp_1 specifically:
+// it excludes Lean's stock initialize.cpp, while the Emscripten compatibility
+// layer supplies the kernel-only lean_initialize implementation.
 const finalLinkStart=build.lastIndexOf('"$wasm_leanc" \\\n');
 assert.ok(finalLinkStart>=0,'final WASM provider link invocation must exist');
 const finalLink=build.slice(finalLinkStart);
 const leanEmscriptenStaticLinkClosure=[
-  '-lleancpp',
+  '-lleancpp_1',
   '-lInit',
   '-lStd',
   '-lLean',
@@ -96,6 +103,7 @@ for(const flag of leanEmscriptenStaticLinkClosure){
   assert.ok(index>previousLinkFlag,`Lean Emscripten link flag order drifted at ${flag}`);
   previousLinkFlag=index;
 }
+assert.doesNotMatch(finalLink,/(?:^|\s)-lleancpp(?:\s|\\|$)/m,'final provider link must not include stock initialize.cpp');
 
 // Emscripten 6.0.9 does not automatically pull the C++ runtime when the final
 // link is driven by emcc. Lean's kernel libraries contain C++, and run 49
@@ -148,9 +156,9 @@ assert.match(patch,/lean_uv_os_get_group/);
 
 // Lean 4.34 forces Emscripten LTO in its archived WASM path. On emsdk 6.0.9
 // that path produces typed-WASM signature conflicts between the runtime C++
-// objects and Lean-generated callers (the current RED is the two default-limit
-// getters). Keep this provider on the same source/semantic closure but compile
-// it without LTO so wasm-ld sees the source-level C ABI directly.
+// objects and Lean-generated callers. Keep this provider on the same
+// source/semantic closure but compile it without LTO so wasm-ld sees the
+// source-level C ABI directly.
 const emscriptenSettingsLine=patch.split('\n').find(line=>line.startsWith('+  set(EMSCRIPTEN_SETTINGS '));
 assert.ok(emscriptenSettingsLine,'compatibility patch must set Emscripten settings');
 assert.match(emscriptenSettingsLine,/-fwasm-exceptions/);

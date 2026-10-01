@@ -23,7 +23,15 @@ try{
 }
 
 assert.match(workflow,/^on:\s*\n\s{2}workflow_dispatch:\s*$/mu);
-assert.doesNotMatch(workflow,/^\s{2}(push|pull_request|schedule):/mu);
+assert.match(workflow,/^\s{2}push:\s*$/mu);
+assert.match(workflow,/^\s{4}branches:\s*\n\s{6}- psc2\/pskernel-lean-wasm\s*$/mu);
+assert.match(workflow,/psc15selfhost\/packages\/pskernel-lean\/scripts\/prebuilt-workflow\.test\.mjs/u);
+assert.doesNotMatch(workflow,/^\s{2}(pull_request|schedule):/mu);
+assert.doesNotMatch(
+  workflow,
+  /^\s{6}- psc15selfhost\/packages\/pskernel-lean\/(?:PREBUILT_MANIFEST\.json|prebuilt\/)/mu,
+  'generated native prebuilt bytes must not retrigger their own rebuild workflow',
+);
 assert.match(workflow,/permissions:\s*\n\s{2}contents:\s*read\s*\n\s*jobs:/mu);
 
 const expectedPairs=[
@@ -78,7 +86,7 @@ assert.match(assembleBlock,/npm pack/u);
 assert.match(assembleBlock,/packed-consumer\.test\.mjs/u);
 assert.match(
   assembleBlock,
-  /build\(psc2\): bundle pskernel-lean 4\.34\.0 native providers/u,
+  /build\(psc2\): bundle slim pskernel-lean 4\.34\.0 native providers \[skip ci\]/u,
 );
 assert.match(assembleBlock,/git push/u);
 

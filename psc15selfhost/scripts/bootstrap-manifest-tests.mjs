@@ -1,3 +1,4 @@
+import "./selfhost-source-isolation-tests.mjs";
 import {
   assertBootstrapManifestShape,
   computeBootstrapClosureSha256,

@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import { findSourceWorkspaceRoot, readGeneratedSourceClosure } from "./selfhost-source-workspace.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -21,22 +22,6 @@ function stripImports(source) {
     .filter((line) => !/^\s*import\s+[A-Za-z0-9_.]+\s*;?\s*$/u.test(line))
     .join("\n")
     .trim();
-}
-
-function findWorkspaceRoot(entryPath) {
-  let current = path.dirname(entryPath);
-  for (let fuel = 0; fuel < 64; fuel += 1) {
-    if (
-      existsSync(path.join(current, "packages")) &&
-      existsSync(path.join(current, "stdlib"))
-    ) {
-      return current;
-    }
-    const parent = path.dirname(current);
-    if (parent === current) break;
-    current = parent;
-  }
-  throw new Error(`PSC2_SELFHOST_WORKSPACE_NOT_FOUND: ${entryPath}`);
 }
 
 function moduleBasePath(workspaceRoot, moduleName) {
@@ -122,7 +107,8 @@ function sourceKind(compiler, sourcePath) {
 }
 
 async function flattenProject(compiler, entryPath) {
-  const workspaceRoot = findWorkspaceRoot(entryPath);
+  const workspaceRoot = findSourceWorkspaceRoot(entryPath);
+  const generated = await readGeneratedSourceClosure(entryPath, workspaceRoot);
   const targetKind = sourceKind(compiler, entryPath);
   const visited = new Set();
   const ordered = [];
@@ -143,7 +129,8 @@ async function flattenProject(compiler, entryPath) {
     ordered.push({ path: absolute, source });
   }
 
-  await visit(entryPath);
+  if (generated) ordered.push(...generated.ordered);
+  else await visit(entryPath);
 
   const chunks = [];
   for (const item of ordered) {
@@ -166,6 +153,7 @@ async function flattenProject(compiler, entryPath) {
   return {
     workspaceRoot,
     moduleCount: ordered.length,
+    closureSha256: generated?.closureSha256,
     sourceKind: targetKind,
     source: chunks.join("\n\n") + "\n",
   };
@@ -255,6 +243,7 @@ process.stdout.write(
     `PSC2_SELFHOST_COMPILER: ${path.relative(selfhostRoot, compilerPath)}`,
     `PSC2_SELFHOST_SOURCE: ${path.relative(selfhostRoot, entryPath)}`,
     `PSC2_SELFHOST_MODULES: ${project.moduleCount}`,
+    ...(project.closureSha256 ? [`PSC2_SELFHOST_SOURCE_CLOSURE_SHA256: ${project.closureSha256}`] : []),
     `PSC2_SELFHOST_TS: ${path.relative(selfhostRoot, outputTsPath)}`,
     `PSC2_SELFHOST_JS: ${path.relative(selfhostRoot, outputTsPath.replace(/\.ts$/u, ".js"))}`,
   ].join("\n") + "\n",

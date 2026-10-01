@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Temporary, read-only reference collection for the requested cross-branch audit.
+// Temporary, read-only reference collection, retried with complete shallow snapshots.
 // Remove this invocation after collecting its CI evidence; it is not a bootstrap gate.
 if (process.env.GITHUB_ACTIONS === "true" && process.env.PSC2_FIXED_POINT_PROBE_ACTIVE !== "1") {
   try {

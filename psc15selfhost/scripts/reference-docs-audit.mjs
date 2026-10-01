@@ -20,8 +20,10 @@ export async function auditReferenceDocs() {
     return result.stdout;
   }
   try {
-    git(["clone", "--quiet", "--bare", "--depth=1", "--filter=blob:none",
-      "--no-single-branch", "https://github.com/dwijayuda/pskernel.git", repository]);
+    // Fetch complete shallow snapshots. Explicit blob wants in a partial clone
+    // failed connectivity checks on this repository; avoid incomplete object sets.
+    git(["clone", "--quiet", "--bare", "--depth=1", "--no-single-branch",
+      "https://github.com/dwijayuda/pskernel.git", repository]);
     const tips = git(["--git-dir", repository, "for-each-ref",
       "--format=%(refname:strip=2)\t%(objectname)", "refs/heads/"])
       .trim().split("\n").filter(Boolean).map((line) => {
@@ -54,13 +56,7 @@ export async function auditReferenceDocs() {
       }
       console.log(`PSC2_REFERENCE_BRANCH ${JSON.stringify({ ...tip, documents: count })}`);
     }
-    // Fetch the exact documentation blobs in batches, rather than downloading
-    // unrelated binary datasets or executing files from reference branches.
     const shas = [...documents.keys()].sort();
-    for (let start = 0; start < shas.length; start += 128) {
-      git(["--git-dir", repository, "fetch", "--quiet", "--no-tags", "--no-filter",
-        "origin", ...shas.slice(start, start + 128)]);
-    }
     let textBytes = 0;
     let fullDocuments = 0;
     for (const sha of shas) {

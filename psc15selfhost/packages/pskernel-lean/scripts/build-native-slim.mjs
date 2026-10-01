@@ -181,39 +181,58 @@ run(leanc,[
   '-o',shimObject,
 ]);
 
-const linkArgs=[...objects,shimObject,`-L${leanLib}`];
-if(process.platform==='darwin'){
-  linkArgs.push(
-    '-lleancpp',
-    '-lInit',
-    '-lStd',
-    '-lLean',
-    '-lleanrt',
-    '-lc++',
-  );
-}else{
-  if(process.platform==='win32'){
-    linkArgs.push(
-      '-Wl,--whole-archive',
-      '-lleanmanifest',
-      '-Wl,--no-whole-archive',
-    );
-  }
-  linkArgs.push(
-    '-Wl,--start-group',
-    '-lleancpp',
-    '-lLean',
-    '-Wl,--end-group',
-    '-lStd',
-    '-Wl,--start-group',
-    '-lInit',
-    '-lleanrt',
-    '-Wl,--end-group',
-    '-lstdc++',
-  );
+const toolchainHelper=path.join(buildRoot,'native-toolchain-flags.lean');
+writeFileSync(toolchainHelper,`
+import Lean.Compiler.FFI
+
+open System
+open Lean.Compiler.FFI
+
+def emitFlags (tag : String) (flags : Array String) : IO Unit := do
+  for flag in flags do
+    IO.println (tag ++ "\\t" ++ flag)
+
+def main (args : List String) : IO UInt32 := do
+  match args with
+  | [prefix] =>
+      let root := FilePath.mk prefix
+      emitFlags "internal-link" (getInternalLinkerFlags root)
+      emitFlags "link" (getLinkerFlags root true)
+      return 0
+  | _ =>
+      IO.eprintln "expected Lean sysroot argument"
+      return 2
+`,'utf8');
+
+const flagsRun=run('lean',['--run',toolchainHelper,leanPrefix]);
+const flagGroups=new Map([
+  ['internal-link',[]],
+  ['link',[]],
+]);
+for(const line of flagsRun.stdout.split(/\\r?\\n/u)){
+  if(line.length===0)continue;
+  const tab=line.indexOf('\\t');
+  assert.ok(tab>0,`unexpected native toolchain flag line: ${line}`);
+  const tag=line.slice(0,tab);
+  const value=line.slice(tab+1);
+  assert.ok(flagGroups.has(tag),`unknown native toolchain flag group: ${tag}`);
+  flagGroups.get(tag).push(value);
 }
-linkArgs.push('-Os','-o',outputPath);
-run(leanc,linkArgs);
+const defaultLinkFlags=flagGroups.get('link');
+assert.ok(defaultLinkFlags.includes('-lLake'),'Lean static user link must contain -lLake before slimming');
+const kernelOnlyLinkFlags=defaultLinkFlags.filter(flag=>flag!=='-lLake');
+assert.equal(kernelOnlyLinkFlags.includes('-lLake'),false);
+
+const cc=leanTool(leanPrefix,'clang');
+const finalArgs=[
+  ...objects,
+  shimObject,
+  ...flagGroups.get('internal-link'),
+  ...kernelOnlyLinkFlags,
+  '-Os',
+  '-o',outputPath,
+];
+run(cc,finalArgs);
 
 assert.equal(existsSync(outputPath),true,'slim native provider was not produced');
 const bytes=statSync(outputPath).size;

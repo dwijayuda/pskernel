@@ -1,4 +1,4 @@
-name: Phase 13 elaborator close-forall portability patch
+name: Phase 13 elaborator forall Option portability patch
 
 on:
   push:
@@ -18,48 +18,25 @@ jobs:
         with:
           ref: psc2/kernel-core-phase13-checkedcore-shadow-work
 
-      - name: Curry changing body behind recursive binder list
+      - name: Qualify forall body expected Option
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import re
 
           path = Path('psc15selfhost/packages/elab/src/Ps/Elab/Term.lean')
           text = path.read_text()
-          pattern = re.compile(
-              r'def psCloseElabForallBinders\n'
-              r'    \(metaContext : PsMetaContext\)\n'
-              r'    \(binders : List PsElabTypedBinder\)\n'
-              r'    \(body : PsExpr\) :\n'
-              r'    PsExpr :=\n'
-              r'  match binders with\n'
-              r'  \| \[\] =>\n'
-              r'      body\n'
-              r'  \| binder :: rest =>\n'
-              r'      let binderType :=\n'
-              r'        psMetaInstantiate metaContext binder\.type;\n'
-              r'      let closedBody :=\n'
-              r'        PsExpr\.forallE\n'
-              r'          binder\.name\n'
-              r'          binderType\n'
-              r'          \(psExprAbstractFVar binder\.id body\)\n'
-              r'          binder\.binder;\n'
-              r'      psCloseElabForallBinders\n'
-              r'        metaContext\n'
-              r'        rest\n'
-              r'        closedBody\n'
-          )
-          replacement = '''def psCloseElabForallBinders\n    (metaContext : PsMetaContext)\n    (binders : List PsElabTypedBinder) :\n    PsExpr -> PsExpr :=\n  match binders with\n  | [] =>\n      fun (body : PsExpr) => body\n  | binder :: rest =>\n      let smaller : PsExpr -> PsExpr :=\n        psCloseElabForallBinders metaContext rest;\n      fun (body : PsExpr) =>\n        let binderType :=\n          psMetaInstantiate metaContext binder.type;\n        let closedBody :=\n          PsExpr.forallE\n            binder.name\n            binderType\n            (psExprAbstractFVar binder.id body)\n            binder.binder;\n        smaller closedBody\n'''
-          updated, count = pattern.subn(replacement, text, count=1)
+          old = '      match elaborate binderResult.context body none with\n'
+          new = '      match elaborate binderResult.context body Option.none with\n'
+          count = text.count(old)
           if count != 1:
-              raise SystemExit(f'expected exactly one psCloseElabForallBinders match, got {count}')
-          path.write_text(updated)
+              raise SystemExit(f'expected exactly one psElabForall bare-none call, got {count}')
+          path.write_text(text.replace(old, new, 1))
           PY
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add psc15selfhost/packages/elab/src/Ps/Elab/Term.lean
           git diff --cached --check
-          git commit -m "fix(elab): curry close-forall body for PSC1"
+          git commit -m "fix(elab): qualify forall Option for PSC1"
           git push origin HEAD:psc2/kernel-core-phase13-checkedcore-shadow-work

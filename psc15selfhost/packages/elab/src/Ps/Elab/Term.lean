@@ -2806,17 +2806,19 @@ def psElabSyntaxLocalId
   | _ => Option.none
 
 def psElabNatListAt
-    (values : List Nat)
-    (index : Nat) : Option Nat :=
+    (values : List Nat) : Nat -> Option Nat :=
   match values with
   | [] =>
-      Option.none
+      fun (_index : Nat) => Option.none
   | value :: rest =>
-      match index with
-      | 0 =>
-          Option.some value
-      | nextIndex + 1 =>
-          psElabNatListAt rest nextIndex
+      let smaller : Nat -> Option Nat :=
+        psElabNatListAt rest;
+      fun (index : Nat) =>
+        match index with
+        | 0 =>
+            Option.some value
+        | nextIndex + 1 =>
+            smaller nextIndex
 
 def psElabValidateStructuralCall
     (context : PsElabContext)

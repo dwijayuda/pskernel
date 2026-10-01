@@ -519,7 +519,7 @@ def psElabTypedBindersAcc
       match psSyntaxNameToName head.name with
       | none => Except.error PsElabError.emptyName
       | some name =>
-          match elaborate context sourceType none with
+          match elaborate context sourceType Option.none with
           | Except.error error => Except.error error
           | Except.ok typeResult =>
               match psInferEnsureSort
@@ -852,7 +852,7 @@ def psElabLet
                 body
                 expected
       | some sourceType =>
-          match elaborate context sourceType none with
+          match elaborate context sourceType Option.none with
           | Except.error error => Except.error error
           | Except.ok typeResult =>
               match psInferEnsureSort

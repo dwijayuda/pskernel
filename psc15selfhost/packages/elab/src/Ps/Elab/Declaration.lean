@@ -1209,8 +1209,8 @@ def psElabPartialDeclaration
     (valueSyntax : PsSyntaxTerm) :
     Except PsElabError PsElabDeclarationResult :=
   match psSyntaxNameToName nameSyntax with
-  | none => Except.error PsElabError.emptyName
-  | some name =>
+  | Option.none => Except.error PsElabError.emptyName
+  | Option.some name =>
       let initial := psElabContextEmpty environment;
       match
           psElabTypedBinders
@@ -1224,7 +1224,7 @@ def psElabPartialDeclaration
               psElabTerm
                 binderResult.context
                 typeSyntax
-                none with
+                Option.none with
           | Except.error error =>
               Except.error error
           | Except.ok typeResult =>
@@ -1249,12 +1249,12 @@ def psElabPartialDeclaration
                     Except.error PsElabError.unresolvedMetavariable
                   else
                     let selfHeader :=
-                      PsDeclaration.axiomDecl name [] closedType;
+                      PsDeclaration.axiomDecl name List.nil closedType;
                     match psEnvironmentAdd environment selfHeader with
-                    | none =>
+                    | Option.none =>
                         Except.error
                           (PsElabError.duplicateDeclaration name)
-                    | some withSelf =>
+                    | Option.some withSelf =>
                         let valueContext :=
                           psElabContextWithEnvironment
                             typeResult.context
@@ -1263,7 +1263,7 @@ def psElabPartialDeclaration
                             psElabTerm
                               valueContext
                               valueSyntax
-                              (some openType) with
+                              (Option.some openType) with
                         | Except.error error => Except.error error
                         | Except.ok valueResult =>
                             let metaContext :=
@@ -1293,15 +1293,14 @@ def psElabPartialDeclaration
                               Except.error
                                 PsElabError.unresolvedMetavariable
                             else
-                              Except.ok {
-                                declaration :=
-                                  PsDeclaration.partialDecl
+                              Except.ok
+                                (PsElabDeclarationResult.mk
+                                  (PsDeclaration.partialDecl
                                     name
-                                    []
+                                    List.nil
                                     (Prod.snd closed)
-                                    (Prod.fst closed)
-                                metaContext := metaContext
-                              }
+                                    (Prod.fst closed))
+                                  metaContext)
 
 def psElabDeclaration
     (environment : PsEnvironment)

@@ -1,3 +1,4 @@
+import "./check-elab-partial-declaration-selfhost-source-syntax.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

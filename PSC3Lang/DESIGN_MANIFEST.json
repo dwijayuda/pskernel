@@ -1,0 +1,61 @@
+{
+  "documentSet": "ProofScript PSC3Lang",
+  "draftVersion": "0.2",
+  "date": "2026-10-03",
+  "status": "research-proposal-not-frozen-not-implemented-not-proved",
+  "repository": "dwijayuda/pskernel",
+  "repositoryBaseCommit": "65369c75c7b63124f1ba7f2289e573181db281f0",
+  "repositoryBaseTree": "9c138519e9e48cb43b44eaab8da30ba44ec1f88a",
+  "languageAuthority": "LANGUAGE_REFERENCE.md",
+  "proposedEdition": "PSC3-0",
+  "proposedLeanReference": {
+    "tag": "v4.34.1",
+    "commit": "5045d0056413266e57c625dcd7c365b10e377c52",
+    "tagResolved": true,
+    "ownedCheckerCompatibilityEstablished": false,
+    "existingRepositoryPinChanged": false
+  },
+  "sourcePolicy": {
+    "lean": "pinned-native-syntactic-and-semantic-subset-with-declared-environment",
+    "ps": "byte-preserving-alias-under-explicit-module-map",
+    "psx": "optional-experimental-PSC3-UI-0-not-stock-syntax",
+    "oldEditionsSilentlyReinterpreted": false
+  },
+  "backendPolicy": {
+    "typescript": "retain-artifact-and-existing-bootstrap-route",
+    "rust": "retain-optional-native-and-wasm-route",
+    "directJavaScript": "favored-after-independent-promotion-gates",
+    "directWebAssembly": "experimental-separately-gated-runtime-profile",
+    "allBackendsMandatoryInBootstrap": false
+  },
+  "reviewCoverage": {
+    "typeScriptWorkflowRows": 42,
+    "representativePopulationFrequencyStudy": false,
+    "allRepositoryBranchesAudited": false,
+    "fullDependencyClosureComputed": false,
+    "humanUsabilityStudyRun": false,
+    "aiProductivityBenchmarkRun": false
+  },
+  "localExperiments": {
+    "pythonVersion": "3.13.5",
+    "nodeVersion": "22.16.0",
+    "typescriptVersion": "5.8.3",
+    "leanAvailable": false,
+    "lakeAvailable": false,
+    "natSubtractionPairs": 1089,
+    "plainSubtractionDisagreements": 528,
+    "absenceStatesRetained": 4,
+    "weakSortInputLists": 40,
+    "alwaysEmptyPermutationFailures": 39,
+    "terminalModelSequences": 27,
+    "candidateTypeScriptCompiledAndExecuted": true,
+    "pscOutputTested": false,
+    "leanExamplesChecked": false,
+    "browserApplicationTested": false,
+    "rustOrWasmArtifactsTested": false,
+    "preservationProofEstablished": false
+  },
+  "mutationScope": "new-PSC3Lang-documentation-only",
+  "compilerOrKernelCodeModified": false,
+  "sourceExamples": "candidate-unexecuted-except-explicit-local-model-and-TS-experiments"
+}

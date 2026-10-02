@@ -355,7 +355,7 @@ def psErasePrimitiveApplication
       let text := psNameToString name;
       let binary :=
         fun (operation : PsVerifiedIrIntrinsic) =>
-          if view.args.length == 2 then
+          if Nat.beq view.args.length 2 then
             match
                 psEraseMappedIntrinsic
                   erase
@@ -365,8 +365,8 @@ def psErasePrimitiveApplication
             | Except.ok result => Except.ok (some result)
           else
             Except.error PsErasureError.unsupportedApplication;
-      if text == "Int.ofNat" then
-        if view.args.length == 1 then
+      if psStringEq text "Int.ofNat" then
+        if Nat.beq view.args.length 1 then
           match
               psEraseMappedIntrinsic
                 erase
@@ -376,8 +376,8 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if text == "Int.negSucc" then
-        if view.args.length == 1 then
+      else if psStringEq text "Int.negSucc" then
+        if Nat.beq view.args.length 1 then
           match
               psEraseMappedIntrinsic
                 erase
@@ -387,8 +387,8 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if text == "Int.neg" then
-        if view.args.length == 1 then
+      else if psStringEq text "Int.neg" then
+        if Nat.beq view.args.length 1 then
           match
               psEraseMappedIntrinsic
                 erase
@@ -398,34 +398,34 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if text == "Int.add" then
+      else if psStringEq text "Int.add" then
         binary PsVerifiedIrIntrinsic.intAdd
-      else if text == "Int.sub" then
+      else if psStringEq text "Int.sub" then
         binary PsVerifiedIrIntrinsic.intSub
-      else if text == "Int.mul" then
+      else if psStringEq text "Int.mul" then
         binary PsVerifiedIrIntrinsic.intMul
-      else if text == "Nat.add" then
+      else if psStringEq text "Nat.add" then
         binary PsVerifiedIrIntrinsic.natAdd
-      else if text == "Nat.sub" then
+      else if psStringEq text "Nat.sub" then
         binary PsVerifiedIrIntrinsic.natSub
-      else if text == "Nat.mul" then
+      else if psStringEq text "Nat.mul" then
         binary PsVerifiedIrIntrinsic.natMul
-      else if text == "Nat.div" then
+      else if psStringEq text "Nat.div" then
         binary PsVerifiedIrIntrinsic.natDiv
-      else if text == "Nat.mod" then
+      else if psStringEq text "Nat.mod" then
         binary PsVerifiedIrIntrinsic.natMod
-      else if text == "Nat.beq" then
+      else if psStringEq text "Nat.beq" then
         binary PsVerifiedIrIntrinsic.natEq
-      else if text == "Nat.ble" then
+      else if psStringEq text "Nat.ble" then
         binary PsVerifiedIrIntrinsic.natLe
-      else if text == "Nat.blt" then
+      else if psStringEq text "Nat.blt" then
         binary PsVerifiedIrIntrinsic.natLt
-      else if text == "Bool.and" then
+      else if psStringEq text "Bool.and" then
         binary PsVerifiedIrIntrinsic.boolAnd
-      else if text == "Bool.or" then
+      else if psStringEq text "Bool.or" then
         binary PsVerifiedIrIntrinsic.boolOr
-      else if text == "Bool.not" then
-        if view.args.length == 1 then
+      else if psStringEq text "Bool.not" then
+        if Nat.beq view.args.length 1 then
           match
               psEraseMappedIntrinsic
                 erase
@@ -435,8 +435,8 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if text == "Char.ofNat" then
-        if view.args.length == 1 then
+      else if psStringEq text "Char.ofNat" then
+        if Nat.beq view.args.length 1 then
           match
               psEraseMappedIntrinsic
                 erase
@@ -446,8 +446,8 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if text == "Char.toNat" then
-        if view.args.length == 1 then
+      else if psStringEq text "Char.toNat" then
+        if Nat.beq view.args.length 1 then
           match
               psEraseMappedIntrinsic
                 erase
@@ -457,8 +457,8 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if text == "String.Pos.Raw.mk"
-          || text == "String.Pos.Raw.byteIdx" then
+      else if psStringEq text "String.Pos.Raw.mk"
+          || psStringEq text "String.Pos.Raw.byteIdx" then
         match view.args with
         | [value] =>
             match erase value with
@@ -466,10 +466,10 @@ def psErasePrimitiveApplication
             | Except.ok result => Except.ok (some result)
         | _ =>
             Except.error PsErasureError.unsupportedApplication
-      else if text == "String.push" then
+      else if psStringEq text "String.push" then
         binary PsVerifiedIrIntrinsic.stringPush
-      else if text == "String.singleton" then
-        if view.args.length == 1 then
+      else if psStringEq text "String.singleton" then
+        if Nat.beq view.args.length 1 then
           match
               psEraseMappedIntrinsic
                 erase
@@ -479,8 +479,8 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if text == "String.Internal.length" then
-        if view.args.length == 1 then
+      else if psStringEq text "String.Internal.length" then
+        if Nat.beq view.args.length 1 then
           match
               psEraseMappedIntrinsic
                 erase
@@ -490,10 +490,10 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if text == "String.Internal.append" then
+      else if psStringEq text "String.Internal.append" then
         binary PsVerifiedIrIntrinsic.stringAppend
-      else if text == "String.utf8ByteSize" then
-        if view.args.length == 1 then
+      else if psStringEq text "String.utf8ByteSize" then
+        if Nat.beq view.args.length 1 then
           match
               psEraseMappedIntrinsic
                 erase
@@ -503,14 +503,14 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if text == "String.Internal.next" then
+      else if psStringEq text "String.Internal.next" then
         binary PsVerifiedIrIntrinsic.stringNext
-      else if text == "String.Internal.get" then
+      else if psStringEq text "String.Internal.get" then
         binary PsVerifiedIrIntrinsic.stringGet
-      else if text == "String.Internal.atEnd" then
+      else if psStringEq text "String.Internal.atEnd" then
         binary PsVerifiedIrIntrinsic.stringAtEnd
-      else if text == "String.Internal.extract" then
-        if view.args.length == 3 then
+      else if psStringEq text "String.Internal.extract" then
+        if Nat.beq view.args.length 3 then
           match
               psEraseMappedIntrinsic
                 erase
@@ -520,7 +520,7 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if text == "Array.emptyWithCapacity" && view.args.length == 2 then
+      else if psStringEq text "Array.emptyWithCapacity" && Nat.beq view.args.length 2 then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -528,7 +528,7 @@ def psErasePrimitiveApplication
               view.args [0] [1] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if text == "Array.size" && view.args.length == 2 then
+      else if psStringEq text "Array.size" && Nat.beq view.args.length 2 then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -536,7 +536,7 @@ def psErasePrimitiveApplication
               view.args [0] [1] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if text == "Array.push" && view.args.length == 3 then
+      else if psStringEq text "Array.push" && Nat.beq view.args.length 3 then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -544,7 +544,7 @@ def psErasePrimitiveApplication
               view.args [0] [1, 2] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if text == "Array.getInternal" && view.args.length == 4 then
+      else if psStringEq text "Array.getInternal" && Nat.beq view.args.length 4 then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -552,7 +552,7 @@ def psErasePrimitiveApplication
               view.args [0] [1, 2] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if text == "Array.getD" && view.args.length == 4 then
+      else if psStringEq text "Array.getD" && Nat.beq view.args.length 4 then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -560,7 +560,7 @@ def psErasePrimitiveApplication
               view.args [0] [1, 2, 3] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if text == "Array.set" && view.args.length == 5 then
+      else if psStringEq text "Array.set" && Nat.beq view.args.length 5 then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -568,7 +568,7 @@ def psErasePrimitiveApplication
               view.args [0] [1, 2, 3] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if text == "Array.setIfInBounds" && view.args.length == 4 then
+      else if psStringEq text "Array.setIfInBounds" && Nat.beq view.args.length 4 then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -576,7 +576,7 @@ def psErasePrimitiveApplication
               view.args [0] [1, 2, 3] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if text == "Array.map" && view.args.length == 4 then
+      else if psStringEq text "Array.map" && Nat.beq view.args.length 4 then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -584,7 +584,7 @@ def psErasePrimitiveApplication
               view.args [0, 1] [2, 3] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if text == "Array.foldl" && view.args.length == 7 then
+      else if psStringEq text "Array.foldl" && Nat.beq view.args.length 7 then
         match
             psEraseTypedIntrinsic
               environment scope erase

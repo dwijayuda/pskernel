@@ -76,6 +76,15 @@ structure PsErasureScope where
   runtimeExpressions : List (Nat × PsVerifiedIrExpr)
   currentDefinition : Option PsErasureCurrentDefinition
 
+def psErasureNatRecursor : PsRuntimeInductiveInfo :=
+  PsRuntimeInductiveInfo.mk "Nat" psNatName psNatRecName 0 List.nil
+    (List.cons
+      (PsRuntimeConstructorInfo.mk "Nat" "zero" psNatZeroName 0 List.nil)
+      (List.cons
+        (PsRuntimeConstructorInfo.mk "Nat" "succ" psNatSuccName 0
+          (List.cons (PsRuntimeConstructorField.mk 0 "predecessor" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat) true) List.nil))
+        List.nil))
+
 def psErasureScopeEmpty
     (declarationNames : List (PsName × String)) :
     PsErasureScope :=
@@ -86,7 +95,7 @@ def psErasureScopeEmpty
     erasedLocals := []
     declarationNames := declarationNames
     runtimeConstructors := []
-    runtimeRecursors := []
+    runtimeRecursors := List.cons (Prod.mk psNatRecName psErasureNatRecursor) List.nil
     runtimeStructures := []
     runtimeStructureConstructors := []
     runtimeExpressions := []

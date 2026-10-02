@@ -14,7 +14,7 @@ export function assertErasurePrimitiveApplicationEquality(source) {
   }
   const natChecks = block.match(/Nat\.beq \(psListLength view\.args\)/g) ?? [];
   const stringChecks = block.match(/psStringEq text/g) ?? [];
-  if (natChecks.length !== 21 || stringChecks.length !== 40) {
+  if (natChecks.length !== 21 || stringChecks.length !== 41) {
     throw new Error(
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_EQUALITY_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Nat/String equality checks",
     );
@@ -47,5 +47,5 @@ for (const [from, to] of [
 }
 
 process.stdout.write(
-  "PSC2_ERASURE_PRIMITIVE_APPLICATION_EQUALITY_SELFHOST_SOURCE_SYNTAX: PASS (21 Nat.beq length checks, 40 psStringEq name checks; equality-operator mutations rejected)\n",
+  "PSC2_ERASURE_PRIMITIVE_APPLICATION_EQUALITY_SELFHOST_SOURCE_SYNTAX: PASS (21 Nat.beq length checks, 41 psStringEq name checks; equality-operator mutations rejected)\n",
 );

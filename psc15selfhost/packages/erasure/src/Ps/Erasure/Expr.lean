@@ -399,6 +399,19 @@ def psErasePrimitiveApplication
         binary PsVerifiedIrIntrinsic.intSub
       else if psStringEq text "Int.mul" then
         binary PsVerifiedIrIntrinsic.intMul
+      else if psStringEq text "Nat.succ" then
+        match view.args with
+        | List.nil => Except.error PsErasureError.unsupportedApplication
+        | List.cons argument rest =>
+            match rest with
+            | List.cons _ _ => Except.error PsErasureError.unsupportedApplication
+            | List.nil =>
+                match erase argument with
+                | Except.error error => Except.error error
+                | Except.ok value =>
+                    Except.ok (Option.some
+                      (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natAdd []
+                        [value, PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)]))
       else if psStringEq text "Nat.add" then
         binary PsVerifiedIrIntrinsic.natAdd
       else if psStringEq text "Nat.sub" then
@@ -1159,6 +1172,45 @@ def psEraseMatchAlternatives
   psEraseMatchAlternativesWorker environment eraseAt scope substitutions recursiveParameterIndex arguments minorStart
     constructors index alternativesRev
 
+def psEraseNatRecursorAlternatives
+    (scrutinee : PsVerifiedIrExpr)
+    (alternatives : List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr)) :
+    Except PsErasureError PsVerifiedIrExpr :=
+  match alternatives with
+  | List.nil => Except.error PsErasureError.binderMismatch
+  | List.cons zeroAlternative rest =>
+      match rest with
+      | List.nil => Except.error PsErasureError.binderMismatch
+      | List.cons succAlternative tail =>
+          if psErasureBoolNot (psListIsEmpty tail) then Except.error PsErasureError.binderMismatch
+          else
+            match zeroAlternative with
+            | Prod.mk zeroName zeroDetail =>
+                match zeroDetail with
+                | Prod.mk zeroBindings zeroBody =>
+                    match succAlternative with
+                    | Prod.mk succName succDetail =>
+                        match succDetail with
+                        | Prod.mk succBindings succBody =>
+                            if psErasureBoolNot (psStringEq zeroName "zero") then Except.error PsErasureError.binderMismatch
+                            else if psErasureBoolNot (psStringEq succName "succ") then Except.error PsErasureError.binderMismatch
+                            else if psErasureBoolNot (psListIsEmpty zeroBindings) then Except.error PsErasureError.binderMismatch
+                            else
+                              match succBindings with
+                              | List.nil => Except.error PsErasureError.binderMismatch
+                              | List.cons binding bindingsTail =>
+                                  if psErasureBoolNot (psListIsEmpty bindingsTail) then Except.error PsErasureError.binderMismatch
+                                  else
+                                    Except.ok
+                                      (PsVerifiedIrExpr.ifE
+                                        (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natEq []
+                                          [scrutinee, PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0)])
+                                        zeroBody
+                                        (PsVerifiedIrExpr.letE binding.name (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+                                          (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natSub []
+                                            [scrutinee, PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)])
+                                          succBody))
+
 def psEraseRuntimeRecursorApplication
     (environment : PsEnvironment)
     (scope : PsErasureScope)
@@ -1233,13 +1285,18 @@ def psEraseRuntimeRecursorApplication
                                 [] with
                           | Except.error error => Except.error error
                           | Except.ok alternatives =>
-                              Except.ok
-                                (Option.some
-                                  (PsVerifiedIrExpr.matchE
-                                    inductiveInfo.name
-                                    typeArguments
-                                    scrutinee
-                                    alternatives))
+                              if psNameEq inductiveInfo.coreName psNatName then
+                                match psEraseNatRecursorAlternatives scrutinee alternatives with
+                                | Except.error error => Except.error error
+                                | Except.ok lowered => Except.ok (Option.some lowered)
+                              else
+                                Except.ok
+                                  (Option.some
+                                    (PsVerifiedIrExpr.matchE
+                                      inductiveInfo.name
+                                      typeArguments
+                                      scrutinee
+                                      alternatives))
   | _ => Except.ok Option.none
 
 def psErasureFindProjectionField
@@ -1327,6 +1384,8 @@ def psEraseRuntimeExprWithFuelWorker
                     Except.ok
                       (PsVerifiedIrExpr.literal
                         PsVerifiedIrLiteral.unit)
+                  else if psNameEq name psNatZeroName then
+                    Except.ok (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0))
                   else
                     Except.error (PsErasureError.unknownConstant name)
       | .app _ _ =>

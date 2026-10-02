@@ -243,9 +243,63 @@ def psAuditTotalJsonWorkers : Bool :=
     | _ => false
   exhausted && boundary && accepted && nested && parserBoundary
 
+def psAuditErasureError (error : PsErasureError) : String :=
+  match error with
+  | .fuelExhausted => "fuelExhausted"
+  | .binderMismatch => "binderMismatch"
+  | .looseBoundVariable => "looseBoundVariable"
+  | .unresolvedMetavariable => "unresolvedMetavariable"
+  | .unknownLocal id => "unknownLocal:" ++ toString id
+  | .erasedLocalUsed id => "erasedLocalUsed:" ++ toString id
+  | .unsupportedRuntimeTerm => "unsupportedRuntimeTerm"
+  | .unsupportedApplication => "unsupportedApplication"
+  | .unknownConstant name => "unknownConstant:" ++ psNameToString name
+
+def psAuditErasureDetails (prepared : PsCompilerAdmissionReadyModule) : IO Unit := do
+  let environment ← match psCompilerEnvironmentFromPrepared prepared with
+    | .error _ => throw (IO.userError "PSC2_REPLAY_ENVIRONMENT_FAILED")
+    | .ok environment => pure environment
+  let declarations := prepared.declarations
+  let runtimeDeclarations := psSelfHostRuntimePreludeDeclarationsWithProd ++ declarations
+  let scope := psErasureScopeEmpty (psErasureDeclarationNames runtimeDeclarations)
+  let structures ← match psPrepareRuntimeStructures environment runtimeDeclarations runtimeDeclarations scope [] with
+    | .error error => throw (IO.userError ("PSC2_REPLAY_STRUCTURES_FAILED: " ++ psAuditErasureError error))
+    | .ok result => pure result
+  let inductives ← match psPrepareRuntimeInductives environment runtimeDeclarations runtimeDeclarations structures.scope [] with
+    | .error error => throw (IO.userError ("PSC2_REPLAY_INDUCTIVES_FAILED: " ++ psAuditErasureError error))
+    | .ok result => pure result
+  let mut failures := 0
+  for declaration in declarations do
+    match declaration with
+    | .definitionDecl name _ type value =>
+        match psEraseDefinition environment inductives.scope name type value with
+        | .error error =>
+            failures := failures + 1
+            IO.println ("PSC2_REPLAY_ERASURE_FAILED: " ++ psNameToString name ++ ": " ++ psAuditErasureError error)
+        | .ok _ => pure ()
+    | _ => pure ()
+  IO.println ("PSC2_REPLAY_ERASURE_FAILURE_COUNT: " ++ toString failures)
+
 def main (arguments : List String) : IO UInt32 := do
   match arguments with
   | ["--watch", file] => return ← psAuditWatchModule file
+  | ["--compile", file, output] =>
+      let elaborated ← psHostLoadProject psSelfHostProdPreludeEnvironment file
+      IO.println ("PSC2_REPLAY_PROJECT_ELAB_PASS: " ++ toString elaborated.declarations.length ++ " declarations")
+      let prepared ← match psCompilerPrepareElaborated elaborated with
+        | .error _ => throw (IO.userError "PSC2_REPLAY_PROJECT_PREPARE_FAILED")
+        | .ok prepared => pure prepared
+      IO.println "PSC2_REPLAY_PROJECT_PREPARE_PASS"
+      match psCompilerTypeScriptFromPrepared prepared with
+      | .error (.compiler (.erasure error)) =>
+          IO.println ("PSC2_REPLAY_PROJECT_ERASURE_FAILED: " ++ psAuditErasureError error)
+          psAuditErasureDetails prepared
+          return 1
+      | .error _ => throw (IO.userError "PSC2_REPLAY_PROJECT_EMIT_FAILED")
+      | .ok source =>
+          IO.FS.writeFile output source
+          IO.println ("PSC2_REPLAY_PROJECT_EMIT_PASS: " ++ output)
+          return 0
   | ["--prepare", file] =>
       let elaborated ← psHostLoadProject psSelfHostProdPreludeEnvironment file
       IO.println ("PSC2_REPLAY_PROJECT_ELAB_PASS: " ++ toString elaborated.declarations.length ++ " declarations")

@@ -1,9 +1,15 @@
 # @proofscript/pskernel-core
 
-**0.1.0-checker.1 — private experimental dependent term-checker checkpoint.**
+**0.1.0-checker.2 — private experimental dependent term-checker checkpoint.**
 
 Regenerated with the current PSC seed, with all 264 baseline tests passing and
 fresh build and reference evidence. See `../../docs/continuity/OWNED_KERNEL_REGENERATION_2026-10-02.md`.
+
+The checker.2 increment adds bounded simultaneous universe instantiation: 14
+additional tests, including 512 deterministic trees, pass. Parameter uniqueness,
+arity, undeclared names and exhaustion are checked explicitly. This operation is
+a prerequisite for polymorphic admission; the default wire checker remains the
+monomorphic fragment until the subsequent declaration checks are validated.
 
 This is the default checker and part of the joint bootstrap source closure.
 The host adapter runs the generated semantic machine and fails closed outside

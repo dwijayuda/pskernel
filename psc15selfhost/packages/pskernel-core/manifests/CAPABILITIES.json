@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "package": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.1",
+  "version": "0.1.0-checker.2",
   "status": "experimental-term-checker",
   "canCheckProofs": false,
   "authoritative": false,
@@ -19,7 +19,8 @@
     "shared-budget-beta-zeta-transparent-delta-reduction",
     "conservative-alpha-normal-form-conversion",
     "dependent-Pi-lambda-application-let-typing",
-    "closed-monomorphic-sequential-definition-admission"
+    "closed-monomorphic-sequential-definition-admission",
+    "bounded-simultaneous-universe-instantiation"
   ],
   "boundedEvidence": [
     "BUILD.json",

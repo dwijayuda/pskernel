@@ -1,36 +1,36 @@
 {
   "schemaVersion": 1,
-  "packageVersion": "0.1.0-checker.1",
-  "sourceManifestSha256": "ecdf7f8f4cfd9abb2faf09766f67a882eb40ebe0042045cd92731ce2965a0619",
-  "seedSha256": "b9ddd63381771f92a8751a8366983279130090cf416667103b5fe94f7f3e3244",
-  "seedSourceCommit": "1a7dff298f3f83739750e3f35e2791f708749c50",
+  "packageVersion": "0.1.0-checker.2",
+  "sourceManifestSha256": "cfd16c97fb093976528440c31b7815ee7725cd63a153919460bb352cab4ed6bd",
+  "seedSha256": "a0673677219da539df555961129385ae4cf5099f303f0c883dd3a26f726449ff",
+  "seedSourceCommit": "cc79e84014ed1d49b0c31971e0a8ceb99b32472c",
   "typescriptVersion": "5.8.3",
   "nodeVersion": "v26.7.0",
-  "leanCheck": "PSC2_CHECK: PASS (376 declarations)",
-  "psCheck": "PSC2_CHECK: PASS (376 declarations)",
+  "leanCheck": "PSC2_CHECK: PASS (411 declarations)",
+  "psCheck": "PSC2_CHECK: PASS (411 declarations)",
   "canonicalPsEmissionParity": true,
   "generatedOutputEdited": false,
   "canCheckProofs": false,
   "outputs": [
     {
       "path": "dist/foundation.d.ts",
-      "sha256": "bcf3c21f1f58b8c12f04e0536c5d1339d57ab52980e36624ad24506234d26902"
+      "sha256": "53eb2ffcae76aa5822ed693f807eac3e0311dcdba70e5af4ee603ba462ef47d0"
     },
     {
       "path": "dist/foundation.js",
-      "sha256": "e3f91d3b731ec1eb345407781893982e823e583ea71ca8dae01542c0268f3cdb"
+      "sha256": "4889b036bdf287a225800523d3f4c26bb5e494e77e3de19b454a8d33fcf3dd50"
     },
     {
       "path": "dist/foundation.lean",
-      "sha256": "716a78c8cecfae30568c35c4e0e37fdb326b2a83ef5144eaaf145860a75f7c94"
+      "sha256": "e621d3b3c38647d2d2ff13ffc9abd12f63c3bce0a9a35755d05f1a907f0bfa3d"
     },
     {
       "path": "dist/foundation.ps",
-      "sha256": "857fbaf09332c01da18c003346ec6bfbeb873d236bd00b6cca1e8066a4933c66"
+      "sha256": "f1f7748a58bc47e7732fd5e86818c2fc66f3c40e427ae5428a4c96c9e1e1ffa5"
     },
     {
       "path": "dist/foundation.ts",
-      "sha256": "bf285d8ba53175426fdfd2fe370a18886986cfa766118b26ebc38fc2459869d0"
+      "sha256": "797d8ef5d2d63926a88e264a91d6ede3d3915f268e37d93803cd3a4e84535842"
     }
   ]
 }

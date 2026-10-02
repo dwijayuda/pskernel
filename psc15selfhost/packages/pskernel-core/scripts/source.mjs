@@ -44,7 +44,7 @@ export function validateCode(source, allowedImports) {
 }
 export function readSources(base = root) {
   const manifest = json(path.join(base, 'manifests/SOURCE.json'));
-  const expected = ["src/Ps/Kernel/Data.lean", "src/Ps/Kernel/Structural.lean", "src/Ps/Kernel/Natural.lean", "src/Ps/Kernel/Expr.lean", "src/Ps/Kernel/Binding.lean", "src/Ps/Kernel/Order.lean", "src/Ps/Kernel/Universe.lean", "src/Ps/Kernel/LevelCheck.lean", "src/Ps/Kernel/Environment.lean", "src/Ps/Kernel/Reduction.lean", "src/Ps/Kernel/Conversion.lean", "src/Ps/Kernel/TypeCheck.lean", "src/Ps/Kernel/Admission.lean"];
+  const expected = ["src/Ps/Kernel/Data.lean", "src/Ps/Kernel/Structural.lean", "src/Ps/Kernel/Natural.lean", "src/Ps/Kernel/Expr.lean", "src/Ps/Kernel/Binding.lean", "src/Ps/Kernel/Order.lean", "src/Ps/Kernel/Universe.lean", "src/Ps/Kernel/LevelCheck.lean", "src/Ps/Kernel/LevelInstantiate.lean", "src/Ps/Kernel/Environment.lean", "src/Ps/Kernel/Reduction.lean", "src/Ps/Kernel/Conversion.lean", "src/Ps/Kernel/TypeCheck.lean", "src/Ps/Kernel/Admission.lean"];
   if (manifest.schemaVersion !== 1 || JSON.stringify(manifest.files.map(x => x.path)) !== JSON.stringify(expected)) throw Error('SOURCE_CLOSURE_CHANGED');
   const allowed = new Set(), chunks = [];
   for (const entry of manifest.files) {

@@ -1,7 +1,7 @@
 # PSC2 checked compiler and owned kernel bootstrap
 
-The default kernel is pskernel-core. The bootstrap entry includes all 13 owned
-kernel modules alongside the compiler: 68 source modules across 13 packages.
+The default kernel is pskernel-core. The bootstrap entry includes all 14 owned
+kernel modules alongside the compiler: 69 source modules across 13 packages.
 The old core package and routing have been retired. Neither Lean provider is in
 the portable closure; neither provider branch is wholesale-merged.
 

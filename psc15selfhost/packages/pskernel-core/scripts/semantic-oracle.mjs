@@ -61,6 +61,22 @@ for(const [a,b]of numeric)positive.push(theorem('NumericResult',ctor('NumericRes
 const u=['param',['str',['anonymous'],'u']],v=['param',['str',['anonymous'],'v']];
 for(const [a,b,e]of [[['max',u,v],['max',v,u],'equal'],[u,['succ',u],'different'],[['imax',u,['zero']],['zero'],'equal']])positive.push(theorem('LevelCheckResult',C('PsKernelLevelCheckResult.'+e),app(C('psKernelLevelCheckRun'),fuel(1024),app(C('psKernelLevelCheckStart'),level(a),level(b)))));
 const wrong=[];
+// Universe instantiation is a prerequisite for polymorphic declaration checking.
+// These ground equalities run the owned source in the pinned reference kernel.
+const iz=['zero'], inu=['str',['anonymous'],'u'], inv=['str',['anonymous'],'v'];
+const ip=n=>['param',n], is=l=>['succ',l];
+const instantiate=(names,levels,target,budget=1024)=>app(C('psKernelLevelInstantiateRun'),fuel(budget),
+  app(C('psKernelLevelInstantiateStart'),list(C('PsKernelName'),names.map(ownName)),list(C('PsKernelLevel'),levels.map(level)),level(target)));
+for(const [names,levels,target,status,expected,budget] of [
+  [[inu,inv],[ip(inv),is(iz)],['max',ip(inu),ip(inv)],'done',['max',ip(inv),is(iz)],1024],
+  [[inu],[is(iz)],['imax',is(ip(inu)),iz],'done',['imax',is(is(iz)),iz],1024],
+  [[inu,inu],[iz,iz],iz,'invalidParameters',null,1024],
+  [[inu],[],iz,'invalidParameters',null,1024],
+  [[],[],ip(inu),'undeclaredParameter',null,1024],
+  [[inu],[iz],ip(inu),'outOfFuel',null,0],
+]) positive.push(theorem('LevelInstantiateResult',status==='done'?ctor('LevelInstantiateResult','done',level(expected)):C('PsKernelLevelInstantiateResult.'+status),instantiate(names,levels,target,budget)));
+wrong.push({label:'universe-substitution-must-be-simultaneous',decl:theorem('LevelInstantiateResult',ctor('LevelInstantiateResult','done',level(is(iz))),instantiate([inu,inv],[ip(inv),is(iz)],ip(inu)))});
+wrong.push({label:'universe-arity-mismatch-cannot-accept',decl:theorem('LevelInstantiateResult',ctor('LevelInstantiateResult','done',level(iz)),instantiate([inu],[],iz))});
 const capture=binding.find(x=>x.label==='substitute-avoids-capture');
 wrong.push({label:'capture-avoidance',decl:theorem('BindingResult',ctor('BindingResult','done',expr(['lam',['str',['anonymous'],'x'],['sort',['zero']],['b','0'],'explicit'])),app(C('psKernelBindingRun'),fuel(capture.fuel),app(C('psKernelBindingStart'),mode(capture.mode),natural(0),expr(capture.input))))});
 wrong.push({label:'imax-right-zero',decl:theorem('UniverseResult',ctor('UniverseResult','done',level(u)),app(C('psKernelUniverseRun'),fuel(1024),app(C('psKernelUniverseStart'),level(['imax',u,['zero']]))))});

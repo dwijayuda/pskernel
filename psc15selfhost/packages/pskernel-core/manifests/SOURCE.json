@@ -34,6 +34,10 @@
       "sha256": "e170073b648beb378f6fda6eed3858b36d873fda2244a720bf77cd4efaaa2216"
     },
     {
+      "path": "src/Ps/Kernel/LevelInstantiate.lean",
+      "sha256": "a959dce67164ba7ff73b519c2d45369791a866a8eb474094d97ae7a1bf6fea6b"
+    },
+    {
       "path": "src/Ps/Kernel/Environment.lean",
       "sha256": "d3f5674e7cb52d770deac7ffdab7c48de82046a0ae1153d52da51ab05412b090"
     },

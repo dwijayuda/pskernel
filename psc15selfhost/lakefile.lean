@@ -164,7 +164,7 @@ lean_lib PsKernelOwned where
   roots := #[
     `Ps.Kernel.Data, `Ps.Kernel.Structural, `Ps.Kernel.Natural,
     `Ps.Kernel.Expr, `Ps.Kernel.Binding, `Ps.Kernel.Order,
-    `Ps.Kernel.Universe, `Ps.Kernel.LevelCheck, `Ps.Kernel.LevelInstantiate, `Ps.Kernel.Environment,
+    `Ps.Kernel.Universe, `Ps.Kernel.LevelCheck, `Ps.Kernel.LevelInstantiate, `Ps.Kernel.ExprInstantiate, `Ps.Kernel.Environment,
     `Ps.Kernel.Reduction, `Ps.Kernel.Conversion, `Ps.Kernel.TypeCheck,
     `Ps.Kernel.Admission
   ]

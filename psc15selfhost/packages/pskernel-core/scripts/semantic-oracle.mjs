@@ -77,6 +77,21 @@ for(const [names,levels,target,status,expected,budget] of [
 ]) positive.push(theorem('LevelInstantiateResult',status==='done'?ctor('LevelInstantiateResult','done',level(expected)):C('PsKernelLevelInstantiateResult.'+status),instantiate(names,levels,target,budget)));
 wrong.push({label:'universe-substitution-must-be-simultaneous',decl:theorem('LevelInstantiateResult',ctor('LevelInstantiateResult','done',level(is(iz))),instantiate([inu,inv],[ip(inv),is(iz)],ip(inu)))});
 wrong.push({label:'universe-arity-mismatch-cannot-accept',decl:theorem('LevelInstantiateResult',ctor('LevelInstantiateResult','done',level(iz)),instantiate([inu],[],iz))});
+const ieName=['str',['anonymous'],'F'];
+const instantiateExpr=target=>app(C('psKernelExprInstantiateRun'),fuel(1024),
+  app(C('psKernelExprInstantiateStart'),list(C('PsKernelName'),[ownName(inu),ownName(inv)]),
+    list(C('PsKernelLevel'),[level(ip(inv)),level(is(iz))]),expr(target)));
+const expressionCases=[
+  [['sort',ip(inu)],['sort',ip(inv)]],
+  [['const',ieName,[ip(inv),ip(inu)]],['const',ieName,[is(iz),ip(inv)]]],
+  [['lam',inu,['sort',ip(inu)],['b','0'],'strictImplicit'],['lam',inu,['sort',ip(inv)],['b','0'],'strictImplicit']],
+  [['pi',inu,['sort',ip(inv)],['sort',ip(inu)],'instanceImplicit'],['pi',inu,['sort',is(iz)],['sort',ip(inv)],'instanceImplicit']],
+  [['let',inu,['sort',ip(inu)],['sort',ip(inv)],['b','0']],['let',inu,['sort',ip(inv)],['sort',is(iz)],['b','0']]],
+  [['proj',ieName,'0',['const',ieName,[ip(inu)]]],['proj',ieName,'0',['const',ieName,[ip(inv)]]]],
+];
+for(const [input,expected]of expressionCases)positive.push(theorem('ExprInstantiateResult',ctor('ExprInstantiateResult','done',expr(expected)),instantiateExpr(input)));
+wrong.push({label:'constant-universe-order-must-be-preserved',decl:theorem('ExprInstantiateResult',
+  ctor('ExprInstantiateResult','done',expr(['const',ieName,[ip(inv),is(iz)]])),instantiateExpr(['const',ieName,[ip(inv),ip(inu)]]))});
 const capture=binding.find(x=>x.label==='substitute-avoids-capture');
 wrong.push({label:'capture-avoidance',decl:theorem('BindingResult',ctor('BindingResult','done',expr(['lam',['str',['anonymous'],'x'],['sort',['zero']],['b','0'],'explicit'])),app(C('psKernelBindingRun'),fuel(capture.fuel),app(C('psKernelBindingStart'),mode(capture.mode),natural(0),expr(capture.input))))});
 wrong.push({label:'imax-right-zero',decl:theorem('UniverseResult',ctor('UniverseResult','done',level(u)),app(C('psKernelUniverseRun'),fuel(1024),app(C('psKernelUniverseStart'),level(['imax',u,['zero']]))))});

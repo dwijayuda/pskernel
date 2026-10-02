@@ -1,7 +1,7 @@
 import Ps.BackendTs.Compiler
 import Ps.Kernel.Admission
 import Ps.Kernel.Structural
-import Ps.Kernel.LevelInstantiate
+import Ps.Kernel.ExprInstantiate
 
 -- The joint fixed-point closure contains the compiler and the owned kernel.
 -- Source-profile regressions are validated through that transitive compiler closure.

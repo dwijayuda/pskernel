@@ -7,7 +7,7 @@ import { defaultCheckedKernel } from './checked-kernel-provider.mjs';
 import '../packages/pskernel-core/scripts/verify-evidence.mjs';
 
 const manifest = JSON.parse(await readFile(new URL('../packages/pskernel-core/package.json', import.meta.url), 'utf8'));
-assert.equal(manifest.version, '0.1.0-checker.2');
+assert.equal(manifest.version, '0.1.0-checker.3');
 assert.equal(manifest.private, true);
 assert.equal(manifest.proofscript.authoritative, false);
 assert.equal(manifest.proofscript.bootstrap, true);
@@ -20,6 +20,11 @@ for (const name of ['pskernel-core.old', 'pskernel-lean', 'pskernel-lean-wasm'])
 assert.equal(defaultCheckedKernel, 'pskernel-core');
 const entry = await readFile(new URL('../packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean', import.meta.url), 'utf8');
 assert.match(entry, /^import Ps\.Kernel\.Admission\s*$/mu);
+assert.match(entry, /^import Ps\.Kernel\.ExprInstantiate\s*$/mu);
+const instantiate = await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/ExprInstantiate.lean', import.meta.url), 'utf8');
+assert(instantiate.includes('PsKernelExprInstantiateTask.validate target'), 'even expressions without levels must validate parameter arity');
+assert(instantiate.includes('psKernelLevelInstantiateStep current'), 'nested instantiation must consume the caller transition budget');
+assert(!instantiate.includes('psKernelLevelInstantiateRun'), 'nested operations must not allocate an independent fuel budget');
 const lake = await readFile(new URL('../lakefile.lean', import.meta.url), 'utf8');
 assert(!lake.includes('lean_lib PsKernelCore where'));
 console.log('PSC2_OWNED_KERNEL_RECEIPT: PASS (checker identities, retired legacy routing, owned bootstrap closure and default; release gates remain closed)');

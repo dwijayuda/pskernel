@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "package": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.2",
+  "version": "0.1.0-checker.3",
   "status": "experimental-term-checker",
   "canCheckProofs": false,
   "authoritative": false,
@@ -20,7 +20,8 @@
     "conservative-alpha-normal-form-conversion",
     "dependent-Pi-lambda-application-let-typing",
     "closed-monomorphic-sequential-definition-admission",
-    "bounded-simultaneous-universe-instantiation"
+    "bounded-simultaneous-universe-instantiation",
+    "bounded-expression-universe-instantiation"
   ],
   "boundedEvidence": [
     "BUILD.json",

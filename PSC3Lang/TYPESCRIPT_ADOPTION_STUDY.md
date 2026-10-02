@@ -4,7 +4,7 @@
 
 ## 1. The adoption hypothesis
 
-Developers choose a language inside a workflow: model API data, call libraries, render UI, handle asynchronous state, debug failures and ship changes. TypeScript's official examples and ecosystem documentation demonstrate these tasks. The hypothesis for PSC3 is that coherent libraries, tooling and checkable guarantees can compensate for learning native Lean syntax. This hypothesis must be tested; familiar keywords alone would not establish it. [T01–T15, E01–E08](RESEARCH_SOURCES.md)
+Developers choose a language inside a workflow: model API data, call libraries, render UI, handle asynchronous state, debug failures and ship changes. TypeScript's official examples and ecosystem documentation demonstrate these tasks. The hypothesis for PSC3 is that coherent libraries, tooling and checkable guarantees can compensate for learning native Lean syntax. This hypothesis must be tested; familiar keywords alone would not establish it. [T01–T16, E01–E08](RESEARCH_SOURCES.md)
 
 The core translation strategy is not structural-type imitation. Use native records, inductives, polymorphism, functions and monadic composition; generate boundary schemas and adapters where foreign APIs need structural shapes. Preserve a stable Lean meaning and make migrations explicit.
 
@@ -27,7 +27,7 @@ The core translation strategy is not structural-type imitation. Use native recor
 | TS09 | Immutable object updates [T04] | Native structure update with dependent fields checked. | Native P0 | Changing a length cannot retain invalid indexed data. |
 | TS10 | Default parameters [T03] | Pinned native default binders; show inserted defaults. | Native P0 | Default dependency and evaluation tests. |
 | TS11 | Optional/rest arguments [T03] | Options structures and Array/List arguments; explicit foreign variadic adapters. | Library/boundary P0/P1 | Omission differs from passing undefined when API requires it. |
-| TS12 | Method-style APIs [T04] | Native generalized field notation; library receiver positions designed for it. | Native/library P0 | Resolve the same method as the pinned Lean environment. |
+| TS12 | Method-style APIs [T03,T04] | Native generalized field notation; library receiver positions designed for it. | Native/library P0 | Resolve the same method as the pinned Lean environment. |
 | TS13 | Overloads [T03] | Named functions or inductive input; importer selects bounded disjoint foreign overloads. | Boundary/tool P1 | Ambiguous overload generates a diagnostic, not `any`. |
 | TS14 | Generic constraints [T05] | Native typeclasses or explicit dictionaries; exact instance semantics. | Native P0 | Imported instance influence is explained. |
 | TS15 | `keyof`/indexed access [T04,T09] | Finite schema descriptors and generated field lenses/accessors. | Library/tool P1 | Unknown keys rejected; no arbitrary dynamic property as proof data. |
@@ -52,8 +52,8 @@ The core translation strategy is not structural-type imitation. Use native recor
 | TS34 | ESM/package exports [T12,E09] | Explicit logical module graph mapped to pinned ESM package interfaces. | Tool P0 | Conditional export resolution recorded per deployment. |
 | TS35 | Development server/HMR [E05] | Vite integration or compatible plugin contract; state migration/reset protocol. | Tool P0 | Stale proofs and incompatible preserved state invalidated. |
 | TS36 | CSS/assets [E05] | Typed asset manifest and stylesheet/module adapters. | Tool P0 | Content hashes, paths, production loading and escaping tested. |
-| TS37 | Classes/`this` [T10] | Structures/functions for owned data; receiver-preserving foreign handle methods. | Native/boundary P0 | Detached call does not lose foreign receiver accidentally. |
-| TS38 | Decorator/procedural ecosystems [T10] | Selected derive/registry plugins; framework-specific transforms explicitly profiled. | Extension P2 | No arbitrary decorator execution treated as proof authority. |
+| TS37 | Classes/`this` [T03,T10] | Structures/functions for owned data; receiver-preserving foreign handle methods. | Native/boundary P0 | Detached call does not lose foreign receiver accidentally. |
+| TS38 | Decorator/procedural ecosystems [T16] | Selected derive/registry plugins; framework-specific transforms explicitly profiled. | Extension P2 | No arbitrary decorator execution treated as proof authority. |
 | TS39 | Fast editor feedback | Shared incremental parser/elaborator, diagnostics, rename and code actions. | Tool P0 | Measure p50/p95 edit latency on representative projects. |
 | TS40 | JS `number` and bigint [T01,E11] | Explicit numeric types and checked boundary conversions; exact Nat/Int. | Native/boundary P0 | Large integers, NaN, signed zero and range errors. |
 | TS41 | Promise/async iteration and streams [E10,E12] | Stream library with backpressure and cancellation contract. | Library/boundary P1 | Bounded demand, late emissions and disposal. |

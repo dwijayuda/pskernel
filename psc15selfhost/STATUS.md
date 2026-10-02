@@ -1,6 +1,6 @@
 # PSC2 minimal self-host status
 
-Status: architecture and bootstrap-boundary refactor implemented; runtime fixed-point evidence is still required before declaring PSC2 self-hosted.
+Status (2026-10-03): compiler/reference replay parity is recorded on the preserved 75-module checkpoint. The default generated-owned kernel is checker.9; it admits the exact three-entry unit/PsSourcePos/PsSourceSpan prefix. Full owned joint self-hosting and release remain unachieved. See `docs/continuity/OWNED_RECORD_FIELDS_2026-10-03.md` for current evidence and blockers.
 
 ## Current bootstrap shape
 
@@ -11,7 +11,7 @@ self-host source:           generated canonical .ps
 fixed-point backend:        TypeScript -> JavaScript
 semantic compiler:          backend-neutral
 optional extensions:        project, Rust, Wasm
-kernel status:              bounded reference package, not yet compiler authority
+kernel status:              generated-owned pskernel-core default; bounded, non-authoritative
 ```
 
 The authoritative source entry is:
@@ -63,16 +63,18 @@ prove full Lean 4 equivalence or final kernel soundness.
 
 ## Current semantic boundary
 
-The compiler currently produces `PsCompilerAdmissionReadyModule`, not `CheckedCore`.
+The compiler-only preparation path produces `PsCompilerAdmissionReadyModule`, not a blanket proof of owned admission.
 This artifact is fail-closed: canonical admissions are revalidated before erasure and
 the erasure environment is reconstructed from the bootstrap prelude plus declarations.
 A caller-provided environment cannot be smuggled through this artifact.
 
-This remains deliberately weaker than real kernel admission. The next kernel milestone
-must explicitly adapt the local reference `packages/pskernel` (or another accepted
-provider) to the compiler Core and make erasure consume a genuine checked artifact.
-Until that adapter exists and is gated, do not rename the current boundary to
-`CheckedCore` and do not claim kernel-backed self-hosting.
+The checked command path now freezes prepared modules, submits their exact canonical
+admissions to the selected kernel, and permits emission only after acceptance.
+The new `packages/pskernel-core` is the default; native Lean and Lean WASM require
+explicit selection and remain outside the portable source closure. Rejection,
+unsupported input, exhaustion and failed checks do not select another checker.
+The full owned closure still fails, so compiler-only or reference fixed points
+do not establish owned joint self-hosting. The retired core is not a continuation path.
 
 ## After the first fixed point
 

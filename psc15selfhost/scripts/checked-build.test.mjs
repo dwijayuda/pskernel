@@ -46,7 +46,7 @@ test('actual unit source passes owned admission, exact-module emission and execu
     assert.notEqual(module.sample, undefined);
     assert.deepEqual(module.sample, module.SampleUnit.make);
     assert.equal(receipt.kernel.selector, 'pskernel-core');
-    assert.equal(receipt.provider.profile, 'owned-natural-literals/5');
+    assert.equal(receipt.provider.profile, 'owned-closed-record-fields/6');
     assert.match(await readFile(path.join(dir, 'out.admissions.json'), 'utf8'), /SampleUnit/u);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
@@ -61,7 +61,7 @@ test('actual Nat constructor source passes the owned bootstrap and executed outp
     const module = await import(pathToFileURL(outputPath).href);
     assert.equal(module.first, 1n);
     assert.equal(receipt.kernel.selector, 'pskernel-core');
-    assert.equal(receipt.provider.profile, 'owned-natural-literals/5');
+    assert.equal(receipt.provider.profile, 'owned-closed-record-fields/6');
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
@@ -73,7 +73,7 @@ for (const kind of ['lean','ps']) test(`actual ${kind} natural literal passes ow
     await writeFile(entryPath,kind==='lean'?'def answer : Nat := 42\n':'def answer: Nat := 42;\n');
     const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});
     assert.equal((await import(pathToFileURL(outputPath).href)).answer,42n);
-    assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-natural-literals/5');
+    assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-closed-record-fields/6');
   } finally {await rm(dir,{recursive:true,force:true});}
 });
 
@@ -138,4 +138,20 @@ test('no unchecked or alternative-kernel fallback in checked profile', async () 
     buildChecked({ entryPath: 'Main.ps', kernel: 'none', checkOnly: true }),
     /KERNEL_UNSUPPORTED/,
   );
+});
+
+for (const kind of ['lean','ps']) test(`actual ${kind} closed record passes owned checking and executed output`, {skip:!native}, async()=>{
+  const dir=await mkdtemp(path.join(tmpdir(),'psc2-owned-record-real-'));
+  try {
+    await writeFile(path.join(dir,'package.json'),'{"type":"module"}');
+    const entryPath=path.join(dir,'Main.'+kind),outputPath=path.join(dir,'out.js');
+    const source=kind==='lean'
+      ? 'structure OwnedPair where\n  left : Nat\n  right : Nat\ndef pair : OwnedPair := OwnedPair.mk 7 11\n'
+      : 'structure OwnedPair where { left : Nat; right : Nat; };\ndef pair : OwnedPair := OwnedPair.mk(7, 11);\n';
+    await writeFile(entryPath,source);
+    const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});
+    const result=(await import(pathToFileURL(outputPath).href)).pair;
+    assert.equal(result.left,7n);assert.equal(result.right,11n);
+    assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-closed-record-fields/6');
+  } finally {await rm(dir,{recursive:true,force:true});}
 });

@@ -84,7 +84,7 @@ test('default admits a polymorphic identity and checks distinct universe instant
     const use = definition('Use', polyType(l), { ...C('Poly'), ls: [l] });
     const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]));
     assert.equal(result.accepted, true, JSON.stringify(result));
-    assert.equal(result.profile, 'owned-natural-literals/5');
+    assert.equal(result.profile, 'owned-closed-record-fields/6');
     assert.equal(descriptor.selector, 'pskernel-core');
   }
 });

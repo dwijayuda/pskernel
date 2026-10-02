@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "Natural literals after owned Nat initialization; exact typing, constructor conversion and dependent recursor iota; not arithmetic primitive completeness",
-  "sourceManifestSha256": "1dc2ac98c0b0cb1c62b3bc939aebe8ad7e1e77ffd9935e0f5117215e5d33869c",
+  "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
   "harnessSha256": "c3ff60a40a93939e4804270534c73bebdc57cc6176032e5b172c98ba983ffacc",
   "provider": {
     "protocol": "pskernel-lean/1",

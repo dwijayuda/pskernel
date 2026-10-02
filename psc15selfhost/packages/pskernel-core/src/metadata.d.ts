@@ -1,7 +1,7 @@
 /** Identity and target metadata; no public proof-checking API exists in this experimental checkpoint. */
 export declare const kernelInfo: Readonly<{
   name: "@proofscript/pskernel-core";
-  version: "0.1.0-checker.8";
+  version: "0.1.0-checker.9";
   implementation: "new-owned-psc-kernel";
   status: "experimental-term-checker";
   canCheckProofs: false;

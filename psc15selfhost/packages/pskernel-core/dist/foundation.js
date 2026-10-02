@@ -383,6 +383,8 @@ export const PsKernelDefinition = {
     "polymorphic": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$48]: "polymorphic", name: __field0, parameters: __field1, type: __field2, value: __field3 }),
     "constant": (__field0, __field1, __field2) => ({ [__ps$tag$48]: "constant", name: __field0, parameters: __field1, type: __field2 }),
     "unitRecursor": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$48]: "unitRecursor", name: __field0, parameters: __field1, type: __field2, ctorName: __field3 }),
+    "recordFamily": (__field0, __field1, __field2) => ({ [__ps$tag$48]: "recordFamily", name: __field0, ctorName: __field1, fields: __field2 }),
+    "recordRecursor": (__field0, __field1, __field2, __field3, __field4) => ({ [__ps$tag$48]: "recordRecursor", name: __field0, parameters: __field1, type: __field2, ctorName: __field3, fields: __field4 }),
     "natFamily": (__field0, __field1, __field2) => ({ [__ps$tag$48]: "natFamily", name: __field0, zeroName: __field1, succName: __field2 }),
     "natRecursor": (__field0, __field1, __field2, __field3, __field4) => ({ [__ps$tag$48]: "natRecursor", name: __field0, parameters: __field1, type: __field2, zeroName: __field3, succName: __field4 }),
 };
@@ -609,33 +611,58 @@ export const PsKernelNatAdmissionStep = {
     "next": (__field0) => ({ [__ps$tag$78]: "next", state: __field0 }),
     "final": (__field0) => ({ [__ps$tag$78]: "final", result: __field0 }),
 };
-const __ps$tag$79 = Symbol("ProofScript.PsKernelJointEntry.tag");
-export const PsKernelJointEntry = {
-    "definition": (__field0) => ({ [__ps$tag$79]: "definition", entry: __field0 }),
-    "unitInductive": (__field0) => ({ [__ps$tag$79]: "unitInductive", entry: __field0 }),
-    "natInductive": (__field0) => ({ [__ps$tag$79]: "natInductive", entry: __field0 }),
+const __ps$tag$79 = Symbol("ProofScript.PsKernelRecordTask.tag");
+export const PsKernelRecordTask = {
+    "initial": { [__ps$tag$79]: "initial" },
+    "familyName": (__field0) => ({ [__ps$tag$79]: "familyName", state: __field0 }),
+    "fields": (__field0, __field1, __field2) => ({ [__ps$tag$79]: "fields", remaining: __field0, reversed: __field1, count: __field2 }),
+    "fieldType": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$79]: "fieldType", remaining: __field0, reversed: __field1, count: __field2, state: __field3 }),
+    "result": (__field0, __field1, __field2) => ({ [__ps$tag$79]: "result", reversed: __field0, count: __field1, tasks: __field2 }),
+    "constructorType": (__field0, __field1, __field2) => ({ [__ps$tag$79]: "constructorType", reversed: __field0, count: __field1, state: __field2 }),
+    "constructorName": (__field0, __field1, __field2) => ({ [__ps$tag$79]: "constructorName", reversed: __field0, count: __field1, state: __field2 }),
+    "recursorName": (__field0, __field1, __field2) => ({ [__ps$tag$79]: "recursorName", reversed: __field0, count: __field1, state: __field2 }),
+    "arguments": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$79]: "arguments", reversed: __field0, count: __field1, index: __field2, value: __field3 }),
+    "minor": (__field0, __field1, __field2) => ({ [__ps$tag$79]: "minor", remaining: __field0, fields: __field1, value: __field2 }),
+    "recursorType": (__field0, __field1, __field2) => ({ [__ps$tag$79]: "recursorType", fields: __field0, type: __field1, state: __field2 }),
 };
-const __ps$tag$80 = Symbol("ProofScript.PsKernelJointState.tag");
-export const PsKernelJointState = {
-    "pending": (__field0, __field1) => ({ [__ps$tag$80]: "pending", environment: __field0, entries: __field1 }),
-    "definition": (__field0, __field1) => ({ [__ps$tag$80]: "definition", rest: __field0, state: __field1 }),
-    "unitInductive": (__field0, __field1) => ({ [__ps$tag$80]: "unitInductive", rest: __field0, state: __field1 }),
-    "natInductive": (__field0, __field1) => ({ [__ps$tag$80]: "natInductive", rest: __field0, state: __field1 }),
+const __ps$tag$80 = Symbol("ProofScript.PsKernelRecordState.tag");
+export const PsKernelRecordState = {
+    "state": (__field0, __field1, __field2) => ({ [__ps$tag$80]: "state", environment: __field0, declaration: __field1, task: __field2 }),
 };
-const __ps$tag$81 = Symbol("ProofScript.PsKernelJointStep.tag");
-export const PsKernelJointStep = {
+const __ps$tag$81 = Symbol("ProofScript.PsKernelRecordStep.tag");
+export const PsKernelRecordStep = {
     "next": (__field0) => ({ [__ps$tag$81]: "next", state: __field0 }),
     "final": (__field0) => ({ [__ps$tag$81]: "final", result: __field0 }),
 };
-const __ps$tag$82 = Symbol("ProofScript.PsKernelBootstrapState.tag");
-export const PsKernelBootstrapState = {
-    "prelude": (__field0, __field1) => ({ [__ps$tag$82]: "prelude", entries: __field0, state: __field1 }),
-    "declarations": (__field0) => ({ [__ps$tag$82]: "declarations", state: __field0 }),
+const __ps$tag$82 = Symbol("ProofScript.PsKernelJointEntry.tag");
+export const PsKernelJointEntry = {
+    "definition": (__field0) => ({ [__ps$tag$82]: "definition", entry: __field0 }),
+    "unitInductive": (__field0) => ({ [__ps$tag$82]: "unitInductive", entry: __field0 }),
+    "recordInductive": (__field0) => ({ [__ps$tag$82]: "recordInductive", entry: __field0 }),
+    "natInductive": (__field0) => ({ [__ps$tag$82]: "natInductive", entry: __field0 }),
 };
-const __ps$tag$83 = Symbol("ProofScript.PsKernelBootstrapStep.tag");
+const __ps$tag$83 = Symbol("ProofScript.PsKernelJointState.tag");
+export const PsKernelJointState = {
+    "pending": (__field0, __field1) => ({ [__ps$tag$83]: "pending", environment: __field0, entries: __field1 }),
+    "definition": (__field0, __field1) => ({ [__ps$tag$83]: "definition", rest: __field0, state: __field1 }),
+    "unitInductive": (__field0, __field1) => ({ [__ps$tag$83]: "unitInductive", rest: __field0, state: __field1 }),
+    "recordInductive": (__field0, __field1) => ({ [__ps$tag$83]: "recordInductive", rest: __field0, state: __field1 }),
+    "natInductive": (__field0, __field1) => ({ [__ps$tag$83]: "natInductive", rest: __field0, state: __field1 }),
+};
+const __ps$tag$84 = Symbol("ProofScript.PsKernelJointStep.tag");
+export const PsKernelJointStep = {
+    "next": (__field0) => ({ [__ps$tag$84]: "next", state: __field0 }),
+    "final": (__field0) => ({ [__ps$tag$84]: "final", result: __field0 }),
+};
+const __ps$tag$85 = Symbol("ProofScript.PsKernelBootstrapState.tag");
+export const PsKernelBootstrapState = {
+    "prelude": (__field0, __field1) => ({ [__ps$tag$85]: "prelude", entries: __field0, state: __field1 }),
+    "declarations": (__field0) => ({ [__ps$tag$85]: "declarations", state: __field0 }),
+};
+const __ps$tag$86 = Symbol("ProofScript.PsKernelBootstrapStep.tag");
 export const PsKernelBootstrapStep = {
-    "next": (__field0) => ({ [__ps$tag$83]: "next", state: __field0 }),
-    "final": (__field0) => ({ [__ps$tag$83]: "final", result: __field0 }),
+    "next": (__field0) => ({ [__ps$tag$86]: "next", state: __field0 }),
+    "final": (__field0) => ({ [__ps$tag$86]: "final", result: __field0 }),
 };
 export function psKernelCompareTasks(fuel, __ps_eta_0) { while (true) {
     {
@@ -3969,6 +3996,20 @@ export function psKernelDefinitionName(entry) { while (true) {
                 const unusedConstructor = __ps$match$0.ctorName;
                 return name;
             }
+            case "recordFamily": {
+                const name = __ps$match$0.name;
+                const unusedCtor = __ps$match$0.ctorName;
+                const unusedFields = __ps$match$0.fields;
+                return name;
+            }
+            case "recordRecursor": {
+                const name = __ps$match$0.name;
+                const unusedParameters = __ps$match$0.parameters;
+                const unusedType = __ps$match$0.type;
+                const unusedCtor = __ps$match$0.ctorName;
+                const unusedFields = __ps$match$0.fields;
+                return name;
+            }
             case "natFamily": {
                 const name = __ps$match$0.name;
                 const unusedZero = __ps$match$0.zeroName;
@@ -4015,6 +4056,20 @@ export function psKernelDefinitionParameters(entry) { while (true) {
                 const parameters = __ps$match$0.parameters;
                 const type = __ps$match$0.type;
                 const unusedConstructor = __ps$match$0.ctorName;
+                return parameters;
+            }
+            case "recordFamily": {
+                const unusedName = __ps$match$0.name;
+                const unusedCtor = __ps$match$0.ctorName;
+                const unusedFields = __ps$match$0.fields;
+                return PsKernelList["nil"]();
+            }
+            case "recordRecursor": {
+                const unusedName = __ps$match$0.name;
+                const parameters = __ps$match$0.parameters;
+                const unusedType = __ps$match$0.type;
+                const unusedCtor = __ps$match$0.ctorName;
+                const unusedFields = __ps$match$0.fields;
                 return parameters;
             }
             case "natFamily": {
@@ -4065,6 +4120,20 @@ export function psKernelDefinitionType(entry) { while (true) {
                 const unusedConstructor = __ps$match$0.ctorName;
                 return type;
             }
+            case "recordFamily": {
+                const unusedName = __ps$match$0.name;
+                const unusedCtor = __ps$match$0.ctorName;
+                const unusedFields = __ps$match$0.fields;
+                return PsKernelExpr["sortE"](PsKernelLevel["succ"](PsKernelLevel["zero"]));
+            }
+            case "recordRecursor": {
+                const unusedName = __ps$match$0.name;
+                const unusedParameters = __ps$match$0.parameters;
+                const type = __ps$match$0.type;
+                const unusedCtor = __ps$match$0.ctorName;
+                const unusedFields = __ps$match$0.fields;
+                return type;
+            }
             case "natFamily": {
                 const name = __ps$match$0.name;
                 const unusedZero = __ps$match$0.zeroName;
@@ -4111,6 +4180,20 @@ export function psKernelDefinitionBody(entry) { while (true) {
                 const unusedParameters = __ps$match$0.parameters;
                 const unusedType = __ps$match$0.type;
                 const unusedConstructor = __ps$match$0.ctorName;
+                return PsKernelDefinitionBody["opaque"];
+            }
+            case "recordFamily": {
+                const unusedName = __ps$match$0.name;
+                const unusedCtor = __ps$match$0.ctorName;
+                const unusedFields = __ps$match$0.fields;
+                return PsKernelDefinitionBody["opaque"];
+            }
+            case "recordRecursor": {
+                const unusedName = __ps$match$0.name;
+                const unusedParameters = __ps$match$0.parameters;
+                const unusedType = __ps$match$0.type;
+                const unusedCtor = __ps$match$0.ctorName;
+                const unusedFields = __ps$match$0.fields;
                 return PsKernelDefinitionBody["opaque"];
             }
             case "natFamily": {
@@ -4236,6 +4319,20 @@ function* __ps$impl$psKernelBuiltinNatStep(state) { return (yield* (function* ()
                         const _wild1 = __ps$match$0.parameters;
                         const _wild2 = __ps$match$0.type;
                         const _wild3 = __ps$match$0.ctorName;
+                        return PsKernelBuiltinNatStep["rejected"](PsKernelCheckError["unsupported"]);
+                    }
+                    case "recordFamily": {
+                        const _wild0 = __ps$match$0.name;
+                        const _wild1 = __ps$match$0.ctorName;
+                        const _wild2 = __ps$match$0.fields;
+                        return PsKernelBuiltinNatStep["rejected"](PsKernelCheckError["unsupported"]);
+                    }
+                    case "recordRecursor": {
+                        const _wild0 = __ps$match$0.name;
+                        const _wild1 = __ps$match$0.parameters;
+                        const _wild2 = __ps$match$0.type;
+                        const _wild3 = __ps$match$0.ctorName;
+                        const _wild4 = __ps$match$0.fields;
                         return PsKernelBuiltinNatStep["rejected"](PsKernelCheckError["unsupported"]);
                     }
                     case "natFamily": {
@@ -5132,6 +5229,20 @@ function* __ps$impl$psKernelReduceStep(state) { return (yield* (function* () { c
                                         const ctorName = __ps$match$0.ctorName;
                                         return (yield* __ps$invoke(psKernelReduceNext, env, PsKernelList["cons"](PsKernelReduceTask["whnf"](major), PsKernelList["cons"](PsKernelReduceTask["unitMajor"](fn, minor, ctorName, levels), rest)), values));
                                     }
+                                    case "recordFamily": {
+                                        const _wild0 = __ps$match$0.name;
+                                        const _wild1 = __ps$match$0.ctorName;
+                                        const _wild2 = __ps$match$0.fields;
+                                        return (yield* __ps$invoke(psKernelReducePush, env, rest, values, PsKernelExpr["app"](fn, major)));
+                                    }
+                                    case "recordRecursor": {
+                                        const _wild0 = __ps$match$0.name;
+                                        const _wild1 = __ps$match$0.parameters;
+                                        const _wild2 = __ps$match$0.type;
+                                        const _wild3 = __ps$match$0.ctorName;
+                                        const _wild4 = __ps$match$0.fields;
+                                        return (yield* __ps$invoke(psKernelReducePush, env, rest, values, PsKernelExpr["app"](fn, major)));
+                                    }
                                     case "natFamily": {
                                         const _wild0 = __ps$match$0.name;
                                         const _wild1 = __ps$match$0.zeroName;
@@ -5272,6 +5383,20 @@ function* __ps$impl$psKernelReduceStep(state) { return (yield* (function* () { c
                                         const _wild1 = __ps$match$0.parameters;
                                         const _wild2 = __ps$match$0.type;
                                         const _wild3 = __ps$match$0.ctorName;
+                                        return (yield* __ps$invoke(psKernelReducePush, env, rest, values, PsKernelExpr["app"](fn, major)));
+                                    }
+                                    case "recordFamily": {
+                                        const _wild0 = __ps$match$0.name;
+                                        const _wild1 = __ps$match$0.ctorName;
+                                        const _wild2 = __ps$match$0.fields;
+                                        return (yield* __ps$invoke(psKernelReducePush, env, rest, values, PsKernelExpr["app"](fn, major)));
+                                    }
+                                    case "recordRecursor": {
+                                        const _wild0 = __ps$match$0.name;
+                                        const _wild1 = __ps$match$0.parameters;
+                                        const _wild2 = __ps$match$0.type;
+                                        const _wild3 = __ps$match$0.ctorName;
+                                        const _wild4 = __ps$match$0.fields;
                                         return (yield* __ps$invoke(psKernelReducePush, env, rest, values, PsKernelExpr["app"](fn, major)));
                                     }
                                     case "natFamily": {
@@ -7728,6 +7853,813 @@ function* __ps$impl$psKernelNatAdmissionRun(fuel, __ps_eta_0) { return (yield* (
     }
 } throw new Error("invalid ProofScript constructor tag"); })()); }
 __ps$implementations.set(psKernelNatAdmissionRun, __ps$impl$psKernelNatAdmissionRun);
+export function psKernelRecordNext(env, declaration, task) { while (true) {
+    return PsKernelRecordStep["next"](PsKernelRecordState["state"](env, declaration, task));
+} }
+export function psKernelRecordReject(error) { while (true) {
+    return PsKernelRecordStep["final"](PsKernelAdmissionResult["rejected"](error));
+} }
+export function psKernelRecordMotive(name) { while (true) {
+    return PsKernelName["num"](name, PsKernelNatural["zero"]);
+} }
+export function psKernelRecordFamilyEnvironment(env, name) { while (true) {
+    return PsKernelList["cons"](PsKernelDefinition["constant"](name, PsKernelList["nil"](), PsKernelExpr["sortE"](PsKernelLevel["succ"](PsKernelLevel["zero"]))), env);
+} }
+export function psKernelRecordConstructorEnvironment(env, name, ctorName, ctorType) { return __ps$run(__ps$impl$psKernelRecordConstructorEnvironment(env, name, ctorName, ctorType)); }
+function* __ps$impl$psKernelRecordConstructorEnvironment(env, name, ctorName, ctorType) { return PsKernelList["cons"](PsKernelDefinition["constant"](ctorName, PsKernelList["nil"](), ctorType), (yield* __ps$invoke(psKernelRecordFamilyEnvironment, env, name))); }
+__ps$implementations.set(psKernelRecordConstructorEnvironment, __ps$impl$psKernelRecordConstructorEnvironment);
+export function psKernelRecordRecursorType(family, minor, motive) { while (true) {
+    return PsKernelExpr["forallE"](PsKernelName["anonymous"], PsKernelExpr["forallE"](PsKernelName["anonymous"], family, PsKernelExpr["sortE"](PsKernelLevel["param"](motive)), PsKernelBinder["explicit"]), PsKernelExpr["forallE"](PsKernelName["anonymous"], minor, PsKernelExpr["forallE"](PsKernelName["anonymous"], family, PsKernelExpr["app"](PsKernelExpr["bvar"](PsKernelNatural["positive"](PsKernelPositive["bit0"](PsKernelPositive["one"]))), PsKernelExpr["bvar"](PsKernelNatural["zero"])), PsKernelBinder["explicit"]), PsKernelBinder["explicit"]), PsKernelBinder["implicit"]);
+} }
+export function psKernelRecordStep(state) { return __ps$run(__ps$impl$psKernelRecordStep(state)); }
+function* __ps$impl$psKernelRecordStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$80]) {
+    case "state": {
+        const env = __ps$match$0.environment;
+        const declaration = __ps$match$0.declaration;
+        const task = __ps$match$0.task;
+        return (yield* (function* () { const __ps$match$0 = declaration; switch (__ps$match$0[__ps$tag$70]) {
+            case "declaration": {
+                const name = __ps$match$0.name;
+                const parameters = __ps$match$0.parameters;
+                const level = __ps$match$0.level;
+                const ctorName = __ps$match$0.ctorName;
+                const ctorType = __ps$match$0.ctorType;
+                return (yield* (function* () { const __ps$match$0 = task; switch (__ps$match$0[__ps$tag$79]) {
+                    case "initial": return (yield* (function* () { const __ps$match$0 = name; switch (__ps$match$0[__ps$tag$6]) {
+                        case "anonymous": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["invalidName"]));
+                        case "str": {
+                            const _wild0 = __ps$match$0.parent;
+                            const _wild1 = __ps$match$0.value;
+                            return (yield* (function* () { const __ps$match$0 = ctorName; switch (__ps$match$0[__ps$tag$6]) {
+                                case "anonymous": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["invalidName"]));
+                                case "str": {
+                                    const _wild0$12 = __ps$match$0.parent;
+                                    const _wild1$13 = __ps$match$0.value;
+                                    return (yield* (function* () { const __ps$match$0 = parameters; switch (__ps$match$0[__ps$tag$8]) {
+                                        case "nil": return (yield* (function* () { const __ps$match$0 = level; switch (__ps$match$0[__ps$tag$7]) {
+                                            case "zero": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            case "succ": {
+                                                const base = __ps$match$0.value;
+                                                return (yield* (function* () { const __ps$match$0 = base; switch (__ps$match$0[__ps$tag$7]) {
+                                                    case "zero": return (yield* (function* () { const __ps$match$0 = ctorType; switch (__ps$match$0[__ps$tag$21]) {
+                                                        case "bvar": {
+                                                            const _wild0$17 = __ps$match$0.index;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "fvar": {
+                                                            const _wild0$17 = __ps$match$0.id;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "sortE": {
+                                                            const _wild0$17 = __ps$match$0.level;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "constE": {
+                                                            const _wild0$17 = __ps$match$0.name;
+                                                            const _wild1$18 = __ps$match$0.levels;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "app": {
+                                                            const _wild0$17 = __ps$match$0.fn;
+                                                            const _wild1$18 = __ps$match$0.arg;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "lam": {
+                                                            const _wild0$17 = __ps$match$0.name;
+                                                            const _wild1$18 = __ps$match$0.type;
+                                                            const _wild2 = __ps$match$0.body;
+                                                            const _wild3 = __ps$match$0.binder;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "forallE": {
+                                                            const unusedName = __ps$match$0.name;
+                                                            const unusedType = __ps$match$0.type;
+                                                            const unusedBody = __ps$match$0.body;
+                                                            const unusedBinder = __ps$match$0.binder;
+                                                            return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["familyName"](PsKernelLookupState["search"](name, env))));
+                                                        }
+                                                        case "letE": {
+                                                            const _wild0$17 = __ps$match$0.name;
+                                                            const _wild1$18 = __ps$match$0.type;
+                                                            const _wild2 = __ps$match$0.value;
+                                                            const _wild3 = __ps$match$0.body;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "lit": {
+                                                            const _wild0$17 = __ps$match$0.value;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "proj": {
+                                                            const _wild0$17 = __ps$match$0.family;
+                                                            const _wild1$18 = __ps$match$0.index;
+                                                            const _wild2 = __ps$match$0.value;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                    } throw new Error("invalid ProofScript constructor tag"); })());
+                                                    case "succ": {
+                                                        const _wild0$17 = __ps$match$0.value;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                    case "max": {
+                                                        const _wild0$17 = __ps$match$0.left;
+                                                        const _wild1$18 = __ps$match$0.right;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                    case "imax": {
+                                                        const _wild0$17 = __ps$match$0.left;
+                                                        const _wild1$18 = __ps$match$0.right;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                    case "param": {
+                                                        const _wild0$17 = __ps$match$0.name;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                } throw new Error("invalid ProofScript constructor tag"); })());
+                                            }
+                                            case "max": {
+                                                const _wild0$15 = __ps$match$0.left;
+                                                const _wild1$16 = __ps$match$0.right;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            }
+                                            case "imax": {
+                                                const _wild0$15 = __ps$match$0.left;
+                                                const _wild1$16 = __ps$match$0.right;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            }
+                                            case "param": {
+                                                const _wild0$15 = __ps$match$0.name;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            }
+                                        } throw new Error("invalid ProofScript constructor tag"); })());
+                                        case "cons": {
+                                            const unused = __ps$match$0.head;
+                                            const rest = __ps$match$0.tail;
+                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                        }
+                                    } throw new Error("invalid ProofScript constructor tag"); })());
+                                }
+                                case "num": {
+                                    const _wild0$12 = __ps$match$0.parent;
+                                    const _wild1$13 = __ps$match$0.value;
+                                    return (yield* (function* () { const __ps$match$0 = parameters; switch (__ps$match$0[__ps$tag$8]) {
+                                        case "nil": return (yield* (function* () { const __ps$match$0 = level; switch (__ps$match$0[__ps$tag$7]) {
+                                            case "zero": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            case "succ": {
+                                                const base = __ps$match$0.value;
+                                                return (yield* (function* () { const __ps$match$0 = base; switch (__ps$match$0[__ps$tag$7]) {
+                                                    case "zero": return (yield* (function* () { const __ps$match$0 = ctorType; switch (__ps$match$0[__ps$tag$21]) {
+                                                        case "bvar": {
+                                                            const _wild0$17 = __ps$match$0.index;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "fvar": {
+                                                            const _wild0$17 = __ps$match$0.id;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "sortE": {
+                                                            const _wild0$17 = __ps$match$0.level;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "constE": {
+                                                            const _wild0$17 = __ps$match$0.name;
+                                                            const _wild1$18 = __ps$match$0.levels;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "app": {
+                                                            const _wild0$17 = __ps$match$0.fn;
+                                                            const _wild1$18 = __ps$match$0.arg;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "lam": {
+                                                            const _wild0$17 = __ps$match$0.name;
+                                                            const _wild1$18 = __ps$match$0.type;
+                                                            const _wild2 = __ps$match$0.body;
+                                                            const _wild3 = __ps$match$0.binder;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "forallE": {
+                                                            const unusedName = __ps$match$0.name;
+                                                            const unusedType = __ps$match$0.type;
+                                                            const unusedBody = __ps$match$0.body;
+                                                            const unusedBinder = __ps$match$0.binder;
+                                                            return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["familyName"](PsKernelLookupState["search"](name, env))));
+                                                        }
+                                                        case "letE": {
+                                                            const _wild0$17 = __ps$match$0.name;
+                                                            const _wild1$18 = __ps$match$0.type;
+                                                            const _wild2 = __ps$match$0.value;
+                                                            const _wild3 = __ps$match$0.body;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "lit": {
+                                                            const _wild0$17 = __ps$match$0.value;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "proj": {
+                                                            const _wild0$17 = __ps$match$0.family;
+                                                            const _wild1$18 = __ps$match$0.index;
+                                                            const _wild2 = __ps$match$0.value;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                    } throw new Error("invalid ProofScript constructor tag"); })());
+                                                    case "succ": {
+                                                        const _wild0$17 = __ps$match$0.value;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                    case "max": {
+                                                        const _wild0$17 = __ps$match$0.left;
+                                                        const _wild1$18 = __ps$match$0.right;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                    case "imax": {
+                                                        const _wild0$17 = __ps$match$0.left;
+                                                        const _wild1$18 = __ps$match$0.right;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                    case "param": {
+                                                        const _wild0$17 = __ps$match$0.name;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                } throw new Error("invalid ProofScript constructor tag"); })());
+                                            }
+                                            case "max": {
+                                                const _wild0$15 = __ps$match$0.left;
+                                                const _wild1$16 = __ps$match$0.right;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            }
+                                            case "imax": {
+                                                const _wild0$15 = __ps$match$0.left;
+                                                const _wild1$16 = __ps$match$0.right;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            }
+                                            case "param": {
+                                                const _wild0$15 = __ps$match$0.name;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            }
+                                        } throw new Error("invalid ProofScript constructor tag"); })());
+                                        case "cons": {
+                                            const unused = __ps$match$0.head;
+                                            const rest = __ps$match$0.tail;
+                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                        }
+                                    } throw new Error("invalid ProofScript constructor tag"); })());
+                                }
+                            } throw new Error("invalid ProofScript constructor tag"); })());
+                        }
+                        case "num": {
+                            const _wild0 = __ps$match$0.parent;
+                            const _wild1 = __ps$match$0.value;
+                            return (yield* (function* () { const __ps$match$0 = ctorName; switch (__ps$match$0[__ps$tag$6]) {
+                                case "anonymous": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["invalidName"]));
+                                case "str": {
+                                    const _wild0$12 = __ps$match$0.parent;
+                                    const _wild1$13 = __ps$match$0.value;
+                                    return (yield* (function* () { const __ps$match$0 = parameters; switch (__ps$match$0[__ps$tag$8]) {
+                                        case "nil": return (yield* (function* () { const __ps$match$0 = level; switch (__ps$match$0[__ps$tag$7]) {
+                                            case "zero": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            case "succ": {
+                                                const base = __ps$match$0.value;
+                                                return (yield* (function* () { const __ps$match$0 = base; switch (__ps$match$0[__ps$tag$7]) {
+                                                    case "zero": return (yield* (function* () { const __ps$match$0 = ctorType; switch (__ps$match$0[__ps$tag$21]) {
+                                                        case "bvar": {
+                                                            const _wild0$17 = __ps$match$0.index;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "fvar": {
+                                                            const _wild0$17 = __ps$match$0.id;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "sortE": {
+                                                            const _wild0$17 = __ps$match$0.level;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "constE": {
+                                                            const _wild0$17 = __ps$match$0.name;
+                                                            const _wild1$18 = __ps$match$0.levels;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "app": {
+                                                            const _wild0$17 = __ps$match$0.fn;
+                                                            const _wild1$18 = __ps$match$0.arg;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "lam": {
+                                                            const _wild0$17 = __ps$match$0.name;
+                                                            const _wild1$18 = __ps$match$0.type;
+                                                            const _wild2 = __ps$match$0.body;
+                                                            const _wild3 = __ps$match$0.binder;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "forallE": {
+                                                            const unusedName = __ps$match$0.name;
+                                                            const unusedType = __ps$match$0.type;
+                                                            const unusedBody = __ps$match$0.body;
+                                                            const unusedBinder = __ps$match$0.binder;
+                                                            return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["familyName"](PsKernelLookupState["search"](name, env))));
+                                                        }
+                                                        case "letE": {
+                                                            const _wild0$17 = __ps$match$0.name;
+                                                            const _wild1$18 = __ps$match$0.type;
+                                                            const _wild2 = __ps$match$0.value;
+                                                            const _wild3 = __ps$match$0.body;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "lit": {
+                                                            const _wild0$17 = __ps$match$0.value;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "proj": {
+                                                            const _wild0$17 = __ps$match$0.family;
+                                                            const _wild1$18 = __ps$match$0.index;
+                                                            const _wild2 = __ps$match$0.value;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                    } throw new Error("invalid ProofScript constructor tag"); })());
+                                                    case "succ": {
+                                                        const _wild0$17 = __ps$match$0.value;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                    case "max": {
+                                                        const _wild0$17 = __ps$match$0.left;
+                                                        const _wild1$18 = __ps$match$0.right;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                    case "imax": {
+                                                        const _wild0$17 = __ps$match$0.left;
+                                                        const _wild1$18 = __ps$match$0.right;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                    case "param": {
+                                                        const _wild0$17 = __ps$match$0.name;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                } throw new Error("invalid ProofScript constructor tag"); })());
+                                            }
+                                            case "max": {
+                                                const _wild0$15 = __ps$match$0.left;
+                                                const _wild1$16 = __ps$match$0.right;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            }
+                                            case "imax": {
+                                                const _wild0$15 = __ps$match$0.left;
+                                                const _wild1$16 = __ps$match$0.right;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            }
+                                            case "param": {
+                                                const _wild0$15 = __ps$match$0.name;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            }
+                                        } throw new Error("invalid ProofScript constructor tag"); })());
+                                        case "cons": {
+                                            const unused = __ps$match$0.head;
+                                            const rest = __ps$match$0.tail;
+                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                        }
+                                    } throw new Error("invalid ProofScript constructor tag"); })());
+                                }
+                                case "num": {
+                                    const _wild0$12 = __ps$match$0.parent;
+                                    const _wild1$13 = __ps$match$0.value;
+                                    return (yield* (function* () { const __ps$match$0 = parameters; switch (__ps$match$0[__ps$tag$8]) {
+                                        case "nil": return (yield* (function* () { const __ps$match$0 = level; switch (__ps$match$0[__ps$tag$7]) {
+                                            case "zero": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            case "succ": {
+                                                const base = __ps$match$0.value;
+                                                return (yield* (function* () { const __ps$match$0 = base; switch (__ps$match$0[__ps$tag$7]) {
+                                                    case "zero": return (yield* (function* () { const __ps$match$0 = ctorType; switch (__ps$match$0[__ps$tag$21]) {
+                                                        case "bvar": {
+                                                            const _wild0$17 = __ps$match$0.index;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "fvar": {
+                                                            const _wild0$17 = __ps$match$0.id;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "sortE": {
+                                                            const _wild0$17 = __ps$match$0.level;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "constE": {
+                                                            const _wild0$17 = __ps$match$0.name;
+                                                            const _wild1$18 = __ps$match$0.levels;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "app": {
+                                                            const _wild0$17 = __ps$match$0.fn;
+                                                            const _wild1$18 = __ps$match$0.arg;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "lam": {
+                                                            const _wild0$17 = __ps$match$0.name;
+                                                            const _wild1$18 = __ps$match$0.type;
+                                                            const _wild2 = __ps$match$0.body;
+                                                            const _wild3 = __ps$match$0.binder;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "forallE": {
+                                                            const unusedName = __ps$match$0.name;
+                                                            const unusedType = __ps$match$0.type;
+                                                            const unusedBody = __ps$match$0.body;
+                                                            const unusedBinder = __ps$match$0.binder;
+                                                            return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["familyName"](PsKernelLookupState["search"](name, env))));
+                                                        }
+                                                        case "letE": {
+                                                            const _wild0$17 = __ps$match$0.name;
+                                                            const _wild1$18 = __ps$match$0.type;
+                                                            const _wild2 = __ps$match$0.value;
+                                                            const _wild3 = __ps$match$0.body;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "lit": {
+                                                            const _wild0$17 = __ps$match$0.value;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                        case "proj": {
+                                                            const _wild0$17 = __ps$match$0.family;
+                                                            const _wild1$18 = __ps$match$0.index;
+                                                            const _wild2 = __ps$match$0.value;
+                                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                        }
+                                                    } throw new Error("invalid ProofScript constructor tag"); })());
+                                                    case "succ": {
+                                                        const _wild0$17 = __ps$match$0.value;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                    case "max": {
+                                                        const _wild0$17 = __ps$match$0.left;
+                                                        const _wild1$18 = __ps$match$0.right;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                    case "imax": {
+                                                        const _wild0$17 = __ps$match$0.left;
+                                                        const _wild1$18 = __ps$match$0.right;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                    case "param": {
+                                                        const _wild0$17 = __ps$match$0.name;
+                                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                                    }
+                                                } throw new Error("invalid ProofScript constructor tag"); })());
+                                            }
+                                            case "max": {
+                                                const _wild0$15 = __ps$match$0.left;
+                                                const _wild1$16 = __ps$match$0.right;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            }
+                                            case "imax": {
+                                                const _wild0$15 = __ps$match$0.left;
+                                                const _wild1$16 = __ps$match$0.right;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            }
+                                            case "param": {
+                                                const _wild0$15 = __ps$match$0.name;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                            }
+                                        } throw new Error("invalid ProofScript constructor tag"); })());
+                                        case "cons": {
+                                            const unused = __ps$match$0.head;
+                                            const rest = __ps$match$0.tail;
+                                            return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["unsupported"]));
+                                        }
+                                    } throw new Error("invalid ProofScript constructor tag"); })());
+                                }
+                            } throw new Error("invalid ProofScript constructor tag"); })());
+                        }
+                    } throw new Error("invalid ProofScript constructor tag"); })());
+                    case "familyName": {
+                        const current = __ps$match$0.state;
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelLookupStep, current)); switch (__ps$match$0[__ps$tag$52]) {
+                            case "next": {
+                                const next = __ps$match$0.state;
+                                return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["familyName"](next)));
+                            }
+                            case "found": {
+                                const unused = __ps$match$0.entry;
+                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["duplicateName"]));
+                            }
+                            case "missing": return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["fields"](ctorType, PsKernelList["nil"](), PsKernelNatural["zero"])));
+                            case "invalidState": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["invalidState"]));
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "fields": {
+                        const remaining = __ps$match$0.remaining;
+                        const reversed = __ps$match$0.reversed;
+                        const count = __ps$match$0.count;
+                        return (yield* (function* () { const __ps$match$0 = remaining; switch (__ps$match$0[__ps$tag$21]) {
+                            case "bvar": {
+                                const _wild0 = __ps$match$0.index;
+                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeMismatch"]));
+                            }
+                            case "fvar": {
+                                const _wild0 = __ps$match$0.id;
+                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeMismatch"]));
+                            }
+                            case "sortE": {
+                                const _wild0 = __ps$match$0.level;
+                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeMismatch"]));
+                            }
+                            case "constE": {
+                                const resultName = __ps$match$0.name;
+                                const resultLevels = __ps$match$0.levels;
+                                return (yield* (function* () { const __ps$match$0 = resultLevels; switch (__ps$match$0[__ps$tag$8]) {
+                                    case "nil": return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["result"](reversed, count, PsKernelList["cons"](PsKernelOrderTask["name"](resultName, name), PsKernelList["nil"]()))));
+                                    case "cons": {
+                                        const _wild0 = __ps$match$0.head;
+                                        const _wild1 = __ps$match$0.tail;
+                                        return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["invalidUniverse"]));
+                                    }
+                                } throw new Error("invalid ProofScript constructor tag"); })());
+                            }
+                            case "app": {
+                                const _wild0 = __ps$match$0.fn;
+                                const _wild1 = __ps$match$0.arg;
+                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeMismatch"]));
+                            }
+                            case "lam": {
+                                const _wild0 = __ps$match$0.name;
+                                const _wild1 = __ps$match$0.type;
+                                const _wild2 = __ps$match$0.body;
+                                const _wild3 = __ps$match$0.binder;
+                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeMismatch"]));
+                            }
+                            case "forallE": {
+                                const unusedName = __ps$match$0.name;
+                                const field = __ps$match$0.type;
+                                const body = __ps$match$0.body;
+                                const unusedBinder = __ps$match$0.binder;
+                                return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["fieldType"](body, PsKernelList["cons"](field, reversed), (yield* __ps$invoke(psKernelNaturalSucc, count)), (yield* __ps$invoke(psKernelCheckStart, env, field, PsKernelExpr["sortE"](PsKernelLevel["succ"](PsKernelLevel["zero"])))))));
+                            }
+                            case "letE": {
+                                const _wild0 = __ps$match$0.name;
+                                const _wild1 = __ps$match$0.type;
+                                const _wild2 = __ps$match$0.value;
+                                const _wild3 = __ps$match$0.body;
+                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeMismatch"]));
+                            }
+                            case "lit": {
+                                const _wild0 = __ps$match$0.value;
+                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeMismatch"]));
+                            }
+                            case "proj": {
+                                const _wild0 = __ps$match$0.family;
+                                const _wild1 = __ps$match$0.index;
+                                const _wild2 = __ps$match$0.value;
+                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeMismatch"]));
+                            }
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "fieldType": {
+                        const remaining = __ps$match$0.remaining;
+                        const reversed = __ps$match$0.reversed;
+                        const count = __ps$match$0.count;
+                        const current = __ps$match$0.state;
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelTypeStep, current)); switch (__ps$match$0[__ps$tag$66]) {
+                            case "next": {
+                                const next = __ps$match$0.state;
+                                return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["fieldType"](remaining, reversed, count, next)));
+                            }
+                            case "final": {
+                                const result = __ps$match$0.result;
+                                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$65]) {
+                                    case "outOfFuel": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["invalidState"]));
+                                    case "rejected": {
+                                        const error = __ps$match$0.error;
+                                        return (yield* __ps$invoke(psKernelRecordReject, error));
+                                    }
+                                    case "done": {
+                                        const unused = __ps$match$0.type;
+                                        return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["fields"](remaining, reversed, count)));
+                                    }
+                                } throw new Error("invalid ProofScript constructor tag"); })());
+                            }
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "result": {
+                        const reversed = __ps$match$0.reversed;
+                        const count = __ps$match$0.count;
+                        const current = __ps$match$0.tasks;
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelOrderStep, current)); switch (__ps$match$0[__ps$tag$28]) {
+                            case "next": {
+                                const next = __ps$match$0.tasks;
+                                return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["result"](reversed, count, next)));
+                            }
+                            case "done": {
+                                const order = __ps$match$0.order;
+                                return (yield* (function* () { const __ps$match$0 = order; switch (__ps$match$0[__ps$tag$13]) {
+                                    case "less": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeMismatch"]));
+                                    case "same": return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["constructorType"](reversed, count, (yield* __ps$invoke(psKernelCheckStart, (yield* __ps$invoke(psKernelRecordFamilyEnvironment, env, name)), ctorType, PsKernelExpr["sortE"](PsKernelLevel["succ"](PsKernelLevel["zero"])))))));
+                                    case "greater": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeMismatch"]));
+                                } throw new Error("invalid ProofScript constructor tag"); })());
+                            }
+                            case "invalidState": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["invalidState"]));
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "constructorType": {
+                        const reversed = __ps$match$0.reversed;
+                        const count = __ps$match$0.count;
+                        const current = __ps$match$0.state;
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelTypeStep, current)); switch (__ps$match$0[__ps$tag$66]) {
+                            case "next": {
+                                const next = __ps$match$0.state;
+                                return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["constructorType"](reversed, count, next)));
+                            }
+                            case "final": {
+                                const result = __ps$match$0.result;
+                                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$65]) {
+                                    case "outOfFuel": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["invalidState"]));
+                                    case "rejected": {
+                                        const error = __ps$match$0.error;
+                                        return (yield* __ps$invoke(psKernelRecordReject, error));
+                                    }
+                                    case "done": {
+                                        const unused = __ps$match$0.type;
+                                        return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["constructorName"](reversed, count, PsKernelLookupState["search"](ctorName, (yield* __ps$invoke(psKernelRecordFamilyEnvironment, env, name))))));
+                                    }
+                                } throw new Error("invalid ProofScript constructor tag"); })());
+                            }
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "constructorName": {
+                        const reversed = __ps$match$0.reversed;
+                        const count = __ps$match$0.count;
+                        const current = __ps$match$0.state;
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelLookupStep, current)); switch (__ps$match$0[__ps$tag$52]) {
+                            case "next": {
+                                const next = __ps$match$0.state;
+                                return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["constructorName"](reversed, count, next)));
+                            }
+                            case "found": {
+                                const unused = __ps$match$0.entry;
+                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["duplicateName"]));
+                            }
+                            case "missing": return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["recursorName"](reversed, count, PsKernelLookupState["search"]((yield* __ps$invoke(psKernelUnitRecursorName, name)), (yield* __ps$invoke(psKernelRecordConstructorEnvironment, env, name, ctorName, ctorType))))));
+                            case "invalidState": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["invalidState"]));
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "recursorName": {
+                        const reversed = __ps$match$0.reversed;
+                        const count = __ps$match$0.count;
+                        const current = __ps$match$0.state;
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelLookupStep, current)); switch (__ps$match$0[__ps$tag$52]) {
+                            case "next": {
+                                const next = __ps$match$0.state;
+                                return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["recursorName"](reversed, count, next)));
+                            }
+                            case "found": {
+                                const unused = __ps$match$0.entry;
+                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["duplicateName"]));
+                            }
+                            case "missing": return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["arguments"](reversed, count, count, PsKernelExpr["constE"](ctorName, PsKernelList["nil"]()))));
+                            case "invalidState": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["invalidState"]));
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "arguments": {
+                        const reversed = __ps$match$0.reversed;
+                        const count = __ps$match$0.count;
+                        const index = __ps$match$0.index;
+                        const value = __ps$match$0.value;
+                        return (yield* (function* () { const __ps$match$0 = index; switch (__ps$match$0[__ps$tag$4]) {
+                            case "zero": return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["minor"](reversed, PsKernelList["nil"](), PsKernelExpr["app"](PsKernelExpr["bvar"](count), value))));
+                            case "positive": {
+                                const _wild0 = __ps$match$0.value;
+                                return (yield* (function* () { {
+                                    const next = (yield* __ps$invoke(psKernelNaturalPred, index));
+                                    return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["arguments"](reversed, count, next, PsKernelExpr["app"](value, PsKernelExpr["bvar"](next)))));
+                                } })());
+                            }
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "minor": {
+                        const remaining = __ps$match$0.remaining;
+                        const fields = __ps$match$0.fields;
+                        const value = __ps$match$0.value;
+                        return (yield* (function* () { const __ps$match$0 = remaining; switch (__ps$match$0[__ps$tag$8]) {
+                            case "nil": return (yield* (function* () { {
+                                const recType = (yield* __ps$invoke(psKernelRecordRecursorType, PsKernelExpr["constE"](name, PsKernelList["nil"]()), value, (yield* __ps$invoke(psKernelRecordMotive, name))));
+                                return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["recursorType"](fields, recType, PsKernelTypeState["state"](PsKernelTypingContext["context"]((yield* __ps$invoke(psKernelRecordConstructorEnvironment, env, name, ctorName, ctorType)), PsKernelList["cons"]((yield* __ps$invoke(psKernelRecordMotive, name)), PsKernelList["nil"]())), PsKernelList["cons"](PsKernelTypeTask["infer"](PsKernelList["nil"](), recType), PsKernelList["cons"](PsKernelTypeTask["reduceTop"], PsKernelList["nil"]())), PsKernelList["nil"]()))));
+                            } })());
+                            case "cons": {
+                                const field = __ps$match$0.head;
+                                const rest = __ps$match$0.tail;
+                                return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["minor"](rest, PsKernelList["cons"](field, fields), PsKernelExpr["forallE"](PsKernelName["anonymous"], field, value, PsKernelBinder["explicit"]))));
+                            }
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "recursorType": {
+                        const fields = __ps$match$0.fields;
+                        const type = __ps$match$0.type;
+                        const current = __ps$match$0.state;
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelTypeStep, current)); switch (__ps$match$0[__ps$tag$66]) {
+                            case "next": {
+                                const next = __ps$match$0.state;
+                                return (yield* __ps$invoke(psKernelRecordNext, env, declaration, PsKernelRecordTask["recursorType"](fields, type, next)));
+                            }
+                            case "final": {
+                                const result = __ps$match$0.result;
+                                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$65]) {
+                                    case "outOfFuel": return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["invalidState"]));
+                                    case "rejected": {
+                                        const error = __ps$match$0.error;
+                                        return (yield* __ps$invoke(psKernelRecordReject, error));
+                                    }
+                                    case "done": {
+                                        const inferred = __ps$match$0.type;
+                                        return (yield* (function* () { const __ps$match$0 = inferred; switch (__ps$match$0[__ps$tag$21]) {
+                                            case "bvar": {
+                                                const _wild0 = __ps$match$0.index;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeExpected"]));
+                                            }
+                                            case "fvar": {
+                                                const _wild0 = __ps$match$0.id;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeExpected"]));
+                                            }
+                                            case "sortE": {
+                                                const unused = __ps$match$0.level;
+                                                return PsKernelRecordStep["final"](PsKernelAdmissionResult["admitted"](PsKernelList["cons"](PsKernelDefinition["recordRecursor"]((yield* __ps$invoke(psKernelUnitRecursorName, name)), PsKernelList["cons"]((yield* __ps$invoke(psKernelRecordMotive, name)), PsKernelList["nil"]()), type, ctorName, fields), PsKernelList["cons"](PsKernelDefinition["constant"](ctorName, PsKernelList["nil"](), ctorType), PsKernelList["cons"](PsKernelDefinition["recordFamily"](name, ctorName, fields), env)))));
+                                            }
+                                            case "constE": {
+                                                const _wild0 = __ps$match$0.name;
+                                                const _wild1 = __ps$match$0.levels;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeExpected"]));
+                                            }
+                                            case "app": {
+                                                const _wild0 = __ps$match$0.fn;
+                                                const _wild1 = __ps$match$0.arg;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeExpected"]));
+                                            }
+                                            case "lam": {
+                                                const _wild0 = __ps$match$0.name;
+                                                const _wild1 = __ps$match$0.type;
+                                                const _wild2 = __ps$match$0.body;
+                                                const _wild3 = __ps$match$0.binder;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeExpected"]));
+                                            }
+                                            case "forallE": {
+                                                const _wild0 = __ps$match$0.name;
+                                                const _wild1 = __ps$match$0.type;
+                                                const _wild2 = __ps$match$0.body;
+                                                const _wild3 = __ps$match$0.binder;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeExpected"]));
+                                            }
+                                            case "letE": {
+                                                const _wild0 = __ps$match$0.name;
+                                                const _wild1 = __ps$match$0.type;
+                                                const _wild2 = __ps$match$0.value;
+                                                const _wild3 = __ps$match$0.body;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeExpected"]));
+                                            }
+                                            case "lit": {
+                                                const _wild0 = __ps$match$0.value;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeExpected"]));
+                                            }
+                                            case "proj": {
+                                                const _wild0 = __ps$match$0.family;
+                                                const _wild1 = __ps$match$0.index;
+                                                const _wild2 = __ps$match$0.value;
+                                                return (yield* __ps$invoke(psKernelRecordReject, PsKernelCheckError["typeExpected"]));
+                                            }
+                                        } throw new Error("invalid ProofScript constructor tag"); })());
+                                    }
+                                } throw new Error("invalid ProofScript constructor tag"); })());
+                            }
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                } throw new Error("invalid ProofScript constructor tag"); })());
+            }
+        } throw new Error("invalid ProofScript constructor tag"); })());
+    }
+} throw new Error("invalid ProofScript constructor tag"); })()); }
+__ps$implementations.set(psKernelRecordStep, __ps$impl$psKernelRecordStep);
+export function psKernelRecordStart(env, declaration) { while (true) {
+    return PsKernelRecordState["state"](env, declaration, PsKernelRecordTask["initial"]);
+} }
+export function psKernelRecordRun(fuel, __ps_eta_0) { return __ps$run(__ps$impl$psKernelRecordRun(fuel, __ps_eta_0)); }
+function* __ps$impl$psKernelRecordRun(fuel, __ps_eta_0) { return (yield* (function* () { const __ps$match$0 = fuel; switch (__ps$match$0[__ps$tag$11]) {
+    case "stop": return (yield* (function* () { {
+        const state = __ps_eta_0;
+        return PsKernelAdmissionResult["outOfFuel"];
+    } })());
+    case "more": {
+        const remaining = __ps$match$0.remaining;
+        return (yield* (function* () { {
+            const state = __ps_eta_0;
+            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelRecordStep, state)); switch (__ps$match$0[__ps$tag$81]) {
+                case "next": {
+                    const next = __ps$match$0.state;
+                    return (yield* (function* () { {
+                        const smaller = __ps$wrap(function* (_$3) { return (yield* __ps$invoke(psKernelRecordRun, remaining, _$3)); });
+                        return (yield* __ps$invoke(smaller, next));
+                    } })());
+                }
+                case "final": {
+                    const result = __ps$match$0.result;
+                    return result;
+                }
+            } throw new Error("invalid ProofScript constructor tag"); })());
+        } })());
+    }
+} throw new Error("invalid ProofScript constructor tag"); })()); }
+__ps$implementations.set(psKernelRecordRun, __ps$impl$psKernelRecordRun);
 export function psKernelJointContinue(rest, result) { while (true) {
     {
         const __ps$match$0 = result;
@@ -7748,7 +8680,7 @@ export function psKernelJointContinue(rest, result) { while (true) {
     }
 } }
 export function psKernelJointStep(state) { return __ps$run(__ps$impl$psKernelJointStep(state)); }
-function* __ps$impl$psKernelJointStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$80]) {
+function* __ps$impl$psKernelJointStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$83]) {
     case "pending": {
         const env = __ps$match$0.environment;
         const entries = __ps$match$0.entries;
@@ -7757,7 +8689,7 @@ function* __ps$impl$psKernelJointStep(state) { return (yield* (function* () { co
             case "cons": {
                 const entry = __ps$match$0.head;
                 const rest = __ps$match$0.tail;
-                return (yield* (function* () { const __ps$match$0 = entry; switch (__ps$match$0[__ps$tag$79]) {
+                return (yield* (function* () { const __ps$match$0 = entry; switch (__ps$match$0[__ps$tag$82]) {
                     case "definition": {
                         const definition = __ps$match$0.entry;
                         return PsKernelJointStep["next"](PsKernelJointState["definition"](rest, PsKernelAdmissionState["pending"](env, PsKernelList["cons"](definition, PsKernelList["nil"]()))));
@@ -7765,6 +8697,10 @@ function* __ps$impl$psKernelJointStep(state) { return (yield* (function* () { co
                     case "unitInductive": {
                         const declaration = __ps$match$0.entry;
                         return PsKernelJointStep["next"](PsKernelJointState["unitInductive"](rest, (yield* __ps$invoke(psKernelUnitStart, env, declaration))));
+                    }
+                    case "recordInductive": {
+                        const declaration = __ps$match$0.entry;
+                        return PsKernelJointStep["next"](PsKernelJointState["recordInductive"](rest, (yield* __ps$invoke(psKernelRecordStart, env, declaration))));
                     }
                     case "natInductive": {
                         const declaration = __ps$match$0.entry;
@@ -7802,6 +8738,20 @@ function* __ps$impl$psKernelJointStep(state) { return (yield* (function* () { co
             }
         } throw new Error("invalid ProofScript constructor tag"); })());
     }
+    case "recordInductive": {
+        const rest = __ps$match$0.rest;
+        const current = __ps$match$0.state;
+        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelRecordStep, current)); switch (__ps$match$0[__ps$tag$81]) {
+            case "next": {
+                const next = __ps$match$0.state;
+                return PsKernelJointStep["next"](PsKernelJointState["recordInductive"](rest, next));
+            }
+            case "final": {
+                const result = __ps$match$0.result;
+                return (yield* __ps$invoke(psKernelJointContinue, rest, result));
+            }
+        } throw new Error("invalid ProofScript constructor tag"); })());
+    }
     case "natInductive": {
         const rest = __ps$match$0.rest;
         const current = __ps$match$0.state;
@@ -7831,7 +8781,7 @@ function* __ps$impl$psKernelJointRun(fuel, __ps_eta_0) { return (yield* (functio
         const remaining = __ps$match$0.remaining;
         return (yield* (function* () { {
             const state = __ps_eta_0;
-            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelJointStep, state)); switch (__ps$match$0[__ps$tag$81]) {
+            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelJointStep, state)); switch (__ps$match$0[__ps$tag$84]) {
                 case "next": {
                     const next = __ps$match$0.state;
                     return (yield* (function* () { {
@@ -7851,7 +8801,7 @@ __ps$implementations.set(psKernelJointRun, __ps$impl$psKernelJointRun);
 export const psKernelBootstrapNatName = __ps$run((function* () { return psKernelBuiltinNatName; })());
 export const psKernelBootstrapNat = __ps$run((function* () { return PsKernelNatDeclaration["declaration"](psKernelBuiltinNatName, psKernelNatFamilySort, psKernelBuiltinNatZeroName, (yield* __ps$invoke(psKernelNatExpectedConstructor, psKernelBuiltinNatName, PsKernelNatPhase["zero"])), psKernelBuiltinNatSuccName, (yield* __ps$invoke(psKernelNatExpectedConstructor, psKernelBuiltinNatName, PsKernelNatPhase["succ"]))); })());
 export function psKernelBootstrapStep(state) { return __ps$run(__ps$impl$psKernelBootstrapStep(state)); }
-function* __ps$impl$psKernelBootstrapStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$82]) {
+function* __ps$impl$psKernelBootstrapStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$85]) {
     case "prelude": {
         const entries = __ps$match$0.entries;
         const current = __ps$match$0.state;
@@ -7878,7 +8828,7 @@ function* __ps$impl$psKernelBootstrapStep(state) { return (yield* (function* () 
     }
     case "declarations": {
         const current = __ps$match$0.state;
-        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelJointStep, current)); switch (__ps$match$0[__ps$tag$81]) {
+        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelJointStep, current)); switch (__ps$match$0[__ps$tag$84]) {
             case "next": {
                 const next = __ps$match$0.state;
                 return PsKernelBootstrapStep["next"](PsKernelBootstrapState["declarations"](next));
@@ -7904,7 +8854,7 @@ function* __ps$impl$psKernelBootstrapRun(fuel, __ps_eta_0) { return (yield* (fun
         const remaining = __ps$match$0.remaining;
         return (yield* (function* () { {
             const state = __ps_eta_0;
-            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelBootstrapStep, state)); switch (__ps$match$0[__ps$tag$83]) {
+            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelBootstrapStep, state)); switch (__ps$match$0[__ps$tag$86]) {
                 case "next": {
                     const next = __ps$match$0.state;
                     return (yield* (function* () { {

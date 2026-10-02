@@ -96,7 +96,8 @@ try {
       for (const ctor of family.cs) shape(ctor, ['n','t'], 0);
       if (family.cs.length === 1) {
         const ctor = family.cs[0];
-        entries.push(k.PsKernelJointEntry.unitInductive(k.PsKernelUnitDeclaration.declaration(
+        const route = ctor.t?.k === 'forall' ? 'recordInductive' : 'unitInductive';
+        entries.push(k.PsKernelJointEntry[route](k.PsKernelUnitDeclaration.declaration(
           name(family.n), list(d.lp.map(item => name(item))), level(family.t.l), name(ctor.n), expr(ctor.t))));
       } else {
         if (d.lp.length !== 0) fail('unsupported-inductive-parameters');

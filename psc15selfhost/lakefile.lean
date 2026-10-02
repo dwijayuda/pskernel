@@ -166,7 +166,7 @@ lean_lib PsKernelOwned where
     `Ps.Kernel.Expr, `Ps.Kernel.Binding, `Ps.Kernel.Order,
     `Ps.Kernel.Universe, `Ps.Kernel.LevelCheck, `Ps.Kernel.LevelInstantiate, `Ps.Kernel.ExprInstantiate, `Ps.Kernel.BuiltinNat, `Ps.Kernel.Environment,
     `Ps.Kernel.Reduction, `Ps.Kernel.Conversion, `Ps.Kernel.TypeCheck,
-    `Ps.Kernel.Admission, `Ps.Kernel.UnitInductive, `Ps.Kernel.NatInductive,
+    `Ps.Kernel.Admission, `Ps.Kernel.UnitInductive, `Ps.Kernel.NatInductive, `Ps.Kernel.RecordInductive,
     `Ps.Kernel.JointAdmission, `Ps.Kernel.Bootstrap
   ]
 

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "scope": "Closed monomorphic Type-valued record fields, constructor applications and derived dependent eliminator typing; not record iota, projection or general inductive completeness",
+  "sourceManifestSha256": "27f5ca183bf374a2ed9db8001b9802c77d6ae83bf91e0f4db6f1569066250c2f",
+  "harnessSha256": "f73b9a45b5d979c2b7dab84744c941e83bdb73bcb489dea4a9dec0813e5c20f4",
+  "provider": {
+    "protocol": "pskernel-lean/1",
+    "provider": "lean4-cpp",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "profile": "lean4.34-core",
+    "status": "version"
+  },
+  "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+  "cases": 102,
+  "matched": 102,
+  "accepted": 42,
+  "rejected": 60,
+  "deliberatelyUnsupported": [
+    "dependent constructor fields",
+    "parameters and indices",
+    "recursive records",
+    "Prop or higher-universe families",
+    "record iota and projections"
+  ],
+  "recordsPath": "dist/evidence/record-differential-records.json",
+  "recordsSha256": "6a76cc5654f90600f3b3174306a0067da6272db98bfdd1b23e1a5ccd25c66f90"
+}

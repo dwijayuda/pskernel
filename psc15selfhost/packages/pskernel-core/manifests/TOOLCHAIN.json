@@ -9,8 +9,8 @@
   "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
   "note": "Locally built Windows seed at the recorded source commit and exact Lean 4.34 pin. Separate measured regeneration; previous checkpoint evidence remains in its recorded Git commit. No automatic download or fallback.",
   "previousCheckpoint": {
-    "version": "0.1.0-checker.7",
-    "integrationCommit": "c727b50e298d5dd85acb90a84982dc09b15cf203",
-    "sourceManifestSha256": "6c03e13e88a2a457f396493eba2c51a9b1eeef8d821086a4143032e99414bfbd"
+    "version": "0.1.0-checker.8",
+    "integrationCommit": "4734acb9ef2a618040beb572c13433ff7cd92ce8",
+    "sourceManifestSha256": "1dc2ac98c0b0cb1c62b3bc939aebe8ad7e1e77ffd9935e0f5117215e5d33869c"
   }
 }

@@ -1,14 +1,17 @@
 # @proofscript/pskernel-core
 
-**0.1.0-checker.8 — private experimental dependent term-checker checkpoint.**
+**0.1.0-checker.9 — private experimental dependent term-checker checkpoint.**
 
-Regenerated with the pinned PSC seed, with all 417 tests passing and fresh build
-and reference evidence. See `../../docs/continuity/OWNED_NAT_LITERALS_2026-10-03.md`.
+Regenerated with the pinned PSC seed, with all 459 tests passing and fresh build
+and reference evidence. See `../../docs/continuity/OWNED_RECORD_FIELDS_2026-10-03.md`.
 
 This is the default checker and part of the joint bootstrap source closure.
 The host adapter runs the generated semantic machine and fails closed outside
-its supported fragment. The bootstrap prefix passes its first unit inductive and
-checks its initial `Nat` prelude, then stops at the next declaration's constructor fields;
+its supported fragment. The exact preserved bootstrap prefix now admits the unit,
+`PsSourcePos` and `PsSourceSpan`, after checking the initial `Nat` prelude.
+The next entry, `PsLexCursor`, rejects an unknown dependency; the complete batch
+still rejects unsupported projection decoding at admission 9.
+The new portable closure has 76 modules (55 compiler plus 21 owned kernel);
 the default selection does not imply release readiness or complete Lean parity.
 
 This package now executes an owned checking fragment, rather than data helpers
@@ -27,7 +30,12 @@ checks its recursive iota rules. Generated bootstrap starts empty and checks the
 fixed Nat declaration through that same admission machine before user declarations.
 Natural literals check only after owned Nat-family metadata is validated;
 conversion and recursor reduction share the bounded transition budget.
-Arithmetic, string literals and other prelude constants remain unsupported.
+The new record fragment admits one monomorphic Type-valued family with closed,
+nonrecursive Type-valued fields. It checks field and constructor types in bounded
+source machines and derives a checked dependent eliminator type and field metadata.
+Record iota and projection typing/reduction are not enabled. Parameters, indices,
+dependent record fields, recursive records, Prop and higher-universe record families
+remain rejected. Arithmetic, string literals and other prelude constants remain unsupported.
 Sequential internal admission starts from the checked prelude,
 rejects forward/self references and duplicates, and returns no environment on a
 failed batch. The generated implementation is not edited by hand.

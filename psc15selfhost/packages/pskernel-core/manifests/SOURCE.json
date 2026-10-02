@@ -43,7 +43,7 @@
     },
     {
       "path": "src/Ps/Kernel/Environment.lean",
-      "sha256": "dfae534039465a29cb8b97e9495a35996bd6c86bda655ad7e0c3293ea60ea24d"
+      "sha256": "a2921d7bd924dbe7a5dc3695d7885e539de0249ea94f57f79c90c2d9ea6490e9"
     },
     {
       "path": "src/Ps/Kernel/BuiltinNat.lean",
@@ -74,8 +74,12 @@
       "sha256": "51e970e371b50e9dcbe79379534898db53c391b390786328e27c7974252c083d"
     },
     {
+      "path": "src/Ps/Kernel/RecordInductive.lean",
+      "sha256": "cfbecf661c5a4d31e7af767d2510beba3e6663ec6d3aada44c07d00a471248c0"
+    },
+    {
       "path": "src/Ps/Kernel/JointAdmission.lean",
-      "sha256": "88054e88138e526ca64f77f0c28f61bb4b2f395459d72754121ad869031c830d"
+      "sha256": "29dc8aacd57d548f661f99d2d581fa8b151022b412d1ac2faf2c9a4e59dbc31f"
     },
     {
       "path": "src/Ps/Kernel/Bootstrap.lean",

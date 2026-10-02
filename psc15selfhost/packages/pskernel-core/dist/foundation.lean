@@ -1424,6 +1424,9 @@ inductive PsKernelDefinition where
   | constant (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
   | unitRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (ctorName : PsKernelName)
 
+  | recordFamily (name ctorName : PsKernelName) (fields : PsKernelList PsKernelExpr)
+  | recordRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
+      (ctorName : PsKernelName) (fields : PsKernelList PsKernelExpr)
   | natFamily (name zeroName succName : PsKernelName)
   | natRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (zeroName succName : PsKernelName)
 
@@ -1433,6 +1436,8 @@ def psKernelDefinitionName (entry : PsKernelDefinition) : PsKernelName :=
   | PsKernelDefinition.polymorphic name unusedParameters unusedType unusedValue => name
   | PsKernelDefinition.constant name parameters type => name
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => name
+  | PsKernelDefinition.recordFamily name unusedCtor unusedFields => name
+  | PsKernelDefinition.recordRecursor name unusedParameters unusedType unusedCtor unusedFields => name
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => name
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => name
 
@@ -1442,6 +1447,8 @@ def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList PsK
   | PsKernelDefinition.polymorphic unusedName parameters unusedType unusedValue => parameters
   | PsKernelDefinition.constant name parameters type => parameters
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => parameters
+  | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelList.nil
+  | PsKernelDefinition.recordRecursor unusedName parameters unusedType unusedCtor unusedFields => parameters
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelList.nil
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => parameters
 
@@ -1451,6 +1458,8 @@ def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr :=
   | PsKernelDefinition.polymorphic unusedName unusedParameters type unusedValue => type
   | PsKernelDefinition.constant name parameters type => type
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => type
+  | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
+  | PsKernelDefinition.recordRecursor unusedName unusedParameters type unusedCtor unusedFields => type
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => type
 
@@ -1461,6 +1470,8 @@ def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody
   | PsKernelDefinition.constant unusedName unusedParameters unusedType => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.unitRecursor unusedName unusedParameters unusedType unusedConstructor => PsKernelDefinitionBody.opaque
 
+  | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelDefinitionBody.opaque
+  | PsKernelDefinition.recordRecursor unusedName unusedParameters unusedType unusedCtor unusedFields => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.natFamily unusedName unusedZero unusedSucc => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.natRecursor unusedName unusedParameters unusedType unusedZero unusedSucc => PsKernelDefinitionBody.opaque
 
@@ -2814,18 +2825,222 @@ def psKernelNatAdmissionRun (fuel : PsKernelFuel) : PsKernelNatAdmissionState ->
 
 
 
+/- Bounded record admission: one monomorphic Type family, at least one closed
+Type-valued constructor field, no parameters, indices, recursion or dependencies
+between fields. Fields are checked in the ORIGINAL environment, before the family
+exists. This excludes negative occurrences as well as all recursive occurrences.
+The constructor and dependent eliminator types are checked; metadata is derived,
+not supplied by the caller. Every traversal/check shares the outer step budget.
+Projection and record iota reduction are deliberately not enabled by this module. -/
+inductive PsKernelRecordTask where
+  | initial
+  | familyName (state : PsKernelLookupState)
+  | fields (remaining : PsKernelExpr) (reversed : PsKernelList PsKernelExpr) (count : PsKernelNatural)
+  | fieldType (remaining : PsKernelExpr) (reversed : PsKernelList PsKernelExpr)
+      (count : PsKernelNatural) (state : PsKernelTypeState)
+  | result (reversed : PsKernelList PsKernelExpr) (count : PsKernelNatural)
+      (tasks : PsKernelList PsKernelOrderTask)
+  | constructorType (reversed : PsKernelList PsKernelExpr) (count : PsKernelNatural) (state : PsKernelTypeState)
+  | constructorName (reversed : PsKernelList PsKernelExpr) (count : PsKernelNatural) (state : PsKernelLookupState)
+  | recursorName (reversed : PsKernelList PsKernelExpr) (count : PsKernelNatural) (state : PsKernelLookupState)
+  | arguments (reversed : PsKernelList PsKernelExpr) (count index : PsKernelNatural) (value : PsKernelExpr)
+  | minor (remaining fields : PsKernelList PsKernelExpr) (value : PsKernelExpr)
+  | recursorType (fields : PsKernelList PsKernelExpr) (type : PsKernelExpr) (state : PsKernelTypeState)
+
+inductive PsKernelRecordState where
+  | state (environment : PsKernelList PsKernelDefinition) (declaration : PsKernelUnitDeclaration) (task : PsKernelRecordTask)
+
+inductive PsKernelRecordStep where
+  | next (state : PsKernelRecordState)
+  | final (result : PsKernelAdmissionResult)
+
+def psKernelRecordNext (env : PsKernelList PsKernelDefinition) (declaration : PsKernelUnitDeclaration)
+    (task : PsKernelRecordTask) : PsKernelRecordStep :=
+  PsKernelRecordStep.next (PsKernelRecordState.state env declaration task)
+
+def psKernelRecordReject (error : PsKernelCheckError) : PsKernelRecordStep :=
+  PsKernelRecordStep.final (PsKernelAdmissionResult.rejected error)
+
+def psKernelRecordMotive (name : PsKernelName) : PsKernelName :=
+  PsKernelName.num name PsKernelNatural.zero
+
+def psKernelRecordFamilyEnvironment (env : PsKernelList PsKernelDefinition) (name : PsKernelName) : PsKernelList PsKernelDefinition :=
+  PsKernelList.cons (PsKernelDefinition.constant name PsKernelList.nil
+    (PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero))) env
+
+def psKernelRecordConstructorEnvironment (env : PsKernelList PsKernelDefinition)
+    (name ctorName : PsKernelName) (ctorType : PsKernelExpr) : PsKernelList PsKernelDefinition :=
+  PsKernelList.cons (PsKernelDefinition.constant ctorName PsKernelList.nil ctorType)
+    (psKernelRecordFamilyEnvironment env name)
+
+def psKernelRecordRecursorType (family minor : PsKernelExpr) (motive : PsKernelName) : PsKernelExpr :=
+  PsKernelExpr.forallE PsKernelName.anonymous
+    (PsKernelExpr.forallE PsKernelName.anonymous family
+      (PsKernelExpr.sortE (PsKernelLevel.param motive)) PsKernelBinder.explicit)
+    (PsKernelExpr.forallE PsKernelName.anonymous minor
+      (PsKernelExpr.forallE PsKernelName.anonymous family
+        (PsKernelExpr.app
+          (PsKernelExpr.bvar (PsKernelNatural.positive (PsKernelPositive.bit0 PsKernelPositive.one)))
+          (PsKernelExpr.bvar PsKernelNatural.zero)) PsKernelBinder.explicit)
+      PsKernelBinder.explicit)
+    PsKernelBinder.implicit
+
+def psKernelRecordStep (state : PsKernelRecordState) : PsKernelRecordStep :=
+  match state with
+  | PsKernelRecordState.state env declaration task =>
+      match declaration with
+      | PsKernelUnitDeclaration.declaration name parameters level ctorName ctorType =>
+          match task with
+          | PsKernelRecordTask.initial =>
+              match name with
+              | PsKernelName.anonymous => psKernelRecordReject PsKernelCheckError.invalidName
+              | _ =>
+                  match ctorName with
+                  | PsKernelName.anonymous => psKernelRecordReject PsKernelCheckError.invalidName
+                  | _ =>
+                      match parameters with
+                      | PsKernelList.cons unused rest => psKernelRecordReject PsKernelCheckError.unsupported
+                      | PsKernelList.nil =>
+                          match level with
+                          | PsKernelLevel.succ base =>
+                              match base with
+                              | PsKernelLevel.zero =>
+                                  match ctorType with
+                                  | PsKernelExpr.forallE unusedName unusedType unusedBody unusedBinder =>
+                                      psKernelRecordNext env declaration (PsKernelRecordTask.familyName (PsKernelLookupState.search name env))
+                                  | _ => psKernelRecordReject PsKernelCheckError.unsupported
+                              | _ => psKernelRecordReject PsKernelCheckError.unsupported
+                          | _ => psKernelRecordReject PsKernelCheckError.unsupported
+          | PsKernelRecordTask.familyName current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next => psKernelRecordNext env declaration (PsKernelRecordTask.familyName next)
+              | PsKernelLookupStep.found unused => psKernelRecordReject PsKernelCheckError.duplicateName
+              | PsKernelLookupStep.missing => psKernelRecordNext env declaration
+                  (PsKernelRecordTask.fields ctorType PsKernelList.nil PsKernelNatural.zero)
+              | _ => psKernelRecordReject PsKernelCheckError.invalidState
+          | PsKernelRecordTask.fields remaining reversed count =>
+              match remaining with
+              | PsKernelExpr.forallE unusedName field body unusedBinder => psKernelRecordNext env declaration
+                  (PsKernelRecordTask.fieldType body (PsKernelList.cons field reversed) (psKernelNaturalSucc count)
+                    (psKernelCheckStart env field (PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero))))
+              | PsKernelExpr.constE resultName resultLevels =>
+                  match resultLevels with
+                  | PsKernelList.nil => psKernelRecordNext env declaration
+                      (PsKernelRecordTask.result reversed count
+                        (PsKernelList.cons (PsKernelOrderTask.name resultName name) PsKernelList.nil))
+                  | _ => psKernelRecordReject PsKernelCheckError.invalidUniverse
+              | _ => psKernelRecordReject PsKernelCheckError.typeMismatch
+          | PsKernelRecordTask.fieldType remaining reversed count current =>
+              match psKernelTypeStep current with
+              | PsKernelTypeStep.next next => psKernelRecordNext env declaration
+                  (PsKernelRecordTask.fieldType remaining reversed count next)
+              | PsKernelTypeStep.final result =>
+                  match result with
+                  | PsKernelTypeResult.done unused => psKernelRecordNext env declaration (PsKernelRecordTask.fields remaining reversed count)
+                  | PsKernelTypeResult.rejected error => psKernelRecordReject error
+                  | _ => psKernelRecordReject PsKernelCheckError.invalidState
+          | PsKernelRecordTask.result reversed count current =>
+              match psKernelOrderStep current with
+              | PsKernelOrderStep.next next => psKernelRecordNext env declaration (PsKernelRecordTask.result reversed count next)
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelRecordNext env declaration
+                      (PsKernelRecordTask.constructorType reversed count
+                        (psKernelCheckStart (psKernelRecordFamilyEnvironment env name) ctorType
+                          (PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero))))
+                  | _ => psKernelRecordReject PsKernelCheckError.typeMismatch
+              | _ => psKernelRecordReject PsKernelCheckError.invalidState
+          | PsKernelRecordTask.constructorType reversed count current =>
+              match psKernelTypeStep current with
+              | PsKernelTypeStep.next next => psKernelRecordNext env declaration (PsKernelRecordTask.constructorType reversed count next)
+              | PsKernelTypeStep.final result =>
+                  match result with
+                  | PsKernelTypeResult.done unused => psKernelRecordNext env declaration
+                      (PsKernelRecordTask.constructorName reversed count (PsKernelLookupState.search ctorName (psKernelRecordFamilyEnvironment env name)))
+                  | PsKernelTypeResult.rejected error => psKernelRecordReject error
+                  | _ => psKernelRecordReject PsKernelCheckError.invalidState
+          | PsKernelRecordTask.constructorName reversed count current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next => psKernelRecordNext env declaration (PsKernelRecordTask.constructorName reversed count next)
+              | PsKernelLookupStep.found unused => psKernelRecordReject PsKernelCheckError.duplicateName
+              | PsKernelLookupStep.missing => psKernelRecordNext env declaration
+                  (PsKernelRecordTask.recursorName reversed count
+                    (PsKernelLookupState.search (psKernelUnitRecursorName name) (psKernelRecordConstructorEnvironment env name ctorName ctorType)))
+              | _ => psKernelRecordReject PsKernelCheckError.invalidState
+          | PsKernelRecordTask.recursorName reversed count current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next => psKernelRecordNext env declaration (PsKernelRecordTask.recursorName reversed count next)
+              | PsKernelLookupStep.found unused => psKernelRecordReject PsKernelCheckError.duplicateName
+              | PsKernelLookupStep.missing => psKernelRecordNext env declaration
+                  (PsKernelRecordTask.arguments reversed count count (PsKernelExpr.constE ctorName PsKernelList.nil))
+              | _ => psKernelRecordReject PsKernelCheckError.invalidState
+          | PsKernelRecordTask.arguments reversed count index value =>
+              match index with
+              | PsKernelNatural.zero => psKernelRecordNext env declaration
+                  (PsKernelRecordTask.minor reversed PsKernelList.nil (PsKernelExpr.app (PsKernelExpr.bvar count) value))
+              | _ =>
+                  let next : PsKernelNatural := psKernelNaturalPred index;
+                  psKernelRecordNext env declaration
+                    (PsKernelRecordTask.arguments reversed count next (PsKernelExpr.app value (PsKernelExpr.bvar next)))
+          | PsKernelRecordTask.minor remaining fields value =>
+              match remaining with
+              | PsKernelList.cons field rest => psKernelRecordNext env declaration
+                  (PsKernelRecordTask.minor rest (PsKernelList.cons field fields)
+                    (PsKernelExpr.forallE PsKernelName.anonymous field value PsKernelBinder.explicit))
+              | PsKernelList.nil =>
+                  let recType : PsKernelExpr := psKernelRecordRecursorType (PsKernelExpr.constE name PsKernelList.nil) value (psKernelRecordMotive name);
+                  psKernelRecordNext env declaration (PsKernelRecordTask.recursorType fields recType
+                    (PsKernelTypeState.state
+                      (PsKernelTypingContext.context (psKernelRecordConstructorEnvironment env name ctorName ctorType)
+                        (PsKernelList.cons (psKernelRecordMotive name) PsKernelList.nil))
+                      (PsKernelList.cons (PsKernelTypeTask.infer PsKernelList.nil recType)
+                        (PsKernelList.cons PsKernelTypeTask.reduceTop PsKernelList.nil)) PsKernelList.nil))
+          | PsKernelRecordTask.recursorType fields type current =>
+              match psKernelTypeStep current with
+              | PsKernelTypeStep.next next => psKernelRecordNext env declaration (PsKernelRecordTask.recursorType fields type next)
+              | PsKernelTypeStep.final result =>
+                  match result with
+                  | PsKernelTypeResult.done inferred =>
+                      match inferred with
+                      | PsKernelExpr.sortE unused => PsKernelRecordStep.final (PsKernelAdmissionResult.admitted
+                          (PsKernelList.cons (PsKernelDefinition.recordRecursor (psKernelUnitRecursorName name)
+                            (PsKernelList.cons (psKernelRecordMotive name) PsKernelList.nil) type ctorName fields)
+                            (PsKernelList.cons (PsKernelDefinition.constant ctorName PsKernelList.nil ctorType)
+                              (PsKernelList.cons (PsKernelDefinition.recordFamily name ctorName fields) env))))
+                      | _ => psKernelRecordReject PsKernelCheckError.typeExpected
+                  | PsKernelTypeResult.rejected error => psKernelRecordReject error
+                  | _ => psKernelRecordReject PsKernelCheckError.invalidState
+
+def psKernelRecordStart (env : PsKernelList PsKernelDefinition) (declaration : PsKernelUnitDeclaration) : PsKernelRecordState :=
+  PsKernelRecordState.state env declaration PsKernelRecordTask.initial
+
+def psKernelRecordRun (fuel : PsKernelFuel) : PsKernelRecordState -> PsKernelAdmissionResult :=
+  match fuel with
+  | PsKernelFuel.stop => fun (state : PsKernelRecordState) => PsKernelAdmissionResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      fun (state : PsKernelRecordState) =>
+        match psKernelRecordStep state with
+        | PsKernelRecordStep.final result => result
+        | PsKernelRecordStep.next next =>
+            let smaller : PsKernelRecordState -> PsKernelAdmissionResult := psKernelRecordRun remaining;
+            smaller next
+
+
+
 /- The only mixed admission entry point starts with an empty environment.
 Each declaration uses the same outer transition budget. Partial state is private
 to the driver; rejection and exhaustion expose no environment. -/
 inductive PsKernelJointEntry where
   | definition (entry : PsKernelDefinition)
   | unitInductive (entry : PsKernelUnitDeclaration)
+  | recordInductive (entry : PsKernelUnitDeclaration)
   | natInductive (entry : PsKernelNatDeclaration)
 
 inductive PsKernelJointState where
   | pending (environment : PsKernelList PsKernelDefinition) (entries : PsKernelList PsKernelJointEntry)
   | definition (rest : PsKernelList PsKernelJointEntry) (state : PsKernelAdmissionState)
   | unitInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelUnitState)
+  | recordInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelRecordState)
   | natInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelNatAdmissionState)
 
 inductive PsKernelJointStep where
@@ -2848,6 +3063,8 @@ def psKernelJointStep (state : PsKernelJointState) : PsKernelJointStep :=
               (PsKernelJointState.definition rest (PsKernelAdmissionState.pending env (PsKernelList.cons definition PsKernelList.nil)))
           | PsKernelJointEntry.unitInductive declaration => PsKernelJointStep.next
               (PsKernelJointState.unitInductive rest (psKernelUnitStart env declaration))
+          | PsKernelJointEntry.recordInductive declaration => PsKernelJointStep.next
+              (PsKernelJointState.recordInductive rest (psKernelRecordStart env declaration))
           | PsKernelJointEntry.natInductive declaration => PsKernelJointStep.next
               (PsKernelJointState.natInductive rest (psKernelNatAdmissionStart env declaration))
   | PsKernelJointState.definition rest current =>
@@ -2858,6 +3075,10 @@ def psKernelJointStep (state : PsKernelJointState) : PsKernelJointStep :=
       match psKernelUnitStep current with
       | PsKernelUnitStep.next next => PsKernelJointStep.next (PsKernelJointState.unitInductive rest next)
       | PsKernelUnitStep.final result => psKernelJointContinue rest result
+  | PsKernelJointState.recordInductive rest current =>
+      match psKernelRecordStep current with
+      | PsKernelRecordStep.next next => PsKernelJointStep.next (PsKernelJointState.recordInductive rest next)
+      | PsKernelRecordStep.final result => psKernelJointContinue rest result
   | PsKernelJointState.natInductive rest current =>
       match psKernelNatAdmissionStep current with
       | PsKernelNatAdmissionStep.next next => PsKernelJointStep.next (PsKernelJointState.natInductive rest next)

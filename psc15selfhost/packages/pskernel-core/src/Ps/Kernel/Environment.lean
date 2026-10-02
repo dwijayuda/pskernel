@@ -14,6 +14,9 @@ inductive PsKernelDefinition where
   | constant (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
   | unitRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (ctorName : PsKernelName)
 
+  | recordFamily (name ctorName : PsKernelName) (fields : PsKernelList PsKernelExpr)
+  | recordRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
+      (ctorName : PsKernelName) (fields : PsKernelList PsKernelExpr)
   | natFamily (name zeroName succName : PsKernelName)
   | natRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (zeroName succName : PsKernelName)
 
@@ -23,6 +26,8 @@ def psKernelDefinitionName (entry : PsKernelDefinition) : PsKernelName :=
   | PsKernelDefinition.polymorphic name unusedParameters unusedType unusedValue => name
   | PsKernelDefinition.constant name parameters type => name
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => name
+  | PsKernelDefinition.recordFamily name unusedCtor unusedFields => name
+  | PsKernelDefinition.recordRecursor name unusedParameters unusedType unusedCtor unusedFields => name
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => name
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => name
 
@@ -32,6 +37,8 @@ def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList PsK
   | PsKernelDefinition.polymorphic unusedName parameters unusedType unusedValue => parameters
   | PsKernelDefinition.constant name parameters type => parameters
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => parameters
+  | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelList.nil
+  | PsKernelDefinition.recordRecursor unusedName parameters unusedType unusedCtor unusedFields => parameters
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelList.nil
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => parameters
 
@@ -41,6 +48,8 @@ def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr :=
   | PsKernelDefinition.polymorphic unusedName unusedParameters type unusedValue => type
   | PsKernelDefinition.constant name parameters type => type
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => type
+  | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
+  | PsKernelDefinition.recordRecursor unusedName unusedParameters type unusedCtor unusedFields => type
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => type
 
@@ -51,6 +60,8 @@ def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody
   | PsKernelDefinition.constant unusedName unusedParameters unusedType => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.unitRecursor unusedName unusedParameters unusedType unusedConstructor => PsKernelDefinitionBody.opaque
 
+  | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelDefinitionBody.opaque
+  | PsKernelDefinition.recordRecursor unusedName unusedParameters unusedType unusedCtor unusedFields => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.natFamily unusedName unusedZero unusedSucc => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.natRecursor unusedName unusedParameters unusedType unusedZero unusedSucc => PsKernelDefinitionBody.opaque
 

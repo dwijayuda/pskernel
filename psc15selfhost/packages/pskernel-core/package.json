@@ -1,6 +1,6 @@
 {
   "name": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.8",
+  "version": "0.1.0-checker.9",
   "private": true,
   "description": "Owned PSC-compiled dependent term-checker fragment; private experimental checkpoint, not an authoritative kernel",
   "type": "module",
@@ -40,7 +40,8 @@
     "verify:evidence": "node scripts/verify-evidence.mjs",
     "test:unit-differential": "node scripts/unit-differential.mjs",
     "test:nat-differential": "node scripts/nat-differential.mjs",
-    "test:literal-differential": "node scripts/literal-differential.mjs"
+    "test:literal-differential": "node scripts/literal-differential.mjs",
+    "test:record-differential": "node scripts/record-differential.mjs"
   },
   "dependencies": {},
   "proofscript": {

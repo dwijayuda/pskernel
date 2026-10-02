@@ -10,6 +10,7 @@ import "./check-erasure-open-match-minor-fields-source-syntax.mjs";
 import "./check-erasure-recursive-call-arguments-source-syntax.mjs";
 import "./check-erasure-open-match-hypotheses-source-syntax.mjs";
 import "./check-erasure-match-minor-sequencing-source-syntax.mjs";
+import "./check-erasure-match-alternatives-source-syntax.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

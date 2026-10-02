@@ -1098,7 +1098,7 @@ def psEraseMatchAlternatives
   | _, [], alternativesRev =>
       Except.ok alternativesRev.reverse
   | index, ctorInfo :: rest, alternativesRev =>
-      match arguments[minorStart + index]? with
+      match psErasureExprListAt arguments (minorStart + index) with
       | none => Except.error PsErasureError.unsupportedApplication
       | some minor =>
           match
@@ -1122,9 +1122,13 @@ def psEraseMatchAlternatives
                 minorStart
                 (index + 1)
                 rest
-                ((alternative.constructorName,
-                  alternative.bindings,
-                  alternative.body) :: alternativesRev)
+                (List.cons
+                  (Prod.mk
+                    alternative.constructorName
+                    (Prod.mk
+                      alternative.bindings
+                      alternative.body))
+                  alternativesRev)
 
 def psEraseRuntimeRecursorApplication
     (environment : PsEnvironment)

@@ -479,7 +479,7 @@ def psErasePrimitiveApplication
           Except.error PsErasureError.unsupportedApplication
       else if psStringEq text "String.Pos.Raw.mk" then
         match view.args with
-        | [value] =>
+        | value :: [] =>
             match erase value with
             | Except.error error => Except.error error
             | Except.ok result => Except.ok (some result)
@@ -487,7 +487,7 @@ def psErasePrimitiveApplication
             Except.error PsErasureError.unsupportedApplication
       else if psStringEq text "String.Pos.Raw.byteIdx" then
         match view.args with
-        | [value] =>
+        | value :: [] =>
             match erase value with
             | Except.error error => Except.error error
             | Except.ok result => Except.ok (some result)

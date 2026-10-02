@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { root, sha256, json, readSources } from './source.mjs';
+readSources();
+const build = json(path.join(root, 'manifests/BUILD.json'));
+const pin = json(path.join(root, 'manifests/TOOLCHAIN.json'));
+if (build.schemaVersion !== 1 || build.canCheckProofs !== false || build.generatedOutputEdited !== false || build.canonicalPsEmissionParity !== true) throw Error('INVALID_BUILD_RECORD');
+if (build.packageVersion !== json(path.join(root, 'package.json')).version || build.seedSha256 !== pin.psc1Sha256 || build.seedSourceCommit !== pin.seedSourceCommit || build.typescriptVersion !== pin.typescriptVersion) throw Error('BUILD_IDENTITY_MISMATCH');
+if (build.sourceManifestSha256 !== sha256(fs.readFileSync(path.join(root, 'manifests/SOURCE.json')))) throw Error('STALE_BUILD');
+const expected = ['dist/foundation.d.ts','dist/foundation.js','dist/foundation.lean','dist/foundation.ps','dist/foundation.ts'];
+if (JSON.stringify(build.outputs.map(x => x.path)) !== JSON.stringify(expected)) throw Error('OUTPUT_CLOSURE_MISMATCH');
+for (const entry of build.outputs) if (sha256(fs.readFileSync(path.join(root, entry.path))) !== entry.sha256) throw Error(`OUTPUT_HASH_MISMATCH: ${entry.path}`);
+console.log('PSKERNEL_CORE_BUILD_IDENTITY: PASS (identity, not a soundness proof)');

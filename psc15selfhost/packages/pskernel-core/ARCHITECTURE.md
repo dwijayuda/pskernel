@@ -1,6 +1,7 @@
 # New pskernel-core architecture
 
-Status: proposed design; the package currently exports identity metadata only.
+Status: target design plus the first executed data/structural foundation; the public
+API still exports identity metadata only. See FOUNDATION.md for implemented scope.
 This document is not an implementation, soundness proof, or compatibility report.
 
 ## 1. Identity and separation
@@ -46,7 +47,7 @@ Claiming the intended source theorem also requires binding the expected statemen
 and relevant definitions to that input; an exporter-supplied name or digest alone
 is not such a comparison.
 
-## 3. Semantic modules (planned, not yet present)
+## 3. Semantic module target (Data/structural foundation now present)
 
 | Module | Responsibility |
 | --- | --- |

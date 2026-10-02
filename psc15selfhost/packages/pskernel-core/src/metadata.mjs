@@ -1,9 +1,9 @@
-/** Package identity only. This scaffold does not check or admit any declaration. */
+/** Package identity only. No declaration-admission API is implemented. */
 export const kernelInfo = Object.freeze({
   name: "@proofscript/pskernel-core",
-  version: "0.1.0-design.0",
+  version: "0.1.0-foundation.0",
   implementation: "new-owned-psc-kernel",
-  status: "design-only",
+  status: "foundation",
   canCheckProofs: false,
   authoritative: false,
   targetLeanVersion: "4.34.0",

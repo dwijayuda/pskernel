@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "status": "foundation-only",
+  "sourceManifestSha256": "9c1273f542c7a1e791722be4b0b91828013035fde66a4e7e4100e476d1b097cc",
+  "localTests": {
+    "passed": 73,
+    "failed": 0,
+    "skipped": 0,
+    "runtime": "Node v22.16.0",
+    "includesSmallNaturalPairs": 256
+  },
+  "leanOracle": {
+    "concreteComputationTheorems": 47,
+    "deliberatelyFalseTheoremsRejected": 1,
+    "generalCorrectnessProved": false,
+    "fullLeanCompatibilityProved": false
+  },
+  "packagedConsumer": {
+    "offlineInstallPassed": true,
+    "testsPassed": 73,
+    "typeDeclarationsPassed": true,
+    "rootExports": [
+      "kernelInfo"
+    ],
+    "proofCheckingApiAvailable": false
+  },
+  "repeatedBuildOutputsIdentical": true,
+  "generatedSemanticOutputHandEdited": false,
+  "fullWorkspaceBuildRun": false,
+  "compilerFixedPointRun": false,
+  "newKernelCanCheckProofs": false,
+  "oldKernelModified": false,
+  "npmPublished": false,
+  "limitations": [
+    "Raw internal text still needs byte/UTF-8 validation at future ingress.",
+    "Generated objects are not yet immutable checked handles.",
+    "Fuel is a task budget, not a host-stack or wall-time guarantee.",
+    "Ground theorems are checked by the external pinned Lean provider, not by the new kernel.",
+    "A durable seed distribution is still needed after the recorded CI artifact expires."
+  ]
+}

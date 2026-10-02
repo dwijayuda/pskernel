@@ -1,8 +1,8 @@
 {
   "name": "@proofscript/pskernel-core",
-  "version": "0.1.0-design.0",
+  "version": "0.1.0-foundation.0",
   "private": true,
-  "description": "Independent PSC kernel design scaffold; no proof checker is implemented or exported",
+  "description": "Owned PSC kernel data and bounded structural comparison; no proof-admission API",
   "type": "module",
   "exports": {
     ".": {
@@ -11,23 +11,36 @@
     }
   },
   "files": [
-    "src/metadata.mjs",
-    "src/metadata.d.ts",
+    "src",
+    "dist",
+    "manifests",
+    "scripts",
+    "test",
     "README.md",
-    "ARCHITECTURE.md"
+    "ARCHITECTURE.md",
+    "FOUNDATION.md"
   ],
   "scripts": {
-    "test": "node --test test/package.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "check:source": "node scripts/source.mjs",
+    "build": "node scripts/build.mjs",
+    "verify:build": "node scripts/verify-build.mjs",
+    "test:oracle": "node scripts/oracle.mjs",
+    "prepack": "node scripts/verify-build.mjs"
   },
   "dependencies": {},
   "proofscript": {
     "bootstrap": false,
     "portable": false,
     "targetPortable": true,
-    "sourceRoots": ["src"],
-    "testRoots": ["test"],
+    "sourceRoots": [
+      "src"
+    ],
+    "testRoots": [
+      "test"
+    ],
     "outDir": "dist",
-    "role": "independent-kernel-design",
+    "role": "independent-kernel-foundation",
     "authoritative": false
   }
 }

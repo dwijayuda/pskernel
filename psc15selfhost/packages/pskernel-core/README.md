@@ -1,43 +1,32 @@
-# pskernel-core (new implementation)
+# pskernel-core (new)
 
-npm identity: `@proofscript/pskernel-core`.
+`@proofscript/pskernel-core@0.1.0-foundation.0` — private, non-authoritative.
+The previous package remains `@proofscript/pskernel-core.old`.
 
-**Status: architecture and package-identity scaffold only. No proof checker,
-declaration admission, Lean compatibility, compiler authority, or kernel self-hosting
-is implemented by this package.** Its only public export is immutable `kernelInfo`.
-The npm package is private to prevent accidental publication.
+This checkpoint contains an **executed PSC data/structural foundation, not a proof
+checker**. Owned source is in `src/Ps/Kernel/`; generated ESM, TypeScript, declarations,
+canonical `.ps` and flattened source are in `dist/`. No generated semantic code is
+hand edited. No old kernel or Lean provider is a runtime dependency.
 
-The previous package is preserved as `../pskernel-core.old/`, with npm identity
-`@proofscript/pskernel-core.old`. Its source is not imported here, and its historical
-tests and compatibility evidence do not establish anything about this implementation.
-The legacy Lean namespace remains `Ps.KernelCore`; the new design reserves `Ps.Kernel`.
-
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for the proposed semantic modules, API,
-Lean proof import path, TCB, release gates, and self-hosting plan.
-
-## Available now
+The only public export remains immutable identity metadata:
 
 ```js
 import { kernelInfo } from '@proofscript/pskernel-core';
-console.log(kernelInfo.status); // design-only
+console.log(kernelInfo.status);         // "foundation"
+console.log(kernelInfo.canCheckProofs); // false
 ```
 
-Run `npm test --workspace @proofscript/pskernel-core` from `psc15selfhost/`,
-or `npm test` from this directory. These are package-contract tests, not proof tests.
-`npm pack --dry-run` inspects the distributable files. Nothing is published by these commands.
+`createKernel`, `checkBundle`, `CheckedModule` and proof admission are not exported.
+The experimental generated data layout is not a stable public API.
 
-## Migration boundary
+```sh
+npm test                 # package, source and generated-code tests
+npm run verify:build     # source/output identity checks, not a soundness proof
+npm pack                 # local tarball; publication remains disabled
+```
 
-The existing `check:kernel-core-source` and `test:kernel-core` workspace commands
-remain legacy checks. Their source lookup now points to `pskernel-core.old`.
-They are not tests of this package. The existing compiler and Lean providers are
-not changed or replaced. Both new and old packages stay outside the existing
-compiler-only bootstrap closure.
-
-## Planned release
-
-The release artifact should contain generated JavaScript, TypeScript declarations,
-exact portable sources, package-local reproducible build instructions, source/build
-manifests, and required license notices. Normal installation must not compile Lean,
-run PSC2, download a checker, or enable an alternate proof provider. Public publication,
-namespace ownership, and a license for the new implementation require separate resolution.
+Rebuilding requires an explicit approved PSC seed and TypeScript 5.8.3. The optional
+oracle gate uses the pinned Lean provider only as an external test tool. See
+`FOUNDATION.md` and the manifests for commands, scope, evidence, seed provenance and
+remaining limitations. `ARCHITECTURE.md` describes the full target, not completed
+capabilities. No complete Lean compatibility or kernel self-hosting is claimed.

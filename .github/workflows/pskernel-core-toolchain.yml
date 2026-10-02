@@ -1,0 +1,66 @@
+name: PSC2 pinned native toolchain bundle
+
+on:
+  push:
+    branches: [psc2/pskernel-core-design-9219bfb]
+    paths: [.github/workflows/pskernel-core-toolchain.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verified-toolchain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Download and verify the exact upstream Lean distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p bundle
+          curl --fail --location --retry 3 \
+            https://github.com/leanprover/lean4/releases/download/v4.34.0/lean-4.34.0-linux.tar.zst \
+            --output lean-4.34.0-linux.tar.zst
+          echo 'caaa98356098c85dc0fcbbd28e1ec66f39eb6551829972b752ff20e1286b646b  lean-4.34.0-linux.tar.zst' | sha256sum --check
+          tar --zstd -xf lean-4.34.0-linux.tar.zst
+          test "$(lean-4.34.0-linux/bin/lean --githash)" = 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+          lean-4.34.0-linux/bin/lean --version | tee bundle/lean-version.txt
+          printf '%s\n' 'Upstream Lean 4.34.0 Linux distribution, unchanged.' \
+            'Archive SHA256: caaa98356098c85dc0fcbbd28e1ec66f39eb6551829972b752ff20e1286b646b' \
+            'Upstream release asset ID: 563514501' \
+            'Lean commit: 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b' \
+            'Concatenate lean-4.34.0-linux.tar.zst.part-00, -01, -02 before extraction.' \
+            'This is a seed/development toolchain, not the owned kernel or a self-hosting claim.' \
+            > bundle/README.txt
+          split --bytes=200M --numeric-suffixes=0 --suffix-length=2 \
+            lean-4.34.0-linux.tar.zst bundle/lean-4.34.0-linux.tar.zst.part-
+          (cd bundle && sha256sum lean-4.34.0-linux.tar.zst.part-*) > bundle/SHA256SUMS
+      - name: Preserve verified distribution part 00
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: lean-4.34.0-verified-part-00
+          path: |
+            bundle/lean-4.34.0-linux.tar.zst.part-00
+            bundle/SHA256SUMS
+            bundle/README.txt
+            bundle/lean-version.txt
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - name: Preserve verified distribution part 01
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: lean-4.34.0-verified-part-01
+          path: bundle/lean-4.34.0-linux.tar.zst.part-01
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - name: Preserve verified distribution part 02
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: lean-4.34.0-verified-part-02
+          path: bundle/lean-4.34.0-linux.tar.zst.part-02
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error

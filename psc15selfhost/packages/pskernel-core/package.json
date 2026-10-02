@@ -1,11 +1,38 @@
 {
   "name": "@proofscript/pskernel-core",
-  "version": "0.0.0-dev",
+  "version": "0.1.0-foundation.0",
   "private": true,
+  "description": "Owned PSC kernel data and bounded structural comparison; no proof-admission API",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/metadata.d.ts",
+      "import": "./src/metadata.mjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "manifests",
+    "scripts",
+    "test",
+    "README.md",
+    "ARCHITECTURE.md",
+    "FOUNDATION.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "check:source": "node scripts/source.mjs",
+    "build": "node scripts/build.mjs",
+    "verify:build": "node scripts/verify-build.mjs",
+    "test:oracle": "node scripts/oracle.mjs",
+    "prepack": "node scripts/verify-build.mjs"
+  },
+  "dependencies": {},
   "proofscript": {
     "bootstrap": false,
-    "portable": true,
+    "portable": false,
+    "targetPortable": true,
     "sourceRoots": [
       "src"
     ],
@@ -13,6 +40,7 @@
       "test"
     ],
     "outDir": "dist",
-    "role": "minimal-trusted-kernel"
+    "role": "independent-kernel-foundation",
+    "authoritative": false
   }
 }

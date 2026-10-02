@@ -52,6 +52,9 @@ async function promote(staging, name) {
 
 async function bootstrap(kernel) {
   run(npm, ['run', 'bootstrap:lean']);
+  // Fail fast on the same real PSC1 project parse/elaboration gate used by
+  // the compiler-only bootstrap before entering the longer checked seed session.
+  run(npm, ['run', 'bootstrap:check']);
   run('lake', ['build', 'psc2_lean_checked_seed', 'psc2_lean_kernel_provider'], path.join(root, 'lean-checked'));
   const config = JSON.parse(await readFile(path.join(root, 'psconfig.json'), 'utf8'));
   await buildChecked({

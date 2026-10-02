@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export function assertFinishApplicationConstructors(source) {
-  const block = source.match(/^def psEraseFinishApplicationWithFuel\b[\s\S]*?(?=^def psEraseFinishApplication\b)/m)?.[0];
+  const block = source.match(/^def psEraseFinishApplicationWithFuelWorker\b[\s\S]*?(?=^def psEraseFinishApplication\b)/m)?.[0];
   if (!block) throw new Error('PSC2_ERASURE_FINISH_APPLICATION_CONSTRUCTORS_MISSING: declaration');
   for (const pattern of [
     /erasedLocals :=\s*List\.cons\s+pushed\.id\s+scope\.erasedLocals/,

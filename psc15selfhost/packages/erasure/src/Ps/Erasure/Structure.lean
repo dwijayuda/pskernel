@@ -10,102 +10,93 @@ def psPrepareRuntimeStructure
     (scope : PsErasureScope)
     (info : PsInductiveInfo) :
     Except PsErasureError PsPreparedStructureResult :=
-  if !info.isStructure || info.numIndices != 0 then
+  if if info.isStructure then psErasureNatNotEqual info.numIndices 0 else true then
     Except.error PsErasureError.unsupportedRuntimeTerm
   else
     match info.constructors with
-    | [constructorName] =>
-        match
-            psFindConstructorDeclaration
-              declarations
-              constructorName with
-        | none =>
-            Except.error
-              (PsErasureError.unknownConstant constructorName)
-        | some constructorInfo =>
-            if constructorInfo.numParams != info.numParams then
-              Except.error PsErasureError.unsupportedRuntimeTerm
-            else
-              let outputName :=
-                match
-                    psErasureLookupName
-                      scope.declarationNames
-                      info.name with
-                | some known => known
-                | none =>
-                    psErasureSafeIdentifier
-                      (psNameToString info.name)
-                      "Structure"
-              match
-                  psPrepareInductiveParameters
-                    environment
-                    scope
-                    info with
-              | Except.error error => Except.error error
-              | Except.ok parameters =>
+    | List.cons constructorName rest =>
+        match rest with
+        | List.nil =>
+            match
+                psFindConstructorDeclaration
+                  declarations
+                  constructorName with
+            | Option.none =>
+                Except.error
+                  (PsErasureError.unknownConstant constructorName)
+            | Option.some constructorInfo =>
+                if psErasureNatNotEqual constructorInfo.numParams info.numParams then
+                  Except.error PsErasureError.unsupportedRuntimeTerm
+                else
+                  let outputName : String :=
+                    match
+                        psErasureLookupName
+                          scope.declarationNames
+                          info.name with
+                    | Option.some known => known
+                    | Option.none =>
+                        psErasureSafeIdentifier
+                          (psNameToString info.name)
+                          "Structure";
                   match
-                      psApplyConstructorParameters
+                      psPrepareInductiveParameters
                         environment
-                        parameters.scope
-                        parameters.values
-                        constructorInfo.type with
+                        scope
+                        info with
                   | Except.error error => Except.error error
-                  | Except.ok fieldCursor =>
+                  | Except.ok parameters =>
                       match
-                          psPrepareConstructorFields
+                          psApplyConstructorParameters
                             environment
                             parameters.scope
-                            fieldCursor
-                            constructorInfo.numFields with
+                            parameters.values
+                            constructorInfo.type with
                       | Except.error error => Except.error error
-                      | Except.ok prepared =>
-                          let fields :=
-                            prepared.fields.map
-                              (fun field => {
-                                sourceIndex :=
-                                  constructorInfo.numParams +
-                                    field.sourceIndex
-                                projectionIndex := field.sourceIndex
-                                name := field.name
-                                type := field.type
-                              })
-                          let runtimeInfo : PsRuntimeStructureInfo := {
-                            name := outputName
-                            coreName := info.name
-                            constructorName := constructorName
-                            numParams := info.numParams
-                            typeParameters := parameters.typeParameters
-                            fields := fields
-                          }
-                          let nextScope : PsErasureScope := {
-                            localContext := scope.localContext
-                            runtimeLocals := scope.runtimeLocals
-                            typeLocals := scope.typeLocals
-                            erasedLocals := scope.erasedLocals
-                            declarationNames := scope.declarationNames
-                            runtimeConstructors :=
-                              scope.runtimeConstructors
-                            runtimeRecursors := scope.runtimeRecursors
-                            runtimeStructures :=
-                              (info.name, runtimeInfo) ::
-                                scope.runtimeStructures
-                            runtimeStructureConstructors :=
-                              (constructorName, runtimeInfo) ::
-                                scope.runtimeStructureConstructors
-                          }
-                          Except.ok {
-                            scope := nextScope
-                            ir := {
-                              name := outputName
-                              typeParameters := parameters.typeParameters
-                              fields :=
-                                fields.map
-                                  (fun field => {
-                                    name := field.name
-                                    type := field.type
-                                  })
-                            }
-                          }
+                      | Except.ok fieldCursor =>
+                          match
+                              psPrepareConstructorFields
+                                environment
+                                parameters.scope
+                                fieldCursor
+                                constructorInfo.numFields with
+                          | Except.error error => Except.error error
+                          | Except.ok prepared =>
+                              let makeField : PsRuntimeConstructorField -> PsRuntimeStructureField :=
+                                fun (field : PsRuntimeConstructorField) =>
+                                  PsRuntimeStructureField.mk
+                                    (Nat.add constructorInfo.numParams field.sourceIndex)
+                                    field.sourceIndex field.name field.type;
+                              let fields := psListMap makeField prepared.fields;
+                              let makeIrField : PsRuntimeStructureField -> PsVerifiedIrStructureField :=
+                                fun (field : PsRuntimeStructureField) =>
+                                  PsVerifiedIrStructureField.mk field.name field.type;
+                              let runtimeInfo : PsRuntimeStructureInfo := {
+                                name := outputName
+                                coreName := info.name
+                                constructorName := constructorName
+                                numParams := info.numParams
+                                typeParameters := parameters.typeParameters
+                                fields := fields
+                              };
+                              let nextScope : PsErasureScope := {
+                                localContext := scope.localContext
+                                runtimeLocals := scope.runtimeLocals
+                                typeLocals := scope.typeLocals
+                                erasedLocals := scope.erasedLocals
+                                declarationNames := scope.declarationNames
+                                runtimeConstructors :=
+                                  scope.runtimeConstructors
+                                runtimeRecursors := scope.runtimeRecursors
+                                runtimeStructures :=
+                                  List.cons (Prod.mk info.name runtimeInfo) scope.runtimeStructures
+                                runtimeStructureConstructors :=
+                                  List.cons (Prod.mk constructorName runtimeInfo) scope.runtimeStructureConstructors
+                                runtimeExpressions := []
+                                currentDefinition := Option.none
+                              };
+                              Except.ok (PsPreparedStructureResult.mk nextScope
+                                (PsVerifiedIrStructure.mk outputName parameters.typeParameters (psListMap makeIrField fields)))
+        | List.cons _ _ => Except.error PsErasureError.unsupportedRuntimeTerm
     | _ => Except.error PsErasureError.unsupportedRuntimeTerm
 
 structure PsPreparedStructuresResult where
@@ -113,18 +104,16 @@ structure PsPreparedStructuresResult where
   ir : List PsVerifiedIrStructure
 
 def psPrepareRuntimeStructures
-    (environment : PsEnvironment)
-    (declarations : List PsDeclaration) :
-    List PsDeclaration ->
-    PsErasureScope ->
-    List PsVerifiedIrStructure ->
-    Except PsErasureError PsPreparedStructuresResult
-  | [], scope, structuresRev =>
-      Except.ok {
-        scope := scope
-        ir := structuresRev.reverse
-      }
-  | declaration :: rest, scope, structuresRev =>
+    (environment : PsEnvironment) (declarations : List PsDeclaration) (inputs : List PsDeclaration) :
+    PsErasureScope -> List PsVerifiedIrStructure -> Except PsErasureError PsPreparedStructuresResult :=
+  match inputs with
+  | List.nil =>
+      fun (scope : PsErasureScope) (structuresRev : List PsVerifiedIrStructure) =>
+        Except.ok (PsPreparedStructuresResult.mk scope (psListReverse structuresRev))
+  | List.cons declaration rest =>
+    let smaller : PsErasureScope -> List PsVerifiedIrStructure -> Except PsErasureError PsPreparedStructuresResult :=
+      psPrepareRuntimeStructures environment declarations rest;
+    fun (scope : PsErasureScope) (structuresRev : List PsVerifiedIrStructure) =>
       match declaration with
       | .inductiveDecl info =>
           if info.isStructure then
@@ -136,23 +125,14 @@ def psPrepareRuntimeStructures
                   info with
             | Except.error error => Except.error error
             | Except.ok prepared =>
-                psPrepareRuntimeStructures
-                  environment
-                  declarations
-                  rest
+                smaller
                   prepared.scope
-                  (prepared.ir :: structuresRev)
+                  (List.cons prepared.ir structuresRev)
           else
-            psPrepareRuntimeStructures
-              environment
-              declarations
-              rest
+            smaller
               scope
               structuresRev
       | _ =>
-          psPrepareRuntimeStructures
-            environment
-            declarations
-            rest
+          smaller
             scope
             structuresRev

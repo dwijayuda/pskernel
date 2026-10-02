@@ -6,6 +6,7 @@ package proofscriptSelfhost
 lean_lib PsFoundation where
   srcDir := "packages/foundation/src"
   roots := #[
+    `Ps.Foundation.List,
     `Ps.Foundation.Name,
     `Ps.Foundation.Source,
     `Ps.Foundation.Diagnostic

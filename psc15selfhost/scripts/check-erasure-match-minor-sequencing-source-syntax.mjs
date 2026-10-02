@@ -5,11 +5,11 @@ import { fileURLToPath } from "node:url";
 
 export function assertErasureMatchMinorSequencing(source) {
   const block = source.match(
-    /^def psEraseMatchMinor\b[\s\S]*?(?=^def psEraseMatchAlternatives\b)/m,
+    /^def psEraseMatchMinor\b[\s\S]*?(?=^def psEraseMatchAlternativesWorker\b)/m,
   )?.[0];
   if (
     !block ||
-    !/let bindings := opened\.bindingsRev\.reverse;\s*match\s+psOpenMatchMinorHypotheses/.test(block)
+    !/let bindings := \(psListReverse opened\.bindingsRev\);\s*match\s+psOpenMatchMinorHypotheses/.test(block)
   ) {
     throw new Error(
       "PSC2_ERASURE_MATCH_MINOR_SEQUENCING_SELFHOST_SOURCE_SYNTAX_MISSING: sequenced bindings",
@@ -24,7 +24,7 @@ const source = await readFile(
   "utf8",
 );
 const block = assertErasureMatchMinorSequencing(source);
-const protectedText = "let bindings := opened.bindingsRev.reverse;";
+const protectedText = "let bindings := (psListReverse opened.bindingsRev);";
 assert.ok(block.includes(protectedText));
 const broken = block.replace(protectedText, protectedText.replace(";", ""));
 assert.throws(

@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 export function assertErasureRuntimeRecursorSourceSyntax(source) {
   const block = source.match(
-    /^def psEraseRuntimeRecursorApplication\b[\s\S]*?(?=^def psEraseRuntimeExprWithFuel\b)/m,
+    /^def psEraseRuntimeRecursorApplication\b[\s\S]*?(?=^def psEraseRuntimeExprWithFuelWorker\b)/m,
   )?.[0];
   if (!block) {
     throw new Error(
@@ -13,7 +13,7 @@ export function assertErasureRuntimeRecursorSourceSyntax(source) {
     );
   }
   const required = [
-    /Nat\.add\s*\(Nat\.add \(Nat\.add inductiveInfo\.numParams 1\)\s*inductiveInfo\.constructors\.length\)\s*1;\s*if psErasureBoolNot \(Nat\.beq view\.args\.length expectedArity\) then/,
+    /Nat\.add\s*\(Nat\.add \(Nat\.add inductiveInfo\.numParams 1\)\s*\(psListLength inductiveInfo\.constructors\)\)\s*1;\s*if psErasureBoolNot \(Nat\.beq \(psListLength view\.args\) expectedArity\) then/,
     /fun \(entry : PsVerifiedIrTypeParameter × PsVerifiedIrType\) =>\s*match entry with\s*\| Prod\.mk parameter value => Prod\.mk parameter\.name value;/,
     /let minorStart := Nat\.add inductiveInfo\.numParams 1;/,
     /let majorIndex := Nat\.sub expectedArity 1;/,

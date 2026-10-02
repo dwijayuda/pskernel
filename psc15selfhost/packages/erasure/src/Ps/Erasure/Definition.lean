@@ -8,19 +8,25 @@ structure PsOpenedErasedDefinition where
   resultType : PsVerifiedIrType
   body : PsVerifiedIrExpr
 
-def psErasureAddUniqueString
-    (used : List String)
-    (base : String) :
-    Nat -> String
-  | 0 => String.Internal.append base "_overflow"
-  | attempts + 1 =>
-      if used.contains base then
-        psErasureAddUniqueString
-          used
-          (String.Internal.append base "_")
-          attempts
-      else
-        base
+def psErasureStringInList (values : List String) : String -> Bool :=
+  match values with
+  | List.nil => fun (_target : String) => false
+  | List.cons value rest =>
+      let smaller : String -> Bool := psErasureStringInList rest;
+      fun (target : String) =>
+        if psStringEq value target then true else smaller target
+
+def psErasureAddUniqueStringWorker (used : List String) (attempts : Nat) : String -> String :=
+  match attempts with
+  | Nat.zero => fun (base : String) => String.Internal.append base "_overflow"
+  | Nat.succ remaining =>
+      let smaller : String -> String := psErasureAddUniqueStringWorker used remaining;
+      fun (base : String) =>
+        if psErasureStringInList used base then smaller (String.Internal.append base "_")
+        else base
+
+def psErasureAddUniqueString (used : List String) (base : String) (attempts : Nat) : String :=
+  psErasureAddUniqueStringWorker used attempts base
 
 structure PsErasureNameState where
   used : List String
@@ -422,13 +428,20 @@ def psEraseDefinitionsLoop
     Except PsErasureError (List PsVerifiedIrDeclaration) :=
   psEraseDefinitionsLoopWorker environment scope declarations declarationsRev
 
+def psErasureAppendDeclarations (declarations : List PsDeclaration) : List PsDeclaration -> List PsDeclaration :=
+  match declarations with
+  | List.nil => fun (tail : List PsDeclaration) => tail
+  | List.cons declaration rest =>
+      let smaller : List PsDeclaration -> List PsDeclaration := psErasureAppendDeclarations rest;
+      fun (tail : List PsDeclaration) => List.cons declaration (smaller tail)
+
 def psEraseCoreModuleWithRuntimePrelude
     (environment : PsEnvironment)
     (runtimePreludeDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration) :
     Except PsErasureError PsVerifiedIrModule :=
   let runtimeDeclarations :=
-    List.append runtimePreludeDeclarations declarations;
+    psErasureAppendDeclarations runtimePreludeDeclarations declarations;
   let names := psErasureDeclarationNames runtimeDeclarations;
   let baseScope := psErasureScopeEmpty names;
   match

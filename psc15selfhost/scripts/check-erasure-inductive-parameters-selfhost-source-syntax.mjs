@@ -14,13 +14,13 @@ export function assertErasureInductiveParametersSource(source) {
   }
   const required = [
     "                  binder;",
-    'String.Internal.append "T" (toString index);',
+    'String.Internal.append "T" (psNatToString index);',
     "let value := PsExpr.fvar pushed.id;",
     "List.cons (Prod.mk pushed.id parameterName) scope.typeLocals",
     "List.cons pushed.id scope.erasedLocals",
     "List.cons value valuesRev",
     "PsVerifiedIrTypeParameter.mk parameterName",
-    "currentDefinition := scope.currentDefinition\n              };",
+    "currentDefinition := scope.currentDefinition\n                  };",
   ];
   for (const text of required) {
     if (!block.includes(text)) {
@@ -45,9 +45,9 @@ const source = await readFile(
 const block = assertErasureInductiveParametersSource(source);
 const terminators = [
   "                  binder;",
-  'let parameterName := String.Internal.append "T" (toString index);',
+  'let parameterName := String.Internal.append "T" (psNatToString index);',
   "let value := PsExpr.fvar pushed.id;",
-  "currentDefinition := scope.currentDefinition\n              };",
+  "currentDefinition := scope.currentDefinition\n                  };",
 ];
 for (const current of terminators) {
   assert.ok(block.includes(current));

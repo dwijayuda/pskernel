@@ -11,22 +11,23 @@ def psErasureStructureNameFromRecursor
   | _ => Option.none
 
 def psErasureApplyStructureMinorFields
-    (structureName : PsName)
-    (major : PsExpr) :
-    Nat -> Nat -> PsExpr -> Except PsErasureError PsExpr
-  | 0, _, minor => Except.ok minor
-  | remaining + 1, index, minor =>
+    (structureName : PsName) (major : PsExpr) (count : Nat) :
+    Nat -> PsExpr -> Except PsErasureError PsExpr :=
+  match count with
+  | Nat.zero => fun (_index : Nat) (minor : PsExpr) => Except.ok minor
+  | Nat.succ remaining =>
+    let smaller : Nat -> PsExpr -> Except PsErasureError PsExpr :=
+      psErasureApplyStructureMinorFields structureName major remaining;
+    fun (index : Nat) (minor : PsExpr) =>
       match minor with
       | PsExpr.lam _ _ body _ =>
           let projection :=
             PsExpr.proj structureName index major;
-          psErasureApplyStructureMinorFields
-            structureName
-            major
-            remaining
+          smaller
             (Nat.add index 1)
             (psExprInstantiate1 body projection)
       | _ => Except.error PsErasureError.binderMismatch
+
 
 def psTryLowerStructureRecursorApplication
     (environment : PsEnvironment)
@@ -41,93 +42,94 @@ def psTryLowerStructureRecursorApplication
           match psEnvironmentFindInductive environment structureName with
           | Option.none => Except.ok Option.none
           | Option.some info =>
-              if !info.isStructure || info.numIndices != 0 then
+              if if info.isStructure then psErasureNatNotEqual info.numIndices 0 else true then
                 Except.ok Option.none
               else
                 match psEnvironmentFindRecursor environment recursorName with
                 | Option.none => Except.ok Option.none
                 | Option.some recInfo =>
                     if
-                        recInfo.numParams != info.numParams
-                          || recInfo.numIndices != 0
-                          || recInfo.numMotives != 1
-                          || recInfo.numMinors != 1 then
+                        if psErasureNatNotEqual recInfo.numParams info.numParams then true
+                        else if psErasureNatNotEqual recInfo.numIndices 0 then true
+                        else if psErasureNatNotEqual recInfo.numMotives 1 then true
+                        else psErasureNatNotEqual recInfo.numMinors 1 then
                       Except.error PsErasureError.unsupportedRuntimeTerm
                     else
                       match info.constructors with
-                      | [constructorName] =>
-                          match
-                              psEnvironmentFindConstructor
-                                environment
-                                constructorName with
-                          | Option.none =>
-                              Except.error
-                                (PsErasureError.unknownConstant constructorName)
-                          | Option.some constructorInfo =>
-                              if constructorInfo.numParams != info.numParams then
-                                Except.error PsErasureError.unsupportedRuntimeTerm
-                              else
-                                let expectedArity :=
-                                  Nat.add info.numParams 3;
-                                if view.args.length != expectedArity then
-                                  Except.ok Option.none
-                                else
-                                  let motiveIndex := info.numParams;
-                                  let minorIndex := Nat.add info.numParams 1;
-                                  let majorIndex := Nat.sub expectedArity 1;
-                                  match
-                                      view.args[motiveIndex]?,
-                                      view.args[minorIndex]?,
-                                      view.args[majorIndex]? with
-                                  | Option.some motive,
-                                    Option.some minor,
-                                    Option.some major =>
-                                      match motive with
-                                      | PsExpr.lam _ majorType _ _ =>
-                                          let liftedMinor :=
-                                            psExprLiftBVars 1 0 minor;
-                                          match
-                                              psErasureApplyStructureMinorFields
-                                                structureName
-                                                (PsExpr.bvar 0)
-                                                constructorInfo.numFields
-                                                0
-                                                liftedMinor with
-                                          | Except.error error =>
-                                              Except.error error
-                                          | Except.ok body =>
-                                              Except.ok
-                                                (Option.some
-                                                  (PsExpr.letE
-                                                    (psRootName "_psStructureMajor")
-                                                    majorType
-                                                    major
-                                                    body))
-                                      | _ =>
-                                          Except.error PsErasureError.binderMismatch
-                                  | _, _, _ =>
-                                      Except.error PsErasureError.unsupportedApplication
+                      | List.cons constructorName rest =>
+                          match rest with
+                          | List.nil =>
+                              match
+                                  psEnvironmentFindConstructor
+                                    environment
+                                    constructorName with
+                              | Option.none =>
+                                  Except.error
+                                    (PsErasureError.unknownConstant constructorName)
+                              | Option.some constructorInfo =>
+                                  if psErasureNatNotEqual constructorInfo.numParams info.numParams then
+                                    Except.error PsErasureError.unsupportedRuntimeTerm
+                                  else
+                                    let expectedArity :=
+                                      Nat.add info.numParams 3;
+                                    if psErasureNatNotEqual (psListLength view.args) expectedArity then
+                                      Except.ok Option.none
+                                    else
+                                      let motiveIndex := info.numParams;
+                                      let minorIndex := Nat.add info.numParams 1;
+                                      let majorIndex := Nat.sub expectedArity 1;
+                                      match psErasureExprListAt view.args motiveIndex with
+                                      | Option.none => Except.error PsErasureError.unsupportedApplication
+                                      | Option.some motive =>
+                                          match psErasureExprListAt view.args minorIndex with
+                                          | Option.none => Except.error PsErasureError.unsupportedApplication
+                                          | Option.some minor =>
+                                              match psErasureExprListAt view.args majorIndex with
+                                              | Option.none => Except.error PsErasureError.unsupportedApplication
+                                              | Option.some major =>
+                                                  match motive with
+                                                  | PsExpr.lam _ majorType _ _ =>
+                                                      let liftedMinor :=
+                                                        psExprLiftBVars 1 0 minor;
+                                                      match
+                                                          psErasureApplyStructureMinorFields
+                                                            structureName
+                                                            (PsExpr.bvar 0)
+                                                            constructorInfo.numFields
+                                                            0
+                                                            liftedMinor with
+                                                      | Except.error error =>
+                                                          Except.error error
+                                                      | Except.ok body =>
+                                                          Except.ok
+                                                            (Option.some
+                                                              (PsExpr.letE
+                                                                (psRootName "_psStructureMajor")
+                                                                majorType
+                                                                major
+                                                                body))
+                                                  | _ =>
+                                                      Except.error PsErasureError.binderMismatch
+                          | List.cons _ _ => Except.error PsErasureError.unsupportedRuntimeTerm
                       | _ => Except.error PsErasureError.unsupportedRuntimeTerm
   | _ => Except.ok Option.none
 
-partial def psLowerStructureRecursorsWithFuel
-    (environment : PsEnvironment) :
-    Nat -> PsExpr -> Except PsErasureError PsExpr
-  | 0, _ => Except.error PsErasureError.fuelExhausted
-  | fuel + 1, expr =>
+def psLowerStructureRecursorsWithFuel
+    (environment : PsEnvironment) (fuel : Nat) : PsExpr -> Except PsErasureError PsExpr :=
+  match fuel with
+  | Nat.zero => fun (_expr : PsExpr) => Except.error PsErasureError.fuelExhausted
+  | Nat.succ remaining =>
+    let smaller : PsExpr -> Except PsErasureError PsExpr := psLowerStructureRecursorsWithFuel environment remaining;
+    fun (expr : PsExpr) =>
       match expr with
       | PsExpr.app fn arg =>
           match
-              psLowerStructureRecursorsWithFuel
-                environment
-                fuel
+              smaller
                 fn with
           | Except.error error => Except.error error
           | Except.ok loweredFn =>
               match
-                  psLowerStructureRecursorsWithFuel
-                    environment
-                    fuel
+                  smaller
                     arg with
               | Except.error error => Except.error error
               | Except.ok loweredArg =>
@@ -137,20 +139,18 @@ partial def psLowerStructureRecursorsWithFuel
                         environment
                         rebuilt with
                   | Except.error error => Except.error error
-                  | Except.ok Option.none => Except.ok rebuilt
-                  | Except.ok (Option.some lowered) => Except.ok lowered
+                  | Except.ok result =>
+                      match result with
+                      | Option.none => Except.ok rebuilt
+                      | Option.some lowered => Except.ok lowered
       | PsExpr.lam name type body binder =>
           match
-              psLowerStructureRecursorsWithFuel
-                environment
-                fuel
+              smaller
                 type with
           | Except.error error => Except.error error
           | Except.ok loweredType =>
               match
-                  psLowerStructureRecursorsWithFuel
-                    environment
-                    fuel
+                  smaller
                     body with
               | Except.error error => Except.error error
               | Except.ok loweredBody =>
@@ -158,16 +158,12 @@ partial def psLowerStructureRecursorsWithFuel
                     (PsExpr.lam name loweredType loweredBody binder)
       | PsExpr.forallE name type body binder =>
           match
-              psLowerStructureRecursorsWithFuel
-                environment
-                fuel
+              smaller
                 type with
           | Except.error error => Except.error error
           | Except.ok loweredType =>
               match
-                  psLowerStructureRecursorsWithFuel
-                    environment
-                    fuel
+                  smaller
                     body with
               | Except.error error => Except.error error
               | Except.ok loweredBody =>
@@ -175,23 +171,17 @@ partial def psLowerStructureRecursorsWithFuel
                     (PsExpr.forallE name loweredType loweredBody binder)
       | PsExpr.letE name type value body =>
           match
-              psLowerStructureRecursorsWithFuel
-                environment
-                fuel
+              smaller
                 type with
           | Except.error error => Except.error error
           | Except.ok loweredType =>
               match
-                  psLowerStructureRecursorsWithFuel
-                    environment
-                    fuel
+                  smaller
                     value with
               | Except.error error => Except.error error
               | Except.ok loweredValue =>
                   match
-                      psLowerStructureRecursorsWithFuel
-                        environment
-                        fuel
+                      smaller
                         body with
                   | Except.error error => Except.error error
                   | Except.ok loweredBody =>
@@ -203,15 +193,14 @@ partial def psLowerStructureRecursorsWithFuel
                           loweredBody)
       | PsExpr.proj typeName index value =>
           match
-              psLowerStructureRecursorsWithFuel
-                environment
-                fuel
+              smaller
                 value with
           | Except.error error => Except.error error
           | Except.ok loweredValue =>
               Except.ok
                 (PsExpr.proj typeName index loweredValue)
       | _ => Except.ok expr
+
 
 def psLowerStructureRecursors
     (environment : PsEnvironment)

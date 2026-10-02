@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 export function assertErasureMatchAlternativesSourceSyntax(source) {
   const block = source.match(
-    /^def psEraseMatchAlternatives\b[\s\S]*?(?=^def psEraseRuntimeRecursorApplication\b)/m,
+    /^def psEraseMatchAlternativesWorker\b[\s\S]*?(?=^def psEraseRuntimeRecursorApplication\b)/m,
   )?.[0];
   if (!block) {
     throw new Error(

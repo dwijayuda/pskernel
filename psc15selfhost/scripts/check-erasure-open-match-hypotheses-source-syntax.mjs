@@ -19,7 +19,7 @@ export function assertErasureOpenMatchHypothesesSourceSyntax(source) {
     /let baseScope : PsErasureScope := \{[\s\S]*?currentDefinition := state\.scope\.currentDefinition\s*\};/,
     /erasedLocals :=\s*List\.cons pushed\.id state\.scope\.erasedLocals/,
     /runtimeExpressions :=\s*List\.cons\s*\(Prod\.mk\s*pushed\.id[\s\S]*?binding\.name\)\)\)\s*baseScope\.runtimeExpressions/,
-    /currentDefinition := baseScope\.currentDefinition[\s\S]*?\};\s*psOpenMatchMinorHypotheses/,
+    /currentDefinition := baseScope\.currentDefinition[\s\S]*?\};\s*smaller/,
   ];
   if (!required.every((pattern) => pattern.test(block))) {
     throw new Error(

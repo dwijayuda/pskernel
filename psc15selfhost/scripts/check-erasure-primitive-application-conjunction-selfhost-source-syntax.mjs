@@ -12,7 +12,7 @@ export function assertErasurePrimitiveApplicationConjunction(source) {
   )?.[0];
   if (
     !helper ||
-    !/\(left : Bool\)\s*\(right : Bool\) : Bool :=\s*match left with\s*\| true => right\s*\| false => false/.test(helper)
+    !/\(left : Bool\)\s*\(right : Bool\) : Bool :=\s*if left then right else false/.test(helper)
   ) {
     throw new Error(
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_CONJUNCTION_SELFHOST_SOURCE_SYNTAX_MISSING: structural Bool conjunction helper",
@@ -23,7 +23,7 @@ export function assertErasurePrimitiveApplicationConjunction(source) {
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_CONJUNCTION_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
     );
   }
-  const uses = block.match(/psErasureBoolAnd \(psStringEq text "Array\.[^"]+"\) \(Nat\.beq view\.args\.length [0-9]+\)/g) ?? [];
+  const uses = block.match(/psErasureBoolAnd \(psStringEq text "Array\.[^"]+"\) \(Nat\.beq \(psListLength view\.args\) [0-9]+\)/g) ?? [];
   if (uses.length !== 9) {
     throw new Error(
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_CONJUNCTION_SELFHOST_SOURCE_SYNTAX_MISSING: nine explicit array conjunctions",
@@ -44,11 +44,11 @@ const source = await readFile(
 );
 const { block } = assertErasurePrimitiveApplicationConjunction(source);
 const current =
-  'psErasureBoolAnd (psStringEq text "Array.emptyWithCapacity") (Nat.beq view.args.length 2)';
+  'psErasureBoolAnd (psStringEq text "Array.emptyWithCapacity") (Nat.beq (psListLength view.args) 2)';
 assert.ok(block.includes(current));
 const broken = block.replace(
   current,
-  'psStringEq text "Array.emptyWithCapacity" && Nat.beq view.args.length 2',
+  'psStringEq text "Array.emptyWithCapacity" && Nat.beq (psListLength view.args) 2',
 );
 assert.throws(
   () => assertErasurePrimitiveApplicationConjunction(source.replace(block, broken)),

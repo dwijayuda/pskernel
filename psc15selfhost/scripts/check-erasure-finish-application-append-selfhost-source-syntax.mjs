@@ -3,12 +3,12 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 export function assertFinishApplicationAppend(source) {
-  const block = source.match(/^def psEraseFinishApplicationWithFuel\b[\s\S]*?(?=^def psEraseFinishApplication\b)/m)?.[0];
+  const block = source.match(/^def psEraseFinishApplicationWithFuelWorker\b[\s\S]*?(?=^def psEraseFinishApplication\b)/m)?.[0];
   if (!block) throw new Error("PSC2_ERASURE_FINISH_APPLICATION_APPEND_MISSING: declaration");
   if (block.includes("++")) throw new Error("PSC2_ERASURE_FINISH_APPLICATION_APPEND_FORBIDDEN: infix append");
   const required = [
-    /String\.Internal\.append\s*\(String\.Internal\.append\s*\(psNameToString name\)\s*"\$"\)\s*\(toString pushed\.id\)/,
-    /String\.Internal\.append\s*"arg\$"\s*\(toString pushed\.id\)/,
+    /String\.Internal\.append\s*\(String\.Internal\.append\s*\(psNameToString name\)\s*"\$"\)\s*\(psNatToString pushed\.id\)/,
+    /String\.Internal\.append\s*"arg\$"\s*\(psNatToString pushed\.id\)/,
     /psErasureAppendRuntimeArgument\s+runtimeArguments\s*\(PsVerifiedIrExpr\.var parameterName\)/,
   ];
   for (const pattern of required) {

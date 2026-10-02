@@ -12,7 +12,7 @@ export function assertErasurePrimitiveApplicationEquality(source) {
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_EQUALITY_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
     );
   }
-  const natChecks = block.match(/Nat\.beq view\.args\.length/g) ?? [];
+  const natChecks = block.match(/Nat\.beq \(psListLength view\.args\)/g) ?? [];
   const stringChecks = block.match(/psStringEq text/g) ?? [];
   if (natChecks.length !== 20 || stringChecks.length !== 39) {
     throw new Error(
@@ -35,7 +35,7 @@ const source = await readFile(
 const block = assertErasurePrimitiveApplicationEquality(source);
 
 for (const [from, to] of [
-  ["Nat.beq view.args.length 2", "view.args.length == 2"],
+  ["Nat.beq (psListLength view.args) 2", "(psListLength view.args) == 2"],
   ["psStringEq text \"Int.ofNat\"", "text == \"Int.ofNat\""],
 ]) {
   assert.ok(block.includes(from));

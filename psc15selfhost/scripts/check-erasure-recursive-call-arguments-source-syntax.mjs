@@ -13,7 +13,7 @@ export function assertErasureRecursiveCallArgumentsSourceSyntax(source) {
     );
   }
   if (
-    (block.match(/List\.cons/g) ?? []).length !== 2 ||
+    (block.match(/List\.cons \(/g) ?? []).length !== 2 ||
     !block.includes("(psErasureRuntimeVariables rest)")
   ) {
     throw new Error(
@@ -36,9 +36,9 @@ const source = await readFile(
 );
 const block = assertErasureRecursiveCallArgumentsSourceSyntax(source);
 const mutations = [
-  ["List.cons\n        (PsVerifiedIrExpr.var recursiveName)",
+  ["List.cons (PsVerifiedIrExpr.var recursiveName)",
    "PsVerifiedIrExpr.var recursiveName ::"],
-  ["List.cons\n        (PsVerifiedIrExpr.var name)",
+  ["List.cons (PsVerifiedIrExpr.var name)",
    "PsVerifiedIrExpr.var name ::"],
   ["(psErasureRuntimeVariables rest)", "(rest.map PsVerifiedIrExpr.var)"],
 ];

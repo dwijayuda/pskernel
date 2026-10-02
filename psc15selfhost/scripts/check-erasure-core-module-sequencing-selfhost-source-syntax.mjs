@@ -19,7 +19,7 @@ if (match === null) {
 
 const block = match[0];
 const required = [
-  /let runtimeDeclarations :=\s*List\.append runtimePreludeDeclarations declarations;/,
+  /let runtimeDeclarations :=\s*psErasureAppendDeclarations runtimePreludeDeclarations declarations;/,
   /let names := psErasureDeclarationNames runtimeDeclarations;/,
   /let baseScope := psErasureScopeEmpty names;/,
 ];

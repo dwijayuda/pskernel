@@ -2,9 +2,9 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-export function assertErasureSelectedArgumentsIndex(source) {
-  const helper = source.match(
-    /def psErasureExprListAtWorker[\s\S]*?(?=\ndef psEraseSelectedArguments)/,
+export function assertErasureSelectedArgumentsIndex(source, basic) {
+  const helper = basic.match(
+    /def psErasureExprListAtWorker[\s\S]*?(?=\ndef psErasurePrimitiveType)/,
   )?.[0];
   if (
     !helper ||
@@ -49,7 +49,8 @@ const source = await readFile(
   path.join(root, "packages/erasure/src/Ps/Erasure/Expr.lean"),
   "utf8",
 );
-assertErasureSelectedArgumentsIndex(source);
+const basic = await readFile(path.join(root, "packages/erasure/src/Ps/Erasure/Basic.lean"), "utf8");
+assertErasureSelectedArgumentsIndex(source, basic);
 process.stdout.write(
   "PSC2_ERASURE_SELECTED_ARGUMENTS_INDEX_SELFHOST_SOURCE_SYNTAX: PASS (PSC1 structural PsExpr list lookup across runtime/type intrinsic selections)\n",
 );

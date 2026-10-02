@@ -7,15 +7,15 @@ export function assertErasureExprOperators(source) {
   for (const [name, pattern] of [
     [
       "and",
-      /def psErasureBoolAnd[\s\S]*?match left with\s*\| true => right\s*\| false => false/,
+      /def psErasureBoolAnd[\s\S]*?if left then right else false/,
     ],
     [
       "or",
-      /def psErasureBoolOr[\s\S]*?match left with\s*\| true => true\s*\| false => right/,
+      /def psErasureBoolOr[\s\S]*?if left then true else right/,
     ],
     [
       "not",
-      /def psErasureBoolNot[\s\S]*?match value with\s*\| true => false\s*\| false => true/,
+      /def psErasureBoolNot[\s\S]*?if value then false else true/,
     ],
   ]) {
     if (!pattern.test(source)) {
@@ -34,7 +34,7 @@ export function assertErasureExprOperators(source) {
     "(Nat.beq ctorInfo.numParams 0)",
     "Nat.beq field.projectionIndex index",
     "(psStringEq ownerName structureInfo.name)",
-    "structureInfo.typeParameters.length)",
+    "(psListLength structureInfo.typeParameters))",
   ];
   for (const text of required) {
     if (!source.includes(text)) {
@@ -61,8 +61,8 @@ assertErasureExprOperators(source);
 for (const [from, to] of [
   ["psStringEq value target", "value == target"],
   [
-    "psErasureBoolAnd\n                    (Nat.beq ctorInfo.numParams 0)\n                    ctorInfo.fields.isEmpty",
-    "Nat.beq ctorInfo.numParams 0 && ctorInfo.fields.isEmpty",
+    "psErasureBoolAnd\n                    (Nat.beq ctorInfo.numParams 0)\n                    (psListIsEmpty ctorInfo.fields)",
+    "Nat.beq ctorInfo.numParams 0 && (psListIsEmpty ctorInfo.fields)",
   ],
   [
     "psErasureBoolOr\n                        (psErasureNatInList scope.erasedLocals id)",

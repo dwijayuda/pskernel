@@ -1,3 +1,4 @@
+import Ps.Foundation.List
 import Ps.CompilerIr.Model
 import Ps.Core.Builtin
 import Ps.Core.Subst
@@ -41,7 +42,7 @@ structure PsRuntimeConstructorField where
   sourceIndex : Nat
   name : String
   type : PsVerifiedIrType
-  recursive : Bool := false
+  recursive : Bool
 
 structure PsRuntimeConstructorInfo where
   inductiveName : String
@@ -70,10 +71,10 @@ structure PsErasureScope where
   declarationNames : List (PsName × String)
   runtimeConstructors : List (PsName × PsRuntimeConstructorInfo)
   runtimeRecursors : List (PsName × PsRuntimeInductiveInfo)
-  runtimeStructures : List (PsName × PsRuntimeStructureInfo) := []
-  runtimeStructureConstructors : List (PsName × PsRuntimeStructureInfo) := []
-  runtimeExpressions : List (Nat × PsVerifiedIrExpr) := []
-  currentDefinition : Option PsErasureCurrentDefinition := none
+  runtimeStructures : List (PsName × PsRuntimeStructureInfo)
+  runtimeStructureConstructors : List (PsName × PsRuntimeStructureInfo)
+  runtimeExpressions : List (Nat × PsVerifiedIrExpr)
+  currentDefinition : Option PsErasureCurrentDefinition
 
 def psErasureScopeEmpty
     (declarationNames : List (PsName × String)) :
@@ -89,72 +90,109 @@ def psErasureScopeEmpty
     runtimeStructures := []
     runtimeStructureConstructors := []
     runtimeExpressions := []
-    currentDefinition := none
+    currentDefinition := Option.none
   }
 
-def psErasureLookupRuntimeExpression :
-    List (Nat × PsVerifiedIrExpr) -> Nat -> Option PsVerifiedIrExpr
-  | [], _ => none
-  | entry :: rest, id =>
-      if entry.1 == id then some entry.2
-      else psErasureLookupRuntimeExpression rest id
+def psErasureLookupRuntimeExpression
+    (entries : List (Prod Nat PsVerifiedIrExpr)) :
+    Nat -> Option PsVerifiedIrExpr :=
+  match entries with
+  | List.nil => fun (_target : Nat) => Option.none
+  | List.cons entry rest =>
+      let smaller : Nat -> Option PsVerifiedIrExpr := psErasureLookupRuntimeExpression rest;
+      fun (target : Nat) =>
+        match entry with
+        | Prod.mk key value =>
+            if Nat.beq key target then Option.some value
+            else smaller target
 
-def psErasureLookupNat :
-    List (Nat × String) -> Nat -> Option String
-  | [], _ => none
-  | entry :: rest, id =>
-      if entry.1 == id then some entry.2
-      else psErasureLookupNat rest id
+def psErasureLookupNat
+    (entries : List (Prod Nat String)) :
+    Nat -> Option String :=
+  match entries with
+  | List.nil => fun (_target : Nat) => Option.none
+  | List.cons entry rest =>
+      let smaller : Nat -> Option String := psErasureLookupNat rest;
+      fun (target : Nat) =>
+        match entry with
+        | Prod.mk key value =>
+            if Nat.beq key target then Option.some value
+            else smaller target
 
-def psErasureLookupName :
-    List (PsName × String) -> PsName -> Option String
-  | [], _ => none
-  | entry :: rest, name =>
-      if psNameEq entry.1 name then some entry.2
-      else psErasureLookupName rest name
+def psErasureLookupName
+    (entries : List (Prod PsName String)) :
+    PsName -> Option String :=
+  match entries with
+  | List.nil => fun (_target : PsName) => Option.none
+  | List.cons entry rest =>
+      let smaller : PsName -> Option String := psErasureLookupName rest;
+      fun (target : PsName) =>
+        match entry with
+        | Prod.mk key value =>
+            if psNameEq key target then Option.some value
+            else smaller target
 
-def psErasureLookupStructure :
-    List (PsName × PsRuntimeStructureInfo) ->
-    PsName ->
-    Option PsRuntimeStructureInfo
-  | [], _ => none
-  | entry :: rest, name =>
-      if psNameEq entry.1 name then some entry.2
-      else psErasureLookupStructure rest name
+def psErasureLookupStructure
+    (entries : List (Prod PsName PsRuntimeStructureInfo)) :
+    PsName -> Option PsRuntimeStructureInfo :=
+  match entries with
+  | List.nil => fun (_target : PsName) => Option.none
+  | List.cons entry rest =>
+      let smaller : PsName -> Option PsRuntimeStructureInfo := psErasureLookupStructure rest;
+      fun (target : PsName) =>
+        match entry with
+        | Prod.mk key value =>
+            if psNameEq key target then Option.some value
+            else smaller target
 
-def psErasureLookupConstructor :
-    List (PsName × PsRuntimeConstructorInfo) ->
-    PsName ->
-    Option PsRuntimeConstructorInfo
-  | [], _ => none
-  | entry :: rest, name =>
-      if psNameEq entry.1 name then some entry.2
-      else psErasureLookupConstructor rest name
+def psErasureLookupConstructor
+    (entries : List (Prod PsName PsRuntimeConstructorInfo)) :
+    PsName -> Option PsRuntimeConstructorInfo :=
+  match entries with
+  | List.nil => fun (_target : PsName) => Option.none
+  | List.cons entry rest =>
+      let smaller : PsName -> Option PsRuntimeConstructorInfo := psErasureLookupConstructor rest;
+      fun (target : PsName) =>
+        match entry with
+        | Prod.mk key value =>
+            if psNameEq key target then Option.some value
+            else smaller target
 
-def psErasureLookupRecursor :
-    List (PsName × PsRuntimeInductiveInfo) ->
-    PsName ->
-    Option PsRuntimeInductiveInfo
-  | [], _ => none
-  | entry :: rest, name =>
-      if psNameEq entry.1 name then some entry.2
-      else psErasureLookupRecursor rest name
+def psErasureLookupRecursor
+    (entries : List (Prod PsName PsRuntimeInductiveInfo)) :
+    PsName -> Option PsRuntimeInductiveInfo :=
+  match entries with
+  | List.nil => fun (_target : PsName) => Option.none
+  | List.cons entry rest =>
+      let smaller : PsName -> Option PsRuntimeInductiveInfo := psErasureLookupRecursor rest;
+      fun (target : PsName) =>
+        match entry with
+        | Prod.mk key value =>
+            if psNameEq key target then Option.some value
+            else smaller target
 
-def psErasureNatInList : List Nat -> Nat -> Bool
-  | [], _ => false
-  | value :: rest, target =>
-      value == target || psErasureNatInList rest target
+def psErasureNatInList (values : List Nat) : Nat -> Bool :=
+  match values with
+  | List.nil => fun (_target : Nat) => false
+  | List.cons value rest =>
+      let smaller := psErasureNatInList rest;
+      fun (target : Nat) =>
+        if Nat.beq value target then true else smaller target
 
-def psLevelNormalizesToZero : PsLevel -> Bool
-  | .zero => true
-  | .succ _ => false
-  | .max left right =>
-      psLevelNormalizesToZero left
-        && psLevelNormalizesToZero right
-  | .imax _ right =>
-      psLevelNormalizesToZero right
-  | .param _ => false
-  | .mvar _ => false
+
+def psLevelNormalizesToZero (level : PsLevel) : Bool :=
+  match level with
+  | PsLevel.zero => true
+  | PsLevel.succ _ => false
+  | PsLevel.max left right =>
+      if psLevelNormalizesToZero left then psLevelNormalizesToZero right else false
+  | PsLevel.imax _ right => psLevelNormalizesToZero right
+  | PsLevel.param _ => false
+  | PsLevel.mvar _ => false
+
+def psErasureNatNotEqual (left : Nat) (right : Nat) : Bool :=
+  if Nat.beq left right then false else true
+
 
 def psErasureIsProp
     (environment : PsEnvironment)
@@ -199,247 +237,310 @@ def psErasureClassifyBinder
       else
         PsErasedBinderKind.runtime
 
-def psErasureSafeChar (char : Char) : Char :=
-  if char.isAlphanum || char == '_' || char == '$' then
-    char
-  else
-    '_'
+def psErasureNatBetween (lower : Nat) (value : Nat) (upper : Nat) : Bool :=
+  if Nat.ble lower value then Nat.ble value upper else false
 
-def psErasureSafeChars : List Char -> List Char
-  | [] => []
-  | char :: rest =>
-      psErasureSafeChar char :: psErasureSafeChars rest
+
+def psErasureAsciiAlpha (char : Char) : Bool :=
+  let value := Char.toNat char;
+  if psErasureNatBetween 65 value 90 then true
+  else psErasureNatBetween 97 value 122
+
+
+def psErasureSafeChar (char : Char) : Char :=
+  if psErasureAsciiAlpha char then char
+  else if psErasureNatBetween 48 (Char.toNat char) 57 then char
+  else if Nat.beq (Char.toNat char) (Char.toNat '_') then char
+  else if Nat.beq (Char.toNat char) (Char.toNat '$') then char
+  else '_'
+
+def psErasureSafeChars (chars : List Char) : List Char :=
+  match chars with
+  | List.nil => List.nil
+  | List.cons char rest =>
+      List.cons (psErasureSafeChar char) (psErasureSafeChars rest)
+
+partial def psErasureSafeStringFrom
+    (raw : String) (position : Nat) (mapped : String) : String :=
+  if String.Internal.atEnd raw (String.Pos.Raw.mk position) then mapped
+  else
+    let char := String.Internal.get raw (String.Pos.Raw.mk position);
+    let next := String.Pos.Raw.byteIdx (String.Internal.next raw (String.Pos.Raw.mk position));
+    psErasureSafeStringFrom raw next (String.push mapped (psErasureSafeChar char))
+
 
 def psErasureSafeIdentifier
     (raw : String)
     (fallback : String) : String :=
-  let mapped := String.ofList (psErasureSafeChars raw.toList)
-  let base := if mapped.isEmpty then fallback else mapped
-  match base.toList with
-  | [] => fallback
-  | first :: _ =>
-      if first.isAlpha || first == '_' || first == '$' then
-        base
-      else
-        "_" ++ base
+  let mapped := psErasureSafeStringFrom raw 0 "";
+  let base := if Nat.beq (String.Internal.length mapped) 0 then fallback else mapped;
+  if String.Internal.atEnd base (String.Pos.Raw.mk 0) then fallback
+  else
+    let first := String.Internal.get base (String.Pos.Raw.mk 0);
+    if psErasureAsciiAlpha first then base
+    else if Nat.beq (Char.toNat first) (Char.toNat '_') then base
+    else if Nat.beq (Char.toNat first) (Char.toNat '$') then base
+    else String.Internal.append "_" base
 
 structure PsErasureAppView where
   head : PsExpr
   args : List PsExpr
 
-def psErasureAppViewAcc :
-    PsExpr -> List PsExpr -> PsErasureAppView
-  | .app fn arg, args =>
-      psErasureAppViewAcc fn (arg :: args)
-  | head, args =>
-      { head := head, args := args }
+def psErasureAppViewAcc (expr : PsExpr) : List PsExpr -> PsErasureAppView :=
+  match expr with
+  | PsExpr.app fn arg =>
+      let smaller : List PsExpr -> PsErasureAppView := psErasureAppViewAcc fn;
+      fun (args : List PsExpr) => smaller (List.cons arg args)
+  | _ =>
+      fun (args : List PsExpr) => PsErasureAppView.mk expr args
 
 def psErasureAppView (expr : PsExpr) : PsErasureAppView :=
   psErasureAppViewAcc expr []
 
+def psErasureExprListAtWorker
+    (index : Nat) :
+    List PsExpr -> Option PsExpr :=
+  match index with
+  | 0 =>
+      fun (values : List PsExpr) =>
+        match values with
+        | [] => Option.none
+        | value :: _ => Option.some value
+  | nextIndex + 1 =>
+      let smaller :
+          List PsExpr -> Option PsExpr :=
+        psErasureExprListAtWorker nextIndex;
+      fun (values : List PsExpr) =>
+        match values with
+        | [] => Option.none
+        | _ :: rest => smaller rest
+
+def psErasureExprListAt
+    (values : List PsExpr)
+    (index : Nat) : Option PsExpr :=
+  psErasureExprListAtWorker
+    index
+    values
+
 def psErasurePrimitiveType
     (name : PsName) : Option PsVerifiedIrType :=
   if psNameEq name psNatName then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.nat)
   else if psNameEq name psIntName then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.int)
   else if psNameEq name psUInt8Name then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.uint8)
   else if psNameEq name psUInt16Name then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.uint16)
   else if psNameEq name psUInt32Name then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.uint32)
   else if psNameEq name psUInt64Name then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.uint64)
   else if psNameEq name psUSizeName then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.usize)
   else if psNameEq name psInt8Name then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.int8)
   else if psNameEq name psInt16Name then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.int16)
   else if psNameEq name psInt32Name then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.int32)
   else if psNameEq name psInt64Name then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.int64)
   else if psNameEq name psISizeName then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.isize)
   else if psNameEq name psFloatName then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.float)
   else if psNameEq name psFloat32Name then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.float32)
   else if psNameEq name psBoolName then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.bool)
   else if psNameEq name psCharName then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.char)
   else if psNameEq name psStringName then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.string)
   else if psNameEq name psUnitName then
-    some
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.unit)
-  else if psNameToString name == "String.Pos.Raw" then
-    some
+  else if psStringEq (psNameToString name) "String.Pos.Raw" then
+    Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.nat)
   else
-    none
+    Option.none
+
+def psErasureMapRuntimeTypes
+    (erase : PsExpr -> Except PsErasureError PsVerifiedIrType)
+    (values : List PsExpr) : Except PsErasureError (List PsVerifiedIrType) :=
+  match values with
+  | List.nil => Except.ok List.nil
+  | List.cons value rest =>
+      match erase value with
+      | Except.error error => Except.error error
+      | Except.ok result =>
+          match psErasureMapRuntimeTypes erase rest with
+          | Except.error error => Except.error error
+          | Except.ok results => Except.ok (List.cons result results)
+
+
+def psEraseRuntimeTypeWithFuelWorker
+    (environment : PsEnvironment)
+    (fuel : Nat) :
+    PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrType :=
+  match fuel with
+  | Nat.zero =>
+      fun (_scope : PsErasureScope) (_type : PsExpr) => Except.error PsErasureError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrType :=
+        psEraseRuntimeTypeWithFuelWorker environment remaining;
+      fun (scope : PsErasureScope) (type : PsExpr) =>
+        let value :=
+          psWhnf
+            environment
+            psMetaEmpty
+            scope.localContext
+            type;
+        match value with
+        | .fvar id =>
+            match psErasureLookupNat scope.typeLocals id with
+            | Option.some name =>
+                Except.ok (PsVerifiedIrType.typeParameter name)
+            | Option.none =>
+                Except.ok PsVerifiedIrType.unknown
+        | .constE name _ =>
+            match psErasurePrimitiveType name with
+            | Option.some primitive => Except.ok primitive
+            | Option.none =>
+                let outputName : String :=
+                  match psErasureLookupName
+                      scope.declarationNames
+                      name with
+                  | Option.some known => known
+                  | Option.none =>
+                      psErasureSafeIdentifier
+                        (psNameToString name)
+                        "Type";
+                Except.ok
+                  (PsVerifiedIrType.named outputName [])
+        | .app _ _ =>
+            let view := psErasureAppView value;
+            match view.head with
+            | .constE name _ =>
+                let outputName : String :=
+                  match psErasureLookupName
+                      scope.declarationNames
+                      name with
+                  | Option.some known => known
+                  | Option.none =>
+                      psErasureSafeIdentifier
+                        (psNameToString name)
+                        "Type";
+                match psErasureMapRuntimeTypes (smaller scope) view.args with
+                | Except.error error => Except.error error
+                | Except.ok arguments =>
+                    Except.ok
+                      (PsVerifiedIrType.named
+                        outputName
+                        arguments)
+            | _ => Except.ok PsVerifiedIrType.unknown
+        | .forallE name domain body binder =>
+            match
+                psErasureClassifyBinder
+                  environment
+                  scope.localContext
+                  domain with
+            | .runtime =>
+                let pushed :=
+                  psLocalPushBinding
+                    scope.localContext
+                    name
+                    domain
+                    binder;
+                let runtimeName :=
+                  psErasureSafeIdentifier
+                    (psNameToString name)
+                    "_arg";
+                let nextScope : PsErasureScope := {
+                  localContext := pushed.context
+                  runtimeLocals :=
+                    List.cons (Prod.mk pushed.id runtimeName) scope.runtimeLocals
+                  typeLocals := scope.typeLocals
+                  erasedLocals := scope.erasedLocals
+                  declarationNames := scope.declarationNames
+                  runtimeConstructors := scope.runtimeConstructors
+                  runtimeRecursors := scope.runtimeRecursors
+                  runtimeStructures := scope.runtimeStructures
+                  runtimeStructureConstructors := scope.runtimeStructureConstructors
+                  runtimeExpressions := []
+                  currentDefinition := Option.none
+                };
+                match
+                    smaller scope
+                      domain with
+                | Except.error error => Except.error error
+                | Except.ok parameter =>
+                    match
+                        smaller nextScope
+                          (psExprInstantiate1
+                            body
+                            (PsExpr.fvar pushed.id)) with
+                    | Except.error error => Except.error error
+                    | Except.ok result =>
+                        match result with
+                        | .function parameters finalResult =>
+                            Except.ok
+                              (PsVerifiedIrType.function
+                                (List.cons parameter parameters)
+                                finalResult)
+                        | _ =>
+                            Except.ok
+                              (PsVerifiedIrType.function
+                                [parameter]
+                                result)
+            | _ =>
+                Except.ok PsVerifiedIrType.unknown
+        | _ =>
+            Except.ok PsVerifiedIrType.unknown
+
 
 def psEraseRuntimeTypeWithFuel
-    (environment : PsEnvironment)
-    (scope : PsErasureScope) :
-    Nat -> PsExpr -> Except PsErasureError PsVerifiedIrType
-  | 0, _ => Except.error PsErasureError.fuelExhausted
-  | fuel + 1, type =>
-      let value :=
-        psWhnf
-          environment
-          psMetaEmpty
-          scope.localContext
-          type
-      match value with
-      | .fvar id =>
-          match psErasureLookupNat scope.typeLocals id with
-          | some name =>
-              Except.ok (PsVerifiedIrType.typeParameter name)
-          | none =>
-              Except.ok PsVerifiedIrType.unknown
-      | .constE name _ =>
-          match psErasurePrimitiveType name with
-          | some primitive => Except.ok primitive
-          | none =>
-              let outputName :=
-                match psErasureLookupName
-                    scope.declarationNames
-                    name with
-                | some known => known
-                | none =>
-                    psErasureSafeIdentifier
-                      (psNameToString name)
-                      "Type"
-              Except.ok
-                (PsVerifiedIrType.named outputName [])
-      | .app _ _ =>
-          let view := psErasureAppView value
-          match view.head with
-          | .constE name _ =>
-              let outputName :=
-                match psErasureLookupName
-                    scope.declarationNames
-                    name with
-                | some known => known
-                | none =>
-                    psErasureSafeIdentifier
-                      (psNameToString name)
-                      "Type"
-              match view.args.mapM
-                  (psEraseRuntimeTypeWithFuel
-                    environment
-                    scope
-                    fuel) with
-              | Except.error error => Except.error error
-              | Except.ok arguments =>
-                  Except.ok
-                    (PsVerifiedIrType.named
-                      outputName
-                      arguments)
-          | _ => Except.ok PsVerifiedIrType.unknown
-      | .forallE name domain body binder =>
-          match
-              psErasureClassifyBinder
-                environment
-                scope.localContext
-                domain with
-          | .runtime =>
-              let pushed :=
-                psLocalPushBinding
-                  scope.localContext
-                  name
-                  domain
-                  binder
-              let runtimeName :=
-                psErasureSafeIdentifier
-                  (psNameToString name)
-                  "_arg"
-              let nextScope : PsErasureScope := {
-                localContext := pushed.context
-                runtimeLocals :=
-                  (pushed.id, runtimeName) ::
-                    scope.runtimeLocals
-                typeLocals := scope.typeLocals
-                erasedLocals := scope.erasedLocals
-                declarationNames := scope.declarationNames
-                runtimeConstructors := scope.runtimeConstructors
-                runtimeRecursors := scope.runtimeRecursors
-                runtimeStructures := scope.runtimeStructures
-                runtimeStructureConstructors := scope.runtimeStructureConstructors
-              }
-              match
-                  psEraseRuntimeTypeWithFuel
-                    environment
-                    scope
-                    fuel
-                    domain with
-              | Except.error error => Except.error error
-              | Except.ok parameter =>
-                  match
-                      psEraseRuntimeTypeWithFuel
-                        environment
-                        nextScope
-                        fuel
-                        (psExprInstantiate1
-                          body
-                          (PsExpr.fvar pushed.id)) with
-                  | Except.error error => Except.error error
-                  | Except.ok result =>
-                      match result with
-                      | .function parameters finalResult =>
-                          Except.ok
-                            (PsVerifiedIrType.function
-                              (parameter :: parameters)
-                              finalResult)
-                      | _ =>
-                          Except.ok
-                            (PsVerifiedIrType.function
-                              [parameter]
-                              result)
-          | _ =>
-              Except.ok PsVerifiedIrType.unknown
-      | _ =>
-          Except.ok PsVerifiedIrType.unknown
+    (environment : PsEnvironment) (scope : PsErasureScope)
+    (fuel : Nat) (type : PsExpr) : Except PsErasureError PsVerifiedIrType :=
+  psEraseRuntimeTypeWithFuelWorker environment fuel scope type
 
 def psEraseRuntimeType
     (environment : PsEnvironment)

@@ -13,8 +13,8 @@ export function assertErasurePrimitiveApplicationSequencing(source) {
     );
   }
   if (
-    !/let text := psNameToString name;\s*let binary :=/.test(block) ||
-    !/let binary :=\s*fun \(operation : PsVerifiedIrIntrinsic\) =>[\s\S]*?Except\.error PsErasureError\.unsupportedApplication;\s*if psStringEq text "Int\.ofNat" then/.test(block)
+    !/let text := psNameToString name;\s*let binary : PsVerifiedIrIntrinsic -> Except PsErasureError \(Option PsVerifiedIrExpr\) :=/.test(block) ||
+    !/let binary : PsVerifiedIrIntrinsic -> Except PsErasureError \(Option PsVerifiedIrExpr\) :=\s*fun \(operation : PsVerifiedIrIntrinsic\) =>[\s\S]*?Except\.error PsErasureError\.unsupportedApplication;\s*if psStringEq text "Int\.ofNat" then/.test(block)
   ) {
     throw new Error(
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX_MISSING: two sequenced locals",

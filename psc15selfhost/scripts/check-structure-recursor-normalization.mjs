@@ -32,7 +32,7 @@ for (const marker of [
   "psExprLiftBVars 1 0 minor",
   "PsExpr.letE",
   "PsExpr.proj structureName index major",
-  "if view.args.length != expectedArity then\n                                  Except.ok Option.none",
+  "if psErasureNatNotEqual (psListLength view.args) expectedArity then\n                                      Except.ok Option.none",
   "psLowerStructureRecursorsWithFuel",
 ]) {
   if (!normalizer.includes(marker)) {

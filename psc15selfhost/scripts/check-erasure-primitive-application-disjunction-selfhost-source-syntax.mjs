@@ -23,7 +23,7 @@ export function assertErasurePrimitiveApplicationDisjunction(source) {
     const start = block.indexOf(branch);
     const end = block.indexOf("\n      else if", start + branch.length);
     const body = block.slice(start + branch.length, end);
-    if (!/^\s*match view\.args with\s*\| List\.cons value rest =>\s*match rest with\s*\| List\.nil =>\s*match erase value with\s*\| Except\.error error => Except\.error error\s*\| Except\.ok result => Except\.ok \(some result\)\s*\| List\.cons _ _ =>\s*Except\.error PsErasureError\.unsupportedApplication\s*\| _ =>\s*Except\.error PsErasureError\.unsupportedApplication\s*$/.test(body)) {
+    if (!/^\s*match view\.args with\s*\| List\.cons value rest =>\s*match rest with\s*\| List\.nil =>\s*match erase value with\s*\| Except\.error error => Except\.error error\s*\| Except\.ok result => Except\.ok \(Option\.some result\)\s*\| List\.cons _ _ =>\s*Except\.error PsErasureError\.unsupportedApplication\s*\| _ =>\s*Except\.error PsErasureError\.unsupportedApplication\s*$/.test(body)) {
       throw new Error(
         `PSC2_ERASURE_PRIMITIVE_APPLICATION_DISJUNCTION_SELFHOST_SOURCE_SYNTAX_MISSING: flat singleton matches and arity rejection for ${branch}`,
       );

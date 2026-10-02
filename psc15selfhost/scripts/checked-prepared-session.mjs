@@ -58,10 +58,7 @@ export function createCheckedPreparedSession(compiler, checkAdmissions) {
   }
   if (typeof checkAdmissions !== 'function') throw new TypeError('Expected kernel checker');
   const modules = new WeakMap();
-  return Object.freeze({
-    async check(sourceKind, source) {
-      if (typeof source !== 'string') throw new TypeError('Expected immutable source text');
-      const prepared = unwrapCompilerResult(compiler.psCompilerPrepareSource(sourceKind, source), 'PREPARE');
+  async function checkPrepared(prepared, source) {
       if (prepared === null || typeof prepared !== 'object') throw new Error('PSC2_CHECKED_PREPARE_RESULT_SHAPE');
       freezeGraph(prepared);
       const admissions = admissionsFrom(compiler, prepared);
@@ -77,6 +74,26 @@ export function createCheckedPreparedSession(compiler, checkAdmissions) {
       });
       modules.set(handle, { prepared, admissions });
       return handle;
+  }
+  return Object.freeze({
+    async check(sourceKind, source) {
+      if (typeof source !== 'string') throw new TypeError('Expected immutable source text');
+      const prepared = unwrapCompilerResult(compiler.psCompilerPrepareSource(sourceKind, source), 'PREPARE');
+      return checkPrepared(prepared, source);
+    },
+    async checkSources(sourceKind, sources) {
+      if (!Array.isArray(sources) || sources.some(source => typeof source !== 'string')) {
+        throw new TypeError('Expected immutable source texts');
+      }
+      if (typeof compiler.psCompilerPrepareSources !== 'function' ||
+          typeof compiler.List?.cons !== 'function' || typeof compiler.List.nil !== 'function') {
+        throw new Error('PSC2_CHECKED_API_MISSING: module preparation');
+      }
+      const source = sources.join('\n\n') + '\n';
+      let values = compiler.List.nil();
+      for (let index = sources.length - 1; index >= 0; index--) values = compiler.List.cons(sources[index], values);
+      const prepared = unwrapCompilerResult(compiler.psCompilerPrepareSources(sourceKind, values), 'PREPARE');
+      return checkPrepared(prepared, source);
     },
     emit(handle) {
       const item = handle !== null && typeof handle === 'object' ? modules.get(handle) : undefined;

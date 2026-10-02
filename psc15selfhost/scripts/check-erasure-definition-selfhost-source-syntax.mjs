@@ -18,7 +18,8 @@ for (const pattern of [
   /let definitionScope : PsErasureScope :=\s*PsErasureScope\.mk\s+scope\.localContext\s+scope\.runtimeLocals\s+scope\.typeLocals\s+scope\.erasedLocals\s+scope\.declarationNames\s+scope\.runtimeConstructors\s+scope\.runtimeRecursors\s+scope\.runtimeStructures\s+scope\.runtimeStructureConstructors\s+scope\.runtimeExpressions\s*\(Option\.some\s*\(PsErasureCurrentDefinition\.mk outputName List\.nil\)\);/,
   /match psLowerStructureRecursors environment value with\s*\| Except\.error error => Except\.error error/,
   /psEraseOpenDefinition\s+environment\s+definitionScope\s+type\s+normalizedValue with/,
-  /Except\.ok\s*\(Option\.some\s*\(PsVerifiedIrDeclaration\.mk\s+outputName\s+opened\.typeParameters\s+opened\.parameters\s+opened\.resultType\s+opened\.body\)\)/,
+  /match psErasureEtaFunction opened\.parameters opened\.resultType opened\.body with/,
+  /PsVerifiedIrExpr\.lambda parameters resultType body =>\s*Except\.ok\s*\(Option\.some\s*\(PsVerifiedIrDeclaration\.mk\s+outputName\s+opened\.typeParameters\s+parameters\s+resultType\s+body\)\)/,
 ]) {
   if (!pattern.test(block)) throw new Error(`PSC2_ERASURE_DEFINITION_MISSING: ${pattern}`);
 }

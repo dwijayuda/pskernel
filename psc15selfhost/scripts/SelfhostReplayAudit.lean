@@ -1,5 +1,6 @@
 import Ps.Bootstrap.SelfHost
 import Ps.Host.ProjectCompiler
+import Lean.Data.Json
 
 -- Native-host regression and diagnostics only; not in the portable source closure.
 theorem psAuditAppendRuntimeArgumentPreservesOrder
@@ -243,6 +244,20 @@ def psAuditTotalJsonWorkers : Bool :=
     | _ => false
   exhausted && boundary && accepted && nested && parserBoundary
 
+def psAuditModularPreparation : Bool :=
+  let sources := [
+    "inductive ReplayChoice where | first | second\n",
+    "def replayChoice (choice : ReplayChoice) : Nat := match choice with | ReplayChoice.first => 1 | ReplayChoice.second => 2\n",
+    "def replaySelected : Nat := replayChoice ReplayChoice.second\n"]
+  let same := match psCompilerPrepareSources .lean sources,
+      psCompilerPrepareSource .lean (String.intercalate "\n\n" sources) with
+    | .ok modules, .ok flat => modules.canonicalAdmissions == flat.canonicalAdmissions
+    | _, _ => false
+  let rejects := match psCompilerPrepareSources .lean ["def first : Nat := 1", "def bad : Nat := Type"] with
+    | .error _ => true
+    | .ok _ => false
+  same && rejects
+
 def psAuditErasureError (error : PsErasureError) : String :=
   match error with
   | .fuelExhausted => "fuelExhausted"
@@ -283,6 +298,55 @@ def psAuditErasureDetails (prepared : PsCompilerAdmissionReadyModule) : IO Unit 
 def main (arguments : List String) : IO UInt32 := do
   match arguments with
   | ["--watch", file] => return ← psAuditWatchModule file
+  | ["--prepare-modules", file, output] =>
+      let start ← IO.monoMsNow
+      let .ok json := Lean.Json.parse (← IO.FS.readFile file)
+        | throw (IO.userError "PSC2_MODULES_JSON_FAILED")
+      let .ok entries := json.getArr?
+        | throw (IO.userError "PSC2_MODULES_ARRAY_FAILED")
+      let sources ← entries.toList.mapM fun entry =>
+        match entry.getStr? with
+        | .error _ => throw (IO.userError "PSC2_MODULES_TEXT_FAILED")
+        | .ok text => pure text
+      let .ok prepared := psCompilerPrepareSources .lean sources
+        | throw (IO.userError "PSC2_MODULES_PREPARE_FAILED")
+      IO.println ("PSC2_MODULES_PREPARE_PASS: " ++ toString prepared.declarations.length ++ " declarations in " ++ toString ((← IO.monoMsNow) - start) ++ "ms")
+      (← IO.getStdout).flush
+      let .ok admissions := psCompilerAdmissionsFromPrepared prepared
+        | throw (IO.userError "PSC2_MODULES_INTEGRITY_FAILED")
+      IO.FS.writeFile output admissions
+      IO.println ("PSC2_MODULES_ADMISSIONS_PASS: " ++ toString admissions.utf8ByteSize ++ " bytes in " ++ toString ((← IO.monoMsNow) - start) ++ "ms")
+      return 0
+  | ["--profile-source", file] =>
+      let source ← IO.FS.readFile file
+      let stdout ← IO.getStdout
+      let start ← IO.monoMsNow
+      IO.println ("PSC2_PROFILE_SOURCE_BYTES: " ++ toString source.utf8ByteSize)
+      stdout.flush
+      let parsed ← match psCompilerParseSource .lean source with
+        | .error _ => throw (IO.userError "PSC2_PROFILE_PARSE_FAILED")
+        | .ok parsed => pure parsed
+      IO.println ("PSC2_PROFILE_PARSE_MS: " ++ toString ((← IO.monoMsNow) - start))
+      stdout.flush
+      let elaborated ← match psCompilerElaborateModule parsed with
+        | .error _ => throw (IO.userError "PSC2_PROFILE_ELAB_FAILED")
+        | .ok elaborated => pure elaborated
+      IO.println ("PSC2_PROFILE_ELAB_MS: " ++ toString ((← IO.monoMsNow) - start))
+      stdout.flush
+      let prepared ← match psCompilerPrepareElaborated elaborated with
+        | .error _ => throw (IO.userError "PSC2_PROFILE_PREPARE_FAILED")
+        | .ok prepared => pure prepared
+      IO.println ("PSC2_PROFILE_PREPARE_MS: " ++ toString ((← IO.monoMsNow) - start))
+      IO.println ("PSC2_PROFILE_ADMISSION_BYTES: " ++ toString prepared.canonicalAdmissions.utf8ByteSize)
+      stdout.flush
+      let admissions ← match psCompilerAdmissionsFromPrepared prepared with
+        | .error _ => throw (IO.userError "PSC2_PROFILE_VALIDATE_FAILED")
+        | .ok admissions => pure admissions
+      IO.println ("PSC2_PROFILE_VALIDATE_MS: " ++ toString ((← IO.monoMsNow) - start))
+      stdout.flush
+      let quoted := psJsonQuote admissions
+      IO.println ("PSC2_PROFILE_QUOTE_MS: " ++ toString ((← IO.monoMsNow) - start) ++ " bytes=" ++ toString quoted.utf8ByteSize)
+      return 0
   | ["--compile", file, output] =>
       let elaborated ← psHostLoadProject psSelfHostProdPreludeEnvironment file
       IO.println ("PSC2_REPLAY_PROJECT_ELAB_PASS: " ++ toString elaborated.declarations.length ++ " declarations")
@@ -337,7 +401,8 @@ def main (arguments : List String) : IO UInt32 := do
         ("unique-name collision order and fuel boundary", psAuditUniqueNames),
         ("Int.repr compilation, arity rejection and error propagation", psAuditIntRepr),
         ("total string workers, UTF-8 positions and large decimal values", psAuditTotalStringWorkers),
-        ("total JSON workers, canonical order and fuel boundaries", psAuditTotalJsonWorkers)] do
+        ("total JSON workers, canonical order and fuel boundaries", psAuditTotalJsonWorkers),
+        ("module preparation preserves combined admissions and rejects bad modules", psAuditModularPreparation)] do
       if passed then IO.println ("PSC2_FIXED_POINT_ERASURE_CASE: PASS " ++ label)
       else throw (IO.userError ("PSC2_FIXED_POINT_ERASURE_CASE: FAIL " ++ label))
     IO.println "PSC2_FIXED_POINT_ERASURE_FINISH_APPLICATION: PASS (native behavior and append-order theorem)"

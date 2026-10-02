@@ -45,6 +45,7 @@ export async function buildChecked({
       binaryPath: binary,
       sourceKind: snapshot.kind,
       source: snapshot.source,
+      sources: snapshot.sources,
       checkAdmissions,
       emit: !checkOnly,
     });
@@ -62,7 +63,7 @@ export async function buildChecked({
       admissions = text;
       return checkAdmissions(text);
     });
-    const handle = await session.check(kind, snapshot.source);
+    const handle = await session.checkSources(kind, snapshot.sources);
     if (!checkOnly) typeScript = session.emit(handle);
   }
 

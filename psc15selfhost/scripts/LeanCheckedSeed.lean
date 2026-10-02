@@ -1,4 +1,5 @@
 import Ps.Host.LeanChecked
+import Lean.Data.Json
 
 def psCheckedSeedAssert (label : String) (passed : Bool) : IO Unit := do
   if passed then IO.println ("PSC2_LEAN_CHECKED_CASE: PASS " ++ label)
@@ -49,12 +50,8 @@ def psCheckedSeedRun (emit : Bool) (kind : PsCompilerSourceKind) : IO Unit := do
 -- native seed (for example pskernel-lean-wasm). The source is read once and the
 -- prepared Lean value remains alive while the host checks its canonical
 -- admissions. Erasure/emission runs only after the host replies `emit`.
-def psCheckedSeedSession
-    (kind : PsCompilerSourceKind)
-    (sourcePath : String) : IO Unit := do
-  let source ← IO.FS.readFile sourcePath
-  let .ok prepared := psCompilerPrepareSource kind source
-    | throw (IO.userError "PSC2_CHECKED_PREPARE_FAILED")
+def psCheckedSeedPreparedSession
+    (prepared : PsCompilerAdmissionReadyModule) : IO Unit := do
   let .ok admissions := psCompilerAdmissionsFromPrepared prepared
     | throw (IO.userError "PSC2_CHECKED_PREPARED_INTEGRITY_FAILED")
   let stdout ← IO.getStdout
@@ -79,6 +76,28 @@ def psCheckedSeedSession
   else
     throw (IO.userError "PSC2_CHECKED_SEED_SESSION_COMMAND")
 
+def psCheckedSeedSession
+    (kind : PsCompilerSourceKind) (sourcePath : String) : IO Unit := do
+  let source ← IO.FS.readFile sourcePath
+  let .ok prepared := psCompilerPrepareSource kind source
+    | throw (IO.userError "PSC2_CHECKED_PREPARE_FAILED")
+  psCheckedSeedPreparedSession prepared
+
+def psCheckedSeedModulesSession
+    (kind : PsCompilerSourceKind) (sourcePath : String) : IO Unit := do
+  let source ← IO.FS.readFile sourcePath
+  let .ok json := Lean.Json.parse source
+    | throw (IO.userError "PSC2_CHECKED_MODULES_JSON")
+  let .ok entries := json.getArr?
+    | throw (IO.userError "PSC2_CHECKED_MODULES_ARRAY")
+  let sources ← entries.toList.mapM fun entry =>
+    match entry.getStr? with
+    | .error _ => throw (IO.userError "PSC2_CHECKED_MODULES_SOURCE")
+    | .ok text => pure text
+  let .ok prepared := psCompilerPrepareSources kind sources
+    | throw (IO.userError "PSC2_CHECKED_PREPARE_FAILED")
+  psCheckedSeedPreparedSession prepared
+
 def main (args : List String) : IO Unit := do
   match args with
   | ["--test"] => psCheckedSeedTests
@@ -88,4 +107,6 @@ def main (args : List String) : IO Unit := do
   | ["--emit-ps"] => psCheckedSeedRun true .proofScript
   | ["--session-lean", sourcePath] => psCheckedSeedSession .lean sourcePath
   | ["--session-ps", sourcePath] => psCheckedSeedSession .proofScript sourcePath
+  | ["--session-modules-lean", sourcePath] => psCheckedSeedModulesSession .lean sourcePath
+  | ["--session-modules-ps", sourcePath] => psCheckedSeedModulesSession .proofScript sourcePath
   | _ => throw (IO.userError "usage: psc2_lean_checked_seed --test|--check-lean|--check-ps|--emit-lean|--emit-ps|--session-lean <file>|--session-ps <file>")

@@ -29,22 +29,25 @@ export async function runCheckedSeedSession({
   binaryPath,
   sourceKind,
   source,
+  sources,
   checkAdmissions,
   emit,
   timeoutMs = 300000,
 }) {
   if (!['lean', 'ps'].includes(sourceKind)) throw new Error('PSC2_CHECKED_SEED_SOURCE_KIND');
   if (typeof source !== 'string') throw new TypeError('Expected immutable source text');
+  if (sources !== undefined && (!Array.isArray(sources) || sources.some(value => typeof value !== 'string') ||
+      sources.join('\n\n') + '\n' !== source)) throw new Error('PSC2_CHECKED_SEED_SOURCE_PARTITION');
   if (typeof checkAdmissions !== 'function') throw new TypeError('Expected kernel checker');
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0) throw new TypeError('timeoutMs must be positive');
 
   const directory = await mkdtemp(path.join(tmpdir(), 'psc2-checked-seed-'));
-  const sourceFile = path.join(directory, `snapshot.${sourceKind === 'ps' ? 'ps' : 'lean'}`);
-  await writeFile(sourceFile, source, 'utf8');
+  const sourceFile = path.join(directory, sources === undefined ? `snapshot.${sourceKind === 'ps' ? 'ps' : 'lean'}` : 'snapshot.json');
+  await writeFile(sourceFile, sources === undefined ? source : JSON.stringify(sources), 'utf8');
   let child;
   let stderr = '';
   try {
-    child = spawn(path.resolve(binaryPath), [`--session-${sourceKind}`, sourceFile], {
+    child = spawn(path.resolve(binaryPath), [`--session-${sources === undefined ? '' : 'modules-'}${sourceKind}`, sourceFile], {
       stdio: ['pipe', 'pipe', 'pipe'],
       windowsHide: true,
     });

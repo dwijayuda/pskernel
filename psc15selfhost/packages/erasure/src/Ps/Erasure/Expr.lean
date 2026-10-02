@@ -354,7 +354,19 @@ def psErasePrimitiveApplication
             | Except.ok result => Except.ok (Option.some result)
           else
             Except.error PsErasureError.unsupportedApplication;
-      if psStringEq text "Int.ofNat" then
+      let productProjection : Nat -> Except PsErasureError (Option PsVerifiedIrExpr) :=
+        fun (index : Nat) =>
+          if Nat.beq (psListLength view.args) 3 then
+            match psErasureExprListAt view.args 2 with
+            | Option.none => Except.error PsErasureError.unsupportedApplication
+            | Option.some value =>
+                match erase (PsExpr.proj psProdName index value) with
+                | Except.error error => Except.error error
+                | Except.ok result => Except.ok (Option.some result)
+          else Except.error PsErasureError.unsupportedApplication;
+      if psStringEq text "Prod.fst" then productProjection 0
+      else if psStringEq text "Prod.snd" then productProjection 1
+      else if psStringEq text "Int.ofNat" then
         if Nat.beq (psListLength view.args) 1 then
           match
               psEraseMappedIntrinsic
@@ -908,9 +920,9 @@ def psOpenMatchMinorFields
                 domain with
           | .runtime =>
               let bindingName :=
-                psErasureSafeIdentifier
+                psErasureLocalName state.scope
                   (psNameToString name)
-                  field.name;
+                  field.name state.scope.localContext.nextId;
               let pushed :=
                 psLocalPushBinding
                   state.scope.localContext
@@ -997,6 +1009,7 @@ def psErasureFindMatchBinding
 
 
 def psOpenMatchMinorHypotheses
+    (environment : PsEnvironment)
     (recursiveParameterIndex : Option Nat) (bindings : List PsVerifiedIrMatchBinding)
     (fields : List PsRuntimeConstructorField) :
     PsOpenMatchHypotheses -> Except PsErasureError PsOpenMatchHypotheses :=
@@ -1004,7 +1017,7 @@ def psOpenMatchMinorHypotheses
   | List.nil => fun (state : PsOpenMatchHypotheses) => Except.ok state
   | List.cons field rest =>
     let smaller : PsOpenMatchHypotheses -> Except PsErasureError PsOpenMatchHypotheses :=
-      psOpenMatchMinorHypotheses recursiveParameterIndex bindings rest;
+      psOpenMatchMinorHypotheses environment recursiveParameterIndex bindings rest;
     fun (state : PsOpenMatchHypotheses) =>
       if psErasureBoolNot field.recursive then
         smaller
@@ -1035,45 +1048,31 @@ def psOpenMatchMinorHypotheses
                   runtimeExpressions := state.scope.runtimeExpressions
                   currentDefinition := state.scope.currentDefinition
                 };
-                let nextScope : PsErasureScope :=
+                let replacement : Except PsErasureError (Option PsVerifiedIrExpr) :=
                   match state.scope.currentDefinition with
-                  | Option.none => baseScope
+                  | Option.none => Except.ok Option.none
                   | Option.some current =>
                       match recursiveParameterIndex with
-                      | Option.none => baseScope
+                      | Option.none => Except.ok Option.none
                       | Option.some parameterIndex =>
-                          {
-                            localContext := baseScope.localContext
-                            runtimeLocals := baseScope.runtimeLocals
-                            typeLocals := baseScope.typeLocals
-                            erasedLocals := baseScope.erasedLocals
-                            declarationNames := baseScope.declarationNames
-                            runtimeConstructors := baseScope.runtimeConstructors
-                            runtimeRecursors := baseScope.runtimeRecursors
-                            runtimeStructures := baseScope.runtimeStructures
-                            runtimeStructureConstructors := baseScope.runtimeStructureConstructors
-                            currentDefinition := baseScope.currentDefinition
-                            runtimeExpressions :=
-                              List.cons
-                                (Prod.mk
-                                  pushed.id
-                                  (PsVerifiedIrExpr.call
-                                    (PsVerifiedIrExpr.var current.name)
-                                    []
-                                    (psErasureRecursiveCallArguments
-                                      current.runtimeParameters
-                                      parameterIndex
-                                      binding.name)))
-                                baseScope.runtimeExpressions
-                          };
-                smaller
-                  {
-                    scope := nextScope
-                    cursor :=
-                      psExprInstantiate1
-                        body
-                        (PsExpr.fvar pushed.id)
-                  }
+                          match psEraseFinishApplication environment baseScope
+                              (PsVerifiedIrExpr.var current.name) List.nil
+                              (psErasureRecursiveCallArguments current.runtimeParameters parameterIndex binding.name)
+                              domain with
+                          | Except.error error => Except.error error
+                          | Except.ok value => Except.ok (Option.some value);
+                match replacement with
+                | Except.error error => Except.error error
+                | Except.ok value =>
+                    let expressions : List (Nat × PsVerifiedIrExpr) :=
+                      match value with
+                      | Option.none => baseScope.runtimeExpressions
+                      | Option.some expression => List.cons (Prod.mk pushed.id expression) baseScope.runtimeExpressions;
+                    let nextScope := PsErasureScope.mk baseScope.localContext baseScope.runtimeLocals
+                      baseScope.typeLocals baseScope.erasedLocals baseScope.declarationNames
+                      baseScope.runtimeConstructors baseScope.runtimeRecursors baseScope.runtimeStructures
+                      baseScope.runtimeStructureConstructors expressions baseScope.currentDefinition;
+                    smaller (PsOpenMatchHypotheses.mk nextScope (psExprInstantiate1 body (PsExpr.fvar pushed.id)))
         | _ => Except.error PsErasureError.binderMismatch
 
 def psEraseMatchMinor
@@ -1103,6 +1102,7 @@ def psEraseMatchMinor
       let bindings := (psListReverse opened.bindingsRev);
       match
           psOpenMatchMinorHypotheses
+            environment
             recursiveParameterIndex
             bindings
             ctorInfo.fields
@@ -1309,6 +1309,94 @@ def psErasureFindProjectionField
       else psErasureFindProjectionField index rest
 
 
+def psErasureIrUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Bool :=
+  match fuel with
+  | Nat.zero => fun (_expr : PsVerifiedIrExpr) (_name : String) => true
+  | Nat.succ remaining =>
+      let smaller : PsVerifiedIrExpr -> String -> Bool := psErasureIrUsesNameWithFuel remaining;
+      fun (expr : PsVerifiedIrExpr) (name : String) =>
+        let uses : PsVerifiedIrExpr -> Bool := fun (value : PsVerifiedIrExpr) => smaller value name;
+        let parameterUses : PsVerifiedIrParameter -> Bool :=
+          fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name name;
+        let bindingUses : PsVerifiedIrMatchBinding -> Bool :=
+          fun (binding : PsVerifiedIrMatchBinding) => psStringEq binding.name name;
+        let fieldUses : (String × PsVerifiedIrExpr) -> Bool :=
+          fun (field : String × PsVerifiedIrExpr) =>
+            match field with
+            | Prod.mk _ value => smaller value name;
+        let alternativeUses : (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) -> Bool :=
+          fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
+            match alternative with
+            | Prod.mk _ detail =>
+                match detail with
+                | Prod.mk bindings body =>
+                    if psListAny bindingUses bindings then true else smaller body name;
+        match expr with
+        | .literal _ => false
+        | .var value => psStringEq value name
+        | .intrinsic _ _ arguments => psListAny uses arguments
+        | .lambda parameters _ body =>
+            if psListAny parameterUses parameters then true else smaller body name
+        | .call fn _ arguments => if smaller fn name then true else psListAny uses arguments
+        | .letE localName _ value body =>
+            if psStringEq localName name then true
+            else if smaller value name then true else smaller body name
+        | .ifE condition thenBranch elseBranch =>
+            if smaller condition name then true
+            else if smaller thenBranch name then true else smaller elseBranch name
+        | .record _ _ fields => psListAny fieldUses fields
+        | .projection _ _ target _ => smaller target name
+        | .constructor _ _ _ fields => psListAny fieldUses fields
+        | .matchE _ _ scrutinee alternatives =>
+            if smaller scrutinee name then true else psListAny alternativeUses alternatives
+
+
+def psErasureEtaNameWithFuel
+    (body : PsVerifiedIrExpr) (used : List PsVerifiedIrParameter) (fuel : Nat) : Nat -> Except PsErasureError String :=
+  match fuel with
+  | Nat.zero => fun (_index : Nat) => Except.error PsErasureError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller : Nat -> Except PsErasureError String := psErasureEtaNameWithFuel body used remaining;
+      fun (index : Nat) =>
+        let candidate := String.Internal.append "__ps_eta_" (psNatToString index);
+        let sameName : PsVerifiedIrParameter -> Bool := fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name candidate;
+        if psListAny sameName used then smaller (Nat.succ index)
+        else if psErasureIrUsesNameWithFuel 4096 body candidate then smaller (Nat.succ index)
+        else Except.ok candidate
+
+def psErasureEtaParameters
+    (body : PsVerifiedIrExpr) (types : List PsVerifiedIrType) :
+    List PsVerifiedIrParameter -> Nat -> Except PsErasureError (List PsVerifiedIrParameter) :=
+  match types with
+  | List.nil => fun (_used : List PsVerifiedIrParameter) (_index : Nat) => Except.ok List.nil
+  | List.cons type rest =>
+      let smaller : List PsVerifiedIrParameter -> Nat -> Except PsErasureError (List PsVerifiedIrParameter) := psErasureEtaParameters body rest;
+      fun (used : List PsVerifiedIrParameter) (index : Nat) =>
+        match psErasureEtaNameWithFuel body used 4096 index with
+        | Except.error error => Except.error error
+        | Except.ok name =>
+            let parameter := PsVerifiedIrParameter.mk name type;
+            match smaller (List.cons parameter used) (Nat.succ index) with
+            | Except.error error => Except.error error
+            | Except.ok parameters => Except.ok (List.cons parameter parameters)
+
+def psErasureEtaFunction
+    (parameters : List PsVerifiedIrParameter) (resultType : PsVerifiedIrType) (body : PsVerifiedIrExpr) :
+    Except PsErasureError PsVerifiedIrExpr :=
+  if psListIsEmpty parameters then Except.ok (PsVerifiedIrExpr.lambda parameters resultType body)
+  else
+    match resultType with
+    | PsVerifiedIrType.function argumentTypes finalResult =>
+        match psErasureEtaParameters body argumentTypes parameters 0 with
+        | Except.error error => Except.error error
+        | Except.ok extraParameters =>
+            let asVariable : PsVerifiedIrParameter -> PsVerifiedIrExpr :=
+              fun (parameter : PsVerifiedIrParameter) => PsVerifiedIrExpr.var parameter.name;
+            Except.ok
+              (PsVerifiedIrExpr.lambda (psListAppend parameters extraParameters) finalResult
+                (PsVerifiedIrExpr.call body List.nil (psListMap asVariable extraParameters)))
+    | _ => Except.ok (PsVerifiedIrExpr.lambda parameters resultType body)
+
 def psEraseRuntimeExprWithFuelWorker
     (environment : PsEnvironment) (fuel : Nat) :
     PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr :=
@@ -1502,9 +1590,9 @@ def psEraseRuntimeExprWithFuelWorker
           match kind with
           | .runtime =>
               let parameterName :=
-                psErasureSafeIdentifier
+                psErasureLocalName scope
                   (psNameToString name)
-                  "arg";
+                  "arg" pushed.id;
               match psEraseRuntimeType environment scope type with
               | Except.error error => Except.error error
               | Except.ok parameterType =>
@@ -1553,11 +1641,10 @@ def psEraseRuntimeExprWithFuelWorker
                               | Except.error error =>
                                   Except.error error
                               | Except.ok resultType =>
-                                  Except.ok
-                                    (PsVerifiedIrExpr.lambda
-                                      (List.cons (PsVerifiedIrParameter.mk parameterName parameterType) List.nil)
-                                      resultType
-                                      loweredBody)
+                                  psErasureEtaFunction
+                                    (List.cons (PsVerifiedIrParameter.mk parameterName parameterType) List.nil)
+                                    resultType
+                                    loweredBody
           | .type =>
               let typeName := String.Internal.append "T" (psNatToString pushed.id);
               let nextScope : PsErasureScope := {
@@ -1615,9 +1702,9 @@ def psEraseRuntimeExprWithFuelWorker
                           type
                           value;
                       let localName :=
-                        psErasureSafeIdentifier
+                        psErasureLocalName scope
                           (psNameToString name)
-                          "local";
+                          "local" pushed.id;
                       let nextScope : PsErasureScope := {
                         localContext := pushed.context
                         runtimeLocals :=

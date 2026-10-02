@@ -14,6 +14,8 @@ test('standalone source snapshot does not reread changed files', () => fixture(a
   const snapshot = await readCheckedSourceSnapshot(entry);
   await writeFile(entry, 'def answer : Nat := 43');
   assert.match(snapshot.source, /42/); assert.ok(Object.isFrozen(snapshot));
+  assert.deepEqual(snapshot.sources, ['def answer : Nat := 42']);
+  assert.ok(Object.isFrozen(snapshot.sources));
   assert.notEqual(snapshot.closureSha256, (await readCheckedSourceSnapshot(entry)).closureSha256);
 }));
 test('PS dependency cannot be shadowed by Lean sibling', () => fixture(async dir => {
@@ -23,6 +25,8 @@ test('PS dependency cannot be shadowed by Lean sibling', () => fixture(async dir
   const snapshot = await readCheckedSourceSnapshot(path.join(dir, 'Main.ps'));
   assert.match(snapshot.source, /answer: Nat := 42/); assert.doesNotMatch(snapshot.source, /WRONG|import Lib/);
   assert.equal(snapshot.ordered.length, 2);
+  assert.deepEqual(snapshot.sources, ['def answer: Nat := 42;', 'def main: Nat := answer;']);
+  assert.equal(snapshot.source, snapshot.sources.join('\n\n') + '\n');
 }));
 test('missing PS dependency cannot fall back to Lean', () => fixture(async dir => {
   await writeFile(path.join(dir, 'Main.ps'), 'import Lib;');

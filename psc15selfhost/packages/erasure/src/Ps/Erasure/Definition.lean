@@ -223,9 +223,9 @@ def psEraseOpenDefinitionWithFuel
                       parametersRev
                 | PsErasedBinderKind.runtime =>
                     let parameterName :=
-                      psErasureSafeIdentifier
+                      psErasureLocalName scope
                         (psNameToString valueName)
-                        "arg";
+                        "arg" pushed.id;
                     match
                         psEraseRuntimeType
                           environment
@@ -364,14 +364,15 @@ def psEraseDefinition
               normalizedValue with
         | Except.error error => Except.error error
         | Except.ok opened =>
-            Except.ok
-              (Option.some
-                (PsVerifiedIrDeclaration.mk
-                  outputName
-                  opened.typeParameters
-                  opened.parameters
-                  opened.resultType
-                  opened.body))
+            match psErasureEtaFunction opened.parameters opened.resultType opened.body with
+            | Except.error error => Except.error error
+            | Except.ok expanded =>
+                match expanded with
+                | PsVerifiedIrExpr.lambda parameters resultType body =>
+                    Except.ok
+                      (Option.some
+                        (PsVerifiedIrDeclaration.mk outputName opened.typeParameters parameters resultType body))
+                | _ => Except.error PsErasureError.unsupportedRuntimeTerm
 
 def psErasureReverseIrDeclarationsAcc
     (declarations : List PsVerifiedIrDeclaration) :

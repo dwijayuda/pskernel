@@ -24,6 +24,13 @@ def psListReverseAcc {alpha : Type} (values : List alpha) : List alpha -> List a
 def psListReverse {alpha : Type} (values : List alpha) : List alpha :=
   psListReverseAcc values List.nil
 
+def psListAppend {alpha : Type} (left : List alpha) : List alpha -> List alpha :=
+  match left with
+  | List.nil => fun (right : List alpha) => right
+  | List.cons value rest =>
+      let smaller : List alpha -> List alpha := psListAppend rest;
+      fun (right : List alpha) => List.cons value (smaller right)
+
 def psListMap {alpha beta : Type} (convert : alpha -> beta) (values : List alpha) : List beta :=
   match values with
   | List.nil => List.nil

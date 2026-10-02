@@ -10,6 +10,14 @@ const identity = { protocol: 'pskernel-lean/1', provider: 'lean4-cpp',
 function fixture(provider = () => identity) {
   const calls = []; let prepared;
   const compiler = {
+    List: { nil: () => null, cons: (head, tail) => ({ head, tail }) },
+    psCompilerPrepareSources(kind, sources) {
+      calls.push('prepare-modules');
+      const values = [];
+      for (let cursor = sources; cursor !== null; cursor = cursor.tail) values.push(cursor.head);
+      prepared = { declarations: values.map((value, index) => ({ name: `module${index}`, value })), kind };
+      return ok(prepared);
+    },
     psCompilerPrepareSource(kind, source) {
       calls.push('prepare'); prepared = { declarations: [{ name: 'answer', value: source }], kind };
       return ok(prepared);
@@ -26,6 +34,30 @@ function fixture(provider = () => identity) {
   });
   return { session, calls, getPrepared: () => prepared };
 }
+
+test('module preparation preserves order and checks one combined immutable payload', async () => {
+  const { session, calls, getPrepared } = fixture();
+  const sources = ['def first : Nat := 1', 'def second : Nat := first'];
+  const pending = session.checkSources('lean', sources);
+  sources[0] = 'mutated';
+  const handle = await pending;
+  assert.deepEqual(getPrepared().declarations.map(item => item.value),
+    ['def first : Nat := 1', 'def second : Nat := first']);
+  assert.equal(session.emit(handle), 'export const answer = 42n;');
+  assert.deepEqual(calls, ['prepare-modules', 'encode', 'kernel', 'encode', 'emit']);
+});
+
+test('module preparation cannot bypass kernel rejection or use a fallback', async () => {
+  const { session, calls } = fixture(() => ({ ...identity, accepted: false }));
+  await assert.rejects(session.checkSources('lean', ['first', 'second']), /KERNEL_REJECTED/);
+  assert.deepEqual(calls, ['prepare-modules', 'encode', 'kernel']);
+});
+
+test('module preparation rejects nontext inputs before preparing', async () => {
+  const { session, calls } = fixture();
+  await assert.rejects(session.checkSources('lean', ['first', 42]), /immutable source texts/);
+  assert.deepEqual(calls, []);
+});
 test('one preparation; exact checked object reaches emission', async () => {
   const { session, calls } = fixture();
   const checked = await session.check('lean', '42');

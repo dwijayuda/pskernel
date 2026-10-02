@@ -298,6 +298,38 @@ def psErasureSafeIdentifier
     else if Nat.beq (Char.toNat first) (Char.toNat '$') then base
     else String.Internal.append "_" base
 
+def psErasureLocalNameUsed (scope : PsErasureScope) (candidate : String) : Bool :=
+  let localUses : (Nat × String) -> Bool :=
+    fun (entry : Nat × String) =>
+      match entry with
+      | Prod.mk _ value => psStringEq value candidate;
+  let declarationUses : (PsName × String) -> Bool :=
+    fun (entry : PsName × String) =>
+      match entry with
+      | Prod.mk _ value => psStringEq value candidate;
+  if psListAny localUses scope.runtimeLocals then true
+  else psListAny declarationUses scope.declarationNames
+
+def psErasureLocalNameWithFuel (scope : PsErasureScope) (base : String) (fuel : Nat) : Nat -> String :=
+  match fuel with
+  | Nat.zero => fun (index : Nat) => String.Internal.append base (String.Internal.append "$" (psNatToString index))
+  | Nat.succ remaining =>
+      let smaller : Nat -> String := psErasureLocalNameWithFuel scope base remaining;
+      fun (index : Nat) =>
+        let candidate := String.Internal.append base (String.Internal.append "$" (psNatToString index));
+        if psErasureLocalNameUsed scope candidate then smaller (Nat.succ index) else candidate
+
+def psErasureLocalName (scope : PsErasureScope) (raw fallback : String) (id : Nat) : String :=
+  let sanitized := psErasureSafeIdentifier raw fallback;
+  let base :=
+    if psStringEq sanitized "arguments" then "_arguments"
+    else if psStringEq sanitized "eval" then "_eval"
+    else sanitized;
+  let fuel := Nat.succ (Nat.add (psListLength scope.runtimeLocals) (psListLength scope.declarationNames));
+  if psStringEq base "_" then psErasureLocalNameWithFuel scope fallback fuel id
+  else if psErasureLocalNameUsed scope base then psErasureLocalNameWithFuel scope base fuel id
+  else base
+
 structure PsErasureAppView where
   head : PsExpr
   args : List PsExpr

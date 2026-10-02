@@ -10,7 +10,7 @@ const required = {
     'psEraseFinishApplicationWithFuelWorker environment fn typeArguments remaining;',
     'psSubstituteVerifiedTypeWithFuel substitutions remaining;',
     'psOpenMatchMinorFields environment substitutions rest;',
-    'psOpenMatchMinorHypotheses recursiveParameterIndex bindings rest;',
+    'psOpenMatchMinorHypotheses environment recursiveParameterIndex bindings rest;',
     'psEraseMatchAlternativesWorker environment eraseAt scope substitutions recursiveParameterIndex arguments minorStart rest;',
     'psEraseRuntimeExprWithFuelWorker environment remaining;',
     'psEraseRuntimeExprWithFuelWorker environment fuel scope expr'],

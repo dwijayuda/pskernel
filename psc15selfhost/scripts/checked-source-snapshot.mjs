@@ -60,6 +60,7 @@ export async function readCheckedSourceSnapshot(entryPath) {
   const closureSha256 = generated?.closureSha256 ?? createHash('sha256')
     .update(JSON.stringify({ entry: path.relative(root, entry).split(path.sep).join('/'), files }))
     .digest('hex');
+  const sources = Object.freeze(ordered.map(item => stripImports(item.source)).filter(Boolean));
   return Object.freeze({ root, entry, kind: extension === '.ps' ? 'ps' : 'lean',
-    ordered, closureSha256, source: ordered.map(item => stripImports(item.source)).filter(Boolean).join('\n\n') + '\n' });
+    ordered, closureSha256, sources, source: sources.join('\n\n') + '\n' });
 }

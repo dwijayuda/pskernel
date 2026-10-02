@@ -525,6 +525,10 @@ def psTsEmitExprWithFuel
           match smaller fn with
           | Except.error error => Except.error error
           | Except.ok printedFn =>
+              let callable : String :=
+                match fn with
+                | PsVerifiedIrExpr.lambda _ _ _ => psTsJoin "" ["(", printedFn, ")"]
+                | _ => printedFn;
               match psTsEmitTypeArguments typeArguments with
               | Except.error error => Except.error error
               | Except.ok generic =>
@@ -532,7 +536,7 @@ def psTsEmitExprWithFuel
                   | Except.error error => Except.error error
                   | Except.ok printedArguments =>
                       Except.ok
-                        (psTsJoin "" [printedFn, generic, "(", psTsJoin ", " printedArguments, ")"])
+                        (psTsJoin "" [callable, generic, "(", psTsJoin ", " printedArguments, ")"])
       | .letE name _ value body =>
           match smaller value with
           | Except.error error => Except.error error
@@ -578,7 +582,7 @@ def psTsEmitExprWithFuel
                     else
                       psTsJoin "" [", ", psTsJoin ", " printedFields];
                   Except.ok
-                    (psTsJoin "" ["{ [", brand, "]: true", suffix, " }"])
+                    (psTsJoin "" ["({ [", brand, "]: true as const", suffix, " })"])
       | .projection _ _ target field =>
           match smaller target with
           | Except.error error => Except.error error

@@ -20,9 +20,9 @@ test('checked bootstrap runs the real PSC1 project preflight before the checked 
   );
   const checkedSeed = bootstrap.indexOf('await buildChecked({');
 
-  assert.ok(lean >= 0, 'bootstrap:lean missing');
-  assert.ok(preflight > lean, 'bootstrap:check must follow bootstrap:lean');
-  assert.ok(providerBuild > preflight, 'provider/seed build must follow parser preflight');
+  assert.ok(preflight >= 0, 'bootstrap:check missing');
+  assert.ok(lean > preflight, 'bootstrap:lean must follow parser preflight');
+  assert.ok(providerBuild > lean, 'provider/seed build must follow full bootstrap suite');
   assert.ok(checkedSeed > providerBuild, 'checked seed session must follow parser preflight');
 });
 

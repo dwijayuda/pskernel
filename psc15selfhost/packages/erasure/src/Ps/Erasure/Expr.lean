@@ -352,7 +352,7 @@ def psErasePrimitiveApplication
     Except PsErasureError (Option PsVerifiedIrExpr) :=
   match view.head with
   | .constE name _ =>
-      let text := psNameToString name
+      let text := psNameToString name;
       let binary :=
         fun operation =>
           if view.args.length == 2 then
@@ -364,7 +364,7 @@ def psErasePrimitiveApplication
             | Except.error error => Except.error error
             | Except.ok result => Except.ok (some result)
           else
-            Except.error PsErasureError.unsupportedApplication
+            Except.error PsErasureError.unsupportedApplication;
       if text == "Int.ofNat" then
         if view.args.length == 1 then
           match

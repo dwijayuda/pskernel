@@ -27,6 +27,7 @@ try{
   const wasmPath=path.join(temp,'wasm/pskernel-lean.wasm');
   const manifestPath=path.join(temp,'PREBUILT_WASM_MANIFEST.json');
   const identity={
+    profile:'lean4.34-core',
     protocol:'pskernel-lean/1',provider:'lean4-cpp',leanVersion:'4.34.0',
     leanCommit:'293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
   };

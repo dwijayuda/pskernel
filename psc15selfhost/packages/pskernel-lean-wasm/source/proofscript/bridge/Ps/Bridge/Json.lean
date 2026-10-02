@@ -28,22 +28,38 @@ def psJsonStringNext
   String.Pos.Raw.byteIdx
     (String.Internal.next value (String.Pos.Raw.mk position))
 
-def psJsonStringCharsWithFuel
-    (fuel : Nat) : String -> Nat -> List Char :=
+def psJsonReverseCharsAcc
+    (values : List Char) : List Char -> List Char :=
+  match values with
+  | List.nil =>
+      fun (acc : List Char) => acc
+  | List.cons head tail =>
+      let smaller : List Char -> List Char :=
+        psJsonReverseCharsAcc tail;
+      fun (acc : List Char) =>
+        smaller (List.cons head acc)
+
+def psJsonReverseChars (values : List Char) : List Char :=
+  psJsonReverseCharsAcc values List.nil
+
+def psJsonStringCharsAccWithFuel
+    (fuel : Nat) : String -> Nat -> List Char -> List Char :=
   match fuel with
   | Nat.zero =>
-      fun (_value : String) (_position : Nat) =>
-        List.nil
+      fun (_value : String) (_position : Nat) (charsRev : List Char) =>
+        psJsonReverseChars charsRev
   | Nat.succ remaining =>
-      let smaller : String -> Nat -> List Char :=
-        psJsonStringCharsWithFuel remaining;
-      fun (value : String) (position : Nat) =>
+      let smaller : String -> Nat -> List Char -> List Char :=
+        psJsonStringCharsAccWithFuel remaining;
+      fun (value : String) (position : Nat) (charsRev : List Char) =>
         if psJsonStringAtEnd value position then
-          List.nil
+          psJsonReverseChars charsRev
         else
-          List.cons
-            (psJsonStringGet value position)
-            (smaller value (psJsonStringNext value position))
+          smaller value (psJsonStringNext value position)
+            (List.cons (psJsonStringGet value position) charsRev)
+
+def psJsonStringCharsWithFuel (fuel : Nat) (value : String) (position : Nat) : List Char :=
+  psJsonStringCharsAccWithFuel fuel value position List.nil
 
 def psJsonStringToChars (value : String) : List Char :=
   psJsonStringCharsWithFuel
@@ -293,20 +309,6 @@ def psJsonDecodeUnicode4
                                   else
                                     Except.ok
                                       (Prod.mk (Char.ofNat value) rest)
-
-def psJsonReverseCharsAcc
-    (values : List Char) : List Char -> List Char :=
-  match values with
-  | List.nil =>
-      fun (acc : List Char) => acc
-  | List.cons head tail =>
-      let smaller : List Char -> List Char :=
-        psJsonReverseCharsAcc tail;
-      fun (acc : List Char) =>
-        smaller (List.cons head acc)
-
-def psJsonReverseChars (values : List Char) : List Char :=
-  psJsonReverseCharsAcc values List.nil
 
 def psJsonParseStringChars
     (fuel : Nat) :
@@ -719,12 +721,16 @@ partial def psJsonParseValueWithFuel
             Except.error
               (PsJsonParseError.expected "JSON value")
 
-def psJsonCharListLength (chars : List Char) : Nat :=
+def psJsonCharListLengthAcc (chars : List Char) : Nat -> Nat :=
   match chars with
   | List.nil =>
-      0
+      fun (count : Nat) => count
   | List.cons _ rest =>
-      Nat.succ (psJsonCharListLength rest)
+      let smaller : Nat -> Nat := psJsonCharListLengthAcc rest;
+      fun (count : Nat) => smaller (Nat.succ count)
+
+def psJsonCharListLength (chars : List Char) : Nat :=
+  psJsonCharListLengthAcc chars 0
 
 def psJsonParse
     (source : String) :

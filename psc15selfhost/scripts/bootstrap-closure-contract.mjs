@@ -21,6 +21,7 @@ export const forbiddenBootstrapPackageNames = Object.freeze([
   "pskernel",
   "pskernel-core",
   "pskernel-lean",
+  "pskernel-lean-wasm",
 ]);
 
 export const allowedBootstrapPackages = new Set(allowedBootstrapPackageNames);
@@ -67,6 +68,7 @@ export function assertBootstrapPolicyWellFormed() {
     "pskernel",
     "pskernel-core",
     "pskernel-lean",
+    "pskernel-lean-wasm",
   ]) {
     if (!forbiddenBootstrapPackages.has(packageName)) {
       throw new Error(`PSC2_BOOTSTRAP_POLICY_MISSING_FORBIDDEN_PACKAGE: ${packageName}`);

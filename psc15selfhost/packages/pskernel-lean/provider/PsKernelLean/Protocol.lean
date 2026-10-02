@@ -172,7 +172,17 @@ def decodeCanonicalAdmissions (source : String) :
   let parsed ←
     match psJsonParse source with
     | .ok value => pure value
-    | .error _ => throw (malformedRequest "invalid JSON")
+    | .error error =>
+        let detail := match error with
+          | .fuelExhausted => "fuel exhausted"
+          | .unexpectedEnd => "unexpected end"
+          | .expected text => "expected " ++ text
+          | .invalidEscape => "invalid escape"
+          | .invalidUnicodeEscape => "invalid Unicode escape"
+          | .invalidNumber => "invalid number"
+          | .invalidLiteral => "invalid literal"
+          | .trailingInput => "trailing input"
+        throw (malformedRequest ("invalid JSON: " ++ detail))
   let format ← jsonString "format must be a string" (← jsonField parsed "format")
   if format != "proofscript-checked-admissions" then
     throw (malformedRequest "unexpected admissions format")

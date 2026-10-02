@@ -64,7 +64,7 @@ assert.match(closure,/pskernel-lean-wasm/);
 // then exposes runtime ABI mismatches that are irrelevant to kernel admission.
 // Keep this boundary on Lean.Environment, which supplies the semantic kernel
 // types and addDeclCore API without depending on Lean.Shell.
-const nativeProviderRoot=path.join(workspaceRoot,'packages/pskernel-lean/provider/PsKernelLean');
+const nativeProviderRoot=path.join(packageRoot,'source/proofscript/provider/PsKernelLean');
 for(const moduleName of ['Convert.lean','Prelude.lean','Protocol.lean']){
   const source=await readFile(path.join(nativeProviderRoot,moduleName),'utf8');
   assert.doesNotMatch(
@@ -85,6 +85,7 @@ try{
   await writeFile(launcherPath,`
 const fs=require('node:fs');
 const metadata={
+  profile:'lean4.34-core',
   protocol:'pskernel-lean/1',
   provider:'lean4-cpp',
   leanVersion:'4.34.0',
@@ -97,6 +98,8 @@ if(command==='--health'){
 }
 if(command==='--check'){
   const source=fs.readFileSync(0,'utf8');
+  metadata.inputIsFile=fs.fstatSync(0).isFile();
+  metadata.inputSha256=require('node:crypto').createHash('sha256').update(source).digest('hex');
   if(source.includes('"reject":true')){
     process.stdout.write(JSON.stringify({...metadata,accepted:false,errorKind:'kernel-rejection',declarationIndex:0}));
   }else{
@@ -114,6 +117,12 @@ process.exit(2);
   const accepted=await kernel.checkCanonicalAdmissions('{"reject":false}');
   assert.equal(accepted.accepted,true);
   assert.equal(accepted.provider,'lean4-cpp');
+  assert.equal(accepted.inputIsFile,true);
+  const large=JSON.stringify({payload:'x'.repeat(10*1024*1024)+'λ😀\n\\\"'});
+  const largeResult=await kernel.checkCanonicalAdmissions(large);
+  const {createHash}=await import('node:crypto');
+  assert.equal(largeResult.inputSha256,createHash('sha256').update(large).digest('hex'));
+  assert.equal(largeResult.inputIsFile,true);
 
   const rejected=await checkCanonicalAdmissions('{"reject":true}',{launcherPath});
   assert.equal(rejected.accepted,false);

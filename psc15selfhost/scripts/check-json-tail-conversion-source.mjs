@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-for (const file of ['packages/bridge/src/Ps/Bridge/Json.lean']) {
+for (const file of ['packages/bridge/src/Ps/Bridge/Json.lean',
+  'packages/pskernel-lean-wasm/source/proofscript/bridge/Ps/Bridge/Json.lean']) {
   const source = await readFile(new URL(`../${file}`, import.meta.url), 'utf8');
   const worker = source.slice(source.indexOf('def psJsonStringCharsAccWithFuel'), source.indexOf('def psJsonStringToChars'));
   const markers = ['psJsonReverseChars charsRev',

@@ -1,5 +1,8 @@
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {closeSync,mkdtempSync,openSync,rmSync,writeFileSync} from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import {verifyWasmPrebuiltManifest} from './host/prebuilt.mjs';
 
 export const leanKernelProviderProtocol='pskernel-lean/1';
@@ -38,14 +41,29 @@ function runProviderCommand(command,options,input){
     verifyWasmPrebuiltManifest();
   }
 
-  const run=spawnSync(options.nodePath,[options.launcherPath,command],{
-    input,
-    encoding:'utf8',
-    maxBuffer:options.maxBuffer,
-    timeout:options.timeoutMs,
-    killSignal:'SIGKILL',
-    windowsHide:true,
-  });
+  // Emscripten's synchronous stdin reader can see EAGAIN on Node's nonblocking
+  // spawnSync input pipe. A private file descriptor supplies the exact bytes,
+  // including multi-megabyte requests, without changing the provider protocol.
+  let directory,fd,run;
+  try{
+    if(input!==undefined){
+      directory=mkdtempSync(path.join(os.tmpdir(),'psc2-wasm-input-'));
+      const inputPath=path.join(directory,'admissions.json');
+      writeFileSync(inputPath,input,{encoding:'utf8',mode:0o600});
+      fd=openSync(inputPath,'r');
+    }
+    run=spawnSync(options.nodePath,[options.launcherPath,command],{
+      stdio:[fd??'ignore','pipe','pipe'],
+      encoding:'utf8',
+      maxBuffer:options.maxBuffer,
+      timeout:options.timeoutMs,
+      killSignal:'SIGKILL',
+      windowsHide:true,
+    });
+  }finally{
+    if(fd!==undefined)closeSync(fd);
+    if(directory!==undefined)rmSync(directory,{recursive:true,force:true});
+  }
 
   if(run.error){
     throw new Error(

@@ -104,7 +104,7 @@ const proofscriptManifest=JSON.parse(
 assert.equal(proofscriptManifest.schemaVersion,1);
 assert.equal(proofscriptManifest.packageName,'@proofscript/pskernel-lean-wasm');
 assert.equal(proofscriptManifest.snapshotRoot,'source/proofscript');
-assert.equal(proofscriptManifest.sourceTreeSha,'71674320ac440364efdad6842289e42e0a19010e');
+assert.equal(proofscriptManifest.sourceTreeSha,'22f39d23220cc53b499640b5777e944a9aad5a97');
 assert.equal(
   await gitTreeSha(path.join(packageRoot,'source','proofscript')),
   proofscriptManifest.sourceTreeSha,

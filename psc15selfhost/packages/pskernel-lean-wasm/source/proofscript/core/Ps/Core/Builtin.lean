@@ -96,6 +96,9 @@ def psIntSubName : PsName :=
 def psIntMulName : PsName :=
   psNameAppendStr psIntName "mul"
 
+def psIntReprName : PsName :=
+  psNameAppendStr psIntName "repr"
+
 def psListName : PsName :=
   psRootName "List"
 

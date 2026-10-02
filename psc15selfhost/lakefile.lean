@@ -247,6 +247,10 @@ lean_exe psc2_prod_match_selfhost_tests where
   root := `ProdMatchSelfHostTests
 
 -- Host-only diagnostics; this executable is not a portable bootstrap module.
+lean_exe psc2_joint_closure_inventory where
+  srcDir := "scripts"
+  root := `JointClosureInventory
+
 lean_exe psc2_selfhost_replay_audit where
   srcDir := "scripts"
   root := `SelfhostReplayAudit

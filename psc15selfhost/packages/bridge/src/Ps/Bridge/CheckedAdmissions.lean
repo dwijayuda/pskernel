@@ -679,9 +679,18 @@ def psCheckedNestedContains (name : PsName) (expr : PsExpr) : Bool :=
   | PsExpr.proj _ _ value => psCheckedNestedContains name value
   | _ => false
 
+-- A recursive family applied to its parameters/indices is still a direct
+-- recursive field. Self occurrences inside an argument remain nested.
+def psCheckedNestedDirect (name : PsName) (type : PsExpr) : Bool :=
+  match type with
+  | PsExpr.constE other _ => psNameEq name other
+  | PsExpr.app fn arg =>
+      if psCheckedNestedContains name arg then false else psCheckedNestedDirect name fn
+  | _ => false
+
 def psCheckedNestedAdd (name : PsName) (type : PsExpr) (shapes : List PsExpr) : List PsExpr :=
   if psCheckedNestedContains name type then
-    if psExprAlphaEq type (PsExpr.constE name List.nil) then shapes
+    if psCheckedNestedDirect name type then shapes
     else if psListAny (psExprAlphaEq type) shapes then shapes
     else psListAppend shapes [type]
   else shapes

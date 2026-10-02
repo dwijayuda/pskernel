@@ -72,3 +72,20 @@ compilation independently reports `prefix` as a reserved identifier in
 regeneration and new evidence, not edits to generated JavaScript or relabeling the
 historical manifests. Full dependency inventory, exact checked emission, owned
 closure admission and the C2/C3 plus K2/K3 fixed points remain release blockers.
+
+## Parameterized direct-recursion adapter follow-up
+
+The inventory localized the canonical admission failure to `PsKernelList`: the
+adapter mistook a direct recursive field `PsKernelList alpha` for nested recursion.
+Direct applications now retain their arguments and are classified as direct only
+when those arguments do not themselves contain the inductive family. The existing
+nested-container restrictions are unchanged. A generic-list fixture, structural
+wrapper lookup and nested-self-argument negative case cover the distinction.
+
+All nine native checked-seed cases passed. The real native Lean provider then
+accepted the received 376-declaration kernel source in 5,387 ms. Canonical
+admissions SHA-256:
+`f5db2da9f85517eae88c96829f6bd61fed9ede7e31dbc8a86660bbe75f3c259b`.
+This is external Lean admission of the owned source, not owned-kernel admission
+or a self-hosted fixed point. The received package bytes and historical manifests
+remain unchanged.

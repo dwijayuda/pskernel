@@ -46,6 +46,16 @@ def psCheckedSeedTests : IO Unit := do
   let nestedResult ← psHostLeanEmitPrepared nested
   psCheckedSeedAssert "real kernel accepts nested recursors and direct recursive hypotheses"
     (match nestedResult with | .ok (_, ts) => ts.contains "checkedTreeExample" | _ => false)
+  let .ok wrappers := psCheckedNestedCollect nested.declarations nested.declarations
+    | throw (IO.userError "nested wrapper classification failed")
+  psCheckedSeedAssert "parameterized direct recursion is not a nested recursor"
+    ((psCheckedNestedFind wrappers (psRootName "CheckedList")).isNone &&
+      match nestedResult with | .ok (_, ts) => ts.contains "checkedListExample" | _ => false)
+  let self := PsExpr.constE (psRootName "Family") []
+  let parameter := PsExpr.fvar 0
+  psCheckedSeedAssert "direct recursion classification retains nested self arguments"
+    (psCheckedNestedDirect (psRootName "Family") (PsExpr.app self parameter) &&
+      !psCheckedNestedDirect (psRootName "Family") (PsExpr.app self self))
   IO.println "PSC2_LEAN_CHECKED_NATIVE: PASS"
 
 def psCheckedSeedRun (emit : Bool) (kind : PsCompilerSourceKind) : IO Unit := do

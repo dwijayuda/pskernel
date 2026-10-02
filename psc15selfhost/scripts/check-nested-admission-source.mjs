@@ -4,6 +4,8 @@ const source = await readFile(new URL('../packages/bridge/src/Ps/Bridge/CheckedA
 const markers = [
   'def psCheckedAdmissionNatToString\n    (value : Nat) : String :=\n  Int.repr (Int.ofNat value)',
   'def psCheckedNestedContainerFields',
+  'if psCheckedNestedContains name arg then false else psCheckedNestedDirect name fn',
+  'if psCheckedNestedDirect name type then shapes',
   'psCheckedNestedName "List"', 'psCheckedNestedName "Option"', 'psCheckedNestedName "Prod"',
   'smaller (psListAppend rest fresh) (psListAppend done [type])',
   'PsExpr.sortE psCheckedNestedLevel',

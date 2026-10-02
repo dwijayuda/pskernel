@@ -643,7 +643,10 @@ def psEraseIteApplication
   match view.head with
   | .constE name _ =>
       if psNameEq name psIteName && view.args.length == 5 then
-        match view.args[1]?, view.args[3]?, view.args[4]? with
+        match
+            psErasureExprListAt view.args 1,
+            psErasureExprListAt view.args 3,
+            psErasureExprListAt view.args 4 with
         | some proposition, some thenBranch, some elseBranch =>
             match psEraseCondition erase proposition with
             | Except.error error => Except.error error

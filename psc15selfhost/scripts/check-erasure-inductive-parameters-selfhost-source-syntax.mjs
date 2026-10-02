@@ -13,6 +13,7 @@ export function assertErasureInductiveParametersSource(source) {
     );
   }
   const required = [
+    "                  binder;",
     'String.Internal.append "T" (toString index);',
     "let value := PsExpr.fvar pushed.id;",
     "List.cons (Prod.mk pushed.id parameterName) scope.typeLocals",

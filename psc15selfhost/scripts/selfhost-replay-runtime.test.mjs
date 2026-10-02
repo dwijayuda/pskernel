@@ -1,3 +1,4 @@
+import './native-typescript-cli.test.mjs';
 import assert from 'node:assert/strict';
 import './native-workspace-isolation.test.mjs';
 import { execFileSync } from 'node:child_process';

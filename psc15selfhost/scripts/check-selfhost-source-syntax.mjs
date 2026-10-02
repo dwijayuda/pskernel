@@ -1,3 +1,4 @@
+import "./check-native-replay-host-source.mjs";
 import "./check-elab-apply-args-recursion-selfhost-source-syntax.mjs";
 import "./check-elab-structural-recursion-source-selfhost-source-syntax.mjs";
 import "./check-elab-inductive-constructor-names-selfhost-source-syntax.mjs";

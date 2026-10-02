@@ -1,11 +1,23 @@
 import Ps.Host.LeanChecked
 import Lean.Data.Json
 
+-- Transport encoding belongs to the native host. Canonical admission bytes stay
+-- unchanged; avoid recursively concatenating a multi-megabyte quoted payload.
+def psCheckedSeedMessage (phase key value : String) : String :=
+  (Lean.Json.mkObj [("phase", Lean.Json.str phase), (key, Lean.Json.str value)]).compress
+
 def psCheckedSeedAssert (label : String) (passed : Bool) : IO Unit := do
   if passed then IO.println ("PSC2_LEAN_CHECKED_CASE: PASS " ++ label)
   else throw (IO.userError ("PSC2_LEAN_CHECKED_CASE: FAIL " ++ label))
 
 def psCheckedSeedTests : IO Unit := do
+  let large := String.ofList (List.replicate 10000000 'x') ++ "\n\t\"\\λ😀"
+  let .ok message := Lean.Json.parse (psCheckedSeedMessage "prepared" "admissions" large)
+    | throw (IO.userError "large transport JSON failed")
+  psCheckedSeedAssert "large transport preserves exact payload and escaped Unicode"
+    (match message.getObjValAs? String "admissions", message.getObjValAs? String "phase" with
+     | .ok value, .ok phase => value == large && phase == "prepared"
+     | _, _ => false)
   let .ok prepared := psCompilerPrepareSource .lean "def answer : Nat := 42\n"
     | throw (IO.userError "valid source preparation failed")
   let checked ← psHostLeanCheckPrepared prepared
@@ -63,8 +75,7 @@ def psCheckedSeedPreparedSession
   let .ok admissions := psCompilerAdmissionsFromPrepared prepared
     | throw (IO.userError "PSC2_CHECKED_PREPARED_INTEGRITY_FAILED")
   let stdout ← IO.getStdout
-  stdout.putStrLn
-    ("{\"phase\":\"prepared\",\"admissions\":" ++ psJsonQuote admissions ++ "}")
+  stdout.putStrLn (psCheckedSeedMessage "prepared" "admissions" admissions)
   stdout.flush
   let command ← (← IO.getStdin).getLine
   if command.trim == "checked" then
@@ -78,8 +89,7 @@ def psCheckedSeedPreparedSession
     match psCompilerTypeScriptFromPrepared prepared with
     | .error _ => throw (IO.userError "PSC2_CHECKED_EMISSION_FAILED")
     | .ok output =>
-        stdout.putStrLn
-          ("{\"phase\":\"emitted\",\"typescript\":" ++ psJsonQuote output ++ "}")
+        stdout.putStrLn (psCheckedSeedMessage "emitted" "typescript" output)
         stdout.flush
   else
     throw (IO.userError "PSC2_CHECKED_SEED_SESSION_COMMAND")

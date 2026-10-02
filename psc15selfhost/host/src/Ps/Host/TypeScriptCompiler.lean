@@ -23,16 +23,26 @@ def psTypeScriptOutputPaths
     psReplaceSuffix typeScriptPath ".ts" ".js.map"
   )
 
-def psTscExecutable : String :=
-  if System.Platform.isWindows then
-    "npx.cmd"
-  else
-    "npx"
+-- Resolve the installed JavaScript entry point. npm exec does not reliably use
+-- a pinned tsc supplied on PATH, and Windows .cmd shims require a shell.
+def psTypeScriptCli : IO String := do
+  let current ← IO.currentDir
+  let separator := if System.Platform.isWindows then ";" else ":"
+  let directories := current.toString :: ((← IO.getEnv "PATH").getD "").splitOn separator
+  for directory in directories do
+    let base := System.FilePath.mk directory
+    for candidate in [base / "node_modules/typescript/bin/tsc",
+        base / "../typescript/bin/tsc", base / "tsc"] do
+      if ← candidate.pathExists then
+        let resolved ← IO.FS.realPath candidate
+        if (resolved.toString.replace "\\" "/").endsWith "/typescript/bin/tsc" then
+          return resolved.toString
+  throw (IO.userError "PSC1_TYPESCRIPT_CLI_MISSING: install TypeScript 5.8.3 locally or on PATH")
 
 def psTypeScriptVersion : IO String := do
   let output ← IO.Process.output {
-    cmd := psTscExecutable
-    args := #["--no-install", "tsc", "--version"]
+    cmd := "node"
+    args := #[← psTypeScriptCli, "--version"]
   }
   if output.exitCode != 0 then
     throw
@@ -48,10 +58,9 @@ def psCompileTypeScriptFile
     (typeScriptPath : String) :
     IO PsTypeScriptCompileResult := do
   let output ← IO.Process.output {
-    cmd := psTscExecutable
+    cmd := "node"
     args := #[
-      "--no-install",
-      "tsc",
+      ← psTypeScriptCli,
       typeScriptPath,
       "--target", "ES2022",
       "--module", "ES2022",

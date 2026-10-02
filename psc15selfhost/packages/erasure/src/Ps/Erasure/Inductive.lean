@@ -48,15 +48,15 @@ def psPrepareInductiveParametersWithFuel
                   scope.localContext
                   name
                   domain
-                  binder
-              let parameterName := "T" ++ toString index
-              let value := PsExpr.fvar pushed.id
+                  binder;
+              let parameterName := String.Internal.append "T" (toString index);
+              let value := PsExpr.fvar pushed.id;
               let nextScope : PsErasureScope := {
                 localContext := pushed.context
                 runtimeLocals := scope.runtimeLocals
                 typeLocals :=
-                  (pushed.id, parameterName) :: scope.typeLocals
-                erasedLocals := pushed.id :: scope.erasedLocals
+                  List.cons (Prod.mk pushed.id parameterName) scope.typeLocals
+                erasedLocals := List.cons pushed.id scope.erasedLocals
                 declarationNames := scope.declarationNames
                 runtimeConstructors := scope.runtimeConstructors
                 runtimeRecursors := scope.runtimeRecursors
@@ -64,7 +64,7 @@ def psPrepareInductiveParametersWithFuel
                 runtimeStructureConstructors := scope.runtimeStructureConstructors
                 runtimeExpressions := scope.runtimeExpressions
                 currentDefinition := scope.currentDefinition
-              }
+              };
               psPrepareInductiveParametersWithFuel
                 environment
                 fuel
@@ -72,8 +72,10 @@ def psPrepareInductiveParametersWithFuel
                 (psExprInstantiate1 body value)
                 remaining
                 (index + 1)
-                (value :: valuesRev)
-                ({ name := parameterName } :: parametersRev)
+                (List.cons value valuesRev)
+                (List.cons
+                  (PsVerifiedIrTypeParameter.mk parameterName)
+                  parametersRev)
           | _ =>
               Except.error PsErasureError.unsupportedRuntimeTerm
       | _ =>

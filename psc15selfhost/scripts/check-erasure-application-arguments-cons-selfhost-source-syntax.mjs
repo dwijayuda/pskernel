@@ -4,6 +4,7 @@ import "./check-erasure-selected-arguments-index-selfhost-source-syntax.mjs";
 import "./check-erasure-selected-arguments-cons-selfhost-source-syntax.mjs";
 import "./check-erasure-primitive-application-sequencing-selfhost-source-syntax.mjs";
 import "./check-erasure-primitive-application-equality-selfhost-source-syntax.mjs";
+import "./check-erasure-primitive-application-disjunction-selfhost-source-syntax.mjs";
 import "./check-erasure-condition-sequencing-selfhost-source-syntax.mjs";
 import "./check-erasure-ite-argument-index-selfhost-source-syntax.mjs";
 import "./check-erasure-ite-equality-selfhost-source-syntax.mjs";

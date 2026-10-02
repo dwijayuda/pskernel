@@ -17,9 +17,9 @@ export function assertErasureIteEquality(source) {
       "PSC2_ERASURE_ITE_EQUALITY_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Nat equality",
     );
   }
-  if (/==/.test(block)) {
+  if (/==|&&/.test(block)) {
     throw new Error(
-      "PSC2_ERASURE_ITE_EQUALITY_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: equality operator",
+      "PSC2_ERASURE_ITE_EQUALITY_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: equality/conjunction operator",
     );
   }
   return block;
@@ -31,9 +31,9 @@ const source = await readFile(
   "utf8",
 );
 const block = assertErasureIteEquality(source);
-const current = "Nat.beq view.args.length 5";
+const current = "psErasureBoolAnd (psNameEq name psIteName) (Nat.beq view.args.length 5)";
 assert.ok(block.includes(current));
-const broken = block.replace(current, "view.args.length == 5");
+const broken = block.replace(current, "psNameEq name psIteName && view.args.length == 5");
 assert.throws(
   () => assertErasureIteEquality(source.replace(block, broken)),
   /ITE_EQUALITY.*(?:MISSING|FORBIDDEN)/,

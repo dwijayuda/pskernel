@@ -58,6 +58,11 @@ def psInventoryNestedFailures (all : List PsDeclaration) : IO (Array Lean.Json) 
   pure failures
 
 def main (args : List String) : IO Unit := do
+  if let ["--prelude", output] := args then
+    let declarations ← psSelfHostProdPreludeEnvironment.declarations.mapM psInventoryDeclaration
+    IO.FS.writeFile output ((Lean.Json.arr declarations.toArray).compress ++ "\n")
+    IO.println s!"PSC2_PRELUDE_INVENTORY: {declarations.length} declarations"
+    return
   let [compilerEntry, kernelEntry, output] := args
     | throw (IO.userError "usage: psc2_joint_closure_inventory <compiler-entry> <kernel-entry> <output.json>")
   let compiler ← psHostLoadProject psSelfHostProdPreludeEnvironment compilerEntry

@@ -100,7 +100,7 @@
     "build:lean": "npm run build:lake",
     "test:kernel-core": "npm run test:kernel-owned",
     "test:selfhost-foundation": "npm run check:selfhost-foundation && npm run check:selfhost-source-syntax && npm run check:structure-recursor-normalization && lake exe psc2_minimal_selfhost_tests && lake exe psc2_prod_match_selfhost_tests && node scripts/selfhost-replay-runtime.test.mjs",
-    "test:bootstrap": "npm run check:selfhost-source-syntax && lake exe psc1_translation_tests && lake exe psc1_bridge_tests && lake exe psc1_backend_ts_tests && lake exe psc1_ir_specialize_tests && lake exe psc1_erasure_tests && npm run test:selfhost-foundation",
+    "test:bootstrap": "npm run check:selfhost-source-syntax && lake build psc2_joint_closure_inventory && node scripts/check-prelude-declaration-parity.mjs && lake exe psc1_translation_tests && lake exe psc1_bridge_tests && lake exe psc1_backend_ts_tests && lake exe psc1_ir_specialize_tests && lake exe psc1_erasure_tests && npm run test:selfhost-foundation",
     "test:regression": "lake exe psc1_tests",
     "test:extensions": "lake exe psc1_backend_wasm_tests && lake exe psc1_backend_wasm_binary_smoke && lake exe psc1_backend_rust_tests && lake exe psc1_backend_rust_source_tests && lake exe psc1_backend_rust_let_function_result_tests",
     "test:lean": "npm run test:all",

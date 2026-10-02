@@ -12,9 +12,9 @@ export function assertErasureIteEquality(source) {
       "PSC2_ERASURE_ITE_EQUALITY_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
     );
   }
-  if (!/psNameEq name psIteName && Nat\.beq view\.args\.length 5/.test(block)) {
+  if (!/psErasureBoolAnd \(psNameEq name psIteName\) \(Nat\.beq view\.args\.length 5\)/.test(block)) {
     throw new Error(
-      "PSC2_ERASURE_ITE_EQUALITY_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Nat equality",
+      "PSC2_ERASURE_ITE_EQUALITY_SELFHOST_SOURCE_SYNTAX_MISSING: structural conjunction with explicit Nat equality",
     );
   }
   if (/==|&&/.test(block)) {
@@ -39,5 +39,5 @@ assert.throws(
   /ITE_EQUALITY.*(?:MISSING|FORBIDDEN)/,
 );
 process.stdout.write(
-  "PSC2_ERASURE_ITE_EQUALITY_SELFHOST_SOURCE_SYNTAX: PASS (explicit Nat.beq length check; equality-operator mutation rejected)\n",
+  "PSC2_ERASURE_ITE_EQUALITY_SELFHOST_SOURCE_SYNTAX: PASS (structural conjunction with Nat.beq length check; operator mutation rejected)\n",
 );

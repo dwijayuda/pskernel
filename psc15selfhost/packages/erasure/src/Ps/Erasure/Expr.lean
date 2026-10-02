@@ -934,14 +934,18 @@ def psErasureRecursiveCallArguments :
     List String -> Nat -> String -> List PsVerifiedIrExpr
   | [], _, _ => []
   | _ :: rest, 0, recursiveName =>
-      PsVerifiedIrExpr.var recursiveName ::
-        rest.map (fun name => PsVerifiedIrExpr.var name)
+      List.cons
+        (PsVerifiedIrExpr.var recursiveName)
+        (rest.map
+          (fun (name : String) =>
+            PsVerifiedIrExpr.var name))
   | name :: rest, index + 1, recursiveName =>
-      PsVerifiedIrExpr.var name ::
-        psErasureRecursiveCallArguments
+      List.cons
+        (PsVerifiedIrExpr.var name)
+        (psErasureRecursiveCallArguments
           rest
           index
-          recursiveName
+          recursiveName)
 
 structure PsOpenMatchHypotheses where
   scope : PsErasureScope

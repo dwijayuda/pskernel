@@ -375,137 +375,149 @@ export const PsKernelExprInstantiateStep = {
 const __ps$tag$47 = Symbol("ProofScript.PsKernelDefinition.tag");
 export const PsKernelDefinition = {
     "definition": (__field0, __field1, __field2) => ({ [__ps$tag$47]: "definition", name: __field0, type: __field1, value: __field2 }),
+    "polymorphic": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$47]: "polymorphic", name: __field0, parameters: __field1, type: __field2, value: __field3 }),
 };
-const __ps$tag$48 = Symbol("ProofScript.PsKernelCheckError.tag");
+const __ps$tag$48 = Symbol("ProofScript.PsKernelTypingContext.tag");
+export const PsKernelTypingContext = {
+    "context": (__field0, __field1) => ({ [__ps$tag$48]: "context", declarations: __field0, parameters: __field1 }),
+};
+const __ps$tag$49 = Symbol("ProofScript.PsKernelCheckError.tag");
 export const PsKernelCheckError = {
-    "invalidState": { [__ps$tag$48]: "invalidState" },
-    "invalidScope": { [__ps$tag$48]: "invalidScope" },
-    "unknownConstant": { [__ps$tag$48]: "unknownConstant" },
-    "unsupported": { [__ps$tag$48]: "unsupported" },
-    "typeExpected": { [__ps$tag$48]: "typeExpected" },
-    "functionExpected": { [__ps$tag$48]: "functionExpected" },
-    "typeMismatch": { [__ps$tag$48]: "typeMismatch" },
-    "duplicateName": { [__ps$tag$48]: "duplicateName" },
-    "invalidName": { [__ps$tag$48]: "invalidName" },
+    "invalidState": { [__ps$tag$49]: "invalidState" },
+    "invalidScope": { [__ps$tag$49]: "invalidScope" },
+    "unknownConstant": { [__ps$tag$49]: "unknownConstant" },
+    "unsupported": { [__ps$tag$49]: "unsupported" },
+    "typeExpected": { [__ps$tag$49]: "typeExpected" },
+    "functionExpected": { [__ps$tag$49]: "functionExpected" },
+    "typeMismatch": { [__ps$tag$49]: "typeMismatch" },
+    "duplicateName": { [__ps$tag$49]: "duplicateName" },
+    "invalidName": { [__ps$tag$49]: "invalidName" },
+    "invalidUniverse": { [__ps$tag$49]: "invalidUniverse" },
 };
-const __ps$tag$49 = Symbol("ProofScript.PsKernelLookupState.tag");
+const __ps$tag$50 = Symbol("ProofScript.PsKernelLookupState.tag");
 export const PsKernelLookupState = {
-    "search": (__field0, __field1) => ({ [__ps$tag$49]: "search", name: __field0, entries: __field1 }),
-    "compare": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$49]: "compare", name: __field0, entry: __field1, rest: __field2, tasks: __field3 }),
+    "search": (__field0, __field1) => ({ [__ps$tag$50]: "search", name: __field0, entries: __field1 }),
+    "compare": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$50]: "compare", name: __field0, entry: __field1, rest: __field2, tasks: __field3 }),
 };
-const __ps$tag$50 = Symbol("ProofScript.PsKernelLookupStep.tag");
+const __ps$tag$51 = Symbol("ProofScript.PsKernelLookupStep.tag");
 export const PsKernelLookupStep = {
-    "next": (__field0) => ({ [__ps$tag$50]: "next", state: __field0 }),
-    "found": (__field0) => ({ [__ps$tag$50]: "found", entry: __field0 }),
-    "missing": { [__ps$tag$50]: "missing" },
-    "invalidState": { [__ps$tag$50]: "invalidState" },
+    "next": (__field0) => ({ [__ps$tag$51]: "next", state: __field0 }),
+    "found": (__field0) => ({ [__ps$tag$51]: "found", entry: __field0 }),
+    "missing": { [__ps$tag$51]: "missing" },
+    "invalidState": { [__ps$tag$51]: "invalidState" },
 };
-const __ps$tag$51 = Symbol("ProofScript.PsKernelReduceTask.tag");
+const __ps$tag$52 = Symbol("ProofScript.PsKernelReduceTask.tag");
 export const PsKernelReduceTask = {
-    "whnf": (__field0) => ({ [__ps$tag$51]: "whnf", value: __field0 }),
-    "apply": (__field0) => ({ [__ps$tag$51]: "apply", arg: __field0 }),
-    "lookup": (__field0) => ({ [__ps$tag$51]: "lookup", state: __field0 }),
-    "binding": (__field0) => ({ [__ps$tag$51]: "binding", state: __field0 }),
-    "resumeWhnf": { [__ps$tag$51]: "resumeWhnf" },
-    "normal": (__field0) => ({ [__ps$tag$51]: "normal", value: __field0 }),
-    "expand": { [__ps$tag$51]: "expand" },
-    "app": { [__ps$tag$51]: "app" },
-    "lam": (__field0, __field1) => ({ [__ps$tag$51]: "lam", name: __field0, binder: __field1 }),
-    "forallE": (__field0, __field1) => ({ [__ps$tag$51]: "forallE", name: __field0, binder: __field1 }),
+    "whnf": (__field0) => ({ [__ps$tag$52]: "whnf", value: __field0 }),
+    "apply": (__field0) => ({ [__ps$tag$52]: "apply", arg: __field0 }),
+    "lookup": (__field0, __field1) => ({ [__ps$tag$52]: "lookup", levels: __field0, state: __field1 }),
+    "instantiate": (__field0) => ({ [__ps$tag$52]: "instantiate", state: __field0 }),
+    "binding": (__field0) => ({ [__ps$tag$52]: "binding", state: __field0 }),
+    "resumeWhnf": { [__ps$tag$52]: "resumeWhnf" },
+    "normal": (__field0) => ({ [__ps$tag$52]: "normal", value: __field0 }),
+    "expand": { [__ps$tag$52]: "expand" },
+    "app": { [__ps$tag$52]: "app" },
+    "lam": (__field0, __field1) => ({ [__ps$tag$52]: "lam", name: __field0, binder: __field1 }),
+    "forallE": (__field0, __field1) => ({ [__ps$tag$52]: "forallE", name: __field0, binder: __field1 }),
 };
-const __ps$tag$52 = Symbol("ProofScript.PsKernelReduceState.tag");
+const __ps$tag$53 = Symbol("ProofScript.PsKernelReduceState.tag");
 export const PsKernelReduceState = {
-    "state": (__field0, __field1, __field2) => ({ [__ps$tag$52]: "state", environment: __field0, tasks: __field1, values: __field2 }),
+    "state": (__field0, __field1, __field2) => ({ [__ps$tag$53]: "state", environment: __field0, tasks: __field1, values: __field2 }),
 };
-const __ps$tag$53 = Symbol("ProofScript.PsKernelReduceResult.tag");
+const __ps$tag$54 = Symbol("ProofScript.PsKernelReduceResult.tag");
 export const PsKernelReduceResult = {
-    "outOfFuel": { [__ps$tag$53]: "outOfFuel" },
-    "rejected": (__field0) => ({ [__ps$tag$53]: "rejected", error: __field0 }),
-    "done": (__field0) => ({ [__ps$tag$53]: "done", value: __field0 }),
+    "outOfFuel": { [__ps$tag$54]: "outOfFuel" },
+    "rejected": (__field0) => ({ [__ps$tag$54]: "rejected", error: __field0 }),
+    "done": (__field0) => ({ [__ps$tag$54]: "done", value: __field0 }),
 };
-const __ps$tag$54 = Symbol("ProofScript.PsKernelReduceStep.tag");
+const __ps$tag$55 = Symbol("ProofScript.PsKernelReduceStep.tag");
 export const PsKernelReduceStep = {
-    "next": (__field0) => ({ [__ps$tag$54]: "next", state: __field0 }),
-    "final": (__field0) => ({ [__ps$tag$54]: "final", result: __field0 }),
+    "next": (__field0) => ({ [__ps$tag$55]: "next", state: __field0 }),
+    "final": (__field0) => ({ [__ps$tag$55]: "final", result: __field0 }),
 };
-const __ps$tag$55 = Symbol("ProofScript.PsKernelConversionTask.tag");
+const __ps$tag$56 = Symbol("ProofScript.PsKernelConversionTask.tag");
 export const PsKernelConversionTask = {
-    "expr": (__field0, __field1) => ({ [__ps$tag$55]: "expr", left: __field0, right: __field1 }),
-    "natural": (__field0) => ({ [__ps$tag$55]: "natural", state: __field0 }),
-    "level": (__field0) => ({ [__ps$tag$55]: "level", state: __field0 }),
+    "expr": (__field0, __field1) => ({ [__ps$tag$56]: "expr", left: __field0, right: __field1 }),
+    "natural": (__field0) => ({ [__ps$tag$56]: "natural", state: __field0 }),
+    "level": (__field0) => ({ [__ps$tag$56]: "level", state: __field0 }),
 };
-const __ps$tag$56 = Symbol("ProofScript.PsKernelConversionState.tag");
+const __ps$tag$57 = Symbol("ProofScript.PsKernelConversionState.tag");
 export const PsKernelConversionState = {
-    "left": (__field0, __field1, __field2) => ({ [__ps$tag$56]: "left", environment: __field0, right: __field1, state: __field2 }),
-    "right": (__field0, __field1) => ({ [__ps$tag$56]: "right", left: __field0, state: __field1 }),
-    "compare": (__field0) => ({ [__ps$tag$56]: "compare", tasks: __field0 }),
+    "left": (__field0, __field1, __field2) => ({ [__ps$tag$57]: "left", environment: __field0, right: __field1, state: __field2 }),
+    "right": (__field0, __field1) => ({ [__ps$tag$57]: "right", left: __field0, state: __field1 }),
+    "compare": (__field0) => ({ [__ps$tag$57]: "compare", tasks: __field0 }),
 };
-const __ps$tag$57 = Symbol("ProofScript.PsKernelConversionResult.tag");
+const __ps$tag$58 = Symbol("ProofScript.PsKernelConversionResult.tag");
 export const PsKernelConversionResult = {
-    "outOfFuel": { [__ps$tag$57]: "outOfFuel" },
-    "rejected": (__field0) => ({ [__ps$tag$57]: "rejected", error: __field0 }),
-    "equal": { [__ps$tag$57]: "equal" },
-    "different": { [__ps$tag$57]: "different" },
+    "outOfFuel": { [__ps$tag$58]: "outOfFuel" },
+    "rejected": (__field0) => ({ [__ps$tag$58]: "rejected", error: __field0 }),
+    "equal": { [__ps$tag$58]: "equal" },
+    "different": { [__ps$tag$58]: "different" },
 };
-const __ps$tag$58 = Symbol("ProofScript.PsKernelConversionStep.tag");
+const __ps$tag$59 = Symbol("ProofScript.PsKernelConversionStep.tag");
 export const PsKernelConversionStep = {
-    "next": (__field0) => ({ [__ps$tag$58]: "next", state: __field0 }),
-    "final": (__field0) => ({ [__ps$tag$58]: "final", result: __field0 }),
+    "next": (__field0) => ({ [__ps$tag$59]: "next", state: __field0 }),
+    "final": (__field0) => ({ [__ps$tag$59]: "final", result: __field0 }),
 };
-const __ps$tag$59 = Symbol("ProofScript.PsKernelTypeTask.tag");
+const __ps$tag$60 = Symbol("ProofScript.PsKernelTypeTask.tag");
 export const PsKernelTypeTask = {
-    "infer": (__field0, __field1) => ({ [__ps$tag$59]: "infer", context: __field0, value: __field1 }),
-    "levels": (__field0, __field1) => ({ [__ps$tag$59]: "levels", pending: __field0, result: __field1 }),
-    "bound": (__field0, __field1, __field2) => ({ [__ps$tag$59]: "bound", context: __field0, index: __field1, shift: __field2 }),
-    "lookup": (__field0) => ({ [__ps$tag$59]: "lookup", state: __field0 }),
-    "binding": (__field0) => ({ [__ps$tag$59]: "binding", state: __field0 }),
-    "reduce": (__field0) => ({ [__ps$tag$59]: "reduce", state: __field0 }),
-    "reduceTop": { [__ps$tag$59]: "reduceTop" },
-    "conversion": (__field0) => ({ [__ps$tag$59]: "conversion", state: __field0 }),
-    "returnE": (__field0) => ({ [__ps$tag$59]: "returnE", value: __field0 }),
-    "lamSort": (__field0, __field1, __field2, __field3, __field4) => ({ [__ps$tag$59]: "lamSort", context: __field0, name: __field1, type: __field2, body: __field3, binder: __field4 }),
-    "lamFinish": (__field0, __field1, __field2) => ({ [__ps$tag$59]: "lamFinish", name: __field0, type: __field1, binder: __field2 }),
-    "piDomain": (__field0, __field1, __field2) => ({ [__ps$tag$59]: "piDomain", context: __field0, type: __field1, body: __field2 }),
-    "piFinish": (__field0) => ({ [__ps$tag$59]: "piFinish", domainLevel: __field0 }),
-    "appPi": (__field0, __field1) => ({ [__ps$tag$59]: "appPi", context: __field0, arg: __field1 }),
-    "appArgument": (__field0, __field1, __field2) => ({ [__ps$tag$59]: "appArgument", domain: __field0, body: __field1, arg: __field2 }),
-    "letSort": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$59]: "letSort", context: __field0, type: __field1, value: __field2, body: __field3 }),
-    "letValue": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$59]: "letValue", context: __field0, type: __field1, value: __field2, body: __field3 }),
-    "letBody": (__field0) => ({ [__ps$tag$59]: "letBody", context: __field0 }),
-    "checkSort": (__field0, __field1) => ({ [__ps$tag$59]: "checkSort", value: __field0, type: __field1 }),
-    "checkValue": (__field0) => ({ [__ps$tag$59]: "checkValue", type: __field0 }),
+    "infer": (__field0, __field1) => ({ [__ps$tag$60]: "infer", context: __field0, value: __field1 }),
+    "levels": (__field0) => ({ [__ps$tag$60]: "levels", pending: __field0 }),
+    "levelName": (__field0, __field1, __field2) => ({ [__ps$tag$60]: "levelName", name: __field0, remaining: __field1, pending: __field2 }),
+    "levelNameCompare": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$60]: "levelNameCompare", name: __field0, remaining: __field1, pending: __field2, work: __field3 }),
+    "parameterArguments": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$60]: "parameterArguments", remaining: __field0, reversed: __field1, value: __field2, type: __field3 }),
+    "parameters": (__field0, __field1, __field2) => ({ [__ps$tag$60]: "parameters", state: __field0, value: __field1, type: __field2 }),
+    "instantiate": (__field0) => ({ [__ps$tag$60]: "instantiate", state: __field0 }),
+    "bound": (__field0, __field1, __field2) => ({ [__ps$tag$60]: "bound", context: __field0, index: __field1, shift: __field2 }),
+    "lookup": (__field0, __field1) => ({ [__ps$tag$60]: "lookup", levels: __field0, state: __field1 }),
+    "binding": (__field0) => ({ [__ps$tag$60]: "binding", state: __field0 }),
+    "reduce": (__field0) => ({ [__ps$tag$60]: "reduce", state: __field0 }),
+    "reduceTop": { [__ps$tag$60]: "reduceTop" },
+    "conversion": (__field0) => ({ [__ps$tag$60]: "conversion", state: __field0 }),
+    "returnE": (__field0) => ({ [__ps$tag$60]: "returnE", value: __field0 }),
+    "lamSort": (__field0, __field1, __field2, __field3, __field4) => ({ [__ps$tag$60]: "lamSort", context: __field0, name: __field1, type: __field2, body: __field3, binder: __field4 }),
+    "lamFinish": (__field0, __field1, __field2) => ({ [__ps$tag$60]: "lamFinish", name: __field0, type: __field1, binder: __field2 }),
+    "piDomain": (__field0, __field1, __field2) => ({ [__ps$tag$60]: "piDomain", context: __field0, type: __field1, body: __field2 }),
+    "piFinish": (__field0) => ({ [__ps$tag$60]: "piFinish", domainLevel: __field0 }),
+    "appPi": (__field0, __field1) => ({ [__ps$tag$60]: "appPi", context: __field0, arg: __field1 }),
+    "appArgument": (__field0, __field1, __field2) => ({ [__ps$tag$60]: "appArgument", domain: __field0, body: __field1, arg: __field2 }),
+    "letSort": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$60]: "letSort", context: __field0, type: __field1, value: __field2, body: __field3 }),
+    "letValue": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$60]: "letValue", context: __field0, type: __field1, value: __field2, body: __field3 }),
+    "letBody": (__field0) => ({ [__ps$tag$60]: "letBody", context: __field0 }),
+    "checkSort": (__field0, __field1) => ({ [__ps$tag$60]: "checkSort", value: __field0, type: __field1 }),
+    "checkValue": (__field0) => ({ [__ps$tag$60]: "checkValue", type: __field0 }),
 };
-const __ps$tag$60 = Symbol("ProofScript.PsKernelTypeState.tag");
+const __ps$tag$61 = Symbol("ProofScript.PsKernelTypeState.tag");
 export const PsKernelTypeState = {
-    "state": (__field0, __field1, __field2) => ({ [__ps$tag$60]: "state", environment: __field0, tasks: __field1, values: __field2 }),
+    "state": (__field0, __field1, __field2) => ({ [__ps$tag$61]: "state", environment: __field0, tasks: __field1, values: __field2 }),
 };
-const __ps$tag$61 = Symbol("ProofScript.PsKernelTypeResult.tag");
+const __ps$tag$62 = Symbol("ProofScript.PsKernelTypeResult.tag");
 export const PsKernelTypeResult = {
-    "outOfFuel": { [__ps$tag$61]: "outOfFuel" },
-    "rejected": (__field0) => ({ [__ps$tag$61]: "rejected", error: __field0 }),
-    "done": (__field0) => ({ [__ps$tag$61]: "done", type: __field0 }),
+    "outOfFuel": { [__ps$tag$62]: "outOfFuel" },
+    "rejected": (__field0) => ({ [__ps$tag$62]: "rejected", error: __field0 }),
+    "done": (__field0) => ({ [__ps$tag$62]: "done", type: __field0 }),
 };
-const __ps$tag$62 = Symbol("ProofScript.PsKernelTypeStep.tag");
+const __ps$tag$63 = Symbol("ProofScript.PsKernelTypeStep.tag");
 export const PsKernelTypeStep = {
-    "next": (__field0) => ({ [__ps$tag$62]: "next", state: __field0 }),
-    "final": (__field0) => ({ [__ps$tag$62]: "final", result: __field0 }),
+    "next": (__field0) => ({ [__ps$tag$63]: "next", state: __field0 }),
+    "final": (__field0) => ({ [__ps$tag$63]: "final", result: __field0 }),
 };
-const __ps$tag$63 = Symbol("ProofScript.PsKernelAdmissionState.tag");
+const __ps$tag$64 = Symbol("ProofScript.PsKernelAdmissionState.tag");
 export const PsKernelAdmissionState = {
-    "pending": (__field0, __field1) => ({ [__ps$tag$63]: "pending", environment: __field0, entries: __field1 }),
-    "duplicate": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$63]: "duplicate", environment: __field0, entry: __field1, rest: __field2, state: __field3 }),
-    "checking": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$63]: "checking", environment: __field0, entry: __field1, rest: __field2, state: __field3 }),
+    "pending": (__field0, __field1) => ({ [__ps$tag$64]: "pending", environment: __field0, entries: __field1 }),
+    "duplicate": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$64]: "duplicate", environment: __field0, entry: __field1, rest: __field2, state: __field3 }),
+    "checking": (__field0, __field1, __field2, __field3) => ({ [__ps$tag$64]: "checking", environment: __field0, entry: __field1, rest: __field2, state: __field3 }),
 };
-const __ps$tag$64 = Symbol("ProofScript.PsKernelAdmissionResult.tag");
+const __ps$tag$65 = Symbol("ProofScript.PsKernelAdmissionResult.tag");
 export const PsKernelAdmissionResult = {
-    "outOfFuel": { [__ps$tag$64]: "outOfFuel" },
-    "rejected": (__field0) => ({ [__ps$tag$64]: "rejected", error: __field0 }),
-    "admitted": (__field0) => ({ [__ps$tag$64]: "admitted", environment: __field0 }),
+    "outOfFuel": { [__ps$tag$65]: "outOfFuel" },
+    "rejected": (__field0) => ({ [__ps$tag$65]: "rejected", error: __field0 }),
+    "admitted": (__field0) => ({ [__ps$tag$65]: "admitted", environment: __field0 }),
 };
-const __ps$tag$65 = Symbol("ProofScript.PsKernelAdmissionStep.tag");
+const __ps$tag$66 = Symbol("ProofScript.PsKernelAdmissionStep.tag");
 export const PsKernelAdmissionStep = {
-    "next": (__field0) => ({ [__ps$tag$65]: "next", state: __field0 }),
-    "final": (__field0) => ({ [__ps$tag$65]: "final", result: __field0 }),
+    "next": (__field0) => ({ [__ps$tag$66]: "next", state: __field0 }),
+    "final": (__field0) => ({ [__ps$tag$66]: "final", result: __field0 }),
 };
 export function psKernelCompareTasks(fuel, __ps_eta_0) { while (true) {
     {
@@ -3809,8 +3821,118 @@ function* __ps$impl$psKernelExprInstantiateRun(fuel, __ps_eta_0) { return (yield
     }
 } throw new Error("invalid ProofScript constructor tag"); })()); }
 __ps$implementations.set(psKernelExprInstantiateRun, __ps$impl$psKernelExprInstantiateRun);
+export function psKernelDefinitionName(entry) { while (true) {
+    {
+        const __ps$match$0 = entry;
+        switch (__ps$match$0[__ps$tag$47]) {
+            case "definition": {
+                const name = __ps$match$0.name;
+                const unusedType = __ps$match$0.type;
+                const unusedValue = __ps$match$0.value;
+                return name;
+            }
+            case "polymorphic": {
+                const name = __ps$match$0.name;
+                const unusedParameters = __ps$match$0.parameters;
+                const unusedType = __ps$match$0.type;
+                const unusedValue = __ps$match$0.value;
+                return name;
+            }
+        }
+        throw new Error("invalid ProofScript constructor tag");
+    }
+} }
+export function psKernelDefinitionParameters(entry) { while (true) {
+    {
+        const __ps$match$0 = entry;
+        switch (__ps$match$0[__ps$tag$47]) {
+            case "definition": {
+                const unusedName = __ps$match$0.name;
+                const unusedType = __ps$match$0.type;
+                const unusedValue = __ps$match$0.value;
+                return PsKernelList["nil"]();
+            }
+            case "polymorphic": {
+                const unusedName = __ps$match$0.name;
+                const parameters = __ps$match$0.parameters;
+                const unusedType = __ps$match$0.type;
+                const unusedValue = __ps$match$0.value;
+                return parameters;
+            }
+        }
+        throw new Error("invalid ProofScript constructor tag");
+    }
+} }
+export function psKernelDefinitionType(entry) { while (true) {
+    {
+        const __ps$match$0 = entry;
+        switch (__ps$match$0[__ps$tag$47]) {
+            case "definition": {
+                const unusedName = __ps$match$0.name;
+                const type = __ps$match$0.type;
+                const unusedValue = __ps$match$0.value;
+                return type;
+            }
+            case "polymorphic": {
+                const unusedName = __ps$match$0.name;
+                const unusedParameters = __ps$match$0.parameters;
+                const type = __ps$match$0.type;
+                const unusedValue = __ps$match$0.value;
+                return type;
+            }
+        }
+        throw new Error("invalid ProofScript constructor tag");
+    }
+} }
+export function psKernelDefinitionValue(entry) { while (true) {
+    {
+        const __ps$match$0 = entry;
+        switch (__ps$match$0[__ps$tag$47]) {
+            case "definition": {
+                const unusedName = __ps$match$0.name;
+                const unusedType = __ps$match$0.type;
+                const value = __ps$match$0.value;
+                return value;
+            }
+            case "polymorphic": {
+                const unusedName = __ps$match$0.name;
+                const unusedParameters = __ps$match$0.parameters;
+                const unusedType = __ps$match$0.type;
+                const value = __ps$match$0.value;
+                return value;
+            }
+        }
+        throw new Error("invalid ProofScript constructor tag");
+    }
+} }
+export function psKernelTypingDeclarations(context) { while (true) {
+    {
+        const __ps$match$0 = context;
+        switch (__ps$match$0[__ps$tag$48]) {
+            case "context": {
+                const declarations = __ps$match$0.declarations;
+                const unusedParameters = __ps$match$0.parameters;
+                return declarations;
+            }
+        }
+        throw new Error("invalid ProofScript constructor tag");
+    }
+} }
+export function psKernelTypingParameters(context) { while (true) {
+    {
+        const __ps$match$0 = context;
+        switch (__ps$match$0[__ps$tag$48]) {
+            case "context": {
+                const unusedDeclarations = __ps$match$0.declarations;
+                const parameters = __ps$match$0.parameters;
+                return parameters;
+            }
+        }
+        throw new Error("invalid ProofScript constructor tag");
+    }
+} }
 export function psKernelLookupStep(state) { return __ps$run(__ps$impl$psKernelLookupStep(state)); }
-function* __ps$impl$psKernelLookupStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$49]) {
+function* __ps$impl$psKernelLookupStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$50]) {
     case "search": {
         const name = __ps$match$0.name;
         const entries = __ps$match$0.entries;
@@ -3819,14 +3941,7 @@ function* __ps$impl$psKernelLookupStep(state) { return (yield* (function* () { c
             case "cons": {
                 const entry = __ps$match$0.head;
                 const rest = __ps$match$0.tail;
-                return (yield* (function* () { const __ps$match$0 = entry; switch (__ps$match$0[__ps$tag$47]) {
-                    case "definition": {
-                        const candidate = __ps$match$0.name;
-                        const unusedType = __ps$match$0.type;
-                        const unusedValue = __ps$match$0.value;
-                        return PsKernelLookupStep["next"](PsKernelLookupState["compare"](name, entry, rest, PsKernelList["cons"](PsKernelOrderTask["name"](name, candidate), PsKernelList["nil"]())));
-                    }
-                } throw new Error("invalid ProofScript constructor tag"); })());
+                return PsKernelLookupStep["next"](PsKernelLookupState["compare"](name, entry, rest, PsKernelList["cons"](PsKernelOrderTask["name"](name, (yield* __ps$invoke(psKernelDefinitionName, entry))), PsKernelList["nil"]())));
             }
         } throw new Error("invalid ProofScript constructor tag"); })());
     }
@@ -3879,14 +3994,7 @@ function* __ps$impl$psKernelReduceWhnf(env, tasks, values, value) { return (yiel
     case "constE": {
         const name = __ps$match$0.name;
         const levels = __ps$match$0.levels;
-        return (yield* (function* () { const __ps$match$0 = levels; switch (__ps$match$0[__ps$tag$8]) {
-            case "nil": return (yield* __ps$invoke(psKernelReduceNext, env, PsKernelList["cons"](PsKernelReduceTask["lookup"](PsKernelLookupState["search"](name, env)), tasks), values));
-            case "cons": {
-                const _wild0 = __ps$match$0.head;
-                const _wild1 = __ps$match$0.tail;
-                return (yield* __ps$invoke(psKernelReduceReject, PsKernelCheckError["unsupported"]));
-            }
-        } throw new Error("invalid ProofScript constructor tag"); })());
+        return (yield* __ps$invoke(psKernelReduceNext, env, PsKernelList["cons"](PsKernelReduceTask["lookup"](levels, PsKernelLookupState["search"](name, env)), tasks), values));
     }
     case "app": {
         const fn = __ps$match$0.fn;
@@ -3932,7 +4040,7 @@ function* __ps$impl$psKernelReduceValueTask(env, task, tasks, values) { return (
     case "cons": {
         const top = __ps$match$0.head;
         const rest = __ps$match$0.tail;
-        return (yield* (function* () { const __ps$match$0 = task; switch (__ps$match$0[__ps$tag$51]) {
+        return (yield* (function* () { const __ps$match$0 = task; switch (__ps$match$0[__ps$tag$52]) {
             case "whnf": {
                 const _wild0 = __ps$match$0.value;
                 return (yield* __ps$invoke(psKernelReduceReject, PsKernelCheckError["invalidState"]));
@@ -3996,6 +4104,11 @@ function* __ps$impl$psKernelReduceValueTask(env, task, tasks, values) { return (
                 } throw new Error("invalid ProofScript constructor tag"); })());
             }
             case "lookup": {
+                const _wild0 = __ps$match$0.levels;
+                const _wild1 = __ps$match$0.state;
+                return (yield* __ps$invoke(psKernelReduceReject, PsKernelCheckError["invalidState"]));
+            }
+            case "instantiate": {
                 const _wild0 = __ps$match$0.state;
                 return (yield* __ps$invoke(psKernelReduceReject, PsKernelCheckError["invalidState"]));
             }
@@ -4100,7 +4213,7 @@ function* __ps$impl$psKernelReduceValueTask(env, task, tasks, values) { return (
 } throw new Error("invalid ProofScript constructor tag"); })()); }
 __ps$implementations.set(psKernelReduceValueTask, __ps$impl$psKernelReduceValueTask);
 export function psKernelReduceStep(state) { return __ps$run(__ps$impl$psKernelReduceStep(state)); }
-function* __ps$impl$psKernelReduceStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$52]) {
+function* __ps$impl$psKernelReduceStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$53]) {
     case "state": {
         const env = __ps$match$0.environment;
         const tasks = __ps$match$0.tasks;
@@ -4124,7 +4237,7 @@ function* __ps$impl$psKernelReduceStep(state) { return (yield* (function* () { c
             case "cons": {
                 const task = __ps$match$0.head;
                 const rest = __ps$match$0.tail;
-                return (yield* (function* () { const __ps$match$0 = task; switch (__ps$match$0[__ps$tag$51]) {
+                return (yield* (function* () { const __ps$match$0 = task; switch (__ps$match$0[__ps$tag$52]) {
                     case "whnf": {
                         const value = __ps$match$0.value;
                         return (yield* __ps$invoke(psKernelReduceWhnf, env, rest, values, value));
@@ -4134,25 +4247,41 @@ function* __ps$impl$psKernelReduceStep(state) { return (yield* (function* () { c
                         return (yield* __ps$invoke(psKernelReduceValueTask, env, task, rest, values));
                     }
                     case "lookup": {
+                        const levels = __ps$match$0.levels;
                         const current = __ps$match$0.state;
-                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelLookupStep, current)); switch (__ps$match$0[__ps$tag$50]) {
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelLookupStep, current)); switch (__ps$match$0[__ps$tag$51]) {
                             case "next": {
                                 const next = __ps$match$0.state;
-                                return (yield* __ps$invoke(psKernelReduceNext, env, PsKernelList["cons"](PsKernelReduceTask["lookup"](next), rest), values));
+                                return (yield* __ps$invoke(psKernelReduceNext, env, PsKernelList["cons"](PsKernelReduceTask["lookup"](levels, next), rest), values));
                             }
                             case "found": {
                                 const entry = __ps$match$0.entry;
-                                return (yield* (function* () { const __ps$match$0 = entry; switch (__ps$match$0[__ps$tag$47]) {
-                                    case "definition": {
-                                        const unusedName = __ps$match$0.name;
-                                        const unusedType = __ps$match$0.type;
-                                        const value = __ps$match$0.value;
-                                        return (yield* __ps$invoke(psKernelReduceNext, env, PsKernelList["cons"](PsKernelReduceTask["whnf"](value), rest), values));
-                                    }
-                                } throw new Error("invalid ProofScript constructor tag"); })());
+                                return (yield* __ps$invoke(psKernelReduceNext, env, PsKernelList["cons"](PsKernelReduceTask["instantiate"]((yield* __ps$invoke(psKernelExprInstantiateStart, (yield* __ps$invoke(psKernelDefinitionParameters, entry)), levels, (yield* __ps$invoke(psKernelDefinitionValue, entry))))), PsKernelList["cons"](PsKernelReduceTask["resumeWhnf"], rest)), values));
                             }
                             case "missing": return (yield* __ps$invoke(psKernelReduceReject, PsKernelCheckError["unknownConstant"]));
                             case "invalidState": return (yield* __ps$invoke(psKernelReduceReject, PsKernelCheckError["invalidState"]));
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "instantiate": {
+                        const current = __ps$match$0.state;
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelExprInstantiateStep, current)); switch (__ps$match$0[__ps$tag$46]) {
+                            case "next": {
+                                const next = __ps$match$0.state;
+                                return (yield* __ps$invoke(psKernelReduceNext, env, PsKernelList["cons"](PsKernelReduceTask["instantiate"](next), rest), values));
+                            }
+                            case "final": {
+                                const result = __ps$match$0.result;
+                                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$45]) {
+                                    case "outOfFuel": return (yield* __ps$invoke(psKernelReduceReject, PsKernelCheckError["invalidState"]));
+                                    case "invalidState": return (yield* __ps$invoke(psKernelReduceReject, PsKernelCheckError["invalidState"]));
+                                    case "invalidParameters": return (yield* __ps$invoke(psKernelReduceReject, PsKernelCheckError["invalidUniverse"]));
+                                    case "undeclaredParameter": return (yield* __ps$invoke(psKernelReduceReject, PsKernelCheckError["invalidUniverse"]));
+                                    case "done": {
+                                        const value = __ps$match$0.value;
+                                        return (yield* __ps$invoke(psKernelReducePush, env, rest, values, value));
+                                    }
+                                } throw new Error("invalid ProofScript constructor tag"); })());
+                            }
                         } throw new Error("invalid ProofScript constructor tag"); })());
                     }
                     case "binding": {
@@ -4215,7 +4344,7 @@ function* __ps$impl$psKernelReduceRun(fuel, __ps_eta_0) { return (yield* (functi
         const remaining = __ps$match$0.remaining;
         return (yield* (function* () { {
             const state = __ps_eta_0;
-            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelReduceStep, state)); switch (__ps$match$0[__ps$tag$54]) {
+            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelReduceStep, state)); switch (__ps$match$0[__ps$tag$55]) {
                 case "next": {
                     const next = __ps$match$0.state;
                     return (yield* (function* () { {
@@ -4566,19 +4695,19 @@ function* __ps$impl$psKernelConversionExpr(left, right, tasks) { return (yield* 
 } throw new Error("invalid ProofScript constructor tag"); })()); }
 __ps$implementations.set(psKernelConversionExpr, __ps$impl$psKernelConversionExpr);
 export function psKernelConversionStep(state) { return __ps$run(__ps$impl$psKernelConversionStep(state)); }
-function* __ps$impl$psKernelConversionStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$56]) {
+function* __ps$impl$psKernelConversionStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$57]) {
     case "left": {
         const env = __ps$match$0.environment;
         const right = __ps$match$0.right;
         const current = __ps$match$0.state;
-        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelReduceStep, current)); switch (__ps$match$0[__ps$tag$54]) {
+        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelReduceStep, current)); switch (__ps$match$0[__ps$tag$55]) {
             case "next": {
                 const next = __ps$match$0.state;
                 return PsKernelConversionStep["next"](PsKernelConversionState["left"](env, right, next));
             }
             case "final": {
                 const result = __ps$match$0.result;
-                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$53]) {
+                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$54]) {
                     case "outOfFuel": return (yield* __ps$invoke(psKernelConversionReject, PsKernelCheckError["invalidState"]));
                     case "rejected": {
                         const error = __ps$match$0.error;
@@ -4595,14 +4724,14 @@ function* __ps$impl$psKernelConversionStep(state) { return (yield* (function* ()
     case "right": {
         const left = __ps$match$0.left;
         const current = __ps$match$0.state;
-        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelReduceStep, current)); switch (__ps$match$0[__ps$tag$54]) {
+        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelReduceStep, current)); switch (__ps$match$0[__ps$tag$55]) {
             case "next": {
                 const next = __ps$match$0.state;
                 return PsKernelConversionStep["next"](PsKernelConversionState["right"](left, next));
             }
             case "final": {
                 const result = __ps$match$0.result;
-                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$53]) {
+                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$54]) {
                     case "outOfFuel": return (yield* __ps$invoke(psKernelConversionReject, PsKernelCheckError["invalidState"]));
                     case "rejected": {
                         const error = __ps$match$0.error;
@@ -4623,7 +4752,7 @@ function* __ps$impl$psKernelConversionStep(state) { return (yield* (function* ()
             case "cons": {
                 const task = __ps$match$0.head;
                 const rest = __ps$match$0.tail;
-                return (yield* (function* () { const __ps$match$0 = task; switch (__ps$match$0[__ps$tag$55]) {
+                return (yield* (function* () { const __ps$match$0 = task; switch (__ps$match$0[__ps$tag$56]) {
                     case "expr": {
                         const left = __ps$match$0.left;
                         const right = __ps$match$0.right;
@@ -4687,7 +4816,7 @@ function* __ps$impl$psKernelConversionRun(fuel, __ps_eta_0) { return (yield* (fu
         const remaining = __ps$match$0.remaining;
         return (yield* (function* () { {
             const state = __ps_eta_0;
-            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelConversionStep, state)); switch (__ps$match$0[__ps$tag$58]) {
+            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelConversionStep, state)); switch (__ps$match$0[__ps$tag$59]) {
                 case "next": {
                     const next = __ps$match$0.state;
                     return (yield* (function* () { {
@@ -4725,19 +4854,12 @@ function* __ps$impl$psKernelTypeInfer(env, context, value, tasks, values) { retu
     }
     case "sortE": {
         const level = __ps$match$0.level;
-        return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levels"](PsKernelList["cons"](level, PsKernelList["nil"]()), PsKernelExpr["sortE"](PsKernelLevel["succ"](level))), tasks), values));
+        return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levels"](PsKernelList["cons"](level, PsKernelList["nil"]())), PsKernelList["cons"](PsKernelTypeTask["returnE"](PsKernelExpr["sortE"](PsKernelLevel["succ"](level))), tasks)), values));
     }
     case "constE": {
         const name = __ps$match$0.name;
         const levels = __ps$match$0.levels;
-        return (yield* (function* () { const __ps$match$0 = levels; switch (__ps$match$0[__ps$tag$8]) {
-            case "nil": return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["lookup"](PsKernelLookupState["search"](name, env)), tasks), values));
-            case "cons": {
-                const _wild0 = __ps$match$0.head;
-                const _wild1 = __ps$match$0.tail;
-                return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["unsupported"]));
-            }
-        } throw new Error("invalid ProofScript constructor tag"); })());
+        return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levels"](levels), PsKernelList["cons"](PsKernelTypeTask["lookup"](levels, PsKernelLookupState["search"](name, (yield* __ps$invoke(psKernelTypingDeclarations, env)))), tasks)), values));
     }
     case "app": {
         const fn = __ps$match$0.fn;
@@ -4783,7 +4905,7 @@ function* __ps$impl$psKernelTypeValueTask(env, task, tasks, values) { return (yi
     case "cons": {
         const top = __ps$match$0.head;
         const rest = __ps$match$0.tail;
-        return (yield* (function* () { const __ps$match$0 = task; switch (__ps$match$0[__ps$tag$59]) {
+        return (yield* (function* () { const __ps$match$0 = task; switch (__ps$match$0[__ps$tag$60]) {
             case "infer": {
                 const _wild0 = __ps$match$0.context;
                 const _wild1 = __ps$match$0.value;
@@ -4791,7 +4913,36 @@ function* __ps$impl$psKernelTypeValueTask(env, task, tasks, values) { return (yi
             }
             case "levels": {
                 const _wild0 = __ps$match$0.pending;
-                const _wild1 = __ps$match$0.result;
+                return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
+            }
+            case "levelName": {
+                const _wild0 = __ps$match$0.name;
+                const _wild1 = __ps$match$0.remaining;
+                const _wild2 = __ps$match$0.pending;
+                return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
+            }
+            case "levelNameCompare": {
+                const _wild0 = __ps$match$0.name;
+                const _wild1 = __ps$match$0.remaining;
+                const _wild2 = __ps$match$0.pending;
+                const _wild3 = __ps$match$0.work;
+                return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
+            }
+            case "parameterArguments": {
+                const _wild0 = __ps$match$0.remaining;
+                const _wild1 = __ps$match$0.reversed;
+                const _wild2 = __ps$match$0.value;
+                const _wild3 = __ps$match$0.type;
+                return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
+            }
+            case "parameters": {
+                const _wild0 = __ps$match$0.state;
+                const _wild1 = __ps$match$0.value;
+                const _wild2 = __ps$match$0.type;
+                return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
+            }
+            case "instantiate": {
+                const _wild0 = __ps$match$0.state;
                 return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
             }
             case "bound": {
@@ -4801,7 +4952,8 @@ function* __ps$impl$psKernelTypeValueTask(env, task, tasks, values) { return (yi
                 return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
             }
             case "lookup": {
-                const _wild0 = __ps$match$0.state;
+                const _wild0 = __ps$match$0.levels;
+                const _wild1 = __ps$match$0.state;
                 return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
             }
             case "binding": {
@@ -4812,7 +4964,7 @@ function* __ps$impl$psKernelTypeValueTask(env, task, tasks, values) { return (yi
                 const _wild0 = __ps$match$0.state;
                 return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
             }
-            case "reduceTop": return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["reduce"]((yield* __ps$invoke(psKernelWhnfStart, env, top))), tasks), rest));
+            case "reduceTop": return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["reduce"]((yield* __ps$invoke(psKernelWhnfStart, (yield* __ps$invoke(psKernelTypingDeclarations, env)), top))), tasks), rest));
             case "conversion": {
                 const _wild0 = __ps$match$0.state;
                 return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
@@ -5070,7 +5222,7 @@ function* __ps$impl$psKernelTypeValueTask(env, task, tasks, values) { return (yi
                 const domain = __ps$match$0.domain;
                 const body = __ps$match$0.body;
                 const arg = __ps$match$0.arg;
-                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["conversion"]((yield* __ps$invoke(psKernelConversionStart, env, top, domain))), PsKernelList["cons"](PsKernelTypeTask["binding"]((yield* __ps$invoke(psKernelBindingStart, PsKernelBindingMode["instantiate"](arg), PsKernelNatural["zero"], body))), tasks)), rest));
+                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["conversion"]((yield* __ps$invoke(psKernelConversionStart, (yield* __ps$invoke(psKernelTypingDeclarations, env)), top, domain))), PsKernelList["cons"](PsKernelTypeTask["binding"]((yield* __ps$invoke(psKernelBindingStart, PsKernelBindingMode["instantiate"](arg), PsKernelNatural["zero"], body))), tasks)), rest));
             }
             case "letSort": {
                 const context = __ps$match$0.context;
@@ -5138,7 +5290,7 @@ function* __ps$impl$psKernelTypeValueTask(env, task, tasks, values) { return (yi
                 const type = __ps$match$0.type;
                 const value = __ps$match$0.value;
                 const body = __ps$match$0.body;
-                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["conversion"]((yield* __ps$invoke(psKernelConversionStart, env, top, type))), PsKernelList["cons"](PsKernelTypeTask["binding"]((yield* __ps$invoke(psKernelBindingStart, PsKernelBindingMode["instantiate"](value), PsKernelNatural["zero"], body))), PsKernelList["cons"](PsKernelTypeTask["letBody"](context), tasks))), rest));
+                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["conversion"]((yield* __ps$invoke(psKernelConversionStart, (yield* __ps$invoke(psKernelTypingDeclarations, env)), top, type))), PsKernelList["cons"](PsKernelTypeTask["binding"]((yield* __ps$invoke(psKernelBindingStart, PsKernelBindingMode["instantiate"](value), PsKernelNatural["zero"], body))), PsKernelList["cons"](PsKernelTypeTask["letBody"](context), tasks))), rest));
             }
             case "letBody": {
                 const context = __ps$match$0.context;
@@ -5205,44 +5357,44 @@ function* __ps$impl$psKernelTypeValueTask(env, task, tasks, values) { return (yi
             }
             case "checkValue": {
                 const type = __ps$match$0.type;
-                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["conversion"]((yield* __ps$invoke(psKernelConversionStart, env, top, type))), PsKernelList["cons"](PsKernelTypeTask["returnE"](type), tasks)), rest));
+                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["conversion"]((yield* __ps$invoke(psKernelConversionStart, (yield* __ps$invoke(psKernelTypingDeclarations, env)), top, type))), PsKernelList["cons"](PsKernelTypeTask["returnE"](type), tasks)), rest));
             }
         } throw new Error("invalid ProofScript constructor tag"); })());
     }
 } throw new Error("invalid ProofScript constructor tag"); })()); }
 __ps$implementations.set(psKernelTypeValueTask, __ps$impl$psKernelTypeValueTask);
-export function psKernelTypeLevels(env, pending, result, tasks, values) { return __ps$run(__ps$impl$psKernelTypeLevels(env, pending, result, tasks, values)); }
-function* __ps$impl$psKernelTypeLevels(env, pending, result, tasks, values) { return (yield* (function* () { const __ps$match$0 = pending; switch (__ps$match$0[__ps$tag$8]) {
-    case "nil": return (yield* __ps$invoke(psKernelTypePush, env, tasks, values, result));
+export function psKernelTypeLevels(env, pending, tasks, values) { return __ps$run(__ps$impl$psKernelTypeLevels(env, pending, tasks, values)); }
+function* __ps$impl$psKernelTypeLevels(env, pending, tasks, values) { return (yield* (function* () { const __ps$match$0 = pending; switch (__ps$match$0[__ps$tag$8]) {
+    case "nil": return (yield* __ps$invoke(psKernelTypeNext, env, tasks, values));
     case "cons": {
         const level = __ps$match$0.head;
         const rest = __ps$match$0.tail;
         return (yield* (function* () { const __ps$match$0 = level; switch (__ps$match$0[__ps$tag$7]) {
-            case "zero": return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levels"](rest, result), tasks), values));
+            case "zero": return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levels"](rest), tasks), values));
             case "succ": {
                 const next = __ps$match$0.value;
-                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levels"](PsKernelList["cons"](next, rest), result), tasks), values));
+                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levels"](PsKernelList["cons"](next, rest)), tasks), values));
             }
             case "max": {
                 const left = __ps$match$0.left;
                 const right = __ps$match$0.right;
-                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levels"](PsKernelList["cons"](left, PsKernelList["cons"](right, rest)), result), tasks), values));
+                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levels"](PsKernelList["cons"](left, PsKernelList["cons"](right, rest))), tasks), values));
             }
             case "imax": {
                 const left = __ps$match$0.left;
                 const right = __ps$match$0.right;
-                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levels"](PsKernelList["cons"](left, PsKernelList["cons"](right, rest)), result), tasks), values));
+                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levels"](PsKernelList["cons"](left, PsKernelList["cons"](right, rest))), tasks), values));
             }
             case "param": {
-                const unusedName = __ps$match$0.name;
-                return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["unsupported"]));
+                const name = __ps$match$0.name;
+                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levelName"](name, (yield* __ps$invoke(psKernelTypingParameters, env)), rest), tasks), values));
             }
         } throw new Error("invalid ProofScript constructor tag"); })());
     }
 } throw new Error("invalid ProofScript constructor tag"); })()); }
 __ps$implementations.set(psKernelTypeLevels, __ps$impl$psKernelTypeLevels);
 export function psKernelTypeStep(state) { return __ps$run(__ps$impl$psKernelTypeStep(state)); }
-function* __ps$impl$psKernelTypeStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$60]) {
+function* __ps$impl$psKernelTypeStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$61]) {
     case "state": {
         const env = __ps$match$0.environment;
         const tasks = __ps$match$0.tasks;
@@ -5266,7 +5418,7 @@ function* __ps$impl$psKernelTypeStep(state) { return (yield* (function* () { con
             case "cons": {
                 const task = __ps$match$0.head;
                 const rest = __ps$match$0.tail;
-                return (yield* (function* () { const __ps$match$0 = task; switch (__ps$match$0[__ps$tag$59]) {
+                return (yield* (function* () { const __ps$match$0 = task; switch (__ps$match$0[__ps$tag$60]) {
                     case "infer": {
                         const context = __ps$match$0.context;
                         const value = __ps$match$0.value;
@@ -5274,8 +5426,101 @@ function* __ps$impl$psKernelTypeStep(state) { return (yield* (function* () { con
                     }
                     case "levels": {
                         const pending = __ps$match$0.pending;
-                        const result = __ps$match$0.result;
-                        return (yield* __ps$invoke(psKernelTypeLevels, env, pending, result, rest, values));
+                        return (yield* __ps$invoke(psKernelTypeLevels, env, pending, rest, values));
+                    }
+                    case "levelName": {
+                        const name = __ps$match$0.name;
+                        const remaining = __ps$match$0.remaining;
+                        const pending = __ps$match$0.pending;
+                        return (yield* (function* () { const __ps$match$0 = remaining; switch (__ps$match$0[__ps$tag$8]) {
+                            case "nil": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidUniverse"]));
+                            case "cons": {
+                                const candidate = __ps$match$0.head;
+                                const tail = __ps$match$0.tail;
+                                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levelNameCompare"](name, tail, pending, PsKernelList["cons"](PsKernelOrderTask["name"](name, candidate), PsKernelList["nil"]())), rest), values));
+                            }
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "levelNameCompare": {
+                        const name = __ps$match$0.name;
+                        const remaining = __ps$match$0.remaining;
+                        const pending = __ps$match$0.pending;
+                        const work = __ps$match$0.work;
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelOrderStep, work)); switch (__ps$match$0[__ps$tag$28]) {
+                            case "next": {
+                                const next = __ps$match$0.tasks;
+                                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levelNameCompare"](name, remaining, pending, next), rest), values));
+                            }
+                            case "done": {
+                                const order = __ps$match$0.order;
+                                return (yield* (function* () { const __ps$match$0 = order; switch (__ps$match$0[__ps$tag$13]) {
+                                    case "less": return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levelName"](name, remaining, pending), rest), values));
+                                    case "same": return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levels"](pending), rest), values));
+                                    case "greater": return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["levelName"](name, remaining, pending), rest), values));
+                                } throw new Error("invalid ProofScript constructor tag"); })());
+                            }
+                            case "invalidState": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "parameterArguments": {
+                        const remaining = __ps$match$0.remaining;
+                        const reversed = __ps$match$0.reversed;
+                        const value = __ps$match$0.value;
+                        const type = __ps$match$0.type;
+                        return (yield* (function* () { const __ps$match$0 = remaining; switch (__ps$match$0[__ps$tag$8]) {
+                            case "nil": return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["parameters"]((yield* __ps$invoke(psKernelLevelInstantiateStart, (yield* __ps$invoke(psKernelTypingParameters, env)), reversed, PsKernelLevel["zero"])), value, type), rest), values));
+                            case "cons": {
+                                const unusedName = __ps$match$0.head;
+                                const tail = __ps$match$0.tail;
+                                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["parameterArguments"](tail, PsKernelList["cons"](PsKernelLevel["zero"], reversed), value, type), rest), values));
+                            }
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "parameters": {
+                        const current = __ps$match$0.state;
+                        const value = __ps$match$0.value;
+                        const type = __ps$match$0.type;
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelLevelInstantiateStep, current)); switch (__ps$match$0[__ps$tag$42]) {
+                            case "next": {
+                                const next = __ps$match$0.state;
+                                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["parameters"](next, value, type), rest), values));
+                            }
+                            case "final": {
+                                const result = __ps$match$0.result;
+                                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$41]) {
+                                    case "outOfFuel": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
+                                    case "invalidState": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
+                                    case "invalidParameters": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidUniverse"]));
+                                    case "undeclaredParameter": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
+                                    case "done": {
+                                        const unused = __ps$match$0.value;
+                                        return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["infer"](PsKernelList["nil"](), type), PsKernelList["cons"](PsKernelTypeTask["reduceTop"], PsKernelList["cons"](PsKernelTypeTask["checkSort"](value, type), rest))), values));
+                                    }
+                                } throw new Error("invalid ProofScript constructor tag"); })());
+                            }
+                        } throw new Error("invalid ProofScript constructor tag"); })());
+                    }
+                    case "instantiate": {
+                        const current = __ps$match$0.state;
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelExprInstantiateStep, current)); switch (__ps$match$0[__ps$tag$46]) {
+                            case "next": {
+                                const next = __ps$match$0.state;
+                                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["instantiate"](next), rest), values));
+                            }
+                            case "final": {
+                                const result = __ps$match$0.result;
+                                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$45]) {
+                                    case "outOfFuel": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
+                                    case "invalidState": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
+                                    case "invalidParameters": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidUniverse"]));
+                                    case "undeclaredParameter": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidUniverse"]));
+                                    case "done": {
+                                        const value = __ps$match$0.value;
+                                        return (yield* __ps$invoke(psKernelTypePush, env, rest, values, value));
+                                    }
+                                } throw new Error("invalid ProofScript constructor tag"); })());
+                            }
+                        } throw new Error("invalid ProofScript constructor tag"); })());
                     }
                     case "bound": {
                         const context = __ps$match$0.context;
@@ -5297,22 +5542,16 @@ function* __ps$impl$psKernelTypeStep(state) { return (yield* (function* () { con
                         } throw new Error("invalid ProofScript constructor tag"); })());
                     }
                     case "lookup": {
+                        const levels = __ps$match$0.levels;
                         const current = __ps$match$0.state;
-                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelLookupStep, current)); switch (__ps$match$0[__ps$tag$50]) {
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelLookupStep, current)); switch (__ps$match$0[__ps$tag$51]) {
                             case "next": {
                                 const next = __ps$match$0.state;
-                                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["lookup"](next), rest), values));
+                                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["lookup"](levels, next), rest), values));
                             }
                             case "found": {
                                 const entry = __ps$match$0.entry;
-                                return (yield* (function* () { const __ps$match$0 = entry; switch (__ps$match$0[__ps$tag$47]) {
-                                    case "definition": {
-                                        const unusedName = __ps$match$0.name;
-                                        const type = __ps$match$0.type;
-                                        const unusedValue = __ps$match$0.value;
-                                        return (yield* __ps$invoke(psKernelTypePush, env, rest, values, type));
-                                    }
-                                } throw new Error("invalid ProofScript constructor tag"); })());
+                                return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["instantiate"]((yield* __ps$invoke(psKernelExprInstantiateStart, (yield* __ps$invoke(psKernelDefinitionParameters, entry)), levels, (yield* __ps$invoke(psKernelDefinitionType, entry))))), rest), values));
                             }
                             case "missing": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["unknownConstant"]));
                             case "invalidState": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
@@ -5341,14 +5580,14 @@ function* __ps$impl$psKernelTypeStep(state) { return (yield* (function* () { con
                     }
                     case "reduce": {
                         const current = __ps$match$0.state;
-                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelReduceStep, current)); switch (__ps$match$0[__ps$tag$54]) {
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelReduceStep, current)); switch (__ps$match$0[__ps$tag$55]) {
                             case "next": {
                                 const next = __ps$match$0.state;
                                 return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["reduce"](next), rest), values));
                             }
                             case "final": {
                                 const result = __ps$match$0.result;
-                                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$53]) {
+                                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$54]) {
                                     case "outOfFuel": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
                                     case "rejected": {
                                         const error = __ps$match$0.error;
@@ -5365,14 +5604,14 @@ function* __ps$impl$psKernelTypeStep(state) { return (yield* (function* () { con
                     case "reduceTop": return (yield* __ps$invoke(psKernelTypeValueTask, env, task, rest, values));
                     case "conversion": {
                         const current = __ps$match$0.state;
-                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelConversionStep, current)); switch (__ps$match$0[__ps$tag$58]) {
+                        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelConversionStep, current)); switch (__ps$match$0[__ps$tag$59]) {
                             case "next": {
                                 const next = __ps$match$0.state;
                                 return (yield* __ps$invoke(psKernelTypeNext, env, PsKernelList["cons"](PsKernelTypeTask["conversion"](next), rest), values));
                             }
                             case "final": {
                                 const result = __ps$match$0.result;
-                                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$57]) {
+                                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$58]) {
                                     case "outOfFuel": return (yield* __ps$invoke(psKernelTypeReject, PsKernelCheckError["invalidState"]));
                                     case "rejected": {
                                         const error = __ps$match$0.error;
@@ -5457,11 +5696,14 @@ function* __ps$impl$psKernelTypeStep(state) { return (yield* (function* () { con
 } throw new Error("invalid ProofScript constructor tag"); })()); }
 __ps$implementations.set(psKernelTypeStep, __ps$impl$psKernelTypeStep);
 export function psKernelInferStart(env, value) { while (true) {
-    return PsKernelTypeState["state"](env, PsKernelList["cons"](PsKernelTypeTask["infer"](PsKernelList["nil"](), value), PsKernelList["nil"]()), PsKernelList["nil"]());
+    return PsKernelTypeState["state"](PsKernelTypingContext["context"](env, PsKernelList["nil"]()), PsKernelList["cons"](PsKernelTypeTask["infer"](PsKernelList["nil"](), value), PsKernelList["nil"]()), PsKernelList["nil"]());
 } }
-export function psKernelCheckStart(env, value, type) { while (true) {
-    return PsKernelTypeState["state"](env, PsKernelList["cons"](PsKernelTypeTask["infer"](PsKernelList["nil"](), type), PsKernelList["cons"](PsKernelTypeTask["reduceTop"], PsKernelList["cons"](PsKernelTypeTask["checkSort"](value, type), PsKernelList["nil"]()))), PsKernelList["nil"]());
+export function psKernelCheckWithParametersStart(env, parameters, value, type) { while (true) {
+    return PsKernelTypeState["state"](PsKernelTypingContext["context"](env, parameters), PsKernelList["cons"](PsKernelTypeTask["parameterArguments"](parameters, PsKernelList["nil"](), value, type), PsKernelList["nil"]()), PsKernelList["nil"]());
 } }
+export function psKernelCheckStart(env, value, type) { return __ps$run(__ps$impl$psKernelCheckStart(env, value, type)); }
+function* __ps$impl$psKernelCheckStart(env, value, type) { return (yield* __ps$invoke(psKernelCheckWithParametersStart, env, PsKernelList["nil"](), value, type)); }
+__ps$implementations.set(psKernelCheckStart, __ps$impl$psKernelCheckStart);
 export function psKernelTypeRun(fuel, __ps_eta_0) { return __ps$run(__ps$impl$psKernelTypeRun(fuel, __ps_eta_0)); }
 function* __ps$impl$psKernelTypeRun(fuel, __ps_eta_0) { return (yield* (function* () { const __ps$match$0 = fuel; switch (__ps$match$0[__ps$tag$11]) {
     case "stop": return (yield* (function* () { {
@@ -5472,7 +5714,7 @@ function* __ps$impl$psKernelTypeRun(fuel, __ps_eta_0) { return (yield* (function
         const remaining = __ps$match$0.remaining;
         return (yield* (function* () { {
             const state = __ps_eta_0;
-            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelTypeStep, state)); switch (__ps$match$0[__ps$tag$62]) {
+            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelTypeStep, state)); switch (__ps$match$0[__ps$tag$63]) {
                 case "next": {
                     const next = __ps$match$0.state;
                     return (yield* (function* () { {
@@ -5493,7 +5735,7 @@ export function psKernelAdmissionReject(error) { while (true) {
     return PsKernelAdmissionStep["final"](PsKernelAdmissionResult["rejected"](error));
 } }
 export function psKernelAdmissionStep(state) { return __ps$run(__ps$impl$psKernelAdmissionStep(state)); }
-function* __ps$impl$psKernelAdmissionStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$63]) {
+function* __ps$impl$psKernelAdmissionStep(state) { return (yield* (function* () { const __ps$match$0 = state; switch (__ps$match$0[__ps$tag$64]) {
     case "pending": {
         const env = __ps$match$0.environment;
         const entries = __ps$match$0.entries;
@@ -5502,26 +5744,22 @@ function* __ps$impl$psKernelAdmissionStep(state) { return (yield* (function* () 
             case "cons": {
                 const entry = __ps$match$0.head;
                 const rest = __ps$match$0.tail;
-                return (yield* (function* () { const __ps$match$0 = entry; switch (__ps$match$0[__ps$tag$47]) {
-                    case "definition": {
-                        const name = __ps$match$0.name;
-                        const unusedType = __ps$match$0.type;
-                        const unusedValue = __ps$match$0.value;
-                        return (yield* (function* () { const __ps$match$0 = name; switch (__ps$match$0[__ps$tag$6]) {
-                            case "anonymous": return (yield* __ps$invoke(psKernelAdmissionReject, PsKernelCheckError["invalidName"]));
-                            case "str": {
-                                const _wild0 = __ps$match$0.parent;
-                                const _wild1 = __ps$match$0.value;
-                                return PsKernelAdmissionStep["next"](PsKernelAdmissionState["duplicate"](env, entry, rest, PsKernelLookupState["search"](name, env)));
-                            }
-                            case "num": {
-                                const _wild0 = __ps$match$0.parent;
-                                const _wild1 = __ps$match$0.value;
-                                return PsKernelAdmissionStep["next"](PsKernelAdmissionState["duplicate"](env, entry, rest, PsKernelLookupState["search"](name, env)));
-                            }
-                        } throw new Error("invalid ProofScript constructor tag"); })());
-                    }
-                } throw new Error("invalid ProofScript constructor tag"); })());
+                return (yield* (function* () { {
+                    const name = (yield* __ps$invoke(psKernelDefinitionName, entry));
+                    return (yield* (function* () { const __ps$match$0 = name; switch (__ps$match$0[__ps$tag$6]) {
+                        case "anonymous": return (yield* __ps$invoke(psKernelAdmissionReject, PsKernelCheckError["invalidName"]));
+                        case "str": {
+                            const _wild0 = __ps$match$0.parent;
+                            const _wild1 = __ps$match$0.value;
+                            return PsKernelAdmissionStep["next"](PsKernelAdmissionState["duplicate"](env, entry, rest, PsKernelLookupState["search"](name, env)));
+                        }
+                        case "num": {
+                            const _wild0 = __ps$match$0.parent;
+                            const _wild1 = __ps$match$0.value;
+                            return PsKernelAdmissionStep["next"](PsKernelAdmissionState["duplicate"](env, entry, rest, PsKernelLookupState["search"](name, env)));
+                        }
+                    } throw new Error("invalid ProofScript constructor tag"); })());
+                } })());
             }
         } throw new Error("invalid ProofScript constructor tag"); })());
     }
@@ -5530,7 +5768,7 @@ function* __ps$impl$psKernelAdmissionStep(state) { return (yield* (function* () 
         const entry = __ps$match$0.entry;
         const rest = __ps$match$0.rest;
         const current = __ps$match$0.state;
-        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelLookupStep, current)); switch (__ps$match$0[__ps$tag$50]) {
+        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelLookupStep, current)); switch (__ps$match$0[__ps$tag$51]) {
             case "next": {
                 const next = __ps$match$0.state;
                 return PsKernelAdmissionStep["next"](PsKernelAdmissionState["duplicate"](env, entry, rest, next));
@@ -5539,14 +5777,7 @@ function* __ps$impl$psKernelAdmissionStep(state) { return (yield* (function* () 
                 const unusedEntry = __ps$match$0.entry;
                 return (yield* __ps$invoke(psKernelAdmissionReject, PsKernelCheckError["duplicateName"]));
             }
-            case "missing": return (yield* (function* () { const __ps$match$0 = entry; switch (__ps$match$0[__ps$tag$47]) {
-                case "definition": {
-                    const unusedName = __ps$match$0.name;
-                    const type = __ps$match$0.type;
-                    const value = __ps$match$0.value;
-                    return PsKernelAdmissionStep["next"](PsKernelAdmissionState["checking"](env, entry, rest, (yield* __ps$invoke(psKernelCheckStart, env, value, type))));
-                }
-            } throw new Error("invalid ProofScript constructor tag"); })());
+            case "missing": return PsKernelAdmissionStep["next"](PsKernelAdmissionState["checking"](env, entry, rest, (yield* __ps$invoke(psKernelCheckWithParametersStart, env, (yield* __ps$invoke(psKernelDefinitionParameters, entry)), (yield* __ps$invoke(psKernelDefinitionValue, entry)), (yield* __ps$invoke(psKernelDefinitionType, entry))))));
             case "invalidState": return (yield* __ps$invoke(psKernelAdmissionReject, PsKernelCheckError["invalidState"]));
         } throw new Error("invalid ProofScript constructor tag"); })());
     }
@@ -5555,14 +5786,14 @@ function* __ps$impl$psKernelAdmissionStep(state) { return (yield* (function* () 
         const entry = __ps$match$0.entry;
         const rest = __ps$match$0.rest;
         const current = __ps$match$0.state;
-        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelTypeStep, current)); switch (__ps$match$0[__ps$tag$62]) {
+        return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelTypeStep, current)); switch (__ps$match$0[__ps$tag$63]) {
             case "next": {
                 const next = __ps$match$0.state;
                 return PsKernelAdmissionStep["next"](PsKernelAdmissionState["checking"](env, entry, rest, next));
             }
             case "final": {
                 const result = __ps$match$0.result;
-                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$61]) {
+                return (yield* (function* () { const __ps$match$0 = result; switch (__ps$match$0[__ps$tag$62]) {
                     case "outOfFuel": return (yield* __ps$invoke(psKernelAdmissionReject, PsKernelCheckError["invalidState"]));
                     case "rejected": {
                         const error = __ps$match$0.error;
@@ -5591,7 +5822,7 @@ function* __ps$impl$psKernelAdmissionRun(fuel, __ps_eta_0) { return (yield* (fun
         const remaining = __ps$match$0.remaining;
         return (yield* (function* () { {
             const state = __ps_eta_0;
-            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelAdmissionStep, state)); switch (__ps$match$0[__ps$tag$65]) {
+            return (yield* (function* () { const __ps$match$0 = (yield* __ps$invoke(psKernelAdmissionStep, state)); switch (__ps$match$0[__ps$tag$66]) {
                 case "next": {
                     const next = __ps$match$0.state;
                     return (yield* (function* () { {

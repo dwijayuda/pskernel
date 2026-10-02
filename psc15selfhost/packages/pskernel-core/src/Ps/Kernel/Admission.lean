@@ -31,21 +31,19 @@ def psKernelAdmissionStep (state : PsKernelAdmissionState) : PsKernelAdmissionSt
       match entries with
       | PsKernelList.nil => PsKernelAdmissionStep.final (PsKernelAdmissionResult.admitted env)
       | PsKernelList.cons entry rest =>
-          match entry with
-          | PsKernelDefinition.definition name unusedType unusedValue =>
-              match name with
-              | PsKernelName.anonymous => psKernelAdmissionReject PsKernelCheckError.invalidName
-              | _ => PsKernelAdmissionStep.next (PsKernelAdmissionState.duplicate env entry rest
-                  (PsKernelLookupState.search name env))
+          let name : PsKernelName := psKernelDefinitionName entry;
+          match name with
+          | PsKernelName.anonymous => psKernelAdmissionReject PsKernelCheckError.invalidName
+          | _ => PsKernelAdmissionStep.next (PsKernelAdmissionState.duplicate env entry rest
+              (PsKernelLookupState.search name env))
   | PsKernelAdmissionState.duplicate env entry rest current =>
       match psKernelLookupStep current with
       | PsKernelLookupStep.next next => PsKernelAdmissionStep.next (PsKernelAdmissionState.duplicate env entry rest next)
       | PsKernelLookupStep.found unusedEntry => psKernelAdmissionReject PsKernelCheckError.duplicateName
       | PsKernelLookupStep.invalidState => psKernelAdmissionReject PsKernelCheckError.invalidState
       | PsKernelLookupStep.missing =>
-          match entry with
-          | PsKernelDefinition.definition unusedName type value =>
-              PsKernelAdmissionStep.next (PsKernelAdmissionState.checking env entry rest (psKernelCheckStart env value type))
+          PsKernelAdmissionStep.next (PsKernelAdmissionState.checking env entry rest
+            (psKernelCheckWithParametersStart env (psKernelDefinitionParameters entry) (psKernelDefinitionValue entry) (psKernelDefinitionType entry)))
   | PsKernelAdmissionState.checking env entry rest current =>
       match psKernelTypeStep current with
       | PsKernelTypeStep.next next => PsKernelAdmissionStep.next (PsKernelAdmissionState.checking env entry rest next)

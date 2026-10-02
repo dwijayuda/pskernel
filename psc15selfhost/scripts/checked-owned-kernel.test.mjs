@@ -48,7 +48,7 @@ for (const [label, change] of [
   ['inductive', a => { a.kind = 'inductive'; }],
   ['axiom', a => { a.declaration.k = 'axiom'; }],
   ['unsafe', a => { a.declaration.s = 'unsafe'; }],
-  ['polymorphic', a => { a.declaration.lp = [name('u')]; }],
+  ['duplicate universe parameters', a => { a.declaration.lp = [name('u'), name('u')]; }],
   ['universe parameter', a => { a.declaration.t.l = { k: 'p', n: name('u') }; }],
   ['literal', a => { a.declaration.v = { k: 'nat', v: '0' }; }],
   ['unknown field', a => { a.accepted = true; }],
@@ -68,6 +68,45 @@ test('structured names do not collide with dotted root names', async () => {
   a.declaration.n = name('A.B');
   b.declaration.n = { k: 's', p: name('A'), v: 'B' };
   assert.equal((await checkOwnedAdmissions(wire([a, b]))).accepted, true);
+});
+
+const param = n => ({ k: 'p', n: name(n) });
+const polyType = l => binder('forall', 'A', { k: 'sort', l }, binder('forall', 'a', B(0), B(1)));
+const polyValue = l => binder('lam', 'A', { k: 'sort', l }, binder('lam', 'a', B(0), B(0)));
+const poly = () => {
+  const d = definition('Poly', polyType(param('u')), polyValue(param('u')));
+  d.declaration.lp = [name('u')];
+  return d;
+};
+test('default admits a polymorphic identity and checks distinct universe instantiations', async () => {
+  for (const l of [Z, { k: 's', o: Z }, { k: 'max', l: Z, r: { k: 's', o: Z } }]) {
+    const use = definition('Use', polyType(l), { ...C('Poly'), ls: [l] });
+    const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]));
+    assert.equal(result.accepted, true, JSON.stringify(result));
+    assert.equal(result.profile, 'owned-polymorphic-definitions/2');
+    assert.equal(descriptor.selector, 'pskernel-core');
+  }
+});
+for (const [label, levels, typeLevel, errorKind] of [
+  ['missing', [], Z, 'invalidUniverse'],
+  ['extra', [Z, Z], Z, 'invalidUniverse'],
+  ['undeclared', [param('missing')], Z, 'invalidUniverse'],
+  ['wrong type', [Z], { k: 's', o: Z }, 'typeMismatch'],
+]) test(`default rejects ${label} polymorphic instantiation without fallback`, async () => {
+  const use = definition('Use', polyType(typeLevel), { ...C('Poly'), ls: levels });
+  const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]));
+  assert.equal(descriptor.selector, 'pskernel-core');
+  assert.equal(result.accepted, false);
+  assert.equal(result.errorKind, errorKind);
+  assert.equal(result.admissionIndex, 1);
+  assert.equal(result.environment, undefined);
+});
+test('polymorphic checking shares exhaustion bounds with ordinary admission', async () => {
+  for (const maxSteps of [0, 1, 32]) {
+    const result = await checkOwnedAdmissions(wire([poly()]), { maxSteps });
+    assert.equal(result.accepted, false);
+    assert.equal(result.errorKind, 'outOfFuel');
+  }
 });
 test('exhaustion, timeout, malformed input and invalid limits cannot accept', async () => {
   for (const maxSteps of [0, 1, 2]) {

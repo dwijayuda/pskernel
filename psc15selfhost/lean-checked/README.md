@@ -14,7 +14,7 @@ the portable closure; neither provider branch is wholesale-merged.
 No failure, timeout, exhaustion, rejection or unsupported declaration triggers
 fallback. Making the owned kernel the default does not complete its release gates.
 
-The owned runtime checks closed monomorphic transparent definitions from an empty
+The owned runtime checks closed universe-polymorphic transparent definitions from an empty
 environment. Generated semantic transitions perform dependent typing, beta/zeta/delta
 reduction, binding and universe normalization. Host code validates and converts the
 wire representation, runs those transitions, enforces bounds and transports results.
@@ -24,7 +24,7 @@ no checked environment.
 
 The full joint bootstrap currently fails at admission 0: the universe-polymorphic
 _pscCheckedNestedUnit inductive. Inductive admission, generated recursors,
-universe-polymorphic declarations, prelude primitives, proof irrelevance and eta
+prelude primitives, proof irrelevance and eta
 remain required development work. See the exact measured checkpoint in
 [OWNED_DEFAULT_BOOTSTRAP_2026-10-02.md](../docs/continuity/OWNED_DEFAULT_BOOTSTRAP_2026-10-02.md).
 

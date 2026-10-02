@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "Actual closed monomorphic term judgments; bounded differential evidence, not full compatibility or a soundness proof",
-  "sourceManifestSha256": "c2ef9dbeca6648e83e6fe8ef8fcad6ca5b83869f14dc32735bb3de84139b5c72",
+  "sourceManifestSha256": "6dc3f454d1c20d82e5eff7025290b863772d6bedf0805dd96ba612812ce4e32f",
   "harnessSha256": "9af8248e9d9d374aca2856247d25a4995eaedd6b1cbc80992e6bb2af120be620",
   "provider": {
     "protocol": "pskernel-lean/1",
@@ -34,7 +34,7 @@
       "reason": "explicitly unsupported feature"
     },
     {
-      "name": "polymorphic-constant-not-supported",
+      "name": "unknown-polymorphic-constant",
       "reason": "explicitly unsupported feature"
     },
     {
@@ -51,5 +51,5 @@
     }
   ],
   "recordsPath": "dist/evidence/checker-differential-records.json",
-  "recordsSha256": "2464a865c31ad0167273dc9b742f3736709bf2bad1e7abdb7d08f3f8c978dd05"
+  "recordsSha256": "ee6dbc5b82e3fbf9bee6600fed638fc5306354145a4412f01c61cd18047fcb58"
 }

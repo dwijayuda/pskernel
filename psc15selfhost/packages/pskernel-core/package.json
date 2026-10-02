@@ -1,6 +1,6 @@
 {
   "name": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.3",
+  "version": "0.1.0-checker.4",
   "private": true,
   "description": "Owned PSC-compiled dependent term-checker fragment; private experimental checkpoint, not an authoritative kernel",
   "type": "module",
@@ -36,6 +36,7 @@
     "prepublishOnly": "node scripts/release-check.mjs",
     "test:checker-oracle": "node scripts/checker-oracle.mjs",
     "test:checker-differential": "node scripts/checker-differential.mjs",
+    "test:polymorphic-differential": "node scripts/polymorphic-differential.mjs",
     "verify:evidence": "node scripts/verify-evidence.mjs"
   },
   "dependencies": {},

@@ -50,8 +50,7 @@ function level(value, depth = 0) {
   shape(value, keys[value.k], depth);
   if (value.k === 'z') return k.PsKernelLevel.zero;
   if (value.k === 's') return k.PsKernelLevel.succ(level(value.o, depth + 1));
-  // This provider profile has no universe-parameter context yet.
-  if (value.k === 'p') fail('unsupported-universe-parameter');
+  if (value.k === 'p') return k.PsKernelLevel.param(name(value.n, depth + 1));
   return k.PsKernelLevel[value.k](level(value.l, depth + 1), level(value.r, depth + 1));
 }
 function expr(value, depth = 0) {
@@ -64,8 +63,8 @@ function expr(value, depth = 0) {
     case 'b': return E.bvar(natural(value.i));
     case 'sort': return E.sortE(level(value.l, depth + 1));
     case 'const':
-      if (!Array.isArray(value.ls) || value.ls.length !== 0) fail('unsupported-universe-instantiation');
-      return E.constE(name(value.n, depth + 1), nil());
+      if (!Array.isArray(value.ls)) fail('invalid-universe-arguments');
+      return E.constE(name(value.n, depth + 1), list(value.ls.map(item => level(item, depth + 1))));
     case 'app': return E.app(sub(value.f), sub(value.a));
     case 'let': return E.letE(name(value.n, depth + 1), sub(value.t), sub(value.v), sub(value.b));
     default: {
@@ -88,12 +87,12 @@ try {
     const d = admission.declaration;
     if (d?.k !== 'definition') fail(`unsupported-declaration:${d?.k}`);
     shape(d, ['k','n','lp','t','v','h','s'], 0);
-    if (!Array.isArray(d.lp) || d.lp.length) fail('unsupported-universe-parameter');
+    if (!Array.isArray(d.lp)) fail('invalid-universe-parameters');
     if (d.s !== 'safe') fail('unsupported-safety');
     shape(d.h, ['k','h'], 0);
     if (d.h.k !== 'regular') fail('unsupported-reducibility');
     natural(d.h.h); // Height is a reduction hint; it grants no admission authority.
-    definitions.push(k.PsKernelDefinition.definition(name(d.n), expr(d.t), expr(d.v)));
+    definitions.push(k.PsKernelDefinition.polymorphic(name(d.n), list(d.lp.map(item => name(item))), expr(d.t), expr(d.v)));
     admissionIndex++;
   }
   let state = k.psKernelAdmissionStart(list(definitions));

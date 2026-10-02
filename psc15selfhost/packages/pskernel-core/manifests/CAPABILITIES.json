@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "package": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.3",
+  "version": "0.1.0-checker.4",
   "status": "experimental-term-checker",
   "canCheckProofs": false,
   "authoritative": false,
@@ -21,7 +21,10 @@
     "dependent-Pi-lambda-application-let-typing",
     "closed-monomorphic-sequential-definition-admission",
     "bounded-simultaneous-universe-instantiation",
-    "bounded-expression-universe-instantiation"
+    "bounded-expression-universe-instantiation",
+    "closed-polymorphic-sequential-definition-admission",
+    "scope-and-arity-checked-universe-instantiation",
+    "polymorphic-transparent-delta-reduction"
   ],
   "boundedEvidence": [
     "BUILD.json",
@@ -29,7 +32,8 @@
     "SEMANTIC_ORACLE.json",
     "LEVEL_DIFFERENTIAL.json",
     "CHECKER_ORACLE.json",
-    "CHECKER_DIFFERENTIAL.json"
+    "CHECKER_DIFFERENTIAL.json",
+    "POLYMORPHIC_DIFFERENTIAL.json"
   ],
   "releaseGates": {
     "term-checking": {
@@ -90,7 +94,6 @@
     }
   },
   "explicitlyUnsupported": [
-    "universe-parameter-instantiation",
     "proof-irrelevance-conversion",
     "function-and-structure-eta",
     "inductive-and-recursor-admission",

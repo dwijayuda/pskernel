@@ -1,3 +1,4 @@
+import Ps.Kernel.ExprInstantiate
 import Ps.Kernel.Data
 import Ps.Kernel.Expr
 import Ps.Kernel.Binding
@@ -9,7 +10,8 @@ All nested substitutions and lookups consume the caller's transition budget. -/
 inductive PsKernelReduceTask where
   | whnf (value : PsKernelExpr)
   | apply (arg : PsKernelExpr)
-  | lookup (state : PsKernelLookupState)
+  | lookup (levels : PsKernelList PsKernelLevel) (state : PsKernelLookupState)
+  | instantiate (state : PsKernelExprInstantiateState)
   | binding (state : PsKernelBindingState)
   | resumeWhnf
   | normal (value : PsKernelExpr)
@@ -57,10 +59,8 @@ def psKernelReduceWhnf
           (PsKernelBindingMode.instantiate val) PsKernelNatural.zero body))
           (PsKernelList.cons PsKernelReduceTask.resumeWhnf tasks)) values
   | PsKernelExpr.constE name levels =>
-      match levels with
-      | PsKernelList.nil => psKernelReduceNext env
-          (PsKernelList.cons (PsKernelReduceTask.lookup (PsKernelLookupState.search name env)) tasks) values
-      | _ => psKernelReduceReject PsKernelCheckError.unsupported
+      psKernelReduceNext env
+        (PsKernelList.cons (PsKernelReduceTask.lookup levels (PsKernelLookupState.search name env)) tasks) values
   | PsKernelExpr.fvar unused => psKernelReduceReject PsKernelCheckError.invalidScope
   | PsKernelExpr.lit unused => psKernelReduceReject PsKernelCheckError.unsupported
   | PsKernelExpr.proj unusedName unusedIndex unusedValue => psKernelReduceReject PsKernelCheckError.unsupported
@@ -129,16 +129,27 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
           | PsKernelReduceTask.normal value =>
               psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf value)
                 (PsKernelList.cons PsKernelReduceTask.expand rest)) values
-          | PsKernelReduceTask.lookup current =>
+          | PsKernelReduceTask.lookup levels current =>
               match psKernelLookupStep current with
               | PsKernelLookupStep.next next =>
-                  psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.lookup next) rest) values
+                  psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.lookup levels next) rest) values
               | PsKernelLookupStep.missing => psKernelReduceReject PsKernelCheckError.unknownConstant
               | PsKernelLookupStep.invalidState => psKernelReduceReject PsKernelCheckError.invalidState
               | PsKernelLookupStep.found entry =>
-                  match entry with
-                  | PsKernelDefinition.definition unusedName unusedType value =>
-                      psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf value) rest) values
+                  psKernelReduceNext env
+                    (PsKernelList.cons (PsKernelReduceTask.instantiate
+                      (psKernelExprInstantiateStart (psKernelDefinitionParameters entry) levels (psKernelDefinitionValue entry)))
+                      (PsKernelList.cons PsKernelReduceTask.resumeWhnf rest)) values
+          | PsKernelReduceTask.instantiate current =>
+              match psKernelExprInstantiateStep current with
+              | PsKernelExprInstantiateStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.instantiate next) rest) values
+              | PsKernelExprInstantiateStep.final result =>
+                  match result with
+                  | PsKernelExprInstantiateResult.done value => psKernelReducePush env rest values value
+                  | PsKernelExprInstantiateResult.invalidParameters => psKernelReduceReject PsKernelCheckError.invalidUniverse
+                  | PsKernelExprInstantiateResult.undeclaredParameter => psKernelReduceReject PsKernelCheckError.invalidUniverse
+                  | _ => psKernelReduceReject PsKernelCheckError.invalidState
           | PsKernelReduceTask.binding current =>
               match psKernelBindingStep current with
               | PsKernelBindingStep.next next =>

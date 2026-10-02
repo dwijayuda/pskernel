@@ -55,8 +55,8 @@ export function assertErasureRuntimeAggregateSourceSyntax(source) {
   }
 
   if (
-    !/structureInfo\.numParams \+ structureInfo\.fields\.length;\s*if view\.args\.length != expectedArity then/.test(structureApp) ||
-    !/ctorInfo\.numParams \+ ctorInfo\.fields\.length;\s*if view\.args\.length != expectedArity then/.test(constructorApp)
+    !/Nat\.add structureInfo\.numParams structureInfo\.fields\.length;\s*if psErasureBoolNot \(Nat\.beq view\.args\.length expectedArity\) then/.test(structureApp) ||
+    !/Nat\.add ctorInfo\.numParams ctorInfo\.fields\.length;\s*if psErasureBoolNot \(Nat\.beq view\.args\.length expectedArity\) then/.test(constructorApp)
   ) {
     throw new Error(
       "PSC2_ERASURE_RUNTIME_AGGREGATE_SELFHOST_SOURCE_SYNTAX_MISSING: sequenced expected arity",
@@ -86,13 +86,13 @@ const mutations = [
   ],
   [
     blocks.structureApp,
-    "structureInfo.numParams + structureInfo.fields.length;",
-    "structureInfo.numParams + structureInfo.fields.length",
+    "Nat.add structureInfo.numParams structureInfo.fields.length;",
+    "Nat.add structureInfo.numParams structureInfo.fields.length",
   ],
   [
     blocks.constructorApp,
-    "ctorInfo.numParams + ctorInfo.fields.length;",
-    "ctorInfo.numParams + ctorInfo.fields.length",
+    "Nat.add ctorInfo.numParams ctorInfo.fields.length;",
+    "Nat.add ctorInfo.numParams ctorInfo.fields.length",
   ],
 ];
 for (const [currentBlock, from, to] of mutations) {

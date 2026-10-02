@@ -637,38 +637,51 @@ def psEraseCondition
     (proposition : PsExpr) :
     Except PsErasureError PsVerifiedIrExpr :=
   let view := psErasureAppView proposition;
-  match view.head, view.args with
-  | .constE name _, [type, left, right] =>
+  match view.head with
+  | .constE name _ =>
       if psNameEq name psEqName then
-        match type with
-        | .constE typeName _ =>
-            if psNameEq typeName psBoolName then
-              match right with
-              | .constE trueName _ =>
-                  if psNameEq trueName psBoolTrueName then
-                    erase left
-                  else
-                    Except.error PsErasureError.unsupportedApplication
-              | _ =>
-                  Except.error PsErasureError.unsupportedApplication
-            else if psNameEq typeName psStringName then
-              match erase left with
-              | Except.error error => Except.error error
-              | Except.ok erasedLeft =>
-                  match erase right with
-                  | Except.error error => Except.error error
-                  | Except.ok erasedRight =>
-                      Except.ok
-                        (PsVerifiedIrExpr.intrinsic
-                          PsVerifiedIrIntrinsic.stringEq
-                          []
-                          [erasedLeft, erasedRight])
-            else
-              Except.error PsErasureError.unsupportedApplication
-        | _ => Except.error PsErasureError.unsupportedApplication
+        match view.args with
+        | List.cons type afterType =>
+            match afterType with
+            | List.cons left afterLeft =>
+                match afterLeft with
+                | List.cons right remaining =>
+                    match remaining with
+                    | List.nil =>
+                        match type with
+                        | .constE typeName _ =>
+                            if psNameEq typeName psBoolName then
+                              match right with
+                              | .constE trueName _ =>
+                                  if psNameEq trueName psBoolTrueName then
+                                    erase left
+                                  else
+                                    Except.error PsErasureError.unsupportedApplication
+                              | _ =>
+                                  Except.error PsErasureError.unsupportedApplication
+                            else if psNameEq typeName psStringName then
+                              match erase left with
+                              | Except.error error => Except.error error
+                              | Except.ok erasedLeft =>
+                                  match erase right with
+                                  | Except.error error => Except.error error
+                                  | Except.ok erasedRight =>
+                                      Except.ok
+                                        (PsVerifiedIrExpr.intrinsic
+                                          PsVerifiedIrIntrinsic.stringEq
+                                          []
+                                          [erasedLeft, erasedRight])
+                            else
+                              Except.error PsErasureError.unsupportedApplication
+                        | _ => Except.error PsErasureError.unsupportedApplication
+                    | List.cons _ _ => Except.error PsErasureError.unsupportedApplication
+                | List.nil => Except.error PsErasureError.unsupportedApplication
+            | List.nil => Except.error PsErasureError.unsupportedApplication
+        | List.nil => Except.error PsErasureError.unsupportedApplication
       else
         Except.error PsErasureError.unsupportedApplication
-  | _, _ => Except.error PsErasureError.unsupportedApplication
+  | _ => Except.error PsErasureError.unsupportedApplication
+
 
 def psEraseIteApplication
     (erase :
@@ -678,40 +691,46 @@ def psEraseIteApplication
   match view.head with
   | .constE name _ =>
       if psErasureBoolAnd (psNameEq name psIteName) (Nat.beq view.args.length 5) then
-        match
-            psErasureExprListAt view.args 1,
-            psErasureExprListAt view.args 3,
-            psErasureExprListAt view.args 4 with
-        | some proposition, some thenBranch, some elseBranch =>
-            match psEraseCondition erase proposition with
-            | Except.error error => Except.error error
-            | Except.ok condition =>
-                match erase thenBranch with
-                | Except.error error => Except.error error
-                | Except.ok erasedThen =>
-                    match erase elseBranch with
+        match psErasureExprListAt view.args 1 with
+        | Option.none => Except.error PsErasureError.unsupportedApplication
+        | Option.some proposition =>
+            match psErasureExprListAt view.args 3 with
+            | Option.none => Except.error PsErasureError.unsupportedApplication
+            | Option.some thenBranch =>
+                match psErasureExprListAt view.args 4 with
+                | Option.none => Except.error PsErasureError.unsupportedApplication
+                | Option.some elseBranch =>
+                    match psEraseCondition erase proposition with
                     | Except.error error => Except.error error
-                    | Except.ok erasedElse =>
-                        Except.ok
-                          (some
-                            (PsVerifiedIrExpr.ifE
-                              condition
-                              erasedThen
-                              erasedElse))
-        | _, _, _ =>
-            Except.error PsErasureError.unsupportedApplication
+                    | Except.ok condition =>
+                        match erase thenBranch with
+                        | Except.error error => Except.error error
+                        | Except.ok erasedThen =>
+                            match erase elseBranch with
+                            | Except.error error => Except.error error
+                            | Except.ok erasedElse =>
+                                Except.ok
+                                  (some
+                                    (PsVerifiedIrExpr.ifE
+                                      condition
+                                      erasedThen
+                                      erasedElse))
       else
         Except.ok none
   | _ => Except.ok none
 
-def psErasureLookupTypeSubstitution :
-    List (String × PsVerifiedIrType) ->
-    String ->
-    Option PsVerifiedIrType
-  | [], _ => none
-  | entry :: rest, name =>
-      if psStringEq entry.1 name then some entry.2
-      else psErasureLookupTypeSubstitution rest name
+def psErasureLookupTypeSubstitution
+    (entries : List (String × PsVerifiedIrType)) :
+    String -> Option PsVerifiedIrType :=
+  match entries with
+  | List.nil => fun (name : String) => Option.none
+  | List.cons entry rest =>
+      let smaller := psErasureLookupTypeSubstitution rest;
+      fun (name : String) =>
+        match entry with
+        | Prod.mk key value =>
+            if psStringEq key name then Option.some value
+            else smaller name
 
 def psSubstituteVerifiedTypeWithFuel
     (substitutions : List (String × PsVerifiedIrType)) :
@@ -787,16 +806,17 @@ def psEraseRuntimeStructureApplication
       | none => Except.ok none
       | some structureInfo =>
           let expectedArity :=
-            structureInfo.numParams + structureInfo.fields.length;
-          if view.args.length != expectedArity then
+            Nat.add structureInfo.numParams structureInfo.fields.length;
+          if psErasureBoolNot (Nat.beq view.args.length expectedArity) then
             Except.error PsErasureError.unsupportedApplication
           else
             match
-                (view.args.take structureInfo.numParams).mapM
-                  (psEraseRuntimeType environment scope) with
+                List.mapM
+                  (psEraseRuntimeType environment scope)
+                  (List.take structureInfo.numParams view.args) with
             | Except.error error => Except.error error
             | Except.ok typeArguments =>
-                if typeArguments.length != structureInfo.typeParameters.length then
+                if psErasureBoolNot (Nat.beq typeArguments.length structureInfo.typeParameters.length) then
                   Except.error PsErasureError.unsupportedApplication
                 else
                   match
@@ -852,13 +872,14 @@ def psEraseRuntimeConstructorApplication
       | none => Except.ok none
       | some ctorInfo =>
           let expectedArity :=
-            ctorInfo.numParams + ctorInfo.fields.length;
-          if view.args.length != expectedArity then
+            Nat.add ctorInfo.numParams ctorInfo.fields.length;
+          if psErasureBoolNot (Nat.beq view.args.length expectedArity) then
             Except.error PsErasureError.unsupportedApplication
           else
             match
-                (view.args.take ctorInfo.numParams).mapM
-                  (psEraseRuntimeType environment scope) with
+                List.mapM
+                  (psEraseRuntimeType environment scope)
+                  (List.take ctorInfo.numParams view.args) with
             | Except.error error => Except.error error
             | Except.ok typeArguments =>
                 match
@@ -963,7 +984,15 @@ def psErasureFindStringIndex
       if psStringEq value target then
         some index
       else
-        psErasureFindStringIndex target rest (index + 1)
+        psErasureFindStringIndex target rest (Nat.add index 1)
+
+def psErasureRuntimeVariables
+    (names : List String) : List PsVerifiedIrExpr :=
+  match names with
+  | List.nil => List.nil
+  | List.cons name rest =>
+      List.cons (PsVerifiedIrExpr.var name) (psErasureRuntimeVariables rest)
+
 
 def psErasureRecursiveCallArguments :
     List String -> Nat -> String -> List PsVerifiedIrExpr
@@ -971,9 +1000,7 @@ def psErasureRecursiveCallArguments :
   | _ :: rest, 0, recursiveName =>
       List.cons
         (PsVerifiedIrExpr.var recursiveName)
-        (rest.map
-          (fun (name : String) =>
-            PsVerifiedIrExpr.var name))
+        (psErasureRuntimeVariables rest)
   | name :: rest, index + 1, recursiveName =>
       List.cons
         (PsVerifiedIrExpr.var name)
@@ -985,6 +1012,16 @@ def psErasureRecursiveCallArguments :
 structure PsOpenMatchHypotheses where
   scope : PsErasureScope
   cursor : PsExpr
+
+def psErasureFindMatchBinding
+    (fieldName : String)
+    (bindings : List PsVerifiedIrMatchBinding) : Option PsVerifiedIrMatchBinding :=
+  match bindings with
+  | List.nil => Option.none
+  | List.cons binding rest =>
+      if psStringEq binding.field fieldName then Option.some binding
+      else psErasureFindMatchBinding fieldName rest
+
 
 def psOpenMatchMinorHypotheses
     (recursiveParameterIndex : Option Nat)
@@ -1003,10 +1040,7 @@ def psOpenMatchMinorHypotheses
       else
         match state.cursor with
         | .lam name domain body binder =>
-            match
-                bindings.find?
-                  (fun (binding : PsVerifiedIrMatchBinding) =>
-                    psStringEq binding.field field.name) with
+            match psErasureFindMatchBinding field.name bindings with
             | none => Except.error PsErasureError.binderMismatch
             | some binding =>
                 let pushed :=
@@ -1029,27 +1063,37 @@ def psOpenMatchMinorHypotheses
                   runtimeExpressions := state.scope.runtimeExpressions
                   currentDefinition := state.scope.currentDefinition
                 };
-                let nextScope :=
-                  match
-                      state.scope.currentDefinition,
-                      recursiveParameterIndex with
-                  | some current, some parameterIndex =>
-                      {
-                        baseScope with
-                        runtimeExpressions :=
-                          List.cons
-                            (Prod.mk
-                              pushed.id
-                              (PsVerifiedIrExpr.call
-                                (PsVerifiedIrExpr.var current.name)
-                                []
-                                (psErasureRecursiveCallArguments
-                                  current.runtimeParameters
-                                  parameterIndex
-                                  binding.name)))
-                            baseScope.runtimeExpressions
-                      }
-                  | _, _ => baseScope;
+                let nextScope : PsErasureScope :=
+                  match state.scope.currentDefinition with
+                  | Option.none => baseScope
+                  | Option.some current =>
+                      match recursiveParameterIndex with
+                      | Option.none => baseScope
+                      | Option.some parameterIndex =>
+                          {
+                            localContext := baseScope.localContext
+                            runtimeLocals := baseScope.runtimeLocals
+                            typeLocals := baseScope.typeLocals
+                            erasedLocals := baseScope.erasedLocals
+                            declarationNames := baseScope.declarationNames
+                            runtimeConstructors := baseScope.runtimeConstructors
+                            runtimeRecursors := baseScope.runtimeRecursors
+                            runtimeStructures := baseScope.runtimeStructures
+                            runtimeStructureConstructors := baseScope.runtimeStructureConstructors
+                            currentDefinition := baseScope.currentDefinition
+                            runtimeExpressions :=
+                              List.cons
+                                (Prod.mk
+                                  pushed.id
+                                  (PsVerifiedIrExpr.call
+                                    (PsVerifiedIrExpr.var current.name)
+                                    []
+                                    (psErasureRecursiveCallArguments
+                                      current.runtimeParameters
+                                      parameterIndex
+                                      binding.name)))
+                                baseScope.runtimeExpressions
+                          };
                 psOpenMatchMinorHypotheses
                   recursiveParameterIndex
                   bindings
@@ -1133,7 +1177,7 @@ def psEraseMatchAlternatives
   | _, [], alternativesRev =>
       Except.ok alternativesRev.reverse
   | index, ctorInfo :: rest, alternativesRev =>
-      match psErasureExprListAt arguments (minorStart + index) with
+      match psErasureExprListAt arguments (Nat.add minorStart index) with
       | none => Except.error PsErasureError.unsupportedApplication
       | some minor =>
           match
@@ -1155,7 +1199,7 @@ def psEraseMatchAlternatives
                 recursiveParameterIndex
                 arguments
                 minorStart
-                (index + 1)
+                (Nat.add index 1)
                 rest
                 (List.cons
                   (Prod.mk
@@ -1180,31 +1224,33 @@ def psEraseRuntimeRecursorApplication
       | none => Except.ok none
       | some inductiveInfo =>
           let expectedArity :=
-            inductiveInfo.numParams +
-              1 +
-              inductiveInfo.constructors.length +
+            Nat.add
+              (Nat.add (Nat.add inductiveInfo.numParams 1)
+                inductiveInfo.constructors.length)
               1;
-          if view.args.length != expectedArity then
+          if psErasureBoolNot (Nat.beq view.args.length expectedArity) then
             Except.error PsErasureError.unsupportedApplication
           else
             match
-                (view.args.take inductiveInfo.numParams).mapM
-                  (psEraseRuntimeType environment scope) with
+                List.mapM
+                  (psEraseRuntimeType environment scope)
+                  (List.take inductiveInfo.numParams view.args) with
             | Except.error error => Except.error error
             | Except.ok typeArguments =>
                 if
-                    typeArguments.length !=
-                      inductiveInfo.typeParameters.length then
+                    psErasureBoolNot
+                      (Nat.beq typeArguments.length
+                        inductiveInfo.typeParameters.length) then
                   Except.error PsErasureError.unsupportedApplication
                 else
+                  let convert :=
+                    fun (entry : PsVerifiedIrTypeParameter × PsVerifiedIrType) =>
+                      match entry with
+                      | Prod.mk parameter value => Prod.mk parameter.name value;
                   let substitutions :=
-                    inductiveInfo.typeParameters.zip typeArguments
-                      |>.map
-                        (fun (entry :
-                            PsVerifiedIrTypeParameter × PsVerifiedIrType) =>
-                          Prod.mk entry.1.name entry.2);
-                  let minorStart := inductiveInfo.numParams + 1;
-                  let majorIndex := expectedArity - 1;
+                    List.map convert (List.zip inductiveInfo.typeParameters typeArguments);
+                  let minorStart := Nat.add inductiveInfo.numParams 1;
+                  let majorIndex := Nat.sub expectedArity 1;
                   match psErasureExprListAt view.args majorIndex with
                   | none =>
                       Except.error PsErasureError.unsupportedApplication
@@ -1212,16 +1258,17 @@ def psEraseRuntimeRecursorApplication
                       match eraseAt scope major with
                       | Except.error error => Except.error error
                       | Except.ok scrutinee =>
-                          let recursiveParameterIndex :=
-                            match
-                                scope.currentDefinition,
-                                scrutinee with
-                            | some current, PsVerifiedIrExpr.var name =>
-                                psErasureFindStringIndex
-                                  name
-                                  current.runtimeParameters
-                                  0
-                            | _, _ => none;
+                          let recursiveParameterIndex : Option Nat :=
+                            match scope.currentDefinition with
+                            | Option.none => Option.none
+                            | Option.some current =>
+                                match scrutinee with
+                                | PsVerifiedIrExpr.var name =>
+                                    psErasureFindStringIndex
+                                      name
+                                      current.runtimeParameters
+                                      0
+                                | _ => Option.none;
                           match
                               psEraseMatchAlternatives
                                 environment
@@ -1244,6 +1291,16 @@ def psEraseRuntimeRecursorApplication
                                     scrutinee
                                     alternatives))
   | _ => Except.ok none
+
+def psErasureFindProjectionField
+    (index : Nat)
+    (fields : List PsRuntimeStructureField) : Option PsRuntimeStructureField :=
+  match fields with
+  | List.nil => Option.none
+  | List.cons field rest =>
+      if Nat.beq field.projectionIndex index then Option.some field
+      else psErasureFindProjectionField index rest
+
 
 def psEraseRuntimeExprWithFuel
     (environment : PsEnvironment)
@@ -1272,12 +1329,14 @@ def psEraseRuntimeExprWithFuel
               match psErasureLookupNat scope.runtimeLocals id with
               | some name => Except.ok (PsVerifiedIrExpr.var name)
               | none =>
+                  let typeLocalPresent : Bool :=
+                    match psErasureLookupNat scope.typeLocals id with
+                    | Option.some _ => true
+                    | Option.none => false;
                   if
                       psErasureBoolOr
                         (psErasureNatInList scope.erasedLocals id)
-                        (match psErasureLookupNat scope.typeLocals id with
-                         | some _ => true
-                         | none => false) then
+                        typeLocalPresent then
                     Except.error (PsErasureError.erasedLocalUsed id)
                   else
                     Except.error (PsErasureError.unknownLocal id)
@@ -1318,126 +1377,135 @@ def psEraseRuntimeExprWithFuel
                   else
                     Except.error (PsErasureError.unknownConstant name)
       | .app _ _ =>
-          let view := psErasureAppView expr
+          let view := psErasureAppView expr;
           let erase :=
             psEraseRuntimeExprWithFuel
               environment
               scope
-              fuel
+              fuel;
           let eraseAt :=
-            fun nextScope value =>
+            fun (nextScope : PsErasureScope) (value : PsExpr) =>
               psEraseRuntimeExprWithFuel
                 environment
                 nextScope
                 fuel
-                value
+                value;
           match psEraseIteApplication erase view with
           | Except.error error => Except.error error
-          | Except.ok (some lowered) => Except.ok lowered
-          | Except.ok none =>
-              match
-                  psErasePrimitiveApplication
-                    environment
-                    scope
-                    erase
-                    view with
-              | Except.error error => Except.error error
-              | Except.ok (some lowered) => Except.ok lowered
-              | Except.ok none =>
+          | Except.ok candidate =>
+              match candidate with
+              | Option.some lowered => Except.ok lowered
+              | Option.none =>
                   match
-                      psEraseRuntimeStructureApplication
+                      psErasePrimitiveApplication
                         environment
                         scope
                         erase
                         view with
                   | Except.error error => Except.error error
-                  | Except.ok (some lowered) => Except.ok lowered
-                  | Except.ok none =>
-                      match
-                          psEraseRuntimeConstructorApplication
-                            environment
-                            scope
-                            erase
-                            view with
-                      | Except.error error => Except.error error
-                      | Except.ok (some lowered) => Except.ok lowered
-                      | Except.ok none =>
+                  | Except.ok candidate =>
+                      match candidate with
+                      | Option.some lowered => Except.ok lowered
+                      | Option.none =>
                           match
-                              psEraseRuntimeRecursorApplication
+                              psEraseRuntimeStructureApplication
                                 environment
                                 scope
-                                eraseAt
+                                erase
                                 view with
                           | Except.error error => Except.error error
-                          | Except.ok (some lowered) => Except.ok lowered
-                          | Except.ok none =>
-                              match
-                                  psInferType
-                                    environment
-                                    psMetaEmpty
-                                    scope.localContext
-                                    view.head with
-                              | Except.error _ =>
-                                  Except.error
-                                    PsErasureError.unsupportedApplication
-                              | Except.ok headType =>
-                                  match erase view.head with
+                          | Except.ok candidate =>
+                              match candidate with
+                              | Option.some lowered => Except.ok lowered
+                              | Option.none =>
+                                  match
+                                      psEraseRuntimeConstructorApplication
+                                        environment
+                                        scope
+                                        erase
+                                        view with
                                   | Except.error error => Except.error error
-                                  | Except.ok loweredHead =>
-                                      match
-                                          psEraseApplicationArguments
-                                            erase
-                                            environment
-                                            scope
-                                            headType
-                                            view.args
-                                            {
-                                              typeArgumentsRev := []
-                                              runtimeArgumentsRev := []
-                                              remainingType := headType
-                                            } with
-                                      | Except.error error =>
-                                          Except.error error
-                                      | Except.ok applied =>
-                                          let typeArguments :=
-                                            applied.typeArgumentsRev.reverse
-                                          let runtimeArguments :=
-                                            applied.runtimeArgumentsRev.reverse
-                                          psEraseFinishApplication
-                                            environment
-                                            scope
-                                            loweredHead
-                                            typeArguments
-                                            runtimeArguments
-                                            applied.remainingType
+                                  | Except.ok candidate =>
+                                      match candidate with
+                                      | Option.some lowered => Except.ok lowered
+                                      | Option.none =>
+                                          match
+                                              psEraseRuntimeRecursorApplication
+                                                environment
+                                                scope
+                                                eraseAt
+                                                view with
+                                          | Except.error error => Except.error error
+                                          | Except.ok candidate =>
+                                              match candidate with
+                                              | Option.some lowered => Except.ok lowered
+                                              | Option.none =>
+                                                  match
+                                                      psInferType
+                                                        environment
+                                                        psMetaEmpty
+                                                        scope.localContext
+                                                        view.head with
+                                                  | Except.error _ =>
+                                                      Except.error
+                                                        PsErasureError.unsupportedApplication
+                                                  | Except.ok headType =>
+                                                      match erase view.head with
+                                                      | Except.error error => Except.error error
+                                                      | Except.ok loweredHead =>
+                                                          match
+                                                              psEraseApplicationArguments
+                                                                erase
+                                                                environment
+                                                                scope
+                                                                headType
+                                                                view.args
+                                                                {
+                                                                  typeArgumentsRev := []
+                                                                  runtimeArgumentsRev := []
+                                                                  remainingType := headType
+                                                                } with
+                                                          | Except.error error =>
+                                                              Except.error error
+                                                          | Except.ok applied =>
+                                                              let typeArguments :=
+                                                                applied.typeArgumentsRev.reverse;
+                                                              let runtimeArguments :=
+                                                                applied.runtimeArgumentsRev.reverse;
+                                                              psEraseFinishApplication
+                                                                environment
+                                                                scope
+                                                                loweredHead
+                                                                typeArguments
+                                                                runtimeArguments
+                                                                applied.remainingType
       | .lam name type body binder =>
           let kind :=
             psErasureClassifyBinder
               environment
               scope.localContext
-              type
+              type;
           let pushed :=
             psLocalPushBinding
               scope.localContext
               name
               type
-              binder
+              binder;
           let openedBody :=
-            psExprInstantiate1 body (PsExpr.fvar pushed.id)
+            psExprInstantiate1 body (PsExpr.fvar pushed.id);
           match kind with
           | .runtime =>
               let parameterName :=
                 psErasureSafeIdentifier
                   (psNameToString name)
-                  "arg"
+                  "arg";
               match psEraseRuntimeType environment scope type with
               | Except.error error => Except.error error
               | Except.ok parameterType =>
                   let nextScope : PsErasureScope := {
                     localContext := pushed.context
                     runtimeLocals :=
-                      (pushed.id, parameterName) ::
-                        scope.runtimeLocals
+                      List.cons (Prod.mk pushed.id parameterName) scope.runtimeLocals
                     typeLocals := scope.typeLocals
                     erasedLocals := scope.erasedLocals
                     declarationNames := scope.declarationNames
@@ -1447,7 +1515,7 @@ def psEraseRuntimeExprWithFuel
                     runtimeStructureConstructors := scope.runtimeStructureConstructors
                     runtimeExpressions := scope.runtimeExpressions
                     currentDefinition := scope.currentDefinition
-                  }
+                  };
                   match
                       psEraseRuntimeExprWithFuel
                         environment
@@ -1460,10 +1528,7 @@ def psEraseRuntimeExprWithFuel
                       | .lambda parameters resultType innerBody =>
                           Except.ok
                             (PsVerifiedIrExpr.lambda
-                              ({
-                                name := parameterName
-                                type := parameterType
-                              } :: parameters)
+                              (List.cons (PsVerifiedIrParameter.mk parameterName parameterType) parameters)
                               resultType
                               innerBody)
                       | _ =>
@@ -1487,20 +1552,17 @@ def psEraseRuntimeExprWithFuel
                               | Except.ok resultType =>
                                   Except.ok
                                     (PsVerifiedIrExpr.lambda
-                                      [{
-                                        name := parameterName
-                                        type := parameterType
-                                      }]
+                                      (List.cons (PsVerifiedIrParameter.mk parameterName parameterType) List.nil)
                                       resultType
                                       loweredBody)
           | .type =>
-              let typeName := "T" ++ toString pushed.id
+              let typeName := String.Internal.append "T" (toString pushed.id);
               let nextScope : PsErasureScope := {
                 localContext := pushed.context
                 runtimeLocals := scope.runtimeLocals
                 typeLocals :=
-                  (pushed.id, typeName) :: scope.typeLocals
-                erasedLocals := pushed.id :: scope.erasedLocals
+                  List.cons (Prod.mk pushed.id typeName) scope.typeLocals
+                erasedLocals := List.cons pushed.id scope.erasedLocals
                 declarationNames := scope.declarationNames
                 runtimeConstructors := scope.runtimeConstructors
                 runtimeRecursors := scope.runtimeRecursors
@@ -1508,7 +1570,7 @@ def psEraseRuntimeExprWithFuel
                 runtimeStructureConstructors := scope.runtimeStructureConstructors
                 runtimeExpressions := scope.runtimeExpressions
                 currentDefinition := scope.currentDefinition
-              }
+              };
               psEraseRuntimeExprWithFuel
                 environment
                 nextScope
@@ -1519,7 +1581,7 @@ def psEraseRuntimeExprWithFuel
                 localContext := pushed.context
                 runtimeLocals := scope.runtimeLocals
                 typeLocals := scope.typeLocals
-                erasedLocals := pushed.id :: scope.erasedLocals
+                erasedLocals := List.cons pushed.id scope.erasedLocals
                 declarationNames := scope.declarationNames
                 runtimeConstructors := scope.runtimeConstructors
                 runtimeRecursors := scope.runtimeRecursors
@@ -1527,7 +1589,7 @@ def psEraseRuntimeExprWithFuel
                 runtimeStructureConstructors := scope.runtimeStructureConstructors
                 runtimeExpressions := scope.runtimeExpressions
                 currentDefinition := scope.currentDefinition
-              }
+              };
               psEraseRuntimeExprWithFuel
                 environment
                 nextScope
@@ -1538,7 +1600,7 @@ def psEraseRuntimeExprWithFuel
             psErasureClassifyBinder
               environment
               scope.localContext
-              type
+              type;
           match kind with
           | .runtime =>
               match psEraseRuntimeType environment scope type with
@@ -1557,16 +1619,15 @@ def psEraseRuntimeExprWithFuel
                           scope.localContext
                           name
                           type
-                          value
+                          value;
                       let localName :=
                         psErasureSafeIdentifier
                           (psNameToString name)
-                          "local"
+                          "local";
                       let nextScope : PsErasureScope := {
                         localContext := pushed.context
                         runtimeLocals :=
-                          (pushed.id, localName) ::
-                            scope.runtimeLocals
+                          List.cons (Prod.mk pushed.id localName) scope.runtimeLocals
                         typeLocals := scope.typeLocals
                         erasedLocals := scope.erasedLocals
                         declarationNames := scope.declarationNames
@@ -1576,7 +1637,7 @@ def psEraseRuntimeExprWithFuel
                         runtimeStructureConstructors := scope.runtimeStructureConstructors
                         runtimeExpressions := scope.runtimeExpressions
                         currentDefinition := scope.currentDefinition
-                      }
+                      };
                       match
                           psEraseRuntimeExprWithFuel
                             environment
@@ -1614,9 +1675,7 @@ def psEraseRuntimeExprWithFuel
                 typeName with
           | none => Except.error PsErasureError.unsupportedRuntimeTerm
           | some structureInfo =>
-              match
-                  structureInfo.fields.find?
-                    (fun field => Nat.beq field.projectionIndex index) with
+              match psErasureFindProjectionField index structureInfo.fields with
               | none => Except.error PsErasureError.unsupportedRuntimeTerm
               | some field =>
                   let typeArgumentsResult :
@@ -1657,7 +1716,7 @@ def psEraseRuntimeExprWithFuel
                                         PsErasureError.unsupportedRuntimeTerm
                                 | _ =>
                                     Except.error
-                                      PsErasureError.unsupportedRuntimeTerm
+                                      PsErasureError.unsupportedRuntimeTerm;
                   match typeArgumentsResult with
                   | Except.error error => Except.error error
                   | Except.ok typeArguments =>

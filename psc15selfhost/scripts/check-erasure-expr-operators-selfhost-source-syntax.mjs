@@ -26,10 +26,10 @@ export function assertErasureExprOperators(source) {
   }
 
   const required = [
-    "psStringEq entry.1 name",
+    "psStringEq key name",
     "psStringEq value target",
     "psErasureBoolNot field.recursive",
-    "psStringEq binding.field field.name",
+    "psStringEq binding.field fieldName",
     "psErasureBoolOr",
     "(Nat.beq ctorInfo.numParams 0)",
     "Nat.beq field.projectionIndex index",

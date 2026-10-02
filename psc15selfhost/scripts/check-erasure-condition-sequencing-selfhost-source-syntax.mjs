@@ -9,7 +9,7 @@ export function assertErasureConditionSequencing(source) {
   )?.[0];
   if (
     !block ||
-    !/let view := psErasureAppView proposition;\s*match view\.head, view\.args with/.test(block)
+    !/let view := psErasureAppView proposition;\s*match view\.head with/.test(block)
   ) {
     throw new Error(
       "PSC2_ERASURE_CONDITION_SEQUENCING_SELFHOST_SOURCE_SYNTAX_MISSING: sequenced app view",

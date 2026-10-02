@@ -14,19 +14,19 @@ export function assertErasureOpenMatchHypothesesSourceSyntax(source) {
   }
   const required = [
     /if psErasureBoolNot field\.recursive then/,
-    /fun \(binding : PsVerifiedIrMatchBinding\) =>\s*psStringEq binding\.field field\.name/,
+    /match psErasureFindMatchBinding field\.name bindings with/,
     /psLocalPushBinding[\s\S]*?binder;/,
     /let baseScope : PsErasureScope := \{[\s\S]*?currentDefinition := state\.scope\.currentDefinition\s*\};/,
     /erasedLocals :=\s*List\.cons pushed\.id state\.scope\.erasedLocals/,
     /runtimeExpressions :=\s*List\.cons\s*\(Prod\.mk\s*pushed\.id[\s\S]*?binding\.name\)\)\)\s*baseScope\.runtimeExpressions/,
-    /\| _, _ => baseScope;\s*psOpenMatchMinorHypotheses/,
+    /currentDefinition := baseScope\.currentDefinition[\s\S]*?\};\s*psOpenMatchMinorHypotheses/,
   ];
   if (!required.every((pattern) => pattern.test(block))) {
     throw new Error(
       "PSC2_ERASURE_OPEN_MATCH_HYPOTHESES_SELFHOST_SOURCE_SYNTAX_MISSING: PSC1-safe recursive-hypothesis path",
     );
   }
-  if (/!field\.recursive|==/.test(block) ||
+  if (/!field\.recursive|==|state\.scope\.currentDefinition,/.test(block) ||
       /fun binding =>/.test(block) ||
       /pushed\.id\s*::\s*state\.scope\.erasedLocals/.test(block) ||
       /\(pushed\.id,[\s\S]*?\)\s*::\s*baseScope\.runtimeExpressions/.test(block)) {
@@ -46,16 +46,16 @@ const block = assertErasureOpenMatchHypothesesSourceSyntax(source);
 const mutations = [
   ["if psErasureBoolNot field.recursive then", "if !field.recursive then"],
   ["if psErasureBoolNot field.recursive then", "if field.recursive == false then"],
-  ["psStringEq binding.field field.name", "binding.field == field.name"],
-  ["fun (binding : PsVerifiedIrMatchBinding) =>", "fun binding =>"],
+  ["match psErasureFindMatchBinding field.name bindings with", "match bindings.find? (fun binding => binding.field == field.name) with"],
+  ["match recursiveParameterIndex with", "match state.scope.currentDefinition, recursiveParameterIndex with"],
   ["binder;", "binder"],
   ["currentDefinition := state.scope.currentDefinition\n                };",
    "currentDefinition := state.scope.currentDefinition\n                }"],
   ["List.cons pushed.id state.scope.erasedLocals",
    "pushed.id :: state.scope.erasedLocals"],
-  ["List.cons\n                            (Prod.mk",
+  ["List.cons\n                                (Prod.mk",
    "(pushed.id,"],
-  ["| _, _ => baseScope;", "| _, _ => baseScope"],
+  ["baseScope.runtimeExpressions\n                          };", "baseScope.runtimeExpressions\n                          }"],
 ];
 for (const [from, to] of mutations) {
   assert.ok(block.includes(from));
@@ -66,5 +66,5 @@ for (const [from, to] of mutations) {
   );
 }
 process.stdout.write(
-  "PSC2_ERASURE_OPEN_MATCH_HYPOTHESES_SELFHOST_SOURCE_SYNTAX: PASS (Bool test, typed lambda, three sequenced locals and explicit cons constructors)\n",
+  "PSC2_ERASURE_OPEN_MATCH_HYPOTHESES_SELFHOST_SOURCE_SYNTAX: PASS (Bool test, structural lookup, unary matches, sequenced locals and explicit cons constructors)\n",
 );

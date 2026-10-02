@@ -13,7 +13,7 @@ export function assertErasureMatchAlternativesSourceSyntax(source) {
     );
   }
   if (
-    !block.includes("match psErasureExprListAt arguments (minorStart + index) with") ||
+    !block.includes("match psErasureExprListAt arguments (Nat.add minorStart index) with") ||
     !/List\.cons\s*\(Prod\.mk\s*alternative\.constructorName\s*\(Prod\.mk\s*alternative\.bindings\s*alternative\.body\)\)\s*alternativesRev/.test(block)
   ) {
     throw new Error(
@@ -37,7 +37,7 @@ const source = await readFile(
 const block = assertErasureMatchAlternativesSourceSyntax(source);
 const mutations = [
   [
-    "match psErasureExprListAt arguments (minorStart + index) with",
+    "match psErasureExprListAt arguments (Nat.add minorStart index) with",
     "match arguments[minorStart + index]? with",
   ],
   [

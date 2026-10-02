@@ -13,12 +13,13 @@ export function assertErasureRuntimeRecursorSourceSyntax(source) {
     );
   }
   const required = [
-    /inductiveInfo\.constructors\.length \+\s*1;\s*if view\.args\.length != expectedArity then/,
-    /fun \(entry :\s*PsVerifiedIrTypeParameter × PsVerifiedIrType\) =>\s*Prod\.mk entry\.1\.name entry\.2/,
-    /let minorStart := inductiveInfo\.numParams \+ 1;/,
-    /let majorIndex := expectedArity - 1;/,
+    /Nat\.add\s*\(Nat\.add \(Nat\.add inductiveInfo\.numParams 1\)\s*inductiveInfo\.constructors\.length\)\s*1;\s*if psErasureBoolNot \(Nat\.beq view\.args\.length expectedArity\) then/,
+    /fun \(entry : PsVerifiedIrTypeParameter × PsVerifiedIrType\) =>\s*match entry with\s*\| Prod\.mk parameter value => Prod\.mk parameter\.name value;/,
+    /let minorStart := Nat\.add inductiveInfo\.numParams 1;/,
+    /let majorIndex := Nat\.sub expectedArity 1;/,
     /match psErasureExprListAt view\.args majorIndex with/,
-    /\| _, _ => none;\s*match\s+psEraseMatchAlternatives/,
+    /match scope\.currentDefinition with\s*\| Option\.none => Option\.none\s*\| Option\.some current =>\s*match scrutinee with/,
+    /\| _ => Option\.none;\s*match\s+psEraseMatchAlternatives/,
   ];
   if (!required.every((pattern) => pattern.test(block))) {
     throw new Error(
@@ -42,14 +43,14 @@ const source = await readFile(
 );
 const block = assertErasureRuntimeRecursorSourceSyntax(source);
 const mutations = [
-  ["1;\n          if view.args.length", "1\n          if view.args.length"],
-  ["fun (entry :\n                            PsVerifiedIrTypeParameter × PsVerifiedIrType) =>",
+  ["1;\n          if psErasureBoolNot", "1\n          if psErasureBoolNot"],
+  ["fun (entry : PsVerifiedIrTypeParameter × PsVerifiedIrType) =>",
    "fun entry =>"],
-  ["Prod.mk entry.1.name entry.2", "(entry.1.name, entry.2)"],
-  ["let minorStart := inductiveInfo.numParams + 1;", "let minorStart := inductiveInfo.numParams + 1"],
-  ["let majorIndex := expectedArity - 1;", "let majorIndex := expectedArity - 1"],
+  ["Prod.mk parameter.name value", "(parameter.name, value)"],
+  ["let minorStart := Nat.add inductiveInfo.numParams 1;", "let minorStart := Nat.add inductiveInfo.numParams 1"],
+  ["let majorIndex := Nat.sub expectedArity 1;", "let majorIndex := Nat.sub expectedArity 1"],
   ["match psErasureExprListAt view.args majorIndex with", "match view.args[majorIndex]? with"],
-  ["| _, _ => none;", "| _, _ => none"],
+  ["| _ => Option.none;", "| _ => Option.none"],
 ];
 for (const [from, to] of mutations) {
   assert.ok(block.includes(from));

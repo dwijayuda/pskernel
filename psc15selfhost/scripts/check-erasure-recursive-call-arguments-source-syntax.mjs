@@ -14,10 +14,10 @@ export function assertErasureRecursiveCallArgumentsSourceSyntax(source) {
   }
   if (
     (block.match(/List\.cons/g) ?? []).length !== 2 ||
-    !/fun \(name : String\) =>\s*PsVerifiedIrExpr\.var name/.test(block)
+    !block.includes("(psErasureRuntimeVariables rest)")
   ) {
     throw new Error(
-      "PSC2_ERASURE_RECURSIVE_CALL_ARGUMENTS_SELFHOST_SOURCE_SYNTAX_MISSING: explicit cons and typed lambda",
+      "PSC2_ERASURE_RECURSIVE_CALL_ARGUMENTS_SELFHOST_SOURCE_SYNTAX_MISSING: explicit cons and structural variable mapping",
     );
   }
   if (/PsVerifiedIrExpr\.var (?:recursiveName|name)\s*::/.test(block) ||
@@ -40,7 +40,7 @@ const mutations = [
    "PsVerifiedIrExpr.var recursiveName ::"],
   ["List.cons\n        (PsVerifiedIrExpr.var name)",
    "PsVerifiedIrExpr.var name ::"],
-  ["fun (name : String) =>", "fun name =>"],
+  ["(psErasureRuntimeVariables rest)", "(rest.map PsVerifiedIrExpr.var)"],
 ];
 for (const [from, to] of mutations) {
   assert.ok(block.includes(from));
@@ -51,5 +51,5 @@ for (const [from, to] of mutations) {
   );
 }
 process.stdout.write(
-  "PSC2_ERASURE_RECURSIVE_CALL_ARGUMENTS_SELFHOST_SOURCE_SYNTAX: PASS (two explicit cons sites and typed map lambda)\n",
+  "PSC2_ERASURE_RECURSIVE_CALL_ARGUMENTS_SELFHOST_SOURCE_SYNTAX: PASS (two explicit cons sites and structural variable mapping)\n",
 );

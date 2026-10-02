@@ -89,16 +89,53 @@ def psAuditStringPositionSingletons : Bool :=
       | _ => false
     accepted && propagated && rejected
 
+def psAuditConditionBranches : Bool :=
+  let apply := fun (head : PsName) (args : List PsExpr) =>
+    args.foldl PsExpr.app (.constE head [])
+  let boolType := PsExpr.constE psBoolName []
+  let stringType := PsExpr.constE psStringName []
+  let left := PsExpr.lit (.string "left")
+  let right := PsExpr.lit (.string "right")
+  let erase := fun (expr : PsExpr) => match expr with
+    | .lit (.string value) => Except.ok (PsVerifiedIrExpr.literal (.string value))
+    | _ => Except.error PsErasureError.fuelExhausted
+  let boolAccepted := match psEraseCondition erase
+      (apply psEqName [boolType, left, .constE psBoolTrueName []]) with
+    | Except.ok (.literal (.string value)) => value == "left"
+    | _ => false
+  let stringAccepted := match psEraseCondition erase
+      (apply psEqName [stringType, left, right]) with
+    | Except.ok (.intrinsic .stringEq [] [.literal (.string a), .literal (.string b)]) =>
+        a == "left" && b == "right"
+    | _ => false
+  let malformed := [[], [stringType], [stringType, left], [stringType, left, right, right],
+    [boolType, left, .constE psBoolFalseName []], [psAuditNat, left, right]]
+  let rejected := malformed.all fun args =>
+    match psEraseCondition erase (apply psEqName args) with
+    | Except.error .unsupportedApplication => true
+    | _ => false
+  let errors := [([stringType, .fvar 0, right] : List PsExpr), [stringType, left, .fvar 0]]
+  let propagated := errors.all fun args =>
+    match psEraseCondition erase (apply psEqName args) with
+    | Except.error .fuelExhausted => true
+    | _ => false
+  boolAccepted && stringAccepted && rejected && propagated
+
 def main (arguments : List String) : IO UInt32 := do
   if arguments == ["--behavior"] then
     for (label, passed) in [("runtime argument and parameter order", psAuditRuntimeBinders),
         ("proof erasure and local IDs", psAuditProofBinders),
         ("sanitized parameter names", psAuditName),
         ("base cases, fuel and unsupported type binder", psAuditBaseCases),
-        ("String.Pos.Raw singleton arity and error propagation", psAuditStringPositionSingletons)] do
+        ("String.Pos.Raw singleton arity and error propagation", psAuditStringPositionSingletons),
+        ("condition arity, Bool/String branches and error propagation", psAuditConditionBranches)] do
       if passed then IO.println ("PSC2_FIXED_POINT_ERASURE_CASE: PASS " ++ label)
       else throw (IO.userError ("PSC2_FIXED_POINT_ERASURE_CASE: FAIL " ++ label))
     IO.println "PSC2_FIXED_POINT_ERASURE_FINISH_APPLICATION: PASS (native behavior and append-order theorem)"
+    let expressionPath := "packages/erasure/src/Ps/Erasure/Expr.lean"
+    let expressionSource ← IO.FS.readFile expressionPath
+    let _ ← psHostParseSource expressionPath expressionSource
+    IO.println "PSC2_FIXED_POINT_ERASURE_EXPR_PARSE: PASS (complete expression module)"
     return 0
   let mut failures := 0
   for file in arguments do

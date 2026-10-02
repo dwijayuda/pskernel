@@ -32,6 +32,19 @@ Linux Node 22.22.1 validation:
   time for both checks was 25,825 ms.
 - Accepted/rejected smoke inputs and prebuilt artifact integrity: PASS.
 - Host exact-input, provider identity, tampering and override tests: PASS.
+- Integrated Windows Node 26.7.0: same full payload accepted in 6,595 ms; the
+  corrupted final definition rejected at admission 1,204, total 18,172 ms.
+- Linux package source-tree, license, kernel snapshot and npm dry-run contents:
+  PASS. Exact-byte Git attributes prevent checkout line-ending conversion from
+  invalidating the recorded provider identities.
+
+Adopted artifact hashes (source commit
+`1b21b2483df7e8de7542873c24eaff2501539b1b`):
+
+- Wasm, 2,177,471 bytes:
+  `ca6bbb58ea5bafe2d5fbc9fa0fce083933ae0dd5e06a2cbe475077b7d71e9428`.
+- Generated launcher:
+  `c7f45ae1cbe5c8c56948b60f70f6c44dbd9c88b72da496bb097f654a1f12ef4c`.
 
 No invalid request is retried with a different checker. Lean Wasm remains the
 default; native Lean is an explicit alternative. This is external checked

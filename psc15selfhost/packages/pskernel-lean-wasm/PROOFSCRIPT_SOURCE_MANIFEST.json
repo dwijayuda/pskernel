@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "packageName": "@proofscript/pskernel-lean-wasm",
   "snapshotRoot": "source/proofscript",
-  "sourceRevision": "1a7dff298f3f83739750e3f35e2791f708749c50+wasm-input-and-prelude-fixes",
+  "sourceRevision": "1b21b2483df7e8de7542873c24eaff2501539b1b",
   "sourceTreeSha": "22f39d23220cc53b499640b5777e944a9aad5a97",
   "components": {
     "foundation": "5cb363c31d7cec6dece85cb6178c0518f409f172",

@@ -1,92 +1,106 @@
 # TypeScript developer workflows and PSC3 adoption design
 
-**Research-informed proposal · draft 0.2.** The matrix records documented capabilities and proposed PSC responses. It is not a measured ranking of TypeScript feature frequency or a claim of implemented PSC support.
+**Research-informed proposal · draft 0.3. Syntax and grammar authority: [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md).** The matrix records documented capabilities and proposed responses, not population feature-frequency measurements or implemented PSC support.
 
-## 1. The adoption hypothesis
+## 1. Adoption hypothesis
 
-Developers choose a language inside a workflow: model API data, call libraries, render UI, handle asynchronous state, debug failures and ship changes. TypeScript's official examples and ecosystem documentation demonstrate these tasks. The hypothesis for PSC3 is that coherent libraries, tooling and checkable guarantees can compensate for learning native Lean syntax. This hypothesis must be tested; familiar keywords alone would not establish it. [T01–T16, E01–E08](RESEARCH_SOURCES.md)
+Developers work with data, libraries, UI, async state, diagnostics and deployment. TypeScript/framework documentation demonstrates these tasks. PSC3 should combine the v0.7 TypeScript-friendly surface and Lean semantics with coherent libraries, tooling and checkable guarantees. Adoption is a hypothesis to test, not a result established by familiar keywords. [T01–T16,E01–E08](RESEARCH_SOURCES.md)
 
-The core translation strategy is not structural-type imitation. Use native records, inductives, polymorphism, functions and monadic composition; generate boundary schemas and adapters where foreign APIs need structural shapes. Preserve a stable Lean meaning and make migrations explicit.
+Use admitted v0.7 calls, aliases and braced forms plus inherited Lean records, inductives, polymorphism, functions and effects. Generate schemas/adapters for foreign structural APIs rather than copy structural subtyping into the logical foundation. The previous proposal that required stock-Lean-only `.ps` is withdrawn.
 
 ## 2. Classification
 
-**Native** means a proposed supported Lean mechanism; **library** means ordinary Lean definitions; **tool** means editor/build/generator work; **extension** means an explicit optional source capability; **boundary** means a foreign runtime model. Priority P0 is needed for a credible first app release, P1 follows the first app, P2 is experimental or later. Priority is a design judgment, not usage statistics.
+**Source** means an admitted v0.7 L/D/E mechanism. **Library**, **tool**, **extension** and **boundary** distinguish ordinary definitions, tooling, explicitly unregistered experimental grammar and foreign behavior. P0 is a first-app target, P1 follows and P2 is experimental/later. Priorities are design judgments, not usage statistics.
 
 ## 3. Feature-to-design matrix
 
 | ID | Documented TypeScript/JS workflow | PSC3 response | Layer / priority | Test that matters |
 |---|---|---|---|---|
-| TS01 | Inference for local values [T01] | Native expected-type/local inference; explicit public signatures by convention. | Native/tool P0 | Inferred type remains inspectable after refactoring. |
-| TS02 | Generic functions [T03,T05] | Universe-polymorphic/dependent functions with implicit type arguments. | Native P0 | `map`/callback inference without manual generic plumbing. |
-| TS03 | Contextually typed callbacks [T03] | Lean lambdas plus contextual expected types and code actions. | Native/tool P0 | Collection and event callbacks infer usable argument types. |
-| TS04 | Object/interface DTOs [T04] | Nominal structures; generated codecs and TS structural interfaces at exports. | Native/library P0 | Nested API response decoded, not merely cast. |
-| TS05 | Optional properties [T04,T15] | `Option` for intentional two-state application data; richer foreign presence type when required. | Library/boundary P0 | Missing, undefined and null not collapsed accidentally. |
-| TS06 | Discriminated unions [T02] | Inductives and exhaustive `match`. | Native P0 | New constructor forces all relevant branches to be handled. |
-| TS07 | Control-flow narrowing [T02] | Pattern refinement; dependent branch evidence where supported. | Native/tool P0 | No unchecked user predicate can fabricate a refined value. |
-| TS08 | Destructuring [T03,T04] | Native patterns and projections; named options records. | Native P0 | Refutable patterns require a failure path. |
-| TS09 | Immutable object updates [T04] | Native structure update with dependent fields checked. | Native P0 | Changing a length cannot retain invalid indexed data. |
-| TS10 | Default parameters [T03] | Pinned native default binders; show inserted defaults. | Native P0 | Default dependency and evaluation tests. |
-| TS11 | Optional/rest arguments [T03] | Options structures and Array/List arguments; explicit foreign variadic adapters. | Library/boundary P0/P1 | Omission differs from passing undefined when API requires it. |
-| TS12 | Method-style APIs [T03,T04] | Native generalized field notation; library receiver positions designed for it. | Native/library P0 | Resolve the same method as the pinned Lean environment. |
-| TS13 | Overloads [T03] | Named functions or inductive input; importer selects bounded disjoint foreign overloads. | Boundary/tool P1 | Ambiguous overload generates a diagnostic, not `any`. |
-| TS14 | Generic constraints [T05] | Native typeclasses or explicit dictionaries; exact instance semantics. | Native P0 | Imported instance influence is explained. |
-| TS15 | `keyof`/indexed access [T04,T09] | Finite schema descriptors and generated field lenses/accessors. | Library/tool P1 | Unknown keys rejected; no arbitrary dynamic property as proof data. |
-| TS16 | Mapped utility types [T06,T09] | Schema projections for patch/input/output DTOs; ordinary generated types. | Library/tool P1 | Projection preserves optional/presence semantics. |
-| TS17 | Conditional types and `infer` [T07] | Bounded import-time specialization; native dependent functions for owned code. | Tool P1 | Unsupported type computation stops import with explanation. |
-| TS18 | Template-literal types [T08] | Typed route/key constructors and parsers with round-trip specs. | Library/tool P1 | Runtime string must validate before gaining a route type. |
-| TS19 | `satisfies` [T14] | Expected-type checking, explicit schema membership checks, retained elaborated type display. | Native/tool P1 | Do not imply TS structural assignability or a new cast. |
-| TS20 | `as`/non-null assertions [T01] | No unchecked analogue in the strict fragment; provide decoding, proof or explicit foreign assumption. | Boundary P0 | Invalid asserted shape cannot enter a verified DTO. |
-| TS21 | `unknown`/dynamic payload [T01] | Opaque `Psc.Js.Value` or data-only JSON value, followed by codecs. | Boundary/library P0 | Dynamic values cannot be pattern-matched as arbitrary Lean types. |
-| TS22 | Async functions/Promises [E07,E12] | New `Psc.Async` library and explicit Promise adapter; native Lean Task unchanged. | Library/boundary P0 | Start order, rejection, cancellation and cleanup traces. |
-| TS23 | Error recovery [T03,E06] | `Except ε α` and standard typed effects; preserve unexpected foreign failure separately. | Native/library P0 | Rejected promise or thrown non-Error value is accounted for. |
-| TS24 | Arrays/maps/sets [T01,T05] | Native data and stable collection APIs with lawful equality requirements. | Library P0 | Bounds, ordering and iteration conformance. |
-| TS25 | JSON parsing and validation [E06] | Shared schema/Codec definitions, not trust in `JSON.parse` types. | Library/tool P0 | Decode malformed input; report field paths. |
-| TS26 | Typed endpoints [E08] | One input/output/error schema generates client and server interfaces. | Library/tool P0 | Runtime route validates; static agreement is not remote correctness. |
-| TS27 | Query/cache state [E07] | Inductive idle/loading/success/failure states, request IDs and explicit invalidation policy. | Library P0 | Stale response cannot overwrite newer state. |
-| TS28 | React props/children/events [E01] | Typed view/component API; bounded React adapter; optional `.psx`. | Library/extension P0/P1 | Component can be authored without markup or raw TS glue. |
-| TS29 | JSX composition [T11] | Explicit UI quotation extension lowering to ordinary constructors. | Extension P1 | Expansion parity and useful original-source diagnostics. |
-| TS30 | Hooks/state/reducers [E01,E02] | Native model/update/view design; generated React wrapper obeys lifecycle constraints. | Library/boundary P0 | Stable subscriptions, no state updates after disposal. |
-| TS31 | DOM handles [E13] | Opaque handles and effectful operations, not structurally assignable pure records. | Boundary P0 | Identity, ownership and listener lifetime tests. |
-| TS32 | Server/client boundaries [E04] | Explicit entry capabilities and serialization-safe shared DTOs. | Tool/library P1 | Client bundle cannot depend transitively on server secrets/capabilities. |
-| TS33 | SSR/hydration [E03] | Deterministic view/state serialization with explicit hydration adapter. | Library/tool P1 | Initial server/client trees and key policies match. |
-| TS34 | ESM/package exports [T12,E09] | Explicit logical module graph mapped to pinned ESM package interfaces. | Tool P0 | Conditional export resolution recorded per deployment. |
-| TS35 | Development server/HMR [E05] | Vite integration or compatible plugin contract; state migration/reset protocol. | Tool P0 | Stale proofs and incompatible preserved state invalidated. |
-| TS36 | CSS/assets [E05] | Typed asset manifest and stylesheet/module adapters. | Tool P0 | Content hashes, paths, production loading and escaping tested. |
-| TS37 | Classes/`this` [T03,T10] | Structures/functions for owned data; receiver-preserving foreign handle methods. | Native/boundary P0 | Detached call does not lose foreign receiver accidentally. |
-| TS38 | Decorator/procedural ecosystems [T16] | Selected derive/registry plugins; framework-specific transforms explicitly profiled. | Extension P2 | No arbitrary decorator execution treated as proof authority. |
-| TS39 | Fast editor feedback | Shared incremental parser/elaborator, diagnostics, rename and code actions. | Tool P0 | Measure p50/p95 edit latency on representative projects. |
-| TS40 | JS `number` and bigint [T01,E11] | Explicit numeric types and checked boundary conversions; exact Nat/Int. | Native/boundary P0 | Large integers, NaN, signed zero and range errors. |
-| TS41 | Promise/async iteration and streams [E10,E12] | Stream library with backpressure and cancellation contract. | Library/boundary P1 | Bounded demand, late emissions and disposal. |
-| TS42 | Publishing reusable packages [T12,E09] | ESM + `.d.ts` + source maps + optional proof bundle and metadata. | Tool P0 | Clean TS consumer and clean PSC consumer installation. |
+| TS01 | Local inference [T01] | Expected-type/local inference; public signatures by convention. | Source/tool P0 | Inferred types remain inspectable after refactoring. |
+| TS02 | Generic functions [T03,T05] | Dependent/universe-polymorphic functions with inherited implicit binders; v0.7 parameter decoration. | Source P0 | `map` inference without manual generic plumbing. |
+| TS03 | Contextual callbacks [T03] | `fun` lambdas with contextual types inside native or D-CALL expressions. | Source/tool P0 | Callback inference; reject JS arrow syntax as base PSC. |
+| TS04 | Object/interface DTOs [T04] | Nominal `structure ... where { ... }`; generated codecs and TS export interfaces. | Source/library P0 | Nested responses decoded, not merely cast. |
+| TS05 | Optional properties [T04,T15] | `Option` fields; richer foreign-presence type when necessary; no native `field?: T` rule. | Library/boundary P0 | Missing, undefined and null not collapsed accidentally. |
+| TS06 | Discriminated unions [T02] | `inductive ... where { ... }` and exhaustive `match ... with { ... }`. | Source P0 | New constructor forces relevant cases. |
+| TS07 | Control-flow narrowing [T02] | Native patterns and dependent branch evidence where supported. | Source/tool P0 | Unchecked predicates cannot fabricate refined values. |
+| TS08 | Destructuring [T03,T04] | Native patterns/projections and options records; D-CALL does not extend patterns. | Source P0 | Refutable patterns need an explicit failure context. |
+| TS09 | Immutable object updates [T04] | Inherited `{ value with field := replacement }`. | Source P0 | Changed index cannot retain invalid dependent data. |
+| TS10 | Defaults [T03] | Supported native default binders and visible inserted expressions. | Source P0 | Dependencies and evaluation order tested. |
+| TS11 | Optional/rest arguments [T03] | Options records, Array/List arguments, foreign variadic adapters. | Library/boundary P0/P1 | Omission differs from undefined when required. |
+| TS12 | Method-style APIs [T03,T04] | Generalized field notation and admitted adjacent calls such as `users.map(fun u => u.name)`. | Source/library P0 | Same resolved meaning after canonical lowering. |
+| TS13 | Overloads [T03] | Named functions or inductive inputs; bounded foreign overload selection. | Boundary/tool P1 | Ambiguity is a diagnostic, not `any`. |
+| TS14 | Generic constraints [T05] | Inherited typeclasses or explicit dictionaries. | Source P0 | Imported instance influence is explained. |
+| TS15 | `keyof`/indexed access [T04,T09] | Finite schemas and generated accessors. | Library/tool P1 | Unknown keys rejected without dynamic proof data. |
+| TS16 | Mapped utilities [T06,T09] | Generated patch/input/output structures. | Library/tool P1 | Optional/presence semantics preserved. |
+| TS17 | Conditional types/`infer` [T07] | Bounded importer specialization; owned dependent functions. | Tool P1 | Unsupported type computation fails explicitly. |
+| TS18 | Template-literal types [T08] | Typed routes/keys and parsers with round-trip specifications. | Library/tool P1 | Runtime strings validate before refinement. |
+| TS19 | `satisfies` [T14] | Expected-type checks and explicit schema membership; no invented syntax. | Source/tool P1 | No new unchecked cast or structural assignability. |
+| TS20 | `as`/non-null assertions [T01] | Decoding, evidence or explicit foreign assumptions. | Boundary P0 | Invalid shapes cannot enter verified DTOs. |
+| TS21 | `unknown`/dynamic payload [T01] | Opaque JS value or data-only JSON, then codecs. | Boundary/library P0 | Dynamic values cannot inhabit arbitrary logical types. |
+| TS22 | Async/Promises [E07,E12] | Proposed `Psc.Async` library and Promise adapter; no `async function` keyword in the base grammar. | Library/boundary P0 | Start/rejection/cancellation/cleanup traces. |
+| TS23 | Error recovery [T03,E06] | Native `Except ε α` and effects, with separate unexpected foreign failures. | Source/library P0 | Non-Error throws and rejection reasons are covered. |
+| TS24 | Collections [T01,T05] | Native data and law-governed collection APIs. | Library P0 | Bounds, ordering and iteration conformance. |
+| TS25 | JSON/validation [E06] | Shared Codec/Schema definitions, not trust in casts. | Library/tool P0 | Malformed values report field paths. |
+| TS26 | Typed endpoints [E08] | Shared input/output/error schemas generate client/server interfaces. | Library/tool P0 | Runtime validation; no inferred remote correctness. |
+| TS27 | Query/cache state [E07] | Inductive state, request IDs and invalidation policy. | Library P0 | Stale responses do not overwrite newer state. |
+| TS28 | React props/events [E01] | Ordinary view APIs and bounded adapters; `.psx` is optional. | Library/extension P0/P1 | Plain `.ps` and `.lean` can author components. |
+| TS29 | JSX composition [T11] | Explicit experimental `.psx` dialect lowering to admitted library expressions. | Extension P1 | Reference/profile separation, expansion and diagnostics. |
+| TS30 | Hooks/state/reducers [E01,E02] | Model/update/view libraries; generated wrapper obeys lifecycle rules. | Library/boundary P0 | Stable subscriptions and disposal. |
+| TS31 | DOM handles [E13] | Opaque identity-bearing handles and effects. | Boundary P0 | Aliasing and listener lifetimes. |
+| TS32 | Server/client boundaries [E04] | Entry capabilities and serialization-safe DTOs. | Tool/library P1 | Client graph excludes server secrets/capabilities. |
+| TS33 | SSR/hydration [E03] | Defined view/state serialization and hydration adapters. | Library/tool P1 | Initial trees/key policies agree. |
+| TS34 | ESM/package exports [T12,E09] | Native logical `import` graph mapped to target ESM exports, not ESM `.ps` grammar. | Tool P0 | Conditional resolution recorded per target. |
+| TS35 | Dev server/HMR [E05] | Vite-compatible integration with reset/migration policy. | Tool P0 | Stale proofs and incompatible retained state invalidated. |
+| TS36 | CSS/assets [E05] | Typed asset manifests and stylesheet adapters. | Tool P0 | Paths, hashing, loading and escaping. |
+| TS37 | Classes/`this` [T03,T10] | Owned structures/functions; receiver-preserving foreign calls. | Source/boundary P0 | Detached calls do not lose required receivers. |
+| TS38 | Decorators [T16] | Selected derives/registries and explicitly profiled extensions. | Extension P2 | No decorator execution becomes proof authority. |
+| TS39 | Fast editor feedback | Shared incremental source/lowering/elaboration information. | Tool P0 | Edit latency and source-map fidelity measured. |
+| TS40 | `number`/bigint [T01,E11] | Exact Nat/Int, explicit numeric types and checked conversions. | Source/boundary P0 | Ranges, NaN, signed zero and large integers. |
+| TS41 | Async iteration/streams [E10,E12] | Library backpressure/cancellation contracts. | Library/boundary P1 | Demand bounds, late emissions and disposal. |
+| TS42 | Package publishing [T12,E09] | ESM + `.d.ts` + maps + optional proof bundles. | Tool P0 | Clean TypeScript and PSC consumers. |
 
 ## 4. Concrete adoption choices
 
-### Data first, not type-level metaprogramming first
+### Data first, not imported type-level machinery first
 
-The proposal deliberately implements the *task* behind advanced TypeScript types before copying each type operator. A route schema can generate endpoint types, codecs and proof statements without adding a TS conditional-type evaluator to the PSC kernel. Type-level computations in a foreign declaration may still require bounded specialization in the importer.
+Implement the tasks behind advanced TS types before copying operators. A schema can generate endpoints, codecs and proof statements without adding conditional-type evaluation to the kernel. Foreign type computations may require bounded import-time specialization.
 
-Schemas are ordinary data with a specified interpretation. Generated code is not trusted merely because it came from a schema. Require codec laws and test malformed inputs. A data-only decoder must not execute arbitrary getters or prototype behavior while pretending it only inspected a mathematical record; the foreign boundary profile decides whether to copy, reject or deliberately evaluate such objects.
+Schemas have specified interpretations. Generated code is not trusted by origin. Require codec laws and malformed-input tests. A data decoder must not secretly execute arbitrary getters or prototype behavior as though inspecting immutable logical data; choose copying, rejection or explicit effectful reads.
 
-### Familiar APIs, honest syntax
+### Familiar APIs, accurate v0.7 syntax
 
-Teach `users.map (fun u => u.name)`, options records, `match`, `do` and `Except` using the actual native forms. Do not teach PSC2 comma-call sugar and silently rewrite it in the new edition. Offer compiler-assisted migration examples and a TS-to-PSC glossary.
+Teach both surfaces explicitly:
 
-For a proposed API such as `client.getUser id`, the primary value is the inferred response and error type, decoded input/output and useful diagnostic. A TypeScript-like spelling alone cannot supply those properties.
+```proofscript
+function names(users : List User) : List String :=
+  users.map(fun u => u.name);
+```
 
-### Structural convenience belongs at the edge
+Canonical/native Lean:
 
-Nominal domain structures prevent accidental mixing of unrelated logical data. Typed foreign views may expose a structural JS API, but they remain effectful/opaque when mutation or accessors are involved. A copied DTO is a new owned value; it is not an identity-preserving reference to the original object.
+```lean
+def names (users : List User) : List String :=
+  users.map (fun u => u.name)
+```
 
-## 5. What not to promise
+The decorated surface is not a stock-Lean file alias. Preserve call adjacency and tuple distinctions. Retain `:=`, `fun`, `where`, `with` and native patterns; do not replace them with bare block bodies, JS lambdas, optional chaining or invented named-argument syntax.
 
-No automatic conversion of an arbitrary TypeScript project, no all-npm compatibility, no universal elimination of runtime validators, no free conversion of Promises into native Lean Task, and no inference that a well-typed foreign implementation satisfies its declared behavior.
+For a proposed `client.getUser(id)` API, inferred response/error types, decoding and diagnostics matter alongside admitted familiar spelling. The API remains a proposal until its implementation/profile is tested.
 
-The gap between a verified pure function and a complete browser/server app is real. P0 includes the platform work needed to cross that gap, while P1/P2 are separately gated rather than hidden in a core-language freeze.
+### Structural convenience at the edge
 
-## 6. Adoption experiments to run
+Nominal domain records keep unrelated logical types distinct. Foreign structural views remain opaque/effectful where identity or mutation exists. Copied DTOs are owned snapshots, not identity-preserving handles.
 
-Compare TypeScript and PSC3 implementations of: a typed form and decoder; a cancellable search UI with stale-result prevention; a server endpoint with structured errors; a reusable package; a refactoring that changes a discriminated union; and a contract added to a state transition.
+## 5. Limits
 
-Record setup time, comprehension mistakes, annotations, callback/type debugging effort, unsupported interop, proof effort, source-map fidelity, build latency and change repair. Separate costs of learning new syntax from library/API defects. No such participant study was run in this pass.
+No automatic migration of arbitrary TypeScript projects, all-npm support, elimination of runtime validation, free Promise/Lean Task equivalence, or inference that a typed foreign implementation satisfies its behavior.
 
-Success means a developer can replace an entire small app module without writing more glue than business logic, and can add guarantees without duplicating the program. It does not mean winning a feature-count table.
+P0 includes actual application/platform work, not only source syntax. `.psx`, later grammar changes and unsupported upstream features stay separately identified rather than entering v0.7 by example.
+
+## 6. Adoption experiments
+
+Compare typed forms/decoders, cancellable search UI, server endpoints, package exports, union changes and added contracts across TypeScript, v0.7 `.ps` and supported native `.lean`. Where studied, add an explicit `.psx` condition rather than confounding base syntax and markup.
+
+Record setup, comprehension, annotations, callback debugging, unsupported interop, proof effort, source maps, latency and change repair. Distinguish learning costs from library defects. No participant study was run in this repair.
+
+Success means replacing a useful module without more glue than business logic and adding guarantees without duplicating the program—not winning a feature-count table.

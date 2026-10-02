@@ -1,16 +1,18 @@
-# Bounded design experiments — observed results
+# Bounded design experiments — historical results and pending syntax gates
 
-**Executed 3 October 2026 in the working container. Scope: isolated models and hand-authored TypeScript candidate runtime code only.** No code here was emitted by PSC. No Lean proof, kernel check, compiler fixed point, browser, Rust or Wasm test was run.
+**Historical draft-0.2 experiment record, reported 3 October 2026. Not rerun by the v0.7 syntax repair.** [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md) governs source grammar; Python and TypeScript below are explicitly foreign experiment code, not `.ps` examples.
 
-## 1. Environment
+No listed code was emitted by PSC. The previous report made no Lean proof, kernel, fixed-point, browser, Rust or Wasm execution claim. This repair preserves that limitation and does not infer parser acceptance from these models.
 
-Observed: Python 3.13.5, Node v22.16.0, TypeScript 5.8.3. `lean` and `lake` were not found on PATH. These versions describe the experiment environment, not the proposed platform's final deployment lock.
+## 1. Historical environment
 
-The experiments motivate test cases and expose simple bad alternatives. Their passing result is not a soundness, termination, scheduler or compiler-preservation proof.
+Reported: Python 3.13.5, Node v22.16.0 and TypeScript 5.8.3; Lean/Lake unavailable. These describe the original experiment, not the current/final platform toolchain. The earlier working directory is not assumed to exist now.
+
+The experiments motivate negative cases. They do not establish soundness, termination, scheduler correctness or compiler preservation.
 
 ## 2. Finite Python policy models
 
-The executed logic is reproducible with:
+Reproduction snippet retained from the prior report:
 
 ```python
 from itertools import product
@@ -48,20 +50,20 @@ print(len(inputs), wrong_permutations)
 print(len(sequences))
 ```
 
-Observed outcomes:
+Historical reported outcomes:
 
 | Model | Domain | Result | Limitation |
 |---|---|---|---|
-| Candidate Nat subtraction | 1,089 pairs, each operand 0..32 | Candidate matched `max(a-b,0)`; plain integer subtraction disagreed in 528 cases. | The model directly encodes the proposed rule; not a Lean/target compiler equivalence test. |
-| Foreign absence | Four labelled states | Tagged representation retained four distinct outcomes; lossy Option-like conversion retained two. | Plain data labels only; no proxies, getters or serialization engine. |
-| Weak sorting contract | 40 lists of length 0..3 over {0,1,2} | Always-empty output is sorted for all; fails permutation for 39 inputs. | Illustrates one weak specification; no general completeness checker. |
-| Terminal-event arbitration | 27 sequences of three terminal events | Exactly one committed transition; first terminal event wins. | No concurrent scheduler, cleanup, fairness or external side effects. |
+| Nat subtraction candidate | 1,089 pairs, operands 0..32 | Matched `max(a-b,0)`; plain subtraction differed in 528 cases. | Direct model of the rule, not a Lean/PSC compiler test. |
+| Absence | Four labels | Tagged form kept four outcomes; collapsed form kept two. | No getters, proxies or serialization engine. |
+| Weak sorting specification | 40 lists, length 0..3 over 0..2 | Always-empty output sorted; permutation failed for 39 inputs. | One weak-spec example, not specification completeness. |
+| Terminal-event model | 27 three-event sequences | One committed transition, first event wins. | No concurrency, cleanup, fairness or external effects. |
 
-The natural subtraction example `(2,5)` gives -3 under ordinary integer subtraction and 0 under the candidate natural rule. This informs the backend primitive tests; it does not prove a backend.
+The `(2,5)` subtraction difference motivates primitive tests; it is not backend evidence.
 
-## 3. Actual TypeScript-to-JS candidate test
+## 3. TypeScript-to-JS candidate experiment
 
-The following hand-authored file was compiled with the installed real TypeScript compiler and executed with Node:
+The previous report says the following hand-authored **TypeScript**, not ProofScript, was compiled and executed:
 
 ```typescript
 // Candidate adapter experiment only; not PSC-generated code.
@@ -103,7 +105,7 @@ console.log(JSON.stringify({
 }));
 ```
 
-Executed command shape (the actual working directory was `/mnt/data/psc3_research`):
+Original command shape, recorded for reproduction rather than rerun here:
 
 ```sh
 node --version
@@ -113,14 +115,20 @@ tsc --strict --noEmitOnError --target ES2022 --module ES2022 \
 node out/boundary-experiment.js
 ```
 
-Observed compiler/execution result: success. Output reported 1,089 pair cases, the large exact-integer case passed, negative input was rejected, presence tags were `missing`, `undefined`, `null`, `value`, and the astral string had two code units and one iterated code point.
+The prior report recorded success: 1,089 pairs, large-integer case, rejected negative input, four presence tags and two code units versus one iterated code point. It identified `/mnt/data/psc3_research` as the then-working directory. This repair makes no claim that those files persist.
 
-The property classifier is intentionally not a production arbitrary-object decoder. It does not establish a security boundary against getters/proxies, prototype mutation or reentrancy. The numeric test does not cover the full runtime operation set. Node and tsc success do not establish PSC preservation.
+The classifier is not a secure arbitrary-object decoder. Tests exclude getters/proxies, prototype mutation and reentrancy, and do not cover the entire primitive set. TS/Node success is not PSC preservation or v0.7 grammar acceptance. Its brace-bodied functions and `=` bindings are TS syntax and must not be copied into `.ps` examples.
 
-## 4. Upstream evidence versus local execution
+## 4. Source evidence versus execution
 
-The pinned Lean parser and intrinsic-verification test file were read from the official source. Their content informed the proposed source profile. Those upstream tests were not executed locally. Candidate Lean/PSC examples remain unexecuted; the full proposed `.psx` and platform APIs do not yet exist in this design change.
+Earlier upstream parser/intrinsic tests were inspected under a 4.34.1 candidate pin, not executed locally. The current syntax authority is the repository v0.7 reference with its 4.34.0 canonical baseline. Later-patch observations do not establish this source profile.
 
-## 5. Next decisive experiments
+This correction reviewed source rules and rewrote documentation examples, but did not run the v0.7 parser/lowerer or Lean oracle. Candidate `.ps`, canonical `.lean`, and UI extension examples remain unexecuted. Registered/reference-specified does not mean implemented or S2-proved.
 
-Run exact native examples under the proposed Lean pin, including negative dependent updates and false contracts; compare owned elaboration; replay actual evidence with the independent checker; compile actual PSC output; exercise real browser/service behavior; and run the user/adoption studies in the roadmap. Do not promote these finite models into a stronger status in the meantime.
+## 5. Pending v0.7 conformance experiments
+
+Run the reference registry and positive/negative/lowering corpus using the actual frontend. Cover valid/invalid aliases; adjacent versus spaced/comment-separated calls; tuple arity; `:=` and category semicolons; braced data and match with native patterns; `fun`; inherited scopes; proof/do category boundaries; and source maps.
+
+Then check canonical output with the exact Lean environment, compare owned elaboration, replay actual proofs and execute PSC-generated targets. `.ps` extension renaming is not the oracle experiment. Optional UI syntax needs its own explicit dialect and expansion tests.
+
+No finite model or documentation scan substitutes for those gates.

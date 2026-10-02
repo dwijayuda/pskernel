@@ -1,10 +1,33 @@
-# PSC3 design examples
+# PSC3 design examples using ProofScript v0.7
 
-**Evidence status: none of the Lean/PSC examples in this file were compiled in this pass.** Lean/Lake were unavailable. Native examples are candidate conformance inputs; proposed platform APIs are clearly marked. Do not infer implementation support from plausible syntax.
+**Syntax authority: [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md).** These are documentation/conformance candidates, not locally compiled proofs or implementation claims. `.ps` fences use `proofscript`; native/canonical `.lean` fences use `lean`; platform names and extension pseudocode are explicitly labelled.
 
 ## 1. Ordinary data and functions
 
-Candidate native `.ps` contents, identical when staged as `.lean`:
+Candidate `.ps` source using registered declaration/call/body forms:
+
+```proofscript
+import Init
+set_option autoImplicit false
+
+structure UserId where {
+  value : Nat;
+}
+
+structure User where {
+  id : UserId;
+  name : String;
+  active : Bool;
+}
+
+function names(users : List User) : List String :=
+  users.map(fun user => user.name);
+
+function activate(user : User) : User :=
+  { user with active := true };
+```
+
+Corresponding canonical/native `.lean` source:
 
 ```lean
 import Init
@@ -25,156 +48,177 @@ def activate (user : User) : User :=
   { user with active := true }
 ```
 
-This teaches data modelling and collection callbacks without a separate TS-like grammar. UserId is a distinct structure, not an abbreviation accidentally interchangeable with all natural numbers.
-
-Conformance cases: empty list; record update retains other fields; user/name type errors; official Lean versus owned elaboration; both target representations; exported DTO validation.
+The relationship is canonical lowering, not byte-identical staging. UserId is a distinct structure rather than an accidental alias for Nat. Conformance cases include empty lists, retained record fields, type errors, source maps, official canonical-Lean versus owned elaboration, runtime representations and exported DTO validation.
 
 ## 2. Explicit errors plus a useful theorem
 
-```lean
+```proofscript
 import Init
 set_option autoImplicit false
 
-def debit (balance amount : Nat) : Except String Nat :=
-  if amount ≤ balance then
-    .ok (balance - amount)
-  else
-    .error "insufficient balance"
+function debit(balance : Nat, amount : Nat) : Except String Nat :=
+  if (amount ≤ balance) {
+    Except.ok(balance - amount)
+  } else {
+    Except.error("insufficient balance")
+  };
 
 theorem debit_ok (balance amount : Nat) (h : amount ≤ balance) :
-    debit balance amount = .ok (balance - amount) := by
+    debit(balance, amount) = Except.ok(balance - amount) := by {
   simp [debit, h]
+}
 ```
 
-This is a candidate example, not a locally checked proof. It establishes only the displayed property if accepted. It does not establish monetary units, authorization, race-free persistence or a globally correct financial system. Applications should use domain-specific quantities and external models appropriate to their actual requirements.
+The registered conditional has one term per branch. The theorem's tactic body retains its own grammar; do not globally insert declaration semicolons into it.
 
-A more complete specification would cover the error branch and invariant preservation. Mutants should include reversed comparison, always-error, incorrect subtraction and missing error handling. Returning an error for every input should not satisfy a contract that promises success for valid inputs.
+This is not a locally checked proof. If accepted, it establishes only the displayed property. It does not establish monetary units, authorization or concurrent persistence. More complete specifications cover errors and invariant preservation. Mutants include reversed comparisons, always-error results, incorrect subtraction and omitted errors; always failing must not satisfy a specification that promises success for valid inputs.
 
-## 3. Async state without an implicit null convention
+## 3. State modelling and constructor patterns
 
-```lean
+```proofscript
 import Init
 set_option autoImplicit false
 
-inductive LoadState (ε α : Type) where
-  | idle
-  | loading (requestId : Nat)
-  | success (requestId : Nat) (value : α)
-  | failure (requestId : Nat) (error : ε)
+inductive LoadState(ε : Type, α : Type) where {
+  | idle;
+  | loading(requestId : Nat);
+  | success(requestId : Nat, value : α);
+  | failure(requestId : Nat, error : ε);
+}
+
+function getOrElse(value : Option Nat, fallback : Nat) : Nat :=
+  match value with {
+    | .none => fallback;
+    | .some x => x;
+  };
 ```
 
-A proposed application update function compares response IDs to the current request before accepting a result. Tests must cover stale completion, cancelled navigation, retry and request-ID rollover policy. This data declaration alone does not implement a scheduler or prove those tests.
+Constructor declarations can use their registered parameter decoration. Patterns still use native Lean binding syntax: `.some x`, not `.some(x)`. Application state may use request IDs to reject stale results, but the data declaration alone does not implement cancellation or prove scheduler behavior.
 
 ## 4. Dependent data interaction
 
-```lean
+```proofscript
 import Init
 set_option autoImplicit false
 
-structure SizedData where
-  size : Nat
-  data : Fin size → Nat
+structure SizedData where {
+  size : Nat;
+  data : Fin size -> Nat;
+}
 
-def replaceData (n : Nat) (f : Fin n → Nat) : SizedData :=
-  { size := n, data := f }
+function replaceData(n : Nat, f : Fin n -> Nat) : SizedData :=
+  { size := n, data := f };
 ```
 
-Negative candidate: update size to an unrelated n while trying to retain arbitrary old data without a transport proof or replacement. The implementation must reject or require the dependent fields, not insert an unchecked cast. Exact native diagnostics are a pending oracle test.
+A negative candidate updates size to an unrelated value while retaining arbitrary old data without evidence or replacement. It must be rejected or require dependent reconstruction, not an unchecked cast. Exact diagnostics and official-oracle acceptance are pending tests.
 
-## 5. Mathematical abstraction
+## 5. Mathematics and inherited scopes
 
-```lean
+```proofscript
 import Init
 set_option autoImplicit false
 universe u
 
-def twice {α : Type u} (f : α → α) (x : α) : α := f (f x)
+namespace Math
+
+function twice {α : Type u}(f : α -> α, x : α) : α :=
+  f(f(x));
 
 theorem twice_id {α : Type u} (x : α) :
-    twice (fun y => y) x = x := by
+    twice(fun y => y, x) = x := by {
   rfl
+}
+
+end Math
 ```
 
-This is a small universal proof example. The design corpus must also include nontrivial indexed induction, typeclass abstractions, classical assumptions, notation and proof maintenance. A one-line theorem does not establish serious theorem-library readiness.
+`namespace ... end` is inherited command syntax; it is not converted to a braced command block. The corpus must also cover indexed induction, typeclasses, notation, classical assumptions and proof repair. A short theorem does not establish large-library readiness.
 
-## 6. Native intrinsic verification
+## 6. Contract syntax versus theorem specifications
 
-The upstream pinned test suite was inspected and shows contract-bearing Id/state computations, generated `.spec` declarations, invariants and separate runtime assertions. [L03–L04](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+The definition-plus-theorem example above is the base specification form. The earlier draft inspected upstream intrinsic verification at a proposed 4.34.1 pin [L03–L04](RESEARCH_SOURCES.md#lean-and-logical-foundations). Those experiments do not by themselves establish the v0.7/4.34.0 source profile.
 
-Use a fresh, independently written candidate such as the following only in the experimental native profile:
+Before adding executable intrinsic examples, verify the exact selected parser, imports/options, clause placement/count and generated-theorem behavior. Do not invent repeated `ensures`, a new final proof-section grammar, or automatic proof parameters. Missing/false obligations must fail. No intrinsic example is promoted here merely because it resembles a later upstream test.
 
-```lean
-import Std.Internal.Do
-set_option experimental.intrinsic true
-set_option autoImplicit false
+## 7. Plain-source UI without new grammar
 
-def unchanged (n : Nat) : Id Nat
-    ensures result => result = n :=
-  pure n
-```
+**Proposed library names, not available imports or an executed application.** The source spelling below follows v0.7:
 
-The import, option and single-clause form follow inspected native facilities. This candidate was not checked here. No custom repeated `ensures`, hidden source rewrite or new proof parameter is implied. Negative cases must include an intentionally false postcondition and unresolved proof evidence.
-
-## 7. Plain-source UI, no `.psx` required
-
-**The following names are proposed library APIs, not available imports.**
-
-```lean
--- Proposed library illustration only.
+```proofscript
 import Psc.UI
 
-inductive CounterMsg where
-  | increment
-  | reset
+inductive CounterMsg where {
+  | increment;
+  | reset;
+}
 
-def updateCounter (count : Nat) (msg : CounterMsg) : Nat :=
-  match msg with
-  | .increment => count + 1
-  | .reset => 0
+function updateCounter(count : Nat, msg : CounterMsg) : Nat :=
+  match msg with {
+    | .increment => count + 1;
+    | .reset => 0;
+  };
 
-def counterView (count : Nat) : View CounterMsg :=
-  View.column
-    [ View.text (toString count)
-    , View.button CounterMsg.increment [View.text "Increment"]
-    , View.button CounterMsg.reset [View.text "Reset"]
-    ]
+function counterView(count : Nat) : View CounterMsg :=
+  View.column([
+    View.text(toString(count)),
+    View.button(CounterMsg.increment, [View.text("Increment")]),
+    View.button(CounterMsg.reset, [View.text("Reset")])
+  ]);
 ```
 
-An eventual runtime attaches event decoding, a serialized update loop and a renderer. The view's pure shape is not proof of DOM correctness. The exact same library calls are the target for the optional quotation example in [PSX](PSX_UI_PROPOSAL.md).
+An eventual runtime provides event decoding, serialized updates and rendering. The pure view does not prove DOM correctness. The optional `.psx` proposal must expand to the same ordinary library semantics without becoming unregistered base `.ps` grammar.
 
 ## 8. Complete application module layout
 
-This is a proposed layout, not created executable code:
+Proposed layout, not created executable code:
 
 ```text
 Inventory/
-  Domain/Item.lean
-  Domain/Adjustment.lean
-  Domain/AdjustmentProofs.lean
-  Api/Inventory.lean
-  Client/Model.lean
-  Client/Update.lean
-  Client/View.lean
-  Client/Main.lean
-  Server/Inventory.lean
-  Server/Store.lean
-  Server/Main.lean
+  Domain/Item.ps
+  Domain/Adjustment.ps
+  Domain/AdjustmentProofs.ps
+  Api/Inventory.ps
+  Client/Model.ps
+  Client/Update.ps
+  Client/View.ps
+  Client/Main.ps
+  Server/Inventory.ps
+  Server/Store.ps
+  Server/Main.ps
 ```
 
-Any ordinary module may instead use `.ps` under the explicit one-source mapping; do not maintain divergent siblings. Client and server share schemas, not secret capabilities. UI markup is an optional alternative view-authoring exercise, not required for the plain-source app.
+A module may instead be authored as supported native `.lean`, selected by the one-source module map. Decorated `.ps` is translated before the Lean oracle; do not merely rename it or maintain diverging siblings. Optional `.psx` views require an explicit dialect and are not selected by suffix alone.
 
-The full-app acceptance run builds the browser, service and typed external client; exercises runtime decoding, persistence, errors, cancellation and request ordering; and checks a real domain theorem. It identifies the database, renderer and compiler assumptions separately.
+The full-app acceptance run builds browser/service/typed-client outputs and tests decoding, persistence, errors, cancellation and request ordering alongside an actual domain theorem. Database, renderer and compiler assumptions stay separate.
 
-## 9. Foreign API example contract
+## 9. Foreign API contract
 
-A proposed imported `getUser` operation specifies an input ID codec, an output User codec, a typed expected-error set, unexpected foreign failure, Promise start/attachment behavior and cancellation support. A `.d.ts` declaration can inform this contract but cannot prove it.
+A proposed imported `getUser` operation identifies ID/User codecs, expected and unexpected errors, Promise attachment/start behavior and cancellation support. `.d.ts` shapes can inform, not prove, this interface.
 
-Tests include nonexistent export, malformed User, negative bigint ID, missing versus undefined field, rejection with a string, detached receiver, late callback after disposal and obsolete response ID. None is silently mapped to successful typed data.
+Tests include missing exports, malformed data, negative bigint IDs, missing versus undefined fields, string rejection reasons, detached receivers, callbacks after disposal and stale responses. FFI package metadata does not authorize a new ESM-style source declaration in ordinary `.ps`.
 
-## 10. Scientific/numerical example requirements
+## 10. Numerical example requirements
 
-Add a numerical model whose mathematical specification uses exact values while its execution uses Float. State an error bound or other relation before claiming correspondence. Test NaN, signed zero, overflow and input domain. Do not declare the floating implementation correct merely because an exact-arithmetic theorem passed.
+Use an explicit relationship between exact mathematical specifications and Float execution. Test error bounds, NaN, signed zero, overflow and input domains. An exact-arithmetic proof does not automatically establish floating-point behavior.
 
-## 11. Expected evidence record
+## 11. Grammar regression examples
 
-For every example record source/environment identity, expected parsing/elaboration result, actual command/output, owned-checker result, executable targets tested, assumptions, and the exact theorem when present. Until a command is run, the status remains candidate/unexecuted. Passing an upstream Lean test is not evidence that PSC's parser, kernel and emitters support the same example.
+Reference-derived distinctions, not executable test results:
+
+```text
+const n : Nat := 1;                  admitted alias form
+function id(x : Nat) : Nat := x;     admitted alias form
+f(x, y)                             two curried arguments
+f((x, y))                           one tuple argument
+f (x, y)                            protected native tuple application
+function f(x : Nat) : Nat { x }      NOT admitted in v0.7
+const n = 1                         NOT the v0.7 binding form
+match v with { | .some(x) => x; }    NOT the v0.7 pattern form
+namespace N { ... }                  NOT the v0.7 command form
+```
+
+Tests must exercise the actual parser/lowerer and the reference's registry/corpus. A documentation scan cannot certify grammar acceptance.
+
+## 12. Evidence record
+
+For each example, record original `.ps` or native `.lean`, environment identity, L/D/E features, canonical output where applicable, command/result, owned-checker verdict, targets, assumptions and exact theorem. Until run, examples remain unexecuted candidates. Official Lean acceptance of a canonical example alone does not prove PSC frontend, kernel or backend support.

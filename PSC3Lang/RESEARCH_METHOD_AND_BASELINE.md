@@ -1,62 +1,63 @@
 # Research method and repository baseline
 
-**Research record · 3 October 2026.** Recommendations are distinguished from upstream facts and actual experiments throughout this folder.
+**Research record with v0.7 syntax correction · 3 October 2026.** [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md) governs syntax/grammar. Recommendations, historical observations and new documentation review are distinct.
 
-## 1. Scope actually reviewed
+## 1. Reviewed scope and repair baseline
 
-Repository: `dwijayuda/pskernel`. Main baseline: `65369c75c7b63124f1ba7f2289e573181db281f0`; root tree: `9c138519e9e48cb43b44eaab8da30ba44ec1f88a`. The root had no `PSC3Lang/` directory at inspection. No matching PSC3 branch was returned by the branch search.
+Repository: `dwijayuda/pskernel`. Original design baseline: `65369c75c7b63124f1ba7f2289e573181db281f0`, root tree `9c138519e9e48cb43b44eaab8da30ba44ec1f88a`. This repair starts from the 21-file PSC3 draft at `b07a5ae10535ebfc93350fe049b931876fd6d4f1` on `docs/psc3-language-design-20261003`.
 
-The reviewed design material includes the PSC2 language reference and companion contracts, migration, feature-research and self-hosting documents; the inherited PSC1 grammar and semantic/runtime companion; and previously reviewed minimal-bootstrap and owned-kernel architecture snapshots. The new upstream tag and relevant parser/test sources were independently fetched. This is not an exhaustive review of every repository branch, implementation file or historical commit. [R01–R06](RESEARCH_SOURCES.md#repository-baselines)
+The earlier research reviewed PSC1/PSC2 language, grammar, runtime, verification and bootstrap/kernel design material plus selected upstream documentation. This correction additionally reads the controlling v0.7 main reference and Appendix A registry, and audits every existing PSC3 document. The exact authority paths/blobs are recorded in [the grammar contract](SYNTAX_AND_GRAMMAR_V07.md) and manifest.
 
-Important inherited facts: PSC2 is a draft, the old grammar has special adjacent calls, the error-type examples disagree on `Result` parameter order, the runtime companion leaves an operation/conversion matrix open, and the proposed platform leaves several async/extension rules unresolved. These are reasons to refine the next edition, not evidence that every implementation has the same defect.
+The earlier byte-identical `.ps`/`.lean` proposal conflicts with that reference and is withdrawn. V0.7 deliberately provides inherited L forms, conservative D decorations and registered E exceptions with canonical Lean lowering. Adjacent calls are a current rule, not an obsolete historical inconvenience to erase. The alias, pattern, punctuation and scope rules are correspondingly restored.
 
-The main baseline remains unchanged by this documentation addition. A reviewed workstream's status must not be generalized to unrelated kernels or branches. No new self-hosting or kernel-completion claim is made.
+This is documentation-only. No compiler/kernel/runtime/package pin or implementation-completion status changes. It is not an all-branch or all-implementation audit.
 
-## 2. Questions guiding the research
+## 2. Research questions
 
-- What tasks do TypeScript ecosystem APIs actually ask developers to perform?
-- Which native Lean mechanisms already serve those tasks, and which require library or tooling support?
-- Which foreign semantic distinctions must remain visible at a JS boundary?
-- Can a complete application be authored without writing ad hoc TS glue?
-- Where does UI sugar help without creating a separate application logic?
-- How can contracts and proofs compose with partiality, resources, external calls and optimization?
-- Which target choices improve delivery without creating independent source semantics?
+Which real TS workflows need support? Which admitted v0.7 mechanisms already address them? Which tasks need libraries, tooling or explicit extensions rather than new native grammar? Which foreign distinctions must remain visible? Can full apps be authored without repetitive glue? How do proof, partiality, resources and targets compose?
+
+Answer those questions inside the selected reference before proposing grammar changes. A future syntax proposal must identify the exact v0.7 limitation, alternatives and required reference/registry evolution.
 
 ## 3. Evidence classes
 
-| Class | What it establishes | What it does not establish |
+| Class | Establishes | Does not establish |
 |---|---|---|
-| Official language specification/documentation | Intended semantics or documented usage. | Frequency among all developers; correctness of PSC's implementation. |
-| Official framework documentation/examples | Concrete workflows and API patterns expected by that framework. | Representative population statistics; proof that all packages are compatible. |
-| Pinned repository source | What the inspected parser, test or design actually contains. | That the test was run here; all-version compatibility. |
-| Research methodology/compiler papers | A design process or formally scoped technique to investigate. | Automatic transfer of its results to PSC. |
-| Local finite models and TS experiment | Observed outcomes for the enumerated cases and candidate code. | Lean acceptance, compiler preservation, production readiness or full semantic coverage. |
-| Proposed user study/benchmark | A falsifiable evaluation plan. | An experiment already conducted. |
+| Controlling source reference/registry | Intended syntax, categories and lowering. | Implemented support or a proof beyond its reported S1 status. |
+| Official language docs | Intended semantics/documented uses. | Population frequency or PSC correctness. |
+| Framework examples | Concrete API/workflow needs. | Universal package compatibility or representative statistics. |
+| Pinned source | Contents of that inspected parser/test/design. | Local execution or all-version parity. |
+| Research papers/methods | A technique/process worth evaluating. | Automatic transfer of their results to PSC. |
+| Historical finite model/TS experiments | Reported outcomes for enumerated candidate cases. | Parser/lowering acceptance, kernel soundness or production readiness. |
+| Proposed studies | Falsifiable plans. | Already executed experiments. |
 
-The feature study deliberately does not invent TypeScript usage percentages. Handbook prominence and framework examples are requirements evidence, not a frequency census. The earlier PSC2 search-match counts are historical noisy signals and were not remeasured as a population study.
+The 42-row TS study contains no invented population percentages. Earlier search-match counts remain noisy historical signals. Handbook prominence is not a census.
 
-## 4. Primary-source selection
+## 4. Source selection and precedence
 
-TypeScript's Handbook supplies functions, data, narrowing, generics, type operators, compatibility and module concepts. React, Next.js, Vite, Zod, TanStack Query and tRPC supply application patterns: props/events, render boundaries, builds, decoding, asynchronous state and endpoint inference. Node, ECMAScript, Fetch and Web IDL supply boundary semantics. Lean's official manual and pinned source supply the semantic constraint. Go and PLIERS inform design discipline. [T01–T15, E01–E13, L01–L13, G01–G04, M01](RESEARCH_SOURCES.md)
+For source syntax, first consult v0.7 and its registry/conformance corpus. PSC1/PSC2 and current implementation gates explain history and coverage, not permission to override the requested grammar in PSC3 docs.
 
-Live documentation is labelled as such. The project has not pinned a complete JS ecosystem dependency matrix. New or changed APIs in live pages are not automatically accepted in the PSC3 profile. Before implementation, record package versions and exact declaration/runtime artifacts for each supported adapter.
+TypeScript/framework/ECMAScript/Web IDL sources motivate data, UI, async, modules and boundaries. Lean sources define inherited/canonical semantics under the selected pin. Go and PLIERS inform engineering/research practice. Existing references are retained as the previous pass's research record; this repair does not claim a new comprehensive web study. [RESEARCH_SOURCES.md](RESEARCH_SOURCES.md)
 
-## 5. Proposed Lean reference
+Live manuals and new package versions do not silently enter a compatibility profile. Record exact dependency and runtime artifacts before claiming an adapter works.
 
-Select v4.34.1, commit `5045d0056413266e57c625dcd7c365b10e377c52`, for the new design profile. The official September 24, 2026 release notes recommend the patch for runtime fixes; the tag resolves to that commit. This is a reason to evaluate the patch rather than assume the old runtime has identical behavior. It is not evidence of owned-kernel compatibility. [L01–L02](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+## 5. Reference version policy
 
-No root toolchain file, old profile or package identity is changed. Migration requires source, logical, runtime and independent-checker gates. A live manual may describe features beyond the selected pin; uncertain cases remain gated rather than inferred from the manual's navigation.
+The v0.7 main reference selects Lean **4.34.0**, commit `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`, for canonical meaning. The earlier proposed 4.34.1 pin and parser/tests are retained as upgrade research only. No root toolchain file is changed.
 
-## 6. Research limitations and operational outcomes
+An actual upgrade requires explicit reference/profile revision, source/category audit, logical/kernel evidence and runtime conformance. Do not apply a later parser test to claim current v0.7 acceptance, or confuse source-reference version with the PSC3 platform edition.
 
-Lean and Lake were not installed in the local working environment. No PSC build, proof replay, Lean compilation, `.psx` expansion, browser test, rustc build or Wasm execution was run. The available Node/TypeScript tools were used only for an isolated hand-authored boundary experiment. A finite Python model explored selected policy counterexamples. Commands and results are recorded in [EXPERIMENTS.md](EXPERIMENTS.md).
+## 6. Operational results and limits
 
-No user study, representative repository-frequency analysis, migration benchmark or complete dependency-closure inventory was executed. Full-app designs and package names are proposals, not installed products. This documentation commit should not trigger a stronger progress label in any existing implementation.
+The earlier pass reported Python 3.13.5, Node 22.16.0 and TypeScript 5.8.3 for isolated models/candidate boundary code, with no Lean/Lake. Those historical snippets/results remain in [EXPERIMENTS.md](EXPERIMENTS.md), labelled as not rerun by this correction.
 
-## 7. Next research that changes decisions
+This repair does not execute a PSC compiler, Lean parser/lowerer, proof replay, browser app, Rust/Wasm build or preservation proof. Documentation review is not a grammar conformance test. No participant study, repository-frequency census, dependency-closure inventory or AI productivity benchmark is claimed.
 
-Use stratified, pinned sample projects spanning services, UI, libraries, tools and theorem code. Define syntax categories before counting, exclude vendored/generated code, and publish the sampling frame and extraction script. Measure task completion and maintenance, not only occurrence counts.
+The repair checks documentation consistency against the reference and keeps all proposed APIs explicitly unimplemented. Actual source acceptance remains a future gate, using the exact original source and canonical result rather than extension renaming.
 
-Compare plain Lean-subset authoring, library-supported PSC3, and optional UI syntax on the same tasks. Give comparable training; counterbalance task order; record experience and accessibility needs. Predeclare outcome measures and separate human results from AI-agent results. PLIERS supplies a relevant user-centered process, not a ready-made finding for this language. [M01](RESEARCH_SOURCES.md#engineering-and-design-method)
+## 7. Decisive next research
 
-A design may be revised when evidence shows unacceptable annotation burden, surprising effects, unreliable diagnostics, excessive proof repair, poor interoperation or a runtime cost that defeats a target use case. Such revision must preserve old editions and record its rationale.
+Use stratified pinned projects across services, UI, libraries, tools and theorem code. Define AST categories before counting and exclude generated/vendor data. Publish sampling/extraction procedures. Measure tasks and maintenance, not just occurrences.
+
+Compare v0.7 `.ps`, supported native `.lean`, TS workflows and separately labelled optional UI syntax with comparable training and counterbalanced tasks. Record comprehension, diagnostic/annotation burden, proof repair, interop and performance. PLIERS is a process reference, not an existing PSC usability result. [M01](RESEARCH_SOURCES.md#engineering-and-design-method)
+
+A design may change based on evidence, but a syntax change must become an explicit reference/registry revision with migration—not an informal contradictory paragraph in an application document.

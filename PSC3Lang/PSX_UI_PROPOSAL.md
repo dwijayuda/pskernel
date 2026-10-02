@@ -1,89 +1,90 @@
 # Optional `.psx` UI extension
 
-**Experimental proposal `PSC3-UI-0`. Not implemented, not stock Lean syntax, and not an unsafe escape hatch.**
+**Experimental proposal `PSC3-UI-0`. Not implemented and not admitted ordinary v0.7 `.ps` syntax.** [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md), especially reference §27, controls the source-profile boundary.
 
 ## 1. Decision and alternatives
 
-Recommended: a small, explicitly delimited UI quotation that expands into an ordinary typed view library. The library is fully usable from `.ps` and `.lean`; `.psx` is optional source ergonomics.
+The library-only UI model is the first baseline. A small optional markup/quotation dialect may improve authoring, but it requires explicit grammar, version, canonical lowering and evidence before acceptance. Arbitrary TSX semantics and a separate framework language are not initial goals.
 
-Alternative A, library-only UI, minimizes syntax/tooling cost and is the first implementation baseline. Alternative B, arbitrary TSX-compatible source, creates another language frontend, JS expression semantics and extensive compatibility obligations; it is rejected for the first extension. Alternative C, a wholly custom framework language, sacrifices interoperation and is deferred.
+v0.7 describes `.psx` as explicitly target-specific/non-Lean-compatible source. The UI proposal lives within that boundary; it does not redefine `.psx` as ordinary verified `.ps`. Source extension identity and assurance are independent. No suffix grants trust, and existing `.psx` files must not be silently treated as UI.
 
-The markup recommendation remains experimental until user studies show material readability/maintenance benefit over the library form. JSX and React TS documentation demonstrate the relevance of typed UI props, children and events, but do not prove that this proposed syntax is better. [T11,E01](RESEARCH_SOURCES.md)
+JSX/React documentation motivates studying typed props, children and events, not a claim that this candidate is better. User studies and maintenance tasks must justify markup over ordinary APIs. [T11,E01](RESEARCH_SOURCES.md)
 
 ## 2. Source and Lean relationship
 
-Ordinary `.ps`/`.lean` remain the strict profile. A `.psx` project explicitly selects `PSC3-UI-0` and a pinned `Psc.UI.Syntax` extension environment. Prefer implementing the quotation as a controlled Lean syntax/macro package, so official Lean can check the extended contents under that declared import as well as the plain expansion.
+Ordinary `.ps` uses v0.7 L/D/E syntax and canonical lowering. Ordinary `.lean` stays native. Both can call the proposed view libraries without markup.
 
-That does not make the extension stock Lean. The project must report strict source versus source-under-extension coverage separately. If the extension cannot be implemented with the promised Lean expansion/oracle behavior, it is not accepted by this design.
+A `.psx` project explicitly selects `PSC3-UI-0`, its parser/expansion version and any extension imports. The extension must describe how embedded `.ps` terms use the v0.7 term category and how the result lowers to canonical Lean/Core. D-CALL inside an interpolation does not automatically change markup, attribute, pattern or tactic grammar.
 
-PSC2 used `.psx` for possible mixed/unverified source. Existing files keep that old-edition meaning. The new extension needs explicit migration and project metadata; the suffix alone cannot choose between dialects. [R01](RESEARCH_SOURCES.md#repository-baselines)
+A controlled Lean macro implementation is an option for the canonical extension stage, not a requirement that original `.psx` bytes be stock Lean. Checks under an imported Lean syntax package are separately labelled extension-environment checks. The unextended `.lean` subset promise remains intact.
 
 ## 3. Candidate authoring example
 
-The following is **illustrative syntax for an unimplemented extension**, not a claim that Lean or PSC accepts it today:
+**Extension pseudocode only; `view!` and markup below are not registered v0.7 forms and were not parsed or implemented:**
 
 ```text
 import Psc.UI.Syntax
 
-def counterView (count : Nat) : View CounterMsg :=
-  view!
-    <button onClick={CounterMsg.increment}>
-      {toString count}
-    </button>
+function counterView(count : Nat) : View CounterMsg :=
+  view! <button onClick={CounterMsg.increment}>
+    {toString(count)}
+  </button>;
 ```
 
-Its proposed plain-library meaning is equivalent to:
+Proposed ordinary-library `.ps` expansion, using v0.7 syntax and unimplemented library names:
+
+```proofscript
+function counterView(count : Nat) : View CounterMsg :=
+  View.button(CounterMsg.increment, [View.text(toString(count))]);
+```
+
+Corresponding canonical/native Lean expression:
 
 ```lean
--- Proposed library names; not a standalone compilable example.
 def counterView (count : Nat) : View CounterMsg :=
   View.button CounterMsg.increment [View.text (toString count)]
 ```
 
-Plain `.lean` applications never need markup. The extension must preserve the same messages, child order, props and view result as the ordinary expression. No arbitrary JS expression is allowed inside interpolation; terms are parsed by the selected Lean term grammar.
+Preserve messages, child order, props and result. Interpolation is PSC term syntax, not arbitrary JS evaluation. A `component` keyword, raw TSX arrow functions or universal statement blocks are not implicitly added.
 
 ## 4. Minimal grammar contract
 
-The quotation is confined to a term context after an unambiguous introducer. It contains known element/component tags, named typed attributes, literal text, term interpolation, nested children and fragments. The full tokenization/escaping grammar is a pre-freeze deliverable.
+A future registry entry must give the exact introducer, tokenization/escaping, element/component resolution, attributes, interpolation boundaries, children and fragments. Unknown or colliding syntax fails closed. The proposal is not a registered E form simply because a document calls it one.
 
-Interpolations are typed: text positions require String or an explicit supported conversion, not automatic host truthiness; event positions require the expected message or typed event-to-message function; component props follow the declared record/schema. Upper/lowercase heuristics must not be the sole semantic namespace rule.
+Text positions require String or an explicit conversion; events require typed messages or functions; props follow a declared record/schema. Case conventions alone must not define namespaces. Avoid dynamic object spread in the first version. If typed props spreading is later supported, specify duplicate-field behavior without importing JS prototypes/descriptors.
 
-No arbitrary spread of dynamic objects in the first version. A typed props record can be supplied through an explicit form whose duplicate-field behavior is specified. Do not copy JS prototype/property-descriptor spread semantics.
-
-Loops/conditions remain ordinary Lean expressions and library combinators inside term positions, rather than a second directive/control language. Keyed lists use an explicit keyed constructor. Unique key constraints may be checked in a development profile or established by a suitable data invariant; do not silently rely on array position for identity-sensitive state.
+Loops and conditionals use ordinary v0.7 expressions/library combinators inside term positions, not a second control language. Keyed lists use explicit identities; array positions are not silently treated as stable keys for stateful elements.
 
 ## 5. Expansion and diagnostics
 
-The expander produces owned syntax with source ranges and a mapping from every generated node back to its original quotation. Expansion is hygienic and deterministic for the locked environment. It constructs ordinary library calls, not privileged renderer nodes in the proof kernel.
+Produce owned syntax with original ranges and generated-to-source mappings. Expansion is hygienic and deterministic in the locked environment. It constructs ordinary library calls, not privileged renderer nodes in the proof kernel.
 
-A macro producing well-typed code is not proof that the expansion preserves the intended source meaning. Define a reference expansion relation, compare implementations and progressively prove it for the supported grammar. Use a trusted/verified printer or actual-file parsing when claiming correspondence to generated artifacts.
+A well-typed expansion is not by itself a preservation theorem. Specify the expansion relation and test/prove it at the claimed scope. Exact generated-file claims also need justified printing/parsing.
 
-Errors should name the original component, prop, expected type, missing required field or unhandled event—not only a generated constructor several layers below. Formatter round trips and error recovery on incomplete markup are release gates.
+Report errors on the original component/attribute/span, expected type and missing fields. Formatter round trips must preserve markup and v0.7 interpolation ownership, including comment/adjacency behavior. Incomplete markup should still produce useful editor diagnostics.
 
-## 6. Native component model
+## 6. Component library
 
-Propose a component library with Props, Model and Msg types; initialization; update returning state plus effect descriptions; pure view construction; and explicitly scoped subscriptions. These are ordinary data/functions and can expose contracts about updates and serializable models.
+Proposed Props, Model and Msg types support initialization, update, effect descriptions, pure views and scoped subscriptions. They are ordinary definitions usable from both source surfaces. No new component declaration grammar is required for the baseline.
 
-Views do not directly call arbitrary network operations. Effects are started by the runtime from declared descriptions, allowing request identity, cancellation and cleanup to have explicit semantics. Imported foreign widgets remain opaque components with reviewed boundary props and lifecycle behavior.
-
-A custom component can later use a different state discipline through an explicit adapter. It cannot secretly mutate the native model while claiming to be a pure view.
+Effects are started from descriptions by an explicit runtime; views do not conceal arbitrary network calls. Imported widgets remain opaque foreign components with reviewed props and lifetimes. Alternative state disciplines need explicit adapters rather than hidden mutation of the native pure model.
 
 ## 7. React adapter
 
-Generate a stable wrapper implementing the required subscriptions, lifecycle and event marshalling. Ordinary React hook calls must obey the framework's rules in that wrapper. Do not generate conditional hooks merely because a Lean `if` occurs in view code. [E02](RESEARCH_SOURCES.md#application-and-javascript-platform)
+Generate stable wrappers for lifecycle, subscriptions and event marshalling. Framework hook rules apply within those wrappers; a source conditional does not justify emitting conditional hooks. [E02](RESEARCH_SOURCES.md#application-and-javascript-platform)
 
-For foreign components, model callbacks, controlled/uncontrolled input differences, refs and children explicitly. A ReactNode-like foreign value is an opaque boundary case, not automatically a value in the native view semantics. Surface the renderer and adapter versions in build evidence.
+Model controlled/uncontrolled inputs, refs, callbacks and children explicitly. A foreign ReactNode is not automatically a native view value. Runtime/adapter identities and assumptions remain part of evidence.
 
 ## 8. Rendering, security and accessibility
 
-Text children must use a renderer operation that performs the specified escaping. Raw HTML is a separate capability with a clearly marked sanitizer/trust policy; it is not an ordinary String prop. URLs and attributes need context-sensitive policies, not one universal escape function. Event handler values must not be serialized as source code.
+Use renderer operations with specified text escaping. Raw HTML has a separate sanitizer/trust policy; URLs and attributes need context-specific handling. Events must not be serialized as executable source.
 
-ARIA/label/keyboard checks are useful tooling, not universal accessibility proofs. Server rendering and hydration need stable initial state, keys and component behavior. The adapter must test server/client agreement and report mismatches. [E03](RESEARCH_SOURCES.md#application-and-javascript-platform)
+Accessibility checks are useful evidence, not universal proofs. SSR/hydration needs compatible initial state, keys and component behavior. Test agreement and expose mismatches. [E03](RESEARCH_SOURCES.md#application-and-javascript-platform)
 
-Preserving a pure view AST does not prove browser layout, accessibility, DOM-engine correctness or absence of every injection bug. Renderer/runtime assumptions remain explicit.
+Preserving a view AST does not prove browser layout, DOM correctness, accessibility or freedom from every injection bug. A checked expansion never grants broad assurance to unmodeled renderers or hosts.
 
 ## 9. Required evidence before promotion
 
-Paired plain-library/quotation examples; official-Lean-under-extension checks; owned frontend expansion checks; prop/children/event negative tests; nested namespace and hygiene tests; formatter/source-map tests; keyed-list state preservation; listener disposal; stale async events; clean React embedding; SSR/hydration cases for that profile; and side-by-side usability tasks.
+Require an explicitly registered dialect; paired markup/v0.7-library/canonical-Lean examples; checking of the lowered output; extension-environment checks where used; negative props/children/event cases; hygiene and source maps; formatting; keyed-state and listener lifetime tests; stale-event handling; clean React embedding; applicable SSR/hydration tests; and user-task comparisons.
 
-No extension implementation or browser tests were executed in this design pass. Until these gates close, library-only views remain the normative application baseline.
+No extension implementation or browser tests are claimed by this repair. Library-only views remain the baseline, and ordinary `.ps` grammar remains v0.7.

@@ -1,6 +1,6 @@
 # PSC3 design constitution
 
-**Proposed policy · draft 0.2 · 3 October 2026.** This document is a decision framework, not evidence that its goals have been achieved.
+**Proposed policy · draft 0.3 · 3 October 2026. Syntax authority: [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md).** This is a decision framework, not evidence that its goals have been achieved.
 
 ## 1. Identity
 
@@ -11,12 +11,12 @@ TypeScript developers are a primary adoption audience, not a requirement to inhe
 ## 2. Priority order when requirements conflict
 
 1. Do not misrepresent meaning, assumptions or evidence.
-2. Preserve the declared Lean-subset semantics and explicit edition boundaries.
+2. Preserve ProofScript v0.7 syntax/grammar and canonical Lean meaning; keep native `.lean` within its declared subset.
 3. Enable complete, maintainable application workflows.
 4. Make common code understandable with predictable elaboration and useful diagnostics.
 5. Preserve mathematical and verification expressiveness above a constrained checker.
 6. Improve runtime/build performance and ecosystem reach using measured evidence.
-7. Add optional surface conveniences only when their benefit exceeds their interaction cost.
+7. Add optional surface conveniences only through explicit future reference/extension proposals, not by silently changing v0.7.
 
 This order does not permit indefinite delivery postponement in pursuit of unlimited proof coverage. Unsupported guarantees must be reported while useful type-checked applications remain possible under explicit runtime profiles.
 
@@ -31,13 +31,13 @@ This order does not permit indefinite delivery postponement in pursuit of unlimi
 | Adoption includes the whole workflow | Formatter, project setup, watch mode, source maps, errors and packaging are release work. | Declaring application readiness because several expressions compile. |
 | Foreign behavior is explicit | Represent nullability, mutability, identity, callbacks and failures at the boundary. | Treating every declaration in a `.d.ts` file as a proved foreign implementation. |
 | Generated evidence is independently checked | A model, tactic or plugin cannot authorize its own assumptions. | Replacing an unsolved obligation with an axiom during an automatic repair. |
-| Stable editions, explicit experiments | Preserve old source semantics; track extension and library versions separately. | Reinterpreting a PSC2 `.psx` escape file as a PSC3 view without migration. |
+| Stable editions, explicit experiments | Preserve reference grammar and track extension/library versions separately. | Reinterpreting a `.psx` file as ordinary verified source or deleting v0.7 call ownership. |
 
 ## 4. Go-inspired, not Go-shaped
 
 Go's original design account concerns software-engineering problems including dependencies, build latency and maintainability. Its FAQ discusses reducing clutter; its compatibility policy makes source continuity a serious obligation with explicit exceptions. Its proposal process requires significant changes to be discussed and, when needed, designed before implementation. These are useful precedents, not proof that Go's exact feature choices fit a dependent language. [G01–G04](RESEARCH_SOURCES.md#engineering-and-design-method)
 
-For PSC3 the corresponding rules are: one canonical teaching form; readable generated interfaces; bounded and explainable inference; one formatter per edition; a precise module graph; versioned evidence; and a recorded answer to each significant proposal. Small kernel size is only one budget. Reader complexity, elaboration cost, proof maintenance, runtime support and documentation cost also count.
+For PSC3 the corresponding rules are: canonical teaching examples within v0.7; readable generated interfaces; bounded and explainable inference; a category-aware formatter; a precise module graph; versioned evidence; and a recorded answer to each significant proposal. Small kernel size is only one budget. Reader complexity, elaboration cost, proof maintenance, runtime support and documentation cost also count.
 
 ## 5. Deliberate non-goals
 
@@ -49,18 +49,20 @@ Do not make all mathematical definitions executable. Do not make all executable 
 
 ## 6. Native syntax and adoption tradeoff
 
-The recommendation is strict native Lean forms in `.ps`/`.lean`, preserving the earlier source-identity goal. This has a real cost: a TypeScript developer must learn curried calls, Lean binders and expression-oriented control flow. Good tutorials cannot be assumed to erase that cost.
+Use the actual v0.7 design: TypeScript-friendly syntax where registered, Lean semantics through canonical lowering. `.ps` supports admitted `const`/`function` aliases, adjacent calls, explicit parameter grouping and category-specific braces. Native `.lean` retains its own grammar. Shared semantics is not a requirement for byte-identical sources.
 
-The compensating proposal is a much better application library and editor experience, familiar method-oriented APIs where native notation permits them, automatic import/code actions, options records and typed endpoints. An optional `.psx` extension serves UI readability without splitting ordinary source semantics.
+This corrects the previous draft's stock-Lean-only `.ps` policy. It also rejects inventing a new TS-shaped surface: bare function block bodies, JS arrow lambdas, colon-named call arguments, optional-property `?`, braced command scopes and ESM source imports are not made ordinary PSC3 syntax.
 
-A broader TS-like surface is not automatically unsound, but it would create another parser, migration model and source-correspondence obligation. It is deferred until comparative usability studies show that the strict design cannot meet adoption goals. It must then be a named extension/edition, never silently called stock Lean.
+The existing adjacency distinction has a real tooling cost. Address it with documented rules, protected-neighbor tests and formatter/source-map correctness, not a silent reinterpretation of v0.7. Proposals to change it belong to a separate reference revision.
+
+Application libraries, inference, codecs, options records, typed endpoints and editor explanations complement the admitted surface. Optional `.psx` UI syntax remains explicitly experimental and outside the base grammar; plain UI APIs remain usable from both `.ps` and `.lean`.
 
 ## 7. Proposal acceptance template
 
-Every substantial proposal records: the user task; current pain; at least one alternative and the no-change alternative; exact syntax/library mechanism; upstream meaning; feature interactions; lowering; trust implications; diagnostics; bootstrap/dependency closure; performance measurements or hypotheses; positive/negative tests; and migration consequences.
+Every substantial proposal records the user task, pain, alternatives, no-change option, exact source/library mechanism, v0.7 L/D/E/X classification or explicit extension status, canonical lowering, interactions, trust, diagnostics, bootstrap/dependency closure, performance hypotheses, positive/negative tests and migration consequences.
 
-The author, implementation reviewer and adversarial reviewer should be distinguishable roles. No single benchmark, popularity count, successful proof or AI endorsement settles a design. The decision ledger records accepted rationale and conditions for revisiting it.
+The author, implementer and adversarial reviewer should be distinguishable roles. No popularity count, successful proof, single benchmark or AI endorsement settles a design. The ledger records rationale and conditions for revisiting decisions. New grammar is never admitted merely by adding an attractive example to this directory.
 
 ## 8. Success criterion
 
-A developer should be able to build, inspect and evolve a full app, then add useful proofs without moving to a different language. A mathematician should be able to use the same foundation without pretending all mathematics is a runnable service. An independent consumer should be able to tell exactly what a package's evidence establishes. These are measurable objectives, not claims achieved by this document.
+A developer should be able to build, inspect and evolve a full app, then add useful proofs without moving to a different semantic language. A mathematician should use the same foundation without pretending every definition is runnable. An independent consumer should understand exactly what package evidence establishes. These are measurable objectives, not achieved claims.

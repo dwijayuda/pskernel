@@ -1,73 +1,65 @@
 # Standard library, modules and package design
 
-**Proposed library architecture.** Names below are design namespaces, not claims that packages have been published or implemented.
+**Proposed library architecture. Syntax authority: [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md).** Names below are proposed namespaces, not published or implemented package claims. Libraries may use v0.7 `.ps` or supported native `.lean`; canonical semantics, not source-byte identity, connects them.
 
 ## 1. Layering
 
 | Layer | Proposed contents | Dependency rule |
 |---|---|---|
-| Native base | Pinned Init and selected Std declarations. | Exact source/elaboration/logical closure recorded. |
-| `Psc.Data` | Text/bytes, collections, schema, codecs, typed routes. | Pure ordinary definitions wherever possible. |
-| `Psc.Spec` | Laws, contracts, invariant libraries and proof conveniences. | No runtime behavior merely from registration metadata. |
-| `Psc.Effect` | Explicit capability descriptions and error/resource conventions. | No hidden host IO in pure-looking APIs. |
-| `Psc.Async` | Portable task descriptions, scope and cancellation model. | Not a replacement definition of native Lean Task. |
-| `Psc.Web` | HTTP, endpoint schemas, URL/form parsing and routing. | Host effects behind typed interfaces. |
-| `Psc.UI` | View/component/model/update/subscription APIs. | Plain Lean source; optional syntax in a separate package. |
-| Adapter packages | Browser, Node, React, selected storage/native/Wasm interfaces. | Exact runtime identity, permissions and assurance status. |
-| Development tooling | Build, LSP, test, docs, bindings and migration. | Outside logical authority; secure execution separately controlled. |
+| Native base | Pinned Init and selected Std declarations. | Exact source/elaboration/logical closure. |
+| `Psc.Data` | Text, bytes, collections, schemas, codecs, routes. | Pure ordinary definitions where possible. |
+| `Psc.Spec` | Laws, contracts, invariants and proof helpers. | Registry membership has no proof authority. |
+| `Psc.Effect` | Capabilities and error/resource conventions. | No hidden IO in pure-looking APIs. |
+| `Psc.Async` | Descriptions, scopes and cancellation. | Not a redefinition of native Lean Task. |
+| `Psc.Web` | HTTP, endpoints, URLs, forms and routing. | Host effects behind typed interfaces. |
+| `Psc.UI` | Views, model/update/subscriptions. | Ordinary v0.7/native API; optional syntax separately profiled. |
+| Adapters | Browser, Node, React, storage/native/Wasm. | Exact runtime identities, permissions and evidence. |
+| Development tooling | Build, LSP, tests, docs, bindings, migration. | No logical authority; execution security is separate. |
 
-Do not force every application to import the prover or every theorem library to import the browser runtime. Separate source/elaboration and executable dependency closures. A proof term can depend on a theorem library while its executable artifact erases that content, provided erasure is justified.
+Applications need not import the whole prover and theorem libraries need not import browser runtimes. Separate source/elaboration from executable dependencies. Proof-only library content may erase only through justified erasure.
 
-## 2. API style
+## 2. API and source style
 
-Use ordinary Lean functions and types. Prefer a canonical error convention `Except ε α`, predictable argument order and options records for evolving configuration. Design receiver positions to support native field notation where appropriate. Offer explicit alternatives when inference is ambiguous.
+Use `def` or the v0.7 `function`/`const` aliases with their restrictions. Function bodies use `:= ...;` in decorated expression declarations; lambdas use `fun`; records use `where` bodies and `:=` field assignment. Prefer native `Except ε α` for standard error APIs. The reference's illustrative user-defined `Result α ε` retains success-first order and is not silently interchangeable with Except.
 
-Choose a small number of concepts shared across platform libraries. For example, the same Codec family should serve JSON endpoints, storage DTOs and initial UI state serialization, rather than introducing incompatible validation DSLs for each subsystem.
+Design predictable argument order, options records and native receiver positions. Method notation and D-CALL offer familiar use without changing resolution. Named/default arguments use supported inherited forms. Do not add colon-named calls, optional-property markers, error-propagation punctuation or universal resource blocks by library convention.
 
-Nominal domain identifiers remain distinct structures unless the programmer deliberately chooses an alias. Convenience does not justify turning all equal-shaped records into the same logical type.
+Share concepts across the platform: one coherent Codec family can serve endpoints, storage and initial UI state. Nominal identifiers stay distinct unless explicitly aliased; equal-shaped data is not automatically one logical type.
 
-## 3. Schema and codec family
+## 3. Schemas and codecs
 
-A proposed Codec for a supported type provides encode and decode functions with typed errors. A law package can establish properties such as `decode (encode x) = .ok x` under the stated wire model. Not every schema or type can satisfy every law; lossy projections and normalization require different named properties.
+A Codec provides encode/decode with typed errors; laws can establish properties such as `decode(encode(x)) = Except.ok(x)` under a defined wire model. The corresponding Lean term is `decode (encode x) = Except.ok x`. Lossy projections or normalizations need different laws.
 
-A Schema description can drive generated Lean definitions, TS interfaces, runtime validation, endpoint descriptions and documentation. Generation itself has no proof authority. Bind generated code and law evidence to the exact schema/version.
+Schema descriptions may generate v0.7 `.ps`, canonical/native Lean, TS interfaces, runtime validation, endpoints and docs. Generated evidence binds to the exact schema and resulting declarations; origin is not proof.
 
-Support a deliberately bounded schema language first: scalar values, finite tagged unions, products/records, options with explicit presence policy, arrays/lists and reviewed recursive forms. Functions, live handles, arbitrary dependent values and proofs are not generic serializable data.
-
-Derived patch/input/output DTOs are ordinary generated types. Specify how missing and null differ, whether unknown fields are rejected and how version evolution is handled. Do not infer backend wire layout from a record's runtime memory representation.
+Start with scalars, tagged unions, products/records, explicit presence policies, lists/arrays and reviewed recursive forms. Functions, handles, arbitrary dependent values and proofs are not generically serializable. Define unknown-field, missing/null and evolution behavior; do not use runtime memory layout as wire format.
 
 ## 4. Modules and package manifests
 
-Use native logical module paths. A manifest maps paths to one chosen source snapshot and records edition, Lean pin, allowed source/extension environment, dependencies and target entry points. Reject ambiguous sibling `.ps`/`.lean` files and undeclared transitive imports.
+Source uses inherited logical imports/namespaces/sections, not ESM-like replacements. A package manifest maps modules to one selected source snapshot and records PSC edition, v0.7 reference version, canonical Lean pin, extension environment, dependencies and target entries. `.ps` goes through structural lowering; `.lean` goes directly to its native frontend. Reject stale/ambiguous siblings and undeclared dependencies.
 
-An application package should expose explicit entry-point capabilities, such as browser/client or server/store, so a client build cannot accidentally close over process/environment secrets through a shared import. This is a module/capability check, not a universal information-flow proof.
+v0.7 §27 recommends npm/package.json as the JS package substrate. PSC-specific semantic/module/evidence metadata may augment it; this grammar repair does not introduce a replacement package manager or a new manifest DSL.
 
-Native initialization and old/new Lean module modes need exact conformance rules. Until they are covered, recommend explicit application startup. Approved parser/tactic registration initialization is a separate elaboration dependency, not a runtime app effect.
+Entry capabilities separate browser/client from server/storage dependencies. This guards module inclusion, not arbitrary information flow. Initialization and visibility modes need exact inherited conformance; explicit startup is the initial recommendation. Parser/tactic registration belongs to elaboration dependencies, not accidental app runtime effects.
 
-## 5. Versioning dimensions
+## 5. Version axes
 
-Keep independent identifiers for source edition, extension grammar, logical profile, axiom policy, Core bundle format, Runtime IR, InterfaceIR, runtime ABI, library API and artifact format. A formatter update is not automatically a logical-profile update; a new primitive reduction rule is not merely a package patch.
+Separate platform edition, source-reference/feature-registry version, extension grammar, logical profile, axiom policy, Core bundle, Runtime IR, InterfaceIR, runtime ABI, library API and artifact format. A formatter update cannot silently change call ownership or turn into a logical-profile update.
 
-Compatible library updates should preserve public types and documented behavior. Proof scripts may require repair even when program APIs remain compatible; report that dimension separately. Semantic migrations and assumption changes need explicit review.
-
-The Go compatibility policy is an engineering reference for taking continuity seriously, not a template that automatically solves proof-script compatibility. [G03](RESEARCH_SOURCES.md#engineering-and-design-method)
+Library compatibility covers documented API/behavior; proof-script repair is separately reported. Semantic or assumption changes require review. Go's compatibility policy is an engineering reference, not a solution to proof compatibility. [G03](RESEARCH_SOURCES.md#engineering-and-design-method)
 
 ## 6. Distribution and reproducibility
 
-The recommended JS package includes executable ESM, `.d.ts`, source maps, runtime dependency identities and optional proof bundles. TS source artifacts can remain available for integration. Native consumers may receive generated `.rs`/crate metadata or built artifacts under their selected route.
+JS packages may contain ESM, `.d.ts`, maps, runtime identities and proof bundles. TS source remains useful; native routes may expose `.rs`/crate metadata or selected built artifacts. These target artifacts do not become the source grammar authority.
 
-Package outputs should not require downloading arbitrary tools at install time without consent. Build scripts and generators are an explicit capability. Dependency locks and hashes identify exact bytes; they do not validate package behavior or substitute for proof checking.
+Do not run arbitrary installation tools without declared permissions. Locks and hashes identify bytes, not behavior. Reports record exact statements, assumptions, dependencies and preservation. Downloaded acceptance flags cannot construct CheckedModule; consumers may request independent replay.
 
-Proof metadata records accepted statements, assumptions, dependency closure, code artifact identities and preservation coverage. Unchecked downloaded reports cannot construct a trusted CheckedModule. Consumer policy may request independent replay.
+## 7. Foreign-package catalog
 
-## 7. External-package catalog
-
-Maintain tested adapter entries rather than claim generic npm compatibility. Each entry specifies package/export versions, supported operations, boundary conversions, callback/resource semantics, startup effects and clean-consumer tests.
-
-For a unsupported library, offer an explicit hand-written adapter route without claiming its behavior verified. A dynamic opaque value can be useful in a host-only region, but cannot be coerced into arbitrary proof-bearing domain types.
+Catalog exact package/export versions, operations, conversions, callbacks/resources, initialization effects and clean-consumer tests. Unsupported libraries may use explicitly reviewed adapters without automatic verification. Dynamic values remain opaque until appropriately validated.
 
 ## 8. Implementation order
 
-First close primitive/data APIs used by the compiler and the reference app. Then ship schemas/codecs, HTTP and async/resource basics, one UI adapter and development tooling. Expand storage, streams and advanced framework integration from actual app requirements.
+Close primitive/data APIs needed by compiler and app corpus; then schemas/codecs, HTTP and async/resource basics, one UI adapter and tooling. Add storage/streams/frameworks from concrete requirements.
 
-Every library family needs readable examples, behavior/law documentation and negative cases. A function name and a `.d.ts` declaration are not an implementation plan.
+Every library needs examples with declared source language and v0.7 lowering where relevant, behavior/law documentation and negative cases. A name and `.d.ts` declaration are not an implementation plan.

@@ -1,99 +1,80 @@
 # JS ecosystem interoperability and InterfaceIR
 
-**Architecture proposal, not implemented npm compatibility.** The objective is that supported applications need no hand-written JS glue, while every imported behavior retains an honest boundary.
+**Architecture proposal, not implemented npm compatibility. Syntax authority: [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md).** Source `.ps` follows the registered grammar; generated TS/JS and interface metadata have their own explicitly labelled formats. Target ESM does not introduce ESM-style source imports into v0.7.
 
-## 1. Three different kinds of boundary value
+## 1. Boundary values
 
-1. **Owned data:** a validated/copied value with ordinary PSC semantics. JSON DTOs usually belong here.
-2. **Foreign references:** opaque handles to mutable, identity-bearing objects. DOM nodes, streams and framework instances usually belong here.
+1. **Owned data:** validated/copied values with ordinary PSC semantics, such as DTOs.
+2. **Foreign references:** opaque mutable, identity-bearing handles, such as DOM nodes or streams.
 3. **Foreign operations:** typed effectful calls with receiver, error, lifetime and scheduling contracts.
 
-Do not treat every structural TS object type as an immutable Lean structure. TypeScript's compatibility design and object examples are not proofs of runtime immutability or nominal domain invariants. [T04,T10](RESEARCH_SOURCES.md#typescript-language-and-tooling)
+A structural TS object type is not automatically an immutable Lean structure. TS interface compatibility does not prove runtime immutability or domain invariants. [T04,T10](RESEARCH_SOURCES.md#typescript-language-and-tooling)
 
-## 2. InterfaceIR proposal
+## 2. InterfaceIR
 
-InterfaceIR is a versioned description of foreign interfaces, distinct from both dependent Core and executable Runtime IR. It can generate Lean declarations, adapters, validation code, `.d.ts` exports and human-readable assumption reports.
+InterfaceIR is a versioned foreign-interface description distinct from dependent Core and Runtime IR. It may generate v0.7 `.ps` declarations, their canonical/native Lean counterparts, adapters, validation code, `.d.ts` exports and assumption reports. Generated `.ps` uses `:=`, `fun`, admitted calls/data forms and inherited commands; it is not a renamed `.d.ts` or stock-Lean-only alias.
 
-Each operation records:
+Each operation records exact package/export/version and resolution conditions; wire types; value/reference distinction; receiver and argument order; omission/overload policy; synchronization and start behavior; expected/unexpected errors; callback multiplicity, reentrancy and lifetime; disposal/cancellation/aliasing; runtime capabilities; and optional specification evidence.
 
-- exact package/export path, dependency version and target-resolution conditions;
-- wire types and value/reference distinction;
-- receiver binding and argument order;
-- optionality/omission and overload policy;
-- synchronous/asynchronous behavior and start semantics;
-- expected error channel plus unexpected foreign failures;
-- callback argument/result schema, call multiplicity, reentrancy and lifetime;
-- resource ownership/disposal, cancellation and aliasing rules;
-- relevant runtime capability and purity assumptions;
-- optional specification theorem/model and its evidence status.
-
-The IR can be ordinary Lean-defined data. A signature is an interface claim, not evidence that its JS implementation obeys it. Package hashes bind identity; they do not prove the package's behavior.
+InterfaceIR can be ordinary Lean-defined data. A signature is an interface claim, not a proof of foreign behavior. Hashes bind identity, not semantics. A future `extern` spelling or the repository's separate FFI extension must be explicitly profiled rather than silently added to v0.7 grammar.
 
 ## 3. Bounded `.d.ts` importer
 
-Recommended first importable subset: concrete primitives, arrays/tuples, explicitly discriminated unions, DTO object shapes, literal tags, callbacks, resolved generics, bounded overloads and Promise-returning operations with an adapter model. Utility/conditional/mapped/template types may be specialized by an untrusted importer when their result is materialized and independently checked against the supported interface contract. [T03–T09](RESEARCH_SOURCES.md#typescript-language-and-tooling)
+The first subset should cover concrete primitives, arrays/tuples, explicit tagged unions, DTOs, callbacks, resolved generics, bounded overloads and Promise operations with adapters. Utility/conditional/mapped/template types may be specialized by an importer when the result is materialized and checked against the supported interface contract. [T03–T09](RESEARCH_SOURCES.md#typescript-language-and-tooling)
 
-Unsupported recursive type computation, declaration merging, arbitrary augmentation, impossible overload discrimination, unmodeled `this`, conditional exports or unsafe dynamic behavior MUST produce diagnostics. They must not lower to an unrestricted `any` equivalent.
+Unsupported recursive type computation, merging/augmentation, overload ambiguity, unmodeled `this`, export conditions and dynamic behavior produce diagnostics, not an unrestricted `any` equivalent.
 
-Importer output is reviewed/generated ordinary source plus InterfaceIR. Runtime decoding protects value domains; it does not prove arbitrary API behavior. Hand-authored interface adapters remain possible for unsupported packages and are explicitly labelled.
-
-There is no claim that all of npm can be imported, nor that a declaration file is accurate or current. The supported-package catalog records exact versions and tested use cases. Installation/build scripts receive explicit permissions; source loading is not permission to run arbitrary code.
+Output is explicit ordinary source plus InterfaceIR. Domain validation does not establish arbitrary API behavior. Handwritten adapters remain available and labelled. No all-npm or declaration-accuracy claim is made. Supported packages record exact versions and tested operations. Loading source is not permission to execute installation/build scripts.
 
 ## 4. Absence and property access
 
-JS distinguishes an absent property, a present property containing undefined, null, and a present value. TypeScript has configuration-sensitive optional-property checking. These distinctions matter to patch APIs and serialization. [T15,E11](RESEARCH_SOURCES.md)
+JS distinguishes missing, present undefined, null and value. These matter to patches and serialization. [T15,E11](RESEARCH_SOURCES.md)
 
-Use a boundary representation conceptually equivalent to:
+Conceptual boundary model, **type-design notation rather than PSC source grammar**:
 
 ```text
 FieldPresence A = missing | present (JsNullable A)
 JsNullable A    = undefined | null | value A
 ```
 
-These are ordinary proposed inductives, not new core rules. A specific application codec may deliberately map several cases into Option, but that lossy policy is explicit and cannot serve as a general inverse conversion.
+Implementation uses ordinary v0.7 inductives or their native Lean equivalents. An application may deliberately collapse states to Option, but that lossy conversion is not a general inverse. No optional-field `?` or `?.`/`??` syntax is admitted by this data model.
 
-A decoder of arbitrary JS objects may encounter accessors, proxies or mutation during reads. Offer a data-only profile accepting/copied from a controlled source and a foreign-object profile whose reads are effects. `hasOwn` plus property access is not a complete security proof; the local experiment only demonstrates the presence distinction on ordinary literals.
-
-Reject or explicitly define unknown fields, duplicate JSON keys, prototype-related keys and schema version changes. Do not globally merge untrusted objects into configuration/prototypes.
+Arbitrary objects may have getters, proxies or mutable reads. Choose a controlled data-only copy/rejection policy or effectful foreign reads. `hasOwn` plus access is not a security proof. Define unknown fields, duplicate keys, prototype-related keys and schema evolution explicitly; do not merge untrusted objects indiscriminately.
 
 ## 5. Numbers, text and collections
 
-Use explicit adapters for JS number, bigint and PSC numeric types. Converting a number to Nat requires the selected finite/integral/range checks; a returned bigint still requires nonnegativity. JSON numeric precision is a wire-design issue: use a specified string or tagged encoding for exact large integers when needed.
+Explicit conversions connect JS number/bigint to PSC values. Nat needs finite/integral/range checks for numbers and nonnegativity for bigints. Exact large JSON integers need a specified string/tagged format where appropriate.
 
-Preserve or reject NaN, infinities and signed zero according to the particular interface. Do not erase these distinctions for convenience. JavaScript strings use UTF-16 code units, while native Lean operations have their own index contracts; provide an explicit `JsString` boundary representation for lossless interoperation, including lone surrogates, and checked conversion to ordinary text. [E11,L11–L13](RESEARCH_SOURCES.md)
+Preserve or reject NaN, infinity and signed zero per interface. Lossless foreign text may require a JsString representation including lone surrogates, followed by checked conversion to native text. [E11,L11–L13](RESEARCH_SOURCES.md)
 
-Maps/sets, dates, regular expressions, typed arrays and buffers are not automatically plain JSON. Supply named adapters. Byte views require explicit copying/sharing/detachment policy. Shared mutable buffers cannot be handed to a pure theorem model without a snapshot or appropriate state relation.
+Maps, sets, dates, regexes, buffers and typed arrays need named adapters. Specify copy/share/detach policies. Shared mutable data requires a snapshot or state relation before reasoning as pure data.
 
 ## 6. Calls, callbacks and receivers
 
-A foreign method call retains the receiver. An extracted function that requires `this` must be bound explicitly or rejected. Registering a callback returns a scoped subscription/handle when the API requires disposal.
+A foreign method retains its required receiver; detached functions are bound or rejected. Subscriptions expose scoped disposal where needed. Specify synchronous/asynchronous, one-shot/repeated and reentrant behavior, including after disposal. Marshal inputs before creating typed messages.
 
-The callback contract states whether invocation is synchronous, asynchronous, one-shot or repeated; whether reentrancy is permitted; and what happens after disposal. Marshal input before constructing a typed message. Keep callback code from directly mutating logically immutable values through hidden aliases.
+A useful runtime pattern is foreign event → decoded message → serialized update → effect descriptions. That does not imply all APIs are pure functions. Source calls use v0.7 D-CALL or supported native application; target `.call`/receiver mechanics remain implementation details with explicit correctness obligations.
 
-A proposed app-runtime pattern is `foreign event → decoded message → serialized update step → effect descriptions`. This reduces accidental reentrancy in owned application state but does not claim that every external API can be reduced to a pure function.
+## 7. Promises and errors
 
-## 7. Promise and error adaptation
+An existing Promise can already be executing. Distinguish attachment from starting a foreign operation inside `Psc.Async`. Abort requests do not guarantee rollback. Settlement, timeout and cancellation races follow the named library model. [E10,E12](RESEARCH_SOURCES.md#application-and-javascript-platform)
 
-An existing Promise may already be executing. Distinguish attaching to it from starting a foreign operation inside a `Psc.Async` scope. Cancellation can request AbortSignal behavior when supported; it cannot promise reversal of a network side effect. Promise settlement, timeout and cancellation races require the explicit library policy. [E10,E12](RESEARCH_SOURCES.md#application-and-javascript-platform)
+Expected failures become typed Except/Async errors. Arbitrary thrown/rejected values need a separate foreign-failure channel. Domain tags do not exhaust every host failure. No new `async`/`await` source grammar or Promise-as-Lean-effect equivalence follows from this adapter.
 
-Expected failures become typed `Except`/Async errors. Unexpected thrown values and rejected reasons need a separate, explicit foreign-failure representation: JS can throw values that are not instances of Error. Do not assume exhaustive application error tags cover every external failure.
+## 8. Exporting libraries
 
-## 8. Exporting PSC libraries
+Generate ESM and `.d.ts` from an owned export schema. Erased proof arguments are not runtime arguments. Expose proof-indexed internals through validating wrappers or an explicitly restricted ABI.
 
-Generate ESM and corresponding `.d.ts` interfaces from an owned export schema. Erased proof arguments do not appear as runtime arguments. A proof-indexed internal function is exported via either a validating wrapper or a clearly restricted internal ABI.
-
-Generated TS interfaces describe the callable boundary, not all logical guarantees. A companion proof bundle identifies specifications, input encoding, runtime assumptions and preservation coverage. A downstream handwritten change to generated code invalidates its artifact identity; it does not keep the proof by keeping the filename.
-
-Expose foreign identity only through opaque API operations. A verified DTO is not automatically interchangeable with a live framework object of the same shape.
+TS interfaces describe the callable boundary, not every logical guarantee. Proof bundles bind specifications, encoding, assumptions and preservation coverage. Editing generated code invalidates identity; keeping its filename does not retain proof. Opaque identity operations remain distinct from ordinary DTO equality.
 
 ## 9. Modules and deployment
 
-ESM is the first recommended JS module route. Record Node/browser/bundler conditions, export maps, extension rules and chosen package entry points. CJS interoperation and side-effecting package initialization are separate catalogued capabilities. Node and TS module documentation show why resolution cannot be left implicit in a cross-toolchain assurance claim. [T12,E09](RESEARCH_SOURCES.md)
+Use inherited logical `import` commands in `.ps`/`.lean`; map them to locked target package entries. ESM is the recommended JS output route. Node/browser/bundler conditions, export maps and entry choices are recorded. CJS and startup side effects are separately supported capabilities. [T12,E09](RESEARCH_SOURCES.md)
 
-Bundlers, minifiers, tree shaking, worker packaging and framework compilation occur after semantic output and require separate testing or validation for any end-to-end guarantee. A Vite development success is not evidence that a production bundle preserves source behavior.
+Bundlers, minifiers, tree shaking, workers and framework transforms occur after semantic output and require appropriate tests/validation. A Vite development success does not prove production preservation.
 
-## 10. First supported adapter targets
+## 10. Initial adapter targets
 
-Prioritize Web Fetch, URL/text/bytes, selected DOM events, timers/cancellation, a small Node file/process profile, ESM library calls, and a bounded React wrapper. Then add streams, database drivers and SSR integrations. Each catalog entry requires a clean example, negative boundary tests, capability report and exact version profile.
+Prioritize Fetch, URL/text/bytes, selected DOM events, timers/cancellation, bounded Node file/process APIs, ESM calls and a bounded React wrapper. Add streams, storage and SSR through concrete apps. Each catalog entry needs source examples classified by language/profile, negative boundary tests, capability reports and exact dependencies.
 
-Do not promise Next.js Server Components merely because React client rendering works. Framework-specific server/client transforms and serialization have their own required integration. [E01–E05,E10,E13](RESEARCH_SOURCES.md)
+React client support does not imply Next.js Server Components. Framework server/client transforms and serialization need their own integration. [E01–E05,E10,E13](RESEARCH_SOURCES.md)

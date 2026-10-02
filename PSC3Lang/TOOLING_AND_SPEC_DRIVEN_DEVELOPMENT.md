@@ -1,81 +1,79 @@
 # Tooling and specification-enforced development
 
-**Proposed tooling contracts, not implemented commands.** A serious language needs useful human tools and exact machine interfaces. AI support should build on those same interfaces.
+**Proposed tooling contracts, not implemented commands. Syntax authority: [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md).** Human and AI tooling must consume the same source categories and semantic information.
 
-## 1. Coherent command experience
+## 1. Coherent commands and templates
 
-Candidate command families are `psc init`, `fmt`, `check`, `build`, `test`, `run`, `docs`, `explain` and `verify-artifact`. These names illustrate the intended integrated experience; they are not assertions that the current CLI implements them.
+Candidate families include `psc init`, `fmt`, `check`, `build`, `test`, `run`, `docs`, `explain` and `verify-artifact`. These names are proposals, not current CLI claims.
 
-Templates should create a minimal library, CLI, browser app or browser/service app using the same module and capability model. The template explicitly records edition and source environment. Ordinary development must not require manually reconstructing the compiler's bootstrap workspace.
+Templates create libraries, CLI or browser/service apps using one module/capability model, with explicit PSC edition, v0.7 source-reference/registry version and canonical Lean environment. `.ps` templates use admitted declarations/calls/braces; `.lean` templates use native forms. Do not generate a competing TS-style dialect or require users to reconstruct bootstrap workspaces.
 
-Go's engineering account and proposal practice motivate integrated, predictable tooling rather than a collection of unrelated configuration systems. [G01,G04](RESEARCH_SOURCES.md#engineering-and-design-method)
+Integrated predictable tools are motivated by Go's engineering/proposal practice, not by copying its semantics. [G01,G04](RESEARCH_SOURCES.md#engineering-and-design-method)
 
-## 2. LSP requirements
+## 2. Parser, formatter and LSP
 
-The language server should share syntax/elaboration information with the compiler and support completion, hover, navigation, references, semantic rename, import actions, formatting and diagnostics. Proof goals and assumption summaries should be available without displacing ordinary programming information.
+Share actual syntax, category ownership, lowering and elaboration information. Provide completion, hover, navigation, references, semantic rename, import actions and diagnostics, with proof goals/assumptions available alongside ordinary programming information.
 
-The inspected source is authoritative: source maps must lead back through `.psx` expansion, generated schema code and target output. A diagnostic on a foreign call should explain a missing adapter/capability, not claim that Lean type checking failed for an unrelated generated node.
+The formatter preserves D-CALL adjacency and tuple distinctions. Adding whitespace/comments can alter ownership; never normalize `f(x,y)` into `f (x,y)` blindly. Respect `:=`, scoped semicolons, `where`/`with`, native patterns/tactics/do and command scopes. Canonical formatting is not permission to change v0.7 grammar.
 
-Incremental caching keys include source/environment identities, options, instances, extension versions and relevant target profiles. Cancellation must stop obsolete work. An outdated proof result cannot be shown as evidence for the current source.
+Source maps traverse original `.ps` → canonical Lean/Core → targets, and any explicitly profiled `.psx` expansion. A compiler error must name the original span, not only an unrelated synthetic node. Cache keys include reference/registry, source/environment, options, instances, extension and target identities. Cancel obsolete work and invalidate stale proof evidence.
 
-## 3. Diagnostic structure
+## 3. Diagnostics
 
-Every diagnostic should provide a stable category, original span, relevant expansion span, module/symbol, expected/actual information, a short explanation and optional structured repair suggestions.
+Provide stable codes/categories, original and lowered/expanded spans, module/symbol, expected/actual information and safe structured repairs. Explain whether failure belongs to a v0.7 owned category, inherited unsupported feature, logical rejection, unresolved search, resource limit or foreign boundary.
 
-Distinguish malformed source, unsupported profile, native elaboration error, logical rejection, unresolved proof search, resource limit, cancellation, foreign boundary failure and internal error. An agent must not interpret every failure as an instruction to change the program.
+Examples of useful grammar feedback: a bare block-bodied function needs the admitted `:= ...;` form; a constructor pattern uses `.some x`; a spaced tuple call is not a two-argument decoration; ESM syntax belongs in target metadata rather than a source import. Suggestions must preserve actual AST meaning.
 
-Explain inferred methods, arguments, instances and coercions. Show which dependency makes an export nonportable or changes an assumption set. Suggestions must not automatically weaken specifications or erase meaningful distinctions.
+Explain methods, arguments, instances, coercions and dependencies affecting portability/assumptions. Never silently weaken a specification to resolve a diagnostic.
 
 ## 4. Agent protocol
 
-Expose versioned operations conceptually equivalent to: inspect symbols; inspect contract and dependency identities; inspect type/elaboration result; obtain goals; propose/check a patch; run selected tests; inspect artifact assurance. These are query/check operations, not permissions to edit arbitrary repository files.
+Versioned queries inspect symbols, types, goals, contracts/dependencies, target profiles and artifact evidence. Candidate-check operations do not grant arbitrary repository edit permission.
 
-An agent's allowed edit set should normally include implementation and proof scripts. Approved requirements, specification predicates, logical assumptions, verification policy, checker sources and release configuration require separate review. File-name protection alone is insufficient when definitions are imported transitively.
+Provide agents the actual v0.7 grammar/feature registry and exact supported capability manifest. Do not let generic TS training examples override those inputs. Reject unregistered syntax instead of rescuing it with textual rewriting.
 
-The agent may suggest changing a requirement, but that is a distinct change type with an explanation of strengthened preconditions, weakened postconditions, expanded effects or new assumptions. It must not count as a successful implementation repair automatically.
+Ordinary allowed edits include implementation and proof scripts. Requirements, predicate dependencies, assumptions, checker sources and release policy need separate review. Proposed requirement changes report stronger preconditions, weaker results, broader effects or new assumptions; they do not count automatically as successful repairs.
 
 ## 5. Acceptance loop
 
 ```text
-Human-approved requirement/model
-                |
-Formal contract + examples + explicit assumptions
-                |
-Candidate implementation and proof construction
-                |
-Type/profile checks + final theorem checking + tests
-                |
-Artifact preservation/runtime evidence where available
-                |
-Independent policy-controlled release decision
+Approved requirement/model
+          |
+Formal contract + examples + assumptions
+          |
+Candidate v0.7 implementation / proof
+          |
+Category-aware parsing/lowering and type/profile checks
+          |
+Final theorem checking + separately labelled tests
+          |
+Artifact/runtime evidence where established
+          |
+Independent policy-controlled release
 ```
 
-A checker validates evidence of a stated claim; it does not prove that a human requirement has been fully formalized. A specification-quality tool should look for vacuity, contradictory preconditions, omitted failure paths and mutants that still satisfy the contract. Such results are scoped evidence, not automatic intent validation.
+A checker establishes a stated claim, not complete formalization of human intent. Vacuity/contradiction/missing-error/mutant checks are scoped quality evidence. Budgets permit honest unresolved outcomes; failure never authorizes new axioms or changed specs.
 
-The loop has resource budgets and an honest unresolved outcome. Failure to prove is not permission to insert axioms, return a constant, redefine the specification or trust an external solver's unverified success.
+## 6. Tool security
 
-## 6. Security of tools and extensions
+Logical non-authority is not OS safety. Tactics, macros, plugins and build scripts may have host capabilities; use explicit permissions, isolation and immutable snapshots. Source loading does not authorize execution.
 
-Logical non-authority does not imply OS-level safety. A tactic, macro, plugin or package build script may read files or run processes in its host environment. Use explicit permissions, isolation and immutable snapshots appropriate to untrusted content.
+An agent able to edit verifier/CI can bypass workspace guards. Release inputs and policy should be independently controlled. Supplied accepted reports do not substitute for actual checking.
 
-A malicious agent able to edit the checker and CI policy can bypass an ordinary workspace guard. Release authority should use independently controlled inputs and artifacts. Never treat a report supplied by the agent as equivalent to running the required verification.
+## 7. Learning and documentation
 
-## 7. Documentation and learning
+Teach TypeScript users actual v0.7 examples: `function f(x : A) : B := ...;`, `fun`, admitted calls, `structure ... where { ... }`, `match ... with { | .some x => ...; }`, options/errors and ordinary async-library calls. Keep native `.lean` translations separately labelled and explain canonical correspondence.
 
-Teach TypeScript users native syntax through side-by-side tasks, not a misleading token substitution table. Start with functions, records, inductives, collection pipelines, options/errors and async library calls. Introduce contracts on one actual function, then dependent types and mathematical proofs as needed.
+Do not falsely say `.ps` is merely Lean with another suffix. Do not teach bare JS arrows, blocks, optional chaining or ESM source imports as accepted grammar. Explain the finite registered conveniences and their Lean meaning.
 
-Teach Lean users the exact executable/adapter profile, package/module mapping, source identity, runtime assumptions and UI/data APIs. Do not imply that all native Lean code is automatically portable.
-
-Generated documentation should show both ordinary API usage and optional guarantees, including the meaning and assumptions of those guarantees. A proof badge without the theorem is not sufficient.
+Lean users need executable/adapter coverage, package mapping, source lowering, runtime assumptions and platform APIs. Native Lean validity alone does not imply PSC compatibility. Docs show exact theorem/assumptions with badges, not badges alone.
 
 ## 8. Development versus release
 
-Fast watch/HMR may run provisionally checked code with a visible status. Strict verified release blocks missing required evidence. Both modes execute the same language semantics; a difference in evidence is not permission to select another runtime behavior.
-
-Hot replacement must migrate or reset state according to an explicit compatibility policy. Changed schemas, model types or initializers invalidate unsafe state retention. Changes to source/spec/runtime dependencies invalidate corresponding proof caches.
+Watch/HMR can use provisional checking with explicit status; strict release blocks missing evidence. Both use the same source semantics. HMR state retention needs a defined compatible migration/reset policy. Changed schemas, types, source, specs and runtimes invalidate affected state or proof caches.
 
 ## 9. Measurements
 
-Measure human comprehension, diagnostic resolution, unsupported-library work, proof burden, proof repair, annotation count and setup time. For agents, record model/version, allowed edits, budget, interventions, exact task/spec and held-out tests. Separate false acceptance from useful completion; rejecting everything is not a successful developer tool.
+Measure comprehension, grammar mistakes, diagnostic repair, interop effort, proof burden, setup and latency. Agent benchmarks record grammar/reference identity, model/version, allowed edits, budgets, interventions and held-out tasks. Report false acceptance and useful completion separately.
 
-Track edit latency, proof checking cost, cache effectiveness and memory across representative projects. Proposed experiments are in the roadmap; none of those human/AI productivity studies were run in this pass.
+The roadmap describes proposed studies; none was executed by this documentation repair. Tests of templates/formatter/lowerer against the v0.7 corpus are required before conformance claims.

@@ -1,169 +1,177 @@
 # PSC3 language reference
 
-**Authoritative proposed requirements for `PSC3Lang/` · review draft 0.2 · 3 October 2026.**
+**Proposed requirements · review draft 0.3 · 3 October 2026. Syntax and grammar follow ProofScript v0.7.0.**
 
-This is not a frozen specification or an implementation report. MUST, MUST NOT, SHOULD and MAY below constrain a future conforming implementation. No capability is implemented or proved by its inclusion here. Existing PSC1/PSC2 editions retain their own specifications.
+This is not a frozen specification or an implementation report. MUST, MUST NOT, SHOULD and MAY constrain the proposed profile. No capability is implemented or proved by inclusion here. Existing PSC1/PSC2 editions retain their own specifications.
+
+The controlling source reference is [ProofScript v0.7.0](../study/proofscript-language-reference-v0.7.0/ProofScript_Language_Reference_v0.7.0_authoritative_draft.md), including its registry and category rules. [SYNTAX_AND_GRAMMAR_V07.md](SYNTAX_AND_GRAMMAR_V07.md) records the authority, source identity, examples and non-admitted forms. This document cannot replace that grammar with stock-Lean-only `.ps` or a new TypeScript-like dialect.
 
 ## 1. Scope
 
-PSC3 combines general-purpose programming, theorem proving and formal verification over a declared Lean-based foundation. Ordinary programming is not conditional on proving every application contract. The requested assurance is a separate, inspectable property of a build and its exports.
+PSC3 combines general-purpose programming, theorem proving and formal verification over a declared Lean-based foundation. Ordinary programming is not conditional on proving every application contract. Requested assurance is a separate, inspectable property of a build and its exports.
 
-The strict source profile is a syntactic and semantic subset of Lean v4.34.1 at `5045d0056413266e57c625dcd7c365b10e377c52`, with an enumerated import/elaboration environment. The [Lean profile](LEAN_PROFILE.md) defines inclusion targets and restrictions. The [semantics companion](SEMANTICS_AND_EFFECTS.md) defines proposed library policies without changing native Lean constructs. [L01–L10](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+The `.ps` reference is v0.7.0, whose canonical semantics use Lean 4.34.0 at `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`. `.lean` remains a supported native subset of that declared environment. Earlier 4.34.1 research is a separate upgrade candidate; it does not silently change the selected source reference. The [Lean profile](LEAN_PROFILE.md) defines compatibility dimensions. The [semantics companion](SEMANTICS_AND_EFFECTS.md) describes library proposals without redefining native constructs.
 
 ## 2. Source files, editions and environments
 
 ### 2.1 Ordinary source
 
-An ordinary `.lean` file MUST be accepted by the pinned official frontend under the declared environment, in addition to satisfying PSC's supported-subset restrictions. An ordinary `.ps` file MUST have the same contents as its staged `.lean` source. Staging changes only the extension and declared filesystem layout; it MUST NOT rewrite calls, add imports, strip punctuation or alter options.
+An ordinary `.lean` file MUST be accepted by the pinned official frontend under its declared environment and satisfy PSC's supported-subset restrictions. It does not accept ProofScript-only decorations.
 
-Each logical module resolves to exactly one source snapshot. A project MUST reject ambiguous `.ps` and `.lean` candidates unless an explicit manifest selects one. It MUST NOT silently use a stale sibling to make a build succeed. Source/import maps, relevant compiler options and the exact dependency environment are part of evidence identity.
+An ordinary `.ps` file MUST follow v0.7 L/D/E syntax and lower canonically to compatible Lean syntax or Core. Its contents need not be valid unmodified Lean. Renaming its extension is not canonical lowering. The reference equation is `meaningPS(p) := meaningLean434(canonicalLower(p))`.
 
-The project declares the source edition independently of extension. A PSC2 file is not PSC3 merely because its suffix is `.ps`. Old meanings MUST remain available through explicit legacy support or be rejected with a migration diagnostic.
+Each logical module resolves to one source snapshot. Reject ambiguous `.ps` and `.lean` candidates unless the manifest selects one. Never use a stale sibling to make a build succeed. Source/import maps, options, exact dependencies and lowering identity are part of evidence identity. Canonical helper declarations and rewritten punctuation must retain the required source-map and hygiene correspondence.
 
-### 2.2 Extensions
+The project records source-reference version separately from PSC platform edition. Existing PSC1/PSC2 meanings are not silently replaced. Moving to PSC3 does not require deleting valid v0.7 aliases or decorations.
 
-The strict default does not add TS-like syntax. A syntax extension MUST have an explicit name/version, parser/expansion contract, allowed imports, source mapping and conformance gate. Its expansion must enter the same ordinary semantic checking path. Extension code has no independent proof authority.
+### 2.2 Registered categories and extensions
 
-`.psx` selects the proposed `PSC3-UI-0` extension only in an explicitly configured project. The UI extension is outside stock syntax; it is not an unsafe mode. Every UI behavior expressible through it SHOULD have a plain `.ps`/`.lean` library expression. See [PSX](PSX_UI_PROPOSAL.md).
+The parser chooses an exact registered E production, then a D production whose discriminator holds, then the supported inherited Lean category. DEFER is not unconditional acceptance. Term decoration does not automatically extend pattern, tactic, command or do-element grammar.
+
+Future syntax requires an explicit ID/class, grammar, discriminator, canonical lowering, compatibility cost, source mapping and conformance evidence. A document's experimental example cannot register it implicitly.
+
+Reference §27 identifies `.psx` as explicitly target-specific/non-Lean-compatible source. Proposed UI markup is a separate experimental dialect within that boundary, selected by project metadata rather than the suffix alone. It must not inherit ordinary `.ps` verification/portability claims automatically. Plain UI libraries remain available from `.ps` and `.lean`. See [PSX](PSX_UI_PROPOSAL.md).
 
 ### 2.3 Compatibility dimensions
 
-Report source syntax, elaboration environment, logical rules/axioms, executable closure, target profile and assurance separately. Supporting exported Lean proofs does not imply support for their original tactic scripts. A working runtime backend does not imply a theorem library is supported. A feature excluded from execution may still be useful in proof-only code.
+Report source syntax, elaboration environment, logical rules/axioms, executable closure, target profile and assurance separately. Checking exported Lean proof terms does not imply original tactic-script support. Runtime backend coverage does not imply theorem-library coverage. A proof-only feature need not have an executable realization.
 
-## 3. Lexing, formatting and declarations
+## 3. Lexing, punctuation, formatting and declarations
 
-Pinned Lean lexical rules govern identifiers, Unicode, comments, precedence and layout in ordinary source. Formatting MUST preserve the parsed meaning and module identity. PSC3 adds no extra adjacency-sensitive call convention.
+Lean lexical rules are inherited except where a registered v0.7 D/E production owns its exact context. Formatting MUST preserve category ownership, parsed meaning and module identity.
 
-`def` is the canonical ordinary definition. `theorem`, `example`, `abbrev`, `opaque`, `structure`, `inductive`, `class` and `instance` retain native meanings in the supported profile. `const` and `function` from PSC2 are not new ordinary PSC3 declarations. Native modifiers, visibility, namespaces and sections retain the exact selected Lean behavior; unsupported module modes fail explicitly.
+`:=` denotes binding/definition/update in the applicable category; `=` is propositional equality; `==` is Boolean equality through the selected Lean machinery. Braces and semicolons are category-specific, not universal JS blocks or globally removable punctuation. No JS-style automatic-semicolon policy is introduced.
 
-The recommended project template includes `set_option autoImplicit false` explicitly. This is a convention using a native option, not an invisible frontend change. Other conventions MUST NOT cause the PSC and Lean oracle to check different environments.
+`def` is the canonical general definition. `const` is the parameterless declaration-head alias; `function` is the alias requiring an explicit declaration parameter group. Both lower to `def` and do not add hoisting, `this`, prototypes or object freezing. Reference §§8–9 govern their exact restrictions.
 
-Every accepted declaration MUST have closed, well-scoped admitted content under its environment. Unknown metavariables, malformed universe parameters and unfinished proofs do not gain release authority.
+```proofscript
+const answer : Nat := 42;
+const increment : Nat -> Nat := fun x => x + 1;
+function add(x : Nat, y : Nat) : Nat := x + y;
+```
+
+Expression-bodied decorated declarations use `:=` and their owned terminating semicolon. Bare brace-bodied `function` declarations are explicitly not admitted in v0.7 (§8.6). `theorem`, `example`, `abbrev` and `opaque` retain their separate inherited meanings; aliases do not automatically apply to them.
+
+The project template MAY explicitly include `set_option autoImplicit false`. It must be part of the declared source/environment, not an invisible difference between PSC and its oracle. Accepted declarations must be closed and well-scoped; unfinished evidence cannot authorize release.
 
 ## 4. Functions and elaboration
 
-Functions use native curried application and binders. Explicit, implicit, strict-implicit and instance-implicit binders retain their roles. A caller-facing type is not changed into TS generic-angle syntax or a new n-ary kernel operation.
+D-CALL lowers `f(x, y)` to `(f x) y`. `f((x, y))` passes one tuple; spaced `f (x, y)` is protected native tuple application. `f()` lowers to `f ()`, not a new zero-argument kernel call. Whitespace/comments between the head and parenthesis break the D-CALL discriminator. Do not equate distinct multi-argument and tuple forms while formatting.
 
-Local inference is encouraged; public signatures SHOULD expose important data, effects and dependencies. Contextual typing of lambdas and automatic insertion of inferable arguments MUST remain inspectable in tooling.
+Explicit `(x : A)`, implicit `{α : Type}`, strict-implicit `{{α : Type}}` and instance `[C α]` binders retain their roles. Comma-grouping is available only in registered headers. Native type application and dependent binders are not replaced by TS `<T>` syntax. Lambdas use `fun x => ...`, not bare `x => ...`.
+
+Local inference is encouraged; public signatures SHOULD expose important data, effects and dependencies. Contextual typing and inserted arguments remain inspectable.
 
 ### 4.1 Names, methods and typeclasses
 
-For accepted source, name resolution, generalized field notation, coercions and instance synthesis MUST choose the terms specified by the pinned Lean environment. If the implementation cannot support a resolution case, it reports that restriction; it does not select a different candidate and label it compatible.
+For accepted source, name resolution, generalized field notation, coercions and instance synthesis retain the meaning of the canonical Lean environment. If a resolution case is unsupported, reject it; do not choose a different candidate and call it compatible.
 
-Import, priority and declaration-order influence is part of the environment. Search budgets are explicit. Exhausting a budget MUST NOT be treated as permission to choose a different meaning. Diagnostics SHOULD show the requested class/method, candidates, selected arguments and the relevant imported declarations. [L07](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+Priorities, imports and declaration order belong to the environment. Search budgets do not authorize a different meaning. Explain selected methods, arguments, instances and relevant declarations. The v0.7 reference §§21–23 governs these inherited mechanisms; a live/manual or later patch does not override the selected pin.
 
 ### 4.2 Named and default arguments
 
-Accept the pinned native forms. Parameter identity is part of the exported source interface when used by name. Dependent argument elaboration follows native rules; defaults are not new runtime overloading. Distinguish the elaborator's processing order from the target program's execution order.
+Use supported inherited Lean forms. For example, a native named call may be `connect host (timeout := 5000)`; `connect(host, timeout: 5000)` is not an admitted replacement grammar. Defaults use the inherited declaration rules. Named-argument support inside a decorated call requires actual category coverage, not an assumption that all text between parentheses is valid.
 
-An options record is an ordinary structure, not a second parameter system. A library may choose it for stable application APIs. Foreign overloads/variadics are handled in [InterfaceIR](JS_INTEROP_AND_INTERFACE_IR.md), not by changing the core function type.
+Parameter identity is part of an API used by name. Dependent elaboration order and runtime evaluation order are distinct. Options records are ordinary structures, not a second parameter system. Foreign overloads/variadics belong in [InterfaceIR](JS_INTEROP_AND_INTERFACE_IR.md).
 
 ### 4.3 Higher-order functions
 
-Functions remain first-class in the logical fragment. Their executable representation and supported polymorphism must be recorded. A backend cannot emit a different calling convention for a function returned from another function without preserving the same application meaning. Closure environment layout and partial application belong in representation evidence.
+Functions remain first-class in the logical fragment. Record the supported executable representation and polymorphism. A backend must preserve returned-function invocation, closure capture and partial application rather than invent a target calling convention.
 
-## 5. Data, schemas and equality
+## 5. Data, patterns, schemas and equality
 
-Structures and inductives retain nominal identity and native formation/elimination rules. Plain records are values, not JS objects whose prototype, address or mutable property identity defines equality. Constructors, projections and pattern motives must be checked.
+Structures and inductives retain nominal identity and native formation/elimination rules. Registered braced data declarations retain `where`; fields/constructors use their category separators.
 
-Dependent fields are not optional verification metadata. When updating an index changes another field's type, reconstruct that field or supply appropriate evidence. The compiler MUST NOT resize data, discard a field or insert an unchecked cast. The simplest initial implementation may reject complicated updates with an actionable diagnostic.
+```proofscript
+structure User where {
+  name : String;
+  active : Bool;
+}
 
-Pattern matching MUST preserve constructor and index refinement. Exhaustiveness, inaccessible patterns and motive synthesis follow the supported native rules. Refutable pattern bindings need the native explicit failure context. A wildcard cannot hide an unsupported dependent motive.
+function activate(user : User) : User :=
+  { user with active := true };
 
-`Option α` is the recommended application absence type and `Except ε α` the standard error type. A foreign boundary requiring more than two absence states MUST use a more precise ordinary data type; it cannot silently collapse them into Option.
+function getOrElse(value : Option Nat, fallback : Nat) : Nat :=
+  match value with {
+    | .none => fallback;
+    | .some x => x;
+  };
+```
 
-Schema and codec libraries are ordinary definitions and generated declarations. They may supply DTO projections, typed paths and endpoint interfaces. They MUST NOT introduce general structural subtyping or prove foreign implementations from declaration shapes.
+Structure values/updates are inherited Lean syntax. Dependent fields are not optional metadata: an update that changes their type must reconstruct them or supply appropriate evidence, never insert an unchecked cast.
 
-Propositional equality, definitional conversion and Boolean equality are distinct. A `BEq` instance does not automatically prove that true means logical equality; verified algorithms require the relevant laws or a verified decision procedure.
+The E-MATCH-BODY form retains `with`. Patterns stay native Lean: `.some x`, not `.some(x)`. Constructor-header decoration does not extend patterns. Exhaustiveness and motive synthesis must preserve native meaning for the claimed capability.
 
-## 6. Logical foundation
+`Option α` is the recommended application absence type and `Except ε α` the standard native error type. The reference's illustrative user-defined `Result α ε` has success first, error second; do not confuse its order with `Except`. Foreign missing/undefined/null distinctions may require richer ordinary data, with explicit conversion policies.
 
-The logical profile MUST implement the selected Lean rules for sorts/universes, dependent functions, binding/substitution, conversion, propositions, proof irrelevance, inductives/recursors and required quotient facilities. It must not substitute a simpler approximate calculus while claiming this profile. [L09](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+Schema/codec libraries generate ordinary declarations. They do not create general structural subtyping or prove foreign behavior from declaration shapes. Propositional equality, definitional conversion and Boolean equality are distinct; `BEq` alone does not establish lawfulness.
 
-The checker may evolve through explicitly partial development coverage. Unsupported terms are not accepted. The public release profile and the minimum compiler implementation subset need not be identical.
+## 6. Logical foundation and proof syntax
 
-### 6.1 Assumptions
+The selected logical profile retains sorts/universes, dependent functions, substitution, conversion, propositions, proof irrelevance, inductives/recursors and relevant quotient rules. Partial implementation coverage must fail closed rather than approximate the theory.
 
-Axiom policy is independent of package version and semantic-profile identity. A Lean-oriented mathematical policy MAY allow exact reviewed foundational declarations; a constructive policy may restrict them. Reports MUST expose the transitive logical assumptions of requested theorems.
+Proof/tactic syntax belongs to its inherited category. For example, the reference admits `theorem ... := by { ... }`; declaration-semicolon rewriting must not alter tactic sequencing. Structured proofs and automation construct evidence, never authority.
 
-Checking names alone is insufficient. A user axiom with the same spelling as a foundation declaration must not inherit its authority. `sorry`/`sorryAx`, incomplete proof artifacts and arbitrary native-result assumptions cannot qualify for strict verified release.
+Axiom policy is independent of package and semantic-profile versions. Report exact transitive assumptions; names alone cannot confer foundational authority. `sorry`/`sorryAx`, incomplete proofs and arbitrary native-result assumptions do not qualify for strict release. Research or larger-trust profiles must be explicit.
 
-Native execution, external solvers and plugins may construct candidates. Unless justified by independently checked evidence, their answers are not new logical rules. Larger trust profiles may be selected explicitly and must say what they assume. [L08](RESEARCH_SOURCES.md#lean-and-logical-foundations)
-
-### 6.2 Mathematics
-
-Universe-polymorphic abstractions, indexed inductives, equality reasoning, classical and noncomputable developments are legitimate user programs in their declared logical profiles. A noncomputable definition is not forced into a runtime artifact. Its executable use requires an explicit realization and the appropriate correspondence evidence.
-
-Tactic and notation environments are versioned. Successful elaboration of a mathematical example under official Lean does not establish owned-frontend compatibility or a complete mathlib port.
+Universe-polymorphic, indexed, classical and noncomputable mathematics remains legitimate. Noncomputable definitions are not silently forced into executable artifacts. Tactic and notation environments are versioned, and successful official Lean checking alone does not establish owned-frontend or backend compatibility.
 
 ## 7. Computation, partiality and effects
 
-Ordinary total definitions use accepted structural or well-founded mechanisms. A failed termination search is a failure to establish evidence, not a theorem of divergence.
+Total definitions use supported structural/well-founded mechanisms. Failed termination search is not proof of divergence. `partial def` retains its native logical/runtime boundary; runtime equations cannot be fabricated by the verifier. Other upstream recursion mechanisms require independently recorded capability evidence.
 
-`partial def` retains its native opaque logical interpretation. Referring to it in a theorem is different from establishing a property of its actual executable body. Its runtime equations must not be invented by the verifier. `partial_fixpoint` is a separately gated native feature with its own reasoning principles. [L05](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+Application execution may include partiality and effects. Report whether type safety, partial correctness, total correctness, trace safety or another precise claim is established. A filename alone does not replace that evidence model.
 
-Typed application execution may include partiality and host effects. It MUST report what is established: type safety, conditional/partial correctness, total correctness, trace safety or another precise property. No global filename-based verified/unverified dichotomy may replace this evidence model.
+`do`, state/error monads, loops, mutable locals and `return` keep inherited Lean meanings. Bracketed `do` is subject to reference §18's pinned-grammar gate; this draft does not register a new block rule. E-IF-BRACE is `if (c) { t } else { e }` with one term per branch; sequencing is not imported from JS statements.
 
-`do`, state/error monads, loops, local mutation and control flow retain native elaboration. Observable effect sequencing is explicit in the computation. Logical reduction and execution are not interchangeable evaluators. Optimizations must respect relevant termination/effect assumptions; deleting an unused divergent computation is not justified merely by calling it pure.
-
-The language MUST preserve the difference between state/error transformer orders. Discarding a pure state result on failure does not undo actual network or database effects.
-
-Resources, async and platform capabilities are governed by separately named ordinary libraries. Native Lean Task and IO operations are not silently redefined to match JS Promise or Rust futures. See [SEMANTICS_AND_EFFECTS.md](SEMANTICS_AND_EFFECTS.md).
+Preserve transformer order and effect sequencing. Discarding logical state on failure does not undo a network/database effect. Resource and `Psc.Async` APIs are separately named library proposals; there are no newly admitted `async function` or `using` keywords, and native Lean Task/IO are not redefined as Promise/futures.
 
 ## 8. Scalars and runtime primitives
 
-Nat/Int denote their exact native values. Fixed-width integers, target-word values, floats, characters, strings and byte arrays require operation-level bindings to the selected reference and runtime implementation. The baseline repository's complete scalar matrix is not closed by this draft. [R03,L11–L13](RESEARCH_SOURCES.md)
+Nat/Int retain exact reference values. Fixed-width integers, target words, floats, characters, strings and bytes require operation-level bindings to the selected reference. The inherited scalar/conversion matrix remains an implementation/release obligation, not closed by this repair.
 
-A backend MUST reject unimplemented primitive semantics for a requested executable profile. It MUST NOT fall back to JS number, Rust debug/release overflow, host string length or arbitrary unchecked conversion.
-
-Target-word values require an explicit width profile. Float contracts concern specified floating behavior or a proved relation to a mathematical model; they are not automatically real-number theorems. Invalid numeric/string boundary conversions use a specified error path.
+Reject missing primitive semantics for a requested executable profile. Do not fall back to JS number, Rust debug/release overflow, host string length or unchecked conversions. Target-word width and resource behavior remain explicit. Floating contracts concern specified floating behavior or a proved relation, not automatic real arithmetic.
 
 ## 9. Specifications and contracts
 
-A specification can be an ordinary proposition/theorem about an ordinary definition. The final checked theorem MUST refer to the actual implementation, requested specification and fixed semantic dependencies. Proving unrelated generated obligations is insufficient.
+Ordinary propositions and theorems about actual definitions are the baseline. Final evidence must bind the implementation, requested specification and fixed semantic dependencies; unrelated discharged VCs are insufficient.
 
-The native intrinsic verification capability is experimental. At the proposed pin it uses one optional requires and one optional ensures clause; compound conditions use predicates/conjunction. It generates a separate specification theorem and uses the pinned library/options. PSC3 MUST NOT silently invent a stronger function type or a different contract semantics. [L03–L04](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+Upstream intrinsic verification syntax remains a separately gated inherited capability under the selected pin, imports and options. Earlier 4.34.1 parser/test research does not automatically certify the v0.7/4.34.0 frontend. Recheck exact placement, clause count and generated-theorem behavior before advertising it. Do not invent repeated clauses, new final proof-section syntax or automatic proof parameters. Plain definition-plus-theorem examples remain usable without that extension.
 
-Verified callers establish the preconditions needed by their correctness argument. A merely type-checked caller does not inherit that proof. A proof-bearing API may instead explicitly request a proof/subtype using ordinary dependent types. Foreign callers need appropriate validating wrappers; `.d.ts` is not a runtime guard.
+Verified callers discharge their required preconditions; ordinary type checking does not imply those proofs. Explicit proof/subtype APIs and external runtime-validating wrappers are separate mechanisms. `.d.ts` is not a runtime guard.
 
-Stateful, error and asynchronous contracts must state the relevant outcomes and assumptions. A successful-result clause alone cannot establish that success occurs. Total correctness needs termination/liveness evidence under stated resource/environment conditions.
+State/error/async contracts state relevant outcomes and assumptions. Successful-result clauses do not establish eventual success. Total correctness needs termination/liveness evidence under stated conditions. Erasure must retain runtime-relevant witnesses and data.
 
-Ghost erasure MUST retain runtime-relevant witnesses and data. Proof fields, Booleans and indices cannot be removed solely because they sound verification-related.
+## 10. Modules, commands and platform interfaces
 
-## 10. Modules, initialization and platform interfaces
+Use inherited commands such as `import Foo.Bar`, `namespace Name ... end Name`, `section ... end`, supported visibility, attributes and options. Braced namespaces/sections and ESM-style `.ps` imports/exports are not admitted v0.7 replacements. `E-WHERE-BODY` is a local-declaration context, not a general command block.
 
-Logical imports are deterministic and mapped to exact package versions/contents. Foreign package resolution is an adapter/build responsibility recorded by deployment profile, not the meaning of Lean imports. Native module initialization and visibility need exact supported semantics; application startup SHOULD be explicit entry points rather than hidden top-level side effects.
+Logical imports map to exact dependencies. JS ESM/package export resolution is a target/tooling responsibility, not a new source grammar. Track source, elaboration and runtime dependency closures separately. Prefer explicit application entry points until native initialization modes are fully covered.
 
-Source, elaboration and runtime dependency closures are separately recorded. Private source visibility is not a security sandbox. Build-time plugins require independent capability permissions and isolation appropriate to untrusted code.
-
-The platform offers typed interfaces for network, storage, time, randomness, UI and process services. Exported API and contract information is generated from the same schema/declaration definitions where applicable. External operations remain assumptions unless their implementation/model relation is established.
+Platform network/storage/time/UI/process APIs are ordinary declared libraries and adapters. Build-time plugins need explicit permissions and appropriate isolation. External behavior remains assumed unless its implementation/model relationship is established.
 
 ## 11. UI and full-app authorship
 
-The standard application profile SHOULD allow complete browser, service and CLI applications without user-authored TS/JS glue for its supported APIs. Runtime and framework adapters may be foreign implementations with explicit identities and assumptions.
+The application profile should permit browser, service and CLI apps without hand-written TS/JS glue for supported APIs. Runtime/framework adapters may be foreign implementations with explicit identities and assumptions.
 
-UI is available as ordinary library values and functions. The optional `.psx` form expands to those same values. A framework-specific adapter cannot skip Core checking or grant broad proof status to the renderer, browser or remote services.
+UI is available through ordinary v0.7 library values/functions and their native Lean equivalents. `.psx` markup is an explicitly profiled, non-base proposal. Its expansion still needs source correspondence and checking; it grants no proof of renderer, browser or remote services.
 
-Source sharing across server/client requires capability and serialization checks. A shared type name alone does not prevent a client dependency from reaching server-only code. Code splitting, workers, SSR and hydration are individually profiled features.
+Client/server source sharing requires capability and serialization checks. Code splitting, workers, SSR and hydration are individually profiled; a shared type name is not a security boundary.
 
 ## 12. Compilation and evidence
 
-The shared path is source interpretation, kernel admission, erasure, Runtime IR and target lowering. Existing TS/Rust and proposed direct JS/Wasm consume the same semantic representation. Target-specific layout must not become a new source interpretation.
+The common path is v0.7 `.ps` lowering or native `.lean` interpretation, elaboration, kernel admission, erasure, Runtime IR and target lowering. Existing TS/Rust and proposed direct JS/Wasm consume one semantic representation. Target layout cannot redefine source syntax or meaning.
 
-Preservation is behavioral equivalence/refinement under explicit representation, effect and resource relations, not textual identity. A proof about an internal AST does not cover a faulty printer; bind evidence to the exact emitted files, linked runtime and dependencies. [C01](RESEARCH_SOURCES.md#compilation-and-targets)
+Preservation is behavioral equivalence/refinement under explicit representation, effect and resource relations. Evidence about an internal AST does not cover an incorrect printer; bind it to actual files and runtime dependencies. A compiler building the checker has a build-trust role distinct from a compiler proposing proofs. Self-hosting and differential agreement are not soundness theorems.
 
-A compiler building the checker executable has a build-trust role distinct from a compiler producing candidate proof terms. Self-hosting, reproducibility and differential agreement are useful evidence but not soundness theorems.
+## 13. Diagnostics, incomplete work and policy
 
-## 13. Diagnostics, incomplete work and release policy
+Editors may retain incomplete source/goals. Release states distinguish accepted, rejected, unsupported, search incomplete, resource limit, cancelled and internal error. Timeout is not proof of falsehood.
 
-Editors may retain incomplete goals and source. A release policy MUST distinguish admitted evidence from provisional results. Statuses include accepted, rejected, unsupported, search incomplete, resource limit, cancelled and internal error. A timeout is not proof that the requested property is false.
+Diagnostics identify original `.ps` spans, lowered/expanded spans, module, expected/actual types, obligation and target capability. Provide the same data to human tools and AI agents. Agents may not silently alter approved specifications, dependencies, assumptions or release authority to turn failure into success.
 
-Diagnostics identify source span, expansion span when relevant, logical module, expected/actual types, unresolved obligation, target capability and actionable alternatives. The same information SHOULD be machine-readable for tools and AI agents.
+## 14. Conformance and freeze
 
-No agent may resolve a failure by changing an approved specification, its dependencies or assumption policy without an explicit reviewed change. Changes to the verifier, CI or release authority are outside an implementation agent's implicit permission.
+The source gate starts with the v0.7 registry and positive/negative/lowering corpus. Test D-CALL neighbors, alias restrictions, brace/separator categories, native patterns, lambda forms, namespace scope and formatting/source maps. Accepting similar-looking examples is not S2 proof or production refinement.
 
-## 14. Freeze conditions
-
-A stable edition requires exact source/library closure, essential scalar/collection bindings, complete semantics for its advertised effects, accepted example corpus, migration rules and independently reviewable evidence labels. A full-app release additionally needs actual application workflows and tool integration; a compiler fixed point alone is insufficient.
-
-Deferred features may remain outside a release. They must not be silently accepted with weaker semantics. See [ROADMAP_AND_CONFORMANCE.md](ROADMAP_AND_CONFORMANCE.md) for concrete promotion gates.
+A stable PSC3 edition additionally needs precise library/effect/primitive closure, actual application workflows, migration rules and evidence reporting. Unsupported features remain rejected or explicitly profiled. See [ROADMAP_AND_CONFORMANCE.md](ROADMAP_AND_CONFORMANCE.md).

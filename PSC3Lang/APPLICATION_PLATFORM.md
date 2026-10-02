@@ -1,12 +1,12 @@
 # Full application platform
 
-**Proposed architecture and release requirements; APIs/packages are not implemented by this document.** Full application authorship is a first-class goal, not a permanent restriction to extracted pure libraries.
+**Proposed architecture and release requirements; no APIs/packages are implemented here. Syntax authority: [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md).** Full application authorship remains a first-class goal, not a permanent restriction to extracted pure libraries.
 
-## 1. Meaning of a full ProofScript application
+## 1. Full ProofScript applications
 
-Within a supported deployment profile, application logic, UI definitions, routing, endpoint schemas, service orchestration, tests and selected proofs can be authored in `.ps` or native `.lean`. Optional `.psx` improves view syntax but is not required. Foreign framework/runtime adapters may exist inside the platform distribution; the user should not need to hand-write glue for every normal operation.
+Within a supported deployment profile, application logic, UI, routing, schemas, orchestration, tests and selected proofs can be authored in v0.7 `.ps` or supported native `.lean`. `.ps` declarations/calls are canonically lowered; they are not merely renamed Lean files. Optional `.psx` views require an explicit extension dialect and are not needed for ordinary APIs.
 
-Full source authorship does not mean the browser, database, operating system or imported npm packages are rewritten in ProofScript. Nor does it mean the whole deployed app is formally verified. Those are separate claims with explicit assumptions.
+Platform/runtime adapters may be foreign implementations inside the distribution; users should not need handwritten glue for every normal operation. Full source authorship does not mean rewriting browsers, databases or npm packages, nor does it mean the whole app is formally verified.
 
 ## 2. Application layers
 
@@ -22,80 +22,80 @@ Psc.Async / resource / capability libraries
 Declared JS/native/Wasm adapters
 ```
 
-The same domain model can be used by browser and service code. Module capabilities restrict which entry points can include which dependencies. Source sharing is not permission to put secrets or filesystem operations in client bundles.
+Shared models can serve browser and service code while module capabilities restrict dependencies. Sharing source is not permission to include secrets or filesystem operations in clients.
 
-Use a minimal number of integrated concepts: ordinary records and inductives; Codec/Schema for untrusted data; Endpoint for request/response/error contracts; Model/Msg/update/view for the native UI layer; and Async/Resource for effects. These are library families with explicit semantics, not independent mini-languages.
+Use a few integrated concepts: records/inductives; Codec/Schema; Endpoint; Model/Msg/update/view; Async/Resource. These are ordinary library families, not independent source languages. V0.7 `function ... := ...;`, `fun`, adjacent calls and registered data/match forms can express their APIs. Proposed async, resource or component conveniences do not add new base keywords.
 
-## 3. Proposed platform inventory
+## 3. Platform inventory
 
 | Area | First credible app profile | Follow-on work |
 |---|---|---|
-| Data | Text/bytes, arrays/maps, JSON codecs, typed validation errors. | Schema evolution, binary formats, streaming codecs. |
-| HTTP | Fetch-style client and selected server adapter; typed endpoints. | Streaming, WebSocket, advanced middleware. |
-| UI | Typed components, event decoding, forms, list keys, state updates, subscriptions. | Advanced composition and multiple renderer adapters. |
-| Routing | Parsed route values, URL encode/decode, parameters and navigation effects. | Nested layouts, streaming loaders and richer server routing. |
-| Async | Scoped tasks, failure/cancellation policy, request identity. | Bounded parallelism, backpressure and advanced scheduling. |
-| Persistence | One explicit driver/transaction adapter with tested CRUD. | Migration tooling, broader drivers and transaction proof models. |
-| Development | Format/check/build/test, watch mode, source maps, error overlay, CSS/assets. | Profiling, advanced HMR state migration, distributed builds. |
-| Distribution | ESM + types; clean Node/browser consumption; selected server deployment. | SSR/hydration, edge-specific capabilities and native packaging. |
-| Assurance | Checked domain contracts and exact assumption reports. | Wider stateful/async specifications and compiler preservation. |
+| Data | Text/bytes, collections, JSON codecs, typed errors. | Schema evolution and streaming/binary formats. |
+| HTTP | Client and one server adapter, typed endpoints. | Streaming, WebSockets, advanced middleware. |
+| UI | Typed views/events/forms/keys/state/subscriptions. | More composition and renderer adapters. |
+| Routing | Parsed routes, encode/decode, navigation effects. | Nested layouts and server routing. |
+| Async | Scoped work, failure/cancellation, request identity. | Bounded parallelism and backpressure. |
+| Persistence | One driver/transaction adapter and tested CRUD. | Migrations, drivers and transaction proof models. |
+| Development | Format/check/build/test/watch, maps, overlay, CSS/assets. | Profiling, HMR migration and distributed builds. |
+| Distribution | ESM + types, clean browser/Node consumers, selected server target. | SSR/hydration, edge and native packaging. |
+| Assurance | Checked domain contracts and exact assumptions. | Wider effectful proofs and compiler preservation. |
 
-Do not postpone every application feature until all theorem automation is complete. Conversely, do not call a compiler application-ready because a single expression evaluates.
+Do not delay all application work until all theorem automation exists. Do not call a compiler app-ready because one expression executes.
 
-## 4. Cohesive reference app: Inventory Board
+## 4. Reference app: Inventory Board
 
-The design corpus should build a small inventory application with a browser view, typed API, persistence and a verified domain transition.
+Build a small browser/service/persistence app with a verified domain transition.
 
 ### Shared source
 
-`Domain.Item` defines nominal IDs, item fields and invariants. `Domain.Adjustment` is an inductive request with explicit error cases. `Api.Inventory` declares request, response and error codecs plus endpoint metadata. The same definitions generate a PSC client, a TS interface and runtime validation on the server.
+`Domain.Item` defines nominal IDs, fields and invariants. `Domain.Adjustment` is an inductive request with explicit errors. `Api.Inventory` supplies request/response/error codecs and endpoint metadata. Shared definitions generate PSC clients, TS interfaces and runtime validation through explicit source/target formats.
 
-Proof candidates establish properties of the actual in-memory transition: stock remains within the chosen domain; rejected requests leave the model unchanged; successful adjustments follow the contract. The theorem does not automatically prove that a database transaction under concurrent requests preserves those properties.
+Theorems concern the actual in-memory transition: stock stays in its domain; rejection preserves the model; success obeys the contract. They do not automatically establish concurrency properties of a database transaction.
 
 ### Browser source
 
-`Client.Model` stores items, form state, query status and a request generation ID. `Client.Update` transforms messages into a new model and effect descriptions. `Client.View` uses ordinary typed view constructors; `Client.View.psx` may be an alternative example but must not duplicate a maintained semantic implementation.
+`Client.Model` stores data, form/query states and a request generation ID. `Client.Update` maps messages to model/effect descriptions. `Client.View` uses ordinary v0.7 view calls or native `.lean` equivalents. An optional `.psx` example must expand to the same library meaning, not create a second maintained semantic implementation.
 
-Form inputs are text until decoded. Loading, success, failure and stale responses have explicit constructors. The latest request ID policy prevents an old response from overwriting a newer result. Cancellation requests do not imply the server rolled back a write.
+Form values remain text until decoded. Explicit loading/success/failure states and request IDs govern stale results. Cancellation does not imply remote writes were rolled back.
 
 ### Server source
 
-`Server.Main` assembles the router, configuration and capabilities. `Server.Inventory` validates requests, checks authorization through a declared provider, executes a transaction operation and encodes responses. Secrets are supplied at the server boundary. The example must not implement home-grown password cryptography or label an auth adapter proved merely because its signature is typed.
+`Server.Main` assembles router, configuration and capabilities. `Server.Inventory` validates, invokes an explicit authorization provider, executes a transaction and encodes outcomes. Secrets enter at the server boundary. Do not implement home-grown password cryptography or label typed authentication adapters proved.
 
-`Server.Store` describes isolation/conflict/retry behavior and identifies the driver/version used. Verified state-transition reasoning is explicitly conditional on the storage model until that adapter relationship is established.
+`Server.Store` states isolation/conflict/retry behavior and identifies the driver. Domain reasoning remains conditional on the storage model until the implementation relation is established.
+
+### Source grammar
+
+Use inherited `import Inventory.Domain.Item`-style logical imports, v0.7 declarations/patterns and library combinators. Server async orchestration is not an implicit `export async function ... { ... }` grammar. ESM exports and deployment entry points are generated metadata/artifacts. `.lean` authors use native forms for the same APIs.
 
 ### Release output
 
-A browser bundle, service package, typed client package, source maps and assurance manifest. Tests cover bad requests, stale results, cancelled navigation, transaction conflicts, denied access, startup failure and a deliberate false domain contract.
+Produce browser/service/client packages, source maps and an assurance manifest. Test malformed requests, stale responses, cancelled navigation, conflicts, denied access, startup failure and a false domain contract. Every app-owned module can be `.ps` or `.lean`; markup is an explicit optional boundary. This is an acceptance target, not a running app claim.
 
-Every application-owned module is ordinary `.ps`/`.lean`, with optional markup only for the view. That is the target full-app acceptance demonstration—not a claim that it runs today.
+## 5. UI and React
 
-## 5. Native UI versus React interoperation
+The recommended library model has state, messages, update and pure view values, giving tests/proofs an identifiable subject. Templates/helpers can reduce boilerplate without hiding meaning.
 
-The recommended native authoring model uses explicit state/messages and pure view construction. This makes state transitions testable and gives proofs an identifiable subject. It does not require users to learn a full functional UI theory before writing a button; project templates and ordinary helper APIs should hide routine boilerplate without hiding meaning.
+A bounded React adapter renders/embeds components in existing TS apps, with reviewed props/events and lifecycle behavior. Hooks are not arbitrary pure functions. [E01–E02](RESEARCH_SOURCES.md#application-and-javascript-platform)
 
-A bounded React adapter can render or embed these components in existing TS apps. Imported React components use reviewed props/events interfaces. React hook and lifecycle behavior remains an adapter obligation; native PSC code must not pretend a hook call is an arbitrary pure function. [E01–E02](RESEARCH_SOURCES.md#application-and-javascript-platform)
+Do not build a DOM engine, React replacement and server framework at once. Validate one renderer before adding alternatives under the same interface contract. Components are ordinary functions unless an explicitly registered extension says otherwise.
 
-Do not build an entirely new DOM engine, React implementation and server framework simultaneously for the first release. Prove the native API useful with one supported renderer, then add alternatives against the same documented view/event contract.
+## 6. SSR/hydration and framework boundaries
 
-## 6. SSR, hydration and framework boundaries
+SSR needs deterministic initial rendering, serialization, stable keys, client capability boundaries and initialization. Hydration correspondence is an adapter test, not a consequence of view typing. [E03](RESEARCH_SOURCES.md#application-and-javascript-platform)
 
-SSR needs deterministic initial rendering, a specified state serialization format, stable keys, explicit client-only capabilities and an initialization protocol. React's hydration documentation requires server/client content correspondence; this is a concrete adapter test, not something guaranteed by typing a view. [E03](RESEARCH_SOURCES.md#application-and-javascript-platform)
+Next.js Server Components require dedicated compilation/serialization integration. ESM or React elements alone are insufficient. Reject unsupported transforms rather than emit misleading directives. [E04](RESEARCH_SOURCES.md#application-and-javascript-platform)
 
-Next.js Server Components introduce framework compilation and serialization constraints. They require a dedicated integration profile; producing ESM or React elements is not sufficient evidence of support. Mark unsupported framework transforms rather than generating misleading directives. [E04](RESEARCH_SOURCES.md#application-and-javascript-platform)
+The plain browser/service app is P0; SSR/hydration is P1. Initial server rendering need not claim incremental hydration support.
 
-SSR/hydration is P1, but the plain browser/service app is P0. Pure server rendering can be used first without promising incremental hydration semantics.
+## 7. Builds, assets and latency
 
-## 7. Builds, assets and development latency
+Use Vite-compatible integration, original-source maps through v0.7 lowering or `.psx` expansion, CSS/assets, dependency invalidation and useful overlays. Development transformation and full checking are distinct evidence states. [E05](RESEARCH_SOURCES.md#application-and-javascript-platform)
 
-Provide a Vite plugin or compatible integration for the selected profile, source maps back to original `.ps`/`.lean`/`.psx`, CSS/assets, dependency invalidation and a useful overlay. Vite's own documentation separates TS transformation from full type checking; similarly, development output must visibly distinguish provisional compilation from verified release. [E05](RESEARCH_SOURCES.md#application-and-javascript-platform)
+HMR retains state only under a justified compatibility policy; otherwise reset. Changes invalidate related proofs. Measure startup, edits, rebuilds, diagnostics, browser cost, memory and clean production builds rather than inventing favorable budgets.
 
-HMR is an explicit development mode. Preserve state only when its version/schema compatibility is justified; otherwise reset. A code or spec change invalidates affected proof evidence. Do not present stale green proof badges while executing newer code.
+## 8. Adoption
 
-Measure cold startup, warm edits, rebuild size, diagnostic latency, browser startup, memory and clean production builds. Set budgets from measured baselines rather than inventing favorable numbers in the spec.
+Support consuming a PSC package, replacing one complete feature and authoring a whole supported app. Maintain examples for each with explicit foreign boundaries.
 
-## 8. Adoption stages
-
-Support three paths: consume one PSC package from TS; replace one feature including its UI/API modules; author a complete app from the supported template. Each path must have maintained examples and an escape boundary that is explicit rather than infecting all domain types.
-
-The ecosystem strategy is to become preferable for concrete work because of maintainability and guarantees. Market-share dominance is not a technical acceptance test and is not predicted by this design.
+The strategy is concrete maintainability and guarantees, not a predicted market-share outcome. This syntax correction preserves the full-app goals while restoring one declared source grammar.

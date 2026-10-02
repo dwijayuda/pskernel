@@ -1,99 +1,93 @@
 # Runtime semantics, effects and resources
 
-**Proposed semantic policies.** Native Lean constructs keep pinned behavior. New names in this document, especially `Psc.Async`, denote ordinary library proposals, not implemented APIs or new kernel rules.
+**Proposed semantic policies. Syntax authority: [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md).** `.ps` uses category-aware canonical lowering; native `.lean` retains the selected reference semantics. New library names, especially `Psc.Async`, are proposals, not implemented APIs, newly admitted syntax or kernel rules.
 
 ## 1. Logical and executable views
 
-A total pure definition participates in logical computation and may have an executable realization. An IO or asynchronous computation can be described by a typed value without making every execution terminate or establishing the correctness of external services. Lean distinguishes effectful types from pure functions; its logical checking evaluation and runtime evaluation are different concerns. [L06](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+A total pure definition participates in logical computation and may have an executable realization. An IO/asynchronous computation can be described by a typed value without making every execution terminate or establishing external-service correctness. Logical checking and runtime evaluation are different concerns. [L06](RESEARCH_SOURCES.md#lean-and-logical-foundations)
 
-The target-neutral runtime relation must specify values, calls, allocations relevant to the model, observable effects, failure and divergence. Where a native construct's observable behavior is not yet covered, restrict executable coverage rather than invent a target-specific rule.
+The runtime relation specifies values, calls, relevant allocations, observable effects, failure and divergence. Unsupported observable behavior restricts executable coverage; it does not authorize a new target-specific source meaning.
 
-Claims distinguish partial correctness, termination, total correctness, safety properties over traces and environmental liveness assumptions. Resource exhaustion may be modeled as an allowed outcome or ruled out by proved bounds; it cannot be ignored while promising success on every finite machine.
+Claims distinguish partial correctness, termination, total correctness, trace safety and environmental liveness. Resource exhaustion is either explicitly allowed or ruled out by bounds, not ignored while promising success on every finite machine.
 
-## 2. Function evaluation and optimization
+## 2. Evaluation, grammar and optimization
 
-Effectful sequencing uses native `do`/bind or an explicitly defined library interpreter. The order of elaborating arguments is not permission to reorder external effects. Code motion, duplication and dead-code elimination require the appropriate purity and termination conditions.
+Effect sequencing uses inherited `do`/bind or a named library interpreter. v0.7 §18 governs the accepted do-element grammar and the conditional gate for bracketed `do`. It does not admit a universal JS block, unrestricted `return`, `async function` or `using`. Local mutation retains `:=` and native scope; new resource/async policies use ordinary library calls.
 
-Under a strict execution model, `first 1 (loopForever ())` does not necessarily behave like `1`. This is a design counterexample: it was not executed under Lean here. The partial function's runtime equations cannot be used as ordinary total equations without a separate justified relation. [L05](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+Elaboration order does not authorize effect reordering. Code motion, duplication and dead-code elimination need appropriate purity/termination conditions. Under a strict execution model, `first(1, loopForever())` need not behave like `1`; its canonical Lean counterpart is `first 1 (loopForever ())`. This remains a design counterexample, not an executed Lean test. A partial function's runtime equations need separate justification before logical use.
 
-Closure conversion must preserve captured values and the relevant state discipline. A backend may use mutable cells internally only when that is a faithful representation of the admitted program. Copying a resource handle is not automatically allowed merely because copying an ordinary immutable record is allowed.
+D-CALL expresses curried application while preserving spaced tuple neighbors. Closure conversion must preserve captured values and state discipline. Mutable target cells may be an internal representation only when faithful. Copying a resource handle is not automatically safe because copying an immutable record is safe.
 
 ## 3. State and failure
 
-Two different interfaces must stay different:
+Keep different interfaces distinct:
 
 - `StateT S (Except E) A`: failure does not return a successful final-state pair.
-- `ExceptT E (StateM S) A`: a final state accompanies either successful or failed computation.
+- `ExceptT E (StateM S) A`: final state accompanies success or failure.
 
-A convenience alias must identify its stack. A parser's speculative logical rollback must restore its relevant internal state. It cannot roll back a filesystem write simply by discarding a state value.
+A convenience alias identifies its stack. Speculative logical rollback restores relevant parser/elaborator state; it does not undo a filesystem write. Database transactions need actual isolation/conflict/retry models. An in-memory inventory theorem is not a proof against concurrent database overselling.
 
-Database transaction operations need a model of the actual transaction boundary, isolation/conflicts and retry semantics. A proof about an in-memory inventory transition is not a proof against concurrent database overselling.
+## 4. Portable async library candidate
 
-## 4. Portable asynchronous library candidate
+**Application priority; experimental until semantic conformance closes.**
 
-**Recommended application priority; experimental semantic profile until conformance closes.**
+Do not redefine native Lean Task. `Psc.Async ε α` is a separately named ordinary library describing asynchronous computation with an explicit interpreter capability. Candidate operations include pure, bind, failure, start-in-scope, await, cancellation request, timeout and bounded parallel traversal. Their signatures must have a valid v0.7/canonical-Lean expression and declared dependency closure. Method names such as await are library API candidates, not newly registered keywords.
 
-Do not redefine native Lean `Task`. Define a separately named library family `Psc.Async ε α` describing asynchronous computations and an explicit interpreter capability. Candidate operations are pure/return, bind, failure, start-in-scope, await, cancel request, timeout and bounded parallel traversal. Their exact signatures must be implementable using ordinary Lean data/functions under a recorded closure.
+The recommended policy is cold descriptions with explicit start: construction schedules nothing; interpretation starts work. Reusing a description starts another run, while sharing a started handle refers to the same run. An existing Promise may already be executing, so attachment differs from starting a cancellable thunk. Promise is a foreign reference, not the library's definition. [E12](RESEARCH_SOURCES.md#application-and-javascript-platform)
 
-A recommended policy is **cold descriptions and explicit start**: constructing an Async value schedules nothing; interpreting it starts work. Reusing a description starts another computation, while sharing an already started handle awaits the same task. Native Promise adapters must account for the fact that an existing Promise may already be running; attaching a Promise is a different operation from starting a cancellable thunk. Promise semantics are a foreign reference, not PSC's definition. [E12](RESEARCH_SOURCES.md#application-and-javascript-platform)
+### Lifecycle
 
-### Lifecycle proposal
+A handle moves from created to running, then one terminal success, typed failure or cancelled outcome. Cancellation is a request until committed; earlier committed success is not retroactively changed. Specify permitted traces and arbitration rather than wall-clock identity across hosts.
 
-A started handle progresses from created to running, then exactly one of success, typed failure or cancelled. Cancellation is a request until a cancellation terminal event commits. A successful completion that committed first is not retroactively changed. Under races, permitted traces and the arbitration point must be specified; wall-clock identity across hosts is not promised.
+The historical finite terminal-event model checks only a small policy property, not a scheduler, fairness, cleanup or liveness. Structured scopes own children and follow a declared cancellation/completion policy. Uncooperative foreign work can prevent prompt shutdown. Force-detach is an explicit capability that changes structured-completion claims.
 
-The finite first-terminal-event model in the experiments only checks a small policy property. It does not establish scheduler correctness, fairness, cleanup or liveness.
-
-Structured scope owns child handles. Scope completion requests cancellation for still-live children and observes their completion according to its declared policy. Uncooperative foreign work may prevent prompt shutdown; deadlines must not be advertised as unconditional termination guarantees. A force-detach escape is a separate explicit capability and disqualifies structured-completion claims for that operation.
-
-A timeout measures a stated host clock/deadline policy. It does not prove that no remote side effect occurred. Late results are ignored or reconciled using an explicit request identity, not mistaken for rollback.
+Timeout uses an identified clock/deadline policy. It does not prove that a remote side effect did not occur. Late results use request identity rather than being mistaken for rollback.
 
 ### Runtime bridge
 
-For JS, specify queueing and Promise/AbortSignal adaptation; for Rust, specify executor and cancellation support; for Wasm, specify host imports and suspension/lifetime handling. Adapters must preserve the permitted trace set or report a narrower unsupported capability. Do not equate identical final values with identical effects.
+Specify JS queues/Promise/AbortSignal adaptation, Rust executor/cancellation support, or Wasm suspension/import/lifetime handling. Adapters preserve the allowed traces or report unsupported capabilities. Equal final values alone do not establish equal effects.
 
 ## 5. Resource library candidate
 
-Use an ordinary bracket-style API with explicit acquisition, body and release. The recommended outcome rules are:
+Use ordinary bracket-style functions with explicit acquisition, body and release. No new `using` grammar is admitted by this proposal.
 
 | Situation | Required outcome policy |
 |---|---|
-| Acquisition fails | Do not call release for a handle never acquired. |
-| Acquisition succeeds, body succeeds | Release once before reporting successful scoped completion. |
-| Body fails | Release once; retain body error. |
-| Release fails after body success | Report release failure; do not claim clean completion. |
-| Body and release fail | Preserve both in a typed aggregate; do not silently lose the body error. |
-| Cancellation after acquisition | Run the declared cleanup protocol before reporting scoped cancellation. |
-| Process/engine termination | Outside exactly-once cleanup guarantee unless separately modeled. |
+| Acquisition fails | No release of a never-acquired handle. |
+| Body succeeds | Release once before reporting scoped success. |
+| Body fails | Release once and retain the body error. |
+| Release fails after body success | Report release failure. |
+| Body and release fail | Preserve both in a typed aggregate. |
+| Cancellation after acquisition | Perform the declared cleanup protocol before scoped cancellation. |
+| Engine/process termination | Outside exactly-once cleanup unless separately modeled. |
 
-Exactly once here concerns the library's intended release invocation in its supported execution model, not proof that an arbitrary external service processed the release exactly once. Retry and idempotency need separate protocols.
-
-Cancellation masking and cleanup interruption remain a freeze gate for the asynchronous resource profile. Native `try/finally` retains its upstream semantics; this different aggregation policy belongs to a differently named library operation. Garbage collection and destructors must not silently define external-resource lifetime.
+Exactly once concerns the intended release invocation in the supported model, not proof of remote processing. Retry/idempotency are separate protocols. Cancellation masking and interruption remain freeze gates. Native try/finally keeps its meaning; different aggregation belongs in a differently named library operation. GC/destructors do not silently define external-resource lifetime.
 
 ## 6. Numeric and text contract
 
-| Domain | Proposed binding discipline | Forbidden shortcut |
+| Domain | Binding discipline | Forbidden shortcut |
 |---|---|---|
-| Nat/Int | Exact mathematical values with exact pinned operations. | JS number range assumptions or machine truncation. |
-| Nat subtraction | Saturating/truncated natural subtraction. | Signed BigInt subtraction for underflow. |
-| Integer division/remainder | Name the exact selected operation and zero/sign convention. | Assuming JS/Rust variants are interchangeable. |
-| Machine integers | Bind width, overflow, shifts and conversions per operation. | Debug/release-dependent source meaning. |
-| USize/ISize | Explicit deployment width; width-sensitive results reported. | Claiming bit-identical wasm32/native64 results automatically. |
-| Float/Float32 | Pin rounding, NaN/signed-zero and permitted transformations. | Real arithmetic proofs applied directly or silent fast-math. |
-| String/Char | Pin Lean operations and index types; convert JS text explicitly. | JS UTF-16 code-unit length treated as native string length. |
-| Byte data | Explicit encoding, endian and bounds behavior. | Native memory layout used as a wire format. |
+| Nat/Int | Exact reference values and operations. | JS number range assumptions or truncation. |
+| Nat subtraction | Truncated natural subtraction. | Signed BigInt subtraction on underflow. |
+| Division/remainder | Exact named operation and zero/sign rules. | Assuming host variants coincide. |
+| Machine integers | Width, overflow, shifts and conversions per operation. | Debug/release-dependent source meaning. |
+| USize/ISize | Explicit deployment width. | Automatic native64/wasm32 identity claims. |
+| Float/Float32 | Pinned rounding, NaN/signed-zero and transforms. | Real-number proofs or silent fast-math. |
+| String/Char | Exact operations/index contracts and explicit conversion. | JS code-unit length as native string length. |
+| Bytes | Encoding, endian and bounds contracts. | Runtime memory layout as a wire format. |
 
-The native numeric/text references and ECMAScript value model motivate these boundaries. The complete declaration-by-declaration primitive matrix is still a release deliverable; an unreviewed primitive is unsupported in the certified profile. [L11–L13,E11,R03](RESEARCH_SOURCES.md)
+The v0.7 canonical baseline and primitive capability set govern bindings. Earlier patch/live-manual research is supporting evidence, not an implicit upgrade. The complete operation matrix is still required; unreviewed primitives remain unsupported. [L11–L13,E11,R03](RESEARCH_SOURCES.md)
 
-The local candidate experiment found the expected discrepancy between a one-code-point astral character and its two UTF-16 code units. That is not an implementation of a Lean String runtime.
+The prior experiment's astral-character discrepancy is a recorded boundary example, not a Lean String implementation or newly executed test.
 
 ## 7. Collections and lawfulness
 
-Prefer application APIs over Array for indexed/bulk work and List for structural recursion where appropriate; do not redefine one as the other. Ordered and hashed collections need separate order, equality and hashing laws. Iteration order belongs to the documented collection API; it cannot vary accidentally with host containers.
+Array and List serve different roles and retain their semantics. Ordered/hashed collections need separate equality/order/hash laws. Iteration order belongs to the API, not an accidental host container.
 
-Offer checked/optional access and proof-indexed access as distinct ordinary APIs. An unchecked host out-of-range read must not become a value of an arbitrary logical type. Schema-derived encoders must explicitly choose missing/null behavior and deterministic field ordering when the wire contract requires it.
+Checked/optional access and proof-indexed access are distinct APIs. Host out-of-range reads cannot yield arbitrary logical values. Schema encoders explicitly select missing/null and field-order policies where needed.
 
 ## 8. Assurance gates
 
-Required cases include divergence-sensitive optimizations; closure capture across mutation; nested state/error recovery; acquisition/body/release combinations; cancellation/completion races; stale results; large arithmetic; zero division; numeric conversion boundaries; Unicode conversion; collection law violations; and explicit host capability failures.
+Test divergence-sensitive optimization, closure capture/mutation, transformer order, acquisition/body/release combinations, cancellation races, stale results, arithmetic and conversion boundaries, Unicode, collection laws and capability failures. Add source-category tests for each API example and source-map preservation through v0.7 lowering.
 
-Native Lean examples, concurrent schedulers and backend traces were not executed in this pass. These policies must be implemented, modeled and tested before being advertised as portable runtime semantics.
+Native examples, concurrent schedulers and target traces were not executed by this syntax repair. Proposed library policies need implementation, models and tests before portable-runtime claims.

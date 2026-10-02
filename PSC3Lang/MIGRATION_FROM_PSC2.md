@@ -1,51 +1,54 @@
 # Migration from PSC2 and earlier PSC3 drafts
 
-**Proposed migration policy. No source or compiler migration was performed by this documentation change.**
+**Proposed migration policy · v0.7 syntax repair.** [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md) governs syntax/grammar. No compiler or application-source migration was executed by this documentation change.
 
-## 1. Edition boundary
+## 1. Edition and reference boundary
 
-PSC3 is a new public-source edition, not a silent reinterpretation of PSC1/PSC2. Existing source keeps its declared semantics. The manifest specifies the edition; a filename is insufficient because `.ps` and `.psx` have different proposed roles across versions.
+PSC3 is a platform/language iteration whose base surface follows the v0.7 reference; it is not a silent replacement with stock-Lean-only source or newly invented TS grammar. Record platform edition, source-reference version, library profile and extension version separately.
 
-The migrator must parse using the old grammar, produce new native syntax, preserve module/definition identities as specified, and report ambiguity. Global replacement of braces, semicolons or calls is not a safe migration. The old grammar explicitly distinguishes adjacent calls from Lean-neighbor tuple/application forms. [R01–R02](RESEARCH_SOURCES.md#repository-baselines)
+Existing PSC1/PSC2 source keeps its declared meaning. A migrator parses the original grammar and preserves or explicitly transforms the AST and module identity. Global replacement of braces, semicolons or calls is unsafe. The v0.7 adjacent-call discriminator and protected native neighbors remain active, not obsolete. [Reference §§5–10](../study/proofscript-language-reference-v0.7.0/ProofScript_Language_Reference_v0.7.0_authoritative_draft.md)
 
-## 2. Main changes
+## 2. Required corrections and retained forms
 
-| Existing design | PSC3 recommendation | Migration/evidence requirement |
+| Existing source/design | Corrected PSC3 policy | Migration/evidence requirement |
 |---|---|---|
-| `def` / `const` / `function` aliases | Canonical native `def`. | Preserve binders, types, defaults and body. |
-| `f(x,y)` adjacent curried call | Native `f x y`; tuple calls remain explicit. | Parse the old AST; do not guess from whitespace alone. |
-| Owned braced declaration/proof blocks | Native Lean forms/layout. | Correct scope, semicolon and macro-category handling. |
-| `.lean` and `.ps` related but distinct surfaces | Strict byte-identical content profile. | Record old-to-new source correspondence and official Lean checks. |
-| Multiple contract clauses in draft prose | Exact pinned native clause grammar or ordinary theorem. | Preserve conjunction/binders and effect-spec meaning. |
-| Inconsistent `Result` ordering examples | Standard `Except ε α`; explicit user Result types allowed. | Transform data constructors/specifications together. |
-| Abstract Task promise | Native Task unchanged; separate proposed `Psc.Async`. | No renaming alone can prove scheduler/cancellation equivalence. |
-| `.psx` mixed/unverified possibility | Explicit optional UI extension in a new edition. | Reject old escape semantics unless a separately named legacy profile is selected. |
-| Feature inclusion by syntax | Source/elaboration/logical/runtime/assurance coverage matrix. | Do not infer executable support from parsing. |
-| Library generation emphasis | Full-app platform and concrete application acceptance gates. | Implement adapters, tooling and end-to-end workflows. |
-| Earlier TS/Rust-only PSC3 proposal | Preserve routes; favor gated direct JS/direct Wasm too. | No deletion or bootstrap change implied. |
+| Valid v0.7 `def`, `const`, `function` | Retain canonical definition and both constrained aliases. | Do not force a blanket rewrite to `def`; enforce alias parameter rules. |
+| `f(x,y)` | Retain adjacent two-argument curried-call decoration. | Canonical Lean is `f x y`; preserve original meaning. |
+| `f((x,y))` / `f (x,y)` | Retain one-tuple semantics and distinct parser ownership. | Never normalize by removing/adding a space without AST knowledge. |
+| Registered braced data/match/where syntax | Retain exact v0.7 categories and lowering. | Keep `where`, `with`, separators and native pattern rules. |
+| Earlier byte-identical `.ps`/`.lean` proposal | Withdraw; `.ps` lowers to Lean/core, `.lean` stays native. | Check lowered artifacts and source correspondence rather than rename files. |
+| Earlier bare function block or TS arrow examples | Not admitted v0.7; rewrite using `:= ...;` and `fun`. | Review source AST; do not call these implemented features. |
+| Braced namespaces/sections or ESM source imports | Not admitted replacements; use native commands. | Target ESM export metadata remains a separate build concern. |
+| `const x = ...` or record fields using `=` | Use `:=` for binding/definition/update in the proper category. | Preserve propositional equality as `=`. |
+| `.some(x)` as a pattern | Use native `.some x`. | Constructor-term/header decoration is not pattern decoration. |
+| Experimental intrinsic contracts | Exact supported inherited grammar or ordinary theorem. | Recheck chosen pin/imports/options; no invented repeated clauses or final-proof grammar. |
+| Result order inconsistencies | Keep native `Except ε α`; reference-style user `Result α ε` is separately defined. | Do not swap type parameters by name or silently rename data types. |
+| Proposed portable Task model | Native Task unchanged; separate `Psc.Async` library. | Runtime model/adapters need evidence, not a keyword rewrite. |
+| `.psx` target-specific boundary | Retain explicit boundary; UI is an opt-in versioned dialect. | Do not automatically reinterpret existing `.psx` files as UI or verified `.ps`. |
+| TS/Rust/direct JS/direct Wasm strategies | Preserve existing routes and independently gate proposed ones. | No compiler dependency or bootstrap change is implied by this syntax repair. |
 
-## 3. Lean patch proposal
+## 3. Lean reference and upgrade candidate
 
-The repository design baseline used v4.34.0; this proposal selects v4.34.1 for the new profile after checking its tag and official runtime-fix guidance. Existing pins and artifacts remain unchanged. [L01–L02](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+The controlling v0.7 reference selects Lean 4.34.0 at `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`. Earlier PSC3 work proposed 4.34.1; retain its source/tag research as an upgrade candidate, not current source authority. Existing runtime/toolchain pins are unchanged.
 
-Before migration, rebuild the selected oracle/tooling, audit logical/native changes, replay positive and adversarial evidence, compare relevant source elaboration, and validate runtime representation behavior. A patch number is not proof of compatibility. Do not mix prebuilt artifacts from different pins under one identity.
+An actual upgrade requires an explicit reference/profile revision, source/category audit, positive/negative replay, logical checking and runtime conformance. Do not mix prebuilt artifacts from different pins under one identity. A patch number alone establishes no compatibility theorem.
 
 ## 4. Specification compatibility
 
-Retain actual program/specification statements or establish the appropriate equivalence/refinement under an explicit migration plan. Changing input domains, error cases, resource behavior, logical assumptions or numeric operations is a semantic change even when the exported name stays the same.
+Retain actual program/specification statements or establish the appropriate equivalence/refinement under a reviewed migration plan. Changes to input domains, errors, resources, assumptions or numeric operations are semantic changes even when names stay the same.
 
-Changing tactics without changing the proved statement is different from weakening the statement. The migration report must distinguish proof-script repair, API change, program behavior change and assumption change.
-
-When a PSC2 behavior is underspecified, do not fabricate an equivalence proof to the newly chosen rule. Identify the ambiguity, propose a rule and require explicit review with regression cases.
+Proof-script repair differs from weakening a statement. Report API, behavior, proof and assumption changes separately. When an earlier proposal is underspecified, identify the ambiguity instead of fabricating an equivalence proof to a newly chosen rule.
 
 ## 5. Generated source and artifacts
 
-Do not hand-maintain two diverging compiler sources while claiming a canonical relationship. Bootstrap source policy and the user-language edition are separate; the compiler need not immediately use every new feature it accepts.
+Do not hand-maintain diverging compiler sources while claiming canonical correspondence. The bootstrap implementation subset and public source capability set remain separate.
 
-The migration tool and its printer are transformations with their own correctness obligations. Hash equality can establish identical bytes, not equality of different source programs. Old checked reports are not automatically valid for new source, runtime or compiler artifacts.
+A `.ps` source may be translated to canonical `.lean` through the v0.7 lowerer. Native source may be printed as `.ps` only using admitted forms with preserved meaning. These are semantic/category-aware transformations, not extension renaming or regex deletion of punctuation.
+
+Hash equality establishes identical bytes, not equivalence between different source programs. Old proof reports are not automatically valid for changed source, runtime or compiler artifacts. Recheck the actual dependency-bound statements and output.
 
 ## 6. Rollout
 
-Maintain a legacy reader or explicit migration tool as appropriate. Provide a report listing changed syntax, retained statements, renamed library operations, target restrictions and manual review items. Build example projects under the old and new declared environments, compare specified behavior and replay relevant proofs.
+Retain or explicitly migrate legacy profiles where needed. Produce reports listing retained v0.7 syntax, genuine changed semantics, renamed library operations, target restrictions and review items. Build source/canonical examples in their declared environments and replay evidence.
 
-Do not introduce the new edition into the active bootstrap until the source subset and generation gates are ready. This documentation folder is a review artifact, not an authorization to rename packages, merge workstreams or modify implementation progress.
+Do not modify active compiler/bootstrap source or merge workstreams merely to apply these documentation corrections. Source/lowering and fixed-point gates remain separate implementation tasks.

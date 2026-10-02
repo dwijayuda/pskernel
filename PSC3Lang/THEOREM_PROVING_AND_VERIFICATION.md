@@ -1,86 +1,88 @@
 # Theorem proving, contracts and verification
 
-**Proposed assurance model.** Mathematical expressiveness and application verification share a foundation, but no compiler/kernel theorem is established by this document.
+**Proposed assurance model. Syntax authority: [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md).** Mathematical and application reasoning share a foundation, but no compiler/kernel theorem is established by this document.
 
 ## 1. A real theorem prover
 
-Retain dependent functions, universes, inductive families, equality, ordinary proof terms, classical/noncomputable mathematics under an explicit policy, and a serious tactic/simplifier layer. The theorem prover is not reduced to an automated contract syntax.
+Retain dependent functions, universes, inductive families, equality, ordinary proof terms, explicit classical/noncomputable policies and substantial tactics/simplification. The prover is not reduced to automated contract syntax.
 
-The initial teaching path can be simple definitions, propositions and equality before advanced universes and automation. The full logical model remains the selected Lean theory; teaching must not invent a simpler incompatible type system. [L09](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+Teach simple definitions/equalities before advanced concepts without inventing a simpler incompatible logic. V0.7 retains `theorem`, `Prop`, `fun`, `by`, `have`, `show`, `calc` and inherited tactic categories. Registered term/header decoration does not globally rewrite tactic punctuation. [Reference §§16–19](../study/proofscript-language-reference-v0.7.0/ProofScript_Language_Reference_v0.7.0_authoritative_draft.md)
 
-Prioritize `have`, `show`, `calc`, rewriting, simplification, cases and induction, with inspectable goals and replayable evidence. Larger arithmetic/search procedures belong in proof-producing libraries/plugins. A large tactic engine need not enlarge the checker, although it increases elaboration and maintenance cost.
-
-## 2. Final theorem, not just successful obligations
-
-For a pure total implementation f, a representative contract theorem is:
-
-```text
-for all x, Pre(x) implies Post(x, f(x))
+```proofscript
+theorem selfEq {α : Type}(x : α) : x = x := by {
+  rfl
+}
 ```
 
-For state/effects, use the appropriate program relation over initial/final states and observable outcomes. The theorem must identify the actual f and fixed specification definitions. An untrusted verification-condition generator that emits `True` must not be able to obtain the requested program theorem merely by proving that unrelated proposition.
+This reference-style example is a documentation candidate, not a new proof execution. Rewriting, simplification, cases and induction should have inspectable goals and replayable evidence. Large search procedures remain proof-producing libraries/plugins, not checker authority.
 
-The policy fixes the specification's semantic dependency closure, not just the source text of its final line. Modifying a predicate definition to always return True is a requirement change. Independent proof validation must match expected statements and referenced definitions. [L08](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+## 2. Final theorem, not unrelated obligations
 
-## 3. Native contract baseline
+For total pure implementation f, the desired form is conceptually:
 
-Plain definition-plus-theorem is the stable conceptual baseline. The pinned intrinsic mechanism is experimental and is adopted only as that named capability. The inspected parser has one optional precondition and one optional postcondition clause; the inspected test generates a separate `.spec` theorem and distinguishes proof assertions from runtime assertions. [L03–L04](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+```text
+for every x: Pre(x) implies Post(x, f(x))
+```
 
-Do not rebrand experimental syntax as a frozen PSC innovation. A specification library may hide some implementation churn behind ordinary definitions. It must still keep the theorem about the actual computation visible.
+This is explanatory logic notation, not replacement source grammar. Effectful claims use the appropriate program relation. The final theorem must identify actual f and fixed predicates. Proving an unrelated True emitted by a buggy VC generator is insufficient.
 
-## 4. Callers and gradual adoption
+Protect semantic specification dependencies, not only final-line text. Modifying a predicate to True changes requirements. Validation must match statements and referenced definitions. [L08](RESEARCH_SOURCES.md#lean-and-logical-foundations)
 
-An ordinary program can be type-checked and executed without a full functional-correctness proof. An explicitly verified caller must discharge the preconditions needed in its own correctness argument. A proof-bearing dependent API can require evidence directly. These are explicit choices, not modes that secretly change function meaning.
+## 3. Contract source baseline
 
-External callers use validated boundary wrappers where the guarantee requires constrained inputs. Generated `.d.ts` and Rust interfaces communicate types, but arbitrary foreign values must not bypass the logical input relation.
+Plain v0.7 definitions plus ordinary theorems are the baseline. `function` and `const` remain aliases to definitions, not aliases to theorem or opaque declarations. Proof-producing contracts must ultimately establish a theorem about that actual definition.
 
-Do not force effectful applications into an unsafe source suffix. A typed IO program may have useful local/state/trace proofs without total termination or a verified world model.
+Upstream intrinsic syntax is a separately gated inherited capability, not newly registered PSC grammar. Prior 4.34.1 parser/test observations [L03–L04](RESEARCH_SOURCES.md#lean-and-logical-foundations) are upgrade research; recheck the exact v0.7/4.34.0 pin/import/option requirements before acceptance. Do not infer repeated clauses, final-proof-section syntax, brace rules or automatic proof arguments from examples in another version.
 
-## 5. Outcome and resource precision
+Specification libraries can stabilize APIs without hiding the resulting theorem. They cannot extend source grammar merely by being mentioned in the platform plan.
 
-A contract about successful results alone may permit an implementation that always fails. A sorting property that only requires sorted output may permit an always-empty result. Contradictory preconditions may make obligations vacuous. Use specification-quality tooling and deliberate bad implementations to expose these weaknesses.
+## 4. Callers and adoption
 
-Such checks are diagnostics and evidence, not proof that the full human requirement has been captured. The finite experiments demonstrate small examples of weak specifications; they do not solve requirement validation generally.
+Ordinary typed programs need not have complete functional-correctness proofs. Verified callers discharge the obligations needed by their claims; dependent APIs may explicitly require proofs. These choices cannot silently change function meaning.
 
-For async programs distinguish successful completion, typed failure, cancellation, divergence and resource outcomes. A timeout does not establish absence of a remote side effect. For partial definitions, a theorem about the opaque logical constant is not automatically about its compiled body. [L05](RESEARCH_SOURCES.md#lean-and-logical-foundations)
+Foreign callers need validating wrappers when required by input relations. `.d.ts`/Rust types do not enforce all logical invariants. Inherited IO/effectful programs can be ordinary `.ps` or `.lean`; lack of a totality theorem does not force a different file suffix. `.psx` is an explicit source/extension boundary, not the name for every unproved program.
 
-## 6. Assumptions and policies
+## 5. Outcomes and resources
 
-Keep these categories separate:
+Success-only conditions can admit always-failing implementations; sorted-output-only contracts can admit empty output; contradictory preconditions can be vacuous. Use deliberate mutants and specification-quality diagnostics without claiming complete human-intent validation.
+
+For async/partial code distinguish success, failure, cancellation, divergence and resources. Timeouts do not erase remote effects. Logical opacity of partial definitions does not prove their executable bodies. Named program models and bridge evidence are required.
+
+## 6. Assumptions
 
 | Category | Treatment |
 |---|---|
-| Selected foundational axioms | Exact reviewed declarations; report transitive theorem dependence. |
-| Explicit user/model hypotheses | Visible in theorem type or assumption policy. |
-| External implementation assumptions | Runtime/model layer; do not silently become proof axioms. |
-| Incomplete proofs | Usable editor state, not admitted strict release evidence. |
-| Native/solver proof shortcuts | Independent certificate/reconstruction or a separately named larger trust profile. |
+| Foundational axioms | Exact reviewed declarations and transitive dependence. |
+| User/model hypotheses | Visible theorem assumptions or explicit policy. |
+| External behavior | Runtime/model boundary, not hidden proof axioms. |
+| Incomplete proofs | Editor state, not strict release evidence. |
+| Native/solver shortcuts | Checked reconstruction/certificates or named larger trust profile. |
 | Compiler/backend assumptions | Separate preservation/build-trust accounting. |
 
-A constructive restriction and a classical mathematics profile may share the same checker rules with different permitted assumptions. Do not ban all classical mathematics to advertise safety; do not permit arbitrary axioms while advertising unconditional proof.
+Classical and constructive policies may share checker rules while differing in assumptions. Do not ban useful mathematics to advertise safety or allow arbitrary axioms while promising unconditional proof.
 
-## 7. Proof-carrying packages and changes
+## 7. Proof packages and changes
 
-A package may contain source declarations, specification identities, proof terms/certificates, logical assumptions, dependency snapshots and target-preservation evidence. The consumer can replay relevant proofs without trusting the author's automation.
+Packages bind source-reference/registry version, original declarations, canonical lowering, specifications, proofs, assumptions, dependencies and target evidence. Consumers can replay evidence without trusting authoring automation.
 
-A package hash or signature authenticates identity/provenance, not mathematical correctness. The exact checked artifact and referenced definitions must be bound. On reimport, a Boolean accepted flag is not a substitute for the required checking operation.
+Hashes/signatures authenticate identity, not truth. An accepted Boolean is not a checking operation. Tactic scripts and proof terms have different stability: pin environments and support explicit evidence/reconstruction and repair.
 
-Proof scripts and proof terms have different stability requirements. Tactic upgrades may break script reconstruction even when a theorem remains meaningful. Pin the elaboration environment, retain useful explicit evidence and support proof-repair diagnostics.
+The v0.7 S1–S5 source/lowering evidence ladder is separate from program contract proofs, kernel compatibility and backend preservation. This documentation correction claims none of those promotions.
 
-## 8. Application verification opportunities
+## 8. Application opportunities
 
-Good early targets include codec round trips and rejection properties; route parsing/printing; invariant-preserving reducers; permission-decision functions under explicit input assumptions; bounded allocation/accounting models; and pure algorithms shared between browser and server.
+Early targets include codec laws, routes, invariant-preserving reducers, permission decisions with explicit inputs, bounded resource models and shared pure algorithms.
 
-A proved authorization decision over validated claims does not verify the identity provider, token parser or transport automatically. A proved transaction state machine does not establish the database's isolation behavior. A proved view model does not verify CSS layout. The report must expose these boundaries rather than undermine useful local proofs with a misleading whole-app claim.
+A permission theorem does not verify the identity provider or transport. A transaction state machine does not prove database isolation. A view model does not verify CSS/browser behavior. Preserve useful scoped proofs without misleading whole-app claims.
 
-## 9. What the checker must establish
+## 9. Checker obligations
 
-The independent kernel's own desired theorem is that successful admission preserves well-formedness/derivability under its declared rules and assumptions. Its implementation needs evidence for binding, universes, conversion, primitives, inductives, quotients and transactional environment updates. Tests and agreement with Lean are important, but not that theorem.
+The desired independent-kernel theorem relates successful admission to derivability/well-formedness under its rules and assumptions. Binding, universes, conversion, primitives, inductives, quotients and transactional updates need evidence. Tests/Lean agreement are useful but not that theorem.
 
-The existing owned-kernel design explicitly recognizes these obligations. Reuse its canonical bundle/checked-module seam instead of inventing another shortcut checker for UI or contracts. [R06](RESEARCH_SOURCES.md#repository-baselines)
+Reuse the owned-kernel bundle/CheckedModule seam rather than inventing a UI/contract bypass. [R06](RESEARCH_SOURCES.md#repository-baselines) A correct checker still needs source-to-statement correspondence through the actual v0.7 lowerer.
 
-## 10. Release assurance vocabulary
+## 10. Assurance vocabulary
 
-Use explicit fields such as source accepted, logical admission, contract evidence, termination evidence, source correspondence, erasure evidence, target preservation, runtime assumptions and observed tests. Do not collapse them into a single green badge.
+Report source conformance, logical admission, contract/termination evidence, canonical source correspondence, erasure, target preservation, runtime assumptions and observed tests separately. Do not collapse them into one badge.
 
-The requested claim determines the needed evidence. If preservation is not established, say that the source theorem is checked and executable correctness retains the reported compiler/runtime assumptions. If a solver fails to find a proof, report incomplete search rather than a fabricated counterexample.
+Missing preservation leaves executable compiler/runtime assumptions explicit. Unsuccessful proof search is not a fabricated counterexample. No new theorem or parser result is claimed by this repair.

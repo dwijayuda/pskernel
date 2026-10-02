@@ -1,58 +1,61 @@
 # Decision ledger and open questions
 
-**Draft 0.2.** Status applies to this design recommendation, not implementation completion. Recommended decisions may still require experiments before freeze.
+**Draft 0.3 · v0.7 syntax repair.** Decisions describe this design, not implemented or proved capabilities. [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md) controls syntax/grammar; prior conflicting recommendations are withdrawn.
 
 ## 1. Decision ledger
 
 | ID | Status | Decision | Alternative and consequence | Revisit condition |
 |---|---|---|---|---|
-| D01 | Recommended | Ordinary `.ps` and `.lean` share native Lean contents and meaning. | Separate TS-like syntax costs another frontend/source-correspondence project. | Controlled user study shows unacceptable adoption cost despite library/tool improvements. |
-| D02 | Recommended | Use v4.34.1 as the proposed new reference, leave old pins untouched. | Staying on 4.34.0 avoids immediate migration but ignores patch guidance. | A later reviewed pin offers a justified compatibility/runtime benefit. |
-| D03 | Recommended | One canonical teaching declaration, native `def`. | Retain many aliases for familiarity; increases explanations and migration ambiguity. | A demonstrated user need outweighs cognitive/maintenance cost in a named extension. |
-| D04 | Recommended | Error-first `Except ε α`; no second standard Result hierarchy. | Duplicate Result creates needless parameter-order and library conversions. | A distinctly different semantic purpose, not spelling preference. |
-| D05 | Recommended | Library-first application platform and explicit capabilities. | Implement every app feature as syntax/kernel nodes; enlarges coupling. | A capability genuinely cannot be expressed in the chosen foundation. |
-| D06 | Recommended | Nominal owned data; structural foreign interfaces only at boundaries. | Native unrestricted structural subtyping changes foundational/typechecking obligations. | A separate formally specified extension has compelling measured value. |
-| D07 | Recommended | Bounded `.d.ts` importer and reviewed adapter catalog. | Claim all npm support; would conceal unsupported dynamic semantics. | Coverage expands with exact artifacts and conformance evidence. |
-| D08 | Recommended | Exact values and explicit foreign numeric/text conversion. | Adopt JS defaults globally; violates source semantics and proof meaning. | Never by convenience; only explicit distinct types/operations. |
-| D09 | Recommended | Native Lean Task remains native; `Psc.Async` is separately named. | Rename Promise to Task and assume equivalence; obscures execution differences. | Native compatibility implementation becomes sufficiently covered for a desired profile. |
-| D10 | Experimental | Cold Async descriptions, explicit start, scoped children and first committed terminal outcome. | Eager descriptions imitate Promise more closely but complicate pure construction/reuse. | Full lifecycle/resource model or user evidence shows another library contract is superior. |
-| D11 | Recommended | Typed resource outcomes preserve body and release failures. | Cleanup error overwrites body error; loses diagnostic information. | An explicit alternative combinator has a justified contract. |
-| D12 | Recommended | Plain-library model/update/view baseline. | Make a markup parser the only route to UI; violates full plain-source goal. | Never remove the ordinary API; optional ergonomics may expand. |
-| D13 | Experimental | `.psx` UI quotation as a bounded imported extension. | Arbitrary TSX or an unsafe escape file; creates semantic ambiguity. | Expansion parity and usability evidence are required before promotion. |
-| D14 | Recommended | One initial renderer/React integration, not several custom frameworks. | Simultaneously build a DOM engine, hooks clone and server framework. | Real applications justify a second backend with equivalent interface behavior. |
-| D15 | Recommended | ESM-first distribution with `.d.ts` and source maps. | Promise all module systems on day one. | CJS/other deployment coverage is explicitly tested and needed. |
-| D16 | Recommended | Preserve TS/Rust artifacts and existing bootstrap. | Delete functioning routes because direct generation seems more independent. | A route has no consumers and explicit retirement/migration is approved. |
-| D17 | Recommended | Favor direct JS after corpus/runtime/tooling/cutover gates. | Keep tsc mandatory forever, or switch on toy examples. | Measured delivery needs and conformance results determine promotion. |
-| D18 | Experimental | Direct Wasm as a separately gated profile. | Four equal-priority mandatory backends block the core app release. | Runtime/ABI and performance/assurance evidence justify broader scope. |
-| D19 | Recommended | Contracts are final theorems about fixed program/specification identities. | Accept proofs of arbitrary generated VCs without the connecting theorem. | This requirement does not weaken. |
-| D20 | Recommended | Protect specification dependencies and release policy from automatic repair. | Let the agent modify acceptance criteria until green. | Requirement changes remain possible through explicit review. |
-| D21 | Recommended | Separate admission, contract, termination and target preservation status. | One global verified badge overstates evidence. | Add new precise fields, not a misleading collapse. |
-| D22 | Recommended | Full-app release gates alongside compiler/prover gates. | Endless bootstrap success without an application workflow. | Scope may be smaller per release, but full-app ambition remains explicit. |
-| D23 | Deferred | General algebraic effect syntax or pervasive ownership types. | Add both while the existing monadic/platform contract is unresolved. | A complete competing model and task evidence justify the extra mechanisms. |
-| D24 | Deferred | Arbitrary macro/elaborator compatibility and all mathlib source. | Calling an independent kernel compatible implies entire Lean frontend support. | Exact library/elaboration closure and oracle/replay tests exist. |
-| D25 | Rejected | Treat source proofs or own emitters as final-executable proof automatically. | Hides printers, runtime, downstream compilers and execution assumptions. | No ownership-based exception. |
+| D01 | Required source baseline | `.ps` follows v0.7 L/D/E syntax and canonical lowering; `.lean` stays native. | Byte-identical alias policy incorrectly removes admitted decorations. | Only an explicit source-reference revision, not backend convenience. |
+| D02 | Required reference identity | v0.7 canonical baseline is Lean 4.34.0; retain 4.34.1 as upgrade research only. | Silently selecting a later patch changes the claimed reference without evidence. | Explicit profile/reference update and regenerated conformance. |
+| D03 | Required source baseline | `def` canonical; retain v0.7 `const` and `function` restrictions, `:=` and category semicolons. | Removing aliases or adding bare brace bodies contradicts reference §8. | Explicit future registry/reference revision. |
+| D04 | Recommended library policy | Native `Except ε α`; user-defined reference-style `Result α ε` remains distinct. | Confusing parameter orders changes types; adding synonyms can fragment libraries. | A justified semantic API need, not an unreviewed rename. |
+| D05 | Recommended | Library-first apps and explicit capabilities. | Every app feature becomes new syntax/kernel nodes. | Capability cannot be expressed coherently above the foundation. |
+| D06 | Recommended | Nominal owned data and structural foreign interfaces at boundaries. | Native unrestricted structural subtyping changes logical obligations. | Separate specified extension with compelling evidence. |
+| D07 | Recommended | Bounded `.d.ts` importer and adapter catalog. | All-npm claims hide dynamic/unsupported behavior. | Coverage grows with exact artifacts/tests. |
+| D08 | Required semantics | Exact values and explicit foreign number/text conversion. | Global JS defaults violate canonical meaning. | Distinct explicit types/operations only. |
+| D09 | Recommended | Native Lean Task unchanged; `Psc.Async` separately named. | Promise renaming hides execution differences. | Covered native profile meets a concrete need. |
+| D10 | Experimental library | Cold Async descriptions, explicit start, scoped children and terminal arbitration. | Eager behavior changes reuse/start semantics. | Complete lifecycle/resource model and user evidence. |
+| D11 | Recommended library | Preserve body and cleanup failures in typed outcomes. | Cleanup overwrites useful failure evidence. | Explicit alternate combinator with a documented contract. |
+| D12 | Recommended | Plain library model/update/view, usable from v0.7 `.ps` and native `.lean`. | Markup becomes the only UI route. | Never remove the ordinary API. |
+| D13 | Experimental extension | `.psx` UI is an opt-in dialect within v0.7's target-specific/non-Lean boundary. | Treating suffix as ordinary verified `.ps` changes source/trust meaning. | Explicit registry/version, expansion and usability gates. |
+| D14 | Recommended | One initial renderer/React integration. | Simultaneous new DOM, hooks and server frameworks. | Real apps justify another adapter. |
+| D15 | Recommended target | ESM artifacts, `.d.ts` and maps; native logical source imports remain unchanged. | ESM output is mistaken for new `.ps` grammar. | Other deployment modes are needed and tested. |
+| D16 | Recommended | Preserve TS/Rust artifacts and current bootstrap. | Delete working routes solely for emitter ownership. | Approved retirement with actual consumer evidence. |
+| D17 | Recommended | Favor direct JS after coverage/runtime/tooling/cutover gates. | Switch on toy examples or mandate tsc forever without need. | Conformance and delivery evidence. |
+| D18 | Experimental target | Independently gated direct Wasm profile. | Four equal-priority bootstrap requirements block delivery. | ABI/runtime and performance/assurance evidence. |
+| D19 | Required assurance | Final theorem refers to actual program and fixed specification. | Accept unrelated VC proofs as program verification. | No weakening of this requirement. |
+| D20 | Required assurance | Protect specification dependencies and release policy from automatic repair. | Agent edits acceptance criteria until green. | Requirement changes receive explicit review. |
+| D21 | Required reporting | Separate source, admission, contract, termination and preservation status. | Single verified badge overstates evidence. | Add precise fields rather than collapse them. |
+| D22 | Recommended | Full-app gates alongside compiler/prover gates. | Bootstrap milestones substitute for application use. | Per-release scope can vary; app ambition remains. |
+| D23 | Deferred grammar | General effect or pervasive ownership syntax. | New mechanisms arrive before existing semantics is clear. | Explicit proposal plus models/tasks and grammar revision. |
+| D24 | Deferred coverage | Arbitrary macro/elaborator and all-mathlib source compatibility. | Kernel support is confused with full frontend support. | Exact closure and oracle/replay evidence. |
+| D25 | Rejected claim | Source proofs or owned emitters imply final-executable correctness automatically. | Printers, runtimes and downstream assumptions disappear. | No ownership exception. |
+| D26 | Required parser discipline | Preserve D-CALL adjacency, native patterns, `fun`, `where`/`with` and inherited scopes. | Whitespace normalization or TS-like replacement changes reference grammar. | Future reference revision only, never a formatter decision. |
 
-## 2. Open freeze obligations
+## 2. Open implementation/profile obligations
 
-| ID | Question that needs an exact answer | Review role | Decisive evidence |
+| ID | Question | Review role | Decisive evidence |
 |---|---|---|---|
-| O01 | What exact native modules/declarations/options are in the first source and elaboration closure? | Frontend/library maintainers | Generated manifests and official/owned positive/negative corpus. |
-| O02 | Which scalar/string/collection primitives are executable, with which exact pinned rules? | Runtime and semantics maintainers | Operation matrix, boundary corpus and representation lemmas. |
-| O03 | Which native module mode and visibility forms are supported? | Frontend/tooling | Module graph, export, initialization and private-name tests. |
-| O04 | What is the complete Async cancellation/cleanup/fairness contract? | Effects/runtime | Executable trace model, adversarial scheduling tests, explicit unsupported cases. |
-| O05 | How are API schemas versioned and presence/unknown fields handled? | Library/interop | Codec laws, migration tests and clean cross-language consumers. |
-| O06 | What is the minimal `.psx` grammar and supported Lean macro implementation? | UI/frontend | Paired expansions, parser/formatter/source-map tests, user tasks. |
-| O07 | Which React/runtime versions and lifecycle guarantees are supported? | Adapter/UI | Exact dependency pins and real browser tests. |
-| O08 | What deployment profile starts direct Wasm: linear memory, GC or a bounded hybrid? | Backend/runtime | ABI specification, actual artifact tests and marshalling/performance measurements. |
-| O09 | Which source-to-Core and compiler-preservation theorems can the first certified profile claim? | Assurance maintainers | Checked theorem statements and exact-artifact replay. |
-| O10 | What evidence demonstrates independent kernel readiness at the new pin? | Kernel maintainers | Positive/adversarial replay and explicit implementation-proof scope. |
-| O11 | What compatibility promise applies to source, APIs, proof scripts and proof bundles? | Language governance | Version policy exercised on a deliberately changed dependency/specification. |
-| O12 | Does strict native syntax meet TS adoption needs? | Usability/research | Counterbalanced tasks, documented training, transparent measures. |
+| O01 | Which v0.7 feature IDs and inherited environments are implemented? | Frontend/library | Exact registry/profile manifests and positive/negative/lowering corpus. |
+| O02 | Which scalar/string/collection operations are executable? | Runtime/semantics | Pinned operation matrix and representation evidence. |
+| O03 | Which inherited module/visibility/initialization modes are covered? | Frontend/tooling | Logical graph, scope, private-name and export tests. |
+| O04 | Complete Async cancellation/cleanup/fairness contract? | Effects/runtime | Trace model, scheduling tests and explicit restrictions. |
+| O05 | Schema presence/unknown-field/version rules? | Library/interop | Codec laws, migrations and consumers. |
+| O06 | Exact optional UI dialect and v0.7 interpolation/lowering contract? | UI/frontend | Registered proposal, paired expansions, maps, formatter and user tasks. |
+| O07 | Supported React/runtime versions and lifetimes? | Adapter/UI | Locked dependencies and browser tests. |
+| O08 | First direct-Wasm memory/GC/ABI profile? | Backend/runtime | Actual artifacts, marshalling and measurements. |
+| O09 | First source-to-Core and target-preservation theorem scope? | Assurance | Checked statements and exact artifact replay. |
+| O10 | Kernel readiness under the declared canonical pin? | Kernel | Positive/adversarial replay and explicit proof scope. |
+| O11 | Compatibility across source, APIs, proofs and bundles? | Governance | Version policy exercised on actual changes. |
+| O12 | Does v0.7 plus libraries/tooling meet TS adoption needs? | Research/usability | Counterbalanced tasks against native Lean and TS baselines. |
 
-Roles are proposed review responsibilities, not claims that people have been assigned. An unresolved item may restrict a release profile instead of blocking every unrelated feature. But the release must not silently choose a backend-specific answer.
+Roles are proposed, not assigned people. Open coverage can limit a release without blocking unrelated work. These questions do not reopen settled v0.7 syntax by implication. Native grammar, future extension grammar and library semantic design are different questions.
 
 ## 3. Anti-drift rules
 
-Only one file is the proposed language authority: LANGUAGE_REFERENCE.md. Domain documents refine named areas. A changed decision updates that reference, this ledger, affected examples and tests in one reviewable change.
+The external repository v0.7 reference and registry govern source syntax; `SYNTAX_AND_GRAMMAR_V07.md` records the local contract. `LANGUAGE_REFERENCE.md` describes PSC3 requirements within it. Domain documents cannot override them.
 
-No new design entry changes existing compiler code, package names or old semantics by itself. Status transitions need evidence. Do not turn an experimental entry into a recommended/frozen one just because implementation effort has already been spent.
+An accepted design update changes affected examples, manifest, ledger and tests together. New grammar needs explicit source-reference/registry evolution and evidence, not a prose example. No document entry changes compiler code, package names, runtime pins or old source semantics automatically.
+
+The correction of draft 0.2's byte-alias policy is intentional and recorded, not a claim that that policy ever had a conforming implementation.

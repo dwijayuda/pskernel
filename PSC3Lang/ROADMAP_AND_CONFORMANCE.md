@@ -1,90 +1,98 @@
 # Implementation roadmap and conformance program
 
-**Proposed gates, not a completion report or schedule estimate.** Delivery should advance through demonstrated capabilities rather than percentages derived from file counts.
+**Proposed gates, not completion or timing claims. Syntax authority: [ProofScript v0.7](SYNTAX_AND_GRAMMAR_V07.md).** Advance through demonstrated capabilities, not file-count percentages.
 
-## 1. Track separation
+## 1. Tracks
 
-Maintain distinct tracks for language/source design, compiler bootstrap, independent kernel, platform/tooling, backend preservation and adoption research. They share versioned interfaces, but one track must not falsely claim completion because another is green.
+Separate source design/conformance, compiler bootstrap, independent kernel, platform/tooling, preservation and adoption research. Shared interfaces do not make one track complete when another passes.
 
-Do not require all UI libraries or optional targets inside the compiler fixed-point closure. Do not let a small bootstrap subset become the permanent public-language limit. Do not claim a general-purpose release solely from kernel replay or a self-compilation result.
+Do not require UI/all targets inside the fixed-point closure, make the bootstrap subset a permanent public limit, or call kernel replay a full-app release. The surface baseline is already v0.7; implementation coverage and future extension proposals must be identified separately.
 
 ## 2. Milestones
 
 | Gate | Deliverable | Acceptance evidence |
 |---|---|---|
-| G0: design baseline | Coherent source/extension/library decisions and pinned evidence. | Review contradictions; exact source paths and open questions; no implementation overclaims. |
-| G1: semantic foundation | Exact supported source/elaboration closure; genuine admission seam; stable bootstrap profile. | Positive/negative native examples; no silent fallback; actual compiler execution and scoped checker evidence. |
-| G2: application data core | Collections, codecs, endpoints, foreign presence/numeric/text adapters. | Native and cross-language examples; malformed inputs; law evidence where claimed. |
-| G3: first full app | Browser/service Inventory Board plus CLI/library examples, one UI adapter and dev tooling. | Clean setup/build, no ad hoc user TS glue for supported APIs, forms/errors/persistence/cancellation/source maps. |
-| G4: integrated verification | Useful domain theorem, specification-quality checks, protected spec workflow, proof package replay. | Deliberately false contract and weak-spec mutants rejected/detected as appropriate; exact statement binding. |
-| G5: direct JS promotion | Full supported runtime corpus and generated-compiler cutover. | Actual next-generation execution, source/compiler parity criteria, clean ESM/TS consumers, diagnostics and source maps. |
-| G6: UI syntax and SSR | Optional `.psx`, plain expansion, selected server-rendering integration. | Lean-under-extension and owned expansion tests; browser lifecycle; hydration; comparative usability evidence. |
-| G7: extended targets | Rust native/Wasm profiles and direct Wasm profile. | Actual artifacts, ABI/runtime/capability checks, measured costs, explicit downstream assumptions. |
-| G8: stronger preservation | Progressively proved erasure/lowering/runtime/serializer relationships. | Independently checked theorems/certificates bound to actual files, not only AST tests. |
+| G0: documentation baseline | One v0.7 source authority and coherent extension/library proposals. | Audit contradictory grammar, explicit paths/IDs and honest evidence states. |
+| G1: source/semantic foundation | Supported L/D/E and inherited closure; true admission seam; stable bootstrap. | Reference corpus, canonical lowering, original spans, native `.lean` checks, actual compiler/checker runs. |
+| G2: application data | Collections, codecs, endpoints and foreign conversions. | `.ps`/canonical-Lean and cross-language examples, malformed inputs and claimed laws. |
+| G3: full app | Inventory Board plus CLI/library, one UI adapter and dev tools. | Clean setup/build, no essential hand-authored TS glue, errors/storage/cancellation/maps. |
+| G4: verification | Domain theorem, spec-quality checks, protected workflow and proof replay. | False contract/weak-spec cases and exact statement binding. |
+| G5: direct JS | Supported corpus and generated-compiler cutover. | Real next generation, parity criteria, clean consumers and maps. |
+| G6: optional UI/SSR | Explicit `.psx` dialect with v0.7-library/canonical expansion. | Registered extension contract, runtime/lifecycle/hydration and usability evidence. |
+| G7: additional targets | Rust native/Wasm and direct Wasm profiles. | Actual artifacts, ABI/capability conformance and explicit downstream assumptions. |
+| G8: preservation | Erasure, runtime, target and serializer relations. | Independently checked evidence bound to exact files. |
 
-Some work may run in parallel, but prerequisites remain explicit. For example, G3 requires a sufficiently specified application Async/resource subset, even if advanced concurrency proofs remain later. G5 is not required to use the existing TS route for G3.
+Parallel work is possible, but G3 still needs a sufficiently specified Async/resource subset and G5 need not block use of the TS route. Stronger proof coverage and practical app delivery remain separate coordinated obligations.
 
-## 3. Conformance families
+## 3. Source conformance baseline
 
-| Test ID | Requirement | Positive and adversarial cases |
+Start with [v0.7 feature-registry.json](../study/proofscript-language-reference-v0.7.0/conformance/feature-registry.json) and its [positive, negative and lowering corpus](../study/proofscript-language-reference-v0.7.0/conformance/README.md). Bind tests to the exact source-reference/registry revision.
+
+Official Lean checks native `.lean` or the canonical lowering of `.ps`. Do not use byte-preserving extension renaming as the `.ps` acceptance gate. Reference S1 status is not upgraded by passing a documentation scan or similar-looking examples.
+
+| ID | Requirement | Positive/adversarial cases |
 |---|---|---|
-| S01 | Source identity | Byte-preserving `.ps` staging; stale sibling, duplicate module and undeclared import rejection. |
-| S02 | Native meaning | Calls, tuples, binders, defaults, sections, instances and coercions match the pin. |
-| S03 | Editions/extensions | Old PSC2 call/`.psx` forms never silently reinterpreted. |
-| D01 | Dependent data | Valid record reconstruction; changed index with invalid retained field rejected. |
-| D02 | Patterns | Nested/indexed cases and wildcard motives; unsupported elaboration rejected. |
-| P01 | Logical policy | Valid proofs; false theorem, hidden sorry/user-axiom/native-result policy violations. |
-| P02 | Contract binding | Actual program/spec theorem; changed predicate or omitted clause cannot reuse approval. |
-| P03 | Erasure | Proof-field removal retains values/witnesses and runtime-relevant indices. |
-| R01 | Numbers/text | Nat/Int, zero division, machine width, float cases, Unicode and boundary decoding. |
-| R02 | Calls/closures | Returned functions, partial application, captured variables and alpha-renaming. |
-| R03 | Partiality | Divergence-sensitive optimization and no invented partial equations. |
-| E01 | State/errors | Transformer order, speculative rollback and external effects not rolled back. |
-| E02 | Resources | Acquisition/body/release matrix, combined errors, cancellation and process-abort assumptions. |
-| E03 | Async | First terminal event, scope lifetime, late results, uncooperative cancellation and bounded queues. |
-| J01 | JS interfaces | Missing/undefined/null, getters/proxies policy, malformed DTOs, `this`, callback disposal and rejection reasons. |
-| J02 | Packages | ESM/conditional exports, side effects, unknown entry points, transitive client/server capability leak. |
-| U01 | Views | Typed props/events/children, native-library and `.psx` expansion agreement. |
-| U02 | Framework | Hook/lifecycle constraints, subscriptions, keys, SSR and hydration per selected profile. |
-| T01 | Tools | Original source diagnostics, semantic rename, invalidated caches, HMR reset/migration. |
-| B01 | Artifacts | Exact emitted bytes, runtime/dependency identity and modified-output rejection. |
-| B02 | Backend parity | Same specified portable behavior across available routes; distinguish resource/profile differences. |
-| A01 | Agent policy | Attempts to weaken specs, assumptions, checker or CI policy are separated from implementation repair. |
+| S01 | Source identity and lowering | Original `.ps`, feature IDs, canonical output and maps; reject stale siblings/undeclared imports. |
+| S02 | D-CALL discrimination | `f(x,y)` versus `f((x,y))` versus `f (x,y)`; whitespace/comments; nested calls and Unit argument. |
+| S03 | Declaration aliases | Valid `const`/`function`/`def`; reject parameterized const, parameterless function and bare function blocks. |
+| S04 | Category punctuation | `:=`, equality, owned semicolons/braces; `where` data and `with` matches; no global punctuation deletion. |
+| S05 | Native categories | `.some x` versus forbidden decorated pattern; `fun`; tactics/do; `namespace ... end`; exact default/named forms. |
+| S06 | Editions/extensions | Unregistered syntax rejected; existing `.psx` is not automatically UI or verified `.ps`. |
+| S07 | Formatting and maps | Preserve discriminator, argument/tuple meaning, bindings and original diagnostic spans. |
+| D01 | Dependent records | Valid reconstruction versus invalid retained indexed data. |
+| D02 | Dependent patterns | Nested/indexed cases and motives; reject unsupported elaboration. |
+| P01 | Logical policy | Valid proof; false theorem, hidden sorry/axiom/native-result rejection. |
+| P02 | Contract identity | Actual program/spec theorem; changed predicates cannot reuse approval. |
+| P03 | Erasure | Remove proofs without losing runtime witnesses/indices. |
+| R01 | Primitives | Exact numbers, zero division, width, floats, Unicode and conversion. |
+| R02 | Calls/closures | Returned functions, partial application, capture and renaming. |
+| R03 | Partiality | Divergence-sensitive optimization and no fabricated equations. |
+| E01 | State/errors | Transformer order, rollback and irreversible host effects. |
+| E02 | Resources | Acquisition/body/release failures, cancellation and abort assumptions. |
+| E03 | Async | Terminal arbitration, scopes, late/uncooperative work and queues. |
+| J01 | JS boundary | Missing/undefined/null, accessors, DTOs, receivers, callbacks and rejected values. |
+| J02 | Packages | Locked ESM conditions, initialization, unknown exports and client/server capabilities. |
+| U01 | Views | Props/events/children; plain v0.7 library and explicit UI expansion parity. |
+| U02 | Frameworks | Hooks, subscriptions, keys and SSR/hydration for selected profiles. |
+| T01 | Tools | Original diagnostics, semantic rename, stale-cache invalidation and HMR resets. |
+| B01 | Artifacts | Exact bytes/runtime/dependencies and modified-output rejection. |
+| B02 | Target parity | Specified observables with explicit resource/profile differences. |
+| A01 | Agent policy | Specification/assumption/checker/CI changes separated from implementation repair. |
 
-Passing tests provides bounded implementation evidence. A soundness or preservation theorem needs its own formal statement and checked proof.
+These are planned tests. Passing finite tests is not a soundness or preservation theorem.
 
 ## 4. Representative projects
 
-Use a file-processing CLI; a browser/service app; a TS/Rust-consumable library; a verified codec/collection/state transition; a mathematical abstraction with dependent proofs; a scientific example relating Float behavior to a model; and a compiler/proof-tool component. Include changed requirements, dependency upgrades, refactoring and proof repair.
+Use CLI, browser/service, TS/Rust-consumable library, verified codec/collection/state transition, mathematical abstraction, numerical-model and compiler/tool examples. Include dependency upgrades, changed requirements, refactoring and proof repair.
 
-The compiler is one member of this corpus, not the whole language's usability benchmark. Toy snippets cannot reveal package boundaries, resource lifetime or incremental-build costs.
+The compiler is one corpus member; snippets alone do not exercise package, lifetime or incremental-build behavior.
 
 ## 5. User-centered experiments
 
-H1: strict native source plus good APIs/tooling is sufficiently learnable for TS developers. Compare against a baseline workflow and an explicitly labelled alternative surface prototype if needed. Separate syntax training from library gaps.
+H1: v0.7 `.ps` plus good libraries/tooling is learnable for TypeScript developers. Compare supported native `.lean` and TS workflows with consistent training; do not substitute an unregistered surface and call it PSC conformance.
 
-H2: `.psx` improves comprehension and maintenance for nontrivial views without hiding effects. Compare paired views, change props/events, locate a type error and repair a keyed list. Include plain `.lean` users as well as TS users.
+H2: an explicit `.psx` extension improves view comprehension without hiding effects. Compare library views and registered-candidate markup separately.
 
-H3: integrated contracts reduce incorrect accepted changes at acceptable authoring/repair cost. Include weak specifications and changed semantic dependencies, not only algorithm bugs.
+H3: contracts reduce incorrect accepted changes at tolerable authoring/repair cost. Include weak specifications and dependency tampering.
 
-H4: the proposed async/resource model is predictable. Ask users to explain cancellation, cleanup errors, stale callbacks and reused task descriptions before and after running examples.
+H4: Async/resource behavior is predictable across cancellation, cleanup failures, stale events and reused descriptions.
 
-Record participant experience, training, task order and exclusions; counterbalance where appropriate. Measure errors, task time, annotations, diagnostics, proof burden and repair. Do not infer broad productivity claims from a small formative sample. PLIERS is a relevant method reference. [M01](RESEARCH_SOURCES.md#engineering-and-design-method)
+Record experience, training, order and exclusions; counterbalance where appropriate. Measure mistakes, time, annotations, diagnostic use and repair. Small studies do not establish universal productivity. [M01](RESEARCH_SOURCES.md#engineering-and-design-method)
 
-## 6. TypeScript corpus study to perform
+## 6. TypeScript corpus study
 
-Predeclare a stratified sampling frame spanning UI, services, reusable libraries and build/tools. Pin repositories and dependencies; exclude generated/vendor code; define AST categories before counting. Record callbacks, unions, optional fields, type operators, async, JSX and module patterns along with the application task they serve.
+Predeclare strata across UI, services, libraries and tools. Pin repositories/dependencies, exclude generated/vendor code, and define AST categories before counting. Record tasks alongside callbacks, unions, optional fields, type operators, async, JSX and modules.
 
-Publish scripts and limitations. Search-match counts and framework documentation are not a representative feature-frequency census. No such corpus measurement was executed in this pass.
+Publish scripts and limitations. Framework examples and search counts are not a population census. This repair did not perform such a study.
 
-## 7. Performance and adoption evidence
+## 7. Performance/adoption evidence
 
-Measure cold build/start, warm edit latency, proof checking, artifact size, memory, execution throughput and interop costs on the corpus. Native-versus-Wasm choices must include host-call and serialization costs, not only a tight arithmetic loop.
+Measure builds, edits, proof cost, sizes, memory, runtime and marshalling on real corpus tasks. Include setup effort, unsupported bindings and handwritten glue. AI experiments report model/version/budget/allowed edits/interventions and both completion and false acceptance.
 
-Track complete-app setup effort, unsupported adapters and user-authored glue. For AI benchmarks record model/budget/version, permitted edits and human interventions. Report both useful completion and false acceptance. No numeric performance/adoption targets are asserted as achieved here.
+No numeric target is claimed achieved here.
 
 ## 8. Release records
 
-Every promoted capability names its source/environment, test evidence, logical/runtime coverage and remaining assumptions. A partial result has a precise label. An unavailable dependency is unsupported, not silently replaced. A failure to prove is not a proof of incorrectness.
+Each promoted capability identifies source reference/registry, environment, actual tests, logical/runtime scope and assumptions. Unsupported dependencies are rejected, not replaced silently. Failed proof search is not incorrectness proof.
 
-Freeze a coherent profile when its own required gates close; leave unrelated advanced features experimental. Preserve old editions and document migrations. The goal is a usable language whose guarantees remain understandable, not indefinite research or premature production claims.
+Freeze a coherent tested profile while leaving unrelated extensions experimental. Preserve v0.7 meaning and explicit migrations. The goal remains usable applications with understandable guarantees.

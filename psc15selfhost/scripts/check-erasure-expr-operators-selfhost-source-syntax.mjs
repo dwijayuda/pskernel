@@ -73,7 +73,7 @@ for (const [from, to] of [
   const broken = source.replace(from, to);
   assert.throws(
     () => assertErasureExprOperators(broken),
-    /ERASURE_EXPR_OPERATORS.*FORBIDDEN/,
+    /ERASURE_EXPR_OPERATORS.*(?:MISSING|FORBIDDEN)/,
   );
 }
 

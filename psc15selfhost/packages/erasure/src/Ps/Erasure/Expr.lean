@@ -1052,7 +1052,7 @@ def psEraseMatchMinor
         } with
   | Except.error error => Except.error error
   | Except.ok opened =>
-      let bindings := opened.bindingsRev.reverse
+      let bindings := opened.bindingsRev.reverse;
       match
           psOpenMatchMinorHypotheses
             recursiveParameterIndex

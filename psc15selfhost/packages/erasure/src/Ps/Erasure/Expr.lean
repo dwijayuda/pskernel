@@ -354,7 +354,7 @@ def psErasePrimitiveApplication
   | .constE name _ =>
       let text := psNameToString name;
       let binary :=
-        fun operation =>
+        fun (operation : PsVerifiedIrIntrinsic) =>
           if view.args.length == 2 then
             match
                 psEraseMappedIntrinsic

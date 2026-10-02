@@ -14,7 +14,7 @@ export function assertErasurePrimitiveApplicationSequencing(source) {
   }
   if (
     !/let text := psNameToString name;\s*let binary :=/.test(block) ||
-    !/let binary :=[\s\S]*?Except\.error PsErasureError\.unsupportedApplication;\s*if text == "Int\.ofNat" then/.test(block)
+    !/let binary :=\s*fun \(operation : PsVerifiedIrIntrinsic\) =>[\s\S]*?Except\.error PsErasureError\.unsupportedApplication;\s*if text == "Int\.ofNat" then/.test(block)
   ) {
     throw new Error(
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX_MISSING: two sequenced locals",
@@ -29,6 +29,12 @@ const source = await readFile(
   "utf8",
 );
 const block = assertErasurePrimitiveApplicationSequencing(source);
+assert.ok(!/fun operation =>/.test(block));
+const lambdaBroken = block.replace("fun (operation : PsVerifiedIrIntrinsic) =>", "fun operation =>");
+assert.throws(
+  () => assertErasurePrimitiveApplicationSequencing(source.replace(block, lambdaBroken)),
+  /SEQUENCING.*MISSING/,
+);
 const protectedTerminators = [
   "let text := psNameToString name;",
   "Except.error PsErasureError.unsupportedApplication;\n      if text == \"Int.ofNat\" then",

@@ -724,7 +724,7 @@ def psEraseRuntimeStructureFields
     Except PsErasureError (List (String × PsVerifiedIrExpr))
   | [], fieldsRev => Except.ok fieldsRev.reverse
   | field :: rest, fieldsRev =>
-      match arguments[field.sourceIndex]? with
+      match psErasureExprListAt arguments field.sourceIndex with
       | none => Except.error PsErasureError.unsupportedApplication
       | some argument =>
           match erase argument with
@@ -734,7 +734,7 @@ def psEraseRuntimeStructureFields
                 erase
                 arguments
                 rest
-                ((field.name, value) :: fieldsRev)
+                (List.cons (Prod.mk field.name value) fieldsRev)
 
 def psEraseRuntimeStructureApplication
     (environment : PsEnvironment)
@@ -752,7 +752,7 @@ def psEraseRuntimeStructureApplication
       | none => Except.ok none
       | some structureInfo =>
           let expectedArity :=
-            structureInfo.numParams + structureInfo.fields.length
+            structureInfo.numParams + structureInfo.fields.length;
           if view.args.length != expectedArity then
             Except.error PsErasureError.unsupportedApplication
           else
@@ -789,7 +789,7 @@ def psEraseRuntimeConstructorFields
     Except PsErasureError (List (String × PsVerifiedIrExpr))
   | [], fieldsRev => Except.ok fieldsRev.reverse
   | field :: rest, fieldsRev =>
-      match arguments[field.sourceIndex]? with
+      match psErasureExprListAt arguments field.sourceIndex with
       | none => Except.error PsErasureError.unsupportedApplication
       | some argument =>
           match erase argument with
@@ -799,7 +799,7 @@ def psEraseRuntimeConstructorFields
                 erase
                 arguments
                 rest
-                ((field.name, value) :: fieldsRev)
+                (List.cons (Prod.mk field.name value) fieldsRev)
 
 def psEraseRuntimeConstructorApplication
     (environment : PsEnvironment)
@@ -817,7 +817,7 @@ def psEraseRuntimeConstructorApplication
       | none => Except.ok none
       | some ctorInfo =>
           let expectedArity :=
-            ctorInfo.numParams + ctorInfo.fields.length
+            ctorInfo.numParams + ctorInfo.fields.length;
           if view.args.length != expectedArity then
             Except.error PsErasureError.unsupportedApplication
           else

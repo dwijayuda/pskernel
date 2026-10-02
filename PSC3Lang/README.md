@@ -192,6 +192,7 @@ An AI may propose implementation and proof changes. Weakening an approved specif
 ## Document map
 
 - DESIGN_PHILOSOPHY.md — product philosophy, language constitution, non-goals and design criteria.
+- DESIGN_DECISIONS.md — current accepted/candidate/rejected design ledger.
 - RESEARCH_METHOD_AND_EVIDENCE.md — how PSC3 decisions are researched and validated.
 - TYPESCRIPT_DEVELOPER_STUDY.md — TypeScript/JS habits worth supporting and habits PSC3 should reject.
 - LEAN4_COMPATIBILITY.md — .lean profile and relationship with Lean semantics.

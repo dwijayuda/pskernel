@@ -18,7 +18,7 @@ export function assertErasureOpenMatchHypothesesSourceSyntax(source) {
     /psLocalPushBinding[\s\S]*?binder;/,
     /let baseScope : PsErasureScope := \{[\s\S]*?currentDefinition := state\.scope\.currentDefinition\s*\};/,
     /erasedLocals :=\s*List\.cons pushed\.id state\.scope\.erasedLocals/,
-    /runtimeExpressions :=\s*List\.cons\s*\(Prod\.mk\s*pushed\.id[\s\S]*?binding\.name\)\)\s*baseScope\.runtimeExpressions/,
+    /runtimeExpressions :=\s*List\.cons\s*\(Prod\.mk\s*pushed\.id[\s\S]*?binding\.name\)\)\)\s*baseScope\.runtimeExpressions/,
     /\| _, _ => baseScope;\s*psOpenMatchMinorHypotheses/,
   ];
   if (!required.every((pattern) => pattern.test(block))) {

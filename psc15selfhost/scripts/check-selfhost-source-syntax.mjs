@@ -25,6 +25,7 @@ import "./check-lexer-input-bound-source.mjs";
 import "./check-meta-instantiation-stop-source.mjs";
 import "./check-nested-admission-source.mjs";
 import "./check-json-tail-conversion-source.mjs";
+import "./check-admission-height-index-source.mjs";
 import "./check-count-fold-source.mjs";
 import "./check-environment-index-source.mjs";
 import "./check-eta-inline-source.mjs";

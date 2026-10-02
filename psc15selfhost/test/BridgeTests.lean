@@ -429,6 +429,25 @@ def psRunBridgeTests : List PsBridgeNamedTest -> IO Bool
       pure (test.passed && restPassed)
 
 def main : IO Unit := do
+  let first := PsName.num PsName.anonymous 0
+  let collision := PsName.num PsName.anonymous 65521
+  let original := psBridgeHeightInsert PsBridgeHeightIndex.empty first 7
+  let withCollision := psBridgeHeightInsert original collision 11
+  let shadowed := psBridgeHeightInsert withCollision first 19
+  let flat := PsName.str PsName.anonymous "A.B"
+  let structured := PsName.str (PsName.str PsName.anonymous "A") "B"
+  let names := psBridgeHeightInsert (psBridgeHeightInsert shadowed flat 23) structured 29
+  if psEnvironmentNameHash first != psEnvironmentNameHash collision ||
+      psBridgeFindRegularHeight original first != 7 ||
+      psBridgeFindRegularHeight original collision != 0 ||
+      psBridgeFindRegularHeight withCollision first != 7 ||
+      psBridgeFindRegularHeight withCollision collision != 11 ||
+      psBridgeFindRegularHeight shadowed first != 19 ||
+      psBridgeFindRegularHeight names flat != 23 ||
+      psBridgeFindRegularHeight names structured != 29 ||
+      psBridgeFindRegularHeight names (psRootName "missing") != 0 then
+    throw (IO.userError "PSC1_BRIDGE_FAIL: persistent collision-safe height index")
+  IO.println "PSC1_BRIDGE_PASS: persistent collision-safe height index"
   let large := List.replicate 1000000 'x'
   if psJsonCharListLength large != 1000000 || psJsonCharListLength [] != 0 ||
       psJsonCharListLength (psJsonStringToChars "aλ😀") != 3 then

@@ -4,6 +4,7 @@ import Ps.Core.Abstract
 import Ps.Core.Subst
 import Ps.Core.Equality
 import Ps.Foundation.List
+import Ps.Environment.Basic
 
 inductive PsCheckedAdmissionCodecError where
   | universeMetavariable
@@ -393,7 +394,7 @@ def psEncodeCodecInductive
               psCheckedAdmissionJsonField "ts" (psJsonArray [encodedTypeEntry])
             ])
 
-def psBridgeFindRegularHeight
+def psBridgeFindRegularHeightInBucket
     (entries : List (PsName × Nat)) :
     PsName -> Nat :=
   match entries with
@@ -401,12 +402,60 @@ def psBridgeFindRegularHeight
       fun (_name : PsName) => 0
   | List.cons entry rest =>
       let smaller : PsName -> Nat :=
-        psBridgeFindRegularHeight rest;
+        psBridgeFindRegularHeightInBucket rest;
       fun (name : PsName) =>
         if psNameEq (Prod.fst entry) name then
           Prod.snd entry
         else
           smaller name
+
+-- Heights are internal encoding metadata. Keep full structured-name equality
+-- in collision buckets and retain the newest binding, as the original list did.
+inductive PsBridgeHeightIndex where
+  | empty
+  | bucket (entries : List (PsName × Nat))
+  | branch (left right : PsBridgeHeightIndex)
+
+def psBridgeHeightBucket (fuel : Nat) : PsBridgeHeightIndex -> Nat -> List (PsName × Nat) :=
+  match fuel with
+  | Nat.zero => fun (index : PsBridgeHeightIndex) (_hash : Nat) =>
+      match index with
+      | PsBridgeHeightIndex.bucket entries => entries
+      | _ => List.nil
+  | Nat.succ remaining =>
+      let smaller : PsBridgeHeightIndex -> Nat -> List (PsName × Nat) := psBridgeHeightBucket remaining;
+      fun (index : PsBridgeHeightIndex) (hash : Nat) =>
+        match index with
+        | PsBridgeHeightIndex.branch left right =>
+            if Nat.beq (Nat.mod hash 2) 0 then smaller left (Nat.div hash 2)
+            else smaller right (Nat.div hash 2)
+        | _ => List.nil
+
+def psBridgeHeightInsertWorker (fuel : Nat) : PsBridgeHeightIndex -> Nat -> PsName -> Nat -> PsBridgeHeightIndex :=
+  match fuel with
+  | Nat.zero => fun (index : PsBridgeHeightIndex) (_hash : Nat) (name : PsName) (height : Nat) =>
+      let entries : List (PsName × Nat) := match index with
+        | PsBridgeHeightIndex.bucket values => values
+        | _ => List.nil;
+      PsBridgeHeightIndex.bucket (List.cons (Prod.mk name height) entries)
+  | Nat.succ remaining =>
+      let smaller : PsBridgeHeightIndex -> Nat -> PsName -> Nat -> PsBridgeHeightIndex := psBridgeHeightInsertWorker remaining;
+      fun (index : PsBridgeHeightIndex) (hash : Nat) (name : PsName) (height : Nat) =>
+        let left : PsBridgeHeightIndex := match index with
+          | PsBridgeHeightIndex.branch value _ => value
+          | _ => PsBridgeHeightIndex.empty;
+        let right : PsBridgeHeightIndex := match index with
+          | PsBridgeHeightIndex.branch _ value => value
+          | _ => PsBridgeHeightIndex.empty;
+        if Nat.beq (Nat.mod hash 2) 0 then
+          PsBridgeHeightIndex.branch (smaller left (Nat.div hash 2) name height) right
+        else PsBridgeHeightIndex.branch left (smaller right (Nat.div hash 2) name height)
+
+def psBridgeHeightInsert (index : PsBridgeHeightIndex) (name : PsName) (height : Nat) : PsBridgeHeightIndex :=
+  psBridgeHeightInsertWorker 16 index (psEnvironmentNameHash name) name height
+
+def psBridgeFindRegularHeight (index : PsBridgeHeightIndex) (name : PsName) : Nat :=
+  psBridgeFindRegularHeightInBucket (psBridgeHeightBucket 16 index (psEnvironmentNameHash name)) name
 
 def psBridgeNatMax (left : Nat) : Nat -> Nat :=
   match left with
@@ -423,7 +472,7 @@ def psBridgeNatMax (left : Nat) : Nat -> Nat :=
             Nat.succ (smaller rightPred)
 
 def psBridgeExprMaxRegularHeight
-    (heights : List (PsName × Nat))
+    (heights : PsBridgeHeightIndex)
     (expr : PsExpr) : Nat :=
   match expr with
   | .constE name _ =>
@@ -511,7 +560,7 @@ def psEncodeInductiveAdmission (declaration : String) : String :=
   ]
 
 structure PsCheckedAdmissionEncodeState where
-  heights : List (PsName × Nat)
+  heights : PsBridgeHeightIndex
   admissionsRev : List String
 
 def psEncodeCheckedAdmissionsLoop
@@ -544,10 +593,7 @@ def psEncodeCheckedAdmissionsLoop
                 Except.error error
             | Except.ok encoded =>
                 smaller {
-                  heights :=
-                    List.cons
-                      (Prod.mk name height)
-                      state.heights
+                  heights := psBridgeHeightInsert state.heights name height
                   admissionsRev :=
                     List.cons
                       (psEncodeConstantAdmission encoded)
@@ -951,7 +997,7 @@ def psEncodeCheckedAdmissionsNormalized
       declarations
       declarations
       {
-        heights := []
+        heights := PsBridgeHeightIndex.empty
         admissionsRev := []
       } with
   | Except.error error => Except.error error

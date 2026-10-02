@@ -65,12 +65,37 @@ def psAuditBaseCases : Bool :=
     | _ => false
   empty && ordered && exhausted && rejected
 
+def psAuditStringPositionSingletons : Bool :=
+  ["String.Pos.Raw.mk", "String.Pos.Raw.byteIdx"].all fun name =>
+    let run := fun (args : List PsExpr)
+        (erase : PsExpr -> Except PsErasureError PsVerifiedIrExpr) =>
+      psErasePrimitiveApplication psBootstrapPreludeEnvironment
+        (psErasureScopeEmpty []) erase
+        { head := .constE (psRootName name) [], args := args }
+    let value := PsExpr.lit (.natural 7)
+    let erase := fun expr => match expr with
+      | .lit (.natural n) => Except.ok (PsVerifiedIrExpr.literal (.natural n))
+      | _ => Except.error PsErasureError.unsupportedRuntimeTerm
+    let accepted := match run [value] erase with
+      | Except.ok (some (.literal (.natural n))) => n == 7
+      | _ => false
+    let propagated := match run [value] (fun _ => Except.error .fuelExhausted) with
+      | Except.error .fuelExhausted => true
+      | _ => false
+    let rejected := [[], [value, value]].all fun args =>
+      -- A distinct callback error also checks rejection happens before erasure.
+      match run args (fun _ => Except.error .fuelExhausted) with
+      | Except.error .unsupportedApplication => true
+      | _ => false
+    accepted && propagated && rejected
+
 def main (arguments : List String) : IO UInt32 := do
   if arguments == ["--behavior"] then
     for (label, passed) in [("runtime argument and parameter order", psAuditRuntimeBinders),
         ("proof erasure and local IDs", psAuditProofBinders),
         ("sanitized parameter names", psAuditName),
-        ("base cases, fuel and unsupported type binder", psAuditBaseCases)] do
+        ("base cases, fuel and unsupported type binder", psAuditBaseCases),
+        ("String.Pos.Raw singleton arity and error propagation", psAuditStringPositionSingletons)] do
       if passed then IO.println ("PSC2_FIXED_POINT_ERASURE_CASE: PASS " ++ label)
       else throw (IO.userError ("PSC2_FIXED_POINT_ERASURE_CASE: FAIL " ++ label))
     IO.println "PSC2_FIXED_POINT_ERASURE_FINISH_APPLICATION: PASS (native behavior and append-order theorem)"

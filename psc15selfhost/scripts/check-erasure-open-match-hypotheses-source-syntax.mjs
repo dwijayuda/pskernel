@@ -13,8 +13,8 @@ export function assertErasureOpenMatchHypothesesSourceSyntax(source) {
     );
   }
   const required = [
-    /if field\.recursive == false then/,
-    /fun \(binding : PsVerifiedIrMatchBinding\) =>\s*binding\.field == field\.name/,
+    /if psErasureBoolNot field\.recursive then/,
+    /fun \(binding : PsVerifiedIrMatchBinding\) =>\s*psStringEq binding\.field field\.name/,
     /psLocalPushBinding[\s\S]*?binder;/,
     /let baseScope : PsErasureScope := \{[\s\S]*?currentDefinition := state\.scope\.currentDefinition\s*\};/,
     /erasedLocals :=\s*List\.cons pushed\.id state\.scope\.erasedLocals/,
@@ -26,7 +26,7 @@ export function assertErasureOpenMatchHypothesesSourceSyntax(source) {
       "PSC2_ERASURE_OPEN_MATCH_HYPOTHESES_SELFHOST_SOURCE_SYNTAX_MISSING: PSC1-safe recursive-hypothesis path",
     );
   }
-  if (/!field\.recursive/.test(block) ||
+  if (/!field\.recursive|==/.test(block) ||
       /fun binding =>/.test(block) ||
       /pushed\.id\s*::\s*state\.scope\.erasedLocals/.test(block) ||
       /\(pushed\.id,[\s\S]*?\)\s*::\s*baseScope\.runtimeExpressions/.test(block)) {
@@ -44,7 +44,9 @@ const source = await readFile(
 );
 const block = assertErasureOpenMatchHypothesesSourceSyntax(source);
 const mutations = [
-  ["if field.recursive == false then", "if !field.recursive then"],
+  ["if psErasureBoolNot field.recursive then", "if !field.recursive then"],
+  ["if psErasureBoolNot field.recursive then", "if field.recursive == false then"],
+  ["psStringEq binding.field field.name", "binding.field == field.name"],
   ["fun (binding : PsVerifiedIrMatchBinding) =>", "fun binding =>"],
   ["binder;", "binder"],
   ["currentDefinition := state.scope.currentDefinition\n                };",

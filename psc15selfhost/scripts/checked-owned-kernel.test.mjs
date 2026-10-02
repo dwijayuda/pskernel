@@ -40,7 +40,7 @@ for (const [label, ds, errorKind] of [
   assert.equal(result.errorKind, errorKind);
   assert.equal(result.environment, undefined);
 });
-test('each check begins empty after a previous accepted check', async () => {
+test('each check begins with only its checked prelude after a previous accepted check', async () => {
   assert.equal((await checkOwnedAdmissions(wire([alias()]))).accepted, true);
   assert.equal((await checkOwnedAdmissions(wire([definition('Use', U(1), C('Alias'))]))).errorKind, 'unknownConstant');
 });
@@ -84,7 +84,7 @@ test('default admits a polymorphic identity and checks distinct universe instant
     const use = definition('Use', polyType(l), { ...C('Poly'), ls: [l] });
     const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]));
     assert.equal(result.accepted, true, JSON.stringify(result));
-    assert.equal(result.profile, 'owned-unit-inductives/3');
+    assert.equal(result.profile, 'owned-nat-and-unit-inductives/4');
     assert.equal(descriptor.selector, 'pskernel-core');
   }
 });

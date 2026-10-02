@@ -12,7 +12,7 @@ for (const file of ['checked-owned-kernel.mjs', 'checked-owned-kernel-worker.mjs
   assert(!/pskernel-lean|lean434|runCheckedSeedSession|\.\.\/.*test\//u.test(source), 'owned runtime must not import a reference checker or test semantics');
 }
 const worker = readFileSync(new URL('checked-owned-kernel-worker.mjs', import.meta.url), 'utf8');
-for (const required of ['k.psKernelJointStart', 'k.psKernelJointStep', 'generatedKernelSha256', "errorKind: 'outOfFuel'"]) {
+for (const required of ['k.psKernelBootstrapStart', 'k.psKernelBootstrapStep', 'generatedKernelSha256', "errorKind: 'outOfFuel'"]) {
   assert(worker.includes(required), `missing owned checking boundary: ${required}`);
 }
 console.log('PSC2_OWNED_DEFAULT_SOURCE: PASS (owned generated transitions, bounded execution, explicit references outside closure)');

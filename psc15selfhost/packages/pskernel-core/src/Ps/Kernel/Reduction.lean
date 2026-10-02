@@ -5,8 +5,8 @@ import Ps.Kernel.Expr
 import Ps.Kernel.Binding
 import Ps.Kernel.Environment
 
-/- First-order beta/zeta/delta reducer. No primitive, quotient or recursor
-reduction is asserted. Type checking, not reduction, validates discarded terms.
+/- First-order beta/zeta/delta and supported inductive recursor reduction.
+No primitive or quotient reduction is asserted. Type checking validates discarded terms.
 All nested substitutions and lookups consume the caller's transition budget. -/
 inductive PsKernelReduceTask where
   | whnf (value : PsKernelExpr)
@@ -21,6 +21,10 @@ inductive PsKernelReduceTask where
       (left : PsKernelList PsKernelLevel) (right : PsKernelList PsKernelLevel)
   | unitLevel (fn : PsKernelExpr) (major : PsKernelExpr) (minor : PsKernelExpr)
       (left : PsKernelList PsKernelLevel) (right : PsKernelList PsKernelLevel) (state : PsKernelLevelCheckState)
+  | natLookup (fn : PsKernelExpr) (major : PsKernelExpr) (zeroCase succCase : PsKernelExpr) (state : PsKernelLookupState)
+  | natMajor (fn : PsKernelExpr) (zeroCase succCase : PsKernelExpr) (zeroName succName : PsKernelName)
+  | natZeroName (fn major zeroCase : PsKernelExpr) (work : PsKernelList PsKernelOrderTask)
+  | natSuccName (fn major succCase predecessor : PsKernelExpr) (work : PsKernelList PsKernelOrderTask)
   | opaqueConstant (value : PsKernelExpr) (state : PsKernelLevelInstantiateState)
   | instantiate (state : PsKernelExprInstantiateState)
   | binding (state : PsKernelBindingState)
@@ -87,6 +91,12 @@ def psKernelReduceNeutralApply
           match head with
           | PsKernelExpr.constE name levels => psKernelReduceNext env
               (PsKernelList.cons (PsKernelReduceTask.unitLookup fn arg minor levels (PsKernelLookupState.search name env)) tasks) values
+          | PsKernelExpr.app natHead unusedNatMotive =>
+              match natHead with
+              | PsKernelExpr.constE name unusedLevels => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.natLookup fn arg unusedMotive minor
+                    (PsKernelLookupState.search name env)) tasks) values
+              | _ => psKernelReducePush env tasks values (PsKernelExpr.app fn arg)
           | _ => psKernelReducePush env tasks values (PsKernelExpr.app fn arg)
       | _ => psKernelReducePush env tasks values (PsKernelExpr.app fn arg)
   | _ => psKernelReducePush env tasks values (PsKernelExpr.app fn arg)
@@ -108,6 +118,24 @@ def psKernelReduceValueTask
                   (PsKernelBindingMode.instantiate arg) PsKernelNatural.zero body))
                   (PsKernelList.cons PsKernelReduceTask.resumeWhnf tasks)) rest
           | _ => psKernelReduceNeutralApply env tasks rest top arg
+      | PsKernelReduceTask.natMajor fn zeroCase succCase zeroName succName =>
+          match top with
+          | PsKernelExpr.constE majorName majorLevels =>
+              match majorLevels with
+              | PsKernelList.nil => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.natZeroName fn top zeroCase
+                    (PsKernelList.cons (PsKernelOrderTask.name zeroName majorName) PsKernelList.nil)) tasks) rest
+              | _ => psKernelReducePush env tasks rest (PsKernelExpr.app fn top)
+          | PsKernelExpr.app head predecessor =>
+              match head with
+              | PsKernelExpr.constE majorName majorLevels =>
+                  match majorLevels with
+                  | PsKernelList.nil => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.natSuccName fn top succCase predecessor
+                        (PsKernelList.cons (PsKernelOrderTask.name succName majorName) PsKernelList.nil)) tasks) rest
+                  | _ => psKernelReducePush env tasks rest (PsKernelExpr.app fn top)
+              | _ => psKernelReducePush env tasks rest (PsKernelExpr.app fn top)
+          | _ => psKernelReducePush env tasks rest (PsKernelExpr.app fn top)
       | PsKernelReduceTask.unitMajor fn minor ctorName levels =>
           match top with
           | PsKernelExpr.constE majorName majorLevels =>
@@ -159,6 +187,37 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
           | _ => psKernelReduceReject PsKernelCheckError.invalidState
       | PsKernelList.cons task rest =>
           match task with
+          | PsKernelReduceTask.natLookup fn major zeroCase succCase current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.natLookup fn major zeroCase succCase next) rest) values
+              | PsKernelLookupStep.found entry =>
+                  match entry with
+                  | PsKernelDefinition.natRecursor unusedName unusedParameters unusedType zeroName succName => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.whnf major)
+                        (PsKernelList.cons (PsKernelReduceTask.natMajor fn zeroCase succCase zeroName succName) rest)) values
+                  | _ => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+              | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.natZeroName fn major zeroCase current =>
+              match psKernelOrderStep current with
+              | PsKernelOrderStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.natZeroName fn major zeroCase next) rest) values
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf zeroCase) rest) values
+                  | _ => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+              | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.natSuccName fn major succCase predecessor current =>
+              match psKernelOrderStep current with
+              | PsKernelOrderStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.natSuccName fn major succCase predecessor next) rest) values
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.whnf (PsKernelExpr.app
+                        (PsKernelExpr.app succCase predecessor) (PsKernelExpr.app fn predecessor))) rest) values
+                  | _ => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+              | _ => psKernelReduceReject PsKernelCheckError.invalidState
           | PsKernelReduceTask.unitLookup fn major minor levels current =>
               match psKernelLookupStep current with
               | PsKernelLookupStep.next next => psKernelReduceNext env

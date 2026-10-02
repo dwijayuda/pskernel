@@ -19,7 +19,7 @@ test('default admits a polymorphic unit, constructor use and generated iota', as
   const entries=[unit(),def('Value',family(),ctor()),def('Reduce',U(S(Z)),iota())];
   const {result,descriptor}=await checkAdmissionsWithKernel(wire(entries));
   assert.equal(descriptor.selector,'pskernel-core');
-  assert.equal(result.profile,'owned-unit-inductives/3');
+  assert.equal(result.profile,'owned-nat-and-unit-inductives/4');
   assert.equal(result.accepted,true,JSON.stringify(result));
   assert.equal(result.admissionCount,3);
 });
@@ -49,10 +49,10 @@ test('unit exhaustion and later rejection expose no partial environment',async()
   const fresh=await checkOwnedAdmissions(wire([def('Use',family(),ctor())]));
   assert.equal(fresh.accepted,false);assert.equal(fresh.errorKind,'unknownConstant');
 });
-test('actual first bootstrap admission passes; next declaration still requires Nat and constructor fields',async()=>{
+test('actual first bootstrap admission passes; next declaration still requires constructor fields',async()=>{
   const admissions=JSON.parse(readFileSync(new URL('./fixtures/owned-bootstrap-prefix.json',import.meta.url)));
   const first=await checkOwnedAdmissions(wire(admissions.slice(0,1)));
   assert.equal(first.accepted,true,JSON.stringify(first));assert.equal(first.admissionCount,1);
   const next=await checkOwnedAdmissions(wire(admissions));
-  assert.equal(next.accepted,false);assert.equal(next.admissionIndex,1);assert.equal(next.errorKind,'unknownConstant');
+  assert.equal(next.accepted,false);assert.equal(next.admissionIndex,1);assert.equal(next.errorKind,'typeMismatch');
 });

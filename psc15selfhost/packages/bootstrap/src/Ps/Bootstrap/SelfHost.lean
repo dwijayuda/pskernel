@@ -1,5 +1,5 @@
 import Ps.BackendTs.Compiler
-import Ps.Kernel.JointAdmission
+import Ps.Kernel.Bootstrap
 import Ps.Kernel.Structural
 
 -- The joint fixed-point closure contains the compiler and the owned kernel.

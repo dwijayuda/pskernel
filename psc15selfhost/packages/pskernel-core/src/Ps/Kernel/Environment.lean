@@ -14,12 +14,15 @@ inductive PsKernelDefinition where
   | constant (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
   | unitRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (ctorName : PsKernelName)
 
+  | natRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (zeroName succName : PsKernelName)
+
 def psKernelDefinitionName (entry : PsKernelDefinition) : PsKernelName :=
   match entry with
   | PsKernelDefinition.definition name unusedType unusedValue => name
   | PsKernelDefinition.polymorphic name unusedParameters unusedType unusedValue => name
   | PsKernelDefinition.constant name parameters type => name
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => name
+  | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => name
 
 def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList PsKernelName :=
   match entry with
@@ -27,6 +30,7 @@ def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList PsK
   | PsKernelDefinition.polymorphic unusedName parameters unusedType unusedValue => parameters
   | PsKernelDefinition.constant name parameters type => parameters
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => parameters
+  | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => parameters
 
 def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr :=
   match entry with
@@ -34,6 +38,7 @@ def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr :=
   | PsKernelDefinition.polymorphic unusedName unusedParameters type unusedValue => type
   | PsKernelDefinition.constant name parameters type => type
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => type
+  | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => type
 
 def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody :=
   match entry with
@@ -42,6 +47,7 @@ def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody
   | PsKernelDefinition.constant unusedName unusedParameters unusedType => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.unitRecursor unusedName unusedParameters unusedType unusedConstructor => PsKernelDefinitionBody.opaque
 
+  | PsKernelDefinition.natRecursor unusedName unusedParameters unusedType unusedZero unusedSucc => PsKernelDefinitionBody.opaque
 
 inductive PsKernelTypingContext where
   | context (declarations : PsKernelList PsKernelDefinition) (parameters : PsKernelList PsKernelName)

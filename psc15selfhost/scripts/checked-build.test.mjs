@@ -30,7 +30,7 @@ test('default owned kernel blocks unsupported inductives before writing output',
   try {
     const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'never/out.js');
     await writeFile(entryPath, 'inductive Flag where\n  | off\n  | on\n');
-    await assert.rejects(buildChecked({ entryPath, outputPath, seedPath: seed }), /KERNEL_REJECTED: unsupported-inductive-shape/);
+    await assert.rejects(buildChecked({ entryPath, outputPath, seedPath: seed }), /KERNEL_REJECTED: unsupported\b/);
     assert.equal(existsSync(path.dirname(outputPath)), false);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
@@ -46,8 +46,22 @@ test('actual unit source passes owned admission, exact-module emission and execu
     assert.notEqual(module.sample, undefined);
     assert.deepEqual(module.sample, module.SampleUnit.make);
     assert.equal(receipt.kernel.selector, 'pskernel-core');
-    assert.equal(receipt.provider.profile, 'owned-unit-inductives/3');
+    assert.equal(receipt.provider.profile, 'owned-nat-and-unit-inductives/4');
     assert.match(await readFile(path.join(dir, 'out.admissions.json'), 'utf8'), /SampleUnit/u);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('actual Nat constructor source passes the owned bootstrap and executed output', { skip: !native }, async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'psc2-owned-nat-real-'));
+  try {
+    await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
+    const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'out.js');
+    await writeFile(entryPath, 'def first : Nat := Nat.succ Nat.zero\n');
+    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed });
+    const module = await import(pathToFileURL(outputPath).href);
+    assert.equal(module.first, 1n);
+    assert.equal(receipt.kernel.selector, 'pskernel-core');
+    assert.equal(receipt.provider.profile, 'owned-nat-and-unit-inductives/4');
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 

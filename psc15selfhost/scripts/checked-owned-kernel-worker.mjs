@@ -90,12 +90,19 @@ try {
       if (d.np !== 0 || !Array.isArray(d.ts) || d.ts.length !== 1) fail('unsupported-inductive-family');
       const family = d.ts[0];
       shape(family, ['n','t','cs'], 0);
-      if (family.t?.k !== 'sort' || !Array.isArray(family.cs) || family.cs.length !== 1) fail('unsupported-inductive-shape');
+      if (family.t?.k !== 'sort' || !Array.isArray(family.cs) || (family.cs.length !== 1 && family.cs.length !== 2)) fail('unsupported-inductive-shape');
       shape(family.t, ['k','l'], 0);
-      const ctor = family.cs[0];
-      shape(ctor, ['n','t'], 0);
-      entries.push(k.PsKernelJointEntry.unitInductive(k.PsKernelUnitDeclaration.declaration(
-        name(family.n), list(d.lp.map(item => name(item))), level(family.t.l), name(ctor.n), expr(ctor.t))));
+      for (const ctor of family.cs) shape(ctor, ['n','t'], 0);
+      if (family.cs.length === 1) {
+        const ctor = family.cs[0];
+        entries.push(k.PsKernelJointEntry.unitInductive(k.PsKernelUnitDeclaration.declaration(
+          name(family.n), list(d.lp.map(item => name(item))), level(family.t.l), name(ctor.n), expr(ctor.t))));
+      } else {
+        if (d.lp.length !== 0) fail('unsupported-inductive-parameters');
+        const [zero, succ] = family.cs;
+        entries.push(k.PsKernelJointEntry.natInductive(k.PsKernelNatDeclaration.declaration(
+          name(family.n), expr(family.t), name(zero.n), expr(zero.t), name(succ.n), expr(succ.t))));
+      }
       admissionIndex++;
       continue;
     }
@@ -110,11 +117,11 @@ try {
     entries.push(k.PsKernelJointEntry.definition(k.PsKernelDefinition.polymorphic(name(d.n), list(d.lp.map(item => name(item))), expr(d.t), expr(d.v))));
     admissionIndex++;
   }
-  let state = k.psKernelJointStart(list(entries));
+  let state = k.psKernelBootstrapStart(list(entries));
   admissionIndex = 0;
   let answer;
   for (let steps = 0; steps < workerData.maxSteps; steps++) {
-    const out = k.psKernelJointStep(state);
+    const out = k.psKernelBootstrapStep(state);
     if (tag(out) === 'final') {
       const result = out.result, status = tag(result);
       answer = status === 'admitted'
@@ -123,7 +130,8 @@ try {
       break;
     }
     if (tag(out) !== 'next') fail('invalid-generated-step');
-    if (tag(state) !== 'pending' && tag(out.state) === 'pending') admissionIndex++;
+    if (tag(state) === 'declarations' && tag(out.state) === 'declarations' &&
+        tag(state.state) !== 'pending' && tag(out.state.state) === 'pending') admissionIndex++;
     state = out.state;
   }
   parentPort.postMessage(answer ?? { accepted: false, errorKind: 'outOfFuel', admissionIndex, steps: workerData.maxSteps });

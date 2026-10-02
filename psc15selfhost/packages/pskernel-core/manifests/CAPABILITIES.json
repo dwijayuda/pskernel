@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "package": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.6",
+  "version": "0.1.0-checker.7",
   "status": "experimental-term-checker",
   "canCheckProofs": false,
   "authoritative": false,
@@ -27,7 +27,9 @@
     "polymorphic-transparent-delta-reduction",
     "internal-opaque-constant-typing-and-conversion-without-declaration-admission",
     "zero-term-parameter-unit-inductives-with-derived-recursor-and-iota",
-    "fresh-mixed-definition-and-unit-admission"
+    "fresh-mixed-definition-and-unit-admission",
+    "monomorphic-zero-successor-inductives-with-derived-dependent-recursor-and-iota",
+    "generated-bootstrap-Nat-checked-from-empty-environment"
   ],
   "boundedEvidence": [
     "BUILD.json",
@@ -37,7 +39,8 @@
     "CHECKER_ORACLE.json",
     "CHECKER_DIFFERENTIAL.json",
     "POLYMORPHIC_DIFFERENTIAL.json",
-    "UNIT_DIFFERENTIAL.json"
+    "UNIT_DIFFERENTIAL.json",
+    "NAT_DIFFERENTIAL.json"
   ],
   "releaseGates": {
     "term-checking": {
@@ -50,7 +53,7 @@
     },
     "inductive-admission": {
       "status": "partial",
-      "evidence": "UNIT_DIFFERENTIAL.json; zero-term-parameter singleton unit fragment only"
+      "evidence": "UNIT_DIFFERENTIAL.json; NAT_DIFFERENTIAL.json; unit and monomorphic zero/successor fragments only"
     },
     "quotient-admission": {
       "status": "pending",
@@ -103,7 +106,7 @@
     "general-mutual-indexed-and-recursive-inductive-admission",
     "quotient-admission",
     "literal-and-projection-typing",
-    "primitive-and-prelude-validation",
+    "remaining-prelude-and-primitive-validation",
     "axiom-and-opaque-declaration-admission",
     "hostile-input-decoder",
     "public-CheckedModule"

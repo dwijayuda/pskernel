@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "ground computation cases for foundation; not full kernel equivalence or general correctness",
-  "sourceManifestSha256": "140e5e2abc8f94391b6da51465e2034a9d99b86e28a27f67489b2b9e52586fd0",
+  "sourceManifestSha256": "6c03e13e88a2a457f396493eba2c51a9b1eeef8d821086a4143032e99414bfbd",
   "provider": {
     "protocol": "pskernel-lean/1",
     "provider": "lean4-cpp",
@@ -14,7 +14,7 @@
   "fixturesSha256": "8638fdfba36489d1ba5579197311c43cad74c2c87db89586bbe2db9029540b22",
   "oracleHarnessSha256": "1b9e6a7e9d82728001d30b9a3b80aa539feafc18d7075d19e8e2c0f819e7950b",
   "positiveCases": 47,
-  "positiveRequestSha256": "478a4369362a170dd6b2d78490e0c130368a9b3d68d5174d5120758780e42810",
+  "positiveRequestSha256": "4806b718c2593b382ea7a1094cd9fa00140e9d8b0a82b493fa530d3f3fb1c714",
   "positive": {
     "protocol": "pskernel-lean/1",
     "provider": "lean4-cpp",
@@ -24,7 +24,7 @@
     "accepted": true
   },
   "negativeControls": 1,
-  "negativeRequestSha256": "d9523c07278cd1fcd71f6f6e6c958075c4ac3b491e207a8414220189954289e8",
+  "negativeRequestSha256": "26249478da2459e0c024c7e474716ee4076dd63f8d8f5f833dae2173a55de45f",
   "negative": {
     "protocol": "pskernel-lean/1",
     "provider": "lean4-cpp",
@@ -33,7 +33,7 @@
     "profile": "lean4.34-core",
     "accepted": false,
     "errorKind": "kernel-rejection",
-    "declarationIndex": 171,
-    "message": "Lean 4.34 kernel rejected declaration 171 (declaration-type-mismatch)"
+    "declarationIndex": 193,
+    "message": "Lean 4.34 kernel rejected declaration 193 (declaration-type-mismatch)"
   }
 }

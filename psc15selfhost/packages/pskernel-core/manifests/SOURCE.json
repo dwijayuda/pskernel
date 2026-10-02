@@ -43,11 +43,11 @@
     },
     {
       "path": "src/Ps/Kernel/Environment.lean",
-      "sha256": "8568a9c0686114b8b873dacac56ce37accb93a7ab968b2b636767660886e9802"
+      "sha256": "7eafb0193426c47188e307c49001938cf5f0b0a5d5facc458fee76e9d8b36724"
     },
     {
       "path": "src/Ps/Kernel/Reduction.lean",
-      "sha256": "d4238bbc89d4c8fea19180c7f9777961bdc727b0b087c0639ee581223045abbf"
+      "sha256": "0d0527695dc6c9de55ce505ccda53a93cc8eb87e2d2c019dcd60ae81da88ea9d"
     },
     {
       "path": "src/Ps/Kernel/Conversion.lean",
@@ -66,8 +66,16 @@
       "sha256": "c3bb990cb0652310e02794d3976f43e8b71c8f639c9f4eb3a51f5cd7731a27ba"
     },
     {
+      "path": "src/Ps/Kernel/NatInductive.lean",
+      "sha256": "b5bc99734b06b8d83740dc7e7f67e7b0c0f457e3ddfbffe460c5172d2265b2d5"
+    },
+    {
       "path": "src/Ps/Kernel/JointAdmission.lean",
-      "sha256": "7bb6ef0aa971a768506839b2f03026e92d76370e6feadc00eef157f668639948"
+      "sha256": "88054e88138e526ca64f77f0c28f61bb4b2f395459d72754121ad869031c830d"
+    },
+    {
+      "path": "src/Ps/Kernel/Bootstrap.lean",
+      "sha256": "09746073ff77816adc2c0e614fe304b461c65e86aa6fb8f04064041766a19b48"
     }
   ]
 }

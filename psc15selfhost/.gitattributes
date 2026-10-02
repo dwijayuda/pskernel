@@ -2,3 +2,6 @@
 packages/pskernel-core/** -text
 # Provider manifests identify exact source and generated artifact bytes too.
 packages/pskernel-lean-wasm/** -text
+
+# Preserve checkpoint compressed inputs and receipt bytes.
+docs/continuity/owned-record-fields-2026-10-03/** -text

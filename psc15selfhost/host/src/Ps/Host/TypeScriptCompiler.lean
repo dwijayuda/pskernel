@@ -99,5 +99,7 @@ def psWriteAndCompileTypeScript
     (source : String)
     (typeScriptPath : String) :
     IO PsTypeScriptCompileResult := do
+  if let some parent := (System.FilePath.mk typeScriptPath).parent then
+    IO.FS.createDirAll parent
   IO.FS.writeFile typeScriptPath source
   psCompileTypeScriptFile typeScriptPath

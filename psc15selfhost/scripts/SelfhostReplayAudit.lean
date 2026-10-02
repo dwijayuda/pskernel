@@ -222,9 +222,18 @@ def psAuditTotalStringWorkers : Bool := Id.run do
         return false
   for value in [0, 1, 9, 10, 999, 9007199254740993, 123456789012345678901234567890] do
     if psNatToString value != toString value then return false
-  return !psStringEq "é" "e" && !psStringEq "abc" "abcd"
+    if psCheckedAdmissionNatToString value != toString value then return false
+  for left in ["", "a", "é", "aa", "ab", "😀", "中x", "name", "namespace"] do
+    for right in ["", "a", "é", "aa", "ab", "😀", "中x", "name", "namespace"] do
+      if psStringEq left right != (left == right) then return false
+  return true
 
 def psAuditTotalJsonWorkers : Bool :=
+  let conversion := Id.run do
+    for source in ["", "abc", "é中😀", String.ofList (List.replicate 20000 'a')] do
+      for fuel in [0, 1, 2, 3, 10, source.utf8ByteSize + 1] do
+        if psJsonStringCharsWithFuel fuel source 0 != source.toList.take fuel then return false
+    return true
   let exhausted := match psJsonEncodeCanonicalWithFuel 0 .nullE with
     | .error .fuelExhausted => true
     | _ => false
@@ -242,7 +251,7 @@ def psAuditTotalJsonWorkers : Bool :=
   let parserBoundary := match psJsonParseValueWithFuel (.error .fuelExhausted) 2 ['[', 'n', 'u', 'l', 'l', ']'] with
     | .error .fuelExhausted => true
     | _ => false
-  exhausted && boundary && accepted && nested && parserBoundary
+  conversion && exhausted && boundary && accepted && nested && parserBoundary
 
 def psAuditLegacyMetaRounds (context : PsMetaContext) : Nat -> PsExpr -> PsExpr
   | 0, expr => expr
@@ -338,6 +347,38 @@ def psAuditErasureDetails (prepared : PsCompilerAdmissionReadyModule) : IO Unit 
         | .ok _ => pure ()
     | _ => pure ()
   IO.println ("PSC2_REPLAY_ERASURE_FAILURE_COUNT: " ++ toString failures)
+
+def psAuditEnvironmentIndex : Bool := Id.run do
+  let names := [psRootName "Aa", psRootName "BB", psRootName "é", psRootName "中",
+    .num .anonymous 0, .num .anonymous 65521, .num (.str .anonymous "n") 9007199254740993]
+    ++ (List.range 1000).map (fun index => psRootName ("declaration" ++ toString index))
+  let mut environment := psEnvironmentEmpty
+  let mut number := 0
+  for name in names do
+    let declaration := PsDeclaration.definitionDecl name [] (.constE psNatName []) (.lit (.natural number))
+    let .some next := psEnvironmentAdd environment declaration | return false
+    if (psEnvironmentFind environment name).isSome then return false
+    if (psEnvironmentAdd next declaration).isSome then return false
+    environment := next
+    number := number + 1
+  number := 0
+  for name in names do
+    let .some (.definitionDecl actual _ _ value) := psEnvironmentFind environment name | return false
+    if !psNameEq actual name || !psExprAlphaEq value (.lit (.natural number)) then return false
+    let .some reference := psEnvironmentFindInList name environment.declarations | return false
+    if !psNameEq (psDeclarationName reference) actual then return false
+    number := number + 1
+  if (psEnvironmentFind environment (psRootName "missing")).isSome then return false
+  let replaceName := psRootName "placeholder"
+  let .some before := psEnvironmentAdd environment (.axiomDecl replaceName [] (.constE psNatName [])) | return false
+  let replacement := PsDeclaration.definitionDecl replaceName [] (.constE psNatName []) (.lit (.natural 42))
+  let .some after := psEnvironmentAddReplacingAxiom before replacement | return false
+  let .some (.axiomDecl _ _ _) := psEnvironmentFind before replaceName | return false
+  let .some (.definitionDecl _ _ _ value) := psEnvironmentFind after replaceName | return false
+  return psExprAlphaEq value (.lit (.natural 42)) &&
+    before.declarations.length == after.declarations.length &&
+    (psEnvironmentAddReplacingAxiom after replacement).isNone &&
+    psEnvironmentNameHash (psRootName "Aa") == psEnvironmentNameHash (psRootName "BB")
 
 def main (arguments : List String) : IO UInt32 := do
   match arguments with
@@ -448,7 +489,8 @@ def main (arguments : List String) : IO UInt32 := do
         ("total JSON workers, canonical order and fuel boundaries", psAuditTotalJsonWorkers),
         ("module preparation preserves combined admissions and rejects bad modules", psAuditModularPreparation),
         ("lexer shares its input bound while preserving low fuel, nested comments and UTF-8 spans", psAuditLexerInputBound),
-        ("meta early exit preserves substitution chains, unresolved terms, fuel, cycles and levels", psAuditMetaFixedPoint)] do
+        ("meta early exit preserves substitution chains, unresolved terms, fuel, cycles and levels", psAuditMetaFixedPoint),
+        ("persistent environment index preserves collisions, duplicates, ordering and axiom replacement", psAuditEnvironmentIndex)] do
       if passed then IO.println ("PSC2_FIXED_POINT_ERASURE_CASE: PASS " ++ label)
       else throw (IO.userError ("PSC2_FIXED_POINT_ERASURE_CASE: FAIL " ++ label))
     IO.println "PSC2_FIXED_POINT_ERASURE_FINISH_APPLICATION: PASS (native behavior and append-order theorem)"

@@ -26,6 +26,14 @@ def psCheckedSeedTests : IO Unit := do
   let invalidResult ← psHostLeanEmitPrepared invalid
   psCheckedSeedAssert "codec-valid ill-typed declaration rejected by real kernel"
     (match invalidResult with | .error error => error.startsWith "PSC2_KERNEL_REJECTED:" | _ => false)
+  let nestedSource ← IO.FS.readFile "../test/fixtures/checked-nested-recursor.lean"
+  let .ok nested := psCompilerPrepareSource .lean nestedSource
+    | throw (IO.userError "nested source preparation failed")
+  psCheckedSeedAssert "nested List Option Prod recursors are adapted in the canonical payload"
+    (nested.canonicalAdmissions.contains "_pscShallowRec" && nested.canonicalAdmissions.contains "_pscCheckedNestedUnit")
+  let nestedResult ← psHostLeanEmitPrepared nested
+  psCheckedSeedAssert "real kernel accepts nested recursors and direct recursive hypotheses"
+    (match nestedResult with | .ok (_, ts) => ts.contains "checkedTreeExample" | _ => false)
   IO.println "PSC2_LEAN_CHECKED_NATIVE: PASS"
 
 def psCheckedSeedRun (emit : Bool) (kind : PsCompilerSourceKind) : IO Unit := do

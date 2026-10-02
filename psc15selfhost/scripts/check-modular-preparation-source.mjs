@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const cases = [
+  ['scripts/compile-with-generated.mjs', [
+    'sources: chunks,',
+    'compiler.List.cons(head, tail), compiler.List.nil()',
+    'compiler.psCompilerPrepareSources(project.sourceKind, sources)',
+    'compiler.psCompilerTypeScriptFromPrepared(prepared)',
+  ]],
   ['packages/compiler/src/Ps/Compiler/Api.lean', [
     'psCompilerElaborateSourcesWorker sourceKind rest',
     'match psCompilerParseSource sourceKind source with',

@@ -5,6 +5,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
 import { findSourceWorkspaceRoot, readGeneratedSourceClosure } from "./selfhost-source-workspace.mjs";
+import { resolveTypeScriptCli } from "./typescript-cli.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -87,7 +88,9 @@ function requireCompilerApi(compiler) {
   const required = [
     "PsCompilerSourceKind",
     "psCompilerTranslateSource",
-    "psCompilerTypeScriptSource",
+    "psCompilerPrepareSources",
+    "psCompilerTypeScriptFromPrepared",
+    "List",
   ];
   for (const name of required) {
     if (!(name in compiler)) {
@@ -155,17 +158,20 @@ async function flattenProject(compiler, entryPath) {
     moduleCount: ordered.length,
     closureSha256: generated?.closureSha256,
     sourceKind: targetKind,
+    sources: chunks,
     source: chunks.join("\n\n") + "\n",
   };
 }
 
 function compileTypeScript(typeScriptPath) {
-  const npx = process.platform === "win32" ? "npx.cmd" : "npx";
+  const tsc = resolveTypeScriptCli();
+  const version = spawnSync(process.execPath, [tsc, '--version'], { encoding: 'utf8', timeout: 10000 });
+  if (version.error || version.status !== 0 || version.stdout.trim() !== 'Version 5.8.3')
+    throw new Error('PSC2_SELFHOST_TYPESCRIPT_PIN: require TypeScript 5.8.3');
   const result = spawnSync(
-    npx,
+    process.execPath,
     [
-      "--no-install",
-      "tsc",
+      tsc,
       typeScriptPath,
       "--target",
       "ES2022",
@@ -226,13 +232,9 @@ const compiler = await import(pathToFileURL(compilerPath).href);
 requireCompilerApi(compiler);
 
 const project = await flattenProject(compiler, entryPath);
-const typeScript = unwrapExcept(
-  compiler.psCompilerTypeScriptSource(
-    project.sourceKind,
-    project.source,
-  ),
-  "compile",
-);
+const sources = project.sources.reduceRight((tail, head) => compiler.List.cons(head, tail), compiler.List.nil());
+const prepared = unwrapExcept(compiler.psCompilerPrepareSources(project.sourceKind, sources), "prepare");
+const typeScript = unwrapExcept(compiler.psCompilerTypeScriptFromPrepared(prepared), "compile");
 
 await mkdir(path.dirname(outputTsPath), { recursive: true });
 await writeFile(outputTsPath, typeScript, "utf8");

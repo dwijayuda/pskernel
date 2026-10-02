@@ -72,7 +72,10 @@ partial def psHostFindWorkspaceRootWithFuel
       let stdlibDir := psHostJoinPath path "stdlib"
       let hasPackages ← System.FilePath.pathExists packageDir
       let hasStdlib ← System.FilePath.pathExists stdlibDir
-      if hasPackages && hasStdlib then
+      let hasBootstrap ← System.FilePath.pathExists (psHostJoinPath path ".proofscript-bootstrap.json")
+      let hasSelfhost ← System.FilePath.pathExists (psHostJoinPath path ".proofscript-selfhost.json")
+      let hasProject ← System.FilePath.pathExists (psHostJoinPath path ".proofscript-project.json")
+      if hasPackages && (hasStdlib || hasBootstrap || hasSelfhost || hasProject) then
         pure (some path)
       else
         let parent := psHostParentDirectory path

@@ -42,7 +42,9 @@ def psStringEqFrom
   psStringEqFromWithFuel (Nat.succ (String.utf8ByteSize left)) left right leftPos rightPos
 
 def psStringEq (left : String) (right : String) : Bool :=
-  psStringEqFrom left right 0 0
+  if Nat.beq (String.utf8ByteSize left) (String.utf8ByteSize right) then
+    psStringEqFrom left right 0 0
+  else false
 
 def psNatToString (value : Nat) : String :=
   Int.repr (Int.ofNat value)

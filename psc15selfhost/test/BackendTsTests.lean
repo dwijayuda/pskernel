@@ -269,7 +269,26 @@ def psTestBackendTsSharedNumericIntrinsics : Bool :=
       output.contains "(((left + right)) >>> 0)"
         && output.contains "Math.fround((left + right))"
 
+def psTestBackendTsEtaInlining : Bool :=
+  let nat := PsVerifiedIrType.primitive .nat
+  let fn := PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "local" nat] nat (.var "local")
+  let optimized := match psTsInlineEtaApplication (.call fn [] [.var "argument"]) with
+    | .letE "local" _ (.var "argument") (.var "local") => true
+    | _ => false
+  let captureBlocked := match psTsInlineEtaApplication (.call fn [] [.var "local"]) with
+    | .call _ _ _ => true
+    | _ => false
+  let evaluationPreserved := match psTsInlineEtaApplication (.call fn [] [.call (.var "effect") [] []]) with
+    | .call _ _ _ => true
+    | _ => false
+  let arityPreserved := match psTsInlineEtaApplication (.call fn [] []) with
+    | .call _ _ _ => true
+    | _ => false
+  optimized && captureBlocked && evaluationPreserved && arityPreserved &&
+    psTsExprUsesNameWithFuel 0 fn "argument"
+
 def psBackendTsTests : List PsBackendTsNamedTest := [
+  { name := "eta inlining preserves scope, argument evaluation and arity", passed := psTestBackendTsEtaInlining },
   { name := "identity module", passed := psTestBackendTsIdentity },
   { name := "generic inductive", passed := psTestBackendTsInductive },
   { name := "Nat intrinsic", passed := psTestBackendTsIntrinsic },

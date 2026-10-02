@@ -196,45 +196,135 @@ def psParseProofScriptSimpleApplication
     (Nat.add (psParseListLength cursor.remaining) 1)
     cursor
 
+def psParseProofScriptArrowTail
+    (parseCodomain :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (domain : PsParseResult PsSyntaxTerm) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  if psTokenCursorAtArrow domain.cursor then
+    match psTokenCursorExpectArrow domain.cursor with
+    | Except.error error => Except.error error
+    | Except.ok afterArrow =>
+        match parseCodomain afterArrow.cursor with
+        | Except.error error => Except.error error
+        | Except.ok codomain =>
+            let domainSpan := psSyntaxTermSpan domain.value;
+            let domainBinder :
+                Prod PsSyntaxBinderHead PsSyntaxTerm :=
+              Prod.mk
+                (psSyntaxAnonymousExplicitBinder domainSpan)
+                domain.value;
+            let binders :
+                List (Prod PsSyntaxBinderHead PsSyntaxTerm) :=
+              List.cons domainBinder List.nil;
+            let span := psSyntaxSpanJoin domainSpan (psSyntaxTermSpan codomain.value);
+            Except.ok {
+              value :=
+                PsSyntaxTerm.forallE
+                  binders
+                  codomain.value
+                  span
+              cursor := codomain.cursor
+            }
+  else
+    Except.ok domain
+
+def psParseProofScriptDependentArrowTail
+    (parseCodomain :
+      PsTokenCursor ->
+      Except PsParseError (PsParseResult PsSyntaxTerm))
+    (binder :
+      PsParseResult (PsSyntaxBinderHead × PsSyntaxTerm)) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  if psTokenCursorAtArrow binder.cursor then
+    match psTokenCursorExpectArrow binder.cursor with
+    | Except.error error => Except.error error
+    | Except.ok afterArrow =>
+        match parseCodomain afterArrow.cursor with
+        | Except.error error => Except.error error
+        | Except.ok codomain =>
+            Except.ok {
+              value :=
+                PsSyntaxTerm.forallE
+                  (List.cons binder.value List.nil)
+                  codomain.value
+                  {
+                    start := binder.value.fst.span.start
+                    stop := psProofScriptTermStop codomain.value
+                  }
+              cursor := codomain.cursor
+            }
+  else
+    let actualText : String :=
+      match psTokenCursorPeek binder.cursor with
+      | Option.none => ""
+      | Option.some token => token.text;
+    let actualSpan : PsSourceSpan :=
+      match psTokenCursorPeek binder.cursor with
+      | Option.none => binder.value.fst.span
+      | Option.some token => token.span;
+    Except.error
+      (PsParseError.expectedText
+        "->"
+        actualText
+        actualSpan)
+
+
+def psParseProofScriptGroupedType
+    (parseType : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
+    (opening : PsSyntaxBinderOpening) : Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match parseType opening.cursor with
+  | Except.error error => Except.error error
+  | Except.ok inner =>
+      match psParseBinderClosing opening inner.cursor with
+      | Except.error error => Except.error error
+      | Except.ok closing =>
+          psParseProofScriptArrowTail parseType (PsParseResult.mk inner.value closing.cursor)
+
+def psParseProofScriptNestedBinderType
+    (parseType : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
+    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  match psParseBinderOpening cursor with
+  | Except.error error => Except.error error
+  | Except.ok opening =>
+      match psTokenCursorExpectKind opening.cursor PsTokenKind.identifier with
+      | Except.error _ => psParseProofScriptGroupedType parseType opening
+      | Except.ok name =>
+          if psTokenCursorAtText name.cursor ":" then
+            match psTokenCursorExpectText name.cursor ":" with
+            | Except.error error => Except.error error
+            | Except.ok colon =>
+                match parseType colon.cursor with
+                | Except.error error => Except.error error
+                | Except.ok type =>
+                    match psParseBinderClosing opening type.cursor with
+                    | Except.error error => Except.error error
+                    | Except.ok closing =>
+                        let binderName := PsSyntaxName.mk (List.cons name.token.text List.nil) name.token.span;
+                        let binder := PsSyntaxBinderHead.mk binderName opening.kind closing.value;
+                        psParseProofScriptDependentArrowTail parseType
+                          (PsParseResult.mk (Prod.mk binder type.value) closing.cursor)
+          else psParseProofScriptGroupedType parseType opening
+
 def psParseProofScriptBinderTypeWithFuel
     (fuel : Nat) :
     PsTokenCursor ->
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   match fuel with
-  | 0 =>
-      fun (_cursor : PsTokenCursor) =>
-        Except.error PsParseError.fuelExhausted
-  | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  | Nat.zero =>
+      fun (_cursor : PsTokenCursor) => Except.error PsParseError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm) :=
         psParseProofScriptBinderTypeWithFuel remaining;
       fun (cursor : PsTokenCursor) =>
-        match psParseProofScriptSimpleApplication cursor with
-        | Except.error error => Except.error error
-        | Except.ok domain =>
-            if psTokenCursorAtArrow domain.cursor then
-              match psTokenCursorExpectArrow domain.cursor with
-              | Except.error error => Except.error error
-              | Except.ok afterArrow =>
-                  match smaller afterArrow.cursor with
-                  | Except.error error => Except.error error
-                  | Except.ok codomain =>
-                      let domainSpan := psSyntaxTermSpan domain.value;
-                      Except.ok {
-                        value :=
-                          PsSyntaxTerm.forallE
-                            [Prod.mk
-                              (psSyntaxAnonymousExplicitBinder domainSpan)
-                              domain.value]
-                            codomain.value
-                            (psSyntaxSpanJoin
-                              domainSpan
-                              (psSyntaxTermSpan codomain.value))
-                        cursor := codomain.cursor
-                      }
-            else
-              Except.ok domain
+        if psTokenCursorAtBinderStart cursor then
+          psParseProofScriptNestedBinderType smaller cursor
+        else
+          match psParseProofScriptApplicationWithFuel smaller (Nat.succ remaining) cursor with
+          | Except.error error => Except.error error
+          | Except.ok domain => psParseProofScriptArrowTail smaller domain
+
 
 def psParseProofScriptBinderType
     (cursor : PsTokenCursor) :
@@ -314,81 +404,6 @@ def psParseProofScriptBindersWithFuel
             value := psParseListReverse bindersRev
             cursor := cursor
           }
-
-def psParseProofScriptArrowTail
-    (parseCodomain :
-      PsTokenCursor ->
-      Except PsParseError (PsParseResult PsSyntaxTerm))
-    (domain : PsParseResult PsSyntaxTerm) :
-    Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  if psTokenCursorAtArrow domain.cursor then
-    match psTokenCursorExpectArrow domain.cursor with
-    | Except.error error => Except.error error
-    | Except.ok afterArrow =>
-        match parseCodomain afterArrow.cursor with
-        | Except.error error => Except.error error
-        | Except.ok codomain =>
-            let domainSpan := psSyntaxTermSpan domain.value;
-            let domainBinder :
-                Prod PsSyntaxBinderHead PsSyntaxTerm :=
-              Prod.mk
-                (psSyntaxAnonymousExplicitBinder domainSpan)
-                domain.value;
-            let binders :
-                List (Prod PsSyntaxBinderHead PsSyntaxTerm) :=
-              List.cons domainBinder List.nil;
-            let span := psSyntaxSpanJoin domainSpan (psSyntaxTermSpan codomain.value);
-            Except.ok {
-              value :=
-                PsSyntaxTerm.forallE
-                  binders
-                  codomain.value
-                  span
-              cursor := codomain.cursor
-            }
-  else
-    Except.ok domain
-
-def psParseProofScriptDependentArrowTail
-    (parseCodomain :
-      PsTokenCursor ->
-      Except PsParseError (PsParseResult PsSyntaxTerm))
-    (binder :
-      PsParseResult (PsSyntaxBinderHead × PsSyntaxTerm)) :
-    Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  if psTokenCursorAtArrow binder.cursor then
-    match psTokenCursorExpectArrow binder.cursor with
-    | Except.error error => Except.error error
-    | Except.ok afterArrow =>
-        match parseCodomain afterArrow.cursor with
-        | Except.error error => Except.error error
-        | Except.ok codomain =>
-            Except.ok {
-              value :=
-                PsSyntaxTerm.forallE
-                  (List.cons binder.value List.nil)
-                  codomain.value
-                  {
-                    start := binder.value.fst.span.start
-                    stop := psProofScriptTermStop codomain.value
-                  }
-              cursor := codomain.cursor
-            }
-  else
-    let actualText : String :=
-      match psTokenCursorPeek binder.cursor with
-      | Option.none => ""
-      | Option.some token => token.text;
-    let actualSpan : PsSourceSpan :=
-      match psTokenCursorPeek binder.cursor with
-      | Option.none => binder.value.fst.span
-      | Option.some token => token.span;
-    Except.error
-      (PsParseError.expectedText
-        "->"
-        actualText
-        actualSpan)
-
 
 def psParseProofScriptMatchAlternativesWithFuel
     (parseTerm :

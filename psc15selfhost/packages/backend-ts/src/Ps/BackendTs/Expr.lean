@@ -11,7 +11,7 @@ def psTsLookup (entries : List (String × String)) : String -> Option String :=
 
 def psTsExprUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Bool :=
   match fuel with
-  | Nat.zero => fun (_expr : PsVerifiedIrExpr) (_name : String) => false
+  | Nat.zero => fun (_expr : PsVerifiedIrExpr) (_name : String) => true
   | Nat.succ remaining =>
       let smaller : PsVerifiedIrExpr -> String -> Bool := psTsExprUsesNameWithFuel remaining;
       fun (expr : PsVerifiedIrExpr) (name : String) =>

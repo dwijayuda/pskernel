@@ -185,15 +185,91 @@ def psTsEmitImport (item : PsVerifiedIrExternalImport) : String :=
 def psTsStackRuntimeSupport : String :=
   "type __ps$Request = { readonly fn: Function; readonly args: unknown[] };\ntype __ps$Computation<R> = Generator<__ps$Request, R, unknown>;\nconst __ps$implementations = new WeakMap<Function, Function>();\nfunction __ps$run<R>(root: __ps$Computation<R>): R {\n  const pending: __ps$Computation<unknown>[] = [root];\n  let value: unknown = undefined;\n  while (pending.length !== 0) {\n    const next = pending[pending.length - 1].next(value);\n    if (next.done) { pending.pop(); value = next.value; }\n    else {\n      const { fn, args } = next.value;\n      const implementation = __ps$implementations.get(fn);\n      if (implementation) { pending.push(Reflect.apply(implementation, undefined, args)); value = undefined; }\n      else value = Reflect.apply(fn, undefined, args);\n    }\n  }\n  return value as R;\n}\nfunction __ps$wrap<A extends unknown[], R>(implementation: (...args: A) => __ps$Computation<R>): (...args: A) => R {\n  const fn = (...args: A): R => __ps$run(implementation(...args));\n  __ps$implementations.set(fn, implementation);\n  return fn;\n}\nfunction* __ps$invoke<A extends unknown[], R>(fn: (...args: A) => R, ...args: A): __ps$Computation<R> {\n  return (yield { fn, args }) as R;\n}"
 
--- Cache one immutable string's byte-position index; retaining new source text
--- releases the previous index. Character access remains exact at UTF-8 boundaries.
+-- Cache two immutable strings so pairwise comparisons reuse both byte indexes.
+-- Retention is bounded; character access remains exact at UTF-8 boundaries.
 def psTsUtf8RuntimeSupport : String :=
-  "type __ps$Utf8View = { readonly text: string; readonly size: bigint; readonly positions: Uint32Array };\nlet __ps$lastUtf8: __ps$Utf8View | undefined;\nfunction __ps$utf8Width(code: number): number { return code <= 0x7f ? 1 : code <= 0x7ff ? 2 : code <= 0xffff ? 3 : 4; }\nfunction __ps$utf8(text: string): __ps$Utf8View {\n  if (__ps$lastUtf8?.text === text) return __ps$lastUtf8;\n  let size = 0;\n  for (const char of text) size += __ps$utf8Width(char.codePointAt(0) ?? 0);\n  const positions = new Uint32Array(size + 1);\n  let byte = 0, index = 0;\n  for (const char of text) {\n    positions[byte] = index + 1;\n    const __ps_w = __ps$utf8Width(char.codePointAt(0) ?? 0);\n    byte += __ps_w; index += char.length;\n  }\n  positions[size] = text.length + 1;\n  return __ps$lastUtf8 = { text, size: BigInt(size), positions };\n}\nfunction __ps$stringGet(text: string, position: bigint): string {\n  const view = __ps$utf8(text);\n  if (position < 0n || position >= view.size) return \"A\";\n  const index = view.positions[Number(position)];\n  return index === 0 ? \"A\" : String.fromCodePoint(text.codePointAt(index - 1) ?? 65);\n}\nfunction __ps$stringNext(text: string, position: bigint): bigint {\n  const view = __ps$utf8(text);\n  if (position < 0n || position >= view.size) return position + 1n;\n  const index = view.positions[Number(position)];\n  return index === 0 ? position + 1n : position + BigInt(__ps$utf8Width(text.codePointAt(index - 1) ?? 0));\n}"
+  "type __ps$Utf8View = { readonly text: string; readonly size: bigint; readonly positions: Uint32Array };\nlet __ps$lastUtf8: __ps$Utf8View | undefined;\nlet __ps$previousUtf8: __ps$Utf8View | undefined;\nfunction __ps$utf8Width(code: number): number { return code <= 0x7f ? 1 : code <= 0x7ff ? 2 : code <= 0xffff ? 3 : 4; }\nfunction __ps$utf8(text: string): __ps$Utf8View {\n  if (__ps$lastUtf8?.text === text) return __ps$lastUtf8;\n  if (__ps$previousUtf8?.text === text) return __ps$previousUtf8;\n  let size = 0;\n  for (const char of text) size += __ps$utf8Width(char.codePointAt(0) ?? 0);\n  const positions = new Uint32Array(size + 1);\n  let byte = 0, index = 0;\n  for (const char of text) {\n    positions[byte] = index + 1;\n    const __ps_w = __ps$utf8Width(char.codePointAt(0) ?? 0);\n    byte += __ps_w; index += char.length;\n  }\n  positions[size] = text.length + 1;\n  __ps$previousUtf8 = __ps$lastUtf8;\n  return __ps$lastUtf8 = { text, size: BigInt(size), positions };\n}\nfunction __ps$stringGet(text: string, position: bigint): string {\n  const view = __ps$utf8(text);\n  if (position < 0n || position >= view.size) return \"A\";\n  const index = view.positions[Number(position)];\n  return index === 0 ? \"A\" : String.fromCodePoint(text.codePointAt(index - 1) ?? 65);\n}\nfunction __ps$stringNext(text: string, position: bigint): bigint {\n  const view = __ps$utf8(text);\n  if (position < 0n || position >= view.size) return position + 1n;\n  const index = view.positions[Number(position)];\n  return index === 0 ? position + 1n : position + BigInt(__ps$utf8Width(text.codePointAt(index - 1) ?? 0));\n}"
 
 def psTsRuntimeSupport : String :=
   psTsJoin "\n" [psTsStackRuntimeSupport, psTsUtf8RuntimeSupport]
 
-def psTsEmitDeclaration
+-- Eta parameters are already evaluated variables. When none of their names
+-- occur in the callee, they can safely pass through its lexical bindings and
+-- branches without capturing a name or changing argument evaluation order.
+def psTsEtaArgumentsFresh (fn : PsVerifiedIrExpr) (arguments : List PsVerifiedIrExpr) : Bool :=
+  match arguments with
+  | List.nil => true
+  | List.cons argument rest =>
+      match argument with
+      | PsVerifiedIrExpr.var name =>
+          if psTsExprUsesNameWithFuel 4096 fn name then false else psTsEtaArgumentsFresh fn rest
+      | _ => false
+
+def psTsEtaBind (parameters : List PsVerifiedIrParameter) : List PsVerifiedIrExpr -> PsVerifiedIrExpr -> Option PsVerifiedIrExpr :=
+  match parameters with
+  | List.nil => fun (arguments : List PsVerifiedIrExpr) (body : PsVerifiedIrExpr) =>
+      if psListIsEmpty arguments then Option.some body else Option.none
+  | List.cons parameter rest =>
+      let smaller : List PsVerifiedIrExpr -> PsVerifiedIrExpr -> Option PsVerifiedIrExpr := psTsEtaBind rest;
+      fun (arguments : List PsVerifiedIrExpr) (body : PsVerifiedIrExpr) =>
+        match arguments with
+        | List.nil => Option.none
+        | List.cons argument tail =>
+            match smaller tail body with
+            | Option.none => Option.none
+            | Option.some inner => Option.some (PsVerifiedIrExpr.letE parameter.name parameter.type argument inner)
+
+def psTsEtaAlternatives (apply : PsVerifiedIrExpr -> Option PsVerifiedIrExpr)
+    (alternatives : List (Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr))) :
+    Option (List (Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr))) :=
+  match alternatives with
+  | List.nil => Option.some List.nil
+  | List.cons alternative rest =>
+      match apply (Prod.snd (Prod.snd alternative)) with
+      | Option.none => Option.none
+      | Option.some body =>
+          match psTsEtaAlternatives apply rest with
+          | Option.none => Option.none
+          | Option.some tail => Option.some (List.cons (Prod.mk (Prod.fst alternative) (Prod.mk (Prod.fst (Prod.snd alternative)) body)) tail)
+
+def psTsEtaApplyWorker (arguments : List PsVerifiedIrExpr) (fuel : Nat) : PsVerifiedIrExpr -> Option PsVerifiedIrExpr :=
+  match fuel with
+  | Nat.zero => fun (_fn : PsVerifiedIrExpr) => Option.none
+  | Nat.succ remaining =>
+      let smaller : PsVerifiedIrExpr -> Option PsVerifiedIrExpr := psTsEtaApplyWorker arguments remaining;
+      fun (fn : PsVerifiedIrExpr) =>
+        match fn with
+        | PsVerifiedIrExpr.lambda parameters _ body => psTsEtaBind parameters arguments body
+        | PsVerifiedIrExpr.letE name type value body =>
+            match smaller body with
+            | Option.none => Option.none
+            | Option.some inner => Option.some (PsVerifiedIrExpr.letE name type value inner)
+        | PsVerifiedIrExpr.ifE condition left right =>
+            match smaller left with
+            | Option.none => Option.none
+            | Option.some first =>
+                match smaller right with
+                | Option.none => Option.none
+                | Option.some second => Option.some (PsVerifiedIrExpr.ifE condition first second)
+        | PsVerifiedIrExpr.matchE name types scrutinee alternatives =>
+            match psTsEtaAlternatives smaller alternatives with
+            | Option.none => Option.none
+            | Option.some branches => Option.some (PsVerifiedIrExpr.matchE name types scrutinee branches)
+        | _ => Option.none
+
+def psTsInlineEtaApplication (expr : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  match expr with
+  | PsVerifiedIrExpr.call fn types arguments =>
+      if psListIsEmpty types then
+        if psTsEtaArgumentsFresh fn arguments then
+          match psTsEtaApplyWorker arguments 4096 fn with
+          | Option.some body => body
+          | Option.none => expr
+        else expr
+      else expr
+  | _ => expr
+
+def psTsEmitDeclarationGeneral
     (brands : List (String × String))
     (tags : List (String × String))
     (declaration : PsVerifiedIrDeclaration) :
@@ -202,7 +278,7 @@ def psTsEmitDeclaration
   match psTsEmitType declaration.resultType with
   | Except.error error => Except.error error
   | Except.ok resultType =>
-      match psTsEmitExpr brands tags declaration.body with
+      match psTsEmitExpr brands tags (psTsInlineEtaApplication declaration.body) with
       | Except.error error => Except.error error
       | Except.ok body =>
           if psListIsEmpty declaration.parameters then
@@ -229,6 +305,125 @@ def psTsEmitDeclaration
                 let implementation := String.Internal.append "__ps$impl$" declaration.name;
                 Except.ok
                   (psTsJoin "" ["export function ", declaration.name, generic, "(", psTsJoin ", " parameters, "): ", resultType, " { return __ps$run(", implementation, generic, "(", arguments, ")); }\nfunction* ", implementation, generic, "(", psTsJoin ", " parameters, "): __ps$Computation<", resultType, "> { return ", body, "; }\n__ps$implementations.set(", declaration.name, ", ", implementation, ");"])
+
+-- A zero/successor fold over one recursive field is a count. Emit its exact
+-- computation as a loop, avoiding a suspended generator for every list cell.
+-- Recognition uses the IR shape, not a source function or inductive name.
+def psTsCountLiteral (expected : Nat) (expr : PsVerifiedIrExpr) : Bool :=
+  match expr with
+  | PsVerifiedIrExpr.literal literal =>
+      match literal with
+      | PsVerifiedIrLiteral.natural value => Nat.beq expected value
+      | _ => false
+  | _ => false
+
+def psTsCountRecursiveArgument (name : String) (expr : PsVerifiedIrExpr) : Option String :=
+  match expr with
+  | PsVerifiedIrExpr.call fn _ args =>
+      match fn with
+      | PsVerifiedIrExpr.var called =>
+          if psStringEq called name then
+            match args with
+            | List.cons argument rest =>
+                if psListIsEmpty rest then
+                  match argument with
+                  | PsVerifiedIrExpr.var localName => Option.some localName
+                  | _ => Option.none
+                else Option.none
+            | _ => Option.none
+          else Option.none
+      | _ => Option.none
+  | _ => Option.none
+
+def psTsCountStepArgument (name : String) (expr : PsVerifiedIrExpr) : Option String :=
+  match expr with
+  | PsVerifiedIrExpr.intrinsic operation _ args =>
+      match operation with
+      | PsVerifiedIrIntrinsic.natAdd =>
+          match args with
+          | List.cons left rest =>
+              match rest with
+              | List.cons right tail =>
+                  if psListIsEmpty tail then
+                    if psTsCountLiteral 1 left then psTsCountRecursiveArgument name right
+                    else if psTsCountLiteral 1 right then psTsCountRecursiveArgument name left
+                    else Option.none
+                  else Option.none
+              | _ => Option.none
+          | _ => Option.none
+      | _ => Option.none
+  | _ => Option.none
+
+def psTsCountField (localName : String) (bindings : List PsVerifiedIrMatchBinding) : Option String :=
+  match bindings with
+  | List.nil => Option.none
+  | List.cons binding rest =>
+      if psStringEq localName binding.name then Option.some binding.field
+      else psTsCountField localName rest
+
+def psTsEmitCountCases (tag : String) (name : String)
+    (base step : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) : Option String :=
+  if psTsCountLiteral 0 (Prod.snd (Prod.snd base)) then
+    match psTsCountStepArgument name (Prod.snd (Prod.snd step)) with
+    | Option.none => Option.none
+    | Option.some localName =>
+        match psTsCountField localName (Prod.fst (Prod.snd step)) with
+        | Option.none => Option.none
+        | Option.some field =>
+            Option.some (psTsJoin "" ["let __ps$count = 0n; for (;;) { switch (__ps$cursor[", tag,
+              "]) { case ", psJsonQuote (Prod.fst base), ": return __ps$count; case ", psJsonQuote (Prod.fst step),
+              ": __ps$cursor = __ps$cursor.", field, "; __ps$count += 1n; break; default: throw new Error(\"invalid ProofScript constructor tag\"); } }"])
+  else Option.none
+
+def psTsEmitCountLoop (tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
+  match declaration.resultType with
+  | PsVerifiedIrType.primitive primitive =>
+      match primitive with
+      | PsVerifiedIrPrimitiveType.nat =>
+          match declaration.parameters with
+          | List.cons parameter rest =>
+              if psListIsEmpty rest then
+                match declaration.body with
+                | PsVerifiedIrExpr.matchE name _ scrutinee alternatives =>
+                    match scrutinee with
+                    | PsVerifiedIrExpr.var localName =>
+                        if psStringEq localName parameter.name then
+                          match psTsLookup tags name with
+                          | Option.none => Option.none
+                          | Option.some tag =>
+                              match alternatives with
+                              | List.cons first remaining =>
+                                  match remaining with
+                                  | List.cons second tail =>
+                                      if psListIsEmpty tail then
+                                        let cases : Option String := match psTsEmitCountCases tag declaration.name first second with
+                                          | Option.some printed => Option.some printed
+                                          | Option.none => psTsEmitCountCases tag declaration.name second first;
+                                        match cases with
+                                        | Option.none => Option.none
+                                        | Option.some printed =>
+                                            match psTsEmitType parameter.type with
+                                            | Except.error _ => Option.none
+                                            | Except.ok type =>
+                                                Option.some (psTsJoin "" ["export function ", declaration.name,
+                                                  psTsGenericNames declaration.typeParameters, "(", parameter.name, ": ", type,
+                                                  "): bigint { let __ps$cursor = ", parameter.name, "; ", printed, " }"])
+                                      else Option.none
+                                  | _ => Option.none
+                              | _ => Option.none
+                        else Option.none
+                    | _ => Option.none
+                | _ => Option.none
+              else Option.none
+          | _ => Option.none
+      | _ => Option.none
+  | _ => Option.none
+
+def psTsEmitDeclaration (brands tags : List (Prod String String))
+    (declaration : PsVerifiedIrDeclaration) : Except PsTsEmitError String :=
+  match psTsEmitCountLoop tags declaration with
+  | Option.some loop => Except.ok loop
+  | Option.none => psTsEmitDeclarationGeneral brands tags declaration
 
 def psTsFlattenLines (groups : List (List String)) : List String :=
   match groups with

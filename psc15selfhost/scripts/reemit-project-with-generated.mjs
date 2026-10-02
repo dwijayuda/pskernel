@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { inspect } from "node:util";
 import {
   bootstrapManifestSchemaVersion,
   canonicalGeneratedPaths,
@@ -34,7 +35,7 @@ function unwrapExcept(value, sourcePath) {
   if (tag === "ok") return value.value;
   if (tag === "error") {
     throw new Error(
-      `PSC1_SELFHOST_REEMIT_FAILED: ${sourcePath}: ${JSON.stringify(value.error)}`,
+      `PSC1_SELFHOST_REEMIT_FAILED: ${sourcePath}: ${inspect(value.error, { depth: 8 })}`,
     );
   }
   throw new Error(`PSC1_SELFHOST_REEMIT_RESULT_SHAPE: ${sourcePath}`);

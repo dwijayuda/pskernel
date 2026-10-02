@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { chmod, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -19,7 +19,6 @@ async function scenario(label, configure = async () => {}, expectedError) {
   try {
     const parent = path.join(directory, "parent");
     const workspace = path.join(parent, "dist", "generated");
-    const bin = path.join(directory, "bin");
     const report = path.join(directory, "consumed.json");
     async function put(file, content) {
       await mkdir(path.dirname(file), { recursive: true });
@@ -42,34 +41,28 @@ async function scenario(label, configure = async () => {}, expectedError) {
     const fixture = { directory, parent, workspace, manifest, put, saveManifest };
     await configure(fixture);
     const compiler = path.join(directory, "compiler.mjs");
-    // Test doubles isolate filesystem/orchestration behavior. These tests do NOT
-    // claim to build a real compiler, execute emitted JS, or validate TypeScript.
+    // A compiler double isolates source selection and module ordering. The
+    // production host still invokes the real, pinned TypeScript compiler.
     await put(compiler, `import { writeFileSync } from "node:fs";
 export const PsCompilerSourceKind = { lean: "lean", proofScript: "ps" };
 let translations = 0;
 const ok = value => ({ [Symbol.for("psc2-test-tag")]: "ok", value });
 export function psCompilerTranslateSource(_from, _to, source) { translations++; return ok(source); }
-export function psCompilerTypeScriptSource(kind, source) {
-  writeFileSync(process.env.PSC2_TEST_SOURCE_REPORT, JSON.stringify({ kind, source, translations }));
+export const List = { nil: () => ({}), cons: (head, tail) => ({ head, tail }) };
+export function psCompilerPrepareSources(kind, sources) {
+  const chunks = [];
+  for (let value = sources; 'head' in value; value = value.tail) chunks.push(value.head);
+  writeFileSync(process.env.PSC2_TEST_SOURCE_REPORT, JSON.stringify({ kind, source: chunks.join('\\n\\n'), chunks, translations }));
+  return ok({});
+}
+export function psCompilerTypeScriptFromPrepared(_prepared) {
   return ok("export const answer = 42;\\n");
 }
 `);
-    await mkdir(bin, { recursive: true });
-    const npx = path.join(bin, process.platform === "win32" ? "npx.cmd" : "npx");
-    const stub = path.join(bin, "tsc-double.cjs");
-    await put(stub, `const assert = require("node:assert/strict");
-assert.ok(process.argv.includes("--strict"));
-assert.ok(process.argv.includes("--noEmitOnError"));
-`);
-    await put(npx, process.platform === "win32"
-      ? `@"${process.execPath}" "${stub}" %*\r\n`
-      : `#!/bin/sh\nexec "${process.execPath}" "${stub}" "$@"\n`);
-    await chmod(npx, 0o755);
     const result = spawnSync(process.execPath, [path.join(root, "scripts/compile-with-generated.mjs"),
       compiler, path.join(workspace, entry), path.join(directory, "output.ts")], {
       cwd: root, encoding: "utf8", timeout: 15000,
-      env: { ...process.env, PATH: `${bin}${path.delimiter}${process.env.PATH ?? ""}`,
-        PSC2_TEST_SOURCE_REPORT: report },
+      env: { ...process.env, PSC2_TEST_SOURCE_REPORT: report },
     });
     if (result.error) throw result.error;
     const output = `${result.stdout}\n${result.stderr}`;
@@ -79,9 +72,11 @@ assert.ok(process.argv.includes("--noEmitOnError"));
       assert.equal(existsSync(report), false, "must reject before invoking semantic compilation");
     } else {
       assert.equal(result.status, 0, output);
+      assert(existsSync(path.join(directory, 'output.js')), 'real TypeScript compilation must complete');
       const consumed = JSON.parse(await readFile(report, "utf8"));
       assert.equal(consumed.kind, "ps");
       assert.equal(consumed.translations, 0, "generated compilation must not translate a handwritten fallback");
+      assert.equal(consumed.chunks.length, 2, "module boundaries must survive compilation");
       assert.match(consumed.source, /GENERATED_DEP/u);
       assert.doesNotMatch(consumed.source, /WRONG_PARENT|STALE_LEAN/u);
       assert.ok(consumed.source.indexOf("GENERATED_DEP") < consumed.source.indexOf("entryMarker"));
@@ -150,4 +145,4 @@ await scenario("selfhost generation manifest accepted", async ({ workspace, put,
 });
 
 if (failures.length) throw new Error(`PSC2_SELFHOST_SOURCE_ISOLATION: ${passed} passed, ${failures.length} failed\n${failures.join("\n")}`);
-console.log(`PSC2_SELFHOST_SOURCE_ISOLATION: PASS (${passed} production-CLI cases; compiler/tsc test doubles)`);
+console.log(`PSC2_SELFHOST_SOURCE_ISOLATION: PASS (${passed} production-CLI cases; compiler double and pinned TypeScript)`);

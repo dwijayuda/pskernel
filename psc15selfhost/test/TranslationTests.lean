@@ -111,7 +111,42 @@ def psTestComplexApplicationTranslationRoundTrip : Bool :=
                leanAgain == canonicalLean
   | _, _ => false
 
+def psTestHigherOrderBinderTranslation : Bool :=
+  let sources := [
+    "def apply (f : Nat -> Nat) (x : Nat) : Nat := f x",
+    "def combine (f : Nat -> Nat -> Nat) (x : Nat) : Nat := f x x",
+    "def nested (f : List Nat -> Nat) : Nat := 0"]
+  sources.all fun source =>
+    match psTranslateLeanToProofScript source, psCanonicalizeLeanSource source with
+    | .ok proofScript, .ok canonicalLean =>
+        match psTranslateProofScriptToLean proofScript, psCanonicalizeProofScriptSource proofScript with
+        | .ok leanAgain, .ok proofScriptAgain =>
+            leanAgain == canonicalLean && proofScriptAgain == proofScript
+        | _, _ => false
+    | _, _ => false
+
+def psTestProofScriptNestedBinderTypes : Bool :=
+  let sources := [
+    "def twice (f : ((_: Nat) -> Nat) -> Nat) : Nat := 0;",
+    "def named (f : (x : Nat) -> Nat) : Nat := 0;",
+    "def nested (f : List((_: Nat) -> Nat)) : Nat := 0;",
+    "def implicitType (f : {x : Nat} -> Nat) : Nat := 0;",
+    "def grouped (f : (Nat -> Nat)) : Nat := 0;"]
+  sources.all fun source =>
+    match psCanonicalizeProofScriptSource source with
+    | .error _ => false
+    | .ok canonical =>
+        match psCanonicalizeProofScriptSource canonical with
+        | .error _ => false
+        | .ok again => again == canonical
+
 def main : IO Unit := do
+  if psTestProofScriptNestedBinderTypes then
+    IO.println "PSC1_TRANSLATION_PASS: grouped and dependent ProofScript binder types"
+  else throw (IO.userError "PSC1_TRANSLATION_FAIL: grouped and dependent ProofScript binder types")
+  if psTestHigherOrderBinderTranslation then
+    IO.println "PSC1_TRANSLATION_PASS: nested function binder canonical round trip"
+  else throw (IO.userError "PSC1_TRANSLATION_FAIL: nested function binder canonical round trip")
   if psTestComplexApplicationTranslationRoundTrip then
     IO.println
       "PSC1_TRANSLATION_PASS: complex application .lean <-> .ps"

@@ -1354,6 +1354,7 @@ def psTestInductiveMetadataLookup : Bool :=
     numParams := 0
     numIndices := 0
     constructors := [ctorName]
+    isStructure := false
   }
   let constructorInfo : PsConstructorInfo := {
     name := ctorName
@@ -1363,6 +1364,7 @@ def psTestInductiveMetadataLookup : Bool :=
     constructorIndex := 0
     numParams := 0
     numFields := 0
+    recursiveFields := []
   }
   let recursorInfo : PsRecursorInfo := {
     name := recName
@@ -1612,6 +1614,7 @@ def psTestChoiceEnvironment : PsEnvironment :=
     numParams := 0
     numIndices := 0
     constructors := [leftName, rightName]
+    isStructure := false
   }
   let leftInfo : PsConstructorInfo := {
     name := leftName
@@ -1621,6 +1624,7 @@ def psTestChoiceEnvironment : PsEnvironment :=
     constructorIndex := 0
     numParams := 0
     numFields := 0
+    recursiveFields := []
   }
   let rightInfo : PsConstructorInfo := {
     name := rightName
@@ -1630,6 +1634,7 @@ def psTestChoiceEnvironment : PsEnvironment :=
     constructorIndex := 1
     numParams := 0
     numFields := 0
+    recursiveFields := []
   }
   let recInfo : PsRecursorInfo := {
     name := recName
@@ -1748,6 +1753,7 @@ def psTestBoxNatEnvironment : PsEnvironment :=
     numParams := 0
     numIndices := 0
     constructors := [ctorName]
+    isStructure := false
   }
   let ctorInfo : PsConstructorInfo := {
     name := ctorName
@@ -1757,6 +1763,7 @@ def psTestBoxNatEnvironment : PsEnvironment :=
     constructorIndex := 0
     numParams := 0
     numFields := 1
+    recursiveFields := []
   }
   let recInfo : PsRecursorInfo := {
     name := recName

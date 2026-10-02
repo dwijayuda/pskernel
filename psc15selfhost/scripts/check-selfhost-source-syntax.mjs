@@ -21,6 +21,12 @@ import "./check-modular-preparation-source.mjs";
 import "./check-stack-safe-ts-source.mjs";
 import "./check-lexer-input-bound-source.mjs";
 import "./check-meta-instantiation-stop-source.mjs";
+import "./check-nested-admission-source.mjs";
+import "./check-json-tail-conversion-source.mjs";
+import "./check-count-fold-source.mjs";
+import "./check-environment-index-source.mjs";
+import "./check-eta-inline-source.mjs";
+import "./check-proofscript-binder-replay-source.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -149,7 +155,7 @@ requireMarkers("MetaContext", metaContext, [
   '| Nat.zero =>\n      fun (expr : PsExpr) => expr',
   'let smaller : PsExpr -> PsExpr :=\n        psMetaInstantiateRounds context remaining;',
   'fun (expr : PsExpr) =>\n        if psMetaExprHasAssignedVar context expr then\n          smaller (psMetaInstantiateStep context expr)\n        else expr',
-  'psMetaInstantiateRounds\n      context\n      (Nat.add (psMetaAssignmentListLength context.assignments) 1)\n      expr;',
+  'if psMetaExprHasAssignedVar context expr then\n      psMetaInstantiateRounds\n        context\n        (Nat.add (psMetaAssignmentListLength context.assignments) 1)\n        expr\n    else expr;',
   'def psExprHasUnresolvedMeta\n    (expr : PsExpr) : Bool :=\n  match expr with',
   'psExprHasUnresolvedMeta body',
 ]);

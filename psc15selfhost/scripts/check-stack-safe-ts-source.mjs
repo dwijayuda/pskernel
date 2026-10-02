@@ -12,6 +12,8 @@ const cases = [
     'return (yield { fn, args }) as R;',
     'let __ps$lastUtf8: __ps$Utf8View | undefined;',
     'if (__ps$lastUtf8?.text === text) return __ps$lastUtf8;',
+    'if (__ps$previousUtf8?.text === text) return __ps$previousUtf8;',
+    '__ps$previousUtf8 = __ps$lastUtf8;',
     'new Uint32Array(size + 1)',
     'position < 0n || position >= view.size',
     'positions[size] = text.length + 1;',

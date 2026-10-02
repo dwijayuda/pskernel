@@ -47,11 +47,72 @@ def psDeclarationRecursorInfo : PsDeclaration -> Option PsRecursorInfo
   | .recursorDecl info => Option.some info
   | _ => Option.none
 
+-- A persistent 16-bit trie narrows lookup to a collision bucket. The ordered
+-- declaration list remains authoritative for enumeration and admission order.
+inductive PsEnvironmentIndex where
+  | empty
+  | bucket (declarations : List PsDeclaration)
+  | branch (left right : PsEnvironmentIndex)
+
+def psEnvironmentHashStringWorker (fuel : Nat) : String -> Nat -> Nat -> Nat :=
+  match fuel with
+  | Nat.zero => fun (_value : String) (_position : Nat) (hash : Nat) => hash
+  | Nat.succ remaining =>
+      let smaller : String -> Nat -> Nat -> Nat := psEnvironmentHashStringWorker remaining;
+      fun (value : String) (position : Nat) (hash : Nat) =>
+        if String.Internal.atEnd value (String.Pos.Raw.mk position) then hash
+        else
+          let char := String.Internal.get value (String.Pos.Raw.mk position);
+          let next := String.Pos.Raw.byteIdx (String.Internal.next value (String.Pos.Raw.mk position));
+          smaller value next (Nat.mod (Nat.add (Nat.mul hash 31) (Char.toNat char)) 65521)
+
+def psEnvironmentNameHash (name : PsName) : Nat :=
+  match name with
+  | PsName.anonymous => 0
+  | PsName.str parent value =>
+      psEnvironmentHashStringWorker (Nat.succ (String.utf8ByteSize value)) value 0
+        (Nat.mod (Nat.add (Nat.mul (psEnvironmentNameHash parent) 31) 1) 65521)
+  | PsName.num parent value =>
+      Nat.mod (Nat.add (Nat.add (Nat.mul (psEnvironmentNameHash parent) 31) 2) value) 65521
+
+def psEnvironmentIndexFindWorker (fuel : Nat) : PsEnvironmentIndex -> Nat -> List PsDeclaration :=
+  match fuel with
+  | Nat.zero =>
+      fun (index : PsEnvironmentIndex) (_hash : Nat) =>
+        match index with
+        | PsEnvironmentIndex.bucket declarations => declarations
+        | _ => List.nil
+  | Nat.succ remaining =>
+      let smaller : PsEnvironmentIndex -> Nat -> List PsDeclaration := psEnvironmentIndexFindWorker remaining;
+      fun (index : PsEnvironmentIndex) (hash : Nat) =>
+        match index with
+        | PsEnvironmentIndex.branch left right =>
+            if Nat.beq (Nat.mod hash 2) 0 then smaller left (Nat.div hash 2)
+            else smaller right (Nat.div hash 2)
+        | _ => List.nil
+
+def psEnvironmentIndexSetWorker (fuel : Nat) : PsEnvironmentIndex -> Nat -> List PsDeclaration -> PsEnvironmentIndex :=
+  match fuel with
+  | Nat.zero => fun (_index : PsEnvironmentIndex) (_hash : Nat) (declarations : List PsDeclaration) => PsEnvironmentIndex.bucket declarations
+  | Nat.succ remaining =>
+      let smaller : PsEnvironmentIndex -> Nat -> List PsDeclaration -> PsEnvironmentIndex := psEnvironmentIndexSetWorker remaining;
+      fun (index : PsEnvironmentIndex) (hash : Nat) (declarations : List PsDeclaration) =>
+        let left : PsEnvironmentIndex := match index with
+          | PsEnvironmentIndex.branch value _ => value
+          | _ => PsEnvironmentIndex.empty;
+        let right : PsEnvironmentIndex := match index with
+          | PsEnvironmentIndex.branch _ value => value
+          | _ => PsEnvironmentIndex.empty;
+        if Nat.beq (Nat.mod hash 2) 0 then
+          PsEnvironmentIndex.branch (smaller left (Nat.div hash 2) declarations) right
+        else PsEnvironmentIndex.branch left (smaller right (Nat.div hash 2) declarations)
+
 structure PsEnvironment where
   declarations : List PsDeclaration
+  index : PsEnvironmentIndex
 
 def psEnvironmentEmpty : PsEnvironment :=
-  PsEnvironment.mk List.nil
+  PsEnvironment.mk List.nil PsEnvironmentIndex.empty
 
 def psEnvironmentFindInListWorker
     (declarations : List PsDeclaration) :
@@ -75,7 +136,7 @@ def psEnvironmentFindInList
   psEnvironmentFindInListWorker declarations name
 
 def psEnvironmentFind (environment : PsEnvironment) (name : PsName) : Option PsDeclaration :=
-  psEnvironmentFindInList name environment.declarations
+  psEnvironmentFindInList name (psEnvironmentIndexFindWorker 16 environment.index (psEnvironmentNameHash name))
 
 def psEnvironmentFindInductive
     (environment : PsEnvironment)
@@ -124,6 +185,12 @@ def psEnvironmentRemoveName
     List PsDeclaration :=
   psEnvironmentRemoveNameWorker declarations name
 
+def psEnvironmentIndexInsert (index : PsEnvironmentIndex) (declaration : PsDeclaration) : PsEnvironmentIndex :=
+  let name := psDeclarationName declaration;
+  let hash := psEnvironmentNameHash name;
+  let bucket := psEnvironmentIndexFindWorker 16 index hash;
+  psEnvironmentIndexSetWorker 16 index hash (List.cons declaration (psEnvironmentRemoveName name bucket))
+
 def psEnvironmentAddReplacingAxiom
     (environment : PsEnvironment)
     (declaration : PsDeclaration) : Option PsEnvironment :=
@@ -132,7 +199,8 @@ def psEnvironmentAddReplacingAxiom
   | none =>
       Option.some
         (PsEnvironment.mk
-          (List.cons declaration environment.declarations))
+          (List.cons declaration environment.declarations)
+          (psEnvironmentIndexInsert environment.index declaration))
   | some existing =>
       match existing with
       | .axiomDecl _ _ _ =>
@@ -142,7 +210,8 @@ def psEnvironmentAddReplacingAxiom
                 declaration
                 (psEnvironmentRemoveName
                   name
-                  environment.declarations)))
+                  environment.declarations))
+              (psEnvironmentIndexInsert environment.index declaration))
       | _ =>
           Option.none
 
@@ -150,4 +219,5 @@ def psEnvironmentAdd (environment : PsEnvironment) (declaration : PsDeclaration)
   if psEnvironmentContains environment (psDeclarationName declaration) then
     Option.none
   else
-    Option.some (PsEnvironment.mk (List.cons declaration environment.declarations))
+    Option.some (PsEnvironment.mk (List.cons declaration environment.declarations)
+      (psEnvironmentIndexInsert environment.index declaration))

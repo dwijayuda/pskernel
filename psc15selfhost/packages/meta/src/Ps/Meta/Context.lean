@@ -231,10 +231,12 @@ def psMetaInstantiateRounds
 
 def psMetaInstantiate (context : PsMetaContext) (expr : PsExpr) : PsExpr :=
   let value :=
-    psMetaInstantiateRounds
-      context
-      (Nat.add (psMetaAssignmentListLength context.assignments) 1)
-      expr;
+    if psMetaExprHasAssignedVar context expr then
+      psMetaInstantiateRounds
+        context
+        (Nat.add (psMetaAssignmentListLength context.assignments) 1)
+        expr
+    else expr;
   psLevelInstantiateExpr context.levels value
 
 structure PsMetaFreshLevelResult where

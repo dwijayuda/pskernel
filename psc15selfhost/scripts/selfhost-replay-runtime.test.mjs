@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import './native-workspace-isolation.test.mjs';
 import { execFileSync } from 'node:child_process';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { existsSync, realpathSync } from 'node:fs';
@@ -27,7 +28,7 @@ assert.equal(execFileSync(process.execPath, [tsc, '--version'], { encoding: 'utf
 const compiler = path.join(root, '.lake/build/bin', process.platform === 'win32' ? 'psc1.exe' : 'psc1');
 const staging = await mkdtemp(path.join(tmpdir(), 'psc2-replay-runtime-'));
 try {
-  for (const fixture of ['selfhost-nat-recursion', 'selfhost-int-repr', 'selfhost-function-results', 'selfhost-text-position']) {
+  for (const fixture of ['selfhost-nat-recursion', 'selfhost-int-repr', 'selfhost-function-results', 'selfhost-text-position', 'selfhost-count-fold']) {
     const source = execFileSync(compiler, ['typescript', `test/fixtures/${fixture}.lean`], {
       cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 8 * 1024 * 1024,
     });
@@ -37,7 +38,23 @@ try {
       encoding: 'utf8', timeout: 120000,
     });
     const compiled = require(path.join(staging, `${fixture}.js`));
-    if (fixture === 'selfhost-nat-recursion') {
+    if (fixture === 'selfhost-count-fold') {
+      for (const name of ['countRenamed', 'countSuccessor']) {
+        assert(source.includes(`export function ${name}`));
+        assert(!source.includes(`__ps$impl$${name}`), `${name} must use the structural count loop`);
+      }
+      for (const name of ['offsetCount', 'doubleCount', 'headSum'])
+        assert(source.includes(`__ps$impl$${name}`), `${name} must retain its distinct semantics`);
+      for (const count of [0, 1, 31, 20000]) {
+        let values = compiled.List.nil();
+        for (let index = 0; index < count; index++) values = compiled.List.cons(7n, values);
+        assert.equal(compiled.countRenamed(values), BigInt(count));
+        assert.equal(compiled.countSuccessor(values), BigInt(count));
+        assert.equal(compiled.offsetCount(values), BigInt(count + 1));
+        assert.equal(compiled.doubleCount(values), BigInt(count * 2));
+        assert.equal(compiled.headSum(values), BigInt(count * 7));
+      }
+    } else if (fixture === 'selfhost-nat-recursion') {
       for (const n of [0n, 1n, 2n, 8n, 100n]) {
         assert.equal(compiled.replayNatCase(n), n === 0n ? 7n : n - 1n);
         assert.equal(compiled.replayNatSum(n), n * (n + 1n) / 2n);

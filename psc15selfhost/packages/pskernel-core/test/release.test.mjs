@@ -1,0 +1,11 @@
+import test from'node:test';import assert from'node:assert/strict';import fs from'node:fs';
+import{requiredReleaseGates,releaseBlockers}from'../scripts/release-check.mjs';
+import*as api from'@proofscript/pskernel-core';
+const read=f=>JSON.parse(fs.readFileSync(new URL('../'+f,import.meta.url),'utf8'));
+const manifest=read('package.json'),caps=read('manifests/CAPABILITIES.json');
+test('incomplete kernel cannot pass release gate',()=>{const errors=releaseBlockers(manifest,caps,Object.keys(api));assert.ok(errors.includes('NO_CHECKING_API'));assert.ok(errors.includes('PACKAGE_PRIVATE'));for(const gate of requiredReleaseGates)assert.ok(errors.includes('INCOMPLETE_GATE:'+gate));});
+test('changing metadata flags alone cannot enable release',()=>{const errors=releaseBlockers({...manifest,private:false},{...caps,canCheckProofs:true,authoritative:true,status:'release-candidate'},Object.keys(api));assert.ok(errors.includes('NO_CHECKING_API'));assert.ok(errors.some(x=>x.startsWith('INCOMPLETE_GATE:')));});
+test('gate names cannot be replaced by an empty successful array',()=>{const errors=releaseBlockers({...manifest,private:false},{...caps,releaseGates:{}},['checkBundle']);for(const gate of requiredReleaseGates)assert.ok(errors.includes('INCOMPLETE_GATE:'+gate));});
+test('a passed flag without evidence is not a completed gate',()=>{const c={...caps,releaseGates:Object.fromEntries(requiredReleaseGates.map(g=>[g,{status:'passed',evidence:''}]))};for(const gate of requiredReleaseGates)assert.ok(releaseBlockers(manifest,c,[]).includes('INCOMPLETE_GATE:'+gate));});
+test('publishing invokes preflight but installation has no hooks',()=>{assert.equal(manifest.scripts.prepublishOnly,'node scripts/release-check.mjs');for(const h of ['preinstall','install','postinstall','prepare'])assert.equal(manifest.scripts[h],undefined);});
+test('unknown/missing capability states fail closed',()=>{assert.ok(releaseBlockers({}, {}, []).length>requiredReleaseGates.length);});

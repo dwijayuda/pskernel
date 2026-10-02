@@ -3,7 +3,7 @@ export const packageBySection = new Map([
   ["Foundation", "foundation"],
   ["Syntax", "syntax"],
   ["Core", "core"],
-  ["KernelCore", "pskernel-core"],
+  ["Kernel", "pskernel-core"],
   ["Environment", "environment"],
   ["Project", "project"],
   ["Meta", "meta"],

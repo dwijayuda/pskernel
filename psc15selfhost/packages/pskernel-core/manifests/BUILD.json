@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "packageVersion": "0.1.0-checker.0",
+  "sourceManifestSha256": "809a99620fe2875c1932c2a0351424b987721af5c280a0df7f66afa78c5f7c2f",
+  "seedSha256": "eeb3f49197d142a7412cf3658c6138d2d56ec8e721338a804111a7e61ab68a99",
+  "seedSourceCommit": "c680b2016ff8e23bdae2bc102128b1308fb5a324",
+  "typescriptVersion": "5.8.3",
+  "nodeVersion": "v22.16.0",
+  "leanCheck": "PSC2_CHECK: PASS (376 declarations)",
+  "psCheck": "PSC2_CHECK: PASS (376 declarations)",
+  "canonicalPsEmissionParity": true,
+  "generatedOutputEdited": false,
+  "canCheckProofs": false,
+  "outputs": [
+    {
+      "path": "dist/foundation.d.ts",
+      "sha256": "a8cce4ab1b27edb35ded2b0ff1ed9582d73c7a6a1e3de778e75a293d62375a86"
+    },
+    {
+      "path": "dist/foundation.js",
+      "sha256": "bf295a0b06eeca90cb085b3757c463a7adddeab534f8e479597f7be7ce567d2b"
+    },
+    {
+      "path": "dist/foundation.lean",
+      "sha256": "1afb1f150eba615f1ef13af0c1ec1b595950aa08d109edc6af08dc8ef6a4eadb"
+    },
+    {
+      "path": "dist/foundation.ps",
+      "sha256": "12c8fab243ba86ef6517922e4806420cbf93f3a8e799b160393c3bab677a4bfd"
+    },
+    {
+      "path": "dist/foundation.ts",
+      "sha256": "b4d0452e12ec69e69821c3ef75dc23cc255ddbb808dae4170d108d07a634210d"
+    }
+  ]
+}

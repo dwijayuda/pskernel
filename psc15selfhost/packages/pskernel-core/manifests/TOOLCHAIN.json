@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "repository": "dwijayuda/pskernel",
+  "seedSourceCommit": "c680b2016ff8e23bdae2bc102128b1308fb5a324",
+  "artifactId": 11198192443,
+  "artifactSha256": "bde07a8a560d36bb7caacdfdd69aa6ca1d9ccff68eb31bd1d264f4189ab79012",
+  "psc1Sha256": "eeb3f49197d142a7412cf3658c6138d2d56ec8e721338a804111a7e61ab68a99",
+  "leanProviderSha256": "98929458d0b29e6a5bc477f748219252b2d8d71861c8a1973869ed1711992ce0",
+  "typescriptVersion": "5.8.3",
+  "leanVersion": "4.34.0",
+  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "note": "Historical CI artifact used as an explicit build/oracle seed, not a runtime dependency or a claim that the complete integration workflow passed. No automatic download."
+}

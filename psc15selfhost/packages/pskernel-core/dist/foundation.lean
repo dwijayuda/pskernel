@@ -1,0 +1,1735 @@
+/-
+Owned kernel data. No logical admission is implemented here.
+Binary positives have a unique representation: the high end terminates in `one`.
+Consequently identifier numerals never pass through a JavaScript Number.
+-/
+inductive PsKernelPositive where
+  | one
+  | bit0 (high : PsKernelPositive)
+  | bit1 (high : PsKernelPositive)
+
+inductive PsKernelNatural where
+  | zero
+  | positive (value : PsKernelPositive)
+
+/- Raw internal UTF-8 byte sequence. Future ingress must validate byte range and
+UTF-8 well-formedness; structural comparison does not establish either property. -/
+inductive PsKernelText where
+  | empty
+  | byte (value : PsKernelNatural) (rest : PsKernelText)
+
+inductive PsKernelName where
+  | anonymous
+  | str (parent : PsKernelName) (value : PsKernelText)
+  | num (parent : PsKernelName) (value : PsKernelNatural)
+
+/- Metavariables deliberately have no representation in this closed-core model. -/
+inductive PsKernelLevel where
+  | zero
+  | succ (value : PsKernelLevel)
+  | max (left : PsKernelLevel) (right : PsKernelLevel)
+  | imax (left : PsKernelLevel) (right : PsKernelLevel)
+  | param (name : PsKernelName)
+
+inductive PsKernelList (a : Type) where
+  | nil
+  | cons (head : a) (tail : PsKernelList a)
+
+/- Exhaustion is not a successful equality result or a proof of inequality. -/
+inductive PsKernelCompareResult where
+  | outOfFuel
+  | equal
+  | different
+
+inductive PsKernelCompareTask where
+  | positive (left : PsKernelPositive) (right : PsKernelPositive)
+  | natural (left : PsKernelNatural) (right : PsKernelNatural)
+  | name (left : PsKernelName) (right : PsKernelName)
+  | text (left : PsKernelText) (right : PsKernelText)
+  | level (left : PsKernelLevel) (right : PsKernelLevel)
+
+/- An owned, finite work budget; avoids relying on a seed's Nat recursor lowering. -/
+inductive PsKernelFuel where
+  | stop
+  | more (remaining : PsKernelFuel)
+
+/- Owned branch flag. Seed Bool/ite are opaque logical prelude assumptions; use
+this inductive for kernel computation instead of a host-only conditional. -/
+inductive PsKernelFlag where
+  | no
+  | yes
+
+
+
+/-
+An explicit work list shares one fuel counter across ALL children and name/text
+comparisons. Fuel bounds tasks, not elapsed time, allocation, or host stack use.
+This is structural comparison only. It is NOT universe equivalence or conversion.
+-/
+def psKernelCompareTasks
+    (fuel : PsKernelFuel) :
+    PsKernelList PsKernelCompareTask -> PsKernelCompareResult :=
+  match fuel with
+  | PsKernelFuel.stop =>
+      fun (tasks : PsKernelList PsKernelCompareTask) =>
+        match tasks with
+        | PsKernelList.nil => PsKernelCompareResult.equal
+        | PsKernelList.cons unusedHead unusedTail => PsKernelCompareResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      let smaller : PsKernelList PsKernelCompareTask -> PsKernelCompareResult :=
+        psKernelCompareTasks remaining;
+      fun (tasks : PsKernelList PsKernelCompareTask) =>
+        match tasks with
+        | PsKernelList.nil => PsKernelCompareResult.equal
+        | PsKernelList.cons task rest =>
+            match task with
+            | PsKernelCompareTask.positive left right =>
+                match left with
+                | PsKernelPositive.one =>
+                    match right with
+                    | PsKernelPositive.one => smaller rest
+                    | _ => PsKernelCompareResult.different
+                | PsKernelPositive.bit0 leftHigh =>
+                    match right with
+                    | PsKernelPositive.bit0 rightHigh =>
+                        smaller
+                          (PsKernelList.cons (PsKernelCompareTask.positive leftHigh rightHigh) rest)
+                    | _ => PsKernelCompareResult.different
+                | PsKernelPositive.bit1 leftHigh =>
+                    match right with
+                    | PsKernelPositive.bit1 rightHigh =>
+                        smaller
+                          (PsKernelList.cons (PsKernelCompareTask.positive leftHigh rightHigh) rest)
+                    | _ => PsKernelCompareResult.different
+            | PsKernelCompareTask.natural left right =>
+                match left with
+                | PsKernelNatural.zero =>
+                    match right with
+                    | PsKernelNatural.zero => smaller rest
+                    | _ => PsKernelCompareResult.different
+                | PsKernelNatural.positive leftValue =>
+                    match right with
+                    | PsKernelNatural.positive rightValue =>
+                        smaller
+                          (PsKernelList.cons (PsKernelCompareTask.positive leftValue rightValue) rest)
+                    | _ => PsKernelCompareResult.different
+            | PsKernelCompareTask.name left right =>
+                match left with
+                | PsKernelName.anonymous =>
+                    match right with
+                    | PsKernelName.anonymous => smaller rest
+                    | _ => PsKernelCompareResult.different
+                | PsKernelName.str leftParent leftValue =>
+                    match right with
+                    | PsKernelName.str rightParent rightValue =>
+                        smaller
+                          (PsKernelList.cons (PsKernelCompareTask.name leftParent rightParent)
+                            (PsKernelList.cons (PsKernelCompareTask.text leftValue rightValue) rest))
+                    | _ => PsKernelCompareResult.different
+                | PsKernelName.num leftParent leftValue =>
+                    match right with
+                    | PsKernelName.num rightParent rightValue =>
+                        smaller
+                          (PsKernelList.cons (PsKernelCompareTask.name leftParent rightParent)
+                            (PsKernelList.cons (PsKernelCompareTask.natural leftValue rightValue) rest))
+                    | _ => PsKernelCompareResult.different
+            | PsKernelCompareTask.text left right =>
+                match left with
+                | PsKernelText.empty =>
+                    match right with
+                    | PsKernelText.empty => smaller rest
+                    | _ => PsKernelCompareResult.different
+                | PsKernelText.byte leftByte leftRest =>
+                    match right with
+                    | PsKernelText.empty => PsKernelCompareResult.different
+                    | PsKernelText.byte rightByte rightRest =>
+                        smaller
+                          (PsKernelList.cons (PsKernelCompareTask.natural leftByte rightByte)
+                            (PsKernelList.cons (PsKernelCompareTask.text leftRest rightRest) rest))
+            | PsKernelCompareTask.level left right =>
+                match left with
+                | PsKernelLevel.zero =>
+                    match right with
+                    | PsKernelLevel.zero => smaller rest
+                    | _ => PsKernelCompareResult.different
+                | PsKernelLevel.succ leftValue =>
+                    match right with
+                    | PsKernelLevel.succ rightValue =>
+                        smaller
+                          (PsKernelList.cons (PsKernelCompareTask.level leftValue rightValue) rest)
+                    | _ => PsKernelCompareResult.different
+                | PsKernelLevel.max leftA leftB =>
+                    match right with
+                    | PsKernelLevel.max rightA rightB =>
+                        smaller
+                          (PsKernelList.cons (PsKernelCompareTask.level leftA rightA)
+                            (PsKernelList.cons (PsKernelCompareTask.level leftB rightB) rest))
+                    | _ => PsKernelCompareResult.different
+                | PsKernelLevel.imax leftA leftB =>
+                    match right with
+                    | PsKernelLevel.imax rightA rightB =>
+                        smaller
+                          (PsKernelList.cons (PsKernelCompareTask.level leftA rightA)
+                            (PsKernelList.cons (PsKernelCompareTask.level leftB rightB) rest))
+                    | _ => PsKernelCompareResult.different
+                | PsKernelLevel.param leftName =>
+                    match right with
+                    | PsKernelLevel.param rightName =>
+                        smaller
+                          (PsKernelList.cons (PsKernelCompareTask.name leftName rightName) rest)
+                    | _ => PsKernelCompareResult.different
+
+
+
+
+/- Exact binary arithmetic. Multi-input operations are first-order machines so
+all bit work is charged to the enclosing driver; no host floating-point numbers. -/
+inductive PsKernelOrder where
+  | less
+  | same
+  | greater
+
+def psKernelPositiveSucc (value : PsKernelPositive) : PsKernelPositive :=
+  match value with
+  | PsKernelPositive.one => PsKernelPositive.bit0 PsKernelPositive.one
+  | PsKernelPositive.bit0 high => PsKernelPositive.bit1 high
+  | PsKernelPositive.bit1 high => PsKernelPositive.bit0 (psKernelPositiveSucc high)
+
+def psKernelNaturalSucc (value : PsKernelNatural) : PsKernelNatural :=
+  match value with
+  | PsKernelNatural.zero => PsKernelNatural.positive PsKernelPositive.one
+  | PsKernelNatural.positive high => PsKernelNatural.positive (psKernelPositiveSucc high)
+
+def psKernelPositivePred (value : PsKernelPositive) : PsKernelNatural :=
+  match value with
+  | PsKernelPositive.one => PsKernelNatural.zero
+  | PsKernelPositive.bit1 high => PsKernelNatural.positive (PsKernelPositive.bit0 high)
+  | PsKernelPositive.bit0 high =>
+      match psKernelPositivePred high with
+      | PsKernelNatural.zero => PsKernelNatural.positive PsKernelPositive.one
+      | PsKernelNatural.positive rest => PsKernelNatural.positive (PsKernelPositive.bit1 rest)
+
+def psKernelNaturalPred (value : PsKernelNatural) : PsKernelNatural :=
+  match value with
+  | PsKernelNatural.zero => PsKernelNatural.zero
+  | PsKernelNatural.positive high => psKernelPositivePred high
+
+inductive PsKernelBit where
+  | zero
+  | one
+
+inductive PsKernelDigit where
+  | digit (low : PsKernelBit) (high : PsKernelNatural)
+
+inductive PsKernelNumericState where
+  | order (left : PsKernelNatural) (right : PsKernelNatural) (lower : PsKernelOrder)
+  | add (left : PsKernelNatural) (right : PsKernelNatural) (carry : PsKernelBit) (bits : PsKernelList PsKernelBit)
+  | rebuild (bits : PsKernelList PsKernelBit) (value : PsKernelNatural)
+
+inductive PsKernelNumericStep where
+  | next (state : PsKernelNumericState)
+  | ordered (order : PsKernelOrder)
+  | sum (value : PsKernelNatural)
+
+def psKernelNaturalDigit (value : PsKernelNatural) : PsKernelDigit :=
+  match value with
+  | PsKernelNatural.zero => PsKernelDigit.digit PsKernelBit.zero PsKernelNatural.zero
+  | PsKernelNatural.positive positive =>
+      match positive with
+      | PsKernelPositive.one => PsKernelDigit.digit PsKernelBit.one PsKernelNatural.zero
+      | PsKernelPositive.bit0 high => PsKernelDigit.digit PsKernelBit.zero (PsKernelNatural.positive high)
+      | PsKernelPositive.bit1 high => PsKernelDigit.digit PsKernelBit.one (PsKernelNatural.positive high)
+
+def psKernelNaturalDoubleBit (value : PsKernelNatural) (bit : PsKernelBit) : PsKernelNatural :=
+  match value with
+  | PsKernelNatural.zero =>
+      match bit with
+      | PsKernelBit.zero => PsKernelNatural.zero
+      | PsKernelBit.one => PsKernelNatural.positive PsKernelPositive.one
+  | PsKernelNatural.positive high =>
+      match bit with
+      | PsKernelBit.zero => PsKernelNatural.positive (PsKernelPositive.bit0 high)
+      | PsKernelBit.one => PsKernelNatural.positive (PsKernelPositive.bit1 high)
+
+def psKernelNumericAddContinue
+    (left right : PsKernelNatural) (carry bit : PsKernelBit)
+    (bits : PsKernelList PsKernelBit) : PsKernelNumericStep :=
+  PsKernelNumericStep.next (PsKernelNumericState.add left right carry (PsKernelList.cons bit bits))
+
+def psKernelNumericAddDigits
+    (left right : PsKernelNatural) (a b carry : PsKernelBit)
+    (bits : PsKernelList PsKernelBit) : PsKernelNumericStep :=
+  match a with
+  | PsKernelBit.zero =>
+      match b with
+      | PsKernelBit.zero => psKernelNumericAddContinue left right PsKernelBit.zero carry bits
+      | PsKernelBit.one =>
+          match carry with
+          | PsKernelBit.zero => psKernelNumericAddContinue left right PsKernelBit.zero PsKernelBit.one bits
+          | PsKernelBit.one => psKernelNumericAddContinue left right PsKernelBit.one PsKernelBit.zero bits
+  | PsKernelBit.one =>
+      match b with
+      | PsKernelBit.one => psKernelNumericAddContinue left right PsKernelBit.one carry bits
+      | PsKernelBit.zero =>
+          match carry with
+          | PsKernelBit.zero => psKernelNumericAddContinue left right PsKernelBit.zero PsKernelBit.one bits
+          | PsKernelBit.one => psKernelNumericAddContinue left right PsKernelBit.one PsKernelBit.zero bits
+
+def psKernelNumericStep (state : PsKernelNumericState) : PsKernelNumericStep :=
+  match state with
+  | PsKernelNumericState.order left right lower =>
+      match left with
+      | PsKernelNatural.zero =>
+          match right with
+          | PsKernelNatural.zero => PsKernelNumericStep.ordered lower
+          | _ => PsKernelNumericStep.ordered PsKernelOrder.less
+      | PsKernelNatural.positive unusedLeft =>
+          match right with
+          | PsKernelNatural.zero => PsKernelNumericStep.ordered PsKernelOrder.greater
+          | PsKernelNatural.positive unusedRight =>
+              match psKernelNaturalDigit left with
+              | PsKernelDigit.digit a leftHigh =>
+                  match psKernelNaturalDigit right with
+                  | PsKernelDigit.digit b rightHigh =>
+                      let nextOrder : PsKernelOrder :=
+                        match a with
+                        | PsKernelBit.zero =>
+                            match b with
+                            | PsKernelBit.zero => lower
+                            | PsKernelBit.one => PsKernelOrder.less
+                        | PsKernelBit.one =>
+                            match b with
+                            | PsKernelBit.zero => PsKernelOrder.greater
+                            | PsKernelBit.one => lower;
+                      PsKernelNumericStep.next (PsKernelNumericState.order leftHigh rightHigh nextOrder)
+  | PsKernelNumericState.add left right carry bits =>
+      match psKernelNaturalDigit left with
+      | PsKernelDigit.digit a leftHigh =>
+          match psKernelNaturalDigit right with
+          | PsKernelDigit.digit b rightHigh =>
+              let allZero : PsKernelFlag :=
+                match left with
+                | PsKernelNatural.zero =>
+                    match right with
+                    | PsKernelNatural.zero =>
+                        match carry with
+                        | PsKernelBit.zero => PsKernelFlag.yes
+                        | PsKernelBit.one => PsKernelFlag.no
+                    | _ => PsKernelFlag.no
+                | _ => PsKernelFlag.no;
+              match allZero with
+              | PsKernelFlag.yes => PsKernelNumericStep.next (PsKernelNumericState.rebuild bits PsKernelNatural.zero)
+              | PsKernelFlag.no => psKernelNumericAddDigits leftHigh rightHigh a b carry bits
+  | PsKernelNumericState.rebuild bits value =>
+      match bits with
+      | PsKernelList.nil => PsKernelNumericStep.sum value
+      | PsKernelList.cons bit rest =>
+          PsKernelNumericStep.next (PsKernelNumericState.rebuild rest (psKernelNaturalDoubleBit value bit))
+
+inductive PsKernelNumericResult where
+  | outOfFuel
+  | ordered (order : PsKernelOrder)
+  | sum (value : PsKernelNatural)
+
+def psKernelNumericRun (fuel : PsKernelFuel) : PsKernelNumericState -> PsKernelNumericResult :=
+  match fuel with
+  | PsKernelFuel.stop =>
+      fun (state : PsKernelNumericState) => PsKernelNumericResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      fun (state : PsKernelNumericState) =>
+        match psKernelNumericStep state with
+        | PsKernelNumericStep.ordered order => PsKernelNumericResult.ordered order
+        | PsKernelNumericStep.sum value => PsKernelNumericResult.sum value
+        | PsKernelNumericStep.next next =>
+            let smaller : PsKernelNumericState -> PsKernelNumericResult := psKernelNumericRun remaining;
+            smaller next
+
+
+
+/- Owned expressions. fvars are internal; closed admission will reject them.
+No metavariables, metadata authority, or caller-provided reduction rules. -/
+inductive PsKernelBinder where
+  | explicit
+  | implicit
+  | strictImplicit
+  | instanceImplicit
+
+inductive PsKernelLiteral where
+  | natural (value : PsKernelNatural)
+  | text (value : PsKernelText)
+
+inductive PsKernelExpr where
+  | bvar (index : PsKernelNatural)
+  | fvar (id : PsKernelNatural)
+  | sortE (level : PsKernelLevel)
+  | constE (name : PsKernelName) (levels : PsKernelList PsKernelLevel)
+  | app (fn : PsKernelExpr) (arg : PsKernelExpr)
+  | lam (name : PsKernelName) (type : PsKernelExpr) (body : PsKernelExpr) (binder : PsKernelBinder)
+  | forallE (name : PsKernelName) (type : PsKernelExpr) (body : PsKernelExpr) (binder : PsKernelBinder)
+  | letE (name : PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr) (body : PsKernelExpr)
+  | lit (value : PsKernelLiteral)
+  | proj (family : PsKernelName) (index : PsKernelNatural) (value : PsKernelExpr)
+
+inductive PsKernelBindingMode where
+  | lift (amount : PsKernelNatural)
+  | instantiate (replacement : PsKernelExpr)
+  | abstract (id : PsKernelNatural)
+  | closed
+
+inductive PsKernelBindingTask where
+  | visit (mode : PsKernelBindingMode) (depth : PsKernelNatural) (value : PsKernelExpr)
+  | orderIndex (mode : PsKernelBindingMode) (depth : PsKernelNatural) (index : PsKernelNatural) (state : PsKernelNumericState)
+  | orderFree (depth : PsKernelNatural) (id : PsKernelNatural) (state : PsKernelNumericState)
+  | sumIndex (state : PsKernelNumericState)
+  | app
+  | lam (name : PsKernelName) (binder : PsKernelBinder)
+  | forallE (name : PsKernelName) (binder : PsKernelBinder)
+  | letE (name : PsKernelName)
+  | proj (family : PsKernelName) (index : PsKernelNatural)
+
+inductive PsKernelBindingState where
+  | state (tasks : PsKernelList PsKernelBindingTask) (values : PsKernelList PsKernelExpr)
+
+inductive PsKernelBindingResult where
+  | outOfFuel
+  | invalidState
+  | invalidScope
+  | done (value : PsKernelExpr)
+
+inductive PsKernelBindingStep where
+  | next (state : PsKernelBindingState)
+  | final (result : PsKernelBindingResult)
+
+
+
+/- First-order traversal with a shared task budget. Abstraction follows Lean's
+fvar abstraction: existing bound variables are not shifted. Scope checking here
+covers variables, NOT typing, universe parameters or literal/primitive validity. -/
+def psKernelBindingPush
+    (tasks : PsKernelList PsKernelBindingTask) (values : PsKernelList PsKernelExpr)
+    (value : PsKernelExpr) : PsKernelBindingStep :=
+  PsKernelBindingStep.next (PsKernelBindingState.state tasks (PsKernelList.cons value values))
+
+def psKernelBindingAfterOrder
+    (mode : PsKernelBindingMode) (depth index : PsKernelNatural) (order : PsKernelOrder)
+    (tasks : PsKernelList PsKernelBindingTask) (values : PsKernelList PsKernelExpr) : PsKernelBindingStep :=
+  match mode with
+  | PsKernelBindingMode.lift amount =>
+      match order with
+      | PsKernelOrder.less => psKernelBindingPush tasks values (PsKernelExpr.bvar index)
+      | _ =>
+          PsKernelBindingStep.next (PsKernelBindingState.state
+            (PsKernelList.cons (PsKernelBindingTask.sumIndex
+              (PsKernelNumericState.add index amount PsKernelBit.zero PsKernelList.nil)) tasks) values)
+  | PsKernelBindingMode.instantiate replacement =>
+      match order with
+      | PsKernelOrder.less => psKernelBindingPush tasks values (PsKernelExpr.bvar index)
+      | PsKernelOrder.greater => psKernelBindingPush tasks values (PsKernelExpr.bvar (psKernelNaturalPred index))
+      | PsKernelOrder.same =>
+          PsKernelBindingStep.next (PsKernelBindingState.state
+            (PsKernelList.cons (PsKernelBindingTask.visit
+              (PsKernelBindingMode.lift depth) PsKernelNatural.zero replacement) tasks) values)
+  | PsKernelBindingMode.abstract unusedId => psKernelBindingPush tasks values (PsKernelExpr.bvar index)
+  | PsKernelBindingMode.closed =>
+      match order with
+      | PsKernelOrder.less => psKernelBindingPush tasks values (PsKernelExpr.bvar index)
+      | _ => PsKernelBindingStep.final PsKernelBindingResult.invalidScope
+
+def psKernelBindingVisit
+    (mode : PsKernelBindingMode) (depth : PsKernelNatural) (value : PsKernelExpr)
+    (tasks : PsKernelList PsKernelBindingTask) (values : PsKernelList PsKernelExpr) : PsKernelBindingStep :=
+  match value with
+  | PsKernelExpr.bvar index =>
+      match mode with
+      | PsKernelBindingMode.abstract unusedId => psKernelBindingPush tasks values value
+      | _ =>
+          PsKernelBindingStep.next (PsKernelBindingState.state
+            (PsKernelList.cons (PsKernelBindingTask.orderIndex mode depth index
+              (PsKernelNumericState.order index depth PsKernelOrder.same)) tasks) values)
+  | PsKernelExpr.fvar id =>
+      match mode with
+      | PsKernelBindingMode.closed => PsKernelBindingStep.final PsKernelBindingResult.invalidScope
+      | PsKernelBindingMode.abstract target =>
+          PsKernelBindingStep.next (PsKernelBindingState.state
+            (PsKernelList.cons (PsKernelBindingTask.orderFree depth id
+              (PsKernelNumericState.order id target PsKernelOrder.same)) tasks) values)
+      | _ => psKernelBindingPush tasks values value
+  | PsKernelExpr.sortE unused => psKernelBindingPush tasks values value
+  | PsKernelExpr.constE unusedName unusedLevels => psKernelBindingPush tasks values value
+  | PsKernelExpr.lit unused => psKernelBindingPush tasks values value
+  | PsKernelExpr.app fn arg =>
+      PsKernelBindingStep.next (PsKernelBindingState.state
+        (PsKernelList.cons (PsKernelBindingTask.visit mode depth fn)
+          (PsKernelList.cons (PsKernelBindingTask.visit mode depth arg)
+            (PsKernelList.cons PsKernelBindingTask.app tasks))) values)
+  | PsKernelExpr.lam name type body binder =>
+      PsKernelBindingStep.next (PsKernelBindingState.state
+        (PsKernelList.cons (PsKernelBindingTask.visit mode depth type)
+          (PsKernelList.cons (PsKernelBindingTask.visit mode (psKernelNaturalSucc depth) body)
+            (PsKernelList.cons (PsKernelBindingTask.lam name binder) tasks))) values)
+  | PsKernelExpr.forallE name type body binder =>
+      PsKernelBindingStep.next (PsKernelBindingState.state
+        (PsKernelList.cons (PsKernelBindingTask.visit mode depth type)
+          (PsKernelList.cons (PsKernelBindingTask.visit mode (psKernelNaturalSucc depth) body)
+            (PsKernelList.cons (PsKernelBindingTask.forallE name binder) tasks))) values)
+  | PsKernelExpr.letE name type val body =>
+      PsKernelBindingStep.next (PsKernelBindingState.state
+        (PsKernelList.cons (PsKernelBindingTask.visit mode depth type)
+          (PsKernelList.cons (PsKernelBindingTask.visit mode depth val)
+            (PsKernelList.cons (PsKernelBindingTask.visit mode (psKernelNaturalSucc depth) body)
+              (PsKernelList.cons (PsKernelBindingTask.letE name) tasks)))) values)
+  | PsKernelExpr.proj family index target =>
+      PsKernelBindingStep.next (PsKernelBindingState.state
+        (PsKernelList.cons (PsKernelBindingTask.visit mode depth target)
+          (PsKernelList.cons (PsKernelBindingTask.proj family index) tasks)) values)
+
+def psKernelBindingRebuild
+    (task : PsKernelBindingTask) (tasks : PsKernelList PsKernelBindingTask)
+    (values : PsKernelList PsKernelExpr) : PsKernelBindingStep :=
+  match values with
+  | PsKernelList.nil => PsKernelBindingStep.final PsKernelBindingResult.invalidState
+  | PsKernelList.cons top rest =>
+      match task with
+      | PsKernelBindingTask.proj family index => psKernelBindingPush tasks rest (PsKernelExpr.proj family index top)
+      | PsKernelBindingTask.app =>
+          match rest with
+          | PsKernelList.nil => PsKernelBindingStep.final PsKernelBindingResult.invalidState
+          | PsKernelList.cons fn tail => psKernelBindingPush tasks tail (PsKernelExpr.app fn top)
+      | PsKernelBindingTask.lam name binder =>
+          match rest with
+          | PsKernelList.nil => PsKernelBindingStep.final PsKernelBindingResult.invalidState
+          | PsKernelList.cons type tail => psKernelBindingPush tasks tail (PsKernelExpr.lam name type top binder)
+      | PsKernelBindingTask.forallE name binder =>
+          match rest with
+          | PsKernelList.nil => PsKernelBindingStep.final PsKernelBindingResult.invalidState
+          | PsKernelList.cons type tail => psKernelBindingPush tasks tail (PsKernelExpr.forallE name type top binder)
+      | PsKernelBindingTask.letE name =>
+          match rest with
+          | PsKernelList.nil => PsKernelBindingStep.final PsKernelBindingResult.invalidState
+          | PsKernelList.cons val tail =>
+              match tail with
+              | PsKernelList.nil => PsKernelBindingStep.final PsKernelBindingResult.invalidState
+              | PsKernelList.cons type remaining => psKernelBindingPush tasks remaining (PsKernelExpr.letE name type val top)
+      | _ => PsKernelBindingStep.final PsKernelBindingResult.invalidState
+
+def psKernelBindingFinish (values : PsKernelList PsKernelExpr) : PsKernelBindingResult :=
+  match values with
+  | PsKernelList.nil => PsKernelBindingResult.invalidState
+  | PsKernelList.cons value rest =>
+      match rest with
+      | PsKernelList.nil => PsKernelBindingResult.done value
+      | _ => PsKernelBindingResult.invalidState
+
+def psKernelBindingStep (state : PsKernelBindingState) : PsKernelBindingStep :=
+  match state with
+  | PsKernelBindingState.state tasks values =>
+      match tasks with
+      | PsKernelList.nil => PsKernelBindingStep.final (psKernelBindingFinish values)
+      | PsKernelList.cons task rest =>
+          match task with
+          | PsKernelBindingTask.visit mode depth value => psKernelBindingVisit mode depth value rest values
+          | PsKernelBindingTask.orderIndex mode depth index numeric =>
+              match psKernelNumericStep numeric with
+              | PsKernelNumericStep.next next =>
+                  PsKernelBindingStep.next (PsKernelBindingState.state
+                    (PsKernelList.cons (PsKernelBindingTask.orderIndex mode depth index next) rest) values)
+              | PsKernelNumericStep.ordered order => psKernelBindingAfterOrder mode depth index order rest values
+              | _ => PsKernelBindingStep.final PsKernelBindingResult.invalidState
+          | PsKernelBindingTask.orderFree depth id numeric =>
+              match psKernelNumericStep numeric with
+              | PsKernelNumericStep.next next =>
+                  PsKernelBindingStep.next (PsKernelBindingState.state
+                    (PsKernelList.cons (PsKernelBindingTask.orderFree depth id next) rest) values)
+              | PsKernelNumericStep.ordered order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelBindingPush rest values (PsKernelExpr.bvar depth)
+                  | _ => psKernelBindingPush rest values (PsKernelExpr.fvar id)
+              | _ => PsKernelBindingStep.final PsKernelBindingResult.invalidState
+          | PsKernelBindingTask.sumIndex numeric =>
+              match psKernelNumericStep numeric with
+              | PsKernelNumericStep.next next =>
+                  PsKernelBindingStep.next (PsKernelBindingState.state
+                    (PsKernelList.cons (PsKernelBindingTask.sumIndex next) rest) values)
+              | PsKernelNumericStep.sum index => psKernelBindingPush rest values (PsKernelExpr.bvar index)
+              | _ => PsKernelBindingStep.final PsKernelBindingResult.invalidState
+          | _ => psKernelBindingRebuild task rest values
+
+def psKernelBindingStart
+    (mode : PsKernelBindingMode) (depth : PsKernelNatural) (value : PsKernelExpr) : PsKernelBindingState :=
+  PsKernelBindingState.state (PsKernelList.cons (PsKernelBindingTask.visit mode depth value) PsKernelList.nil) PsKernelList.nil
+
+def psKernelBindingRun (fuel : PsKernelFuel) : PsKernelBindingState -> PsKernelBindingResult :=
+  match fuel with
+  | PsKernelFuel.stop =>
+      fun (state : PsKernelBindingState) =>
+        match state with
+        | PsKernelBindingState.state tasks values =>
+            match tasks with
+            | PsKernelList.nil => psKernelBindingFinish values
+            | _ => PsKernelBindingResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      fun (state : PsKernelBindingState) =>
+        match psKernelBindingStep state with
+        | PsKernelBindingStep.final result => result
+        | PsKernelBindingStep.next next =>
+            let smaller : PsKernelBindingState -> PsKernelBindingResult := psKernelBindingRun remaining;
+            smaller next
+
+
+
+/- Internal total structural order, not Lean's name-hash ordering API. -/
+inductive PsKernelOrderTask where
+  | name (left : PsKernelName) (right : PsKernelName)
+  | text (left : PsKernelText) (right : PsKernelText)
+  | level (left : PsKernelLevel) (right : PsKernelLevel)
+  | number (state : PsKernelNumericState)
+
+inductive PsKernelOrderStep where
+  | next (tasks : PsKernelList PsKernelOrderTask)
+  | done (order : PsKernelOrder)
+  | invalidState
+
+def psKernelOrderStep (tasks : PsKernelList PsKernelOrderTask) : PsKernelOrderStep :=
+  match tasks with
+  | PsKernelList.nil => PsKernelOrderStep.done PsKernelOrder.same
+  | PsKernelList.cons task rest =>
+      match task with
+      | PsKernelOrderTask.number state =>
+          match psKernelNumericStep state with
+          | PsKernelNumericStep.next next =>
+              PsKernelOrderStep.next (PsKernelList.cons (PsKernelOrderTask.number next) rest)
+          | PsKernelNumericStep.ordered order =>
+              match order with
+              | PsKernelOrder.same => PsKernelOrderStep.next rest
+              | PsKernelOrder.less => PsKernelOrderStep.done PsKernelOrder.less
+              | PsKernelOrder.greater => PsKernelOrderStep.done PsKernelOrder.greater
+          | _ => PsKernelOrderStep.invalidState
+      | PsKernelOrderTask.name left right =>
+          match left with
+          | PsKernelName.anonymous =>
+              match right with
+              | PsKernelName.anonymous => PsKernelOrderStep.next rest
+              | PsKernelName.str rParent rValue => PsKernelOrderStep.done PsKernelOrder.less
+              | PsKernelName.num rParent rValue => PsKernelOrderStep.done PsKernelOrder.less
+          | PsKernelName.str lParent lValue =>
+              match right with
+              | PsKernelName.anonymous => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelName.str rParent rValue => PsKernelOrderStep.next (PsKernelList.cons (PsKernelOrderTask.name lParent rParent) (PsKernelList.cons (PsKernelOrderTask.text lValue rValue) rest))
+              | PsKernelName.num rParent rValue => PsKernelOrderStep.done PsKernelOrder.less
+          | PsKernelName.num lParent lValue =>
+              match right with
+              | PsKernelName.anonymous => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelName.str rParent rValue => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelName.num rParent rValue => PsKernelOrderStep.next (PsKernelList.cons (PsKernelOrderTask.name lParent rParent) (PsKernelList.cons (PsKernelOrderTask.number (PsKernelNumericState.order lValue rValue PsKernelOrder.same)) rest))
+      | PsKernelOrderTask.level left right =>
+          match left with
+          | PsKernelLevel.zero =>
+              match right with
+              | PsKernelLevel.zero => PsKernelOrderStep.next rest
+              | PsKernelLevel.succ rValue => PsKernelOrderStep.done PsKernelOrder.less
+              | PsKernelLevel.max rLeft rRight => PsKernelOrderStep.done PsKernelOrder.less
+              | PsKernelLevel.imax rLeft rRight => PsKernelOrderStep.done PsKernelOrder.less
+              | PsKernelLevel.param rName => PsKernelOrderStep.done PsKernelOrder.less
+          | PsKernelLevel.succ lValue =>
+              match right with
+              | PsKernelLevel.zero => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelLevel.succ rValue => PsKernelOrderStep.next (PsKernelList.cons (PsKernelOrderTask.level lValue rValue) rest)
+              | PsKernelLevel.max rLeft rRight => PsKernelOrderStep.done PsKernelOrder.less
+              | PsKernelLevel.imax rLeft rRight => PsKernelOrderStep.done PsKernelOrder.less
+              | PsKernelLevel.param rName => PsKernelOrderStep.done PsKernelOrder.less
+          | PsKernelLevel.max lLeft lRight =>
+              match right with
+              | PsKernelLevel.zero => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelLevel.succ rValue => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelLevel.max rLeft rRight => PsKernelOrderStep.next (PsKernelList.cons (PsKernelOrderTask.level lLeft rLeft) (PsKernelList.cons (PsKernelOrderTask.level lRight rRight) rest))
+              | PsKernelLevel.imax rLeft rRight => PsKernelOrderStep.done PsKernelOrder.less
+              | PsKernelLevel.param rName => PsKernelOrderStep.done PsKernelOrder.less
+          | PsKernelLevel.imax lLeft lRight =>
+              match right with
+              | PsKernelLevel.zero => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelLevel.succ rValue => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelLevel.max rLeft rRight => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelLevel.imax rLeft rRight => PsKernelOrderStep.next (PsKernelList.cons (PsKernelOrderTask.level lLeft rLeft) (PsKernelList.cons (PsKernelOrderTask.level lRight rRight) rest))
+              | PsKernelLevel.param rName => PsKernelOrderStep.done PsKernelOrder.less
+          | PsKernelLevel.param lName =>
+              match right with
+              | PsKernelLevel.zero => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelLevel.succ rValue => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelLevel.max rLeft rRight => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelLevel.imax rLeft rRight => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelLevel.param rName => PsKernelOrderStep.next (PsKernelList.cons (PsKernelOrderTask.name lName rName) rest)
+      | PsKernelOrderTask.text left right =>
+          match left with
+          | PsKernelText.empty =>
+              match right with
+              | PsKernelText.empty => PsKernelOrderStep.next rest
+              | PsKernelText.byte rValue rRest => PsKernelOrderStep.done PsKernelOrder.less
+          | PsKernelText.byte lValue lRest =>
+              match right with
+              | PsKernelText.empty => PsKernelOrderStep.done PsKernelOrder.greater
+              | PsKernelText.byte rValue rRest => PsKernelOrderStep.next (PsKernelList.cons (PsKernelOrderTask.number (PsKernelNumericState.order lValue rValue PsKernelOrder.same)) (PsKernelList.cons (PsKernelOrderTask.text lRest rRest) rest))
+
+
+
+/- Normalization implementation studied against Lean 4.34 kernel/level.cpp.
+Internal canonical ordering differs from Lean name ordering. Compatibility must
+be measured, not inferred from these rules. Helpers require bounded-depth input.
+Native evaluation and complete universe-algebra solving are not implemented. -/
+inductive PsKernelLevelOffset where
+  | parts (base : PsKernelLevel) (count : PsKernelNatural)
+
+def psKernelLevelOffset (value : PsKernelLevel) : PsKernelLevelOffset :=
+  match value with
+  | PsKernelLevel.succ child =>
+      match psKernelLevelOffset child with
+      | PsKernelLevelOffset.parts base count => PsKernelLevelOffset.parts base (psKernelNaturalSucc count)
+  | PsKernelLevel.zero => PsKernelLevelOffset.parts PsKernelLevel.zero PsKernelNatural.zero
+  | PsKernelLevel.param name => PsKernelLevelOffset.parts (PsKernelLevel.param name) PsKernelNatural.zero
+  | PsKernelLevel.max left right => PsKernelLevelOffset.parts (PsKernelLevel.max left right) PsKernelNatural.zero
+  | PsKernelLevel.imax left right => PsKernelLevelOffset.parts (PsKernelLevel.imax left right) PsKernelNatural.zero
+
+def psKernelLevelNeverZero (value : PsKernelLevel) : PsKernelFlag :=
+  match value with
+  | PsKernelLevel.zero => PsKernelFlag.no
+  | PsKernelLevel.param name => PsKernelFlag.no
+  | PsKernelLevel.succ child => PsKernelFlag.yes
+  | PsKernelLevel.max left right =>
+      match psKernelLevelNeverZero left with
+      | PsKernelFlag.yes => PsKernelFlag.yes
+      | PsKernelFlag.no => psKernelLevelNeverZero right
+  | PsKernelLevel.imax left right => psKernelLevelNeverZero right
+
+def psKernelLevelAlwaysZero (value : PsKernelLevel) : PsKernelFlag :=
+  match value with
+  | PsKernelLevel.zero => PsKernelFlag.yes
+  | PsKernelLevel.param name => PsKernelFlag.no
+  | PsKernelLevel.succ child => PsKernelFlag.no
+  | PsKernelLevel.max left right =>
+      match psKernelLevelAlwaysZero left with
+      | PsKernelFlag.yes => psKernelLevelAlwaysZero right
+      | PsKernelFlag.no => PsKernelFlag.no
+  | PsKernelLevel.imax left right => psKernelLevelAlwaysZero right
+
+inductive PsKernelMaxProbe where
+  | probe (left : PsKernelLevel) (right : PsKernelLevel) (result : PsKernelLevel)
+
+inductive PsKernelUniverseTask where
+  | normalize (value : PsKernelLevel) (offset : PsKernelNatural)
+  | joinMax (offset : PsKernelNatural)
+  | joinIMax (offset : PsKernelNatural)
+  | wrap (value : PsKernelLevel) (offset : PsKernelNatural)
+  | imaxCompare (left : PsKernelLevel) (right : PsKernelLevel) (offset : PsKernelNatural) (work : PsKernelList PsKernelOrderTask)
+  | maxBases (left : PsKernelLevel) (right : PsKernelLevel) (offset : PsKernelNatural) (work : PsKernelList PsKernelOrderTask)
+  | maxOffsets (left : PsKernelLevel) (right : PsKernelLevel) (offset : PsKernelNatural) (numeric : PsKernelNumericState)
+  | probeMax (left : PsKernelLevel) (right : PsKernelLevel) (offset : PsKernelNatural) (probes : PsKernelList PsKernelMaxProbe)
+  | probeCompare (left : PsKernelLevel) (right : PsKernelLevel) (offset : PsKernelNatural) (result : PsKernelLevel) (probes : PsKernelList PsKernelMaxProbe) (work : PsKernelList PsKernelOrderTask)
+  | collect (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (leaves : PsKernelList PsKernelLevel)
+  | sort (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (sorted : PsKernelList PsKernelLevel)
+  | insert (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (candidate : PsKernelLevel) (scan : PsKernelList PsKernelLevel) (prefix : PsKernelList PsKernelLevel)
+  | insertCompare (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (candidate : PsKernelLevel) (current : PsKernelLevel) (tail : PsKernelList PsKernelLevel) (prefix : PsKernelList PsKernelLevel) (work : PsKernelList PsKernelOrderTask)
+  | insertOffset (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (candidate : PsKernelLevel) (current : PsKernelLevel) (tail : PsKernelList PsKernelLevel) (prefix : PsKernelList PsKernelLevel) (numeric : PsKernelNumericState)
+  | restore (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (prefix : PsKernelList PsKernelLevel) (suffix : PsKernelList PsKernelLevel)
+  | prune (offset : PsKernelNatural) (sorted : PsKernelList PsKernelLevel)
+  | constantScan (offset : PsKernelNatural) (constant : PsKernelLevel) (others : PsKernelList PsKernelLevel) (scan : PsKernelList PsKernelLevel)
+  | constantCompare (offset : PsKernelNatural) (constant : PsKernelLevel) (others : PsKernelList PsKernelLevel) (scan : PsKernelList PsKernelLevel) (numeric : PsKernelNumericState)
+  | wrapList (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (doneRev : PsKernelList PsKernelLevel)
+  | wrapped (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (doneRev : PsKernelList PsKernelLevel)
+  | assemble (todo : PsKernelList PsKernelLevel) (value : PsKernelLevel)
+
+inductive PsKernelUniverseState where
+  | state (tasks : PsKernelList PsKernelUniverseTask) (values : PsKernelList PsKernelLevel)
+
+inductive PsKernelUniverseResult where
+  | outOfFuel
+  | invalidState
+  | done (value : PsKernelLevel)
+
+inductive PsKernelUniverseStep where
+  | next (state : PsKernelUniverseState)
+  | final (result : PsKernelUniverseResult)
+
+def psKernelUniverseSchedule (task : PsKernelUniverseTask)
+    (tasks : PsKernelList PsKernelUniverseTask) (values : PsKernelList PsKernelLevel) : PsKernelUniverseStep :=
+  PsKernelUniverseStep.next (PsKernelUniverseState.state (PsKernelList.cons task tasks) values)
+
+def psKernelUniversePush (value : PsKernelLevel)
+    (tasks : PsKernelList PsKernelUniverseTask) (values : PsKernelList PsKernelLevel) : PsKernelUniverseStep :=
+  PsKernelUniverseStep.next (PsKernelUniverseState.state tasks (PsKernelList.cons value values))
+
+def psKernelUniverseSmartMax (left right : PsKernelLevel) (offset : PsKernelNatural)
+    (tasks : PsKernelList PsKernelUniverseTask) (values : PsKernelList PsKernelLevel) : PsKernelUniverseStep :=
+  match left with
+  | PsKernelLevel.zero => psKernelUniverseSchedule (PsKernelUniverseTask.wrap right offset) tasks values
+  | _ =>
+      match right with
+      | PsKernelLevel.zero => psKernelUniverseSchedule (PsKernelUniverseTask.wrap left offset) tasks values
+      | _ =>
+          match psKernelLevelOffset left with
+          | PsKernelLevelOffset.parts leftBase leftCount =>
+              match psKernelLevelOffset right with
+              | PsKernelLevelOffset.parts rightBase rightCount =>
+                  psKernelUniverseSchedule (PsKernelUniverseTask.maxBases left right offset
+                    (PsKernelList.cons (PsKernelOrderTask.level leftBase rightBase) PsKernelList.nil)) tasks values
+
+def psKernelUniverseIMax (left right : PsKernelLevel) (offset : PsKernelNatural)
+    (tasks : PsKernelList PsKernelUniverseTask) (values : PsKernelList PsKernelLevel) : PsKernelUniverseStep :=
+  match psKernelLevelNeverZero right with
+  | PsKernelFlag.yes => psKernelUniverseSmartMax left right offset tasks values
+  | PsKernelFlag.no =>
+      match right with
+      | PsKernelLevel.zero => psKernelUniverseSchedule (PsKernelUniverseTask.wrap right offset) tasks values
+      | _ =>
+          let smallLeft : PsKernelFlag :=
+            match left with
+            | PsKernelLevel.zero => PsKernelFlag.yes
+            | PsKernelLevel.succ child =>
+                match child with
+                | PsKernelLevel.zero => PsKernelFlag.yes
+                | _ => PsKernelFlag.no
+            | _ => PsKernelFlag.no;
+          match smallLeft with
+          | PsKernelFlag.yes => psKernelUniverseSchedule (PsKernelUniverseTask.wrap right offset) tasks values
+          | PsKernelFlag.no => psKernelUniverseSchedule (PsKernelUniverseTask.imaxCompare left right offset
+              (PsKernelList.cons (PsKernelOrderTask.level left right) PsKernelList.nil)) tasks values
+
+def psKernelUniverseProbes (left right : PsKernelLevel) : PsKernelList PsKernelMaxProbe :=
+  let fromLeft : PsKernelList PsKernelMaxProbe :=
+    match left with
+    | PsKernelLevel.max a b =>
+        PsKernelList.cons (PsKernelMaxProbe.probe right a left)
+          (PsKernelList.cons (PsKernelMaxProbe.probe right b left) PsKernelList.nil)
+    | _ => PsKernelList.nil;
+  match right with
+  | PsKernelLevel.max a b =>
+      PsKernelList.cons (PsKernelMaxProbe.probe left a right)
+        (PsKernelList.cons (PsKernelMaxProbe.probe left b right) fromLeft)
+  | _ => fromLeft
+
+def psKernelUniverseFinish (values : PsKernelList PsKernelLevel) : PsKernelUniverseResult :=
+  match values with
+  | PsKernelList.nil => PsKernelUniverseResult.invalidState
+  | PsKernelList.cons value tail =>
+      match tail with
+      | PsKernelList.nil => PsKernelUniverseResult.done value
+      | _ => PsKernelUniverseResult.invalidState
+
+def psKernelUniverseStep (state : PsKernelUniverseState) : PsKernelUniverseStep :=
+  match state with
+  | PsKernelUniverseState.state tasks values =>
+      match tasks with
+      | PsKernelList.nil => PsKernelUniverseStep.final (psKernelUniverseFinish values)
+      | PsKernelList.cons task rest =>
+          match task with
+          | PsKernelUniverseTask.normalize value offset =>
+              match value with
+              | PsKernelLevel.succ child => psKernelUniverseSchedule (PsKernelUniverseTask.normalize child (psKernelNaturalSucc offset)) rest values
+              | PsKernelLevel.max left right =>
+                  psKernelUniverseSchedule (PsKernelUniverseTask.normalize left PsKernelNatural.zero)
+                    (PsKernelList.cons (PsKernelUniverseTask.normalize right PsKernelNatural.zero)
+                      (PsKernelList.cons (PsKernelUniverseTask.joinMax offset) rest)) values
+              | PsKernelLevel.imax left right =>
+                  psKernelUniverseSchedule (PsKernelUniverseTask.normalize left PsKernelNatural.zero)
+                    (PsKernelList.cons (PsKernelUniverseTask.normalize right PsKernelNatural.zero)
+                      (PsKernelList.cons (PsKernelUniverseTask.joinIMax offset) rest)) values
+              | _ => psKernelUniverseSchedule (PsKernelUniverseTask.wrap value offset) rest values
+          | PsKernelUniverseTask.wrap value offset =>
+              match offset with
+              | PsKernelNatural.zero => psKernelUniversePush value rest values
+              | _ => psKernelUniverseSchedule (PsKernelUniverseTask.wrap (PsKernelLevel.succ value) (psKernelNaturalPred offset)) rest values
+          | PsKernelUniverseTask.joinIMax offset =>
+              match values with
+              | PsKernelList.cons right tail =>
+                  match tail with
+                  | PsKernelList.cons left remaining => psKernelUniverseIMax left right offset rest remaining
+                  | _ => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+              | _ => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+          | PsKernelUniverseTask.joinMax offset =>
+              match values with
+              | PsKernelList.cons right tail =>
+                  match tail with
+                  | PsKernelList.cons left remaining =>
+                      psKernelUniverseSchedule (PsKernelUniverseTask.collect offset
+                        (PsKernelList.cons left (PsKernelList.cons right PsKernelList.nil)) PsKernelList.nil) rest remaining
+                  | _ => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+              | _ => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+          | PsKernelUniverseTask.imaxCompare left right offset work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelUniverseSchedule (PsKernelUniverseTask.imaxCompare left right offset next) rest values
+              | PsKernelOrderStep.invalidState => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelUniverseSchedule (PsKernelUniverseTask.wrap left offset) rest values
+                  | _ => psKernelUniverseSchedule (PsKernelUniverseTask.wrap (PsKernelLevel.imax left right) offset) rest values
+          | PsKernelUniverseTask.maxBases left right offset work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelUniverseSchedule (PsKernelUniverseTask.maxBases left right offset next) rest values
+              | PsKernelOrderStep.invalidState => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same =>
+                      match psKernelLevelOffset left with
+                      | PsKernelLevelOffset.parts unusedLeft leftCount =>
+                          match psKernelLevelOffset right with
+                          | PsKernelLevelOffset.parts unusedRight rightCount =>
+                              psKernelUniverseSchedule (PsKernelUniverseTask.maxOffsets left right offset
+                                (PsKernelNumericState.order leftCount rightCount PsKernelOrder.same)) rest values
+                  | _ => psKernelUniverseSchedule (PsKernelUniverseTask.probeMax left right offset (psKernelUniverseProbes left right)) rest values
+          | PsKernelUniverseTask.maxOffsets left right offset numeric =>
+              match psKernelNumericStep numeric with
+              | PsKernelNumericStep.next next => psKernelUniverseSchedule (PsKernelUniverseTask.maxOffsets left right offset next) rest values
+              | PsKernelNumericStep.ordered order =>
+                  match order with
+                  | PsKernelOrder.less => psKernelUniverseSchedule (PsKernelUniverseTask.wrap right offset) rest values
+                  | _ => psKernelUniverseSchedule (PsKernelUniverseTask.wrap left offset) rest values
+              | _ => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+          | PsKernelUniverseTask.probeMax left right offset probes =>
+              match probes with
+              | PsKernelList.nil => psKernelUniverseSchedule (PsKernelUniverseTask.wrap (PsKernelLevel.max left right) offset) rest values
+              | PsKernelList.cons probe tail =>
+                  match probe with
+                  | PsKernelMaxProbe.probe a b result => psKernelUniverseSchedule
+                      (PsKernelUniverseTask.probeCompare left right offset result tail
+                        (PsKernelList.cons (PsKernelOrderTask.level a b) PsKernelList.nil)) rest values
+          | PsKernelUniverseTask.probeCompare left right offset result probes work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelUniverseSchedule (PsKernelUniverseTask.probeCompare left right offset result probes next) rest values
+              | PsKernelOrderStep.invalidState => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelUniverseSchedule (PsKernelUniverseTask.wrap result offset) rest values
+                  | _ => psKernelUniverseSchedule (PsKernelUniverseTask.probeMax left right offset probes) rest values
+          | PsKernelUniverseTask.collect offset todo leaves =>
+              match todo with
+              | PsKernelList.nil => psKernelUniverseSchedule (PsKernelUniverseTask.sort offset leaves PsKernelList.nil) rest values
+              | PsKernelList.cons value tail =>
+                  match value with
+                  | PsKernelLevel.max a b => psKernelUniverseSchedule
+                      (PsKernelUniverseTask.collect offset (PsKernelList.cons a (PsKernelList.cons b tail)) leaves) rest values
+                  | _ => psKernelUniverseSchedule (PsKernelUniverseTask.collect offset tail (PsKernelList.cons value leaves)) rest values
+          | PsKernelUniverseTask.sort offset todo sorted =>
+              match todo with
+              | PsKernelList.nil => psKernelUniverseSchedule (PsKernelUniverseTask.prune offset sorted) rest values
+              | PsKernelList.cons candidate tail => psKernelUniverseSchedule (PsKernelUniverseTask.insert offset tail candidate sorted PsKernelList.nil) rest values
+          | PsKernelUniverseTask.insert offset todo candidate scan prefix =>
+              match scan with
+              | PsKernelList.nil => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo prefix (PsKernelList.cons candidate PsKernelList.nil)) rest values
+              | PsKernelList.cons current tail =>
+                  match psKernelLevelOffset candidate with
+                  | PsKernelLevelOffset.parts a unusedCountA =>
+                      match psKernelLevelOffset current with
+                      | PsKernelLevelOffset.parts b unusedCountB => psKernelUniverseSchedule
+                          (PsKernelUniverseTask.insertCompare offset todo candidate current tail prefix
+                            (PsKernelList.cons (PsKernelOrderTask.level a b) PsKernelList.nil)) rest values
+          | PsKernelUniverseTask.insertCompare offset todo candidate current tail prefix work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelUniverseSchedule (PsKernelUniverseTask.insertCompare offset todo candidate current tail prefix next) rest values
+              | PsKernelOrderStep.invalidState => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.less => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo prefix
+                      (PsKernelList.cons candidate (PsKernelList.cons current tail))) rest values
+                  | PsKernelOrder.greater => psKernelUniverseSchedule (PsKernelUniverseTask.insert offset todo candidate tail (PsKernelList.cons current prefix)) rest values
+                  | PsKernelOrder.same =>
+                      match psKernelLevelOffset candidate with
+                      | PsKernelLevelOffset.parts unusedA a =>
+                          match psKernelLevelOffset current with
+                          | PsKernelLevelOffset.parts unusedB b => psKernelUniverseSchedule
+                              (PsKernelUniverseTask.insertOffset offset todo candidate current tail prefix
+                                (PsKernelNumericState.order a b PsKernelOrder.same)) rest values
+          | PsKernelUniverseTask.insertOffset offset todo candidate current tail prefix numeric =>
+              match psKernelNumericStep numeric with
+              | PsKernelNumericStep.next next => psKernelUniverseSchedule (PsKernelUniverseTask.insertOffset offset todo candidate current tail prefix next) rest values
+              | PsKernelNumericStep.ordered order =>
+                  match order with
+                  | PsKernelOrder.greater => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo prefix (PsKernelList.cons candidate tail)) rest values
+                  | _ => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo prefix (PsKernelList.cons current tail)) rest values
+              | _ => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+          | PsKernelUniverseTask.restore offset todo prefix suffix =>
+              match prefix with
+              | PsKernelList.nil => psKernelUniverseSchedule (PsKernelUniverseTask.sort offset todo suffix) rest values
+              | PsKernelList.cons head tail => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo tail (PsKernelList.cons head suffix)) rest values
+          | PsKernelUniverseTask.prune offset sorted =>
+              match sorted with
+              | PsKernelList.nil => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+              | PsKernelList.cons first tail =>
+                  match psKernelLevelOffset first with
+                  | PsKernelLevelOffset.parts base count =>
+                      match base with
+                      | PsKernelLevel.zero => psKernelUniverseSchedule (PsKernelUniverseTask.constantScan offset first tail tail) rest values
+                      | _ => psKernelUniverseSchedule (PsKernelUniverseTask.wrapList offset sorted PsKernelList.nil) rest values
+          | PsKernelUniverseTask.constantScan offset constant others scan =>
+              match scan with
+              | PsKernelList.nil => psKernelUniverseSchedule (PsKernelUniverseTask.wrapList offset (PsKernelList.cons constant others) PsKernelList.nil) rest values
+              | PsKernelList.cons head tail =>
+                  match psKernelLevelOffset constant with
+                  | PsKernelLevelOffset.parts unusedA a =>
+                      match psKernelLevelOffset head with
+                      | PsKernelLevelOffset.parts unusedB b => psKernelUniverseSchedule
+                          (PsKernelUniverseTask.constantCompare offset constant others tail
+                            (PsKernelNumericState.order b a PsKernelOrder.same)) rest values
+          | PsKernelUniverseTask.constantCompare offset constant others scan numeric =>
+              match psKernelNumericStep numeric with
+              | PsKernelNumericStep.next next => psKernelUniverseSchedule (PsKernelUniverseTask.constantCompare offset constant others scan next) rest values
+              | PsKernelNumericStep.ordered order =>
+                  match order with
+                  | PsKernelOrder.less => psKernelUniverseSchedule (PsKernelUniverseTask.constantScan offset constant others scan) rest values
+                  | _ => psKernelUniverseSchedule (PsKernelUniverseTask.wrapList offset others PsKernelList.nil) rest values
+              | _ => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+          | PsKernelUniverseTask.wrapList offset todo doneRev =>
+              match todo with
+              | PsKernelList.nil =>
+                  match doneRev with
+                  | PsKernelList.nil => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+                  | PsKernelList.cons last tail => psKernelUniverseSchedule (PsKernelUniverseTask.assemble tail last) rest values
+              | PsKernelList.cons head tail => psKernelUniverseSchedule (PsKernelUniverseTask.wrap head offset)
+                  (PsKernelList.cons (PsKernelUniverseTask.wrapped offset tail doneRev) rest) values
+          | PsKernelUniverseTask.wrapped offset todo doneRev =>
+              match values with
+              | PsKernelList.nil => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
+              | PsKernelList.cons wrapped tail => psKernelUniverseSchedule (PsKernelUniverseTask.wrapList offset todo (PsKernelList.cons wrapped doneRev)) rest tail
+          | PsKernelUniverseTask.assemble todo value =>
+              match todo with
+              | PsKernelList.nil => psKernelUniversePush value rest values
+              | PsKernelList.cons head tail => psKernelUniverseSchedule (PsKernelUniverseTask.assemble tail (PsKernelLevel.max head value)) rest values
+
+def psKernelUniverseStart (value : PsKernelLevel) : PsKernelUniverseState :=
+  PsKernelUniverseState.state (PsKernelList.cons (PsKernelUniverseTask.normalize value PsKernelNatural.zero) PsKernelList.nil) PsKernelList.nil
+
+def psKernelUniverseRun (fuel : PsKernelFuel) : PsKernelUniverseState -> PsKernelUniverseResult :=
+  match fuel with
+  | PsKernelFuel.stop =>
+      fun (state : PsKernelUniverseState) =>
+        match state with
+        | PsKernelUniverseState.state tasks values =>
+            match tasks with
+            | PsKernelList.nil => psKernelUniverseFinish values
+            | _ => PsKernelUniverseResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      fun (state : PsKernelUniverseState) =>
+        match psKernelUniverseStep state with
+        | PsKernelUniverseStep.final result => result
+        | PsKernelUniverseStep.next next =>
+            let smaller : PsKernelUniverseState -> PsKernelUniverseResult := psKernelUniverseRun remaining;
+            smaller next
+
+
+
+/- Bounded normalization/equality composition; not term conversion or admission. -/
+inductive PsKernelLevelCheckState where
+  | left (right : PsKernelLevel) (state : PsKernelUniverseState)
+  | right (left : PsKernelLevel) (state : PsKernelUniverseState)
+  | order (tasks : PsKernelList PsKernelOrderTask)
+
+inductive PsKernelLevelCheckResult where
+  | outOfFuel
+  | invalidState
+  | equal
+  | different
+
+inductive PsKernelLevelCheckStep where
+  | next (state : PsKernelLevelCheckState)
+  | final (result : PsKernelLevelCheckResult)
+
+def psKernelLevelCheckStart (left right : PsKernelLevel) : PsKernelLevelCheckState :=
+  PsKernelLevelCheckState.left right (psKernelUniverseStart left)
+
+def psKernelLevelCheckStep (state : PsKernelLevelCheckState) : PsKernelLevelCheckStep :=
+  match state with
+  | PsKernelLevelCheckState.left right current =>
+      match psKernelUniverseStep current with
+      | PsKernelUniverseStep.next next => PsKernelLevelCheckStep.next (PsKernelLevelCheckState.left right next)
+      | PsKernelUniverseStep.final result =>
+          match result with
+          | PsKernelUniverseResult.done left => PsKernelLevelCheckStep.next (PsKernelLevelCheckState.right left (psKernelUniverseStart right))
+          | _ => PsKernelLevelCheckStep.final PsKernelLevelCheckResult.invalidState
+  | PsKernelLevelCheckState.right left current =>
+      match psKernelUniverseStep current with
+      | PsKernelUniverseStep.next next => PsKernelLevelCheckStep.next (PsKernelLevelCheckState.right left next)
+      | PsKernelUniverseStep.final result =>
+          match result with
+          | PsKernelUniverseResult.done right => PsKernelLevelCheckStep.next (PsKernelLevelCheckState.order
+              (PsKernelList.cons (PsKernelOrderTask.level left right) PsKernelList.nil))
+          | _ => PsKernelLevelCheckStep.final PsKernelLevelCheckResult.invalidState
+  | PsKernelLevelCheckState.order tasks =>
+      match psKernelOrderStep tasks with
+      | PsKernelOrderStep.next next => PsKernelLevelCheckStep.next (PsKernelLevelCheckState.order next)
+      | PsKernelOrderStep.invalidState => PsKernelLevelCheckStep.final PsKernelLevelCheckResult.invalidState
+      | PsKernelOrderStep.done order =>
+          match order with
+          | PsKernelOrder.same => PsKernelLevelCheckStep.final PsKernelLevelCheckResult.equal
+          | _ => PsKernelLevelCheckStep.final PsKernelLevelCheckResult.different
+
+def psKernelLevelCheckRun (fuel : PsKernelFuel) : PsKernelLevelCheckState -> PsKernelLevelCheckResult :=
+  match fuel with
+  | PsKernelFuel.stop => fun (state : PsKernelLevelCheckState) => PsKernelLevelCheckResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      fun (state : PsKernelLevelCheckState) =>
+        match psKernelLevelCheckStep state with
+        | PsKernelLevelCheckStep.final result => result
+        | PsKernelLevelCheckStep.next next =>
+            let smaller : PsKernelLevelCheckState -> PsKernelLevelCheckResult := psKernelLevelCheckRun remaining;
+            smaller next
+
+
+
+/- Internal monomorphic definitions. A list is NOT a trusted environment merely
+because it has this representation. Only fresh replay through Admission checks it. -/
+inductive PsKernelDefinition where
+  | definition (name : PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
+
+inductive PsKernelCheckError where
+  | invalidState
+  | invalidScope
+  | unknownConstant
+  | unsupported
+  | typeExpected
+  | functionExpected
+  | typeMismatch
+  | duplicateName
+  | invalidName
+
+inductive PsKernelLookupState where
+  | search (name : PsKernelName) (entries : PsKernelList PsKernelDefinition)
+  | compare (name : PsKernelName) (entry : PsKernelDefinition)
+      (rest : PsKernelList PsKernelDefinition) (tasks : PsKernelList PsKernelOrderTask)
+
+inductive PsKernelLookupStep where
+  | next (state : PsKernelLookupState)
+  | found (entry : PsKernelDefinition)
+  | missing
+  | invalidState
+
+def psKernelLookupStep (state : PsKernelLookupState) : PsKernelLookupStep :=
+  match state with
+  | PsKernelLookupState.search name entries =>
+      match entries with
+      | PsKernelList.nil => PsKernelLookupStep.missing
+      | PsKernelList.cons entry rest =>
+          match entry with
+          | PsKernelDefinition.definition candidate unusedType unusedValue =>
+              PsKernelLookupStep.next (PsKernelLookupState.compare name entry rest
+                (PsKernelList.cons (PsKernelOrderTask.name name candidate) PsKernelList.nil))
+  | PsKernelLookupState.compare name entry rest tasks =>
+      match psKernelOrderStep tasks with
+      | PsKernelOrderStep.next next =>
+          PsKernelLookupStep.next (PsKernelLookupState.compare name entry rest next)
+      | PsKernelOrderStep.invalidState => PsKernelLookupStep.invalidState
+      | PsKernelOrderStep.done order =>
+          match order with
+          | PsKernelOrder.same => PsKernelLookupStep.found entry
+          | _ => PsKernelLookupStep.next (PsKernelLookupState.search name rest)
+
+
+
+/- First-order beta/zeta/delta reducer. No primitive, quotient or recursor
+reduction is asserted. Type checking, not reduction, validates discarded terms.
+All nested substitutions and lookups consume the caller's transition budget. -/
+inductive PsKernelReduceTask where
+  | whnf (value : PsKernelExpr)
+  | apply (arg : PsKernelExpr)
+  | lookup (state : PsKernelLookupState)
+  | binding (state : PsKernelBindingState)
+  | resumeWhnf
+  | normal (value : PsKernelExpr)
+  | expand
+  | app
+  | lam (name : PsKernelName) (binder : PsKernelBinder)
+  | forallE (name : PsKernelName) (binder : PsKernelBinder)
+
+inductive PsKernelReduceState where
+  | state (environment : PsKernelList PsKernelDefinition)
+      (tasks : PsKernelList PsKernelReduceTask) (values : PsKernelList PsKernelExpr)
+
+inductive PsKernelReduceResult where
+  | outOfFuel
+  | rejected (error : PsKernelCheckError)
+  | done (value : PsKernelExpr)
+
+inductive PsKernelReduceStep where
+  | next (state : PsKernelReduceState)
+  | final (result : PsKernelReduceResult)
+
+def psKernelReduceReject (error : PsKernelCheckError) : PsKernelReduceStep :=
+  PsKernelReduceStep.final (PsKernelReduceResult.rejected error)
+
+def psKernelReduceNext
+    (env : PsKernelList PsKernelDefinition) (tasks : PsKernelList PsKernelReduceTask)
+    (values : PsKernelList PsKernelExpr) : PsKernelReduceStep :=
+  PsKernelReduceStep.next (PsKernelReduceState.state env tasks values)
+
+def psKernelReducePush
+    (env : PsKernelList PsKernelDefinition) (tasks : PsKernelList PsKernelReduceTask)
+    (values : PsKernelList PsKernelExpr) (value : PsKernelExpr) : PsKernelReduceStep :=
+  psKernelReduceNext env tasks (PsKernelList.cons value values)
+
+def psKernelReduceWhnf
+    (env : PsKernelList PsKernelDefinition) (tasks : PsKernelList PsKernelReduceTask)
+    (values : PsKernelList PsKernelExpr) (value : PsKernelExpr) : PsKernelReduceStep :=
+  match value with
+  | PsKernelExpr.app fn arg =>
+      psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf fn)
+        (PsKernelList.cons (PsKernelReduceTask.apply arg) tasks)) values
+  | PsKernelExpr.letE unusedName unusedType val body =>
+      psKernelReduceNext env
+        (PsKernelList.cons (PsKernelReduceTask.binding (psKernelBindingStart
+          (PsKernelBindingMode.instantiate val) PsKernelNatural.zero body))
+          (PsKernelList.cons PsKernelReduceTask.resumeWhnf tasks)) values
+  | PsKernelExpr.constE name levels =>
+      match levels with
+      | PsKernelList.nil => psKernelReduceNext env
+          (PsKernelList.cons (PsKernelReduceTask.lookup (PsKernelLookupState.search name env)) tasks) values
+      | _ => psKernelReduceReject PsKernelCheckError.unsupported
+  | PsKernelExpr.fvar unused => psKernelReduceReject PsKernelCheckError.invalidScope
+  | PsKernelExpr.lit unused => psKernelReduceReject PsKernelCheckError.unsupported
+  | PsKernelExpr.proj unusedName unusedIndex unusedValue => psKernelReduceReject PsKernelCheckError.unsupported
+  | _ => psKernelReducePush env tasks values value
+
+def psKernelReduceValueTask
+    (env : PsKernelList PsKernelDefinition) (task : PsKernelReduceTask)
+    (tasks : PsKernelList PsKernelReduceTask) (values : PsKernelList PsKernelExpr) : PsKernelReduceStep :=
+  match values with
+  | PsKernelList.nil => psKernelReduceReject PsKernelCheckError.invalidState
+  | PsKernelList.cons top rest =>
+      match task with
+      | PsKernelReduceTask.resumeWhnf =>
+          psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf top) tasks) rest
+      | PsKernelReduceTask.apply arg =>
+          match top with
+          | PsKernelExpr.lam unusedName unusedType body unusedBinder =>
+              psKernelReduceNext env
+                (PsKernelList.cons (PsKernelReduceTask.binding (psKernelBindingStart
+                  (PsKernelBindingMode.instantiate arg) PsKernelNatural.zero body))
+                  (PsKernelList.cons PsKernelReduceTask.resumeWhnf tasks)) rest
+          | _ => psKernelReducePush env tasks rest (PsKernelExpr.app top arg)
+      | PsKernelReduceTask.expand =>
+          match top with
+          | PsKernelExpr.app fn arg =>
+              psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.normal fn)
+                (PsKernelList.cons (PsKernelReduceTask.normal arg)
+                  (PsKernelList.cons PsKernelReduceTask.app tasks))) rest
+          | PsKernelExpr.lam name type body binder =>
+              psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.normal type)
+                (PsKernelList.cons (PsKernelReduceTask.normal body)
+                  (PsKernelList.cons (PsKernelReduceTask.lam name binder) tasks))) rest
+          | PsKernelExpr.forallE name type body binder =>
+              psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.normal type)
+                (PsKernelList.cons (PsKernelReduceTask.normal body)
+                  (PsKernelList.cons (PsKernelReduceTask.forallE name binder) tasks))) rest
+          | _ => psKernelReducePush env tasks rest top
+      | PsKernelReduceTask.app =>
+          match rest with
+          | PsKernelList.cons fn tail => psKernelReducePush env tasks tail (PsKernelExpr.app fn top)
+          | _ => psKernelReduceReject PsKernelCheckError.invalidState
+      | PsKernelReduceTask.lam name binder =>
+          match rest with
+          | PsKernelList.cons type tail => psKernelReducePush env tasks tail (PsKernelExpr.lam name type top binder)
+          | _ => psKernelReduceReject PsKernelCheckError.invalidState
+      | PsKernelReduceTask.forallE name binder =>
+          match rest with
+          | PsKernelList.cons type tail => psKernelReducePush env tasks tail (PsKernelExpr.forallE name type top binder)
+          | _ => psKernelReduceReject PsKernelCheckError.invalidState
+      | _ => psKernelReduceReject PsKernelCheckError.invalidState
+
+def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
+  match state with
+  | PsKernelReduceState.state env tasks values =>
+      match tasks with
+      | PsKernelList.nil =>
+          match values with
+          | PsKernelList.cons value rest =>
+              match rest with
+              | PsKernelList.nil => PsKernelReduceStep.final (PsKernelReduceResult.done value)
+              | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | _ => psKernelReduceReject PsKernelCheckError.invalidState
+      | PsKernelList.cons task rest =>
+          match task with
+          | PsKernelReduceTask.whnf value => psKernelReduceWhnf env rest values value
+          | PsKernelReduceTask.normal value =>
+              psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf value)
+                (PsKernelList.cons PsKernelReduceTask.expand rest)) values
+          | PsKernelReduceTask.lookup current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next =>
+                  psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.lookup next) rest) values
+              | PsKernelLookupStep.missing => psKernelReduceReject PsKernelCheckError.unknownConstant
+              | PsKernelLookupStep.invalidState => psKernelReduceReject PsKernelCheckError.invalidState
+              | PsKernelLookupStep.found entry =>
+                  match entry with
+                  | PsKernelDefinition.definition unusedName unusedType value =>
+                      psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf value) rest) values
+          | PsKernelReduceTask.binding current =>
+              match psKernelBindingStep current with
+              | PsKernelBindingStep.next next =>
+                  psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.binding next) rest) values
+              | PsKernelBindingStep.final result =>
+                  match result with
+                  | PsKernelBindingResult.done value => psKernelReducePush env rest values value
+                  | PsKernelBindingResult.invalidScope => psKernelReduceReject PsKernelCheckError.invalidScope
+                  | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | _ => psKernelReduceValueTask env task rest values
+
+def psKernelWhnfStart
+    (env : PsKernelList PsKernelDefinition) (value : PsKernelExpr) : PsKernelReduceState :=
+  PsKernelReduceState.state env (PsKernelList.cons (PsKernelReduceTask.whnf value) PsKernelList.nil) PsKernelList.nil
+
+def psKernelNormalStart
+    (env : PsKernelList PsKernelDefinition) (value : PsKernelExpr) : PsKernelReduceState :=
+  PsKernelReduceState.state env (PsKernelList.cons (PsKernelReduceTask.normal value) PsKernelList.nil) PsKernelList.nil
+
+def psKernelReduceRun (fuel : PsKernelFuel) : PsKernelReduceState -> PsKernelReduceResult :=
+  match fuel with
+  | PsKernelFuel.stop => fun (state : PsKernelReduceState) => PsKernelReduceResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      fun (state : PsKernelReduceState) =>
+        match psKernelReduceStep state with
+        | PsKernelReduceStep.final result => result
+        | PsKernelReduceStep.next next =>
+            let smaller : PsKernelReduceState -> PsKernelReduceResult := psKernelReduceRun remaining;
+            smaller next
+
+
+
+/- Conservative conversion for the present fragment: alpha/beta/zeta/delta and
+universe normalization. A mismatch is NOT a claim of full Lean inequivalence.
+Eta, proof irrelevance, primitive and recursor conversion remain separate work. -/
+inductive PsKernelConversionTask where
+  | expr (left : PsKernelExpr) (right : PsKernelExpr)
+  | natural (state : PsKernelNumericState)
+  | level (state : PsKernelLevelCheckState)
+
+inductive PsKernelConversionState where
+  | left (environment : PsKernelList PsKernelDefinition) (right : PsKernelExpr) (state : PsKernelReduceState)
+  | right (left : PsKernelExpr) (state : PsKernelReduceState)
+  | compare (tasks : PsKernelList PsKernelConversionTask)
+
+inductive PsKernelConversionResult where
+  | outOfFuel
+  | rejected (error : PsKernelCheckError)
+  | equal
+  | different
+
+inductive PsKernelConversionStep where
+  | next (state : PsKernelConversionState)
+  | final (result : PsKernelConversionResult)
+
+def psKernelConversionReject (error : PsKernelCheckError) : PsKernelConversionStep :=
+  PsKernelConversionStep.final (PsKernelConversionResult.rejected error)
+
+def psKernelConversionTasks (tasks : PsKernelList PsKernelConversionTask) : PsKernelConversionStep :=
+  PsKernelConversionStep.next (PsKernelConversionState.compare tasks)
+
+def psKernelConversionExpr
+    (left right : PsKernelExpr) (tasks : PsKernelList PsKernelConversionTask) : PsKernelConversionStep :=
+  match left with
+  | PsKernelExpr.bvar index =>
+      match right with
+      | PsKernelExpr.bvar other => psKernelConversionTasks (PsKernelList.cons
+          (PsKernelConversionTask.natural (PsKernelNumericState.order index other PsKernelOrder.same)) tasks)
+      | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+  | PsKernelExpr.sortE level =>
+      match right with
+      | PsKernelExpr.sortE other => psKernelConversionTasks
+          (PsKernelList.cons (PsKernelConversionTask.level (psKernelLevelCheckStart level other)) tasks)
+      | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+  | PsKernelExpr.app fn arg =>
+      match right with
+      | PsKernelExpr.app otherFn otherArg => psKernelConversionTasks
+          (PsKernelList.cons (PsKernelConversionTask.expr fn otherFn)
+            (PsKernelList.cons (PsKernelConversionTask.expr arg otherArg) tasks))
+      | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+  | PsKernelExpr.lam unusedName type body unusedBinder =>
+      match right with
+      | PsKernelExpr.lam unusedOtherName otherType otherBody unusedOtherBinder => psKernelConversionTasks
+          (PsKernelList.cons (PsKernelConversionTask.expr type otherType)
+            (PsKernelList.cons (PsKernelConversionTask.expr body otherBody) tasks))
+      | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+  | PsKernelExpr.forallE unusedName type body unusedBinder =>
+      match right with
+      | PsKernelExpr.forallE unusedOtherName otherType otherBody unusedOtherBinder => psKernelConversionTasks
+          (PsKernelList.cons (PsKernelConversionTask.expr type otherType)
+            (PsKernelList.cons (PsKernelConversionTask.expr body otherBody) tasks))
+      | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+  | _ => psKernelConversionReject PsKernelCheckError.unsupported
+
+def psKernelConversionStep (state : PsKernelConversionState) : PsKernelConversionStep :=
+  match state with
+  | PsKernelConversionState.left env right current =>
+      match psKernelReduceStep current with
+      | PsKernelReduceStep.next next => PsKernelConversionStep.next (PsKernelConversionState.left env right next)
+      | PsKernelReduceStep.final result =>
+          match result with
+          | PsKernelReduceResult.done left => PsKernelConversionStep.next
+              (PsKernelConversionState.right left (psKernelNormalStart env right))
+          | PsKernelReduceResult.rejected error => psKernelConversionReject error
+          | _ => psKernelConversionReject PsKernelCheckError.invalidState
+  | PsKernelConversionState.right left current =>
+      match psKernelReduceStep current with
+      | PsKernelReduceStep.next next => PsKernelConversionStep.next (PsKernelConversionState.right left next)
+      | PsKernelReduceStep.final result =>
+          match result with
+          | PsKernelReduceResult.done right => psKernelConversionTasks
+              (PsKernelList.cons (PsKernelConversionTask.expr left right) PsKernelList.nil)
+          | PsKernelReduceResult.rejected error => psKernelConversionReject error
+          | _ => psKernelConversionReject PsKernelCheckError.invalidState
+  | PsKernelConversionState.compare tasks =>
+      match tasks with
+      | PsKernelList.nil => PsKernelConversionStep.final PsKernelConversionResult.equal
+      | PsKernelList.cons task rest =>
+          match task with
+          | PsKernelConversionTask.expr left right => psKernelConversionExpr left right rest
+          | PsKernelConversionTask.natural current =>
+              match psKernelNumericStep current with
+              | PsKernelNumericStep.next next => psKernelConversionTasks (PsKernelList.cons (PsKernelConversionTask.natural next) rest)
+              | PsKernelNumericStep.ordered order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelConversionTasks rest
+                  | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+              | _ => psKernelConversionReject PsKernelCheckError.invalidState
+          | PsKernelConversionTask.level current =>
+              match psKernelLevelCheckStep current with
+              | PsKernelLevelCheckStep.next next => psKernelConversionTasks (PsKernelList.cons (PsKernelConversionTask.level next) rest)
+              | PsKernelLevelCheckStep.final result =>
+                  match result with
+                  | PsKernelLevelCheckResult.equal => psKernelConversionTasks rest
+                  | PsKernelLevelCheckResult.different => PsKernelConversionStep.final PsKernelConversionResult.different
+                  | _ => psKernelConversionReject PsKernelCheckError.invalidState
+
+def psKernelConversionStart
+    (env : PsKernelList PsKernelDefinition) (left right : PsKernelExpr) : PsKernelConversionState :=
+  PsKernelConversionState.left env right (psKernelNormalStart env left)
+
+def psKernelConversionRun (fuel : PsKernelFuel) : PsKernelConversionState -> PsKernelConversionResult :=
+  match fuel with
+  | PsKernelFuel.stop => fun (state : PsKernelConversionState) => PsKernelConversionResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      fun (state : PsKernelConversionState) =>
+        match psKernelConversionStep state with
+        | PsKernelConversionStep.final result => result
+        | PsKernelConversionStep.next next =>
+            let smaller : PsKernelConversionState -> PsKernelConversionResult := psKernelConversionRun remaining;
+            smaller next
+
+
+
+/- Internal dependent-function fragment. Context entries store binder types in
+that binder's OUTER context; lookup lifts by index+1 into the current context.
+No self-inference shortcut and no acceptance Boolean supplied by the caller.
+Raw machine states are implementation data, not a checked-module capability. -/
+inductive PsKernelTypeTask where
+  | infer (context : PsKernelList PsKernelExpr) (value : PsKernelExpr)
+  | levels (pending : PsKernelList PsKernelLevel) (result : PsKernelExpr)
+  | bound (context : PsKernelList PsKernelExpr) (index : PsKernelNatural) (shift : PsKernelNatural)
+  | lookup (state : PsKernelLookupState)
+  | binding (state : PsKernelBindingState)
+  | reduce (state : PsKernelReduceState)
+  | reduceTop
+  | conversion (state : PsKernelConversionState)
+  | returnE (value : PsKernelExpr)
+  | lamSort (context : PsKernelList PsKernelExpr) (name : PsKernelName)
+      (type : PsKernelExpr) (body : PsKernelExpr) (binder : PsKernelBinder)
+  | lamFinish (name : PsKernelName) (type : PsKernelExpr) (binder : PsKernelBinder)
+  | piDomain (context : PsKernelList PsKernelExpr) (type : PsKernelExpr) (body : PsKernelExpr)
+  | piFinish (domainLevel : PsKernelLevel)
+  | appPi (context : PsKernelList PsKernelExpr) (arg : PsKernelExpr)
+  | appArgument (domain : PsKernelExpr) (body : PsKernelExpr) (arg : PsKernelExpr)
+  | letSort (context : PsKernelList PsKernelExpr) (type : PsKernelExpr) (value : PsKernelExpr) (body : PsKernelExpr)
+  | letValue (context : PsKernelList PsKernelExpr) (type : PsKernelExpr) (value : PsKernelExpr) (body : PsKernelExpr)
+  | letBody (context : PsKernelList PsKernelExpr)
+  | checkSort (value : PsKernelExpr) (type : PsKernelExpr)
+  | checkValue (type : PsKernelExpr)
+
+inductive PsKernelTypeState where
+  | state (environment : PsKernelList PsKernelDefinition)
+      (tasks : PsKernelList PsKernelTypeTask) (values : PsKernelList PsKernelExpr)
+
+inductive PsKernelTypeResult where
+  | outOfFuel
+  | rejected (error : PsKernelCheckError)
+  | done (type : PsKernelExpr)
+
+inductive PsKernelTypeStep where
+  | next (state : PsKernelTypeState)
+  | final (result : PsKernelTypeResult)
+
+def psKernelTypeReject (error : PsKernelCheckError) : PsKernelTypeStep :=
+  PsKernelTypeStep.final (PsKernelTypeResult.rejected error)
+
+def psKernelTypeNext
+    (env : PsKernelList PsKernelDefinition) (tasks : PsKernelList PsKernelTypeTask)
+    (values : PsKernelList PsKernelExpr) : PsKernelTypeStep :=
+  PsKernelTypeStep.next (PsKernelTypeState.state env tasks values)
+
+def psKernelTypePush
+    (env : PsKernelList PsKernelDefinition) (tasks : PsKernelList PsKernelTypeTask)
+    (values : PsKernelList PsKernelExpr) (value : PsKernelExpr) : PsKernelTypeStep :=
+  psKernelTypeNext env tasks (PsKernelList.cons value values)
+
+def psKernelTypeInfer
+    (env : PsKernelList PsKernelDefinition) (context : PsKernelList PsKernelExpr)
+    (value : PsKernelExpr) (tasks : PsKernelList PsKernelTypeTask)
+    (values : PsKernelList PsKernelExpr) : PsKernelTypeStep :=
+  match value with
+  | PsKernelExpr.sortE level =>
+      psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.levels
+        (PsKernelList.cons level PsKernelList.nil) (PsKernelExpr.sortE (PsKernelLevel.succ level))) tasks) values
+  | PsKernelExpr.bvar index =>
+      psKernelTypeNext env (PsKernelList.cons
+        (PsKernelTypeTask.bound context index (psKernelNaturalSucc index)) tasks) values
+  | PsKernelExpr.fvar unused => psKernelTypeReject PsKernelCheckError.invalidScope
+  | PsKernelExpr.constE name levels =>
+      match levels with
+      | PsKernelList.nil => psKernelTypeNext env
+          (PsKernelList.cons (PsKernelTypeTask.lookup (PsKernelLookupState.search name env)) tasks) values
+      | _ => psKernelTypeReject PsKernelCheckError.unsupported
+  | PsKernelExpr.lam name type body binder =>
+      psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context type)
+        (PsKernelList.cons PsKernelTypeTask.reduceTop
+          (PsKernelList.cons (PsKernelTypeTask.lamSort context name type body binder) tasks))) values
+  | PsKernelExpr.forallE unusedName type body unusedBinder =>
+      psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context type)
+        (PsKernelList.cons PsKernelTypeTask.reduceTop
+          (PsKernelList.cons (PsKernelTypeTask.piDomain context type body) tasks))) values
+  | PsKernelExpr.app fn arg =>
+      psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context fn)
+        (PsKernelList.cons PsKernelTypeTask.reduceTop
+          (PsKernelList.cons (PsKernelTypeTask.appPi context arg) tasks))) values
+  | PsKernelExpr.letE unusedName type val body =>
+      psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context type)
+        (PsKernelList.cons PsKernelTypeTask.reduceTop
+          (PsKernelList.cons (PsKernelTypeTask.letSort context type val body) tasks))) values
+  | _ => psKernelTypeReject PsKernelCheckError.unsupported
+
+def psKernelTypeValueTask
+    (env : PsKernelList PsKernelDefinition) (task : PsKernelTypeTask)
+    (tasks : PsKernelList PsKernelTypeTask) (values : PsKernelList PsKernelExpr) : PsKernelTypeStep :=
+  match values with
+  | PsKernelList.nil => psKernelTypeReject PsKernelCheckError.invalidState
+  | PsKernelList.cons top rest =>
+      match task with
+      | PsKernelTypeTask.reduceTop =>
+          psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.reduce (psKernelWhnfStart env top)) tasks) rest
+      | PsKernelTypeTask.lamSort context name type body binder =>
+          match top with
+          | PsKernelExpr.sortE unusedLevel =>
+              psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer (PsKernelList.cons type context) body)
+                (PsKernelList.cons (PsKernelTypeTask.lamFinish name type binder) tasks)) rest
+          | _ => psKernelTypeReject PsKernelCheckError.typeExpected
+      | PsKernelTypeTask.lamFinish name type binder =>
+          psKernelTypePush env tasks rest (PsKernelExpr.forallE name type top binder)
+      | PsKernelTypeTask.piDomain context type body =>
+          match top with
+          | PsKernelExpr.sortE level =>
+              psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer (PsKernelList.cons type context) body)
+                (PsKernelList.cons PsKernelTypeTask.reduceTop
+                  (PsKernelList.cons (PsKernelTypeTask.piFinish level) tasks))) rest
+          | _ => psKernelTypeReject PsKernelCheckError.typeExpected
+      | PsKernelTypeTask.piFinish domainLevel =>
+          match top with
+          | PsKernelExpr.sortE bodyLevel =>
+              psKernelTypePush env tasks rest (PsKernelExpr.sortE (PsKernelLevel.imax domainLevel bodyLevel))
+          | _ => psKernelTypeReject PsKernelCheckError.typeExpected
+      | PsKernelTypeTask.appPi context arg =>
+          match top with
+          | PsKernelExpr.forallE unusedName domain body unusedBinder =>
+              psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context arg)
+                (PsKernelList.cons (PsKernelTypeTask.appArgument domain body arg) tasks)) rest
+          | _ => psKernelTypeReject PsKernelCheckError.functionExpected
+      | PsKernelTypeTask.appArgument domain body arg =>
+          psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.conversion (psKernelConversionStart env top domain))
+            (PsKernelList.cons (PsKernelTypeTask.binding (psKernelBindingStart
+              (PsKernelBindingMode.instantiate arg) PsKernelNatural.zero body)) tasks)) rest
+      | PsKernelTypeTask.letSort context type value body =>
+          match top with
+          | PsKernelExpr.sortE unusedLevel =>
+              psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context value)
+                (PsKernelList.cons (PsKernelTypeTask.letValue context type value body) tasks)) rest
+          | _ => psKernelTypeReject PsKernelCheckError.typeExpected
+      | PsKernelTypeTask.letValue context type value body =>
+          psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.conversion (psKernelConversionStart env top type))
+            (PsKernelList.cons (PsKernelTypeTask.binding (psKernelBindingStart
+              (PsKernelBindingMode.instantiate value) PsKernelNatural.zero body))
+              (PsKernelList.cons (PsKernelTypeTask.letBody context) tasks))) rest
+      | PsKernelTypeTask.letBody context =>
+          psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context top) tasks) rest
+      | PsKernelTypeTask.checkSort value type =>
+          match top with
+          | PsKernelExpr.sortE unusedLevel =>
+              psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer PsKernelList.nil value)
+                (PsKernelList.cons (PsKernelTypeTask.checkValue type) tasks)) rest
+          | _ => psKernelTypeReject PsKernelCheckError.typeExpected
+      | PsKernelTypeTask.checkValue type =>
+          psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.conversion (psKernelConversionStart env top type))
+            (PsKernelList.cons (PsKernelTypeTask.returnE type) tasks)) rest
+      | _ => psKernelTypeReject PsKernelCheckError.invalidState
+
+def psKernelTypeLevels
+    (env : PsKernelList PsKernelDefinition) (pending : PsKernelList PsKernelLevel) (result : PsKernelExpr)
+    (tasks : PsKernelList PsKernelTypeTask) (values : PsKernelList PsKernelExpr) : PsKernelTypeStep :=
+  match pending with
+  | PsKernelList.nil => psKernelTypePush env tasks values result
+  | PsKernelList.cons level rest =>
+      match level with
+      | PsKernelLevel.zero => psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.levels rest result) tasks) values
+      | PsKernelLevel.succ next => psKernelTypeNext env
+          (PsKernelList.cons (PsKernelTypeTask.levels (PsKernelList.cons next rest) result) tasks) values
+      | PsKernelLevel.max left right => psKernelTypeNext env
+          (PsKernelList.cons (PsKernelTypeTask.levels (PsKernelList.cons left (PsKernelList.cons right rest)) result) tasks) values
+      | PsKernelLevel.imax left right => psKernelTypeNext env
+          (PsKernelList.cons (PsKernelTypeTask.levels (PsKernelList.cons left (PsKernelList.cons right rest)) result) tasks) values
+      | PsKernelLevel.param unusedName => psKernelTypeReject PsKernelCheckError.unsupported
+
+def psKernelTypeStep (state : PsKernelTypeState) : PsKernelTypeStep :=
+  match state with
+  | PsKernelTypeState.state env tasks values =>
+      match tasks with
+      | PsKernelList.nil =>
+          match values with
+          | PsKernelList.cons type rest =>
+              match rest with
+              | PsKernelList.nil => PsKernelTypeStep.final (PsKernelTypeResult.done type)
+              | _ => psKernelTypeReject PsKernelCheckError.invalidState
+          | _ => psKernelTypeReject PsKernelCheckError.invalidState
+      | PsKernelList.cons task rest =>
+          match task with
+          | PsKernelTypeTask.infer context value => psKernelTypeInfer env context value rest values
+          | PsKernelTypeTask.levels pending result => psKernelTypeLevels env pending result rest values
+          | PsKernelTypeTask.returnE value => psKernelTypePush env rest values value
+          | PsKernelTypeTask.bound context index shift =>
+              match context with
+              | PsKernelList.nil => psKernelTypeReject PsKernelCheckError.invalidScope
+              | PsKernelList.cons type tail =>
+                  match index with
+                  | PsKernelNatural.zero =>
+                      psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.binding
+                        (psKernelBindingStart (PsKernelBindingMode.lift shift) PsKernelNatural.zero type)) rest) values
+                  | _ => psKernelTypeNext env
+                      (PsKernelList.cons (PsKernelTypeTask.bound tail (psKernelNaturalPred index) shift) rest) values
+          | PsKernelTypeTask.lookup current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next =>
+                  psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.lookup next) rest) values
+              | PsKernelLookupStep.missing => psKernelTypeReject PsKernelCheckError.unknownConstant
+              | PsKernelLookupStep.invalidState => psKernelTypeReject PsKernelCheckError.invalidState
+              | PsKernelLookupStep.found entry =>
+                  match entry with
+                  | PsKernelDefinition.definition unusedName type unusedValue => psKernelTypePush env rest values type
+          | PsKernelTypeTask.binding current =>
+              match psKernelBindingStep current with
+              | PsKernelBindingStep.next next =>
+                  psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.binding next) rest) values
+              | PsKernelBindingStep.final result =>
+                  match result with
+                  | PsKernelBindingResult.done value => psKernelTypePush env rest values value
+                  | PsKernelBindingResult.invalidScope => psKernelTypeReject PsKernelCheckError.invalidScope
+                  | _ => psKernelTypeReject PsKernelCheckError.invalidState
+          | PsKernelTypeTask.reduce current =>
+              match psKernelReduceStep current with
+              | PsKernelReduceStep.next next =>
+                  psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.reduce next) rest) values
+              | PsKernelReduceStep.final result =>
+                  match result with
+                  | PsKernelReduceResult.done value => psKernelTypePush env rest values value
+                  | PsKernelReduceResult.rejected error => psKernelTypeReject error
+                  | _ => psKernelTypeReject PsKernelCheckError.invalidState
+          | PsKernelTypeTask.conversion current =>
+              match psKernelConversionStep current with
+              | PsKernelConversionStep.next next =>
+                  psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.conversion next) rest) values
+              | PsKernelConversionStep.final result =>
+                  match result with
+                  | PsKernelConversionResult.equal => psKernelTypeNext env rest values
+                  | PsKernelConversionResult.different => psKernelTypeReject PsKernelCheckError.typeMismatch
+                  | PsKernelConversionResult.rejected error => psKernelTypeReject error
+                  | _ => psKernelTypeReject PsKernelCheckError.invalidState
+          | _ => psKernelTypeValueTask env task rest values
+
+def psKernelInferStart
+    (env : PsKernelList PsKernelDefinition) (value : PsKernelExpr) : PsKernelTypeState :=
+  PsKernelTypeState.state env (PsKernelList.cons (PsKernelTypeTask.infer PsKernelList.nil value) PsKernelList.nil) PsKernelList.nil
+
+def psKernelCheckStart
+    (env : PsKernelList PsKernelDefinition) (value type : PsKernelExpr) : PsKernelTypeState :=
+  PsKernelTypeState.state env (PsKernelList.cons (PsKernelTypeTask.infer PsKernelList.nil type)
+    (PsKernelList.cons PsKernelTypeTask.reduceTop
+      (PsKernelList.cons (PsKernelTypeTask.checkSort value type) PsKernelList.nil))) PsKernelList.nil
+
+def psKernelTypeRun (fuel : PsKernelFuel) : PsKernelTypeState -> PsKernelTypeResult :=
+  match fuel with
+  | PsKernelFuel.stop => fun (state : PsKernelTypeState) => PsKernelTypeResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      fun (state : PsKernelTypeState) =>
+        match psKernelTypeStep state with
+        | PsKernelTypeStep.final result => result
+        | PsKernelTypeStep.next next =>
+            let smaller : PsKernelTypeState -> PsKernelTypeResult := psKernelTypeRun remaining;
+            smaller next
+
+
+
+/- Fresh, sequential replay of closed monomorphic transparent definitions.
+No axiom form, self-reference, forward-reference or caller supplied environment.
+A failure returns NO environment. These are internal values, not public handles. -/
+inductive PsKernelAdmissionState where
+  | pending (environment : PsKernelList PsKernelDefinition) (entries : PsKernelList PsKernelDefinition)
+  | duplicate (environment : PsKernelList PsKernelDefinition) (entry : PsKernelDefinition)
+      (rest : PsKernelList PsKernelDefinition) (state : PsKernelLookupState)
+  | checking (environment : PsKernelList PsKernelDefinition) (entry : PsKernelDefinition)
+      (rest : PsKernelList PsKernelDefinition) (state : PsKernelTypeState)
+
+inductive PsKernelAdmissionResult where
+  | outOfFuel
+  | rejected (error : PsKernelCheckError)
+  | admitted (environment : PsKernelList PsKernelDefinition)
+
+inductive PsKernelAdmissionStep where
+  | next (state : PsKernelAdmissionState)
+  | final (result : PsKernelAdmissionResult)
+
+def psKernelAdmissionReject (error : PsKernelCheckError) : PsKernelAdmissionStep :=
+  PsKernelAdmissionStep.final (PsKernelAdmissionResult.rejected error)
+
+def psKernelAdmissionStep (state : PsKernelAdmissionState) : PsKernelAdmissionStep :=
+  match state with
+  | PsKernelAdmissionState.pending env entries =>
+      match entries with
+      | PsKernelList.nil => PsKernelAdmissionStep.final (PsKernelAdmissionResult.admitted env)
+      | PsKernelList.cons entry rest =>
+          match entry with
+          | PsKernelDefinition.definition name unusedType unusedValue =>
+              match name with
+              | PsKernelName.anonymous => psKernelAdmissionReject PsKernelCheckError.invalidName
+              | _ => PsKernelAdmissionStep.next (PsKernelAdmissionState.duplicate env entry rest
+                  (PsKernelLookupState.search name env))
+  | PsKernelAdmissionState.duplicate env entry rest current =>
+      match psKernelLookupStep current with
+      | PsKernelLookupStep.next next => PsKernelAdmissionStep.next (PsKernelAdmissionState.duplicate env entry rest next)
+      | PsKernelLookupStep.found unusedEntry => psKernelAdmissionReject PsKernelCheckError.duplicateName
+      | PsKernelLookupStep.invalidState => psKernelAdmissionReject PsKernelCheckError.invalidState
+      | PsKernelLookupStep.missing =>
+          match entry with
+          | PsKernelDefinition.definition unusedName type value =>
+              PsKernelAdmissionStep.next (PsKernelAdmissionState.checking env entry rest (psKernelCheckStart env value type))
+  | PsKernelAdmissionState.checking env entry rest current =>
+      match psKernelTypeStep current with
+      | PsKernelTypeStep.next next => PsKernelAdmissionStep.next (PsKernelAdmissionState.checking env entry rest next)
+      | PsKernelTypeStep.final result =>
+          match result with
+          | PsKernelTypeResult.done unusedType =>
+              PsKernelAdmissionStep.next (PsKernelAdmissionState.pending (PsKernelList.cons entry env) rest)
+          | PsKernelTypeResult.rejected error => psKernelAdmissionReject error
+          | _ => psKernelAdmissionReject PsKernelCheckError.invalidState
+
+def psKernelAdmissionStart (entries : PsKernelList PsKernelDefinition) : PsKernelAdmissionState :=
+  PsKernelAdmissionState.pending PsKernelList.nil entries
+
+def psKernelAdmissionRun (fuel : PsKernelFuel) : PsKernelAdmissionState -> PsKernelAdmissionResult :=
+  match fuel with
+  | PsKernelFuel.stop => fun (state : PsKernelAdmissionState) => PsKernelAdmissionResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      fun (state : PsKernelAdmissionState) =>
+        match psKernelAdmissionStep state with
+        | PsKernelAdmissionStep.final result => result
+        | PsKernelAdmissionStep.next next =>
+            let smaller : PsKernelAdmissionState -> PsKernelAdmissionResult := psKernelAdmissionRun remaining;
+            smaller next
+

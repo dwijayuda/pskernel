@@ -159,9 +159,15 @@ lean_lib PsElab where
     `Ps.Elab.Declaration
   ]
 
-lean_lib PsKernelCore where
+lean_lib PsKernelOwned where
   srcDir := "packages/pskernel-core/src"
-  roots := #[`Ps.KernelCore]
+  roots := #[
+    `Ps.Kernel.Data, `Ps.Kernel.Structural, `Ps.Kernel.Natural,
+    `Ps.Kernel.Expr, `Ps.Kernel.Binding, `Ps.Kernel.Order,
+    `Ps.Kernel.Universe, `Ps.Kernel.LevelCheck, `Ps.Kernel.Environment,
+    `Ps.Kernel.Reduction, `Ps.Kernel.Conversion, `Ps.Kernel.TypeCheck,
+    `Ps.Kernel.Admission
+  ]
 
 lean_lib PSC1KernelReferenceFoundations where
   srcDir := "packages/pskernel"
@@ -239,22 +245,6 @@ lean_exe psc2_minimal_selfhost_tests where
 lean_exe psc2_prod_match_selfhost_tests where
   srcDir := "test"
   root := `ProdMatchSelfHostTests
-
-lean_exe psc2_kernel_core_boundary_tests where
-  srcDir := "test"
-  root := `KernelCoreBoundaryTests
-
-lean_exe psc2_kernel_core_name_parity_tests where
-  srcDir := "test"
-  root := `KernelCoreNameParityTests
-
-lean_exe psc2_kernel_core_level_parity_tests where
-  srcDir := "test"
-  root := `KernelCoreLevelParityTests
-
-lean_exe psc2_kernel_core_expr_parity_tests where
-  srcDir := "test"
-  root := `KernelCoreExprParityTests
 
 -- Host-only diagnostics; this executable is not a portable bootstrap module.
 lean_exe psc2_selfhost_replay_audit where

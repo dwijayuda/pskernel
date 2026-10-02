@@ -1,11 +1,48 @@
 {
   "name": "@proofscript/pskernel-core",
-  "version": "0.0.0-dev",
+  "version": "0.1.0-checker.0",
   "private": true,
+  "description": "Owned PSC-compiled dependent term-checker fragment; private experimental checkpoint, not an authoritative kernel",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/metadata.d.ts",
+      "import": "./src/metadata.mjs"
+    }
+  },
+  "files": [
+    "src",
+    "dist",
+    "manifests",
+    "scripts",
+    "test",
+    "README.md",
+    "ARCHITECTURE.md",
+    "FOUNDATION.md",
+    "BINDING_UNIVERSES.md",
+    "CHECKER.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "check:source": "node scripts/source.mjs",
+    "build": "node scripts/build.mjs",
+    "verify:build": "node scripts/verify-build.mjs",
+    "test:oracle": "node scripts/oracle.mjs",
+    "prepack": "node scripts/verify-build.mjs && node scripts/verify-evidence.mjs",
+    "test:semantic-oracle": "node scripts/semantic-oracle.mjs",
+    "test:level-differential": "node scripts/level-differential.mjs",
+    "release:check": "node scripts/release-check.mjs",
+    "prepublishOnly": "node scripts/release-check.mjs",
+    "test:checker-oracle": "node scripts/checker-oracle.mjs",
+    "test:checker-differential": "node scripts/checker-differential.mjs",
+    "verify:evidence": "node scripts/verify-evidence.mjs"
+  },
+  "dependencies": {},
   "proofscript": {
     "bootstrap": false,
-    "portable": true,
+    "portable": false,
+    "targetPortable": true,
     "sourceRoots": [
       "src"
     ],
@@ -13,6 +50,7 @@
       "test"
     ],
     "outDir": "dist",
-    "role": "minimal-trusted-kernel"
+    "role": "independent-kernel-experimental-checker",
+    "authoritative": false
   }
 }

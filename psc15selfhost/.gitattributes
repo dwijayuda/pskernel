@@ -1,0 +1,2 @@
+# Preserve the transferred package's source, generated output and evidence hashes.
+packages/pskernel-core/** -text

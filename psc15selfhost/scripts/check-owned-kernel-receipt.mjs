@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { packageBySection } from './workspace-layout.mjs';
+import { bootstrapPackageViolation } from './bootstrap-closure-contract.mjs';
+import { defaultCheckedKernel } from './checked-kernel-provider.mjs';
+import '../packages/pskernel-core/scripts/verify-evidence.mjs';
+
+const manifest = JSON.parse(await readFile(new URL('../packages/pskernel-core/package.json', import.meta.url), 'utf8'));
+assert.equal(manifest.version, '0.1.0-checker.0');
+assert.equal(manifest.private, true);
+assert.equal(manifest.proofscript.authoritative, false);
+assert.equal(manifest.proofscript.bootstrap, false);
+assert(!existsSync(new URL('../packages/pskernel-core.old', import.meta.url)));
+assert(!packageBySection.has('KernelCore'));
+assert.equal(packageBySection.get('Kernel'), 'pskernel-core');
+for (const name of ['pskernel-core', 'pskernel-core.old']) assert(bootstrapPackageViolation(name));
+assert.equal(defaultCheckedKernel, 'lean434-wasm');
+const lake = await readFile(new URL('../lakefile.lean', import.meta.url), 'utf8');
+assert(!lake.includes('lean_lib PsKernelCore where'));
+console.log('PSC2_OWNED_KERNEL_RECEIPT: PASS (checker identities, retired legacy routing, separate closure and unchanged default)');

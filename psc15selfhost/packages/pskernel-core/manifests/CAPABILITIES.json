@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "package": "@proofscript/pskernel-core",
+  "version": "0.1.0-checker.0",
+  "status": "experimental-term-checker",
+  "canCheckProofs": false,
+  "authoritative": false,
+  "selfHosted": false,
+  "fullLeanCompatibilityVerified": false,
+  "targetLeanVersion": "4.34.0",
+  "targetLeanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "implemented": [
+    "owned-expressions",
+    "exact-binary-arithmetic",
+    "binding-lift-instantiate-abstract",
+    "variable-scope-traversal",
+    "bounded-level-normalization",
+    "bounded-normalize-compare",
+    "shared-budget-beta-zeta-transparent-delta-reduction",
+    "conservative-alpha-normal-form-conversion",
+    "dependent-Pi-lambda-application-let-typing",
+    "closed-monomorphic-sequential-definition-admission"
+  ],
+  "boundedEvidence": [
+    "BUILD.json",
+    "ORACLE.json",
+    "SEMANTIC_ORACLE.json",
+    "LEVEL_DIFFERENTIAL.json",
+    "CHECKER_ORACLE.json",
+    "CHECKER_DIFFERENTIAL.json"
+  ],
+  "releaseGates": {
+    "term-checking": {
+      "status": "partial",
+      "evidence": "CHECKER_DIFFERENTIAL.json; CHECKER_ORACLE.json; fragment only"
+    },
+    "conversion": {
+      "status": "partial",
+      "evidence": "CHECKER_DIFFERENTIAL.json; CHECKER_ORACLE.json; fragment only"
+    },
+    "inductive-admission": {
+      "status": "pending",
+      "evidence": null
+    },
+    "quotient-admission": {
+      "status": "pending",
+      "evidence": null
+    },
+    "primitive-validation": {
+      "status": "pending",
+      "evidence": null
+    },
+    "axiom-policy": {
+      "status": "pending",
+      "evidence": null
+    },
+    "bounded-input-validation": {
+      "status": "pending",
+      "evidence": null
+    },
+    "checked-module-integration": {
+      "status": "pending",
+      "evidence": null
+    },
+    "compiler-kernel-closure": {
+      "status": "pending",
+      "evidence": null
+    },
+    "generated-kernel-fixed-point": {
+      "status": "pending",
+      "evidence": null
+    },
+    "promised-library-replay": {
+      "status": "pending",
+      "evidence": null
+    },
+    "full-workspace-ci": {
+      "status": "pending",
+      "evidence": null
+    },
+    "license-and-attribution": {
+      "status": "pending",
+      "evidence": null
+    },
+    "release-provenance": {
+      "status": "pending",
+      "evidence": null
+    }
+  },
+  "explicitlyUnsupported": [
+    "universe-parameter-instantiation",
+    "proof-irrelevance-conversion",
+    "function-and-structure-eta",
+    "inductive-and-recursor-admission",
+    "quotient-admission",
+    "literal-and-projection-typing",
+    "primitive-and-prelude-validation",
+    "axiom-and-opaque-declaration-admission",
+    "hostile-input-decoder",
+    "public-CheckedModule"
+  ]
+}

@@ -42,5 +42,5 @@ export function runtimeFuel(k,count) {
 export function runCase(k, c) {
   const convert = c.kind === 'name' ? runtimeName : c.kind === 'level' ? runtimeLevel : runtimeNatural;
   const task=k.PsKernelCompareTask[c.kind](convert(k,c.left),convert(k,c.right));
-  return k.psKernelCompareTasks(runtimeFuel(k,c.fuel))(k.PsKernelList.cons(task,k.PsKernelList.nil()));
+  return k.psKernelCompareTasks(runtimeFuel(k,c.fuel),k.PsKernelList.cons(task,k.PsKernelList.nil()));
 }

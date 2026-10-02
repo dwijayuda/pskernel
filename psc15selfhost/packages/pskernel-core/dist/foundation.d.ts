@@ -590,7 +590,7 @@ export type PsKernelUniverseTask = {
     readonly todo: PsKernelList<PsKernelLevel>;
     readonly candidate: PsKernelLevel;
     readonly scan: PsKernelList<PsKernelLevel>;
-    readonly prefix: PsKernelList<PsKernelLevel>;
+    readonly prefixRev: PsKernelList<PsKernelLevel>;
 } | {
     readonly [__ps$tag$31]: "insertCompare";
     readonly offset: PsKernelNatural;
@@ -598,7 +598,7 @@ export type PsKernelUniverseTask = {
     readonly candidate: PsKernelLevel;
     readonly current: PsKernelLevel;
     readonly tail: PsKernelList<PsKernelLevel>;
-    readonly prefix: PsKernelList<PsKernelLevel>;
+    readonly prefixRev: PsKernelList<PsKernelLevel>;
     readonly work: PsKernelList<PsKernelOrderTask>;
 } | {
     readonly [__ps$tag$31]: "insertOffset";
@@ -607,13 +607,13 @@ export type PsKernelUniverseTask = {
     readonly candidate: PsKernelLevel;
     readonly current: PsKernelLevel;
     readonly tail: PsKernelList<PsKernelLevel>;
-    readonly prefix: PsKernelList<PsKernelLevel>;
+    readonly prefixRev: PsKernelList<PsKernelLevel>;
     readonly numeric: PsKernelNumericState;
 } | {
     readonly [__ps$tag$31]: "restore";
     readonly offset: PsKernelNatural;
     readonly todo: PsKernelList<PsKernelLevel>;
-    readonly prefix: PsKernelList<PsKernelLevel>;
+    readonly prefixRev: PsKernelList<PsKernelLevel>;
     readonly suffix: PsKernelList<PsKernelLevel>;
 } | {
     readonly [__ps$tag$31]: "prune";
@@ -1163,7 +1163,7 @@ export declare const PsKernelAdmissionStep: {
     readonly next: (__field0: PsKernelAdmissionState) => PsKernelAdmissionStep;
     readonly final: (__field0: PsKernelAdmissionResult) => PsKernelAdmissionStep;
 };
-export declare function psKernelCompareTasks(fuel: PsKernelFuel): (_arg0: PsKernelList<PsKernelCompareTask>) => PsKernelCompareResult;
+export declare function psKernelCompareTasks(fuel: PsKernelFuel, __ps_eta_0: PsKernelList<PsKernelCompareTask>): PsKernelCompareResult;
 export declare function psKernelPositiveSucc(value: PsKernelPositive): PsKernelPositive;
 export declare function psKernelNaturalSucc(value: PsKernelNatural): PsKernelNatural;
 export declare function psKernelPositivePred(value: PsKernelPositive): PsKernelNatural;
@@ -1173,7 +1173,7 @@ export declare function psKernelNaturalDoubleBit(value: PsKernelNatural, bit: Ps
 export declare function psKernelNumericAddContinue(left: PsKernelNatural, right: PsKernelNatural, carry: PsKernelBit, bit: PsKernelBit, bits: PsKernelList<PsKernelBit>): PsKernelNumericStep;
 export declare function psKernelNumericAddDigits(left: PsKernelNatural, right: PsKernelNatural, a: PsKernelBit, b: PsKernelBit, carry: PsKernelBit, bits: PsKernelList<PsKernelBit>): PsKernelNumericStep;
 export declare function psKernelNumericStep(state: PsKernelNumericState): PsKernelNumericStep;
-export declare function psKernelNumericRun(fuel: PsKernelFuel): (_arg0: PsKernelNumericState) => PsKernelNumericResult;
+export declare function psKernelNumericRun(fuel: PsKernelFuel, __ps_eta_0: PsKernelNumericState): PsKernelNumericResult;
 export declare function psKernelBindingPush(tasks: PsKernelList<PsKernelBindingTask>, values: PsKernelList<PsKernelExpr>, value: PsKernelExpr): PsKernelBindingStep;
 export declare function psKernelBindingAfterOrder(mode: PsKernelBindingMode, depth: PsKernelNatural, index: PsKernelNatural, order: PsKernelOrder, tasks: PsKernelList<PsKernelBindingTask>, values: PsKernelList<PsKernelExpr>): PsKernelBindingStep;
 export declare function psKernelBindingVisit(mode: PsKernelBindingMode, depth: PsKernelNatural, value: PsKernelExpr, tasks: PsKernelList<PsKernelBindingTask>, values: PsKernelList<PsKernelExpr>): PsKernelBindingStep;
@@ -1181,7 +1181,7 @@ export declare function psKernelBindingRebuild(task: PsKernelBindingTask, tasks:
 export declare function psKernelBindingFinish(values: PsKernelList<PsKernelExpr>): PsKernelBindingResult;
 export declare function psKernelBindingStep(state: PsKernelBindingState): PsKernelBindingStep;
 export declare function psKernelBindingStart(mode: PsKernelBindingMode, depth: PsKernelNatural, value: PsKernelExpr): PsKernelBindingState;
-export declare function psKernelBindingRun(fuel: PsKernelFuel): (_arg0: PsKernelBindingState) => PsKernelBindingResult;
+export declare function psKernelBindingRun(fuel: PsKernelFuel, __ps_eta_0: PsKernelBindingState): PsKernelBindingResult;
 export declare function psKernelOrderStep(tasks: PsKernelList<PsKernelOrderTask>): PsKernelOrderStep;
 export declare function psKernelLevelOffset(value: PsKernelLevel): PsKernelLevelOffset;
 export declare function psKernelLevelNeverZero(value: PsKernelLevel): PsKernelFlag;
@@ -1194,10 +1194,10 @@ export declare function psKernelUniverseProbes(left: PsKernelLevel, right: PsKer
 export declare function psKernelUniverseFinish(values: PsKernelList<PsKernelLevel>): PsKernelUniverseResult;
 export declare function psKernelUniverseStep(state: PsKernelUniverseState): PsKernelUniverseStep;
 export declare function psKernelUniverseStart(value: PsKernelLevel): PsKernelUniverseState;
-export declare function psKernelUniverseRun(fuel: PsKernelFuel): (_arg0: PsKernelUniverseState) => PsKernelUniverseResult;
+export declare function psKernelUniverseRun(fuel: PsKernelFuel, __ps_eta_0: PsKernelUniverseState): PsKernelUniverseResult;
 export declare function psKernelLevelCheckStart(left: PsKernelLevel, right: PsKernelLevel): PsKernelLevelCheckState;
 export declare function psKernelLevelCheckStep(state: PsKernelLevelCheckState): PsKernelLevelCheckStep;
-export declare function psKernelLevelCheckRun(fuel: PsKernelFuel): (_arg0: PsKernelLevelCheckState) => PsKernelLevelCheckResult;
+export declare function psKernelLevelCheckRun(fuel: PsKernelFuel, __ps_eta_0: PsKernelLevelCheckState): PsKernelLevelCheckResult;
 export declare function psKernelLookupStep(state: PsKernelLookupState): PsKernelLookupStep;
 export declare function psKernelReduceReject(error: PsKernelCheckError): PsKernelReduceStep;
 export declare function psKernelReduceNext(env: PsKernelList<PsKernelDefinition>, tasks: PsKernelList<PsKernelReduceTask>, values: PsKernelList<PsKernelExpr>): PsKernelReduceStep;
@@ -1207,13 +1207,13 @@ export declare function psKernelReduceValueTask(env: PsKernelList<PsKernelDefini
 export declare function psKernelReduceStep(state: PsKernelReduceState): PsKernelReduceStep;
 export declare function psKernelWhnfStart(env: PsKernelList<PsKernelDefinition>, value: PsKernelExpr): PsKernelReduceState;
 export declare function psKernelNormalStart(env: PsKernelList<PsKernelDefinition>, value: PsKernelExpr): PsKernelReduceState;
-export declare function psKernelReduceRun(fuel: PsKernelFuel): (_arg0: PsKernelReduceState) => PsKernelReduceResult;
+export declare function psKernelReduceRun(fuel: PsKernelFuel, __ps_eta_0: PsKernelReduceState): PsKernelReduceResult;
 export declare function psKernelConversionReject(error: PsKernelCheckError): PsKernelConversionStep;
 export declare function psKernelConversionTasks(tasks: PsKernelList<PsKernelConversionTask>): PsKernelConversionStep;
 export declare function psKernelConversionExpr(left: PsKernelExpr, right: PsKernelExpr, tasks: PsKernelList<PsKernelConversionTask>): PsKernelConversionStep;
 export declare function psKernelConversionStep(state: PsKernelConversionState): PsKernelConversionStep;
 export declare function psKernelConversionStart(env: PsKernelList<PsKernelDefinition>, left: PsKernelExpr, right: PsKernelExpr): PsKernelConversionState;
-export declare function psKernelConversionRun(fuel: PsKernelFuel): (_arg0: PsKernelConversionState) => PsKernelConversionResult;
+export declare function psKernelConversionRun(fuel: PsKernelFuel, __ps_eta_0: PsKernelConversionState): PsKernelConversionResult;
 export declare function psKernelTypeReject(error: PsKernelCheckError): PsKernelTypeStep;
 export declare function psKernelTypeNext(env: PsKernelList<PsKernelDefinition>, tasks: PsKernelList<PsKernelTypeTask>, values: PsKernelList<PsKernelExpr>): PsKernelTypeStep;
 export declare function psKernelTypePush(env: PsKernelList<PsKernelDefinition>, tasks: PsKernelList<PsKernelTypeTask>, values: PsKernelList<PsKernelExpr>, value: PsKernelExpr): PsKernelTypeStep;
@@ -1223,9 +1223,9 @@ export declare function psKernelTypeLevels(env: PsKernelList<PsKernelDefinition>
 export declare function psKernelTypeStep(state: PsKernelTypeState): PsKernelTypeStep;
 export declare function psKernelInferStart(env: PsKernelList<PsKernelDefinition>, value: PsKernelExpr): PsKernelTypeState;
 export declare function psKernelCheckStart(env: PsKernelList<PsKernelDefinition>, value: PsKernelExpr, type: PsKernelExpr): PsKernelTypeState;
-export declare function psKernelTypeRun(fuel: PsKernelFuel): (_arg0: PsKernelTypeState) => PsKernelTypeResult;
+export declare function psKernelTypeRun(fuel: PsKernelFuel, __ps_eta_0: PsKernelTypeState): PsKernelTypeResult;
 export declare function psKernelAdmissionReject(error: PsKernelCheckError): PsKernelAdmissionStep;
 export declare function psKernelAdmissionStep(state: PsKernelAdmissionState): PsKernelAdmissionStep;
 export declare function psKernelAdmissionStart(entries: PsKernelList<PsKernelDefinition>): PsKernelAdmissionState;
-export declare function psKernelAdmissionRun(fuel: PsKernelFuel): (_arg0: PsKernelAdmissionState) => PsKernelAdmissionResult;
+export declare function psKernelAdmissionRun(fuel: PsKernelFuel, __ps_eta_0: PsKernelAdmissionState): PsKernelAdmissionResult;
 export {};

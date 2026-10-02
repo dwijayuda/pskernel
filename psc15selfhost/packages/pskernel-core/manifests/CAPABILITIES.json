@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "package": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.0",
+  "version": "0.1.0-checker.1",
   "status": "experimental-term-checker",
   "canCheckProofs": false,
   "authoritative": false,

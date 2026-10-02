@@ -17,7 +17,7 @@ case'let':return E.letE(runtimeName(k,x[1]),expression(x[2]),expression(x[3]),ex
 case'nat':return E.lit(k.PsKernelLiteral.natural(nat(x[1])));case'text':return E.lit(k.PsKernelLiteral.text(runtimeText(k,x[1])));
 case'proj':return E.proj(runtimeName(k,x[1]),nat(x[2]),expression(x[3]));default:throw Error('unknown fixture expression');}}
 export function mode(x){switch(x[0]){case'lift':return k.PsKernelBindingMode.lift(nat(x[1]));case'instantiate':return k.PsKernelBindingMode.instantiate(expression(x[1]));case'abstract':return k.PsKernelBindingMode.abstract(nat(x[1]));case'closed':return k.PsKernelBindingMode.closed;default:throw Error('unknown fixture mode');}}
-export const runBinding=(c,budget=c.fuel??1024)=>k.psKernelBindingRun(runtimeFuel(k,budget))(k.psKernelBindingStart(mode(c.mode),nat(c.depth??'0'),expression(c.input)));
+export const runBinding=(c,budget=c.fuel??1024)=>k.psKernelBindingRun(runtimeFuel(k,budget),k.psKernelBindingStart(mode(c.mode),nat(c.depth??'0'),expression(c.input)));
 export const checkExpected=c=>c.status==='done'?k.PsKernelBindingResult.done(expression(c.expected)):k.PsKernelBindingResult[c.status];
 export function spec(x,op,depth=0n){switch(x[0]){
 case'b':{const i=BigInt(x[1]);if(op[0]==='closed'){if(i>=depth)throw Error('scope');return x;}if(op[0]==='lift')return['b',String(i<depth?i:i+BigInt(op[1]))];if(op[0]==='abstract')return x;return i<depth?x:i===depth?spec(op[1],['lift',String(depth)],0n):['b',String(i-1n)];}

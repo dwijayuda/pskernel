@@ -11,7 +11,7 @@ import {randomGenerator} from '../test/binding-values.mjs';
 const pin=json(path.join(root,'manifests/TOOLCHAIN.json'));
 const provider=checkedTool(process.env.LEAN_PROVIDER,pin.leanProviderSha256,'LEAN_PROVIDER');
 function call(args,input){
- const p=spawnSync(provider,args,{input,encoding:'utf8',timeout:20000,maxBuffer:8*1024*1024});
+ const p=spawnSync(provider,args,{input,encoding:'utf8',timeout:120000,maxBuffer:8*1024*1024});
  if(p.error||p.signal||p.status!==0)throw p.error||Error('NATIVE_PROCESS_FAILED');
  const r=JSON.parse(p.stdout);
  if(r.protocol!=='pskernel-lean/1'||r.provider!=='lean4-cpp'||r.leanVersion!==pin.leanVersion||r.leanCommit!==pin.leanCommit||r.profile!=='lean4.34-core')throw Error('NATIVE_IDENTITY_MISMATCH');
@@ -62,6 +62,7 @@ for(const c of [...corpus,...gaps.map(g=>({...g,group:'known-completeness-gap',p
   if(own.status!=='rejected'||own.error!=='typeMismatch'||result.accepted!==true)throw Error('GAP_EXPECTATION_CHANGED:'+c.name);
  }else if((own.status==='done')!==result.accepted)throw Error('UNEXPECTED_CHECKER_MISMATCH:'+JSON.stringify(record));
  records.push(record);
+ if(records.length%50===0)console.log('PSKERNEL_CHECKER_DIFFERENTIAL_PROGRESS: '+records.length);
 }
 const comparable=records.filter(x=>x.group!=='known-completeness-gap');
 const report={schemaVersion:1,scope:'Actual closed monomorphic term judgments; bounded differential evidence, not full compatibility or a soundness proof',sourceManifestSha256:sha256(fs.readFileSync(path.join(root,'manifests/SOURCE.json'))),harnessSha256:sha256(fs.readFileSync(fileURLToPath(import.meta.url))),provider:identityPin,providerSha256:pin.leanProviderSha256,comparableCases:comparable.length,matched:comparable.length,accepted:comparable.filter(x=>x.nativeAccepted).length,rejected:comparable.filter(x=>!x.nativeAccepted).length,knownCompletenessGaps:gaps.map(x=>x.name),excluded,records};

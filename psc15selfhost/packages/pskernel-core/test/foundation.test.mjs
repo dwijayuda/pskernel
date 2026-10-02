@@ -8,7 +8,7 @@ for (const c of cases) test(c.label, () => {
   if (c.expected !== 'outOfFuel') assert.equal(runCase(k,{...c,fuel:1024}), k.PsKernelCompareResult[c.expected], 'additional fuel must preserve a result');
 });
 test('empty worklist finishes with no fuel',()=> {
-  assert.equal(k.psKernelCompareTasks(k.PsKernelFuel.stop)(k.PsKernelList.nil()),k.PsKernelCompareResult.equal);
+  assert.equal(k.psKernelCompareTasks(k.PsKernelFuel.stop,k.PsKernelList.nil()),k.PsKernelCompareResult.equal);
 });
 test('exhaustion is not converted into inequality',()=> {
   assert.notEqual(k.PsKernelCompareResult.outOfFuel,k.PsKernelCompareResult.different);
@@ -22,8 +22,8 @@ test('all 256 small natural pairs preserve exact equality',()=> {
 test('global fuel is shared across independent queued comparisons',()=> {
   const t=k.PsKernelCompareTask.name(k.PsKernelName.anonymous,k.PsKernelName.anonymous);
   const tasks=k.PsKernelList.cons(t,k.PsKernelList.cons(t,k.PsKernelList.nil()));
-  assert.equal(k.psKernelCompareTasks(runtimeFuel(k,1))(tasks),k.PsKernelCompareResult.outOfFuel);
-  assert.equal(k.psKernelCompareTasks(runtimeFuel(k,2))(tasks),k.PsKernelCompareResult.equal);
+  assert.equal(k.psKernelCompareTasks(runtimeFuel(k,1),tasks),k.PsKernelCompareResult.outOfFuel);
+  assert.equal(k.psKernelCompareTasks(runtimeFuel(k,2),tasks),k.PsKernelCompareResult.equal);
 });
 test('separately allocated data compare without object-identity assumptions',()=> {
   const n=k.PsKernelName, t=k.PsKernelCompareTask, l=k.PsKernelList;
@@ -31,6 +31,6 @@ test('separately allocated data compare without object-identity assumptions',()=
   assert.notEqual(a,b);
   const input=l.cons(t.name(a,b),l.nil());
   const before=JSON.stringify(input);
-  assert.equal(k.psKernelCompareTasks(runtimeFuel(k,256))(input),k.PsKernelCompareResult.equal);
+  assert.equal(k.psKernelCompareTasks(runtimeFuel(k,256),input),k.PsKernelCompareResult.equal);
   assert.equal(JSON.stringify(input),before,'comparison must not mutate supplied well-formed data');
 });

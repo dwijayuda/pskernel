@@ -1,13 +1,18 @@
 {
   "schemaVersion": 1,
   "repository": "dwijayuda/pskernel",
-  "seedSourceCommit": "c680b2016ff8e23bdae2bc102128b1308fb5a324",
-  "artifactId": 11198192443,
-  "artifactSha256": "bde07a8a560d36bb7caacdfdd69aa6ca1d9ccff68eb31bd1d264f4189ab79012",
-  "psc1Sha256": "eeb3f49197d142a7412cf3658c6138d2d56ec8e721338a804111a7e61ab68a99",
-  "leanProviderSha256": "98929458d0b29e6a5bc477f748219252b2d8d71861c8a1973869ed1711992ce0",
+  "seedSourceCommit": "1a7dff298f3f83739750e3f35e2791f708749c50",
+  "psc1Sha256": "b9ddd63381771f92a8751a8366983279130090cf416667103b5fe94f7f3e3244",
+  "leanProviderSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
   "typescriptVersion": "5.8.3",
   "leanVersion": "4.34.0",
   "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
-  "note": "Historical CI artifact used as an explicit build/oracle seed, not a runtime dependency or a claim that the complete integration workflow passed. No automatic download."
+  "note": "Locally built Windows seed at the recorded source commit and exact Lean 4.34 pin. Separate measured regeneration; previous checkpoint evidence remains in its recorded Git commit. No automatic download or fallback.",
+  "previousCheckpoint": {
+    "version": "0.1.0-checker.0",
+    "integrationCommit": "7f8c078efbc95616148e5eda5946a3f4b557a75e",
+    "seedSourceCommit": "c680b2016ff8e23bdae2bc102128b1308fb5a324",
+    "artifactId": 11198192443,
+    "artifactSha256": "bde07a8a560d36bb7caacdfdd69aa6ca1d9ccff68eb31bd1d264f4189ab79012"
+  }
 }

@@ -7,7 +7,7 @@ import { defaultCheckedKernel } from './checked-kernel-provider.mjs';
 import '../packages/pskernel-core/scripts/verify-evidence.mjs';
 
 const manifest = JSON.parse(await readFile(new URL('../packages/pskernel-core/package.json', import.meta.url), 'utf8'));
-assert.equal(manifest.version, '0.1.0-checker.0');
+assert.equal(manifest.version, '0.1.0-checker.1');
 assert.equal(manifest.private, true);
 assert.equal(manifest.proofscript.authoritative, false);
 assert.equal(manifest.proofscript.bootstrap, false);

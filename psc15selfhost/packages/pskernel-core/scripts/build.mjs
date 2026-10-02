@@ -10,7 +10,9 @@ const seed = fs.realpathSync(process.env.PSC1);
 if (sha256(fs.readFileSync(seed)) !== pin.psc1Sha256) throw Error('PSC1_DIGEST_MISMATCH');
 const tsc = process.env.TSC || 'tsc';
 const run = (exe, args) => execFileSync(exe, args, { encoding: 'utf8', timeout: 60000, maxBuffer: 16 * 1024 * 1024 });
-const tscVersion = run(tsc, ['--version']).trim();
+// An explicit installed JS CLI also works on Windows without a shell shim.
+const runTsc = args => /\.[cm]?js$/u.test(tsc) ? run(process.execPath, [tsc, ...args]) : run(tsc, args);
+const tscVersion = runTsc(['--version']).trim();
 if (tscVersion !== `Version ${pin.typescriptVersion}`) throw Error('TYPESCRIPT_VERSION_MISMATCH');
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'pskernel-core-build-'));
 try {
@@ -23,7 +25,7 @@ try {
   if (!leanTs.trim() || leanTs !== psTs) throw Error('CANONICAL_PS_EMISSION_MISMATCH');
   fs.writeFileSync(path.join(temporary, 'foundation.ts'), leanTs);
   const output = path.join(temporary, 'output');
-  run(tsc, ['--strict', '--target', 'ES2022', '--module', 'ES2022', '--declaration', '--noEmitOnError', '--outDir', output, path.join(temporary, 'foundation.ts')]);
+  runTsc(['--strict', '--target', 'ES2022', '--module', 'ES2022', '--declaration', '--noEmitOnError', '--outDir', output, path.join(temporary, 'foundation.ts')]);
   fs.copyFileSync(ps, path.join(output, 'foundation.ps'));
   fs.copyFileSync(lean, path.join(output, 'foundation.lean'));
   fs.copyFileSync(path.join(temporary, 'foundation.ts'), path.join(output, 'foundation.ts'));

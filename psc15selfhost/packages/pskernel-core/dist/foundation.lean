@@ -725,10 +725,10 @@ inductive PsKernelUniverseTask where
   | probeCompare (left : PsKernelLevel) (right : PsKernelLevel) (offset : PsKernelNatural) (result : PsKernelLevel) (probes : PsKernelList PsKernelMaxProbe) (work : PsKernelList PsKernelOrderTask)
   | collect (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (leaves : PsKernelList PsKernelLevel)
   | sort (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (sorted : PsKernelList PsKernelLevel)
-  | insert (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (candidate : PsKernelLevel) (scan : PsKernelList PsKernelLevel) (prefix : PsKernelList PsKernelLevel)
-  | insertCompare (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (candidate : PsKernelLevel) (current : PsKernelLevel) (tail : PsKernelList PsKernelLevel) (prefix : PsKernelList PsKernelLevel) (work : PsKernelList PsKernelOrderTask)
-  | insertOffset (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (candidate : PsKernelLevel) (current : PsKernelLevel) (tail : PsKernelList PsKernelLevel) (prefix : PsKernelList PsKernelLevel) (numeric : PsKernelNumericState)
-  | restore (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (prefix : PsKernelList PsKernelLevel) (suffix : PsKernelList PsKernelLevel)
+  | insert (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (candidate : PsKernelLevel) (scan : PsKernelList PsKernelLevel) (prefixRev : PsKernelList PsKernelLevel)
+  | insertCompare (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (candidate : PsKernelLevel) (current : PsKernelLevel) (tail : PsKernelList PsKernelLevel) (prefixRev : PsKernelList PsKernelLevel) (work : PsKernelList PsKernelOrderTask)
+  | insertOffset (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (candidate : PsKernelLevel) (current : PsKernelLevel) (tail : PsKernelList PsKernelLevel) (prefixRev : PsKernelList PsKernelLevel) (numeric : PsKernelNumericState)
+  | restore (offset : PsKernelNatural) (todo : PsKernelList PsKernelLevel) (prefixRev : PsKernelList PsKernelLevel) (suffix : PsKernelList PsKernelLevel)
   | prune (offset : PsKernelNatural) (sorted : PsKernelList PsKernelLevel)
   | constantScan (offset : PsKernelNatural) (constant : PsKernelLevel) (others : PsKernelList PsKernelLevel) (scan : PsKernelList PsKernelLevel)
   | constantCompare (offset : PsKernelNatural) (constant : PsKernelLevel) (others : PsKernelList PsKernelLevel) (scan : PsKernelList PsKernelLevel) (numeric : PsKernelNumericState)
@@ -910,42 +910,42 @@ def psKernelUniverseStep (state : PsKernelUniverseState) : PsKernelUniverseStep 
               match todo with
               | PsKernelList.nil => psKernelUniverseSchedule (PsKernelUniverseTask.prune offset sorted) rest values
               | PsKernelList.cons candidate tail => psKernelUniverseSchedule (PsKernelUniverseTask.insert offset tail candidate sorted PsKernelList.nil) rest values
-          | PsKernelUniverseTask.insert offset todo candidate scan prefix =>
+          | PsKernelUniverseTask.insert offset todo candidate scan prefixRev =>
               match scan with
-              | PsKernelList.nil => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo prefix (PsKernelList.cons candidate PsKernelList.nil)) rest values
+              | PsKernelList.nil => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo prefixRev (PsKernelList.cons candidate PsKernelList.nil)) rest values
               | PsKernelList.cons current tail =>
                   match psKernelLevelOffset candidate with
                   | PsKernelLevelOffset.parts a unusedCountA =>
                       match psKernelLevelOffset current with
                       | PsKernelLevelOffset.parts b unusedCountB => psKernelUniverseSchedule
-                          (PsKernelUniverseTask.insertCompare offset todo candidate current tail prefix
+                          (PsKernelUniverseTask.insertCompare offset todo candidate current tail prefixRev
                             (PsKernelList.cons (PsKernelOrderTask.level a b) PsKernelList.nil)) rest values
-          | PsKernelUniverseTask.insertCompare offset todo candidate current tail prefix work =>
+          | PsKernelUniverseTask.insertCompare offset todo candidate current tail prefixRev work =>
               match psKernelOrderStep work with
-              | PsKernelOrderStep.next next => psKernelUniverseSchedule (PsKernelUniverseTask.insertCompare offset todo candidate current tail prefix next) rest values
+              | PsKernelOrderStep.next next => psKernelUniverseSchedule (PsKernelUniverseTask.insertCompare offset todo candidate current tail prefixRev next) rest values
               | PsKernelOrderStep.invalidState => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
               | PsKernelOrderStep.done order =>
                   match order with
-                  | PsKernelOrder.less => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo prefix
+                  | PsKernelOrder.less => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo prefixRev
                       (PsKernelList.cons candidate (PsKernelList.cons current tail))) rest values
-                  | PsKernelOrder.greater => psKernelUniverseSchedule (PsKernelUniverseTask.insert offset todo candidate tail (PsKernelList.cons current prefix)) rest values
+                  | PsKernelOrder.greater => psKernelUniverseSchedule (PsKernelUniverseTask.insert offset todo candidate tail (PsKernelList.cons current prefixRev)) rest values
                   | PsKernelOrder.same =>
                       match psKernelLevelOffset candidate with
                       | PsKernelLevelOffset.parts unusedA a =>
                           match psKernelLevelOffset current with
                           | PsKernelLevelOffset.parts unusedB b => psKernelUniverseSchedule
-                              (PsKernelUniverseTask.insertOffset offset todo candidate current tail prefix
+                              (PsKernelUniverseTask.insertOffset offset todo candidate current tail prefixRev
                                 (PsKernelNumericState.order a b PsKernelOrder.same)) rest values
-          | PsKernelUniverseTask.insertOffset offset todo candidate current tail prefix numeric =>
+          | PsKernelUniverseTask.insertOffset offset todo candidate current tail prefixRev numeric =>
               match psKernelNumericStep numeric with
-              | PsKernelNumericStep.next next => psKernelUniverseSchedule (PsKernelUniverseTask.insertOffset offset todo candidate current tail prefix next) rest values
+              | PsKernelNumericStep.next next => psKernelUniverseSchedule (PsKernelUniverseTask.insertOffset offset todo candidate current tail prefixRev next) rest values
               | PsKernelNumericStep.ordered order =>
                   match order with
-                  | PsKernelOrder.greater => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo prefix (PsKernelList.cons candidate tail)) rest values
-                  | _ => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo prefix (PsKernelList.cons current tail)) rest values
+                  | PsKernelOrder.greater => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo prefixRev (PsKernelList.cons candidate tail)) rest values
+                  | _ => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo prefixRev (PsKernelList.cons current tail)) rest values
               | _ => PsKernelUniverseStep.final PsKernelUniverseResult.invalidState
-          | PsKernelUniverseTask.restore offset todo prefix suffix =>
-              match prefix with
+          | PsKernelUniverseTask.restore offset todo prefixRev suffix =>
+              match prefixRev with
               | PsKernelList.nil => psKernelUniverseSchedule (PsKernelUniverseTask.sort offset todo suffix) rest values
               | PsKernelList.cons head tail => psKernelUniverseSchedule (PsKernelUniverseTask.restore offset todo tail (PsKernelList.cons head suffix)) rest values
           | PsKernelUniverseTask.prune offset sorted =>

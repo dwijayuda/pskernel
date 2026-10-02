@@ -7,7 +7,7 @@ import{levelCheck,normalize,decodeLevel,randomGenerator,randomLevel,P,S,M,I,Z}fr
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');verifySource(root);
 const tools=JSON.parse(fs.readFileSync(path.join(root,'manifests/TOOLCHAIN.json'),'utf8')),provider=checkedTool(process.env.LEAN_PROVIDER,tools.leanProviderSha256,'LEAN_PROVIDER');
 const hash=x=>createHash('sha256').update(x).digest('hex');
-const call=(args,input)=>{const r=spawnSync(provider,args,{input,encoding:'utf8',timeout:20000,maxBuffer:4*1024*1024});if(r.error||r.signal)throw r.error||Error('ORACLE_SIGNAL:'+r.signal);const result=JSON.parse(r.stdout);if(result.protocol!=='pskernel-lean/1'||result.provider!=='lean4-cpp'||result.leanVersion!==tools.leanVersion||result.leanCommit!==tools.leanCommit||result.profile!=='lean4.34-core')throw Error('ORACLE_RESPONSE_IDENTITY');return result;};
+const call=(args,input)=>{const r=spawnSync(provider,args,{input,encoding:'utf8',timeout:120000,maxBuffer:4*1024*1024});if(r.error||r.signal)throw r.error||Error('ORACLE_SIGNAL:'+r.signal);const result=JSON.parse(r.stdout);if(result.protocol!=='pskernel-lean/1'||result.provider!=='lean4-cpp'||result.leanVersion!==tools.leanVersion||result.leanCommit!==tools.leanCommit||result.profile!=='lean4.34-core')throw Error('ORACLE_RESPONSE_IDENTITY');return result;};
 const identity=call(['--version']);if(identity.protocol!=='pskernel-lean/1'||identity.leanVersion!==tools.leanVersion||identity.leanCommit!==tools.leanCommit||identity.provider!=='lean4-cpp')throw Error('PROVIDER_IDENTITY');
 const nam=d=>typeof d==='string'?{k:'s',p:{k:'a'},v:d}:d[0]==='anonymous'?{k:'a'}:{k:d[0]==='str'?'s':'n',p:nam(d[1]),v:d[2]};
 const lvl=x=>x[0]==='zero'?{k:'z'}:x[0]==='param'?{k:'p',n:nam(x[1])}:x[0]==='succ'?{k:'s',o:lvl(x[1])}:{k:x[0],l:lvl(x[1]),r:lvl(x[2])};
@@ -33,7 +33,17 @@ for(let i=0;i<100;i++){
 // Explicit native-incomplete raw imax cases, not silently repaired to a stronger algebra.
 cases.push({label:'raw-imax-successor-distribution',a:S(I(P('v'),S(P('u')))),b:M(S(P('v')),S(S(P('u'))))});
 const records=[];
-for(const c of cases){const req=request(c.a,c.b),predicted=levelCheck(c.a,c.b,50000),result=call(['--check'],req);if(result.accepted!==true&&(result.accepted!==false||result.errorKind!=='kernel-rejection'||result.declarationIndex!==0))throw Error('INVALID_PROBE '+c.label+' '+JSON.stringify(result));records.push({...c,predicted,native:result.accepted?'equal':'different',requestSha256:hash(req),...(result.accepted?{}:{errorKind:result.errorKind,message:result.message})});}
+for(const c of cases){
+ const req=request(c.a,c.b),predicted=levelCheck(c.a,c.b,50000);
+ let result;
+ try{result=call(['--check'],req);}catch(error){
+  console.error(JSON.stringify({failedCase:c.label,requestSha256:hash(req),completed:records.length,error:String(error)}));
+  throw error;
+ }
+ if(result.accepted!==true&&(result.accepted!==false||result.errorKind!=='kernel-rejection'||result.declarationIndex!==0))throw Error('INVALID_PROBE '+c.label+' '+JSON.stringify(result));
+ records.push({...c,predicted,native:result.accepted?'equal':'different',requestSha256:hash(req),...(result.accepted?{}:{errorKind:result.errorKind,message:result.message})});
+ if(records.length%50===0)console.log('PSKERNEL_LEVEL_DIFFERENTIAL_PROGRESS: '+records.length+'/'+cases.length);
+}
 const mismatches=records.filter(x=>x.predicted!==x.native);
 const report={schemaVersion:1,scope:'Bounded direct kernel conversion probes on the recorded provider prelude; not full Lean compatibility',provider:identity,sourceManifestSha256:hash(fs.readFileSync(path.join(root,'manifests/SOURCE.json'))),harnessSha256:hash(fs.readFileSync(fileURLToPath(import.meta.url))),cases:records.length,matched:records.length-mismatches.length,mismatches,records};
 const recordsPath='dist/evidence/level-differential-records.json',recordsText=JSON.stringify(records,null,2)+'\n';

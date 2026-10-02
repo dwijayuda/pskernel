@@ -61,7 +61,7 @@ test('generated recursive runners agree with iterative transition drivers',()=>{
   [k.psKernelTypeRun,k.psKernelCheckStart(nil(),expression(v),expression(t)),complete.steps,complete.result,k.PsKernelTypeResult.outOfFuel],
   [k.psKernelAdmissionRun,k.psKernelAdmissionStart(list(ds.map(definition))),admitted.steps,admitted.result,k.PsKernelAdmissionResult.outOfFuel]
  ];
- for(const [run,state,steps,result,exhausted]of tests){assert.deepEqual(run(runtimeFuel(k,steps))(state),result);assert.deepEqual(run(runtimeFuel(k,steps-1))(state),exhausted);}
+ for(const [run,state,steps,result,exhausted]of tests){assert.deepEqual(run(runtimeFuel(k,steps),state),result);assert.deepEqual(run(runtimeFuel(k,steps-1),state),exhausted);}
 });
 test('malformed internal final states do not manufacture success',()=>{
  assert.equal(drive(k.psKernelTypeStep,k.PsKernelTypeState.state(nil(),nil(),nil())).error,'invalidState');

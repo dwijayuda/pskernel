@@ -27,7 +27,7 @@
     },
     {
       "path": "src/Ps/Kernel/Universe.lean",
-      "sha256": "9e66e07f254214ce5954f980c378d539d2532ba34595cb923705a1eb0aef2fbb"
+      "sha256": "e701f0cea10936096dad4678fe2ca480c760323ee5fe68e0c8a50f4402ba577f"
     },
     {
       "path": "src/Ps/Kernel/LevelCheck.lean",

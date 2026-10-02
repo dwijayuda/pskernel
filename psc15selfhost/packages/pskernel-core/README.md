@@ -1,6 +1,9 @@
 # @proofscript/pskernel-core
 
-**0.1.0-checker.0 — private experimental dependent term-checker checkpoint.**
+**0.1.0-checker.1 — private experimental dependent term-checker checkpoint.**
+
+Regenerated with the current PSC seed, with all 264 baseline tests passing and
+fresh build and reference evidence. See `../../docs/continuity/OWNED_KERNEL_REGENERATION_2026-10-02.md`.
 
 This package now executes an owned checking fragment, rather than data helpers
 alone. It is **not the authoritative PSC2 kernel**, a full Lean-compatible

@@ -9,15 +9,15 @@
     "profile": "lean4.34-core",
     "status": "version"
   },
-  "providerSha256": "98929458d0b29e6a5bc477f748219252b2d8d71861c8a1973869ed1711992ce0",
-  "sourceManifestSha256": "809a99620fe2875c1932c2a0351424b987721af5c280a0df7f66afa78c5f7c2f",
+  "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+  "sourceManifestSha256": "ecdf7f8f4cfd9abb2faf09766f67a882eb40ebe0042045cd92731ce2965a0619",
   "harnessSha256": "f0413fe0818d1a2212fb9bfa2485a2dfb616a19a2958addd8298d0f4fc2957dc",
   "fixtureSha256": {
     "binding": "221290504b7f1852c982eb0e77be0b85fe227f70777dc355c3b26794b9a864fa",
     "universes": "a594e52c27cfb97d45dceaea53156afbd85d299ab7583c60e94161ef66fbe254"
   },
   "positiveCases": 88,
-  "positiveRequestSha256": "024b9c539e2822dab2df47663873e28bb387ad4f7801bcb72e2269de08710da8",
+  "positiveRequestSha256": "0ddbaeff4205d535d4ccb16f85d14ca84f43dc3618a19ae22fffa8ba2af29918",
   "positive": {
     "protocol": "pskernel-lean/1",
     "provider": "lean4-cpp",
@@ -29,7 +29,7 @@
   "negativeControls": [
     {
       "label": "capture-avoidance",
-      "requestSha256": "e471139a8bb85eec39e6be2a5a3c20d684e40101076712e62985f7fb90e486db",
+      "requestSha256": "265ff7c635a2036a53fed62af703a4b0139f777f1eb412171059ae2ab40ef30e",
       "result": {
         "protocol": "pskernel-lean/1",
         "provider": "lean4-cpp",
@@ -44,7 +44,7 @@
     },
     {
       "label": "imax-right-zero",
-      "requestSha256": "254344278f1867e70aceced09e905381e1b153cbfd5d2febd0272f91df01e3ae",
+      "requestSha256": "694d170ed513916eb4ebfe9ffa8d16a35aa49d71c030bf7b400d081957df914a",
       "result": {
         "protocol": "pskernel-lean/1",
         "provider": "lean4-cpp",
@@ -59,7 +59,7 @@
     },
     {
       "label": "rounded-natural",
-      "requestSha256": "c8d15292a44cddd9c15f372c2a4bccab980f71575a496820512e46fe0260a6b8",
+      "requestSha256": "e1713fd3fdcbdfc383a0c74376a92412d87a3151cdebb7280bda607cf391b7f0",
       "result": {
         "protocol": "pskernel-lean/1",
         "provider": "lean4-cpp",

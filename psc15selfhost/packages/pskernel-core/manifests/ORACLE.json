@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "ground computation cases for foundation; not full kernel equivalence or general correctness",
-  "sourceManifestSha256": "809a99620fe2875c1932c2a0351424b987721af5c280a0df7f66afa78c5f7c2f",
+  "sourceManifestSha256": "ecdf7f8f4cfd9abb2faf09766f67a882eb40ebe0042045cd92731ce2965a0619",
   "provider": {
     "protocol": "pskernel-lean/1",
     "provider": "lean4-cpp",
@@ -10,11 +10,11 @@
     "profile": "lean4.34-core",
     "status": "version"
   },
-  "providerSha256": "98929458d0b29e6a5bc477f748219252b2d8d71861c8a1973869ed1711992ce0",
+  "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
   "fixturesSha256": "8638fdfba36489d1ba5579197311c43cad74c2c87db89586bbe2db9029540b22",
   "oracleHarnessSha256": "1b9e6a7e9d82728001d30b9a3b80aa539feafc18d7075d19e8e2c0f819e7950b",
   "positiveCases": 47,
-  "positiveRequestSha256": "55b0031d2802b3ec160bb6be436dc26a8c5b89f27ef750fff2f27142f7debd40",
+  "positiveRequestSha256": "761518813e63f40c985b886e4b151e80bd536de2c698e6d3e0c47891c83038a5",
   "positive": {
     "protocol": "pskernel-lean/1",
     "provider": "lean4-cpp",
@@ -24,7 +24,7 @@
     "accepted": true
   },
   "negativeControls": 1,
-  "negativeRequestSha256": "17d5e93032e07b52c4fe03b49f2a7a1757f665c579638f4a46883170ee626266",
+  "negativeRequestSha256": "6eac96d17c344e03b93917675cdd259725c77415c7e989b66001c0d8e0af390a",
   "negative": {
     "protocol": "pskernel-lean/1",
     "provider": "lean4-cpp",

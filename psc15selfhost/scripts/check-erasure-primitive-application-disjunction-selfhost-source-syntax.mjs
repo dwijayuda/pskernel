@@ -19,8 +19,8 @@ export function assertErasurePrimitiveApplicationDisjunction(source) {
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_DISJUNCTION_SELFHOST_SOURCE_SYNTAX_MISSING: split String.Pos.Raw branches",
     );
   }
-  const singletonPatterns = block.match(/\\| value :: \\[\\] =>/g) ?? [];
-  if (singletonPatterns.length !== 2 || /\\|\\s*\\[value\\]\\s*=>/.test(block)) {
+  const singletonPatterns = block.match(/\| value :: \[\] =>/g) ?? [];
+  if (singletonPatterns.length !== 2 || /\|\s*\[value\]\s*=>/.test(block)) {
     throw new Error(
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_DISJUNCTION_SELFHOST_SOURCE_SYNTAX_MISSING: two explicit singleton cons patterns",
     );

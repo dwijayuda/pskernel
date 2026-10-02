@@ -343,6 +343,13 @@ def psEraseTypedIntrinsic
               typeArguments
               runtimeArguments)
 
+def psErasureBoolAnd
+    (left : Bool)
+    (right : Bool) : Bool :=
+  match left with
+  | true => right
+  | false => false
+
 def psErasePrimitiveApplication
     (environment : PsEnvironment)
     (scope : PsErasureScope)
@@ -527,7 +534,7 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if psStringEq text "Array.emptyWithCapacity" && Nat.beq view.args.length 2 then
+      else if psErasureBoolAnd (psStringEq text "Array.emptyWithCapacity") (Nat.beq view.args.length 2) then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -535,7 +542,7 @@ def psErasePrimitiveApplication
               view.args [0] [1] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if psStringEq text "Array.size" && Nat.beq view.args.length 2 then
+      else if psErasureBoolAnd (psStringEq text "Array.size") (Nat.beq view.args.length 2) then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -543,7 +550,7 @@ def psErasePrimitiveApplication
               view.args [0] [1] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if psStringEq text "Array.push" && Nat.beq view.args.length 3 then
+      else if psErasureBoolAnd (psStringEq text "Array.push") (Nat.beq view.args.length 3) then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -551,7 +558,7 @@ def psErasePrimitiveApplication
               view.args [0] [1, 2] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if psStringEq text "Array.getInternal" && Nat.beq view.args.length 4 then
+      else if psErasureBoolAnd (psStringEq text "Array.getInternal") (Nat.beq view.args.length 4) then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -559,7 +566,7 @@ def psErasePrimitiveApplication
               view.args [0] [1, 2] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if psStringEq text "Array.getD" && Nat.beq view.args.length 4 then
+      else if psErasureBoolAnd (psStringEq text "Array.getD") (Nat.beq view.args.length 4) then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -567,7 +574,7 @@ def psErasePrimitiveApplication
               view.args [0] [1, 2, 3] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if psStringEq text "Array.set" && Nat.beq view.args.length 5 then
+      else if psErasureBoolAnd (psStringEq text "Array.set") (Nat.beq view.args.length 5) then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -575,7 +582,7 @@ def psErasePrimitiveApplication
               view.args [0] [1, 2, 3] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if psStringEq text "Array.setIfInBounds" && Nat.beq view.args.length 4 then
+      else if psErasureBoolAnd (psStringEq text "Array.setIfInBounds") (Nat.beq view.args.length 4) then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -583,7 +590,7 @@ def psErasePrimitiveApplication
               view.args [0] [1, 2, 3] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if psStringEq text "Array.map" && Nat.beq view.args.length 4 then
+      else if psErasureBoolAnd (psStringEq text "Array.map") (Nat.beq view.args.length 4) then
         match
             psEraseTypedIntrinsic
               environment scope erase
@@ -591,7 +598,7 @@ def psErasePrimitiveApplication
               view.args [0, 1] [2, 3] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (some result)
-      else if psStringEq text "Array.foldl" && Nat.beq view.args.length 7 then
+      else if psErasureBoolAnd (psStringEq text "Array.foldl") (Nat.beq view.args.length 7) then
         match
             psEraseTypedIntrinsic
               environment scope erase

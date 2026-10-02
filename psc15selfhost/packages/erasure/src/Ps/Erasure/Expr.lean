@@ -601,7 +601,7 @@ def psEraseCondition
       PsExpr -> Except PsErasureError PsVerifiedIrExpr)
     (proposition : PsExpr) :
     Except PsErasureError PsVerifiedIrExpr :=
-  let view := psErasureAppView proposition
+  let view := psErasureAppView proposition;
   match view.head, view.args with
   | .constE name _, [type, left, right] =>
       if psNameEq name psEqName then

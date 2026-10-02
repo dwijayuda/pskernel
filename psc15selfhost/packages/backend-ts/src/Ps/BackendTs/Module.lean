@@ -419,11 +419,255 @@ def psTsEmitCountLoop (tags : List (Prod String String)) (declaration : PsVerifi
       | _ => Option.none
   | _ => Option.none
 
+-- Closed tail workers need no suspended continuations. This recognizer accepts
+-- pure expressions and exact self calls only; all other code uses generators.
+structure PsTsTailAlias where
+  name : String
+  captured : List PsVerifiedIrExpr
+  arity : Nat
+
+def psTsTailMap {alpha beta : Type} (convert : alpha -> Option beta) (values : List alpha) : Option (List beta) :=
+  match values with
+  | List.nil => Option.some List.nil
+  | List.cons value rest =>
+      match convert value with
+      | Option.none => Option.none
+      | Option.some result =>
+          match psTsTailMap convert rest with
+          | Option.none => Option.none
+          | Option.some results => Option.some (List.cons result results)
+
+def psTsTailFindAlias (aliases : List PsTsTailAlias) (name : String) : Option PsTsTailAlias :=
+  match aliases with
+  | List.nil => Option.none
+  | List.cons alias rest =>
+      if psStringEq alias.name name then Option.some alias else psTsTailFindAlias rest name
+
+def psTsTailParametersMatch (parameters : List PsVerifiedIrParameter) : List PsVerifiedIrExpr -> Bool :=
+  match parameters with
+  | List.nil => fun (arguments : List PsVerifiedIrExpr) => psListIsEmpty arguments
+  | List.cons parameter rest =>
+      let smaller : List PsVerifiedIrExpr -> Bool := psTsTailParametersMatch rest;
+      fun (arguments : List PsVerifiedIrExpr) =>
+        match arguments with
+        | List.nil => false
+        | List.cons argument tail =>
+            match argument with
+            | PsVerifiedIrExpr.var name => if psStringEq name parameter.name then smaller tail else false
+            | _ => false
+
+def psTsTailAliasPrefix (parameters : List PsVerifiedIrParameter) (arguments : List PsVerifiedIrExpr) : Option (List PsVerifiedIrExpr) :=
+  match arguments with
+  | List.nil => if psListIsEmpty parameters then Option.some List.nil else Option.none
+  | List.cons argument rest =>
+      if psTsTailParametersMatch parameters arguments then Option.some List.nil
+      else
+        match argument with
+        | PsVerifiedIrExpr.var name =>
+            let shadows : PsVerifiedIrParameter -> Bool := fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name name;
+            if psListAny shadows parameters then Option.none
+            else
+              match psTsTailAliasPrefix parameters rest with
+              | Option.none => Option.none
+              | Option.some captured => Option.some (List.cons argument captured)
+        | _ => Option.none
+
+def psTsTailAliasValue (self name : String) (value : PsVerifiedIrExpr) : Option PsTsTailAlias :=
+  match value with
+  | PsVerifiedIrExpr.lambda parameters _ body =>
+      match body with
+      | PsVerifiedIrExpr.call fn types arguments =>
+          if psListIsEmpty types then
+            match fn with
+            | PsVerifiedIrExpr.var called =>
+                if psStringEq called self then
+                  let shadows : PsVerifiedIrParameter -> Bool := fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name self;
+                  if psListAny shadows parameters then Option.none
+                  else
+                    match psTsTailAliasPrefix parameters arguments with
+                    | Option.none => Option.none
+                    | Option.some captured => Option.some (PsTsTailAlias.mk name captured (psListLength parameters))
+                else Option.none
+            | _ => Option.none
+          else Option.none
+      | _ => Option.none
+  | _ => Option.none
+
+def psTsTailPureWithFuel (aliases : List PsTsTailAlias) (fuel : Nat) : PsVerifiedIrExpr -> Bool :=
+  match fuel with
+  | Nat.zero => fun (_expr : PsVerifiedIrExpr) => false
+  | Nat.succ remaining =>
+      let smaller : PsVerifiedIrExpr -> Bool := psTsTailPureWithFuel aliases remaining;
+      fun (expr : PsVerifiedIrExpr) =>
+        let impure : PsVerifiedIrExpr -> Bool := fun (value : PsVerifiedIrExpr) => if smaller value then false else true;
+        let impureField : Prod String PsVerifiedIrExpr -> Bool := fun (field : Prod String PsVerifiedIrExpr) => impure (Prod.snd field);
+        match expr with
+        | PsVerifiedIrExpr.literal _ => true
+        | PsVerifiedIrExpr.var name =>
+            match psTsTailFindAlias aliases name with
+            | Option.none => true
+            | Option.some _ => false
+        | PsVerifiedIrExpr.intrinsic operation _ arguments =>
+            match operation with
+            | PsVerifiedIrIntrinsic.arrayMap => false
+            | PsVerifiedIrIntrinsic.arrayFoldl => false
+            | _ => if psListAny impure arguments then false else true
+        | PsVerifiedIrExpr.record _ _ fields => if psListAny impureField fields then false else true
+        | PsVerifiedIrExpr.constructor _ _ _ fields => if psListAny impureField fields then false else true
+        | PsVerifiedIrExpr.projection _ _ target _ => smaller target
+        | PsVerifiedIrExpr.ifE condition left right =>
+            if smaller condition then if smaller left then smaller right else false else false
+        | _ => false
+
+def psTsTailPrintPure (brands tags : List (Prod String String)) (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) : Option String :=
+  if psTsTailPureWithFuel aliases 4096 expr then
+    match psTsEmitExpr brands tags expr with
+    | Except.error _ => Option.none
+    | Except.ok printed => Option.some printed
+  else Option.none
+
+def psTsTailBindingSafe (declaration : PsVerifiedIrDeclaration) (aliases : List PsTsTailAlias) (name : String) : Bool :=
+  let parameterUses : PsVerifiedIrParameter -> Bool := fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name name;
+  let prefixUses : PsVerifiedIrExpr -> Bool := fun (value : PsVerifiedIrExpr) => psTsExprUsesNameWithFuel 4096 value name;
+  let aliasUses : PsTsTailAlias -> Bool := fun (alias : PsTsTailAlias) =>
+    if psStringEq alias.name name then true else psListAny prefixUses alias.captured;
+  if psStringEq declaration.name name then false
+  else if psListAny parameterUses declaration.parameters then false
+  else if psListAny aliasUses aliases then false
+  else true
+
+def psTsTailCallArguments (self : String) (aliases : List PsTsTailAlias)
+    (fn : PsVerifiedIrExpr) (arguments : List PsVerifiedIrExpr) : Option (List PsVerifiedIrExpr) :=
+  match fn with
+  | PsVerifiedIrExpr.var name =>
+      if psStringEq name self then Option.some arguments
+      else
+        match psTsTailFindAlias aliases name with
+        | Option.none => Option.none
+        | Option.some alias =>
+            if Nat.beq alias.arity (psListLength arguments) then Option.some (psListAppend alias.captured arguments)
+            else Option.none
+  | _ => Option.none
+
+def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration)
+    (fuel : Nat) : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String :=
+  match fuel with
+  | Nat.zero => fun (_aliases : List PsTsTailAlias) (_expr : PsVerifiedIrExpr) => Option.none
+  | Nat.succ remaining =>
+      let smaller : List PsTsTailAlias -> PsVerifiedIrExpr -> Option String := psTsTailEmitWithFuel brands tags declaration remaining;
+      fun (aliases : List PsTsTailAlias) (expr : PsVerifiedIrExpr) =>
+        let emitPure : PsVerifiedIrExpr -> Option String := psTsTailPrintPure brands tags aliases;
+        match expr with
+        | PsVerifiedIrExpr.call fn types arguments =>
+            if psListIsEmpty types then
+              match psTsTailCallArguments declaration.name aliases fn arguments with
+              | Option.none => Option.none
+              | Option.some actual =>
+                  if Nat.beq (psListLength actual) (psListLength declaration.parameters) then
+                    match psTsTailMap emitPure actual with
+                    | Option.none => Option.none
+                    | Option.some printed =>
+                        let parameterName : PsVerifiedIrParameter -> String := fun (parameter : PsVerifiedIrParameter) => parameter.name;
+                        Option.some (psTsJoin "" ["[", psTsJoin ", " (psListMap parameterName declaration.parameters),
+                          "] = [", psTsJoin ", " printed, "]; continue;"])
+                  else Option.none
+            else Option.none
+        | PsVerifiedIrExpr.letE name type value body =>
+            if psTsTailBindingSafe declaration aliases name then
+              match psTsTailAliasValue declaration.name name value with
+              | Option.some alias =>
+                  let capturedAlias : PsVerifiedIrExpr -> Bool := fun (argument : PsVerifiedIrExpr) =>
+                    if psTsTailPureWithFuel aliases 4096 argument then false else true;
+                  if psListAny capturedAlias alias.captured then Option.none
+                  else smaller (List.cons alias aliases) body
+              | Option.none =>
+                  match emitPure value with
+                  | Option.none => Option.none
+                  | Option.some printedValue =>
+                      match psTsEmitType type with
+                      | Except.error _ => Option.none
+                      | Except.ok printedType =>
+                          match smaller aliases body with
+                          | Option.none => Option.none
+                          | Option.some printedBody => Option.some (psTsJoin "" ["{ const ", name, ": ", printedType,
+                              " = ", printedValue, "; ", printedBody, " }"])
+            else Option.none
+        | PsVerifiedIrExpr.ifE condition left right =>
+            match emitPure condition with
+            | Option.none => Option.none
+            | Option.some printedCondition =>
+                match smaller aliases left with
+                | Option.none => Option.none
+                | Option.some printedLeft =>
+                    match smaller aliases right with
+                    | Option.none => Option.none
+                    | Option.some printedRight => Option.some (psTsJoin "" ["if (", printedCondition, ") { ",
+                        printedLeft, " } else { ", printedRight, " }"])
+        | PsVerifiedIrExpr.matchE name _ scrutinee alternatives =>
+            match psTsLookup tags name with
+            | Option.none => Option.none
+            | Option.some tag =>
+                match emitPure scrutinee with
+                | Option.none => Option.none
+                | Option.some printedScrutinee =>
+                    let temporary := psTsFreshMatchTemp declaration.body;
+                    let printBinding : PsVerifiedIrMatchBinding -> Option String := fun (binding : PsVerifiedIrMatchBinding) =>
+                      if psTsTailBindingSafe declaration aliases binding.name then
+                        match psTsEmitType binding.type with
+                        | Except.error _ => Option.none
+                        | Except.ok type => Option.some (psTsJoin "" ["const ", binding.name, ": ", type, " = ", temporary, ".", binding.field, ";"])
+                      else Option.none;
+                    let printAlternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr) -> Option String :=
+                      fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+                        match psTsTailMap printBinding (Prod.fst (Prod.snd alternative)) with
+                        | Option.none => Option.none
+                        | Option.some bindings =>
+                            match smaller aliases (Prod.snd (Prod.snd alternative)) with
+                            | Option.none => Option.none
+                            | Option.some body => Option.some (psTsJoin "" ["case ", psJsonQuote (Prod.fst alternative), ": { ",
+                                psTsJoin " " bindings, " ", body, " }"]);
+                    if psTsTailBindingSafe declaration aliases temporary then
+                      match psTsTailMap printAlternative alternatives with
+                      | Option.none => Option.none
+                      | Option.some cases => Option.some (psTsJoin "" ["{ const ", temporary, " = ", printedScrutinee,
+                          "; switch (", temporary, "[", tag, "]) { ", psTsJoin " " cases,
+                          " } throw new Error(\"invalid ProofScript constructor tag\"); }"])
+                    else Option.none
+        | _ =>
+            match emitPure expr with
+            | Option.none => Option.none
+            | Option.some printed => Option.some (psTsJoin "" ["return ", printed, ";"])
+
+def psTsEmitTailLoop (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
+  if psListIsEmpty declaration.typeParameters then
+    if psListIsEmpty declaration.parameters then Option.none
+    else
+      let body := psTsInlineEtaApplication declaration.body;
+      match psTsTailEmitWithFuel brands tags declaration 4096 List.nil body with
+      | Option.none => Option.none
+      | Option.some printedBody =>
+          let printParameter : PsVerifiedIrParameter -> Option String := fun (parameter : PsVerifiedIrParameter) =>
+            match psTsEmitType parameter.type with
+            | Except.error _ => Option.none
+            | Except.ok type => Option.some (psTsJoin "" [parameter.name, ": ", type]);
+          match psTsTailMap printParameter declaration.parameters with
+          | Option.none => Option.none
+          | Option.some parameters =>
+              match psTsEmitType declaration.resultType with
+              | Except.error _ => Option.none
+              | Except.ok resultType => Option.some (psTsJoin "" ["export function ", declaration.name, "(",
+                  psTsJoin ", " parameters, "): ", resultType, " { while (true) { ", printedBody, " } }"])
+  else Option.none
+
+
 def psTsEmitDeclaration (brands tags : List (Prod String String))
     (declaration : PsVerifiedIrDeclaration) : Except PsTsEmitError String :=
   match psTsEmitCountLoop tags declaration with
   | Option.some loop => Except.ok loop
-  | Option.none => psTsEmitDeclarationGeneral brands tags declaration
+  | Option.none =>
+      match psTsEmitTailLoop brands tags declaration with
+      | Option.some loop => Except.ok loop
+      | Option.none => psTsEmitDeclarationGeneral brands tags declaration
 
 def psTsFlattenLines (groups : List (List String)) : List String :=
   match groups with

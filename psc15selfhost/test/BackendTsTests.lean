@@ -24,9 +24,7 @@ def psBackendTsIdentityModule : PsVerifiedIrModule :=
 def psBackendTsExpectedIdentity : String :=
   "// generated from pskernel-admitted ProofScript checked core\n" ++
   psTsRuntimeSupport ++ "\n" ++
-  "export function idNat(x: bigint): bigint { return __ps$run(__ps$impl$idNat(x)); }\n" ++
-  "function* __ps$impl$idNat(x: bigint): __ps$Computation<bigint> { return x; }\n" ++
-  "__ps$implementations.set(idNat, __ps$impl$idNat);\n"
+  "export function idNat(x: bigint): bigint { while (true) { return x; } }\n"
 
 def psTestBackendTsIdentity : Bool :=
   match psTsEmitModule psBackendTsIdentityModule with
@@ -287,7 +285,29 @@ def psTestBackendTsEtaInlining : Bool :=
   optimized && captureBlocked && evaluationPreserved && arityPreserved &&
     psTsExprUsesNameWithFuel 0 fn "argument"
 
+def psTestBackendTsTailLoopGuards : Bool :=
+  let natType := PsVerifiedIrType.primitive .nat
+  let parameter := PsVerifiedIrParameter.mk "x" natType
+  let call := PsVerifiedIrExpr.call (.var "loop") [] [.var "x"]
+  let declaration := PsVerifiedIrDeclaration.mk "loop" [] [parameter] natType call
+  let isSome := fun (value : Option String) => match value with | .some _ => true | .none => false
+  let isNone := fun (value : Option String) => match value with | .none => true | .some _ => false
+  let alias := PsTsTailAlias.mk "smaller" [.var "captured"] 1
+  isSome (psTsEmitTailLoop [] [] declaration) &&
+    isNone (psTsEmitTailLoop [] [] { declaration with body := .call (.var "loop") [] [] }) &&
+    isNone (psTsEmitTailLoop [] [] { declaration with body := .intrinsic .natAdd [] [call, .literal (.natural 1)] }) &&
+    isNone (psTsEmitTailLoop [] [] { declaration with typeParameters := [PsVerifiedIrTypeParameter.mk "a"] }) &&
+    isNone (psTsTailEmitWithFuel [] [] declaration 0 [] call) &&
+    !psTsTailBindingSafe declaration [alias] "captured" &&
+    !psTsTailBindingSafe declaration [alias] "smaller" &&
+    !psTsTailBindingSafe declaration [alias] "x" &&
+    !psTsTailBindingSafe declaration [alias] "loop" &&
+    !psTsTailPureWithFuel [alias] 32 (.var "smaller") &&
+    !psTsTailPureWithFuel [] 32 (.intrinsic .arrayMap [] []) &&
+    !psTsTailPureWithFuel [] 32 (.intrinsic .arrayFoldl [] [])
+
 def psBackendTsTests : List PsBackendTsNamedTest := [
+  { name := "tail loops preserve arity, scope and fallback for callbacks and non-tail recursion", passed := psTestBackendTsTailLoopGuards },
   { name := "eta inlining preserves scope, argument evaluation and arity", passed := psTestBackendTsEtaInlining },
   { name := "identity module", passed := psTestBackendTsIdentity },
   { name := "generic inductive", passed := psTestBackendTsInductive },

@@ -28,6 +28,7 @@ import "./check-count-fold-source.mjs";
 import "./check-environment-index-source.mjs";
 import "./check-eta-inline-source.mjs";
 import "./check-proofscript-binder-replay-source.mjs";
+import "./check-tail-loop-source.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

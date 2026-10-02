@@ -2293,10 +2293,8 @@ def psLeanFirstCompletedEquation
 
 def psLeanMapPatternAlternatives
     (lowerClauses :
-      List PsSyntaxName ->
       List PsLeanEquationClause ->
       Option PsSyntaxTerm)
-    (arguments : List PsSyntaxName)
     (clauses : List PsLeanEquationClause)
     (patterns : List PsSyntaxPattern) :
     Option
@@ -2312,7 +2310,7 @@ def psLeanMapPatternAlternatives
         psLeanEquationClausesForBranch
           pattern
           clauses;
-      match lowerClauses arguments branchClauses with
+      match lowerClauses branchClauses with
       | Option.none => Option.none
       | Option.some body =>
           let alternative :=
@@ -2326,52 +2324,51 @@ def psLeanMapPatternAlternatives
           match
               psLeanMapPatternAlternatives
                 lowerClauses
-                arguments
                 clauses
                 rest with
           | Option.none => Option.none
           | Option.some tail =>
               Option.some (List.cons alternative tail)
 
-partial def psLeanLowerEquationClauses
-    (arguments : List PsSyntaxName)
-    (clauses : List PsLeanEquationClause) :
-    Option PsSyntaxTerm :=
+def psLeanLowerEquationClauses
+    (arguments : List PsSyntaxName) : List PsLeanEquationClause -> Option PsSyntaxTerm :=
   match arguments with
   | [] =>
-      match psLeanFirstCompletedEquation clauses with
-      | Option.none => Option.none
-      | Option.some clause => Option.some clause.body
-  | List.cons argument rest =>
-      let patterns :=
-        psLeanEquationHeadPatterns clauses;
-      if psLeanPatternListIsEmpty patterns then
-        Option.none
-      else
-        match
-            psLeanMapPatternAlternatives
-              psLeanLowerEquationClauses
-              rest
-              clauses
-              patterns with
+      fun (clauses : List PsLeanEquationClause) =>
+        match psLeanFirstCompletedEquation clauses with
         | Option.none => Option.none
-        | Option.some alternatives =>
-            match psParseListReverse alternatives with
-            | [] => Option.none
-            | List.cons alternative _ =>
-                match alternative with
-                | Prod.mk _ bodyAndSpan =>
-                    match bodyAndSpan with
-                    | Prod.mk body _ =>
-                        let matchSpan : PsSourceSpan := {
-                          start := argument.span.start
-                          stop := psLeanTermStop body
-                        };
-                        Option.some
-                          (PsSyntaxTerm.matchE
-                            (PsSyntaxTerm.reference argument)
-                            alternatives
-                            matchSpan)
+        | Option.some clause => Option.some clause.body
+  | List.cons argument rest =>
+      let smaller : List PsLeanEquationClause -> Option PsSyntaxTerm := psLeanLowerEquationClauses rest;
+      fun (clauses : List PsLeanEquationClause) =>
+        let patterns :=
+          psLeanEquationHeadPatterns clauses;
+        if psLeanPatternListIsEmpty patterns then
+          Option.none
+        else
+          match
+              psLeanMapPatternAlternatives
+                smaller
+                clauses
+                patterns with
+          | Option.none => Option.none
+          | Option.some alternatives =>
+              match psParseListReverse alternatives with
+              | [] => Option.none
+              | List.cons alternative _ =>
+                  match alternative with
+                  | Prod.mk _ bodyAndSpan =>
+                      match bodyAndSpan with
+                      | Prod.mk body _ =>
+                          let matchSpan : PsSourceSpan := {
+                            start := argument.span.start
+                            stop := psLeanTermStop body
+                          };
+                          Option.some
+                            (PsSyntaxTerm.matchE
+                              (PsSyntaxTerm.reference argument)
+                              alternatives
+                              matchSpan)
 
 def psLeanFlattenForallBinders
     (type : PsSyntaxTerm) :

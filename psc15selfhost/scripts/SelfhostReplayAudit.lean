@@ -210,6 +210,39 @@ def psAuditWatchModule (file : String) : IO UInt32 := do
     stdout.flush
   return 0
 
+def psAuditTotalStringWorkers : Bool := Id.run do
+  let strings : List String := ["", "ascii!", "éλ😀", "x\ny", "𐀀a"]
+  for source in strings do
+    if psLexStringToList source != String.toList source then return false
+    for position in List.range (String.utf8ByteSize source + 2) do
+      if !psStringEqFrom source source position position then return false
+      if psErasureSafeStringFrom source position "prefix" !=
+          "prefix" ++ String.ofList ((psLexStringToListFrom source position).map psErasureSafeChar) then
+        return false
+  for value in [0, 1, 9, 10, 999, 9007199254740993, 123456789012345678901234567890] do
+    if psNatToString value != toString value then return false
+  return !psStringEq "é" "e" && !psStringEq "abc" "abcd"
+
+def psAuditTotalJsonWorkers : Bool :=
+  let exhausted := match psJsonEncodeCanonicalWithFuel 0 .nullE with
+    | .error .fuelExhausted => true
+    | _ => false
+  let boundary := match psJsonEncodeCanonicalWithFuel 1 (.array [.nullE]) with
+    | .error .fuelExhausted => true
+    | _ => false
+  let accepted := match psJsonEncodeCanonicalWithFuel 2 (.array [.nullE]) with
+    | .ok "[null]" => true
+    | _ => false
+  let nested := match psJsonParse "{\"z\":[true,null],\"a\":-12}" with
+    | .error _ => false
+    | .ok value => match psJsonEncodeCanonical value with
+      | .ok "{\"a\":-12,\"z\":[true,null]}" => true
+      | _ => false
+  let parserBoundary := match psJsonParseValueWithFuel (.error .fuelExhausted) 2 ['[', 'n', 'u', 'l', 'l', ']'] with
+    | .error .fuelExhausted => true
+    | _ => false
+  exhausted && boundary && accepted && nested && parserBoundary
+
 def main (arguments : List String) : IO UInt32 := do
   match arguments with
   | ["--watch", file] => return ← psAuditWatchModule file
@@ -248,7 +281,9 @@ def main (arguments : List String) : IO UInt32 := do
         ("sanitizer ASCII, Unicode and fallback equivalence", psAuditSanitizer),
         ("portable collections preserve order, bounds and first errors", psAuditCollections),
         ("unique-name collision order and fuel boundary", psAuditUniqueNames),
-        ("Int.repr compilation, arity rejection and error propagation", psAuditIntRepr)] do
+        ("Int.repr compilation, arity rejection and error propagation", psAuditIntRepr),
+        ("total string workers, UTF-8 positions and large decimal values", psAuditTotalStringWorkers),
+        ("total JSON workers, canonical order and fuel boundaries", psAuditTotalJsonWorkers)] do
       if passed then IO.println ("PSC2_FIXED_POINT_ERASURE_CASE: PASS " ++ label)
       else throw (IO.userError ("PSC2_FIXED_POINT_ERASURE_CASE: FAIL " ++ label))
     IO.println "PSC2_FIXED_POINT_ERASURE_FINISH_APPLICATION: PASS (native behavior and append-order theorem)"

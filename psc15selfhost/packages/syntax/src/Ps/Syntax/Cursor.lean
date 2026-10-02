@@ -8,27 +8,33 @@ structure PsLexStep where
   char : Char
   cursor : PsLexCursor
 
-partial def psLexStringToListFrom
-    (source : String)
-    (position : Nat) : List Char :=
-  if
-      String.Internal.atEnd
-        source
-        (String.Pos.Raw.mk position) then
-    List.nil
-  else
-    let char : Char :=
-      String.Internal.get
-        source
-        (String.Pos.Raw.mk position);
-    let nextPosition : Nat :=
-      String.Pos.Raw.byteIdx
-        (String.Internal.next
-          source
-          (String.Pos.Raw.mk position));
-    List.cons
-      char
-      (psLexStringToListFrom source nextPosition)
+def psLexStringToListFromWithFuel (fuel : Nat) : String -> Nat -> List Char :=
+  match fuel with
+  | Nat.zero => fun (_source : String) (_position : Nat) => List.nil
+  | Nat.succ remaining =>
+      let smaller : String -> Nat -> List Char := psLexStringToListFromWithFuel remaining;
+      fun (source : String) (position : Nat) =>
+        if
+            String.Internal.atEnd
+              source
+              (String.Pos.Raw.mk position) then
+          List.nil
+        else
+          let char : Char :=
+            String.Internal.get
+              source
+              (String.Pos.Raw.mk position);
+          let nextPosition : Nat :=
+            String.Pos.Raw.byteIdx
+              (String.Internal.next
+                source
+                (String.Pos.Raw.mk position));
+          List.cons
+            char
+            (smaller source nextPosition)
+
+def psLexStringToListFrom (source : String) (position : Nat) : List Char :=
+  psLexStringToListFromWithFuel (Nat.succ (String.utf8ByteSize source)) source position
 
 def psLexStringToList (source : String) : List Char :=
   psLexStringToListFrom source 0

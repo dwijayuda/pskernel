@@ -648,76 +648,85 @@ def psJsonParseObjectWith
             else
               Except.error (PsJsonParseError.expected "object key")
 
-partial def psJsonParseValueWithFuel
+def psJsonParseValueWithFuelWorker
     (fallback : Except PsJsonParseError PsJsonParseResult)
-    (fuel : Nat)
-    (input : List Char) :
-    Except PsJsonParseError PsJsonParseResult :=
+    (fuel : Nat) : Nat -> List Char -> Except PsJsonParseError PsJsonParseResult :=
   match fuel with
   | Nat.zero =>
-      Except.error PsJsonParseError.fuelExhausted
+      fun (_requested : Nat) (_input : List Char) =>
+        Except.error PsJsonParseError.fuelExhausted
   | Nat.succ remaining =>
-      let chars := psJsonSkipWhitespace input;
-      match chars with
-      | List.nil =>
-          Except.error PsJsonParseError.unexpectedEnd
-      | List.cons first rest =>
-          if psJsonCharEq first '"' then
-            match psJsonParseStringChars remaining rest List.nil with
-            | Except.error error => Except.error error
-            | Except.ok stringResult =>
-                let value := Prod.fst stringResult;
-                let afterString := Prod.snd stringResult;
-                Except.ok {
-                  value := PsJsonValue.string value
-                  rest := afterString
-                }
-          else if psJsonCharEq first '[' then
-            psJsonParseArrayWith
-              (psJsonParseValueWithFuel fallback)
-              remaining
-              rest
-              List.nil
-          else if psJsonCharEq first '{' then
-            psJsonParseObjectWith
-              (psJsonParseValueWithFuel fallback)
-              remaining
-              rest
-              List.nil
-          else if psJsonCharEq first 't' then
-            match psJsonConsumeLiteral ['t','r','u','e'] chars with
-            | Option.none => Except.error PsJsonParseError.invalidLiteral
-            | Option.some afterLiteral =>
-                Except.ok {
-                  value := PsJsonValue.bool true
-                  rest := afterLiteral
-                }
-          else if psJsonCharEq first 'f' then
-            match
-                psJsonConsumeLiteral
-                  ['f','a','l','s','e']
-                  chars with
-            | Option.none => Except.error PsJsonParseError.invalidLiteral
-            | Option.some afterLiteral =>
-                Except.ok {
-                  value := PsJsonValue.bool false
-                  rest := afterLiteral
-                }
-          else if psJsonCharEq first 'n' then
-            match psJsonConsumeLiteral ['n','u','l','l'] chars with
-            | Option.none => Except.error PsJsonParseError.invalidLiteral
-            | Option.some afterLiteral =>
-                Except.ok {
-                  value := PsJsonValue.nullE
-                  rest := afterLiteral
-                }
-          else if psJsonCharEq first '-' then
-            psJsonParseNumber chars
-          else if psJsonDigit first then
-            psJsonParseNumber chars
-          else
-            Except.error
-              (PsJsonParseError.expected "JSON value")
+      let smaller : Nat -> List Char -> Except PsJsonParseError PsJsonParseResult :=
+        psJsonParseValueWithFuelWorker fallback remaining;
+      fun (requested : Nat) (input : List Char) =>
+        if Nat.blt requested (Nat.succ remaining) then smaller requested input
+        else
+          let chars := psJsonSkipWhitespace input;
+          match chars with
+          | List.nil =>
+              Except.error PsJsonParseError.unexpectedEnd
+          | List.cons first rest =>
+              if psJsonCharEq first '"' then
+                match psJsonParseStringChars remaining rest List.nil with
+                | Except.error error => Except.error error
+                | Except.ok stringResult =>
+                    let value := Prod.fst stringResult;
+                    let afterString := Prod.snd stringResult;
+                    Except.ok {
+                      value := PsJsonValue.string value
+                      rest := afterString
+                    }
+              else if psJsonCharEq first '[' then
+                psJsonParseArrayWith
+                  smaller
+                  remaining
+                  rest
+                  List.nil
+              else if psJsonCharEq first '{' then
+                psJsonParseObjectWith
+                  smaller
+                  remaining
+                  rest
+                  List.nil
+              else if psJsonCharEq first 't' then
+                match psJsonConsumeLiteral ['t','r','u','e'] chars with
+                | Option.none => Except.error PsJsonParseError.invalidLiteral
+                | Option.some afterLiteral =>
+                    Except.ok {
+                      value := PsJsonValue.bool true
+                      rest := afterLiteral
+                    }
+              else if psJsonCharEq first 'f' then
+                match
+                    psJsonConsumeLiteral
+                      ['f','a','l','s','e']
+                      chars with
+                | Option.none => Except.error PsJsonParseError.invalidLiteral
+                | Option.some afterLiteral =>
+                    Except.ok {
+                      value := PsJsonValue.bool false
+                      rest := afterLiteral
+                    }
+              else if psJsonCharEq first 'n' then
+                match psJsonConsumeLiteral ['n','u','l','l'] chars with
+                | Option.none => Except.error PsJsonParseError.invalidLiteral
+                | Option.some afterLiteral =>
+                    Except.ok {
+                      value := PsJsonValue.nullE
+                      rest := afterLiteral
+                    }
+              else if psJsonCharEq first '-' then
+                psJsonParseNumber chars
+              else if psJsonDigit first then
+                psJsonParseNumber chars
+              else
+                Except.error
+                  (PsJsonParseError.expected "JSON value")
+
+def psJsonParseValueWithFuel
+    (fallback : Except PsJsonParseError PsJsonParseResult)
+    (fuel : Nat) (input : List Char) : Except PsJsonParseError PsJsonParseResult :=
+  psJsonParseValueWithFuelWorker fallback fuel fuel input
 
 def psJsonCharListLength (chars : List Char) : Nat :=
   match chars with
@@ -788,6 +797,7 @@ def psJsonAsObject :
 
 
 inductive PsJsonEncodeError where
+  | fuelExhausted
   | invalidNumber (text : String)
   | duplicateObjectKey (key : String)
 
@@ -930,42 +940,48 @@ def psJsonEncodeFieldList
                   (Prod.mk (Prod.fst field) encodedHead)
                   encodedTail)
 
-partial def psJsonEncodeCanonical
-    (value : PsJsonValue) :
-    Except PsJsonEncodeError String :=
-  match value with
-  | PsJsonValue.nullE => Except.ok "null"
-  | PsJsonValue.bool boolValue =>
-      if boolValue then
-        Except.ok "true"
-      else
-        Except.ok "false"
-  | PsJsonValue.number text =>
-      if psJsonValidateCanonicalNumber text then
-        Except.ok text
-      else
-        Except.error (PsJsonEncodeError.invalidNumber text)
-  | PsJsonValue.string text =>
-      Except.ok (psJsonQuote text)
-  | PsJsonValue.array values =>
-      match
-          psJsonEncodeValueList
-            psJsonEncodeCanonical
-            values with
-      | Except.error error => Except.error error
-      | Except.ok encoded =>
-          Except.ok (psJsonArray encoded)
-  | PsJsonValue.object fields =>
-      match psJsonSortObjectFields fields with
-      | Except.error error => Except.error error
-      | Except.ok sorted =>
-          match
-              psJsonEncodeFieldList
-                psJsonEncodeCanonical
-                sorted with
-          | Except.error error => Except.error error
-          | Except.ok encodedFields =>
-              Except.ok (psJsonObject encodedFields)
+def psJsonEncodeCanonicalWithFuel (fuel : Nat) : PsJsonValue -> Except PsJsonEncodeError String :=
+  match fuel with
+  | Nat.zero => fun (_value : PsJsonValue) => Except.error PsJsonEncodeError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller : PsJsonValue -> Except PsJsonEncodeError String := psJsonEncodeCanonicalWithFuel remaining;
+      fun (value : PsJsonValue) =>
+        match value with
+        | PsJsonValue.nullE => Except.ok "null"
+        | PsJsonValue.bool boolValue =>
+            if boolValue then
+              Except.ok "true"
+            else
+              Except.ok "false"
+        | PsJsonValue.number text =>
+            if psJsonValidateCanonicalNumber text then
+              Except.ok text
+            else
+              Except.error (PsJsonEncodeError.invalidNumber text)
+        | PsJsonValue.string text =>
+            Except.ok (psJsonQuote text)
+        | PsJsonValue.array values =>
+            match
+                psJsonEncodeValueList
+                  smaller
+                  values with
+            | Except.error error => Except.error error
+            | Except.ok encoded =>
+                Except.ok (psJsonArray encoded)
+        | PsJsonValue.object fields =>
+            match psJsonSortObjectFields fields with
+            | Except.error error => Except.error error
+            | Except.ok sorted =>
+                match
+                    psJsonEncodeFieldList
+                      smaller
+                      sorted with
+                | Except.error error => Except.error error
+                | Except.ok encodedFields =>
+                    Except.ok (psJsonObject encodedFields)
+
+def psJsonEncodeCanonical (value : PsJsonValue) : Except PsJsonEncodeError String :=
+  psJsonEncodeCanonicalWithFuel 4096 value
 
 def psJsonEncodeCanonicalText
     (value : PsJsonValue) :

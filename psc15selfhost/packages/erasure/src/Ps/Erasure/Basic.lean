@@ -260,13 +260,20 @@ def psErasureSafeChars (chars : List Char) : List Char :=
   | List.cons char rest =>
       List.cons (psErasureSafeChar char) (psErasureSafeChars rest)
 
-partial def psErasureSafeStringFrom
-    (raw : String) (position : Nat) (mapped : String) : String :=
-  if String.Internal.atEnd raw (String.Pos.Raw.mk position) then mapped
-  else
-    let char := String.Internal.get raw (String.Pos.Raw.mk position);
-    let next := String.Pos.Raw.byteIdx (String.Internal.next raw (String.Pos.Raw.mk position));
-    psErasureSafeStringFrom raw next (String.push mapped (psErasureSafeChar char))
+def psErasureSafeStringFromWithFuel (fuel : Nat) : String -> Nat -> String -> String :=
+  match fuel with
+  | Nat.zero => fun (_raw : String) (_position : Nat) (mapped : String) => mapped
+  | Nat.succ remaining =>
+      let smaller : String -> Nat -> String -> String := psErasureSafeStringFromWithFuel remaining;
+      fun (raw : String) (position : Nat) (mapped : String) =>
+        if String.Internal.atEnd raw (String.Pos.Raw.mk position) then mapped
+        else
+          let char := String.Internal.get raw (String.Pos.Raw.mk position);
+          let next := String.Pos.Raw.byteIdx (String.Internal.next raw (String.Pos.Raw.mk position));
+          smaller raw next (String.push mapped (psErasureSafeChar char))
+
+def psErasureSafeStringFrom (raw : String) (position : Nat) (mapped : String) : String :=
+  psErasureSafeStringFromWithFuel (Nat.succ (String.utf8ByteSize raw)) raw position mapped
 
 
 def psErasureSafeIdentifier

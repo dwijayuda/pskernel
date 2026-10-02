@@ -9,45 +9,43 @@ def psNameDepth (name : PsName) : Nat :=
   | PsName.str parent _ => Nat.add (psNameDepth parent) 1
   | PsName.num parent _ => Nat.add (psNameDepth parent) 1
 
-partial def psStringEqFrom
-    (left : String)
-    (right : String)
-    (leftPos : Nat)
-    (rightPos : Nat) : Bool :=
-  if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
-    String.Internal.atEnd right (String.Pos.Raw.mk rightPos)
-  else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
-    false
-  else
-    let leftChar : Char := String.Internal.get left (String.Pos.Raw.mk leftPos);
-    let rightChar : Char := String.Internal.get right (String.Pos.Raw.mk rightPos);
-    if Nat.beq (Char.toNat leftChar) (Char.toNat rightChar) then
-      psStringEqFrom
-        left
-        right
-        (String.Pos.Raw.byteIdx
-          (String.Internal.next
-            left
-            (String.Pos.Raw.mk leftPos)))
-        (String.Pos.Raw.byteIdx
-          (String.Internal.next
-            right
-            (String.Pos.Raw.mk rightPos)))
-    else
-      false
+def psStringEqFromWithFuel (fuel : Nat) : String -> String -> Nat -> Nat -> Bool :=
+  match fuel with
+  | Nat.zero => fun (_left : String) (_right : String) (_leftPos : Nat) (_rightPos : Nat) => false
+  | Nat.succ remaining =>
+      let smaller : String -> String -> Nat -> Nat -> Bool := psStringEqFromWithFuel remaining;
+      fun (left : String) (right : String) (leftPos : Nat) (rightPos : Nat) =>
+        if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
+          String.Internal.atEnd right (String.Pos.Raw.mk rightPos)
+        else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
+          false
+        else
+          let leftChar : Char := String.Internal.get left (String.Pos.Raw.mk leftPos);
+          let rightChar : Char := String.Internal.get right (String.Pos.Raw.mk rightPos);
+          if Nat.beq (Char.toNat leftChar) (Char.toNat rightChar) then
+            smaller
+              left
+              right
+              (String.Pos.Raw.byteIdx
+                (String.Internal.next
+                  left
+                  (String.Pos.Raw.mk leftPos)))
+              (String.Pos.Raw.byteIdx
+                (String.Internal.next
+                  right
+                  (String.Pos.Raw.mk rightPos)))
+          else
+            false
+
+def psStringEqFrom
+    (left : String) (right : String) (leftPos : Nat) (rightPos : Nat) : Bool :=
+  psStringEqFromWithFuel (Nat.succ (String.utf8ByteSize left)) left right leftPos rightPos
 
 def psStringEq (left : String) (right : String) : Bool :=
   psStringEqFrom left right 0 0
 
-partial def psNatToString (value : Nat) : String :=
-  if Nat.blt value 10 then
-    String.singleton (Char.ofNat (Nat.add 48 value))
-  else
-    String.Internal.append
-      (psNatToString (Nat.div value 10))
-      (String.singleton
-        (Char.ofNat
-          (Nat.add 48 (Nat.mod value 10))))
+def psNatToString (value : Nat) : String :=
+  Int.repr (Int.ofNat value)
 
 def psNameEq (left : PsName) : PsName -> Bool :=
   match left with

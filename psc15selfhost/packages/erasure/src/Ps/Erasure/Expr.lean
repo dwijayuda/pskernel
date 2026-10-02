@@ -1148,7 +1148,7 @@ def psEraseRuntimeRecursorApplication
             inductiveInfo.numParams +
               1 +
               inductiveInfo.constructors.length +
-              1
+              1;
           if view.args.length != expectedArity then
             Except.error PsErasureError.unsupportedApplication
           else
@@ -1165,11 +1165,12 @@ def psEraseRuntimeRecursorApplication
                   let substitutions :=
                     inductiveInfo.typeParameters.zip typeArguments
                       |>.map
-                        (fun entry =>
-                          (entry.1.name, entry.2))
-                  let minorStart := inductiveInfo.numParams + 1
-                  let majorIndex := expectedArity - 1
-                  match view.args[majorIndex]? with
+                        (fun (entry :
+                            PsVerifiedIrTypeParameter × PsVerifiedIrType) =>
+                          Prod.mk entry.1.name entry.2);
+                  let minorStart := inductiveInfo.numParams + 1;
+                  let majorIndex := expectedArity - 1;
+                  match psErasureExprListAt view.args majorIndex with
                   | none =>
                       Except.error PsErasureError.unsupportedApplication
                   | some major =>
@@ -1185,7 +1186,7 @@ def psEraseRuntimeRecursorApplication
                                   name
                                   current.runtimeParameters
                                   0
-                            | _, _ => none
+                            | _, _ => none;
                           match
                               psEraseMatchAlternatives
                                 environment

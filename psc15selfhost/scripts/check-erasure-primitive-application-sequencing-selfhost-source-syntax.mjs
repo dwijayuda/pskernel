@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 export function assertErasurePrimitiveApplicationSequencing(source) {
   const block = source.match(
-    /^def psErasePrimitiveApplication\b[\s\S]*?(?=^def |\s*$)/m,
+    /^def psErasePrimitiveApplication\b[\s\S]*?(?=^def psEraseCondition\b)/m,
   )?.[0];
   if (!block) {
     throw new Error(

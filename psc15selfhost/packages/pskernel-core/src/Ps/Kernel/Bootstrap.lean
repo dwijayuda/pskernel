@@ -3,15 +3,12 @@ import Ps.Kernel.JointAdmission
 /- The initial Nat prelude is generated source data submitted to the same owned
 inductive checker. No assumed environment or caller-supplied builtin constants.
 Literal and arithmetic primitive semantics remain unsupported. -/
-def psKernelBootstrapNatName : PsKernelName :=
-  PsKernelName.str PsKernelName.anonymous (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one))))))) PsKernelText.empty)))
+def psKernelBootstrapNatName : PsKernelName := psKernelBuiltinNatName
 
 def psKernelBootstrapNat : PsKernelNatDeclaration :=
-  PsKernelNatDeclaration.declaration psKernelBootstrapNatName psKernelNatFamilySort
-    (PsKernelName.str psKernelBootstrapNatName (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 PsKernelPositive.one))))))) PsKernelText.empty)))))
-    (psKernelNatExpectedConstructor psKernelBootstrapNatName PsKernelNatPhase.zero)
-    (PsKernelName.str psKernelBootstrapNatName (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 PsKernelPositive.one))))))) PsKernelText.empty)))))
-    (psKernelNatExpectedConstructor psKernelBootstrapNatName PsKernelNatPhase.succ)
+  PsKernelNatDeclaration.declaration psKernelBuiltinNatName psKernelNatFamilySort
+    psKernelBuiltinNatZeroName (psKernelNatExpectedConstructor psKernelBuiltinNatName PsKernelNatPhase.zero)
+    psKernelBuiltinNatSuccName (psKernelNatExpectedConstructor psKernelBuiltinNatName PsKernelNatPhase.succ)
 
 inductive PsKernelBootstrapState where
   | prelude (entries : PsKernelList PsKernelJointEntry) (state : PsKernelNatAdmissionState)

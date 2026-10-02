@@ -1,3 +1,4 @@
+import Ps.Kernel.BuiltinNat
 import Ps.Kernel.ExprInstantiate
 import Ps.Kernel.Data
 import Ps.Kernel.Expr
@@ -12,6 +13,7 @@ that binder's OUTER context; lookup lifts by index+1 into the current context.
 No self-inference shortcut and no acceptance Boolean supplied by the caller.
 Raw machine states are implementation data, not a checked-module capability. -/
 inductive PsKernelTypeTask where
+  | natural (state : PsKernelBuiltinNatState)
   | infer (context : PsKernelList PsKernelExpr) (value : PsKernelExpr)
   | levels (pending : PsKernelList PsKernelLevel)
   | levelName (name : PsKernelName) (remaining : PsKernelList PsKernelName) (pending : PsKernelList PsKernelLevel)
@@ -82,6 +84,11 @@ def psKernelTypeInfer
   | PsKernelExpr.constE name levels =>
       psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.levels levels)
         (PsKernelList.cons (PsKernelTypeTask.lookup levels (PsKernelLookupState.search name (psKernelTypingDeclarations env))) tasks)) values
+  | PsKernelExpr.lit literal =>
+      match literal with
+      | PsKernelLiteral.natural unused => psKernelTypeNext env
+          (PsKernelList.cons (PsKernelTypeTask.natural (psKernelBuiltinNatStart (psKernelTypingDeclarations env))) tasks) values
+      | _ => psKernelTypeReject PsKernelCheckError.unsupported
   | PsKernelExpr.lam name type body binder =>
       psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context type)
         (PsKernelList.cons PsKernelTypeTask.reduceTop
@@ -193,6 +200,12 @@ def psKernelTypeStep (state : PsKernelTypeState) : PsKernelTypeStep :=
           | _ => psKernelTypeReject PsKernelCheckError.invalidState
       | PsKernelList.cons task rest =>
           match task with
+          | PsKernelTypeTask.natural current =>
+              match psKernelBuiltinNatStep current with
+              | PsKernelBuiltinNatStep.next next => psKernelTypeNext env
+                  (PsKernelList.cons (PsKernelTypeTask.natural next) rest) values
+              | PsKernelBuiltinNatStep.ready => psKernelTypePush env rest values (PsKernelExpr.constE psKernelBuiltinNatName PsKernelList.nil)
+              | PsKernelBuiltinNatStep.rejected error => psKernelTypeReject error
           | PsKernelTypeTask.infer context value => psKernelTypeInfer env context value rest values
           | PsKernelTypeTask.levels pending => psKernelTypeLevels env pending rest values
           | PsKernelTypeTask.levelName name remaining pending =>

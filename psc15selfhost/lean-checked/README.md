@@ -1,7 +1,7 @@
 # PSC2 checked compiler and owned kernel bootstrap
 
-The default kernel is pskernel-core. The bootstrap entry includes all 19 owned
-kernel modules alongside the compiler: 74 source modules across 13 packages.
+The default kernel is pskernel-core. The bootstrap entry includes all 20 owned
+kernel modules alongside the compiler: 75 source modules across 13 packages.
 The old core package and routing have been retired. Neither Lean provider is in
 the portable closure; neither provider branch is wholesale-merged.
 
@@ -17,7 +17,7 @@ fallback. Making the owned kernel the default does not complete its release gate
 The owned runtime checks closed universe-polymorphic transparent definitions and
 zero-term-parameter unit and monomorphic zero/successor inductives. Generated
 bootstrap checks its initial Nat declaration from an empty environment. Semantic
-transitions derive unit and Nat-like dependent recursors and perform dependent typing, beta/zeta/delta/iota
+transitions validate natural literals and derive unit and Nat-like dependent recursors and perform dependent typing, beta/zeta/delta/iota
 reduction, binding and universe normalization. Host code validates and converts the
 wire representation, runs those transitions, enforces bounds and transports results.
 A disposable worker enforces a wall clock limit; a shared transition budget stops
@@ -28,7 +28,7 @@ The actual bootstrap prefix now admits `_pscCheckedNestedUnit` and fails at
 admission 1, `PsSourcePos`, because its constructor fields require record
 inductive support. Nat is now available through owned prelude checking. Prelude primitives, general recursors, proof
 irrelevance, eta and the generated pair fixed point remain development work.
-See [OWNED_NAT_BOOTSTRAP_2026-10-03.md](../docs/continuity/OWNED_NAT_BOOTSTRAP_2026-10-03.md).
+See [OWNED_NAT_LITERALS_2026-10-03.md](../docs/continuity/OWNED_NAT_LITERALS_2026-10-03.md).
 
 ## Check before emission
 

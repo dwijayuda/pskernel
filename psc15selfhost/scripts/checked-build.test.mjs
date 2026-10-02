@@ -46,7 +46,7 @@ test('actual unit source passes owned admission, exact-module emission and execu
     assert.notEqual(module.sample, undefined);
     assert.deepEqual(module.sample, module.SampleUnit.make);
     assert.equal(receipt.kernel.selector, 'pskernel-core');
-    assert.equal(receipt.provider.profile, 'owned-nat-and-unit-inductives/4');
+    assert.equal(receipt.provider.profile, 'owned-natural-literals/5');
     assert.match(await readFile(path.join(dir, 'out.admissions.json'), 'utf8'), /SampleUnit/u);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
@@ -61,8 +61,20 @@ test('actual Nat constructor source passes the owned bootstrap and executed outp
     const module = await import(pathToFileURL(outputPath).href);
     assert.equal(module.first, 1n);
     assert.equal(receipt.kernel.selector, 'pskernel-core');
-    assert.equal(receipt.provider.profile, 'owned-nat-and-unit-inductives/4');
+    assert.equal(receipt.provider.profile, 'owned-natural-literals/5');
   } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+for (const kind of ['lean','ps']) test(`actual ${kind} natural literal passes owned checking and executed output`, {skip:!native}, async()=>{
+  const dir=await mkdtemp(path.join(tmpdir(),'psc2-owned-literal-real-'));
+  try {
+    await writeFile(path.join(dir,'package.json'),'{"type":"module"}');
+    const entryPath=path.join(dir,'Main.'+kind),outputPath=path.join(dir,'out.js');
+    await writeFile(entryPath,kind==='lean'?'def answer : Nat := 42\n':'def answer: Nat := 42;\n');
+    const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});
+    assert.equal((await import(pathToFileURL(outputPath).href)).answer,42n);
+    assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-natural-literals/5');
+  } finally {await rm(dir,{recursive:true,force:true});}
 });
 
 for (const [kind, source] of [

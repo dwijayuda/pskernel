@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "Bounded actual polymorphic transparent-definition judgments; not full kernel compatibility",
-  "sourceManifestSha256": "6c03e13e88a2a457f396493eba2c51a9b1eeef8d821086a4143032e99414bfbd",
+  "sourceManifestSha256": "1dc2ac98c0b0cb1c62b3bc939aebe8ad7e1e77ffd9935e0f5117215e5d33869c",
   "harnessSha256": "4196bc420bb64efe98a414a6a0053fc7ac94685a83f987e2745ab38eb8bdf180",
   "provider": {
     "protocol": "pskernel-lean/1",

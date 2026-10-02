@@ -1,3 +1,4 @@
+import Ps.Kernel.BuiltinNat
 import Ps.Kernel.LevelCheck
 import Ps.Kernel.ExprInstantiate
 import Ps.Kernel.Data
@@ -9,6 +10,7 @@ import Ps.Kernel.Environment
 No primitive or quotient reduction is asserted. Type checking validates discarded terms.
 All nested substitutions and lookups consume the caller's transition budget. -/
 inductive PsKernelReduceTask where
+  | natural (value : PsKernelNatural) (state : PsKernelBuiltinNatState)
   | whnf (value : PsKernelExpr)
   | apply (arg : PsKernelExpr)
   | lookup (levels : PsKernelList PsKernelLevel) (state : PsKernelLookupState)
@@ -77,7 +79,11 @@ def psKernelReduceWhnf
       psKernelReduceNext env
         (PsKernelList.cons (PsKernelReduceTask.lookup levels (PsKernelLookupState.search name env)) tasks) values
   | PsKernelExpr.fvar unused => psKernelReduceReject PsKernelCheckError.invalidScope
-  | PsKernelExpr.lit unused => psKernelReduceReject PsKernelCheckError.unsupported
+  | PsKernelExpr.lit literal =>
+      match literal with
+      | PsKernelLiteral.natural number => psKernelReduceNext env
+          (PsKernelList.cons (PsKernelReduceTask.natural number (psKernelBuiltinNatStart env)) tasks) values
+      | _ => psKernelReduceReject PsKernelCheckError.unsupported
   | PsKernelExpr.proj unusedName unusedIndex unusedValue => psKernelReduceReject PsKernelCheckError.unsupported
   | _ => psKernelReducePush env tasks values value
 
@@ -261,6 +267,17 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                       (PsKernelList.cons (PsKernelReduceTask.unitLevels fn major minor left right) rest) values
                   | PsKernelLevelCheckResult.different => psKernelReducePush env rest values (PsKernelExpr.app fn major)
                   | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.natural number current =>
+              match psKernelBuiltinNatStep current with
+              | PsKernelBuiltinNatStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.natural number next) rest) values
+              | PsKernelBuiltinNatStep.rejected error => psKernelReduceReject error
+              | PsKernelBuiltinNatStep.ready =>
+                  match number with
+                  | PsKernelNatural.zero => psKernelReducePush env rest values (PsKernelExpr.constE psKernelBuiltinNatZeroName PsKernelList.nil)
+                  | PsKernelNatural.positive unused => psKernelReducePush env rest values
+                      (PsKernelExpr.app (PsKernelExpr.constE psKernelBuiltinNatSuccName PsKernelList.nil)
+                        (PsKernelExpr.lit (PsKernelLiteral.natural (psKernelNaturalPred number))))
           | PsKernelReduceTask.whnf value => psKernelReduceWhnf env rest values value
           | PsKernelReduceTask.normal value =>
               psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf value)

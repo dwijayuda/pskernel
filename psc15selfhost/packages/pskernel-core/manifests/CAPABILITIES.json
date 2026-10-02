@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "package": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.7",
+  "version": "0.1.0-checker.8",
   "status": "experimental-term-checker",
   "canCheckProofs": false,
   "authoritative": false,
@@ -29,7 +29,9 @@
     "zero-term-parameter-unit-inductives-with-derived-recursor-and-iota",
     "fresh-mixed-definition-and-unit-admission",
     "monomorphic-zero-successor-inductives-with-derived-dependent-recursor-and-iota",
-    "generated-bootstrap-Nat-checked-from-empty-environment"
+    "generated-bootstrap-Nat-checked-from-empty-environment",
+    "natural-literal-typing-after-checked-Nat-admission",
+    "bounded-natural-literal-constructor-conversion-and-recursor-reduction"
   ],
   "boundedEvidence": [
     "BUILD.json",
@@ -40,7 +42,8 @@
     "CHECKER_DIFFERENTIAL.json",
     "POLYMORPHIC_DIFFERENTIAL.json",
     "UNIT_DIFFERENTIAL.json",
-    "NAT_DIFFERENTIAL.json"
+    "NAT_DIFFERENTIAL.json",
+    "LITERAL_DIFFERENTIAL.json"
   ],
   "releaseGates": {
     "term-checking": {
@@ -60,8 +63,8 @@
       "evidence": null
     },
     "primitive-validation": {
-      "status": "pending",
-      "evidence": null
+      "status": "partial",
+      "evidence": "LITERAL_DIFFERENTIAL.json; natural literals require owned Nat-family metadata; arithmetic and other primitives remain unsupported"
     },
     "axiom-policy": {
       "status": "pending",
@@ -105,7 +108,7 @@
     "function-and-structure-eta",
     "general-mutual-indexed-and-recursive-inductive-admission",
     "quotient-admission",
-    "literal-and-projection-typing",
+    "text-literal-and-projection-typing",
     "remaining-prelude-and-primitive-validation",
     "axiom-and-opaque-declaration-admission",
     "hostile-input-decoder",

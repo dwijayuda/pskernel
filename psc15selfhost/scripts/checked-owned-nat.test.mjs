@@ -24,7 +24,7 @@ test('default checks its Nat prelude and derived recursor before user declaratio
     def('First',C('Nat'),numeral('Nat',1)),def('Fold',C('Nat'),fold('Nat',4)),
   ]));
   assert.equal(descriptor.selector,'pskernel-core');
-  assert.equal(result.profile,'owned-nat-and-unit-inductives/4');
+  assert.equal(result.profile,'owned-natural-literals/5');
   assert.equal(result.accepted,true,JSON.stringify(result));
   assert.equal(result.admissionCount,2);
 });

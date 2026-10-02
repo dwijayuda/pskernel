@@ -19,7 +19,7 @@ test('default admits a polymorphic unit, constructor use and generated iota', as
   const entries=[unit(),def('Value',family(),ctor()),def('Reduce',U(S(Z)),iota())];
   const {result,descriptor}=await checkAdmissionsWithKernel(wire(entries));
   assert.equal(descriptor.selector,'pskernel-core');
-  assert.equal(result.profile,'owned-nat-and-unit-inductives/4');
+  assert.equal(result.profile,'owned-natural-literals/5');
   assert.equal(result.accepted,true,JSON.stringify(result));
   assert.equal(result.admissionCount,3);
 });

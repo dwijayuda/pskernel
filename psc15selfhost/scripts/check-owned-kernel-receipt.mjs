@@ -7,7 +7,7 @@ import { defaultCheckedKernel } from './checked-kernel-provider.mjs';
 import '../packages/pskernel-core/scripts/verify-evidence.mjs';
 
 const manifest = JSON.parse(await readFile(new URL('../packages/pskernel-core/package.json', import.meta.url), 'utf8'));
-assert.equal(manifest.version, '0.1.0-checker.7');
+assert.equal(manifest.version, '0.1.0-checker.8');
 assert.equal(manifest.private, true);
 assert.equal(manifest.proofscript.authoritative, false);
 assert.equal(manifest.proofscript.bootstrap, true);
@@ -61,4 +61,15 @@ assert(!/psKernel(?:NatAdmission|Joint)Run/u.test(bootstrap), 'prelude must shar
 const nat = await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/NatInductive.lean', import.meta.url), 'utf8');
 for (const transition of ['psKernelTypeStep current', 'psKernelConversionStep current', 'psKernelLookupStep current']) assert(nat.includes(transition));
 assert(!/psKernel(?:Type|Conversion|Lookup|Order)Run/u.test(nat));
+assert(nat.includes('PsKernelDefinition.natFamily name zeroName succName'));
+const builtin = await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/BuiltinNat.lean', import.meta.url), 'utf8');
+assert(builtin.includes('PsKernelDefinition.natFamily unusedName zeroName succName'));
+assert(builtin.includes('psKernelLookupStep current'));
+assert(builtin.includes('psKernelOrderStep current'));
+assert(builtin.includes('PsKernelOrderTask.name zeroName psKernelBuiltinNatZeroName'));
+assert(builtin.includes('PsKernelOrderTask.name succName psKernelBuiltinNatSuccName'));
+assert(!/psKernel(?:Lookup|Order)Run/u.test(builtin));
+assert(typing.includes('psKernelBuiltinNatStep current'));
+assert(reduction.includes('psKernelBuiltinNatStep current'));
+assert(worker.includes('E.lit(k.PsKernelLiteral.natural(natural(value.v)))'));
 console.log('PSC2_OWNED_KERNEL_RECEIPT: PASS (checker identities, retired legacy routing, owned bootstrap closure and default; release gates remain closed)');

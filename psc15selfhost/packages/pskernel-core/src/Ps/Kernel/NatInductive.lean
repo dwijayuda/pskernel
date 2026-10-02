@@ -124,7 +124,7 @@ def psKernelNatAdmissionStep (state : PsKernelNatAdmissionState) : PsKernelNatAd
               | PsKernelLookupStep.found unused => psKernelNatAdmissionReject PsKernelCheckError.duplicateName
               | PsKernelLookupStep.missing =>
                   let updated : PsKernelList PsKernelDefinition := PsKernelList.cons
-                    (PsKernelDefinition.constant name PsKernelList.nil familyType) env;
+                    (PsKernelDefinition.natFamily name zeroName succName) env;
                   psKernelNatAdmissionNext updated declaration
                     (PsKernelNatAdmissionTask.ctorName PsKernelNatPhase.zero (PsKernelLookupState.search zeroName updated))
               | _ => psKernelNatAdmissionReject PsKernelCheckError.invalidState

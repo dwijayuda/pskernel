@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "scope": "Actual closed monomorphic term judgments; bounded differential evidence, not full compatibility or a soundness proof",
-  "sourceManifestSha256": "6c03e13e88a2a457f396493eba2c51a9b1eeef8d821086a4143032e99414bfbd",
-  "harnessSha256": "9af8248e9d9d374aca2856247d25a4995eaedd6b1cbc80992e6bb2af120be620",
+  "sourceManifestSha256": "1dc2ac98c0b0cb1c62b3bc939aebe8ad7e1e77ffd9935e0f5117215e5d33869c",
+  "harnessSha256": "54c368e2f2e5cb32e734f065c41455d45de761b80f70b310150264368e624022",
   "provider": {
     "protocol": "pskernel-lean/1",
     "provider": "lean4-cpp",
@@ -39,7 +39,7 @@
     },
     {
       "name": "natural-primitive-not-admitted",
-      "reason": "explicitly unsupported feature"
+      "reason": "Requires a checked Nat prelude; this corpus starts empty. See LITERAL_DIFFERENTIAL.json."
     },
     {
       "name": "projection-not-admitted",

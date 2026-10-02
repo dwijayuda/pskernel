@@ -32,7 +32,7 @@ function expr(x){switch(x[0]){
 function canonical(x){if(Array.isArray(x))return x.map(canonical);if(x&&typeof x==='object')return Object.fromEntries(Object.keys(x).sort().map(k=>[k,canonical(x[k])]));return x;}
 const declaration=d=>({kind:'constant',declaration:{k:'definition',n:name(d.name),lp:[],t:expr(d.type),v:expr(d.value),h:{k:'regular',h:'1'},s:'safe'}});
 const fixed=json(path.join(root,'test/checker-cases.json'));
-const excluded=fixed.filter(c=>c.native===null||['internal-free-variable','huge-bound-index-not-rounded'].includes(c.name)).map(c=>({name:c.name,reason:c.native===null?'explicitly unsupported feature':'not representable in native closed-core wire fragment'}));
+const excluded=fixed.filter(c=>c.native===null||['internal-free-variable','huge-bound-index-not-rounded'].includes(c.name)).map(c=>({name:c.name,reason:c.exclusionReason??(c.native===null?'explicitly unsupported feature':'not representable in native closed-core wire fragment')}));
 const corpus=fixed.filter(c=>!excluded.some(x=>x.name===c.name)).map(c=>({...c,group:'named'}));
 const rand=randomGenerator(919);
 for(let i=0;i<128;i++){

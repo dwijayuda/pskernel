@@ -51,7 +51,7 @@ for (const [label, change] of [
   ['unsafe', a => { a.declaration.s = 'unsafe'; }],
   ['duplicate universe parameters', a => { a.declaration.lp = [name('u'), name('u')]; }],
   ['universe parameter', a => { a.declaration.t.l = { k: 'p', n: name('u') }; }],
-  ['literal', a => { a.declaration.v = { k: 'nat', v: '0' }; }],
+  ['literal at the wrong type', a => { a.declaration.v = { k: 'nat', v: '0' }; }],
   ['unknown field', a => { a.accepted = true; }],
   ['malformed height', a => { a.declaration.h.h = '-1'; }],
   ['lossy numeric name', a => { a.declaration.n = { k: 'n', p: { k: 'a' }, v: 1e30 }; }],
@@ -84,7 +84,7 @@ test('default admits a polymorphic identity and checks distinct universe instant
     const use = definition('Use', polyType(l), { ...C('Poly'), ls: [l] });
     const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]));
     assert.equal(result.accepted, true, JSON.stringify(result));
-    assert.equal(result.profile, 'owned-nat-and-unit-inductives/4');
+    assert.equal(result.profile, 'owned-natural-literals/5');
     assert.equal(descriptor.selector, 'pskernel-core');
   }
 });

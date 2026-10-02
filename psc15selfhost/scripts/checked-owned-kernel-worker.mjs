@@ -54,12 +54,13 @@ function level(value, depth = 0) {
   return k.PsKernelLevel[value.k](level(value.l, depth + 1), level(value.r, depth + 1));
 }
 function expr(value, depth = 0) {
-  const keys = { b: ['k','i'], sort: ['k','l'], const: ['k','n','ls'], app: ['k','f','a'],
+  const keys = { nat: ['k','v'], b: ['k','i'], sort: ['k','l'], const: ['k','n','ls'], app: ['k','f','a'],
     lam: ['k','n','t','b','bi'], forall: ['k','n','t','b','bi'], let: ['k','n','t','v','b'] };
   if (!keys[value?.k]) fail(`unsupported-expression:${value?.k}`);
   shape(value, keys[value.k], depth);
   const E = k.PsKernelExpr, sub = item => expr(item, depth + 1);
   switch (value.k) {
+    case 'nat': return E.lit(k.PsKernelLiteral.natural(natural(value.v)));
     case 'b': return E.bvar(natural(value.i));
     case 'sort': return E.sortE(level(value.l, depth + 1));
     case 'const':

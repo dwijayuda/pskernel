@@ -1,9 +1,9 @@
 # @proofscript/pskernel-core
 
-**0.1.0-checker.7 — private experimental dependent term-checker checkpoint.**
+**0.1.0-checker.8 — private experimental dependent term-checker checkpoint.**
 
-Regenerated with the pinned PSC seed, with all 396 tests passing and fresh build
-and reference evidence. See `../../docs/continuity/OWNED_NAT_BOOTSTRAP_2026-10-03.md`.
+Regenerated with the pinned PSC seed, with all 417 tests passing and fresh build
+and reference evidence. See `../../docs/continuity/OWNED_NAT_LITERALS_2026-10-03.md`.
 
 This is the default checker and part of the joint bootstrap source closure.
 The host adapter runs the generated semantic machine and fails closed outside
@@ -25,7 +25,9 @@ one family, no term parameters or indices, and one constructor with no fields.
 The monomorphic zero/successor fragment also derives a dependent recursor and
 checks its recursive iota rules. Generated bootstrap starts empty and checks the
 fixed Nat declaration through that same admission machine before user declarations.
-Natural literals, arithmetic and other prelude constants remain unsupported.
+Natural literals check only after owned Nat-family metadata is validated;
+conversion and recursor reduction share the bounded transition budget.
+Arithmetic, string literals and other prelude constants remain unsupported.
 Sequential internal admission starts from the checked prelude,
 rejects forward/self references and duplicates, and returns no environment on a
 failed batch. The generated implementation is not edited by hand.

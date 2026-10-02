@@ -19,6 +19,12 @@ export function assertErasurePrimitiveApplicationDisjunction(source) {
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_DISJUNCTION_SELFHOST_SOURCE_SYNTAX_MISSING: split String.Pos.Raw branches",
     );
   }
+  const singletonPatterns = block.match(/\\| value :: \\[\\] =>/g) ?? [];
+  if (singletonPatterns.length !== 2 || /\\|\\s*\\[value\\]\\s*=>/.test(block)) {
+    throw new Error(
+      "PSC2_ERASURE_PRIMITIVE_APPLICATION_DISJUNCTION_SELFHOST_SOURCE_SYNTAX_MISSING: two explicit singleton cons patterns",
+    );
+  }
   if (/\|\|/.test(block)) {
     throw new Error(
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_DISJUNCTION_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: boolean disjunction operator",
@@ -44,5 +50,5 @@ assert.throws(
   /PRIMITIVE_APPLICATION_DISJUNCTION.*(?:MISSING|FORBIDDEN)/,
 );
 process.stdout.write(
-  "PSC2_ERASURE_PRIMITIVE_APPLICATION_DISJUNCTION_SELFHOST_SOURCE_SYNTAX: PASS (String.Pos.Raw cases split; disjunction mutation rejected)\n",
+  "PSC2_ERASURE_PRIMITIVE_APPLICATION_DISJUNCTION_SELFHOST_SOURCE_SYNTAX: PASS (String.Pos.Raw cases split; explicit singleton cons patterns; disjunction mutation rejected)\n",
 );

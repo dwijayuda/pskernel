@@ -943,52 +943,69 @@ export declare const PsKernelExprInstantiateStep: {
     readonly final: (__field0: PsKernelExprInstantiateResult) => PsKernelExprInstantiateStep;
 };
 declare const __ps$tag$47: unique symbol;
+export type PsKernelDefinitionBody = {
+    readonly [__ps$tag$47]: "transparent";
+    readonly value: PsKernelExpr;
+} | {
+    readonly [__ps$tag$47]: "opaque";
+};
+export declare const PsKernelDefinitionBody: {
+    readonly transparent: (__field0: PsKernelExpr) => PsKernelDefinitionBody;
+    readonly opaque: PsKernelDefinitionBody;
+};
+declare const __ps$tag$48: unique symbol;
 export type PsKernelDefinition = {
-    readonly [__ps$tag$47]: "definition";
+    readonly [__ps$tag$48]: "definition";
     readonly name: PsKernelName;
     readonly type: PsKernelExpr;
     readonly value: PsKernelExpr;
 } | {
-    readonly [__ps$tag$47]: "polymorphic";
+    readonly [__ps$tag$48]: "polymorphic";
     readonly name: PsKernelName;
     readonly parameters: PsKernelList<PsKernelName>;
     readonly type: PsKernelExpr;
     readonly value: PsKernelExpr;
+} | {
+    readonly [__ps$tag$48]: "constant";
+    readonly name: PsKernelName;
+    readonly parameters: PsKernelList<PsKernelName>;
+    readonly type: PsKernelExpr;
 };
 export declare const PsKernelDefinition: {
     readonly definition: (__field0: PsKernelName, __field1: PsKernelExpr, __field2: PsKernelExpr) => PsKernelDefinition;
     readonly polymorphic: (__field0: PsKernelName, __field1: PsKernelList<PsKernelName>, __field2: PsKernelExpr, __field3: PsKernelExpr) => PsKernelDefinition;
+    readonly constant: (__field0: PsKernelName, __field1: PsKernelList<PsKernelName>, __field2: PsKernelExpr) => PsKernelDefinition;
 };
-declare const __ps$tag$48: unique symbol;
+declare const __ps$tag$49: unique symbol;
 export type PsKernelTypingContext = {
-    readonly [__ps$tag$48]: "context";
+    readonly [__ps$tag$49]: "context";
     readonly declarations: PsKernelList<PsKernelDefinition>;
     readonly parameters: PsKernelList<PsKernelName>;
 };
 export declare const PsKernelTypingContext: {
     readonly context: (__field0: PsKernelList<PsKernelDefinition>, __field1: PsKernelList<PsKernelName>) => PsKernelTypingContext;
 };
-declare const __ps$tag$49: unique symbol;
+declare const __ps$tag$50: unique symbol;
 export type PsKernelCheckError = {
-    readonly [__ps$tag$49]: "invalidState";
+    readonly [__ps$tag$50]: "invalidState";
 } | {
-    readonly [__ps$tag$49]: "invalidScope";
+    readonly [__ps$tag$50]: "invalidScope";
 } | {
-    readonly [__ps$tag$49]: "unknownConstant";
+    readonly [__ps$tag$50]: "unknownConstant";
 } | {
-    readonly [__ps$tag$49]: "unsupported";
+    readonly [__ps$tag$50]: "unsupported";
 } | {
-    readonly [__ps$tag$49]: "typeExpected";
+    readonly [__ps$tag$50]: "typeExpected";
 } | {
-    readonly [__ps$tag$49]: "functionExpected";
+    readonly [__ps$tag$50]: "functionExpected";
 } | {
-    readonly [__ps$tag$49]: "typeMismatch";
+    readonly [__ps$tag$50]: "typeMismatch";
 } | {
-    readonly [__ps$tag$49]: "duplicateName";
+    readonly [__ps$tag$50]: "duplicateName";
 } | {
-    readonly [__ps$tag$49]: "invalidName";
+    readonly [__ps$tag$50]: "invalidName";
 } | {
-    readonly [__ps$tag$49]: "invalidUniverse";
+    readonly [__ps$tag$50]: "invalidUniverse";
 };
 export declare const PsKernelCheckError: {
     readonly invalidState: PsKernelCheckError;
@@ -1002,13 +1019,13 @@ export declare const PsKernelCheckError: {
     readonly invalidName: PsKernelCheckError;
     readonly invalidUniverse: PsKernelCheckError;
 };
-declare const __ps$tag$50: unique symbol;
+declare const __ps$tag$51: unique symbol;
 export type PsKernelLookupState = {
-    readonly [__ps$tag$50]: "search";
+    readonly [__ps$tag$51]: "search";
     readonly name: PsKernelName;
     readonly entries: PsKernelList<PsKernelDefinition>;
 } | {
-    readonly [__ps$tag$50]: "compare";
+    readonly [__ps$tag$51]: "compare";
     readonly name: PsKernelName;
     readonly entry: PsKernelDefinition;
     readonly rest: PsKernelList<PsKernelDefinition>;
@@ -1018,17 +1035,17 @@ export declare const PsKernelLookupState: {
     readonly search: (__field0: PsKernelName, __field1: PsKernelList<PsKernelDefinition>) => PsKernelLookupState;
     readonly compare: (__field0: PsKernelName, __field1: PsKernelDefinition, __field2: PsKernelList<PsKernelDefinition>, __field3: PsKernelList<PsKernelOrderTask>) => PsKernelLookupState;
 };
-declare const __ps$tag$51: unique symbol;
+declare const __ps$tag$52: unique symbol;
 export type PsKernelLookupStep = {
-    readonly [__ps$tag$51]: "next";
+    readonly [__ps$tag$52]: "next";
     readonly state: PsKernelLookupState;
 } | {
-    readonly [__ps$tag$51]: "found";
+    readonly [__ps$tag$52]: "found";
     readonly entry: PsKernelDefinition;
 } | {
-    readonly [__ps$tag$51]: "missing";
+    readonly [__ps$tag$52]: "missing";
 } | {
-    readonly [__ps$tag$51]: "invalidState";
+    readonly [__ps$tag$52]: "invalidState";
 };
 export declare const PsKernelLookupStep: {
     readonly next: (__field0: PsKernelLookupState) => PsKernelLookupStep;
@@ -1036,38 +1053,42 @@ export declare const PsKernelLookupStep: {
     readonly missing: PsKernelLookupStep;
     readonly invalidState: PsKernelLookupStep;
 };
-declare const __ps$tag$52: unique symbol;
+declare const __ps$tag$53: unique symbol;
 export type PsKernelReduceTask = {
-    readonly [__ps$tag$52]: "whnf";
+    readonly [__ps$tag$53]: "whnf";
     readonly value: PsKernelExpr;
 } | {
-    readonly [__ps$tag$52]: "apply";
+    readonly [__ps$tag$53]: "apply";
     readonly arg: PsKernelExpr;
 } | {
-    readonly [__ps$tag$52]: "lookup";
+    readonly [__ps$tag$53]: "lookup";
     readonly levels: PsKernelList<PsKernelLevel>;
     readonly state: PsKernelLookupState;
 } | {
-    readonly [__ps$tag$52]: "instantiate";
+    readonly [__ps$tag$53]: "opaqueConstant";
+    readonly value: PsKernelExpr;
+    readonly state: PsKernelLevelInstantiateState;
+} | {
+    readonly [__ps$tag$53]: "instantiate";
     readonly state: PsKernelExprInstantiateState;
 } | {
-    readonly [__ps$tag$52]: "binding";
+    readonly [__ps$tag$53]: "binding";
     readonly state: PsKernelBindingState;
 } | {
-    readonly [__ps$tag$52]: "resumeWhnf";
+    readonly [__ps$tag$53]: "resumeWhnf";
 } | {
-    readonly [__ps$tag$52]: "normal";
+    readonly [__ps$tag$53]: "normal";
     readonly value: PsKernelExpr;
 } | {
-    readonly [__ps$tag$52]: "expand";
+    readonly [__ps$tag$53]: "expand";
 } | {
-    readonly [__ps$tag$52]: "app";
+    readonly [__ps$tag$53]: "app";
 } | {
-    readonly [__ps$tag$52]: "lam";
+    readonly [__ps$tag$53]: "lam";
     readonly name: PsKernelName;
     readonly binder: PsKernelBinder;
 } | {
-    readonly [__ps$tag$52]: "forallE";
+    readonly [__ps$tag$53]: "forallE";
     readonly name: PsKernelName;
     readonly binder: PsKernelBinder;
 };
@@ -1075,6 +1096,7 @@ export declare const PsKernelReduceTask: {
     readonly whnf: (__field0: PsKernelExpr) => PsKernelReduceTask;
     readonly apply: (__field0: PsKernelExpr) => PsKernelReduceTask;
     readonly lookup: (__field0: PsKernelList<PsKernelLevel>, __field1: PsKernelLookupState) => PsKernelReduceTask;
+    readonly opaqueConstant: (__field0: PsKernelExpr, __field1: PsKernelLevelInstantiateState) => PsKernelReduceTask;
     readonly instantiate: (__field0: PsKernelExprInstantiateState) => PsKernelReduceTask;
     readonly binding: (__field0: PsKernelBindingState) => PsKernelReduceTask;
     readonly resumeWhnf: PsKernelReduceTask;
@@ -1084,9 +1106,9 @@ export declare const PsKernelReduceTask: {
     readonly lam: (__field0: PsKernelName, __field1: PsKernelBinder) => PsKernelReduceTask;
     readonly forallE: (__field0: PsKernelName, __field1: PsKernelBinder) => PsKernelReduceTask;
 };
-declare const __ps$tag$53: unique symbol;
+declare const __ps$tag$54: unique symbol;
 export type PsKernelReduceState = {
-    readonly [__ps$tag$53]: "state";
+    readonly [__ps$tag$54]: "state";
     readonly environment: PsKernelList<PsKernelDefinition>;
     readonly tasks: PsKernelList<PsKernelReduceTask>;
     readonly values: PsKernelList<PsKernelExpr>;
@@ -1094,14 +1116,14 @@ export type PsKernelReduceState = {
 export declare const PsKernelReduceState: {
     readonly state: (__field0: PsKernelList<PsKernelDefinition>, __field1: PsKernelList<PsKernelReduceTask>, __field2: PsKernelList<PsKernelExpr>) => PsKernelReduceState;
 };
-declare const __ps$tag$54: unique symbol;
+declare const __ps$tag$55: unique symbol;
 export type PsKernelReduceResult = {
-    readonly [__ps$tag$54]: "outOfFuel";
+    readonly [__ps$tag$55]: "outOfFuel";
 } | {
-    readonly [__ps$tag$54]: "rejected";
+    readonly [__ps$tag$55]: "rejected";
     readonly error: PsKernelCheckError;
 } | {
-    readonly [__ps$tag$54]: "done";
+    readonly [__ps$tag$55]: "done";
     readonly value: PsKernelExpr;
 };
 export declare const PsKernelReduceResult: {
@@ -1109,47 +1131,56 @@ export declare const PsKernelReduceResult: {
     readonly rejected: (__field0: PsKernelCheckError) => PsKernelReduceResult;
     readonly done: (__field0: PsKernelExpr) => PsKernelReduceResult;
 };
-declare const __ps$tag$55: unique symbol;
+declare const __ps$tag$56: unique symbol;
 export type PsKernelReduceStep = {
-    readonly [__ps$tag$55]: "next";
+    readonly [__ps$tag$56]: "next";
     readonly state: PsKernelReduceState;
 } | {
-    readonly [__ps$tag$55]: "final";
+    readonly [__ps$tag$56]: "final";
     readonly result: PsKernelReduceResult;
 };
 export declare const PsKernelReduceStep: {
     readonly next: (__field0: PsKernelReduceState) => PsKernelReduceStep;
     readonly final: (__field0: PsKernelReduceResult) => PsKernelReduceStep;
 };
-declare const __ps$tag$56: unique symbol;
+declare const __ps$tag$57: unique symbol;
 export type PsKernelConversionTask = {
-    readonly [__ps$tag$56]: "expr";
+    readonly [__ps$tag$57]: "expr";
     readonly left: PsKernelExpr;
     readonly right: PsKernelExpr;
 } | {
-    readonly [__ps$tag$56]: "natural";
+    readonly [__ps$tag$57]: "names";
+    readonly state: PsKernelList<PsKernelOrderTask>;
+} | {
+    readonly [__ps$tag$57]: "levels";
+    readonly left: PsKernelList<PsKernelLevel>;
+    readonly right: PsKernelList<PsKernelLevel>;
+} | {
+    readonly [__ps$tag$57]: "natural";
     readonly state: PsKernelNumericState;
 } | {
-    readonly [__ps$tag$56]: "level";
+    readonly [__ps$tag$57]: "level";
     readonly state: PsKernelLevelCheckState;
 };
 export declare const PsKernelConversionTask: {
     readonly expr: (__field0: PsKernelExpr, __field1: PsKernelExpr) => PsKernelConversionTask;
+    readonly names: (__field0: PsKernelList<PsKernelOrderTask>) => PsKernelConversionTask;
+    readonly levels: (__field0: PsKernelList<PsKernelLevel>, __field1: PsKernelList<PsKernelLevel>) => PsKernelConversionTask;
     readonly natural: (__field0: PsKernelNumericState) => PsKernelConversionTask;
     readonly level: (__field0: PsKernelLevelCheckState) => PsKernelConversionTask;
 };
-declare const __ps$tag$57: unique symbol;
+declare const __ps$tag$58: unique symbol;
 export type PsKernelConversionState = {
-    readonly [__ps$tag$57]: "left";
+    readonly [__ps$tag$58]: "left";
     readonly environment: PsKernelList<PsKernelDefinition>;
     readonly right: PsKernelExpr;
     readonly state: PsKernelReduceState;
 } | {
-    readonly [__ps$tag$57]: "right";
+    readonly [__ps$tag$58]: "right";
     readonly left: PsKernelExpr;
     readonly state: PsKernelReduceState;
 } | {
-    readonly [__ps$tag$57]: "compare";
+    readonly [__ps$tag$58]: "compare";
     readonly tasks: PsKernelList<PsKernelConversionTask>;
 };
 export declare const PsKernelConversionState: {
@@ -1157,16 +1188,16 @@ export declare const PsKernelConversionState: {
     readonly right: (__field0: PsKernelExpr, __field1: PsKernelReduceState) => PsKernelConversionState;
     readonly compare: (__field0: PsKernelList<PsKernelConversionTask>) => PsKernelConversionState;
 };
-declare const __ps$tag$58: unique symbol;
+declare const __ps$tag$59: unique symbol;
 export type PsKernelConversionResult = {
-    readonly [__ps$tag$58]: "outOfFuel";
+    readonly [__ps$tag$59]: "outOfFuel";
 } | {
-    readonly [__ps$tag$58]: "rejected";
+    readonly [__ps$tag$59]: "rejected";
     readonly error: PsKernelCheckError;
 } | {
-    readonly [__ps$tag$58]: "equal";
+    readonly [__ps$tag$59]: "equal";
 } | {
-    readonly [__ps$tag$58]: "different";
+    readonly [__ps$tag$59]: "different";
 };
 export declare const PsKernelConversionResult: {
     readonly outOfFuel: PsKernelConversionResult;
@@ -1174,124 +1205,124 @@ export declare const PsKernelConversionResult: {
     readonly equal: PsKernelConversionResult;
     readonly different: PsKernelConversionResult;
 };
-declare const __ps$tag$59: unique symbol;
+declare const __ps$tag$60: unique symbol;
 export type PsKernelConversionStep = {
-    readonly [__ps$tag$59]: "next";
+    readonly [__ps$tag$60]: "next";
     readonly state: PsKernelConversionState;
 } | {
-    readonly [__ps$tag$59]: "final";
+    readonly [__ps$tag$60]: "final";
     readonly result: PsKernelConversionResult;
 };
 export declare const PsKernelConversionStep: {
     readonly next: (__field0: PsKernelConversionState) => PsKernelConversionStep;
     readonly final: (__field0: PsKernelConversionResult) => PsKernelConversionStep;
 };
-declare const __ps$tag$60: unique symbol;
+declare const __ps$tag$61: unique symbol;
 export type PsKernelTypeTask = {
-    readonly [__ps$tag$60]: "infer";
+    readonly [__ps$tag$61]: "infer";
     readonly context: PsKernelList<PsKernelExpr>;
     readonly value: PsKernelExpr;
 } | {
-    readonly [__ps$tag$60]: "levels";
+    readonly [__ps$tag$61]: "levels";
     readonly pending: PsKernelList<PsKernelLevel>;
 } | {
-    readonly [__ps$tag$60]: "levelName";
+    readonly [__ps$tag$61]: "levelName";
     readonly name: PsKernelName;
     readonly remaining: PsKernelList<PsKernelName>;
     readonly pending: PsKernelList<PsKernelLevel>;
 } | {
-    readonly [__ps$tag$60]: "levelNameCompare";
+    readonly [__ps$tag$61]: "levelNameCompare";
     readonly name: PsKernelName;
     readonly remaining: PsKernelList<PsKernelName>;
     readonly pending: PsKernelList<PsKernelLevel>;
     readonly work: PsKernelList<PsKernelOrderTask>;
 } | {
-    readonly [__ps$tag$60]: "parameterArguments";
+    readonly [__ps$tag$61]: "parameterArguments";
     readonly remaining: PsKernelList<PsKernelName>;
     readonly reversed: PsKernelList<PsKernelLevel>;
     readonly value: PsKernelExpr;
     readonly type: PsKernelExpr;
 } | {
-    readonly [__ps$tag$60]: "parameters";
+    readonly [__ps$tag$61]: "parameters";
     readonly state: PsKernelLevelInstantiateState;
     readonly value: PsKernelExpr;
     readonly type: PsKernelExpr;
 } | {
-    readonly [__ps$tag$60]: "instantiate";
+    readonly [__ps$tag$61]: "instantiate";
     readonly state: PsKernelExprInstantiateState;
 } | {
-    readonly [__ps$tag$60]: "bound";
+    readonly [__ps$tag$61]: "bound";
     readonly context: PsKernelList<PsKernelExpr>;
     readonly index: PsKernelNatural;
     readonly shift: PsKernelNatural;
 } | {
-    readonly [__ps$tag$60]: "lookup";
+    readonly [__ps$tag$61]: "lookup";
     readonly levels: PsKernelList<PsKernelLevel>;
     readonly state: PsKernelLookupState;
 } | {
-    readonly [__ps$tag$60]: "binding";
+    readonly [__ps$tag$61]: "binding";
     readonly state: PsKernelBindingState;
 } | {
-    readonly [__ps$tag$60]: "reduce";
+    readonly [__ps$tag$61]: "reduce";
     readonly state: PsKernelReduceState;
 } | {
-    readonly [__ps$tag$60]: "reduceTop";
+    readonly [__ps$tag$61]: "reduceTop";
 } | {
-    readonly [__ps$tag$60]: "conversion";
+    readonly [__ps$tag$61]: "conversion";
     readonly state: PsKernelConversionState;
 } | {
-    readonly [__ps$tag$60]: "returnE";
+    readonly [__ps$tag$61]: "returnE";
     readonly value: PsKernelExpr;
 } | {
-    readonly [__ps$tag$60]: "lamSort";
+    readonly [__ps$tag$61]: "lamSort";
     readonly context: PsKernelList<PsKernelExpr>;
     readonly name: PsKernelName;
     readonly type: PsKernelExpr;
     readonly body: PsKernelExpr;
     readonly binder: PsKernelBinder;
 } | {
-    readonly [__ps$tag$60]: "lamFinish";
+    readonly [__ps$tag$61]: "lamFinish";
     readonly name: PsKernelName;
     readonly type: PsKernelExpr;
     readonly binder: PsKernelBinder;
 } | {
-    readonly [__ps$tag$60]: "piDomain";
+    readonly [__ps$tag$61]: "piDomain";
     readonly context: PsKernelList<PsKernelExpr>;
     readonly type: PsKernelExpr;
     readonly body: PsKernelExpr;
 } | {
-    readonly [__ps$tag$60]: "piFinish";
+    readonly [__ps$tag$61]: "piFinish";
     readonly domainLevel: PsKernelLevel;
 } | {
-    readonly [__ps$tag$60]: "appPi";
+    readonly [__ps$tag$61]: "appPi";
     readonly context: PsKernelList<PsKernelExpr>;
     readonly arg: PsKernelExpr;
 } | {
-    readonly [__ps$tag$60]: "appArgument";
+    readonly [__ps$tag$61]: "appArgument";
     readonly domain: PsKernelExpr;
     readonly body: PsKernelExpr;
     readonly arg: PsKernelExpr;
 } | {
-    readonly [__ps$tag$60]: "letSort";
+    readonly [__ps$tag$61]: "letSort";
     readonly context: PsKernelList<PsKernelExpr>;
     readonly type: PsKernelExpr;
     readonly value: PsKernelExpr;
     readonly body: PsKernelExpr;
 } | {
-    readonly [__ps$tag$60]: "letValue";
+    readonly [__ps$tag$61]: "letValue";
     readonly context: PsKernelList<PsKernelExpr>;
     readonly type: PsKernelExpr;
     readonly value: PsKernelExpr;
     readonly body: PsKernelExpr;
 } | {
-    readonly [__ps$tag$60]: "letBody";
+    readonly [__ps$tag$61]: "letBody";
     readonly context: PsKernelList<PsKernelExpr>;
 } | {
-    readonly [__ps$tag$60]: "checkSort";
+    readonly [__ps$tag$61]: "checkSort";
     readonly value: PsKernelExpr;
     readonly type: PsKernelExpr;
 } | {
-    readonly [__ps$tag$60]: "checkValue";
+    readonly [__ps$tag$61]: "checkValue";
     readonly type: PsKernelExpr;
 };
 export declare const PsKernelTypeTask: {
@@ -1321,9 +1352,9 @@ export declare const PsKernelTypeTask: {
     readonly checkSort: (__field0: PsKernelExpr, __field1: PsKernelExpr) => PsKernelTypeTask;
     readonly checkValue: (__field0: PsKernelExpr) => PsKernelTypeTask;
 };
-declare const __ps$tag$61: unique symbol;
+declare const __ps$tag$62: unique symbol;
 export type PsKernelTypeState = {
-    readonly [__ps$tag$61]: "state";
+    readonly [__ps$tag$62]: "state";
     readonly environment: PsKernelTypingContext;
     readonly tasks: PsKernelList<PsKernelTypeTask>;
     readonly values: PsKernelList<PsKernelExpr>;
@@ -1331,14 +1362,14 @@ export type PsKernelTypeState = {
 export declare const PsKernelTypeState: {
     readonly state: (__field0: PsKernelTypingContext, __field1: PsKernelList<PsKernelTypeTask>, __field2: PsKernelList<PsKernelExpr>) => PsKernelTypeState;
 };
-declare const __ps$tag$62: unique symbol;
+declare const __ps$tag$63: unique symbol;
 export type PsKernelTypeResult = {
-    readonly [__ps$tag$62]: "outOfFuel";
+    readonly [__ps$tag$63]: "outOfFuel";
 } | {
-    readonly [__ps$tag$62]: "rejected";
+    readonly [__ps$tag$63]: "rejected";
     readonly error: PsKernelCheckError;
 } | {
-    readonly [__ps$tag$62]: "done";
+    readonly [__ps$tag$63]: "done";
     readonly type: PsKernelExpr;
 };
 export declare const PsKernelTypeResult: {
@@ -1346,31 +1377,31 @@ export declare const PsKernelTypeResult: {
     readonly rejected: (__field0: PsKernelCheckError) => PsKernelTypeResult;
     readonly done: (__field0: PsKernelExpr) => PsKernelTypeResult;
 };
-declare const __ps$tag$63: unique symbol;
+declare const __ps$tag$64: unique symbol;
 export type PsKernelTypeStep = {
-    readonly [__ps$tag$63]: "next";
+    readonly [__ps$tag$64]: "next";
     readonly state: PsKernelTypeState;
 } | {
-    readonly [__ps$tag$63]: "final";
+    readonly [__ps$tag$64]: "final";
     readonly result: PsKernelTypeResult;
 };
 export declare const PsKernelTypeStep: {
     readonly next: (__field0: PsKernelTypeState) => PsKernelTypeStep;
     readonly final: (__field0: PsKernelTypeResult) => PsKernelTypeStep;
 };
-declare const __ps$tag$64: unique symbol;
+declare const __ps$tag$65: unique symbol;
 export type PsKernelAdmissionState = {
-    readonly [__ps$tag$64]: "pending";
+    readonly [__ps$tag$65]: "pending";
     readonly environment: PsKernelList<PsKernelDefinition>;
     readonly entries: PsKernelList<PsKernelDefinition>;
 } | {
-    readonly [__ps$tag$64]: "duplicate";
+    readonly [__ps$tag$65]: "duplicate";
     readonly environment: PsKernelList<PsKernelDefinition>;
     readonly entry: PsKernelDefinition;
     readonly rest: PsKernelList<PsKernelDefinition>;
     readonly state: PsKernelLookupState;
 } | {
-    readonly [__ps$tag$64]: "checking";
+    readonly [__ps$tag$65]: "checking";
     readonly environment: PsKernelList<PsKernelDefinition>;
     readonly entry: PsKernelDefinition;
     readonly rest: PsKernelList<PsKernelDefinition>;
@@ -1381,14 +1412,14 @@ export declare const PsKernelAdmissionState: {
     readonly duplicate: (__field0: PsKernelList<PsKernelDefinition>, __field1: PsKernelDefinition, __field2: PsKernelList<PsKernelDefinition>, __field3: PsKernelLookupState) => PsKernelAdmissionState;
     readonly checking: (__field0: PsKernelList<PsKernelDefinition>, __field1: PsKernelDefinition, __field2: PsKernelList<PsKernelDefinition>, __field3: PsKernelTypeState) => PsKernelAdmissionState;
 };
-declare const __ps$tag$65: unique symbol;
+declare const __ps$tag$66: unique symbol;
 export type PsKernelAdmissionResult = {
-    readonly [__ps$tag$65]: "outOfFuel";
+    readonly [__ps$tag$66]: "outOfFuel";
 } | {
-    readonly [__ps$tag$65]: "rejected";
+    readonly [__ps$tag$66]: "rejected";
     readonly error: PsKernelCheckError;
 } | {
-    readonly [__ps$tag$65]: "admitted";
+    readonly [__ps$tag$66]: "admitted";
     readonly environment: PsKernelList<PsKernelDefinition>;
 };
 export declare const PsKernelAdmissionResult: {
@@ -1396,12 +1427,12 @@ export declare const PsKernelAdmissionResult: {
     readonly rejected: (__field0: PsKernelCheckError) => PsKernelAdmissionResult;
     readonly admitted: (__field0: PsKernelList<PsKernelDefinition>) => PsKernelAdmissionResult;
 };
-declare const __ps$tag$66: unique symbol;
+declare const __ps$tag$67: unique symbol;
 export type PsKernelAdmissionStep = {
-    readonly [__ps$tag$66]: "next";
+    readonly [__ps$tag$67]: "next";
     readonly state: PsKernelAdmissionState;
 } | {
-    readonly [__ps$tag$66]: "final";
+    readonly [__ps$tag$67]: "final";
     readonly result: PsKernelAdmissionResult;
 };
 export declare const PsKernelAdmissionStep: {
@@ -1460,7 +1491,7 @@ export declare function psKernelExprInstantiateRun(fuel: PsKernelFuel, __ps_eta_
 export declare function psKernelDefinitionName(entry: PsKernelDefinition): PsKernelName;
 export declare function psKernelDefinitionParameters(entry: PsKernelDefinition): PsKernelList<PsKernelName>;
 export declare function psKernelDefinitionType(entry: PsKernelDefinition): PsKernelExpr;
-export declare function psKernelDefinitionValue(entry: PsKernelDefinition): PsKernelExpr;
+export declare function psKernelDefinitionBody(entry: PsKernelDefinition): PsKernelDefinitionBody;
 export declare function psKernelTypingDeclarations(context: PsKernelTypingContext): PsKernelList<PsKernelDefinition>;
 export declare function psKernelTypingParameters(context: PsKernelTypingContext): PsKernelList<PsKernelName>;
 export declare function psKernelLookupStep(state: PsKernelLookupState): PsKernelLookupStep;

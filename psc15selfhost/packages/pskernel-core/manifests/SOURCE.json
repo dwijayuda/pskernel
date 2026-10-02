@@ -43,15 +43,15 @@
     },
     {
       "path": "src/Ps/Kernel/Environment.lean",
-      "sha256": "5b4504c6fe717388c22e5c0140e26aeae473591c2c80d0b553ac61c10f84f2cf"
+      "sha256": "c464f1a0ac45c4674b8c0e46f326bef0e4381bbd7a95da971781fd9a873e0d5f"
     },
     {
       "path": "src/Ps/Kernel/Reduction.lean",
-      "sha256": "f1f85d2e65740379f2c457932201be97d3f8190f45304a7e4059a1c903c9729e"
+      "sha256": "f55bfbf313ae46e22e86a838987f2cf105efe9a62c77fbcc6d08a2c01dd1f03a"
     },
     {
       "path": "src/Ps/Kernel/Conversion.lean",
-      "sha256": "8f5a0e748bb6479f38a4f3fdb76338ec9223d3eddce8ba481ea9de649906d4d7"
+      "sha256": "a699c1d8322f399bc96403650568f91432b1a22f1d438ade6f539d804958ba54"
     },
     {
       "path": "src/Ps/Kernel/TypeCheck.lean",
@@ -59,7 +59,7 @@
     },
     {
       "path": "src/Ps/Kernel/Admission.lean",
-      "sha256": "8f74eedf58e9e3266b2986c957ea35416bf755802472b26629638a5848f7fd1a"
+      "sha256": "8c7d7549727d099f74c02b7f8af36b3374292083fe4a31cfd5f8ebe7ea98a3ad"
     }
   ]
 }

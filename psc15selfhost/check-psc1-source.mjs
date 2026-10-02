@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { hasOpaqueSourceCommand } from './scripts/source-profile-opaque.mjs';
 
 const scriptPath = fileURLToPath(import.meta.url);
 const workspaceRoot = path.dirname(scriptPath);
@@ -155,7 +156,7 @@ const forbidden = [
   [/\bnamespace\b/, "namespace convenience"],
   [/\bsection\b/, "section convenience"],
   [/\babbrev\b/, "abbrev convenience"],
-  [/\bopaque\b/, "opaque source convenience"],
+  [{ test: hasOpaqueSourceCommand }, "opaque source convenience"],
   [/\bmutual\b/, "mutual declaration convenience"],
   [/\btermination_by\b|\bdecreasing_by\b/, "explicit termination machinery"],
   [/\bIO(?:\.|\s|\b)/, "IO in portable semantic module"],

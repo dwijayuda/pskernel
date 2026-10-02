@@ -1412,31 +1412,41 @@ def psKernelExprInstantiateRun (fuel : PsKernelFuel) : PsKernelExprInstantiateSt
 
 
 
-/- Internal monomorphic definitions. A list is NOT a trusted environment merely
+/- Internal declarations. A list is NOT a trusted environment merely
 because it has this representation. Only fresh replay through Admission checks it. -/
+inductive PsKernelDefinitionBody where
+  | transparent (value : PsKernelExpr)
+  | opaque
+
 inductive PsKernelDefinition where
   | definition (name : PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
   | polymorphic (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
+  | constant (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
 
 def psKernelDefinitionName (entry : PsKernelDefinition) : PsKernelName :=
   match entry with
   | PsKernelDefinition.definition name unusedType unusedValue => name
   | PsKernelDefinition.polymorphic name unusedParameters unusedType unusedValue => name
+  | PsKernelDefinition.constant name parameters type => name
 
 def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList PsKernelName :=
   match entry with
   | PsKernelDefinition.definition unusedName unusedType unusedValue => PsKernelList.nil
   | PsKernelDefinition.polymorphic unusedName parameters unusedType unusedValue => parameters
+  | PsKernelDefinition.constant name parameters type => parameters
 
 def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr :=
   match entry with
   | PsKernelDefinition.definition unusedName type unusedValue => type
   | PsKernelDefinition.polymorphic unusedName unusedParameters type unusedValue => type
+  | PsKernelDefinition.constant name parameters type => type
 
-def psKernelDefinitionValue (entry : PsKernelDefinition) : PsKernelExpr :=
+def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody :=
   match entry with
-  | PsKernelDefinition.definition unusedName unusedType value => value
-  | PsKernelDefinition.polymorphic unusedName unusedParameters unusedType value => value
+  | PsKernelDefinition.definition unusedName unusedType value => PsKernelDefinitionBody.transparent value
+  | PsKernelDefinition.polymorphic unusedName unusedParameters unusedType value => PsKernelDefinitionBody.transparent value
+  | PsKernelDefinition.constant unusedName unusedParameters unusedType => PsKernelDefinitionBody.opaque
+
 
 inductive PsKernelTypingContext where
   | context (declarations : PsKernelList PsKernelDefinition) (parameters : PsKernelList PsKernelName)
@@ -1499,6 +1509,7 @@ inductive PsKernelReduceTask where
   | whnf (value : PsKernelExpr)
   | apply (arg : PsKernelExpr)
   | lookup (levels : PsKernelList PsKernelLevel) (state : PsKernelLookupState)
+  | opaqueConstant (value : PsKernelExpr) (state : PsKernelLevelInstantiateState)
   | instantiate (state : PsKernelExprInstantiateState)
   | binding (state : PsKernelBindingState)
   | resumeWhnf
@@ -1624,10 +1635,24 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
               | PsKernelLookupStep.missing => psKernelReduceReject PsKernelCheckError.unknownConstant
               | PsKernelLookupStep.invalidState => psKernelReduceReject PsKernelCheckError.invalidState
               | PsKernelLookupStep.found entry =>
-                  psKernelReduceNext env
-                    (PsKernelList.cons (PsKernelReduceTask.instantiate
-                      (psKernelExprInstantiateStart (psKernelDefinitionParameters entry) levels (psKernelDefinitionValue entry)))
-                      (PsKernelList.cons PsKernelReduceTask.resumeWhnf rest)) values
+                  match psKernelDefinitionBody entry with
+                  | PsKernelDefinitionBody.transparent value => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.instantiate
+                        (psKernelExprInstantiateStart (psKernelDefinitionParameters entry) levels value))
+                        (PsKernelList.cons PsKernelReduceTask.resumeWhnf rest)) values
+                  | PsKernelDefinitionBody.opaque => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.opaqueConstant
+                        (PsKernelExpr.constE (psKernelDefinitionName entry) levels)
+                        (psKernelLevelInstantiateStart (psKernelDefinitionParameters entry) levels PsKernelLevel.zero)) rest) values
+          | PsKernelReduceTask.opaqueConstant value current =>
+              match psKernelLevelInstantiateStep current with
+              | PsKernelLevelInstantiateStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.opaqueConstant value next) rest) values
+              | PsKernelLevelInstantiateStep.final result =>
+                  match result with
+                  | PsKernelLevelInstantiateResult.done unused => psKernelReducePush env rest values value
+                  | PsKernelLevelInstantiateResult.invalidParameters => psKernelReduceReject PsKernelCheckError.invalidUniverse
+                  | _ => psKernelReduceReject PsKernelCheckError.invalidState
           | PsKernelReduceTask.instantiate current =>
               match psKernelExprInstantiateStep current with
               | PsKernelExprInstantiateStep.next next => psKernelReduceNext env
@@ -1675,6 +1700,8 @@ universe normalization. A mismatch is NOT a claim of full Lean inequivalence.
 Eta, proof irrelevance, primitive and recursor conversion remain separate work. -/
 inductive PsKernelConversionTask where
   | expr (left : PsKernelExpr) (right : PsKernelExpr)
+  | names (state : PsKernelList PsKernelOrderTask)
+  | levels (left : PsKernelList PsKernelLevel) (right : PsKernelList PsKernelLevel)
   | natural (state : PsKernelNumericState)
   | level (state : PsKernelLevelCheckState)
 
@@ -1711,6 +1738,13 @@ def psKernelConversionExpr
       match right with
       | PsKernelExpr.sortE other => psKernelConversionTasks
           (PsKernelList.cons (PsKernelConversionTask.level (psKernelLevelCheckStart level other)) tasks)
+      | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+  | PsKernelExpr.constE name levels =>
+      match right with
+      | PsKernelExpr.constE otherName otherLevels => psKernelConversionTasks
+          (PsKernelList.cons (PsKernelConversionTask.names
+            (PsKernelList.cons (PsKernelOrderTask.name name otherName) PsKernelList.nil))
+            (PsKernelList.cons (PsKernelConversionTask.levels levels otherLevels) tasks))
       | _ => PsKernelConversionStep.final PsKernelConversionResult.different
   | PsKernelExpr.app fn arg =>
       match right with
@@ -1758,6 +1792,27 @@ def psKernelConversionStep (state : PsKernelConversionState) : PsKernelConversio
       | PsKernelList.cons task rest =>
           match task with
           | PsKernelConversionTask.expr left right => psKernelConversionExpr left right rest
+          | PsKernelConversionTask.names current =>
+              match psKernelOrderStep current with
+              | PsKernelOrderStep.next next => psKernelConversionTasks
+                  (PsKernelList.cons (PsKernelConversionTask.names next) rest)
+              | PsKernelOrderStep.invalidState => psKernelConversionReject PsKernelCheckError.invalidState
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelConversionTasks rest
+                  | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+          | PsKernelConversionTask.levels left right =>
+              match left with
+              | PsKernelList.nil =>
+                  match right with
+                  | PsKernelList.nil => psKernelConversionTasks rest
+                  | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+              | PsKernelList.cons head tail =>
+                  match right with
+                  | PsKernelList.nil => PsKernelConversionStep.final PsKernelConversionResult.different
+                  | PsKernelList.cons otherHead otherTail => psKernelConversionTasks
+                      (PsKernelList.cons (PsKernelConversionTask.level (psKernelLevelCheckStart head otherHead))
+                        (PsKernelList.cons (PsKernelConversionTask.levels tail otherTail) rest))
           | PsKernelConversionTask.natural current =>
               match psKernelNumericStep current with
               | PsKernelNumericStep.next next => psKernelConversionTasks (PsKernelList.cons (PsKernelConversionTask.natural next) rest)
@@ -2100,7 +2155,7 @@ def psKernelTypeRun (fuel : PsKernelFuel) : PsKernelTypeState -> PsKernelTypeRes
 
 
 
-/- Fresh, sequential replay of closed monomorphic transparent definitions.
+/- Fresh, sequential replay of closed universe-polymorphic transparent definitions.
 No axiom form, self-reference, forward-reference or caller supplied environment.
 A failure returns NO environment. These are internal values, not public handles. -/
 inductive PsKernelAdmissionState where
@@ -2139,8 +2194,12 @@ def psKernelAdmissionStep (state : PsKernelAdmissionState) : PsKernelAdmissionSt
       | PsKernelLookupStep.found unusedEntry => psKernelAdmissionReject PsKernelCheckError.duplicateName
       | PsKernelLookupStep.invalidState => psKernelAdmissionReject PsKernelCheckError.invalidState
       | PsKernelLookupStep.missing =>
-          PsKernelAdmissionStep.next (PsKernelAdmissionState.checking env entry rest
-            (psKernelCheckWithParametersStart env (psKernelDefinitionParameters entry) (psKernelDefinitionValue entry) (psKernelDefinitionType entry)))
+          match psKernelDefinitionBody entry with
+          | PsKernelDefinitionBody.opaque => psKernelAdmissionReject PsKernelCheckError.unsupported
+          | PsKernelDefinitionBody.transparent value =>
+              PsKernelAdmissionStep.next (PsKernelAdmissionState.checking env entry rest
+                (psKernelCheckWithParametersStart env (psKernelDefinitionParameters entry) value (psKernelDefinitionType entry)))
+
   | PsKernelAdmissionState.checking env entry rest current =>
       match psKernelTypeStep current with
       | PsKernelTypeStep.next next => PsKernelAdmissionStep.next (PsKernelAdmissionState.checking env entry rest next)

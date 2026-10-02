@@ -7,7 +7,7 @@ import { defaultCheckedKernel } from './checked-kernel-provider.mjs';
 import '../packages/pskernel-core/scripts/verify-evidence.mjs';
 
 const manifest = JSON.parse(await readFile(new URL('../packages/pskernel-core/package.json', import.meta.url), 'utf8'));
-assert.equal(manifest.version, '0.1.0-checker.4');
+assert.equal(manifest.version, '0.1.0-checker.5');
 assert.equal(manifest.private, true);
 assert.equal(manifest.proofscript.authoritative, false);
 assert.equal(manifest.proofscript.bootstrap, true);
@@ -26,6 +26,9 @@ assert(typing.includes('psKernelExprInstantiateStep current'));
 assert(!typing.includes('psKernelExprInstantiateRun'));
 const admission = await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/Admission.lean', import.meta.url), 'utf8');
 assert(admission.includes('psKernelCheckWithParametersStart env (psKernelDefinitionParameters entry)'));
+assert(admission.includes('PsKernelDefinitionBody.opaque => psKernelAdmissionReject PsKernelCheckError.unsupported'), 'external opaque declarations must remain rejected');
+const reduction = await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/Reduction.lean', import.meta.url), 'utf8');
+assert(reduction.includes('PsKernelDefinitionBody.opaque'));
 const instantiate = await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/ExprInstantiate.lean', import.meta.url), 'utf8');
 assert(instantiate.includes('PsKernelExprInstantiateTask.validate target'), 'even expressions without levels must validate parameter arity');
 assert(instantiate.includes('psKernelLevelInstantiateStep current'), 'nested instantiation must consume the caller transition budget');

@@ -3,7 +3,7 @@ import Ps.Kernel.Expr
 import Ps.Kernel.Environment
 import Ps.Kernel.TypeCheck
 
-/- Fresh, sequential replay of closed monomorphic transparent definitions.
+/- Fresh, sequential replay of closed universe-polymorphic transparent definitions.
 No axiom form, self-reference, forward-reference or caller supplied environment.
 A failure returns NO environment. These are internal values, not public handles. -/
 inductive PsKernelAdmissionState where
@@ -42,8 +42,12 @@ def psKernelAdmissionStep (state : PsKernelAdmissionState) : PsKernelAdmissionSt
       | PsKernelLookupStep.found unusedEntry => psKernelAdmissionReject PsKernelCheckError.duplicateName
       | PsKernelLookupStep.invalidState => psKernelAdmissionReject PsKernelCheckError.invalidState
       | PsKernelLookupStep.missing =>
-          PsKernelAdmissionStep.next (PsKernelAdmissionState.checking env entry rest
-            (psKernelCheckWithParametersStart env (psKernelDefinitionParameters entry) (psKernelDefinitionValue entry) (psKernelDefinitionType entry)))
+          match psKernelDefinitionBody entry with
+          | PsKernelDefinitionBody.opaque => psKernelAdmissionReject PsKernelCheckError.unsupported
+          | PsKernelDefinitionBody.transparent value =>
+              PsKernelAdmissionStep.next (PsKernelAdmissionState.checking env entry rest
+                (psKernelCheckWithParametersStart env (psKernelDefinitionParameters entry) value (psKernelDefinitionType entry)))
+
   | PsKernelAdmissionState.checking env entry rest current =>
       match psKernelTypeStep current with
       | PsKernelTypeStep.next next => PsKernelAdmissionStep.next (PsKernelAdmissionState.checking env entry rest next)

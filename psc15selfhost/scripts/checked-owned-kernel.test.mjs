@@ -47,6 +47,7 @@ test('each check begins empty after a previous accepted check', async () => {
 for (const [label, change] of [
   ['inductive', a => { a.kind = 'inductive'; }],
   ['axiom', a => { a.declaration.k = 'axiom'; }],
+  ['opaque', a => { a.declaration.k = 'opaque'; }],
   ['unsafe', a => { a.declaration.s = 'unsafe'; }],
   ['duplicate universe parameters', a => { a.declaration.lp = [name('u'), name('u')]; }],
   ['universe parameter', a => { a.declaration.t.l = { k: 'p', n: name('u') }; }],

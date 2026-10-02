@@ -11,6 +11,7 @@ inductive PsKernelReduceTask where
   | whnf (value : PsKernelExpr)
   | apply (arg : PsKernelExpr)
   | lookup (levels : PsKernelList PsKernelLevel) (state : PsKernelLookupState)
+  | opaqueConstant (value : PsKernelExpr) (state : PsKernelLevelInstantiateState)
   | instantiate (state : PsKernelExprInstantiateState)
   | binding (state : PsKernelBindingState)
   | resumeWhnf
@@ -136,10 +137,24 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
               | PsKernelLookupStep.missing => psKernelReduceReject PsKernelCheckError.unknownConstant
               | PsKernelLookupStep.invalidState => psKernelReduceReject PsKernelCheckError.invalidState
               | PsKernelLookupStep.found entry =>
-                  psKernelReduceNext env
-                    (PsKernelList.cons (PsKernelReduceTask.instantiate
-                      (psKernelExprInstantiateStart (psKernelDefinitionParameters entry) levels (psKernelDefinitionValue entry)))
-                      (PsKernelList.cons PsKernelReduceTask.resumeWhnf rest)) values
+                  match psKernelDefinitionBody entry with
+                  | PsKernelDefinitionBody.transparent value => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.instantiate
+                        (psKernelExprInstantiateStart (psKernelDefinitionParameters entry) levels value))
+                        (PsKernelList.cons PsKernelReduceTask.resumeWhnf rest)) values
+                  | PsKernelDefinitionBody.opaque => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.opaqueConstant
+                        (PsKernelExpr.constE (psKernelDefinitionName entry) levels)
+                        (psKernelLevelInstantiateStart (psKernelDefinitionParameters entry) levels PsKernelLevel.zero)) rest) values
+          | PsKernelReduceTask.opaqueConstant value current =>
+              match psKernelLevelInstantiateStep current with
+              | PsKernelLevelInstantiateStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.opaqueConstant value next) rest) values
+              | PsKernelLevelInstantiateStep.final result =>
+                  match result with
+                  | PsKernelLevelInstantiateResult.done unused => psKernelReducePush env rest values value
+                  | PsKernelLevelInstantiateResult.invalidParameters => psKernelReduceReject PsKernelCheckError.invalidUniverse
+                  | _ => psKernelReduceReject PsKernelCheckError.invalidState
           | PsKernelReduceTask.instantiate current =>
               match psKernelExprInstantiateStep current with
               | PsKernelExprInstantiateStep.next next => psKernelReduceNext env

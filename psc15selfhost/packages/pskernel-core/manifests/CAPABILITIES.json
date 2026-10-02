@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "package": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.4",
+  "version": "0.1.0-checker.5",
   "status": "experimental-term-checker",
   "canCheckProofs": false,
   "authoritative": false,
@@ -24,7 +24,8 @@
     "bounded-expression-universe-instantiation",
     "closed-polymorphic-sequential-definition-admission",
     "scope-and-arity-checked-universe-instantiation",
-    "polymorphic-transparent-delta-reduction"
+    "polymorphic-transparent-delta-reduction",
+    "internal-opaque-constant-typing-and-conversion-without-declaration-admission"
   ],
   "boundedEvidence": [
     "BUILD.json",

@@ -1,6 +1,6 @@
 # @proofscript/pskernel-core
 
-**0.1.0-checker.4 — private experimental dependent term-checker checkpoint.**
+**0.1.0-checker.5 — private experimental dependent term-checker checkpoint.**
 
 Regenerated with the current PSC seed, with all 264 baseline tests passing and
 fresh build and reference evidence. See `../../docs/continuity/OWNED_KERNEL_REGENERATION_2026-10-02.md`.

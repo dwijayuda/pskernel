@@ -2,31 +2,41 @@ import Ps.Kernel.Data
 import Ps.Kernel.Expr
 import Ps.Kernel.Order
 
-/- Internal monomorphic definitions. A list is NOT a trusted environment merely
+/- Internal declarations. A list is NOT a trusted environment merely
 because it has this representation. Only fresh replay through Admission checks it. -/
+inductive PsKernelDefinitionBody where
+  | transparent (value : PsKernelExpr)
+  | opaque
+
 inductive PsKernelDefinition where
   | definition (name : PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
   | polymorphic (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
+  | constant (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
 
 def psKernelDefinitionName (entry : PsKernelDefinition) : PsKernelName :=
   match entry with
   | PsKernelDefinition.definition name unusedType unusedValue => name
   | PsKernelDefinition.polymorphic name unusedParameters unusedType unusedValue => name
+  | PsKernelDefinition.constant name parameters type => name
 
 def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList PsKernelName :=
   match entry with
   | PsKernelDefinition.definition unusedName unusedType unusedValue => PsKernelList.nil
   | PsKernelDefinition.polymorphic unusedName parameters unusedType unusedValue => parameters
+  | PsKernelDefinition.constant name parameters type => parameters
 
 def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr :=
   match entry with
   | PsKernelDefinition.definition unusedName type unusedValue => type
   | PsKernelDefinition.polymorphic unusedName unusedParameters type unusedValue => type
+  | PsKernelDefinition.constant name parameters type => type
 
-def psKernelDefinitionValue (entry : PsKernelDefinition) : PsKernelExpr :=
+def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody :=
   match entry with
-  | PsKernelDefinition.definition unusedName unusedType value => value
-  | PsKernelDefinition.polymorphic unusedName unusedParameters unusedType value => value
+  | PsKernelDefinition.definition unusedName unusedType value => PsKernelDefinitionBody.transparent value
+  | PsKernelDefinition.polymorphic unusedName unusedParameters unusedType value => PsKernelDefinitionBody.transparent value
+  | PsKernelDefinition.constant unusedName unusedParameters unusedType => PsKernelDefinitionBody.opaque
+
 
 inductive PsKernelTypingContext where
   | context (declarations : PsKernelList PsKernelDefinition) (parameters : PsKernelList PsKernelName)

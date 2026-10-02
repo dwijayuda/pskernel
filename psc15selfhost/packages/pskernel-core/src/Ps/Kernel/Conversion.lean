@@ -9,6 +9,8 @@ universe normalization. A mismatch is NOT a claim of full Lean inequivalence.
 Eta, proof irrelevance, primitive and recursor conversion remain separate work. -/
 inductive PsKernelConversionTask where
   | expr (left : PsKernelExpr) (right : PsKernelExpr)
+  | names (state : PsKernelList PsKernelOrderTask)
+  | levels (left : PsKernelList PsKernelLevel) (right : PsKernelList PsKernelLevel)
   | natural (state : PsKernelNumericState)
   | level (state : PsKernelLevelCheckState)
 
@@ -45,6 +47,13 @@ def psKernelConversionExpr
       match right with
       | PsKernelExpr.sortE other => psKernelConversionTasks
           (PsKernelList.cons (PsKernelConversionTask.level (psKernelLevelCheckStart level other)) tasks)
+      | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+  | PsKernelExpr.constE name levels =>
+      match right with
+      | PsKernelExpr.constE otherName otherLevels => psKernelConversionTasks
+          (PsKernelList.cons (PsKernelConversionTask.names
+            (PsKernelList.cons (PsKernelOrderTask.name name otherName) PsKernelList.nil))
+            (PsKernelList.cons (PsKernelConversionTask.levels levels otherLevels) tasks))
       | _ => PsKernelConversionStep.final PsKernelConversionResult.different
   | PsKernelExpr.app fn arg =>
       match right with
@@ -92,6 +101,27 @@ def psKernelConversionStep (state : PsKernelConversionState) : PsKernelConversio
       | PsKernelList.cons task rest =>
           match task with
           | PsKernelConversionTask.expr left right => psKernelConversionExpr left right rest
+          | PsKernelConversionTask.names current =>
+              match psKernelOrderStep current with
+              | PsKernelOrderStep.next next => psKernelConversionTasks
+                  (PsKernelList.cons (PsKernelConversionTask.names next) rest)
+              | PsKernelOrderStep.invalidState => psKernelConversionReject PsKernelCheckError.invalidState
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelConversionTasks rest
+                  | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+          | PsKernelConversionTask.levels left right =>
+              match left with
+              | PsKernelList.nil =>
+                  match right with
+                  | PsKernelList.nil => psKernelConversionTasks rest
+                  | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+              | PsKernelList.cons head tail =>
+                  match right with
+                  | PsKernelList.nil => PsKernelConversionStep.final PsKernelConversionResult.different
+                  | PsKernelList.cons otherHead otherTail => psKernelConversionTasks
+                      (PsKernelList.cons (PsKernelConversionTask.level (psKernelLevelCheckStart head otherHead))
+                        (PsKernelList.cons (PsKernelConversionTask.levels tail otherTail) rest))
           | PsKernelConversionTask.natural current =>
               match psKernelNumericStep current with
               | PsKernelNumericStep.next next => psKernelConversionTasks (PsKernelList.cons (PsKernelConversionTask.natural next) rest)

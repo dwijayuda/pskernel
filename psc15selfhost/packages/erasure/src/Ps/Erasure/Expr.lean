@@ -959,7 +959,7 @@ def psOpenMatchMinorHypotheses
     Except PsErasureError PsOpenMatchHypotheses
   | [], state => Except.ok state
   | field :: rest, state =>
-      if !field.recursive then
+      if field.recursive == false then
         psOpenMatchMinorHypotheses
           recursiveParameterIndex
           bindings
@@ -968,7 +968,10 @@ def psOpenMatchMinorHypotheses
       else
         match state.cursor with
         | .lam name domain body binder =>
-            match bindings.find? (fun binding => binding.field == field.name) with
+            match
+                bindings.find?
+                  (fun (binding : PsVerifiedIrMatchBinding) =>
+                    binding.field == field.name) with
             | none => Except.error PsErasureError.binderMismatch
             | some binding =>
                 let pushed :=
@@ -976,12 +979,13 @@ def psOpenMatchMinorHypotheses
                     state.scope.localContext
                     name
                     domain
-                    binder
+                    binder;
                 let baseScope : PsErasureScope := {
                   localContext := pushed.context
                   runtimeLocals := state.scope.runtimeLocals
                   typeLocals := state.scope.typeLocals
-                  erasedLocals := pushed.id :: state.scope.erasedLocals
+                  erasedLocals :=
+                    List.cons pushed.id state.scope.erasedLocals
                   declarationNames := state.scope.declarationNames
                   runtimeConstructors := state.scope.runtimeConstructors
                   runtimeRecursors := state.scope.runtimeRecursors
@@ -989,7 +993,7 @@ def psOpenMatchMinorHypotheses
                   runtimeStructureConstructors := state.scope.runtimeStructureConstructors
                   runtimeExpressions := state.scope.runtimeExpressions
                   currentDefinition := state.scope.currentDefinition
-                }
+                };
                 let nextScope :=
                   match
                       state.scope.currentDefinition,
@@ -998,17 +1002,19 @@ def psOpenMatchMinorHypotheses
                       {
                         baseScope with
                         runtimeExpressions :=
-                          (pushed.id,
-                            PsVerifiedIrExpr.call
-                              (PsVerifiedIrExpr.var current.name)
-                              []
-                              (psErasureRecursiveCallArguments
-                                current.runtimeParameters
-                                parameterIndex
-                                binding.name)) ::
+                          List.cons
+                            (Prod.mk
+                              pushed.id
+                              (PsVerifiedIrExpr.call
+                                (PsVerifiedIrExpr.var current.name)
+                                []
+                                (psErasureRecursiveCallArguments
+                                  current.runtimeParameters
+                                  parameterIndex
+                                  binding.name)))
                             baseScope.runtimeExpressions
                       }
-                  | _, _ => baseScope
+                  | _, _ => baseScope;
                 psOpenMatchMinorHypotheses
                   recursiveParameterIndex
                   bindings

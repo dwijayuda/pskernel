@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createCheckedPreparedSession } from './checked-prepared-session.mjs';
+import { createCheckedPreparedSession, leanCheckedIdentity } from './checked-prepared-session.mjs';
 
 const tag = Symbol('Except');
 const ok = value => ({ [tag]: 'ok', value });
@@ -31,7 +31,7 @@ function fixture(provider = () => identity) {
   };
   const session = createCheckedPreparedSession(compiler, admissions => {
     calls.push('kernel'); return provider(admissions, prepared);
-  });
+  }, leanCheckedIdentity);
   return { session, calls, getPrepared: () => prepared };
 }
 
@@ -111,7 +111,7 @@ test('changed canonical output is rejected before emission', async () => {
     psCompilerAdmissionsFromPrepared: () => ok(String(count++)),
     psCompilerTypeScriptFromPrepared: () => { calls.push('emit'); return ok('bad'); },
   };
-  const session = createCheckedPreparedSession(compiler, () => identity);
+  const session = createCheckedPreparedSession(compiler, () => identity, leanCheckedIdentity);
   const checked = await session.check('lean', '42');
   assert.throws(() => session.emit(checked), /CHECKED_PAYLOAD_CHANGED/);
   assert.deepEqual(calls, []);

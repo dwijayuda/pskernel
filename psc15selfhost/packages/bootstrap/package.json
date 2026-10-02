@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@proofscript/compiler-next": "0.0.0-dev",
-    "@proofscript/backend-ts-next": "0.0.0-dev"
+    "@proofscript/backend-ts-next": "0.0.0-dev",
+    "@proofscript/pskernel-core": "0.1.0-checker.1"
   }
 }

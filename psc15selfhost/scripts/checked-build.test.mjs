@@ -10,6 +10,31 @@ import { buildChecked, defaultCheckedSeed } from './checked-build.mjs';
 const seed = process.env.PSC2_CHECKED_SEED_BIN ?? defaultCheckedSeed;
 const native = existsSync(seed);
 
+test('default owned kernel checks dependent source before emission and execution', { skip: !native }, async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'psc2-owned-checked-real-'));
+  try {
+    await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
+    const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'out.js');
+    await writeFile(entryPath, 'def identity (A : Type) (a : A) : A := a\n');
+    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed });
+    const module = await import(pathToFileURL(outputPath).href);
+    assert.equal(module.identity(42n), 42n);
+    assert.equal(receipt.kernel.selector, 'pskernel-core');
+    assert.equal(receipt.provider.provider, 'psc-generated-owned');
+    assert.equal(receipt.schemaVersion, 3);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('default owned kernel blocks unsupported inductives before writing output', { skip: !native }, async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'psc2-owned-rejected-real-'));
+  try {
+    const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'never/out.js');
+    await writeFile(entryPath, 'inductive Flag where\n  | off\n  | on\n');
+    await assert.rejects(buildChecked({ entryPath, outputPath, seedPath: seed }), /KERNEL_REJECTED: unsupported-admission:inductive/);
+    assert.equal(existsSync(path.dirname(outputPath)), false);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
 for (const [kind, source] of [
   ['lean', 'def answer : Nat := 42\n'],
   ['ps', 'def answer: Nat := 42;\n'],
@@ -21,7 +46,7 @@ for (const [kind, source] of [
       const entryPath = path.join(dir, 'Main.' + kind);
       await writeFile(entryPath, source);
       const outputPath = path.join(dir, 'out.js');
-      const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed });
+      const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'lean434-wasm' });
       const module = await import(pathToFileURL(outputPath).href);
       assert.equal(module.answer, 42n);
       assert.equal(receipt.provider.profile, 'lean4.34-core');

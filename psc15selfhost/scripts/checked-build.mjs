@@ -4,7 +4,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readCheckedSourceSnapshot } from './checked-source-snapshot.mjs';
-import { createCheckedPreparedSession, leanCheckedIdentity } from './checked-prepared-session.mjs';
+import { createCheckedPreparedSession } from './checked-prepared-session.mjs';
+import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 import {
   checkAdmissionsWithKernel,
   checkedKernelDescriptor,
@@ -17,7 +18,11 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = data => createHash('sha256').update(data).digest('hex');
 const nativeSuffix = process.platform === 'win32' ? '.exe' : '';
 export const defaultCheckedSeed = path.join(root, 'lean-checked/.lake/build/bin/psc2_lean_checked_seed' + nativeSuffix);
-export const defaultCheckedCompiler = path.join(root, 'dist/lean-checked/bootstrap/packages/compiler/index.js');
+export function checkedCompilerPath(kernel = defaultCheckedKernel) {
+  checkedKernelDescriptor(kernel);
+  return path.join(root, 'dist/checked', kernel, 'bootstrap/packages/compiler/index.js');
+}
+export const defaultCheckedCompiler = checkedCompilerPath();
 
 export async function buildChecked({
   entryPath,
@@ -53,7 +58,7 @@ export async function buildChecked({
     admissions = result.admissions;
     typeScript = result.typeScript;
   } else {
-    const file = path.resolve(compilerPath ?? defaultCheckedCompiler);
+    const file = path.resolve(compilerPath ?? checkedCompilerPath(kernel));
     compilerIdentity = { engine: 'generated-js', sha256: digest(await readFile(file)) };
     const compiler = await import(pathToFileURL(file).href);
     const kind = snapshot.kind === 'ps'
@@ -63,15 +68,15 @@ export async function buildChecked({
     const session = createCheckedPreparedSession(compiler, async text => {
       admissions = text;
       return checkAdmissions(text);
-    });
+    }, checkedKernelIdentity(kernel));
     const handle = await session.checkSources(kind, snapshot.sources);
     if (!checkOnly) typeScript = session.emit(handle);
   }
 
   const receipt = {
-    schemaVersion: 2,
-    kind: 'psc2-lean-checked-build',
-    provider: leanCheckedIdentity,
+    schemaVersion: 3,
+    kind: 'psc2-checked-build',
+    provider: checkedKernelIdentity(kernel),
     kernel: kernelDescriptor,
     compiler: compilerIdentity,
     sourceClosureSha256: snapshot.closureSha256,
@@ -133,8 +138,8 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     } else throw new Error(`Unknown checked-build option: ${flag}`);
   }
   if (!entryPath) {
-    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434-wasm|lean434]');
+    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel pskernel-core|lean434-wasm|lean434]');
   }
   const receipt = await buildChecked(options);
-  console.log('PSC2_LEAN_CHECKED_BUILD: PASS ' + JSON.stringify(receipt));
+  console.log('PSC2_CHECKED_BUILD: PASS ' + JSON.stringify(receipt));
 }

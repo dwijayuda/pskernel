@@ -3,12 +3,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { buildChecked, defaultCheckedSeed, defaultCheckedCompiler } from './checked-build.mjs';
-import { leanCheckedIdentity } from './checked-prepared-session.mjs';
+import { buildChecked, defaultCheckedSeed } from './checked-build.mjs';
+import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 import { checkedKernelDescriptor, defaultCheckedKernel } from './checked-kernel-provider.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const base = path.join(root, 'dist/lean-checked');
+let base;
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 
@@ -26,16 +26,14 @@ function run(command, args, cwd = root) {
 async function validateGeneration(generation, kernel) {
   const compiler = path.join(generation, 'packages/compiler/index.js');
   const receipt = JSON.parse(await readFile(compiler.replace(/\.js$/u, '.checked.json'), 'utf8'));
-  for (const [key, value] of Object.entries(leanCheckedIdentity)) {
+  for (const [key, value] of Object.entries(checkedKernelIdentity(kernel))) {
     if (receipt.provider?.[key] !== value) throw new Error('PSC2_CHECKED_GENERATION_PROVIDER');
   }
   const expectedKernel = checkedKernelDescriptor(kernel);
-  if (receipt.kernel?.selector !== expectedKernel.selector ||
-      receipt.kernel?.package !== expectedKernel.package ||
-      receipt.kernel?.sourceCommit !== expectedKernel.sourceCommit) {
+  if (Object.entries(expectedKernel).some(([key, value]) => receipt.kernel?.[key] !== value)) {
     throw new Error('PSC2_CHECKED_GENERATION_KERNEL');
   }
-  if (receipt.kind !== 'psc2-lean-checked-build' || receipt.schemaVersion !== 2 ||
+  if (receipt.kind !== 'psc2-checked-build' || receipt.schemaVersion !== 3 ||
       hash(await readFile(compiler)) !== receipt.javaScriptSha256 ||
       hash(await readFile(compiler.replace(/\.js$/u, '.ts'))) !== receipt.typeScriptSha256 ||
       hash(await readFile(compiler.replace(/\.js$/u, '.admissions.json'))) !== receipt.canonicalAdmissionsSha256) {
@@ -120,7 +118,7 @@ async function compare(kernel) {
     ]);
     run(process.execPath, [
       'scripts/compare-selfhost.mjs',
-      defaultCheckedCompiler.replace(/\.js$/u, '.ts'),
+      path.join(base, 'bootstrap/packages/compiler/index.ts'),
       path.join(base, name, 'packages/compiler/index.ts'),
     ]);
   }
@@ -141,7 +139,8 @@ while (args.length) {
   }
 }
 checkedKernelDescriptor(kernel);
-if (!stage) throw new Error('usage: checked-selfhost.mjs bootstrap|next|fixed-point|verify [--kernel lean434-wasm|lean434]');
+base = path.join(root, 'dist/checked', kernel);
+if (!stage) throw new Error('usage: checked-selfhost.mjs bootstrap|next|fixed-point|verify [--kernel pskernel-core|lean434-wasm|lean434]');
 
 switch (stage) {
   case 'bootstrap':

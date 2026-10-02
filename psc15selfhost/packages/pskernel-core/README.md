@@ -5,6 +5,11 @@
 Regenerated with the current PSC seed, with all 264 baseline tests passing and
 fresh build and reference evidence. See `../../docs/continuity/OWNED_KERNEL_REGENERATION_2026-10-02.md`.
 
+This is the default checker and part of the joint bootstrap source closure.
+The host adapter runs the generated semantic machine and fails closed outside
+its supported fragment. Full bootstrap currently stops at the first inductive;
+the default selection does not imply release readiness or complete Lean parity.
+
 This package now executes an owned checking fragment, rather than data helpers
 alone. It is **not the authoritative PSC2 kernel**, a full Lean-compatible
 checker, a jointly self-hosted compiler/kernel, or a published npm release.

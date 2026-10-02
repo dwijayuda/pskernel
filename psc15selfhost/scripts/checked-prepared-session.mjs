@@ -1,9 +1,7 @@
 import { createHash } from 'node:crypto';
 
-export const leanCheckedIdentity = Object.freeze({
-  protocol: 'pskernel-lean/1', provider: 'lean4-cpp', leanVersion: '4.34.0',
-  leanCommit: '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b', profile: 'lean4.34-core',
-});
+import { ownedCheckedIdentity } from './checked-kernel-identity.mjs';
+export { leanCheckedIdentity } from './checked-kernel-identity.mjs';
 const hash = text => createHash('sha256').update(text, 'utf8').digest('hex');
 
 export function unwrapCompilerResult(result, stage) {
@@ -47,11 +45,13 @@ function admissionsFrom(compiler, prepared) {
 /**
  * Trusted host composition boundary. compiler and checkAdmissions are selected by
  * the host, never by a serialized receipt or an untrusted caller's checked flag.
- * Production composes this with the pinned pskernel-lean package. Test doubles
+ * Production supplies the selected, pinned kernel identity. Test doubles
  * exercise orchestration only. This does not sandbox malicious compiler/host JS
  * and does not claim a portable, universally unforgeable CheckedCore type.
  */
-export function createCheckedPreparedSession(compiler, checkAdmissions) {
+export function createCheckedPreparedSession(compiler, checkAdmissions, expectedIdentity = ownedCheckedIdentity) {
+  const identity = Object.freeze({ ...expectedIdentity });
+  if (!identity.protocol || !identity.provider || !identity.profile) throw new Error('PSC2_CHECKED_IDENTITY_REQUIRED');
   for (const name of ['psCompilerPrepareSource', 'psCompilerAdmissionsFromPrepared',
     'psCompilerTypeScriptFromPrepared']) {
     if (typeof compiler?.[name] !== 'function') throw new Error(`PSC2_CHECKED_API_MISSING: ${name}`);
@@ -63,14 +63,14 @@ export function createCheckedPreparedSession(compiler, checkAdmissions) {
       freezeGraph(prepared);
       const admissions = admissionsFrom(compiler, prepared);
       const result = await checkAdmissions(admissions);
-      for (const [field, expected] of Object.entries(leanCheckedIdentity)) {
+      for (const [field, expected] of Object.entries(identity)) {
         if (result?.[field] !== expected) throw new Error(`PSC2_CHECKED_PROVIDER_IDENTITY: ${field}`);
       }
       if (typeof result.accepted !== 'boolean') throw new Error('PSC2_CHECKED_PROVIDER_RESULT');
       if (!result.accepted) throw new Error(`PSC2_KERNEL_REJECTED: ${result.errorKind ?? 'kernel-rejection'}`);
       const handle = Object.freeze({
         sourceSha256: hash(source), canonicalAdmissionsSha256: hash(admissions),
-        provider: leanCheckedIdentity,
+        provider: identity,
       });
       modules.set(handle, { prepared, admissions });
       return handle;

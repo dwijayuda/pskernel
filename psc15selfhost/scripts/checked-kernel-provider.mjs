@@ -1,21 +1,27 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { leanCheckedIdentity } from './checked-prepared-session.mjs';
+import { checkedKernelIdentity, ownedCheckedIdentity } from './checked-kernel-identity.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const nativeSuffix = process.platform === 'win32' ? '.exe' : '';
 
-export const defaultCheckedKernel = 'lean434-wasm';
-export const checkedKernelSelectors = Object.freeze(['lean434-wasm', 'lean434']);
+export const defaultCheckedKernel = 'pskernel-core';
+export const checkedKernelSelectors = Object.freeze(['pskernel-core', 'lean434-wasm', 'lean434']);
 
 const descriptors = Object.freeze({
+  'pskernel-core': Object.freeze({
+    selector: 'pskernel-core', package: '@proofscript/pskernel-core',
+    execution: 'psc-generated-js', version: ownedCheckedIdentity.version,
+    generatedKernelSha256: ownedCheckedIdentity.generatedKernelSha256,
+    sourceManifestSha256: ownedCheckedIdentity.sourceManifestSha256,
+  }),
   'lean434-wasm': Object.freeze({
     selector: 'lean434-wasm',
     package: '@proofscript/pskernel-lean-wasm',
     execution: 'wasm-node',
-    sourceCommit: 'd6bd812e42b28893e60d52efa9b8a5d17f78e44f',
-    verificationRun: 36916202568,
+    sourceCommit: '1b21b2483df7e8de7542873c24eaff2501539b1b',
+    verificationRun: 37014379617,
   }),
   lean434: Object.freeze({
     selector: 'lean434',
@@ -32,8 +38,8 @@ export function checkedKernelDescriptor(selector = defaultCheckedKernel) {
   return descriptor;
 }
 
-function assertSemanticIdentity(result) {
-  for (const [field, expected] of Object.entries(leanCheckedIdentity)) {
+function assertSemanticIdentity(result, selector) {
+  for (const [field, expected] of Object.entries(checkedKernelIdentity(selector))) {
     if (result?.[field] !== expected) {
       throw new Error(`PSC2_CHECKED_PROVIDER_IDENTITY: ${field}`);
     }
@@ -53,14 +59,20 @@ export async function checkAdmissionsWithKernel(
   const timeoutMs = options.timeoutMs ?? 60000;
   let result;
 
-  if (selector === 'lean434-wasm') {
+  if (selector === 'pskernel-core') {
+    const provider = await import('./checked-owned-kernel.mjs');
+    result = await provider.checkOwnedAdmissions(admissions, {
+      timeoutMs,
+      ...(options.maxSteps !== undefined ? { maxSteps: options.maxSteps } : {}),
+    });
+  } else if (selector === 'lean434-wasm') {
     const provider = await import('../packages/pskernel-lean-wasm/index.mjs');
     result = await provider.checkCanonicalAdmissions(admissions, {
       timeoutMs,
       ...(options.wasmLauncherPath ? { launcherPath: options.wasmLauncherPath } : {}),
       ...(options.wasmNodePath ? { nodePath: options.wasmNodePath } : {}),
     });
-  } else {
+  } else if (selector === 'lean434') {
     const provider = await import('../packages/pskernel-lean/index.mjs');
     const developmentBinary = path.join(
       root,
@@ -77,6 +89,6 @@ export async function checkAdmissionsWithKernel(
     });
   }
 
-  assertSemanticIdentity(result);
+  assertSemanticIdentity(result, selector);
   return Object.freeze({ result, descriptor });
 }

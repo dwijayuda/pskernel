@@ -40,8 +40,8 @@
   },
   "dependencies": {},
   "proofscript": {
-    "bootstrap": false,
-    "portable": false,
+    "bootstrap": true,
+    "portable": true,
     "targetPortable": true,
     "sourceRoots": [
       "src"

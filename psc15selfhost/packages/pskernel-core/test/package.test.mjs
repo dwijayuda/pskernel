@@ -20,9 +20,9 @@ test('package identity matches metadata and has no runtime dependencies',()=> {
 });
 test('publication and compiler authority remain disabled',()=> {
   assert.equal(manifest.private,true);
-  assert.equal(manifest.proofscript.bootstrap,false);
+  assert.equal(manifest.proofscript.bootstrap,true);
   assert.equal(manifest.proofscript.authoritative,false);
-  assert.equal(manifest.proofscript.portable,false);
+  assert.equal(manifest.proofscript.portable,true);
   for(const hook of ['preinstall','install','postinstall','prepare']) assert.equal(manifest.scripts[hook],undefined);
 });
 test('Lean target is pinned, not a compatibility claim',()=> {

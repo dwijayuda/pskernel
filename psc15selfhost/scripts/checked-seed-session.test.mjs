@@ -12,14 +12,14 @@ for (const sourceKind of ['lean', 'ps']) {
   const end = sourceKind === 'lean' ? '\n' : ';\n';
   const sources = ['def first : Nat := 7' + end, 'def second : Nat := first' + end];
   const source = sources.join('\n\n') + '\n';
-  test(`real ${sourceKind} module session emits only after the default Wasm check`, { skip: !available }, async () => {
+  test(`real ${sourceKind} module session emits only after the explicit Wasm check`, { skip: !available }, async () => {
     let calls = 0;
     const result = await runCheckedSeedSession({
       binaryPath, sourceKind, source, sources, emit: true,
       checkAdmissions: async admissions => {
         calls++;
         assert(admissions.includes('second'));
-        return (await checkAdmissionsWithKernel(admissions)).result;
+        return (await checkAdmissionsWithKernel(admissions, 'lean434-wasm')).result;
       },
     });
     assert.equal(calls, 1);

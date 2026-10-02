@@ -6,7 +6,7 @@ import { readdirSync } from 'node:fs';
 import path from 'node:path';
 
 const root = fileURLToPath(new URL('../packages/pskernel-core/', import.meta.url));
-test('received owned kernel remains isolated and has matching build/evidence identities', () => {
+test('regenerated owned kernel has matching build/evidence identities and owns bootstrap routing', () => {
   execFileSync(process.execPath, [fileURLToPath(new URL('./check-owned-kernel-receipt.mjs', import.meta.url))]);
 });
 test('received owned checker reproduces all 264 baseline tests', {
@@ -15,9 +15,11 @@ test('received owned checker reproduces all 264 baseline tests', {
 }, () => {
   const tests = readdirSync(path.join(root, 'test')).filter(name => name.endsWith('.test.mjs')).sort();
   const { NODE_TEST_CONTEXT: _nestedRunner, ...env } = process.env;
-  const output = execFileSync(process.execPath, ['--test', '--test-reporter=tap', ...tests.map(name => path.join('test', name))], {
-    cwd: root, env, encoding: 'utf8', timeout: 120000, maxBuffer: 8 * 1024 * 1024,
+  const run = spawnSync(process.execPath, ['--test', '--test-reporter=tap', ...tests.map(name => path.join('test', name))], {
+    cwd: root, env, encoding: 'utf8', timeout: 300000, maxBuffer: 8 * 1024 * 1024,
   });
+  assert.equal(run.status, 0, `${run.error ?? ''}\n${run.stdout}\n${run.stderr}`);
+  const output = run.stdout;
   assert.match(output, /# tests 264\b/u);
   assert.match(output, /# pass 264\b/u);
   assert.match(output, /# fail 0\b/u);

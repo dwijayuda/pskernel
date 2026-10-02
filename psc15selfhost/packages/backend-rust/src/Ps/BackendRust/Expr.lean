@@ -302,6 +302,11 @@ def psRustEmitIntrinsicFromPrinted
               "))")
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.intRepr =>
+      match arguments with
+      | List.cons value List.nil =>
+          Except.ok (psRustConcat3 "(" value ").to_string()")
+      | _ => Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intNegSucc =>
       match arguments with
       | List.cons value List.nil =>

@@ -8,6 +8,12 @@ def psListIsEmpty {alpha : Type} (values : List alpha) : Bool :=
   | List.nil => true
   | List.cons _ _ => false
 
+def psListAny {alpha : Type} (predicate : alpha -> Bool) (values : List alpha) : Bool :=
+  match values with
+  | List.nil => false
+  | List.cons value rest =>
+      if predicate value then true else psListAny predicate rest
+
 def psListReverseAcc {alpha : Type} (values : List alpha) : List alpha -> List alpha :=
   match values with
   | List.nil => fun (acc : List alpha) => acc

@@ -25,7 +25,7 @@ def psCompilerTranslateSource
     (sourceKind targetKind : PsCompilerSourceKind)
     (source : String) :
     Except PsCompilerError String :=
-  let translated :=
+  let translated : Except PsTranslationError String :=
     match sourceKind with
     | PsCompilerSourceKind.lean =>
         match targetKind with
@@ -138,7 +138,7 @@ def psCompilerAdmissionsFromPrepared
   | Except.error error =>
       Except.error error
   | Except.ok _ =>
-      Except.ok (String.append prepared.canonicalAdmissions "\n")
+      Except.ok (String.Internal.append prepared.canonicalAdmissions "\n")
 
 def psCompilerAdmissionsFromElaborated
     (elaborated : PsElabModuleResult) :

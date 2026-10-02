@@ -571,7 +571,10 @@ def psBootstrapPreludeEnvironment : PsEnvironment :=
     psPreludeAdd env7
       (PsDeclaration.axiomDecl psIntMulName [] intBinaryType);
   let envScalarUInt8 :=
-    psPreludeAdd env8
+    psPreludeAdd
+      (psPreludeAdd env8
+        (PsDeclaration.axiomDecl psIntReprName []
+          (PsExpr.forallE nName intType stringType PsBinderInfo.explicit)))
       (PsDeclaration.axiomDecl psUInt8Name [] typeType);
   let envScalarUInt16 :=
     psPreludeAdd envScalarUInt8

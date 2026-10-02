@@ -158,6 +158,23 @@ def psAuditUniqueNames : Bool :=
     psErasureAddUniqueString [] "free" 1 == "free" &&
     psErasureAddUniqueString [] "free" 0 == "free_overflow"
 
+def psAuditIntRepr : Bool :=
+  let compiled := psCompilerTypeScriptSource PsCompilerSourceKind.lean
+    "def renderInt (value : Int) : String := Int.repr value"
+  let emitted := match compiled with
+    | Except.ok output => output.contains "return (value).toString();"
+    | Except.error _ => false
+  let run := fun args erase => psErasePrimitiveApplication psBootstrapPreludeEnvironment
+    (psErasureScopeEmpty []) erase { head := .constE psIntReprName [], args := args }
+  let rejected := [[], [.fvar 0, .fvar 1]].all fun args =>
+    match run args (fun _ => Except.error .fuelExhausted) with
+    | Except.error .unsupportedApplication => true
+    | _ => false
+  let propagated := match run [.fvar 0] (fun _ => Except.error .fuelExhausted) with
+    | Except.error .fuelExhausted => true
+    | _ => false
+  emitted && rejected && propagated
+
 def psAuditWatchModule (file : String) : IO UInt32 := do
   let initial ← psHostParseSource file (← IO.FS.readFile file)
   let root := psHostDirectoryOfPath file
@@ -196,6 +213,30 @@ def psAuditWatchModule (file : String) : IO UInt32 := do
 def main (arguments : List String) : IO UInt32 := do
   match arguments with
   | ["--watch", file] => return ← psAuditWatchModule file
+  | ["--prepare", file] =>
+      let elaborated ← psHostLoadProject psSelfHostProdPreludeEnvironment file
+      IO.println ("PSC2_REPLAY_PROJECT_ELAB_PASS: " ++ toString elaborated.declarations.length ++ " declarations")
+      match psCompilerPrepareElaborated elaborated with
+      | Except.ok _ =>
+          IO.println "PSC2_REPLAY_PROJECT_PREPARE_PASS"
+          return 0
+      | Except.error (.admission error) =>
+          let detail := match error with
+            | .universeMetavariable => "universeMetavariable"
+            | .freeVariable => "freeVariable"
+            | .expressionMetavariable => "expressionMetavariable"
+            | .missingConstructor name => "missingConstructor:" ++ psNameToString name
+            | .mismatchedConstructor name => "mismatchedConstructor:" ++ psNameToString name
+            | .unsupportedDeclaration => "unsupportedDeclaration"
+          IO.println ("PSC2_REPLAY_PROJECT_PREPARE_FAILED: " ++ detail)
+          for declaration in elaborated.declarations do
+            match declaration with
+            | .partialDecl name _ _ _ => IO.println ("PSC2_REPLAY_PARTIAL_DECLARATION: " ++ psNameToString name)
+            | .axiomDecl name _ _ => IO.println ("PSC2_REPLAY_AXIOM_DECLARATION: " ++ psNameToString name)
+            | .opaqueDecl name _ _ _ => IO.println ("PSC2_REPLAY_OPAQUE_DECLARATION: " ++ psNameToString name)
+            | _ => pure ()
+          return 1
+      | Except.error _ => throw (IO.userError "PSC2_REPLAY_PROJECT_PREPARE_FAILED: compiler error")
   | _ => pure ()
   if arguments == ["--behavior"] then
     for (label, passed) in [("runtime argument and parameter order", psAuditRuntimeBinders),
@@ -206,7 +247,8 @@ def main (arguments : List String) : IO UInt32 := do
         ("condition arity, Bool/String branches and error propagation", psAuditConditionBranches),
         ("sanitizer ASCII, Unicode and fallback equivalence", psAuditSanitizer),
         ("portable collections preserve order, bounds and first errors", psAuditCollections),
-        ("unique-name collision order and fuel boundary", psAuditUniqueNames)] do
+        ("unique-name collision order and fuel boundary", psAuditUniqueNames),
+        ("Int.repr compilation, arity rejection and error propagation", psAuditIntRepr)] do
       if passed then IO.println ("PSC2_FIXED_POINT_ERASURE_CASE: PASS " ++ label)
       else throw (IO.userError ("PSC2_FIXED_POINT_ERASURE_CASE: FAIL " ++ label))
     IO.println "PSC2_FIXED_POINT_ERASURE_FINISH_APPLICATION: PASS (native behavior and append-order theorem)"
@@ -214,6 +256,10 @@ def main (arguments : List String) : IO UInt32 := do
       let path := "packages/erasure/src/Ps/Erasure/" ++ name ++ ".lean"
       let _ ← psHostParseSource path (← IO.FS.readFile path)
       IO.println ("PSC2_FIXED_POINT_ERASURE_PARSE: PASS " ++ name)
+    for name in ["Type", "Expr", "Module"] do
+      let path := "packages/backend-ts/src/Ps/BackendTs/" ++ name ++ ".lean"
+      let _ ← psHostParseSource path (← IO.FS.readFile path)
+      IO.println ("PSC2_FIXED_POINT_BACKEND_TS_PARSE: PASS " ++ name)
     return 0
   let mut failures := 0
   for file in arguments do

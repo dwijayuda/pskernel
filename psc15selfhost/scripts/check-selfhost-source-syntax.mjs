@@ -12,6 +12,7 @@ import "./check-erasure-inductive-parameters-selfhost-source-syntax.mjs";
 import "./check-erasure-expression-flat-matches.mjs";
 import "./check-erasure-basic-source-syntax.mjs";
 import "./check-erasure-replay-workers.mjs";
+import "./check-backend-ts-replay-source.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

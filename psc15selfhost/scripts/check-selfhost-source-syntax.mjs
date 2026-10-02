@@ -8,6 +8,7 @@ import "./check-erasure-declaration-names-selfhost-source-syntax.mjs";
 import "./check-erasure-open-definition-selfhost-source-syntax.mjs";
 import "./check-erasure-definition-selfhost-source-syntax.mjs";
 import "./check-erasure-definitions-loop-selfhost-source-syntax.mjs";
+import "./check-erasure-inductive-parameters-selfhost-source-syntax.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

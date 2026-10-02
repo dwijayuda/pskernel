@@ -30,8 +30,24 @@ test('default owned kernel blocks unsupported inductives before writing output',
   try {
     const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'never/out.js');
     await writeFile(entryPath, 'inductive Flag where\n  | off\n  | on\n');
-    await assert.rejects(buildChecked({ entryPath, outputPath, seedPath: seed }), /KERNEL_REJECTED: unsupported-admission:inductive/);
+    await assert.rejects(buildChecked({ entryPath, outputPath, seedPath: seed }), /KERNEL_REJECTED: unsupported-inductive-shape/);
     assert.equal(existsSync(path.dirname(outputPath)), false);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('actual unit source passes owned admission, exact-module emission and execution', { skip: !native }, async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'psc2-owned-unit-real-'));
+  try {
+    await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
+    const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'out.js');
+    await writeFile(entryPath, 'inductive SampleUnit where\n  | make\ndef sample : SampleUnit := SampleUnit.make\n');
+    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed });
+    const module = await import(pathToFileURL(outputPath).href);
+    assert.notEqual(module.sample, undefined);
+    assert.deepEqual(module.sample, module.SampleUnit.make);
+    assert.equal(receipt.kernel.selector, 'pskernel-core');
+    assert.equal(receipt.provider.profile, 'owned-unit-inductives/3');
+    assert.match(await readFile(path.join(dir, 'out.admissions.json'), 'utf8'), /SampleUnit/u);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 

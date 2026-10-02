@@ -1,7 +1,7 @@
 # PSC2 checked compiler and owned kernel bootstrap
 
-The default kernel is pskernel-core. The bootstrap entry includes all 15 owned
-kernel modules alongside the compiler: 70 source modules across 13 packages.
+The default kernel is pskernel-core. The bootstrap entry includes all 17 owned
+kernel modules alongside the compiler: 72 source modules across 13 packages.
 The old core package and routing have been retired. Neither Lean provider is in
 the portable closure; neither provider branch is wholesale-merged.
 
@@ -14,19 +14,20 @@ the portable closure; neither provider branch is wholesale-merged.
 No failure, timeout, exhaustion, rejection or unsupported declaration triggers
 fallback. Making the owned kernel the default does not complete its release gates.
 
-The owned runtime checks closed universe-polymorphic transparent definitions from an empty
-environment. Generated semantic transitions perform dependent typing, beta/zeta/delta
+The owned runtime checks closed universe-polymorphic transparent definitions and
+zero-term-parameter unit inductives from an empty environment. Generated semantic
+transitions derive unit recursors and perform dependent typing, beta/zeta/delta/iota
 reduction, binding and universe normalization. Host code validates and converts the
 wire representation, runs those transitions, enforces bounds and transports results.
 A disposable worker enforces a wall clock limit; a shared transition budget stops
 nested work. The generated module digest is checked before loading. Failure exposes
 no checked environment.
 
-The full joint bootstrap currently fails at admission 0: the universe-polymorphic
-_pscCheckedNestedUnit inductive. Inductive admission, generated recursors,
-prelude primitives, proof irrelevance and eta
-remain required development work. See the exact measured checkpoint in
-[OWNED_DEFAULT_BOOTSTRAP_2026-10-02.md](../docs/continuity/OWNED_DEFAULT_BOOTSTRAP_2026-10-02.md).
+The actual bootstrap prefix now admits `_pscCheckedNestedUnit` and fails at
+admission 1, `PsSourcePos`, because `Nat` is unknown. Its constructor fields also
+require general inductive support. Prelude primitives, general recursors, proof
+irrelevance, eta and the generated pair fixed point remain development work.
+See [OWNED_UNIT_INDUCTIVES_2026-10-03.md](../docs/continuity/OWNED_UNIT_INDUCTIVES_2026-10-03.md).
 
 ## Check before emission
 

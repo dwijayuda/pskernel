@@ -12,30 +12,35 @@ inductive PsKernelDefinition where
   | definition (name : PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
   | polymorphic (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
   | constant (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
+  | unitRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (ctorName : PsKernelName)
 
 def psKernelDefinitionName (entry : PsKernelDefinition) : PsKernelName :=
   match entry with
   | PsKernelDefinition.definition name unusedType unusedValue => name
   | PsKernelDefinition.polymorphic name unusedParameters unusedType unusedValue => name
   | PsKernelDefinition.constant name parameters type => name
+  | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => name
 
 def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList PsKernelName :=
   match entry with
   | PsKernelDefinition.definition unusedName unusedType unusedValue => PsKernelList.nil
   | PsKernelDefinition.polymorphic unusedName parameters unusedType unusedValue => parameters
   | PsKernelDefinition.constant name parameters type => parameters
+  | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => parameters
 
 def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr :=
   match entry with
   | PsKernelDefinition.definition unusedName type unusedValue => type
   | PsKernelDefinition.polymorphic unusedName unusedParameters type unusedValue => type
   | PsKernelDefinition.constant name parameters type => type
+  | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => type
 
 def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody :=
   match entry with
   | PsKernelDefinition.definition unusedName unusedType value => PsKernelDefinitionBody.transparent value
   | PsKernelDefinition.polymorphic unusedName unusedParameters unusedType value => PsKernelDefinitionBody.transparent value
   | PsKernelDefinition.constant unusedName unusedParameters unusedType => PsKernelDefinitionBody.opaque
+  | PsKernelDefinition.unitRecursor unusedName unusedParameters unusedType unusedConstructor => PsKernelDefinitionBody.opaque
 
 
 inductive PsKernelTypingContext where

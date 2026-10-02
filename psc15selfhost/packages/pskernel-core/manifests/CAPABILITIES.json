@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "package": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.5",
+  "version": "0.1.0-checker.6",
   "status": "experimental-term-checker",
   "canCheckProofs": false,
   "authoritative": false,
@@ -25,7 +25,9 @@
     "closed-polymorphic-sequential-definition-admission",
     "scope-and-arity-checked-universe-instantiation",
     "polymorphic-transparent-delta-reduction",
-    "internal-opaque-constant-typing-and-conversion-without-declaration-admission"
+    "internal-opaque-constant-typing-and-conversion-without-declaration-admission",
+    "zero-term-parameter-unit-inductives-with-derived-recursor-and-iota",
+    "fresh-mixed-definition-and-unit-admission"
   ],
   "boundedEvidence": [
     "BUILD.json",
@@ -34,7 +36,8 @@
     "LEVEL_DIFFERENTIAL.json",
     "CHECKER_ORACLE.json",
     "CHECKER_DIFFERENTIAL.json",
-    "POLYMORPHIC_DIFFERENTIAL.json"
+    "POLYMORPHIC_DIFFERENTIAL.json",
+    "UNIT_DIFFERENTIAL.json"
   ],
   "releaseGates": {
     "term-checking": {
@@ -46,8 +49,8 @@
       "evidence": "CHECKER_DIFFERENTIAL.json; CHECKER_ORACLE.json; fragment only"
     },
     "inductive-admission": {
-      "status": "pending",
-      "evidence": null
+      "status": "partial",
+      "evidence": "UNIT_DIFFERENTIAL.json; zero-term-parameter singleton unit fragment only"
     },
     "quotient-admission": {
       "status": "pending",
@@ -97,7 +100,7 @@
   "explicitlyUnsupported": [
     "proof-irrelevance-conversion",
     "function-and-structure-eta",
-    "inductive-and-recursor-admission",
+    "general-mutual-indexed-and-recursive-inductive-admission",
     "quotient-admission",
     "literal-and-projection-typing",
     "primitive-and-prelude-validation",

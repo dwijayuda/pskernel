@@ -67,7 +67,7 @@ if (directImports.length === 0) {
 if (!directImports.includes(tsCompositionModule)) {
   throw new Error("PSC2_BOOTSTRAP_ROOT_MISSING_TS_COMPOSITION");
 }
-if (!directImports.includes('Ps.Kernel.Admission')) {
+if (!directImports.includes('Ps.Kernel.JointAdmission')) {
   throw new Error('PSC2_BOOTSTRAP_ROOT_MISSING_OWNED_KERNEL');
 }
 

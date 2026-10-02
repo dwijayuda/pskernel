@@ -970,11 +970,18 @@ export type PsKernelDefinition = {
     readonly name: PsKernelName;
     readonly parameters: PsKernelList<PsKernelName>;
     readonly type: PsKernelExpr;
+} | {
+    readonly [__ps$tag$48]: "unitRecursor";
+    readonly name: PsKernelName;
+    readonly parameters: PsKernelList<PsKernelName>;
+    readonly type: PsKernelExpr;
+    readonly ctorName: PsKernelName;
 };
 export declare const PsKernelDefinition: {
     readonly definition: (__field0: PsKernelName, __field1: PsKernelExpr, __field2: PsKernelExpr) => PsKernelDefinition;
     readonly polymorphic: (__field0: PsKernelName, __field1: PsKernelList<PsKernelName>, __field2: PsKernelExpr, __field3: PsKernelExpr) => PsKernelDefinition;
     readonly constant: (__field0: PsKernelName, __field1: PsKernelList<PsKernelName>, __field2: PsKernelExpr) => PsKernelDefinition;
+    readonly unitRecursor: (__field0: PsKernelName, __field1: PsKernelList<PsKernelName>, __field2: PsKernelExpr, __field3: PsKernelName) => PsKernelDefinition;
 };
 declare const __ps$tag$49: unique symbol;
 export type PsKernelTypingContext = {
@@ -1065,6 +1072,42 @@ export type PsKernelReduceTask = {
     readonly levels: PsKernelList<PsKernelLevel>;
     readonly state: PsKernelLookupState;
 } | {
+    readonly [__ps$tag$53]: "unitLookup";
+    readonly fn: PsKernelExpr;
+    readonly major: PsKernelExpr;
+    readonly minor: PsKernelExpr;
+    readonly levels: PsKernelList<PsKernelLevel>;
+    readonly state: PsKernelLookupState;
+} | {
+    readonly [__ps$tag$53]: "unitMajor";
+    readonly fn: PsKernelExpr;
+    readonly minor: PsKernelExpr;
+    readonly ctorName: PsKernelName;
+    readonly levels: PsKernelList<PsKernelLevel>;
+} | {
+    readonly [__ps$tag$53]: "unitName";
+    readonly fn: PsKernelExpr;
+    readonly major: PsKernelExpr;
+    readonly minor: PsKernelExpr;
+    readonly left: PsKernelList<PsKernelLevel>;
+    readonly right: PsKernelList<PsKernelLevel>;
+    readonly work: PsKernelList<PsKernelOrderTask>;
+} | {
+    readonly [__ps$tag$53]: "unitLevels";
+    readonly fn: PsKernelExpr;
+    readonly major: PsKernelExpr;
+    readonly minor: PsKernelExpr;
+    readonly left: PsKernelList<PsKernelLevel>;
+    readonly right: PsKernelList<PsKernelLevel>;
+} | {
+    readonly [__ps$tag$53]: "unitLevel";
+    readonly fn: PsKernelExpr;
+    readonly major: PsKernelExpr;
+    readonly minor: PsKernelExpr;
+    readonly left: PsKernelList<PsKernelLevel>;
+    readonly right: PsKernelList<PsKernelLevel>;
+    readonly state: PsKernelLevelCheckState;
+} | {
     readonly [__ps$tag$53]: "opaqueConstant";
     readonly value: PsKernelExpr;
     readonly state: PsKernelLevelInstantiateState;
@@ -1096,6 +1139,11 @@ export declare const PsKernelReduceTask: {
     readonly whnf: (__field0: PsKernelExpr) => PsKernelReduceTask;
     readonly apply: (__field0: PsKernelExpr) => PsKernelReduceTask;
     readonly lookup: (__field0: PsKernelList<PsKernelLevel>, __field1: PsKernelLookupState) => PsKernelReduceTask;
+    readonly unitLookup: (__field0: PsKernelExpr, __field1: PsKernelExpr, __field2: PsKernelExpr, __field3: PsKernelList<PsKernelLevel>, __field4: PsKernelLookupState) => PsKernelReduceTask;
+    readonly unitMajor: (__field0: PsKernelExpr, __field1: PsKernelExpr, __field2: PsKernelName, __field3: PsKernelList<PsKernelLevel>) => PsKernelReduceTask;
+    readonly unitName: (__field0: PsKernelExpr, __field1: PsKernelExpr, __field2: PsKernelExpr, __field3: PsKernelList<PsKernelLevel>, __field4: PsKernelList<PsKernelLevel>, __field5: PsKernelList<PsKernelOrderTask>) => PsKernelReduceTask;
+    readonly unitLevels: (__field0: PsKernelExpr, __field1: PsKernelExpr, __field2: PsKernelExpr, __field3: PsKernelList<PsKernelLevel>, __field4: PsKernelList<PsKernelLevel>) => PsKernelReduceTask;
+    readonly unitLevel: (__field0: PsKernelExpr, __field1: PsKernelExpr, __field2: PsKernelExpr, __field3: PsKernelList<PsKernelLevel>, __field4: PsKernelList<PsKernelLevel>, __field5: PsKernelLevelCheckState) => PsKernelReduceTask;
     readonly opaqueConstant: (__field0: PsKernelExpr, __field1: PsKernelLevelInstantiateState) => PsKernelReduceTask;
     readonly instantiate: (__field0: PsKernelExprInstantiateState) => PsKernelReduceTask;
     readonly binding: (__field0: PsKernelBindingState) => PsKernelReduceTask;
@@ -1439,6 +1487,144 @@ export declare const PsKernelAdmissionStep: {
     readonly next: (__field0: PsKernelAdmissionState) => PsKernelAdmissionStep;
     readonly final: (__field0: PsKernelAdmissionResult) => PsKernelAdmissionStep;
 };
+declare const __ps$tag$68: unique symbol;
+export type PsKernelUnitDeclaration = {
+    readonly [__ps$tag$68]: "declaration";
+    readonly name: PsKernelName;
+    readonly parameters: PsKernelList<PsKernelName>;
+    readonly level: PsKernelLevel;
+    readonly ctorName: PsKernelName;
+    readonly ctorType: PsKernelExpr;
+};
+export declare const PsKernelUnitDeclaration: {
+    readonly declaration: (__field0: PsKernelName, __field1: PsKernelList<PsKernelName>, __field2: PsKernelLevel, __field3: PsKernelName, __field4: PsKernelExpr) => PsKernelUnitDeclaration;
+};
+declare const __ps$tag$69: unique symbol;
+export type PsKernelUnitTask = {
+    readonly [__ps$tag$69]: "initial";
+} | {
+    readonly [__ps$tag$69]: "parameters";
+    readonly remaining: PsKernelList<PsKernelName>;
+    readonly reversed: PsKernelList<PsKernelLevel>;
+} | {
+    readonly [__ps$tag$69]: "reverse";
+    readonly remaining: PsKernelList<PsKernelLevel>;
+    readonly levels: PsKernelList<PsKernelLevel>;
+} | {
+    readonly [__ps$tag$69]: "validate";
+    readonly levels: PsKernelList<PsKernelLevel>;
+    readonly state: PsKernelTypeState;
+} | {
+    readonly [__ps$tag$69]: "family";
+    readonly levels: PsKernelList<PsKernelLevel>;
+    readonly state: PsKernelLookupState;
+} | {
+    readonly [__ps$tag$69]: "constructorName";
+    readonly levels: PsKernelList<PsKernelLevel>;
+    readonly state: PsKernelLookupState;
+} | {
+    readonly [__ps$tag$69]: "constructorType";
+    readonly levels: PsKernelList<PsKernelLevel>;
+    readonly state: PsKernelTypeState;
+} | {
+    readonly [__ps$tag$69]: "constructorResult";
+    readonly levels: PsKernelList<PsKernelLevel>;
+    readonly state: PsKernelConversionState;
+} | {
+    readonly [__ps$tag$69]: "fresh";
+    readonly levels: PsKernelList<PsKernelLevel>;
+    readonly candidate: PsKernelNatural;
+    readonly remaining: PsKernelList<PsKernelName>;
+} | {
+    readonly [__ps$tag$69]: "freshCompare";
+    readonly levels: PsKernelList<PsKernelLevel>;
+    readonly candidate: PsKernelNatural;
+    readonly remaining: PsKernelList<PsKernelName>;
+    readonly work: PsKernelList<PsKernelOrderTask>;
+} | {
+    readonly [__ps$tag$69]: "recursorName";
+    readonly levels: PsKernelList<PsKernelLevel>;
+    readonly motive: PsKernelName;
+    readonly state: PsKernelLookupState;
+};
+export declare const PsKernelUnitTask: {
+    readonly initial: PsKernelUnitTask;
+    readonly parameters: (__field0: PsKernelList<PsKernelName>, __field1: PsKernelList<PsKernelLevel>) => PsKernelUnitTask;
+    readonly reverse: (__field0: PsKernelList<PsKernelLevel>, __field1: PsKernelList<PsKernelLevel>) => PsKernelUnitTask;
+    readonly validate: (__field0: PsKernelList<PsKernelLevel>, __field1: PsKernelTypeState) => PsKernelUnitTask;
+    readonly family: (__field0: PsKernelList<PsKernelLevel>, __field1: PsKernelLookupState) => PsKernelUnitTask;
+    readonly constructorName: (__field0: PsKernelList<PsKernelLevel>, __field1: PsKernelLookupState) => PsKernelUnitTask;
+    readonly constructorType: (__field0: PsKernelList<PsKernelLevel>, __field1: PsKernelTypeState) => PsKernelUnitTask;
+    readonly constructorResult: (__field0: PsKernelList<PsKernelLevel>, __field1: PsKernelConversionState) => PsKernelUnitTask;
+    readonly fresh: (__field0: PsKernelList<PsKernelLevel>, __field1: PsKernelNatural, __field2: PsKernelList<PsKernelName>) => PsKernelUnitTask;
+    readonly freshCompare: (__field0: PsKernelList<PsKernelLevel>, __field1: PsKernelNatural, __field2: PsKernelList<PsKernelName>, __field3: PsKernelList<PsKernelOrderTask>) => PsKernelUnitTask;
+    readonly recursorName: (__field0: PsKernelList<PsKernelLevel>, __field1: PsKernelName, __field2: PsKernelLookupState) => PsKernelUnitTask;
+};
+declare const __ps$tag$70: unique symbol;
+export type PsKernelUnitState = {
+    readonly [__ps$tag$70]: "state";
+    readonly environment: PsKernelList<PsKernelDefinition>;
+    readonly declaration: PsKernelUnitDeclaration;
+    readonly task: PsKernelUnitTask;
+};
+export declare const PsKernelUnitState: {
+    readonly state: (__field0: PsKernelList<PsKernelDefinition>, __field1: PsKernelUnitDeclaration, __field2: PsKernelUnitTask) => PsKernelUnitState;
+};
+declare const __ps$tag$71: unique symbol;
+export type PsKernelUnitStep = {
+    readonly [__ps$tag$71]: "next";
+    readonly state: PsKernelUnitState;
+} | {
+    readonly [__ps$tag$71]: "final";
+    readonly result: PsKernelAdmissionResult;
+};
+export declare const PsKernelUnitStep: {
+    readonly next: (__field0: PsKernelUnitState) => PsKernelUnitStep;
+    readonly final: (__field0: PsKernelAdmissionResult) => PsKernelUnitStep;
+};
+declare const __ps$tag$72: unique symbol;
+export type PsKernelJointEntry = {
+    readonly [__ps$tag$72]: "definition";
+    readonly entry: PsKernelDefinition;
+} | {
+    readonly [__ps$tag$72]: "unitInductive";
+    readonly entry: PsKernelUnitDeclaration;
+};
+export declare const PsKernelJointEntry: {
+    readonly definition: (__field0: PsKernelDefinition) => PsKernelJointEntry;
+    readonly unitInductive: (__field0: PsKernelUnitDeclaration) => PsKernelJointEntry;
+};
+declare const __ps$tag$73: unique symbol;
+export type PsKernelJointState = {
+    readonly [__ps$tag$73]: "pending";
+    readonly environment: PsKernelList<PsKernelDefinition>;
+    readonly entries: PsKernelList<PsKernelJointEntry>;
+} | {
+    readonly [__ps$tag$73]: "definition";
+    readonly rest: PsKernelList<PsKernelJointEntry>;
+    readonly state: PsKernelAdmissionState;
+} | {
+    readonly [__ps$tag$73]: "unitInductive";
+    readonly rest: PsKernelList<PsKernelJointEntry>;
+    readonly state: PsKernelUnitState;
+};
+export declare const PsKernelJointState: {
+    readonly pending: (__field0: PsKernelList<PsKernelDefinition>, __field1: PsKernelList<PsKernelJointEntry>) => PsKernelJointState;
+    readonly definition: (__field0: PsKernelList<PsKernelJointEntry>, __field1: PsKernelAdmissionState) => PsKernelJointState;
+    readonly unitInductive: (__field0: PsKernelList<PsKernelJointEntry>, __field1: PsKernelUnitState) => PsKernelJointState;
+};
+declare const __ps$tag$74: unique symbol;
+export type PsKernelJointStep = {
+    readonly [__ps$tag$74]: "next";
+    readonly state: PsKernelJointState;
+} | {
+    readonly [__ps$tag$74]: "final";
+    readonly result: PsKernelAdmissionResult;
+};
+export declare const PsKernelJointStep: {
+    readonly next: (__field0: PsKernelJointState) => PsKernelJointStep;
+    readonly final: (__field0: PsKernelAdmissionResult) => PsKernelJointStep;
+};
 export declare function psKernelCompareTasks(fuel: PsKernelFuel, __ps_eta_0: PsKernelList<PsKernelCompareTask>): PsKernelCompareResult;
 export declare function psKernelPositiveSucc(value: PsKernelPositive): PsKernelPositive;
 export declare function psKernelNaturalSucc(value: PsKernelNatural): PsKernelNatural;
@@ -1499,6 +1685,7 @@ export declare function psKernelReduceReject(error: PsKernelCheckError): PsKerne
 export declare function psKernelReduceNext(env: PsKernelList<PsKernelDefinition>, tasks: PsKernelList<PsKernelReduceTask>, values: PsKernelList<PsKernelExpr>): PsKernelReduceStep;
 export declare function psKernelReducePush(env: PsKernelList<PsKernelDefinition>, tasks: PsKernelList<PsKernelReduceTask>, values: PsKernelList<PsKernelExpr>, value: PsKernelExpr): PsKernelReduceStep;
 export declare function psKernelReduceWhnf(env: PsKernelList<PsKernelDefinition>, tasks: PsKernelList<PsKernelReduceTask>, values: PsKernelList<PsKernelExpr>, value: PsKernelExpr): PsKernelReduceStep;
+export declare function psKernelReduceNeutralApply(env: PsKernelList<PsKernelDefinition>, tasks: PsKernelList<PsKernelReduceTask>, values: PsKernelList<PsKernelExpr>, fn: PsKernelExpr, arg: PsKernelExpr): PsKernelReduceStep;
 export declare function psKernelReduceValueTask(env: PsKernelList<PsKernelDefinition>, task: PsKernelReduceTask, tasks: PsKernelList<PsKernelReduceTask>, values: PsKernelList<PsKernelExpr>): PsKernelReduceStep;
 export declare function psKernelReduceStep(state: PsKernelReduceState): PsKernelReduceStep;
 export declare function psKernelWhnfStart(env: PsKernelList<PsKernelDefinition>, value: PsKernelExpr): PsKernelReduceState;
@@ -1525,4 +1712,15 @@ export declare function psKernelAdmissionReject(error: PsKernelCheckError): PsKe
 export declare function psKernelAdmissionStep(state: PsKernelAdmissionState): PsKernelAdmissionStep;
 export declare function psKernelAdmissionStart(entries: PsKernelList<PsKernelDefinition>): PsKernelAdmissionState;
 export declare function psKernelAdmissionRun(fuel: PsKernelFuel, __ps_eta_0: PsKernelAdmissionState): PsKernelAdmissionResult;
+export declare function psKernelUnitNext(env: PsKernelList<PsKernelDefinition>, declaration: PsKernelUnitDeclaration, task: PsKernelUnitTask): PsKernelUnitStep;
+export declare function psKernelUnitReject(error: PsKernelCheckError): PsKernelUnitStep;
+export declare function psKernelUnitRecursorName(family: PsKernelName): PsKernelName;
+export declare function psKernelUnitRecursorType(family: PsKernelExpr, ctor: PsKernelExpr, motive: PsKernelName): PsKernelExpr;
+export declare function psKernelUnitStep(state: PsKernelUnitState): PsKernelUnitStep;
+export declare function psKernelUnitStart(env: PsKernelList<PsKernelDefinition>, declaration: PsKernelUnitDeclaration): PsKernelUnitState;
+export declare function psKernelUnitRun(fuel: PsKernelFuel, __ps_eta_0: PsKernelUnitState): PsKernelAdmissionResult;
+export declare function psKernelJointContinue(rest: PsKernelList<PsKernelJointEntry>, result: PsKernelAdmissionResult): PsKernelJointStep;
+export declare function psKernelJointStep(state: PsKernelJointState): PsKernelJointStep;
+export declare function psKernelJointStart(entries: PsKernelList<PsKernelJointEntry>): PsKernelJointState;
+export declare function psKernelJointRun(fuel: PsKernelFuel, __ps_eta_0: PsKernelJointState): PsKernelAdmissionResult;
 export {};

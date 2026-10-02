@@ -80,11 +80,26 @@ try {
   const input = JSON.parse(workerData.admissions);
   shape(input, ['format', 'version', 'admissions'], 0);
   if (input.format !== 'proofscript-checked-admissions' || input.version !== 2 || !Array.isArray(input.admissions)) fail('invalid-wire-format');
-  const definitions = [];
+  const entries = [];
   for (const admission of input.admissions) {
     shape(admission, ['kind', 'declaration'], 0);
-    if (admission.kind !== 'constant') fail(`unsupported-admission:${admission.kind}`);
     const d = admission.declaration;
+    if (admission.kind === 'inductive') {
+      shape(d, ['lp','np','ts'], 0);
+      if (!Array.isArray(d.lp)) fail('invalid-universe-parameters');
+      if (d.np !== 0 || !Array.isArray(d.ts) || d.ts.length !== 1) fail('unsupported-inductive-family');
+      const family = d.ts[0];
+      shape(family, ['n','t','cs'], 0);
+      if (family.t?.k !== 'sort' || !Array.isArray(family.cs) || family.cs.length !== 1) fail('unsupported-inductive-shape');
+      shape(family.t, ['k','l'], 0);
+      const ctor = family.cs[0];
+      shape(ctor, ['n','t'], 0);
+      entries.push(k.PsKernelJointEntry.unitInductive(k.PsKernelUnitDeclaration.declaration(
+        name(family.n), list(d.lp.map(item => name(item))), level(family.t.l), name(ctor.n), expr(ctor.t))));
+      admissionIndex++;
+      continue;
+    }
+    if (admission.kind !== 'constant') fail(`unsupported-admission:${admission.kind}`);
     if (d?.k !== 'definition') fail(`unsupported-declaration:${d?.k}`);
     shape(d, ['k','n','lp','t','v','h','s'], 0);
     if (!Array.isArray(d.lp)) fail('invalid-universe-parameters');
@@ -92,23 +107,23 @@ try {
     shape(d.h, ['k','h'], 0);
     if (d.h.k !== 'regular') fail('unsupported-reducibility');
     natural(d.h.h); // Height is a reduction hint; it grants no admission authority.
-    definitions.push(k.PsKernelDefinition.polymorphic(name(d.n), list(d.lp.map(item => name(item))), expr(d.t), expr(d.v)));
+    entries.push(k.PsKernelJointEntry.definition(k.PsKernelDefinition.polymorphic(name(d.n), list(d.lp.map(item => name(item))), expr(d.t), expr(d.v))));
     admissionIndex++;
   }
-  let state = k.psKernelAdmissionStart(list(definitions));
+  let state = k.psKernelJointStart(list(entries));
   admissionIndex = 0;
   let answer;
   for (let steps = 0; steps < workerData.maxSteps; steps++) {
-    const out = k.psKernelAdmissionStep(state);
+    const out = k.psKernelJointStep(state);
     if (tag(out) === 'final') {
       const result = out.result, status = tag(result);
       answer = status === 'admitted'
-        ? { accepted: true, admissionCount: definitions.length, steps: steps + 1 }
+        ? { accepted: true, admissionCount: entries.length, steps: steps + 1 }
         : { accepted: false, errorKind: status === 'rejected' ? tag(result.error) : status, admissionIndex, steps: steps + 1 };
       break;
     }
     if (tag(out) !== 'next') fail('invalid-generated-step');
-    if (tag(state) === 'checking' && tag(out.state) === 'pending') admissionIndex++;
+    if (tag(state) !== 'pending' && tag(out.state) === 'pending') admissionIndex++;
     state = out.state;
   }
   parentPort.postMessage(answer ?? { accepted: false, errorKind: 'outOfFuel', admissionIndex, steps: workerData.maxSteps });

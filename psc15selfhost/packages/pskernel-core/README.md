@@ -1,13 +1,14 @@
 # @proofscript/pskernel-core
 
-**0.1.0-checker.5 — private experimental dependent term-checker checkpoint.**
+**0.1.0-checker.6 — private experimental dependent term-checker checkpoint.**
 
-Regenerated with the current PSC seed, with all 264 baseline tests passing and
-fresh build and reference evidence. See `../../docs/continuity/OWNED_KERNEL_REGENERATION_2026-10-02.md`.
+Regenerated with the pinned PSC seed, with all 359 tests passing and fresh build
+and reference evidence. See `../../docs/continuity/OWNED_UNIT_INDUCTIVES_2026-10-03.md`.
 
 This is the default checker and part of the joint bootstrap source closure.
 The host adapter runs the generated semantic machine and fails closed outside
-its supported fragment. Full bootstrap currently stops at the first inductive;
+its supported fragment. The bootstrap prefix passes its first unit inductive and
+stops at the next declaration's missing `Nat` dependency;
 the default selection does not imply release readiness or complete Lean parity.
 
 This package now executes an owned checking fragment, rather than data helpers
@@ -15,15 +16,19 @@ alone. It is **not the authoritative PSC2 kernel**, a full Lean-compatible
 checker, a jointly self-hosted compiler/kernel, or a published npm release.
 
 The public package export is still only immutable `kernelInfo`. The internal
-machines check closed monomorphic terms with dependent function types, typed
+machines check closed universe-polymorphic terms with dependent function types, typed
 lambdas, applications, lets and earlier admitted transparent definitions.
 Conversion implements beta, zeta, transparent delta and alpha comparison, with
-bounded universe normalization. Sequential internal admission starts empty,
+bounded universe normalization. The generated unit-inductive admission machine
+derives a recursor and implements its constructor iota rule. The fragment has
+one family, no term parameters or indices, and one constructor with no fields.
+Sequential internal admission starts empty,
 rejects forward/self references and duplicates, and returns no environment on a
 failed batch. The generated implementation is not edited by hand.
 
-See **CHECKER.md** for supported judgments, critical limitations, the source and
-runtime agreement tests, and the inherited defects repaired in this checkpoint.
+See the current continuity checkpoint and CAPABILITIES.json for supported
+judgments and remaining release gates. **CHECKER.md** records the original
+checker.0 judgments, tests and repaired defects as historical receipt evidence.
 The target architecture remains in ARCHITECTURE.md. FOUNDATION.md and
 BINDING_UNIVERSES.md describe earlier checkpoints, not current release readiness.
 

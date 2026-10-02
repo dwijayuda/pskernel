@@ -730,12 +730,16 @@ def psJsonParseValueWithFuel
     (fuel : Nat) (input : List Char) : Except PsJsonParseError PsJsonParseResult :=
   psJsonParseValueWithFuelWorker fallback fuel fuel input
 
-def psJsonCharListLength (chars : List Char) : Nat :=
+def psJsonCharListLengthAcc (chars : List Char) : Nat -> Nat :=
   match chars with
   | List.nil =>
-      0
+      fun (count : Nat) => count
   | List.cons _ rest =>
-      Nat.succ (psJsonCharListLength rest)
+      let smaller : Nat -> Nat := psJsonCharListLengthAcc rest;
+      fun (count : Nat) => smaller (Nat.succ count)
+
+def psJsonCharListLength (chars : List Char) : Nat :=
+  psJsonCharListLengthAcc chars 0
 
 def psJsonParse
     (source : String) :

@@ -429,6 +429,11 @@ def psRunBridgeTests : List PsBridgeNamedTest -> IO Bool
       pure (test.passed && restPassed)
 
 def main : IO Unit := do
+  let large := List.replicate 1000000 'x'
+  if psJsonCharListLength large != 1000000 || psJsonCharListLength [] != 0 ||
+      psJsonCharListLength (psJsonStringToChars "aλ😀") != 3 then
+    throw (IO.userError "PSC1_BRIDGE_FAIL: large and Unicode JSON character count")
+  IO.println "PSC1_BRIDGE_PASS: large and Unicode JSON character count"
   let passed ← psRunBridgeTests psBridgeTests
   if passed then
     IO.println "PSC1_BRIDGE_TESTS: PASS"

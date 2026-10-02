@@ -872,17 +872,18 @@ def psOpenMatchMinorFields
               let bindingName :=
                 psErasureSafeIdentifier
                   (psNameToString name)
-                  field.name
+                  field.name;
               let pushed :=
                 psLocalPushBinding
                   state.scope.localContext
                   name
                   domain
-                  binder
+                  binder;
               let nextScope : PsErasureScope := {
                 localContext := pushed.context
                 runtimeLocals :=
-                  (pushed.id, bindingName) ::
+                  List.cons
+                    (Prod.mk pushed.id bindingName)
                     state.scope.runtimeLocals
                 typeLocals := state.scope.typeLocals
                 erasedLocals := state.scope.erasedLocals
@@ -894,7 +895,7 @@ def psOpenMatchMinorFields
                 runtimeStructureConstructors := state.scope.runtimeStructureConstructors
                 runtimeExpressions := state.scope.runtimeExpressions
                 currentDefinition := state.scope.currentDefinition
-              }
+              };
               psOpenMatchMinorFields
                 environment
                 substitutions
@@ -905,14 +906,15 @@ def psOpenMatchMinorFields
                     psExprInstantiate1
                       body
                       (PsExpr.fvar pushed.id)
-                  bindingsRev := {
-                    field := field.name
-                    name := bindingName
-                    type :=
-                      psSubstituteVerifiedType
-                        substitutions
-                        field.type
-                  } :: state.bindingsRev
+                  bindingsRev :=
+                    List.cons
+                      (PsVerifiedIrMatchBinding.mk
+                        field.name
+                        bindingName
+                        (psSubstituteVerifiedType
+                          substitutions
+                          field.type))
+                      state.bindingsRev
                 }
           | _ =>
               Except.error PsErasureError.unsupportedRuntimeTerm

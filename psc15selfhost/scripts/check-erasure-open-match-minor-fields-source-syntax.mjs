@@ -13,7 +13,7 @@ export function assertErasureOpenMatchMinorFieldsSourceSyntax(source) {
     );
   }
   const required = [
-    /psErasureSafeIdentifier[\s\S]*?field\.name;/,
+    /psErasureLocalName state\.scope[\s\S]*?field\.name state\.scope\.localContext\.nextId;/,
     /psLocalPushBinding[\s\S]*?binder;/,
     /let nextScope : PsErasureScope := \{[\s\S]*?currentDefinition := state\.scope\.currentDefinition\s*\};/,
     /runtimeLocals :=\s*List\.cons\s*\(Prod\.mk pushed\.id bindingName\)\s*state\.scope\.runtimeLocals/,
@@ -40,7 +40,7 @@ const source = await readFile(
 );
 const block = assertErasureOpenMatchMinorFieldsSourceSyntax(source);
 const mutations = [
-  ["field.name;", "field.name"],
+  ["field.name state.scope.localContext.nextId;", "field.name state.scope.localContext.nextId"],
   ["binder;", "binder"],
   ["currentDefinition := state.scope.currentDefinition\n              };",
    "currentDefinition := state.scope.currentDefinition\n              }"],

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { existsSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -8,11 +9,25 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(import.meta.url);
-const tsc = require.resolve('typescript/bin/tsc');
+let tsc;
+try { tsc = require.resolve('typescript/bin/tsc'); } catch {
+  for (const directory of (process.env.PATH ?? '').split(path.delimiter)) {
+    for (const file of [path.join(directory, 'tsc'), path.join(directory, 'node_modules/typescript/bin/tsc'),
+      ...(path.basename(directory) === '.bin' ? [path.join(directory, '../typescript/bin/tsc')] : [])]) {
+      if (existsSync(file)) {
+        const resolved = realpathSync(file);
+        if (resolved.replaceAll('\\', '/').endsWith('/typescript/bin/tsc')) tsc = resolved;
+      }
+    }
+    if (tsc) break;
+  }
+}
+assert(tsc, 'TypeScript 5.8.3 must be installed locally or available on PATH');
+assert.equal(execFileSync(process.execPath, [tsc, '--version'], { encoding: 'utf8' }).trim(), 'Version 5.8.3');
 const compiler = path.join(root, '.lake/build/bin', process.platform === 'win32' ? 'psc1.exe' : 'psc1');
 const staging = await mkdtemp(path.join(tmpdir(), 'psc2-replay-runtime-'));
 try {
-  for (const fixture of ['selfhost-nat-recursion', 'selfhost-int-repr', 'selfhost-function-results']) {
+  for (const fixture of ['selfhost-nat-recursion', 'selfhost-int-repr', 'selfhost-function-results', 'selfhost-text-position']) {
     const source = execFileSync(compiler, ['typescript', `test/fixtures/${fixture}.lean`], {
       cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 8 * 1024 * 1024,
     });
@@ -28,10 +43,33 @@ try {
         assert.equal(compiled.replayNatSum(n), n * (n + 1n) / 2n);
         assert.equal(compiled.replayNatSuccessor(n), n + 1n);
       }
+      assert.equal(compiled.replayNatSum(20000n), 200010000n);
     } else if (fixture === 'selfhost-int-repr') {
       for (const n of [0n, 1n, -1n, 9007199254740993n, -9007199254740993n,
         123456789012345678901234567890n, -123456789012345678901234567890n]) {
         assert.equal(compiled.renderInt(n), n.toString());
+      }
+    } else if (fixture === 'selfhost-text-position') {
+      for (const text of ['', 'abc', 'Aé中😀Z', '\u0000é\n', 'a'.repeat(30000) + '😀']) {
+        const positions = new Map();
+        let size = 0n;
+        for (const char of text) {
+          const width = BigInt(Buffer.byteLength(char));
+          positions.set(size, { char, next: size + width });
+          size += width;
+        }
+        assert.equal(compiled.replayTextBytes(text), size);
+        for (let position = 0n; position <= size + 1n; position++) {
+          assert.equal(compiled.replayTextGet(text, position), positions.get(position)?.char ?? 'A');
+          assert.equal(compiled.replayTextNext(text, position), positions.get(position)?.next ?? position + 1n);
+          assert.equal(compiled.replayTextAtEnd(text, position), position >= size);
+        }
+        assert.equal(compiled.replayTextGet(text, 2n ** 70n), 'A');
+        assert.equal(compiled.replayTextNext(text, 2n ** 70n), 2n ** 70n + 1n);
+      }
+      // Alternate cached text, including equal content from separate allocations.
+      for (const text of ['é', 'xyz', ['é'].join(''), 'xyz']) {
+        assert.equal(compiled.replayTextGet(text, 0n), [...text][0]);
       }
     } else {
       for (const n of [0n, 1n, 2n, 8n, 100n]) {
@@ -50,9 +88,19 @@ try {
       assert.equal(compiled.replayReversed.head, 9n);
       assert.equal(compiled.replayReversed.tail.head, 7n);
       assert.equal(Object.keys(compiled.replayReversed.tail.tail).length, 0);
+      let deep = compiled.List.nil();
+      for (let n = 0n; n < 20000n; n++) deep = compiled.List.cons(n, deep);
+      let reversed = compiled.replayReverse(deep);
+      for (let n = 0n; n < 20000n; n++) {
+        assert.equal(reversed.head, n);
+        reversed = reversed.tail;
+      }
+      assert.equal(Object.keys(reversed).length, 0);
+      assert.equal(compiled.replayFuelFunction(20000n, 11n), 20011n);
+      assert.throws(() => compiled.replayReverse({}), /invalid ProofScript constructor tag/);
     }
   }
-  console.log('PSC2_SELFHOST_REPLAY_RUNTIME: PASS (strict TypeScript; Nat recursion, Int printing, function results, partial application, name collisions and generic list recursion)');
+  console.log('PSC2_SELFHOST_REPLAY_RUNTIME: PASS (strict TypeScript; 20000-step recursion, function results, name collisions, generic lists and exact UTF-8 positions)');
 } finally {
   await rm(staging, { recursive: true, force: true });
 }

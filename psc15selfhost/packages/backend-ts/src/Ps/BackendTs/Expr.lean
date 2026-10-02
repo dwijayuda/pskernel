@@ -404,25 +404,25 @@ def psTsEmitIntrinsicFromPrinted
       let emit : String -> Except PsTsEmitError String :=
         fun (value : String) =>
           Except.ok
-            (psTsJoin "" ["((__ps_s: string) => { let __ps_n = 0n; ", "for (const __ps_c of __ps_s) { ", "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ", "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : ", "__ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ", "__ps_n += __ps_w; } return __ps_n; })(", value, ")"]);
+            (psTsJoin "" ["__ps$utf8(", value, ").size"]);
       psTsPrinted1 emit arguments
   | .stringNext =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (value : String) (position : String) =>
           Except.ok
-            (psTsJoin "" ["((__ps_s: string, __ps_p: bigint) => { let __ps_i = 0n; ", "for (const __ps_c of __ps_s) { ", "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ", "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : ", "__ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ", "if (__ps_i === __ps_p) return __ps_p + __ps_w; ", "if (__ps_i > __ps_p) return __ps_p + 1n; ", "__ps_i += __ps_w; } return __ps_p + 1n; })(", value, ", ", position, ")"]);
+            (psTsJoin "" ["__ps$stringNext(", value, ", ", position, ")"]);
       psTsPrinted2 emit arguments
   | .stringGet =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (value : String) (position : String) =>
           Except.ok
-            (psTsJoin "" ["((__ps_s: string, __ps_p: bigint) => { let __ps_i = 0n; ", "for (const __ps_c of __ps_s) { ", "if (__ps_i === __ps_p) return __ps_c; ", "if (__ps_i > __ps_p) return \"A\"; ", "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ", "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : ", "__ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ", "__ps_i += __ps_w; } return \"A\"; })(", value, ", ", position, ")"]);
+            (psTsJoin "" ["__ps$stringGet(", value, ", ", position, ")"]);
       psTsPrinted2 emit arguments
   | .stringAtEnd =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (value : String) (position : String) =>
           let size :=
-            psTsJoin "" ["((__ps_s: string) => { let __ps_n = 0n; ", "for (const __ps_c of __ps_s) { ", "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ", "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : ", "__ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ", "__ps_n += __ps_w; } return __ps_n; })(", value, ")"];
+            psTsJoin "" ["__ps$utf8(", value, ").size"];
           Except.ok (psTsJoin "" ["(", position, " >= ", size, ")"]);
       psTsPrinted2 emit arguments
   | .stringExtract =>
@@ -488,6 +488,26 @@ def psTsEmitIntrinsicFromPrinted
           Except.ok
             (psTsJoin "" ["(<A, B>(__ps_f: (__ps_b: B, __ps_x: A) => B, __ps_init: B, ", "__ps_a: A[], __ps_start: bigint, __ps_stop: bigint): B => {", " const __ps_size = BigInt(__ps_a.length); ", "const __ps_end = __ps_stop <= __ps_size ? __ps_stop : __ps_size; ", "let __ps_acc = __ps_init; ", "for (let __ps_i = __ps_start; __ps_i < __ps_end; __ps_i += 1n) {", " __ps_acc = __ps_f(__ps_acc, __ps_a[Number(__ps_i)]!); } ", "return __ps_acc; })(", fn, ", ", init, ", ", array, ", ", start, ", ", stop, ")"]);
       psTsPrinted5 emit arguments
+def psTsEmitLetStatements
+    (emit : PsVerifiedIrExpr -> Except PsTsEmitError String)
+    (expr : PsVerifiedIrExpr) : Except PsTsEmitError String :=
+  match expr with
+  | PsVerifiedIrExpr.letE name type value body =>
+      match psTsEmitType type with
+      | Except.error error => Except.error error
+      | Except.ok printedType =>
+          match emit value with
+          | Except.error error => Except.error error
+          | Except.ok printedValue =>
+              match psTsEmitLetStatements emit body with
+              | Except.error error => Except.error error
+              | Except.ok printedBody =>
+                  Except.ok (psTsJoin "" ["{ const ", name, ": ", printedType, " = ", printedValue, "; ", printedBody, " }"])
+  | _ =>
+      match emit expr with
+      | Except.error error => Except.error error
+      | Except.ok printed => Except.ok (psTsJoin "" ["return ", printed, ";"])
+
 def psTsEmitExprWithFuel
     (brands : List (String × String)) (tags : List (String × String)) (fuel : Nat) :
     PsVerifiedIrExpr -> Except PsTsEmitError String :=
@@ -506,7 +526,7 @@ def psTsEmitExprWithFuel
           | Except.error error => Except.error error
           | Except.ok printed =>
               psTsEmitIntrinsicFromPrinted operation printed
-      | .lambda parameters _ body =>
+      | .lambda parameters resultType body =>
           let printParameter : PsVerifiedIrParameter -> Except PsTsEmitError String :=
             fun (parameter : PsVerifiedIrParameter) =>
               match psTsEmitType parameter.type with
@@ -519,8 +539,11 @@ def psTsEmitExprWithFuel
               match smaller body with
               | Except.error error => Except.error error
               | Except.ok printedBody =>
-                  Except.ok
-                    (psTsJoin "" ["(", psTsJoin ", " printedParameters, ") => ", printedBody])
+                  match psTsEmitType resultType with
+                  | Except.error error => Except.error error
+                  | Except.ok printedResult =>
+                      Except.ok
+                        (psTsJoin "" ["__ps$wrap(function*(", psTsJoin ", " printedParameters, "): __ps$Computation<", printedResult, "> { return ", printedBody, "; })"])
       | .call fn typeArguments arguments =>
           match smaller fn with
           | Except.error error => Except.error error
@@ -535,17 +558,16 @@ def psTsEmitExprWithFuel
                   match psListMapExcept smaller arguments with
                   | Except.error error => Except.error error
                   | Except.ok printedArguments =>
+                      let suffix :=
+                        if psListIsEmpty printedArguments then ""
+                        else psTsJoin "" [", ", psTsJoin ", " printedArguments];
                       Except.ok
-                        (psTsJoin "" [callable, generic, "(", psTsJoin ", " printedArguments, ")"])
-      | .letE name _ value body =>
-          match smaller value with
+                        (psTsJoin "" ["(yield* __ps$invoke(", callable, generic, suffix, "))"])
+      | .letE _ _ _ _ =>
+          match psTsEmitLetStatements smaller expr with
           | Except.error error => Except.error error
-          | Except.ok printedValue =>
-              match smaller body with
-              | Except.error error => Except.error error
-              | Except.ok printedBody =>
-                  Except.ok
-                    (psTsJoin "" ["(() => { const ", name, " = ", printedValue, "; return ", printedBody, "; })()"])
+          | Except.ok statements =>
+              Except.ok (psTsJoin "" ["(yield* (function*() { ", statements, " })())"])
       | .ifE condition thenBranch elseBranch =>
           match smaller condition with
           | Except.error error => Except.error error
@@ -639,15 +661,12 @@ def psTsEmitExprWithFuel
                                 | Except.error error => Except.error error
                                 | Except.ok type =>
                                     Except.ok
-                                      (psTsJoin "" [binding.name, ": ", type]);
+                                      (psTsJoin "" ["const ", binding.name, ": ", type, " = ", temp, ".", binding.field, ";"]);
                             match psListMapExcept printBinding bindings with
                             | Except.error error => Except.error error
                             | Except.ok printedBindings =>
-                                let accessBinding : PsVerifiedIrMatchBinding -> String :=
-                                  fun (binding : PsVerifiedIrMatchBinding) => String.Internal.append temp (String.Internal.append "." binding.field);
-                                let arguments := psListMap accessBinding bindings;
                                 Except.ok
-                                  (psTsJoin "" ["case ", psJsonQuote constructorName, ": return ((", psTsJoin ", " printedBindings, ") => ", printedBody, ")(", psTsJoin ", " arguments, ");"]);
+                                  (psTsJoin "" ["case ", psJsonQuote constructorName, ": { ", psTsJoin " " printedBindings, " return ", printedBody, "; }"]);
               match psListMapExcept printAlternative alternatives with
               | Except.error error => Except.error error
               | Except.ok cases =>
@@ -657,8 +676,8 @@ def psTsEmitExprWithFuel
                   | Except.error error => Except.error error
                   | Except.ok printedScrutinee =>
                       Except.ok
-                        (psTsJoin "" ["((", temp, ") => { switch (", temp, "[", tag, "]) { ", psTsJoin " " cases, " } throw new Error(", psJsonQuote
-                            "invalid ProofScript constructor tag", "); })(", printedScrutinee, ")"])
+                        (psTsJoin "" ["(yield* (function*() { const ", temp, " = ", printedScrutinee, "; switch (", temp, "[", tag, "]) { ", psTsJoin " " cases, " } throw new Error(", psJsonQuote
+                            "invalid ProofScript constructor tag", "); })())"])
 
 
 def psTsEmitExpr

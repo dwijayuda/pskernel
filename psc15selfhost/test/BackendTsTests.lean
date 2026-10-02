@@ -23,7 +23,10 @@ def psBackendTsIdentityModule : PsVerifiedIrModule :=
 
 def psBackendTsExpectedIdentity : String :=
   "// generated from pskernel-admitted ProofScript checked core\n" ++
-  "export function idNat(x: bigint): bigint { return x; }\n"
+  psTsRuntimeSupport ++ "\n" ++
+  "export function idNat(x: bigint): bigint { return __ps$run(__ps$impl$idNat(x)); }\n" ++
+  "function* __ps$impl$idNat(x: bigint): __ps$Computation<bigint> { return x; }\n" ++
+  "__ps$implementations.set(idNat, __ps$impl$idNat);\n"
 
 def psTestBackendTsIdentity : Bool :=
   match psTsEmitModule psBackendTsIdentityModule with
@@ -161,8 +164,8 @@ def psTestBackendTsMachineLiterals : Bool :=
   match psTsEmitModule psBackendTsMachineLiteralModule with
   | Except.error _ => false
   | Except.ok output =>
-      output.contains "export const u32Max: number = 4294967295;"
-        && output.contains "export const u64Value: bigint = 42n;"
+      output.contains "export const u32Max: number = __ps$run((function*(): __ps$Computation<number> { return 4294967295; })());"
+        && output.contains "export const u64Value: bigint = __ps$run((function*(): __ps$Computation<bigint> { return 42n; })());"
 
 def psBackendTsTargetWordLiteralModule : PsVerifiedIrModule :=
   {

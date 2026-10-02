@@ -98,9 +98,25 @@ def psCheckedSeedModulesSession
     | throw (IO.userError "PSC2_CHECKED_PREPARE_FAILED")
   psCheckedSeedPreparedSession prepared
 
+def psCheckedSeedDiagnoseAdmissions (sourcePath : String) : IO Unit := do
+  let source ← IO.FS.readFile sourcePath
+  let .ok declarations := PsKernelLean.decodeCanonicalAdmissions source
+    | throw (IO.userError "PSC2_CHECKED_DIAGNOSE_DECODE")
+  let .ok initial ← PsKernelLean.buildLeanPreludeEnvironment
+    | throw (IO.userError "PSC2_CHECKED_DIAGNOSE_PRELUDE")
+  let mut environment := initial
+  for index in [:declarations.size] do
+    match environment.addDeclCore 2000000 20000 declarations[index]! none true with
+    | .ok next => environment := next
+    | .error error =>
+        IO.println s!"PSC2_CHECKED_DIAGNOSE_REJECTION: {index}"
+        throw (IO.userError (← (error.toMessageData {}).toString))
+  IO.println "PSC2_CHECKED_DIAGNOSE_ACCEPTED"
+
 def main (args : List String) : IO Unit := do
   match args with
   | ["--test"] => psCheckedSeedTests
+  | ["--diagnose-admissions", sourcePath] => psCheckedSeedDiagnoseAdmissions sourcePath
   | ["--check-lean"] => psCheckedSeedRun false .lean
   | ["--check-ps"] => psCheckedSeedRun false .proofScript
   | ["--emit-lean"] => psCheckedSeedRun true .lean

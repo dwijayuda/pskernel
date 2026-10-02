@@ -196,6 +196,25 @@ def psMetaInstantiateStep
         (psMetaInstantiateStep context value)
   | _ => expr
 
+def psMetaExprHasAssignedVar (context : PsMetaContext) (expr : PsExpr) : Bool :=
+  match expr with
+  | PsExpr.mvar id =>
+      match psMetaFindAssignment context id with
+      | Option.none => false
+      | Option.some _ => true
+  | PsExpr.app fn arg =>
+      if psMetaExprHasAssignedVar context fn then true else psMetaExprHasAssignedVar context arg
+  | PsExpr.lam _ type body _ =>
+      if psMetaExprHasAssignedVar context type then true else psMetaExprHasAssignedVar context body
+  | PsExpr.forallE _ type body _ =>
+      if psMetaExprHasAssignedVar context type then true else psMetaExprHasAssignedVar context body
+  | PsExpr.letE _ type value body =>
+      if psMetaExprHasAssignedVar context type then true
+      else if psMetaExprHasAssignedVar context value then true
+      else psMetaExprHasAssignedVar context body
+  | PsExpr.proj _ _ value => psMetaExprHasAssignedVar context value
+  | _ => false
+
 def psMetaInstantiateRounds
     (context : PsMetaContext)
     (fuel : Nat) : PsExpr -> PsExpr :=
@@ -206,7 +225,9 @@ def psMetaInstantiateRounds
       let smaller : PsExpr -> PsExpr :=
         psMetaInstantiateRounds context remaining;
       fun (expr : PsExpr) =>
-        smaller (psMetaInstantiateStep context expr)
+        if psMetaExprHasAssignedVar context expr then
+          smaller (psMetaInstantiateStep context expr)
+        else expr
 
 def psMetaInstantiate (context : PsMetaContext) (expr : PsExpr) : PsExpr :=
   let value :=

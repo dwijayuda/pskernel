@@ -56,7 +56,10 @@ def psTestDualSourceLeanNativeIdentity : Bool :=
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       let expected :=
         "// generated from pskernel-admitted ProofScript checked core\n" ++
-        "export function idNat(x: bigint): bigint { return x; }\n"
+        psTsRuntimeSupport ++ "\n" ++
+        "export function idNat(x: bigint): bigint { return __ps$run(__ps$impl$idNat(x)); }\n" ++
+        "function* __ps$impl$idNat(x: bigint): __ps$Computation<bigint> { return x; }\n" ++
+        "__ps$implementations.set(idNat, __ps$impl$idNat);\n"
       leanOutput == expected
         && proofScriptOutput == expected
   | _, _ => false
@@ -70,7 +73,10 @@ def psTestDualSourceLeanNativeGenericIdentity : Bool :=
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       let expected :=
         "// generated from pskernel-admitted ProofScript checked core\n" ++
-        "export function identity<T0>(x: T0): T0 { return x; }\n"
+        psTsRuntimeSupport ++ "\n" ++
+        "export function identity<T0>(x: T0): T0 { return __ps$run(__ps$impl$identity<T0>(x)); }\n" ++
+        "function* __ps$impl$identity<T0>(x: T0): __ps$Computation<T0> { return x; }\n" ++
+        "__ps$implementations.set(identity, __ps$impl$identity);\n"
       leanOutput == expected
         && proofScriptOutput == expected
   | _, _ => false
@@ -84,7 +90,7 @@ def psTestDualSourceLeanNativeLet : Bool :=
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains
-          "export const one: bigint = (() => { const x = 1n; return x; })();"
+          "export const one: bigint = __ps$run((function*(): __ps$Computation<bigint> { return (yield* (function*() { { const x: bigint = 1n; return x; } })()); })());"
   | _, _ => false
 
 def psTestDualSourceLeanNativeIf : Bool :=
@@ -96,7 +102,7 @@ def psTestDualSourceLeanNativeIf : Bool :=
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains
-          "export function choose(b: boolean): bigint { return (b ? 1n : 2n); }"
+          "function* __ps$impl$choose(b: boolean): __ps$Computation<bigint> { return (b ? 1n : 2n); }"
   | _, _ => false
 
 def psTestDualSourceLeanNativeMaybeMatch : Bool :=
@@ -122,7 +128,7 @@ def psTestDualSourceLeanNativeMaybeMatch : Bool :=
         && leanOutput.contains "Maybe[\"some\"]<bigint>(1n)"
         && leanOutput.contains "export function getOrZero(m: Maybe<bigint>): bigint"
         && leanOutput.contains "case \"none\": return 0n;"
-        && leanOutput.contains "case \"some\": return"
+        && leanOutput.contains "case \"some\": { const value: bigint ="
   | _, _ => false
 
 def psTestDualSourceLeanNativeStructureProjection : Bool :=
@@ -145,7 +151,7 @@ def psTestDualSourceLeanNativeStructureProjection : Bool :=
         && leanOutput.contains "export const user: User"
         && leanOutput.contains "age: 33n"
         && leanOutput.contains
-          "export function ageOf(u: User): bigint { return u.age; }"
+          "function* __ps$impl$ageOf(u: User): __ps$Computation<bigint> { return u.age; }"
   | _, _ => false
 
 def psTestDualSourceLeanNativeStructuralRecursion : Bool :=
@@ -164,7 +170,7 @@ def psTestDualSourceLeanNativeStructuralRecursion : Bool :=
       leanOutput == proofScriptOutput
         && leanOutput.contains "export type ListR<T0>"
         && leanOutput.contains "export function lengthR(xs: ListR<bigint>): bigint"
-        && leanOutput.contains "lengthR(tail)"
+        && leanOutput.contains "(yield* __ps$invoke(lengthR, tail))"
   | _, _ => false
 
 def psTestDualSourceLeanNativeInt : Bool :=
@@ -181,7 +187,7 @@ def psTestDualSourceLeanNativeInt : Bool :=
       psCompileProofScriptSourceToTypeScript proofScriptSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
-        && leanOutput.contains "export const intOne: bigint = 1n;"
+        && leanOutput.contains "export const intOne: bigint = __ps$run((function*(): __ps$Computation<bigint> { return 1n; })());"
         && leanOutput.contains
           "export function intCalc(x: bigint): bigint"
         && leanOutput.contains "(x + 2n)"
@@ -279,7 +285,7 @@ def psTestDualSourceLeanNativePartialApplication : Bool :=
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains "export const addOne:"
-        && leanOutput.contains "=> addPair(1n,"
+        && leanOutput.contains "(yield* __ps$invoke(addPair, 1n,"
   | _, _ => false
 
 def psTestDualSourceLeanNativeTextPrimitives : Bool :=
@@ -304,7 +310,8 @@ def psTestDualSourceLeanNativeTextPrimitives : Bool :=
         && leanOutput.contains "codePointAt(0)"
         && leanOutput.contains "export function nextPos(s: string, p: bigint): bigint"
         && leanOutput.contains "export function textBytes(s: string): bigint"
-        && leanOutput.contains "const __ps_w = BigInt"
+        && leanOutput.contains "__ps$stringGet(s, 0n)"
+        && leanOutput.contains "__ps$utf8(s).size"
   | _, _ => false
 
 def psTestDualSourceLeanNativeStringRawPositionBridge : Bool :=
@@ -330,7 +337,7 @@ def psTestDualSourceLeanNativeStringRawPositionBridge : Bool :=
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains
-          "export function rawPositionRoundTrip(p: bigint): bigint { return p; }"
+          "function* __ps$impl$rawPositionRoundTrip(p: bigint): __ps$Computation<bigint> { return p; }"
         && leanOutput.contains
           "export function rawCharAt(s: string, p: bigint): string"
         && leanOutput.contains
@@ -348,7 +355,7 @@ def psTestDualSourceLeanNativePartialDefinition : Bool :=
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains
-          "export function loop(n: bigint): bigint { return loop(n); }"
+          "function* __ps$impl$loop(n: bigint): __ps$Computation<bigint> { return (yield* __ps$invoke(loop, n)); }"
   | _, _ => false
 
 structure PsErasureNamedTest where

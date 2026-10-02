@@ -180,6 +180,19 @@ def psTsEmitImport (item : PsVerifiedIrExternalImport) : String :=
   psTsJoin "" ["import { ", item.importedName, alias, " } from ", psJsonQuote item.source, ";"]
 
 
+-- Each recursive call suspends its generator; the host loop owns the work stack.
+-- Public functions remain synchronous and retain their ordinary TypeScript types.
+def psTsStackRuntimeSupport : String :=
+  "type __ps$Request = { readonly fn: Function; readonly args: unknown[] };\ntype __ps$Computation<R> = Generator<__ps$Request, R, unknown>;\nconst __ps$implementations = new WeakMap<Function, Function>();\nfunction __ps$run<R>(root: __ps$Computation<R>): R {\n  const pending: __ps$Computation<unknown>[] = [root];\n  let value: unknown = undefined;\n  while (pending.length !== 0) {\n    const next = pending[pending.length - 1].next(value);\n    if (next.done) { pending.pop(); value = next.value; }\n    else {\n      const { fn, args } = next.value;\n      const implementation = __ps$implementations.get(fn);\n      if (implementation) { pending.push(Reflect.apply(implementation, undefined, args)); value = undefined; }\n      else value = Reflect.apply(fn, undefined, args);\n    }\n  }\n  return value as R;\n}\nfunction __ps$wrap<A extends unknown[], R>(implementation: (...args: A) => __ps$Computation<R>): (...args: A) => R {\n  const fn = (...args: A): R => __ps$run(implementation(...args));\n  __ps$implementations.set(fn, implementation);\n  return fn;\n}\nfunction* __ps$invoke<A extends unknown[], R>(fn: (...args: A) => R, ...args: A): __ps$Computation<R> {\n  return (yield { fn, args }) as R;\n}"
+
+-- Cache one immutable string's byte-position index; retaining new source text
+-- releases the previous index. Character access remains exact at UTF-8 boundaries.
+def psTsUtf8RuntimeSupport : String :=
+  "type __ps$Utf8View = { readonly text: string; readonly size: bigint; readonly positions: Uint32Array };\nlet __ps$lastUtf8: __ps$Utf8View | undefined;\nfunction __ps$utf8Width(code: number): number { return code <= 0x7f ? 1 : code <= 0x7ff ? 2 : code <= 0xffff ? 3 : 4; }\nfunction __ps$utf8(text: string): __ps$Utf8View {\n  if (__ps$lastUtf8?.text === text) return __ps$lastUtf8;\n  let size = 0;\n  for (const char of text) size += __ps$utf8Width(char.codePointAt(0) ?? 0);\n  const positions = new Uint32Array(size + 1);\n  let byte = 0, index = 0;\n  for (const char of text) {\n    positions[byte] = index + 1;\n    const __ps_w = __ps$utf8Width(char.codePointAt(0) ?? 0);\n    byte += __ps_w; index += char.length;\n  }\n  positions[size] = text.length + 1;\n  return __ps$lastUtf8 = { text, size: BigInt(size), positions };\n}\nfunction __ps$stringGet(text: string, position: bigint): string {\n  const view = __ps$utf8(text);\n  if (position < 0n || position >= view.size) return \"A\";\n  const index = view.positions[Number(position)];\n  return index === 0 ? \"A\" : String.fromCodePoint(text.codePointAt(index - 1) ?? 65);\n}\nfunction __ps$stringNext(text: string, position: bigint): bigint {\n  const view = __ps$utf8(text);\n  if (position < 0n || position >= view.size) return position + 1n;\n  const index = view.positions[Number(position)];\n  return index === 0 ? position + 1n : position + BigInt(__ps$utf8Width(text.codePointAt(index - 1) ?? 0));\n}"
+
+def psTsRuntimeSupport : String :=
+  psTsJoin "\n" [psTsStackRuntimeSupport, psTsUtf8RuntimeSupport]
+
 def psTsEmitDeclaration
     (brands : List (String × String))
     (tags : List (String × String))
@@ -195,7 +208,7 @@ def psTsEmitDeclaration
           if psListIsEmpty declaration.parameters then
             if psListIsEmpty declaration.typeParameters then
               Except.ok
-                (psTsJoin "" ["export const ", declaration.name, ": ", resultType, " = ", body, ";"])
+                (psTsJoin "" ["export const ", declaration.name, ": ", resultType, " = __ps$run((function*(): __ps$Computation<", resultType, "> { return ", body, "; })());"])
             else
               Except.error
                 (PsTsEmitError.genericValueUnsupported declaration.name)
@@ -210,8 +223,12 @@ def psTsEmitDeclaration
             match psListMapExcept printParameter declaration.parameters with
             | Except.error error => Except.error error
             | Except.ok parameters =>
+                let parameterName : PsVerifiedIrParameter -> String :=
+                  fun (parameter : PsVerifiedIrParameter) => parameter.name;
+                let arguments := psTsJoin ", " (psListMap parameterName declaration.parameters);
+                let implementation := String.Internal.append "__ps$impl$" declaration.name;
                 Except.ok
-                  (psTsJoin "" ["export function ", declaration.name, generic, "(", psTsJoin ", " parameters, "): ", resultType, " { return ", body, "; }"])
+                  (psTsJoin "" ["export function ", declaration.name, generic, "(", psTsJoin ", " parameters, "): ", resultType, " { return __ps$run(", implementation, generic, "(", arguments, ")); }\nfunction* ", implementation, generic, "(", psTsJoin ", " parameters, "): __ps$Computation<", resultType, "> { return ", body, "; }\n__ps$implementations.set(", declaration.name, ", ", implementation, ");"])
 
 def psTsFlattenLines (groups : List (List String)) : List String :=
   match groups with
@@ -232,6 +249,6 @@ def psTsEmitModule
           match psListMapExcept (psTsEmitDeclaration brands tags) module.declarations with
           | Except.error error => Except.error error
           | Except.ok declarations =>
-              let header : List String := ["// generated from pskernel-admitted ProofScript checked core"];
+              let header : List String := ["// generated from pskernel-admitted ProofScript checked core", psTsRuntimeSupport];
               let lines := psTsFlattenLines [header, psListMap psTsEmitImport module.imports, psTsFlattenLines structures, psTsFlattenLines inductives, declarations];
               Except.ok (psTsJoin "" [psTsJoin "\n" lines, "\n"])

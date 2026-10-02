@@ -244,6 +244,50 @@ def psAuditTotalJsonWorkers : Bool :=
     | _ => false
   exhausted && boundary && accepted && nested && parserBoundary
 
+def psAuditLegacyMetaRounds (context : PsMetaContext) : Nat -> PsExpr -> PsExpr
+  | 0, expr => expr
+  | n + 1, expr => psAuditLegacyMetaRounds context n (psMetaInstantiateStep context expr)
+
+def psAuditMetaFixedPoint : Bool := Id.run do
+  for count in [0, 1, 2, 8, 32] do
+    let assignments := (List.range count).map fun id =>
+      PsMetaAssignment.mk id (if id + 1 < count then .mvar (id + 1) else .lit (.natural 17))
+    let context := { psMetaEmpty with assignments := assignments }
+    let name := psRootName "binder"
+    let leaf : PsExpr := .mvar 0
+    let samples := [leaf, .mvar 999, .app leaf leaf,
+      .lam name leaf leaf .explicit, .forallE name leaf leaf .explicit,
+      .letE name leaf leaf leaf, .proj name 0 leaf,
+      .app (.constE psNatName []) (.lit (.natural 3))]
+    for sample in samples do
+      for fuel in [0, 1, 2, count, count + 1] do
+        if !psExprAlphaEq (psMetaInstantiateRounds context fuel sample)
+            (psAuditLegacyMetaRounds context fuel sample) then return false
+  let cyclic := { psMetaEmpty with assignments := [⟨0, .mvar 1⟩, ⟨1, .mvar 0⟩] }
+  let cycleOk := (List.range 12).all fun fuel =>
+    psExprAlphaEq (psMetaInstantiateRounds cyclic fuel (.mvar 0))
+      (psAuditLegacyMetaRounds cyclic fuel (.mvar 0))
+  let levels := { psLevelMetaEmpty with assignments := [⟨0, .zero⟩] }
+  let context := { psMetaEmpty with levels := levels }
+  return cycleOk && psExprAlphaEq (psMetaInstantiate context (.sortE (.mvar 0))) (.sortE .zero)
+
+def psAuditLexerInputBound : Bool :=
+  let sources := ["42", "    42", "-- é中😀\n42", "/- outer /- inner -/ done -/42"]
+  let oneToken := sources.all fun source =>
+    match psLexAllWithFuel 1 (psLexCursorFromString source) with
+    | .ok [token, eof] =>
+        psTokenKindEq token.kind .natural && token.text == "42" &&
+        token.span.stop.byteOffset == source.utf8ByteSize &&
+        psTokenKindEq eof.kind .endOfInput && eof.span.start.byteOffset == source.utf8ByteSize
+    | _ => false
+  let exhausted := match psLexAllWithFuel 0 (psLexCursorFromString "42") with
+    | .error .fuelExhausted => true | _ => false
+  let empty := match psLexAllWithFuel 0 (psLexCursorFromString "") with
+    | .ok [token] => psTokenKindEq token.kind .endOfInput | _ => false
+  let malformed := match psLexAllWithFuel 1 (psLexCursorFromString "/- unfinished") with
+    | .error (.unterminatedBlockComment _) => true | _ => false
+  oneToken && exhausted && empty && malformed
+
 def psAuditModularPreparation : Bool :=
   let sources := [
     "inductive ReplayChoice where | first | second\n",
@@ -402,7 +446,9 @@ def main (arguments : List String) : IO UInt32 := do
         ("Int.repr compilation, arity rejection and error propagation", psAuditIntRepr),
         ("total string workers, UTF-8 positions and large decimal values", psAuditTotalStringWorkers),
         ("total JSON workers, canonical order and fuel boundaries", psAuditTotalJsonWorkers),
-        ("module preparation preserves combined admissions and rejects bad modules", psAuditModularPreparation)] do
+        ("module preparation preserves combined admissions and rejects bad modules", psAuditModularPreparation),
+        ("lexer shares its input bound while preserving low fuel, nested comments and UTF-8 spans", psAuditLexerInputBound),
+        ("meta early exit preserves substitution chains, unresolved terms, fuel, cycles and levels", psAuditMetaFixedPoint)] do
       if passed then IO.println ("PSC2_FIXED_POINT_ERASURE_CASE: PASS " ++ label)
       else throw (IO.userError ("PSC2_FIXED_POINT_ERASURE_CASE: FAIL " ++ label))
     IO.println "PSC2_FIXED_POINT_ERASURE_FINISH_APPLICATION: PASS (native behavior and append-order theorem)"

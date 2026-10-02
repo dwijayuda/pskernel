@@ -19,7 +19,7 @@ const names = [
 ];
 const emission = [
   '| PsVerifiedIrExpr.lambda _ _ _ => psTsJoin "" ["(", printedFn, ")"]',
-  '[callable, generic, "(", psTsJoin ", " printedArguments, ")"]',
+  '["(yield* __ps$invoke(", callable, generic, suffix, "))"]',
   '["({ [", brand, "]: true as const", suffix, " })"]',
 ];
 requireAll(basic, names);

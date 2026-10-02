@@ -891,7 +891,8 @@ def psLexReadToken
                     read)
                   read.cursor)
 
-def psLexAllWithFuel
+def psLexAllWorker
+    (inputBound : Nat)
     (fuel : Nat) :
     PsLexCursor -> Except PsLexError (List PsToken) :=
   match fuel with
@@ -912,9 +913,9 @@ def psLexAllWithFuel
       let smaller :
           PsLexCursor ->
           Except PsLexError (List PsToken) :=
-        psLexAllWithFuel remainingFuel;
+        psLexAllWorker inputBound remainingFuel;
       fun (cursor : PsLexCursor) =>
-        match psLexSkipTrivia cursor.remaining cursor.position with
+        match psLexSkipTriviaWithFuel inputBound cursor.remaining cursor.position with
         | Except.error error => Except.error error
         | Except.ok ready =>
             if psLexCursorDone ready then
@@ -937,6 +938,10 @@ def psLexAllWithFuel
                   | Except.ok rest =>
                       Except.ok (List.cons token rest)
 
+def psLexAllWithFuel (fuel : Nat) (cursor : PsLexCursor) : Except PsLexError (List PsToken) :=
+  psLexAllWorker (Nat.succ (psLexListLength cursor.remaining)) fuel cursor
+
 def psLex (source : String) : Except PsLexError (List PsToken) :=
   let cursor := psLexCursorFromString source;
-  psLexAllWithFuel (Nat.add (String.utf8ByteSize source) 1) cursor
+  let bound := Nat.succ (String.utf8ByteSize source);
+  psLexAllWorker bound bound cursor

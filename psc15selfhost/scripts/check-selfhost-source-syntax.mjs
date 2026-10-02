@@ -18,6 +18,9 @@ import "./check-nat-recursor-erasure-source.mjs";
 import "./check-function-result-erasure-source.mjs";
 import "./check-replay-emission-source.mjs";
 import "./check-modular-preparation-source.mjs";
+import "./check-stack-safe-ts-source.mjs";
+import "./check-lexer-input-bound-source.mjs";
+import "./check-meta-instantiation-stop-source.mjs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -145,7 +148,7 @@ requireMarkers("MetaContext", metaContext, [
   'def psMetaInstantiateRounds\n    (context : PsMetaContext)\n    (fuel : Nat) : PsExpr -> PsExpr :=\n  match fuel with',
   '| Nat.zero =>\n      fun (expr : PsExpr) => expr',
   'let smaller : PsExpr -> PsExpr :=\n        psMetaInstantiateRounds context remaining;',
-  'fun (expr : PsExpr) =>\n        smaller (psMetaInstantiateStep context expr)',
+  'fun (expr : PsExpr) =>\n        if psMetaExprHasAssignedVar context expr then\n          smaller (psMetaInstantiateStep context expr)\n        else expr',
   'psMetaInstantiateRounds\n      context\n      (Nat.add (psMetaAssignmentListLength context.assignments) 1)\n      expr;',
   'def psExprHasUnresolvedMeta\n    (expr : PsExpr) : Bool :=\n  match expr with',
   'psExprHasUnresolvedMeta body',

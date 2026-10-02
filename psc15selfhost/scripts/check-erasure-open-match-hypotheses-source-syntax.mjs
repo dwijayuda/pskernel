@@ -18,8 +18,9 @@ export function assertErasureOpenMatchHypothesesSourceSyntax(source) {
     /psLocalPushBinding[\s\S]*?binder;/,
     /let baseScope : PsErasureScope := \{[\s\S]*?currentDefinition := state\.scope\.currentDefinition\s*\};/,
     /erasedLocals :=\s*List\.cons pushed\.id state\.scope\.erasedLocals/,
-    /runtimeExpressions :=\s*List\.cons\s*\(Prod\.mk\s*pushed\.id[\s\S]*?binding\.name\)\)\)\s*baseScope\.runtimeExpressions/,
-    /currentDefinition := baseScope\.currentDefinition[\s\S]*?\};\s*smaller/,
+    /psEraseFinishApplication environment baseScope[\s\S]*?domain with\s*\| Except\.error error => Except\.error error/,
+    /List\.cons \(Prod\.mk pushed\.id expression\) baseScope\.runtimeExpressions;/,
+    /baseScope\.runtimeStructureConstructors expressions baseScope\.currentDefinition;\s*smaller/,
   ];
   if (!required.every((pattern) => pattern.test(block))) {
     throw new Error(
@@ -53,9 +54,10 @@ const mutations = [
    "currentDefinition := state.scope.currentDefinition\n                }"],
   ["List.cons pushed.id state.scope.erasedLocals",
    "pushed.id :: state.scope.erasedLocals"],
-  ["List.cons\n                                (Prod.mk",
-   "(pushed.id,"],
-  ["baseScope.runtimeExpressions\n                          };", "baseScope.runtimeExpressions\n                          }"],
+  ["List.cons (Prod.mk pushed.id expression) baseScope.runtimeExpressions;",
+   "(pushed.id, expression) :: baseScope.runtimeExpressions;"],
+  ["baseScope.runtimeExpressions;", "baseScope.runtimeExpressions"],
+  ["baseScope.currentDefinition;", "baseScope.currentDefinition"],
 ];
 for (const [from, to] of mutations) {
   assert.ok(block.includes(from));

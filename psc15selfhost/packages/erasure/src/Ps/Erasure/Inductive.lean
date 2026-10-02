@@ -265,14 +265,9 @@ structure PsPreparedInductiveResult where
   scope : PsErasureScope
   ir : PsVerifiedIrInductive
 
-def psErasureAppendConstructorEntries (entries : List (PsName × PsRuntimeConstructorInfo)) :
-    List (PsName × PsRuntimeConstructorInfo) -> List (PsName × PsRuntimeConstructorInfo) :=
-  match entries with
-  | List.nil => fun (tail : List (PsName × PsRuntimeConstructorInfo)) => tail
-  | List.cons entry rest =>
-      let smaller : List (PsName × PsRuntimeConstructorInfo) -> List (PsName × PsRuntimeConstructorInfo) :=
-        psErasureAppendConstructorEntries rest;
-      fun (tail : List (PsName × PsRuntimeConstructorInfo)) => List.cons entry (smaller tail)
+def psErasureAppendConstructorEntries (entries : List (PsName × PsRuntimeConstructorInfo))
+    (tail : PsErasureNameIndex PsRuntimeConstructorInfo) : PsErasureNameIndex PsRuntimeConstructorInfo :=
+  psErasureIndexPrepend PsRuntimeConstructorInfo entries tail
 
 def psPrepareRuntimeInductive
     (environment : PsEnvironment)
@@ -342,7 +337,7 @@ def psPrepareRuntimeInductive
                     runtimeConstructors :=
                       psErasureAppendConstructorEntries constructorEntries scope.runtimeConstructors
                     runtimeRecursors :=
-                      List.cons (Prod.mk recursorName runtimeInfo) scope.runtimeRecursors
+                      psErasureIndexInsert PsRuntimeInductiveInfo scope.runtimeRecursors recursorName runtimeInfo
                     runtimeStructures := scope.runtimeStructures
                     runtimeStructureConstructors :=
                       scope.runtimeStructureConstructors

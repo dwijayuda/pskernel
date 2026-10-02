@@ -8,6 +8,88 @@ import Ps.Meta.Context
 import Ps.Meta.Infer
 import Ps.Meta.Reduce
 
+-- Persistent collision buckets accelerate lookup without changing name equality
+-- or first-entry precedence. They contain compiler data, never admission authority.
+inductive PsErasureNameIndex (Value : Type) where
+  | empty
+  | bucket (entries : List (Prod PsName Value))
+  | branch (left right : PsErasureNameIndex Value)
+
+def psErasureIndexBucket (Value : Type) (fuel : Nat) :
+    PsErasureNameIndex Value -> Nat -> List (Prod PsName Value) :=
+  match fuel with
+  | Nat.zero => fun (index : PsErasureNameIndex Value) (_hash : Nat) =>
+      match index with
+      | PsErasureNameIndex.bucket entries => entries
+      | _ => List.nil
+  | Nat.succ remaining =>
+      let smaller : PsErasureNameIndex Value -> Nat -> List (Prod PsName Value) := psErasureIndexBucket Value remaining;
+      fun (index : PsErasureNameIndex Value) (hash : Nat) =>
+        match index with
+        | PsErasureNameIndex.branch left right =>
+            if Nat.beq (Nat.mod hash 2) 0 then smaller left (Nat.div hash 2)
+            else smaller right (Nat.div hash 2)
+        | _ => List.nil
+
+def psErasureIndexSet (Value : Type) (fuel : Nat) :
+    PsErasureNameIndex Value -> Nat -> List (Prod PsName Value) -> PsErasureNameIndex Value :=
+  match fuel with
+  | Nat.zero => fun (_index : PsErasureNameIndex Value) (_hash : Nat) (entries : List (Prod PsName Value)) =>
+      PsErasureNameIndex.bucket entries
+  | Nat.succ remaining =>
+      let smaller : PsErasureNameIndex Value -> Nat -> List (Prod PsName Value) -> PsErasureNameIndex Value := psErasureIndexSet Value remaining;
+      fun (index : PsErasureNameIndex Value) (hash : Nat) (entries : List (Prod PsName Value)) =>
+        let left : PsErasureNameIndex Value := match index with
+          | PsErasureNameIndex.branch value _ => value
+          | _ => PsErasureNameIndex.empty;
+        let right : PsErasureNameIndex Value := match index with
+          | PsErasureNameIndex.branch _ value => value
+          | _ => PsErasureNameIndex.empty;
+        if Nat.beq (Nat.mod hash 2) 0 then PsErasureNameIndex.branch (smaller left (Nat.div hash 2) entries) right
+        else PsErasureNameIndex.branch left (smaller right (Nat.div hash 2) entries)
+
+def psErasureIndexFindInBucket (Value : Type) (entries : List (Prod PsName Value)) : PsName -> Option Value :=
+  match entries with
+  | List.nil => fun (_target : PsName) => Option.none
+  | List.cons entry rest =>
+      let smaller : PsName -> Option Value := psErasureIndexFindInBucket Value rest;
+      fun (target : PsName) =>
+        match entry with
+        | Prod.mk key value => if psNameEq key target then Option.some value else smaller target
+
+def psErasureIndexFind (Value : Type) (index : PsErasureNameIndex Value) (name : PsName) : Option Value :=
+  psErasureIndexFindInBucket Value (psErasureIndexBucket Value 16 index (psEnvironmentNameHash name)) name
+
+def psErasureIndexInsert (Value : Type) (index : PsErasureNameIndex Value) (name : PsName) (value : Value) : PsErasureNameIndex Value :=
+  let hash := psEnvironmentNameHash name;
+  psErasureIndexSet Value 16 index hash (List.cons (Prod.mk name value) (psErasureIndexBucket Value 16 index hash))
+
+def psErasureIndexPrepend (Value : Type) (entries : List (Prod PsName Value)) : PsErasureNameIndex Value -> PsErasureNameIndex Value :=
+  match entries with
+  | List.nil => fun (tail : PsErasureNameIndex Value) => tail
+  | List.cons entry rest =>
+      let smaller : PsErasureNameIndex Value -> PsErasureNameIndex Value := psErasureIndexPrepend Value rest;
+      fun (tail : PsErasureNameIndex Value) =>
+        match entry with
+        | Prod.mk name value => psErasureIndexInsert Value (smaller tail) name value
+
+structure PsErasureDeclarationNames where
+  byCore : PsErasureNameIndex String
+  byOutput : PsErasureNameIndex Bool
+  count : Nat
+
+def psErasureDeclarationNameIndex (entries : List (Prod PsName String)) : PsErasureDeclarationNames :=
+  match entries with
+  | List.nil => PsErasureDeclarationNames.mk PsErasureNameIndex.empty PsErasureNameIndex.empty 0
+  | List.cons entry rest =>
+      let tail := psErasureDeclarationNameIndex rest;
+      match entry with
+      | Prod.mk name value => PsErasureDeclarationNames.mk
+          (psErasureIndexInsert String tail.byCore name value)
+          (psErasureIndexInsert Bool tail.byOutput (PsName.str PsName.anonymous value) true)
+          (Nat.succ tail.count)
+
+
 inductive PsErasedBinderKind where
   | type
   | proof
@@ -68,11 +150,11 @@ structure PsErasureScope where
   runtimeLocals : List (Nat × String)
   typeLocals : List (Nat × String)
   erasedLocals : List Nat
-  declarationNames : List (PsName × String)
-  runtimeConstructors : List (PsName × PsRuntimeConstructorInfo)
-  runtimeRecursors : List (PsName × PsRuntimeInductiveInfo)
-  runtimeStructures : List (PsName × PsRuntimeStructureInfo)
-  runtimeStructureConstructors : List (PsName × PsRuntimeStructureInfo)
+  declarationNames : PsErasureDeclarationNames
+  runtimeConstructors : PsErasureNameIndex PsRuntimeConstructorInfo
+  runtimeRecursors : PsErasureNameIndex PsRuntimeInductiveInfo
+  runtimeStructures : PsErasureNameIndex PsRuntimeStructureInfo
+  runtimeStructureConstructors : PsErasureNameIndex PsRuntimeStructureInfo
   runtimeExpressions : List (Nat × PsVerifiedIrExpr)
   currentDefinition : Option PsErasureCurrentDefinition
 
@@ -93,11 +175,11 @@ def psErasureScopeEmpty
     runtimeLocals := []
     typeLocals := []
     erasedLocals := []
-    declarationNames := declarationNames
-    runtimeConstructors := []
-    runtimeRecursors := List.cons (Prod.mk psNatRecName psErasureNatRecursor) List.nil
-    runtimeStructures := []
-    runtimeStructureConstructors := []
+    declarationNames := psErasureDeclarationNameIndex declarationNames
+    runtimeConstructors := PsErasureNameIndex.empty
+    runtimeRecursors := psErasureIndexInsert PsRuntimeInductiveInfo PsErasureNameIndex.empty psNatRecName psErasureNatRecursor
+    runtimeStructures := PsErasureNameIndex.empty
+    runtimeStructureConstructors := PsErasureNameIndex.empty
     runtimeExpressions := []
     currentDefinition := Option.none
   }
@@ -128,57 +210,18 @@ def psErasureLookupNat
             if Nat.beq key target then Option.some value
             else smaller target
 
-def psErasureLookupName
-    (entries : List (Prod PsName String)) :
-    PsName -> Option String :=
-  match entries with
-  | List.nil => fun (_target : PsName) => Option.none
-  | List.cons entry rest =>
-      let smaller : PsName -> Option String := psErasureLookupName rest;
-      fun (target : PsName) =>
-        match entry with
-        | Prod.mk key value =>
-            if psNameEq key target then Option.some value
-            else smaller target
+def psErasureLookupName (entries : PsErasureDeclarationNames) (name : PsName) : Option String :=
+  psErasureIndexFind String entries.byCore name
 
-def psErasureLookupStructure
-    (entries : List (Prod PsName PsRuntimeStructureInfo)) :
-    PsName -> Option PsRuntimeStructureInfo :=
-  match entries with
-  | List.nil => fun (_target : PsName) => Option.none
-  | List.cons entry rest =>
-      let smaller : PsName -> Option PsRuntimeStructureInfo := psErasureLookupStructure rest;
-      fun (target : PsName) =>
-        match entry with
-        | Prod.mk key value =>
-            if psNameEq key target then Option.some value
-            else smaller target
+def psErasureLookupStructure (entries : PsErasureNameIndex PsRuntimeStructureInfo) (name : PsName) : Option PsRuntimeStructureInfo :=
+  psErasureIndexFind PsRuntimeStructureInfo entries name
 
-def psErasureLookupConstructor
-    (entries : List (Prod PsName PsRuntimeConstructorInfo)) :
-    PsName -> Option PsRuntimeConstructorInfo :=
-  match entries with
-  | List.nil => fun (_target : PsName) => Option.none
-  | List.cons entry rest =>
-      let smaller : PsName -> Option PsRuntimeConstructorInfo := psErasureLookupConstructor rest;
-      fun (target : PsName) =>
-        match entry with
-        | Prod.mk key value =>
-            if psNameEq key target then Option.some value
-            else smaller target
+def psErasureLookupConstructor (entries : PsErasureNameIndex PsRuntimeConstructorInfo) (name : PsName) : Option PsRuntimeConstructorInfo :=
+  psErasureIndexFind PsRuntimeConstructorInfo entries name
 
-def psErasureLookupRecursor
-    (entries : List (Prod PsName PsRuntimeInductiveInfo)) :
-    PsName -> Option PsRuntimeInductiveInfo :=
-  match entries with
-  | List.nil => fun (_target : PsName) => Option.none
-  | List.cons entry rest =>
-      let smaller : PsName -> Option PsRuntimeInductiveInfo := psErasureLookupRecursor rest;
-      fun (target : PsName) =>
-        match entry with
-        | Prod.mk key value =>
-            if psNameEq key target then Option.some value
-            else smaller target
+def psErasureLookupRecursor (entries : PsErasureNameIndex PsRuntimeInductiveInfo) (name : PsName) : Option PsRuntimeInductiveInfo :=
+  psErasureIndexFind PsRuntimeInductiveInfo entries name
+
 
 def psErasureNatInList (values : List Nat) : Nat -> Bool :=
   match values with
@@ -303,12 +346,11 @@ def psErasureLocalNameUsed (scope : PsErasureScope) (candidate : String) : Bool 
     fun (entry : Nat × String) =>
       match entry with
       | Prod.mk _ value => psStringEq value candidate;
-  let declarationUses : (PsName × String) -> Bool :=
-    fun (entry : PsName × String) =>
-      match entry with
-      | Prod.mk _ value => psStringEq value candidate;
   if psListAny localUses scope.runtimeLocals then true
-  else psListAny declarationUses scope.declarationNames
+  else
+    match psErasureIndexFind Bool scope.declarationNames.byOutput (PsName.str PsName.anonymous candidate) with
+    | Option.some _ => true
+    | Option.none => false
 
 def psErasureLocalNameWithFuel (scope : PsErasureScope) (base : String) (fuel : Nat) : Nat -> String :=
   match fuel with
@@ -325,7 +367,7 @@ def psErasureLocalName (scope : PsErasureScope) (raw fallback : String) (id : Na
     if psStringEq sanitized "arguments" then "_arguments"
     else if psStringEq sanitized "eval" then "_eval"
     else sanitized;
-  let fuel := Nat.succ (Nat.add (psListLength scope.runtimeLocals) (psListLength scope.declarationNames));
+  let fuel := Nat.succ (Nat.add (psListLength scope.runtimeLocals) scope.declarationNames.count);
   if psStringEq base "_" then psErasureLocalNameWithFuel scope fallback fuel id
   else if psErasureLocalNameUsed scope base then psErasureLocalNameWithFuel scope base fuel id
   else base

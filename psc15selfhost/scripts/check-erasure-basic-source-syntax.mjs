@@ -18,7 +18,18 @@ export function assertErasureBasicSource(source) {
   assert.ok(/let nextScope : PsErasureScope := \{[^}]*runtimeExpressions := \[\]\s*currentDefinition := Option.none/.test(source), 'ERASURE_BASIC_MISSING: original runtime-type scope defaults');
   assert.ok(!/==|&&|\|\||entry\.[12]\b/.test(source), 'ERASURE_BASIC_FORBIDDEN: operators or numeric projections');
   const lookups = source.slice(source.indexOf('def psErasureLookupRuntimeExpression'), source.indexOf('def psErasureNatInList'));
-  assert.equal((lookups.match(/\| Prod\.mk key value =>/g) ?? []).length, 6, 'ERASURE_BASIC_MISSING: six first-match lookups');
+  assert.equal((lookups.match(/\| Prod\.mk key value =>/g) ?? []).length, 2, 'ERASURE_BASIC_MISSING: local first-match lookups');
+  for (const marker of [
+    'psErasureIndexFind String entries.byCore name',
+    'psErasureIndexFind PsRuntimeStructureInfo entries name',
+    'psErasureIndexFind PsRuntimeConstructorInfo entries name',
+    'psErasureIndexFind PsRuntimeInductiveInfo entries name',
+    'psErasureIndexInsert Value (smaller tail) name value',
+    'psErasureIndexFind Bool scope.declarationNames.byOutput (PsName.str PsName.anonymous candidate)',
+    'psErasureIndexInsert Bool tail.byOutput (PsName.str PsName.anonymous value) true',
+    '(Nat.succ tail.count)',
+  ]) assert.ok(source.includes(marker), `ERASURE_BASIC_MISSING: indexed lookup ${marker}`);
+  assert.ok(!source.includes('psListAny declarationUses scope.declarationNames'), 'ERASURE_BASIC_FORBIDDEN: repeated full declaration-name scans');
 }
 
 const source = await readFile(new URL('../packages/erasure/src/Ps/Erasure/Basic.lean', import.meta.url), 'utf8');
@@ -30,6 +41,8 @@ for (const [from, to] of [
   ['psNameEq key target', 'psNameEq entry.1 target'],
   ['if Nat.beq value target then true else smaller target', 'Nat.beq value target || smaller target'],
   ['runtimeExpressions := []\n                  currentDefinition := Option.none', 'runtimeExpressions := scope.runtimeExpressions\n                  currentDefinition := scope.currentDefinition'],
+  ['psErasureIndexInsert Value (smaller tail) name value', 'smaller (psErasureIndexInsert Value tail name value)'],
+  ['psErasureIndexFind Bool scope.declarationNames.byOutput', 'psErasureIndexFind Bool scope.declarationNames.byCore'],
 ]) {
   assert.ok(source.includes(from));
   assert.throws(() => assertErasureBasicSource(source.replace(from, to)), /ERASURE_BASIC/);

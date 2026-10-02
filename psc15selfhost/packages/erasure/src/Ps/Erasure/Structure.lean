@@ -88,9 +88,9 @@ def psPrepareRuntimeStructure
                                   scope.runtimeConstructors
                                 runtimeRecursors := scope.runtimeRecursors
                                 runtimeStructures :=
-                                  List.cons (Prod.mk info.name runtimeInfo) scope.runtimeStructures
+                                  psErasureIndexInsert PsRuntimeStructureInfo scope.runtimeStructures info.name runtimeInfo
                                 runtimeStructureConstructors :=
-                                  List.cons (Prod.mk constructorName runtimeInfo) scope.runtimeStructureConstructors
+                                  psErasureIndexInsert PsRuntimeStructureInfo scope.runtimeStructureConstructors constructorName runtimeInfo
                                 runtimeExpressions := []
                                 currentDefinition := Option.none
                               };

@@ -10,7 +10,8 @@ function requireAll(source, markers) {
 }
 const names = [
   'if psListAny localUses scope.runtimeLocals then true',
-  'else psListAny declarationUses scope.declarationNames',
+  'psErasureIndexFind Bool scope.declarationNames.byOutput (PsName.str PsName.anonymous candidate)',
+  'Nat.succ (Nat.add (psListLength scope.runtimeLocals) scope.declarationNames.count)',
   'if psErasureLocalNameUsed scope candidate then smaller (Nat.succ index) else candidate',
   'if psStringEq sanitized "arguments" then "_arguments"',
   'else if psStringEq sanitized "eval" then "_eval"',

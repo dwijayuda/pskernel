@@ -11,7 +11,7 @@ function validate(source) {
     'if psNameEq inductiveInfo.coreName psNatName then',
   ]) assert(source.includes(marker), `missing Nat recursion lowering guard: ${marker}`);
 }
-assert(basic.includes('runtimeRecursors := List.cons (Prod.mk psNatRecName psErasureNatRecursor) List.nil'));
+assert(basic.includes('runtimeRecursors := psErasureIndexInsert PsRuntimeInductiveInfo PsErasureNameIndex.empty psNatRecName psErasureNatRecursor'));
 assert(basic.includes('PsRuntimeConstructorField.mk 0 "predecessor" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat) true'));
 validate(expr);
 for (const marker of ['psStringEq zeroName "zero"', 'psListIsEmpty zeroBindings', 'psListIsEmpty bindingsTail']) {

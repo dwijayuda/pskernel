@@ -642,7 +642,7 @@ def psEraseIteApplication
     Except PsErasureError (Option PsVerifiedIrExpr) :=
   match view.head with
   | .constE name _ =>
-      if psNameEq name psIteName && view.args.length == 5 then
+      if psNameEq name psIteName && Nat.beq view.args.length 5 then
         match
             psErasureExprListAt view.args 1,
             psErasureExprListAt view.args 3,

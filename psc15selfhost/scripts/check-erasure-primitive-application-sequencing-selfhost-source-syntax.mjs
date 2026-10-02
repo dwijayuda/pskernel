@@ -14,10 +14,11 @@ export function assertErasurePrimitiveApplicationSequencing(source) {
   }
   if (
     !/let text := psNameToString name;\s*let binary : PsVerifiedIrIntrinsic -> Except PsErasureError \(Option PsVerifiedIrExpr\) :=/.test(block) ||
-    !/let binary : PsVerifiedIrIntrinsic -> Except PsErasureError \(Option PsVerifiedIrExpr\) :=\s*fun \(operation : PsVerifiedIrIntrinsic\) =>[\s\S]*?Except\.error PsErasureError\.unsupportedApplication;\s*if psStringEq text "Int\.ofNat" then/.test(block)
+    !/let binary : PsVerifiedIrIntrinsic -> Except PsErasureError \(Option PsVerifiedIrExpr\) :=\s*fun \(operation : PsVerifiedIrIntrinsic\) =>[\s\S]*?Except\.error PsErasureError\.unsupportedApplication;\s*let productProjection : Nat -> Except PsErasureError \(Option PsVerifiedIrExpr\) :=/.test(block) ||
+    !/let productProjection : Nat -> Except PsErasureError \(Option PsVerifiedIrExpr\) :=\s*fun \(index : Nat\) =>[\s\S]*?Except\.error PsErasureError\.unsupportedApplication;\s*if psStringEq text "Prod\.fst" then/.test(block)
   ) {
     throw new Error(
-      "PSC2_ERASURE_PRIMITIVE_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX_MISSING: two sequenced locals",
+      "PSC2_ERASURE_PRIMITIVE_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX_MISSING: three sequenced locals",
     );
   }
   return block;
@@ -37,7 +38,8 @@ assert.throws(
 );
 const protectedTerminators = [
   "let text := psNameToString name;",
-  "Except.error PsErasureError.unsupportedApplication;\n      if psStringEq text \"Int.ofNat\" then",
+  "Except.error PsErasureError.unsupportedApplication;\n      let productProjection",
+  "Except.error PsErasureError.unsupportedApplication;\n      if psStringEq text \"Prod.fst\" then",
 ];
 for (const protectedText of protectedTerminators) {
   assert.ok(block.includes(protectedText));
@@ -48,5 +50,5 @@ for (const protectedText of protectedTerminators) {
   );
 }
 process.stdout.write(
-  "PSC2_ERASURE_PRIMITIVE_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX: PASS (two sequenced locals; two missing-terminator mutation checks)\n",
+  "PSC2_ERASURE_PRIMITIVE_APPLICATION_SEQUENCING_SELFHOST_SOURCE_SYNTAX: PASS (three sequenced locals; three missing-terminator mutation checks)\n",
 );

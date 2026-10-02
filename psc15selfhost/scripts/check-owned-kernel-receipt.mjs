@@ -35,6 +35,11 @@ assert(instantiate.includes('psKernelLevelInstantiateStep current'), 'nested ins
 assert(!instantiate.includes('psKernelLevelInstantiateRun'), 'nested operations must not allocate an independent fuel budget');
 const lake = await readFile(new URL('../lakefile.lean', import.meta.url), 'utf8');
 assert(!lake.includes('lean_lib PsKernelCore where'));
+const ownedSource = JSON.parse(await readFile(new URL('../packages/pskernel-core/manifests/SOURCE.json', import.meta.url), 'utf8'));
+for (const { path } of ownedSource.files) {
+  const moduleName = path.slice(4, -5).replaceAll('/', '.');
+  assert(lake.includes('`' + moduleName), `native build must register owned module ${moduleName}`);
+}
 const joint = await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/JointAdmission.lean', import.meta.url), 'utf8');
 assert(joint.includes('PsKernelJointState.pending PsKernelList.nil entries'));
 assert(joint.includes('psKernelAdmissionStep current'));

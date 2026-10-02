@@ -350,6 +350,19 @@ def psErasureBoolAnd
   | true => right
   | false => false
 
+def psErasureBoolOr
+    (left : Bool)
+    (right : Bool) : Bool :=
+  match left with
+  | true => true
+  | false => right
+
+def psErasureBoolNot
+    (value : Bool) : Bool :=
+  match value with
+  | true => false
+  | false => true
+
 def psErasePrimitiveApplication
     (environment : PsEnvironment)
     (scope : PsErasureScope)
@@ -689,7 +702,7 @@ def psErasureLookupTypeSubstitution :
     Option PsVerifiedIrType
   | [], _ => none
   | entry :: rest, name =>
-      if entry.1 == name then some entry.2
+      if psStringEq entry.1 name then some entry.2
       else psErasureLookupTypeSubstitution rest name
 
 def psSubstituteVerifiedTypeWithFuel
@@ -939,7 +952,7 @@ def psErasureFindStringIndex
     List String -> Nat -> Option Nat
   | [], _ => none
   | value :: rest, index =>
-      if value == target then
+      if psStringEq value target then
         some index
       else
         psErasureFindStringIndex target rest (index + 1)
@@ -973,7 +986,7 @@ def psOpenMatchMinorHypotheses
     Except PsErasureError PsOpenMatchHypotheses
   | [], state => Except.ok state
   | field :: rest, state =>
-      if field.recursive == false then
+      if psErasureBoolNot field.recursive then
         psOpenMatchMinorHypotheses
           recursiveParameterIndex
           bindings
@@ -985,7 +998,7 @@ def psOpenMatchMinorHypotheses
             match
                 bindings.find?
                   (fun (binding : PsVerifiedIrMatchBinding) =>
-                    binding.field == field.name) with
+                    psStringEq binding.field field.name) with
             | none => Except.error PsErasureError.binderMismatch
             | some binding =>
                 let pushed :=
@@ -1252,10 +1265,11 @@ def psEraseRuntimeExprWithFuel
               | some name => Except.ok (PsVerifiedIrExpr.var name)
               | none =>
                   if
-                      psErasureNatInList scope.erasedLocals id
-                        || match psErasureLookupNat scope.typeLocals id with
-                           | some _ => true
-                           | none => false then
+                      psErasureBoolOr
+                        (psErasureNatInList scope.erasedLocals id)
+                        (match psErasureLookupNat scope.typeLocals id with
+                         | some _ => true
+                         | none => false) then
                     Except.error (PsErasureError.erasedLocalUsed id)
                   else
                     Except.error (PsErasureError.unknownLocal id)
@@ -1266,8 +1280,9 @@ def psEraseRuntimeExprWithFuel
                 name with
           | some ctorInfo =>
               if
-                  ctorInfo.numParams == 0
-                    && ctorInfo.fields.isEmpty then
+                  psErasureBoolAnd
+                    (Nat.beq ctorInfo.numParams 0)
+                    ctorInfo.fields.isEmpty then
                 Except.ok
                   (PsVerifiedIrExpr.constructor
                     ctorInfo.inductiveName
@@ -1593,7 +1608,7 @@ def psEraseRuntimeExprWithFuel
           | some structureInfo =>
               match
                   structureInfo.fields.find?
-                    (fun field => field.projectionIndex == index) with
+                    (fun field => Nat.beq field.projectionIndex index) with
               | none => Except.error PsErasureError.unsupportedRuntimeTerm
               | some field =>
                   let typeArgumentsResult :
@@ -1622,9 +1637,11 @@ def psEraseRuntimeExprWithFuel
                                 match erasedType with
                                 | .named ownerName arguments =>
                                     if
-                                        ownerName == structureInfo.name
-                                          && arguments.length ==
-                                            structureInfo.typeParameters.length
+                                        psErasureBoolAnd
+                                          (psStringEq ownerName structureInfo.name)
+                                          (Nat.beq
+                                            arguments.length
+                                            structureInfo.typeParameters.length)
                                     then
                                       Except.ok arguments
                                     else

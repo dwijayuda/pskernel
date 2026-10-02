@@ -25,24 +25,28 @@ def psCheckedSeedTests : IO Unit := do
   let emitted ← psHostLeanEmitPrepared prepared
   psCheckedSeedAssert "real kernel then actual erasure and TS emission"
     (match emitted with | .ok (_, ts) => ts.contains "answer" | _ => false)
-  let forged := { prepared with canonicalAdmissions := "forged" }
+  let forged : PsCompilerAdmissionReadyModule := { declarations := [
+    PsDeclaration.definitionDecl (psRootName "bad") []
+      (PsExpr.constE psNatName []) (PsExpr.mvar 0)] }
   let rejected ← psHostLeanEmitPrepared forged
-  psCheckedSeedAssert "forged prepared artifact blocked before emission"
+  psCheckedSeedAssert "codec-invalid prepared declarations blocked before emission"
     (match rejected with | .error "PSC2_CHECKED_PREPARED_INTEGRITY_FAILED" => true | _ => false)
   let invalidDeclarations := [PsDeclaration.definitionDecl (psRootName "bad") []
     (PsExpr.constE psNatName []) (PsExpr.sortE PsLevel.zero)]
-  let .ok canonical := psEncodeCheckedAdmissionsCanonical invalidDeclarations
+  let .ok _ := psEncodeCheckedAdmissionsCanonical invalidDeclarations
     | throw (IO.userError "ill-typed fixture is not codec-valid")
   let invalid : PsCompilerAdmissionReadyModule := {
-    declarations := invalidDeclarations, canonicalAdmissions := canonical }
+    declarations := invalidDeclarations }
   let invalidResult ← psHostLeanEmitPrepared invalid
   psCheckedSeedAssert "codec-valid ill-typed declaration rejected by real kernel"
     (match invalidResult with | .error error => error.startsWith "PSC2_KERNEL_REJECTED:" | _ => false)
   let nestedSource ← IO.FS.readFile "../test/fixtures/checked-nested-recursor.lean"
   let .ok nested := psCompilerPrepareSource .lean nestedSource
     | throw (IO.userError "nested source preparation failed")
+  let .ok nestedAdmissions := psCompilerAdmissionsFromPrepared nested
+    | throw (IO.userError "nested admission encoding failed")
   psCheckedSeedAssert "nested List Option Prod recursors are adapted in the canonical payload"
-    (nested.canonicalAdmissions.contains "_pscShallowRec" && nested.canonicalAdmissions.contains "_pscCheckedNestedUnit")
+    (nestedAdmissions.contains "_pscShallowRec" && nestedAdmissions.contains "_pscCheckedNestedUnit")
   let nestedResult ← psHostLeanEmitPrepared nested
   psCheckedSeedAssert "real kernel accepts nested recursors and direct recursive hypotheses"
     (match nestedResult with | .ok (_, ts) => ts.contains "checkedTreeExample" | _ => false)

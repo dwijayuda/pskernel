@@ -304,7 +304,10 @@ def psAuditModularPreparation : Bool :=
     "def replaySelected : Nat := replayChoice ReplayChoice.second\n"]
   let same := match psCompilerPrepareSources .lean sources,
       psCompilerPrepareSource .lean (String.intercalate "\n\n" sources) with
-    | .ok modules, .ok flat => modules.canonicalAdmissions == flat.canonicalAdmissions
+    | .ok modules, .ok flat =>
+        match psCompilerAdmissionsFromPrepared modules, psCompilerAdmissionsFromPrepared flat with
+        | .ok left, .ok right => left == right
+        | _, _ => false
     | _, _ => false
   let rejects := match psCompilerPrepareSources .lean ["def first : Nat := 1", "def bad : Nat := Type"] with
     | .error _ => true
@@ -422,11 +425,11 @@ def main (arguments : List String) : IO UInt32 := do
         | .error _ => throw (IO.userError "PSC2_PROFILE_PREPARE_FAILED")
         | .ok prepared => pure prepared
       IO.println ("PSC2_PROFILE_PREPARE_MS: " ++ toString ((← IO.monoMsNow) - start))
-      IO.println ("PSC2_PROFILE_ADMISSION_BYTES: " ++ toString prepared.canonicalAdmissions.utf8ByteSize)
       stdout.flush
       let admissions ← match psCompilerAdmissionsFromPrepared prepared with
         | .error _ => throw (IO.userError "PSC2_PROFILE_VALIDATE_FAILED")
         | .ok admissions => pure admissions
+      IO.println ("PSC2_PROFILE_ADMISSION_BYTES: " ++ toString admissions.utf8ByteSize)
       IO.println ("PSC2_PROFILE_VALIDATE_MS: " ++ toString ((← IO.monoMsNow) - start))
       stdout.flush
       let quoted := psJsonQuote admissions

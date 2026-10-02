@@ -138,12 +138,14 @@ Every executable backend exposed by the bootstrap compiler MUST consume Verified
 created through this preparation boundary. No public compiler-service path may go
 straight from arbitrary elaborated declarations to backend emission.
 
-`PsCompilerAdmissionReadyModule` deliberately stores only the declarations and their
-canonical admissions encoding. It does not carry a caller-provided environment as
-hidden authority. Before erasure, the compiler re-encodes the declarations and rejects
-a mismatched canonical payload, then reconstructs the environment deterministically
-from the bootstrap prelude plus those declarations. This keeps the current boundary
-fail-closed even though it is still weaker than genuine kernel admission.
+`PsCompilerAdmissionReadyModule` stores only the declarations. Every admissions
+request encodes those declarations directly; there is no second cached payload or
+caller-provided environment. Before erasure, the compiler validates codec support
+and reconstructs the environment from the bootstrap prelude and those declarations.
+Preparation alone is weaker than genuine kernel admission. The checked host freezes
+the prepared graph before checking, holds the accepted graph behind a session-local
+handle, re-encodes and compares its exact accepted payload before emission, and emits
+from that same graph. Native Lean sessions retain the same immutable prepared value.
 
 When the independent kernel provider is wired into this directory, the stable seam is:
 

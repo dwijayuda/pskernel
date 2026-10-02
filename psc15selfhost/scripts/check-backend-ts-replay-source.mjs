@@ -42,7 +42,7 @@ for (const arity of [1, 2, 3, 5]) {
 }
 const api = await readFile(new URL('../packages/compiler/src/Ps/Compiler/Api.lean', import.meta.url), 'utf8');
 assert.ok(api.includes('let translated : Except PsTranslationError String :='));
-assert.ok(api.includes('String.Internal.append prepared.canonicalAdmissions "\\n"'));
+assert.ok(api.includes('String.Internal.append canonicalAdmissions "\\n"'));
 const erasure = await readFile(new URL('../packages/erasure/src/Ps/Erasure/Expr.lean', import.meta.url), 'utf8');
 assert.match(erasure, /psStringEq text "Int\.repr" then\s*if Nat\.beq \(psListLength view\.args\) 1 then\s*match psEraseMappedIntrinsic erase PsVerifiedIrIntrinsic\.intRepr view\.args with/);
 console.log('PSC2_BACKEND_TS_REPLAY_SOURCE: PASS (three modules; explicit recursion, products, intrinsic coverage and exact arity rejection)');

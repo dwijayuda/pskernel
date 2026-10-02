@@ -14,12 +14,10 @@ inductive PsCompilerError where
   | proofScriptFrontend (error : PsProofScriptFrontendError)
   | elaboration (error : PsElabError)
   | admission (error : PsCheckedAdmissionCodecError)
-  | preparedAdmissionMismatch
   | erasure (error : PsErasureError)
 
 structure PsCompilerAdmissionReadyModule where
   declarations : List PsDeclaration
-  canonicalAdmissions : String
 
 def psCompilerTranslateSource
     (sourceKind targetKind : PsCompilerSourceKind)
@@ -90,11 +88,8 @@ def psCompilerPrepareElaborated
         elaborated.declarations with
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
-  | Except.ok canonicalAdmissions =>
-      Except.ok {
-        declarations := elaborated.declarations
-        canonicalAdmissions := canonicalAdmissions
-      }
+  | Except.ok _ =>
+      Except.ok (PsCompilerAdmissionReadyModule.mk elaborated.declarations)
 
 def psCompilerCheckElaborated
     (elaborated : PsElabModuleResult) :
@@ -152,20 +147,17 @@ def psCompilerValidatePrepared
         prepared.declarations with
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
-  | Except.ok canonicalAdmissions =>
-      if psStringEq canonicalAdmissions prepared.canonicalAdmissions then
-        Except.ok Unit.unit
-      else
-        Except.error PsCompilerError.preparedAdmissionMismatch
+  | Except.ok _ =>
+      Except.ok Unit.unit
 
 def psCompilerAdmissionsFromPrepared
     (prepared : PsCompilerAdmissionReadyModule) :
     Except PsCompilerError String :=
-  match psCompilerValidatePrepared prepared with
+  match psEncodeCheckedAdmissionsCanonical prepared.declarations with
   | Except.error error =>
-      Except.error error
-  | Except.ok _ =>
-      Except.ok (String.Internal.append prepared.canonicalAdmissions "\n")
+      Except.error (PsCompilerError.admission error)
+  | Except.ok canonicalAdmissions =>
+      Except.ok (String.Internal.append canonicalAdmissions "\n")
 
 def psCompilerAdmissionsFromElaborated
     (elaborated : PsElabModuleResult) :

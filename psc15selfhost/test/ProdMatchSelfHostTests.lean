@@ -13,7 +13,7 @@ def psTestProdMatchPreparation : Bool :=
   | Except.error _ => false
   | Except.ok prepared =>
       prepared.declarations.length > 0
-        && prepared.canonicalAdmissions.length > 0
+        && (psCompilerAdmissionsFromPrepared prepared).isOk
 
 def psTestProdMatchVerifiedIr : Bool :=
   match

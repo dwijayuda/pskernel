@@ -47,7 +47,7 @@ def psTestMinimalSelfHostPreparation : Bool :=
   | Except.error _ => false
   | Except.ok prepared =>
       prepared.declarations.length > 0
-        && prepared.canonicalAdmissions.length > 0
+        && (psCompilerAdmissionsFromPrepared prepared).isOk
 
 def psTestMinimalSelfHostVerifiedIr : Bool :=
   match
@@ -60,7 +60,7 @@ def psTestMinimalSelfHostVerifiedIr : Bool :=
       | Except.error _ => false
       | Except.ok _ => true
 
-def psTestForgedAdmissionReadyRejected : Bool :=
+def psTestInvalidAdmissionReadyRejected : Bool :=
   match
       psCompilerPrepareSource
         PsCompilerSourceKind.lean
@@ -68,9 +68,10 @@ def psTestForgedAdmissionReadyRejected : Bool :=
   | Except.error _ => false
   | Except.ok prepared =>
       let forged : PsCompilerAdmissionReadyModule :=
-        { prepared with canonicalAdmissions := "forged" }
+        { declarations := [PsDeclaration.definitionDecl (psRootName "bad") []
+            (PsExpr.constE psNatName []) (PsExpr.mvar 0)] }
       match psCompilerVerifiedIrFromPrepared forged with
-      | Except.error PsCompilerError.preparedAdmissionMismatch => true
+      | Except.error (PsCompilerError.admission _) => true
       | _ => false
 
 def psTestMinimalSelfHostTypeScript : Bool :=
@@ -89,7 +90,7 @@ def psTestMinimalSelfHostListConstructionPreparation : Bool :=
   | Except.error _ => false
   | Except.ok prepared =>
       prepared.declarations.length > 0
-        && prepared.canonicalAdmissions.length > 0
+        && (psCompilerAdmissionsFromPrepared prepared).isOk
 
 def psTestMinimalSelfHostListMatchPreparation : Bool :=
   match
@@ -99,7 +100,7 @@ def psTestMinimalSelfHostListMatchPreparation : Bool :=
   | Except.error _ => false
   | Except.ok prepared =>
       prepared.declarations.length > 0
-        && prepared.canonicalAdmissions.length > 0
+        && (psCompilerAdmissionsFromPrepared prepared).isOk
 
 def psTestMinimalSelfHostListPreparation : Bool :=
   match
@@ -109,7 +110,7 @@ def psTestMinimalSelfHostListPreparation : Bool :=
   | Except.error _ => false
   | Except.ok prepared =>
       prepared.declarations.length > 0
-        && prepared.canonicalAdmissions.length > 0
+        && (psCompilerAdmissionsFromPrepared prepared).isOk
 
 def psTestMinimalSelfHostListConstructionMissingRuntime : Bool :=
   match
@@ -169,7 +170,7 @@ def psTestMinimalSelfHostOptionPreparation : Bool :=
   | Except.error _ => false
   | Except.ok prepared =>
       prepared.declarations.length > 0
-        && prepared.canonicalAdmissions.length > 0
+        && (psCompilerAdmissionsFromPrepared prepared).isOk
 
 def psTestMinimalSelfHostOptionVerifiedIr : Bool :=
   match
@@ -198,7 +199,7 @@ def psTestMinimalSelfHostExceptPreparation : Bool :=
   | Except.error _ => false
   | Except.ok prepared =>
       prepared.declarations.length > 0
-        && prepared.canonicalAdmissions.length > 0
+        && (psCompilerAdmissionsFromPrepared prepared).isOk
 
 def psTestMinimalSelfHostExceptVerifiedIr : Bool :=
   match
@@ -227,7 +228,7 @@ def psTestMinimalSelfHostProdPreparation : Bool :=
   | Except.error _ => false
   | Except.ok prepared =>
       prepared.declarations.length > 0
-        && prepared.canonicalAdmissions.length > 0
+        && (psCompilerAdmissionsFromPrepared prepared).isOk
 
 def psTestMinimalSelfHostProdVerifiedIr : Bool :=
   match
@@ -256,7 +257,7 @@ def psTestMinimalSelfHostProdMatchPreparation : Bool :=
   | Except.error _ => false
   | Except.ok prepared =>
       prepared.declarations.length > 0
-        && prepared.canonicalAdmissions.length > 0
+        && (psCompilerAdmissionsFromPrepared prepared).isOk
 
 def psTestInductiveConstructorTraversal : Bool :=
   let position := PsSourcePos.mk 0 1 1
@@ -416,12 +417,12 @@ def main : IO Unit := do
     throw
       (IO.userError
         "PSC2_MINIMAL_SELFHOST_FAIL: prepared core -> VerifiedIR")
-  if psTestForgedAdmissionReadyRejected then
-    IO.println "PSC2_MINIMAL_SELFHOST_PASS: forged admission-ready artifact rejected"
+  if psTestInvalidAdmissionReadyRejected then
+    IO.println "PSC2_MINIMAL_SELFHOST_PASS: codec-invalid admission-ready declarations rejected"
   else
     throw
       (IO.userError
-        "PSC2_MINIMAL_SELFHOST_FAIL: forged admission-ready artifact was accepted")
+        "PSC2_MINIMAL_SELFHOST_FAIL: codec-invalid admission-ready declarations was accepted")
   if psTestMinimalSelfHostTypeScript then
     IO.println "PSC2_MINIMAL_SELFHOST_PASS: TypeScript bootstrap backend"
   else

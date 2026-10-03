@@ -122,7 +122,7 @@ Normative keywords:
 
 ProofScript is a general-purpose programming language and theorem-proving/formal-verification language whose logical meaning is defined through Lean-compatible elaboration and genuine kernel admission.
 
-r3 changes the application-facing syntax, source profiles, specification layer, application model, and foreign-interface model. It does not introduce a competing logical type theory.
+The r3 edition defines the application-facing syntax, source profiles, specification layer, application model, and foreign-interface model. It does not introduce a competing logical type theory.
 
 The language is designed to make ordinary application programming more approachable to TypeScript/JavaScript developers while preserving exact dependent-type and proof semantics.
 
@@ -606,7 +606,7 @@ CheckedModule
 RuntimeIR
 ~~~
 
-The older planning name `RuntimeIR` MUST be interpreted as **RuntimeIR plus separately recorded preservation/checking evidence**, not as a second IR semantics and not as a type name that creates proof authority.
+`RuntimeIR` is a semantic artifact name, not an assurance claim. Preservation/checking evidence is recorded separately; an IR type name MUST NOT create proof authority.
 
 Backends consume RuntimeIR (or a versioned serialization of it).
 

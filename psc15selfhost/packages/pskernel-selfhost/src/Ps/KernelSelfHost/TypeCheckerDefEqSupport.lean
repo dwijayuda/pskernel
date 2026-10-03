@@ -1146,16 +1146,18 @@ def psKernelDefEqLazyStep
                   PsKernelDeltaStepResult.equal
                   (Prod.snd compared))
             else
+              let comparedState :=
+                Prod.snd compared;
               let afterFailure :=
                 if sameShortcut then
                   psKernelCheckerStateWithFailure
-                    (Prod.snd compared)
+                    comparedState
                     (psKernelExprPairSetInsert
-                      (Prod.snd compared).failure
+                      comparedState.failure
                       left
                       right)
                 else
-                  Prod.snd compared;
+                  comparedState;
               match
                   psKernelDefEqDeltaOnce
                     coreWhnf

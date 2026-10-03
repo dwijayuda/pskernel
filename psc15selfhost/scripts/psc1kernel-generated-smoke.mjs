@@ -31,6 +31,8 @@ const required = [
   "psKernelWhnfNoRecursor",
   "psKernelMkCheckerSession",
   "psKernelSessionIsDefEq",
+  "psKernelSessionWhnf",
+  "psKernelApplyArgs",
   "psKernelAddAxiom",
   "psKernelAddSimpleInductive",
   "psKernelSimpleRecName",
@@ -187,6 +189,44 @@ assert.equal(kernel.psKernelEnvironmentContains(environment2, unitName), true);
 assert.equal(kernel.psKernelEnvironmentContains(environment2, unitCtorName), true);
 assert.equal(kernel.psKernelEnvironmentContains(environment2, unitRecName), true);
 
+const unitCtorValue = kernel.PsKernelExpr.const(
+  unitCtorName,
+  kernel.List.nil(),
+);
+const motiveName = kernel.PsKernelName.str(anonymous, "motiveArg");
+const unitMotive = kernel.PsKernelExpr.lam(
+  motiveName,
+  unitValueType,
+  unitValueType,
+  kernel.PsKernelBinderInfo.default,
+);
+const unitRecursorApp = kernel.psKernelApplyArgs(
+  kernel.PsKernelExpr.const(unitRecName, kernel.List.nil()),
+  kernel.List.cons(
+    unitMotive,
+    kernel.List.cons(
+      unitCtorValue,
+      kernel.List.cons(unitCtorValue, kernel.List.nil()),
+    ),
+  ),
+);
+const unitSession = kernel.psKernelMkCheckerSession(
+  environment2,
+  kernel.List.nil(),
+  kernel.PsKernelDefinitionSafety.safe,
+  0n,
+  kernel.psKernelLeanNatMaxSizeDefault,
+);
+const unitReduced = unwrapExcept(
+  kernel.psKernelSessionWhnf(
+    16384n,
+    unitSession,
+    unitRecursorApp,
+  ),
+  "RECURSOR",
+);
+assert.equal(kernel.psKernelExprEq(unitReduced.fst, unitCtorValue), true);
+
 const duplicateInductive = kernel.psKernelAddSimpleInductive(
   16384n,
   environment2,
@@ -200,6 +240,6 @@ process.stdout.write(
   [
     "PSC1KERNEL_GENERATED_SMOKE: PASS",
     `kernel=${path.relative(root, kernelPath)}`,
-    "checks=name,level,expr,subst,nat,whnf,defeq,axiom,inductive,duplicate-rejection",
+    "checks=name,level,expr,subst,nat,whnf,defeq,axiom,inductive,recursor,duplicate-rejection",
   ].join("\n") + "\n",
 );

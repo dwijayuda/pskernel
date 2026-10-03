@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.TypeCheckerWhnf
+import Ps.KernelSelfHost.TypeCheckerInfer
 import PSC1Kernel.TypeChecker
 
 def psKernelNameToReference
@@ -751,6 +751,126 @@ def psKernelSelfHostWhnfTests : Bool :=
               psKernelWhnfCacheTest
               psKernelWhnfFuelExhaustionTest)))))
 
+def psKernelInferenceWhnf
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr) :
+    Except String
+      (Prod PsKernelExpr PsKernelCheckerState) :=
+  psKernelWhnfNoRecursor
+    512
+    context
+    state
+    expr
+
+def psKernelInferenceStructuralDefEq
+    (_context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left : PsKernelExpr)
+    (right : PsKernelExpr) :
+    Except String
+      (Prod Bool PsKernelCheckerState) :=
+  Except.ok
+    (Prod.mk
+      (psKernelExprEq left right)
+      state)
+
+def psKernelInferDifferentialCase
+    (expr : PsKernelExpr) : Bool :=
+  let portableContext :=
+    psKernelCheckerContextEmpty
+      psKernelEnvironmentEmpty;
+  let referenceContext :=
+    PSC1Kernel.CheckerContext.empty
+      PSC1Kernel.Environment.empty;
+  match
+      psKernelInferWithFuel
+        512
+        psKernelInferenceWhnf
+        psKernelInferenceStructuralDefEq
+        portableContext
+        psKernelCheckerStateEmpty
+        expr,
+      PSC1Kernel.infer
+        referenceContext
+        (psKernelExprToReference expr) with
+  | Except.ok portableResult, Except.ok referenceResult =>
+      psKernelExprReferenceEq
+        (Prod.fst portableResult)
+        referenceResult
+  | Except.error portableError, Except.error referenceError =>
+      portableError == referenceError
+  | _, _ =>
+      false
+
+def psKernelSelfHostInferTests : Bool :=
+  let propSort :=
+    PsKernelExpr.sort
+      PsKernelLevel.zero;
+  let typeSort :=
+    PsKernelExpr.sort
+      (PsKernelLevel.succ PsKernelLevel.zero);
+  let binderName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "x";
+  let innerName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "y";
+  let identity :=
+    PsKernelExpr.lam
+      binderName
+      propSort
+      (PsKernelExpr.bvar 0)
+      PsKernelBinderInfo.default;
+  let nested :=
+    PsKernelExpr.lam
+      binderName
+      typeSort
+      (PsKernelExpr.lam
+        innerName
+        (PsKernelExpr.bvar 0)
+        (PsKernelExpr.bvar 0)
+        PsKernelBinderInfo.default)
+      PsKernelBinderInfo.default;
+  let forallExpr :=
+    PsKernelExpr.forallE
+      binderName
+      propSort
+      propSort
+      PsKernelBinderInfo.default;
+  let letExpr :=
+    PsKernelExpr.letE
+      binderName
+      propSort
+      propSort
+      (PsKernelExpr.bvar 0)
+      false;
+  let appliedNested :=
+    PsKernelExpr.app
+      nested
+      propSort;
+  Bool.and
+    (psKernelInferDifferentialCase propSort)
+    (Bool.and
+      (psKernelInferDifferentialCase
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat 17)))
+      (Bool.and
+        (psKernelInferDifferentialCase
+          (PsKernelExpr.lit
+            (PsKernelLiteral.str "λ")))
+        (Bool.and
+          (psKernelInferDifferentialCase identity)
+          (Bool.and
+            (psKernelInferDifferentialCase nested)
+            (Bool.and
+              (psKernelInferDifferentialCase forallExpr)
+              (Bool.and
+                (psKernelInferDifferentialCase letExpr)
+                (psKernelInferDifferentialCase appliedNested)))))))
+
 def main : IO Unit :=
   if !psKernelSelfHostNameTests then
     throw
@@ -776,6 +896,10 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_WHNF_DIFFERENTIAL: FAIL")
+  else if !psKernelSelfHostInferTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_INFER_DIFFERENTIAL: FAIL")
   else
     IO.println
       "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"

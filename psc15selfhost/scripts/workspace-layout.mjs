@@ -4,6 +4,7 @@ export const packageBySection = new Map([
   ["Syntax", "syntax"],
   ["Core", "core"],
   ["Kernel", "pskernel-core"],
+  ["KernelSelfHost", "pskernel-selfhost"],
   ["Environment", "environment"],
   ["Project", "project"],
   ["Meta", "meta"],

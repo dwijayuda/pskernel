@@ -1,20 +1,18 @@
 import Ps.KernelSelfHost.Expr
 
-structure PsKernelExprMap (alpha : Type) where
-  entries : List (Prod PsKernelExpr alpha)
+structure PsKernelExprMap where
+  entries : List (Prod PsKernelExpr PsKernelExpr)
 
-def psKernelExprMapEmpty
-    (alpha : Type) :
-    PsKernelExprMap alpha :=
+def psKernelExprMapEmpty :
+    PsKernelExprMap :=
   {
     entries := List.nil
   }
 
 def psKernelExprMapGetIn
-    (alpha : Type)
     (expr : PsKernelExpr)
-    (entries : List (Prod PsKernelExpr alpha)) :
-    Option alpha :=
+    (entries : List (Prod PsKernelExpr PsKernelExpr)) :
+    Option PsKernelExpr :=
   match entries with
   | List.nil =>
       Option.none
@@ -26,26 +24,22 @@ def psKernelExprMapGetIn
         Option.some (Prod.snd entry)
       else
         psKernelExprMapGetIn
-          alpha
           expr
           rest
 
 def psKernelExprMapGet
-    (alpha : Type)
-    (cache : PsKernelExprMap alpha)
+    (cache : PsKernelExprMap)
     (expr : PsKernelExpr) :
-    Option alpha :=
+    Option PsKernelExpr :=
   psKernelExprMapGetIn
-    alpha
     expr
     cache.entries
 
 def psKernelExprMapInsertIn
-    (alpha : Type)
     (expr : PsKernelExpr)
-    (value : alpha)
-    (entries : List (Prod PsKernelExpr alpha)) :
-    List (Prod PsKernelExpr alpha) :=
+    (value : PsKernelExpr)
+    (entries : List (Prod PsKernelExpr PsKernelExpr)) :
+    List (Prod PsKernelExpr PsKernelExpr) :=
   match entries with
   | List.nil =>
       List.cons
@@ -63,21 +57,18 @@ def psKernelExprMapInsertIn
         List.cons
           entry
           (psKernelExprMapInsertIn
-            alpha
             expr
             value
             rest)
 
 def psKernelExprMapInsert
-    (alpha : Type)
-    (cache : PsKernelExprMap alpha)
+    (cache : PsKernelExprMap)
     (expr : PsKernelExpr)
-    (value : alpha) :
-    PsKernelExprMap alpha :=
+    (value : PsKernelExpr) :
+    PsKernelExprMap :=
   {
     entries :=
       psKernelExprMapInsertIn
-        alpha
         expr
         value
         cache.entries
@@ -154,11 +145,11 @@ def psKernelExprPairSetInsert
 
 structure PsKernelCheckerState where
   nextFresh : Nat
-  inferOnly : PsKernelExprMap PsKernelExpr
-  checkedInfer : PsKernelExprMap PsKernelExpr
-  whnfCore : PsKernelExprMap PsKernelExpr
-  whnf : PsKernelExprMap PsKernelExpr
-  unfold : PsKernelExprMap PsKernelExpr
+  inferOnly : PsKernelExprMap
+  checkedInfer : PsKernelExprMap
+  whnfCore : PsKernelExprMap
+  whnf : PsKernelExprMap
+  unfold : PsKernelExprMap
   success : PsKernelExprPairSet
   failure : PsKernelExprPairSet
 
@@ -166,18 +157,18 @@ def psKernelCheckerStateEmpty :
     PsKernelCheckerState :=
   {
     nextFresh := 0
-    inferOnly := psKernelExprMapEmpty PsKernelExpr
-    checkedInfer := psKernelExprMapEmpty PsKernelExpr
-    whnfCore := psKernelExprMapEmpty PsKernelExpr
-    whnf := psKernelExprMapEmpty PsKernelExpr
-    unfold := psKernelExprMapEmpty PsKernelExpr
+    inferOnly := psKernelExprMapEmpty
+    checkedInfer := psKernelExprMapEmpty
+    whnfCore := psKernelExprMapEmpty
+    whnf := psKernelExprMapEmpty
+    unfold := psKernelExprMapEmpty
     success := psKernelExprPairSetEmpty
     failure := psKernelExprPairSetEmpty
   }
 
 def psKernelCheckerStateWithInferOnly
     (state : PsKernelCheckerState)
-    (cache : PsKernelExprMap PsKernelExpr) :
+    (cache : PsKernelExprMap) :
     PsKernelCheckerState :=
   {
     nextFresh := state.nextFresh
@@ -192,7 +183,7 @@ def psKernelCheckerStateWithInferOnly
 
 def psKernelCheckerStateWithCheckedInfer
     (state : PsKernelCheckerState)
-    (cache : PsKernelExprMap PsKernelExpr) :
+    (cache : PsKernelExprMap) :
     PsKernelCheckerState :=
   {
     nextFresh := state.nextFresh
@@ -207,7 +198,7 @@ def psKernelCheckerStateWithCheckedInfer
 
 def psKernelCheckerStateWithWhnfCore
     (state : PsKernelCheckerState)
-    (cache : PsKernelExprMap PsKernelExpr) :
+    (cache : PsKernelExprMap) :
     PsKernelCheckerState :=
   {
     nextFresh := state.nextFresh
@@ -222,7 +213,7 @@ def psKernelCheckerStateWithWhnfCore
 
 def psKernelCheckerStateWithWhnf
     (state : PsKernelCheckerState)
-    (cache : PsKernelExprMap PsKernelExpr) :
+    (cache : PsKernelExprMap) :
     PsKernelCheckerState :=
   {
     nextFresh := state.nextFresh
@@ -237,7 +228,7 @@ def psKernelCheckerStateWithWhnf
 
 def psKernelCheckerStateWithUnfold
     (state : PsKernelCheckerState)
-    (cache : PsKernelExprMap PsKernelExpr) :
+    (cache : PsKernelExprMap) :
     PsKernelCheckerState :=
   {
     nextFresh := state.nextFresh

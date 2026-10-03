@@ -1,101 +1,109 @@
-# r3 First Backend Preservation Slice
+# r3 Backend Preservation Slice Plan
 
-Status: first small semantic-preservation theorem completed; no claim about the production JS backend.
+Status: **documentation and proof-design plan only; no backend preservation theorem is claimed by the final branch state**
 
-## Model
+## Purpose
 
-The companion proofs/Backend.lean defines a tiny RuntimeIR-like language:
+Do not attempt a universal compiler-correctness theorem first.
 
-~~~text
-Nat literal
-addition
-one local binding
-bound variable zero
-~~~
+Choose a tiny executable RuntimeIR fragment and one target semantics, then prove one complete semantic-preservation slice.
 
-and a tiny JS-core-like AST with corresponding constructs.
+## Proposed first source fragment
 
-The lowerer recursively maps RuntimeIR expressions to JS-core expressions.
-
-## Theorem
-
-Lean 4.34.0 accepted:
+A suitable RuntimeIR fragment includes:
 
 ~~~text
-lower_preserves_eval:
-  jeval (lower e) env = reval e env
+Bool
+exact Nat literals
+exact Nat addition/multiplication
+local immutable bindings
+pure function calls
+small algebraic constructors/matches
 ~~~
 
-for every expression in the modeled fragment and optional local environment.
+Avoid effects, async, exceptions, strings, FFI, recursion, and optimization in the first theorem.
 
-It also accepted:
+## Proposed first target
+
+Direct JavaScript is the most useful first target if a sufficiently small explicit JS-core semantics is defined.
+
+Direct Wasm is also viable, but should be a separate theorem once the source fragment and representation layer are stable.
+
+## Required definitions
+
+The proof should define:
+
+- RuntimeIR syntax;
+- RuntimeIR evaluation relation;
+- target AST;
+- target evaluation relation;
+- value relation;
+- lowering function;
+- serializer relation;
+- exact artifact identity relation;
+- permitted resource/termination outcomes.
+
+## Target theorem shape
+
+For the chosen terminating pure fragment, prove something like:
 
 ~~~text
-emitted_ast_preserves
+if
+  source program P evaluates to value v
+and
+  lower(P) = T
+then
+  target program T evaluates to v'
+and
+  RelatedValue(v, v')
 ~~~
 
-for the emitted AST and:
+If target evaluation can fail for declared finite-resource reasons, state that relation explicitly rather than silently weakening the theorem.
+
+## Serializer/artifact boundary
+
+A theorem about an internal target AST does not prove the emitted file.
+
+The first complete slice should eventually connect:
 
 ~~~text
-emitted_bytes_bound
+Target AST
+  -> canonical serializer
+  -> exact emitted bytes
+  -> independently parsed restricted target syntax
+  -> target semantics
 ~~~
 
-which binds the emitted String field to the model serializer output.
+A hash identifies exact bytes; it does not prove the parser/serializer relation.
 
-The exact file hash and observed axiom output are recorded in proofs/EVIDENCE.json.
+## Translation validation alternative
 
-## What this establishes
+For later optimization passes, a sound per-artifact validator may be preferable:
 
-For this toy language only:
+~~~text
+validate(sourceIR, targetIR, certificate) = accepted
+  ->
+Preserves(sourceIR, targetIR)
+~~~
 
-- syntax-directed lowering is total;
-- target-model evaluation agrees with source-model evaluation;
-- the emitted artifact object records bytes equal to its serializer output.
+The validator itself needs a soundness argument.
 
-This is a real checked theorem over the model.
+## Explicit non-claims
 
-## What it does not establish
+This document does not claim:
 
-The serializer emits JS-looking text, but no theorem currently connects that text to the ECMAScript specification or a real JS parser/engine.
-
-Therefore this does not prove:
-
-- correctness of the current ProofScript RuntimeIR;
-- correctness of the production direct-JS backend;
-- correctness of actual JS parsing/evaluation;
-- BigInt representation of all Nat operations;
-- closures, recursion, constructors, strings, effects, errors, async, resources, or modules;
+- production RuntimeIR correctness;
+- production direct-JS correctness;
+- ECMAScript equivalence;
+- correctness of JS BigInt as a complete Nat implementation;
+- closure conversion correctness;
 - source-to-RuntimeIR preservation;
-- printer correctness beyond equality to the modeled serializer;
-- exact executable bytes after bundling/minification.
+- module/linker/bundler correctness;
+- direct-Wasm correctness.
 
-Calling this an end-to-end JavaScript compiler proof would be false.
+## Evidence status
 
-## Next preservation slice
-
-Recommended next theorem chain:
-
-~~~text
-real restricted RuntimeIR
-  -> defined JsIR
-  -> canonical JS serializer
-  -> independently parsed restricted JS
-  -> small-step or big-step JS-subset semantics
-~~~
-
-Then prove value/termination preservation for:
-
-- Bool;
-- exact Nat addition/multiplication;
-- local bindings;
-- constructors/matches;
-- pure functions.
-
-Only after that add representation lemmas for more arithmetic and data.
-
-## Evidence classification
-
-Formal model theorem: completed.
-Translation validation: not implemented.
-Production backend theorem: not established.
-Real JS-engine equivalence: not established.
+Formal backend theorem: **not claimed in the final documentation-only branch state**.
+Translation validator: **not implemented**.
+Real target-semantics connection: **not established**.
+Exact-artifact preservation: **not established**.

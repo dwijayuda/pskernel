@@ -462,16 +462,27 @@ def psKernelExprInstantiateRev
     expr
     (psKernelExprListReverse subst)
 
+def psKernelExprApplyArgsCheapWorker
+    (args : List PsKernelExpr) :
+    PsKernelExpr -> PsKernelExpr :=
+  match args with
+  | List.nil =>
+      fun (fn : PsKernelExpr) =>
+        fn
+  | List.cons arg rest =>
+      let smaller :
+          PsKernelExpr -> PsKernelExpr :=
+        psKernelExprApplyArgsCheapWorker rest;
+      fun (fn : PsKernelExpr) =>
+        smaller
+          (PsKernelExpr.app fn arg)
+
 def psKernelExprApplyArgsCheap
     (fn : PsKernelExpr)
     (args : List PsKernelExpr) : PsKernelExpr :=
-  match args with
-  | List.nil =>
-      fn
-  | List.cons arg rest =>
-      psKernelExprApplyArgsCheap
-        (PsKernelExpr.app fn arg)
-        rest
+  psKernelExprApplyArgsCheapWorker
+    args
+    fn
 
 partial def psKernelExprConsumeLambdaSpine
     (fn : PsKernelExpr)

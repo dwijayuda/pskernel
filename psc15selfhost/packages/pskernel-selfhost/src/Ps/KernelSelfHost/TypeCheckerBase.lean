@@ -32,6 +32,36 @@ def psKernelCheckerContextEmpty
     recDepth := 0
   }
 
+def psKernelCheckerContextWithLocalContext
+    (context : PsKernelCheckerContext)
+    (localContext : PsKernelLocalContext) :
+    PsKernelCheckerContext :=
+  {
+    environment := context.environment
+    localContext := localContext
+    levelParams := context.levelParams
+    safety := context.safety
+    eagerReduce := context.eagerReduce
+    maxRecDepth := context.maxRecDepth
+    maxNatSize := context.maxNatSize
+    recDepth := context.recDepth
+  }
+
+def psKernelCheckerContextWithEagerReduce
+    (context : PsKernelCheckerContext)
+    (eagerReduce : Bool) :
+    PsKernelCheckerContext :=
+  {
+    environment := context.environment
+    localContext := context.localContext
+    levelParams := context.levelParams
+    safety := context.safety
+    eagerReduce := eagerReduce
+    maxRecDepth := context.maxRecDepth
+    maxNatSize := context.maxNatSize
+    recDepth := context.recDepth
+  }
+
 def psKernelRecDepthFactor : Nat :=
   16
 

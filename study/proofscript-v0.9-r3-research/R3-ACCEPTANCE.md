@@ -101,3 +101,33 @@ Accepted additions:
 - InterfaceIR v1 has normative prose and JSON Schema plus exact module-resolution identity.
 
 The remaining gates are implementation and evidence work, not undefined base-r3 semantics.
+
+## 4 October 2026 language revision addendum — Braced definition-body revision
+
+The accepted standalone r3 language now permits def, const, and function bodies in either of these semantically identical forms:
+
+~~~proofscript
+function add(x: Nat, y: Nat): Nat :=
+  x + y
+~~~
+
+~~~proofscript
+function add(x: Nat, y: Nat): Nat := {
+  x + y
+}
+~~~
+
+The braced form contains exactly one term. It is not a statement block and introduces no implicit return, sequencing, JavaScript scope, or alternative function semantics.
+
+Existing complete braced terms retain ownership. Therefore a direct record literal such as:
+
+~~~proofscript
+const user: User := {
+  id := 1,
+  name := "Alice"
+}
+~~~
+
+remains a record-literal term. An explicit declaration-body wrapper around a record literal uses a second brace layer.
+
+This revision is represented by feature id \`D-DECL-BODY-BRACE-R3\` and is part of \`psc2-language-v1\`.

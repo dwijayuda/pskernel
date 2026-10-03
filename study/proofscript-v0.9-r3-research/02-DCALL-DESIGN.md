@@ -76,7 +76,7 @@ The parser does not delete whitespace and then reparse text. It records the sour
 
 The accepted r3 `CallGap` is deliberately **horizontal**.
 
-It permits spaces, horizontal tabs, and Lean comments treated as lexical trivia nodes. A bare source line terminator outside a comment breaks parenthesized-call ownership between the completed head and `(`.
+It permits inherited horizontal Lean space trivia (ordinary spaces under the pinned lexer) and Lean comments treated as lexical trivia nodes. A bare source line terminator outside a comment breaks parenthesized-call ownership between the completed head and `(`.
 
 Thus:
 
@@ -269,7 +269,7 @@ f(x, y)
 f((x, y))
 ~~~
 
-This formatting choice no longer carries semantic information; adding ordinary horizontal trivia before the parenthesis does not change the AST.
+This formatting choice no longer carries semantic information; adding permitted horizontal Lean trivia before the parenthesis does not change the AST. Tabs are not introduced as a new r3 whitespace token.
 
 Tuple intent is structural and remains visible through the extra grouping.
 

@@ -413,7 +413,22 @@ psc2-compiler-v1
 
 A compiler claiming `psc2-compiler-v1` MUST publish an exact capability manifest rather than claiming "all Lean" or "all ProofScript" support.
 
-The manifest records at least:
+The user-facing Standard distribution is a separate composition profile:
+
+~~~text
+psc2-standard-v1
+  =
+psc2-compiler-v1
+  + selected Standard libraries
+  + selected Standard prover packages
+  + selected official Standard extensions
+~~~
+
+A feature can therefore be part of the PSC2 user experience without being implemented as compiler core syntax/logic.
+
+A `psc2-standard-v1` release MUST publish its exact library/prover/extension manifest. The language specification does not turn those packages into kernel authority.
+
+The compiler manifest records at least:
 
 ~~~text
 languageEdition
@@ -577,7 +592,7 @@ Large automation and AI proof search remain plugins/libraries unless a future St
 
 ### 8.7 Post-PSC2 platform sequence
 
-The recommended platform sequence after the first stable PSC2 compiler/self-host closure is:
+The recommended platform sequence after the first stable `psc2-compiler-v1` self-host closure is:
 
 ~~~text
 P1  versioned Core / CheckedCore / CheckedModule / RuntimeIR contracts
@@ -589,7 +604,7 @@ P6  App/Stream/Resource runtime implementations + cross-backend conformance
 P7  large math/tactic/FFI/ecosystem expansion
 ~~~
 
-Some work MAY overlap, but P2–P7 are not retroactive requirements for the first PSC2 compiler fixed point unless an actual required compiler module depends on them.
+Some work MAY overlap. These are not retroactive compiler-core requirements for the first `psc2-compiler-v1` fixed point unless an actual required compiler module depends on them. Some P2/P3 capabilities may be selected into `psc2-standard-v1` as ordinary libraries/prover packages without becoming compiler-core features.
 
 ### 8.7.1 Semantic artifact naming
 
@@ -611,7 +626,7 @@ Backends consume RuntimeIR (or a versioned serialization of it).
 
 ### 8.8 Naming: language profiles versus compiler generations
 
-The name **PSC2** refers to the compiler capability/product profile described above, not to a bootstrap generation number.
+The name **PSC2** refers to the compiler/distribution capability family (`psc2-compiler-v1`, `psc2-standard-v1`), not to a bootstrap generation number.
 
 Self-host iterations MUST use generation-neutral names such as:
 
@@ -3183,6 +3198,7 @@ A cache key that omits a semantic input is unsound.
 | P-STANDARD-R3 | profile | closed Standard source environment |
 | P-LEAN-EXTENSIBLE-R3 | profile | declared extensible source environment |
 | C-PSC2-COMPILER-V1 | compiler profile | required first PSC2 compiler-owned capability set |
+| D-PSC2-STANDARD-V1 | distribution profile | compiler + selected Standard library/prover/extension capabilities |
 | L-LEAN-SUBSET-PSC2-V1 | compatibility profile | bounded native Lean frontend subset |
 | PATTERN-PSC2-V1 | compiler profile | bounded required PSC2 pattern compiler |
 | INTERFACEIR-V1 | interop | versioned npm/TypeScript boundary |

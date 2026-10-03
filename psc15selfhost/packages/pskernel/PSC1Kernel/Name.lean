@@ -30,14 +30,14 @@ def Name.append : Name → Name → Name
 def Name.appendIndexAfter (name : Name) (index : Nat) : Name :=
   name.appendAfter ("_" ++ toString index)
 
-partial def Name.isPrefixOf (needle : Name) : Name → Bool
+def Name.isPrefixOf (needle : Name) : Name → Bool
   | .anonymous => Name.eq needle .anonymous
   | name@(.str parent _) =>
       Name.eq needle name || Name.isPrefixOf needle parent
   | name@(.num parent _) =>
       Name.eq needle name || Name.isPrefixOf needle parent
 
-partial def Name.replacePrefix
+def Name.replacePrefix
     (name oldPrefix newPrefix : Name) : Option Name :=
   if Name.eq name oldPrefix then
     some newPrefix

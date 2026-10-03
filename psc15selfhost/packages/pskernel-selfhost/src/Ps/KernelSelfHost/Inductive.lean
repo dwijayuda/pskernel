@@ -28,11 +28,6 @@ structure PsKernelOpenBindersResult where
   binders : List PsKernelOpenBinder
   result : PsKernelExpr
 
-structure PsKernelOpenBinderStepResult where
-  session : PsKernelCheckerSession
-  binder : PsKernelOpenBinder
-  result : PsKernelExpr
-
 structure PsKernelRecursiveArgumentResult where
   session : PsKernelCheckerSession
   recursiveInfo : Option (Prod (List PsKernelOpenBinder) (List PsKernelExpr))
@@ -525,7 +520,10 @@ def psKernelOpenSimpleHeaderParamStep
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (type : PsKernelExpr) :
-    Except String PsKernelOpenBinderStepResult :=
+    Except String
+      (Prod
+        (Prod PsKernelCheckerSession PsKernelOpenBinder)
+        PsKernelExpr) :=
   match
       psKernelSessionWhnf
         fuel
@@ -570,9 +568,10 @@ def psKernelOpenSimpleHeaderParamStep
                       localDomain
                       binderInfo;
                   Except.ok
-                    (PsKernelOpenBinderStepResult.mk
-                      (Prod.snd localResult)
-                      binder
+                    (Prod.mk
+                      (Prod.mk
+                        (Prod.snd localResult)
+                        binder)
                       (psKernelExprInstantiate1
                         body
                         (PsKernelExpr.fvar fresh)))
@@ -628,16 +627,19 @@ def psKernelOpenSimpleHeaderParamsWorker
         | Except.error error =>
             Except.error error
         | Except.ok step =>
-            match step with
-            | PsKernelOpenBinderStepResult.mk
-                nextSession
-                binder
-                nextType =>
-                smaller
-                  fuel
-                  nextSession
-                  nextType
-                  (List.cons binder revParams)
+            let pair :=
+              Prod.fst step;
+            let nextSession :=
+              Prod.fst pair;
+            let binder :=
+              Prod.snd pair;
+            let nextType :=
+              Prod.snd step;
+            smaller
+              fuel
+              nextSession
+              nextType
+              (List.cons binder revParams)
 
 def psKernelOpenSimpleHeaderParams
     (fuel : Nat)

@@ -23,6 +23,18 @@
       "target": "pinned included native categories"
     },
     {
+      "id": "M-PUBLIC-IMPORT-R3",
+      "class": "surface",
+      "category": "module-header",
+      "status": "current",
+      "target": "Lean-compatible exported import dependency",
+      "syntax": "public import Module.Name",
+      "ordinaryImportReexports": false,
+      "publicImportReexports": true,
+      "openReexports": false,
+      "privateDeclarationsReexported": false
+    },
+    {
       "id": "D-CONST-ALIAS",
       "class": "surface",
       "category": "command",

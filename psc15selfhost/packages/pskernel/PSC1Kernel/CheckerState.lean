@@ -1,123 +1,250 @@
-import Std.Data.HashMap
 import PSC1Kernel.Expr
 
 namespace PSC1Kernel
 
-/-- Small structural-hash combiner used only for checker memo-table keys. -/
-def checkerMixHash (a b : UInt64) : UInt64 :=
-  a * 1099511628211 + b + 1469598103934665603
+/--
+Portable checker-cache implementation for the self-host kernel.
 
-partial def checkerNameHash : Name → UInt64
+Caches are operational only: collisions are always resolved with kernel
+structural equality, so changing the bucket hash cannot change acceptance
+semantics. Keeping this code on Array/List removes the Std.HashMap dependency
+from the trusted self-host closure and lets PSC1 lower the same source to
+portable backends.
+-/
+def checkerCacheBucketCount : Nat := 256
+
+def checkerMixBucket (left right : Nat) : Nat :=
+  (left * 33 + right + 1) % checkerCacheBucketCount
+
+def checkerStringBucketHashCore : List Char → Nat → Nat
+  | [], acc => acc
+  | char :: rest, acc =>
+      checkerStringBucketHashCore rest
+        (checkerMixBucket acc char.toNat)
+
+def checkerStringBucketHash (value : String) : Nat :=
+  checkerStringBucketHashCore value.toList 17
+
+def checkerNameBucketHash : Name → Nat
   | .anonymous => 11
   | .str parent value =>
-      checkerMixHash 13 (checkerMixHash (checkerNameHash parent) (hash value))
+      checkerMixBucket 13
+        (checkerMixBucket
+          (checkerNameBucketHash parent)
+          (checkerStringBucketHash value))
   | .num parent value =>
-      checkerMixHash 17 (checkerMixHash (checkerNameHash parent) (hash value))
+      checkerMixBucket 17
+        (checkerMixBucket
+          (checkerNameBucketHash parent)
+          (value % checkerCacheBucketCount))
 
-partial def checkerLevelHash : Level → UInt64
+def checkerLevelBucketHash : Level → Nat
   | .zero => 19
-  | .succ level => checkerMixHash 23 (checkerLevelHash level)
+  | .succ level =>
+      checkerMixBucket 23 (checkerLevelBucketHash level)
   | .max left right =>
-      checkerMixHash 29 (checkerMixHash (checkerLevelHash left) (checkerLevelHash right))
+      checkerMixBucket 29
+        (checkerMixBucket
+          (checkerLevelBucketHash left)
+          (checkerLevelBucketHash right))
   | .imax left right =>
-      checkerMixHash 31 (checkerMixHash (checkerLevelHash left) (checkerLevelHash right))
-  | .param name => checkerMixHash 37 (checkerNameHash name)
-  | .mvar name => checkerMixHash 41 (checkerNameHash name)
+      checkerMixBucket 31
+        (checkerMixBucket
+          (checkerLevelBucketHash left)
+          (checkerLevelBucketHash right))
+  | .param name =>
+      checkerMixBucket 37 (checkerNameBucketHash name)
+  | .mvar name =>
+      checkerMixBucket 41 (checkerNameBucketHash name)
 
-partial def checkerLevelsHash (levels : List Level) : UInt64 :=
-  levels.foldl (fun acc level => checkerMixHash acc (checkerLevelHash level)) 43
+def checkerLevelsBucketHash : List Level → Nat
+  | [] => 43
+  | level :: rest =>
+      checkerMixBucket
+        (checkerLevelBucketHash level)
+        (checkerLevelsBucketHash rest)
+
+def checkerLiteralBucketHash : Literal → Nat
+  | .nat value =>
+      checkerMixBucket 89 (value % checkerCacheBucketCount)
+  | .str value =>
+      checkerMixBucket 97 (checkerStringBucketHash value)
 
 /--
-Hash compatible with `Expr.eq`, not `Expr.equal`: binder display names and
-binder annotations are intentionally ignored, while let nondep and metadata
-remain structural. This matches the equality contract required by Lean's
-kernel expression maps.
+Hash compatible with Expr.eq, not Expr.equal: binder display names and binder
+annotations are intentionally ignored, while let nondep and metadata remain
+structural. Collisions are harmless because bucket lookup rechecks Expr.eq.
 -/
-partial def checkerExprHash : Expr → UInt64
-  | .bvar index => checkerMixHash 47 (hash index)
-  | .fvar name => checkerMixHash 53 (checkerNameHash name)
-  | .mvar name => checkerMixHash 59 (checkerNameHash name)
-  | .sort level => checkerMixHash 61 (checkerLevelHash level)
+def checkerExprBucketHash : Expr → Nat
+  | .bvar index =>
+      checkerMixBucket 47 (index % checkerCacheBucketCount)
+  | .fvar name =>
+      checkerMixBucket 53 (checkerNameBucketHash name)
+  | .mvar name =>
+      checkerMixBucket 59 (checkerNameBucketHash name)
+  | .sort level =>
+      checkerMixBucket 61 (checkerLevelBucketHash level)
   | .const name levels =>
-      checkerMixHash 67 (checkerMixHash (checkerNameHash name) (checkerLevelsHash levels))
+      checkerMixBucket 67
+        (checkerMixBucket
+          (checkerNameBucketHash name)
+          (checkerLevelsBucketHash levels))
   | .app fn arg =>
-      checkerMixHash 71 (checkerMixHash (checkerExprHash fn) (checkerExprHash arg))
+      checkerMixBucket 71
+        (checkerMixBucket
+          (checkerExprBucketHash fn)
+          (checkerExprBucketHash arg))
   | .lam _ type body _ =>
-      checkerMixHash 73 (checkerMixHash (checkerExprHash type) (checkerExprHash body))
+      checkerMixBucket 73
+        (checkerMixBucket
+          (checkerExprBucketHash type)
+          (checkerExprBucketHash body))
   | .forallE _ type body _ =>
-      checkerMixHash 79 (checkerMixHash (checkerExprHash type) (checkerExprHash body))
+      checkerMixBucket 79
+        (checkerMixBucket
+          (checkerExprBucketHash type)
+          (checkerExprBucketHash body))
   | .letE _ type value body nondep =>
-      checkerMixHash 83 <|
-        checkerMixHash (checkerExprHash type) <|
-          checkerMixHash (checkerExprHash value) <|
-            checkerMixHash (checkerExprHash body) (hash nondep)
-  | .lit (.nat value) => checkerMixHash 89 (hash value)
-  | .lit (.str value) => checkerMixHash 97 (hash value)
+      let nondepHash := if nondep then 1 else 0
+      checkerMixBucket 83
+        (checkerMixBucket
+          (checkerExprBucketHash type)
+          (checkerMixBucket
+            (checkerExprBucketHash value)
+            (checkerMixBucket
+              (checkerExprBucketHash body)
+              nondepHash)))
+  | .lit value =>
+      checkerLiteralBucketHash value
   | .mdata metadata expr =>
-      checkerMixHash 101 (checkerMixHash (hash metadata) (checkerExprHash expr))
+      checkerMixBucket 101
+        (checkerMixBucket
+          (metadata % checkerCacheBucketCount)
+          (checkerExprBucketHash expr))
   | .proj typeName index expr =>
-      checkerMixHash 103 <|
-        checkerMixHash (checkerNameHash typeName) <|
-          checkerMixHash (hash index) (checkerExprHash expr)
+      checkerMixBucket 103
+        (checkerMixBucket
+          (checkerNameBucketHash typeName)
+          (checkerMixBucket
+            (index % checkerCacheBucketCount)
+            (checkerExprBucketHash expr)))
 
-structure CheckerExprKey where
-  value : Expr
-
-instance : BEq CheckerExprKey where
-  beq left right := Expr.eq left.value right.value
-
-instance : Hashable CheckerExprKey where
-  hash key := checkerExprHash key.value
-
-structure CheckerExprPairKey where
-  left : Expr
-  right : Expr
-
-instance : BEq CheckerExprPairKey where
-  beq a b :=
-    (Expr.eq a.left b.left && Expr.eq a.right b.right) ||
-    (Expr.eq a.left b.right && Expr.eq a.right b.left)
-
-instance : Hashable CheckerExprPairKey where
-  hash key :=
-    let left := checkerExprHash key.left
-    let right := checkerExprHash key.right
-    -- Commutative combination because defeq-pair membership is symmetric.
-    checkerMixHash 107 (left + right + left * right)
-
-abbrev CheckerExprMap (α : Type) := Std.HashMap CheckerExprKey α
+structure CheckerExprMap (α : Type) where
+  buckets : Array (List (Prod Expr α))
 
 namespace CheckerExprMap
 
 def empty : CheckerExprMap α :=
-  Std.HashMap.emptyWithCapacity 64
+  { buckets := Array.replicate checkerCacheBucketCount [] }
+
+def findInBucket
+    (expr : Expr) : List (Prod Expr α) → Option α
+  | [] => none
+  | entry :: rest =>
+      if Expr.eq entry.fst expr then
+        some entry.snd
+      else
+        findInBucket expr rest
+
+def replaceInBucket
+    (expr : Expr)
+    (value : α) : List (Prod Expr α) → List (Prod Expr α)
+  | [] => [Prod.mk expr value]
+  | entry :: rest =>
+      if Expr.eq entry.fst expr then
+        Prod.mk expr value :: rest
+      else
+        entry :: replaceInBucket expr value rest
 
 def get? (cache : CheckerExprMap α) (expr : Expr) : Option α :=
-  Std.HashMap.get? cache (CheckerExprKey.mk expr)
+  let key := checkerExprBucketHash expr
+  if cache.buckets.size == checkerCacheBucketCount then
+    match cache.buckets[key]? with
+    | some values => findInBucket expr values
+    | none => none
+  else
+    none
 
-def insert (cache : CheckerExprMap α) (expr : Expr) (value : α) : CheckerExprMap α :=
-  Std.HashMap.insert cache (CheckerExprKey.mk expr) value
+def insert
+    (cache : CheckerExprMap α)
+    (expr : Expr)
+    (value : α) : CheckerExprMap α :=
+  let buckets :=
+    if cache.buckets.size == checkerCacheBucketCount then
+      cache.buckets
+    else
+      Array.replicate checkerCacheBucketCount []
+  let key := checkerExprBucketHash expr
+  match buckets[key]? with
+  | some values =>
+      { buckets := buckets.set! key (replaceInBucket expr value values) }
+  | none =>
+      { buckets := buckets }
 
 end CheckerExprMap
 
 structure CheckerExprPairSet where
-  entries : Std.HashMap CheckerExprPairKey Unit
+  buckets : Array (List (Prod Expr Expr))
 
 namespace CheckerExprPairSet
 
 def empty : CheckerExprPairSet :=
-  { entries := Std.HashMap.emptyWithCapacity 64 }
+  { buckets := Array.replicate checkerCacheBucketCount [] }
 
-def contains (set : CheckerExprPairSet) (left right : Expr) : Bool :=
-  (Std.HashMap.get? set.entries (CheckerExprPairKey.mk left right)).isSome
+def pairEq
+    (left right : Expr)
+    (entry : Prod Expr Expr) : Bool :=
+  (Expr.eq entry.fst left && Expr.eq entry.snd right) ||
+    (Expr.eq entry.fst right && Expr.eq entry.snd left)
 
-def insert (set : CheckerExprPairSet) (left right : Expr) : CheckerExprPairSet :=
-  { entries := Std.HashMap.insert set.entries (CheckerExprPairKey.mk left right) () }
+def containsInBucket
+    (left right : Expr) : List (Prod Expr Expr) → Bool
+  | [] => false
+  | entry :: rest =>
+      if pairEq left right entry then
+        true
+      else
+        containsInBucket left right rest
+
+def contains
+    (set : CheckerExprPairSet)
+    (left right : Expr) : Bool :=
+  let key :=
+    checkerMixBucket 107
+      ((checkerExprBucketHash left +
+        checkerExprBucketHash right) % checkerCacheBucketCount)
+  if set.buckets.size == checkerCacheBucketCount then
+    match set.buckets[key]? with
+    | some values => containsInBucket left right values
+    | none => false
+  else
+    false
+
+def insert
+    (set : CheckerExprPairSet)
+    (left right : Expr) : CheckerExprPairSet :=
+  if contains set left right then
+    set
+  else
+    let buckets :=
+      if set.buckets.size == checkerCacheBucketCount then
+        set.buckets
+      else
+        Array.replicate checkerCacheBucketCount []
+    let key :=
+      checkerMixBucket 107
+        ((checkerExprBucketHash left +
+          checkerExprBucketHash right) % checkerCacheBucketCount)
+    match buckets[key]? with
+    | some values =>
+        { buckets := buckets.set! key (Prod.mk left right :: values) }
+    | none =>
+        { buckets := buckets }
 
 end CheckerExprPairSet
 
 /--
-Pure declaration-scoped counterpart of final Lean 4.34 `type_checker::state`.
+Pure declaration-scoped counterpart of final Lean 4.34 type_checker::state.
 No cache in this structure is valid across an environment mutation.
 -/
 structure CheckerState where

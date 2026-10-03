@@ -52,20 +52,25 @@ jobs:
           set -euo pipefail
           node check-psc1-source.mjs --all-portable
 
-      - name: Build portable foundation and compiler
+      - name: Build proven PSC1 compiler
         run: |
           set -euo pipefail
-          lake build PsKernelSelfHost psc1 psc1_kernel_selfhost_foundation_tests
-
-      - name: Differential-test portable foundation against reference
-        run: |
-          set -euo pipefail
-          lake exe psc1_kernel_selfhost_foundation_tests
+          lake build psc1
 
       - name: PSC1-check all portable kernel modules
         run: |
           set -euo pipefail
           node scripts/psc1kernel-port-batch-check.mjs
+
+      - name: Build portable kernel and differential tests
+        run: |
+          set -euo pipefail
+          lake build PsKernelSelfHost psc1_kernel_selfhost_foundation_tests
+
+      - name: Differential-test portable foundation against reference
+        run: |
+          set -euo pipefail
+          lake exe psc1_kernel_selfhost_foundation_tests
 
       - name: Require canonical ProofScript translation
         run: |

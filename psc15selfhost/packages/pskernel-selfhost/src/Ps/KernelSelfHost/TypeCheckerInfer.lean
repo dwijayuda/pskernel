@@ -15,7 +15,6 @@ def psKernelCacheInferResult
   if inferOnly then
     let cache :=
       psKernelExprMapInsert
-        PsKernelExpr
         state.inferOnly
         expr
         result;
@@ -25,7 +24,6 @@ def psKernelCacheInferResult
   else
     let cache :=
       psKernelExprMapInsert
-        PsKernelExpr
         state.checkedInfer
         expr
         result;
@@ -259,7 +257,6 @@ def psKernelInferCoreWithFuel
             state.checkedInfer;
         match
             psKernelExprMapGet
-              PsKernelExpr
               cache
               expr with
         | Option.some cached =>

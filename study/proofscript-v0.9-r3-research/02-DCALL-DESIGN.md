@@ -306,4 +306,4 @@ Proposed diagnostics:
 5. interactions with <code>do</code>, tactics, quotations, macros, defaults, named arguments, and partial application;
 6. TypeScript-developer comprehension experiment.
 
-Current status: **accepted r3 design rule**. Exact normative grammar is in `17-R3-GRAMMAR-AND-FEATURE-REGISTRY.md`. No production parser is claimed.
+Current status: **accepted r3 design rule**. Exact normative grammar is in `R3-GRAMMAR-AND-FEATURE-REGISTRY.md`. No production parser is claimed.

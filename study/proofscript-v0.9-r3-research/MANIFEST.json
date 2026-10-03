@@ -106,7 +106,8 @@
     "semanticPin": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
     "includesPsc2CompilerCoverageMatrix": true,
     "includesBoundedLeanCompatibilityProfile": true,
-    "fullLeanSourceCompatibilityClaim": false
+    "fullLeanSourceCompatibilityClaim": false,
+    "distinguishesCompilerCoreFromDistribution": true
   },
   "compilerProfiles": {
     "requiredFirstCompiler": "psc2-compiler-v1",
@@ -117,6 +118,16 @@
       "CompilerGen1",
       "CompilerGen2",
       "CompilerGen3"
+    ],
+    "standardDistribution": "psc2-standard-v1",
+    "postCompilerPlatformSequence": [
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6",
+      "P7"
     ]
   },
   "featureOwnership": [

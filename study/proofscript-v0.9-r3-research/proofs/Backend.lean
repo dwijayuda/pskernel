@@ -72,3 +72,5 @@ theorem emitted_bytes_bound (e : RExpr) :
   exact (emit e).evidence
 
 end ProofScript.R3.Backend
+#print axioms ProofScript.R3.Backend.lower_preserves_eval
+#print axioms ProofScript.R3.Backend.emitted_bytes_bound

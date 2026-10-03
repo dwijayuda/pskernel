@@ -44,6 +44,22 @@
       "target": "optional Unit binder defaulting to Unit.unit"
     },
     {
+      "id": "D-DECL-BODY-BRACE-R3",
+      "class": "surface",
+      "category": "definition-body",
+      "status": "current",
+      "scope": [
+        "def",
+        "const",
+        "function"
+      ],
+      "target": "single PSTerm body with identical meaning to unbraced := PSTerm",
+      "grammar": ":= { PSTerm }",
+      "statementBlock": false,
+      "implicitReturn": false,
+      "preservesExistingBracedTermOwnership": true
+    },
+    {
       "id": "D-EXPLICIT-PARAMS",
       "class": "surface",
       "category": "binder-list",

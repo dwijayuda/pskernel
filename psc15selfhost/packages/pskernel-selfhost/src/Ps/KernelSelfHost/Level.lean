@@ -9,44 +9,60 @@ inductive PsKernelLevel where
   | mvar (name : PsKernelName)
 
 def psKernelLevelEq
-    (left : PsKernelLevel)
-    (right : PsKernelLevel) : Bool :=
+    (left : PsKernelLevel) :
+    PsKernelLevel -> Bool :=
   match left with
   | PsKernelLevel.zero =>
-      match right with
-      | PsKernelLevel.zero => true
-      | _ => false
+      fun (right : PsKernelLevel) =>
+        match right with
+        | PsKernelLevel.zero => true
+        | _ => false
   | PsKernelLevel.succ leftValue =>
-      match right with
-      | PsKernelLevel.succ rightValue =>
-          psKernelLevelEq leftValue rightValue
-      | _ => false
+      let smaller : PsKernelLevel -> Bool :=
+        psKernelLevelEq leftValue;
+      fun (right : PsKernelLevel) =>
+        match right with
+        | PsKernelLevel.succ rightValue =>
+            smaller rightValue
+        | _ => false
   | PsKernelLevel.max leftA leftB =>
-      match right with
-      | PsKernelLevel.max rightA rightB =>
-          if psKernelLevelEq leftA rightA then
-            psKernelLevelEq leftB rightB
-          else
-            false
-      | _ => false
+      let compareLeft : PsKernelLevel -> Bool :=
+        psKernelLevelEq leftA;
+      let compareRight : PsKernelLevel -> Bool :=
+        psKernelLevelEq leftB;
+      fun (right : PsKernelLevel) =>
+        match right with
+        | PsKernelLevel.max rightA rightB =>
+            if compareLeft rightA then
+              compareRight rightB
+            else
+              false
+        | _ => false
   | PsKernelLevel.imax leftA leftB =>
-      match right with
-      | PsKernelLevel.imax rightA rightB =>
-          if psKernelLevelEq leftA rightA then
-            psKernelLevelEq leftB rightB
-          else
-            false
-      | _ => false
+      let compareLeft : PsKernelLevel -> Bool :=
+        psKernelLevelEq leftA;
+      let compareRight : PsKernelLevel -> Bool :=
+        psKernelLevelEq leftB;
+      fun (right : PsKernelLevel) =>
+        match right with
+        | PsKernelLevel.imax rightA rightB =>
+            if compareLeft rightA then
+              compareRight rightB
+            else
+              false
+        | _ => false
   | PsKernelLevel.param leftName =>
-      match right with
-      | PsKernelLevel.param rightName =>
-          psKernelNameEq leftName rightName
-      | _ => false
+      fun (right : PsKernelLevel) =>
+        match right with
+        | PsKernelLevel.param rightName =>
+            psKernelNameEq leftName rightName
+        | _ => false
   | PsKernelLevel.mvar leftName =>
-      match right with
-      | PsKernelLevel.mvar rightName =>
-          psKernelNameEq leftName rightName
-      | _ => false
+      fun (right : PsKernelLevel) =>
+        match right with
+        | PsKernelLevel.mvar rightName =>
+            psKernelNameEq leftName rightName
+        | _ => false
 
 def psKernelLevelIsZero
     (level : PsKernelLevel) : Bool :=

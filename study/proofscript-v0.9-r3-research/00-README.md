@@ -7,15 +7,17 @@ Semantic pin: Lean 4.34.0, commit <code>293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
 
 ## Primary reference for humans and AI/compiler agents
 
-Start with:
+The sole normative ProofScript r3 language/compiler-design document is:
 
 ~~~text
 ProofScript_Language_Reference_v0.9.0_r3.md
 ~~~
 
-That single Markdown document is now **fully standalone**: it embeds the exact r3 authority/delta rules, inheritance matrix, exact grammar, feature and Standard registries, contract/application/interop specifications, semantic-bundle and InterfaceIR schemas, pre-stable evidence gates, and the complete inherited r2 baseline.
+It is now a **clean standalone specification**. It does not require earlier ProofScript references, revision notes, audits, or companion design documents to determine language meaning.
 
-A human or AI compiler agent does not need to open another ProofScript design document to understand the r3 language/compiler contract. Companion files remain only as convenient machine-readable mirrors, research history, and maintenance views.
+It contains the language surface, grammar/ownership model, type/runtime semantics, Standard/Extensible profiles, contracts, application model, InterfaceIR/npm boundary, compiler pipeline, admission/erasure/backend obligations, diagnostics, formatting, evidence model, conformance rules, and explicit AI/compiler implementation guidance.
+
+Other files in this directory are research history, focused maintenance views, machine-readable mirrors, or future evidence plans. They MUST NOT override the main reference.
 
 ## Mission
 

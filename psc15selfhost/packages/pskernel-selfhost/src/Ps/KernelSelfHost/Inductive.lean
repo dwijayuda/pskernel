@@ -407,39 +407,56 @@ def psKernelSimpleCheckUniformOccurrence
     expr
     offset
 
+def psKernelSimpleCheckUniformOccurrencesWorker
+    (ctorTypes : List PsKernelExpr) :
+    List PsKernelName ->
+    List PsKernelLevel ->
+    Nat ->
+    Except String Unit :=
+  match ctorTypes with
+  | List.nil =>
+      fun
+        (_declaredNames : List PsKernelName)
+        (_expectedLevels : List PsKernelLevel)
+        (_numParams : Nat) =>
+        Except.ok ()
+  | List.cons head tail =>
+      let smaller :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          Nat ->
+          Except String Unit :=
+        psKernelSimpleCheckUniformOccurrencesWorker tail;
+      fun
+        (declaredNames : List PsKernelName)
+        (expectedLevels : List PsKernelLevel)
+        (numParams : Nat) =>
+        match
+            psKernelSimpleCheckUniformOccurrence
+              declaredNames
+              expectedLevels
+              numParams
+              head
+              0 with
+        | Except.error error =>
+            Except.error error
+        | Except.ok _ =>
+            smaller
+              declaredNames
+              expectedLevels
+              numParams
+
 def psKernelSimpleCheckUniformOccurrences
     (declaredNames : List PsKernelName)
     (levelParams : List PsKernelName)
     (numParams : Nat)
     (ctorTypes : List PsKernelExpr) :
     Except String Unit :=
-  let expectedLevels :=
-    psKernelLevelParamsToLevels levelParams;
-  let worker :=
-    fun
-      (values : List PsKernelExpr) =>
-      values;
-  match worker ctorTypes with
-  | List.nil =>
-      Except.ok ()
-  | List.cons head tail =>
-      match
-          psKernelSimpleCheckUniformOccurrence
-            declaredNames
-            expectedLevels
-            numParams
-            head
-            0 with
-      | Except.error error =>
-          Except.error error
-      | Except.ok _ =>
-          let recResult :=
-            psKernelSimpleCheckUniformOccurrences
-              declaredNames
-              levelParams
-              numParams
-              tail;
-          recResult
+  psKernelSimpleCheckUniformOccurrencesWorker
+    ctorTypes
+    declaredNames
+    (psKernelLevelParamsToLevels levelParams)
+    numParams
 
 def psKernelExprContainsConst
     (target : PsKernelName)

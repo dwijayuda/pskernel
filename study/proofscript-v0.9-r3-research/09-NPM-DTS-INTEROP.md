@@ -37,21 +37,27 @@ A d.ts declaration is not runtime validation and not proof that the package impl
 
 The format records not merely a package name but the exact resolved runtime/type surface:
 
-- TypeScript version;
+- TypeScript version/profile;
 - `moduleResolution` mode (`node16`, `nodenext`, or `bundler`);
+- resolver profile `psc-node-exports-v1`;
+- package install/source identity and optional lockfile SHA-256;
 - custom conditions;
 - ordered effective conditions;
 - package name/version;
 - package.json SHA-256;
 - requested export subpath;
-- selected runtime entry and module format;
-- selected declaration entry;
+- ordered runtime-condition trace;
+- selected runtime entry, module format, and runtime-entry SHA-256;
+- ordered declaration/type-condition trace;
+- selected declaration entry and declaration-entry SHA-256;
 - declaration-file SHA-256 values;
 - target runtime/platform.
 
 This is required because Node conditional exports and TypeScript type resolution can choose different branches based on ordered conditions, resolver mode, `types` conditions, versioned `types@` conditions, and custom conditions.
 
 The importer rejects if it cannot bind the selected declaration surface and runtime entry to the same requested package export identity.
+
+A suspicious mismatch between the runtime conditional branch and type/declaration conditional branch rejects as `PS_DTS_RUNTIME_TYPE_BRANCH_MISMATCH` unless a versioned binding policy explicitly relates them.
 
 Core type forms and declaration tags are defined by the JSON Schema and the support matrix in `INTERFACEIR-v1.md`.
 
@@ -164,6 +170,8 @@ Each imported symbol is one of:
 - PS_DTS_UNSUPPORTED_TYPE_OPERATOR
 - PS_DTS_AMBIGUOUS_OVERLOAD
 - PS_DTS_EXPORT_CONDITION_MISMATCH
+- PS_DTS_RUNTIME_TYPE_BRANCH_MISMATCH
+- PS_DTS_RESOLUTION_AMBIGUOUS
 - PS_DTS_PRESENCE_POLICY_REQUIRED
 - PS_DTS_RECEIVER_REQUIRED
 - PS_DTS_RUNTIME_VALIDATION_REQUIRED

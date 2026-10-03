@@ -9,7 +9,7 @@
     "profile": "lean4.34-core",
     "status": "version"
   },
-  "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+  "sourceManifestSha256": "cfcf3dbf7c8e1908aaf644398ecffc1806b56c5049464a73686877dc37700183",
   "harnessSha256": "bdc15bb543fc7d22709563df20222496316005c79f7ee83cc18370c7fa6f2e4b",
   "cases": 671,
   "matched": 671,

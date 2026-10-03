@@ -1,6 +1,6 @@
 # PSC2 minimal self-host status
 
-Status (2026-10-03): compiler/reference replay parity is recorded on the preserved 75-module checkpoint. The default generated-owned kernel is checker.10; it admits the exact three-entry unit/PsSourcePos/PsSourceSpan prefix and checks closed-record projections and iota. Complete decoding now rejects PsTokenKind at index 14; the independent PsLexCursor prefix still rejects missing prelude dependencies at index 3. Full owned joint self-hosting and release remain unachieved. See `docs/continuity/OWNED_RECORD_ELIMINATION_2026-10-03.md` for current evidence and blockers.
+Status (2026-10-03): the default generated-owned kernel is checker.11 and checks nullary enumerations with dependent recursor typing and reduction. The exact PsTokenKind declaration passes in isolation. Full decoding rejects PsLexError at index 17; PsLexCursor independently rejects missing List/Char dependencies at index 3. Full owned-checked compiler/kernel pair, joint self-hosting and release remain unachieved. See `docs/continuity/OWNED_ENUMERATIONS_2026-10-03.md` for current evidence.
 
 ## Current bootstrap shape
 

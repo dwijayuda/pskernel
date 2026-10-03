@@ -250,7 +250,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 6335,
+    "steps": 6402,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -512,7 +512,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 7370,
+    "steps": 7437,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -856,7 +856,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 7252,
+    "steps": 7410,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -1197,7 +1197,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 8287,
+    "steps": 8445,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -2060,7 +2060,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 7157,
+    "steps": 7284,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -2351,7 +2351,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 8192,
+    "steps": 8319,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -2746,7 +2746,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 8355,
+    "steps": 8573,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -3138,7 +3138,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 9390,
+    "steps": 9608,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -3432,7 +3432,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 8688,
+    "steps": 8815,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -3723,7 +3723,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 9723,
+    "steps": 9850,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -4118,7 +4118,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 9882,
+    "steps": 10100,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -4510,7 +4510,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 10917,
+    "steps": 11135,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -5511,7 +5511,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 8043,
+    "steps": 8231,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -5831,7 +5831,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 9078,
+    "steps": 9266,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -6277,7 +6277,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 9525,
+    "steps": 9804,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -6720,7 +6720,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 10560,
+    "steps": 10839,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -7043,7 +7043,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 9574,
+    "steps": 9762,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -7363,7 +7363,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 10609,
+    "steps": 10797,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -7809,7 +7809,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 11053,
+    "steps": 11332,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -8252,7 +8252,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 12088,
+    "steps": 12367,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -8575,7 +8575,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 11105,
+    "steps": 11293,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -8895,7 +8895,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 12140,
+    "steps": 12328,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -9341,7 +9341,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 12579,
+    "steps": 12858,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -9784,7 +9784,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 13614,
+    "steps": 13893,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -10923,7 +10923,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 8936,
+    "steps": 9186,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -11272,7 +11272,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 9971,
+    "steps": 10221,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -11769,7 +11769,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 10705,
+    "steps": 11046,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -12263,7 +12263,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 11740,
+    "steps": 12081,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -12615,7 +12615,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 10467,
+    "steps": 10717,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -12964,7 +12964,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 11502,
+    "steps": 11752,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -13461,7 +13461,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 12235,
+    "steps": 12576,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -13955,7 +13955,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 13270,
+    "steps": 13611,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -14307,7 +14307,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 11998,
+    "steps": 12248,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -14656,7 +14656,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 13033,
+    "steps": 13283,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -15153,7 +15153,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 13762,
+    "steps": 14103,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -15647,7 +15647,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 14797,
+    "steps": 15138,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -15999,7 +15999,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 13529,
+    "steps": 13779,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -16348,7 +16348,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 14564,
+    "steps": 14814,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -16845,7 +16845,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 15287,
+    "steps": 15628,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -17339,7 +17339,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 16322,
+    "steps": 16663,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -18645,7 +18645,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 10629,
+    "steps": 11006,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -19052,7 +19052,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 11664,
+    "steps": 12041,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -19651,7 +19651,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 12982,
+    "steps": 13450,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -20247,7 +20247,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 14017,
+    "steps": 14485,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -20657,7 +20657,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 12160,
+    "steps": 12537,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -21064,7 +21064,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 13195,
+    "steps": 13572,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -21663,7 +21663,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 14513,
+    "steps": 14981,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -22259,7 +22259,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 15548,
+    "steps": 16016,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -22669,7 +22669,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 13691,
+    "steps": 14068,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -23076,7 +23076,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 14726,
+    "steps": 15103,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -23675,7 +23675,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 16041,
+    "steps": 16509,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -24271,7 +24271,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 17076,
+    "steps": 17544,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -24681,7 +24681,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 15222,
+    "steps": 15599,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -25088,7 +25088,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 16257,
+    "steps": 16634,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -25687,7 +25687,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 17571,
+    "steps": 18039,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -26283,7 +26283,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 18606,
+    "steps": 19074,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -26693,7 +26693,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 16753,
+    "steps": 17130,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -27100,7 +27100,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 17788,
+    "steps": 18165,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -27699,7 +27699,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 19096,
+    "steps": 19564,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -28295,7 +28295,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 20131,
+    "steps": 20599,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -28705,7 +28705,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 18284,
+    "steps": 18661,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -29112,7 +29112,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 19319,
+    "steps": 19696,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -29711,7 +29711,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 20619,
+    "steps": 21087,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -30307,7 +30307,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 21654,
+    "steps": 22122,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -31889,7 +31889,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 12350,
+    "steps": 12858,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -32354,7 +32354,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 13385,
+    "steps": 13893,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -33055,7 +33055,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 15299,
+    "steps": 15898,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -33753,7 +33753,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 16334,
+    "steps": 16933,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -34221,7 +34221,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 13881,
+    "steps": 14389,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -34686,7 +34686,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 14916,
+    "steps": 15424,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -35387,7 +35387,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 16830,
+    "steps": 17429,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -36085,7 +36085,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 17865,
+    "steps": 18464,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -36553,7 +36553,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 15412,
+    "steps": 15920,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -37018,7 +37018,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 16447,
+    "steps": 16955,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -37719,7 +37719,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 18361,
+    "steps": 18960,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -38417,7 +38417,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 19396,
+    "steps": 19995,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -38885,7 +38885,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 16943,
+    "steps": 17451,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -39350,7 +39350,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 17978,
+    "steps": 18486,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -40051,7 +40051,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 19892,
+    "steps": 20491,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -40749,7 +40749,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 20927,
+    "steps": 21526,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -41217,7 +41217,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 18474,
+    "steps": 18982,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -41682,7 +41682,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 19509,
+    "steps": 20017,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -42383,7 +42383,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 21418,
+    "steps": 22017,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -43081,7 +43081,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 22453,
+    "steps": 23052,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -43549,7 +43549,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 20005,
+    "steps": 20513,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -44014,7 +44014,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 21040,
+    "steps": 21548,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -44715,7 +44715,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 22948,
+    "steps": 23547,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -45413,7 +45413,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 23983,
+    "steps": 24582,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -45881,7 +45881,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 21536,
+    "steps": 22044,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -46346,7 +46346,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 22571,
+    "steps": 23079,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -47047,7 +47047,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 24471,
+    "steps": 25070,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -47745,7 +47745,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 25506,
+    "steps": 26105,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -48213,7 +48213,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 23067,
+    "steps": 23575,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -48678,7 +48678,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 24102,
+    "steps": 24610,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -49379,7 +49379,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 25992,
+    "steps": 26591,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -50077,7 +50077,7 @@
     "expected": false,
     "ours": "rejected",
     "ourError": "typeMismatch",
-    "steps": 27027,
+    "steps": 27626,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -52320,7 +52320,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 20503,
+    "steps": 20802,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -52644,7 +52644,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 23623,
+    "steps": 23756,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -52957,7 +52957,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 25520,
+    "steps": 25587,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -53277,7 +53277,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 16238,
+    "steps": 16305,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -53593,7 +53593,7 @@
     "expected": true,
     "ours": "admitted",
     "ourError": null,
-    "steps": 23396,
+    "steps": 23523,
     "native": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",

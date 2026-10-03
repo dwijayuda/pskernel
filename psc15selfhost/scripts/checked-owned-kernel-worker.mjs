@@ -92,15 +92,20 @@ try {
       if (d.np !== 0 || !Array.isArray(d.ts) || d.ts.length !== 1) fail('unsupported-inductive-family');
       const family = d.ts[0];
       shape(family, ['n','t','cs'], 0);
-      if (family.t?.k !== 'sort' || !Array.isArray(family.cs) || (family.cs.length !== 1 && family.cs.length !== 2)) fail('unsupported-inductive-shape');
+      if (family.t?.k !== 'sort' || !Array.isArray(family.cs) || family.cs.length < 1) fail('unsupported-inductive-shape');
       shape(family.t, ['k','l'], 0);
       for (const ctor of family.cs) shape(ctor, ['n','t'], 0);
-      if (family.cs.length === 1) {
+      if (family.cs.length >= 2 && family.cs.every(ctor => ctor.t?.k === 'const')) {
+        entries.push(k.PsKernelJointEntry.enumInductive(k.PsKernelEnumDeclaration.declaration(
+          name(family.n), list(d.lp.map(item => name(item))), level(family.t.l),
+          list(family.cs.map(ctor => k.PsKernelEnumConstructor.ctor(name(ctor.n), expr(ctor.t)))))));
+      } else if (family.cs.length === 1) {
         const ctor = family.cs[0];
         const route = ctor.t?.k === 'forall' ? 'recordInductive' : 'unitInductive';
         entries.push(k.PsKernelJointEntry[route](k.PsKernelUnitDeclaration.declaration(
           name(family.n), list(d.lp.map(item => name(item))), level(family.t.l), name(ctor.n), expr(ctor.t))));
       } else {
+        if (family.cs.length !== 2) fail('unsupported-inductive-shape');
         if (d.lp.length !== 0) fail('unsupported-inductive-parameters');
         const [zero, succ] = family.cs;
         entries.push(k.PsKernelJointEntry.natInductive(k.PsKernelNatDeclaration.declaration(

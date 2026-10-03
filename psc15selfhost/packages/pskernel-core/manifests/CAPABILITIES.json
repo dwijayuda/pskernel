@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "package": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.10",
+  "version": "0.1.0-checker.11",
   "status": "experimental-term-checker",
   "canCheckProofs": false,
   "authoritative": false,
@@ -35,7 +35,8 @@
     "closed-monomorphic-nonrecursive-record-constructor-field-admission",
     "source-derived-record-field-metadata-and-dependent-eliminator-typing",
     "validated-closed-record-projection-typing-and-reduction",
-    "bounded-closed-record-iota-and-neutral-projection-conversion"
+    "bounded-closed-record-iota-and-neutral-projection-conversion",
+    "monomorphic-nullary-enumerations-with-checked-dependent-recursor-and-iota"
   ],
   "boundedEvidence": [
     "BUILD.json",
@@ -49,7 +50,8 @@
     "NAT_DIFFERENTIAL.json",
     "LITERAL_DIFFERENTIAL.json",
     "RECORD_DIFFERENTIAL.json",
-    "RECORD_ELIMINATION_DIFFERENTIAL.json"
+    "RECORD_ELIMINATION_DIFFERENTIAL.json",
+    "ENUM_DIFFERENTIAL.json"
   ],
   "releaseGates": {
     "term-checking": {
@@ -62,7 +64,7 @@
     },
     "inductive-admission": {
       "status": "partial",
-      "evidence": "UNIT_DIFFERENTIAL.json; NAT_DIFFERENTIAL.json; RECORD_DIFFERENTIAL.json; bounded fragments only"
+      "evidence": "UNIT_DIFFERENTIAL.json; NAT_DIFFERENTIAL.json; RECORD_DIFFERENTIAL.json; bounded fragments only; ENUM_DIFFERENTIAL.json; enumerations only"
     },
     "quotient-admission": {
       "status": "pending",

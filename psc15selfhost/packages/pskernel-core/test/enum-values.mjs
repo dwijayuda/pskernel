@@ -1,0 +1,16 @@
+// Test transport and data construction only; generated source makes all judgments.
+import {k,list,expression,drive} from './checker-values.mjs';
+import {runtimeName,runtimeLevel} from './fixture-values.mjs';
+import {N,Z,S,U,B,C,app,pi,lam,member,literal,ownedEntry as previousEntry} from './record-values.mjs';
+export {N,Z,S,U,B,C,app,pi,lam,member,literal};
+export const enumeration=(name='Enum',count=2,overrides={})=>({kind:'enum',name:Array.isArray(name)?name:N(name),parameters:[],level:S(Z),constructors:Array.from({length:count},(_,i)=>({name:member(name,'c'+i),type:C(name)})),...overrides});
+export const ownedEntry=e=>e.kind==='enum'?k.PsKernelJointEntry.enumInductive(k.PsKernelEnumDeclaration.declaration(runtimeName(k,e.name),list(e.parameters.map(n=>runtimeName(k,n))),runtimeLevel(k,e.level),list(e.constructors.map(c=>k.PsKernelEnumConstructor.ctor(runtimeName(k,c.name),expression(c.type)))))):previousEntry(e);
+export const bootstrap=(entries,budget=1000000)=>drive(k.psKernelBootstrapStep,k.psKernelBootstrapStart(list(entries.map(ownedEntry))),budget);
+export const joint=(entries,budget=1000000)=>drive(k.psKernelJointStep,k.psKernelJointStart(list(entries.map(ownedEntry))),budget);
+export const eliminate=(e,which,minors=e.constructors.map((_,i)=>literal(i+1)),motive=lam('major',C(e.name),C('Nat')),universe=S(Z))=>app(C(member(e.name,'rec'),[universe]),motive,...minors,C(e.constructors[which].name));
+export const resultWitness=(term,n)=>({type:pi('F',pi('n',C('Nat'),U(S(Z))),pi('h',app(B(0),literal(n)),app(B(1),term))),value:lam('F',pi('n',C('Nat'),U(S(Z))),lam('h',app(B(0),literal(n)),B(0)))});
+export const wireName=x=>x[0]==='anonymous'?{k:'a'}:{k:x[0]==='str'?'s':'n',p:wireName(x[1]),v:x[2]};
+export const wireLevel=x=>x[0]==='zero'?{k:'z'}:x[0]==='succ'?{k:'s',o:wireLevel(x[1])}:x[0]==='param'?{k:'p',n:wireName(x[1])}:{k:x[0],l:wireLevel(x[1]),r:wireLevel(x[2])};
+export function wireExpr(x){switch(x[0]){case'b':return{k:'b',i:Number(x[1])};case'sort':return{k:'sort',l:wireLevel(x[1])};case'const':return{k:'const',n:wireName(x[1]),ls:x[2].map(wireLevel)};case'nat':return{k:'nat',v:x[1]};case'app':return{k:'app',f:wireExpr(x[1]),a:wireExpr(x[2])};case'proj':return{k:'proj',n:wireName(x[1]),i:Number(x[2]),e:wireExpr(x[3])};case'let':return{k:'let',n:wireName(x[1]),t:wireExpr(x[2]),v:wireExpr(x[3]),b:wireExpr(x[4])};case'lam':case'pi':return{k:x[0]==='lam'?'lam':'forall',n:wireName(x[1]),bi:'default',t:wireExpr(x[2]),b:wireExpr(x[3])};default:throw Error('UNSUPPORTED_TEST_EXPRESSION '+x[0]);}}
+export const wireEntry=e=>e.kind==='enum'?{kind:'inductive',declaration:{lp:e.parameters.map(wireName),np:0,ts:[{n:wireName(e.name),t:wireExpr(U(e.level)),cs:e.constructors.map(c=>({n:wireName(c.name),t:wireExpr(c.type)}))}]}}:e.kind==='record'?{kind:'inductive',declaration:{lp:e.parameters.map(wireName),np:0,ts:[{n:wireName(e.name),t:wireExpr(U(e.level)),cs:[{n:wireName(e.ctorName),t:wireExpr(e.ctorType)}]}]}}:{kind:'constant',declaration:{k:'definition',n:wireName(e.name),lp:e.parameters.map(wireName),t:wireExpr(e.type),v:wireExpr(e.value),s:'safe',h:{k:'regular',h:'1'}}};
+export const wireBatch=entries=>JSON.stringify({format:'proofscript-checked-admissions',version:2,admissions:entries.map(wireEntry)});

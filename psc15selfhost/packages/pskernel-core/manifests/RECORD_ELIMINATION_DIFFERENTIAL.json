@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "Closed-record projection typing, bounds, substitution and iota with dependent computed-result witnesses; not general inductive completeness",
-  "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+  "sourceManifestSha256": "cfcf3dbf7c8e1908aaf644398ecffc1806b56c5049464a73686877dc37700183",
   "harnessSha256": "52266f3ee24f1313b48f4e0a47f97d8de9caa51f482f2d772e5309652369cbe1",
   "provider": {
     "protocol": "pskernel-lean/1",
@@ -23,5 +23,5 @@
     "Prop or higher-universe families"
   ],
   "recordsPath": "dist/evidence/record-elimination-differential-records.json",
-  "recordsSha256": "a44651d2fbef076a9386c62e2a03d847fd46f3b5fdc86611a07a134c8904d622"
+  "recordsSha256": "717208eb42c91b24c0628e2ec2e789ed52a7167bb9cf3b99b918700496dd220c"
 }

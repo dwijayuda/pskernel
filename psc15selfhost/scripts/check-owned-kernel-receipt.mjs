@@ -7,7 +7,7 @@ import { defaultCheckedKernel } from './checked-kernel-provider.mjs';
 import '../packages/pskernel-core/scripts/verify-evidence.mjs';
 
 const manifest = JSON.parse(await readFile(new URL('../packages/pskernel-core/package.json', import.meta.url), 'utf8'));
-assert.equal(manifest.version, '0.1.0-checker.10');
+assert.equal(manifest.version, '0.1.0-checker.11');
 assert.equal(manifest.private, true);
 assert.equal(manifest.proofscript.authoritative, false);
 assert.equal(manifest.proofscript.bootstrap, true);
@@ -46,14 +46,15 @@ assert(joint.includes('psKernelAdmissionStep current'));
 assert(joint.includes('psKernelUnitStep current'));
 assert(joint.includes('psKernelNatAdmissionStep current'));
 assert(joint.includes('psKernelRecordStep current'));
-assert(!/psKernel(?:Admission|Unit|NatAdmission|Record)Run/u.test(joint));
+assert(joint.includes('psKernelEnumStep current'));
+assert(!/psKernel(?:Admission|Unit|NatAdmission|Record|Enum)Run/u.test(joint));
 const unit = await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/UnitInductive.lean', import.meta.url), 'utf8');
 for (const transition of ['psKernelTypeStep current', 'psKernelConversionStep current', 'psKernelLookupStep current', 'psKernelOrderStep current']) assert(unit.includes(transition));
 assert(!/psKernel(?:Type|Conversion|Lookup|Order)Run/u.test(unit));
 const worker = await readFile(new URL('./checked-owned-kernel-worker.mjs', import.meta.url), 'utf8');
 assert(worker.includes('k.psKernelBootstrapStart(list(entries))'));
 assert(worker.includes('k.psKernelBootstrapStep(state)'));
-assert(!/psKernel(?:Unit|Nat|Record)RecursorType/u.test(worker), 'host must not synthesize semantic recursor types');
+assert(!/psKernel(?:Unit|Nat|Record|Enum)RecursorType/u.test(worker), 'host must not synthesize semantic recursor types');
 const bootstrap = await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/Bootstrap.lean', import.meta.url), 'utf8');
 assert(bootstrap.includes('psKernelNatAdmissionStart PsKernelList.nil psKernelBootstrapNat'));
 assert(bootstrap.includes('psKernelNatAdmissionStep current'));
@@ -90,4 +91,11 @@ assert(worker.includes('E.proj(name(value.n, depth + 1), natural(value.i), sub(v
 assert(!/psKernel(?:Type|Lookup|Order|Binding|Conversion|Reduce)Run/u.test(reduction.slice(0,reduction.indexOf('def psKernelReduceRun'))));
 assert(!/psKernel(?:Type|Lookup|Order|Binding|Conversion|Reduce)Run/u.test(typing.slice(0,typing.indexOf('def psKernelTypeRun'))));
 
+const enumeration=await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/EnumInductive.lean',import.meta.url),'utf8');
+assert(enumeration.includes('psKernelTypeStep typing'));
+assert(enumeration.includes('psKernelLookupStep lookup'));
+assert(enumeration.includes('psKernelOrderStep work'));
+assert(!/psKernel(?:Type|Lookup|Order|Conversion|Reduce)Run/u.test(enumeration));
+assert(reduction.includes('PsKernelReduceTask.enumMinors'));
+assert(reduction.includes('PsKernelDefinition.enumRecursor'));
 console.log('PSC2_OWNED_KERNEL_RECEIPT: PASS (checker identities, retired legacy routing, owned bootstrap closure and default; release gates remain closed)');

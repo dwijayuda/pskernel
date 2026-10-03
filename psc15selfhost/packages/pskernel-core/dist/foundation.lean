@@ -1424,6 +1424,7 @@ inductive PsKernelDefinition where
   | constant (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
   | unitRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (ctorName : PsKernelName)
 
+  | enumRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (constructors : PsKernelList PsKernelName)
   | recordFamily (name ctorName : PsKernelName) (fields : PsKernelList PsKernelExpr)
   | recordRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
       (ctorName : PsKernelName) (fields : PsKernelList PsKernelExpr)
@@ -1436,6 +1437,7 @@ def psKernelDefinitionName (entry : PsKernelDefinition) : PsKernelName :=
   | PsKernelDefinition.polymorphic name unusedParameters unusedType unusedValue => name
   | PsKernelDefinition.constant name parameters type => name
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => name
+  | PsKernelDefinition.enumRecursor name unusedParameters unusedType unusedConstructors => name
   | PsKernelDefinition.recordFamily name unusedCtor unusedFields => name
   | PsKernelDefinition.recordRecursor name unusedParameters unusedType unusedCtor unusedFields => name
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => name
@@ -1447,6 +1449,7 @@ def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList PsK
   | PsKernelDefinition.polymorphic unusedName parameters unusedType unusedValue => parameters
   | PsKernelDefinition.constant name parameters type => parameters
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => parameters
+  | PsKernelDefinition.enumRecursor unusedName parameters unusedType unusedConstructors => parameters
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelList.nil
   | PsKernelDefinition.recordRecursor unusedName parameters unusedType unusedCtor unusedFields => parameters
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelList.nil
@@ -1458,6 +1461,7 @@ def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr :=
   | PsKernelDefinition.polymorphic unusedName unusedParameters type unusedValue => type
   | PsKernelDefinition.constant name parameters type => type
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => type
+  | PsKernelDefinition.enumRecursor unusedName unusedParameters type unusedConstructors => type
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
   | PsKernelDefinition.recordRecursor unusedName unusedParameters type unusedCtor unusedFields => type
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
@@ -1470,6 +1474,7 @@ def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody
   | PsKernelDefinition.constant unusedName unusedParameters unusedType => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.unitRecursor unusedName unusedParameters unusedType unusedConstructor => PsKernelDefinitionBody.opaque
 
+  | PsKernelDefinition.enumRecursor unusedName unusedParameters unusedType unusedConstructors => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.recordRecursor unusedName unusedParameters unusedType unusedCtor unusedFields => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.natFamily unusedName unusedZero unusedSucc => PsKernelDefinitionBody.opaque
@@ -1583,6 +1588,9 @@ All nested substitutions and lookups consume the caller's transition budget. -/
 /- Closed record metadata is installed only by RecordInductive admission.
 The field types are closed: projection types need no contextual substitution.
 Record elimination still traverses and validates the full constructor spine. -/
+inductive PsKernelEnumBranch where
+  | branch (name : PsKernelName) (minor : PsKernelExpr)
+
 inductive PsKernelRecordAction where
   | project (family : PsKernelName) (index : PsKernelNatural)
   | eliminate (fn : PsKernelExpr) (minor : PsKernelExpr)
@@ -1593,6 +1601,15 @@ def psKernelRecordNeutral (action : PsKernelRecordAction) (major : PsKernelExpr)
   | PsKernelRecordAction.eliminate fn unusedMinor => PsKernelExpr.app fn major
 
 inductive PsKernelReduceTask where
+  | enumSpine (original cursor : PsKernelExpr) (args : PsKernelList PsKernelExpr)
+  | enumLookup (original : PsKernelExpr) (args : PsKernelList PsKernelExpr)
+      (levels : PsKernelList PsKernelLevel) (state : PsKernelLookupState)
+  | enumMinors (original : PsKernelExpr) (constructors : PsKernelList PsKernelName)
+      (args : PsKernelList PsKernelExpr) (branches : PsKernelList PsKernelEnumBranch)
+  | enumMajor (fn : PsKernelExpr) (branches : PsKernelList PsKernelEnumBranch)
+  | enumFind (fn major : PsKernelExpr) (name : PsKernelName) (branches : PsKernelList PsKernelEnumBranch)
+  | enumName (fn major : PsKernelExpr) (name : PsKernelName) (minor : PsKernelExpr)
+      (remaining : PsKernelList PsKernelEnumBranch) (work : PsKernelList PsKernelOrderTask)
   | projectLookup (family : PsKernelName) (index : PsKernelNatural) (major : PsKernelExpr) (state : PsKernelLookupState)
   | projectBound (family : PsKernelName) (index : PsKernelNatural) (major : PsKernelExpr)
       (ctor : PsKernelName) (fields pending : PsKernelList PsKernelExpr) (cursor : PsKernelNatural)
@@ -1683,6 +1700,12 @@ def psKernelReduceWhnf
       (PsKernelList.cons (PsKernelReduceTask.projectLookup family index major (PsKernelLookupState.search family env)) tasks) values
   | _ => psKernelReducePush env tasks values value
 
+def psKernelReduceEnumApply
+    (env : PsKernelList PsKernelDefinition) (tasks : PsKernelList PsKernelReduceTask)
+    (values : PsKernelList PsKernelExpr) (fn arg : PsKernelExpr) : PsKernelReduceStep :=
+  let original : PsKernelExpr := PsKernelExpr.app fn arg;
+  psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.enumSpine original original PsKernelList.nil) tasks) values
+
 def psKernelReduceNeutralApply
     (env : PsKernelList PsKernelDefinition) (tasks : PsKernelList PsKernelReduceTask)
     (values : PsKernelList PsKernelExpr) (fn arg : PsKernelExpr) : PsKernelReduceStep :=
@@ -1698,10 +1721,10 @@ def psKernelReduceNeutralApply
               | PsKernelExpr.constE name unusedLevels => psKernelReduceNext env
                   (PsKernelList.cons (PsKernelReduceTask.natLookup fn arg unusedMotive minor
                     (PsKernelLookupState.search name env)) tasks) values
-              | _ => psKernelReducePush env tasks values (PsKernelExpr.app fn arg)
-          | _ => psKernelReducePush env tasks values (PsKernelExpr.app fn arg)
-      | _ => psKernelReducePush env tasks values (PsKernelExpr.app fn arg)
-  | _ => psKernelReducePush env tasks values (PsKernelExpr.app fn arg)
+              | _ => psKernelReduceEnumApply env tasks values fn arg
+          | _ => psKernelReduceEnumApply env tasks values fn arg
+      | _ => psKernelReduceEnumApply env tasks values fn arg
+  | _ => psKernelReduceEnumApply env tasks values fn arg
 
 def psKernelReduceValueTask
     (env : PsKernelList PsKernelDefinition) (task : PsKernelReduceTask)
@@ -1710,6 +1733,14 @@ def psKernelReduceValueTask
   | PsKernelList.nil => psKernelReduceReject PsKernelCheckError.invalidState
   | PsKernelList.cons top rest =>
       match task with
+      | PsKernelReduceTask.enumMajor fn branches =>
+          match top with
+          | PsKernelExpr.constE name levels =>
+              match levels with
+              | PsKernelList.nil => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.enumFind fn top name branches) tasks) rest
+              | _ => psKernelReducePush env tasks rest (PsKernelExpr.app fn top)
+          | _ => psKernelReducePush env tasks rest (PsKernelExpr.app fn top)
       | PsKernelReduceTask.recordMajor action ctor fields => psKernelReduceNext env
           (PsKernelList.cons (PsKernelReduceTask.recordSpine action top top ctor fields PsKernelList.nil) tasks) rest
       | PsKernelReduceTask.proj family index => psKernelReducePush env tasks rest (PsKernelExpr.proj family index top)
@@ -1795,6 +1826,70 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
           | _ => psKernelReduceReject PsKernelCheckError.invalidState
       | PsKernelList.cons task rest =>
           match task with
+          | PsKernelReduceTask.enumSpine original cursor args =>
+              match cursor with
+              | PsKernelExpr.app fn arg => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.enumSpine original fn (PsKernelList.cons arg args)) rest) values
+              | PsKernelExpr.constE name levels => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.enumLookup original args levels (PsKernelLookupState.search name env)) rest) values
+              | _ => psKernelReducePush env rest values original
+          | PsKernelReduceTask.enumLookup original args levels current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.enumLookup original args levels next) rest) values
+              | PsKernelLookupStep.found entry =>
+                  match entry with
+                  | PsKernelDefinition.enumRecursor unusedName unusedParameters unusedType constructors =>
+                      match levels with
+                      | PsKernelList.cons unusedLevel tail =>
+                          match tail with
+                          | PsKernelList.nil =>
+                              match args with
+                              | PsKernelList.cons unusedMotive tailArgs => psKernelReduceNext env
+                                  (PsKernelList.cons (PsKernelReduceTask.enumMinors original constructors tailArgs PsKernelList.nil) rest) values
+                              | _ => psKernelReducePush env rest values original
+                          | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
+                      | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
+                  | _ => psKernelReducePush env rest values original
+              | PsKernelLookupStep.missing => psKernelReduceReject PsKernelCheckError.unknownConstant
+              | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.enumMinors original constructors args branches =>
+              match constructors with
+              | PsKernelList.cons ctorName tail =>
+                  match args with
+                  | PsKernelList.cons minor tailArgs => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.enumMinors original tail tailArgs
+                        (PsKernelList.cons (PsKernelEnumBranch.branch ctorName minor) branches)) rest) values
+                  | _ => psKernelReducePush env rest values original
+              | PsKernelList.nil =>
+                  match args with
+                  | PsKernelList.cons major tail =>
+                      match tail with
+                      | PsKernelList.nil =>
+                          match original with
+                          | PsKernelExpr.app fn unusedMajor => psKernelReduceNext env
+                              (PsKernelList.cons (PsKernelReduceTask.whnf major)
+                                (PsKernelList.cons (PsKernelReduceTask.enumMajor fn branches) rest)) values
+                          | _ => psKernelReduceReject PsKernelCheckError.invalidState
+                      | _ => psKernelReducePush env rest values original
+                  | _ => psKernelReducePush env rest values original
+          | PsKernelReduceTask.enumFind fn major name branches =>
+              match branches with
+              | PsKernelList.nil => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+              | PsKernelList.cons branch tail =>
+                  match branch with
+                  | PsKernelEnumBranch.branch ctorName minor => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.enumName fn major name minor tail
+                        (PsKernelList.cons (PsKernelOrderTask.name name ctorName) PsKernelList.nil)) rest) values
+          | PsKernelReduceTask.enumName fn major name minor remaining work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.enumName fn major name minor remaining next) rest) values
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf minor) rest) values
+                  | _ => psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.enumFind fn major name remaining) rest) values
+              | _ => psKernelReduceReject PsKernelCheckError.invalidState
           | PsKernelReduceTask.projectLookup family index major current =>
               match psKernelLookupStep current with
               | PsKernelLookupStep.next next => psKernelReduceNext env
@@ -1876,7 +1971,7 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                   | PsKernelDefinition.natRecursor unusedName unusedParameters unusedType zeroName succName => psKernelReduceNext env
                       (PsKernelList.cons (PsKernelReduceTask.whnf major)
                         (PsKernelList.cons (PsKernelReduceTask.natMajor fn zeroCase succCase zeroName succName) rest)) values
-                  | _ => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+                  | _ => psKernelReduceEnumApply env rest values fn major
               | _ => psKernelReduceReject PsKernelCheckError.invalidState
           | PsKernelReduceTask.natZeroName fn major zeroCase current =>
               match psKernelOrderStep current with
@@ -1917,7 +2012,7 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                   | PsKernelDefinition.unitRecursor unusedName unusedParameters unusedType ctorName => psKernelReduceNext env
                       (PsKernelList.cons (PsKernelReduceTask.whnf major)
                         (PsKernelList.cons (PsKernelReduceTask.unitMajor fn minor ctorName levels) rest)) values
-                  | _ => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+                  | _ => psKernelReduceEnumApply env rest values fn major
               | _ => psKernelReduceReject PsKernelCheckError.invalidState
           | PsKernelReduceTask.unitName fn major minor left right current =>
               match psKernelOrderStep current with
@@ -3195,6 +3290,211 @@ def psKernelRecordRun (fuel : PsKernelFuel) : PsKernelRecordState -> PsKernelAdm
 
 
 
+/- A monomorphic Type-valued family with at least two nullary constructors.
+Every constructor must return exactly the fresh family. Names, constructor
+judgments and the derived dependent eliminator are checked before any environment
+is published. This does not grant parameterized, recursive or arbitrary sum rules.
+All traversal and inference is stepped by the caller's single outer budget. -/
+inductive PsKernelEnumConstructor where
+  | ctor (name : PsKernelName) (type : PsKernelExpr)
+
+inductive PsKernelEnumDeclaration where
+  | declaration (name : PsKernelName) (parameters : PsKernelList PsKernelName)
+      (level : PsKernelLevel) (constructors : PsKernelList PsKernelEnumConstructor)
+
+inductive PsKernelEnumTask where
+  | initial
+  | familyName (state : PsKernelLookupState)
+  | constructors (pending : PsKernelList PsKernelEnumConstructor)
+      (current : PsKernelList PsKernelDefinition) (reversed : PsKernelList PsKernelName) (count : PsKernelNatural)
+  | constructorName (pending : PsKernelList PsKernelEnumConstructor)
+      (current : PsKernelList PsKernelDefinition) (reversed : PsKernelList PsKernelName)
+      (count : PsKernelNatural) (name : PsKernelName) (type : PsKernelExpr) (state : PsKernelLookupState)
+  | constructorResult (pending : PsKernelList PsKernelEnumConstructor)
+      (current : PsKernelList PsKernelDefinition) (reversed : PsKernelList PsKernelName)
+      (count : PsKernelNatural) (name : PsKernelName) (type : PsKernelExpr) (work : PsKernelList PsKernelOrderTask)
+  | constructorType (pending : PsKernelList PsKernelEnumConstructor)
+      (current : PsKernelList PsKernelDefinition) (reversed : PsKernelList PsKernelName)
+      (count : PsKernelNatural) (name : PsKernelName) (type : PsKernelExpr) (state : PsKernelTypeState)
+  | recursorName (current : PsKernelList PsKernelDefinition)
+      (reversed : PsKernelList PsKernelName) (count : PsKernelNatural) (state : PsKernelLookupState)
+  | minors (current : PsKernelList PsKernelDefinition)
+      (pending forward : PsKernelList PsKernelName) (count : PsKernelNatural) (body : PsKernelExpr)
+  | recursorType (current : PsKernelList PsKernelDefinition)
+      (constructors : PsKernelList PsKernelName) (type : PsKernelExpr) (state : PsKernelTypeState)
+
+inductive PsKernelEnumState where
+  | state (environment : PsKernelList PsKernelDefinition) (declaration : PsKernelEnumDeclaration) (task : PsKernelEnumTask)
+
+inductive PsKernelEnumStep where
+  | next (state : PsKernelEnumState)
+  | final (result : PsKernelAdmissionResult)
+
+def psKernelEnumNext (env : PsKernelList PsKernelDefinition) (declaration : PsKernelEnumDeclaration)
+    (task : PsKernelEnumTask) : PsKernelEnumStep :=
+  PsKernelEnumStep.next (PsKernelEnumState.state env declaration task)
+
+def psKernelEnumReject (error : PsKernelCheckError) : PsKernelEnumStep :=
+  PsKernelEnumStep.final (PsKernelAdmissionResult.rejected error)
+
+def psKernelEnumType : PsKernelExpr :=
+  PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
+
+def psKernelEnumRecursorType (name : PsKernelName) (body : PsKernelExpr) : PsKernelExpr :=
+  PsKernelExpr.forallE PsKernelName.anonymous
+    (PsKernelExpr.forallE PsKernelName.anonymous (PsKernelExpr.constE name PsKernelList.nil)
+      (PsKernelExpr.sortE (PsKernelLevel.param (psKernelRecordMotive name))) PsKernelBinder.explicit)
+    body PsKernelBinder.implicit
+
+def psKernelEnumStep (state : PsKernelEnumState) : PsKernelEnumStep :=
+  match state with
+  | PsKernelEnumState.state env declaration task =>
+      match declaration with
+      | PsKernelEnumDeclaration.declaration name parameters level constructors =>
+          match task with
+          | PsKernelEnumTask.initial =>
+              match name with
+              | PsKernelName.anonymous => psKernelEnumReject PsKernelCheckError.invalidName
+              | _ =>
+                  match parameters with
+                  | PsKernelList.cons unused rest => psKernelEnumReject PsKernelCheckError.unsupported
+                  | PsKernelList.nil =>
+                      match level with
+                      | PsKernelLevel.succ base =>
+                          match base with
+                          | PsKernelLevel.zero =>
+                              match constructors with
+                              | PsKernelList.cons first tail =>
+                                  match tail with
+                                  | PsKernelList.cons second rest => psKernelEnumNext env declaration
+                                      (PsKernelEnumTask.familyName (PsKernelLookupState.search name env))
+                                  | _ => psKernelEnumReject PsKernelCheckError.unsupported
+                              | _ => psKernelEnumReject PsKernelCheckError.unsupported
+                          | _ => psKernelEnumReject PsKernelCheckError.unsupported
+                      | _ => psKernelEnumReject PsKernelCheckError.unsupported
+          | PsKernelEnumTask.familyName current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next => psKernelEnumNext env declaration (PsKernelEnumTask.familyName next)
+              | PsKernelLookupStep.found unused => psKernelEnumReject PsKernelCheckError.duplicateName
+              | PsKernelLookupStep.missing => psKernelEnumNext env declaration
+                  (PsKernelEnumTask.constructors constructors (psKernelRecordFamilyEnvironment env name)
+                    PsKernelList.nil PsKernelNatural.zero)
+              | _ => psKernelEnumReject PsKernelCheckError.invalidState
+          | PsKernelEnumTask.constructors pending current reversed count =>
+              match pending with
+              | PsKernelList.nil => psKernelEnumNext env declaration
+                  (PsKernelEnumTask.recursorName current reversed count
+                    (PsKernelLookupState.search (psKernelUnitRecursorName name) current))
+              | PsKernelList.cons ctor rest =>
+                  match ctor with
+                  | PsKernelEnumConstructor.ctor ctorName ctorType =>
+                      match ctorName with
+                      | PsKernelName.anonymous => psKernelEnumReject PsKernelCheckError.invalidName
+                      | _ => psKernelEnumNext env declaration
+                          (PsKernelEnumTask.constructorName rest current reversed count ctorName ctorType
+                            (PsKernelLookupState.search ctorName current))
+          | PsKernelEnumTask.constructorName pending current reversed count ctorName ctorType lookup =>
+              match psKernelLookupStep lookup with
+              | PsKernelLookupStep.next next => psKernelEnumNext env declaration
+                  (PsKernelEnumTask.constructorName pending current reversed count ctorName ctorType next)
+              | PsKernelLookupStep.found unused => psKernelEnumReject PsKernelCheckError.duplicateName
+              | PsKernelLookupStep.invalidState => psKernelEnumReject PsKernelCheckError.invalidState
+              | PsKernelLookupStep.missing =>
+                  match ctorType with
+                  | PsKernelExpr.constE resultName resultLevels =>
+                      match resultLevels with
+                      | PsKernelList.nil => psKernelEnumNext env declaration
+                          (PsKernelEnumTask.constructorResult pending current reversed count ctorName ctorType
+                            (PsKernelList.cons (PsKernelOrderTask.name resultName name) PsKernelList.nil))
+                      | _ => psKernelEnumReject PsKernelCheckError.invalidUniverse
+                  | _ => psKernelEnumReject PsKernelCheckError.unsupported
+          | PsKernelEnumTask.constructorResult pending current reversed count ctorName ctorType work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelEnumNext env declaration
+                  (PsKernelEnumTask.constructorResult pending current reversed count ctorName ctorType next)
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelEnumNext env declaration
+                      (PsKernelEnumTask.constructorType pending current reversed count ctorName ctorType
+                        (psKernelCheckStart current ctorType psKernelEnumType))
+                  | _ => psKernelEnumReject PsKernelCheckError.typeMismatch
+              | _ => psKernelEnumReject PsKernelCheckError.invalidState
+          | PsKernelEnumTask.constructorType pending current reversed count ctorName ctorType typing =>
+              match psKernelTypeStep typing with
+              | PsKernelTypeStep.next next => psKernelEnumNext env declaration
+                  (PsKernelEnumTask.constructorType pending current reversed count ctorName ctorType next)
+              | PsKernelTypeStep.final result =>
+                  match result with
+                  | PsKernelTypeResult.done unused => psKernelEnumNext env declaration
+                      (PsKernelEnumTask.constructors pending
+                        (PsKernelList.cons (PsKernelDefinition.constant ctorName PsKernelList.nil ctorType) current)
+                        (PsKernelList.cons ctorName reversed) (psKernelNaturalSucc count))
+                  | PsKernelTypeResult.rejected error => psKernelEnumReject error
+                  | _ => psKernelEnumReject PsKernelCheckError.invalidState
+          | PsKernelEnumTask.recursorName current reversed count lookup =>
+              match psKernelLookupStep lookup with
+              | PsKernelLookupStep.next next => psKernelEnumNext env declaration
+                  (PsKernelEnumTask.recursorName current reversed count next)
+              | PsKernelLookupStep.found unused => psKernelEnumReject PsKernelCheckError.duplicateName
+              | PsKernelLookupStep.missing => psKernelEnumNext env declaration
+                  (PsKernelEnumTask.minors current reversed PsKernelList.nil count
+                    (PsKernelExpr.forallE PsKernelName.anonymous (PsKernelExpr.constE name PsKernelList.nil)
+                      (PsKernelExpr.app (PsKernelExpr.bvar (psKernelNaturalSucc count))
+                        (PsKernelExpr.bvar PsKernelNatural.zero)) PsKernelBinder.explicit))
+              | _ => psKernelEnumReject PsKernelCheckError.invalidState
+          | PsKernelEnumTask.minors current pending forward count body =>
+              match pending with
+              | PsKernelList.cons ctorName rest =>
+                  match count with
+                  | PsKernelNatural.zero => psKernelEnumReject PsKernelCheckError.invalidState
+                  | _ =>
+                      let next : PsKernelNatural := psKernelNaturalPred count;
+                      psKernelEnumNext env declaration
+                        (PsKernelEnumTask.minors current rest (PsKernelList.cons ctorName forward) next
+                          (PsKernelExpr.forallE PsKernelName.anonymous
+                            (PsKernelExpr.app (PsKernelExpr.bvar next) (PsKernelExpr.constE ctorName PsKernelList.nil))
+                            body PsKernelBinder.explicit))
+              | PsKernelList.nil =>
+                  match count with
+                  | PsKernelNatural.positive unused => psKernelEnumReject PsKernelCheckError.invalidState
+                  | PsKernelNatural.zero =>
+                      let recType : PsKernelExpr := psKernelEnumRecursorType name body;
+                      psKernelEnumNext env declaration (PsKernelEnumTask.recursorType current forward recType
+                        (PsKernelTypeState.state
+                          (PsKernelTypingContext.context current (PsKernelList.cons (psKernelRecordMotive name) PsKernelList.nil))
+                          (PsKernelList.cons (PsKernelTypeTask.infer PsKernelList.nil recType)
+                            (PsKernelList.cons PsKernelTypeTask.reduceTop PsKernelList.nil)) PsKernelList.nil))
+          | PsKernelEnumTask.recursorType current ctorNames type typing =>
+              match psKernelTypeStep typing with
+              | PsKernelTypeStep.next next => psKernelEnumNext env declaration
+                  (PsKernelEnumTask.recursorType current ctorNames type next)
+              | PsKernelTypeStep.final result =>
+                  match result with
+                  | PsKernelTypeResult.done inferred =>
+                      match inferred with
+                      | PsKernelExpr.sortE unused => PsKernelEnumStep.final (PsKernelAdmissionResult.admitted
+                          (PsKernelList.cons (PsKernelDefinition.enumRecursor (psKernelUnitRecursorName name)
+                            (PsKernelList.cons (psKernelRecordMotive name) PsKernelList.nil) type ctorNames) current))
+                      | _ => psKernelEnumReject PsKernelCheckError.typeExpected
+                  | PsKernelTypeResult.rejected error => psKernelEnumReject error
+                  | _ => psKernelEnumReject PsKernelCheckError.invalidState
+
+def psKernelEnumStart (env : PsKernelList PsKernelDefinition) (declaration : PsKernelEnumDeclaration) : PsKernelEnumState :=
+  PsKernelEnumState.state env declaration PsKernelEnumTask.initial
+
+def psKernelEnumRun (fuel : PsKernelFuel) : PsKernelEnumState -> PsKernelAdmissionResult :=
+  match fuel with
+  | PsKernelFuel.stop => fun (state : PsKernelEnumState) => PsKernelAdmissionResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      fun (state : PsKernelEnumState) =>
+        match psKernelEnumStep state with
+        | PsKernelEnumStep.final result => result
+        | PsKernelEnumStep.next next =>
+            let smaller : PsKernelEnumState -> PsKernelAdmissionResult := psKernelEnumRun remaining;
+            smaller next
+
+
+
 /- The only mixed admission entry point starts with an empty environment.
 Each declaration uses the same outer transition budget. Partial state is private
 to the driver; rejection and exhaustion expose no environment. -/
@@ -3202,6 +3502,7 @@ inductive PsKernelJointEntry where
   | definition (entry : PsKernelDefinition)
   | unitInductive (entry : PsKernelUnitDeclaration)
   | recordInductive (entry : PsKernelUnitDeclaration)
+  | enumInductive (entry : PsKernelEnumDeclaration)
   | natInductive (entry : PsKernelNatDeclaration)
 
 inductive PsKernelJointState where
@@ -3209,6 +3510,7 @@ inductive PsKernelJointState where
   | definition (rest : PsKernelList PsKernelJointEntry) (state : PsKernelAdmissionState)
   | unitInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelUnitState)
   | recordInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelRecordState)
+  | enumInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelEnumState)
   | natInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelNatAdmissionState)
 
 inductive PsKernelJointStep where
@@ -3233,6 +3535,8 @@ def psKernelJointStep (state : PsKernelJointState) : PsKernelJointStep :=
               (PsKernelJointState.unitInductive rest (psKernelUnitStart env declaration))
           | PsKernelJointEntry.recordInductive declaration => PsKernelJointStep.next
               (PsKernelJointState.recordInductive rest (psKernelRecordStart env declaration))
+          | PsKernelJointEntry.enumInductive declaration => PsKernelJointStep.next
+              (PsKernelJointState.enumInductive rest (psKernelEnumStart env declaration))
           | PsKernelJointEntry.natInductive declaration => PsKernelJointStep.next
               (PsKernelJointState.natInductive rest (psKernelNatAdmissionStart env declaration))
   | PsKernelJointState.definition rest current =>
@@ -3247,6 +3551,10 @@ def psKernelJointStep (state : PsKernelJointState) : PsKernelJointStep :=
       match psKernelRecordStep current with
       | PsKernelRecordStep.next next => PsKernelJointStep.next (PsKernelJointState.recordInductive rest next)
       | PsKernelRecordStep.final result => psKernelJointContinue rest result
+  | PsKernelJointState.enumInductive rest current =>
+      match psKernelEnumStep current with
+      | PsKernelEnumStep.next next => PsKernelJointStep.next (PsKernelJointState.enumInductive rest next)
+      | PsKernelEnumStep.final result => psKernelJointContinue rest result
   | PsKernelJointState.natInductive rest current =>
       match psKernelNatAdmissionStep current with
       | PsKernelNatAdmissionStep.next next => PsKernelJointStep.next (PsKernelJointState.natInductive rest next)

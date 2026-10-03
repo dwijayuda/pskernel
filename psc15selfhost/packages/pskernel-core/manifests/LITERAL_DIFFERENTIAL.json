@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "Natural literals after owned Nat initialization; exact typing, constructor conversion and dependent recursor iota; not arithmetic primitive completeness",
-  "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
+  "sourceManifestSha256": "cfcf3dbf7c8e1908aaf644398ecffc1806b56c5049464a73686877dc37700183",
   "harnessSha256": "c3ff60a40a93939e4804270534c73bebdc57cc6176032e5b172c98ba983ffacc",
   "provider": {
     "protocol": "pskernel-lean/1",
@@ -22,5 +22,5 @@
     "unbounded evaluation"
   ],
   "recordsPath": "dist/evidence/literal-differential-records.json",
-  "recordsSha256": "a0ca588308b26dc9f9888854c8c63b611233e183802a52b050ae9f1336b5d2e9"
+  "recordsSha256": "54ec71d21339ca27758b1b96b5c98ec092d4e3f6a0af587711d0af8ff92976c8"
 }

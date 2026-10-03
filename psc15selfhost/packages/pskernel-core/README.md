@@ -1,17 +1,17 @@
 # @proofscript/pskernel-core
 
-**0.1.0-checker.10 — private experimental dependent term-checker checkpoint.**
+**0.1.0-checker.11 — private experimental dependent term-checker checkpoint.**
 
-Regenerated with the pinned PSC seed, with all 489 tests passing and fresh build
-and reference evidence. See `../../docs/continuity/OWNED_RECORD_ELIMINATION_2026-10-03.md`.
+Regenerated with the pinned PSC seed, with all 521 tests passing and fresh build
+and reference evidence. See `../../docs/continuity/OWNED_ENUMERATIONS_2026-10-03.md`.
 
 This is the default checker and part of the joint bootstrap source closure.
 The host adapter runs the generated semantic machine and fails closed outside
 its supported fragment. The exact preserved bootstrap prefix now admits the unit,
 `PsSourcePos` and `PsSourceSpan`, after checking the initial `Nat` prelude.
 The next entry, `PsLexCursor`, rejects an unknown dependency; the complete batch
-now decodes projections and rejects the six-constructor PsTokenKind family at admission 14.
-The new portable closure has 76 modules (55 compiler plus 21 owned kernel);
+now decodes projections and nullary enums, and rejects PsLexError at admission 17.
+The new portable closure has 77 modules (55 compiler plus 22 owned kernel);
 the default selection does not imply release readiness or complete Lean parity.
 
 This package now executes an owned checking fragment, rather than data helpers
@@ -36,6 +36,8 @@ source machines and derives a checked dependent eliminator type and field metada
 Record iota and projection typing/reduction run against validated closed-record metadata. Parameters, indices,
 dependent record fields, recursive records, Prop and higher-universe record families
 remain rejected. Arithmetic, string literals and other prelude constants remain unsupported.
+Nullary enumerations derive checked dependent recursors and computed branch reduction.
+Payload sums, parameterized and recursive general families are not yet supported.
 Sequential internal admission starts from the checked prelude,
 rejects forward/self references and duplicates, and returns no environment on a
 failed batch. The generated implementation is not edited by hand.

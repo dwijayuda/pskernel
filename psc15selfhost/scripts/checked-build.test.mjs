@@ -25,11 +25,24 @@ test('default owned kernel checks dependent source before emission and execution
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
-test('default owned kernel blocks unsupported inductives before writing output', { skip: !native }, async () => {
+test('previously unsupported Flag enum is now owned-checked and emitted', { skip: !native }, async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'psc2-owned-flag-real-'));
+  try {
+    await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
+    const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'out.js');
+    await writeFile(entryPath, 'inductive Flag where\n  | off\n  | on\n');
+    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed });
+    assert.equal(receipt.kernel.selector, 'pskernel-core');
+    const module = await import(pathToFileURL(outputPath).href);
+    assert.notDeepEqual(module.Flag.off, module.Flag.on);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test('default owned kernel blocks unsupported payload sums before writing output', { skip: !native }, async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'psc2-owned-rejected-real-'));
   try {
     const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'never/out.js');
-    await writeFile(entryPath, 'inductive Flag where\n  | off\n  | on\n');
+    await writeFile(entryPath, 'inductive PayloadFlag where\n  | off\n  | on (value : Nat)\n');
     await assert.rejects(buildChecked({ entryPath, outputPath, seedPath: seed }), /KERNEL_REJECTED: unsupported\b/);
     assert.equal(existsSync(path.dirname(outputPath)), false);
   } finally { await rm(dir, { recursive: true, force: true }); }
@@ -46,7 +59,7 @@ test('actual unit source passes owned admission, exact-module emission and execu
     assert.notEqual(module.sample, undefined);
     assert.deepEqual(module.sample, module.SampleUnit.make);
     assert.equal(receipt.kernel.selector, 'pskernel-core');
-    assert.equal(receipt.provider.profile, 'owned-closed-record-elimination/7');
+    assert.equal(receipt.provider.profile, 'owned-nullary-enumerations/8');
     assert.match(await readFile(path.join(dir, 'out.admissions.json'), 'utf8'), /SampleUnit/u);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
@@ -61,7 +74,7 @@ test('actual Nat constructor source passes the owned bootstrap and executed outp
     const module = await import(pathToFileURL(outputPath).href);
     assert.equal(module.first, 1n);
     assert.equal(receipt.kernel.selector, 'pskernel-core');
-    assert.equal(receipt.provider.profile, 'owned-closed-record-elimination/7');
+    assert.equal(receipt.provider.profile, 'owned-nullary-enumerations/8');
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
@@ -73,7 +86,7 @@ for (const kind of ['lean','ps']) test(`actual ${kind} natural literal passes ow
     await writeFile(entryPath,kind==='lean'?'def answer : Nat := 42\n':'def answer: Nat := 42;\n');
     const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});
     assert.equal((await import(pathToFileURL(outputPath).href)).answer,42n);
-    assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-closed-record-elimination/7');
+    assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-nullary-enumerations/8');
   } finally {await rm(dir,{recursive:true,force:true});}
 });
 
@@ -152,6 +165,6 @@ for (const kind of ['lean','ps']) test(`actual ${kind} closed record passes owne
     const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});
     const result=(await import(pathToFileURL(outputPath).href)).pair;
     assert.equal(result.left,7n);assert.equal(result.right,11n);
-    assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-closed-record-elimination/7');
+    assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-nullary-enumerations/8');
   } finally {await rm(dir,{recursive:true,force:true});}
 });

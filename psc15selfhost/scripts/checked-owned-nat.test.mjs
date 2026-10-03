@@ -24,7 +24,7 @@ test('default checks its Nat prelude and derived recursor before user declaratio
     def('First',C('Nat'),numeral('Nat',1)),def('Fold',C('Nat'),fold('Nat',4)),
   ]));
   assert.equal(descriptor.selector,'pskernel-core');
-  assert.equal(result.profile,'owned-closed-record-elimination/7');
+  assert.equal(result.profile,'owned-nullary-enumerations/8');
   assert.equal(result.accepted,true,JSON.stringify(result));
   assert.equal(result.admissionCount,2);
 });
@@ -33,7 +33,7 @@ test('default derives a fresh Nat-like family and checks constructor iota',async
   assert.equal(result.accepted,true,JSON.stringify(result));assert.equal(result.admissionCount,2);
 });
 for(const [label,change] of [
-  ['wrong successor type',d=>{d.ts[0].cs[1].t=C('Counter');}],
+  ['wrong constructor result',d=>{d.ts[0].cs[1].t=C('Nat');}],
   ['negative recursion',d=>{d.ts[0].cs[1].t=pi('f',pi('n',C('Counter'),C('Nat')),C('Counter'));}],
   ['higher sort',d=>{d.ts[0].t=U(S(S(Z)));}],
   ['duplicate constructors',d=>{d.ts[0].cs[1].n=d.ts[0].cs[0].n;}],
@@ -62,4 +62,17 @@ test('later rejection retains the user admission index and exposes no partial en
   const result=await checkOwnedAdmissions(wire([def('Good',C('Nat'),numeral('Nat',0)),def('Bad',U(Z),numeral('Nat',0))]));
   assert.equal(result.accepted,false);assert.equal(result.errorKind,'typeMismatch');
   assert.equal(result.admissionIndex,1);assert.equal(result.environment,undefined);
+});
+
+// The old 'wrong successor' input is a valid enum, not a malformed inductive.
+// Preserve it and prove that its name does not confer Nat-like application/iota.
+test('two nullary constructors named zero/succ form an enum without Nat authority',async()=>{
+  const entry=nat('Counter');entry.declaration.ts[0].cs[1].t=C('Counter');
+  const accepted=await checkOwnedAdmissions(wire([entry]));
+  assert.equal(accepted.accepted,true,JSON.stringify(accepted));
+  for(const bad of [def('BadSuccessor',C('Counter'),numeral('Counter',1)),def('BadFold',C('Counter'),fold('Counter',1))]){
+    const {result,descriptor}=await checkAdmissionsWithKernel(wire([entry,bad]));
+    assert.equal(descriptor.selector,'pskernel-core');assert.equal(result.accepted,false,JSON.stringify(result));
+    assert.equal(result.admissionIndex,1);assert.equal(result.environment,undefined);
+  }
 });

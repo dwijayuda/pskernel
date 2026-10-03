@@ -12,6 +12,9 @@ All nested substitutions and lookups consume the caller's transition budget. -/
 /- Closed record metadata is installed only by RecordInductive admission.
 The field types are closed: projection types need no contextual substitution.
 Record elimination still traverses and validates the full constructor spine. -/
+inductive PsKernelEnumBranch where
+  | branch (name : PsKernelName) (minor : PsKernelExpr)
+
 inductive PsKernelRecordAction where
   | project (family : PsKernelName) (index : PsKernelNatural)
   | eliminate (fn : PsKernelExpr) (minor : PsKernelExpr)
@@ -22,6 +25,15 @@ def psKernelRecordNeutral (action : PsKernelRecordAction) (major : PsKernelExpr)
   | PsKernelRecordAction.eliminate fn unusedMinor => PsKernelExpr.app fn major
 
 inductive PsKernelReduceTask where
+  | enumSpine (original cursor : PsKernelExpr) (args : PsKernelList PsKernelExpr)
+  | enumLookup (original : PsKernelExpr) (args : PsKernelList PsKernelExpr)
+      (levels : PsKernelList PsKernelLevel) (state : PsKernelLookupState)
+  | enumMinors (original : PsKernelExpr) (constructors : PsKernelList PsKernelName)
+      (args : PsKernelList PsKernelExpr) (branches : PsKernelList PsKernelEnumBranch)
+  | enumMajor (fn : PsKernelExpr) (branches : PsKernelList PsKernelEnumBranch)
+  | enumFind (fn major : PsKernelExpr) (name : PsKernelName) (branches : PsKernelList PsKernelEnumBranch)
+  | enumName (fn major : PsKernelExpr) (name : PsKernelName) (minor : PsKernelExpr)
+      (remaining : PsKernelList PsKernelEnumBranch) (work : PsKernelList PsKernelOrderTask)
   | projectLookup (family : PsKernelName) (index : PsKernelNatural) (major : PsKernelExpr) (state : PsKernelLookupState)
   | projectBound (family : PsKernelName) (index : PsKernelNatural) (major : PsKernelExpr)
       (ctor : PsKernelName) (fields pending : PsKernelList PsKernelExpr) (cursor : PsKernelNatural)
@@ -112,6 +124,12 @@ def psKernelReduceWhnf
       (PsKernelList.cons (PsKernelReduceTask.projectLookup family index major (PsKernelLookupState.search family env)) tasks) values
   | _ => psKernelReducePush env tasks values value
 
+def psKernelReduceEnumApply
+    (env : PsKernelList PsKernelDefinition) (tasks : PsKernelList PsKernelReduceTask)
+    (values : PsKernelList PsKernelExpr) (fn arg : PsKernelExpr) : PsKernelReduceStep :=
+  let original : PsKernelExpr := PsKernelExpr.app fn arg;
+  psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.enumSpine original original PsKernelList.nil) tasks) values
+
 def psKernelReduceNeutralApply
     (env : PsKernelList PsKernelDefinition) (tasks : PsKernelList PsKernelReduceTask)
     (values : PsKernelList PsKernelExpr) (fn arg : PsKernelExpr) : PsKernelReduceStep :=
@@ -127,10 +145,10 @@ def psKernelReduceNeutralApply
               | PsKernelExpr.constE name unusedLevels => psKernelReduceNext env
                   (PsKernelList.cons (PsKernelReduceTask.natLookup fn arg unusedMotive minor
                     (PsKernelLookupState.search name env)) tasks) values
-              | _ => psKernelReducePush env tasks values (PsKernelExpr.app fn arg)
-          | _ => psKernelReducePush env tasks values (PsKernelExpr.app fn arg)
-      | _ => psKernelReducePush env tasks values (PsKernelExpr.app fn arg)
-  | _ => psKernelReducePush env tasks values (PsKernelExpr.app fn arg)
+              | _ => psKernelReduceEnumApply env tasks values fn arg
+          | _ => psKernelReduceEnumApply env tasks values fn arg
+      | _ => psKernelReduceEnumApply env tasks values fn arg
+  | _ => psKernelReduceEnumApply env tasks values fn arg
 
 def psKernelReduceValueTask
     (env : PsKernelList PsKernelDefinition) (task : PsKernelReduceTask)
@@ -139,6 +157,14 @@ def psKernelReduceValueTask
   | PsKernelList.nil => psKernelReduceReject PsKernelCheckError.invalidState
   | PsKernelList.cons top rest =>
       match task with
+      | PsKernelReduceTask.enumMajor fn branches =>
+          match top with
+          | PsKernelExpr.constE name levels =>
+              match levels with
+              | PsKernelList.nil => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.enumFind fn top name branches) tasks) rest
+              | _ => psKernelReducePush env tasks rest (PsKernelExpr.app fn top)
+          | _ => psKernelReducePush env tasks rest (PsKernelExpr.app fn top)
       | PsKernelReduceTask.recordMajor action ctor fields => psKernelReduceNext env
           (PsKernelList.cons (PsKernelReduceTask.recordSpine action top top ctor fields PsKernelList.nil) tasks) rest
       | PsKernelReduceTask.proj family index => psKernelReducePush env tasks rest (PsKernelExpr.proj family index top)
@@ -224,6 +250,70 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
           | _ => psKernelReduceReject PsKernelCheckError.invalidState
       | PsKernelList.cons task rest =>
           match task with
+          | PsKernelReduceTask.enumSpine original cursor args =>
+              match cursor with
+              | PsKernelExpr.app fn arg => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.enumSpine original fn (PsKernelList.cons arg args)) rest) values
+              | PsKernelExpr.constE name levels => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.enumLookup original args levels (PsKernelLookupState.search name env)) rest) values
+              | _ => psKernelReducePush env rest values original
+          | PsKernelReduceTask.enumLookup original args levels current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.enumLookup original args levels next) rest) values
+              | PsKernelLookupStep.found entry =>
+                  match entry with
+                  | PsKernelDefinition.enumRecursor unusedName unusedParameters unusedType constructors =>
+                      match levels with
+                      | PsKernelList.cons unusedLevel tail =>
+                          match tail with
+                          | PsKernelList.nil =>
+                              match args with
+                              | PsKernelList.cons unusedMotive tailArgs => psKernelReduceNext env
+                                  (PsKernelList.cons (PsKernelReduceTask.enumMinors original constructors tailArgs PsKernelList.nil) rest) values
+                              | _ => psKernelReducePush env rest values original
+                          | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
+                      | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
+                  | _ => psKernelReducePush env rest values original
+              | PsKernelLookupStep.missing => psKernelReduceReject PsKernelCheckError.unknownConstant
+              | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.enumMinors original constructors args branches =>
+              match constructors with
+              | PsKernelList.cons ctorName tail =>
+                  match args with
+                  | PsKernelList.cons minor tailArgs => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.enumMinors original tail tailArgs
+                        (PsKernelList.cons (PsKernelEnumBranch.branch ctorName minor) branches)) rest) values
+                  | _ => psKernelReducePush env rest values original
+              | PsKernelList.nil =>
+                  match args with
+                  | PsKernelList.cons major tail =>
+                      match tail with
+                      | PsKernelList.nil =>
+                          match original with
+                          | PsKernelExpr.app fn unusedMajor => psKernelReduceNext env
+                              (PsKernelList.cons (PsKernelReduceTask.whnf major)
+                                (PsKernelList.cons (PsKernelReduceTask.enumMajor fn branches) rest)) values
+                          | _ => psKernelReduceReject PsKernelCheckError.invalidState
+                      | _ => psKernelReducePush env rest values original
+                  | _ => psKernelReducePush env rest values original
+          | PsKernelReduceTask.enumFind fn major name branches =>
+              match branches with
+              | PsKernelList.nil => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+              | PsKernelList.cons branch tail =>
+                  match branch with
+                  | PsKernelEnumBranch.branch ctorName minor => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.enumName fn major name minor tail
+                        (PsKernelList.cons (PsKernelOrderTask.name name ctorName) PsKernelList.nil)) rest) values
+          | PsKernelReduceTask.enumName fn major name minor remaining work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.enumName fn major name minor remaining next) rest) values
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf minor) rest) values
+                  | _ => psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.enumFind fn major name remaining) rest) values
+              | _ => psKernelReduceReject PsKernelCheckError.invalidState
           | PsKernelReduceTask.projectLookup family index major current =>
               match psKernelLookupStep current with
               | PsKernelLookupStep.next next => psKernelReduceNext env
@@ -305,7 +395,7 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                   | PsKernelDefinition.natRecursor unusedName unusedParameters unusedType zeroName succName => psKernelReduceNext env
                       (PsKernelList.cons (PsKernelReduceTask.whnf major)
                         (PsKernelList.cons (PsKernelReduceTask.natMajor fn zeroCase succCase zeroName succName) rest)) values
-                  | _ => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+                  | _ => psKernelReduceEnumApply env rest values fn major
               | _ => psKernelReduceReject PsKernelCheckError.invalidState
           | PsKernelReduceTask.natZeroName fn major zeroCase current =>
               match psKernelOrderStep current with
@@ -346,7 +436,7 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                   | PsKernelDefinition.unitRecursor unusedName unusedParameters unusedType ctorName => psKernelReduceNext env
                       (PsKernelList.cons (PsKernelReduceTask.whnf major)
                         (PsKernelList.cons (PsKernelReduceTask.unitMajor fn minor ctorName levels) rest)) values
-                  | _ => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+                  | _ => psKernelReduceEnumApply env rest values fn major
               | _ => psKernelReduceReject PsKernelCheckError.invalidState
           | PsKernelReduceTask.unitName fn major minor left right current =>
               match psKernelOrderStep current with

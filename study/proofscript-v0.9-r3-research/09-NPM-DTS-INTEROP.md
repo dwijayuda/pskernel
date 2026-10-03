@@ -1,10 +1,18 @@
 # r3 npm and TypeScript Declaration Interoperability
 
-Status: **accepted r3 interop architecture; InterfaceIR schema/importer/exporter implementation pending.**
+Status: **accepted r3 InterfaceIR v1 specification; importer/exporter implementation pending.**
 
 ## Goal
 
 Make npm interoperability routine without importing TypeScript structural unsoundness into native ProofScript.
+
+The normative interchange format is:
+
+~~~text
+INTERFACEIR-v1.md
+INTERFACEIR-v1.schema.json
+schemaVersion = proofscript-interface-ir-1.0.0
+~~~
 
 ## Pipeline
 
@@ -25,11 +33,27 @@ npm package + package exports + d.ts + runtime profile
 
 A d.ts declaration is not runtime validation and not proof that the package implementation behaves as declared.
 
-## InterfaceIR v1 concepts
+## InterfaceIR v1 resolution identity
 
-Record package name/version, exact package export condition, ESM/CJS mode, selected declaration-file identities, type declarations, functions, receiver identity, callbacks, Promise behavior, presence policies, errors/effects, and target profile.
+The format records not merely a package name but the exact resolved runtime/type surface:
 
-Core type forms should include primitive values, literals, arrays, tuples, records, variants, functions, Promise, callbacks, handles, generics, and opaque foreign types.
+- TypeScript version;
+- `moduleResolution` mode (`node16`, `nodenext`, or `bundler`);
+- custom conditions;
+- ordered effective conditions;
+- package name/version;
+- package.json SHA-256;
+- requested export subpath;
+- selected runtime entry and module format;
+- selected declaration entry;
+- declaration-file SHA-256 values;
+- target runtime/platform.
+
+This is required because Node conditional exports and TypeScript type resolution can choose different branches based on ordered conditions, resolver mode, `types` conditions, versioned `types@` conditions, and custom conditions.
+
+The importer rejects if it cannot bind the selected declaration surface and runtime entry to the same requested package export identity.
+
+Core type forms and declaration tags are defined by the JSON Schema and the support matrix in `INTERFACEIR-v1.md`.
 
 ## Three layers
 
@@ -151,9 +175,9 @@ The importer prototype must eventually cover a pure utility package, JSON/schema
 
 ## Evidence status
 
-Architecture: **accepted for r3**.
-Serialized InterfaceIR schema: **pending**.
-InterfaceIR importer: **not implemented; no prototype evidence claimed by this documentation baseline**.
-Exporter: **pending**.
-npm package workflow evidence: **not claimed by this documentation baseline**.
+InterfaceIR v1 schema, resolution identity and support-class model: **accepted for r3**.
+Importer: **not implemented**.
+Exporter: **not implemented**.
 Runtime validation library: **pending**.
+Real npm binding corpus: **future evidence work**.
+No package/runtime execution evidence is claimed by this documentation baseline.

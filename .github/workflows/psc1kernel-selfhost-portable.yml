@@ -66,6 +66,7 @@ jobs:
           set -euo pipefail
           lake exe psc1 check packages/pskernel-selfhost/src/Ps/KernelSelfHost/Name.lean
           lake exe psc1 check packages/pskernel-selfhost/src/Ps/KernelSelfHost/Level.lean
+          lake exe psc1 check packages/pskernel-selfhost/src/Ps/KernelSelfHost/Expr.lean
 
       - name: Require canonical ProofScript translation
         run: |

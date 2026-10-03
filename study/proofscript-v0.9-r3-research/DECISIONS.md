@@ -42,3 +42,5 @@ Human-study results may still justify a later pre-1.0 change to <code>const</cod
 | R3-015 | Contract core | Base r3 freezes total-pure requires/ensures, semantic FrameSpec and higher-order CallableSpec; state/loop/async surface clauses are staged. | accepted | verification-language research |
 | R3-016 | Application semantics | App is cold; Fiber is started; Exit excludes RuntimeFault; cancellation is two-phase; cleanup is shielded; capabilities are type-visible; native IO/Task are low-level/nonportable substrate. | accepted | async/resource research |
 | R3-017 | InterfaceIR v1 | Versioned JSON schema binds TS resolver/version, package/export conditions, runtime/type entries and declaration hashes with explicit support classes. | accepted | Node/TypeScript research |
+
+| R3-018 | Pre-stable evidence gates | Stable/1.0 review requires the consolidated usability, frontend-proof, backend-preservation, primitive/runtime, application-semantics, InterfaceIR/npm, reference-app, Standard-profile, contract, and artifact-binding evidence plan. None is completed by the documentation pass. | accepted future release gate | `23-PRE-STABLE-EVIDENCE-GATES.md` |

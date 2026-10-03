@@ -548,6 +548,21 @@ def psKernelLevelMkMaxList
             head
             (psKernelLevelMkMaxList tail)
 
+def psKernelLevelNormalizeListWith
+    (normalize : PsKernelLevel -> PsKernelLevel)
+    (values : List PsKernelLevel) :
+    List PsKernelLevel :=
+  match values with
+  | List.nil =>
+      List.nil
+  | List.cons head tail =>
+      psKernelLevelListAppend
+        (psKernelLevelFlattenMax
+          (normalize head))
+        (psKernelLevelNormalizeListWith
+          normalize
+          tail)
+
 partial def psKernelLevelNormalize
     (level : PsKernelLevel) : PsKernelLevel :=
   let pair := psKernelLevelToOffset level;
@@ -569,19 +584,9 @@ partial def psKernelLevelNormalize
           (psKernelLevelNormalize right))
         amount
   | PsKernelLevel.max _ _ =>
-      let rec normalizeList
-          (values : List PsKernelLevel) :
-          List PsKernelLevel :=
-        match values with
-        | List.nil =>
-            List.nil
-        | List.cons head tail =>
-            psKernelLevelListAppend
-              (psKernelLevelFlattenMax
-                (psKernelLevelNormalize head))
-              (normalizeList tail);
       let normalized :=
-        normalizeList
+        psKernelLevelNormalizeListWith
+          psKernelLevelNormalize
           (psKernelLevelFlattenMax root);
       let sorted :=
         psKernelLevelSortLevels normalized;

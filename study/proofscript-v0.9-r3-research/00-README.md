@@ -33,6 +33,20 @@ It intentionally does **not** define compiler architecture, self-host sequencing
 
 No companion document may override language meaning.
 
+## Consolidated language handbook
+
+For one self-contained document containing all current PSC2 language features with grammar, semantics, accepted syntax variants, examples, rejection cases, Standard prover selections, and Post-PSC2 boundaries, use:
+
+~~~text
+PSC2_LANGUAGE_FEATURES_COMPLETE.md
+~~~
+
+For the three-language Lean 4 / ProofScript / TypeScript comparison, use:
+
+~~~text
+PSC2_LEAN4_TYPESCRIPT_COMPARISON.md
+~~~
+
 ## PSC2 language identities
 
 ~~~text

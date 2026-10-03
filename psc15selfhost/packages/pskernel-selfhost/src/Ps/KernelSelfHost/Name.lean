@@ -1,3 +1,5 @@
+import ProofScript.Data.Ordering
+
 inductive PsKernelName where
   | anonymous
   | str (parent : PsKernelName) (value : String)

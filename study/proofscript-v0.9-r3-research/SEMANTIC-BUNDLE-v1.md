@@ -1,6 +1,6 @@
 # PSC Semantic Bundle v1
 
-Status: **normative import protocol for `ps-standard` consuming checked semantic exports**
+Status: **normative checked-semantic import protocol only; not a ProofScript source-language authority**
 
 Schema: `SEMANTIC-BUNDLE-v1.schema.json`  
 Schema identity: `psc-semantic-bundle-1.0.0`

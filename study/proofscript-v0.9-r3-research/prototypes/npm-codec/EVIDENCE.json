@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "scope": "hand-authored package-shape prototype; not PSC-generated output",
+  "toolchain": {
+    "node": "v26.7.0",
+    "typescript": "Version 7.0.2",
+    "npm": "12.0.2"
+  },
+  "steps": {
+    "npmPackExit": 0,
+    "cleanConsumerInstallExit": 0,
+    "strictTscNoEmitExit": 0,
+    "nodeRuntimeExit": 0
+  },
+  "runtimeOutput": {
+    "status": "passed",
+    "ok": "42",
+    "bad": "error"
+  },
+  "sha256": {
+    "package.json": "41f862558c130368e72fdf3311cf94774e4a5ce13e51e76831c2623d7fabf8cc",
+    "index.js": "ed06b7c1b7e57fcc4585ab8161fc0807130e489b7403f362bd4c806560c17623",
+    "index.d.ts": "bc69ae52d038d16a827e66c44c43e21a3eb8a25ff447d9d99788c962638eef62",
+    "consumer.ts": "2a761f567f91d801981cf63342ae5ecc51a022b36aa016b680ee58c95c0c043d"
+  }
+}

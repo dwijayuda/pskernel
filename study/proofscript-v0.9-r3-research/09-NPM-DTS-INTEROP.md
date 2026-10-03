@@ -153,7 +153,7 @@ The importer prototype must eventually cover a pure utility package, JSON/schema
 
 Architecture: recommended.
 Serialized InterfaceIR schema: pending.
-Importer: pending.
+Restricted InterfaceIR shape prototype: passed on a tiny fixture and rejected a tested conditional type; production importer remains pending.
 Exporter: pending.
-Real npm corpus: pending.
+Hand-authored npm package-shape workflow: npm pack/install, strict TypeScript 7.0.2 consumer check, and Node runtime test passed; this is not PSC-generated output.
 Runtime validation library: pending.

@@ -6,7 +6,7 @@ A decision here is a recommendation for the r3 candidate. It does not activate t
 
 | ID | Topic | Decision | Status | Evidence |
 |---|---|---|---|---|
-| R3-001 | Parenthesized calls | In <code>.ps</code>, ordinary trivia before <code>(</code> does not change parenthesized-call ownership; tuple argument requires extra grouping. Reclassify as E-class exception. | recommended | reference research; toy formal lowering model completed |
+| R3-001 | Parenthesized calls | In <code>.ps</code>, ordinary trivia before <code>(</code> does not change parenthesized-call ownership; tuple argument requires extra grouping. Reclassify as E-class exception. | recommended | reference research; formal proof plan documented |
 | R3-002 | Owned braces | Owned braces define outer member boundaries; use comma fields, marker alternatives, and native semicolons where the native sequence has them. | recommended | reference research; prototype pending |
 | R3-003 | <code>function f()</code> | Lower to one explicit Unit binder; <code>f()</code> remains Unit application. | recommended | semantic design; oracle test pending |
 | R3-004 | <code>const</code> | Retain as top-level/namespace parameterless-def alias, but freeze only after human comprehension study. | provisional | design analysis; human study not run |
@@ -14,7 +14,7 @@ A decision here is a recommendation for the r3 candidate. It does not activate t
 | R3-006 | Contracts | Define PSC-owned stable contract semantics tied to ordinary admitted theorems/program logic. Lean intrinsic verification becomes optional compatibility/oracle. | recommended | design; implementation/proof pending |
 | R3-007 | App effects | Standardize a library/runtime model around <code>App</code>, <code>Fiber</code>, <code>Resource</code>, <code>Stream</code>, and explicit exits; do not reuse Promise as semantics. | recommended | research; prototype pending |
 | R3-008 | JS/TS boundary | Introduce versioned InterfaceIR, raw/safe/spec layers, and fail closed on unsupported <code>.d.ts</code> machinery. | recommended | research; prototype pending |
-| R3-009 | Formal slices | Prove a small call-overlay model and RuntimeIR-to-JS-core preservation theorem before broad claims. | required | toy overlay and backend theorems completed; production relation pending |
+| R3-009 | Formal slices | Prove a small call-overlay model and RuntimeIR-to-JS-core preservation theorem before broad claims. | required | formal proof plans documented; no executed proof claimed in final docs-only branch |
 | R3-010 | Human study | Do not freeze high-risk syntax before controlled TypeScript/Lean participant study. | required gate | protocol complete; study not run |
 
 ## Rejected directions

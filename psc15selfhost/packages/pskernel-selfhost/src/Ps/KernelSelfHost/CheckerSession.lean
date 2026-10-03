@@ -46,13 +46,14 @@ def psKernelSessionWhnf
   | Except.error error =>
       Except.error error
   | Except.ok result =>
+      let nextSession :=
+        PsKernelCheckerSession.mk
+          session.context
+          (Prod.snd result);
       Except.ok
         (Prod.mk
           (Prod.fst result)
-          {
-            context := session.context
-            state := Prod.snd result
-          })
+          nextSession)
 
 def psKernelSessionInfer
     (fuel : Nat)
@@ -72,13 +73,14 @@ def psKernelSessionInfer
   | Except.error error =>
       Except.error error
   | Except.ok result =>
+      let nextSession :=
+        PsKernelCheckerSession.mk
+          session.context
+          (Prod.snd result);
       Except.ok
         (Prod.mk
           (Prod.fst result)
-          {
-            context := session.context
-            state := Prod.snd result
-          })
+          nextSession)
 
 def psKernelSessionCheck
     (fuel : Nat)
@@ -103,13 +105,14 @@ def psKernelSessionCheck
   | Except.error error =>
       Except.error error
   | Except.ok result =>
+      let nextSession :=
+        PsKernelCheckerSession.mk
+          session.context
+          (Prod.snd result);
       Except.ok
         (Prod.mk
           (Prod.fst result)
-          {
-            context := session.context
-            state := Prod.snd result
-          })
+          nextSession)
 
 def psKernelSessionEnsureSort
     (fuel : Nat)
@@ -171,10 +174,11 @@ def psKernelSessionIsDefEq
   | Except.error error =>
       Except.error error
   | Except.ok result =>
+      let nextSession :=
+        PsKernelCheckerSession.mk
+          session.context
+          (Prod.snd result);
       Except.ok
         (Prod.mk
           (Prod.fst result)
-          {
-            context := session.context
-            state := Prod.snd result
-          })
+          nextSession)

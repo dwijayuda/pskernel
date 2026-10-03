@@ -182,7 +182,8 @@ lean_lib PsKernelSelfHost where
   srcDir := "packages/pskernel-selfhost/src"
   roots := #[
     `Ps.KernelSelfHost.Name,
-    `Ps.KernelSelfHost.Level
+    `Ps.KernelSelfHost.Level,
+    `Ps.KernelSelfHost.Expr
   ]
 
 @[default_target]

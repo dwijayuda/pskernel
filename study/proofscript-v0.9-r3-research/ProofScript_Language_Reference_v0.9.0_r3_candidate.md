@@ -358,7 +358,7 @@ Current participant count is zero; no superiority claim is made.
 
 ProofScript should not claim r3 full-app readiness until the CLI, HTTP service, browser UI, and published npm library reference applications build and execute through supported PSC toolchains, with the verified state-machine application demonstrating a useful admitted contract.
 
-Those applications are not yet completed on this research branch.
+Those applications are not yet completed on this research branch. However, bounded layer evidence exists: a hand-authored npm ESM + d.ts package passes pack/install/strict-TypeScript-consumer/runtime tests; a restricted InterfaceIR shape prototype passes its fixture and rejects a conditional-type example; and a small Resource/race trace model passes its Node tests. None is PSC-generated end-to-end application evidence.
 
 ## 20. Open status
 

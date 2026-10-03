@@ -344,16 +344,19 @@ def psKernelLevelInsertSorted
               tail)
 
 def psKernelLevelSortLevelsWorker
-    (remaining : List PsKernelLevel)
-    (acc : List PsKernelLevel) :
-    List PsKernelLevel :=
+    (remaining : List PsKernelLevel) :
+    List PsKernelLevel -> List PsKernelLevel :=
   match remaining with
   | List.nil =>
-      acc
+      fun (acc : List PsKernelLevel) =>
+        acc
   | List.cons head tail =>
-      psKernelLevelSortLevelsWorker
-        tail
-        (psKernelLevelInsertSorted head acc)
+      let smaller :
+          List PsKernelLevel -> List PsKernelLevel :=
+        psKernelLevelSortLevelsWorker tail;
+      fun (acc : List PsKernelLevel) =>
+        smaller
+          (psKernelLevelInsertSorted head acc)
 
 def psKernelLevelSortLevels
     (values : List PsKernelLevel) :
@@ -430,29 +433,46 @@ def psKernelLevelTrimExplicit
       else
         List.cons maximum rest
 
+def psKernelLevelDedupOffsetsWorkerCore
+    (rest : List PsKernelLevel) :
+    PsKernelLevel ->
+    List PsKernelLevel ->
+    List PsKernelLevel :=
+  match rest with
+  | List.nil =>
+      fun
+        (current : PsKernelLevel)
+        (rev : List PsKernelLevel) =>
+        List.reverse
+          (List.cons current rev)
+  | List.cons next tail =>
+      let smaller :
+          PsKernelLevel ->
+          List PsKernelLevel ->
+          List PsKernelLevel :=
+        psKernelLevelDedupOffsetsWorkerCore tail;
+      fun
+        (current : PsKernelLevel)
+        (rev : List PsKernelLevel) =>
+        if
+            psKernelLevelEq
+              (psKernelLevelToOffset current).fst
+              (psKernelLevelToOffset next).fst then
+          smaller next rev
+        else
+          smaller
+            next
+            (List.cons current rev)
+
 def psKernelLevelDedupOffsetsWorker
     (current : PsKernelLevel)
     (rest : List PsKernelLevel)
     (rev : List PsKernelLevel) :
     List PsKernelLevel :=
-  match rest with
-  | List.nil =>
-      List.reverse
-        (List.cons current rev)
-  | List.cons next tail =>
-      if
-          psKernelLevelEq
-            (psKernelLevelToOffset current).fst
-            (psKernelLevelToOffset next).fst then
-        psKernelLevelDedupOffsetsWorker
-          next
-          tail
-          rev
-      else
-        psKernelLevelDedupOffsetsWorker
-          next
-          tail
-          (List.cons current rev)
+  psKernelLevelDedupOffsetsWorkerCore
+    rest
+    current
+    rev
 
 def psKernelLevelDedupOffsets
     (values : List PsKernelLevel) :
@@ -615,24 +635,27 @@ def psKernelLevelEquivalent
 
 def psKernelNameLookupLevel
     (name : PsKernelName)
-    (params : List PsKernelName)
-    (values : List PsKernelLevel) :
-    Option PsKernelLevel :=
+    (params : List PsKernelName) :
+    List PsKernelLevel -> Option PsKernelLevel :=
   match params with
   | List.nil =>
-      Option.none
+      fun (_values : List PsKernelLevel) =>
+        Option.none
   | List.cons param restParams =>
-      match values with
-      | List.nil =>
-          Option.none
-      | List.cons value restValues =>
-          if psKernelNameEq name param then
-            Option.some value
-          else
-            psKernelNameLookupLevel
-              name
-              restParams
-              restValues
+      let smaller :
+          List PsKernelLevel -> Option PsKernelLevel :=
+        psKernelNameLookupLevel
+          name
+          restParams;
+      fun (values : List PsKernelLevel) =>
+        match values with
+        | List.nil =>
+            Option.none
+        | List.cons value restValues =>
+            if psKernelNameEq name param then
+              Option.some value
+            else
+              smaller restValues
 
 def psKernelLevelInstantiateParams
     (root : PsKernelLevel)

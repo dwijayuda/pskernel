@@ -1,4 +1,5 @@
 import { mkdir, mkdtemp, readFile, rm, rename } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -9,8 +10,18 @@ import { checkedKernelDescriptor, defaultCheckedKernel } from './checked-kernel-
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 let base;
-const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+
+function runNpm(args, cwd = root) {
+  if (process.platform !== 'win32') return run('npm', args, cwd);
+  const candidates = [
+    path.join(path.dirname(process.execPath), 'node_modules/npm/bin/npm-cli.js'),
+    ...(process.env.APPDATA ? [path.join(process.env.APPDATA, 'npm/node_modules/npm/bin/npm-cli.js')] : []),
+  ];
+  const cli = candidates.find(candidate => existsSync(candidate));
+  if (!cli) throw new Error('PSC2_CHECKED_NPM_CLI_MISSING');
+  return run(process.execPath, [cli, ...args], cwd);
+}
 
 function run(command, args, cwd = root) {
   const result = spawnSync(command, args, {
@@ -51,8 +62,8 @@ async function promote(staging, name) {
 async function bootstrap(kernel) {
   // Fail fast on the real PSC1 project parse/elaboration gate before the
   // broader bootstrap suite or the longer checked seed session.
-  run(npm, ['run', 'bootstrap:check']);
-  run(npm, ['run', 'bootstrap:lean']);
+  runNpm(['run', 'bootstrap:check']);
+  runNpm(['run', 'bootstrap:lean']);
   const hostTargets = kernel === 'lean434'
     ? ['build', 'psc2_lean_checked_seed', 'psc2_lean_kernel_provider']
     : ['build', 'psc2_lean_checked_seed'];

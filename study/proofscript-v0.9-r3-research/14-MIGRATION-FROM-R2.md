@@ -18,7 +18,7 @@ f(())
 
 in r3.
 
-The new r3 `f()` empty-invocation semantics (defaults/auto insertion plus one possible Unit synthesis, with required-non-Unit rejection) is available only to source authored/accepted under r3. Migration does not silently reinterpret an old empty call.
+The new r3 `f()` empty-invocation semantics (native optional/automatic completion through high-level ellipsis, with ordinary required explicit arguments rejected) is available only to source authored/accepted under r3. Migration does not silently reinterpret an old empty call.
 
 r2 native f (x,y), which means one tuple argument, becomes:
 

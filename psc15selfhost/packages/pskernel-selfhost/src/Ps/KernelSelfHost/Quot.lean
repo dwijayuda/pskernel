@@ -56,7 +56,7 @@ def psKernelEqName : PsKernelName :=
 def psKernelExpectedEqType
     (universeName : PsKernelName) :
     PsKernelExpr :=
-  let universe :=
+  let universeLevel :=
     PsKernelLevel.param universeName;
   let alphaName :=
     psKernelQuotInternalName
@@ -70,7 +70,7 @@ def psKernelExpectedEqType
         PsKernelName.str
           PsKernelName.anonymous
           "α"
-      type := PsKernelExpr.sort universe
+      type := PsKernelExpr.sort universeLevel
       binderInfo := PsKernelBinderInfo.implicit
     };
   psKernelCloseOpenBinders
@@ -85,7 +85,7 @@ def psKernelExpectedEqType
 def psKernelExpectedEqReflType
     (universeName : PsKernelName) :
     PsKernelExpr :=
-  let universe :=
+  let universeLevel :=
     PsKernelLevel.param universeName;
   let alphaName :=
     psKernelQuotInternalName
@@ -104,7 +104,7 @@ def psKernelExpectedEqReflType
         PsKernelName.str
           PsKernelName.anonymous
           "α"
-      type := PsKernelExpr.sort universe
+      type := PsKernelExpr.sort universeLevel
       binderInfo := PsKernelBinderInfo.implicit
     };
   let valueBinder : PsKernelOpenBinder :=
@@ -121,7 +121,7 @@ def psKernelExpectedEqReflType
     psKernelApplyArgs
       (PsKernelExpr.const
         psKernelEqName
-        (List.cons universe List.nil))
+        (List.cons universeLevel List.nil))
       (List.cons
         alpha
         (List.cons
@@ -211,7 +211,7 @@ def psKernelCheckEqForQuot
 def psKernelMakeQuotType
     (universeName : PsKernelName) :
     PsKernelExpr :=
-  let universe :=
+  let universeLevel :=
     PsKernelLevel.param universeName;
   let alphaName :=
     psKernelQuotInternalName "quot.alpha";
@@ -228,7 +228,7 @@ def psKernelMakeQuotType
         PsKernelName.str
           PsKernelName.anonymous
           "α"
-      type := PsKernelExpr.sort universe
+      type := PsKernelExpr.sort universeLevel
       binderInfo := PsKernelBinderInfo.implicit
     };
   let relationBinder : PsKernelOpenBinder :=
@@ -251,12 +251,12 @@ def psKernelMakeQuotType
     (List.cons
       alphaBinder
       (List.cons relationBinder List.nil))
-    (PsKernelExpr.sort universe)
+    (PsKernelExpr.sort universeLevel)
 
 def psKernelMakeQuotMkType
     (universeName : PsKernelName) :
     PsKernelExpr :=
-  let universe :=
+  let universeLevel :=
     PsKernelLevel.param universeName;
   let alphaName :=
     psKernelQuotInternalName "mk.alpha";
@@ -277,7 +277,7 @@ def psKernelMakeQuotMkType
         PsKernelName.str
           PsKernelName.anonymous
           "α"
-      type := PsKernelExpr.sort universe
+      type := PsKernelExpr.sort universeLevel
       binderInfo := PsKernelBinderInfo.implicit
     };
   let relationBinder : PsKernelOpenBinder :=
@@ -310,7 +310,7 @@ def psKernelMakeQuotMkType
     psKernelApplyArgs
       (PsKernelExpr.const
         psKernelQuotName
-        (List.cons universe List.nil))
+        (List.cons universeLevel List.nil))
       (List.cons
         alpha
         (List.cons relation List.nil));
@@ -326,7 +326,7 @@ def psKernelMakeQuotLiftType
     (universeName : PsKernelName)
     (resultUniverseName : PsKernelName) :
     PsKernelExpr :=
-  let universe :=
+  let universeLevel :=
     PsKernelLevel.param universeName;
   let resultUniverse :=
     PsKernelLevel.param resultUniverseName;
@@ -359,7 +359,7 @@ def psKernelMakeQuotLiftType
     psKernelApplyArgs
       (PsKernelExpr.const
         psKernelQuotName
-        (List.cons universe List.nil))
+        (List.cons universeLevel List.nil))
       (List.cons
         alpha
         (List.cons relation List.nil));
@@ -368,7 +368,7 @@ def psKernelMakeQuotLiftType
       internalName := alphaName
       userName :=
         PsKernelName.str PsKernelName.anonymous "α"
-      type := PsKernelExpr.sort universe
+      type := PsKernelExpr.sort universeLevel
       binderInfo := PsKernelBinderInfo.implicit
     };
   let relationBinder : PsKernelOpenBinder :=
@@ -458,7 +458,7 @@ def psKernelMakeQuotLiftType
 def psKernelMakeQuotIndType
     (universeName : PsKernelName) :
     PsKernelExpr :=
-  let universe :=
+  let universeLevel :=
     PsKernelLevel.param universeName;
   let alphaName :=
     psKernelQuotInternalName "ind.alpha";
@@ -488,7 +488,7 @@ def psKernelMakeQuotIndType
     psKernelApplyArgs
       (PsKernelExpr.const
         psKernelQuotName
-        (List.cons universe List.nil))
+        (List.cons universeLevel List.nil))
       (List.cons
         alpha
         (List.cons relation List.nil));
@@ -497,7 +497,7 @@ def psKernelMakeQuotIndType
       internalName := alphaName
       userName :=
         PsKernelName.str PsKernelName.anonymous "α"
-      type := PsKernelExpr.sort universe
+      type := PsKernelExpr.sort universeLevel
       binderInfo := PsKernelBinderInfo.implicit
     };
   let relationBinder : PsKernelOpenBinder :=
@@ -532,7 +532,7 @@ def psKernelMakeQuotIndType
     psKernelApplyArgs
       (PsKernelExpr.const
         psKernelQuotMkName
-        (List.cons universe List.nil))
+        (List.cons universeLevel List.nil))
       (List.cons
         alpha
         (List.cons

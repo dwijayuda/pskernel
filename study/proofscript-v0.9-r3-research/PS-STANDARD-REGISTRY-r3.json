@@ -171,5 +171,52 @@
     "axiomPolicy",
     "compilerRevision",
     "checkerRevision"
-  ]
+  ],
+  "optionPolicy": {
+    "allowedOptionUniverse": "options registered by the exact Standard registration closure",
+    "unknownOption": "reject",
+    "cacheRelevantOptionsMustBeIdentityBound": true,
+    "hostSecurityOptionsMayNotBeEnabledBySemanticImports": true
+  },
+  "attributePolicy": {
+    "allowedAttributeNames": [
+      "simp",
+      "instance",
+      "default_instance",
+      "inline",
+      "macro_inline",
+      "reducible",
+      "irreducible",
+      "deprecated",
+      "inherit_doc",
+      "pp_nodot"
+    ],
+    "newAttributeHandlerRegistration": false
+  },
+  "tacticPolicy": {
+    "fixedHeads": [
+      "rfl",
+      "exact",
+      "apply",
+      "intro",
+      "intros",
+      "assumption",
+      "constructor",
+      "cases",
+      "induction",
+      "rw",
+      "simp",
+      "simp_all",
+      "unfold",
+      "change",
+      "have",
+      "show",
+      "suffices",
+      "decide",
+      "omega",
+      "grind"
+    ],
+    "dependencyMayAddTacticSyntax": false,
+    "dependencyMayReplaceTacticElaborator": false
+  }
 }

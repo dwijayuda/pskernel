@@ -1257,6 +1257,7 @@ It must accept the native Lean spellings corresponding to the psc2-language-v1 s
 
 Required compatibility families:
 
+- ordinary import and public import module headers;
 - def, theorem, example, abbrev, opaque, axiom;
 - supported declaration modifiers;
 - explicit, implicit, strict-implicit, and instance binders;

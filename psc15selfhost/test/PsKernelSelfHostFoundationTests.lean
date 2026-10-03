@@ -336,4 +336,3 @@ def main : IO Unit :=
     IO.println
       "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"
 
-[executed on device: box (459eb03d-a4f9-4033-b2ed-5fa4ec9998df)]

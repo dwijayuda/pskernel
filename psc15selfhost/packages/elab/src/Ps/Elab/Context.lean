@@ -60,6 +60,7 @@ def psElabContextWithMeta
     instances := context.instances
     metaContext := metaContext
     structuralRecursion := context.structuralRecursion
+    namespacePrefix := context.namespacePrefix
   }
 
 def psElabContextWithStructuralRecursion

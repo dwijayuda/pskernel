@@ -55,9 +55,9 @@ Normative keywords:
 22. Canonical examples
 23. Non-goals and explicit exclusions
 24. Evidence status of this reference
-25. Final implementation directive
-26. Full parser algorithm and grammar summary
-27. Generated machine-readable mirror policy
+25. Parser algorithm and grammar summary
+26. Generated machine-readable mirror policy
+27. Final implementation directive
 
 ## Glossary
 
@@ -129,21 +129,21 @@ ProofScript deliberately does not import the following JavaScript/TypeScript sem
 
 **[NORMATIVE ASSURANCE]**
 
-r3 is a complete normative delta over one exact earlier experimental syntax artifact.
+r3 is a complete normative delta over one exact  artifact.
 
 Authority order **inside this standalone file** for ps-0.9-r3:
 
 1. Parts I–XXV of this document;
 2. embedded r3 Appendices A–J for the specific domains they define;
-3. embedded Appendix K, the exact earlier experimental syntax baseline, for every rule not overridden by r3;
+3. embedded Appendix K, the exact  baseline, for every rule not overridden by r3;
 4. the pinned Lean 4.34 source/environment as the semantic oracle for inherited Lean theory/implementation details;
 5. non-normative examples/research rationale.
 
 No separate ProofScript document is required to resolve the r3 language contract.
 
-If this document is silent about an earlier experimental syntax semantic rule, the earlier experimental syntax rule remains normative unchanged unless the inheritance matrix explicitly marks it otherwise.
+If this document is silent about an  semantic rule, the  rule remains normative unchanged unless the inheritance matrix explicitly marks it otherwise.
 
-This preserves the detailed earlier experimental syntax requirements for:
+This preserves the detailed  requirements for:
 
 - lexical syntax;
 - native categories and precedence;
@@ -2603,7 +2603,7 @@ If a source case is unclear:
 
 1. consult the relevant main section of this document;
 2. consult the embedded r3 appendices in this file;
-3. if the rule is inherited, consult the embedded exact earlier experimental syntax baseline in Appendix K;
+3. if the rule is inherited, consult the embedded exact  baseline in Appendix K;
 4. use the pinned Lean 4.34 implementation only as the semantic oracle for inherited Lean details;
 5. if still unsupported or genuinely unspecified, reject/raise a specification issue.
 
@@ -3031,7 +3031,7 @@ This document establishes:
 - accepted r3 design;
 - exact source/profile rules at specification level;
 - exact call/brace/default behavior at specification level;
-- complete earlier experimental syntax-delta authority;
+- complete standalone language authority;
 - compiler phase/invariant requirements;
 - stable pure contract semantics;
 - application semantic architecture;
@@ -3059,9 +3059,9 @@ Those require their own evidence.
 
 ---
 
-# Part XXVI — Parser algorithm and grammar summary
+# Part XXV — Parser algorithm and grammar summary
 
-## 123. Completed-head postfix parsing
+## 122. Completed-head postfix parsing
 
 **[NORMATIVE LANGUAGE]**
 
@@ -3096,7 +3096,7 @@ The owned call suffix is:
 
 This algorithm defines ownership/grouping, not a required parser implementation technology.
 
-## 124. Core owned grammar summary
+## 123. Core owned grammar summary
 
 **[NORMATIVE LANGUAGE]**
 
@@ -3142,7 +3142,9 @@ BracedIf :=
 
 A structure/class trailing field comma is rejected.
 
-## 125. Machine-readable mirror policy
+# Part XXVI — Machine-readable mirror policy
+
+## 124. Generated mirror authority
 
 **[NORMATIVE ASSURANCE]**
 
@@ -3186,14 +3188,13 @@ Representative mirror:
 
 # Part XXVII — Final implementation directive
 
+## 125. Single-source compiler-design rule
 
-## 122. Single-source compiler-design rule
-
-**[INFORMATIVE]**
+**[IMPLEMENTATION GUIDANCE]**
 
 For an AI or human designing the ProofScript compiler:
 
-1. implement only behavior specified here or inherited by the exact earlier experimental syntax/Lean authorities named here;
+1. implement only behavior specified here or inherited directly from the pinned Lean 4.34.0 semantic environment as this document permits;
 2. preserve phase separation;
 3. preserve exact source/environment identity;
 4. use category-aware parsing and structural AST lowering;

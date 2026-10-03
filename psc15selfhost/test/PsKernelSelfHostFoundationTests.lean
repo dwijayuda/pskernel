@@ -1,5 +1,5 @@
-import Ps.KernelSelfHost.Name
-import PSC1Kernel.Name
+import Ps.KernelSelfHost.Level
+import PSC1Kernel.Level
 
 def psKernelNameToReference
     (name : PsKernelName) : PSC1Kernel.Name :=
@@ -106,10 +106,100 @@ def psKernelSelfHostNameTests : Bool :=
           psKernelNameTestRoot
           psKernelNameTestReplacement)))
 
+def psKernelLevelToReference
+    (level : PsKernelLevel) : PSC1Kernel.Level :=
+  match level with
+  | PsKernelLevel.zero =>
+      PSC1Kernel.Level.zero
+  | PsKernelLevel.succ inner =>
+      PSC1Kernel.Level.succ
+        (psKernelLevelToReference inner)
+  | PsKernelLevel.max left right =>
+      PSC1Kernel.Level.max
+        (psKernelLevelToReference left)
+        (psKernelLevelToReference right)
+  | PsKernelLevel.imax left right =>
+      PSC1Kernel.Level.imax
+        (psKernelLevelToReference left)
+        (psKernelLevelToReference right)
+  | PsKernelLevel.param name =>
+      PSC1Kernel.Level.param
+        (psKernelNameToReference name)
+  | PsKernelLevel.mvar name =>
+      PSC1Kernel.Level.mvar
+        (psKernelNameToReference name)
+
+def psKernelLevelDifferentialCase
+    (left right : PsKernelLevel) : Bool :=
+  let referenceLeft :=
+    psKernelLevelToReference left
+  let referenceRight :=
+    psKernelLevelToReference right
+  let normalizedPortable :=
+    psKernelLevelToReference
+      (psKernelLevelNormalize left)
+  let normalizedReference :=
+    PSC1Kernel.Level.normalize referenceLeft
+  Bool.and
+    ((psKernelLevelEquivalent left right) ==
+      (PSC1Kernel.Level.equivalent
+        referenceLeft
+        referenceRight))
+    (Bool.and
+      ((psKernelLevelLe left right) ==
+        (PSC1Kernel.Level.le
+          referenceLeft
+          referenceRight))
+      (PSC1Kernel.Level.eq
+        normalizedPortable
+        normalizedReference))
+
+def psKernelLevelParamU : PsKernelLevel :=
+  PsKernelLevel.param
+    (PsKernelName.str
+      PsKernelName.anonymous
+      "u")
+
+def psKernelLevelParamV : PsKernelLevel :=
+  PsKernelLevel.param
+    (PsKernelName.str
+      PsKernelName.anonymous
+      "v")
+
+def psKernelSelfHostLevelTests : Bool :=
+  let explicitTwo :=
+    PsKernelLevel.succ
+      (PsKernelLevel.succ
+        PsKernelLevel.zero)
+  let left :=
+    PsKernelLevel.max
+      (PsKernelLevel.succ psKernelLevelParamU)
+      explicitTwo
+  let right :=
+    PsKernelLevel.imax
+      psKernelLevelParamV
+      (PsKernelLevel.succ PsKernelLevel.zero)
+  Bool.and
+    (psKernelLevelDifferentialCase
+      PsKernelLevel.zero
+      PsKernelLevel.zero)
+    (Bool.and
+      (psKernelLevelDifferentialCase
+        left
+        left)
+      (psKernelLevelDifferentialCase
+        left
+        right))
+
 def main : IO Unit :=
-  if psKernelSelfHostNameTests then
-    IO.println "PSC1_KERNEL_SELFHOST_NAME_DIFFERENTIAL: PASS"
-  else
+  if !psKernelSelfHostNameTests then
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_NAME_DIFFERENTIAL: FAIL")
+  else if !psKernelSelfHostLevelTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_LEVEL_DIFFERENTIAL: FAIL")
+  else
+    IO.println
+      "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"

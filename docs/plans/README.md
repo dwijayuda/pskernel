@@ -46,5 +46,6 @@ See:
 - `03_COMPILER_RUNTIME_BACKENDS.md`
 - `04_LANGUAGE_SERVICE_AND_TOOLING.md`
 - `05_RELEASE_AND_ASSURANCE.md`
+- `08_JS_PLATFORM_PROFILE.md` — `psc-js-platform-v1`, the non-language profile for TypeScript-replacement capability
 
 The source-derived Lean subsystem mapping is in `../LEAN_PACKAGE_ROADMAP.md`.

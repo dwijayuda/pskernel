@@ -195,7 +195,7 @@ partial def isDefEqStateful
   else
     return (false, state)
 
-private def cacheInferStatefulResult
+def cacheInferStatefulResult
     (state : CheckerState)
     (inferOnly : Bool)
     (e result : Expr) : CheckerState :=
@@ -204,7 +204,7 @@ private def cacheInferStatefulResult
   else
     { state with checkedInfer := CheckerExprMap.insert state.checkedInfer e result }
 
-private def ensureSortStatefulResult
+def ensureSortStatefulResult
     (ctx : CheckerContext)
     (state : CheckerState)
     (type : Expr) : Except String (Level × CheckerState) := do

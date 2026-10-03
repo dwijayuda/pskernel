@@ -1,142 +1,123 @@
-# ProofScript v0.9 r3 Accepted Design Workstream
+# ProofScript v0.9 r3 Language Research Workstream
 
-Status: **accepted and specification-complete r3 documentation baseline; not a compiler release or proof of soundness**  
-Branch: <code>research/proofscript-v0.9-r3</code>  
-Semantic pin: Lean 4.34.0, commit <code>293d5d0c0c3f3dded4688b3ccd6a33939ac5102b</code>
+Status: **accepted language specification plus supporting research/protocol documents; not an implementation release**  
+Branch: research/proofscript-v0.9-r3  
+Semantic pin: Lean 4.34.0, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
 
-## Primary reference for humans and AI/compiler agents
+## Language authority
 
-The sole normative ProofScript r3 language/compiler-design document is:
+The sole normative authority for ProofScript source syntax and language semantics on this branch is:
 
 ~~~text
 ProofScript_Language_Reference_v0.9.0_r3.md
 ~~~
 
-It is now a **clean standalone specification**. It does not require earlier ProofScript references, revision notes, audits, or companion design documents to determine language meaning.
+The reference is standalone and language-only. It contains:
 
-It contains the language surface, grammar/ownership model, type/runtime semantics, Standard/Extensible profiles, contracts, application model, InterfaceIR/npm boundary, compiler pipeline, admission/erasure/backend obligations, diagnostics, formatting, evidence model, conformance rules, and explicit AI/compiler implementation guidance.
+- language/profile identities;
+- lexical and source rules;
+- declarations and binders;
+- terms and application;
+- structures/classes/inductives/patterns;
+- recursion and basic do semantics;
+- primitive/data semantics;
+- proof source;
+- pure contract syntax/meaning;
+- exact psc2-language-v1 coverage;
+- exact lean-subset-psc2-v1 boundaries;
+- psc2-standard-language-v1 language-facing closure;
+- Post-PSC2 language candidates;
+- owned grammar and canonical examples.
 
-Other files in this directory are research history, focused maintenance views, machine-readable mirrors, or future evidence plans. They MUST NOT override the main reference.
+It intentionally does **not** define compiler architecture, self-host sequencing, backend architecture, cache layout, compiler IR implementation, release evidence, or package implementation.
 
-The main reference also distinguishes the language edition <code>ps-0.9-r3</code> from the implementation profile <code>psc2-compiler-v1</code>, the bounded Lean frontend <code>lean-subset-psc2-v1</code>, libraries/prover packages/extensions/plugins, and post-PSC2 platform work.
+No companion document may override language meaning.
 
-## Mission
-
-This workstream researched the r3 surface/platform revision and now records the accepted r3 design baseline without changing ProofScript's logical foundation.
-
-The invariant is:
+## PSC2 language identities
 
 ~~~text
-.ps source
-  -> category-aware ProofScript parsing
-  -> owned surface AST
-  -> explicit Lean-compatible lowering
-  -> Lean-compatible elaboration
-  -> candidate declarations
-  -> genuine kernel admission
-  -> CheckedModule
-  -> justified erasure/runtime lowering
-  -> RuntimeIR
-  -> target lowering / validation
-  -> JS / Wasm / optional other artifacts
+ps-0.9-r3
+ps-standard-0.9-r3
+ps-lean-extensible-0.9-r3
+
+psc2-language-v1
+psc2-standard-language-v1
+lean-subset-psc2-v1
+psc2-pattern-v1
 ~~~
 
-The project does **not** equate parser success, elaboration, proof acceptance, compiler correctness, backend correctness, self-hosting, hashes, tests, or AI confidence.
-## Accepted research decisions
+psc2-compiler-v1 is a compiler/product claim. Its source-language requirement is exactly psc2-language-v1.
 
-The r3 study was organized around ten linked decisions, now accepted as the r3 design baseline:
+psc2-standard-v1 is a packaged distribution claim. Its language-facing Standard profile is psc2-standard-language-v1; libraries/provers/runtimes remain separately versioned packages rather than hidden additions to the base language.
 
-1. Make native <code>.ps</code> parenthesized calls insensitive to ordinary trivia, with explicit tuple grouping.
-2. Make ProofScript-owned braces genuinely structural instead of visually brace-delimited but secretly layout-delimited.
-3. Accept <code>function f()</code> as zero-source-argument sugar backed by a native optional Unit default.
-4. Retain <code>const</code> in r3 while keeping a pre-stable usability review.
-5. Separate <code>ps-standard</code> from <code>ps-lean-extensible</code> without weakening the type theory.
-6. Define stable PSC-owned contracts rather than relying semantically on experimental Lean intrinsic verification.
-7. Freeze one application error/resource/async model.
-8. Define a versioned npm / <code>.d.ts</code> boundary and exercise it with applications.
-9. Adopt the first formal overlay theorem and backend-preservation slice as future evidence obligations.
-10. Adopt the TypeScript-developer usability study protocol as a pre-stable/1.0 evidence gate.
+## Post-PSC2 language roadmap
 
-## Accepted r3 direction
+Language evolution after PSC2 is isolated in:
 
-The following research results are accepted into r3:
+~~~text
+POST_PSC2_LANGUAGE_ROADMAP.md
+~~~
 
-- use the r3 parenthesized-call surface rule: ordinary allowed trivia before <code>(</code> does not change call meaning, and a tuple argument requires explicit extra grouping;
-- keep <code>.lean</code> native Lean syntax while supporting only the explicit bounded <code>lean-subset-psc2-v1</code> compatibility profile in the PSC2 compiler;
-- make owned brace bodies explicitly delimited with category-specific separators; structure/class fields use commas only **between** fields, with no trailing field comma;
-- add zero-source-argument function sugar via a native optional Unit default, integrated with the general empty-call/default-completion rule;
-- retain top-level <code>const</code> in r3, while keeping it subject to reconsideration before stable/1.0 if usability evidence shows harmful false familiarity;
-- freeze a closed-syntax Standard profile and a separately extensible Lean-oriented profile;
-- define contracts as ordinary checkable logical artifacts tied to the actual implementation;
-- standardize <code>App</code>, <code>Fiber</code>, <code>Resource</code>, <code>Stream</code>, and explicit execution outcomes as library/runtime concepts, not kernel primitives.
-## Evidence discipline
+That roadmap discusses only future language candidates such as richer matching, imperative-looking sugar, richer verification syntax, application-effect syntax, controlled extensions, UI dialects, larger Lean compatibility profiles, and possible systems-language surfaces.
 
-Each decision document distinguishes:
+Compiler/platform sequencing belongs in the implementation plans, not the language roadmap.
 
-- **research evidence**: source/reference reading or precedent;
-- **design decision**: a proposed language contract;
-- **prototype evidence**: a parser/runtime experiment;
-- **native oracle evidence**: an exact pinned Lean run;
-- **formal theorem**: a theorem checked by the selected proof checker;
-- **differential evidence**: agreement between implementations on a test corpus;
-- **usability evidence**: observations from human participants;
-- **unproved assumption**: an explicit remaining boundary.
+## Machine-readable mirrors
 
-A green test does not promote itself into a theorem.
+These files mirror selected current profile rules:
 
-## Document map
+- FEATURE-REGISTRY-r3.json
+- PS-STANDARD-REGISTRY-r3.json
 
-- <code>01-DESIGN-CONSTITUTION.md</code> — constraints and decision criteria.
-- <code>02-DCALL-DESIGN.md</code> — r3 call ownership and migration.
-- <code>03-BRACES-AND-LAYOUT.md</code> — structural brace grammar.
-- <code>04-ZERO-ARG-FUNCTIONS.md</code> — Unit-function sugar.
-- <code>05-CONST-DECISION.md</code> — retain/remove analysis.
-- <code>06-STANDARD-VS-EXTENSIBLE-PROFILES.md</code> — two source profiles.
-- <code>07-CONTRACTS-AND-SPECIFICATIONS.md</code> — stable PSC contracts.
-- <code>08-APPLICATION-EFFECTS-ASYNC-RESOURCES.md</code> — standard application model.
-- <code>09-NPM-DTS-INTEROP.md</code> — InterfaceIR and JS/TS boundaries.
-- <code>10-REFERENCE-APPLICATIONS.md</code> — application corpus, acceptance criteria, and future prototype plan.
-- <code>11-FORMAL-OVERLAY-PROOF.md</code> — proposed first overlay theorem and proof plan.
-- <code>12-BACKEND-PRESERVATION-SLICE.md</code> — proposed first backend-preservation theorem plan.
-- <code>13-USABILITY-STUDY.md</code> — human-study protocol and status.
-- <code>14-MIGRATION-FROM-R2.md</code> — edition-aware migration.
-- <code>15-CONFORMANCE-PLAN.md</code> — parser/runtime/proof matrices.
-- <code>16-OPEN-QUESTIONS.md</code> — unresolved items.
-- <code>DECISIONS.md</code> — compact decision ledger.
-- <code>MANIFEST.json</code> — machine-readable identities and evidence.
-- <code>RESEARCH-SOURCES.md</code> — local and current official research sources.
-- <code>ProofScript_Language_Reference_v0.9.0_r3.md</code> — accepted integrated r3 language/design reference.
-- <code>R3-ACCEPTANCE.md</code> — acceptance record and evidence boundary.
-- <code>R3-SPEC-COMPLETION-PROMPT.md</code> — reusable AI prompt for the focused completion pass.
-- <code>R3-AUTHORITY-AND-DELTA.md</code> — complete-delta authority over immutable r2.
-- <code>R3-R2-INHERITANCE-MATRIX.md</code> — all 89 r2 sections classified as inherited/amended/overridden.
-- <code>R3-GRAMMAR-AND-FEATURE-REGISTRY.md</code> / <code>FEATURE-REGISTRY-r3.json</code> — exact overlay grammar and feature IDs.
-- <code>PS-STANDARD-REGISTRY-r3.json</code> — fixed Standard parser/tactic/extension policy.
-- <code>SEMANTIC-BUNDLE-v1.md</code> / schema — Extensible-to-Standard checked semantic import protocol.
-- <code>INTERFACEIR-v1.md</code> / schema — concrete npm/TypeScript binding interchange format.
-- <code>23-PRE-STABLE-EVIDENCE-GATES.md</code> — consolidated usability/formal/runtime/interop/application gates before stable/1.0.
-- <code>R3-SPEC-COMPLETION-REPORT.md</code> — methodology, resolved gaps, and evidence boundary for the focused completion pass.
-## Research sources
+They are not independent language authorities. If a mirror disagrees with the language reference, the mirror is wrong and must be regenerated/fixed.
 
-Primary local sources remain the repository's pinned <code>study/</code> material: the v0.7 language lineage, Lean 4.34 parser/source, the Lean language-reference mirror, TypeScript documentation mirror, Lean4Lean divergence notes, theorem-proving material, and language-design books.
+The active feature registry contains only current feature/profile identities. Historical inheritance and retired feature identities are research history, not active language definition.
 
-Current official sources are used when current ecosystem behavior matters. In particular:
+## Scoped companion protocols
 
-- Lean function application and extensible syntax: https://lean-lang.org/doc/reference/latest/
-- TypeScript handbook and compatibility: https://www.typescriptlang.org/docs/
-- Go specification and engineering account: https://go.dev/ref/spec and https://go.dev/talks/2012/splash.article
-- ReScript interop and JSX: https://rescript-lang.org/docs/
-- Gleam externals: https://gleam.run/documentation/externals/
-- F* proof-oriented programming: https://fstar-lang.org/tutorial/book/
-- Verus guide: https://verus-lang.github.io/verus/guide/
-- Dafny guide: https://dafny.org/dafny/OnlineTutorial/guide
-- Koka effect research: https://koka-lang.github.io/koka/
-- WebAssembly Component Model async/WASI: https://component-model.bytecodealliance.org/
+These documents may be normative for their own protocol, but are not source-language authorities:
 
-Source popularity is not a language-design proof.
+- INTERFACEIR-v1.md / INTERFACEIR-v1.schema.json — foreign npm/TypeScript binding protocol;
+- SEMANTIC-BUNDLE-v1.md / SEMANTIC-BUNDLE-v1.schema.json — checked semantic import protocol;
+- 23-PRE-STABLE-EVIDENCE-GATES.md — release/evidence policy.
 
-## Repository safety
+Application runtime semantics are researched separately in:
 
-This directory is additive. It must not overwrite v0.7, v0.9-r2, compiler code, kernel code, or main-branch policy. r3 syntax is not activated merely because this documentation exists.
+~~~text
+08-APPLICATION-EFFECTS-ASYNC-RESOURCES.md
+~~~
 
-The r3 design is accepted and the identified specification gaps are resolved at documentation/specification level. Implementation, formal proof, complete-application, and human-usability evidence remain separate future work and are not implied by specification completion.
+They remain library/runtime semantics unless a future language profile adds syntax over them.
+
+## Implementation and planning documents
+
+Compiler architecture, bootstrap/self-host work, RuntimeIR/backends, tooling, packages, and platform plans remain under docs/ and PSC2 Lang/.
+
+They are implementation or research inputs. They may explain how to implement the language, but they cannot add source constructs or change source meaning.
+
+In particular, a feature found in Lean 4 is not automatically:
+
+- a psc2-language-v1 feature;
+- a psc2-compiler-v1 requirement;
+- a ps-standard feature.
+
+Every language-facing capability must have explicit profile ownership.
+
+## Research history
+
+The numbered research files, decision ledger, acceptance report, old PSC2 research drafts, migration studies, and baseline snapshots are retained to explain why decisions were made.
+
+They are not needed to interpret a current ProofScript program.
+
+## Current completeness criterion
+
+The source-language design is considered closed for this edition when every relevant capability is:
+
+1. defined by the main reference;
+2. explicitly included from the pinned native semantic categories;
+3. selected by the closed Standard language profile;
+4. assigned to a separate extensible profile;
+5. listed as Post-PSC2 language work; or
+6. explicitly excluded.
+
+This is intentionally not Lean feature-count parity. Libraries, prover packages, official extensions, plugins, and foreign interfaces are expected to provide substantial user-facing power without turning every facility into compiler-core syntax.

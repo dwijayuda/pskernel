@@ -178,6 +178,10 @@ lean_lib PSC1KernelReferenceFoundations where
     `PSC1Kernel.Expr
   ]
 
+lean_lib PSC1KernelSelfHost where
+  srcDir := "packages/pskernel"
+  roots := #[`PSC1KernelSelfHost]
+
 @[default_target]
 lean_exe psc1 where
   srcDir := "packages/cli/src"

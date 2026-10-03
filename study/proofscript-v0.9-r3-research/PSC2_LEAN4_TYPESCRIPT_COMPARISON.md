@@ -280,11 +280,38 @@ TypeScript has no exact equivalent; imports or qualified names are used.
 
 ## 5.6 include / omit
 
-Lean proof/declaration source can use <code>include</code> and <code>omit</code> around section variables.
+Lean:
 
-ProofScript includes these only where meaningful in the selected native category.
+~~~lean
+section
+variable {α : Type}
+variable (x : α)
 
-TypeScript has no equivalent.
+include x
+-- declarations here may force x into generated declaration dependencies
+
+omit x
+-- declarations here may omit it when otherwise unused
+
+end
+~~~
+
+ProofScript uses the selected native family:
+
+~~~proofscript
+section
+variable {α: Type}
+variable (x: α)
+
+include x
+-- supported declaration source
+
+omit x
+
+end
+~~~
+
+TypeScript has no equivalent section-variable dependency-control command.
 
 ## 5.7 universe declarations
 
@@ -1528,11 +1555,52 @@ TypeScript has no genuine equivalent. Literal-number generics and tuple-length t
 
 # 32. Constructors and projections
 
-Lean constructors/projections are generated from inductive/structure declarations.
+Lean:
 
-ProofScript inherits that logical meaning and allows constructor applications/projections through the selected source subset.
+~~~lean
+structure User where
+  id : Nat
+  name : String
 
-TypeScript object constructors/property access are only runtime/structural analogues.
+def u : User := { id := 1, name := "Alice" }
+
+#check User.mk
+#check u.id
+~~~
+
+ProofScript:
+
+~~~proofscript
+structure User where {
+  id: Nat,
+  name: String
+}
+
+const u: User := {
+  id := 1,
+  name := "Alice"
+}
+
+const id: Nat := {
+  u.id
+}
+~~~
+
+Constructors and projections retain selected Lean-compatible declaration/type meaning.
+
+TypeScript closest:
+
+~~~ts
+interface User {
+  id: number;
+  name: string;
+}
+
+const u: User = { id: 1, name: "Alice" };
+const id: number = u.id;
+~~~
+
+TypeScript object construction/property access is a runtime/structural analogue only.
 
 ---
 
@@ -1667,14 +1735,53 @@ Lean:
 
 ~~~lean
 mutual
-  def even ...
-  def odd ...
+  def even : Nat → Bool
+    | 0 => true
+    | n + 1 => odd n
+
+  def odd : Nat → Bool
+    | 0 => false
+    | n + 1 => even n
 end
 ~~~
 
-ProofScript supports explicit <code>mutual</code> for selected declaration forms.
+ProofScript uses explicit <code>mutual</code> for the supported declaration subset. A representative PSC form is:
 
-TypeScript permits mutually recursive functions through ordinary name resolution/runtime semantics.
+~~~proofscript
+mutual
+  function even(n: Nat): Bool := {
+    if (n == 0) {
+      true
+    } else {
+      odd(n - 1)
+    }
+  }
+
+  function odd(n: Nat): Bool := {
+    if (n == 0) {
+      false
+    } else {
+      even(n - 1)
+    }
+  }
+end
+~~~
+
+The exact accepted recursive bodies must still satisfy the selected PSC termination/partial rules.
+
+TypeScript:
+
+~~~ts
+function even(n: number): boolean {
+  return n === 0 ? true : odd(n - 1);
+}
+
+function odd(n: number): boolean {
+  return n === 0 ? false : even(n - 1);
+}
+~~~
+
+TypeScript permits mutual recursion through ordinary runtime/name semantics and does not prove termination.
 
 ## 36.4 arbitrary well-founded recursion
 
@@ -2150,11 +2257,33 @@ TypeScript has no constructive-vs-classical proof distinction.
 
 # 52. Attributes
 
-Lean:
+Lean declaration attribute:
 
 ~~~lean
 @[simp]
-theorem ...
+theorem add_zero' (n : Nat) : n + 0 = n := by
+  simp
+~~~
+
+Lean attribute command:
+
+~~~lean
+attribute [simp] someTheorem
+~~~
+
+ProofScript declaration attribute:
+
+~~~proofscript
+@[simp]
+theorem addZero(n: Nat): n + 0 = n := by {
+  simp
+}
+~~~
+
+ProofScript attribute command over a registered Standard attribute:
+
+~~~proofscript
+attribute [simp] someTheorem
 ~~~
 
 ProofScript Standard fixed attribute names:
@@ -2174,7 +2303,14 @@ pp_nodot
 
 ProofScript dependencies cannot register arbitrary new Standard attribute handlers.
 
-TypeScript closest concepts include decorators and declaration modifiers, but they are not theorem/elaboration attribute registries.
+TypeScript closest concepts include decorators and declaration modifiers:
+
+~~~ts
+@decorator
+class Example {}
+~~~
+
+but TypeScript decorators are not theorem/elaboration attribute registries and do not have Lean/PSC proof meaning.
 
 ---
 
@@ -2238,9 +2374,23 @@ Lean:
 #eval expr
 ~~~
 
-ProofScript recognizes these as tooling-profile commands, **not** <code>psc2-language-v1</code> program declarations.
+ProofScript tooling-profile spelling:
 
-TypeScript uses compiler/editor/tool operations rather than analogous source commands.
+~~~proofscript
+#check foo
+#print foo
+#reduce expr
+#eval expr
+~~~
+
+These are **not** <code>psc2-language-v1</code> program declarations; they are development/tooling commands.
+
+TypeScript uses compiler/editor/tool operations rather than analogous source commands, for example:
+
+~~~text
+tsc --noEmit
+editor hover / go-to-definition / type display
+~~~
 
 ---
 

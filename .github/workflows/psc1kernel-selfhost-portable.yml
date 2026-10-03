@@ -75,6 +75,10 @@ jobs:
       - name: Require canonical ProofScript translation
         run: |
           set -euo pipefail
-          lake exe psc1 translate             packages/pskernel-selfhost/src/PsKernel/Name.lean             --to ps             --out /tmp/PsKernel.Name.ps
-          test -s /tmp/PsKernel.Name.ps
-          lake exe psc1 check /tmp/PsKernel.Name.ps
+          for module in Name Level Expr Instantiate; do
+            source="packages/pskernel-selfhost/src/Ps/KernelSelfHost/${module}.lean"
+            output="/tmp/Ps.KernelSelfHost.${module}.ps"
+            lake exe psc1 translate "${source}" --to ps --out "${output}"
+            test -s "${output}"
+            lake exe psc1 check "${output}"
+          done

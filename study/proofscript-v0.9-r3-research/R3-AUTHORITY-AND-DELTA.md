@@ -1,6 +1,8 @@
 # r3 Authority and Complete r2 Delta
 
-Status: **normative for the accepted `ps-0.9-r3` documentation baseline**
+Status: **historical specification-construction record; non-normative for current ps-0.9-r3 source meaning**
+
+> The current standalone authority is `ProofScript_Language_Reference_v0.9.0_r3.md`. The r2-delta mechanism described below is retained only to document how the earlier research draft was assembled; current r3 does not depend on it.
 
 ## 1. Why r3 is defined as a complete delta
 

@@ -163,6 +163,7 @@ Required patterns:
 |---|---|
 | identifiers/literals/comments | required |
 | modules/imports/qualified names | required |
+| public import / transitive re-export | required |
 | namespace/section/open/variable/include/omit/universe | required |
 | private visibility | required |
 | registered attributes | required |
@@ -235,6 +236,7 @@ These IDs are the current machine-readable r3 feature/profile identifiers. They 
 | Feature ID | Meaning |
 |---|---|
 | <code>L-CORE-LEAN</code> | explicitly included pinned Lean semantic categories |
+| <code>M-PUBLIC-IMPORT-R3</code> | Lean-compatible <code>public import</code> module re-export |
 | <code>D-CONST-ALIAS</code> | <code>const</code> parameterless-definition alias |
 | <code>D-FUNCTION-ALIAS-R3</code> | <code>function</code> declaration alias |
 | <code>D-FUNCTION-UNIT-R3</code> | zero-source-argument <code>function f()</code> sugar |
@@ -337,25 +339,64 @@ CallGap permits inherited horizontal space/comments that do not contain a physic
 
 # 6. Modules and names
 
-## 6.1 import
+## 6.1 Ordinary import
 
 ~~~proofscript
 import Std.Data.List
 import MyProject.Util
 ~~~
 
-Imports affect the selected semantic environment.
+An ordinary `import M` makes `M`'s public declarations available to the current module.
 
-They do not grant new Standard parser registrations.
+It does **not** re-export `M` as part of the current module's public dependency surface.
 
-## 6.2 Qualified names
+Imports do not grant new Standard parser registrations.
+
+## 6.2 public import
+
+~~~proofscript
+public import Public.Core
+public import Public.Data
+~~~
+
+`public import M` imports `M` and re-exports the public declarations reachable through `M`'s public-import closure.
+
+Rules:
+
+- ordinary top-level declarations are public unless marked `private`;
+- `private` declarations are never exported or re-exported;
+- ordinary `import` does not re-export;
+- `public import` does re-export;
+- `open` affects local name resolution only and never re-exports;
+- re-export preserves declaration identity;
+- ambiguous imported/re-exported names reject deterministically.
+
+PSC2 does not require TypeScript/ECMAScript-style selective export lists, default exports, or namespace exports as core syntax.
+
+A curated public API should use a facade module:
+
+~~~proofscript
+import Internal.BigModule
+
+def selectedValue := Internal.BigModule.selectedValue
+theorem selectedLaw := Internal.BigModule.selectedLaw
+~~~
+
+or intentionally public-import whole public modules:
+
+~~~proofscript
+public import Public.Core
+public import Public.Data
+~~~
+
+## 6.3 Qualified names
 
 ~~~proofscript
 Foo.Bar.value
 Namespace.Type.constructor
 ~~~
 
-## 6.3 One authoritative source per module
+## 6.4 One authoritative source per module
 
 A logical module resolves to one selected source.
 
@@ -2404,6 +2445,9 @@ function debit(balance: Nat, amount: Nat): Except String Nat
 ContractClause :=
     "requires" PSTerm
   | "ensures" Ident "=>" PSTerm
+
+ContractedFunction :=
+  FunctionHeader ContractClause* DefinitionBody
 ~~~
 
 ## 107.4 Semantics

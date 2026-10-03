@@ -197,6 +197,66 @@ def psKernelSimpleUniformParamArgsMatch
     offset
     index
 
+def psKernelSimpleCheckUniformOccurrenceHead
+    (declaredNames : List PsKernelName)
+    (expectedLevels : List PsKernelLevel)
+    (numParams : Nat)
+    (expr : PsKernelExpr)
+    (offset : Nat) :
+    Except String Unit :=
+  match psKernelExprGetAppFn expr with
+  | PsKernelExpr.const name levels =>
+      let args :=
+        psKernelExprGetAppArgs expr;
+      let declared :=
+        psKernelSimpleDeclaredNameMember
+          name
+          declaredNames;
+      let shortEnough :=
+        Nat.ble
+          (psKernelExprListLength args)
+          numParams;
+      if declared then
+        if shortEnough then
+          let enoughOffset :=
+            psKernelNatGe offset numParams;
+          let fullParams :=
+            Nat.beq
+              (psKernelExprListLength args)
+              numParams;
+          let levelsOk :=
+            psKernelLevelListEq
+              levels
+              expectedLevels;
+          let argsOk :=
+            psKernelSimpleUniformParamArgsMatch
+              offset
+              args
+              0;
+          if enoughOffset then
+            if fullParams then
+              if levelsOk then
+                if argsOk then
+                  Except.ok ()
+                else
+                  Except.error
+                    "invalid occurrence of datatype being declared: it must be applied to the parameters and universe levels of the mutual declaration"
+              else
+                Except.error
+                  "invalid occurrence of datatype being declared: it must be applied to the parameters and universe levels of the mutual declaration"
+            else
+              Except.error
+                "invalid occurrence of datatype being declared: it must be applied to the parameters and universe levels of the mutual declaration"
+          else
+            Except.error
+              "invalid occurrence of datatype being declared: it must be applied to the parameters and universe levels of the mutual declaration"
+        else
+          Except.ok ()
+      else
+        Except.ok ()
+  | _ =>
+      Except.ok ()
+
 def psKernelSimpleCheckUniformOccurrenceWithFuel
     (fuel : Nat) :
     List PsKernelName ->
@@ -224,55 +284,14 @@ def psKernelSimpleCheckUniformOccurrenceWithFuel
         (numParams : Nat)
         (expr : PsKernelExpr)
         (offset : Nat) =>
-        let checkHead :=
-          match psKernelExprGetAppFn expr with
-          | PsKernelExpr.const name levels =>
-              let args :=
-                psKernelExprGetAppArgs expr;
-              if
-                  if
-                      psKernelSimpleDeclaredNameMember
-                        name
-                        declaredNames then
-                    Nat.ble
-                      (psKernelExprListLength args)
-                      numParams
-                  else
-                    false then
-                let enoughOffset :=
-                  psKernelNatGe offset numParams;
-                let fullParams :=
-                  Nat.beq
-                    (psKernelExprListLength args)
-                    numParams;
-                let levelsOk :=
-                  psKernelLevelListEq
-                    levels
-                    expectedLevels;
-                let argsOk :=
-                  psKernelSimpleUniformParamArgsMatch
-                    offset
-                    args
-                    0;
-                if
-                    if enoughOffset then
-                      if fullParams then
-                        if levelsOk then
-                          argsOk
-                        else
-                          false
-                      else
-                        false
-                    else
-                      false then
-                  Except.ok ()
-                else
-                  Except.error
-                    "invalid occurrence of datatype being declared: it must be applied to the parameters and universe levels of the mutual declaration"
-              else
-                Except.ok ()
-          | _ =>
-              Except.ok ();
+        let checkHead :
+            Except String Unit :=
+          psKernelSimpleCheckUniformOccurrenceHead
+            declaredNames
+            expectedLevels
+            numParams
+            expr
+            offset;
         match checkHead with
         | Except.error error =>
             Except.error error

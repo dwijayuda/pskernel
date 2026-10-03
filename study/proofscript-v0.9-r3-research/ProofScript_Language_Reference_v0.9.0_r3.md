@@ -237,8 +237,7 @@ Native .lean behavior is unchanged.
 
 Between a completed callable head and the opening parenthesis, r3 admits:
 
-- spaces;
-- horizontal tabs;
+- inherited horizontal Lean space trivia (ordinary spaces under the pinned lexer; r3 does not add tab-as-whitespace);
 - Lean comments as lexical trivia nodes.
 
 A bare source line terminator outside a comment is not CallGap.

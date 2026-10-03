@@ -180,7 +180,31 @@ lean_lib PSC1KernelReferenceFoundations where
 
 lean_lib PSC1KernelSelfHost where
   srcDir := "packages/pskernel"
-  roots := #[`PSC1KernelSelfHost]
+  roots := #[
+    `PSC1Kernel.Name,
+    `PSC1Kernel.Level,
+    `PSC1Kernel.Expr,
+    `PSC1Kernel.Instantiate,
+    `PSC1Kernel.Declaration,
+    `PSC1Kernel.Environment,
+    `PSC1Kernel.LocalContext,
+    `PSC1Kernel.TypeChecker,
+    `PSC1Kernel.CheckerState,
+    `PSC1Kernel.CheckerStateful,
+    `PSC1Kernel.CheckerReductionStateful,
+    `PSC1Kernel.CheckerLazyDeltaStateful,
+    `PSC1Kernel.CheckerDefEqStateful,
+    `PSC1Kernel.CheckerDefEqStatefulClosed,
+    `PSC1Kernel.CheckerDefEqStatefulReduced,
+    `PSC1Kernel.CheckerRecursorStateful,
+    `PSC1Kernel.CheckerSession,
+    `PSC1Kernel.Quot,
+    `PSC1Kernel.Kernel,
+    `PSC1Kernel.Inductive,
+    `PSC1Kernel.MutualInductive,
+    `PSC1Kernel.NestedInductive,
+    `PSC1KernelSelfHost
+  ]
 
 @[default_target]
 lean_exe psc1 where

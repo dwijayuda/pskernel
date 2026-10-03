@@ -30,7 +30,13 @@
         "typesEntry",
         "declarationFiles",
         "targetRuntime",
-        "targetPlatform"
+        "targetPlatform",
+        "installIdentity",
+        "resolverProfile",
+        "runtimeEntrySha256",
+        "typesEntrySha256",
+        "runtimeConditionTrace",
+        "typeConditionTrace"
       ],
       "properties": {
         "typescriptVersion": {
@@ -118,6 +124,36 @@
         "targetPlatform": {
           "type": "string",
           "minLength": 1
+        },
+        "installIdentity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lockfileSha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "resolverProfile": {
+          "const": "psc-node-exports-v1"
+        },
+        "runtimeEntrySha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "typesEntrySha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "runtimeConditionTrace": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "typeConditionTrace": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
         }
       }
     },

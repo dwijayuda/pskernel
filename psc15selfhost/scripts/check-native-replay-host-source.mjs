@@ -13,5 +13,10 @@ const host = await readFile(new URL('../host/src/Ps/Host/TypeScriptCompiler.lean
 assert(!host.includes('"npx"') && !host.includes('"npx.cmd"'));
 assert(host.includes('IO.FS.realPath candidate'));
 assert(host.includes('endsWith "/typescript/bin/tsc"'));
-assert(host.includes('cmd := "node"'));
-console.log('PSC2_NATIVE_REPLAY_HOST_SOURCE: PASS (installed TypeScript entry, exact payload transport and emission integrity)');
+assert(host.includes('PSC_TYPESCRIPT_NATIVE_TSC'));
+assert(host.includes('IO.appPath'));
+assert(host.includes('bundleRoot / "typescript" / "lib" / psTypeScriptNativeExecutableName'));
+assert(host.includes('cmd := tool.command'));
+assert(host.includes('tool.prefixArgs ++ #["--version"]'));
+assert(host.includes('require TypeScript 7.0.2'));
+console.log('PSC2_NATIVE_REPLAY_HOST_SOURCE: PASS (native TypeScript bundle first, pinned npm launcher fallback, exact payload transport and emission integrity)');

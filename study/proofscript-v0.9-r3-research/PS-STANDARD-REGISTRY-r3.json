@@ -123,7 +123,9 @@
   "fixedTacticHeads": [
     "rfl",
     "exact",
+    "exact?",
     "apply",
+    "refine",
     "intro",
     "intros",
     "assumption",
@@ -132,12 +134,24 @@
     "induction",
     "rw",
     "simp",
+    "simpa",
     "simp_all",
     "unfold",
     "change",
+    "dsimp",
     "have",
     "show",
     "suffices",
+    "by_cases",
+    "by_contra",
+    "exfalso",
+    "subst",
+    "generalize",
+    "rcases",
+    "rintro",
+    "obtain",
+    "use",
+    "ext",
     "decide",
     "omega",
     "grind"
@@ -188,5 +202,17 @@
     "#reduce",
     "#eval"
   ],
-  "toolingCommandsAreLanguage": false
+  "toolingCommandsAreLanguage": false,
+  "fixedTacticVariants": [
+    "simp only"
+  ],
+  "fixedProofCommandHeads": [
+    "classical"
+  ],
+  "nonStandardAutomation": [
+    "ring",
+    "linarith",
+    "SMT",
+    "AI/general proof search"
+  ]
 }

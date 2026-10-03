@@ -5,9 +5,9 @@ namespace PSC1Kernel
 
 namespace StatefulDefEqReduced
 
-abbrev DefEqFn := StatefulDefEq.DefEqFn
+def DefEqFn : Type := StatefulDefEq.DefEqFn
 
-private def finish
+def finish
     (state : CheckerState)
     (left right : Expr)
     (value : Bool) : Bool × CheckerState :=

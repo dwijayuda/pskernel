@@ -1,10 +1,16 @@
 # ProofScript PSC2
 
+> **Superseded research input for the r3 branch.** This file is preserved for historical design evidence and PSC2 feature research only. It is **not normative** for `ps-0.9-r3`, `psc2-compiler-v1`, or `lean-subset-psc2-v1`. The sole normative language/compiler-design authority on this branch is:
+>
+> `study/proofscript-v0.9-r3-research/ProofScript_Language_Reference_v0.9.0_r3.md`
+>
+> When this file conflicts with that standalone reference, the standalone reference wins. In particular, features may now be classified as compiler-owned, library-owned, Standard prover/extension, controlled plugin, bounded Lean compatibility, post-PSC2 platform work, or deferred.
+
 Status: **research-driven post-PSC1 profile draft**
 
 Base profile: [`PSC1 Lang`](../PSC1%20Lang/README.md)
 
-Primary normative draft: [PSC2_LANGUAGE_REFERENCE.md](./PSC2_LANGUAGE_REFERENCE.md)
+Former draft map: `PSC2_LANGUAGE_REFERENCE.md` and related files below are superseded research inputs; see the standalone r3 reference named above.
 
 PSC2 extends PSC1. It does **not** reopen or invalidate the PSC1 freeze.
 PSC1 remains the small bootstrap language and semantic foundation. PSC2 is the

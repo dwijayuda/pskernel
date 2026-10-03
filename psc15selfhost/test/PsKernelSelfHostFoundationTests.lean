@@ -1,4 +1,4 @@
-import PsKernel.Name
+import Ps.KernelSelfHost.Name
 import PSC1Kernel.Name
 
 def psKernelNameToReference

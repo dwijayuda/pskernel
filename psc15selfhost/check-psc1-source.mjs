@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { hasOpaqueSourceCommand } from './scripts/source-profile-opaque.mjs';
+import { auditPsc1Source } from "./scripts/psc1-source-profile.mjs";
 
 const scriptPath = fileURLToPath(import.meta.url);
 const workspaceRoot = path.dirname(scriptPath);
@@ -57,124 +57,14 @@ function walk(dir) {
 
 for (const sourceRoot of roots) walk(sourceRoot);
 
-function maskLeanNonCode(source) {
-  let output = "";
-  let index = 0;
-  let blockDepth = 0;
-  let inString = false;
-  let escaped = false;
-
-  while (index < source.length) {
-    const char = source[index];
-    const next = index + 1 < source.length ? source[index + 1] : "";
-
-    if (blockDepth > 0) {
-      if (char === "/" && next === "-") {
-        blockDepth += 1;
-        output += "  ";
-        index += 2;
-        continue;
-      }
-      if (char === "-" && next === "/") {
-        blockDepth -= 1;
-        output += "  ";
-        index += 2;
-        continue;
-      }
-      output += char === "\n" ? "\n" : " ";
-      index += 1;
-      continue;
-    }
-
-    if (inString) {
-      if (escaped) {
-        output += char === "\n" ? "\n" : " ";
-        escaped = false;
-        index += 1;
-        continue;
-      }
-      if (char === "\\") {
-        output += " ";
-        escaped = true;
-        index += 1;
-        continue;
-      }
-      if (char === "\"") {
-        output += " ";
-        inString = false;
-        index += 1;
-        continue;
-      }
-      output += char === "\n" ? "\n" : " ";
-      index += 1;
-      continue;
-    }
-
-    if (char === "-" && next === "-") {
-      output += "  ";
-      index += 2;
-      while (index < source.length && source[index] !== "\n") {
-        output += " ";
-        index += 1;
-      }
-      continue;
-    }
-
-    if (char === "/" && next === "-") {
-      blockDepth = 1;
-      output += "  ";
-      index += 2;
-      continue;
-    }
-
-    if (char === "\"") {
-      inString = true;
-      output += " ";
-      index += 1;
-      continue;
-    }
-
-    output += char;
-    index += 1;
-  }
-
-  return output;
-}
-
-const forbidden = [
-  [/(^|\n)\s*import\s+Lean(?:\.|\s|$)/, "Lean implementation import"],
-  [/(^|\n)\s*import\s+Std(?:\.|\s|$)/, "Std implementation import"],
-  [/\bunsafe\b/, "unsafe"],
-  [/\bimplemented_by\b/, "implemented_by"],
-  [/\bextern\b/, "extern"],
-  [/\bmacro_rules\b|\bmacro\b/, "macro"],
-  [/(^|\s)syntax(?:\s|$)/, "custom syntax"],
-  [/\belab_rules\b|\belab\b/, "custom elaborator"],
-  [/\brun_tac\b/, "run_tac"],
-  [/\bset_option\b/, "set_option"],
-  [/\bopen\s+scoped\b/, "open scoped"],
-  [/\bnamespace\b/, "namespace convenience"],
-  [/\bsection\b/, "section convenience"],
-  [/\babbrev\b/, "abbrev convenience"],
-  [{ test: hasOpaqueSourceCommand }, "opaque source convenience"],
-  [/\bmutual\b/, "mutual declaration convenience"],
-  [/\btermination_by\b|\bdecreasing_by\b/, "explicit termination machinery"],
-  [/\bIO(?:\.|\s|\b)/, "IO in portable semantic module"],
-  [/\bLean\./, "Lean implementation API"],
-  [/\bStd\./, "Std implementation API"],
-];
-
 let failed = false;
 for (const file of files) {
   const source = fs.readFileSync(file, "utf8");
-  const auditedSource = maskLeanNonCode(source);
-  for (const [pattern, label] of forbidden) {
-    if (pattern.test(auditedSource)) {
-      console.error(
-        `PSC1_SOURCE_PROFILE: ${path.relative(workspaceRoot, file)}: forbidden ${label}`,
-      );
-      failed = true;
-    }
+  for (const rule of auditPsc1Source(source)) {
+    console.error(
+      `PSC1_SOURCE_PROFILE: ${path.relative(workspaceRoot, file)}: forbidden ${rule.label}`,
+    );
+    failed = true;
   }
 }
 
@@ -182,7 +72,9 @@ if (files.length === 0) {
   console.error("PSC1_SOURCE_PROFILE: no portable Lean modules found");
   failed = true;
 }
+
 if (failed) process.exit(1);
+
 const scope = allPortable ? "all-portable" : "bootstrap";
 console.log(
   `PSC1_SOURCE_PROFILE: PASS (${scope}; ${files.length} portable modules across ${roots.length} source roots)`,

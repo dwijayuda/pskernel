@@ -786,9 +786,7 @@ def psKernelDefEqUnfold
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
     (expr : PsKernelExpr) :
-    Prod
-      (Option PsKernelExpr)
-      PsKernelCheckerState :=
+    Prod (Option PsKernelExpr) PsKernelCheckerState :=
   match
       psKernelExprMapGet
         PsKernelExpr

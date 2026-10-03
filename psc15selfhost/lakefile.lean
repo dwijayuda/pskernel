@@ -187,7 +187,8 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Instantiate,
     `Ps.KernelSelfHost.Declaration,
     `Ps.KernelSelfHost.LocalContext,
-    `Ps.KernelSelfHost.Environment
+    `Ps.KernelSelfHost.Environment,
+    `Ps.KernelSelfHost.CheckerState
   ]
 
 @[default_target]

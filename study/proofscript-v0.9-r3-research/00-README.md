@@ -16,7 +16,7 @@ The reference is standalone and language-only. It contains:
 
 - language/profile identities;
 - lexical and source rules;
-- declarations and binders;
+- declarations and binders, including equivalent `:= term` / `:= { term }` bodies for `def`, `const`, and `function`;
 - terms and application;
 - structures/classes/inductives/patterns;
 - recursion and basic do semantics;

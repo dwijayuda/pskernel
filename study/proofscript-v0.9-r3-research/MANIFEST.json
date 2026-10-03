@@ -91,5 +91,12 @@
       "bareLineTerminator": false,
       "tabsAddedByR3": false
     }
+  },
+  "primaryReference": {
+    "path": "ProofScript_Language_Reference_v0.9.0_r3.md",
+    "purpose": "single human and AI/compiler-design reference",
+    "includesCompilerImplementationContract": true,
+    "grammar": "ps-0.9-r3",
+    "semanticPin": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
   }
 }

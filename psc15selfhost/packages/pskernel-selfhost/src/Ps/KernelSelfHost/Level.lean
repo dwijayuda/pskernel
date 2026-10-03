@@ -106,7 +106,7 @@ def psKernelLevelToOffset
   match level with
   | PsKernelLevel.succ inner =>
       let pair := psKernelLevelToOffset inner;
-      Prod.mk pair.fst (Nat.succ pair.snd)
+      Prod.mk Prod.fst pair (Nat.succ Prod.snd pair)
   | _ =>
       Prod.mk level 0
 
@@ -123,7 +123,7 @@ def psKernelLevelAddOffset
 def psKernelLevelIsExplicit
     (level : PsKernelLevel) : Bool :=
   psKernelLevelIsZero
-    (psKernelLevelToOffset level).fst
+    Prod.fst (psKernelLevelToOffset level)
 
 def psKernelLevelMkMax
     (left : PsKernelLevel)
@@ -135,7 +135,7 @@ def psKernelLevelMkMax
         false then
     let leftPair := psKernelLevelToOffset left;
     let rightPair := psKernelLevelToOffset right;
-    if psKernelNatGe leftPair.snd rightPair.snd then left else right
+    if psKernelNatGe Prod.snd leftPair Prod.snd rightPair then left else right
   else if psKernelLevelEq left right then
     left
   else if psKernelLevelIsZero left then
@@ -163,15 +163,15 @@ def psKernelLevelMkMax
               else
                 let leftPair := psKernelLevelToOffset left;
                 let rightPair := psKernelLevelToOffset right;
-                if psKernelLevelEq leftPair.fst rightPair.fst then
-                  if psKernelNatGt leftPair.snd rightPair.snd then left else right
+                if psKernelLevelEq Prod.fst leftPair Prod.fst rightPair then
+                  if psKernelNatGt Prod.snd leftPair Prod.snd rightPair then left else right
                 else
                   PsKernelLevel.max left right
           | _ =>
               let leftPair := psKernelLevelToOffset left;
               let rightPair := psKernelLevelToOffset right;
-              if psKernelLevelEq leftPair.fst rightPair.fst then
-                if psKernelNatGt leftPair.snd rightPair.snd then left else right
+              if psKernelLevelEq Prod.fst leftPair Prod.fst rightPair then
+                if psKernelNatGt Prod.snd leftPair Prod.snd rightPair then left else right
               else
                 PsKernelLevel.max left right
     | _ =>
@@ -186,15 +186,15 @@ def psKernelLevelMkMax
             else
               let leftPair := psKernelLevelToOffset left;
               let rightPair := psKernelLevelToOffset right;
-              if psKernelLevelEq leftPair.fst rightPair.fst then
-                if psKernelNatGt leftPair.snd rightPair.snd then left else right
+              if psKernelLevelEq Prod.fst leftPair Prod.fst rightPair then
+                if psKernelNatGt Prod.snd leftPair Prod.snd rightPair then left else right
               else
                 PsKernelLevel.max left right
         | _ =>
             let leftPair := psKernelLevelToOffset left;
             let rightPair := psKernelLevelToOffset right;
-            if psKernelLevelEq leftPair.fst rightPair.fst then
-              if psKernelNatGt leftPair.snd rightPair.snd then left else right
+            if psKernelLevelEq Prod.fst leftPair Prod.fst rightPair then
+              if psKernelNatGt Prod.snd leftPair Prod.snd rightPair then left else right
             else
               PsKernelLevel.max left right
 
@@ -270,10 +270,10 @@ def psKernelLevelNormCmpWithFuel
         else
           let leftPair := psKernelLevelToOffset left;
           let rightPair := psKernelLevelToOffset right;
-          let leftRoot := leftPair.fst;
-          let rightRoot := rightPair.fst;
+          let leftRoot := Prod.fst leftPair;
+          let rightRoot := Prod.fst rightPair;
           if psKernelLevelEq leftRoot rightRoot then
-            psKernelNatCmp leftPair.snd rightPair.snd
+            psKernelNatCmp Prod.snd leftPair Prod.snd rightPair
           else if
               psKernelNatLt
                 (psKernelLevelKindRank leftRoot)
@@ -451,7 +451,7 @@ def psKernelLevelAnyOffsetAtLeast
   | List.nil =>
       false
   | List.cons head tail =>
-      if psKernelNatGe (psKernelLevelToOffset head).snd minimum then
+      if psKernelNatGe Prod.snd (psKernelLevelToOffset head) minimum then
         true
       else
         psKernelLevelAnyOffsetAtLeast
@@ -467,7 +467,7 @@ def psKernelLevelTrimExplicit
   | Option.none =>
       values
   | Option.some maximum =>
-      let amount := (psKernelLevelToOffset maximum).snd;
+      let amount := Prod.snd (psKernelLevelToOffset maximum);
       if psKernelLevelAnyOffsetAtLeast rest amount then
         rest
       else
@@ -496,8 +496,8 @@ def psKernelLevelDedupOffsetsWorkerCore
         (rev : List PsKernelLevel) =>
         if
             psKernelLevelEq
-              (psKernelLevelToOffset current).fst
-              (psKernelLevelToOffset next).fst then
+              Prod.fst (psKernelLevelToOffset current)
+              Prod.fst (psKernelLevelToOffset next) then
           smaller next rev
         else
           smaller
@@ -544,8 +544,8 @@ def psKernelLevelMkMaxList
 partial def psKernelLevelNormalize
     (level : PsKernelLevel) : PsKernelLevel :=
   let pair := psKernelLevelToOffset level;
-  let root := pair.fst;
-  let amount := pair.snd;
+  let root := Prod.fst pair;
+  let amount := Prod.snd pair;
   match root with
   | PsKernelLevel.zero =>
       level
@@ -612,21 +612,21 @@ partial def psKernelLevelGeqCore
                 psKernelLevelToOffset fallbackRight;
               if
                   if psKernelLevelEq
-                      leftPair.fst
-                      rightPair.fst then
+                      Prod.fst leftPair
+                      Prod.fst rightPair then
                     true
                   else
                     psKernelLevelIsZero
-                      rightPair.fst then
-                psKernelNatGe leftPair.snd rightPair.snd
+                      Prod.fst rightPair then
+                psKernelNatGe Prod.snd leftPair Prod.snd rightPair
               else if
-                  if Nat.beq leftPair.snd rightPair.snd then
-                    psKernelNatGt leftPair.snd 0
+                  if Nat.beq Prod.snd leftPair Prod.snd rightPair then
+                    psKernelNatGt Prod.snd leftPair 0
                   else
                     false then
                 psKernelLevelGeqCore
-                  leftPair.fst
-                  rightPair.fst
+                  Prod.fst leftPair
+                  Prod.fst rightPair
               else
                 false;
   if

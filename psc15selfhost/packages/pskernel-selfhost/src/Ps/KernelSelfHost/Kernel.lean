@@ -631,111 +631,142 @@ def psKernelAddOpaque
                           "opaque value type mismatch"
 
 def psKernelMutualWorkEnvironment
-    (values : List PsKernelDefinitionInfo)
-    (environment : PsKernelEnvironment) :
-    PsKernelEnvironment :=
+    (values : List PsKernelDefinitionInfo) :
+    PsKernelEnvironment -> PsKernelEnvironment :=
   match values with
   | List.nil =>
-      environment
+      fun (environment : PsKernelEnvironment) =>
+        environment
   | List.cons value rest =>
-      psKernelMutualWorkEnvironment
-        rest
-        (psKernelEnvironmentAddUnchecked
-          environment
-          (PsKernelConstantInfo.defnInfo value))
+      let smaller :
+          PsKernelEnvironment -> PsKernelEnvironment :=
+        psKernelMutualWorkEnvironment rest;
+      fun (environment : PsKernelEnvironment) =>
+        smaller
+          (psKernelEnvironmentAddUnchecked
+            environment
+            (PsKernelConstantInfo.defnInfo value))
 
 def psKernelCheckMutualHeaders
-    (fuel : Nat)
-    (environment : PsKernelEnvironment)
-    (first : PsKernelDefinitionInfo)
-    (maxRecDepth : Nat)
-    (maxNatSize : Nat)
-    (seen : List PsKernelName)
     (values : List PsKernelDefinitionInfo) :
+    Nat ->
+    PsKernelEnvironment ->
+    PsKernelDefinitionInfo ->
+    Nat ->
+    Nat ->
+    List PsKernelName ->
     Except String Unit :=
   match values with
   | List.nil =>
-      Except.ok ()
+      fun
+        (_fuel : Nat)
+        (_environment : PsKernelEnvironment)
+        (_first : PsKernelDefinitionInfo)
+        (_maxRecDepth : Nat)
+        (_maxNatSize : Nat)
+        (_seen : List PsKernelName) =>
+        Except.ok ()
   | List.cons value rest =>
-      if
-          psKernelSafetyEq
-            value.safety
-            first.safety then
+      let smaller :=
+        psKernelCheckMutualHeaders rest;
+      fun
+        (fuel : Nat)
+        (environment : PsKernelEnvironment)
+        (first : PsKernelDefinitionInfo)
+        (maxRecDepth : Nat)
+        (maxNatSize : Nat)
+        (seen : List PsKernelName) =>
         if
-            psKernelNameListsEq
-              value.base.levelParams
-              first.base.levelParams then
+            psKernelSafetyEq
+              value.safety
+              first.safety then
           if
-              psKernelNameMember
-                value.base.name
-                seen then
-            Except.error
-              "invalid mutual definition, duplicate declaration name"
-          else
-            let session :=
-              psKernelMkCheckerSession
-                environment
+              psKernelNameListsEq
                 value.base.levelParams
-                first.safety
-                maxRecDepth
-                maxNatSize;
-            match
-                psKernelCheckConstantBaseWithSession
-                  fuel
-                  session
-                  value.base with
-            | Except.error error =>
-                Except.error error
-            | Except.ok _ =>
-                psKernelCheckMutualHeaders
-                  fuel
+                first.base.levelParams then
+            if
+                psKernelNameMember
+                  value.base.name
+                  seen then
+              Except.error
+                "invalid mutual definition, duplicate declaration name"
+            else
+              let session :=
+                psKernelMkCheckerSession
                   environment
-                  first
+                  value.base.levelParams
+                  first.safety
                   maxRecDepth
-                  maxNatSize
-                  (List.cons value.base.name seen)
-                  rest
+                  maxNatSize;
+              match
+                  psKernelCheckConstantBaseWithSession
+                    fuel
+                    session
+                    value.base with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok _ =>
+                  smaller
+                    fuel
+                    environment
+                    first
+                    maxRecDepth
+                    maxNatSize
+                    (List.cons value.base.name seen)
+          else
+            Except.error
+              "invalid mutual definition, declarations must have the same universe level parameters"
         else
           Except.error
-            "invalid mutual definition, declarations must have the same universe level parameters"
-      else
-        Except.error
-          "invalid mutual definition, declarations must have the same safety annotation"
+            "invalid mutual definition, declarations must have the same safety annotation"
 
 def psKernelCheckMutualBodies
-    (fuel : Nat)
-    (environment : PsKernelEnvironment)
-    (safety : PsKernelDefinitionSafety)
-    (maxRecDepth : Nat)
-    (maxNatSize : Nat)
     (values : List PsKernelDefinitionInfo) :
+    Nat ->
+    PsKernelEnvironment ->
+    PsKernelDefinitionSafety ->
+    Nat ->
+    Nat ->
     Except String Unit :=
   match values with
   | List.nil =>
-      Except.ok ()
+      fun
+        (_fuel : Nat)
+        (_environment : PsKernelEnvironment)
+        (_safety : PsKernelDefinitionSafety)
+        (_maxRecDepth : Nat)
+        (_maxNatSize : Nat) =>
+        Except.ok ()
   | List.cons value rest =>
-      let session :=
-        psKernelMkCheckerSession
-          environment
-          value.base.levelParams
-          safety
-          maxRecDepth
-          maxNatSize;
-      match
-          psKernelCheckDefinitionBodyWithSession
-            fuel
-            session
-            value with
-      | Except.error error =>
-          Except.error error
-      | Except.ok _ =>
-          psKernelCheckMutualBodies
-            fuel
+      let smaller :=
+        psKernelCheckMutualBodies rest;
+      fun
+        (fuel : Nat)
+        (environment : PsKernelEnvironment)
+        (safety : PsKernelDefinitionSafety)
+        (maxRecDepth : Nat)
+        (maxNatSize : Nat) =>
+        let session :=
+          psKernelMkCheckerSession
             environment
+            value.base.levelParams
             safety
             maxRecDepth
-            maxNatSize
-            rest
+            maxNatSize;
+        match
+            psKernelCheckDefinitionBodyWithSession
+              fuel
+              session
+              value with
+        | Except.error error =>
+            Except.error error
+        | Except.ok _ =>
+            smaller
+              fuel
+              environment
+              safety
+              maxRecDepth
+              maxNatSize
 
 def psKernelAddMutualDefinitions
     (fuel : Nat)
@@ -757,13 +788,13 @@ def psKernelAddMutualDefinitions
       else
         match
             psKernelCheckMutualHeaders
+              values
               fuel
               environment
               first
               maxRecDepth
               maxNatSize
-              List.nil
-              values with
+              List.nil with
         | Except.error error =>
             Except.error error
         | Except.ok _ =>
@@ -773,12 +804,12 @@ def psKernelAddMutualDefinitions
                 environment;
             match
                 psKernelCheckMutualBodies
+                  values
                   fuel
                   work
                   first.safety
                   maxRecDepth
-                  maxNatSize
-                  values with
+                  maxNatSize with
             | Except.error error =>
                 Except.error error
             | Except.ok _ =>

@@ -914,6 +914,88 @@ def psKernelMakeSimpleRecursiveCalls
     recLevels
     fixed
 
+def psKernelMakeSimpleRecursorRulesWorker
+    (shapes : List PsKernelSimpleConstructorShape) :
+    PsKernelName ->
+    List PsKernelLevel ->
+    List PsKernelOpenBinder ->
+    PsKernelExpr ->
+    List PsKernelOpenBinder ->
+    List PsKernelOpenBinder ->
+    List PsKernelOpenBinder ->
+    List PsKernelRecursorRule :=
+  match shapes with
+  | List.nil =>
+      fun
+        (_recName : PsKernelName)
+        (_recLevels : List PsKernelLevel)
+        (_params : List PsKernelOpenBinder)
+        (_motive : PsKernelExpr)
+        (_allMinors : List PsKernelOpenBinder)
+        (_ruleBinders : List PsKernelOpenBinder)
+        (_minors : List PsKernelOpenBinder) =>
+        List.nil
+  | List.cons shape shapeRest =>
+      let smaller :
+          PsKernelName ->
+          List PsKernelLevel ->
+          List PsKernelOpenBinder ->
+          PsKernelExpr ->
+          List PsKernelOpenBinder ->
+          List PsKernelOpenBinder ->
+          List PsKernelOpenBinder ->
+          List PsKernelRecursorRule :=
+        psKernelMakeSimpleRecursorRulesWorker shapeRest;
+      fun
+        (recName : PsKernelName)
+        (recLevels : List PsKernelLevel)
+        (params : List PsKernelOpenBinder)
+        (motive : PsKernelExpr)
+        (allMinors : List PsKernelOpenBinder)
+        (ruleBinders : List PsKernelOpenBinder)
+        (minors : List PsKernelOpenBinder) =>
+        match minors with
+        | List.nil =>
+            List.nil
+        | List.cons minor minorRest =>
+            let recursiveCalls :=
+              psKernelMakeSimpleRecursiveCalls
+                recName
+                recLevels
+                params
+                motive
+                allMinors
+                shape;
+            let args :=
+              psKernelExprListAppend
+                (psKernelSimpleFieldArgs shape)
+                recursiveCalls;
+            let body :=
+              psKernelApplyArgs
+                (PsKernelExpr.fvar
+                  minor.internalName)
+                args;
+            let binders :=
+              psKernelOpenBinderListAppend
+                ruleBinders
+                shape.fields;
+            List.cons
+              (PsKernelRecursorRule.mk
+                shape.ctor.name
+                (psKernelOpenBinderListLength
+                  shape.fields)
+                (psKernelCloseOpenLambdas
+                  binders
+                  body))
+              (smaller
+                recName
+                recLevels
+                params
+                motive
+                allMinors
+                ruleBinders
+                minorRest)
+
 def psKernelMakeSimpleRecursorRules
     (recName : PsKernelName)
     (recLevels : List PsKernelLevel)
@@ -924,52 +1006,15 @@ def psKernelMakeSimpleRecursorRules
     (shapes : List PsKernelSimpleConstructorShape)
     (minors : List PsKernelOpenBinder) :
     List PsKernelRecursorRule :=
-  match shapes with
-  | List.nil =>
-      List.nil
-  | List.cons shape shapeRest =>
-      match minors with
-      | List.nil =>
-          List.nil
-      | List.cons minor minorRest =>
-          let recursiveCalls :=
-            psKernelMakeSimpleRecursiveCalls
-              recName
-              recLevels
-              params
-              motive
-              allMinors
-              shape;
-          let args :=
-            psKernelExprListAppend
-              (psKernelSimpleFieldArgs shape)
-              recursiveCalls;
-          let body :=
-            psKernelApplyArgs
-              (PsKernelExpr.fvar
-                minor.internalName)
-              args;
-          let binders :=
-            psKernelOpenBinderListAppend
-              ruleBinders
-              shape.fields;
-          List.cons
-            (PsKernelRecursorRule.mk
-              shape.ctor.name
-              (psKernelOpenBinderListLength
-                shape.fields)
-              (psKernelCloseOpenLambdas
-                binders
-                body))
-            (psKernelMakeSimpleRecursorRules
-              recName
-              recLevels
-              params
-              motive
-              allMinors
-              ruleBinders
-              shapeRest
-              minorRest)
+  psKernelMakeSimpleRecursorRulesWorker
+    shapes
+    recName
+    recLevels
+    params
+    motive
+    allMinors
+    ruleBinders
+    minors
 
 def psKernelValidateSimpleRecursorRules
     (fuel : Nat)

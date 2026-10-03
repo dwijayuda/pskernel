@@ -516,6 +516,36 @@ def psKernelSessionWithLocal
     (Prod.fst opened)
     nextSession
 
+def psKernelOpenBindersResult
+    (session : PsKernelCheckerSession)
+    (revBinders : List PsKernelOpenBinder)
+    (result : PsKernelExpr) :
+    Except String PsKernelOpenBindersResult :=
+  Except.ok
+    (PsKernelOpenBindersResult.mk
+      session
+      (List.reverse revBinders)
+      result)
+
+def psKernelFinishOpenBindersWithWhnf
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (type : PsKernelExpr)
+    (revBinders : List PsKernelOpenBinder) :
+    Except String PsKernelOpenBindersResult :=
+  match
+      psKernelSessionWhnf
+        fuel
+        session
+        type with
+  | Except.error error =>
+      Except.error error
+  | Except.ok reduced =>
+      psKernelOpenBindersResult
+        (Prod.snd reduced)
+        revBinders
+        (Prod.fst reduced)
+
 def psKernelOpenSimpleHeaderParamStep
     (fuel : Nat)
     (session : PsKernelCheckerSession)
@@ -593,19 +623,11 @@ def psKernelOpenSimpleHeaderParamsWorker
         (session : PsKernelCheckerSession)
         (type : PsKernelExpr)
         (revParams : List PsKernelOpenBinder) =>
-        match
-            psKernelSessionWhnf
-              fuel
-              session
-              type with
-        | Except.error error =>
-            Except.error error
-        | Except.ok reduced =>
-            Except.ok
-              (PsKernelOpenBindersResult.mk
-                (Prod.snd reduced)
-                (List.reverse revParams)
-                (Prod.fst reduced))
+        psKernelFinishOpenBindersWithWhnf
+          fuel
+          session
+          type
+          revParams
   | Nat.succ remaining =>
       let smaller :
           Nat ->
@@ -727,11 +749,10 @@ def psKernelOpenSimpleHeaderIndicesWithFuel
                             (PsKernelExpr.fvar fresh))
                           (List.cons binder revIndices)
             | _ =>
-                Except.ok
-                  (PsKernelOpenBindersResult.mk
-                    (Prod.snd reduced)
-                    (List.reverse revIndices)
-                    current)
+                psKernelOpenBindersResult
+                  (Prod.snd reduced)
+                  revIndices
+                  current
 
 def psKernelOpenSimpleHeaderIndices
     (fuel : Nat)

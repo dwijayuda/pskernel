@@ -1,13 +1,18 @@
 {
-  "schemaVersion": "proofscript-standard-registry-2",
+  "schemaVersion": "proofscript-standard-language-registry-1",
   "registryId": "ps-standard-0.9-r3",
   "grammarRevision": "ps-0.9-r3",
   "semanticPin": {
     "leanVersion": "4.34.0",
     "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
   },
-  "parserModel": "closed-snapshot-independent-of-package-import-side-effects",
-  "allowDependencySyntaxMutation": false,
+  "authority": "ProofScript_Language_Reference_v0.9.0_r3.md",
+  "languageCapabilityProfile": "psc2-language-v1",
+  "standardLanguageProfile": "psc2-standard-language-v1",
+  "leanCompatibilityProfile": "lean-subset-psc2-v1",
+  "patternProfile": "psc2-pattern-v1",
+  "closedGrammar": true,
+  "dependencyMayMutateGrammar": false,
   "allowedSurfaceFeatures": [
     "E-CALL-PARENS-R3",
     "E-EMPTY-CALL-R3",
@@ -25,6 +30,7 @@
     "E-MATCH-BODY-R3",
     "E-INSTANCE-BODY-R3",
     "E-WHERE-BODY-R3",
+    "N-BASIC-DO-PSC2",
     "S-PURE-CONTRACT-R3"
   ],
   "allowedCommandHeads": [
@@ -53,6 +59,14 @@
     "attribute",
     "set_option"
   ],
+  "allowedDeclarationModifiers": [
+    "private",
+    "partial",
+    "noncomputable"
+  ],
+  "excludedDeclarationModifiers": [
+    "unsafe"
+  ],
   "allowedTermFamilies": [
     "identifier",
     "literal",
@@ -79,6 +93,33 @@
     "show",
     "suffices"
   ],
+  "patternFamilies": [
+    "variable",
+    "wildcard",
+    "constructor",
+    "nested-constructor",
+    "tuple-product",
+    "supported-literal",
+    "single-scrutinee-match"
+  ],
+  "basicDoProfile": {
+    "semantics": "selected native Bind/Pure sequencing",
+    "requiredForms": [
+      "term-statement",
+      "simple-let",
+      "identifier-or-wildcard-monadic-bind",
+      "return-or-pure-completion"
+    ],
+    "excludedForms": [
+      "refutable-pattern-bind",
+      "let-mut",
+      "assignment",
+      "for",
+      "while",
+      "break",
+      "continue"
+    ]
+  },
   "fixedTacticHeads": [
     "rfl",
     "exact",
@@ -101,6 +142,7 @@
     "omega",
     "grind"
   ],
+  "dependencyMayAddTacticSyntax": false,
   "allowedAttributeNames": [
     "simp",
     "instance",
@@ -113,6 +155,18 @@
     "inherit_doc",
     "pp_nodot"
   ],
+  "dependencyMayRegisterAttributeHandler": false,
+  "optionPolicy": {
+    "allowed": "options selected by the fixed Standard registration closure",
+    "unknown": "reject",
+    "dependencyMayRegisterOption": false
+  },
+  "operatorPolicy": {
+    "source": "fixed Standard registration closure",
+    "dependencyMayAddOperatorNotation": false,
+    "propositionEquality": "=",
+    "booleanEquality": "=="
+  },
   "forbiddenDynamicSyntaxHeads": [
     "syntax",
     "macro",
@@ -127,140 +181,12 @@
     "prefix",
     "postfix"
   ],
-  "forbiddenElaboratorAttributes": [
-    "term_elab",
-    "command_elab",
-    "tactic"
-  ],
   "quotationPolicy": "not-in-standard-source",
-  "semanticImport": {
-    "schemaVersion": "psc-semantic-bundle-1.0.0",
-    "syntaxMetaExportsMustBeEmpty": true,
-    "hostBuildEffectsMustBeEmpty": true,
-    "exactBundleIdentityRequired": true
-  },
-  "nativeIOPolicy": "direct native IO/Task allowed only in modules explicitly marked nonportable-adapter; portable Standard application APIs use App",
-  "environmentRoots": [
-    "Lean.Init@4.34.0",
-    "Lean.Std@4.34.0",
-    "ProofScript.Standard@0.9-r3"
-  ],
-  "registrationClosure": {
-    "materializedManifestRequired": true,
-    "digestAlgorithm": "sha256",
-    "releaseMustPublishDigest": true,
-    "hostInstalledExtraRegistrationsAllowed": false
-  },
-  "hostSecurity": {
-    "semanticImportGrantsHostPermissions": false,
-    "arbitraryDependencyInstallScriptRequired": false
-  },
-  "cacheIdentity": [
-    "grammarRevision",
-    "registryId",
-    "registrationClosureSha256",
-    "leanSemanticCommit",
-    "moduleSourceIdentities",
-    "semanticBundleIdentities",
-    "options",
-    "semanticRegistrations",
-    "axiomPolicy",
-    "compilerRevision",
-    "checkerRevision"
-  ],
-  "optionPolicy": {
-    "allowedOptionUniverse": "options registered by the exact Standard registration closure",
-    "unknownOption": "reject",
-    "cacheRelevantOptionsMustBeIdentityBound": true,
-    "hostSecurityOptionsMayNotBeEnabledBySemanticImports": true
-  },
-  "attributePolicy": {
-    "allowedAttributeNames": [
-      "simp",
-      "instance",
-      "default_instance",
-      "inline",
-      "macro_inline",
-      "reducible",
-      "irreducible",
-      "deprecated",
-      "inherit_doc",
-      "pp_nodot"
-    ],
-    "newAttributeHandlerRegistration": false
-  },
-  "tacticPolicy": {
-    "fixedHeads": [
-      "rfl",
-      "exact",
-      "apply",
-      "intro",
-      "intros",
-      "assumption",
-      "constructor",
-      "cases",
-      "induction",
-      "rw",
-      "simp",
-      "simp_all",
-      "unfold",
-      "change",
-      "have",
-      "show",
-      "suffices",
-      "decide",
-      "omega",
-      "grind"
-    ],
-    "dependencyMayAddTacticSyntax": false,
-    "dependencyMayReplaceTacticElaborator": false,
-    "owner": "psc2-standard-language-v1 Standard prover surface; tactic names are not PSC2 compiler-core logical primitives",
-    "additionalDependencyTacticsBecomeStandard": false
-  },
-  "languageCapabilityProfile": "psc2-language-v1",
-  "standardLanguageProfile": "psc2-standard-language-v1",
-  "leanCompatibilityProfile": "lean-subset-psc2-v1",
-  "patternProfile": "psc2-pattern-v1",
-  "basicDoProfile": {
-    "required": true,
-    "semantics": "selected native Bind/Pure sequencing",
-    "requiredForms": [
-      "term-statement",
-      "simple-let",
-      "identifier-or-wildcard-monadic-bind",
-      "return-or-pure-completion"
-    ],
-    "excludedCoreForms": [
-      "refutable-pattern-bind",
-      "let-mut",
-      "assignment",
-      "for",
-      "while",
-      "break",
-      "continue"
-    ]
-  },
-  "unsafePolicy": "not-part-of-ps-standard-0.9-r3",
-  "profileAuthority": "ProofScript_Language_Reference_v0.9.0_r3.md",
   "toolingCommandHeads": [
     "#check",
     "#print",
     "#reduce",
     "#eval"
   ],
-  "toolingCommandsAreLanguage": false,
-  "allowedDeclarationModifiers": [
-    "private",
-    "partial",
-    "noncomputable"
-  ],
-  "excludedDeclarationModifiers": [
-    "unsafe"
-  ],
-  "operatorPolicy": {
-    "source": "fixed Standard registration closure",
-    "dependencyMayAddOperatorNotation": false,
-    "equalityProposition": "=",
-    "booleanEquality": "=="
-  }
+  "toolingCommandsAreLanguage": false
 }

@@ -1,6 +1,6 @@
 # r3 Braces and Layout
 
-Status: **recommended r3 grammar redesign; not implemented**
+Status: **accepted r3 design; documentation/specification only; not implemented**
 
 ## Problem
 
@@ -44,8 +44,8 @@ Thus ProofScript does not claim that every brace anywhere disables Lean layout.
 
 | Owned body | Outer boundary mechanism |
 |---|---|
-| structure fields | comma-separated fields, optional trailing comma |
-| class fields | comma-separated fields, optional trailing comma |
+| structure fields | comma-separated fields; no trailing comma |
+| class fields | comma-separated fields; no trailing comma |
 | inductive constructors | leading <code>|</code> marker |
 | match alternatives | leading <code>|</code> marker |
 | instance field initializers | native semicolon separator, optional trailing semicolon |
@@ -62,11 +62,11 @@ Proposed Standard spelling:
 ~~~proofscript
 structure User where {
   name: String,
-  active: Bool,
+  active: Bool
 }
 
 class Sized(α: Type) where {
-  size: α -> Nat,
+  size: α -> Nat
 }
 ~~~
 
@@ -74,10 +74,10 @@ Conceptual grammar:
 
 ~~~ebnf
 BracedStructBody ::=
-  "{" StructField ("," StructField)* ","? "}"
+  "{" StructField ("," StructField)* "}"
 
 BracedClassBody ::=
-  "{" ClassField ("," ClassField)* ","? "}"
+  "{" ClassField ("," ClassField)* "}"
 ~~~
 
 A field type may span lines. A top-level comma at the owned brace depth ends the field; commas nested inside a term do not.
@@ -249,7 +249,7 @@ For a field body, a comma closes the current field only at outer brace depth. Fo
 
 The Standard formatter:
 - uses two-space indentation as presentation only inside owned braces;
-- emits trailing commas for multiline structure/class fields;
+- emits commas **between** structure/class fields and never emits a trailing field comma;
 - emits one constructor/alternative per line;
 - emits semicolons for multiline owned instance/where brace bodies because those separators are grammatical;
 - does not add a semicolon after the closing brace of a declaration;
@@ -258,7 +258,7 @@ The Standard formatter:
 
 Migration parses r2 first.
 
-- r2 braced structure/class fields are emitted with commas.
+- r2 braced structure/class fields are emitted with commas **between** fields and no trailing field comma.
 - r2 match and inductive members keep their marker tokens; no new separator is needed.
 - r2 instance/where member sequences receive explicit native semicolons where the old AST contains more than one member and no separator was present in source.
 - nested native <code>do</code>/tactic syntax is preserved according to its AST.
@@ -292,4 +292,4 @@ A backend must therefore not observe brace style.
 5. migration corpus;
 6. usability comparison of r2 hybrid braces, r3 explicit braces, and Lean layout.
 
-Current evidence: **design recommendation only**.
+Current status: **accepted r3 design rule; implementation/testing evidence remains future work**.

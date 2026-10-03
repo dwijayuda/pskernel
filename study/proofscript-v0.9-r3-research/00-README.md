@@ -90,7 +90,7 @@ A green test does not promote itself into a theorem.
 - <code>DECISIONS.md</code> — compact decision ledger.
 - <code>MANIFEST.json</code> — machine-readable identities and evidence.
 - <code>RESEARCH-SOURCES.md</code> — local and current official research sources.
-- <code>ProofScript_Language_Reference_v0.9.0_r3_candidate.md</code> — integrated candidate, created after the decision documents.
+- <code>ProofScript_Language_Reference_v0.9.0_r3_candidate.md</code> — integrated candidate, created after the decision documents.\n- <code>proofs/</code> — checked narrow formal models and evidence.\n- <code>prototypes/</code> — bounded executable research prototypes, explicitly not production components.\n- <code>reference-apps/Inventory.lean</code> — checked canonical domain-transition theorem.
 ## Research sources
 
 Primary local sources remain the repository's pinned <code>study/</code> material: the v0.7 language lineage, Lean 4.34 parser/source, the Lean language-reference mirror, TypeScript documentation mirror, Lean4Lean divergence notes, theorem-proving material, and language-design books.

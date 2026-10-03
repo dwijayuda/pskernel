@@ -4,7 +4,7 @@ Status: **accepted r3 conformance plan; execution pending.**
 
 ## Parser and lowering
 
-Cover parenthesized calls with spaces/comments/newlines, tuple grouping, callable heads, named/default arguments, zero-argument Unit sugar, structural brace separators, **required commas between multiple structure/class fields and rejection of a trailing field comma**, nested delimiters, native do/tactic categories, committed errors, and Standard versus Extensible syntax environments. Keep call/header trailing-comma tests separate because those lists retain their own accepted rule.
+Cover parenthesized calls with spaces/tabs/comments, explicit rejection of head-to-parenthesis line breaks as one r3 call, multiline arguments after `(`, tuple grouping, callable heads, native-dot adjacency, named/default arguments, empty-call/default/automatic/Unit interactions, required-non-Unit empty-call rejection, explicit `f(())`, zero-argument Unit declaration sugar, structural brace separators, **required commas between multiple structure/class fields and rejection of a trailing field comma**, nested delimiters, native do/tactic categories, committed errors, and Standard versus Extensible syntax environments. Keep call/header trailing-comma tests separate because those lists retain their own accepted rule.
 
 For every accepted source, compare the intended canonical native syntax/AST and preserve application grouping needed for Lean elaboration.
 
@@ -51,3 +51,16 @@ human-studied
 full-app-tested
 
 Do not collapse them into one verified flag.
+
+
+## Schema/registry conformance
+
+Validate representative positive/negative documents against:
+- `FEATURE-REGISTRY-r3.json`;
+- `PS-STANDARD-REGISTRY-r3.json`;
+- `SEMANTIC-BUNDLE-v1.schema.json`;
+- `INTERFACEIR-v1.schema.json`.
+
+Standard-profile tests must reject dependency-provided syntax/meta registrations and any semantic bundle with nonempty syntax/meta exports.
+
+InterfaceIR resolution tests must vary export subpath, condition ordering, TypeScript resolver mode/version, custom conditions, runtime entry and type entry so a mismatched runtime/type branch cannot share one binding identity.

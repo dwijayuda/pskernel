@@ -4,7 +4,7 @@ Status: **accepted r3 conformance plan; execution pending.**
 
 ## Parser and lowering
 
-Cover parenthesized calls with spaces/tabs/comments, explicit rejection of head-to-parenthesis line breaks as one r3 call, multiline arguments after `(`, tuple grouping, callable heads, native-dot adjacency, named/default arguments, empty-call/default/automatic/Unit interactions, required-non-Unit empty-call rejection, explicit `f(())`, zero-argument Unit declaration sugar, structural brace separators, **required commas between multiple structure/class fields and rejection of a trailing field comma**, nested delimiters, native do/tactic categories, committed errors, and Standard versus Extensible syntax environments. Keep call/header trailing-comma tests separate because those lists retain their own accepted rule.
+Cover parenthesized calls with spaces/tabs/comments, explicit rejection of head-to-parenthesis line breaks as one r3 call, multiline arguments after `(`, tuple grouping, callable heads, native-dot adjacency, named/default arguments, empty-call lowering to native `f ..`, optional/default/automatic insertion, ordinary-required-explicit empty-call rejection, explicit `f(())`, zero-source-argument declaration lowering to optional Unit default, structural brace separators, **required commas between multiple structure/class fields and rejection of a trailing field comma**, nested delimiters, native do/tactic categories, committed errors, and Standard versus Extensible syntax environments. Keep call/header trailing-comma tests separate because those lists retain their own accepted rule.
 
 For every accepted source, compare the intended canonical native syntax/AST and preserve application grouping needed for Lean elaboration.
 
@@ -61,6 +61,13 @@ Validate representative positive/negative documents against:
 - `SEMANTIC-BUNDLE-v1.schema.json`;
 - `INTERFACEIR-v1.schema.json`.
 
-Standard-profile tests must reject dependency-provided syntax/meta registrations and any semantic bundle with nonempty syntax/meta exports.
+Standard-profile tests must reject dependency-provided syntax/meta registrations and any semantic bundle with nonempty `syntaxMetaExports` or `hostBuildEffects`, and must bind the materialized Standard registration-closure digest.
 
-InterfaceIR resolution tests must vary export subpath, condition ordering, TypeScript resolver mode/version, custom conditions, runtime entry and type entry so a mismatched runtime/type branch cannot share one binding identity.
+InterfaceIR resolution tests must vary install identity, export subpath, condition ordering, TypeScript resolver mode/version, custom conditions, runtime entry/hash and type entry/hash so a mismatched runtime/type branch cannot share one binding identity.
+
+
+## Stable/1.0 evidence gate
+
+The consolidated release-evidence checklist is `23-PRE-STABLE-EVIDENCE-GATES.md`.
+
+This conformance document defines what to test; it does not claim those tests have run.

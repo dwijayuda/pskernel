@@ -83,6 +83,24 @@ def psNameAppendStr (parent : PsName) (value : String) : PsName :=
 def psNameAppendNum (parent : PsName) (value : Nat) : PsName :=
   PsName.num parent value
 
+def psNameParent (name : PsName) : PsName :=
+  match name with
+  | PsName.anonymous => PsName.anonymous
+  | PsName.str parent _ => parent
+  | PsName.num parent _ => parent
+
+def psNameAppendName (prefix : PsName) (suffix : PsName) : PsName :=
+  match suffix with
+  | PsName.anonymous => prefix
+  | PsName.str parent value =>
+      psNameAppendStr
+        (psNameAppendName prefix parent)
+        value
+  | PsName.num parent value =>
+      psNameAppendNum
+        (psNameAppendName prefix parent)
+        value
+
 def psNameToString (name : PsName) : String :=
   match name with
   | PsName.anonymous => ""

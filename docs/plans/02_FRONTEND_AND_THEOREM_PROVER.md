@@ -1,6 +1,6 @@
 # Frontend and theorem-prover plan
 
-> **r3 reconciliation note.** PSC2 compiler core owns the semantic services required for proof construction and admission, but tactic-name breadth belongs primarily to the Standard prover or controlled plugins. The standalone r3 reference defines the exact ownership split and bounded Lean compatibility target.
+> **r3 reconciliation note.** This is an implementation plan. The standalone r3 language reference defines `psc2-language-v1`, `psc2-standard-language-v1`, and `lean-subset-psc2-v1`. Proof-term meaning belongs to the language; implementation of prover services and tactic engines belongs here or in Standard prover/plugin packages and must not enlarge the language profile implicitly.
 
 
 Status: post-module/conformance foundation.

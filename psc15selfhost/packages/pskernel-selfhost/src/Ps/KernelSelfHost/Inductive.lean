@@ -600,7 +600,9 @@ def psKernelOpenSimpleHeaderIndicesWithFuel
         | Except.error error =>
             Except.error error
         | Except.ok reduced =>
-            match Prod.fst reduced with
+            let current :=
+              Prod.fst reduced;
+            match current with
             | PsKernelExpr.forallE userName domain body binderInfo =>
                 match
                     psKernelSessionCheck
@@ -641,12 +643,12 @@ def psKernelOpenSimpleHeaderIndicesWithFuel
                             body
                             (PsKernelExpr.fvar fresh))
                           (List.cons binder revIndices)
-            | result =>
+            | _ =>
                 Except.ok
                   (PsKernelOpenBindersResult.mk
                     (Prod.snd reduced)
                     (List.reverse revIndices)
-                    result)
+                    current)
 
 def psKernelOpenSimpleHeaderIndices
     (fuel : Nat)

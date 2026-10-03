@@ -634,3 +634,7 @@ inductive PsKernelDeltaStepResult where
   | unknown
       (left : PsKernelExpr)
       (right : PsKernelExpr)
+  | equal
+  | different
+      (left : PsKernelExpr)
+      (right : PsKernelExpr)

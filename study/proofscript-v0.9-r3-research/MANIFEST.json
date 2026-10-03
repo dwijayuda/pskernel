@@ -66,6 +66,30 @@
       "schemaVersion": "proofscript-interface-ir-1.0.0",
       "doc": "INTERFACEIR-v1.md",
       "schema": "INTERFACEIR-v1.schema.json"
+    },
+    "authorityDoc": "R3-AUTHORITY-AND-DELTA.md",
+    "contractCore": "07-CONTRACTS-AND-SPECIFICATIONS.md",
+    "applicationSemantics": "08-APPLICATION-EFFECTS-ASYNC-RESOURCES.md",
+    "preStableEvidenceGates": "23-PRE-STABLE-EVIDENCE-GATES.md",
+    "prompt": "R3-SPEC-COMPLETION-PROMPT.md",
+    "report": "R3-SPEC-COMPLETION-REPORT.md",
+    "emptyCall": {
+      "canonicalLeanRequest": "f ..",
+      "zeroArgFunctionLowering": "def f (_ : Unit := ()) := ...",
+      "omitAllowedExplicitKinds": [
+        "optParam",
+        "autoParam"
+      ],
+      "rejectOrdinaryRequiredExplicit": true,
+      "r2EmptyCallMigration": "f() -> f(())"
+    },
+    "callGap": {
+      "inheritedHorizontalWhitespace": [
+        "space"
+      ],
+      "comments": "Lean comments with no physical line terminator",
+      "bareLineTerminator": false,
+      "tabsAddedByR3": false
     }
   }
 }

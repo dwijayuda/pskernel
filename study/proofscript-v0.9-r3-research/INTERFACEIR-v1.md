@@ -9,15 +9,19 @@ Schema identity: `proofscript-interface-ir-1.0.0`
 
 An InterfaceIR file binds the runtime and type surfaces selected from an npm package. The identity includes:
 
-- TypeScript version;
+- TypeScript version/profile;
 - TypeScript `moduleResolution` mode;
+- resolver profile `psc-node-exports-v1`;
+- install/package-store identity and optional lockfile SHA-256;
 - custom conditions;
 - ordered effective export conditions;
 - package name/version;
 - exact `package.json` SHA-256;
 - requested export subpath;
-- selected runtime entry and module format;
-- selected declaration entry;
+- ordered runtime condition trace;
+- selected runtime entry, module format, and runtime-entry SHA-256;
+- ordered type/declaration condition trace;
+- selected declaration entry and declaration-entry SHA-256;
 - every declaration-file SHA-256;
 - target runtime/platform.
 
@@ -25,11 +29,15 @@ This is necessary because Node conditional exports can select different runtime 
 
 ## 2. Resolution rule
 
-The importer MUST use the declared TypeScript resolver/version for the type side and a declared runtime resolver profile for the runtime side.
+The importer MUST use the declared TypeScript resolver/version for the type side and `psc-node-exports-v1` (or a future explicitly named resolver profile) for the runtime side.
 
-It MUST record the final selected entries rather than only the original module specifier.
+It MUST record the complete ordered condition traces and the final selected entries rather than only the original module specifier.
+
+The runtime entry bytes and selected type/declaration entry bytes are separately hashed. A package version or path alone is never sufficient binding identity.
 
 If runtime/type entries cannot be shown to belong to the same requested package export surface under the recorded condition set, the binding rejects with `PS_DTS_EXPORT_CONDITION_MISMATCH`.
+
+If the selected declaration branch is plausibly from a different conditional/export surface than the selected runtime branch and no explicit binding policy relates them, reject with `PS_DTS_RUNTIME_TYPE_BRANCH_MISMATCH`.
 
 ## 3. Support classes
 
@@ -108,4 +116,4 @@ An arbitrary thrown JS value is not silently converted into the typed PSC error 
 
 Changing the schema, resolver rules, support matrix or interpretation of a tagged node requires an InterfaceIR schema-version change.
 
-The full binding identity includes the InterfaceIR bytes plus all resolution identities and referenced declaration hashes.
+The full binding identity includes the InterfaceIR bytes plus install identity, package.json identity, resolver profile, export subpath, ordered runtime/type condition traces, exact runtime-entry hash, exact type-entry/declaration hashes, TypeScript profile/version, target runtime/platform, and all referenced declaration hashes.

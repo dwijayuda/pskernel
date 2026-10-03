@@ -1,6 +1,6 @@
 # r3 Decision: <code>const</code>
 
-Status: **provisionally retain; usability-gated before 1.0**
+Status: **accepted for r3; still usability-gated before stable/1.0 freeze**
 
 ## Question
 
@@ -47,7 +47,7 @@ This merely replaces one vocabulary choice with another and adds migration cost.
 ### D. Keep const only in ps-standard
 
 This would make identical .ps source profile-dependent for no semantic benefit. Reject.
-## Provisional decision
+## Accepted r3 decision
 
 Retain <code>const</code> in both r3 profiles as a **top-level/namespace value-declaration alias**.
 
@@ -134,4 +134,4 @@ Current evidence:
 - human comprehension: **not yet measured**;
 - production parser implementation: not claimed.
 
-Decision remains **provisional retain**.
+Decision for r3: **retain**. Reconsideration remains explicitly permitted before stable/1.0 freeze if the human study shows persistent false-friend confusion.

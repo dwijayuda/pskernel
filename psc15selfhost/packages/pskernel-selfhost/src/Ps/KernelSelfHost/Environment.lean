@@ -127,12 +127,12 @@ def psKernelEnvironmentIsNonRecStructure
   match psKernelEnvironmentFind environment name with
   | Option.some info =>
       match info with
-      | PsKernelConstantInfo.inductInfo inductive =>
-          if inductive.isRec then
+      | PsKernelConstantInfo.inductInfo inductiveInfo =>
+          if inductiveInfo.isRec then
             false
-          else if Nat.beq inductive.numIndices 0 then
+          else if Nat.beq inductiveInfo.numIndices 0 then
             Nat.beq
-              (psKernelNameListLength inductive.ctors)
+              (psKernelNameListLength inductiveInfo.ctors)
               1
           else
             false

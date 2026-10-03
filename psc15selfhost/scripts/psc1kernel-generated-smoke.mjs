@@ -29,6 +29,8 @@ const required = [
   "psKernelCheckerContextEmpty",
   "psKernelCheckerStateEmpty",
   "psKernelWhnfNoRecursor",
+  "psKernelMkCheckerSession",
+  "psKernelSessionIsDefEq",
   "psKernelAddAxiom",
   "psKernelAddSimpleInductive",
   "psKernelSimpleRecName",
@@ -91,6 +93,34 @@ const whnf = unwrapExcept(
   "WHNF",
 );
 assert.equal(kernel.psKernelExprEq(whnf.fst, sort0), true);
+
+const defeqSession = kernel.psKernelMkCheckerSession(
+  environment0,
+  kernel.List.nil(),
+  kernel.PsKernelDefinitionSafety.safe,
+  0n,
+  kernel.psKernelLeanNatMaxSizeDefault,
+);
+const xName = kernel.PsKernelName.str(anonymous, "x");
+const betaLeft = kernel.PsKernelExpr.app(
+  kernel.PsKernelExpr.lam(
+    xName,
+    sort0,
+    kernel.PsKernelExpr.bvar(0n),
+    kernel.PsKernelBinderInfo.default,
+  ),
+  seven,
+);
+const betaEqual = unwrapExcept(
+  kernel.psKernelSessionIsDefEq(
+    2048n,
+    defeqSession,
+    betaLeft,
+    seven,
+  ),
+  "DEFEQ",
+);
+assert.equal(betaEqual.fst, true);
 
 const base = {
   name: alpha,
@@ -170,6 +200,6 @@ process.stdout.write(
   [
     "PSC1KERNEL_GENERATED_SMOKE: PASS",
     `kernel=${path.relative(root, kernelPath)}`,
-    "checks=name,level,expr,subst,nat,whnf,axiom,inductive,duplicate-rejection",
+    "checks=name,level,expr,subst,nat,whnf,defeq,axiom,inductive,duplicate-rejection",
   ].join("\n") + "\n",
 );

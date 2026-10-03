@@ -53,7 +53,7 @@ No JavaScript `undefined` value is introduced.
 
 ### Call gap
 
-For r3 parenthesized-call ownership, horizontal spaces/tabs and comments that contain no line terminator may occur between the completed callable head and `(`.
+For r3 parenthesized-call ownership, inherited horizontal Lean space trivia (ordinary spaces under the pinned lexer) and comments that contain no line terminator may occur between the completed callable head and `(`. Do not introduce tab-as-whitespace only for this feature.
 
 A physical line terminator breaks r3 parenthesized-call ownership. Multiline arguments are allowed after the opening parenthesis.
 

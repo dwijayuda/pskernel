@@ -176,7 +176,7 @@ def psKernelNameAppendAfter
     (suffix : String) : PsKernelName :=
   match name with
   | PsKernelName.str parent value =>
-      PsKernelName.str parent (value ++ suffix)
+      PsKernelName.str parent (String.Internal.append value suffix)
   | other =>
       PsKernelName.str other suffix
 
@@ -200,7 +200,7 @@ def psKernelNameAppendIndexAfter
     (index : Nat) : PsKernelName :=
   psKernelNameAppendAfter
     name
-    ("_" ++ psKernelNatToString index)
+    (String.Internal.append "_" (psKernelNatToString index))
 
 def psKernelNameIsPrefixOf
     (needle : PsKernelName)

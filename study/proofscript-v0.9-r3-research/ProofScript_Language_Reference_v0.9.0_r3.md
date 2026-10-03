@@ -1043,8 +1043,8 @@ A required item cannot be omitted while retaining that claim.
 | modules/imports/qualified names | required |
 | namespace/section/open/variable/include/omit/universe | required |
 | private declaration visibility | required |
-| fixed attribute command/names | required in Standard profile |
-| set_option over selected Standard options | required in Standard profile |
+| attribute command over registered attributes | required |
+| set_option over registered options | required |
 | interactive #check/#print/#reduce/#eval | tooling only; not psc2-language-v1 declarations |
 | def | required |
 | const | required |
@@ -1075,8 +1075,6 @@ A required item cannot be omitted while retaining that claim.
 | Prop/Type/Sort/universes/Pi/Eq | required |
 | by/proof terms/have/show/suffices/calc | required |
 | pure requires/ensures contracts | required |
-| fixed Standard notation/attributes | selected by psc2-standard-language-v1; not part of the smaller psc2-language-v1 closure |
-| fixed Standard tactic names | selected by psc2-standard-language-v1; not part of the smaller psc2-language-v1 closure |
 | multi-scrutinee match | not required |
 | equation-style definition sugar | not required |
 | if-let / let-pattern / rich do-pattern sugar | not required |

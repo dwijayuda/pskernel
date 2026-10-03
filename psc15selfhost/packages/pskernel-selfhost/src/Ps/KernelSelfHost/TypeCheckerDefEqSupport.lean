@@ -1546,7 +1546,11 @@ def psKernelDefEqLazyReductionWithFuel
                           (Prod.snd result))
               | Option.none =>
                   psKernelDefEqLazyReductionAfterPred
-                    (fun nextContext nextState nextLeft nextRight =>
+                    (fun
+                      (nextContext : PsKernelCheckerContext)
+                      (nextState : PsKernelCheckerState)
+                      (nextLeft : PsKernelExpr)
+                      (nextRight : PsKernelExpr) =>
                       smaller
                         defeq
                         whnf

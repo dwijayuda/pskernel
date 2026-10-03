@@ -1,6 +1,6 @@
 # ProofScript v0.9 r3 Accepted Design Workstream
 
-Status: **accepted r3 design baseline; documentation/specification only; not a compiler release or proof of soundness**  
+Status: **accepted and specification-complete r3 documentation baseline; not a compiler release or proof of soundness**  
 Branch: <code>research/proofscript-v0.9-r3</code>  
 Baseline: ProofScript v0.9.0 draft revision 2 (<code>ps-0.9-r2</code>)  
 Semantic pin: Lean 4.34.0, commit <code>293d5d0c0c3f3dded4688b3ccd6a33939ac5102b</code>
@@ -92,6 +92,13 @@ A green test does not promote itself into a theorem.
 - <code>RESEARCH-SOURCES.md</code> — local and current official research sources.
 - <code>ProofScript_Language_Reference_v0.9.0_r3.md</code> — accepted integrated r3 language/design reference.
 - <code>R3-ACCEPTANCE.md</code> — acceptance record and evidence boundary.
+- <code>R3-SPEC-COMPLETION-PROMPT.md</code> — reusable AI prompt for the focused completion pass.
+- <code>R3-AUTHORITY-AND-DELTA.md</code> — complete-delta authority over immutable r2.
+- <code>R3-R2-INHERITANCE-MATRIX.md</code> — all 89 r2 sections classified as inherited/amended/overridden.
+- <code>R3-GRAMMAR-AND-FEATURE-REGISTRY.md</code> / <code>FEATURE-REGISTRY-r3.json</code> — exact overlay grammar and feature IDs.
+- <code>PS-STANDARD-REGISTRY-r3.json</code> — fixed Standard parser/tactic/extension policy.
+- <code>SEMANTIC-BUNDLE-v1.md</code> / schema — Extensible-to-Standard checked semantic import protocol.
+- <code>INTERFACEIR-v1.md</code> / schema — concrete npm/TypeScript binding interchange format.
 ## Research sources
 
 Primary local sources remain the repository's pinned <code>study/</code> material: the v0.7 language lineage, Lean 4.34 parser/source, the Lean language-reference mirror, TypeScript documentation mirror, Lean4Lean divergence notes, theorem-proving material, and language-design books.
@@ -115,4 +122,4 @@ Source popularity is not a language-design proof.
 
 This directory is additive. It must not overwrite v0.7, v0.9-r2, compiler code, kernel code, or main-branch policy. r3 syntax is not activated merely because this documentation exists.
 
-The r3 design is accepted as the documentation/specification baseline. Implementation, formal proof, complete-application, and human-usability evidence remain separate future work and are not implied by design acceptance.
+The r3 design is accepted and the identified specification gaps are resolved at documentation/specification level. Implementation, formal proof, complete-application, and human-usability evidence remain separate future work and are not implied by specification completion.

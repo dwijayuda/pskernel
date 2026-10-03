@@ -4,7 +4,7 @@ Status: **accepted r3 conformance plan; execution pending.**
 
 ## Parser and lowering
 
-Cover parenthesized calls with spaces/comments/newlines, tuple grouping, callable heads, named/default arguments, zero-argument Unit sugar, structural brace separators, nested delimiters, native do/tactic categories, committed errors, and Standard versus Extensible syntax environments.
+Cover parenthesized calls with spaces/comments/newlines, tuple grouping, callable heads, named/default arguments, zero-argument Unit sugar, structural brace separators, **required commas between multiple structure/class fields and rejection of a trailing field comma**, nested delimiters, native do/tactic categories, committed errors, and Standard versus Extensible syntax environments. Keep call/header trailing-comma tests separate because those lists retain their own accepted rule.
 
 For every accepted source, compare the intended canonical native syntax/AST and preserve application grouping needed for Lean elaboration.
 

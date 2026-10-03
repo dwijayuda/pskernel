@@ -209,8 +209,15 @@ def psKernelLevelMkIMax
     right
   else
     match left with
-    | PsKernelLevel.succ PsKernelLevel.zero =>
-        right
+    | PsKernelLevel.succ inner =>
+        match inner with
+        | PsKernelLevel.zero =>
+            right
+        | _ =>
+            if psKernelLevelEq left right then
+              left
+            else
+              PsKernelLevel.imax left right
     | _ =>
         if psKernelLevelEq left right then
           left

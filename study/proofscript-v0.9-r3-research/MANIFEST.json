@@ -44,5 +44,28 @@
     "proofClaim": false,
     "humanStudyClaim": false
   },
-  "acceptedGrammar": "ps-0.9-r3"
+  "acceptedGrammar": "ps-0.9-r3",
+  "specificationCompletion": {
+    "completed": true,
+    "methodology": "documentation research and normative design only",
+    "r2BaselinePath": "baseline/ProofScript_Language_Reference_v0.9.0_r2.md",
+    "r2BaselineSha256": "d29c0b2d5780e6cdb08a4c9ac00cc7442a64b1c8133b51c5f0c0e9a343b11b8d",
+    "authorityMap": "R3-R2-INHERITANCE-MATRIX.md",
+    "grammar": "R3-GRAMMAR-AND-FEATURE-REGISTRY.md",
+    "featureRegistry": "FEATURE-REGISTRY-r3.json",
+    "standardRegistry": {
+      "id": "ps-standard-0.9-r3",
+      "path": "PS-STANDARD-REGISTRY-r3.json"
+    },
+    "semanticBundle": {
+      "schemaVersion": "psc-semantic-bundle-1.0.0",
+      "doc": "SEMANTIC-BUNDLE-v1.md",
+      "schema": "SEMANTIC-BUNDLE-v1.schema.json"
+    },
+    "interfaceIR": {
+      "schemaVersion": "proofscript-interface-ir-1.0.0",
+      "doc": "INTERFACEIR-v1.md",
+      "schema": "INTERFACEIR-v1.schema.json"
+    }
+  }
 }

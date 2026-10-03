@@ -196,7 +196,8 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.CheckerState,
     `Ps.KernelSelfHost.TypeCheckerBase,
     `Ps.KernelSelfHost.TypeCheckerPrimitives,
-    `Ps.KernelSelfHost.TypeCheckerWhnf
+    `Ps.KernelSelfHost.TypeCheckerWhnf,
+    `Ps.KernelSelfHost.TypeCheckerInfer
   ]
 
 @[default_target]

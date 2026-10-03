@@ -15,6 +15,13 @@ def psKernelNameToReference
         (psKernelNameToReference parent)
         value
 
+def psKernelOrderingToReference
+    (value : PsKernelOrdering) : Ordering :=
+  match value with
+  | PsKernelOrdering.lt => Ordering.lt
+  | PsKernelOrdering.eq => Ordering.eq
+  | PsKernelOrdering.gt => Ordering.gt
+
 def psKernelNameOptionToReference
     (value : Option PsKernelName) :
     Option PSC1Kernel.Name :=
@@ -44,7 +51,8 @@ def psKernelNameDifferentialCase
       (PSC1Kernel.Name.eq
         (psKernelNameToReference left)
         (psKernelNameToReference right)))
-    (psKernelNameCmp left right ==
+    (psKernelOrderingToReference
+      (psKernelNameCmp left right) ==
       PSC1Kernel.Name.cmp
         (psKernelNameToReference left)
         (psKernelNameToReference right))

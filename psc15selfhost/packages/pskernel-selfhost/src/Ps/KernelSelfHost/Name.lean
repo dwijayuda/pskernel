@@ -7,6 +7,127 @@ inductive PsKernelNameComponent where
   | str (value : String)
   | num (value : Nat)
 
+def psKernelStringEqFromWithFuel
+    (fuel : Nat)
+    (left : String)
+    (right : String)
+    (leftPos : Nat)
+    (rightPos : Nat) : Bool :=
+  match fuel with
+  | Nat.zero =>
+      false
+  | Nat.succ remaining =>
+      if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
+        String.Internal.atEnd right (String.Pos.Raw.mk rightPos)
+      else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
+        false
+      else
+        let leftChar :=
+          String.Internal.get left (String.Pos.Raw.mk leftPos)
+        let rightChar :=
+          String.Internal.get right (String.Pos.Raw.mk rightPos)
+        if Nat.beq (Char.toNat leftChar) (Char.toNat rightChar) then
+          psKernelStringEqFromWithFuel
+            remaining
+            left
+            right
+            (String.Pos.Raw.byteIdx
+              (String.Internal.next
+                left
+                (String.Pos.Raw.mk leftPos)))
+            (String.Pos.Raw.byteIdx
+              (String.Internal.next
+                right
+                (String.Pos.Raw.mk rightPos)))
+        else
+          false
+
+def psKernelStringEq
+    (left : String)
+    (right : String) : Bool :=
+  if Nat.beq (String.utf8ByteSize left) (String.utf8ByteSize right) then
+    psKernelStringEqFromWithFuel
+      (Nat.succ (String.utf8ByteSize left))
+      left
+      right
+      0
+      0
+  else
+    false
+
+def psKernelNatCmp
+    (left : Nat)
+    (right : Nat) : Ordering :=
+  if Nat.beq left right then
+    Ordering.eq
+  else if Nat.ble left right then
+    Ordering.lt
+  else
+    Ordering.gt
+
+def psKernelStringCmpWithFuel
+    (fuel : Nat)
+    (left : String)
+    (right : String)
+    (leftPos : Nat)
+    (rightPos : Nat) : Ordering :=
+  match fuel with
+  | Nat.zero =>
+      Ordering.eq
+  | Nat.succ remaining =>
+      if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
+        if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
+          Ordering.eq
+        else
+          Ordering.lt
+      else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
+        Ordering.gt
+      else
+        let leftChar :=
+          Char.toNat
+            (String.Internal.get
+              left
+              (String.Pos.Raw.mk leftPos))
+        let rightChar :=
+          Char.toNat
+            (String.Internal.get
+              right
+              (String.Pos.Raw.mk rightPos))
+        if Nat.beq leftChar rightChar then
+          psKernelStringCmpWithFuel
+            remaining
+            left
+            right
+            (String.Pos.Raw.byteIdx
+              (String.Internal.next
+                left
+                (String.Pos.Raw.mk leftPos)))
+            (String.Pos.Raw.byteIdx
+              (String.Internal.next
+                right
+                (String.Pos.Raw.mk rightPos)))
+        else if Nat.ble leftChar rightChar then
+          Ordering.lt
+        else
+          Ordering.gt
+
+def psKernelStringCmp
+    (left : String)
+    (right : String) : Ordering :=
+  psKernelStringCmpWithFuel
+    (Nat.succ
+      (Nat.add
+        (String.utf8ByteSize left)
+        (String.utf8ByteSize right)))
+    left
+    right
+    0
+    0
+
+def psKernelNatToString
+    (value : Nat) : String :=
+  Int.repr (Int.ofNat value)
+
 def psKernelNameEq
     (left : PsKernelName)
     (right : PsKernelName) : Bool :=
@@ -18,7 +139,7 @@ def psKernelNameEq
   | PsKernelName.str leftParent leftValue =>
       match right with
       | PsKernelName.str rightParent rightValue =>
-          if leftValue == rightValue then
+          if psKernelStringEq leftValue rightValue then
             psKernelNameEq leftParent rightParent
           else
             false
@@ -26,7 +147,7 @@ def psKernelNameEq
   | PsKernelName.num leftParent leftValue =>
       match right with
       | PsKernelName.num rightParent rightValue =>
-          if leftValue == rightValue then
+          if Nat.beq leftValue rightValue then
             psKernelNameEq leftParent rightParent
           else
             false
@@ -61,7 +182,7 @@ def psKernelNameAppendIndexAfter
     (index : Nat) : PsKernelName :=
   psKernelNameAppendAfter
     name
-    ("_" ++ toString index)
+    ("_" ++ psKernelNatToString index)
 
 def psKernelNameIsPrefixOf
     (needle : PsKernelName)
@@ -152,7 +273,7 @@ def psKernelNameComponentCmp
   | PsKernelNameComponent.num leftValue =>
       match right with
       | PsKernelNameComponent.num rightValue =>
-          compare leftValue rightValue
+          psKernelNatCmp leftValue rightValue
       | PsKernelNameComponent.str _ =>
           Ordering.lt
   | PsKernelNameComponent.str leftValue =>
@@ -160,7 +281,7 @@ def psKernelNameComponentCmp
       | PsKernelNameComponent.num _ =>
           Ordering.gt
       | PsKernelNameComponent.str rightValue =>
-          compare leftValue rightValue
+          psKernelStringCmp leftValue rightValue
 
 def psKernelCompareNameComponents
     (left : List PsKernelNameComponent)

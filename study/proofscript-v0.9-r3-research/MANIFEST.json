@@ -90,44 +90,35 @@
   },
   "primaryReference": {
     "path": "ProofScript_Language_Reference_v0.9.0_r3.md",
-    "purpose": "sole normative standalone human and AI/compiler-design reference",
+    "purpose": "sole normative authority for ProofScript source syntax and language semantics",
     "standalone": true,
-    "dependsOnPreviousProofScriptDocs": false,
-    "companionDocsCanOverride": false,
-    "includesNormativeKeywords": true,
-    "includesGlossary": true,
-    "includesTableOfContents": true,
-    "includesExactCallAndBraceRules": true,
-    "includesCompilerImplementationContract": true,
-    "includesApplicationRuntimeAlgebra": true,
-    "includesInterfaceIRResolutionIdentity": true,
-    "machineReadableMirrorsAreGeneratedNonAuthoritative": true,
+    "companionDocsCanOverrideLanguageMeaning": false,
+    "languageOnly": true,
+    "excludesCompilerImplementationArchitecture": true,
+    "excludesBackendImplementation": true,
+    "excludesReleaseEvidence": true,
+    "excludesInteropProtocolInternals": true,
     "grammar": "ps-0.9-r3",
     "semanticPin": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
-    "includesPsc2CompilerCoverageMatrix": true,
-    "includesBoundedLeanCompatibilityProfile": true,
+    "psc2LanguageProfile": "psc2-language-v1",
+    "psc2StandardLanguageProfile": "psc2-standard-language-v1",
+    "leanCompatibilityProfile": "lean-subset-psc2-v1",
+    "patternProfile": "psc2-pattern-v1",
     "fullLeanSourceCompatibilityClaim": false,
-    "distinguishesCompilerCoreFromDistribution": true
+    "postPsc2LanguageRoadmap": "POST_PSC2_LANGUAGE_ROADMAP.md"
   },
   "compilerProfiles": {
     "requiredFirstCompiler": "psc2-compiler-v1",
+    "requiredLanguageCapability": "psc2-language-v1",
     "leanCompatibility": "lean-subset-psc2-v1",
     "patternProfile": "psc2-pattern-v1",
+    "standardLanguageProfile": "psc2-standard-language-v1",
+    "standardDistribution": "psc2-standard-v1",
     "generationNaming": [
       "CompilerGen0",
       "CompilerGen1",
       "CompilerGen2",
       "CompilerGen3"
-    ],
-    "standardDistribution": "psc2-standard-v1",
-    "postCompilerPlatformSequence": [
-      "P1",
-      "P2",
-      "P3",
-      "P4",
-      "P5",
-      "P6",
-      "P7"
     ]
   },
   "featureOwnership": [
@@ -142,5 +133,11 @@
     "HOST_BOUNDARY",
     "POST_PSC2",
     "DEFERRED"
-  ]
+  ],
+  "protocolScopes": {
+    "interfaceIR": "normative interop protocol only; not source-language authority",
+    "semanticBundle": "normative semantic-import protocol only; not source-language authority",
+    "evidenceGates": "release/evidence policy only; not source-language authority",
+    "architecture": "implementation anti-drift guidance only; not source-language authority"
+  }
 }

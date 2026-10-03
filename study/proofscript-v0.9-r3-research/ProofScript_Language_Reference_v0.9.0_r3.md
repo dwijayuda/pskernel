@@ -31,11 +31,12 @@ d29c0b2d5780e6cdb08a4c9ac00cc7442a64b1c8133b51c5f0c0e9a343b11b8d
 Authority order:
 
 1. this accepted r3 reference;
-2. accepted r3 normative companion documents and machine-readable registries;
-3. R3-NORMATIVE-INHERITANCE.md;
-4. the exact r2 artifact above;
-5. pinned Lean 4.34 source/environment for inherited Lean syntax and semantics;
-6. tutorials/examples/rationale.
+2. R3-AUTHORITY-AND-DELTA.md and R3-R2-INHERITANCE-MATRIX.md;
+3. R3-GRAMMAR-AND-FEATURE-REGISTRY.md plus the machine-readable registries/schemas for the domains they define;
+4. accepted r3 topic documents (profiles, contracts, application semantics, interop, migration, conformance);
+5. the exact vendored r2 artifact identified above;
+6. pinned Lean 4.34 source/environment for inherited Lean syntax and semantics;
+7. tutorials/examples/research rationale.
 
 If an r2 rule is not explicitly superseded, retired, restricted, or reclassified by r3, it remains normative unchanged.
 
@@ -157,8 +158,8 @@ It does not import the producer's syntax/meta side effects.
 Normative format:
 
 ~~~text
-19-SEMANTIC-BUNDLE-FORMAT.md
-semantic-bundle.schema.json
+SEMANTIC-BUNDLE-v1.md
+SEMANTIC-BUNDLE-v1.schema.json
 ~~~
 
 ## 5. Definitions and declaration aliases
@@ -474,8 +475,8 @@ r3 structural-brace rules do not reinterpret their inner separators.
 Exact grammar:
 
 ~~~text
-17-R3-GRAMMAR-AND-FEATURE-REGISTRY.md
-r3-feature-registry.json
+R3-GRAMMAR-AND-FEATURE-REGISTRY.md
+FEATURE-REGISTRY-r3.json
 ~~~
 
 ## 10. Lambdas, equality and logical vocabulary
@@ -580,7 +581,7 @@ without adding a second kernel theory.
 Normative details:
 
 ~~~text
-20-CONTRACT-CORE.md
+07-CONTRACTS-AND-SPECIFICATIONS.md
 ~~~
 
 Experimental Lean intrinsic verification is compatibility/oracle machinery, not PSC contract semantics.
@@ -680,7 +681,7 @@ They do not define PSC source semantics.
 Normative details:
 
 ~~~text
-21-APPLICATION-SEMANTICS.md
+08-APPLICATION-EFFECTS-ASYNC-RESOURCES.md
 ~~~
 
 No async/await/using syntax is added in base r3.
@@ -756,8 +757,8 @@ Global/module augmentation and non-normalizable declaration merging are unsuppor
 Normative documents:
 
 ~~~text
-22-INTERFACEIR-V1.md
-interface-ir-v1.schema.json
+INTERFACEIR-v1.md
+INTERFACEIR-v1.schema.json
 ~~~
 
 ## 15. Source/module identity
@@ -1059,18 +1060,21 @@ The r3 normative set includes:
 
 ~~~text
 ProofScript_Language_Reference_v0.9.0_r3.md
-R3-NORMATIVE-INHERITANCE.md
-17-R3-GRAMMAR-AND-FEATURE-REGISTRY.md
-r3-feature-registry.json
-18-PS-STANDARD-REGISTRY.md
-ps-standard-registry.json
-19-SEMANTIC-BUNDLE-FORMAT.md
-semantic-bundle.schema.json
-20-CONTRACT-CORE.md
-21-APPLICATION-SEMANTICS.md
-22-INTERFACEIR-V1.md
-interface-ir-v1.schema.json
+R3-AUTHORITY-AND-DELTA.md
+R3-R2-INHERITANCE-MATRIX.md
+R3-GRAMMAR-AND-FEATURE-REGISTRY.md
+FEATURE-REGISTRY-r3.json
+06-STANDARD-VS-EXTENSIBLE-PROFILES.md
+PS-STANDARD-REGISTRY-r3.json
+SEMANTIC-BUNDLE-v1.md
+SEMANTIC-BUNDLE-v1.schema.json
+07-CONTRACTS-AND-SPECIFICATIONS.md
+08-APPLICATION-EFFECTS-ASYNC-RESOURCES.md
+09-NPM-DTS-INTEROP.md
+INTERFACEIR-v1.md
+INTERFACEIR-v1.schema.json
 23-PRE-STABLE-EVIDENCE-GATES.md
+R3-ACCEPTANCE.md
 DECISIONS.md
 MANIFEST.json
 ~~~

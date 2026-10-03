@@ -141,16 +141,19 @@ def psKernelConstantInfoBase
 
 def psKernelConstantInfoName
     (info : PsKernelConstantInfo) : PsKernelName :=
-  (psKernelConstantInfoBase info).name
+  let base := psKernelConstantInfoBase info;
+  base.name
 
 def psKernelConstantInfoLevelParams
     (info : PsKernelConstantInfo) :
     List PsKernelName :=
-  (psKernelConstantInfoBase info).levelParams
+  let base := psKernelConstantInfoBase info;
+  base.levelParams
 
 def psKernelConstantInfoType
     (info : PsKernelConstantInfo) : PsKernelExpr :=
-  (psKernelConstantInfoBase info).type
+  let base := psKernelConstantInfoBase info;
+  base.type
 
 def psKernelConstantInfoDeltaValue
     (info : PsKernelConstantInfo) :

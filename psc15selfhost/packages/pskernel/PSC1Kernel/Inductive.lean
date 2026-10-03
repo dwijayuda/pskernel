@@ -78,7 +78,7 @@ def simpleUniformParamArgsMatch
             simpleUniformParamArgsMatch offset rest (index + 1)
       | _ => false
 
-partial def simpleCheckUniformOccurrenceExpr
+def simpleCheckUniformOccurrenceExpr
     (declaredNames : List Name)
     (expectedLevels : List Level)
     (numParams : Nat)
@@ -138,7 +138,7 @@ def simpleCheckUniformOccurrences
         go rest
   go ctorTypes
 
-partial def exprContainsConst (target : Name) : Expr → Bool
+def exprContainsConst (target : Name) : Expr → Bool
   | .const name _ => Name.eq name target
   | .app fn arg => exprContainsConst target fn || exprContainsConst target arg
   | .lam _ type body _ =>
@@ -165,7 +165,7 @@ structure SimpleConstructorShape where
   recursiveFields : List SimpleRecursiveField
   resultIndices : List Expr
 
-partial def openSimpleHeaderParams
+def openSimpleHeaderParams
     (ctx : CheckerContext)
     (type : Expr) :
     Nat → List OpenBinder →
@@ -215,7 +215,7 @@ partial def openSimpleHeaderIndices
   | result =>
       pure (ctx, revIndices.reverse, result)
 
-partial def openSimpleConstructorParams
+def openSimpleConstructorParams
     (ctx : CheckerContext)
     (params : List OpenBinder)
     (type : Expr) : Except String Expr := do
@@ -257,7 +257,7 @@ def simpleInductiveAppIndices?
         | none => none
   | _ => none
 
-partial def simpleIndicesContainTarget
+def simpleIndicesContainTarget
     (target : Name) : List Expr → Bool
   | [] => false
   | index :: rest =>
@@ -421,7 +421,7 @@ def simpleHasReflexiveFields : List SimpleConstructorShape → Bool
       shape.recursiveFields.any (fun recursive => !recursive.args.isEmpty) ||
         simpleHasReflexiveFields rest
 
-partial def replaceSimpleConstant
+def replaceSimpleConstant
     (target : Name)
     (replacement : ConstantInfo) : List ConstantInfo → List ConstantInfo
   | [] => []

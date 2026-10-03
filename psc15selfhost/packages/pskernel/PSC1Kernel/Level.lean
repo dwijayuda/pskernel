@@ -136,7 +136,7 @@ def Level.flattenMax : Level → List Level
   | .max a b => a.flattenMax ++ b.flattenMax
   | l => [l]
 
-partial def Level.insertSorted (x : Level) : List Level → List Level
+def Level.insertSorted (x : Level) : List Level → List Level
   | [] => [x]
   | y :: ys =>
     match Level.normCmp x y with
@@ -169,7 +169,7 @@ def Level.trimExplicit (xs : List Level) : List Level :=
     let k := m.toOffset.2
     if rest.any (fun x => x.toOffset.2 ≥ k) then rest else m :: rest
 
-partial def Level.dedupOffsets : List Level → List Level
+def Level.dedupOffsets : List Level → List Level
   | [] => []
   | x :: xs =>
     let rec go (current : Level) (rest : List Level) (rev : List Level) : List Level :=

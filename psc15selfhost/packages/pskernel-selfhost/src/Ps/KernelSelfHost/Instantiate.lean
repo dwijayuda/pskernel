@@ -506,11 +506,7 @@ partial def psKernelExprCheapBetaReduce
       let consumed := consumedResult.snd;
       if Nat.beq consumed 0 then
         expr
-      else if !psKernelExprHasLooseBVar body then
-        psKernelExprApplyArgsCheap
-          body
-          (psKernelExprListDrop consumed args)
-      else
+      else if psKernelExprHasLooseBVar body then
         match body with
         | PsKernelExpr.bvar index =>
             if psKernelNatLt index consumed then
@@ -532,8 +528,20 @@ partial def psKernelExprCheapBetaReduce
               expr
         | _ =>
             expr
+      else
+        psKernelExprApplyArgsCheap
+          body
+          (psKernelExprListDrop consumed args)
   | _ =>
       expr
+
+def psKernelNameListLength
+    (values : List PsKernelName) : Nat :=
+  match values with
+  | List.nil =>
+      0
+  | List.cons _ rest =>
+      Nat.succ (psKernelNameListLength rest)
 
 def psKernelNameLastIndexWorker
     (values : List PsKernelName) :

@@ -8,7 +8,17 @@ Migration parses r2 under r2 grammar first. It never reinterprets raw text direc
 
 ## D-CALL
 
-r2 owned f(x,y) remains an r3 call.
+A nonempty r2 owned call such as `f(x,y)` remains an r3 call.
+
+An **empty** r2 D-CALL `f()` meant an explicit Unit application. To preserve r2 meaning mechanically, the migrator emits:
+
+~~~proofscript
+f(())
+~~~
+
+in r3.
+
+The new r3 `f()` empty-invocation semantics (defaults/auto insertion plus one possible Unit synthesis, with required-non-Unit rejection) is available only to source authored/accepted under r3. Migration does not silently reinterpret an old empty call.
 
 r2 native f (x,y), which means one tuple argument, becomes:
 

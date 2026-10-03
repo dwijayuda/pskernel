@@ -2,7 +2,6 @@
 
 Status: **accepted and specification-complete r3 documentation baseline; not a compiler release or proof of soundness**  
 Branch: <code>research/proofscript-v0.9-r3</code>  
-Baseline: ProofScript v0.9.0 draft revision 2 (<code>ps-0.9-r2</code>)  
 Semantic pin: Lean 4.34.0, commit <code>293d5d0c0c3f3dded4688b3ccd6a33939ac5102b</code>
 
 ## Primary reference for humans and AI/compiler agents
@@ -18,6 +17,8 @@ It is now a **clean standalone specification**. It does not require earlier Proo
 It contains the language surface, grammar/ownership model, type/runtime semantics, Standard/Extensible profiles, contracts, application model, InterfaceIR/npm boundary, compiler pipeline, admission/erasure/backend obligations, diagnostics, formatting, evidence model, conformance rules, and explicit AI/compiler implementation guidance.
 
 Other files in this directory are research history, focused maintenance views, machine-readable mirrors, or future evidence plans. They MUST NOT override the main reference.
+
+The main reference also distinguishes the language edition <code>ps-0.9-r3</code> from the implementation profile <code>psc2-compiler-v1</code>, the bounded Lean frontend <code>lean-subset-psc2-v1</code>, libraries/prover packages/extensions/plugins, and post-PSC2 platform work.
 
 ## Mission
 
@@ -60,8 +61,8 @@ The r3 study was organized around ten linked decisions, now accepted as the r3 d
 
 The following research results are accepted into r3:
 
-- replace r2 <code>D-CALL</code> with an r3 parenthesized-call **surface exception**, because <code>f (x, y)</code> will no longer retain the r2 native-tuple neighbor inside <code>.ps</code>;
-- keep <code>.lean</code> entirely unchanged;
+- use the r3 parenthesized-call surface rule: ordinary allowed trivia before <code>(</code> does not change call meaning, and a tuple argument requires explicit extra grouping;
+- keep <code>.lean</code> native Lean syntax while supporting only the explicit bounded <code>lean-subset-psc2-v1</code> compatibility profile in the PSC2 compiler;
 - make owned brace bodies explicitly delimited with category-specific separators; structure/class fields use commas only **between** fields, with no trailing field comma;
 - add zero-source-argument function sugar via a native optional Unit default, integrated with the general empty-call/default-completion rule;
 - retain top-level <code>const</code> in r3, while keeping it subject to reconsideration before stable/1.0 if usability evidence shows harmful false familiarity;

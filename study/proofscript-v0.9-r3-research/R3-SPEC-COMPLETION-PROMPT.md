@@ -34,14 +34,22 @@ Complete r3 as an implementable language specification by resolving these ten it
 
 Define `f()` as a complete empty source-level invocation, distinct from `f(())`.
 
-- Insert native implicit and instance parameters as usual.
-- Insert optional/default and automatic parameters as usual.
-- If the next required explicit parameter is definitionally `Unit`, synthesize exactly one `()` for the empty-call sugar, then continue inserting trailing implicit/default/automatic parameters.
-- If any required non-Unit explicit parameter remains unsatisfied, reject the empty call rather than eta-abstract it.
+Canonical native high-level request:
+
+~~~lean
+f ..
+~~~
+
+- Let the pinned Lean application elaborator insert implicit, instance, optional/default and automatic parameters.
+- After elaboration, reject if any omitted explicit parameter was an ordinary required explicit parameter, even if ellipsis created/inferred a metavariable for it.
+- Do not eta-abstract missing required arguments for an empty call.
 - `f(())` is an ordinary explicit Unit argument and may participate in native partial application.
-- `function f()` lowers to a function with one explicit Unit binder.
-- Thus `function f(x : Nat := 1)` may be invoked as `f()`, while `function f(x : Nat)` may not.
+- `function f()` lowers to one native optional Unit binder with default `()`: `def f (_ : Unit := ()) := ...`.
+- Thus both `function f()` and `function f(x : Nat := 1)` may be invoked as `f()`, while `function f(x : Nat)` may not.
 - Preserve native partial application for nonempty applications and for using the function value without parentheses.
+- Preserve r2 source meaning during migration by rewriting r2 empty D-CALL `f()` to r3 `f(())`.
+
+No JavaScript `undefined` value is introduced.
 
 ### Call gap
 

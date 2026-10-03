@@ -680,7 +680,6 @@ def psKernelWhnfCacheTest : Bool :=
         Prod.snd result
       match
           psKernelExprMapGet
-            PsKernelExpr
             state.whnf
             expr with
       | Option.none => false
@@ -1283,7 +1282,6 @@ def psKernelSelfHostRecursorTests : Bool :=
           referenceResult)
         (match
             psKernelExprMapGet
-              PsKernelExpr
               (Prod.snd portableResult).inferOnly
               portableMajor with
          | Option.some _ => true

@@ -178,10 +178,20 @@ lean_lib PSC1KernelReferenceFoundations where
     `PSC1Kernel.Expr
   ]
 
+lean_lib PsCli where
+  srcDir := "packages/cli/src"
+  roots := #[`PsCli]
+
 @[default_target]
 lean_exe psc1 where
   srcDir := "packages/cli/src"
   root := `Main
+
+-- Production-named native compiler. `psc1` remains as the bootstrap/compatibility
+-- executable while both targets are built from the same pinned Lean 4.34 sources.
+lean_exe psc where
+  srcDir := "packages/cli/src"
+  root := `PscMain
 
 lean_exe psc1_tests where
   srcDir := "test"

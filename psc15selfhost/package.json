@@ -127,6 +127,8 @@
     "verify:source": "node scripts/compare-source-workspaces.mjs dist/bootstrap/workspace dist/selfhost/workspace",
     "verify:compiler": "node scripts/compare-selfhost.mjs dist/bootstrap/packages/compiler/index.ts dist/selfhost/packages/compiler/index.ts",
     "build:lake": "lake build",
+    "build:native-psc": "lake build psc",
+    "psc:native": "lake exe psc --",
     "build:psc": "node scripts/build-current.mjs",
     "build:auto": "node scripts/build-auto.mjs",
     "build:dual": "npm run build:lake && npm run build:psc",
@@ -134,6 +136,6 @@
     "check:ir-neutrality": "node scripts/check-ir-neutrality.mjs"
   },
   "devDependencies": {
-    "typescript": "5.8.3"
+    "typescript": "7.0.2"
   }
 }

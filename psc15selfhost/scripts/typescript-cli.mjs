@@ -4,6 +4,9 @@ import path from 'node:path';
 
 // Invoke the installed JavaScript CLI directly on every host, including Windows
 // where child_process cannot execute a .cmd shim without a shell.
+export const pinnedTypeScriptVersion = '7.0.2';
+export const pinnedTypeScriptVersionText = 'Version ' + pinnedTypeScriptVersion;
+
 export function resolveTypeScriptCli() {
   try { return createRequire(import.meta.url).resolve('typescript/bin/tsc'); } catch {}
   for (const directory of (process.env.PATH ?? '').split(path.delimiter)) {
@@ -16,5 +19,5 @@ export function resolveTypeScriptCli() {
       }
     }
   }
-  throw new Error('PSC2_TYPESCRIPT_CLI_MISSING: install TypeScript 5.8.3 locally or on PATH');
+  throw new Error('PSC2_TYPESCRIPT_CLI_MISSING: install TypeScript 7.0.2 locally or on PATH');
 }

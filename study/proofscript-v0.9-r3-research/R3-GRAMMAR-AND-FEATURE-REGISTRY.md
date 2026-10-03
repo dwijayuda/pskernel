@@ -7,7 +7,7 @@ This document specifies the r3-owned overlay. Native categories not replaced her
 ## 1. Lexical rule for parenthesized calls
 
 `CallGap` permits:
-- zero or more spaces/tabs;
+- zero or more inherited horizontal Lean space trivia (under the pinned lexer this means ordinary space, not a tab);
 - Lean comments that contain **no physical line terminator**.
 
 A physical line terminator ends the possibility of r3 parenthesized-call ownership between the completed head and the opening `(`.
@@ -108,7 +108,7 @@ unless a migration tool has separately established and recorded a stronger sourc
 ## 4. Owned grammar
 
 ~~~ebnf
-PSFile              ::= StandardCommandSequence EOF
+PSFile              ::= ProfileCommandSequence EOF
 
 PSCommand           ::= OwnedValueDecl
                       | BracedStructure
@@ -129,8 +129,11 @@ FunctionDecl        ::= "function" Native<DeclId> FunctionBinders
 DecoratedDef        ::= "def" Native<DeclId> HeaderBinders?
                         ResultSpec? ContractClauses? OwnedValue
 
-FunctionBinders     ::= EmptyFunctionGroup
-                      | HeaderBinder+
+FunctionBinders     ::= OrdinaryFunctionBinders
+                      | ZeroArgFunctionBinders
+
+OrdinaryFunctionBinders ::= HeaderBinder+
+ZeroArgFunctionBinders ::= Native<OtherDeclarationBinder>* EmptyFunctionGroup
 
 EmptyFunctionGroup  ::= "(" ")"
 HeaderBinders       ::= HeaderBinder+
@@ -147,19 +150,19 @@ WhereSuffix         ::= BracedWhere | Lift<NativeWhereDecls>
 BracedWhere         ::= "where" "{" WhereField (";" WhereField)* ";"? "}"
 
 BracedStructure     ::= Native<StructurePrefixAndHeader> "where"
-                        "{" StructField ("," StructField)* "}"
+                        "{" (StructField ("," StructField)*)? "}"
                         Native<DerivingSuffix>?
 
 BracedClass         ::= Native<ClassPrefixAndHeader> "where"
-                        "{" ClassField ("," ClassField)* "}"
+                        "{" (ClassField ("," ClassField)*)? "}"
                         Native<DerivingSuffix>?
 
 BracedInductive     ::= Native<InductivePrefixAndHeader> "where"
-                        "{" Constructor+ "}" Native<InductiveSuffix>?
+                        "{" Constructor* "}" Native<InductiveSuffix>?
 Constructor         ::= "|" Lift<NativeConstructorBody>
 
 BracedInstance      ::= Native<InstancePrefixAndHeader> "where"
-                        "{" InstanceField (";" InstanceField)* ";"? "}"
+                        "{" (InstanceField (";" InstanceField)* ";"?)? "}"
 
 PSTerm              ::= ParenthesizedCall
                       | EmptyCall
@@ -199,6 +202,12 @@ WhereField          ::= Lift<NativeWhereLocalDecl>
 ~~~
 
 The EBNF semicolons above are grammar notation, not ProofScript tokens.
+
+Semantic predicates:
+- `OrdinaryFunctionBinders` must contain at least one `ExplicitGroup`;
+- `ZeroArgFunctionBinders` may contain only native non-explicit binders before the final empty group;
+- empty structure/class/inductive/instance bodies are accepted only where the corresponding lowered native declaration is semantically valid;
+- `BracedWhere` still requires at least one local declaration.
 
 ## 5. Structural brace rules
 

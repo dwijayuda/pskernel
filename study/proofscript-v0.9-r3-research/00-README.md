@@ -33,6 +33,16 @@ It intentionally does **not** define compiler architecture, self-host sequencing
 
 No companion document may override language meaning.
 
+## Single consolidated PSC2 reference
+
+For one document covering the current PSC2 language, syntax/grammar/semantics/examples, Standard prover surface, JavaScript/npm platform profile, TypeScript-replacement requirements, and Post-PSC2 language roadmap, use:
+
+~~~text
+PSC2_COMPLETE_LANGUAGE_AND_JS_PLATFORM.md
+~~~
+
+This is the preferred one-stop reading document. The standalone language reference remains the normative source-language authority.
+
 ## Consolidated language handbook
 
 For one self-contained document containing all current PSC2 language features with grammar, semantics, accepted syntax variants, examples, rejection cases, Standard prover selections, and Post-PSC2 boundaries, use:

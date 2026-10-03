@@ -256,37 +256,64 @@ def psKernelNameIsPrefixOf
         psKernelNameIsPrefixOf needle parent
 
 def psKernelNameReplacePrefix
-    (name : PsKernelName)
-    (oldPrefix : PsKernelName)
-    (newPrefix : PsKernelName) : Option PsKernelName :=
-  if psKernelNameEq name oldPrefix then
-    Option.some newPrefix
-  else
-    match name with
-    | PsKernelName.str parent value =>
-        match
-            psKernelNameReplacePrefix
-              parent
-              oldPrefix
-              newPrefix with
-        | Option.some replacedParent =>
-            Option.some
-              (PsKernelName.str replacedParent value)
-        | Option.none =>
-            Option.none
-    | PsKernelName.num parent value =>
-        match
-            psKernelNameReplacePrefix
-              parent
-              oldPrefix
-              newPrefix with
-        | Option.some replacedParent =>
-            Option.some
-              (PsKernelName.num replacedParent value)
-        | Option.none =>
-            Option.none
-    | PsKernelName.anonymous =>
-        Option.none
+    (name : PsKernelName) :
+    PsKernelName -> PsKernelName -> Option PsKernelName :=
+  match name with
+  | PsKernelName.anonymous =>
+      fun
+        (oldPrefix : PsKernelName)
+        (newPrefix : PsKernelName) =>
+        if
+            psKernelNameEq
+              PsKernelName.anonymous
+              oldPrefix then
+          Option.some newPrefix
+        else
+          Option.none
+  | PsKernelName.str parent value =>
+      let smaller :
+          PsKernelName ->
+          PsKernelName ->
+          Option PsKernelName :=
+        psKernelNameReplacePrefix parent;
+      fun
+        (oldPrefix : PsKernelName)
+        (newPrefix : PsKernelName) =>
+        let current :=
+          PsKernelName.str parent value;
+        if psKernelNameEq current oldPrefix then
+          Option.some newPrefix
+        else
+          match smaller oldPrefix newPrefix with
+          | Option.some replacedParent =>
+              Option.some
+                (PsKernelName.str
+                  replacedParent
+                  value)
+          | Option.none =>
+              Option.none
+  | PsKernelName.num parent value =>
+      let smaller :
+          PsKernelName ->
+          PsKernelName ->
+          Option PsKernelName :=
+        psKernelNameReplacePrefix parent;
+      fun
+        (oldPrefix : PsKernelName)
+        (newPrefix : PsKernelName) =>
+        let current :=
+          PsKernelName.num parent value;
+        if psKernelNameEq current oldPrefix then
+          Option.some newPrefix
+        else
+          match smaller oldPrefix newPrefix with
+          | Option.some replacedParent =>
+              Option.some
+                (PsKernelName.num
+                  replacedParent
+                  value)
+          | Option.none =>
+              Option.none
 
 def psKernelNameComponentAppend
     (left : List PsKernelNameComponent)

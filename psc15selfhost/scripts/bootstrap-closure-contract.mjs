@@ -11,7 +11,6 @@ export const allowedBootstrapPackageNames = Object.freeze([
   "erasure",
   "compiler",
   "backend-ts",
-  "pskernel-core",
 ]);
 
 export const forbiddenBootstrapPackageNames = Object.freeze([
@@ -20,6 +19,7 @@ export const forbiddenBootstrapPackageNames = Object.freeze([
   "backend-rust",
   "backend-wasm",
   "pskernel",
+  "pskernel-core",
   "pskernel-lean",
   "pskernel-lean-wasm",
 ]);

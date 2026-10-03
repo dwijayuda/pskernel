@@ -12,10 +12,10 @@ const emptyAdmissions = JSON.stringify({
   version: 2,
 });
 
-test('owned generated kernel is the checked-profile default', () => {
-  assert.equal(defaultCheckedKernel, 'pskernel-core');
-  assert.equal(checkedKernelDescriptor().package, '@proofscript/pskernel-core');
-  assert.equal(checkedKernelDescriptor().execution, 'psc-generated-js');
+test('Lean WASM is the checked-profile default and remains host-side', () => {
+  assert.equal(defaultCheckedKernel, 'lean434-wasm');
+  assert.equal(checkedKernelDescriptor().package, '@proofscript/pskernel-lean-wasm');
+  assert.equal(checkedKernelDescriptor().execution, 'wasm-node');
 });
 
 test('real bundled WASM provider accepts canonical empty module', async () => {

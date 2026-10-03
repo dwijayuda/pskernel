@@ -49,7 +49,7 @@
   },
   "dependencies": {},
   "proofscript": {
-    "bootstrap": true,
+    "bootstrap": false,
     "portable": true,
     "targetPortable": true,
     "sourceRoots": [
@@ -59,7 +59,7 @@
       "test"
     ],
     "outDir": "dist",
-    "role": "independent-kernel-experimental-checker",
+    "role": "experimental-owned-kernel-off-bootstrap",
     "authoritative": false
   }
 }

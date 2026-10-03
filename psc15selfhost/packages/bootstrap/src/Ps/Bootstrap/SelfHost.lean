@@ -1,9 +1,5 @@
 import Ps.BackendTs.Compiler
-import Ps.Kernel.Bootstrap
-import Ps.Kernel.Structural
 
--- The joint fixed-point closure contains the compiler and the owned kernel.
--- Source-profile regressions are validated through that transitive compiler closure.
--- Duplicate-name source normalization is verified by the focused self-host gate.
--- Match-fields patch transport is temporary and does not change bootstrap semantics.
--- Match-fields line-safe transport rerun.
+-- Compiler-only self-host composition root.
+-- Kernel checking is a host-side gate and is deliberately outside the generated
+-- bootstrap closure. The default host checker is the pinned Lean 4.34 WASM provider.

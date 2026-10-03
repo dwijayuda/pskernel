@@ -67,8 +67,11 @@ if (directImports.length === 0) {
 if (!directImports.includes(tsCompositionModule)) {
   throw new Error("PSC2_BOOTSTRAP_ROOT_MISSING_TS_COMPOSITION");
 }
-if (!directImports.includes('Ps.Kernel.Bootstrap')) {
-  throw new Error('PSC2_BOOTSTRAP_ROOT_MISSING_OWNED_KERNEL');
+if (directImports.some((moduleName) => moduleName.startsWith('Ps.Kernel.'))) {
+  throw new Error('PSC2_BOOTSTRAP_ROOT_KERNEL_MUST_BE_HOST_SIDE');
+}
+if (JSON.stringify(directImports) !== JSON.stringify([tsCompositionModule])) {
+  throw new Error(`PSC2_BOOTSTRAP_ROOT_NOT_COMPILER_ONLY: ${directImports.join(", ")}`);
 }
 
 const baseline = await orderedClosureFromRootImports(directImports);

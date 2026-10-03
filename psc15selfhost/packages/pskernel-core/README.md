@@ -5,14 +5,15 @@
 Regenerated with the pinned PSC seed, with all 651 tests passing and fresh build
 and reference evidence. See `../../docs/continuity/OWNED_UNIFORM_ALGEBRAIC_2026-10-03.md`.
 
-This is the default checker and part of the joint bootstrap source closure.
-The host adapter runs the generated semantic machine and fails closed outside
-its supported fragment. The exact preserved bootstrap prefix now admits the unit,
+This checker is preserved as an explicit private experimental alternative. It is no
+longer the default checker and is no longer part of the compiler bootstrap source
+closure. The host adapter runs the generated semantic machine and fails closed outside
+its supported fragment. Historical owned-prefix evidence admits the unit,
 `PsSourcePos` and `PsSourceSpan`, after checking the initial `Nat` prelude.
-The next entry, `PsLexCursor`, rejects an unknown dependency; the complete batch
-now decodes all 1,714 entries and rejects semantically at PsLexCursor (index 3).
-The new portable closure has 91 modules (55 compiler plus 36 owned kernel);
-the default selection does not imply release readiness or complete Lean parity.
+The next entry, `PsLexCursor`, rejects an unknown dependency; the preserved complete
+batch decodes all 1,714 entries and rejects semantically at PsLexCursor (index 3).
+The former joint closure had 91 modules (55 compiler plus 36 owned kernel); the
+current compiler-only bootstrap deliberately excludes those 36 kernel modules.
 
 This package now executes an owned checking fragment, rather than data helpers
 alone. It is **not the authoritative PSC2 kernel**, a full Lean-compatible

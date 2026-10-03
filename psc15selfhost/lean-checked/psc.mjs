@@ -10,13 +10,13 @@ let script;
 let forwarded;
 
 if (!command || command === '--help') {
-  console.log(`PSC2 checked profile (default kernel: pskernel-core)
-  node lean-checked/psc.mjs check <entry> [--compiler compiler.js | --seed binary] [--kernel pskernel-core|lean434-wasm|lean434]
-  node lean-checked/psc.mjs build <entry> --out output.js [--compiler compiler.js | --seed binary] [--kernel pskernel-core|lean434-wasm|lean434]
-  node lean-checked/psc.mjs bootstrap [--kernel pskernel-core|lean434-wasm|lean434]
-  node lean-checked/psc.mjs selfhost [--kernel pskernel-core|lean434-wasm|lean434]
-  node lean-checked/psc.mjs fixed-point [--kernel pskernel-core|lean434-wasm|lean434]
-  node lean-checked/psc.mjs verify-selfhost [--kernel pskernel-core|lean434-wasm|lean434]
+  console.log(`PSC2 checked compiler profile (default kernel: lean434-wasm)
+  node lean-checked/psc.mjs check <entry> [--compiler compiler.js | --seed binary] [--kernel lean434-wasm|pskernel-core|lean434]
+  node lean-checked/psc.mjs build <entry> --out output.js [--compiler compiler.js | --seed binary] [--kernel lean434-wasm|pskernel-core|lean434]
+  node lean-checked/psc.mjs bootstrap [--kernel lean434-wasm|pskernel-core|lean434]
+  node lean-checked/psc.mjs selfhost [--kernel lean434-wasm|pskernel-core|lean434]
+  node lean-checked/psc.mjs fixed-point [--kernel lean434-wasm|pskernel-core|lean434]
+  node lean-checked/psc.mjs verify-selfhost [--kernel lean434-wasm|pskernel-core|lean434]
 
 pskernel-core uses the generated owned kernel and is the default. Unsupported declarations fail closed.
 lean434-wasm uses @proofscript/pskernel-lean-wasm as an explicit reference alternative.

@@ -10,16 +10,16 @@ const manifest = JSON.parse(await readFile(new URL('../packages/pskernel-core/pa
 assert.equal(manifest.version, '0.1.0-checker.14');
 assert.equal(manifest.private, true);
 assert.equal(manifest.proofscript.authoritative, false);
-assert.equal(manifest.proofscript.bootstrap, true);
+assert.equal(manifest.proofscript.bootstrap, false);
 assert.equal(manifest.proofscript.portable, true);
 assert(!existsSync(new URL('../packages/pskernel-core.old', import.meta.url)));
 assert(!packageBySection.has('KernelCore'));
 assert.equal(packageBySection.get('Kernel'), 'pskernel-core');
-assert.equal(bootstrapPackageViolation('pskernel-core'), undefined);
-for (const name of ['pskernel-core.old', 'pskernel-lean', 'pskernel-lean-wasm']) assert(bootstrapPackageViolation(name));
-assert.equal(defaultCheckedKernel, 'pskernel-core');
+assert(bootstrapPackageViolation('pskernel-core'));
+for (const name of ['pskernel-core.old', 'pskernel-core', 'pskernel-lean', 'pskernel-lean-wasm']) assert(bootstrapPackageViolation(name));
+assert.equal(defaultCheckedKernel, 'lean434-wasm');
 const entry = await readFile(new URL('../packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean', import.meta.url), 'utf8');
-assert.match(entry, /^import Ps\.Kernel\.Bootstrap\s*$/mu);
+assert(!/^import Ps\.Kernel\./mu.test(entry), 'compiler bootstrap must not import a kernel');
 const typing = await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/TypeCheck.lean', import.meta.url), 'utf8');
 assert.match(typing, /^import Ps\.Kernel\.ExprInstantiate\s*$/mu);
 assert(typing.includes('psKernelExprInstantiateStep current'));
@@ -119,4 +119,4 @@ for(const step of ['psKernelAlgHeaderStep current','psKernelAlgConstructorStep c
 assert(joint.includes('psKernelAlgAdmissionStep current'));assert(!joint.includes('psKernelAlgAdmissionRun'));
 assert(worker.includes('k.PsKernelAlgDeclaration.declaration('));assert(!worker.includes('psKernelAlgRecursor'));
 assert(reduction.includes('psKernelAlgReduceStep current'));assert(!reduction.includes('psKernelAlgReduceRun'));
-console.log('PSC2_OWNED_KERNEL_RECEIPT: PASS (checker identities, retired legacy routing, owned bootstrap closure and default; release gates remain closed)');
+console.log('PSC2_OWNED_KERNEL_RECEIPT: PASS (owned checker preserved off-bootstrap as an explicit experimental alternative)');

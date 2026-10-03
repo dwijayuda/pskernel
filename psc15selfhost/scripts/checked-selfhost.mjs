@@ -140,7 +140,7 @@ while (args.length) {
 }
 checkedKernelDescriptor(kernel);
 base = path.join(root, 'dist/checked', kernel);
-if (!stage) throw new Error('usage: checked-selfhost.mjs bootstrap|next|fixed-point|verify [--kernel pskernel-core|lean434-wasm|lean434]');
+if (!stage) throw new Error('usage: checked-selfhost.mjs bootstrap|next|fixed-point|verify [--kernel lean434-wasm|pskernel-core|lean434]');
 
 switch (stage) {
   case 'bootstrap':

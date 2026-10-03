@@ -1,96 +1,20 @@
 # PSC2 minimal self-host status
 
-Status (2026-10-03): generated-owned checker.14 supports uniform Type0 type parameters and direct recursion. Exact PsKernelList and real recursive-list programs pass; complete 91-module decoding now succeeds but semantic replay rejects PsLexCursor at index 3 for missing prelude dependencies. No complete owned-checked pair, joint self-hosting or release. See `docs/continuity/OWNED_UNIFORM_ALGEBRAIC_2026-10-03.md`.
+Status (2026-10-03): the project has returned to a **compiler-only bootstrap**.
+`@proofscript/pskernel-lean-wasm` (Lean 4.34.0 WASM) is the default host-side
+checker. No kernel package is in the generated compiler bootstrap closure.
 
-## Current bootstrap shape
+The generated owned `@proofscript/pskernel-core` work through checker.14 is
+preserved as a private experimental alternative, with its historical evidence intact,
+but it is no longer a bootstrap dependency or the default checker. No fallback is
+performed between checker implementations.
 
-```text
-handwritten compiler source: PSC1-compatible .lean
-bootstrap host:             Lean 4.34 + Lake
-self-host source:           generated canonical .ps
-fixed-point backend:        TypeScript -> JavaScript
-semantic compiler:          backend-neutral
-optional extensions:        project, Rust, Wasm
-kernel status:              generated-owned pskernel-core default; bounded, non-authoritative
-```
+The acceptance target is now the compiler fixed point:
 
-The authoritative source entry is:
+1. canonical compiler source closure generated from PSC1-compatible Lean;
+2. admissions checked by the selected host-side Lean WASM kernel;
+3. generated compiler re-emits the same canonical ProofScript workspace;
+4. generated TypeScript compiler output is byte-identical at the fixed point.
 
-```text
-packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean
-```
-
-The fixed-point import closure is guarded by `scripts/check-bootstrap-closure.mjs`.
-It rejects project tooling, Rust, Wasm and the reference `pskernel` from the first
-compiler generation. Workspace package dependencies are checked as well as Lean source
-imports.
-
-## Acceptance gates
-
-Do not claim a self-host milestone merely because the architecture compiles on paper or
-because generated files look stable. The following gates are the acceptance sequence:
-
-```text
-npm run check:workspace
-npm run check:source:bootstrap
-npm run check:layout
-npm run check:bootstrap-closure
-npm run check:ir-neutrality
-npm run build:lean
-npm run test:bootstrap
-npm run fixed-point
-```
-
-After the fixed-point gate is green, run the broader non-bootstrap assurance:
-
-```text
-npm run check
-```
-
-`npm run check` intentionally includes the all-portable source audit, broad regression
-suite, and Rust/Wasm extension suites. These are release assurance, not prerequisites
-for producing the smallest compiler generation.
-
-## Fixed-point evidence
-
-`npm run fixed-point` must demonstrate both:
-
-1. canonical generated `.ps` workspace parity between bootstrap and next generation;
-2. exact generated TypeScript compiler parity between bootstrap and self-host generation.
-
-A passing fixed point proves bootstrap stability for this compiler profile. It does not
-prove full Lean 4 equivalence or final kernel soundness.
-
-## Current semantic boundary
-
-The compiler-only preparation path produces `PsCompilerAdmissionReadyModule`, not a blanket proof of owned admission.
-This artifact is fail-closed: canonical admissions are revalidated before erasure and
-the erasure environment is reconstructed from the bootstrap prelude plus declarations.
-A caller-provided environment cannot be smuggled through this artifact.
-
-The checked command path now freezes prepared modules, submits their exact canonical
-admissions to the selected kernel, and permits emission only after acceptance.
-The new `packages/pskernel-core` is the default; native Lean and Lean WASM require
-explicit selection and remain outside the portable source closure. Rejection,
-unsupported input, exhaustion and failed checks do not select another checker.
-The full owned closure still fails, so compiler-only or reference fixed points
-do not establish owned joint self-hosting. The retired core is not a continuation path.
-
-## After the first fixed point
-
-Grow PSC2 upward rather than enlarging the trusted core. Preferred order:
-
-1. richer patterns;
-2. namespace ergonomics;
-3. method notation;
-4. practical local/mutual recursion lowering;
-5. structured proof terms;
-6. Meta/tactic and simplifier libraries;
-7. contracts and VC generation;
-8. controlled plugin APIs;
-9. Task/async/resource libraries;
-10. InterfaceIR/FFI and broader backend/plugin ecosystem.
-
-Each feature should record its implementation profile, accepted profile, lowering target,
-kernel requirements and backend requirements. Features that can live in libraries or
-elaboration must not be pushed into the kernel for convenience.
+This target does **not** claim owned-kernel self-hosting or a joint compiler/kernel
+fixed point.

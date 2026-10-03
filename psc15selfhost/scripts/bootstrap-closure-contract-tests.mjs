@@ -36,7 +36,6 @@ const expectedAllowed = [
   "erasure",
   "compiler",
   "backend-ts",
-  "pskernel-core",
 ];
 const expectedForbidden = [
   "stdlib",
@@ -44,6 +43,7 @@ const expectedForbidden = [
   "backend-rust",
   "backend-wasm",
   "pskernel",
+  "pskernel-core",
   "pskernel-lean",
   "pskernel-lean-wasm",
 ];

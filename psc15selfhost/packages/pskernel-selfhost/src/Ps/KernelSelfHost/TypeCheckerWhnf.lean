@@ -586,7 +586,11 @@ def psKernelWhnfCoreWithFuel
                               Prod.fst firstResult;
                             let state1 :=
                               Prod.snd firstResult;
-                            let expandedResult :=
+                            let expandedResult :
+                                Except String
+                                  (Prod
+                                    PsKernelExpr
+                                    PsKernelCheckerState) :=
                               match structReduced with
                               | PsKernelExpr.lit literal =>
                                   match literal with

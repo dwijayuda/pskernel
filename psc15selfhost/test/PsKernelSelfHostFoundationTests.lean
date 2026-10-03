@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.TypeCheckerPrimitives
+import Ps.KernelSelfHost.TypeCheckerWhnf
 import PSC1Kernel.TypeChecker
 
 def psKernelNameToReference
@@ -584,6 +584,173 @@ def psKernelSelfHostPrimitiveTests : Bool :=
       psKernelSelfHostPrimitiveBoundaryTests
       psKernelSelfHostPrimitiveStringTests)
 
+def psKernelWhnfDifferentialCase
+    (expr : PsKernelExpr) : Bool :=
+  let portableContext :=
+    psKernelCheckerContextEmpty
+      psKernelEnvironmentEmpty
+  let referenceContext :=
+    PSC1Kernel.CheckerContext.empty
+      PSC1Kernel.Environment.empty
+  match
+      psKernelWhnfNoRecursor
+        256
+        portableContext
+        psKernelCheckerStateEmpty
+        expr,
+      PSC1Kernel.whnf
+        referenceContext
+        (psKernelExprToReference expr) with
+  | Except.ok portableResult, Except.ok referenceResult =>
+      psKernelExprReferenceEq
+        (Prod.fst portableResult)
+        referenceResult
+  | Except.error portableError, Except.error referenceError =>
+      portableError == referenceError
+  | _, _ =>
+      false
+
+def psKernelWhnfLocalLetDifferential : Bool :=
+  let userName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "local"
+  let type :=
+    PsKernelExpr.sort PsKernelLevel.zero
+  let value :=
+    PsKernelExpr.lit (PsKernelLiteral.nat 11)
+  let portableAdded :=
+    psKernelCheckerContextWithLet
+      (psKernelCheckerContextEmpty
+        psKernelEnvironmentEmpty)
+      userName
+      type
+      value
+  let portableName :=
+    Prod.fst portableAdded
+  let portableContext :=
+    Prod.snd portableAdded
+  let referenceAdded :=
+    (PSC1Kernel.CheckerContext.empty
+      PSC1Kernel.Environment.empty).withLet
+      (psKernelNameToReference userName)
+      (psKernelExprToReference type)
+      (psKernelExprToReference value)
+  let referenceName :=
+    Prod.fst referenceAdded
+  let referenceContext :=
+    Prod.snd referenceAdded
+  match
+      psKernelWhnfNoRecursor
+        256
+        portableContext
+        psKernelCheckerStateEmpty
+        (PsKernelExpr.fvar portableName),
+      PSC1Kernel.whnf
+        referenceContext
+        (PSC1Kernel.Expr.fvar referenceName) with
+  | Except.ok portableResult, Except.ok referenceResult =>
+      psKernelExprReferenceEq
+        (Prod.fst portableResult)
+        referenceResult
+  | _, _ =>
+      false
+
+def psKernelWhnfCacheTest : Bool :=
+  let expr :=
+    PsKernelExpr.app
+      (PsKernelExpr.lam
+        PsKernelName.anonymous
+        (PsKernelExpr.sort PsKernelLevel.zero)
+        (PsKernelExpr.bvar 0)
+        PsKernelBinderInfo.default)
+      (PsKernelExpr.lit
+        (PsKernelLiteral.nat 7))
+  match
+      psKernelWhnfNoRecursor
+        256
+        (psKernelCheckerContextEmpty
+          psKernelEnvironmentEmpty)
+        psKernelCheckerStateEmpty
+        expr with
+  | Except.error _ =>
+      false
+  | Except.ok result =>
+      let state :=
+        Prod.snd result
+      match
+          psKernelExprMapGet
+            PsKernelExpr
+            state.whnf
+            expr with
+      | Option.none => false
+      | Option.some cached =>
+          psKernelExprEq
+            cached
+            (Prod.fst result)
+
+def psKernelWhnfFuelExhaustionTest : Bool :=
+  match
+      psKernelWhnfNoRecursor
+        0
+        (psKernelCheckerContextEmpty
+          psKernelEnvironmentEmpty)
+        psKernelCheckerStateEmpty
+        (PsKernelExpr.bvar 0) with
+  | Except.error _ => true
+  | Except.ok _ => false
+
+def psKernelSelfHostWhnfTests : Bool :=
+  let type :=
+    PsKernelExpr.sort PsKernelLevel.zero
+  let beta :=
+    PsKernelExpr.app
+      (PsKernelExpr.lam
+        PsKernelName.anonymous
+        type
+        (PsKernelExpr.bvar 0)
+        PsKernelBinderInfo.default)
+      (PsKernelExpr.lit
+        (PsKernelLiteral.nat 42))
+  let zeta :=
+    PsKernelExpr.letE
+      PsKernelName.anonymous
+      type
+      (PsKernelExpr.lit
+        (PsKernelLiteral.nat 9))
+      (PsKernelExpr.bvar 0)
+      false
+  let natSucc :=
+    PsKernelExpr.app
+      (PsKernelExpr.const
+        psKernelNatSuccName
+        List.nil)
+      (PsKernelExpr.lit
+        (PsKernelLiteral.nat 5))
+  let natAdd :=
+    PsKernelExpr.app
+      (PsKernelExpr.app
+        (PsKernelExpr.const
+          psKernelNatAddName
+          List.nil)
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat 4)))
+      (PsKernelExpr.lit
+        (PsKernelLiteral.nat 9))
+  Bool.and
+    (psKernelWhnfDifferentialCase beta)
+    (Bool.and
+      (psKernelWhnfDifferentialCase zeta)
+      (Bool.and
+        (psKernelWhnfDifferentialCase natSucc)
+        (Bool.and
+          (psKernelWhnfDifferentialCase natAdd)
+          (Bool.and
+            psKernelWhnfLocalLetDifferential
+            (Bool.and
+              psKernelWhnfCacheTest
+              psKernelWhnfFuelExhaustionTest)))))
+
 def main : IO Unit :=
   if !psKernelSelfHostNameTests then
     throw
@@ -605,6 +772,10 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_PRIMITIVE_DIFFERENTIAL: FAIL")
+  else if !psKernelSelfHostWhnfTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_WHNF_DIFFERENTIAL: FAIL")
   else
     IO.println
       "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"

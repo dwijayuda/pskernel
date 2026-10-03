@@ -627,73 +627,77 @@ def psKernelAddQuot
               PsKernelName.str
                 PsKernelName.anonymous
                 "v";
+            let quotTypeBase :=
+              PsKernelConstantBase.mk
+                psKernelQuotName
+                (List.cons
+                  universeName
+                  List.nil)
+                (psKernelMakeQuotType
+                  universeName);
+            let quotTypeInfo :=
+              PsKernelQuotInfo.mk
+                quotTypeBase
+                PsKernelQuotKind.typeQ;
             let env1 :=
               psKernelEnvironmentAddUnchecked
                 environment
-                (PsKernelConstantInfo.quotInfo {
-                  base := {
-                    name := psKernelQuotName
-                    levelParams :=
-                      List.cons
-                        universeName
-                        List.nil
-                    type :=
-                      psKernelMakeQuotType
-                        universeName
-                  }
-                  kind := PsKernelQuotKind.typeQ
-                });
+                (PsKernelConstantInfo.quotInfo
+                  quotTypeInfo);
+            let quotMkBase :=
+              PsKernelConstantBase.mk
+                psKernelQuotMkName
+                (List.cons
+                  universeName
+                  List.nil)
+                (psKernelMakeQuotMkType
+                  universeName);
+            let quotMkInfo :=
+              PsKernelQuotInfo.mk
+                quotMkBase
+                PsKernelQuotKind.ctorQ;
             let env2 :=
               psKernelEnvironmentAddUnchecked
                 env1
-                (PsKernelConstantInfo.quotInfo {
-                  base := {
-                    name := psKernelQuotMkName
-                    levelParams :=
-                      List.cons
-                        universeName
-                        List.nil
-                    type :=
-                      psKernelMakeQuotMkType
-                        universeName
-                  }
-                  kind := PsKernelQuotKind.ctorQ
-                });
+                (PsKernelConstantInfo.quotInfo
+                  quotMkInfo);
+            let quotLiftBase :=
+              PsKernelConstantBase.mk
+                psKernelQuotLiftName
+                (List.cons
+                  universeName
+                  (List.cons
+                    resultUniverseName
+                    List.nil))
+                (psKernelMakeQuotLiftType
+                  universeName
+                  resultUniverseName);
+            let quotLiftInfo :=
+              PsKernelQuotInfo.mk
+                quotLiftBase
+                PsKernelQuotKind.liftQ;
             let env3 :=
               psKernelEnvironmentAddUnchecked
                 env2
-                (PsKernelConstantInfo.quotInfo {
-                  base := {
-                    name := psKernelQuotLiftName
-                    levelParams :=
-                      List.cons
-                        universeName
-                        (List.cons
-                          resultUniverseName
-                          List.nil)
-                    type :=
-                      psKernelMakeQuotLiftType
-                        universeName
-                        resultUniverseName
-                  }
-                  kind := PsKernelQuotKind.liftQ
-                });
+                (PsKernelConstantInfo.quotInfo
+                  quotLiftInfo);
+            let quotIndBase :=
+              PsKernelConstantBase.mk
+                psKernelQuotIndName
+                (List.cons
+                  universeName
+                  List.nil)
+                (psKernelMakeQuotIndType
+                  universeName);
+            let quotIndInfo :=
+              PsKernelQuotInfo.mk
+                quotIndBase
+                PsKernelQuotKind.indQ;
             let env4 :=
               psKernelEnvironmentAddUnchecked
                 env3
-                (PsKernelConstantInfo.quotInfo {
-                  base := {
-                    name := psKernelQuotIndName
-                    levelParams :=
-                      List.cons
-                        universeName
-                        List.nil
-                    type :=
-                      psKernelMakeQuotIndType
-                        universeName
-                  }
-                  kind := PsKernelQuotKind.indQ
-                });
+                (PsKernelConstantInfo.quotInfo
+                  quotIndInfo);
             Except.ok
               (psKernelEnvironmentMarkQuotInitialized
                 env4)

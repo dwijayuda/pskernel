@@ -601,7 +601,9 @@ def psKernelReduceInductiveRecWith
                         Option.none
                         state)
                 | Option.some major0 =>
-                    let majorKResult :=
+                    let majorKResult :
+                        Except String
+                          (Prod PsKernelExpr PsKernelCheckerState) :=
                       if recursor.k then
                         psKernelToConstructorWhenK
                           publicWhnf
@@ -618,7 +620,9 @@ def psKernelReduceInductiveRecWith
                     | Except.error error =>
                         Except.error error
                     | Except.ok majorK =>
-                        let reducedResult :=
+                        let reducedResult :
+                            Except String
+                              (Prod PsKernelExpr PsKernelCheckerState) :=
                           if cheapRec then
                             coreWhnf
                               context
@@ -637,7 +641,9 @@ def psKernelReduceInductiveRecWith
                         | Except.ok reduced =>
                             let majorReduced :=
                               Prod.fst reduced;
-                            let normalizeResult :=
+                            let normalizeResult :
+                                Except String
+                                  (Prod PsKernelExpr PsKernelCheckerState) :=
                               match majorReduced with
                               | PsKernelExpr.lit literal =>
                                   match literal with

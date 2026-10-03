@@ -32,7 +32,13 @@
       "category": "term",
       "status": "accepted",
       "discriminator": "CallableHead CallGap ()",
-      "target": "complete empty invocation with default/auto insertion and at most one synthesized Unit"
+      "target": "native high-level ellipsis application plus r3 omitted-required-parameter acceptance check",
+      "canonicalLean": "head ..",
+      "omittedExplicitAcceptedKinds": [
+        "optParam",
+        "autoParam"
+      ],
+      "rejectOrdinaryRequiredExplicit": true
     },
     {
       "id": "D-NAMED-CALL",
@@ -74,7 +80,7 @@
       "class": "D",
       "category": "function-header",
       "status": "accepted",
-      "target": "one explicit Unit binder"
+      "target": "native def with one optional Unit binder defaulting to ()"
     },
     {
       "id": "D-EXPLICIT-PARAMS",
@@ -171,5 +177,13 @@
       "id": "D-DECL-SEMI",
       "reason": "retired in r2 and remains retired"
     }
-  ]
+  ],
+  "callGap": {
+    "horizontalWhitespace": [
+      "space",
+      "tab"
+    ],
+    "comments": "Lean comments with no physical line terminator",
+    "bareLineTerminator": false
+  }
 }

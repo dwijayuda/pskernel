@@ -14,7 +14,7 @@ The Bool reports whether this subtree changed. When no descendant changes we
 return the original node, preserving the sharing Lean's kernel relies on,
 without pointer APIs or host-specific mutation.
 -/
-private def Expr.liftLooseBVarsChanged
+def Expr.liftLooseBVarsChanged
     (e : Expr) (start amount : Nat) : Expr × Bool :=
   if amount == 0 then
     (e, false)
@@ -59,7 +59,7 @@ original node when substitution does not affect the subtree, matching the
 sharing behavior of Lean's `replace`-based implementation without `unsafe` or
 `implemented_by`.
 -/
-private def Expr.instantiateAtChanged
+def Expr.instantiateAtChanged
     (e : Expr) (start : Nat) (subst : List Expr) (offset : Nat) : Expr × Bool :=
   match e with
   | .bvar i =>
@@ -175,7 +175,7 @@ verbatim instead of being rebuilt. This recovers the important sharing property
 of Lean's pointer-memoized abstraction while staying inside the PSC1 source
 profile.
 -/
-private def Expr.abstractFVarsAtChanged
+def Expr.abstractFVarsAtChanged
     (e : Expr) (fvars : List Name) (offset : Nat) : Expr × Bool :=
   match e with
   | .fvar n =>

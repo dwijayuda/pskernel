@@ -64,7 +64,8 @@ jobs:
       - name: PSC1-check the portable source
         run: |
           set -euo pipefail
-          lake exe psc1 check packages/pskernel-selfhost/src/PsKernel/Name.lean
+          lake exe psc1 check packages/pskernel-selfhost/src/Ps/KernelSelfHost/Name.lean
+          lake exe psc1 check packages/pskernel-selfhost/src/Ps/KernelSelfHost/Level.lean
 
       - name: Require canonical ProofScript translation
         run: |

@@ -81,8 +81,8 @@ A green test does not promote itself into a theorem.
 - <code>08-APPLICATION-EFFECTS-ASYNC-RESOURCES.md</code> — standard application model.
 - <code>09-NPM-DTS-INTEROP.md</code> — InterfaceIR and JS/TS boundaries.
 - <code>10-REFERENCE-APPLICATIONS.md</code> — application corpus and executed prototypes.
-- <code>11-FORMAL-OVERLAY-PROOF.md</code> — first overlay formalization.
-- <code>12-BACKEND-PRESERVATION-SLICE.md</code> — first RuntimeIR-to-JS model.
+- <code>11-FORMAL-OVERLAY-PROOF.md</code> — proposed first overlay theorem and proof plan.
+- <code>12-BACKEND-PRESERVATION-SLICE.md</code> — proposed first backend-preservation theorem plan.
 - <code>13-USABILITY-STUDY.md</code> — human-study protocol and status.
 - <code>14-MIGRATION-FROM-R2.md</code> — edition-aware migration.
 - <code>15-CONFORMANCE-PLAN.md</code> — parser/runtime/proof matrices.
@@ -114,4 +114,4 @@ Source popularity is not a language-design proof.
 
 This directory is additive. It must not overwrite v0.7, v0.9-r2, compiler code, kernel code, or main-branch policy. r3 syntax is not activated merely because this documentation exists.
 
-The integrated r3 candidate now exists, and two small formal models have been checked under Lean 4.34.0. This does not activate r3. Language freeze still requires the production parser/lowerer, profile/runtime/interop implementation, complete reference applications, production-refinement/preservation evidence, and the human usability study.
+The integrated r3 candidate now exists as documentation research only. Language freeze still requires future implementation work, formal proofs, application experiments, and the human usability study; none of those are claimed by this branch.

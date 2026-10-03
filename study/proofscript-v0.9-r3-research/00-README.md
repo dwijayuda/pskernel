@@ -33,7 +33,7 @@ The r3 study was organized around ten linked decisions, now accepted as the r3 d
 
 1. Make native <code>.ps</code> parenthesized calls insensitive to ordinary trivia, with explicit tuple grouping.
 2. Make ProofScript-owned braces genuinely structural instead of visually brace-delimited but secretly layout-delimited.
-3. Accept <code>function f()</code> as explicit Unit-function sugar.
+3. Accept <code>function f()</code> as zero-source-argument sugar backed by a native optional Unit default.
 4. Retain <code>const</code> in r3 while keeping a pre-stable usability review.
 5. Separate <code>ps-standard</code> from <code>ps-lean-extensible</code> without weakening the type theory.
 6. Define stable PSC-owned contracts rather than relying semantically on experimental Lean intrinsic verification.
@@ -49,7 +49,7 @@ The following research results are accepted into r3:
 - replace r2 <code>D-CALL</code> with an r3 parenthesized-call **surface exception**, because <code>f (x, y)</code> will no longer retain the r2 native-tuple neighbor inside <code>.ps</code>;
 - keep <code>.lean</code> entirely unchanged;
 - make owned brace bodies explicitly delimited with category-specific separators; structure/class fields use commas only **between** fields, with no trailing field comma;
-- add Unit-function sugar;
+- add zero-source-argument function sugar via a native optional Unit default, integrated with the general empty-call/default-completion rule;
 - retain top-level <code>const</code> in r3, while keeping it subject to reconsideration before stable/1.0 if usability evidence shows harmful false familiarity;
 - freeze a closed-syntax Standard profile and a separately extensible Lean-oriented profile;
 - define contracts as ordinary checkable logical artifacts tied to the actual implementation;
@@ -99,6 +99,8 @@ A green test does not promote itself into a theorem.
 - <code>PS-STANDARD-REGISTRY-r3.json</code> — fixed Standard parser/tactic/extension policy.
 - <code>SEMANTIC-BUNDLE-v1.md</code> / schema — Extensible-to-Standard checked semantic import protocol.
 - <code>INTERFACEIR-v1.md</code> / schema — concrete npm/TypeScript binding interchange format.
+- <code>23-PRE-STABLE-EVIDENCE-GATES.md</code> — consolidated usability/formal/runtime/interop/application gates before stable/1.0.
+- <code>R3-SPEC-COMPLETION-REPORT.md</code> — methodology, resolved gaps, and evidence boundary for the focused completion pass.
 ## Research sources
 
 Primary local sources remain the repository's pinned <code>study/</code> material: the v0.7 language lineage, Lean 4.34 parser/source, the Lean language-reference mirror, TypeScript documentation mirror, Lean4Lean divergence notes, theorem-proving material, and language-design books.

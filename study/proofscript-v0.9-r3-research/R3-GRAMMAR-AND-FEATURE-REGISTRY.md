@@ -1,6 +1,8 @@
 # r3 Exact Overlay Grammar and Feature Registry
 
-Status: **normative for `ps-0.9-r3` surface ownership**
+Status: **historical overlay-grammar research record; non-normative for current ps-0.9-r3 source meaning**
+
+> Current grammar and feature ownership are defined directly by `ProofScript_Language_Reference_v0.9.0_r3.md` and its language-only generated mirrors.
 
 This document specifies the r3-owned overlay. Native categories not replaced here are inherited from the exact r2/Lean 4.34 baseline through `R3-AUTHORITY-AND-DELTA.md`.
 

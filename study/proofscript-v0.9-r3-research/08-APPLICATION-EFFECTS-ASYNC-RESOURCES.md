@@ -122,7 +122,7 @@ The cross-target suite must cover success, typed failure, panic, cancellation ti
 
 Semantic model: recommended.
 Exact library encoding: not frozen.
-JS runtime prototype: not built.
+JS trace-model prototype: passed 7 resource cases and 1 race case; this is not the production runtime.
 Direct Wasm mapping: not built.
-Cross-target conformance: not executed.
+Cross-target conformance: not executed; direct Wasm side is still absent.
 Program-logic proof: pending.

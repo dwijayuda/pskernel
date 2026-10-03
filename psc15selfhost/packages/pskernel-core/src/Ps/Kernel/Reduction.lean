@@ -6,6 +6,7 @@ import Ps.Kernel.Data
 import Ps.Kernel.Expr
 import Ps.Kernel.Binding
 import Ps.Kernel.Environment
+import Ps.Kernel.AlgebraicReduction
 
 /- First-order beta/zeta/delta and supported inductive recursor reduction.
 No primitive or quotient reduction is asserted. Type checking validates discarded terms.
@@ -29,6 +30,8 @@ def psKernelRecordNeutral (action : PsKernelRecordAction) (major : PsKernelExpr)
   | PsKernelRecordAction.eliminate fn unusedMinor => PsKernelExpr.app fn major
 
 inductive PsKernelReduceTask where
+  | algebraic (state : PsKernelAlgReduceState)
+  | algebraicMajor (continuation : PsKernelAlgReduceContinuation)
   | sumMinors (original : PsKernelExpr) (rules : PsKernelList PsKernelSumRule)
       (args : PsKernelList PsKernelExpr) (branches : PsKernelList PsKernelSumBranch)
   | sumMajor (fn : PsKernelExpr) (branches : PsKernelList PsKernelSumBranch)
@@ -174,6 +177,8 @@ def psKernelReduceValueTask
   | PsKernelList.nil => psKernelReduceReject PsKernelCheckError.invalidState
   | PsKernelList.cons top rest =>
       match task with
+      | PsKernelReduceTask.algebraicMajor continuation => psKernelReduceNext env
+          (PsKernelList.cons (PsKernelReduceTask.algebraic (psKernelAlgReduceResume continuation top)) tasks) rest
       | PsKernelReduceTask.sumMajor fn branches => psKernelReduceNext env
           (PsKernelList.cons (PsKernelReduceTask.sumSpine fn top top PsKernelList.nil branches) tasks) rest
       | PsKernelReduceTask.enumMajor fn branches =>
@@ -269,6 +274,17 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
           | _ => psKernelReduceReject PsKernelCheckError.invalidState
       | PsKernelList.cons task rest =>
           match task with
+          | PsKernelReduceTask.algebraic current =>
+              match psKernelAlgReduceStep current with
+              | PsKernelAlgReduceStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.algebraic next) rest) values
+              | PsKernelAlgReduceStep.major major continuation => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.whnf major)
+                    (PsKernelList.cons (PsKernelReduceTask.algebraicMajor continuation) rest)) values
+              | PsKernelAlgReduceStep.neutral value => psKernelReducePush env rest values value
+              | PsKernelAlgReduceStep.reduced value => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.whnf value) rest) values
+              | PsKernelAlgReduceStep.rejected error => psKernelReduceReject error
           | PsKernelReduceTask.enumSpine original cursor args =>
               match cursor with
               | PsKernelExpr.app fn arg => psKernelReduceNext env
@@ -282,6 +298,15 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                   (PsKernelList.cons (PsKernelReduceTask.enumLookup original args levels next) rest) values
               | PsKernelLookupStep.found entry =>
                   match entry with
+                  | PsKernelDefinition.algebraicRecursor name unusedLevels unusedType parameters rules =>
+                      match levels with
+                      | PsKernelList.cons unusedLevel tail =>
+                          match tail with
+                          | PsKernelList.nil => psKernelReduceNext env
+                              (PsKernelList.cons (PsKernelReduceTask.algebraic
+                                (psKernelAlgReduceStart original (PsKernelExpr.constE name levels) parameters rules args)) rest) values
+                          | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
+                      | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
                   | PsKernelDefinition.sumRecursor unusedName unusedParameters unusedType rules =>
                       match levels with
                       | PsKernelList.cons unusedLevel tail =>

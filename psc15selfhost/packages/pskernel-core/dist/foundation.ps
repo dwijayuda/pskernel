@@ -1148,6 +1148,47 @@ def psKernelExprInstantiateRun (fuel : PsKernelFuel) : (_ : PsKernelExprInstanti
 };
 };
 
+inductive PsKernelOption (a : Type) where {
+  | none;
+  | some (value : a);
+};
+
+inductive PsKernelAlgInputConstructor where {
+  | constructor (name : PsKernelName) (type : PsKernelExpr);
+};
+
+inductive PsKernelAlgDeclaration where {
+  | declaration (name : PsKernelName) (parameters : PsKernelNatural) (type : PsKernelExpr) (constructors : PsKernelList(PsKernelAlgInputConstructor));
+};
+
+inductive PsKernelAlgConstructor where {
+  | constructor (name : PsKernelName) (type : PsKernelExpr) (fields : PsKernelList(PsKernelExpr));
+};
+
+inductive PsKernelAlgRule where {
+  | rule (constructor : PsKernelName) (constructorParameters : PsKernelNatural) (minorIndex : PsKernelNatural) (recursiveFields : PsKernelList(PsKernelOption(PsKernelName)));
+};
+
+inductive PsKernelAlgBinder where {
+  | binder (id : PsKernelNatural) (type : PsKernelExpr) (visibility : PsKernelBinder);
+};
+
+inductive PsKernelAlgTargetReference where {
+  | reference (index : PsKernelNatural) (recursor : PsKernelName);
+};
+
+inductive PsKernelAlgTarget where {
+  | target (type : PsKernelExpr) (reference : PsKernelAlgTargetReference) (arguments : PsKernelList(PsKernelExpr)) (constructors : PsKernelList(PsKernelAlgConstructor));
+};
+
+inductive PsKernelAlgMinor where {
+  | minor (target : PsKernelAlgTargetReference) (constructor : PsKernelName) (arguments : PsKernelList(PsKernelExpr)) (fields : PsKernelList(PsKernelExpr)) (recursiveFields : PsKernelList(PsKernelOption(PsKernelAlgTargetReference)));
+};
+
+inductive PsKernelAlgHeader where {
+  | header (name : PsKernelName) (type : PsKernelExpr) (parameters : PsKernelNatural) (arguments : PsKernelList(PsKernelExpr)) (binders : PsKernelList(PsKernelAlgBinder)) (uniform : PsKernelExpr);
+};
+
 inductive PsKernelDefinitionBody where {
   | transparent (value : PsKernelExpr);
   | opaque;
@@ -1158,6 +1199,8 @@ inductive PsKernelSumRule where {
 };
 
 inductive PsKernelDefinition where {
+  | algebraicFamily (name : PsKernelName) (type : PsKernelExpr) (parameters : PsKernelNatural) (constructors : PsKernelList(PsKernelAlgConstructor));
+  | algebraicRecursor (name : PsKernelName) (levels : PsKernelList(PsKernelName)) (type : PsKernelExpr) (parameters : PsKernelNatural) (rules : PsKernelList(PsKernelAlgRule));
   | stringType (name : PsKernelName);
   | definition (name : PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr);
   | polymorphic (name : PsKernelName) (parameters : PsKernelList(PsKernelName)) (type : PsKernelExpr) (value : PsKernelExpr);
@@ -1180,6 +1223,8 @@ def psKernelDefinitionName (entry : PsKernelDefinition) : PsKernelName := match 
   | PsKernelDefinition.sumRecursor name unusedParameters unusedType unusedRules => name;
   | PsKernelDefinition.recordFamily name unusedCtor unusedFields => name;
   | PsKernelDefinition.recordRecursor name unusedParameters unusedType unusedCtor unusedFields => name;
+  | PsKernelDefinition.algebraicFamily name unusedType unusedParameters unusedConstructors => name;
+  | PsKernelDefinition.algebraicRecursor name unusedLevels unusedType unusedParameters unusedRules => name;
   | PsKernelDefinition.stringType name => name;
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => name;
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => name;
@@ -1194,6 +1239,8 @@ def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList(PsK
   | PsKernelDefinition.sumRecursor unusedName parameters unusedType unusedRules => parameters;
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelList.nil;
   | PsKernelDefinition.recordRecursor unusedName parameters unusedType unusedCtor unusedFields => parameters;
+  | PsKernelDefinition.algebraicFamily unusedName unusedType unusedParameters unusedConstructors => PsKernelList.nil;
+  | PsKernelDefinition.algebraicRecursor unusedName levels unusedType unusedParameters unusedRules => levels;
   | PsKernelDefinition.stringType unusedName => PsKernelList.nil;
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelList.nil;
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => parameters;
@@ -1208,6 +1255,8 @@ def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr := match 
   | PsKernelDefinition.sumRecursor unusedName unusedParameters type unusedRules => type;
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelExpr.sortE(PsKernelLevel.succ(PsKernelLevel.zero));
   | PsKernelDefinition.recordRecursor unusedName unusedParameters type unusedCtor unusedFields => type;
+  | PsKernelDefinition.algebraicFamily unusedName type unusedParameters unusedConstructors => type;
+  | PsKernelDefinition.algebraicRecursor unusedName unusedLevels type unusedParameters unusedRules => type;
   | PsKernelDefinition.stringType unusedName => PsKernelExpr.sortE(PsKernelLevel.succ(PsKernelLevel.zero));
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelExpr.sortE(PsKernelLevel.succ(PsKernelLevel.zero));
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => type;
@@ -1222,6 +1271,8 @@ def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody
   | PsKernelDefinition.sumRecursor unusedName unusedParameters unusedType unusedRules => PsKernelDefinitionBody.opaque;
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelDefinitionBody.opaque;
   | PsKernelDefinition.recordRecursor unusedName unusedParameters unusedType unusedCtor unusedFields => PsKernelDefinitionBody.opaque;
+  | PsKernelDefinition.algebraicFamily unusedName unusedType unusedParameters unusedConstructors => PsKernelDefinitionBody.opaque;
+  | PsKernelDefinition.algebraicRecursor unusedName unusedLevels unusedType unusedParameters unusedRules => PsKernelDefinitionBody.opaque;
   | PsKernelDefinition.stringType unusedName => PsKernelDefinitionBody.opaque;
   | PsKernelDefinition.natFamily unusedName unusedZero unusedSucc => PsKernelDefinitionBody.opaque;
   | PsKernelDefinition.natRecursor unusedName unusedParameters unusedType unusedZero unusedSucc => PsKernelDefinitionBody.opaque;
@@ -1447,6 +1498,122 @@ def psKernelStringPreludeStep (state : PsKernelStringPreludeState) : PsKernelStr
 };
 };
 
+inductive PsKernelAlgBranch where {
+  | branch (name : PsKernelName) (parameters : PsKernelNatural) (fields : PsKernelList(PsKernelOption(PsKernelName))) (minor : PsKernelExpr);
+};
+
+inductive PsKernelAlgReduceContinuation where {
+  | continuation (recHead : PsKernelExpr) (branches : PsKernelList(PsKernelAlgBranch));
+};
+
+inductive PsKernelAlgReduceState where {
+  | parameters (original : PsKernelExpr) (recHead : PsKernelExpr) (remaining : PsKernelNatural) (rules : PsKernelList(PsKernelAlgRule)) (args : PsKernelList(PsKernelExpr));
+  | motive (original : PsKernelExpr) (recHead : PsKernelExpr) (rules : PsKernelList(PsKernelAlgRule)) (args : PsKernelList(PsKernelExpr));
+  | minors (original : PsKernelExpr) (recHead : PsKernelExpr) (rules : PsKernelList(PsKernelAlgRule)) (args : PsKernelList(PsKernelExpr)) (branches : PsKernelList(PsKernelAlgBranch));
+  | spine (recHead : PsKernelExpr) (major : PsKernelExpr) (cursor : PsKernelExpr) (args : PsKernelList(PsKernelExpr)) (branches : PsKernelList(PsKernelAlgBranch));
+  | find (recHead : PsKernelExpr) (major : PsKernelExpr) (name : PsKernelName) (args : PsKernelList(PsKernelExpr)) (branches : PsKernelList(PsKernelAlgBranch));
+  | compare (recHead : PsKernelExpr) (major : PsKernelExpr) (name : PsKernelName) (args : PsKernelList(PsKernelExpr)) (branch : PsKernelAlgBranch) (branches : PsKernelList(PsKernelAlgBranch)) (tasks : PsKernelList(PsKernelOrderTask));
+  | drop (recHead : PsKernelExpr) (minor : PsKernelExpr) (remaining : PsKernelNatural) (fields : PsKernelList(PsKernelOption(PsKernelName))) (args : PsKernelList(PsKernelExpr));
+  | fields (recHead : PsKernelExpr) (minor : PsKernelExpr) (fields : PsKernelList(PsKernelOption(PsKernelName))) (args : PsKernelList(PsKernelExpr)) (recursive : PsKernelList(PsKernelExpr));
+  | reverse (recHead : PsKernelExpr) (minor : PsKernelExpr) (pending : PsKernelList(PsKernelExpr)) (recursive : PsKernelList(PsKernelExpr));
+  | hypotheses (recHead : PsKernelExpr) (minor : PsKernelExpr) (recursive : PsKernelList(PsKernelExpr));
+};
+
+inductive PsKernelAlgReduceStep where {
+  | next (state : PsKernelAlgReduceState);
+  | major (value : PsKernelExpr) (continuation : PsKernelAlgReduceContinuation);
+  | neutral (value : PsKernelExpr);
+  | reduced (value : PsKernelExpr);
+  | rejected (error : PsKernelCheckError);
+};
+
+def psKernelAlgReduceStep (state : PsKernelAlgReduceState) : PsKernelAlgReduceStep := match state with {
+  | PsKernelAlgReduceState.parameters original recHead remaining rules args => match remaining with {
+  | PsKernelNatural.zero => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.motive(original, recHead, rules, args));
+  | _ => match args with {
+  | PsKernelList.cons arg rest => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.parameters(original, PsKernelExpr.app(recHead, arg), psKernelNaturalPred(remaining), rules, rest));
+  | _ => PsKernelAlgReduceStep.neutral(original);
+};
+};
+  | PsKernelAlgReduceState.motive original recHead rules args => match args with {
+  | PsKernelList.cons motive rest => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.minors(original, PsKernelExpr.app(recHead, motive), rules, rest, PsKernelList.nil));
+  | _ => PsKernelAlgReduceStep.neutral(original);
+};
+  | PsKernelAlgReduceState.minors original recHead rules args branches => match rules with {
+  | PsKernelList.cons rule rest => match args with {
+  | PsKernelList.cons minor tail => match rule with {
+  | PsKernelAlgRule.rule name parameters unusedIndex fields => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.minors(original, PsKernelExpr.app(recHead, minor), rest, tail, PsKernelList.cons(PsKernelAlgBranch.branch(name, parameters, fields, minor), branches)));
+};
+  | _ => PsKernelAlgReduceStep.neutral(original);
+};
+  | PsKernelList.nil => match args with {
+  | PsKernelList.cons major tail => match tail with {
+  | PsKernelList.nil => PsKernelAlgReduceStep.major(major, PsKernelAlgReduceContinuation.continuation(recHead, branches));
+  | _ => PsKernelAlgReduceStep.neutral(original);
+};
+  | _ => PsKernelAlgReduceStep.neutral(original);
+};
+};
+  | PsKernelAlgReduceState.spine recHead major cursor args branches => match cursor with {
+  | PsKernelExpr.app fn arg => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.spine(recHead, major, fn, PsKernelList.cons(arg, args), branches));
+  | PsKernelExpr.constE name levels => match levels with {
+  | PsKernelList.nil => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.find(recHead, major, name, args, branches));
+  | _ => PsKernelAlgReduceStep.neutral(PsKernelExpr.app(recHead, major));
+};
+  | _ => PsKernelAlgReduceStep.neutral(PsKernelExpr.app(recHead, major));
+};
+  | PsKernelAlgReduceState.find recHead major name args branches => match branches with {
+  | PsKernelList.nil => PsKernelAlgReduceStep.neutral(PsKernelExpr.app(recHead, major));
+  | PsKernelList.cons branch rest => match branch with {
+  | PsKernelAlgBranch.branch constructor unusedParameters unusedFields unusedMinor => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.compare(recHead, major, name, args, branch, rest, PsKernelList.cons(PsKernelOrderTask.name(constructor, name), PsKernelList.nil)));
+};
+};
+  | PsKernelAlgReduceState.compare recHead major name args branch branches current => match psKernelOrderStep(current) with {
+  | PsKernelOrderStep.next next => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.compare(recHead, major, name, args, branch, branches, next));
+  | PsKernelOrderStep.done order => match order with {
+  | PsKernelOrder.same => match branch with {
+  | PsKernelAlgBranch.branch unusedName parameters fields minor => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.drop(recHead, minor, parameters, fields, args));
+};
+  | _ => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.find(recHead, major, name, args, branches));
+};
+  | _ => PsKernelAlgReduceStep.rejected(PsKernelCheckError.invalidState);
+};
+  | PsKernelAlgReduceState.drop recHead minor remaining fields args => match remaining with {
+  | PsKernelNatural.zero => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.fields(recHead, minor, fields, args, PsKernelList.nil));
+  | _ => match args with {
+  | PsKernelList.cons unused rest => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.drop(recHead, minor, psKernelNaturalPred(remaining), fields, rest));
+  | _ => PsKernelAlgReduceStep.rejected(PsKernelCheckError.typeMismatch);
+};
+};
+  | PsKernelAlgReduceState.fields recHead minor fields args recursive => match fields with {
+  | PsKernelList.nil => match args with {
+  | PsKernelList.nil => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.reverse(recHead, minor, recursive, PsKernelList.nil));
+  | _ => PsKernelAlgReduceStep.rejected(PsKernelCheckError.typeMismatch);
+};
+  | PsKernelList.cons flag rest => match args with {
+  | PsKernelList.cons arg tail => match flag with {
+  | PsKernelOption.none => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.fields(recHead, PsKernelExpr.app(minor, arg), rest, tail, recursive));
+  | PsKernelOption.some unusedRecursor => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.fields(recHead, PsKernelExpr.app(minor, arg), rest, tail, PsKernelList.cons(arg, recursive)));
+};
+  | _ => PsKernelAlgReduceStep.rejected(PsKernelCheckError.typeMismatch);
+};
+};
+  | PsKernelAlgReduceState.reverse recHead minor pending recursive => match pending with {
+  | PsKernelList.cons arg rest => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.reverse(recHead, minor, rest, PsKernelList.cons(arg, recursive)));
+  | PsKernelList.nil => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.hypotheses(recHead, minor, recursive));
+};
+  | PsKernelAlgReduceState.hypotheses recHead minor recursive => match recursive with {
+  | PsKernelList.cons arg rest => PsKernelAlgReduceStep.next(PsKernelAlgReduceState.hypotheses(recHead, PsKernelExpr.app(minor, PsKernelExpr.app(recHead, arg)), rest));
+  | PsKernelList.nil => PsKernelAlgReduceStep.reduced(minor);
+};
+};
+
+def psKernelAlgReduceStart (original : PsKernelExpr) (head : PsKernelExpr) (parameters : PsKernelNatural) (rules : PsKernelList(PsKernelAlgRule)) (args : PsKernelList(PsKernelExpr)) : PsKernelAlgReduceState := PsKernelAlgReduceState.parameters(original, head, parameters, rules, args);
+
+def psKernelAlgReduceResume (continuation : PsKernelAlgReduceContinuation) (major : PsKernelExpr) : PsKernelAlgReduceState := match continuation with {
+  | PsKernelAlgReduceContinuation.continuation recHead branches => PsKernelAlgReduceState.spine(recHead, major, major, PsKernelList.nil, branches);
+};
+
 inductive PsKernelEnumBranch where {
   | branch (name : PsKernelName) (minor : PsKernelExpr);
 };
@@ -1466,6 +1633,8 @@ def psKernelRecordNeutral (action : PsKernelRecordAction) (major : PsKernelExpr)
 };
 
 inductive PsKernelReduceTask where {
+  | algebraic (state : PsKernelAlgReduceState);
+  | algebraicMajor (continuation : PsKernelAlgReduceContinuation);
   | sumMinors (original : PsKernelExpr) (rules : PsKernelList(PsKernelSumRule)) (args : PsKernelList(PsKernelExpr)) (branches : PsKernelList(PsKernelSumBranch));
   | sumMajor (fn : PsKernelExpr) (branches : PsKernelList(PsKernelSumBranch));
   | sumSpine (fn : PsKernelExpr) (major : PsKernelExpr) (cursor : PsKernelExpr) (args : PsKernelList(PsKernelExpr)) (branches : PsKernelList(PsKernelSumBranch));
@@ -1566,6 +1735,7 @@ def psKernelReduceNeutralApply (env : PsKernelList(PsKernelDefinition)) (tasks :
 def psKernelReduceValueTask (env : PsKernelList(PsKernelDefinition)) (task : PsKernelReduceTask) (tasks : PsKernelList(PsKernelReduceTask)) (values : PsKernelList(PsKernelExpr)) : PsKernelReduceStep := match values with {
   | PsKernelList.nil => psKernelReduceReject(PsKernelCheckError.invalidState);
   | PsKernelList.cons top rest => match task with {
+  | PsKernelReduceTask.algebraicMajor continuation => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.algebraic(psKernelAlgReduceResume(continuation, top)), tasks), rest);
   | PsKernelReduceTask.sumMajor fn branches => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.sumSpine(fn, top, top, PsKernelList.nil, branches), tasks), rest);
   | PsKernelReduceTask.enumMajor fn branches => match top with {
   | PsKernelExpr.constE name levels => match levels with {
@@ -1635,6 +1805,13 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep := mat
   | _ => psKernelReduceReject(PsKernelCheckError.invalidState);
 };
   | PsKernelList.cons task rest => match task with {
+  | PsKernelReduceTask.algebraic current => match psKernelAlgReduceStep(current) with {
+  | PsKernelAlgReduceStep.next next => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.algebraic(next), rest), values);
+  | PsKernelAlgReduceStep.major major continuation => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.whnf(major), PsKernelList.cons(PsKernelReduceTask.algebraicMajor(continuation), rest)), values);
+  | PsKernelAlgReduceStep.neutral value => psKernelReducePush(env, rest, values, value);
+  | PsKernelAlgReduceStep.reduced value => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.whnf(value), rest), values);
+  | PsKernelAlgReduceStep.rejected error => psKernelReduceReject(error);
+};
   | PsKernelReduceTask.enumSpine original cursor args => match cursor with {
   | PsKernelExpr.app fn arg => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.enumSpine(original, fn, PsKernelList.cons(arg, args)), rest), values);
   | PsKernelExpr.constE name levels => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.enumLookup(original, args, levels, PsKernelLookupState.search(name, env)), rest), values);
@@ -1643,6 +1820,13 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep := mat
   | PsKernelReduceTask.enumLookup original args levels current => match psKernelLookupStep(current) with {
   | PsKernelLookupStep.next next => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.enumLookup(original, args, levels, next), rest), values);
   | PsKernelLookupStep.found entry => match entry with {
+  | PsKernelDefinition.algebraicRecursor name unusedLevels unusedType parameters rules => match levels with {
+  | PsKernelList.cons unusedLevel tail => match tail with {
+  | PsKernelList.nil => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.algebraic(psKernelAlgReduceStart(original, PsKernelExpr.constE(name, levels), parameters, rules, args)), rest), values);
+  | _ => psKernelReduceReject(PsKernelCheckError.invalidUniverse);
+};
+  | _ => psKernelReduceReject(PsKernelCheckError.invalidUniverse);
+};
   | PsKernelDefinition.sumRecursor unusedName unusedParameters unusedType rules => match levels with {
   | PsKernelList.cons unusedLevel tail => match tail with {
   | PsKernelList.nil => match args with {
@@ -3151,7 +3335,979 @@ def psKernelSumRun (fuel : PsKernelFuel) : (_ : PsKernelSumState) -> PsKernelAdm
 };
 };
 
+def psKernelAlgType : PsKernelExpr := PsKernelExpr.sortE(PsKernelLevel.succ(PsKernelLevel.zero));
+
+inductive PsKernelAlgHeaderTask where {
+  | initial;
+  | scope (state : PsKernelBindingState);
+  | name (state : PsKernelLookupState);
+  | type (state : PsKernelTypeState);
+  | parameters (remainingType : PsKernelExpr) (remaining : PsKernelNatural) (nextId : PsKernelNatural) (reversed : PsKernelList(PsKernelExpr)) (binders : PsKernelList(PsKernelAlgBinder)) (uniform : PsKernelExpr);
+  | reverse (pending : PsKernelList(PsKernelExpr)) (arguments : PsKernelList(PsKernelExpr)) (binders : PsKernelList(PsKernelAlgBinder)) (uniform : PsKernelExpr);
+};
+
+inductive PsKernelAlgHeaderState where {
+  | state (environment : PsKernelList(PsKernelDefinition)) (declaration : PsKernelAlgDeclaration) (task : PsKernelAlgHeaderTask);
+};
+
+inductive PsKernelAlgHeaderStep where {
+  | next (state : PsKernelAlgHeaderState);
+  | accepted (header : PsKernelAlgHeader);
+  | rejected (error : PsKernelCheckError);
+};
+
+def psKernelAlgHeaderNext (env : PsKernelList(PsKernelDefinition)) (declaration : PsKernelAlgDeclaration) (task : PsKernelAlgHeaderTask) : PsKernelAlgHeaderStep := PsKernelAlgHeaderStep.next(PsKernelAlgHeaderState.state(env, declaration, task));
+
+def psKernelAlgHeaderStep (state : PsKernelAlgHeaderState) : PsKernelAlgHeaderStep := match state with {
+  | PsKernelAlgHeaderState.state env declaration task => match declaration with {
+  | PsKernelAlgDeclaration.declaration name parameters type constructors => match task with {
+  | PsKernelAlgHeaderTask.initial => match name with {
+  | PsKernelName.anonymous => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.invalidName);
+  | _ => match constructors with {
+  | PsKernelList.nil => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.unsupported);
+  | PsKernelList.cons unusedHead unusedTail => psKernelAlgHeaderNext(env, declaration, PsKernelAlgHeaderTask.scope(psKernelBindingStart(PsKernelBindingMode.closed, PsKernelNatural.zero, type)));
+};
+};
+  | PsKernelAlgHeaderTask.scope current => match psKernelBindingStep(current) with {
+  | PsKernelBindingStep.next next => psKernelAlgHeaderNext(env, declaration, PsKernelAlgHeaderTask.scope(next));
+  | PsKernelBindingStep.final result => match result with {
+  | PsKernelBindingResult.done unused => psKernelAlgHeaderNext(env, declaration, PsKernelAlgHeaderTask.name(PsKernelLookupState.search(name, env)));
+  | PsKernelBindingResult.invalidScope => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.invalidScope);
+  | _ => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.invalidState);
+};
+};
+  | PsKernelAlgHeaderTask.name current => match psKernelLookupStep(current) with {
+  | PsKernelLookupStep.next next => psKernelAlgHeaderNext(env, declaration, PsKernelAlgHeaderTask.name(next));
+  | PsKernelLookupStep.missing => psKernelAlgHeaderNext(env, declaration, PsKernelAlgHeaderTask.type(psKernelInferStart(env, type)));
+  | PsKernelLookupStep.found unused => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.duplicateName);
+  | _ => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.invalidState);
+};
+  | PsKernelAlgHeaderTask.type current => match psKernelTypeStep(current) with {
+  | PsKernelTypeStep.next next => psKernelAlgHeaderNext(env, declaration, PsKernelAlgHeaderTask.type(next));
+  | PsKernelTypeStep.final result => match result with {
+  | PsKernelTypeResult.done kind => match kind with {
+  | PsKernelExpr.sortE unused => psKernelAlgHeaderNext(env, declaration, PsKernelAlgHeaderTask.parameters(type, parameters, PsKernelNatural.zero, PsKernelList.nil, PsKernelList.nil, PsKernelExpr.constE(name, PsKernelList.nil)));
+  | _ => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.typeExpected);
+};
+  | PsKernelTypeResult.rejected error => PsKernelAlgHeaderStep.rejected(error);
+  | _ => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.invalidState);
+};
+};
+  | PsKernelAlgHeaderTask.parameters remainingType remaining nextId reversed binders uniform => match remaining with {
+  | PsKernelNatural.zero => match remainingType with {
+  | PsKernelExpr.sortE level => match level with {
+  | PsKernelLevel.succ inner => match inner with {
+  | PsKernelLevel.zero => psKernelAlgHeaderNext(env, declaration, PsKernelAlgHeaderTask.reverse(reversed, PsKernelList.nil, binders, uniform));
+  | _ => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.unsupported);
+};
+  | _ => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.unsupported);
+};
+  | _ => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.unsupported);
+};
+  | _ => match remainingType with {
+  | PsKernelExpr.forallE unusedName domain body unusedBinder => match domain with {
+  | PsKernelExpr.sortE level => match level with {
+  | PsKernelLevel.succ inner => match inner with {
+  | PsKernelLevel.zero => psKernelAlgHeaderNext(env, declaration, PsKernelAlgHeaderTask.parameters(body, psKernelNaturalPred(remaining), psKernelNaturalSucc(nextId), PsKernelList.cons(PsKernelExpr.fvar(nextId), reversed), PsKernelList.cons(PsKernelAlgBinder.binder(nextId, psKernelAlgType, PsKernelBinder.implicit), binders), PsKernelExpr.app(uniform, PsKernelExpr.fvar(nextId))));
+  | _ => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.unsupported);
+};
+  | _ => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.unsupported);
+};
+  | _ => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.unsupported);
+};
+  | _ => PsKernelAlgHeaderStep.rejected(PsKernelCheckError.typeMismatch);
+};
+};
+  | PsKernelAlgHeaderTask.reverse pending arguments binders uniform => match pending with {
+  | PsKernelList.cons argument rest => psKernelAlgHeaderNext(env, declaration, PsKernelAlgHeaderTask.reverse(rest, PsKernelList.cons(argument, arguments), binders, uniform));
+  | PsKernelList.nil => PsKernelAlgHeaderStep.accepted(PsKernelAlgHeader.header(name, type, parameters, arguments, binders, uniform));
+};
+};
+};
+};
+
+def psKernelAlgHeaderStart (env : PsKernelList(PsKernelDefinition)) (declaration : PsKernelAlgDeclaration) : PsKernelAlgHeaderState := PsKernelAlgHeaderState.state(env, declaration, PsKernelAlgHeaderTask.initial);
+
+inductive PsKernelCloseMode where {
+  | pi;
+  | lambda;
+};
+
+inductive PsKernelCloseTask where {
+  | binders (pending : PsKernelList(PsKernelAlgBinder)) (value : PsKernelExpr);
+  | abstract (binder : PsKernelAlgBinder) (pending : PsKernelList(PsKernelAlgBinder)) (state : PsKernelBindingState);
+};
+
+inductive PsKernelCloseState where {
+  | state (mode : PsKernelCloseMode) (task : PsKernelCloseTask);
+};
+
+inductive PsKernelCloseStep where {
+  | next (state : PsKernelCloseState);
+  | done (value : PsKernelExpr);
+  | invalidState;
+};
+
+inductive PsKernelCloseResult where {
+  | done (value : PsKernelExpr);
+  | invalidState;
+  | outOfFuel;
+};
+
+def psKernelCloseNext (mode : PsKernelCloseMode) (task : PsKernelCloseTask) : PsKernelCloseStep := PsKernelCloseStep.next(PsKernelCloseState.state(mode, task));
+
+def psKernelCloseStep (state : PsKernelCloseState) : PsKernelCloseStep := match state with {
+  | PsKernelCloseState.state mode task => match task with {
+  | PsKernelCloseTask.binders pending value => match pending with {
+  | PsKernelList.nil => PsKernelCloseStep.done(value);
+  | PsKernelList.cons binder rest => match binder with {
+  | PsKernelAlgBinder.binder id unusedType unusedVisibility => psKernelCloseNext(mode, PsKernelCloseTask.abstract(binder, rest, psKernelBindingStart(PsKernelBindingMode.abstract(id), PsKernelNatural.zero, value)));
+};
+};
+  | PsKernelCloseTask.abstract binder pending current => match psKernelBindingStep(current) with {
+  | PsKernelBindingStep.next next => psKernelCloseNext(mode, PsKernelCloseTask.abstract(binder, pending, next));
+  | PsKernelBindingStep.final result => match result with {
+  | PsKernelBindingResult.done value => match binder with {
+  | PsKernelAlgBinder.binder unusedId type visibility => match mode with {
+  | PsKernelCloseMode.pi => psKernelCloseNext(mode, PsKernelCloseTask.binders(pending, PsKernelExpr.forallE(PsKernelName.anonymous, type, value, visibility)));
+  | PsKernelCloseMode.lambda => psKernelCloseNext(mode, PsKernelCloseTask.binders(pending, PsKernelExpr.lam(PsKernelName.anonymous, type, value, visibility)));
+};
+};
+  | _ => PsKernelCloseStep.invalidState;
+};
+};
+};
+};
+
+def psKernelCloseStart (mode : PsKernelCloseMode) (reversedBinders : PsKernelList(PsKernelAlgBinder)) (value : PsKernelExpr) : PsKernelCloseState := PsKernelCloseState.state(mode, PsKernelCloseTask.binders(reversedBinders, value));
+
+def psKernelCloseRun (fuel : PsKernelFuel) : (_ : PsKernelCloseState) -> PsKernelCloseResult := match fuel with {
+  | PsKernelFuel.stop => fun (state : PsKernelCloseState) => PsKernelCloseResult.outOfFuel;
+  | PsKernelFuel.more remaining => fun (state : PsKernelCloseState) => match psKernelCloseStep(state) with {
+  | PsKernelCloseStep.done value => PsKernelCloseResult.done(value);
+  | PsKernelCloseStep.invalidState => PsKernelCloseResult.invalidState;
+  | PsKernelCloseStep.next next => let smaller : (_ : PsKernelCloseState) -> PsKernelCloseResult := psKernelCloseRun(remaining); smaller(next);
+};
+};
+
+inductive PsKernelOccurrenceTask where {
+  | visit (value : PsKernelExpr);
+  | name (work : PsKernelList(PsKernelOrderTask));
+};
+
+inductive PsKernelOccurrenceState where {
+  | state (family : PsKernelName) (parameters : PsKernelFlag) (tasks : PsKernelList(PsKernelOccurrenceTask));
+};
+
+inductive PsKernelOccurrenceStep where {
+  | next (state : PsKernelOccurrenceState);
+  | found;
+  | absent;
+  | invalidState;
+};
+
+def psKernelOccurrenceNext (family : PsKernelName) (parameters : PsKernelFlag) (tasks : PsKernelList(PsKernelOccurrenceTask)) : PsKernelOccurrenceStep := PsKernelOccurrenceStep.next(PsKernelOccurrenceState.state(family, parameters, tasks));
+
+def psKernelOccurrenceStep (state : PsKernelOccurrenceState) : PsKernelOccurrenceStep := match state with {
+  | PsKernelOccurrenceState.state family parameters tasks => match tasks with {
+  | PsKernelList.nil => PsKernelOccurrenceStep.absent;
+  | PsKernelList.cons task rest => match task with {
+  | PsKernelOccurrenceTask.name current => match psKernelOrderStep(current) with {
+  | PsKernelOrderStep.next next => psKernelOccurrenceNext(family, parameters, PsKernelList.cons(PsKernelOccurrenceTask.name(next), rest));
+  | PsKernelOrderStep.done order => match order with {
+  | PsKernelOrder.same => PsKernelOccurrenceStep.found;
+  | _ => psKernelOccurrenceNext(family, parameters, rest);
+};
+  | _ => PsKernelOccurrenceStep.invalidState;
+};
+  | PsKernelOccurrenceTask.visit value => match value with {
+  | PsKernelExpr.fvar unused => match parameters with {
+  | PsKernelFlag.yes => PsKernelOccurrenceStep.found;
+  | PsKernelFlag.no => psKernelOccurrenceNext(family, parameters, rest);
+};
+  | PsKernelExpr.constE name unusedLevels => psKernelOccurrenceNext(family, parameters, PsKernelList.cons(PsKernelOccurrenceTask.name(PsKernelList.cons(PsKernelOrderTask.name(name, family), PsKernelList.nil)), rest));
+  | PsKernelExpr.app fn arg => psKernelOccurrenceNext(family, parameters, PsKernelList.cons(PsKernelOccurrenceTask.visit(fn), PsKernelList.cons(PsKernelOccurrenceTask.visit(arg), rest)));
+  | PsKernelExpr.lam unusedName type body unusedBinder => psKernelOccurrenceNext(family, parameters, PsKernelList.cons(PsKernelOccurrenceTask.visit(type), PsKernelList.cons(PsKernelOccurrenceTask.visit(body), rest)));
+  | PsKernelExpr.forallE unusedName type body unusedBinder => psKernelOccurrenceNext(family, parameters, PsKernelList.cons(PsKernelOccurrenceTask.visit(type), PsKernelList.cons(PsKernelOccurrenceTask.visit(body), rest)));
+  | PsKernelExpr.letE unusedName type val body => psKernelOccurrenceNext(family, parameters, PsKernelList.cons(PsKernelOccurrenceTask.visit(type), PsKernelList.cons(PsKernelOccurrenceTask.visit(val), PsKernelList.cons(PsKernelOccurrenceTask.visit(body), rest))));
+  | PsKernelExpr.proj name unusedIndex major => psKernelOccurrenceNext(family, parameters, PsKernelList.cons(PsKernelOccurrenceTask.name(PsKernelList.cons(PsKernelOrderTask.name(name, family), PsKernelList.nil)), PsKernelList.cons(PsKernelOccurrenceTask.visit(major), rest)));
+  | _ => psKernelOccurrenceNext(family, parameters, rest);
+};
+};
+};
+};
+
+def psKernelOccurrenceStart (family : PsKernelName) (parameters : PsKernelFlag) (value : PsKernelExpr) : PsKernelOccurrenceState := PsKernelOccurrenceState.state(family, parameters, PsKernelList.cons(PsKernelOccurrenceTask.visit(value), PsKernelList.nil));
+
+inductive PsKernelExprEqualTask where {
+  | pair (left : PsKernelExpr) (right : PsKernelExpr);
+  | order (tasks : PsKernelList(PsKernelOrderTask));
+  | levels (left : PsKernelList(PsKernelLevel)) (right : PsKernelList(PsKernelLevel));
+};
+
+inductive PsKernelExprEqualState where {
+  | state (tasks : PsKernelList(PsKernelExprEqualTask));
+};
+
+inductive PsKernelExprEqualStep where {
+  | next (state : PsKernelExprEqualState);
+  | equal;
+  | different;
+  | invalidState;
+};
+
+def psKernelExprEqualNext (tasks : PsKernelList(PsKernelExprEqualTask)) : PsKernelExprEqualStep := PsKernelExprEqualStep.next(PsKernelExprEqualState.state(tasks));
+
+def psKernelExprEqualOrder (task : PsKernelOrderTask) (rest : PsKernelList(PsKernelExprEqualTask)) : PsKernelExprEqualStep := psKernelExprEqualNext(PsKernelList.cons(PsKernelExprEqualTask.order(PsKernelList.cons(task, PsKernelList.nil)), rest));
+
+def psKernelExprEqualPair (left : PsKernelExpr) (right : PsKernelExpr) (rest : PsKernelList(PsKernelExprEqualTask)) : PsKernelExprEqualStep := match left with {
+  | PsKernelExpr.bvar index => match right with {
+  | PsKernelExpr.bvar other => psKernelExprEqualOrder(PsKernelOrderTask.number(PsKernelNumericState.order(index, other, PsKernelOrder.same)), rest);
+  | _ => PsKernelExprEqualStep.different;
+};
+  | PsKernelExpr.fvar id => match right with {
+  | PsKernelExpr.fvar other => psKernelExprEqualOrder(PsKernelOrderTask.number(PsKernelNumericState.order(id, other, PsKernelOrder.same)), rest);
+  | _ => PsKernelExprEqualStep.different;
+};
+  | PsKernelExpr.sortE level => match right with {
+  | PsKernelExpr.sortE other => psKernelExprEqualOrder(PsKernelOrderTask.level(level, other), rest);
+  | _ => PsKernelExprEqualStep.different;
+};
+  | PsKernelExpr.constE name levels => match right with {
+  | PsKernelExpr.constE otherName otherLevels => psKernelExprEqualOrder(PsKernelOrderTask.name(name, otherName), PsKernelList.cons(PsKernelExprEqualTask.levels(levels, otherLevels), rest));
+  | _ => PsKernelExprEqualStep.different;
+};
+  | PsKernelExpr.app fn arg => match right with {
+  | PsKernelExpr.app otherFn otherArg => psKernelExprEqualNext(PsKernelList.cons(PsKernelExprEqualTask.pair(fn, otherFn), PsKernelList.cons(PsKernelExprEqualTask.pair(arg, otherArg), rest)));
+  | _ => PsKernelExprEqualStep.different;
+};
+  | PsKernelExpr.lam unusedName type body unusedBinder => match right with {
+  | PsKernelExpr.lam unusedOtherName otherType otherBody unusedOtherBinder => psKernelExprEqualNext(PsKernelList.cons(PsKernelExprEqualTask.pair(type, otherType), PsKernelList.cons(PsKernelExprEqualTask.pair(body, otherBody), rest)));
+  | _ => PsKernelExprEqualStep.different;
+};
+  | PsKernelExpr.forallE unusedName type body unusedBinder => match right with {
+  | PsKernelExpr.forallE unusedOtherName otherType otherBody unusedOtherBinder => psKernelExprEqualNext(PsKernelList.cons(PsKernelExprEqualTask.pair(type, otherType), PsKernelList.cons(PsKernelExprEqualTask.pair(body, otherBody), rest)));
+  | _ => PsKernelExprEqualStep.different;
+};
+  | PsKernelExpr.letE unusedName type val body => match right with {
+  | PsKernelExpr.letE unusedOtherName otherType otherVal otherBody => psKernelExprEqualNext(PsKernelList.cons(PsKernelExprEqualTask.pair(type, otherType), PsKernelList.cons(PsKernelExprEqualTask.pair(val, otherVal), PsKernelList.cons(PsKernelExprEqualTask.pair(body, otherBody), rest))));
+  | _ => PsKernelExprEqualStep.different;
+};
+  | PsKernelExpr.proj name index major => match right with {
+  | PsKernelExpr.proj otherName otherIndex otherMajor => psKernelExprEqualOrder(PsKernelOrderTask.name(name, otherName), PsKernelList.cons(PsKernelExprEqualTask.order(PsKernelList.cons(PsKernelOrderTask.number(PsKernelNumericState.order(index, otherIndex, PsKernelOrder.same)), PsKernelList.nil)), PsKernelList.cons(PsKernelExprEqualTask.pair(major, otherMajor), rest)));
+  | _ => PsKernelExprEqualStep.different;
+};
+  | PsKernelExpr.lit literal => match right with {
+  | PsKernelExpr.lit other => match literal with {
+  | PsKernelLiteral.natural value => match other with {
+  | PsKernelLiteral.natural otherValue => psKernelExprEqualOrder(PsKernelOrderTask.number(PsKernelNumericState.order(value, otherValue, PsKernelOrder.same)), rest);
+  | _ => PsKernelExprEqualStep.different;
+};
+  | PsKernelLiteral.text value => match other with {
+  | PsKernelLiteral.text otherValue => psKernelExprEqualOrder(PsKernelOrderTask.text(value, otherValue), rest);
+  | _ => PsKernelExprEqualStep.different;
+};
+};
+  | _ => PsKernelExprEqualStep.different;
+};
+};
+
+def psKernelExprEqualStep (state : PsKernelExprEqualState) : PsKernelExprEqualStep := match state with {
+  | PsKernelExprEqualState.state tasks => match tasks with {
+  | PsKernelList.nil => PsKernelExprEqualStep.equal;
+  | PsKernelList.cons task rest => match task with {
+  | PsKernelExprEqualTask.pair left right => psKernelExprEqualPair(left, right, rest);
+  | PsKernelExprEqualTask.order current => match psKernelOrderStep(current) with {
+  | PsKernelOrderStep.next next => psKernelExprEqualNext(PsKernelList.cons(PsKernelExprEqualTask.order(next), rest));
+  | PsKernelOrderStep.done order => match order with {
+  | PsKernelOrder.same => psKernelExprEqualNext(rest);
+  | _ => PsKernelExprEqualStep.different;
+};
+  | _ => PsKernelExprEqualStep.invalidState;
+};
+  | PsKernelExprEqualTask.levels left right => match left with {
+  | PsKernelList.nil => match right with {
+  | PsKernelList.nil => psKernelExprEqualNext(rest);
+  | _ => PsKernelExprEqualStep.different;
+};
+  | PsKernelList.cons level tail => match right with {
+  | PsKernelList.cons other otherTail => psKernelExprEqualOrder(PsKernelOrderTask.level(level, other), PsKernelList.cons(PsKernelExprEqualTask.levels(tail, otherTail), rest));
+  | _ => PsKernelExprEqualStep.different;
+};
+};
+};
+};
+};
+
+def psKernelExprEqualStart (left : PsKernelExpr) (right : PsKernelExpr) : PsKernelExprEqualState := PsKernelExprEqualState.state(PsKernelList.cons(PsKernelExprEqualTask.pair(left, right), PsKernelList.nil));
+
+inductive PsKernelPositiveFieldTask where {
+  | fields (pending : PsKernelList(PsKernelExpr));
+  | occurrence (value : PsKernelExpr) (pending : PsKernelList(PsKernelExpr)) (state : PsKernelOccurrenceState);
+  | uniform (value : PsKernelExpr) (pending : PsKernelList(PsKernelExpr)) (state : PsKernelExprEqualState);
+  | spine (value : PsKernelExpr) (arguments : PsKernelList(PsKernelExpr)) (pending : PsKernelList(PsKernelExpr));
+  | lookup (arguments : PsKernelList(PsKernelExpr)) (pending : PsKernelList(PsKernelExpr)) (state : PsKernelLookupState);
+  | arity (remaining : PsKernelNatural) (arguments : PsKernelList(PsKernelExpr)) (pending : PsKernelList(PsKernelExpr));
+};
+
+inductive PsKernelPositiveFieldState where {
+  | state (environment : PsKernelList(PsKernelDefinition)) (family : PsKernelName) (uniform : PsKernelExpr) (task : PsKernelPositiveFieldTask);
+};
+
+inductive PsKernelPositiveFieldStep where {
+  | next (state : PsKernelPositiveFieldState);
+  | accepted;
+  | rejected (error : PsKernelCheckError);
+};
+
+inductive PsKernelPositiveFieldResult where {
+  | accepted;
+  | rejected (error : PsKernelCheckError);
+  | outOfFuel;
+};
+
+def psKernelPositiveFieldNext (env : PsKernelList(PsKernelDefinition)) (family : PsKernelName) (uniform : PsKernelExpr) (task : PsKernelPositiveFieldTask) : PsKernelPositiveFieldStep := PsKernelPositiveFieldStep.next(PsKernelPositiveFieldState.state(env, family, uniform, task));
+
+def psKernelPositiveFieldStep (state : PsKernelPositiveFieldState) : PsKernelPositiveFieldStep := match state with {
+  | PsKernelPositiveFieldState.state env family uniform task => match task with {
+  | PsKernelPositiveFieldTask.fields pending => match pending with {
+  | PsKernelList.nil => PsKernelPositiveFieldStep.accepted;
+  | PsKernelList.cons value rest => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.occurrence(value, rest, psKernelOccurrenceStart(family, PsKernelFlag.yes, value)));
+};
+  | PsKernelPositiveFieldTask.occurrence value pending current => match psKernelOccurrenceStep(current) with {
+  | PsKernelOccurrenceStep.next next => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.occurrence(value, pending, next));
+  | PsKernelOccurrenceStep.absent => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.fields(pending));
+  | PsKernelOccurrenceStep.found => match value with {
+  | PsKernelExpr.fvar unused => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.fields(pending));
+  | _ => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.uniform(value, pending, psKernelExprEqualStart(value, uniform)));
+};
+  | _ => PsKernelPositiveFieldStep.rejected(PsKernelCheckError.invalidState);
+};
+  | PsKernelPositiveFieldTask.uniform value pending current => match psKernelExprEqualStep(current) with {
+  | PsKernelExprEqualStep.next next => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.uniform(value, pending, next));
+  | PsKernelExprEqualStep.equal => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.fields(pending));
+  | PsKernelExprEqualStep.different => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.spine(value, PsKernelList.nil, pending));
+  | _ => PsKernelPositiveFieldStep.rejected(PsKernelCheckError.invalidState);
+};
+  | PsKernelPositiveFieldTask.spine value arguments pending => match value with {
+  | PsKernelExpr.app fn arg => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.spine(fn, PsKernelList.cons(arg, arguments), pending));
+  | PsKernelExpr.constE name levels => match levels with {
+  | PsKernelList.nil => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.lookup(arguments, pending, PsKernelLookupState.search(name, env)));
+  | _ => PsKernelPositiveFieldStep.rejected(PsKernelCheckError.unsupported);
+};
+  | _ => PsKernelPositiveFieldStep.rejected(PsKernelCheckError.unsupported);
+};
+  | PsKernelPositiveFieldTask.lookup arguments pending current => match psKernelLookupStep(current) with {
+  | PsKernelLookupStep.next next => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.lookup(arguments, pending, next));
+  | PsKernelLookupStep.found entry => match entry with {
+  | PsKernelDefinition.algebraicFamily unusedName unusedType parameters unusedConstructors => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.arity(parameters, arguments, pending));
+  | _ => PsKernelPositiveFieldStep.rejected(PsKernelCheckError.unsupported);
+};
+  | PsKernelLookupStep.missing => PsKernelPositiveFieldStep.rejected(PsKernelCheckError.unknownConstant);
+  | _ => PsKernelPositiveFieldStep.rejected(PsKernelCheckError.invalidState);
+};
+  | PsKernelPositiveFieldTask.arity remaining arguments pending => match remaining with {
+  | PsKernelNatural.zero => match arguments with {
+  | PsKernelList.nil => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.fields(pending));
+  | _ => PsKernelPositiveFieldStep.rejected(PsKernelCheckError.typeMismatch);
+};
+  | _ => match arguments with {
+  | PsKernelList.cons argument rest => psKernelPositiveFieldNext(env, family, uniform, PsKernelPositiveFieldTask.arity(psKernelNaturalPred(remaining), rest, PsKernelList.cons(argument, pending)));
+  | _ => PsKernelPositiveFieldStep.rejected(PsKernelCheckError.typeMismatch);
+};
+};
+};
+};
+
+def psKernelPositiveFieldStart (env : PsKernelList(PsKernelDefinition)) (family : PsKernelName) (uniform : PsKernelExpr) (value : PsKernelExpr) : PsKernelPositiveFieldState := PsKernelPositiveFieldState.state(env, family, uniform, PsKernelPositiveFieldTask.fields(PsKernelList.cons(value, PsKernelList.nil)));
+
+def psKernelPositiveFieldRun (fuel : PsKernelFuel) : (_ : PsKernelPositiveFieldState) -> PsKernelPositiveFieldResult := match fuel with {
+  | PsKernelFuel.stop => fun (state : PsKernelPositiveFieldState) => PsKernelPositiveFieldResult.outOfFuel;
+  | PsKernelFuel.more remaining => fun (state : PsKernelPositiveFieldState) => match psKernelPositiveFieldStep(state) with {
+  | PsKernelPositiveFieldStep.accepted => PsKernelPositiveFieldResult.accepted;
+  | PsKernelPositiveFieldStep.rejected error => PsKernelPositiveFieldResult.rejected(error);
+  | PsKernelPositiveFieldStep.next next => let smaller : (_ : PsKernelPositiveFieldState) -> PsKernelPositiveFieldResult := psKernelPositiveFieldRun(remaining); smaller(next);
+};
+};
+
+inductive PsKernelAlgConstructorTask where {
+  | scope (state : PsKernelBindingState);
+  | name (state : PsKernelLookupState);
+  | parameters (remaining : PsKernelExpr) (arguments : PsKernelList(PsKernelExpr));
+  | parameter (arguments : PsKernelList(PsKernelExpr)) (state : PsKernelBindingState);
+  | fields (remaining : PsKernelExpr) (reversed : PsKernelList(PsKernelExpr)) (nextId : PsKernelNatural);
+  | closeField (field : PsKernelExpr) (body : PsKernelExpr) (reversed : PsKernelList(PsKernelExpr)) (id : PsKernelNatural) (state : PsKernelCloseState);
+  | fieldType (field : PsKernelExpr) (body : PsKernelExpr) (closed : PsKernelExpr) (reversed : PsKernelList(PsKernelExpr)) (id : PsKernelNatural) (state : PsKernelTypeState);
+  | template (field : PsKernelExpr) (body : PsKernelExpr) (closed : PsKernelExpr) (reversed : PsKernelList(PsKernelExpr)) (id : PsKernelNatural) (remaining : PsKernelNatural);
+  | positive (body : PsKernelExpr) (template : PsKernelExpr) (reversed : PsKernelList(PsKernelExpr)) (id : PsKernelNatural) (state : PsKernelPositiveFieldState);
+  | fieldBody (reversed : PsKernelList(PsKernelExpr)) (id : PsKernelNatural) (state : PsKernelBindingState);
+  | result (reversed : PsKernelList(PsKernelExpr)) (state : PsKernelExprEqualState);
+  | constructorType (reversed : PsKernelList(PsKernelExpr)) (state : PsKernelTypeState);
+  | reverse (pending : PsKernelList(PsKernelExpr)) (fields : PsKernelList(PsKernelExpr));
+};
+
+inductive PsKernelAlgConstructorState where {
+  | state (environment : PsKernelList(PsKernelDefinition)) (header : PsKernelAlgHeader) (input : PsKernelAlgInputConstructor) (task : PsKernelAlgConstructorTask);
+};
+
+inductive PsKernelAlgConstructorStep where {
+  | next (state : PsKernelAlgConstructorState);
+  | accepted (constructor : PsKernelAlgConstructor);
+  | rejected (error : PsKernelCheckError);
+};
+
+inductive PsKernelAlgConstructorResult where {
+  | accepted (constructor : PsKernelAlgConstructor);
+  | rejected (error : PsKernelCheckError);
+  | outOfFuel;
+};
+
+def psKernelAlgConstructorNext (env : PsKernelList(PsKernelDefinition)) (header : PsKernelAlgHeader) (input : PsKernelAlgInputConstructor) (task : PsKernelAlgConstructorTask) : PsKernelAlgConstructorStep := PsKernelAlgConstructorStep.next(PsKernelAlgConstructorState.state(env, header, input, task));
+
+def psKernelAlgConstructorStep (state : PsKernelAlgConstructorState) : PsKernelAlgConstructorStep := match state with {
+  | PsKernelAlgConstructorState.state env header input task => match header with {
+  | PsKernelAlgHeader.header family familyType parameters arguments binders uniform => match input with {
+  | PsKernelAlgInputConstructor.constructor name type => match task with {
+  | PsKernelAlgConstructorTask.scope current => match psKernelBindingStep(current) with {
+  | PsKernelBindingStep.next next => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.scope(next));
+  | PsKernelBindingStep.final result => match result with {
+  | PsKernelBindingResult.done unused => match name with {
+  | PsKernelName.anonymous => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.invalidName);
+  | _ => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.name(PsKernelLookupState.search(name, env)));
+};
+  | PsKernelBindingResult.invalidScope => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.invalidScope);
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.invalidState);
+};
+};
+  | PsKernelAlgConstructorTask.name current => match psKernelLookupStep(current) with {
+  | PsKernelLookupStep.next next => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.name(next));
+  | PsKernelLookupStep.missing => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.parameters(type, arguments));
+  | PsKernelLookupStep.found unused => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.duplicateName);
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.invalidState);
+};
+  | PsKernelAlgConstructorTask.parameters remaining pending => match pending with {
+  | PsKernelList.nil => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.fields(remaining, PsKernelList.nil, parameters));
+  | PsKernelList.cons argument rest => match remaining with {
+  | PsKernelExpr.forallE unusedName domain body unusedBinder => match domain with {
+  | PsKernelExpr.sortE level => match level with {
+  | PsKernelLevel.succ inner => match inner with {
+  | PsKernelLevel.zero => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.parameter(rest, psKernelBindingStart(PsKernelBindingMode.instantiate(argument), PsKernelNatural.zero, body)));
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.unsupported);
+};
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.unsupported);
+};
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.unsupported);
+};
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.typeMismatch);
+};
+};
+  | PsKernelAlgConstructorTask.parameter pending current => match psKernelBindingStep(current) with {
+  | PsKernelBindingStep.next next => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.parameter(pending, next));
+  | PsKernelBindingStep.final result => match result with {
+  | PsKernelBindingResult.done remaining => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.parameters(remaining, pending));
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.invalidState);
+};
+};
+  | PsKernelAlgConstructorTask.fields remaining reversed nextId => match remaining with {
+  | PsKernelExpr.forallE unusedName field body unusedBinder => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.closeField(field, body, reversed, nextId, psKernelCloseStart(PsKernelCloseMode.lambda, binders, field)));
+  | _ => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.result(reversed, psKernelExprEqualStart(remaining, uniform)));
+};
+  | PsKernelAlgConstructorTask.closeField field body reversed id current => match psKernelCloseStep(current) with {
+  | PsKernelCloseStep.next next => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.closeField(field, body, reversed, id, next));
+  | PsKernelCloseStep.done closed => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.fieldType(field, body, closed, reversed, id, psKernelCheckStart(env, closed, familyType)));
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.invalidState);
+};
+  | PsKernelAlgConstructorTask.fieldType field body closed reversed id current => match psKernelTypeStep(current) with {
+  | PsKernelTypeStep.next next => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.fieldType(field, body, closed, reversed, id, next));
+  | PsKernelTypeStep.final result => match result with {
+  | PsKernelTypeResult.done unused => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.template(field, body, closed, reversed, id, parameters));
+  | PsKernelTypeResult.rejected error => PsKernelAlgConstructorStep.rejected(error);
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.invalidState);
+};
+};
+  | PsKernelAlgConstructorTask.template field body closed reversed id remaining => match remaining with {
+  | PsKernelNatural.zero => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.positive(body, closed, reversed, id, psKernelPositiveFieldStart(env, family, uniform, field)));
+  | _ => match closed with {
+  | PsKernelExpr.lam unusedName unusedType inner unusedBinder => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.template(field, body, inner, reversed, id, psKernelNaturalPred(remaining)));
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.invalidState);
+};
+};
+  | PsKernelAlgConstructorTask.positive body template reversed id current => match psKernelPositiveFieldStep(current) with {
+  | PsKernelPositiveFieldStep.next next => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.positive(body, template, reversed, id, next));
+  | PsKernelPositiveFieldStep.accepted => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.fieldBody(PsKernelList.cons(template, reversed), psKernelNaturalSucc(id), psKernelBindingStart(PsKernelBindingMode.instantiate(PsKernelExpr.fvar(id)), PsKernelNatural.zero, body)));
+  | PsKernelPositiveFieldStep.rejected error => PsKernelAlgConstructorStep.rejected(error);
+};
+  | PsKernelAlgConstructorTask.fieldBody reversed id current => match psKernelBindingStep(current) with {
+  | PsKernelBindingStep.next next => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.fieldBody(reversed, id, next));
+  | PsKernelBindingStep.final result => match result with {
+  | PsKernelBindingResult.done remaining => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.fields(remaining, reversed, id));
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.invalidState);
+};
+};
+  | PsKernelAlgConstructorTask.result reversed current => match psKernelExprEqualStep(current) with {
+  | PsKernelExprEqualStep.next next => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.result(reversed, next));
+  | PsKernelExprEqualStep.equal => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.constructorType(reversed, psKernelInferStart(env, type)));
+  | PsKernelExprEqualStep.different => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.typeMismatch);
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.invalidState);
+};
+  | PsKernelAlgConstructorTask.constructorType reversed current => match psKernelTypeStep(current) with {
+  | PsKernelTypeStep.next next => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.constructorType(reversed, next));
+  | PsKernelTypeStep.final result => match result with {
+  | PsKernelTypeResult.done kind => match kind with {
+  | PsKernelExpr.sortE unused => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.reverse(reversed, PsKernelList.nil));
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.typeExpected);
+};
+  | PsKernelTypeResult.rejected error => PsKernelAlgConstructorStep.rejected(error);
+  | _ => PsKernelAlgConstructorStep.rejected(PsKernelCheckError.invalidState);
+};
+};
+  | PsKernelAlgConstructorTask.reverse pending fields => match pending with {
+  | PsKernelList.cons field rest => psKernelAlgConstructorNext(env, header, input, PsKernelAlgConstructorTask.reverse(rest, PsKernelList.cons(field, fields)));
+  | PsKernelList.nil => PsKernelAlgConstructorStep.accepted(PsKernelAlgConstructor.constructor(name, type, fields));
+};
+};
+};
+};
+};
+
+def psKernelAlgConstructorStart (env : PsKernelList(PsKernelDefinition)) (header : PsKernelAlgHeader) (input : PsKernelAlgInputConstructor) : PsKernelAlgConstructorState := match input with {
+  | PsKernelAlgInputConstructor.constructor unusedName type => PsKernelAlgConstructorState.state(env, header, input, PsKernelAlgConstructorTask.scope(psKernelBindingStart(PsKernelBindingMode.closed, PsKernelNatural.zero, type)));
+};
+
+def psKernelAlgConstructorRun (fuel : PsKernelFuel) : (_ : PsKernelAlgConstructorState) -> PsKernelAlgConstructorResult := match fuel with {
+  | PsKernelFuel.stop => fun (state : PsKernelAlgConstructorState) => PsKernelAlgConstructorResult.outOfFuel;
+  | PsKernelFuel.more remaining => fun (state : PsKernelAlgConstructorState) => match psKernelAlgConstructorStep(state) with {
+  | PsKernelAlgConstructorStep.accepted constructor => PsKernelAlgConstructorResult.accepted(constructor);
+  | PsKernelAlgConstructorStep.rejected error => PsKernelAlgConstructorResult.rejected(error);
+  | PsKernelAlgConstructorStep.next next => let smaller : (_ : PsKernelAlgConstructorState) -> PsKernelAlgConstructorResult := psKernelAlgConstructorRun(remaining); smaller(next);
+};
+};
+
+inductive PsKernelParameterTask where {
+  | reverse (pending : PsKernelList(PsKernelExpr)) (reversed : PsKernelList(PsKernelExpr)) (value : PsKernelExpr);
+  | visit (depth : PsKernelNatural) (value : PsKernelExpr);
+  | bound (original : PsKernelNatural) (index : PsKernelNatural) (remainingDepth : PsKernelNatural) (depth : PsKernelNatural);
+  | select (index : PsKernelNatural) (depth : PsKernelNatural) (arguments : PsKernelList(PsKernelExpr));
+  | lift (state : PsKernelBindingState);
+  | app;
+  | lam (name : PsKernelName) (binder : PsKernelBinder);
+  | forallE (name : PsKernelName) (binder : PsKernelBinder);
+  | letE (name : PsKernelName);
+  | proj (family : PsKernelName) (index : PsKernelNatural);
+};
+
+inductive PsKernelParameterState where {
+  | state (arguments : PsKernelList(PsKernelExpr)) (tasks : PsKernelList(PsKernelParameterTask)) (values : PsKernelList(PsKernelExpr));
+};
+
+inductive PsKernelParameterResult where {
+  | done (value : PsKernelExpr);
+  | invalidScope;
+  | invalidState;
+  | outOfFuel;
+};
+
+inductive PsKernelParameterStep where {
+  | next (state : PsKernelParameterState);
+  | final (result : PsKernelParameterResult);
+};
+
+def psKernelParameterNext (arguments : PsKernelList(PsKernelExpr)) (tasks : PsKernelList(PsKernelParameterTask)) (values : PsKernelList(PsKernelExpr)) : PsKernelParameterStep := PsKernelParameterStep.next(PsKernelParameterState.state(arguments, tasks, values));
+
+def psKernelParameterPush (arguments : PsKernelList(PsKernelExpr)) (tasks : PsKernelList(PsKernelParameterTask)) (values : PsKernelList(PsKernelExpr)) (value : PsKernelExpr) : PsKernelParameterStep := psKernelParameterNext(arguments, tasks, PsKernelList.cons(value, values));
+
+def psKernelParameterVisit (arguments : PsKernelList(PsKernelExpr)) (depth : PsKernelNatural) (value : PsKernelExpr) (tasks : PsKernelList(PsKernelParameterTask)) (values : PsKernelList(PsKernelExpr)) : PsKernelParameterStep := match value with {
+  | PsKernelExpr.bvar index => psKernelParameterNext(arguments, PsKernelList.cons(PsKernelParameterTask.bound(index, index, depth, depth), tasks), values);
+  | PsKernelExpr.fvar unused => PsKernelParameterStep.final(PsKernelParameterResult.invalidScope);
+  | PsKernelExpr.sortE unused => psKernelParameterPush(arguments, tasks, values, value);
+  | PsKernelExpr.constE unusedName unusedLevels => psKernelParameterPush(arguments, tasks, values, value);
+  | PsKernelExpr.lit unused => psKernelParameterPush(arguments, tasks, values, value);
+  | PsKernelExpr.app fn arg => psKernelParameterNext(arguments, PsKernelList.cons(PsKernelParameterTask.visit(depth, fn), PsKernelList.cons(PsKernelParameterTask.visit(depth, arg), PsKernelList.cons(PsKernelParameterTask.app, tasks))), values);
+  | PsKernelExpr.lam name type body binder => psKernelParameterNext(arguments, PsKernelList.cons(PsKernelParameterTask.visit(depth, type), PsKernelList.cons(PsKernelParameterTask.visit(psKernelNaturalSucc(depth), body), PsKernelList.cons(PsKernelParameterTask.lam(name, binder), tasks))), values);
+  | PsKernelExpr.forallE name type body binder => psKernelParameterNext(arguments, PsKernelList.cons(PsKernelParameterTask.visit(depth, type), PsKernelList.cons(PsKernelParameterTask.visit(psKernelNaturalSucc(depth), body), PsKernelList.cons(PsKernelParameterTask.forallE(name, binder), tasks))), values);
+  | PsKernelExpr.letE name type val body => psKernelParameterNext(arguments, PsKernelList.cons(PsKernelParameterTask.visit(depth, type), PsKernelList.cons(PsKernelParameterTask.visit(depth, val), PsKernelList.cons(PsKernelParameterTask.visit(psKernelNaturalSucc(depth), body), PsKernelList.cons(PsKernelParameterTask.letE(name), tasks)))), values);
+  | PsKernelExpr.proj family index major => psKernelParameterNext(arguments, PsKernelList.cons(PsKernelParameterTask.visit(depth, major), PsKernelList.cons(PsKernelParameterTask.proj(family, index), tasks)), values);
+};
+
+def psKernelParameterRebuild (arguments : PsKernelList(PsKernelExpr)) (task : PsKernelParameterTask) (tasks : PsKernelList(PsKernelParameterTask)) (values : PsKernelList(PsKernelExpr)) : PsKernelParameterStep := match values with {
+  | PsKernelList.nil => PsKernelParameterStep.final(PsKernelParameterResult.invalidState);
+  | PsKernelList.cons top rest => match task with {
+  | PsKernelParameterTask.proj family index => psKernelParameterPush(arguments, tasks, rest, PsKernelExpr.proj(family, index, top));
+  | PsKernelParameterTask.app => match rest with {
+  | PsKernelList.cons fn tail => psKernelParameterPush(arguments, tasks, tail, PsKernelExpr.app(fn, top));
+  | _ => PsKernelParameterStep.final(PsKernelParameterResult.invalidState);
+};
+  | PsKernelParameterTask.lam name binder => match rest with {
+  | PsKernelList.cons type tail => psKernelParameterPush(arguments, tasks, tail, PsKernelExpr.lam(name, type, top, binder));
+  | _ => PsKernelParameterStep.final(PsKernelParameterResult.invalidState);
+};
+  | PsKernelParameterTask.forallE name binder => match rest with {
+  | PsKernelList.cons type tail => psKernelParameterPush(arguments, tasks, tail, PsKernelExpr.forallE(name, type, top, binder));
+  | _ => PsKernelParameterStep.final(PsKernelParameterResult.invalidState);
+};
+  | PsKernelParameterTask.letE name => match rest with {
+  | PsKernelList.cons val tail => match tail with {
+  | PsKernelList.cons type remaining => psKernelParameterPush(arguments, tasks, remaining, PsKernelExpr.letE(name, type, val, top));
+  | _ => PsKernelParameterStep.final(PsKernelParameterResult.invalidState);
+};
+  | _ => PsKernelParameterStep.final(PsKernelParameterResult.invalidState);
+};
+  | _ => PsKernelParameterStep.final(PsKernelParameterResult.invalidState);
+};
+};
+
+def psKernelParameterStep (state : PsKernelParameterState) : PsKernelParameterStep := match state with {
+  | PsKernelParameterState.state arguments tasks values => match tasks with {
+  | PsKernelList.nil => match values with {
+  | PsKernelList.cons value rest => match rest with {
+  | PsKernelList.nil => PsKernelParameterStep.final(PsKernelParameterResult.done(value));
+  | _ => PsKernelParameterStep.final(PsKernelParameterResult.invalidState);
+};
+  | _ => PsKernelParameterStep.final(PsKernelParameterResult.invalidState);
+};
+  | PsKernelList.cons task rest => match task with {
+  | PsKernelParameterTask.reverse pending reversed value => match pending with {
+  | PsKernelList.nil => psKernelParameterNext(reversed, PsKernelList.cons(PsKernelParameterTask.visit(PsKernelNatural.zero, value), rest), values);
+  | PsKernelList.cons arg tail => psKernelParameterNext(arguments, PsKernelList.cons(PsKernelParameterTask.reverse(tail, PsKernelList.cons(arg, reversed), value), rest), values);
+};
+  | PsKernelParameterTask.visit depth value => psKernelParameterVisit(arguments, depth, value, rest, values);
+  | PsKernelParameterTask.bound original index remainingDepth depth => match remainingDepth with {
+  | PsKernelNatural.zero => psKernelParameterNext(arguments, PsKernelList.cons(PsKernelParameterTask.select(index, depth, arguments), rest), values);
+  | _ => match index with {
+  | PsKernelNatural.zero => psKernelParameterPush(arguments, rest, values, PsKernelExpr.bvar(original));
+  | _ => psKernelParameterNext(arguments, PsKernelList.cons(PsKernelParameterTask.bound(original, psKernelNaturalPred(index), psKernelNaturalPred(remainingDepth), depth), rest), values);
+};
+};
+  | PsKernelParameterTask.select index depth pending => match pending with {
+  | PsKernelList.nil => PsKernelParameterStep.final(PsKernelParameterResult.invalidScope);
+  | PsKernelList.cons arg tail => match index with {
+  | PsKernelNatural.zero => psKernelParameterNext(arguments, PsKernelList.cons(PsKernelParameterTask.lift(psKernelBindingStart(PsKernelBindingMode.lift(depth), PsKernelNatural.zero, arg)), rest), values);
+  | _ => psKernelParameterNext(arguments, PsKernelList.cons(PsKernelParameterTask.select(psKernelNaturalPred(index), depth, tail), rest), values);
+};
+};
+  | PsKernelParameterTask.lift current => match psKernelBindingStep(current) with {
+  | PsKernelBindingStep.next next => psKernelParameterNext(arguments, PsKernelList.cons(PsKernelParameterTask.lift(next), rest), values);
+  | PsKernelBindingStep.final result => match result with {
+  | PsKernelBindingResult.done value => psKernelParameterPush(arguments, rest, values, value);
+  | PsKernelBindingResult.invalidScope => PsKernelParameterStep.final(PsKernelParameterResult.invalidScope);
+  | _ => PsKernelParameterStep.final(PsKernelParameterResult.invalidState);
+};
+};
+  | _ => psKernelParameterRebuild(arguments, task, rest, values);
+};
+};
+};
+
+def psKernelParameterStart (arguments : PsKernelList(PsKernelExpr)) (value : PsKernelExpr) : PsKernelParameterState := PsKernelParameterState.state(PsKernelList.nil, PsKernelList.cons(PsKernelParameterTask.reverse(arguments, PsKernelList.nil, value), PsKernelList.nil), PsKernelList.nil);
+
+def psKernelParameterRun (fuel : PsKernelFuel) : (_ : PsKernelParameterState) -> PsKernelParameterResult := match fuel with {
+  | PsKernelFuel.stop => fun (state : PsKernelParameterState) => PsKernelParameterResult.outOfFuel;
+  | PsKernelFuel.more remaining => fun (state : PsKernelParameterState) => match psKernelParameterStep(state) with {
+  | PsKernelParameterStep.final result => result;
+  | PsKernelParameterStep.next next => let smaller : (_ : PsKernelParameterState) -> PsKernelParameterResult := psKernelParameterRun(remaining); smaller(next);
+};
+};
+
+inductive PsKernelAlgMinorFrame where {
+  | frame (pending : PsKernelList(PsKernelExpr)) (value : PsKernelExpr) (nextId : PsKernelNatural) (binders : PsKernelList(PsKernelAlgBinder)) (recursive : PsKernelList(PsKernelExpr)) (flags : PsKernelList(PsKernelOption(PsKernelName)));
+};
+
+inductive PsKernelAlgMinorTask where {
+  | parameters (pending : PsKernelList(PsKernelExpr)) (value : PsKernelExpr);
+  | fields (frame : PsKernelAlgMinorFrame);
+  | instantiate (frame : PsKernelAlgMinorFrame) (state : PsKernelParameterState);
+  | equal (frame : PsKernelAlgMinorFrame) (type : PsKernelExpr) (state : PsKernelExprEqualState);
+  | occurrence (frame : PsKernelAlgMinorFrame) (type : PsKernelExpr) (state : PsKernelOccurrenceState);
+  | reverseFlags (frame : PsKernelAlgMinorFrame) (pending : PsKernelList(PsKernelOption(PsKernelName))) (flags : PsKernelList(PsKernelOption(PsKernelName)));
+  | reverseRecursive (frame : PsKernelAlgMinorFrame) (flags : PsKernelList(PsKernelOption(PsKernelName))) (pending : PsKernelList(PsKernelExpr)) (recursive : PsKernelList(PsKernelExpr));
+  | hypotheses (value : PsKernelExpr) (nextId : PsKernelNatural) (binders : PsKernelList(PsKernelAlgBinder)) (flags : PsKernelList(PsKernelOption(PsKernelName))) (pending : PsKernelList(PsKernelExpr));
+  | close (flags : PsKernelList(PsKernelOption(PsKernelName))) (state : PsKernelCloseState);
+};
+
+inductive PsKernelAlgMinorState where {
+  | state (header : PsKernelAlgHeader) (constructor : PsKernelAlgConstructor) (fieldStart : PsKernelNatural) (task : PsKernelAlgMinorTask);
+};
+
+inductive PsKernelAlgMinorStep where {
+  | next (state : PsKernelAlgMinorState);
+  | ready (type : PsKernelExpr) (recursiveFields : PsKernelList(PsKernelOption(PsKernelName)));
+  | rejected (error : PsKernelCheckError);
+};
+
+def psKernelAlgMinorNext (header : PsKernelAlgHeader) (constructor : PsKernelAlgConstructor) (fieldStart : PsKernelNatural) (task : PsKernelAlgMinorTask) : PsKernelAlgMinorStep := PsKernelAlgMinorStep.next(PsKernelAlgMinorState.state(header, constructor, fieldStart, task));
+
+def psKernelAlgMinorContinue (header : PsKernelAlgHeader) (constructor : PsKernelAlgConstructor) (fieldStart : PsKernelNatural) (frame : PsKernelAlgMinorFrame) (type : PsKernelExpr) (flag : PsKernelOption(PsKernelName)) (recursive : PsKernelList(PsKernelExpr)) : PsKernelAlgMinorStep := match frame with {
+  | PsKernelAlgMinorFrame.frame pending value nextId binders unusedRecursive flags => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.fields(PsKernelAlgMinorFrame.frame(pending, PsKernelExpr.app(value, PsKernelExpr.fvar(nextId)), psKernelNaturalSucc(nextId), PsKernelList.cons(PsKernelAlgBinder.binder(nextId, type, PsKernelBinder.explicit), binders), recursive, PsKernelList.cons(flag, flags))));
+};
+
+def psKernelAlgMinorStep (state : PsKernelAlgMinorState) : PsKernelAlgMinorStep := match state with {
+  | PsKernelAlgMinorState.state header constructor fieldStart task => match header with {
+  | PsKernelAlgHeader.header family unusedType parameters arguments unusedBinders uniform => match task with {
+  | PsKernelAlgMinorTask.parameters pending value => match pending with {
+  | PsKernelList.cons arg tail => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.parameters(tail, PsKernelExpr.app(value, arg)));
+  | PsKernelList.nil => match constructor with {
+  | PsKernelAlgConstructor.constructor unusedName unusedConstructorType fields => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.fields(PsKernelAlgMinorFrame.frame(fields, value, fieldStart, PsKernelList.nil, PsKernelList.nil, PsKernelList.nil)));
+};
+};
+  | PsKernelAlgMinorTask.fields frame => match frame with {
+  | PsKernelAlgMinorFrame.frame pending value nextId binders recursive flags => match pending with {
+  | PsKernelList.nil => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.reverseFlags(frame, flags, PsKernelList.nil));
+  | PsKernelList.cons template rest => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.instantiate(PsKernelAlgMinorFrame.frame(rest, value, nextId, binders, recursive, flags), psKernelParameterStart(arguments, template)));
+};
+};
+  | PsKernelAlgMinorTask.instantiate frame current => match psKernelParameterStep(current) with {
+  | PsKernelParameterStep.next next => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.instantiate(frame, next));
+  | PsKernelParameterStep.final result => match result with {
+  | PsKernelParameterResult.done type => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.equal(frame, type, psKernelExprEqualStart(type, uniform)));
+  | PsKernelParameterResult.invalidScope => PsKernelAlgMinorStep.rejected(PsKernelCheckError.invalidScope);
+  | _ => PsKernelAlgMinorStep.rejected(PsKernelCheckError.invalidState);
+};
+};
+  | PsKernelAlgMinorTask.equal frame type current => match psKernelExprEqualStep(current) with {
+  | PsKernelExprEqualStep.next next => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.equal(frame, type, next));
+  | PsKernelExprEqualStep.equal => match frame with {
+  | PsKernelAlgMinorFrame.frame unusedPending unusedValue nextId unusedBinders recursive unusedFlags => psKernelAlgMinorContinue(header, constructor, fieldStart, frame, type, PsKernelOption.some(psKernelUnitRecursorName(family)), PsKernelList.cons(PsKernelExpr.fvar(nextId), recursive));
+};
+  | PsKernelExprEqualStep.different => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.occurrence(frame, type, psKernelOccurrenceStart(family, PsKernelFlag.no, type)));
+  | _ => PsKernelAlgMinorStep.rejected(PsKernelCheckError.invalidState);
+};
+  | PsKernelAlgMinorTask.occurrence frame type current => match psKernelOccurrenceStep(current) with {
+  | PsKernelOccurrenceStep.next next => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.occurrence(frame, type, next));
+  | PsKernelOccurrenceStep.absent => match frame with {
+  | PsKernelAlgMinorFrame.frame unusedPending unusedValue unusedId unusedBinders recursive unusedFlags => psKernelAlgMinorContinue(header, constructor, fieldStart, frame, type, PsKernelOption.none, recursive);
+};
+  | PsKernelOccurrenceStep.found => PsKernelAlgMinorStep.rejected(PsKernelCheckError.unsupported);
+  | _ => PsKernelAlgMinorStep.rejected(PsKernelCheckError.invalidState);
+};
+  | PsKernelAlgMinorTask.reverseFlags frame pending flags => match pending with {
+  | PsKernelList.cons flag rest => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.reverseFlags(frame, rest, PsKernelList.cons(flag, flags)));
+  | PsKernelList.nil => match frame with {
+  | PsKernelAlgMinorFrame.frame unusedPending unusedValue unusedId unusedBinders recursive unusedFlags => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.reverseRecursive(frame, flags, recursive, PsKernelList.nil));
+};
+};
+  | PsKernelAlgMinorTask.reverseRecursive frame flags pending recursive => match pending with {
+  | PsKernelList.cons value rest => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.reverseRecursive(frame, flags, rest, PsKernelList.cons(value, recursive)));
+  | PsKernelList.nil => match frame with {
+  | PsKernelAlgMinorFrame.frame unusedPending value nextId binders unusedRecursive unusedFlags => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.hypotheses(value, nextId, binders, flags, recursive));
+};
+};
+  | PsKernelAlgMinorTask.hypotheses value nextId binders flags pending => match pending with {
+  | PsKernelList.cons field rest => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.hypotheses(value, psKernelNaturalSucc(nextId), PsKernelList.cons(PsKernelAlgBinder.binder(nextId, PsKernelExpr.app(PsKernelExpr.fvar(parameters), field), PsKernelBinder.explicit), binders), flags, rest));
+  | PsKernelList.nil => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.close(flags, psKernelCloseStart(PsKernelCloseMode.pi, binders, PsKernelExpr.app(PsKernelExpr.fvar(parameters), value))));
+};
+  | PsKernelAlgMinorTask.close flags current => match psKernelCloseStep(current) with {
+  | PsKernelCloseStep.next next => psKernelAlgMinorNext(header, constructor, fieldStart, PsKernelAlgMinorTask.close(flags, next));
+  | PsKernelCloseStep.done value => PsKernelAlgMinorStep.ready(value, flags);
+  | _ => PsKernelAlgMinorStep.rejected(PsKernelCheckError.invalidState);
+};
+};
+};
+};
+
+def psKernelAlgMinorStart (header : PsKernelAlgHeader) (constructor : PsKernelAlgConstructor) (fieldStart : PsKernelNatural) : PsKernelAlgMinorState := match header with {
+  | PsKernelAlgHeader.header unusedName unusedType unusedParameters arguments unusedBinders unusedUniform => match constructor with {
+  | PsKernelAlgConstructor.constructor name unusedConstructorType unusedFields => PsKernelAlgMinorState.state(header, constructor, fieldStart, PsKernelAlgMinorTask.parameters(arguments, PsKernelExpr.constE(name, PsKernelList.nil)));
+};
+};
+
+def psKernelAlgRecursorLevelName : PsKernelName := PsKernelName.num(PsKernelName.anonymous, PsKernelNatural.zero);
+
+inductive PsKernelAlgRecursorFrame where {
+  | frame (pending : PsKernelList(PsKernelAlgConstructor)) (index : PsKernelNatural) (minorId : PsKernelNatural) (fieldStart : PsKernelNatural) (binders : PsKernelList(PsKernelAlgBinder)) (rules : PsKernelList(PsKernelAlgRule));
+};
+
+inductive PsKernelAlgRecursorTask where {
+  | count (pending : PsKernelList(PsKernelAlgConstructor)) (fieldStart : PsKernelNatural);
+  | minors (frame : PsKernelAlgRecursorFrame);
+  | minor (frame : PsKernelAlgRecursorFrame) (constructor : PsKernelAlgConstructor) (state : PsKernelAlgMinorState);
+  | reverseBinders (fieldStart : PsKernelNatural) (pending : PsKernelList(PsKernelAlgBinder)) (forward : PsKernelList(PsKernelAlgBinder)) (rules : PsKernelList(PsKernelAlgRule));
+  | binders (fieldStart : PsKernelNatural) (pending : PsKernelList(PsKernelAlgBinder)) (binders : PsKernelList(PsKernelAlgBinder)) (rules : PsKernelList(PsKernelAlgRule));
+  | reverseRules (fieldStart : PsKernelNatural) (binders : PsKernelList(PsKernelAlgBinder)) (pending : PsKernelList(PsKernelAlgRule)) (rules : PsKernelList(PsKernelAlgRule));
+  | close (rules : PsKernelList(PsKernelAlgRule)) (state : PsKernelCloseState);
+};
+
+inductive PsKernelAlgRecursorState where {
+  | state (header : PsKernelAlgHeader) (constructors : PsKernelList(PsKernelAlgConstructor)) (task : PsKernelAlgRecursorTask);
+};
+
+inductive PsKernelAlgRecursorStep where {
+  | next (state : PsKernelAlgRecursorState);
+  | ready (type : PsKernelExpr) (rules : PsKernelList(PsKernelAlgRule));
+  | rejected (error : PsKernelCheckError);
+};
+
+def psKernelAlgRecursorNext (header : PsKernelAlgHeader) (constructors : PsKernelList(PsKernelAlgConstructor)) (task : PsKernelAlgRecursorTask) : PsKernelAlgRecursorStep := PsKernelAlgRecursorStep.next(PsKernelAlgRecursorState.state(header, constructors, task));
+
+def psKernelAlgRecursorStep (state : PsKernelAlgRecursorState) : PsKernelAlgRecursorStep := match state with {
+  | PsKernelAlgRecursorState.state header constructors task => match header with {
+  | PsKernelAlgHeader.header unusedName unusedType parameters unusedArguments parameterBinders uniform => match task with {
+  | PsKernelAlgRecursorTask.count pending fieldStart => match pending with {
+  | PsKernelList.cons unused rest => psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.count(rest, psKernelNaturalSucc(fieldStart)));
+  | PsKernelList.nil => psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.minors(PsKernelAlgRecursorFrame.frame(constructors, PsKernelNatural.zero, psKernelNaturalSucc(parameters), fieldStart, PsKernelList.nil, PsKernelList.nil)));
+};
+  | PsKernelAlgRecursorTask.minors frame => match frame with {
+  | PsKernelAlgRecursorFrame.frame pending index minorId fieldStart binders rules => match pending with {
+  | PsKernelList.cons constructor rest => psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.minor(PsKernelAlgRecursorFrame.frame(rest, index, minorId, fieldStart, binders, rules), constructor, psKernelAlgMinorStart(header, constructor, fieldStart)));
+  | PsKernelList.nil => psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.reverseBinders(fieldStart, binders, PsKernelList.nil, rules));
+};
+};
+  | PsKernelAlgRecursorTask.minor frame constructor current => match psKernelAlgMinorStep(current) with {
+  | PsKernelAlgMinorStep.next next => psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.minor(frame, constructor, next));
+  | PsKernelAlgMinorStep.rejected error => PsKernelAlgRecursorStep.rejected(error);
+  | PsKernelAlgMinorStep.ready type flags => match frame with {
+  | PsKernelAlgRecursorFrame.frame pending index minorId fieldStart binders rules => match constructor with {
+  | PsKernelAlgConstructor.constructor name unusedConstructorType unusedFields => psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.minors(PsKernelAlgRecursorFrame.frame(pending, psKernelNaturalSucc(index), psKernelNaturalSucc(minorId), fieldStart, PsKernelList.cons(PsKernelAlgBinder.binder(minorId, type, PsKernelBinder.explicit), binders), PsKernelList.cons(PsKernelAlgRule.rule(name, parameters, index, flags), rules))));
+};
+};
+};
+  | PsKernelAlgRecursorTask.reverseBinders fieldStart pending forward rules => match pending with {
+  | PsKernelList.cons binder rest => psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.reverseBinders(fieldStart, rest, PsKernelList.cons(binder, forward), rules));
+  | PsKernelList.nil => let motiveType := PsKernelExpr.forallE(PsKernelName.anonymous, uniform, PsKernelExpr.sortE(PsKernelLevel.param(psKernelAlgRecursorLevelName)), PsKernelBinder.explicit); psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.binders(fieldStart, forward, PsKernelList.cons(PsKernelAlgBinder.binder(parameters, motiveType, PsKernelBinder.implicit), parameterBinders), rules));
+};
+  | PsKernelAlgRecursorTask.binders fieldStart pending binders rules => match pending with {
+  | PsKernelList.cons binder rest => psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.binders(fieldStart, rest, PsKernelList.cons(binder, binders), rules));
+  | PsKernelList.nil => psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.reverseRules(fieldStart, binders, rules, PsKernelList.nil));
+};
+  | PsKernelAlgRecursorTask.reverseRules fieldStart binders pending rules => match pending with {
+  | PsKernelList.cons rule rest => psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.reverseRules(fieldStart, binders, rest, PsKernelList.cons(rule, rules)));
+  | PsKernelList.nil => psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.close(rules, psKernelCloseStart(PsKernelCloseMode.pi, PsKernelList.cons(PsKernelAlgBinder.binder(fieldStart, uniform, PsKernelBinder.explicit), binders), PsKernelExpr.app(PsKernelExpr.fvar(parameters), PsKernelExpr.fvar(fieldStart)))));
+};
+  | PsKernelAlgRecursorTask.close rules current => match psKernelCloseStep(current) with {
+  | PsKernelCloseStep.next next => psKernelAlgRecursorNext(header, constructors, PsKernelAlgRecursorTask.close(rules, next));
+  | PsKernelCloseStep.done value => PsKernelAlgRecursorStep.ready(value, rules);
+  | _ => PsKernelAlgRecursorStep.rejected(PsKernelCheckError.invalidState);
+};
+};
+};
+};
+
+def psKernelAlgRecursorStart (header : PsKernelAlgHeader) (constructors : PsKernelList(PsKernelAlgConstructor)) : PsKernelAlgRecursorState := match header with {
+  | PsKernelAlgHeader.header unusedName unusedType parameters unusedArguments unusedBinders unusedUniform => PsKernelAlgRecursorState.state(header, constructors, PsKernelAlgRecursorTask.count(constructors, psKernelNaturalSucc(parameters)));
+};
+
+inductive PsKernelAlgAdmissionFrame where {
+  | frame (header : PsKernelAlgHeader) (working : PsKernelList(PsKernelDefinition)) (pending : PsKernelList(PsKernelAlgInputConstructor)) (reversed : PsKernelList(PsKernelAlgConstructor));
+};
+
+inductive PsKernelAlgAdmissionTask where {
+  | header (state : PsKernelAlgHeaderState);
+  | recursorName (header : PsKernelAlgHeader) (state : PsKernelLookupState);
+  | constructors (frame : PsKernelAlgAdmissionFrame);
+  | constructorName (frame : PsKernelAlgAdmissionFrame) (input : PsKernelAlgInputConstructor) (tasks : PsKernelList(PsKernelOrderTask));
+  | constructor (frame : PsKernelAlgAdmissionFrame) (state : PsKernelAlgConstructorState);
+  | reverse (header : PsKernelAlgHeader) (working : PsKernelList(PsKernelDefinition)) (pending : PsKernelList(PsKernelAlgConstructor)) (constructors : PsKernelList(PsKernelAlgConstructor));
+  | recursor (header : PsKernelAlgHeader) (working : PsKernelList(PsKernelDefinition)) (constructors : PsKernelList(PsKernelAlgConstructor)) (state : PsKernelAlgRecursorState);
+  | check (header : PsKernelAlgHeader) (constructors : PsKernelList(PsKernelAlgConstructor)) (type : PsKernelExpr) (rules : PsKernelList(PsKernelAlgRule)) (state : PsKernelTypeState);
+  | install (header : PsKernelAlgHeader) (pending : PsKernelList(PsKernelAlgConstructor)) (type : PsKernelExpr) (rules : PsKernelList(PsKernelAlgRule)) (environment : PsKernelList(PsKernelDefinition));
+};
+
+inductive PsKernelAlgAdmissionState where {
+  | state (environment : PsKernelList(PsKernelDefinition)) (declaration : PsKernelAlgDeclaration) (task : PsKernelAlgAdmissionTask);
+};
+
+inductive PsKernelAlgAdmissionStep where {
+  | next (state : PsKernelAlgAdmissionState);
+  | final (result : PsKernelAdmissionResult);
+};
+
+def psKernelAlgAdmissionNext (env : PsKernelList(PsKernelDefinition)) (declaration : PsKernelAlgDeclaration) (task : PsKernelAlgAdmissionTask) : PsKernelAlgAdmissionStep := PsKernelAlgAdmissionStep.next(PsKernelAlgAdmissionState.state(env, declaration, task));
+
+def psKernelAlgAdmissionReject (error : PsKernelCheckError) : PsKernelAlgAdmissionStep := PsKernelAlgAdmissionStep.final(PsKernelAdmissionResult.rejected(error));
+
+def psKernelAlgAdmissionStep (state : PsKernelAlgAdmissionState) : PsKernelAlgAdmissionStep := match state with {
+  | PsKernelAlgAdmissionState.state env declaration task => match task with {
+  | PsKernelAlgAdmissionTask.header current => match psKernelAlgHeaderStep(current) with {
+  | PsKernelAlgHeaderStep.next next => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.header(next));
+  | PsKernelAlgHeaderStep.rejected error => psKernelAlgAdmissionReject(error);
+  | PsKernelAlgHeaderStep.accepted header => match header with {
+  | PsKernelAlgHeader.header name unusedType unusedParameters unusedArguments unusedBinders unusedUniform => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.recursorName(header, PsKernelLookupState.search(psKernelUnitRecursorName(name), env)));
+};
+};
+  | PsKernelAlgAdmissionTask.recursorName header current => match psKernelLookupStep(current) with {
+  | PsKernelLookupStep.next next => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.recursorName(header, next));
+  | PsKernelLookupStep.found unused => psKernelAlgAdmissionReject(PsKernelCheckError.duplicateName);
+  | PsKernelLookupStep.invalidState => psKernelAlgAdmissionReject(PsKernelCheckError.invalidState);
+  | PsKernelLookupStep.missing => match declaration with {
+  | PsKernelAlgDeclaration.declaration name unusedParameters type constructors => match constructors with {
+  | PsKernelList.nil => psKernelAlgAdmissionReject(PsKernelCheckError.unsupported);
+  | _ => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.constructors(PsKernelAlgAdmissionFrame.frame(header, PsKernelList.cons(PsKernelDefinition.constant(name, PsKernelList.nil, type), env), constructors, PsKernelList.nil)));
+};
+};
+};
+  | PsKernelAlgAdmissionTask.constructors frame => match frame with {
+  | PsKernelAlgAdmissionFrame.frame header working pending reversed => match pending with {
+  | PsKernelList.nil => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.reverse(header, working, reversed, PsKernelList.nil));
+  | PsKernelList.cons input rest => match input with {
+  | PsKernelAlgInputConstructor.constructor name unusedType => match header with {
+  | PsKernelAlgHeader.header family unusedFamilyType unusedParameters unusedArguments unusedBinders unusedUniform => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.constructorName(PsKernelAlgAdmissionFrame.frame(header, working, rest, reversed), input, PsKernelList.cons(PsKernelOrderTask.name(name, psKernelUnitRecursorName(family)), PsKernelList.nil)));
+};
+};
+};
+};
+  | PsKernelAlgAdmissionTask.constructorName frame input current => match psKernelOrderStep(current) with {
+  | PsKernelOrderStep.next next => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.constructorName(frame, input, next));
+  | PsKernelOrderStep.invalidState => psKernelAlgAdmissionReject(PsKernelCheckError.invalidState);
+  | PsKernelOrderStep.done order => match order with {
+  | PsKernelOrder.same => psKernelAlgAdmissionReject(PsKernelCheckError.duplicateName);
+  | _ => match frame with {
+  | PsKernelAlgAdmissionFrame.frame header working unusedPending unusedReversed => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.constructor(frame, psKernelAlgConstructorStart(working, header, input)));
+};
+};
+};
+  | PsKernelAlgAdmissionTask.constructor frame current => match psKernelAlgConstructorStep(current) with {
+  | PsKernelAlgConstructorStep.next next => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.constructor(frame, next));
+  | PsKernelAlgConstructorStep.rejected error => psKernelAlgAdmissionReject(error);
+  | PsKernelAlgConstructorStep.accepted constructor => match frame with {
+  | PsKernelAlgAdmissionFrame.frame header working pending reversed => match constructor with {
+  | PsKernelAlgConstructor.constructor name type unusedFields => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.constructors(PsKernelAlgAdmissionFrame.frame(header, PsKernelList.cons(PsKernelDefinition.constant(name, PsKernelList.nil, type), working), pending, PsKernelList.cons(constructor, reversed))));
+};
+};
+};
+  | PsKernelAlgAdmissionTask.reverse header working pending constructors => match pending with {
+  | PsKernelList.cons constructor rest => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.reverse(header, working, rest, PsKernelList.cons(constructor, constructors)));
+  | PsKernelList.nil => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.recursor(header, working, constructors, psKernelAlgRecursorStart(header, constructors)));
+};
+  | PsKernelAlgAdmissionTask.recursor header working constructors current => match psKernelAlgRecursorStep(current) with {
+  | PsKernelAlgRecursorStep.next next => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.recursor(header, working, constructors, next));
+  | PsKernelAlgRecursorStep.rejected error => psKernelAlgAdmissionReject(error);
+  | PsKernelAlgRecursorStep.ready type rules => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.check(header, constructors, type, rules, PsKernelTypeState.state(PsKernelTypingContext.context(working, PsKernelList.cons(psKernelAlgRecursorLevelName, PsKernelList.nil)), PsKernelList.cons(PsKernelTypeTask.infer(PsKernelList.nil, type), PsKernelList.nil), PsKernelList.nil)));
+};
+  | PsKernelAlgAdmissionTask.check header constructors type rules current => match psKernelTypeStep(current) with {
+  | PsKernelTypeStep.next next => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.check(header, constructors, type, rules, next));
+  | PsKernelTypeStep.final result => match result with {
+  | PsKernelTypeResult.rejected error => psKernelAlgAdmissionReject(error);
+  | PsKernelTypeResult.done kind => match kind with {
+  | PsKernelExpr.sortE unusedLevel => match header with {
+  | PsKernelAlgHeader.header name familyType parameters unusedArguments unusedBinders unusedUniform => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.install(header, constructors, type, rules, PsKernelList.cons(PsKernelDefinition.algebraicFamily(name, familyType, parameters, constructors), env)));
+};
+  | _ => psKernelAlgAdmissionReject(PsKernelCheckError.typeExpected);
+};
+  | _ => psKernelAlgAdmissionReject(PsKernelCheckError.invalidState);
+};
+};
+  | PsKernelAlgAdmissionTask.install header pending type rules result => match pending with {
+  | PsKernelList.cons constructor rest => match constructor with {
+  | PsKernelAlgConstructor.constructor name constructorType unusedFields => psKernelAlgAdmissionNext(env, declaration, PsKernelAlgAdmissionTask.install(header, rest, type, rules, PsKernelList.cons(PsKernelDefinition.constant(name, PsKernelList.nil, constructorType), result)));
+};
+  | PsKernelList.nil => match header with {
+  | PsKernelAlgHeader.header name unusedFamilyType parameters unusedArguments unusedBinders unusedUniform => PsKernelAlgAdmissionStep.final(PsKernelAdmissionResult.admitted(PsKernelList.cons(PsKernelDefinition.algebraicRecursor(psKernelUnitRecursorName(name), PsKernelList.cons(psKernelAlgRecursorLevelName, PsKernelList.nil), type, parameters, rules), result)));
+};
+};
+};
+};
+
+def psKernelAlgAdmissionStart (env : PsKernelList(PsKernelDefinition)) (declaration : PsKernelAlgDeclaration) : PsKernelAlgAdmissionState := PsKernelAlgAdmissionState.state(env, declaration, PsKernelAlgAdmissionTask.header(psKernelAlgHeaderStart(env, declaration)));
+
+def psKernelAlgAdmissionRun (fuel : PsKernelFuel) : (_ : PsKernelAlgAdmissionState) -> PsKernelAdmissionResult := match fuel with {
+  | PsKernelFuel.stop => fun (state : PsKernelAlgAdmissionState) => PsKernelAdmissionResult.outOfFuel;
+  | PsKernelFuel.more remaining => fun (state : PsKernelAlgAdmissionState) => match psKernelAlgAdmissionStep(state) with {
+  | PsKernelAlgAdmissionStep.final result => result;
+  | PsKernelAlgAdmissionStep.next next => let smaller : (_ : PsKernelAlgAdmissionState) -> PsKernelAdmissionResult := psKernelAlgAdmissionRun(remaining); smaller(next);
+};
+};
+
 inductive PsKernelJointEntry where {
+  | algebraic (entry : PsKernelAlgDeclaration);
   | definition (entry : PsKernelDefinition);
   | unitInductive (entry : PsKernelUnitDeclaration);
   | recordInductive (entry : PsKernelUnitDeclaration);
@@ -3161,6 +4317,7 @@ inductive PsKernelJointEntry where {
 };
 
 inductive PsKernelJointState where {
+  | algebraic (rest : PsKernelList(PsKernelJointEntry)) (state : PsKernelAlgAdmissionState);
   | pending (environment : PsKernelList(PsKernelDefinition)) (entries : PsKernelList(PsKernelJointEntry));
   | definition (rest : PsKernelList(PsKernelJointEntry)) (state : PsKernelAdmissionState);
   | unitInductive (rest : PsKernelList(PsKernelJointEntry)) (state : PsKernelUnitState);
@@ -3184,6 +4341,7 @@ def psKernelJointStep (state : PsKernelJointState) : PsKernelJointStep := match 
   | PsKernelJointState.pending env entries => match entries with {
   | PsKernelList.nil => PsKernelJointStep.final(PsKernelAdmissionResult.admitted(env));
   | PsKernelList.cons entry rest => match entry with {
+  | PsKernelJointEntry.algebraic declaration => PsKernelJointStep.next(PsKernelJointState.algebraic(rest, psKernelAlgAdmissionStart(env, declaration)));
   | PsKernelJointEntry.definition definition => PsKernelJointStep.next(PsKernelJointState.definition(rest, PsKernelAdmissionState.pending(env, PsKernelList.cons(definition, PsKernelList.nil))));
   | PsKernelJointEntry.unitInductive declaration => PsKernelJointStep.next(PsKernelJointState.unitInductive(rest, psKernelUnitStart(env, declaration)));
   | PsKernelJointEntry.recordInductive declaration => PsKernelJointStep.next(PsKernelJointState.recordInductive(rest, psKernelRecordStart(env, declaration)));
@@ -3191,6 +4349,10 @@ def psKernelJointStep (state : PsKernelJointState) : PsKernelJointStep := match 
   | PsKernelJointEntry.sumInductive declaration => PsKernelJointStep.next(PsKernelJointState.sumInductive(rest, psKernelSumStart(env, declaration)));
   | PsKernelJointEntry.natInductive declaration => PsKernelJointStep.next(PsKernelJointState.natInductive(rest, psKernelNatAdmissionStart(env, declaration)));
 };
+};
+  | PsKernelJointState.algebraic rest current => match psKernelAlgAdmissionStep(current) with {
+  | PsKernelAlgAdmissionStep.next next => PsKernelJointStep.next(PsKernelJointState.algebraic(rest, next));
+  | PsKernelAlgAdmissionStep.final result => psKernelJointContinue(rest, result);
 };
   | PsKernelJointState.definition rest current => match psKernelAdmissionStep(current) with {
   | PsKernelAdmissionStep.next next => PsKernelJointStep.next(PsKernelJointState.definition(rest, next));

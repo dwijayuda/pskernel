@@ -42,8 +42,12 @@
       "sha256": "7c9f68756f8f2cebb07d4e9207725f5784732c9fbdd218546ad38fb9031cf732"
     },
     {
+      "path": "src/Ps/Kernel/AlgebraicData.lean",
+      "sha256": "b482b600a187545d7dac25fbc7e92f50fdc59a68dcef3cb42db0b68b0cecc828"
+    },
+    {
       "path": "src/Ps/Kernel/Environment.lean",
-      "sha256": "c8d8b1f86abfc47ebf176a9263f084d67ea03e264879ffba80b203c6c889d1e5"
+      "sha256": "44049d7f7a09f34a965172389ea1c8cbae3fffb83709cf643f979f8277279abb"
     },
     {
       "path": "src/Ps/Kernel/BuiltinNat.lean",
@@ -54,8 +58,12 @@
       "sha256": "1f7d13b4288f8c96fe614d7b998e936bf923d9392c7059371fadf45dff342ec4"
     },
     {
+      "path": "src/Ps/Kernel/AlgebraicReduction.lean",
+      "sha256": "89dc8873d341a5cd2ccff40ac9b306f26406f7cb42a597993220e9c9e97c4a6a"
+    },
+    {
       "path": "src/Ps/Kernel/Reduction.lean",
-      "sha256": "359314f2b8d96ffccebe2fb12f76e47d0a3be03aceaada7da21477c878cf55d8"
+      "sha256": "9dffb2f10a5e16e83d2c9e930fe61449cebab7b3b65fb937fad547ced841f6b6"
     },
     {
       "path": "src/Ps/Kernel/Conversion.lean",
@@ -90,8 +98,48 @@
       "sha256": "0847c46e326adafad7b3aae8ce199285df83a707d877df3422af76b760e2d3e4"
     },
     {
+      "path": "src/Ps/Kernel/AlgebraicHeader.lean",
+      "sha256": "21cee7dac26c0656123bd58e922f7a2b3ed299205858dbca0c583cfc9a99fade"
+    },
+    {
+      "path": "src/Ps/Kernel/Closing.lean",
+      "sha256": "be6cbc897202666f09e382ae2740c1c8ea15dd148d462f48389d8590ceafa207"
+    },
+    {
+      "path": "src/Ps/Kernel/Occurrence.lean",
+      "sha256": "683e69690b0695e4241befc4ad8ea87ddd1144b0659cb247eb4dc7300db239cc"
+    },
+    {
+      "path": "src/Ps/Kernel/ExpressionEquality.lean",
+      "sha256": "a11bd034c0df503d265cfad716e28941bc0254b47330414c226d16a19e703cf2"
+    },
+    {
+      "path": "src/Ps/Kernel/Positivity.lean",
+      "sha256": "2d15081ee31224a5bbe963de98a091a2d5309526d37c2c4047f64faa46b3b841"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicConstructor.lean",
+      "sha256": "0c1f098ad8fdabed0caaddecc6a3de1819818424a910123e58c9738df750eb2c"
+    },
+    {
+      "path": "src/Ps/Kernel/Parameters.lean",
+      "sha256": "a72ef711750694782f2e16e20762f4f337210f7f7ee33e196126fc0e043bc377"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicMinor.lean",
+      "sha256": "194a2ff39e61aeb61c84a9dbe87c15d348a7f8700cf0d53f4733eaec24b4a298"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicRecursor.lean",
+      "sha256": "6bb82e59807ccff3f4dab6360e5cb4aabbec05e043cbfacc660a35ac22478d7a"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicAdmission.lean",
+      "sha256": "1a6c16ca3ea86978a5409c6b742c895e7133ebedc12f1ef69d44cab2d03381b5"
+    },
+    {
       "path": "src/Ps/Kernel/JointAdmission.lean",
-      "sha256": "f9ab347c64d152876acbb908d72c31cf2aafbea565ee4ea7071c077fc20aacdf"
+      "sha256": "315cf46fe9ac95dd70d596bd5bdb69b0edbf7a095f05c1a7489d41dcd8fa1d18"
     },
     {
       "path": "src/Ps/Kernel/Bootstrap.lean",

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "Monomorphic Type-valued nullary enumerations, freshness, derived dependent recursor typing and computed iota witnesses; not general sum/recursive completeness",
-  "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+  "sourceManifestSha256": "fe74eb30a78c2ff6b7295862c4988139b717cf7e2fe4e5ece7d131a6a1314513",
   "harnessSha256": "962ab12f3c812806287ce16efdf9baa6634a92b5f08e120e3180cc5f5c7274ba",
   "fixtureSha256": "32f1c9a6bde52e1434ffa1179dc0aeb2c7ad756f53f8c4a54a85a26c989e2529",
   "provider": {

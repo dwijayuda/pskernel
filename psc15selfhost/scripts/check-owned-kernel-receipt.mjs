@@ -7,7 +7,7 @@ import { defaultCheckedKernel } from './checked-kernel-provider.mjs';
 import '../packages/pskernel-core/scripts/verify-evidence.mjs';
 
 const manifest = JSON.parse(await readFile(new URL('../packages/pskernel-core/package.json', import.meta.url), 'utf8'));
-assert.equal(manifest.version, '0.1.0-checker.13');
+assert.equal(manifest.version, '0.1.0-checker.14');
 assert.equal(manifest.private, true);
 assert.equal(manifest.proofscript.authoritative, false);
 assert.equal(manifest.proofscript.bootstrap, true);
@@ -114,4 +114,9 @@ assert(bootstrap.includes('psKernelStringPreludeStart env'));assert(bootstrap.in
 assert(typing.includes('psKernelTextCheckStep current'));assert(reduction.includes('psKernelTextCheckStep current'));
 assert(worker.includes('E.lit(k.PsKernelLiteral.text(text(value.v)))'));assert(!worker.includes('PsKernelDefinition.stringType'));
 
+const algebraic=await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/AlgebraicAdmission.lean',import.meta.url),'utf8');
+for(const step of ['psKernelAlgHeaderStep current','psKernelAlgConstructorStep current','psKernelAlgRecursorStep current','psKernelTypeStep current'])assert(algebraic.includes(step));
+assert(joint.includes('psKernelAlgAdmissionStep current'));assert(!joint.includes('psKernelAlgAdmissionRun'));
+assert(worker.includes('k.PsKernelAlgDeclaration.declaration('));assert(!worker.includes('psKernelAlgRecursor'));
+assert(reduction.includes('psKernelAlgReduceStep current'));assert(!reduction.includes('psKernelAlgReduceRun'));
 console.log('PSC2_OWNED_KERNEL_RECEIPT: PASS (checker identities, retired legacy routing, owned bootstrap closure and default; release gates remain closed)');

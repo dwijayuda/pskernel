@@ -110,10 +110,20 @@ try {
     if (admission.kind === 'inductive') {
       shape(d, ['lp','np','ts'], 0);
       if (!Array.isArray(d.lp)) fail('invalid-universe-parameters');
-      if (d.np !== 0 || !Array.isArray(d.ts) || d.ts.length !== 1) fail('unsupported-inductive-family');
+      if (!Number.isSafeInteger(d.np) || d.np < 0 || !Array.isArray(d.ts) || d.ts.length !== 1) fail('unsupported-inductive-family');
       const family = d.ts[0];
       shape(family, ['n','t','cs'], 0);
-      if (family.t?.k !== 'sort' || !Array.isArray(family.cs) || family.cs.length < 1) fail('unsupported-inductive-shape');
+      if (!Array.isArray(family.cs) || family.cs.length < 1) fail('unsupported-inductive-shape');
+      if (d.np > 0) {
+        if (d.lp.length !== 0) fail('unsupported-inductive-universe');
+        for (const ctor of family.cs) shape(ctor, ['n','t'], 0);
+        entries.push(k.PsKernelJointEntry.algebraic(k.PsKernelAlgDeclaration.declaration(
+          name(family.n), natural(d.np), expr(family.t),
+          list(family.cs.map(ctor => k.PsKernelAlgInputConstructor.constructor(name(ctor.n), expr(ctor.t)))))));
+        admissionIndex++;
+        continue;
+      }
+      if (family.t?.k !== 'sort') fail('unsupported-inductive-shape');
       shape(family.t, ['k','l'], 0);
       for (const ctor of family.cs) shape(ctor, ['n','t'], 0);
       if (family.cs.length >= 2 && family.cs.every(ctor => ctor.t?.k === 'const')) {

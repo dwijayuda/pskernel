@@ -2,11 +2,13 @@ import Ps.Kernel.NatInductive
 import Ps.Kernel.RecordInductive
 import Ps.Kernel.EnumInductive
 import Ps.Kernel.SumInductive
+import Ps.Kernel.AlgebraicAdmission
 
 /- The only mixed admission entry point starts with an empty environment.
 Each declaration uses the same outer transition budget. Partial state is private
 to the driver; rejection and exhaustion expose no environment. -/
 inductive PsKernelJointEntry where
+  | algebraic (entry : PsKernelAlgDeclaration)
   | definition (entry : PsKernelDefinition)
   | unitInductive (entry : PsKernelUnitDeclaration)
   | recordInductive (entry : PsKernelUnitDeclaration)
@@ -15,6 +17,7 @@ inductive PsKernelJointEntry where
   | natInductive (entry : PsKernelNatDeclaration)
 
 inductive PsKernelJointState where
+  | algebraic (rest : PsKernelList PsKernelJointEntry) (state : PsKernelAlgAdmissionState)
   | pending (environment : PsKernelList PsKernelDefinition) (entries : PsKernelList PsKernelJointEntry)
   | definition (rest : PsKernelList PsKernelJointEntry) (state : PsKernelAdmissionState)
   | unitInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelUnitState)
@@ -39,6 +42,8 @@ def psKernelJointStep (state : PsKernelJointState) : PsKernelJointStep :=
       | PsKernelList.nil => PsKernelJointStep.final (PsKernelAdmissionResult.admitted env)
       | PsKernelList.cons entry rest =>
           match entry with
+          | PsKernelJointEntry.algebraic declaration => PsKernelJointStep.next
+              (PsKernelJointState.algebraic rest (psKernelAlgAdmissionStart env declaration))
           | PsKernelJointEntry.definition definition => PsKernelJointStep.next
               (PsKernelJointState.definition rest (PsKernelAdmissionState.pending env (PsKernelList.cons definition PsKernelList.nil)))
           | PsKernelJointEntry.unitInductive declaration => PsKernelJointStep.next
@@ -51,6 +56,10 @@ def psKernelJointStep (state : PsKernelJointState) : PsKernelJointStep :=
               (PsKernelJointState.sumInductive rest (psKernelSumStart env declaration))
           | PsKernelJointEntry.natInductive declaration => PsKernelJointStep.next
               (PsKernelJointState.natInductive rest (psKernelNatAdmissionStart env declaration))
+  | PsKernelJointState.algebraic rest current =>
+      match psKernelAlgAdmissionStep current with
+      | PsKernelAlgAdmissionStep.next next => PsKernelJointStep.next (PsKernelJointState.algebraic rest next)
+      | PsKernelAlgAdmissionStep.final result => psKernelJointContinue rest result
   | PsKernelJointState.definition rest current =>
       match psKernelAdmissionStep current with
       | PsKernelAdmissionStep.next next => PsKernelJointStep.next (PsKernelJointState.definition rest next)

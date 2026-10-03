@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "Zero-term-parameter singleton unit inductives and derived recursors; not general inductive completeness",
-  "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
+  "sourceManifestSha256": "fe74eb30a78c2ff6b7295862c4988139b717cf7e2fe4e5ece7d131a6a1314513",
   "harnessSha256": "8e1ce4839f0099990b163f4d258acd66c6efa0850e5a6e116c853c2f8f4fd402",
   "provider": {
     "protocol": "pskernel-lean/1",

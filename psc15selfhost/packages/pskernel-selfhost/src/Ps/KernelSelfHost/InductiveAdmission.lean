@@ -761,27 +761,35 @@ def psKernelMakeSimpleMinorBinders
     shapes
     0
 
-def psKernelMakeSimpleRecursiveCalls
-    (recName : PsKernelName)
-    (recLevels : List PsKernelLevel)
-    (params : List PsKernelOpenBinder)
-    (motive : PsKernelExpr)
-    (minors : List PsKernelOpenBinder)
-    (shape : PsKernelSimpleConstructorShape) :
+def psKernelOpenBinderListLength
+    (values : List PsKernelOpenBinder) : Nat :=
+  match values with
+  | List.nil =>
+      0
+  | List.cons _ rest =>
+      Nat.succ
+        (psKernelOpenBinderListLength rest)
+
+def psKernelMakeSimpleRecursiveCallsWorker
+    (fields : List PsKernelSimpleRecursiveField) :
+    PsKernelName ->
+    List PsKernelLevel ->
+    List PsKernelExpr ->
     List PsKernelExpr :=
-  let fixed :=
-    psKernelExprListAppend
-      (psKernelSimpleParamArgs params)
-      (List.cons
-        motive
-        (psKernelOpenBinderExprs minors));
-  let rec worker
-      (fields : List PsKernelSimpleRecursiveField) :
-      List PsKernelExpr :=
-    match fields with
-    | List.nil =>
+  match fields with
+  | List.nil =>
+      fun
+        (_recName : PsKernelName)
+        (_recLevels : List PsKernelLevel)
+        (_fixed : List PsKernelExpr) =>
         List.nil
-    | List.cons recursive rest =>
+  | List.cons recursive rest =>
+      let smaller :=
+        psKernelMakeSimpleRecursiveCallsWorker rest;
+      fun
+        (recName : PsKernelName)
+        (recLevels : List PsKernelLevel)
+        (fixed : List PsKernelExpr) =>
         let appliedField :=
           psKernelApplyArgs
             (PsKernelExpr.fvar
@@ -806,8 +814,30 @@ def psKernelMakeSimpleRecursiveCalls
           (psKernelCloseOpenLambdas
             recursive.args
             recursiveCall)
-          (worker rest);
-  worker shape.recursiveFields
+          (smaller
+            recName
+            recLevels
+            fixed)
+
+def psKernelMakeSimpleRecursiveCalls
+    (recName : PsKernelName)
+    (recLevels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (motive : PsKernelExpr)
+    (minors : List PsKernelOpenBinder)
+    (shape : PsKernelSimpleConstructorShape) :
+    List PsKernelExpr :=
+  let fixed :=
+    psKernelExprListAppend
+      (psKernelSimpleParamArgs params)
+      (List.cons
+        motive
+        (psKernelOpenBinderExprs minors));
+  psKernelMakeSimpleRecursiveCallsWorker
+    shape.recursiveFields
+    recName
+    recLevels
+    fixed
 
 def psKernelMakeSimpleRecursorRules
     (recName : PsKernelName)
@@ -865,15 +895,6 @@ def psKernelMakeSimpleRecursorRules
               ruleBinders
               shapeRest
               minorRest)
-
-def psKernelOpenBinderListLength
-    (values : List PsKernelOpenBinder) : Nat :=
-  match values with
-  | List.nil =>
-      0
-  | List.cons _ rest =>
-      Nat.succ
-        (psKernelOpenBinderListLength rest)
 
 def psKernelValidateSimpleRecursorRules
     (fuel : Nat)

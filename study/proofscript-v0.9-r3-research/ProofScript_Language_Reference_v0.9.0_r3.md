@@ -769,6 +769,23 @@ The language recognizes the native semantic distinctions among families such as:
 
 Libraries may define additional collections without adding language primitives.
 
+## 19.8 Operators and equality
+
+The fixed Standard notation closure uses the selected pinned precedence and associativity rules unless an owned ProofScript production in this document says otherwise.
+
+The equality distinction is fundamental:
+
+~~~text
+x = y     proposition / equality type
+x == y    Bool-valued equality when the selected BEq-like operation exists
+~~~
+
+A Bool-valued comparison does not silently become a proposition.
+
+Arithmetic, comparison, Boolean, and other fixed Standard operators denote the declarations selected by the Standard registry. They do not acquire JavaScript numeric/coercion semantics.
+
+ps-standard-0.9-r3 does not permit ordinary dependencies to introduce new operator notation. The extensible profile may declare notation as part of its explicit grammar/environment identity.
+
 # 20. Propositions and proof source
 
 ProofScript source may contain propositions and proof terms using the selected logical foundation.
@@ -784,7 +801,7 @@ psc2-language-v1 includes:
 - calc;
 - equality reasoning required by the supported proof surface.
 
-The compiler-core language requirement is proof-term meaning, not ownership of every tactic name.
+The language requirement is proof-term meaning. Tactic-name breadth is a Standard-profile selection and does not create a second logical theory.
 
 psc2-standard-language-v1 selects a fixed Standard prover surface. The fixed tactic heads for this profile are:
 
@@ -946,8 +963,8 @@ A required item cannot be omitted while retaining that claim.
 | Prop/Type/Sort/universes/Pi/Eq | required |
 | by/proof terms/have/show/suffices/calc | required |
 | pure requires/ensures contracts | required |
-| fixed Standard notation/attributes | required by psc2-standard-language-v1, not compiler-core ownership |
-| fixed Standard tactic names | required by psc2-standard-language-v1, not compiler-core ownership |
+| fixed Standard notation/attributes | selected by psc2-standard-language-v1; not part of the smaller psc2-language-v1 closure |
+| fixed Standard tactic names | selected by psc2-standard-language-v1; not part of the smaller psc2-language-v1 closure |
 | multi-scrutinee match | not required |
 | equation-style definition sugar | not required |
 | if-let / let-pattern / rich do-pattern sugar | not required |

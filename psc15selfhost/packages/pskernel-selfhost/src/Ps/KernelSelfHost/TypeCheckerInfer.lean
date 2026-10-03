@@ -76,14 +76,15 @@ def psKernelEnsureForallWith
   | Except.ok result =>
       match Prod.fst result with
       | PsKernelExpr.forallE name domain body binderInfo =>
+          let view :=
+            PsKernelForallView.mk
+              name
+              domain
+              body
+              binderInfo;
           Except.ok
             (Prod.mk
-              {
-                name := name
-                domain := domain
-                body := body
-                binderInfo := binderInfo
-              }
+              view
               (Prod.snd result))
       | _ =>
           Except.error "expected function type"

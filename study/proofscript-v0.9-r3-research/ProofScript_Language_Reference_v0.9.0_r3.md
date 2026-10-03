@@ -86,6 +86,7 @@ The included semantic foundation contains:
 - inductive families and constructors;
 - recursors and dependent elimination;
 - equality;
+- quotient semantics provided by the selected pinned logical foundation;
 - proof irrelevance according to the pinned theory;
 - typeclass-directed elaboration for the selected profile;
 - coercions for the selected profile;
@@ -859,6 +860,18 @@ Registering a new attribute handler is not Standard source behavior.
 
 Attributes may guide elaboration, optimization, printing, or proof construction according to their selected semantics; they do not independently prove propositions.
 
+## 21.1 Options
+
+ps-standard-0.9-r3 permits set_option only for option names selected by the fixed Standard registration closure.
+
+An unknown or unselected option rejects.
+
+An option may affect elaboration, diagnostics, reduction/transparency, or other source-observable behavior only according to its selected pinned semantics.
+
+Ordinary dependencies cannot register new Standard options.
+
+Interactive commands such as #check, #print, #reduce, and #eval are tooling commands, not psc2-language-v1 program declarations.
+
 # 22. Pure contracts
 
 ProofScript defines one stable base contract surface for total pure functions.
@@ -937,6 +950,10 @@ A required item cannot be omitted while retaining that claim.
 | lexical/native identifiers/literals/comments | required |
 | modules/imports/qualified names | required |
 | namespace/section/open/variable/include/omit/universe | required |
+| private declaration visibility | required |
+| fixed attribute command/names | required in Standard profile |
+| set_option over selected Standard options | required in Standard profile |
+| interactive #check/#print/#reduce/#eval | tooling only; not psc2-language-v1 declarations |
 | def | required |
 | const | required |
 | function | required |

@@ -4,18 +4,42 @@ Status: **accepted r3 application-semantics direction; library/runtime implement
 
 ## Decision
 
-Use ordinary Lean-compatible library/runtime definitions rather than new kernel effects. The candidate standard concepts are:
+Use ordinary Lean-compatible library/runtime definitions rather than new kernel effects. The accepted semantic model is conceptually:
 
 ~~~text
-App error result
-Exit error result
-Fiber error result
-Resource error value
-Stream error item
-Capability capabilityId
+App (caps : CapabilitySet) (err : Type) (result : Type)
+Fiber err result
+Exit err result
+  | success result
+  | failure err
+  | cancelled CancelReason
+
+RuntimeFault
+
+Resource (caps : CapabilitySet) (err : Type) value
+Stream   (caps : CapabilitySet) (err : Type) item
 ~~~
 
-Names can still change, but their required semantics are fixed by this research direction.
+The exact Lean library encoding may use equivalent ordinary definitions, but it must preserve these relationships.
+
+## Cold versus started computations
+
+`App caps err result` is **cold**: constructing, copying, storing, or reusing an App value does not by itself start external work.
+
+Work starts only through an explicit execution/start operation such as `run` or `fork`.
+
+`Fiber err result` denotes already-started work.
+
+Conceptually:
+
+~~~text
+run  : CapEnv caps -> App caps err a -> native IO (Exit err a)
+fork : App caps err a -> App parentCaps parentErr (Fiber err a)
+join : Fiber err a -> App caps parentErr (Exit err a)
+cancel : Fiber err a -> App caps parentErr Unit
+~~~
+
+The final library types may refine parent/child capability/error relationships, but they may not change the cold/start distinction.
 
 ## Pure functions
 
@@ -23,55 +47,60 @@ Ordinary functions remain pure with respect to application effects. A Standard-p
 
 ## Execution outcomes
 
-Application execution distinguishes:
+Ordinary recoverable application execution has exactly these terminal outcomes:
 
 ~~~text
 Success value
 Failure typedError
 Cancelled reason
-Panic unexpectedRuntimeFailure
 ~~~
 
-Typed failure is not the same as an arbitrary JS exception or Promise rejection.
+Unexpected host/runtime failures are represented separately as `RuntimeFault`.
+
+A `RuntimeFault` is **not** catchable by ordinary typed-error handlers. A foreign/runtime adapter may explicitly translate selected faults into the declared typed error channel, and that translation is part of the adapter contract.
+
+This avoids pretending every arbitrary JS throw, engine trap, process failure, or corrupted host condition inhabits the application's declared error type.
 
 ## Capabilities
 
 Effects require declared capabilities such as filesystem, network, clock, random, process, environment, storage, console, and DOM.
 
-A package manifest records required capabilities. Availability of a host global does not grant a PSC capability automatically.
+Capabilities are visible in the application type through `App caps err result`, not only in package metadata.
+
+`CapabilitySet` is a canonical finite type-level capability set. Its concrete Lean encoding may be a normalized list/set index, but equivalent sets must have a deterministic canonical identity for manifests/caches.
+
+A package manifest aggregates the capabilities reachable from its exported/runtime entry points. Availability of a host global does not grant a PSC capability automatically.
 
 ## Resource
 
-Resource means deterministic acquisition/release, independent of garbage collection finalizers.
+`Resource caps err a` describes acquisition and deterministic release.
 
-After successful acquisition, release is attempted exactly once on normal success, typed failure, and cancellation, subject to explicitly reported fatal runtime limitations.
+After successful acquisition, release is attempted exactly once on normal success, typed failure, and cancellation, subject only to explicitly reported fatal runtime limitations.
 
-If body and cleanup both fail, preserve both causes rather than silently discard one.
+### Cancellation
 
-## Structured concurrency
+Cancellation is cooperative and two-phase:
 
-Fiber is a started child computation owned by a scope.
+~~~text
+Running
+  -> cancellation requested
+Cancelling
+  -> terminal Success | Failure | Cancelled
+~~~
 
-Default rule: children do not silently outlive their parent scope.
+`cancel fiber` requests cancellation. It is not itself proof that the fiber is terminal.
 
-Scope completion:
+`join fiber` observes the terminal `Exit`.
 
-1. requests cancellation of unfinished children;
-2. waits for terminal outcomes or an explicit resource-limit result;
-3. releases child-owned resources;
-4. combines failures according to a documented cause policy.
-
-Detached work requires an explicit API/capability.
-
-## Cancellation
-
-Cancellation is a request followed by a terminal outcome; the request itself is not completion.
+A normal completion or typed failure may race with a cancellation request according to the scheduler trace; the terminal outcome is whichever the semantic scheduler relation selects.
 
 Foreign adapters state whether external work is actually cancellable. Cancelling a local wait does not prove a remote side effect was reversed.
 
 ## Race and timeout
 
-Race selects the first terminal outcome observed by the scheduler trace, requests cancellation of losers, and waits for required cleanup before the scope completes.
+Race selects the first terminal outcome observed by the scheduler trace, requests cancellation of losers, and waits for required loser cleanup before the race scope completes.
+
+If the scheduler model admits nondeterminism, the specification reports the set/relation of permitted outcomes rather than inventing deterministic wall-clock ordering.
 
 Timeout is a race with an explicit clock/deadline computation. Clock assumptions and late effects remain visible.
 
@@ -89,22 +118,37 @@ A foreign callback binding records whether invocation is synchronous/reentrant o
 
 Native local mutation in do remains native elaboration. Shared mutable identity uses explicit reference/state abstractions.
 
+## Native Lean IO/Task relationship
+
+Native Lean `IO` and `Task` remain the low-level pinned substrate.
+
+Portable `ps-standard` application APIs expose `App`, `Fiber`, `Resource`, and `Stream`.
+
+Direct native `IO`/`Task` use is permitted only in modules explicitly marked as nonportable/native-adapter modules (or in `ps-lean-extensible`), and its capabilities/assumptions are reflected in the module/runtime manifest.
+
+Thus the Standard model does not redefine Lean IO, but ordinary portable application code does not accidentally bypass capability/error/resource semantics through arbitrary native IO.
+
 ## JS mapping
 
 A JS runtime may implement:
 
 ~~~text
-App      -> explicit runtime state machine plus Promise machinery
-Fiber    -> handle plus cancellation token/controller
-Resource -> bracket/finally helper
+App      -> cold PSC runtime description/state machine
+run/fork -> Promise/event-loop machinery that starts work
+Fiber    -> started handle plus cancellation controller/token
+Resource -> bracket/finally runtime helper with cleanup shielding
 Stream   -> PSC stream runtime plus adapters
 ~~~
 
-Promise semantics do not define PSC App/Fiber semantics.
+A JavaScript Promise is normally already an eventual/running foreign handle and therefore adapts to the started/foreign-async side, not to the definition of cold `App`.
+
+Promise rejection maps only through explicit failure/fault classification.
 
 ## Wasm mapping
 
-Prefer versioned Component Model/WASI capabilities where they preserve the required behavior. Map typed outcomes to variants/results and resources to explicit host resources. A weaker target must use a separately named weaker profile or reject.
+Prefer versioned Component Model/WASI capabilities where they preserve the required behavior. WASI 0.3's `async func`, `future<T>`, and `stream<T>` are target mechanisms for implementing PSC's already-defined App/Fiber/Stream relations, not their source definition.
+
+Map typed outcomes to variants/results and resources to explicit host resources. A weaker target must use a separately named weaker profile or reject.
 
 ## Contracts
 
@@ -120,9 +164,10 @@ The cross-target suite must cover success, typed failure, panic, cancellation ti
 
 ## Evidence status
 
-Semantic model: **accepted for r3**.
-Exact library encoding: **not yet frozen**.
+Application semantic model (cold App, started Fiber, typed Exit, separate RuntimeFault, capability-indexed effects, structured scope, shielded Resource cleanup, Stream relation, native-IO boundary): **accepted for r3**.
+
+Exact Lean library encoding: **not yet implemented/frozen at API-name level**.
 JS runtime implementation/evidence: **not claimed by this documentation baseline**.
-Direct Wasm mapping: **not built**.
+Direct Wasm implementation/evidence: **not claimed**.
 Cross-target conformance: **not executed**.
 Program-logic proof: **pending**.

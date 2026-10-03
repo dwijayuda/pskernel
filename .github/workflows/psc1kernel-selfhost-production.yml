@@ -1,0 +1,78 @@
+name: PSC1Kernel selfhost production
+
+on:
+  push:
+    branches:
+      - psc2/psc1kernel-selfhost-production
+    paths:
+      - psc15selfhost/packages/pskernel/**
+      - psc15selfhost/lakefile.lean
+      - psc15selfhost/packages/foundation/**
+      - psc15selfhost/packages/syntax/**
+      - psc15selfhost/packages/core/**
+      - psc15selfhost/packages/environment/**
+      - psc15selfhost/packages/meta/**
+      - psc15selfhost/packages/elab/**
+      - psc15selfhost/packages/bridge/**
+      - psc15selfhost/packages/compiler-ir/**
+      - psc15selfhost/packages/erasure/**
+      - psc15selfhost/packages/compiler/**
+      - psc15selfhost/packages/backend-ts/**
+      - psc15selfhost/host/**
+      - psc15selfhost/scripts/**
+      - .github/workflows/psc1kernel-selfhost-production.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kernel-selfhost:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: psc15selfhost
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install pinned Lean and TypeScript
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh             | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm install --no-audit --no-fund
+          test "$(lean --githash)" = 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+
+      - name: Audit portable kernel closure
+        run: |
+          set -euo pipefail
+          node packages/pskernel/scripts/check-selfhost-source.mjs
+
+      - name: Build Lean semantic root and PSC1 compiler
+        run: |
+          set -euo pipefail
+          lake build PSC1KernelSelfHost psc1
+
+      - name: PSC1-check complete kernel semantic root
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel/PSC1KernelSelfHost.lean
+
+      - name: Translate complete kernel root to canonical ProofScript
+        run: |
+          set -euo pipefail
+          lake exe psc1 translate packages/pskernel/PSC1KernelSelfHost.lean --to ps > /tmp/PSC1KernelSelfHost.ps
+          test -s /tmp/PSC1KernelSelfHost.ps
+          lake exe psc1 check /tmp/PSC1KernelSelfHost.ps
+
+      - name: Build existing PSC1Kernel regression target
+        run: |
+          set -euo pipefail
+          cd packages/pskernel
+          lake build

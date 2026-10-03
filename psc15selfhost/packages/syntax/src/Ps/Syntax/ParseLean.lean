@@ -56,6 +56,10 @@ def psLeanReservedApplicationToken (token : PsToken) : Bool :=
     true
   else if psStringEq token.text "structure" then
     true
+  else if psStringEq token.text "namespace" then
+    true
+  else if psStringEq token.text "end" then
+    true
   else if psStringEq token.text "where" then
     true
   else if psStringEq token.text "then" then
@@ -2725,15 +2729,94 @@ def psParseLeanImportsWithFuel
             cursor := cursor
           }
 
+def psLeanStringListEq
+    (left : List String) : List String -> Bool :=
+  match left with
+  | List.nil =>
+      fun (right : List String) =>
+        match right with
+        | List.nil => true
+        | List.cons _ _ => false
+  | List.cons leftValue leftRest =>
+      let smaller : List String -> Bool :=
+        psLeanStringListEq leftRest;
+      fun (right : List String) =>
+        match right with
+        | List.nil => false
+        | List.cons rightValue rightRest =>
+            if psStringEq leftValue rightValue then
+              smaller rightRest
+            else
+              false
+
+def psLeanNamespacePrefix
+    (framesRev : List (List String)) : List String :=
+  match framesRev with
+  | List.nil => List.nil
+  | List.cons frame rest =>
+      psParseListAppend
+        (psLeanNamespacePrefix rest)
+        frame
+
+def psLeanQualifySyntaxName
+    (prefix : List String)
+    (name : PsSyntaxName) : PsSyntaxName :=
+  {
+    segments := psParseListAppend prefix name.segments
+    span := name.span
+  }
+
+def psLeanQualifyDeclaration
+    (prefix : List String)
+    (declaration : PsSyntaxDeclaration) : PsSyntaxDeclaration :=
+  if List.isEmpty prefix then
+    declaration
+  else
+    match declaration with
+    | .definition name binders type value span =>
+        PsSyntaxDeclaration.definition
+          (psLeanQualifySyntaxName prefix name)
+          binders type value span
+    | .partialDefinition name binders type value span =>
+        PsSyntaxDeclaration.partialDefinition
+          (psLeanQualifySyntaxName prefix name)
+          binders type value span
+    | .theoremDecl name binders type value span =>
+        PsSyntaxDeclaration.theoremDecl
+          (psLeanQualifySyntaxName prefix name)
+          binders type value span
+    | .inductiveDecl name params resultType constructors span =>
+        PsSyntaxDeclaration.inductiveDecl
+          (psLeanQualifySyntaxName prefix name)
+          params resultType constructors span
+    | .structureDecl name params fields span =>
+        PsSyntaxDeclaration.structureDecl
+          (psLeanQualifySyntaxName prefix name)
+          params fields span
+
+def psLeanNamespaceBoundaryToken
+    (text : String) : Bool :=
+  if psStringEq text "namespace" then true
+  else if psStringEq text "end" then true
+  else if psStringEq text "partial" then true
+  else if psStringEq text "def" then true
+  else if psStringEq text "theorem" then true
+  else if psStringEq text "inductive" then true
+  else if psStringEq text "structure" then true
+  else if psStringEq text "import" then true
+  else false
+
 def psParseLeanDeclarationsWithFuel
     (fuel : Nat) :
     PsTokenCursor ->
+    List (List String) ->
     List PsSyntaxDeclaration ->
     Except PsParseError (PsParseResult (List PsSyntaxDeclaration)) :=
   match fuel with
   | 0 =>
       fun
         (cursor : PsTokenCursor)
+        (_namespaceFramesRev : List (List String))
         (declarationsRev : List PsSyntaxDeclaration) =>
         if psTokenCursorDone cursor then
           Except.ok {
@@ -2755,24 +2838,93 @@ def psParseLeanDeclarationsWithFuel
   | remaining + 1 =>
       let smaller :
           PsTokenCursor ->
+          List (List String) ->
           List PsSyntaxDeclaration ->
           Except PsParseError (PsParseResult (List PsSyntaxDeclaration)) :=
         psParseLeanDeclarationsWithFuel remaining;
       fun
         (cursor : PsTokenCursor)
+        (namespaceFramesRev : List (List String))
         (declarationsRev : List PsSyntaxDeclaration) =>
         if psTokenCursorDone cursor then
           Except.ok {
             value := psParseListReverse declarationsRev
             cursor := cursor
           }
+        else if psTokenCursorAtText cursor "namespace" then
+          match psTokenCursorAdvance cursor with
+          | Option.none =>
+              Except.error
+                (PsParseError.unexpectedEnd "namespace name")
+          | Option.some keyword =>
+              match psParseSyntaxName keyword.cursor with
+              | Except.error error => Except.error error
+              | Except.ok parsedName =>
+                  smaller
+                    parsedName.cursor
+                    (List.cons
+                      parsedName.value.segments
+                      namespaceFramesRev)
+                    declarationsRev
+        else if psTokenCursorAtText cursor "end" then
+          match namespaceFramesRev with
+          | List.nil =>
+              match psTokenCursorPeek cursor with
+              | Option.none =>
+                  Except.error
+                    (PsParseError.unexpectedEnd "namespace")
+              | Option.some token =>
+                  Except.error
+                    (PsParseError.expectedText
+                      "open namespace"
+                      token.text
+                      token.span)
+          | List.cons currentFrame remainingFrames =>
+              match psTokenCursorAdvance cursor with
+              | Option.none =>
+                  smaller cursor remainingFrames declarationsRev
+              | Option.some keyword =>
+                  match psTokenCursorPeek keyword.cursor with
+                  | Option.none =>
+                      smaller keyword.cursor remainingFrames declarationsRev
+                  | Option.some nextToken =>
+                      if psLeanNamespaceBoundaryToken nextToken.text then
+                        smaller
+                          keyword.cursor
+                          remainingFrames
+                          declarationsRev
+                      else
+                        match psParseSyntaxName keyword.cursor with
+                        | Except.error error => Except.error error
+                        | Except.ok parsedName =>
+                            if
+                                psLeanStringListEq
+                                  parsedName.value.segments
+                                  currentFrame then
+                              smaller
+                                parsedName.cursor
+                                remainingFrames
+                                declarationsRev
+                            else
+                              Except.error
+                                (PsParseError.expectedText
+                                  "matching namespace name"
+                                  nextToken.text
+                                  nextToken.span)
         else
           match psParseLeanDeclaration cursor with
           | Except.error error => Except.error error
           | Except.ok parsed =>
+              let prefix :=
+                psLeanNamespacePrefix namespaceFramesRev;
               smaller
                 parsed.cursor
-                (List.cons parsed.value declarationsRev)
+                namespaceFramesRev
+                (List.cons
+                  (psLeanQualifyDeclaration
+                    prefix
+                    parsed.value)
+                  declarationsRev)
 
 def psParseLeanTokens
     (tokens : List PsToken) :
@@ -2784,6 +2936,7 @@ def psParseLeanTokens
       match psParseLeanDeclarationsWithFuel
           (psParseListLength tokens)
           imports.cursor
+          []
           [] with
       | Except.error error => Except.error error
       | Except.ok declarations =>

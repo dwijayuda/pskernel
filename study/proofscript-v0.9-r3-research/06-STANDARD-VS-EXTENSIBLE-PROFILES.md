@@ -1,6 +1,6 @@
 # r3 Source Profiles: Standard and Lean-Extensible
 
-Status: **accepted r3 architecture; not implemented**
+Status: **accepted r3 profile specification; implementation pending**
 
 ## Decision
 
@@ -10,6 +10,30 @@ Create two explicit <code>.ps</code> source profiles over the same Lean-compatib
 - <code>ps-lean-extensible</code> — advanced theorem/metaprogramming profile that permits declared Lean syntax, notation, macro, and elaborator extensions.
 
 These are capability profiles, not different type systems.
+
+## Normative Standard registry
+
+The exact Standard parser/tactic/attribute policy is machine-readable in:
+
+~~~text
+PS-STANDARD-REGISTRY-r3.json
+registryId = ps-standard-0.9-r3
+~~~
+
+The Standard parser is a **closed snapshot**. Package imports do not mutate its parser tables.
+
+The registry explicitly lists:
+- accepted r3 surface features;
+- accepted native command heads;
+- accepted term families;
+- fixed tactic heads;
+- allowed attribute names;
+- forbidden syntax-mutating commands;
+- forbidden elaborator attributes.
+
+Any change to that registry is a profile revision.
+
+The Standard profile forbids source/dependency declarations such as `syntax`, `macro`, `macro_rules`, `elab`, `elab_rules`, `declare_syntax_cat`, notation/infix/prefix/postfix declarations, and direct term/command/tactic elaborator registration unless a future Standard registry version explicitly adds the construct.
 
 A declaration admitted from either profile enters the same selected Lean 4.34 logical model.
 
@@ -62,7 +86,7 @@ The profile name does not mean "all Lean source is implemented by the standalone
 
 ## Dependency rule
 
-A Standard package MAY depend on a package authored in the extensible profile only through interfaces that do not require importing its syntax registrations into the Standard parser.
+A Standard package MAY depend on a package authored in the extensible profile only through interfaces that do not import its syntax/meta registrations.
 
 Three dependency surfaces are distinguished:
 
@@ -70,11 +94,17 @@ Three dependency surfaces are distinguished:
 2. **runtime exports** — executable artifacts/adapters with runtime identities;
 3. **syntax/meta exports** — parser, macro, tactic, elaborator, or build-time host behavior.
 
-Standard may consume semantic/runtime exports when their profiles are compatible.
+The normative Extensible-to-Standard boundary is `PSC Semantic Bundle v1`:
 
-Standard may not implicitly consume syntax/meta exports.
+~~~text
+SEMANTIC-BUNDLE-v1.md
+SEMANTIC-BUNDLE-v1.schema.json
+schemaVersion = psc-semantic-bundle-1.0.0
+~~~
 
-If source import of an extensible package would register syntax in the importer, the dependency is incompatible with <code>ps-standard</code> unless that syntax package is part of the selected Standard profile itself.
+A Standard importer requires `syntaxMetaExports = []`, validates all manifest/dependency/payload hashes, and rechecks/imports the declaration payload through the selected genuine checker protocol.
+
+Standard may consume compatible semantic/runtime exports. It may not implicitly consume syntax/meta exports.
 
 ## Package metadata
 
@@ -150,22 +180,25 @@ A project can contain both <code>.lean</code> and <code>.ps</code> modules when 
 
 ## Interoperability between profiles
 
-Checked declarations can cross the profile boundary through a canonical declaration bundle.
+Checked declarations cross the profile boundary through `PSC Semantic Bundle v1`.
 
-Crossing does not imply proof-script or syntax-source compatibility.
-For a Standard importer, an Extensible library should ideally publish:
+Conceptually:
 
 ~~~text
-source package
-  -> extensible parsing/elaboration
-  -> checked declarations
-  -> canonical checked bundle
-  -> Standard semantic import
+Extensible source
+  -> extension-aware parse/elaboration
+  -> genuine checked declarations
+  -> versioned semantic bundle
+  -> Standard manifest/hash validation
+  -> genuine checker import/recheck
+  -> Standard semantic environment
 ~~~
 
-The importer still verifies/rechecks the selected evidence protocol.
+The bundle is not a proof token. A manifest flag cannot authorize unchecked declarations.
 
-This is analogous to consuming a compiled library interface without importing its compiler plugins.
+Crossing the boundary does not provide source-level syntax compatibility. The Standard parser never installs the producing package's macro/notation/elaborator tables.
+
+Runtime exports in a bundle retain separate target/ABI/capability/preservation identities and do not grant host permissions merely because a theorem is imported.
 
 ## Diagnostics
 
@@ -195,4 +228,4 @@ No project is silently downgraded.
 - at least one Extensible theorem package consumed semantically by a Standard app;
 - LSP prototype for both profiles.
 
-Current evidence: **architectural design; no production profile implementation claimed**.
+Current status: **accepted r3 profile specification**. The registry and semantic-bundle format are frozen in the named companion files; no production profile implementation is claimed.

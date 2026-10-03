@@ -1,5 +1,5 @@
-import Ps.KernelSelfHost.Instantiate
-import PSC1Kernel.Instantiate
+import Ps.KernelSelfHost.TypeCheckerPrimitives
+import PSC1Kernel.TypeChecker
 
 def psKernelNameToReference
     (name : PsKernelName) : PSC1Kernel.Name :=
@@ -438,6 +438,152 @@ def psKernelSelfHostInstantiateTests : Bool :=
           abstracted
           referenceAbstracted)))
 
+def psKernelReferenceExprOptionEq
+    (portable : Option PsKernelExpr)
+    (reference : Option PSC1Kernel.Expr) : Bool :=
+  match portable with
+  | Option.none =>
+      match reference with
+      | Option.none => true
+      | Option.some _ => false
+  | Option.some portableExpr =>
+      match reference with
+      | Option.none => false
+      | Option.some referenceExpr =>
+          psKernelExprReferenceEq
+            portableExpr
+            referenceExpr
+
+def psKernelNatReductionDifferential
+    (portableOp : PsKernelName)
+    (referenceOp : PSC1Kernel.Name)
+    (left right maxNatSize : Nat) : Bool :=
+  match
+      psKernelReduceNatBinary
+        maxNatSize
+        portableOp
+        left
+        right,
+      PSC1Kernel.reduceNatBinary
+        maxNatSize
+        referenceOp
+        left
+        right with
+  | Except.ok portableResult, Except.ok referenceResult =>
+      psKernelReferenceExprOptionEq
+        portableResult
+        referenceResult
+  | Except.error portableError, Except.error referenceError =>
+      portableError == referenceError
+  | _, _ =>
+      false
+
+def psKernelSelfHostPrimitiveNatTests : Bool :=
+  let maxSize := psKernelLeanNatMaxSizeDefault
+  Bool.and
+    (psKernelNatReductionDifferential
+      psKernelNatAddName
+      PSC1Kernel.kernelNatAddName
+      12 30 maxSize)
+    (Bool.and
+      (psKernelNatReductionDifferential
+        psKernelNatSubName
+        PSC1Kernel.kernelNatSubName
+        3 8 maxSize)
+      (Bool.and
+        (psKernelNatReductionDifferential
+          psKernelNatMulName
+          PSC1Kernel.kernelNatMulName
+          7 6 maxSize)
+        (Bool.and
+          (psKernelNatReductionDifferential
+            psKernelNatPowName
+            PSC1Kernel.kernelNatPowName
+            3 5 maxSize)
+          (Bool.and
+            (psKernelNatReductionDifferential
+              psKernelNatGcdName
+              PSC1Kernel.kernelNatGcdName
+              48 18 maxSize)
+            (Bool.and
+              (psKernelNatReductionDifferential
+                psKernelNatModName
+                PSC1Kernel.kernelNatModName
+                17 5 maxSize)
+              (Bool.and
+                (psKernelNatReductionDifferential
+                  psKernelNatDivName
+                  PSC1Kernel.kernelNatDivName
+                  17 5 maxSize)
+                (Bool.and
+                  (psKernelNatReductionDifferential
+                    psKernelNatBeqName
+                    PSC1Kernel.kernelNatBeqName
+                    5 5 maxSize)
+                  (Bool.and
+                    (psKernelNatReductionDifferential
+                      psKernelNatBleName
+                      PSC1Kernel.kernelNatBleName
+                      5 7 maxSize)
+                    (Bool.and
+                      (psKernelNatReductionDifferential
+                        psKernelNatLandName
+                        PSC1Kernel.kernelNatLandName
+                        13 10 maxSize)
+                      (Bool.and
+                        (psKernelNatReductionDifferential
+                          psKernelNatLorName
+                          PSC1Kernel.kernelNatLorName
+                          13 10 maxSize)
+                        (Bool.and
+                          (psKernelNatReductionDifferential
+                            psKernelNatXorName
+                            PSC1Kernel.kernelNatXorName
+                            13 10 maxSize)
+                          (Bool.and
+                            (psKernelNatReductionDifferential
+                              psKernelNatShiftLeftName
+                              PSC1Kernel.kernelNatShiftLeftName
+                              3 4 maxSize)
+                            (psKernelNatReductionDifferential
+                              psKernelNatShiftRightName
+                              PSC1Kernel.kernelNatShiftRightName
+                              48 3 maxSize)))))))))))))
+
+def psKernelSelfHostPrimitiveBoundaryTests : Bool :=
+  Bool.and
+    (psKernelNatSizeInBytes 0 ==
+      PSC1Kernel.natSizeInBytes 0)
+    (Bool.and
+      (psKernelNatSizeInBytes 18446744073709551616 ==
+        PSC1Kernel.natSizeInBytes 18446744073709551616)
+      (Bool.and
+        (psKernelNatReductionDifferential
+          psKernelNatShiftLeftName
+          PSC1Kernel.kernelNatShiftLeftName
+          1
+          4294967296
+          psKernelLeanNatMaxSizeDefault)
+        (psKernelNatReductionDifferential
+          psKernelNatPowName
+          PSC1Kernel.kernelNatPowName
+          2
+          64
+          8)))
+
+def psKernelSelfHostPrimitiveStringTests : Bool :=
+  PSC1Kernel.Expr.eq
+    (psKernelExprToReference
+      (psKernelStringLitToConstructor "Aλ"))
+    (PSC1Kernel.stringLitToConstructor "Aλ")
+
+def psKernelSelfHostPrimitiveTests : Bool :=
+  Bool.and
+    psKernelSelfHostPrimitiveNatTests
+    (Bool.and
+      psKernelSelfHostPrimitiveBoundaryTests
+      psKernelSelfHostPrimitiveStringTests)
+
 def main : IO Unit :=
   if !psKernelSelfHostNameTests then
     throw
@@ -455,6 +601,10 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_INSTANTIATE_DIFFERENTIAL: FAIL")
+  else if !psKernelSelfHostPrimitiveTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_PRIMITIVE_DIFFERENTIAL: FAIL")
   else
     IO.println
       "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"

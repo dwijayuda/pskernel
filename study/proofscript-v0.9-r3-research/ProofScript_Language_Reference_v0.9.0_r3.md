@@ -75,6 +75,12 @@ Normative keywords:
 
 **CheckedModule** — module state constructible only through genuine admission or an explicitly sound recheck/import protocol.
 
+**CompilerCapabilityProfile** — versioned statement of which language/frontend/elaboration/runtime facilities a concrete compiler implementation owns directly.
+
+**FeatureOwner** — architectural layer responsible for implementing a capability: compiler frontend, elaborator, library, prover package, controlled extension, compatibility frontend, host boundary, post-PSC2 platform, or deferred/unsupported.
+
+**LeanCompatibilityProfile** — bounded, versioned set of native Lean source constructs accepted by the ProofScript `.lean` frontend.
+
 **Environment identity** — identity of all semantic inputs that can affect parsing, elaboration, checking, or execution claims, including imports, options, registrations, policies, and profile.
 
 **E-class** — explicit ProofScript surface exception: syntax intentionally differs from a valid or plausible native Lean neighbor but lowers to the selected Lean-compatible meaning.
@@ -125,44 +131,39 @@ ProofScript deliberately does not import the following JavaScript/TypeScript sem
 - declaration files as runtime validation or proof;
 - structural unsoundness as the native proof/type model.
 
-## 2. Complete normative authority
+## 2. Normative authority and conformance
 
 **[NORMATIVE ASSURANCE]**
 
-r3 is a complete normative delta over one exact  artifact.
+This document is the sole ProofScript-specific normative authority for `ps-0.9-r3`.
 
-Authority order **inside this standalone file** for ps-0.9-r3:
+No earlier ProofScript document contributes normative meaning.
 
-1. Parts I–XXV of this document;
-2. embedded r3 Appendices A–J for the specific domains they define;
-3. embedded Appendix K, the exact  baseline, for every rule not overridden by r3;
-4. the pinned Lean 4.34 source/environment as the semantic oracle for inherited Lean theory/implementation details;
-5. non-normative examples/research rationale.
+The pinned Lean 4.34.0 environment is the external semantic oracle for the Lean constructs that this specification explicitly includes through a selected source/compiler/compatibility profile.
 
-No separate ProofScript document is required to resolve the r3 language contract.
+A construct existing in Lean 4 does **not** imply that the PSC2 compiler implements it.
 
-If this document is silent about an  semantic rule, the  rule remains normative unchanged unless the inheritance matrix explicitly marks it otherwise.
+A ProofScript implementation MAY support a documented subset of the language/profile. Unsupported input MUST fail closed and MUST NOT be approximated by a different semantic model.
 
-This preserves the detailed  requirements for:
+Conformance has separate dimensions:
 
-- lexical syntax;
-- native categories and precedence;
-- dependent type theory;
-- universes;
-- structures, inductives, classes, instances;
-- recursion, partiality, unsafe and noncomputable declarations;
-- Nat, Int, floating-point, strings, bytes, collections;
-- modules and source identity;
-- theorem/axiom policies;
-- parser ownership and hygiene;
-- compiler phases;
-- genuine declaration admission;
-- erasure and RuntimeIR;
-- primitive/runtime matrices;
-- backend preservation;
-- artifact binding;
-- diagnostics and resource limits;
-- evidence manifests and release snapshots.
+- **source conformance** — accepted/rejected source and ownership follow this specification;
+- **logical conformance** — supported source lowers/elaborates to the specified Lean-compatible meaning and receives genuine admission;
+- **compiler-capability conformance** — the implementation reports the exact compiler capability profile it supports;
+- **Lean-compatibility conformance** — a `.lean` frontend reports the exact bounded compatibility profile it implements;
+- **runtime conformance** — primitives, effects, resources, async, FFI, and target behavior satisfy the selected runtime profile;
+- **assurance conformance** — claims are no stronger than the proofs, validators, tests, and assumptions actually recorded.
+
+The core architectural rule is:
+
+~~~text
+If a capability can be an ordinary library, make it a library.
+If it is only syntax ergonomics, lower/desugar it.
+If it is proof automation, make it an untrusted proof-producing library.
+If compiler participation is necessary, use a controlled versioned extension.
+If it is foreign/target-specific, put it behind InterfaceIR/FFI.
+Change Core or the kernel only when the capability genuinely cannot be represented above them.
+~~~
 
 ## 3. Central semantic relationship
 
@@ -217,9 +218,42 @@ It can contain:
 
 A .lean file is native Lean syntax.
 
-ProofScript productions MUST NOT be injected into .lean.
+ProofScript productions MUST NOT be injected into `.lean`.
 
-A standalone ProofScript compiler may support only a documented subset of native Lean. Unsupported native Lean is unsupported; it must not be reinterpreted into a different ProofScript form.
+The PSC2 compiler does **not** promise full Lean 4 source compatibility.
+
+The initial required compatibility profile is:
+
+~~~text
+lean-subset-psc2-v1
+~~~
+
+It is intentionally bounded to constructs whose canonical meaning the ProofScript pipeline owns.
+
+Required `lean-subset-psc2-v1` families:
+
+- `def`, `theorem`, `example`, and supported declaration modifiers;
+- explicit, implicit, strict-implicit, and instance binders needed by the supported subset;
+- universes/type applications used by supported declarations;
+- structures, classes, instances, inductives, constructors, projections, and ordinary record construction/update where supported by PSC2;
+- lambdas, lets, applications, literals, conditionals, and match;
+- structural recursion and the explicitly supported recursion subset;
+- supported propositions/equality/primitive operations;
+- the selected Standard prover/tactic forms that the compiler capability profile advertises.
+
+Excluded unless a later compatibility profile explicitly adds them:
+
+- arbitrary user-defined `syntax`, `macro`, `macro_rules`, `elab`, or parser categories;
+- unrestricted quotations/metaprogramming;
+- arbitrary command/attribute registrations;
+- unsupported tactics/automation;
+- Lean compiler/runtime intrinsics not represented by the selected ProofScript semantic/runtime profiles;
+- arbitrary environment-extension machinery;
+- unsupported well-founded/dependent-pattern/compiler extensions.
+
+Every rejection SHOULD identify the unsupported Lean compatibility feature.
+
+The `.lean` frontend and `.ps` frontend MUST converge on one canonical semantic pipeline for their claimed overlap.
 
 ### 4.3 .psx and future dialects
 
@@ -334,6 +368,210 @@ The importer verifies exact bundle/dependency/payload identities and rechecks/re
 A semantic import does not grant filesystem/network/process permission.
 
 Logical assumptions and runtime/external assumptions are reported separately.
+
+### 8.1 Compiler capability profile
+
+**[NORMATIVE ASSURANCE]**
+
+The language edition and a compiler implementation are not the same thing.
+
+This specification defines the language edition:
+
+~~~text
+ps-0.9-r3
+~~~
+
+The required first production/compiler capability target is:
+
+~~~text
+psc2-compiler-v1
+~~~
+
+A compiler claiming `psc2-compiler-v1` MUST publish an exact capability manifest rather than claiming "all Lean" or "all ProofScript" support.
+
+The manifest records at least:
+
+~~~text
+languageEdition
+sourceProfiles
+compilerCapabilityProfile
+leanCompatibilityProfile
+kernelProfile
+runtimeProfiles
+backendProfiles
+standardLibraryProfile
+standardProverProfile
+extensionApiVersions
+unsupportedFeatureFamilies
+~~~
+
+### 8.2 Feature ownership classes
+
+Every material capability belongs to one primary implementation owner:
+
+| Owner | Meaning |
+|---|---|
+| `CORE` | logical/core semantic construct requiring checker/kernel representation |
+| `PSC2_FRONTEND` | parser/name-resolution/desugaring feature required in the PSC2 compiler |
+| `PSC2_ELAB` | elaboration/Meta feature required in the PSC2 compiler |
+| `STANDARD_LIBRARY` | ordinary ProofScript library capability; not compiler syntax/authority |
+| `STANDARD_PROVER` | proof/tactic/Meta library shipped in the standard distribution |
+| `STANDARD_EXTENSION` | versioned official syntax/elaboration extension over existing semantics |
+| `CONTROLLED_PLUGIN` | optional versioned plugin/extension; not part of base compiler conformance |
+| `LEAN_COMPAT` | accepted only through the bounded `.lean` compatibility frontend/profile |
+| `HOST_BOUNDARY` | Node/npm/filesystem/TypeScript/WASI/native adapter outside portable semantics |
+| `POST_PSC2` | planned platform capability that does not block the first PSC2 compiler closure |
+| `DEFERRED` | intentionally unsupported/fail-closed until a later version/profile |
+
+A capability being useful or common in Lean does not move it into `PSC2_FRONTEND` or `PSC2_ELAB`.
+
+### 8.3 PSC2 compiler ownership matrix
+
+The following matrix reconciles the language with the PSC2 compiler and platform plans.
+
+| Capability | Owner | PSC2 compiler v1 requirement | Notes |
+|---|---|---:|---|
+| core Pi/lambda/Prop/Type/Sort/Eq/inductives/recursors | `CORE` | yes | same Lean-compatible logical foundation |
+| `def`, `const`, `function` | `PSC2_FRONTEND` + `PSC2_ELAB` | yes | lower to ordinary definitions |
+| explicit/implicit/instance binders | `PSC2_ELAB` | yes | only supported Lean-compatible subset |
+| parenthesized calls, named/default args, empty-call rules | `PSC2_FRONTEND` + `PSC2_ELAB` | yes | exact r3 semantics |
+| generalized field/method notation | `PSC2_ELAB` | yes | deterministic/type-directed, never JS prototype dispatch |
+| record/structure update | `PSC2_FRONTEND` + `PSC2_ELAB` | yes | constructor/projection semantics |
+| constructor/nested/tuple/wildcard/basic literal patterns | `PSC2_FRONTEND` | yes | bounded pattern compiler |
+| multi-scrutinee match | `STANDARD_EXTENSION` | no | desugars to supported matches |
+| let/do pattern bindings | `STANDARD_EXTENSION` | no | may ship with Standard distribution |
+| `if let` convenience | `STANDARD_EXTENSION` | no | sugar only |
+| equation-style function definitions | `STANDARD_EXTENSION` | no | pattern/compiler sugar |
+| namespace/open/section/shared-variable/name-resolution basics | `PSC2_FRONTEND` | yes | required for scalable projects |
+| deterministic import/re-export/package API semantics | `PSC2_FRONTEND` | yes | exact module graph ownership |
+| local recursion | `PSC2_ELAB` | yes | bounded supported form |
+| mutual recursion | `PSC2_ELAB` | yes | supported form must be explicit |
+| structural recursion | `PSC2_ELAB` | yes | ordinary verified total recursion |
+| well-founded recursion | `PSC2_ELAB` + `STANDARD_PROVER` | bounded | explicit supported termination interface; not all Lean elaboration |
+| `partial` / unsafe / noncomputable boundaries | `PSC2_ELAB` + runtime policy | yes where advertised | no proof/runtime authority confusion |
+| `let mut`, reassignment, `for`, `while`, `break`, `continue` | `STANDARD_EXTENSION` | no | owned sugar over explicit state/effect/iteration semantics |
+| typed try/recovery | `STANDARD_LIBRARY` + optional `STANDARD_EXTENSION` | no | over `Except`/App error semantics, not host exceptions |
+| `abbrev`, opacity/transparency controls | `PSC2_ELAB` / `LEAN_COMPAT` | bounded | only exact supported semantics |
+| typeclass search, priorities, local/scoped instances | `PSC2_ELAB` | yes, bounded | recursion/cycle/ambiguity fail closed |
+| coercion insertion | `PSC2_ELAB` | yes, bounded | no TypeScript-style implicit coercion |
+| `have`, `show`, `suffices`, `calc` | `STANDARD_PROVER` | no compiler-core blocker | elaborates to ordinary proof terms |
+| `rw`, `cases`, `induction`, `by_cases`, `by_contra`, destructuring proof helpers | `STANDARD_PROVER` | no compiler-core blocker | require Meta/proof-term API, not kernel growth |
+| `simp`, `simpa`, `simp only` | `STANDARD_PROVER` | no compiler-core blocker | proof-producing deterministic subsystem |
+| large automation (`omega`, `ring`, `linarith`, search, SMT, AI proving) | `CONTROLLED_PLUGIN` / library | no | certificates/proof terms required for strict assurance |
+| `classical` and `noncomputable` | `PSC2_ELAB` / `LEAN_COMPAT` | bounded | exact assumption/execution policy required |
+| fixed Standard notation set | `STANDARD_EXTENSION` | no | frozen registry, not arbitrary parser mutation |
+| attributes/registries | `STANDARD_EXTENSION` / `STANDARD_PROVER` | bounded | metadata has no proof authority |
+| deriving | `CONTROLLED_PLUGIN` / official Standard extension | no | generated declarations still admitted normally |
+| `requires` / `ensures` pure contract core | `PSC2_ELAB` + specification layer | yes for contract-enabled compiler | final evidence is kernel-checkable |
+| `assert`, loop `invariant`, `old`, ghost/stateful contract sugar | `POST_PSC2` / verification extension | no | underlying logic may be used without dedicated sugar |
+| `decreasing` convenience syntax | `STANDARD_EXTENSION` / termination tooling | no | explicit termination evidence remains available |
+| App/Fiber/Resource/Stream semantic model | `STANDARD_LIBRARY` + runtime adapters | semantics specified; implementation may follow PSC2 core closure | no new kernel theory |
+| InterfaceIR/importer/exporter | `POST_PSC2` + `HOST_BOUNDARY` | no | platform/interop layer, not parser/kernel prerequisite |
+| Meta API / tactic API / safe reflection | `POST_PSC2` | no | versioned compiler-service layer |
+| general controlled plugin API | `POST_PSC2` | no | follows Meta/service stabilization |
+| broad npm/WIT/Rust binding generation | `POST_PSC2` | no | InterfaceIR-based |
+| large stdlib/math/proof ecosystem | `STANDARD_LIBRARY` / ecosystem | no | grows above compiler/kernel |
+| arbitrary Lean syntax/macros/custom elaborators | `DEFERRED` or `ps-lean-extensible` | no | never implied by PSC2 conformance |
+| arbitrary Lean compiler intrinsics/runtime representation | `DEFERRED` / `HOST_BOUNDARY` | no | only explicit compatibility adapters may expose them |
+
+### 8.4 Required PSC2 pattern profile
+
+The first PSC2 compiler pattern profile is:
+
+~~~text
+psc2-pattern-v1
+~~~
+
+Required:
+
+- variable and wildcard patterns;
+- constructor patterns;
+- nested constructor patterns;
+- tuple/product patterns;
+- supported literal patterns where literal matching has exact owned semantics;
+- single-scrutinee match;
+- dependent motive handling only for the explicitly supported subset.
+
+Not required for the first PSC2 compiler closure:
+
+- arbitrary Lean pattern elaboration;
+- unsupported indexed/dependent motive synthesis;
+- generalized pattern alternatives;
+- equation compiler parity with Lean;
+- user-defined pattern macros.
+
+Those can be added through a later compiler capability revision or Standard extension.
+
+### 8.5 Names/modules required for PSC2
+
+The first PSC2 compiler closure MUST own enough deterministic name/module behavior for compiler-scale and package-scale code:
+
+- namespace declarations;
+- qualified names;
+- explicit imports;
+- deterministic `open` behavior for the selected subset;
+- section/local variable scoping required by supported theorem/library source;
+- visibility/public-private policy;
+- deterministic re-export/package API representation;
+- duplicate/ambiguous module-source rejection.
+
+The compiler is not required to reproduce every Lean command or environment extension.
+
+### 8.6 Standard prover and plugin boundary
+
+The PSC2 compiler MUST provide the semantic services needed for proof-producing tooling:
+
+~~~text
+parse tactic/proof blocks
+goal state
+Meta operations
+candidate term construction
+kernel admission
+~~~
+
+It does **not** need every tactic name built into the compiler.
+
+The Standard prover package may implement common tactics as ordinary untrusted programs over the Meta interface.
+
+Large automation and AI proof search remain plugins/libraries unless a future Standard profile explicitly promotes them.
+
+### 8.7 Post-PSC2 platform sequence
+
+The recommended platform sequence after the first stable PSC2 compiler/self-host closure is:
+
+~~~text
+P1  versioned Core / CheckedModule / RuntimeIR contracts
+P2  standard-library laws, tests, properties, differential conformance
+P3  Meta API + tactic API + safe reflection
+P4  controlled plugin API
+P5  InterfaceIR + generated TypeScript/WIT/Rust foreign bindings
+P6  App/Stream/Resource runtime implementations + cross-backend conformance
+P7  large math/tactic/FFI/ecosystem expansion
+~~~
+
+Some work MAY overlap, but P2–P7 are not retroactive requirements for the first PSC2 compiler fixed point unless an actual required compiler module depends on them.
+
+### 8.8 Naming: language profiles versus compiler generations
+
+The name **PSC2** refers to the compiler capability/product profile described above, not to a bootstrap generation number.
+
+Self-host iterations MUST use generation-neutral names such as:
+
+~~~text
+CompilerGen0
+CompilerGen1
+CompilerGen2
+CompilerGen3
+~~~
+
+Example:
+
+~~~text
+compiler source --CompilerGen0--> CompilerGen1
+compiler source --CompilerGen1--> CompilerGen2
+~~~
+
+Do not use `PSC2` or `PSC3` to mean compiler generations in new plans, evidence, or release reports.
 
 ---
 
@@ -2601,43 +2839,54 @@ An AI/compiler agent MUST treat this section as an implementation discipline, no
 
 If a source case is unclear:
 
-1. consult the relevant main section of this document;
-2. consult the embedded r3 appendices in this file;
-3. if the rule is inherited, consult the embedded exact  baseline in Appendix K;
-4. use the pinned Lean 4.34 implementation only as the semantic oracle for inherited Lean details;
-5. if still unsupported or genuinely unspecified, reject/raise a specification issue.
+1. consult the relevant section of this document;
+2. identify the selected source profile, compiler capability profile, Lean compatibility profile, runtime profile, and extension set;
+3. use the pinned Lean 4.34 implementation only as the semantic oracle for the native Lean constructs explicitly included by those profiles;
+4. if the capability belongs to a library/Standard prover/controlled extension/post-PSC2 layer, do not move it into the compiler core merely for convenience;
+5. if still unsupported or genuinely unspecified, reject or raise a specification issue.
 
 Do not silently choose a JavaScript/TypeScript interpretation.
 
 ### 106.2 Implement the smallest semantic slice first
 
-Recommended order:
+Recommended **PSC2 core-compiler closure** order:
 
 1. immutable source/profile/module identity;
 2. lexer/source spans;
 3. parser ownership framework;
-4. const/function aliases;
-5. explicit binder groups;
-6. parenthesized nonempty calls;
-7. empty calls;
-8. structural braces;
-9. native lifted terms/declarations;
-10. canonical lowering;
-11. reference-compatible elaboration;
-12. genuine admission;
-13. CheckedModule;
-14. pure RuntimeIR;
-15. primitive matrix;
-16. direct JS pure slice;
-17. contracts pure core;
-18. Standard registry enforcement;
-19. semantic bundles;
-20. InterfaceIR;
-21. App/Fiber/Resource/Stream runtime;
-22. direct Wasm;
-23. application/reference-platform layers.
+4. declarations, binders, calls, structures/inductives/classes;
+5. bounded `psc2-pattern-v1`;
+6. deterministic names/modules/imports/scopes;
+7. canonical lowering;
+8. Lean-compatible Meta/elaboration for the advertised subset;
+9. genuine admission and CheckedModule;
+10. bounded theorem/proof block support needed by compiler/library source;
+11. erasure and pure RuntimeIR;
+12. primitive/runtime matrix;
+13. direct JavaScript pure/core execution slice;
+14. Standard-profile registry enforcement;
+15. source/module/package fixed-point infrastructure.
 
-Do not implement broad app syntax before the semantic core is stable.
+Then grow above that closure according to ownership:
+
+~~~text
+STANDARD_LIBRARY / STANDARD_PROVER
+    -> richer proofs, data libraries, contracts, utilities
+
+POST_PSC2 P3/P4
+    -> Meta/tactic service API, reflection, controlled plugins
+
+POST_PSC2 P5
+    -> InterfaceIR and broad generated FFI
+
+POST_PSC2 P6
+    -> App/Fiber/Resource/Stream runtime implementations and conformance
+
+additional backends
+    -> Rust / direct Wasm over the same checked RuntimeIR
+~~~
+
+Do not make a post-PSC2/library/plugin capability a prerequisite for the first compiler generation that is supposed to create that capability unless an explicit bootstrap host/profile is recorded.
 
 ### 106.3 Maintain a feature ledger
 
@@ -2647,6 +2896,9 @@ For each feature, maintain:
 featureId
 specVersion
 sourceProfile
+compilerCapabilityProfile
+leanCompatibilityProfile
+featureOwner
 parserCategory
 discriminator
 ASTNode
@@ -2657,6 +2909,8 @@ formatterRule
 migrationRule
 elaborationDependencies
 runtimeDependencies
+bootstrapRequirement
+extensionPackageOrPlugin
 formalEvidence
 testEvidence
 implementationStatus
@@ -2857,6 +3111,9 @@ A cache key that omits a semantic input is unsound.
 | S-PURE-CONTRACT-R3 | semantic | stable requires/ensures pure contract core |
 | P-STANDARD-R3 | profile | closed Standard source environment |
 | P-LEAN-EXTENSIBLE-R3 | profile | declared extensible source environment |
+| C-PSC2-COMPILER-V1 | compiler profile | required first PSC2 compiler-owned capability set |
+| L-LEAN-SUBSET-PSC2-V1 | compatibility profile | bounded native Lean frontend subset |
+| PATTERN-PSC2-V1 | compiler profile | bounded required PSC2 pattern compiler |
 | INTERFACEIR-V1 | interop | versioned npm/TypeScript boundary |
 
 This table lists current features only. Historical feature identities are not part of the language specification.
@@ -2999,6 +3256,7 @@ Tactic syntax/semantics remain selected native/Standard-profile behavior.
 - Promise as native task semantics;
 - automatic JSX;
 - arbitrary dependency parser mutation in Standard;
+- full Lean 4 parser/macro/elaborator/metaprogramming parity as a PSC2 compiler requirement;
 - trust in .d.ts as runtime validation;
 - hidden proof/verification fallbacks.
 
@@ -3029,6 +3287,7 @@ Every addition requires a new explicit registry/spec/profile revision.
 This document establishes:
 
 - accepted r3 design;
+- exact separation of language edition, PSC2 compiler capability, bounded Lean compatibility, library/extension ownership, and post-PSC2 platform work;
 - exact source/profile rules at specification level;
 - exact call/brace/default behavior at specification level;
 - complete standalone language authority;

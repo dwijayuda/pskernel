@@ -1,6 +1,6 @@
 # r3 Complete Reference Applications
 
-Status: acceptance plan. These are not yet completed r3 PSC applications.
+Status: **accepted r3 application acceptance plan. These are not yet completed r3 PSC applications.**
 
 ## Principle
 

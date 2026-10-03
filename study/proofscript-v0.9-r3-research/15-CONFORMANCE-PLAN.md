@@ -1,6 +1,6 @@
 # r3 Conformance Plan
 
-Status: required release matrix.
+Status: **accepted r3 conformance plan; execution pending.**
 
 ## Parser and lowering
 

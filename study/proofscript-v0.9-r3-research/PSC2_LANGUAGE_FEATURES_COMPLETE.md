@@ -228,6 +228,41 @@ Required patterns:
 
 ---
 
+# 3.1 Current feature-registry IDs
+
+These IDs are the current machine-readable r3 feature/profile identifiers. They are included here so every active registry entry has a human-readable location in this handbook.
+
+| Feature ID | Meaning |
+|---|---|
+| <code>L-CORE-LEAN</code> | explicitly included pinned Lean semantic categories |
+| <code>D-CONST-ALIAS</code> | <code>const</code> parameterless-definition alias |
+| <code>D-FUNCTION-ALIAS-R3</code> | <code>function</code> declaration alias |
+| <code>D-FUNCTION-UNIT-R3</code> | zero-source-argument <code>function f()</code> sugar |
+| <code>D-DECL-BODY-BRACE-R3</code> | single-term <code>:= { PSTerm }</code> body wrapper |
+| <code>D-EXPLICIT-PARAMS</code> | comma-separated explicit parameter group |
+| <code>E-CALL-PARENS-R3</code> | ProofScript-owned parenthesized call |
+| <code>E-EMPTY-CALL-R3</code> | empty-call/default-completion syntax |
+| <code>D-NAMED-CALL</code> | named argument syntax |
+| <code>D-TRAILING-COMMA-CALL</code> | trailing comma in nonempty call |
+| <code>D-TRAILING-COMMA-PARAMS</code> | trailing comma in explicit parameter group |
+| <code>E-IF-BRACE</code> | one-term braced conditional branches |
+| <code>E-STRUCT-BODY-R3</code> | structural braced structure fields |
+| <code>E-CLASS-BODY-R3</code> | structural braced class fields |
+| <code>E-INDUCTIVE-BODY-R3</code> | structural braced inductive constructors |
+| <code>E-MATCH-BODY-R3</code> | structural braced match alternatives |
+| <code>E-INSTANCE-BODY-R3</code> | structural braced instance initializer sequence |
+| <code>E-WHERE-BODY-R3</code> | structural braced local where declarations |
+| <code>N-BASIC-DO-PSC2</code> | required bounded native do subset |
+| <code>S-PURE-CONTRACT-R3</code> | pure requires/ensures contract surface |
+| <code>P-STANDARD-R3</code> | closed Standard source profile |
+| <code>P-LEAN-EXTENSIBLE-R3</code> | declared extensible source profile |
+| <code>P-PSC2-LANGUAGE-V1</code> | required PSC2 language capability profile |
+| <code>P-PSC2-STANDARD-LANGUAGE-V1</code> | Standard language-facing PSC2 profile |
+| <code>P-LEAN-SUBSET-PSC2-V1</code> | bounded Lean compatibility profile |
+| <code>P-PATTERN-PSC2-V1</code> | required PSC2 pattern profile |
+
+---
+
 # 4. Lexical rules
 
 ## 4.1 Identifiers and literals

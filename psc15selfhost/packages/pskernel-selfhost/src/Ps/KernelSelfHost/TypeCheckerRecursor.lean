@@ -972,6 +972,38 @@ def psKernelWhnfWithRecursorFuel
     state
     expr
 
+def psKernelWhnfCoreWithRecursorFuel
+    (fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (cheapRec : Bool)
+    (cheapProj : Bool) :
+    Except String
+      (Prod PsKernelExpr PsKernelCheckerState) :=
+  let reducer :=
+    psKernelReduceRecursorBoundedWithFuel
+      fuel
+      defeq;
+  psKernelWhnfCoreWithFuel
+    fuel
+    (psKernelWhnfWithRecursorFuel
+      fuel
+      defeq)
+    reducer
+    context
+    state
+    expr
+    cheapRec
+    cheapProj
+
 def psKernelInferWithRecursorFuel
     (fuel : Nat)
     (defeq :

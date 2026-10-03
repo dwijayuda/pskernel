@@ -1,0 +1,5 @@
+{
+  "name": "r3-consumer",
+  "private": true,
+  "type": "module"
+}

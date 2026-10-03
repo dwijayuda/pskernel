@@ -389,7 +389,8 @@
       "required": [
         "name",
         "type",
-        "optional"
+        "optional",
+        "kind"
       ],
       "properties": {
         "name": {
@@ -399,6 +400,19 @@
           "$ref": "#/$defs/typeRef"
         },
         "optional": {
+          "type": "boolean"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "required",
+            "optional",
+            "defaulted",
+            "rest",
+            "this"
+          ]
+        },
+        "defaultSourceKnown": {
           "type": "boolean"
         }
       }
@@ -415,11 +429,17 @@
             "parameters",
             "result",
             "syncKind",
-            "throwsPolicy"
+            "throwsPolicy",
+            "sourceDeclarationSha256"
           ],
           "properties": {
             "kind": {
-              "const": "function"
+              "enum": [
+                "function",
+                "callSignature",
+                "constructSignature",
+                "constructor"
+              ]
             },
             "name": {
               "type": "string",
@@ -468,6 +488,22 @@
                 "string",
                 "null"
               ]
+            },
+            "sourceDeclarationSha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "externalAssumptions": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "validationPolicy": {
+              "type": "string"
+            },
+            "logicalModelIdentity": {
+              "type": "string"
             }
           }
         },
@@ -478,7 +514,8 @@
             "kind",
             "name",
             "support",
-            "fields"
+            "fields",
+            "sourceDeclarationSha256"
           ],
           "properties": {
             "kind": {
@@ -500,6 +537,22 @@
               "items": {
                 "$ref": "#/$defs/field"
               }
+            },
+            "sourceDeclarationSha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "externalAssumptions": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "validationPolicy": {
+              "type": "string"
+            },
+            "logicalModelIdentity": {
+              "type": "string"
             }
           }
         },
@@ -510,7 +563,8 @@
             "kind",
             "name",
             "support",
-            "type"
+            "type",
+            "sourceDeclarationSha256"
           ],
           "properties": {
             "kind": {
@@ -530,6 +584,22 @@
             },
             "type": {
               "$ref": "#/$defs/typeRef"
+            },
+            "sourceDeclarationSha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "externalAssumptions": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string"
+              }
+            },
+            "validationPolicy": {
+              "type": "string"
+            },
+            "logicalModelIdentity": {
+              "type": "string"
             }
           }
         }

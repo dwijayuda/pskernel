@@ -1,5 +1,8 @@
 # Master package plan
 
+> **r3 reconciliation note.** This file is an implementation/package plan, not the language authority. On `research/proofscript-v0.9-r3`, the sole normative language/compiler-design reference is `study/proofscript-v0.9-r3-research/ProofScript_Language_Reference_v0.9.0_r3.md`. Read implementation milestones through its feature-ownership model: compiler-owned, library-owned, Standard prover/extension, controlled plugin, bounded Lean compatibility, host boundary, post-PSC2, or deferred.
+
+
 Status: living plan.
 
 > **Execution priority override (2026-09-24):** ProofScript package/infrastructure

@@ -18,7 +18,8 @@ test('caller cannot redeclare or replace standard Nat',()=>{
 test('bootstrap does not import other batches or an implicit reference prelude',()=>{
  assert.equal(bootstrap([unit()]).status,'admitted');
  for(const name of ['OwnedUnit','String','Bool']){
-  const r=bootstrap([definition('Use',[],U(S(Z)),C(name))]);assert.equal(r.status,'rejected');assert.equal(r.error,'unknownConstant');
+  const r=bootstrap([definition('Use',[],U(S(Z)),C(name))]);
+  if(name==='String'){assert.equal(r.status,'admitted');}else{assert.equal(r.status,'rejected');assert.equal(r.error,'unknownConstant');}
  }
 });
 test('wrongly typed Nat use fails after valid Nat initialization',()=>{

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "package": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.12",
+  "version": "0.1.0-checker.13",
   "status": "experimental-term-checker",
   "canCheckProofs": false,
   "authoritative": false,
@@ -37,7 +37,10 @@
     "validated-closed-record-projection-typing-and-reduction",
     "bounded-closed-record-iota-and-neutral-projection-conversion",
     "monomorphic-nullary-enumerations-with-checked-dependent-recursor-and-iota",
-    "closed-monomorphic-nonrecursive-sums-with-checked-dependent-recursor-and-iota"
+    "closed-monomorphic-nonrecursive-sums-with-checked-dependent-recursor-and-iota",
+    "fixed-intrinsic-String-Type-without-user-axiom-ingress",
+    "source-owned-bounded-UTF8-scalar-validation",
+    "checked-string-literal-typing-and-byte-exact-conversion"
   ],
   "boundedEvidence": [
     "BUILD.json",
@@ -53,7 +56,8 @@
     "RECORD_DIFFERENTIAL.json",
     "RECORD_ELIMINATION_DIFFERENTIAL.json",
     "ENUM_DIFFERENTIAL.json",
-    "SUM_DIFFERENTIAL.json"
+    "SUM_DIFFERENTIAL.json",
+    "TEXT_DIFFERENTIAL.json"
   ],
   "releaseGates": {
     "term-checking": {
@@ -74,7 +78,7 @@
     },
     "primitive-validation": {
       "status": "partial",
-      "evidence": "LITERAL_DIFFERENTIAL.json; natural literals require owned Nat-family metadata; arithmetic and other primitives remain unsupported"
+      "evidence": "LITERAL_DIFFERENTIAL.json; TEXT_DIFFERENTIAL.json; checked Nat and fixed intrinsic String only; no String operations"
     },
     "axiom-policy": {
       "status": "pending",
@@ -118,7 +122,7 @@
     "function-and-structure-eta",
     "general-mutual-indexed-and-recursive-inductive-admission",
     "quotient-admission",
-    "text-literal-and-general-projection-typing",
+    "String-constructors-operations-and-general-projection-typing",
     "remaining-prelude-and-primitive-validation",
     "axiom-and-opaque-declaration-admission",
     "hostile-input-decoder",

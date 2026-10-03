@@ -24,7 +24,7 @@ test('default checks its Nat prelude and derived recursor before user declaratio
     def('First',C('Nat'),numeral('Nat',1)),def('Fold',C('Nat'),fold('Nat',4)),
   ]));
   assert.equal(descriptor.selector,'pskernel-core');
-  assert.equal(result.profile,'owned-closed-sums/9');
+  assert.equal(result.profile,'owned-utf8-string-literals/10');
   assert.equal(result.accepted,true,JSON.stringify(result));
   assert.equal(result.admissionCount,2);
 });
@@ -56,7 +56,9 @@ test('prelude cannot be redeclared and earlier user environments never leak',asy
   const fresh=await checkOwnedAdmissions(wire([def('Leak',C('Counter'),numeral('Counter',0))]));
   assert.equal(fresh.errorKind,'unknownConstant');
   const other=await checkOwnedAdmissions(wire([def('Other',U(S(Z)),C('String'))]));
-  assert.equal(other.errorKind,'unknownConstant');
+  assert.equal(other.accepted,true);
+  const unavailable=await checkOwnedAdmissions(wire([def('Other',U(S(Z)),C('Bool'))]));
+  assert.equal(unavailable.errorKind,'unknownConstant');
 });
 test('later rejection retains the user admission index and exposes no partial environment',async()=>{
   const result=await checkOwnedAdmissions(wire([def('Good',C('Nat'),numeral('Nat',0)),def('Bad',U(Z),numeral('Nat',0))]));

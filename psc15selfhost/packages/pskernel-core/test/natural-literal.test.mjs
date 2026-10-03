@@ -35,10 +35,11 @@ test('external metadata cannot mint literal authority',()=>{
  const r=drive(k.psKernelAdmissionStep,k.psKernelAdmissionStart(list([forged])));
  assert.equal(r.status,'rejected');assert.equal(r.error,'unsupported');assert.equal(r.result.environment,undefined);
 });
-test('wrong types, literal functions and string literals still reject',()=>{
+test('wrong natural types and literal functions reject; supported text retains String type',()=>{
  const env=environment();assert.equal(check(literal(0),U(Z),env).error,'typeMismatch');
  assert.equal(infer(app(literal(0),literal(0)),env).error,'functionExpected');
- assert.equal(infer(['text','no string semantics'],env).error,'unsupported');
+ assert.equal(infer(['text','no string semantics'],env).status,'done');
+ assert.equal(check(['text','no string semantics'],C('Nat'),env).error,'typeMismatch');
 });
 test('literal expansion and authority validation consume the same bounded execution budget',()=>{
  const env=environment(),r=normal(literal(8),env);assert.equal(r.status,'done');

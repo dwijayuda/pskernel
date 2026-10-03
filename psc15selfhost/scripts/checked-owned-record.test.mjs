@@ -8,7 +8,7 @@ const wire=admissions=>JSON.stringify({format:'proofscript-checked-admissions',v
 test('preserved record prefix admits PsSourcePos and PsSourceSpan without prelude substitution',async()=>{
  const result=await checkOwnedAdmissions(wire(prefix.slice(0,3)));
  assert.equal(result.accepted,true,JSON.stringify(result));assert.equal(result.admissionCount,3);
- assert.equal(result.profile,'owned-closed-sums/9');
+ assert.equal(result.profile,'owned-utf8-string-literals/10');
  const next=await checkOwnedAdmissions(wire(prefix));
  assert.equal(next.accepted,false);assert.equal(next.admissionIndex,3);assert.equal(next.errorKind,'unknownConstant');
  assert.equal(next.environment,undefined);

@@ -1,17 +1,17 @@
 # @proofscript/pskernel-core
 
-**0.1.0-checker.12 — private experimental dependent term-checker checkpoint.**
+**0.1.0-checker.13 — private experimental dependent term-checker checkpoint.**
 
-Regenerated with the pinned PSC seed, with all 561 tests passing and fresh build
-and reference evidence. See `../../docs/continuity/OWNED_CLOSED_SUMS_2026-10-03.md`.
+Regenerated with the pinned PSC seed, with all 612 tests passing and fresh build
+and reference evidence. See `../../docs/continuity/OWNED_TEXT_LITERALS_2026-10-03.md`.
 
 This is the default checker and part of the joint bootstrap source closure.
 The host adapter runs the generated semantic machine and fails closed outside
 its supported fragment. The exact preserved bootstrap prefix now admits the unit,
 `PsSourcePos` and `PsSourceSpan`, after checking the initial `Nat` prelude.
 The next entry, `PsLexCursor`, rejects an unknown dependency; the complete batch
-now decodes closed payload sums and rejects string expressions at admission 20.
-The new portable closure has 78 modules (55 compiler plus 23 owned kernel);
+now decodes strings and rejects the parameterized PsParseResult family at admission 80.
+The new portable closure has 79 modules (55 compiler plus 24 owned kernel);
 the default selection does not imply release readiness or complete Lean parity.
 
 This package now executes an owned checking fragment, rather than data helpers
@@ -35,7 +35,8 @@ nonrecursive Type-valued fields. It checks field and constructor types in bounde
 source machines and derives a checked dependent eliminator type and field metadata.
 Record iota and projection typing/reduction run against validated closed-record metadata. Parameters, indices,
 dependent record fields, recursive records, Prop and higher-universe record families
-remain rejected. Arithmetic, string literals and other prelude constants remain unsupported.
+remain rejected. String literals are validated against a fixed intrinsic String type; String operations,
+arithmetic and other missing prelude constants remain unsupported. See PRIMITIVE_POLICY.md.
 Nullary enumerations derive checked dependent recursors and computed branch reduction.
 Closed nonrecursive payload sums are checked; parameterized and general recursive families remain unsupported.
 Sequential internal admission starts from the checked prelude,

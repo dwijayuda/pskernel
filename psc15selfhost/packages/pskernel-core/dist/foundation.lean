@@ -1423,6 +1423,7 @@ inductive PsKernelSumRule where
   | rule (name : PsKernelName) (reversedFields : PsKernelList PsKernelExpr) (fieldCount : PsKernelNatural)
 
 inductive PsKernelDefinition where
+  | stringType (name : PsKernelName)
   | definition (name : PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
   | polymorphic (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
   | constant (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
@@ -1446,6 +1447,7 @@ def psKernelDefinitionName (entry : PsKernelDefinition) : PsKernelName :=
   | PsKernelDefinition.sumRecursor name unusedParameters unusedType unusedRules => name
   | PsKernelDefinition.recordFamily name unusedCtor unusedFields => name
   | PsKernelDefinition.recordRecursor name unusedParameters unusedType unusedCtor unusedFields => name
+  | PsKernelDefinition.stringType name => name
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => name
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => name
 
@@ -1459,6 +1461,7 @@ def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList PsK
   | PsKernelDefinition.sumRecursor unusedName parameters unusedType unusedRules => parameters
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelList.nil
   | PsKernelDefinition.recordRecursor unusedName parameters unusedType unusedCtor unusedFields => parameters
+  | PsKernelDefinition.stringType unusedName => PsKernelList.nil
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelList.nil
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => parameters
 
@@ -1472,6 +1475,7 @@ def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr :=
   | PsKernelDefinition.sumRecursor unusedName unusedParameters type unusedRules => type
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
   | PsKernelDefinition.recordRecursor unusedName unusedParameters type unusedCtor unusedFields => type
+  | PsKernelDefinition.stringType unusedName => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => type
 
@@ -1486,6 +1490,7 @@ def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody
   | PsKernelDefinition.sumRecursor unusedName unusedParameters unusedType unusedRules => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.recordRecursor unusedName unusedParameters unusedType unusedCtor unusedFields => PsKernelDefinitionBody.opaque
+  | PsKernelDefinition.stringType unusedName => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.natFamily unusedName unusedZero unusedSucc => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.natRecursor unusedName unusedParameters unusedType unusedZero unusedSucc => PsKernelDefinitionBody.opaque
 
@@ -1501,6 +1506,7 @@ def psKernelTypingParameters (context : PsKernelTypingContext) : PsKernelList Ps
   | PsKernelTypingContext.context unusedDeclarations parameters => parameters
 
 inductive PsKernelCheckError where
+  | invalidText
   | invalidState
   | invalidScope
   | unknownConstant
@@ -1591,6 +1597,157 @@ def psKernelBuiltinNatStep (state : PsKernelBuiltinNatState) : PsKernelBuiltinNa
 
 
 
+/- Intrinsic String fragment: an opaque Type with well-formed UTF-8 literals.
+No public declaration can install the intrinsic marker. This deliberately does
+not implement Lean String constructors, byte arrays, projections or operations.
+Every input byte and comparison is charged to the enclosing transition budget. -/
+
+def psKernelBuiltinStringName : PsKernelName :=
+  PsKernelName.str PsKernelName.anonymous (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 PsKernelPositive.one))))))) (PsKernelText.byte (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 PsKernelPositive.one))))))) PsKernelText.empty))))))
+
+inductive PsKernelUtf8Mode where
+  | start
+  | one
+  | two
+  | three
+  | e0
+  | ed
+  | f0
+  | f4
+
+inductive PsKernelUtf8Range where
+  | range (low high : PsKernelNatural) (next : PsKernelUtf8Mode)
+
+def psKernelUtf8Ranges (mode : PsKernelUtf8Mode) : PsKernelList PsKernelUtf8Range :=
+  match mode with
+  | PsKernelUtf8Mode.start =>
+      (PsKernelList.cons (PsKernelUtf8Range.range PsKernelNatural.zero (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one))))))) PsKernelUtf8Mode.start) (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) PsKernelUtf8Mode.one) (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) PsKernelUtf8Mode.e0) (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) PsKernelUtf8Mode.two) (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) PsKernelUtf8Mode.ed) (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) PsKernelUtf8Mode.two) (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) PsKernelUtf8Mode.f0) (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) PsKernelUtf8Mode.three) (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 PsKernelPositive.one)))))))) PsKernelUtf8Mode.f4) PsKernelList.nil)))))))))
+  | PsKernelUtf8Mode.one =>
+      (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) PsKernelUtf8Mode.start) PsKernelList.nil)
+  | PsKernelUtf8Mode.two =>
+      (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) PsKernelUtf8Mode.one) PsKernelList.nil)
+  | PsKernelUtf8Mode.three =>
+      (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) PsKernelUtf8Mode.two) PsKernelList.nil)
+  | PsKernelUtf8Mode.e0 =>
+      (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) PsKernelUtf8Mode.one) PsKernelList.nil)
+  | PsKernelUtf8Mode.ed =>
+      (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) PsKernelUtf8Mode.one) PsKernelList.nil)
+  | PsKernelUtf8Mode.f0 =>
+      (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) PsKernelUtf8Mode.two) PsKernelList.nil)
+  | PsKernelUtf8Mode.f4 =>
+      (PsKernelList.cons (PsKernelUtf8Range.range (PsKernelNatural.positive (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) (PsKernelNatural.positive (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit1 (PsKernelPositive.bit0 (PsKernelPositive.bit0 (PsKernelPositive.bit0 PsKernelPositive.one)))))))) PsKernelUtf8Mode.two) PsKernelList.nil)
+
+inductive PsKernelUtf8State where
+  | scan (mode : PsKernelUtf8Mode) (text : PsKernelText)
+  | ranges (value : PsKernelNatural) (text : PsKernelText) (ranges : PsKernelList PsKernelUtf8Range)
+  | lower (value : PsKernelNatural) (text : PsKernelText) (high : PsKernelNatural)
+      (mode : PsKernelUtf8Mode) (ranges : PsKernelList PsKernelUtf8Range) (state : PsKernelNumericState)
+  | upper (value : PsKernelNatural) (text : PsKernelText) (mode : PsKernelUtf8Mode)
+      (ranges : PsKernelList PsKernelUtf8Range) (state : PsKernelNumericState)
+
+inductive PsKernelUtf8Step where
+  | next (state : PsKernelUtf8State)
+  | valid
+  | invalid
+  | invalidState
+
+def psKernelUtf8Start (text : PsKernelText) : PsKernelUtf8State :=
+  PsKernelUtf8State.scan PsKernelUtf8Mode.start text
+
+def psKernelUtf8Step (state : PsKernelUtf8State) : PsKernelUtf8Step :=
+  match state with
+  | PsKernelUtf8State.scan mode text =>
+      match text with
+      | PsKernelText.empty =>
+          match mode with
+          | PsKernelUtf8Mode.start => PsKernelUtf8Step.valid
+          | _ => PsKernelUtf8Step.invalid
+      | PsKernelText.byte value rest => PsKernelUtf8Step.next
+          (PsKernelUtf8State.ranges value rest (psKernelUtf8Ranges mode))
+  | PsKernelUtf8State.ranges value text ranges =>
+      match ranges with
+      | PsKernelList.nil => PsKernelUtf8Step.invalid
+      | PsKernelList.cons range rest =>
+          match range with
+          | PsKernelUtf8Range.range low high mode => PsKernelUtf8Step.next
+              (PsKernelUtf8State.lower value text high mode rest
+                (PsKernelNumericState.order value low PsKernelOrder.same))
+  | PsKernelUtf8State.lower value text high mode ranges current =>
+      match psKernelNumericStep current with
+      | PsKernelNumericStep.next next => PsKernelUtf8Step.next
+          (PsKernelUtf8State.lower value text high mode ranges next)
+      | PsKernelNumericStep.ordered order =>
+          match order with
+          | PsKernelOrder.less => PsKernelUtf8Step.next (PsKernelUtf8State.ranges value text ranges)
+          | _ => PsKernelUtf8Step.next (PsKernelUtf8State.upper value text mode ranges
+              (PsKernelNumericState.order value high PsKernelOrder.same))
+      | _ => PsKernelUtf8Step.invalidState
+  | PsKernelUtf8State.upper value text mode ranges current =>
+      match psKernelNumericStep current with
+      | PsKernelNumericStep.next next => PsKernelUtf8Step.next
+          (PsKernelUtf8State.upper value text mode ranges next)
+      | PsKernelNumericStep.ordered order =>
+          match order with
+          | PsKernelOrder.greater => PsKernelUtf8Step.next (PsKernelUtf8State.ranges value text ranges)
+          | _ => PsKernelUtf8Step.next (PsKernelUtf8State.scan mode text)
+      | _ => PsKernelUtf8Step.invalidState
+
+inductive PsKernelTextCheckState where
+  | lookup (text : PsKernelText) (state : PsKernelLookupState)
+  | validate (state : PsKernelUtf8State)
+
+inductive PsKernelTextCheckStep where
+  | next (state : PsKernelTextCheckState)
+  | ready
+  | rejected (error : PsKernelCheckError)
+
+def psKernelTextCheckStart (env : PsKernelList PsKernelDefinition) (text : PsKernelText) : PsKernelTextCheckState :=
+  PsKernelTextCheckState.lookup text (PsKernelLookupState.search psKernelBuiltinStringName env)
+
+def psKernelTextCheckStep (state : PsKernelTextCheckState) : PsKernelTextCheckStep :=
+  match state with
+  | PsKernelTextCheckState.lookup text current =>
+      match psKernelLookupStep current with
+      | PsKernelLookupStep.next next => PsKernelTextCheckStep.next (PsKernelTextCheckState.lookup text next)
+      | PsKernelLookupStep.missing => PsKernelTextCheckStep.rejected PsKernelCheckError.unknownConstant
+      | PsKernelLookupStep.invalidState => PsKernelTextCheckStep.rejected PsKernelCheckError.invalidState
+      | PsKernelLookupStep.found entry =>
+          match entry with
+          | PsKernelDefinition.stringType unusedName => PsKernelTextCheckStep.next
+              (PsKernelTextCheckState.validate (psKernelUtf8Start text))
+          | _ => PsKernelTextCheckStep.rejected PsKernelCheckError.unsupported
+  | PsKernelTextCheckState.validate current =>
+      match psKernelUtf8Step current with
+      | PsKernelUtf8Step.next next => PsKernelTextCheckStep.next (PsKernelTextCheckState.validate next)
+      | PsKernelUtf8Step.valid => PsKernelTextCheckStep.ready
+      | PsKernelUtf8Step.invalid => PsKernelTextCheckStep.rejected PsKernelCheckError.invalidText
+      | PsKernelUtf8Step.invalidState => PsKernelTextCheckStep.rejected PsKernelCheckError.invalidState
+
+/- This fixed intrinsic rule is part of the kernel, not an axiom ingress API.
+It introduces only String : Type and never supplies a proof or a recursor. -/
+inductive PsKernelStringPreludeState where
+  | check (environment : PsKernelList PsKernelDefinition) (state : PsKernelLookupState)
+
+inductive PsKernelStringPreludeStep where
+  | next (state : PsKernelStringPreludeState)
+  | ready (environment : PsKernelList PsKernelDefinition)
+  | rejected (error : PsKernelCheckError)
+
+def psKernelStringPreludeStart (env : PsKernelList PsKernelDefinition) : PsKernelStringPreludeState :=
+  PsKernelStringPreludeState.check env (PsKernelLookupState.search psKernelBuiltinStringName env)
+
+def psKernelStringPreludeStep (state : PsKernelStringPreludeState) : PsKernelStringPreludeStep :=
+  match state with
+  | PsKernelStringPreludeState.check env current =>
+      match psKernelLookupStep current with
+      | PsKernelLookupStep.next next => PsKernelStringPreludeStep.next (PsKernelStringPreludeState.check env next)
+      | PsKernelLookupStep.missing => PsKernelStringPreludeStep.ready
+          (PsKernelList.cons (PsKernelDefinition.stringType psKernelBuiltinStringName) env)
+      | PsKernelLookupStep.found unused => PsKernelStringPreludeStep.rejected PsKernelCheckError.duplicateName
+      | PsKernelLookupStep.invalidState => PsKernelStringPreludeStep.rejected PsKernelCheckError.invalidState
+
+
+
 /- First-order beta/zeta/delta and supported inductive recursor reduction.
 No primitive or quotient reduction is asserted. Type checking validates discarded terms.
 All nested substitutions and lookups consume the caller's transition budget. -/
@@ -1645,6 +1802,7 @@ inductive PsKernelReduceTask where
   | recordSelect (index : PsKernelNatural) (args : PsKernelList PsKernelExpr)
   | recordApply (minor : PsKernelExpr) (args : PsKernelList PsKernelExpr)
   | proj (family : PsKernelName) (index : PsKernelNatural)
+  | text (value : PsKernelText) (state : PsKernelTextCheckState)
   | natural (value : PsKernelNatural) (state : PsKernelBuiltinNatState)
   | whnf (value : PsKernelExpr)
   | apply (arg : PsKernelExpr)
@@ -1718,7 +1876,8 @@ def psKernelReduceWhnf
       match literal with
       | PsKernelLiteral.natural number => psKernelReduceNext env
           (PsKernelList.cons (PsKernelReduceTask.natural number (psKernelBuiltinNatStart env)) tasks) values
-      | _ => psKernelReduceReject PsKernelCheckError.unsupported
+      | PsKernelLiteral.text text => psKernelReduceNext env
+          (PsKernelList.cons (PsKernelReduceTask.text text (psKernelTextCheckStart env text)) tasks) values
   | PsKernelExpr.proj family index major => psKernelReduceNext env
       (PsKernelList.cons (PsKernelReduceTask.projectLookup family index major (PsKernelLookupState.search family env)) tasks) values
   | _ => psKernelReducePush env tasks values value
@@ -2147,6 +2306,13 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                       (PsKernelList.cons (PsKernelReduceTask.unitLevels fn major minor left right) rest) values
                   | PsKernelLevelCheckResult.different => psKernelReducePush env rest values (PsKernelExpr.app fn major)
                   | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.text text current =>
+              match psKernelTextCheckStep current with
+              | PsKernelTextCheckStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.text text next) rest) values
+              | PsKernelTextCheckStep.ready => psKernelReducePush env rest values
+                  (PsKernelExpr.lit (PsKernelLiteral.text text))
+              | PsKernelTextCheckStep.rejected error => psKernelReduceReject error
           | PsKernelReduceTask.natural number current =>
               match psKernelBuiltinNatStep current with
               | PsKernelBuiltinNatStep.next next => psKernelReduceNext env
@@ -2307,6 +2473,18 @@ def psKernelConversionExpr
           (PsKernelList.cons (PsKernelConversionTask.expr type otherType)
             (PsKernelList.cons (PsKernelConversionTask.expr body otherBody) tasks))
       | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+  | PsKernelExpr.lit literal =>
+      match literal with
+      | PsKernelLiteral.text text =>
+          match right with
+          | PsKernelExpr.lit otherLiteral =>
+              match otherLiteral with
+              | PsKernelLiteral.text other => psKernelConversionTasks
+                  (PsKernelList.cons (PsKernelConversionTask.names
+                    (PsKernelList.cons (PsKernelOrderTask.text text other) PsKernelList.nil)) tasks)
+              | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+          | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+      | _ => psKernelConversionReject PsKernelCheckError.unsupported
   | _ => psKernelConversionReject PsKernelCheckError.unsupported
 
 def psKernelConversionStep (state : PsKernelConversionState) : PsKernelConversionStep :=
@@ -2395,6 +2573,7 @@ that binder's OUTER context; lookup lifts by index+1 into the current context.
 No self-inference shortcut and no acceptance Boolean supplied by the caller.
 Raw machine states are implementation data, not a checked-module capability. -/
 inductive PsKernelTypeTask where
+  | text (state : PsKernelTextCheckState)
   | natural (state : PsKernelBuiltinNatState)
   | infer (context : PsKernelList PsKernelExpr) (value : PsKernelExpr)
   | levels (pending : PsKernelList PsKernelLevel)
@@ -2474,7 +2653,8 @@ def psKernelTypeInfer
       match literal with
       | PsKernelLiteral.natural unused => psKernelTypeNext env
           (PsKernelList.cons (PsKernelTypeTask.natural (psKernelBuiltinNatStart (psKernelTypingDeclarations env))) tasks) values
-      | _ => psKernelTypeReject PsKernelCheckError.unsupported
+      | PsKernelLiteral.text text => psKernelTypeNext env
+          (PsKernelList.cons (PsKernelTypeTask.text (psKernelTextCheckStart (psKernelTypingDeclarations env) text)) tasks) values
   | PsKernelExpr.lam name type body binder =>
       psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context type)
         (PsKernelList.cons PsKernelTypeTask.reduceTop
@@ -2628,6 +2808,13 @@ def psKernelTypeStep (state : PsKernelTypeState) : PsKernelTypeStep :=
                   | PsKernelNatural.zero => psKernelTypePush env rest values field
                   | _ => psKernelTypeNext env
                       (PsKernelList.cons (PsKernelTypeTask.projectField (psKernelNaturalPred index) tail) rest) values
+          | PsKernelTypeTask.text current =>
+              match psKernelTextCheckStep current with
+              | PsKernelTextCheckStep.next next => psKernelTypeNext env
+                  (PsKernelList.cons (PsKernelTypeTask.text next) rest) values
+              | PsKernelTextCheckStep.ready => psKernelTypePush env rest values
+                  (PsKernelExpr.constE psKernelBuiltinStringName PsKernelList.nil)
+              | PsKernelTextCheckStep.rejected error => psKernelTypeReject error
           | PsKernelTypeTask.natural current =>
               match psKernelBuiltinNatStep current with
               | PsKernelBuiltinNatStep.next next => psKernelTypeNext env
@@ -3980,7 +4167,8 @@ def psKernelJointRun (fuel : PsKernelFuel) : PsKernelJointState -> PsKernelAdmis
 
 /- The initial Nat prelude is generated source data submitted to the same owned
 inductive checker. No assumed environment or caller-supplied builtin constants.
-Literal and arithmetic primitive semantics remain unsupported. -/
+Nat literals require checked Nat metadata. The fixed intrinsic String type is
+installed next; arithmetic and String operations remain unsupported. -/
 def psKernelBootstrapNatName : PsKernelName := psKernelBuiltinNatName
 
 def psKernelBootstrapNat : PsKernelNatDeclaration :=
@@ -3990,6 +4178,7 @@ def psKernelBootstrapNat : PsKernelNatDeclaration :=
 
 inductive PsKernelBootstrapState where
   | prelude (entries : PsKernelList PsKernelJointEntry) (state : PsKernelNatAdmissionState)
+  | textPrelude (entries : PsKernelList PsKernelJointEntry) (state : PsKernelStringPreludeState)
   | declarations (state : PsKernelJointState)
 
 inductive PsKernelBootstrapStep where
@@ -4004,8 +4193,14 @@ def psKernelBootstrapStep (state : PsKernelBootstrapState) : PsKernelBootstrapSt
       | PsKernelNatAdmissionStep.final result =>
           match result with
           | PsKernelAdmissionResult.admitted env => PsKernelBootstrapStep.next
-              (PsKernelBootstrapState.declarations (PsKernelJointState.pending env entries))
+              (PsKernelBootstrapState.textPrelude entries (psKernelStringPreludeStart env))
           | _ => PsKernelBootstrapStep.final result
+  | PsKernelBootstrapState.textPrelude entries current =>
+      match psKernelStringPreludeStep current with
+      | PsKernelStringPreludeStep.next next => PsKernelBootstrapStep.next (PsKernelBootstrapState.textPrelude entries next)
+      | PsKernelStringPreludeStep.ready env => PsKernelBootstrapStep.next
+          (PsKernelBootstrapState.declarations (PsKernelJointState.pending env entries))
+      | PsKernelStringPreludeStep.rejected error => PsKernelBootstrapStep.final (PsKernelAdmissionResult.rejected error)
   | PsKernelBootstrapState.declarations current =>
       match psKernelJointStep current with
       | PsKernelJointStep.next next => PsKernelBootstrapStep.next (PsKernelBootstrapState.declarations next)

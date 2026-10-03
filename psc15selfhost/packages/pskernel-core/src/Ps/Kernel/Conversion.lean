@@ -82,6 +82,18 @@ def psKernelConversionExpr
           (PsKernelList.cons (PsKernelConversionTask.expr type otherType)
             (PsKernelList.cons (PsKernelConversionTask.expr body otherBody) tasks))
       | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+  | PsKernelExpr.lit literal =>
+      match literal with
+      | PsKernelLiteral.text text =>
+          match right with
+          | PsKernelExpr.lit otherLiteral =>
+              match otherLiteral with
+              | PsKernelLiteral.text other => psKernelConversionTasks
+                  (PsKernelList.cons (PsKernelConversionTask.names
+                    (PsKernelList.cons (PsKernelOrderTask.text text other) PsKernelList.nil)) tasks)
+              | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+          | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+      | _ => psKernelConversionReject PsKernelCheckError.unsupported
   | _ => psKernelConversionReject PsKernelCheckError.unsupported
 
 def psKernelConversionStep (state : PsKernelConversionState) : PsKernelConversionStep :=

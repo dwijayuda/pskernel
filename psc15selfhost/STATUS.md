@@ -1,6 +1,6 @@
 # PSC2 minimal self-host status
 
-Status (2026-10-03): generated-owned checker.12 checks closed payload sums, including the exact PsLexError dependency slice. Full decoding now rejects string expressions at index 20; PsLexCursor independently rejects missing List/Char dependencies at index 3. No complete owned-checked compiler/kernel pair, joint self-hosting or release yet. See `docs/continuity/OWNED_CLOSED_SUMS_2026-10-03.md`.
+Status (2026-10-03): generated-owned checker.13 validates UTF-8 String literals and admits the exact PsToken dependency slice. Full decoding rejects the parameterized PsParseResult family at index 80; the PsLexCursor prefix still rejects missing List/Char dependencies at index 3. No complete owned-checked compiler/kernel pair, joint self-hosting or release yet. See `docs/continuity/OWNED_TEXT_LITERALS_2026-10-03.md`.
 
 ## Current bootstrap shape
 

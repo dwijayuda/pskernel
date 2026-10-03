@@ -7,7 +7,7 @@ import { defaultCheckedKernel } from './checked-kernel-provider.mjs';
 import '../packages/pskernel-core/scripts/verify-evidence.mjs';
 
 const manifest = JSON.parse(await readFile(new URL('../packages/pskernel-core/package.json', import.meta.url), 'utf8'));
-assert.equal(manifest.version, '0.1.0-checker.12');
+assert.equal(manifest.version, '0.1.0-checker.13');
 assert.equal(manifest.private, true);
 assert.equal(manifest.proofscript.authoritative, false);
 assert.equal(manifest.proofscript.bootstrap, true);
@@ -106,4 +106,12 @@ assert(sum.includes('PsKernelSumStep.final result'));
 assert(!/psKernel(?:Type|Lookup|Order|Conversion|Reduce)Run/u.test(sum));
 assert(reduction.includes('PsKernelReduceTask.sumFields'));
 assert(reduction.includes('PsKernelDefinition.sumRecursor'));
+
+const textSource=await readFile(new URL('../packages/pskernel-core/src/Ps/Kernel/BuiltinText.lean',import.meta.url),'utf8');
+for(const transition of ['psKernelLookupStep current','psKernelNumericStep current','psKernelUtf8Step current'])assert(textSource.includes(transition));
+assert(!/psKernel(?:Lookup|Numeric|Utf8)Run/u.test(textSource));
+assert(bootstrap.includes('psKernelStringPreludeStart env'));assert(bootstrap.includes('psKernelStringPreludeStep current'));
+assert(typing.includes('psKernelTextCheckStep current'));assert(reduction.includes('psKernelTextCheckStep current'));
+assert(worker.includes('E.lit(k.PsKernelLiteral.text(text(value.v)))'));assert(!worker.includes('PsKernelDefinition.stringType'));
+
 console.log('PSC2_OWNED_KERNEL_RECEIPT: PASS (checker identities, retired legacy routing, owned bootstrap closure and default; release gates remain closed)');

@@ -44,8 +44,8 @@ for(const c of cases){const ours=(c.bootstrap?bootstrap:joint)(c.entries,1000000
  if(native.accepted!==c.expected||(ours.status==='admitted')!==native.accepted)throw Error('LITERAL_MISMATCH:'+JSON.stringify(record));
  records.push(record);if(records.length%20===0)console.log('LITERAL_DIFFERENTIAL_PROGRESS: '+records.length+'/'+cases.length);}
 const recordsPath='dist/evidence/literal-differential-records.json',recordsText=JSON.stringify(records,null,2)+'\n';fs.mkdirSync(path.join(root,'dist/evidence'),{recursive:true});fs.writeFileSync(path.join(root,recordsPath),recordsText);
-const report={schemaVersion:1,scope:'Natural literals after owned Nat initialization; exact typing, constructor conversion and dependent recursor iota; not arithmetic primitive completeness',
+const report={schemaVersion:1,scope:'Natural literals after owned Nat initialization; exact typing, constructor conversion and dependent recursor iota; not arithmetic primitive completeness; String comparisons belong to TEXT_DIFFERENTIAL',
  sourceManifestSha256:sha256(fs.readFileSync(path.join(root,'manifests/SOURCE.json'))),harnessSha256:sha256(fs.readFileSync(fileURLToPath(import.meta.url))),provider:identity,providerSha256:pin.leanProviderSha256,
  cases:records.length,matched:records.length,accepted:records.filter(x=>x.native.accepted).length,rejected:records.filter(x=>!x.native.accepted).length,
- deliberatelyUnsupported:['Nat arithmetic primitives','String and other literal kinds','unbounded evaluation'],recordsPath,recordsSha256:sha256(recordsText)};
+ deliberatelyUnsupported:['Nat arithmetic primitives','unbounded evaluation'],recordsPath,recordsSha256:sha256(recordsText)};
 fs.writeFileSync(path.join(root,'manifests/LITERAL_DIFFERENTIAL.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));

@@ -13,6 +13,7 @@ inductive PsKernelSumRule where
   | rule (name : PsKernelName) (reversedFields : PsKernelList PsKernelExpr) (fieldCount : PsKernelNatural)
 
 inductive PsKernelDefinition where
+  | stringType (name : PsKernelName)
   | definition (name : PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
   | polymorphic (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
   | constant (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
@@ -36,6 +37,7 @@ def psKernelDefinitionName (entry : PsKernelDefinition) : PsKernelName :=
   | PsKernelDefinition.sumRecursor name unusedParameters unusedType unusedRules => name
   | PsKernelDefinition.recordFamily name unusedCtor unusedFields => name
   | PsKernelDefinition.recordRecursor name unusedParameters unusedType unusedCtor unusedFields => name
+  | PsKernelDefinition.stringType name => name
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => name
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => name
 
@@ -49,6 +51,7 @@ def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList PsK
   | PsKernelDefinition.sumRecursor unusedName parameters unusedType unusedRules => parameters
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelList.nil
   | PsKernelDefinition.recordRecursor unusedName parameters unusedType unusedCtor unusedFields => parameters
+  | PsKernelDefinition.stringType unusedName => PsKernelList.nil
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelList.nil
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => parameters
 
@@ -62,6 +65,7 @@ def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr :=
   | PsKernelDefinition.sumRecursor unusedName unusedParameters type unusedRules => type
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
   | PsKernelDefinition.recordRecursor unusedName unusedParameters type unusedCtor unusedFields => type
+  | PsKernelDefinition.stringType unusedName => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
   | PsKernelDefinition.natRecursor name parameters type unusedZero unusedSucc => type
 
@@ -76,6 +80,7 @@ def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody
   | PsKernelDefinition.sumRecursor unusedName unusedParameters unusedType unusedRules => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.recordRecursor unusedName unusedParameters unusedType unusedCtor unusedFields => PsKernelDefinitionBody.opaque
+  | PsKernelDefinition.stringType unusedName => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.natFamily unusedName unusedZero unusedSucc => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.natRecursor unusedName unusedParameters unusedType unusedZero unusedSucc => PsKernelDefinitionBody.opaque
 
@@ -91,6 +96,7 @@ def psKernelTypingParameters (context : PsKernelTypingContext) : PsKernelList Ps
   | PsKernelTypingContext.context unusedDeclarations parameters => parameters
 
 inductive PsKernelCheckError where
+  | invalidText
   | invalidState
   | invalidScope
   | unknownConstant

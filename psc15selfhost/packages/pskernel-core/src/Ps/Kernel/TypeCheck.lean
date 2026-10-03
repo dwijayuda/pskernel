@@ -1,4 +1,5 @@
 import Ps.Kernel.BuiltinNat
+import Ps.Kernel.BuiltinText
 import Ps.Kernel.ExprInstantiate
 import Ps.Kernel.Data
 import Ps.Kernel.Expr
@@ -13,6 +14,7 @@ that binder's OUTER context; lookup lifts by index+1 into the current context.
 No self-inference shortcut and no acceptance Boolean supplied by the caller.
 Raw machine states are implementation data, not a checked-module capability. -/
 inductive PsKernelTypeTask where
+  | text (state : PsKernelTextCheckState)
   | natural (state : PsKernelBuiltinNatState)
   | infer (context : PsKernelList PsKernelExpr) (value : PsKernelExpr)
   | levels (pending : PsKernelList PsKernelLevel)
@@ -92,7 +94,8 @@ def psKernelTypeInfer
       match literal with
       | PsKernelLiteral.natural unused => psKernelTypeNext env
           (PsKernelList.cons (PsKernelTypeTask.natural (psKernelBuiltinNatStart (psKernelTypingDeclarations env))) tasks) values
-      | _ => psKernelTypeReject PsKernelCheckError.unsupported
+      | PsKernelLiteral.text text => psKernelTypeNext env
+          (PsKernelList.cons (PsKernelTypeTask.text (psKernelTextCheckStart (psKernelTypingDeclarations env) text)) tasks) values
   | PsKernelExpr.lam name type body binder =>
       psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context type)
         (PsKernelList.cons PsKernelTypeTask.reduceTop
@@ -246,6 +249,13 @@ def psKernelTypeStep (state : PsKernelTypeState) : PsKernelTypeStep :=
                   | PsKernelNatural.zero => psKernelTypePush env rest values field
                   | _ => psKernelTypeNext env
                       (PsKernelList.cons (PsKernelTypeTask.projectField (psKernelNaturalPred index) tail) rest) values
+          | PsKernelTypeTask.text current =>
+              match psKernelTextCheckStep current with
+              | PsKernelTextCheckStep.next next => psKernelTypeNext env
+                  (PsKernelList.cons (PsKernelTypeTask.text next) rest) values
+              | PsKernelTextCheckStep.ready => psKernelTypePush env rest values
+                  (PsKernelExpr.constE psKernelBuiltinStringName PsKernelList.nil)
+              | PsKernelTextCheckStep.rejected error => psKernelTypeReject error
           | PsKernelTypeTask.natural current =>
               match psKernelBuiltinNatStep current with
               | PsKernelBuiltinNatStep.next next => psKernelTypeNext env

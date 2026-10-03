@@ -1,4 +1,5 @@
 import Ps.Kernel.BuiltinNat
+import Ps.Kernel.BuiltinText
 import Ps.Kernel.LevelCheck
 import Ps.Kernel.ExprInstantiate
 import Ps.Kernel.Data
@@ -60,6 +61,7 @@ inductive PsKernelReduceTask where
   | recordSelect (index : PsKernelNatural) (args : PsKernelList PsKernelExpr)
   | recordApply (minor : PsKernelExpr) (args : PsKernelList PsKernelExpr)
   | proj (family : PsKernelName) (index : PsKernelNatural)
+  | text (value : PsKernelText) (state : PsKernelTextCheckState)
   | natural (value : PsKernelNatural) (state : PsKernelBuiltinNatState)
   | whnf (value : PsKernelExpr)
   | apply (arg : PsKernelExpr)
@@ -133,7 +135,8 @@ def psKernelReduceWhnf
       match literal with
       | PsKernelLiteral.natural number => psKernelReduceNext env
           (PsKernelList.cons (PsKernelReduceTask.natural number (psKernelBuiltinNatStart env)) tasks) values
-      | _ => psKernelReduceReject PsKernelCheckError.unsupported
+      | PsKernelLiteral.text text => psKernelReduceNext env
+          (PsKernelList.cons (PsKernelReduceTask.text text (psKernelTextCheckStart env text)) tasks) values
   | PsKernelExpr.proj family index major => psKernelReduceNext env
       (PsKernelList.cons (PsKernelReduceTask.projectLookup family index major (PsKernelLookupState.search family env)) tasks) values
   | _ => psKernelReducePush env tasks values value
@@ -562,6 +565,13 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                       (PsKernelList.cons (PsKernelReduceTask.unitLevels fn major minor left right) rest) values
                   | PsKernelLevelCheckResult.different => psKernelReducePush env rest values (PsKernelExpr.app fn major)
                   | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.text text current =>
+              match psKernelTextCheckStep current with
+              | PsKernelTextCheckStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.text text next) rest) values
+              | PsKernelTextCheckStep.ready => psKernelReducePush env rest values
+                  (PsKernelExpr.lit (PsKernelLiteral.text text))
+              | PsKernelTextCheckStep.rejected error => psKernelReduceReject error
           | PsKernelReduceTask.natural number current =>
               match psKernelBuiltinNatStep current with
               | PsKernelBuiltinNatStep.next next => psKernelReduceNext env

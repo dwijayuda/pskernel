@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "Closed monomorphic Type-valued payload sums, constructor checks, derived dependent recursor typing and computed iota witnesses; not parameterized/recursive completeness",
-  "sourceManifestSha256": "8c21e6dcb8dc8a967abba7d81b3bef97b4f9cab57d548cf331c55fd8ea4f00d0",
+  "sourceManifestSha256": "92a62e0184f1cc404d27631f8a62f2551973602606f758a96fd8158b292edf82",
   "harnessSha256": "eb9d35e953f0b34302911a08377bdb7e1043b81b62b874855ff62b44f33e1e63",
   "fixtureSha256": "c5360b182dd78179c2c98de7cbb531fc8044fb91b41cc5eb178b30291037712f",
   "provider": {
@@ -26,5 +26,5 @@
     "empty family"
   ],
   "recordsPath": "dist/evidence/sum-differential-records.json",
-  "recordsSha256": "df67107dd3f14646e8bb708f84b0996ebcb1f82280f917b2d8503124cdb18158"
+  "recordsSha256": "9b2dcfcede53e9ea6b836affba835fbf501cb8f6b6700d879a4028c0931d37b9"
 }

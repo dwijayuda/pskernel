@@ -53,7 +53,10 @@ async function bootstrap(kernel) {
   // broader bootstrap suite or the longer checked seed session.
   run(npm, ['run', 'bootstrap:check']);
   run(npm, ['run', 'bootstrap:lean']);
-  run('lake', ['build', 'psc2_lean_checked_seed', 'psc2_lean_kernel_provider'], path.join(root, 'lean-checked'));
+  const hostTargets = kernel === 'lean434'
+    ? ['build', 'psc2_lean_checked_seed', 'psc2_lean_kernel_provider']
+    : ['build', 'psc2_lean_checked_seed'];
+  run('lake', hostTargets, path.join(root, 'lean-checked'));
   const config = JSON.parse(await readFile(path.join(root, 'psconfig.json'), 'utf8'));
   await buildChecked({
     entryPath: path.join(root, config.entry),

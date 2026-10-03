@@ -12,6 +12,7 @@ const entry = "packages/bootstrap/src/Ps/Bootstrap/SelfHost.ps";
 const dependency = "packages/foundation/src/Ps/Foundation/Probe.ps";
 const extra = "packages/foundation/src/Ps/Foundation/Unused.ps";
 let passed = 0;
+let skipped = 0;
 const failures = [];
 
 async function scenario(label, configure = async () => {}, expectedError) {
@@ -85,8 +86,13 @@ export function psCompilerTypeScriptFromPrepared(_prepared) {
     passed++;
     console.log(`PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS ${label}`);
   } catch (error) {
-    failures.push(`${label}: ${error.message}`);
-    console.error(`PSC2_SELFHOST_SOURCE_ISOLATION_CASE: FAIL ${label}: ${error.message}`);
+    if (error?.code === "PSC2_POSIX_ONLY_SKIP") {
+      skipped++;
+      console.log(`PSC2_SELFHOST_SOURCE_ISOLATION_CASE: SKIP ${label}: ${error.message}`);
+    } else {
+      failures.push(`${label}: ${error.message}`);
+      console.error(`PSC2_SELFHOST_SOURCE_ISOLATION_CASE: FAIL ${label}: ${error.message}`);
+    }
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
@@ -133,7 +139,16 @@ await scenario("symlink cannot escape generated root", async ({ directory, works
   const outside = path.join(directory, "outside.ps");
   await put(outside, await readFile(path.join(workspace, dependency), "utf8"));
   await rm(path.join(workspace, dependency));
-  await symlink(outside, path.join(workspace, dependency));
+  try {
+    await symlink(outside, path.join(workspace, dependency));
+  } catch (error) {
+    if (process.platform === "win32" && error?.code === "EPERM") {
+      const skip = new Error("Windows host cannot create this symlink; covered by the POSIX run");
+      skip.code = "PSC2_POSIX_ONLY_SKIP";
+      throw skip;
+    }
+    throw error;
+  }
 }, /SOURCE_OUTSIDE_WORKSPACE/u);
 await scenario("cyclic source imports", async ({ workspace, put, saveManifest }) => {
   await put(path.join(workspace, dependency), "import Ps.Bootstrap.SelfHost;\ndef GENERATED_DEP : Nat := 42\n");
@@ -145,4 +160,4 @@ await scenario("selfhost generation manifest accepted", async ({ workspace, put,
 });
 
 if (failures.length) throw new Error(`PSC2_SELFHOST_SOURCE_ISOLATION: ${passed} passed, ${failures.length} failed\n${failures.join("\n")}`);
-console.log(`PSC2_SELFHOST_SOURCE_ISOLATION: PASS (${passed} production-CLI cases; compiler double and pinned TypeScript)`);
+console.log(`PSC2_SELFHOST_SOURCE_ISOLATION: PASS (${passed} passed; ${skipped} platform skips; compiler double and pinned TypeScript)`);

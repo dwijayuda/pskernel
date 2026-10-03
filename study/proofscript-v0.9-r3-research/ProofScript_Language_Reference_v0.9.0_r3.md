@@ -588,7 +588,11 @@ It does **not** need every tactic name built into the compiler.
 
 The Standard prover package may implement common tactics as ordinary untrusted programs over the Meta interface.
 
-Large automation and AI proof search remain plugins/libraries unless a future Standard profile explicitly promotes them.
+A tactic/notation/deriving/official syntax extension is available in `ps-standard` only when its exact registration is selected into the materialized `psc2-standard-v1` registration closure. Installing an ordinary dependency MUST NOT mutate Standard parsing.
+
+Third-party syntax/meta plugins require `ps-lean-extensible` or a separately named derived profile; they do not silently enlarge `ps-standard`.
+
+Large automation and AI proof search remain plugins/libraries unless a future Standard distribution explicitly selects them.
 
 ### 8.7 Post-PSC2 platform sequence
 

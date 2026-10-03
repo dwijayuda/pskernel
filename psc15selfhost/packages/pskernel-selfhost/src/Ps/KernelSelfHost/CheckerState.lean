@@ -175,6 +175,36 @@ def psKernelCheckerStateEmpty :
     failure := psKernelExprPairSetEmpty
   }
 
+def psKernelCheckerStateWithInferOnly
+    (state : PsKernelCheckerState)
+    (cache : PsKernelExprMap PsKernelExpr) :
+    PsKernelCheckerState :=
+  {
+    nextFresh := state.nextFresh
+    inferOnly := cache
+    checkedInfer := state.checkedInfer
+    whnfCore := state.whnfCore
+    whnf := state.whnf
+    unfold := state.unfold
+    success := state.success
+    failure := state.failure
+  }
+
+def psKernelCheckerStateWithCheckedInfer
+    (state : PsKernelCheckerState)
+    (cache : PsKernelExprMap PsKernelExpr) :
+    PsKernelCheckerState :=
+  {
+    nextFresh := state.nextFresh
+    inferOnly := state.inferOnly
+    checkedInfer := cache
+    whnfCore := state.whnfCore
+    whnf := state.whnf
+    unfold := state.unfold
+    success := state.success
+    failure := state.failure
+  }
+
 def psKernelCheckerStateWithWhnfCore
     (state : PsKernelCheckerState)
     (cache : PsKernelExprMap PsKernelExpr) :

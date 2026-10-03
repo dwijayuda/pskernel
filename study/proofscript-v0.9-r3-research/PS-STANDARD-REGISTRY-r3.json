@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "proofscript-standard-registry-1",
+  "schemaVersion": "proofscript-standard-registry-2",
   "registryId": "ps-standard-0.9-r3",
   "grammarRevision": "ps-0.9-r3",
   "semanticPin": {
@@ -217,6 +217,33 @@
       "grind"
     ],
     "dependencyMayAddTacticSyntax": false,
-    "dependencyMayReplaceTacticElaborator": false
-  }
+    "dependencyMayReplaceTacticElaborator": false,
+    "owner": "psc2-standard-language-v1 Standard prover surface; tactic names are not PSC2 compiler-core logical primitives",
+    "additionalDependencyTacticsBecomeStandard": false
+  },
+  "languageCapabilityProfile": "psc2-language-v1",
+  "standardLanguageProfile": "psc2-standard-language-v1",
+  "leanCompatibilityProfile": "lean-subset-psc2-v1",
+  "patternProfile": "psc2-pattern-v1",
+  "basicDoProfile": {
+    "required": true,
+    "semantics": "selected native Bind/Pure sequencing",
+    "requiredForms": [
+      "term-statement",
+      "simple-let",
+      "identifier-or-wildcard-monadic-bind",
+      "return-or-pure-completion"
+    ],
+    "excludedCoreForms": [
+      "refutable-pattern-bind",
+      "let-mut",
+      "assignment",
+      "for",
+      "while",
+      "break",
+      "continue"
+    ]
+  },
+  "unsafePolicy": "not-part-of-ps-standard-0.9-r3",
+  "profileAuthority": "ProofScript_Language_Reference_v0.9.0_r3.md"
 }

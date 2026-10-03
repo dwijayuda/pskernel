@@ -1,6 +1,6 @@
 # PSC2 minimal self-host status
 
-Status (2026-10-03): the default generated-owned kernel is checker.11 and checks nullary enumerations with dependent recursor typing and reduction. The exact PsTokenKind declaration passes in isolation. Full decoding rejects PsLexError at index 17; PsLexCursor independently rejects missing List/Char dependencies at index 3. Full owned-checked compiler/kernel pair, joint self-hosting and release remain unachieved. See `docs/continuity/OWNED_ENUMERATIONS_2026-10-03.md` for current evidence.
+Status (2026-10-03): generated-owned checker.12 checks closed payload sums, including the exact PsLexError dependency slice. Full decoding now rejects string expressions at index 20; PsLexCursor independently rejects missing List/Char dependencies at index 3. No complete owned-checked compiler/kernel pair, joint self-hosting or release yet. See `docs/continuity/OWNED_CLOSED_SUMS_2026-10-03.md`.
 
 ## Current bootstrap shape
 

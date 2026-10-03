@@ -1,6 +1,7 @@
 import Ps.Kernel.NatInductive
 import Ps.Kernel.RecordInductive
 import Ps.Kernel.EnumInductive
+import Ps.Kernel.SumInductive
 
 /- The only mixed admission entry point starts with an empty environment.
 Each declaration uses the same outer transition budget. Partial state is private
@@ -10,6 +11,7 @@ inductive PsKernelJointEntry where
   | unitInductive (entry : PsKernelUnitDeclaration)
   | recordInductive (entry : PsKernelUnitDeclaration)
   | enumInductive (entry : PsKernelEnumDeclaration)
+  | sumInductive (entry : PsKernelEnumDeclaration)
   | natInductive (entry : PsKernelNatDeclaration)
 
 inductive PsKernelJointState where
@@ -18,6 +20,7 @@ inductive PsKernelJointState where
   | unitInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelUnitState)
   | recordInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelRecordState)
   | enumInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelEnumState)
+  | sumInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelSumState)
   | natInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelNatAdmissionState)
 
 inductive PsKernelJointStep where
@@ -44,6 +47,8 @@ def psKernelJointStep (state : PsKernelJointState) : PsKernelJointStep :=
               (PsKernelJointState.recordInductive rest (psKernelRecordStart env declaration))
           | PsKernelJointEntry.enumInductive declaration => PsKernelJointStep.next
               (PsKernelJointState.enumInductive rest (psKernelEnumStart env declaration))
+          | PsKernelJointEntry.sumInductive declaration => PsKernelJointStep.next
+              (PsKernelJointState.sumInductive rest (psKernelSumStart env declaration))
           | PsKernelJointEntry.natInductive declaration => PsKernelJointStep.next
               (PsKernelJointState.natInductive rest (psKernelNatAdmissionStart env declaration))
   | PsKernelJointState.definition rest current =>
@@ -62,6 +67,10 @@ def psKernelJointStep (state : PsKernelJointState) : PsKernelJointStep :=
       match psKernelEnumStep current with
       | PsKernelEnumStep.next next => PsKernelJointStep.next (PsKernelJointState.enumInductive rest next)
       | PsKernelEnumStep.final result => psKernelJointContinue rest result
+  | PsKernelJointState.sumInductive rest current =>
+      match psKernelSumStep current with
+      | PsKernelSumStep.next next => PsKernelJointStep.next (PsKernelJointState.sumInductive rest next)
+      | PsKernelSumStep.final result => psKernelJointContinue rest result
   | PsKernelJointState.natInductive rest current =>
       match psKernelNatAdmissionStep current with
       | PsKernelNatAdmissionStep.next next => PsKernelJointStep.next (PsKernelJointState.natInductive rest next)

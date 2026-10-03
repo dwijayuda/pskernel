@@ -43,7 +43,7 @@
     },
     {
       "path": "src/Ps/Kernel/Environment.lean",
-      "sha256": "f3c4879b31e8b23caed0310892f61892c58867c5cbe5cfcaf617550482ff91e2"
+      "sha256": "68d8c96dfb6f73bffb19e604ce491e92689185ba293e207a61adbd91ef9a6d14"
     },
     {
       "path": "src/Ps/Kernel/BuiltinNat.lean",
@@ -51,7 +51,7 @@
     },
     {
       "path": "src/Ps/Kernel/Reduction.lean",
-      "sha256": "31b1c00ee1ef0cf09cdc7bc8520d0c21738362361592f4d8df1ffdf4f151fbfb"
+      "sha256": "64cb5138b94a0454147547136cd0fa84307afc596c42cc772a6348716228a458"
     },
     {
       "path": "src/Ps/Kernel/Conversion.lean",
@@ -82,8 +82,12 @@
       "sha256": "a9489c8e62733604bb3b40b3d8930861da094c4eae12f777e8b010b9d7828c9c"
     },
     {
+      "path": "src/Ps/Kernel/SumInductive.lean",
+      "sha256": "0847c46e326adafad7b3aae8ce199285df83a707d877df3422af76b760e2d3e4"
+    },
+    {
       "path": "src/Ps/Kernel/JointAdmission.lean",
-      "sha256": "afca7ba6848eea661601dc083de802bc0bdb093c5906db295150df7b770507c4"
+      "sha256": "f9ab347c64d152876acbb908d72c31cf2aafbea565ee4ea7071c077fc20aacdf"
     },
     {
       "path": "src/Ps/Kernel/Bootstrap.lean",

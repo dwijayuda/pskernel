@@ -1418,6 +1418,10 @@ inductive PsKernelDefinitionBody where
   | transparent (value : PsKernelExpr)
   | opaque
 
+/- Sum rules are derived by checked admission, never accepted as wire metadata. -/
+inductive PsKernelSumRule where
+  | rule (name : PsKernelName) (reversedFields : PsKernelList PsKernelExpr) (fieldCount : PsKernelNatural)
+
 inductive PsKernelDefinition where
   | definition (name : PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
   | polymorphic (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
@@ -1425,6 +1429,7 @@ inductive PsKernelDefinition where
   | unitRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (ctorName : PsKernelName)
 
   | enumRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (constructors : PsKernelList PsKernelName)
+  | sumRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (rules : PsKernelList PsKernelSumRule)
   | recordFamily (name ctorName : PsKernelName) (fields : PsKernelList PsKernelExpr)
   | recordRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
       (ctorName : PsKernelName) (fields : PsKernelList PsKernelExpr)
@@ -1438,6 +1443,7 @@ def psKernelDefinitionName (entry : PsKernelDefinition) : PsKernelName :=
   | PsKernelDefinition.constant name parameters type => name
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => name
   | PsKernelDefinition.enumRecursor name unusedParameters unusedType unusedConstructors => name
+  | PsKernelDefinition.sumRecursor name unusedParameters unusedType unusedRules => name
   | PsKernelDefinition.recordFamily name unusedCtor unusedFields => name
   | PsKernelDefinition.recordRecursor name unusedParameters unusedType unusedCtor unusedFields => name
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => name
@@ -1450,6 +1456,7 @@ def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList PsK
   | PsKernelDefinition.constant name parameters type => parameters
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => parameters
   | PsKernelDefinition.enumRecursor unusedName parameters unusedType unusedConstructors => parameters
+  | PsKernelDefinition.sumRecursor unusedName parameters unusedType unusedRules => parameters
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelList.nil
   | PsKernelDefinition.recordRecursor unusedName parameters unusedType unusedCtor unusedFields => parameters
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelList.nil
@@ -1462,6 +1469,7 @@ def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr :=
   | PsKernelDefinition.constant name parameters type => type
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => type
   | PsKernelDefinition.enumRecursor unusedName unusedParameters type unusedConstructors => type
+  | PsKernelDefinition.sumRecursor unusedName unusedParameters type unusedRules => type
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
   | PsKernelDefinition.recordRecursor unusedName unusedParameters type unusedCtor unusedFields => type
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
@@ -1475,6 +1483,7 @@ def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody
   | PsKernelDefinition.unitRecursor unusedName unusedParameters unusedType unusedConstructor => PsKernelDefinitionBody.opaque
 
   | PsKernelDefinition.enumRecursor unusedName unusedParameters unusedType unusedConstructors => PsKernelDefinitionBody.opaque
+  | PsKernelDefinition.sumRecursor unusedName unusedParameters unusedType unusedRules => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.recordRecursor unusedName unusedParameters unusedType unusedCtor unusedFields => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.natFamily unusedName unusedZero unusedSucc => PsKernelDefinitionBody.opaque
@@ -1591,6 +1600,9 @@ Record elimination still traverses and validates the full constructor spine. -/
 inductive PsKernelEnumBranch where
   | branch (name : PsKernelName) (minor : PsKernelExpr)
 
+inductive PsKernelSumBranch where
+  | branch (name : PsKernelName) (fields : PsKernelNatural) (minor : PsKernelExpr)
+
 inductive PsKernelRecordAction where
   | project (family : PsKernelName) (index : PsKernelNatural)
   | eliminate (fn : PsKernelExpr) (minor : PsKernelExpr)
@@ -1601,6 +1613,17 @@ def psKernelRecordNeutral (action : PsKernelRecordAction) (major : PsKernelExpr)
   | PsKernelRecordAction.eliminate fn unusedMinor => PsKernelExpr.app fn major
 
 inductive PsKernelReduceTask where
+  | sumMinors (original : PsKernelExpr) (rules : PsKernelList PsKernelSumRule)
+      (args : PsKernelList PsKernelExpr) (branches : PsKernelList PsKernelSumBranch)
+  | sumMajor (fn : PsKernelExpr) (branches : PsKernelList PsKernelSumBranch)
+  | sumSpine (fn major cursor : PsKernelExpr) (args : PsKernelList PsKernelExpr)
+      (branches : PsKernelList PsKernelSumBranch)
+  | sumFind (fn major : PsKernelExpr) (name : PsKernelName) (args : PsKernelList PsKernelExpr)
+      (branches : PsKernelList PsKernelSumBranch)
+  | sumName (fn major : PsKernelExpr) (name : PsKernelName) (args : PsKernelList PsKernelExpr)
+      (fields : PsKernelNatural) (minor : PsKernelExpr)
+      (remaining : PsKernelList PsKernelSumBranch) (work : PsKernelList PsKernelOrderTask)
+  | sumFields (minor : PsKernelExpr) (args : PsKernelList PsKernelExpr) (remaining : PsKernelNatural)
   | enumSpine (original cursor : PsKernelExpr) (args : PsKernelList PsKernelExpr)
   | enumLookup (original : PsKernelExpr) (args : PsKernelList PsKernelExpr)
       (levels : PsKernelList PsKernelLevel) (state : PsKernelLookupState)
@@ -1733,6 +1756,8 @@ def psKernelReduceValueTask
   | PsKernelList.nil => psKernelReduceReject PsKernelCheckError.invalidState
   | PsKernelList.cons top rest =>
       match task with
+      | PsKernelReduceTask.sumMajor fn branches => psKernelReduceNext env
+          (PsKernelList.cons (PsKernelReduceTask.sumSpine fn top top PsKernelList.nil branches) tasks) rest
       | PsKernelReduceTask.enumMajor fn branches =>
           match top with
           | PsKernelExpr.constE name levels =>
@@ -1839,6 +1864,17 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                   (PsKernelList.cons (PsKernelReduceTask.enumLookup original args levels next) rest) values
               | PsKernelLookupStep.found entry =>
                   match entry with
+                  | PsKernelDefinition.sumRecursor unusedName unusedParameters unusedType rules =>
+                      match levels with
+                      | PsKernelList.cons unusedLevel tail =>
+                          match tail with
+                          | PsKernelList.nil =>
+                              match args with
+                              | PsKernelList.cons unusedMotive tailArgs => psKernelReduceNext env
+                                  (PsKernelList.cons (PsKernelReduceTask.sumMinors original rules tailArgs PsKernelList.nil) rest) values
+                              | _ => psKernelReducePush env rest values original
+                          | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
+                      | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
                   | PsKernelDefinition.enumRecursor unusedName unusedParameters unusedType constructors =>
                       match levels with
                       | PsKernelList.cons unusedLevel tail =>
@@ -1853,6 +1889,71 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                   | _ => psKernelReducePush env rest values original
               | PsKernelLookupStep.missing => psKernelReduceReject PsKernelCheckError.unknownConstant
               | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.sumMinors original rules args branches =>
+              match rules with
+              | PsKernelList.cons rule tail =>
+                  match rule with
+                  | PsKernelSumRule.rule ctorName unusedFields count =>
+                      match args with
+                      | PsKernelList.cons minor tailArgs => psKernelReduceNext env
+                          (PsKernelList.cons (PsKernelReduceTask.sumMinors original tail tailArgs
+                            (PsKernelList.cons (PsKernelSumBranch.branch ctorName count minor) branches)) rest) values
+                      | _ => psKernelReducePush env rest values original
+              | PsKernelList.nil =>
+                  match args with
+                  | PsKernelList.cons major tail =>
+                      match tail with
+                      | PsKernelList.nil =>
+                          match original with
+                          | PsKernelExpr.app fn unusedMajor => psKernelReduceNext env
+                              (PsKernelList.cons (PsKernelReduceTask.whnf major)
+                                (PsKernelList.cons (PsKernelReduceTask.sumMajor fn branches) rest)) values
+                          | _ => psKernelReduceReject PsKernelCheckError.invalidState
+                      | _ => psKernelReducePush env rest values original
+                  | _ => psKernelReducePush env rest values original
+          | PsKernelReduceTask.sumSpine fn major cursor args branches =>
+              match cursor with
+              | PsKernelExpr.app head arg => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.sumSpine fn major head
+                    (PsKernelList.cons arg args) branches) rest) values
+              | PsKernelExpr.constE name levels =>
+                  match levels with
+                  | PsKernelList.nil => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.sumFind fn major name args branches) rest) values
+                  | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
+              | _ => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+          | PsKernelReduceTask.sumFind fn major name args branches =>
+              match branches with
+              | PsKernelList.nil => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+              | PsKernelList.cons branch tail =>
+                  match branch with
+                  | PsKernelSumBranch.branch ctorName count minor => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.sumName fn major name args count minor tail
+                        (PsKernelList.cons (PsKernelOrderTask.name name ctorName) PsKernelList.nil)) rest) values
+          | PsKernelReduceTask.sumName fn major name args count minor remaining work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.sumName fn major name args count minor remaining next) rest) values
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.sumFields minor args count) rest) values
+                  | _ => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.sumFind fn major name args remaining) rest) values
+              | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.sumFields minor args remaining =>
+              match remaining with
+              | PsKernelNatural.zero =>
+                  match args with
+                  | PsKernelList.nil => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.whnf minor) rest) values
+                  | _ => psKernelReduceReject PsKernelCheckError.typeMismatch
+              | _ =>
+                  match args with
+                  | PsKernelList.cons arg tail => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.sumFields (PsKernelExpr.app minor arg)
+                        tail (psKernelNaturalPred remaining)) rest) values
+                  | _ => psKernelReduceReject PsKernelCheckError.typeMismatch
           | PsKernelReduceTask.enumMinors original constructors args branches =>
               match constructors with
               | PsKernelList.cons ctorName tail =>
@@ -3495,6 +3596,299 @@ def psKernelEnumRun (fuel : PsKernelFuel) : PsKernelEnumState -> PsKernelAdmissi
 
 
 
+/- Closed monomorphic sums. Each field is checked in the original environment,
+before the family exists. Names, constructor types and the derived dependent
+eliminator are checked before any environment escapes. Dispatch to the existing
+Nat fragment is decided from source structure before checking, never by retrying
+a rejected judgment. Every traversal and judgment uses the outer budget. -/
+inductive PsKernelSumProgress where
+  | progress (pending : PsKernelList PsKernelEnumConstructor)
+      (current : PsKernelList PsKernelDefinition)
+      (reversed : PsKernelList PsKernelSumRule) (count : PsKernelNatural)
+
+inductive PsKernelSumMinorContext where
+  | context (current : PsKernelList PsKernelDefinition)
+      (pending forward : PsKernelList PsKernelSumRule)
+      (count : PsKernelNatural) (body : PsKernelExpr)
+
+inductive PsKernelSumTask where
+  | initial
+  | selectNat (zero successor : PsKernelEnumConstructor) (work : PsKernelList PsKernelOrderTask)
+  | natAdmission (state : PsKernelNatAdmissionState)
+  | familyName (state : PsKernelLookupState)
+  | constructors (progress : PsKernelSumProgress)
+  | constructorName (progress : PsKernelSumProgress) (name : PsKernelName)
+      (type : PsKernelExpr) (state : PsKernelLookupState)
+  | fields (progress : PsKernelSumProgress) (name : PsKernelName)
+      (type remaining : PsKernelExpr) (reversed : PsKernelList PsKernelExpr) (count : PsKernelNatural)
+  | fieldType (progress : PsKernelSumProgress) (name : PsKernelName)
+      (type remaining : PsKernelExpr) (reversed : PsKernelList PsKernelExpr)
+      (count : PsKernelNatural) (state : PsKernelTypeState)
+  | result (progress : PsKernelSumProgress) (name : PsKernelName) (type : PsKernelExpr)
+      (reversed : PsKernelList PsKernelExpr) (count : PsKernelNatural) (work : PsKernelList PsKernelOrderTask)
+  | constructorType (progress : PsKernelSumProgress) (name : PsKernelName) (type : PsKernelExpr)
+      (reversed : PsKernelList PsKernelExpr) (count : PsKernelNatural) (state : PsKernelTypeState)
+  | recursorName (current : PsKernelList PsKernelDefinition)
+      (reversed : PsKernelList PsKernelSumRule) (count : PsKernelNatural) (state : PsKernelLookupState)
+  | minors (current : PsKernelList PsKernelDefinition) (pending forward : PsKernelList PsKernelSumRule)
+      (count : PsKernelNatural) (body : PsKernelExpr)
+  | arguments (context : PsKernelSumMinorContext) (reversed : PsKernelList PsKernelExpr)
+      (index motiveIndex : PsKernelNatural) (value : PsKernelExpr)
+  | minor (context : PsKernelSumMinorContext) (remaining : PsKernelList PsKernelExpr) (value : PsKernelExpr)
+  | recursorType (current : PsKernelList PsKernelDefinition) (rules : PsKernelList PsKernelSumRule)
+      (type : PsKernelExpr) (state : PsKernelTypeState)
+
+inductive PsKernelSumState where
+  | state (environment : PsKernelList PsKernelDefinition) (declaration : PsKernelEnumDeclaration) (task : PsKernelSumTask)
+
+inductive PsKernelSumStep where
+  | next (state : PsKernelSumState)
+  | final (result : PsKernelAdmissionResult)
+
+def psKernelSumNext (env : PsKernelList PsKernelDefinition) (declaration : PsKernelEnumDeclaration)
+    (task : PsKernelSumTask) : PsKernelSumStep :=
+  PsKernelSumStep.next (PsKernelSumState.state env declaration task)
+
+def psKernelSumReject (error : PsKernelCheckError) : PsKernelSumStep :=
+  PsKernelSumStep.final (PsKernelAdmissionResult.rejected error)
+
+def psKernelSumCurrent (progress : PsKernelSumProgress) : PsKernelList PsKernelDefinition :=
+  match progress with
+  | PsKernelSumProgress.progress unusedPending current unusedReversed unusedCount => current
+
+def psKernelSumFamilyName (env : PsKernelList PsKernelDefinition)
+    (declaration : PsKernelEnumDeclaration) : PsKernelSumStep :=
+  match declaration with
+  | PsKernelEnumDeclaration.declaration name unusedParameters unusedLevel unusedConstructors =>
+      psKernelSumNext env declaration (PsKernelSumTask.familyName (PsKernelLookupState.search name env))
+
+def psKernelSumChoose (env : PsKernelList PsKernelDefinition)
+    (declaration : PsKernelEnumDeclaration) : PsKernelSumStep :=
+  match declaration with
+  | PsKernelEnumDeclaration.declaration name unusedParameters unusedLevel constructors =>
+      match constructors with
+      | PsKernelList.nil => psKernelSumReject PsKernelCheckError.unsupported
+      | PsKernelList.cons first tail =>
+          match tail with
+          | PsKernelList.nil => psKernelSumReject PsKernelCheckError.unsupported
+          | PsKernelList.cons second rest =>
+              match rest with
+              | PsKernelList.cons unused more => psKernelSumFamilyName env declaration
+              | PsKernelList.nil =>
+                  match second with
+                  | PsKernelEnumConstructor.ctor unusedName type =>
+                      match type with
+                      | PsKernelExpr.forallE unusedBinder field unusedBody unusedVisibility =>
+                          match field with
+                          | PsKernelExpr.constE target levels =>
+                              match levels with
+                              | PsKernelList.nil => psKernelSumNext env declaration
+                                  (PsKernelSumTask.selectNat first second
+                                    (PsKernelList.cons (PsKernelOrderTask.name target name) PsKernelList.nil))
+                              | _ => psKernelSumFamilyName env declaration
+                          | _ => psKernelSumFamilyName env declaration
+                      | _ => psKernelSumFamilyName env declaration
+
+def psKernelSumStep (state : PsKernelSumState) : PsKernelSumStep :=
+  match state with
+  | PsKernelSumState.state env declaration task =>
+      match declaration with
+      | PsKernelEnumDeclaration.declaration name parameters level constructors =>
+          match task with
+          | PsKernelSumTask.initial =>
+              match name with
+              | PsKernelName.anonymous => psKernelSumReject PsKernelCheckError.invalidName
+              | _ =>
+                  match parameters with
+                  | PsKernelList.cons unused rest => psKernelSumReject PsKernelCheckError.unsupported
+                  | PsKernelList.nil =>
+                      match level with
+                      | PsKernelLevel.succ base =>
+                          match base with
+                          | PsKernelLevel.zero => psKernelSumChoose env declaration
+                          | _ => psKernelSumReject PsKernelCheckError.unsupported
+                      | _ => psKernelSumReject PsKernelCheckError.unsupported
+          | PsKernelSumTask.selectNat zero successor work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelSumNext env declaration (PsKernelSumTask.selectNat zero successor next)
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same =>
+                      match zero with
+                      | PsKernelEnumConstructor.ctor zeroName zeroType =>
+                          match successor with
+                          | PsKernelEnumConstructor.ctor succName succType => psKernelSumNext env declaration
+                              (PsKernelSumTask.natAdmission (psKernelNatAdmissionStart env
+                                (PsKernelNatDeclaration.declaration name (PsKernelExpr.sortE level)
+                                  zeroName zeroType succName succType)))
+                  | _ => psKernelSumFamilyName env declaration
+              | _ => psKernelSumReject PsKernelCheckError.invalidState
+          | PsKernelSumTask.natAdmission current =>
+              match psKernelNatAdmissionStep current with
+              | PsKernelNatAdmissionStep.next next => psKernelSumNext env declaration (PsKernelSumTask.natAdmission next)
+              | PsKernelNatAdmissionStep.final result => PsKernelSumStep.final result
+          | PsKernelSumTask.familyName current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next => psKernelSumNext env declaration (PsKernelSumTask.familyName next)
+              | PsKernelLookupStep.found unused => psKernelSumReject PsKernelCheckError.duplicateName
+              | PsKernelLookupStep.missing => psKernelSumNext env declaration
+                  (PsKernelSumTask.constructors (PsKernelSumProgress.progress constructors
+                    (psKernelRecordFamilyEnvironment env name) PsKernelList.nil PsKernelNatural.zero))
+              | _ => psKernelSumReject PsKernelCheckError.invalidState
+          | PsKernelSumTask.constructors progress =>
+              match progress with
+              | PsKernelSumProgress.progress pending current reversed count =>
+                  match pending with
+                  | PsKernelList.nil => psKernelSumNext env declaration
+                      (PsKernelSumTask.recursorName current reversed count
+                        (PsKernelLookupState.search (psKernelUnitRecursorName name) current))
+                  | PsKernelList.cons ctor rest =>
+                      match ctor with
+                      | PsKernelEnumConstructor.ctor ctorName ctorType =>
+                          match ctorName with
+                          | PsKernelName.anonymous => psKernelSumReject PsKernelCheckError.invalidName
+                          | _ => psKernelSumNext env declaration
+                              (PsKernelSumTask.constructorName (PsKernelSumProgress.progress rest current reversed count)
+                                ctorName ctorType (PsKernelLookupState.search ctorName current))
+          | PsKernelSumTask.constructorName progress ctorName ctorType current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next => psKernelSumNext env declaration
+                  (PsKernelSumTask.constructorName progress ctorName ctorType next)
+              | PsKernelLookupStep.found unused => psKernelSumReject PsKernelCheckError.duplicateName
+              | PsKernelLookupStep.missing => psKernelSumNext env declaration
+                  (PsKernelSumTask.fields progress ctorName ctorType ctorType PsKernelList.nil PsKernelNatural.zero)
+              | _ => psKernelSumReject PsKernelCheckError.invalidState
+          | PsKernelSumTask.fields progress ctorName ctorType remaining reversed count =>
+              match remaining with
+              | PsKernelExpr.forallE unusedName field body unusedBinder => psKernelSumNext env declaration
+                  (PsKernelSumTask.fieldType progress ctorName ctorType body
+                    (PsKernelList.cons field reversed) (psKernelNaturalSucc count)
+                    (psKernelCheckStart env field psKernelEnumType))
+              | PsKernelExpr.constE resultName resultLevels =>
+                  match resultLevels with
+                  | PsKernelList.nil => psKernelSumNext env declaration
+                      (PsKernelSumTask.result progress ctorName ctorType reversed count
+                        (PsKernelList.cons (PsKernelOrderTask.name resultName name) PsKernelList.nil))
+                  | _ => psKernelSumReject PsKernelCheckError.invalidUniverse
+              | _ => psKernelSumReject PsKernelCheckError.typeMismatch
+          | PsKernelSumTask.fieldType progress ctorName ctorType remaining reversed count current =>
+              match psKernelTypeStep current with
+              | PsKernelTypeStep.next next => psKernelSumNext env declaration
+                  (PsKernelSumTask.fieldType progress ctorName ctorType remaining reversed count next)
+              | PsKernelTypeStep.final result =>
+                  match result with
+                  | PsKernelTypeResult.done unused => psKernelSumNext env declaration
+                      (PsKernelSumTask.fields progress ctorName ctorType remaining reversed count)
+                  | PsKernelTypeResult.rejected error => psKernelSumReject error
+                  | _ => psKernelSumReject PsKernelCheckError.invalidState
+          | PsKernelSumTask.result progress ctorName ctorType reversed count work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelSumNext env declaration
+                  (PsKernelSumTask.result progress ctorName ctorType reversed count next)
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelSumNext env declaration
+                      (PsKernelSumTask.constructorType progress ctorName ctorType reversed count
+                        (psKernelCheckStart (psKernelSumCurrent progress) ctorType psKernelEnumType))
+                  | _ => psKernelSumReject PsKernelCheckError.typeMismatch
+              | _ => psKernelSumReject PsKernelCheckError.invalidState
+          | PsKernelSumTask.constructorType progress ctorName ctorType reversed fields current =>
+              match psKernelTypeStep current with
+              | PsKernelTypeStep.next next => psKernelSumNext env declaration
+                  (PsKernelSumTask.constructorType progress ctorName ctorType reversed fields next)
+              | PsKernelTypeStep.final result =>
+                  match result with
+                  | PsKernelTypeResult.done unused =>
+                      match progress with
+                      | PsKernelSumProgress.progress pending entries rules count => psKernelSumNext env declaration
+                          (PsKernelSumTask.constructors (PsKernelSumProgress.progress pending
+                            (PsKernelList.cons (PsKernelDefinition.constant ctorName PsKernelList.nil ctorType) entries)
+                            (PsKernelList.cons (PsKernelSumRule.rule ctorName reversed fields) rules) (psKernelNaturalSucc count)))
+                  | PsKernelTypeResult.rejected error => psKernelSumReject error
+                  | _ => psKernelSumReject PsKernelCheckError.invalidState
+          | PsKernelSumTask.recursorName current reversed count lookup =>
+              match psKernelLookupStep lookup with
+              | PsKernelLookupStep.next next => psKernelSumNext env declaration
+                  (PsKernelSumTask.recursorName current reversed count next)
+              | PsKernelLookupStep.found unused => psKernelSumReject PsKernelCheckError.duplicateName
+              | PsKernelLookupStep.missing => psKernelSumNext env declaration
+                  (PsKernelSumTask.minors current reversed PsKernelList.nil count
+                    (PsKernelExpr.forallE PsKernelName.anonymous (PsKernelExpr.constE name PsKernelList.nil)
+                      (PsKernelExpr.app (PsKernelExpr.bvar (psKernelNaturalSucc count))
+                        (PsKernelExpr.bvar PsKernelNatural.zero)) PsKernelBinder.explicit))
+              | _ => psKernelSumReject PsKernelCheckError.invalidState
+          | PsKernelSumTask.minors current pending forward count body =>
+              match pending with
+              | PsKernelList.cons rule rest =>
+                  match count with
+                  | PsKernelNatural.zero => psKernelSumReject PsKernelCheckError.invalidState
+                  | _ =>
+                      match rule with
+                      | PsKernelSumRule.rule ctorName reversed fields =>
+                          let next : PsKernelNatural := psKernelNaturalPred count;
+                          psKernelSumNext env declaration
+                            (PsKernelSumTask.arguments
+                              (PsKernelSumMinorContext.context current rest (PsKernelList.cons rule forward) next body)
+                              reversed fields next (PsKernelExpr.constE ctorName PsKernelList.nil))
+              | PsKernelList.nil =>
+                  match count with
+                  | PsKernelNatural.positive unused => psKernelSumReject PsKernelCheckError.invalidState
+                  | PsKernelNatural.zero =>
+                      let recType : PsKernelExpr := psKernelEnumRecursorType name body;
+                      psKernelSumNext env declaration (PsKernelSumTask.recursorType current forward recType
+                        (PsKernelTypeState.state
+                          (PsKernelTypingContext.context current (PsKernelList.cons (psKernelRecordMotive name) PsKernelList.nil))
+                          (PsKernelList.cons (PsKernelTypeTask.infer PsKernelList.nil recType)
+                            (PsKernelList.cons PsKernelTypeTask.reduceTop PsKernelList.nil)) PsKernelList.nil))
+          | PsKernelSumTask.arguments context reversed index motiveIndex value =>
+              match index with
+              | PsKernelNatural.zero => psKernelSumNext env declaration
+                  (PsKernelSumTask.minor context reversed (PsKernelExpr.app (PsKernelExpr.bvar motiveIndex) value))
+              | _ =>
+                  let next : PsKernelNatural := psKernelNaturalPred index;
+                  psKernelSumNext env declaration (PsKernelSumTask.arguments context reversed next
+                    (psKernelNaturalSucc motiveIndex) (PsKernelExpr.app value (PsKernelExpr.bvar next)))
+          | PsKernelSumTask.minor context remaining value =>
+              match remaining with
+              | PsKernelList.cons field rest => psKernelSumNext env declaration
+                  (PsKernelSumTask.minor context rest
+                    (PsKernelExpr.forallE PsKernelName.anonymous field value PsKernelBinder.explicit))
+              | PsKernelList.nil =>
+                  match context with
+                  | PsKernelSumMinorContext.context current pending forward count body => psKernelSumNext env declaration
+                      (PsKernelSumTask.minors current pending forward count
+                        (PsKernelExpr.forallE PsKernelName.anonymous value body PsKernelBinder.explicit))
+          | PsKernelSumTask.recursorType current rules type typing =>
+              match psKernelTypeStep typing with
+              | PsKernelTypeStep.next next => psKernelSumNext env declaration
+                  (PsKernelSumTask.recursorType current rules type next)
+              | PsKernelTypeStep.final result =>
+                  match result with
+                  | PsKernelTypeResult.done inferred =>
+                      match inferred with
+                      | PsKernelExpr.sortE unused => PsKernelSumStep.final (PsKernelAdmissionResult.admitted
+                          (PsKernelList.cons (PsKernelDefinition.sumRecursor (psKernelUnitRecursorName name)
+                            (PsKernelList.cons (psKernelRecordMotive name) PsKernelList.nil) type rules) current))
+                      | _ => psKernelSumReject PsKernelCheckError.typeExpected
+                  | PsKernelTypeResult.rejected error => psKernelSumReject error
+                  | _ => psKernelSumReject PsKernelCheckError.invalidState
+
+def psKernelSumStart (env : PsKernelList PsKernelDefinition) (declaration : PsKernelEnumDeclaration) : PsKernelSumState :=
+  PsKernelSumState.state env declaration PsKernelSumTask.initial
+
+def psKernelSumRun (fuel : PsKernelFuel) : PsKernelSumState -> PsKernelAdmissionResult :=
+  match fuel with
+  | PsKernelFuel.stop => fun (state : PsKernelSumState) => PsKernelAdmissionResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      fun (state : PsKernelSumState) =>
+        match psKernelSumStep state with
+        | PsKernelSumStep.final result => result
+        | PsKernelSumStep.next next =>
+            let smaller : PsKernelSumState -> PsKernelAdmissionResult := psKernelSumRun remaining;
+            smaller next
+
+
+
 /- The only mixed admission entry point starts with an empty environment.
 Each declaration uses the same outer transition budget. Partial state is private
 to the driver; rejection and exhaustion expose no environment. -/
@@ -3503,6 +3897,7 @@ inductive PsKernelJointEntry where
   | unitInductive (entry : PsKernelUnitDeclaration)
   | recordInductive (entry : PsKernelUnitDeclaration)
   | enumInductive (entry : PsKernelEnumDeclaration)
+  | sumInductive (entry : PsKernelEnumDeclaration)
   | natInductive (entry : PsKernelNatDeclaration)
 
 inductive PsKernelJointState where
@@ -3511,6 +3906,7 @@ inductive PsKernelJointState where
   | unitInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelUnitState)
   | recordInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelRecordState)
   | enumInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelEnumState)
+  | sumInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelSumState)
   | natInductive (rest : PsKernelList PsKernelJointEntry) (state : PsKernelNatAdmissionState)
 
 inductive PsKernelJointStep where
@@ -3537,6 +3933,8 @@ def psKernelJointStep (state : PsKernelJointState) : PsKernelJointStep :=
               (PsKernelJointState.recordInductive rest (psKernelRecordStart env declaration))
           | PsKernelJointEntry.enumInductive declaration => PsKernelJointStep.next
               (PsKernelJointState.enumInductive rest (psKernelEnumStart env declaration))
+          | PsKernelJointEntry.sumInductive declaration => PsKernelJointStep.next
+              (PsKernelJointState.sumInductive rest (psKernelSumStart env declaration))
           | PsKernelJointEntry.natInductive declaration => PsKernelJointStep.next
               (PsKernelJointState.natInductive rest (psKernelNatAdmissionStart env declaration))
   | PsKernelJointState.definition rest current =>
@@ -3555,6 +3953,10 @@ def psKernelJointStep (state : PsKernelJointState) : PsKernelJointStep :=
       match psKernelEnumStep current with
       | PsKernelEnumStep.next next => PsKernelJointStep.next (PsKernelJointState.enumInductive rest next)
       | PsKernelEnumStep.final result => psKernelJointContinue rest result
+  | PsKernelJointState.sumInductive rest current =>
+      match psKernelSumStep current with
+      | PsKernelSumStep.next next => PsKernelJointStep.next (PsKernelJointState.sumInductive rest next)
+      | PsKernelSumStep.final result => psKernelJointContinue rest result
   | PsKernelJointState.natInductive rest current =>
       match psKernelNatAdmissionStep current with
       | PsKernelNatAdmissionStep.next next => PsKernelJointStep.next (PsKernelJointState.natInductive rest next)

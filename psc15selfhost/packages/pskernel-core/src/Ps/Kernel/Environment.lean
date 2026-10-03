@@ -8,6 +8,10 @@ inductive PsKernelDefinitionBody where
   | transparent (value : PsKernelExpr)
   | opaque
 
+/- Sum rules are derived by checked admission, never accepted as wire metadata. -/
+inductive PsKernelSumRule where
+  | rule (name : PsKernelName) (reversedFields : PsKernelList PsKernelExpr) (fieldCount : PsKernelNatural)
+
 inductive PsKernelDefinition where
   | definition (name : PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
   | polymorphic (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (value : PsKernelExpr)
@@ -15,6 +19,7 @@ inductive PsKernelDefinition where
   | unitRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (ctorName : PsKernelName)
 
   | enumRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (constructors : PsKernelList PsKernelName)
+  | sumRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr) (rules : PsKernelList PsKernelSumRule)
   | recordFamily (name ctorName : PsKernelName) (fields : PsKernelList PsKernelExpr)
   | recordRecursor (name : PsKernelName) (parameters : PsKernelList PsKernelName) (type : PsKernelExpr)
       (ctorName : PsKernelName) (fields : PsKernelList PsKernelExpr)
@@ -28,6 +33,7 @@ def psKernelDefinitionName (entry : PsKernelDefinition) : PsKernelName :=
   | PsKernelDefinition.constant name parameters type => name
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => name
   | PsKernelDefinition.enumRecursor name unusedParameters unusedType unusedConstructors => name
+  | PsKernelDefinition.sumRecursor name unusedParameters unusedType unusedRules => name
   | PsKernelDefinition.recordFamily name unusedCtor unusedFields => name
   | PsKernelDefinition.recordRecursor name unusedParameters unusedType unusedCtor unusedFields => name
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => name
@@ -40,6 +46,7 @@ def psKernelDefinitionParameters (entry : PsKernelDefinition) : PsKernelList PsK
   | PsKernelDefinition.constant name parameters type => parameters
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => parameters
   | PsKernelDefinition.enumRecursor unusedName parameters unusedType unusedConstructors => parameters
+  | PsKernelDefinition.sumRecursor unusedName parameters unusedType unusedRules => parameters
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelList.nil
   | PsKernelDefinition.recordRecursor unusedName parameters unusedType unusedCtor unusedFields => parameters
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelList.nil
@@ -52,6 +59,7 @@ def psKernelDefinitionType (entry : PsKernelDefinition) : PsKernelExpr :=
   | PsKernelDefinition.constant name parameters type => type
   | PsKernelDefinition.unitRecursor name parameters type unusedConstructor => type
   | PsKernelDefinition.enumRecursor unusedName unusedParameters type unusedConstructors => type
+  | PsKernelDefinition.sumRecursor unusedName unusedParameters type unusedRules => type
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
   | PsKernelDefinition.recordRecursor unusedName unusedParameters type unusedCtor unusedFields => type
   | PsKernelDefinition.natFamily name unusedZero unusedSucc => PsKernelExpr.sortE (PsKernelLevel.succ PsKernelLevel.zero)
@@ -65,6 +73,7 @@ def psKernelDefinitionBody (entry : PsKernelDefinition) : PsKernelDefinitionBody
   | PsKernelDefinition.unitRecursor unusedName unusedParameters unusedType unusedConstructor => PsKernelDefinitionBody.opaque
 
   | PsKernelDefinition.enumRecursor unusedName unusedParameters unusedType unusedConstructors => PsKernelDefinitionBody.opaque
+  | PsKernelDefinition.sumRecursor unusedName unusedParameters unusedType unusedRules => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.recordFamily unusedName unusedCtor unusedFields => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.recordRecursor unusedName unusedParameters unusedType unusedCtor unusedFields => PsKernelDefinitionBody.opaque
   | PsKernelDefinition.natFamily unusedName unusedZero unusedSucc => PsKernelDefinitionBody.opaque

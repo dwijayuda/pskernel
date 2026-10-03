@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "Closed-record projection typing, bounds, substitution and iota with dependent computed-result witnesses; not general inductive completeness",
-  "sourceManifestSha256": "cfcf3dbf7c8e1908aaf644398ecffc1806b56c5049464a73686877dc37700183",
+  "sourceManifestSha256": "8c21e6dcb8dc8a967abba7d81b3bef97b4f9cab57d548cf331c55fd8ea4f00d0",
   "harnessSha256": "52266f3ee24f1313b48f4e0a47f97d8de9caa51f482f2d772e5309652369cbe1",
   "provider": {
     "protocol": "pskernel-lean/1",

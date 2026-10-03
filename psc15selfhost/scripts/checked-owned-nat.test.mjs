@@ -24,7 +24,7 @@ test('default checks its Nat prelude and derived recursor before user declaratio
     def('First',C('Nat'),numeral('Nat',1)),def('Fold',C('Nat'),fold('Nat',4)),
   ]));
   assert.equal(descriptor.selector,'pskernel-core');
-  assert.equal(result.profile,'owned-nullary-enumerations/8');
+  assert.equal(result.profile,'owned-closed-sums/9');
   assert.equal(result.accepted,true,JSON.stringify(result));
   assert.equal(result.admissionCount,2);
 });

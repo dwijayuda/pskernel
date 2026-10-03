@@ -15,6 +15,9 @@ Record elimination still traverses and validates the full constructor spine. -/
 inductive PsKernelEnumBranch where
   | branch (name : PsKernelName) (minor : PsKernelExpr)
 
+inductive PsKernelSumBranch where
+  | branch (name : PsKernelName) (fields : PsKernelNatural) (minor : PsKernelExpr)
+
 inductive PsKernelRecordAction where
   | project (family : PsKernelName) (index : PsKernelNatural)
   | eliminate (fn : PsKernelExpr) (minor : PsKernelExpr)
@@ -25,6 +28,17 @@ def psKernelRecordNeutral (action : PsKernelRecordAction) (major : PsKernelExpr)
   | PsKernelRecordAction.eliminate fn unusedMinor => PsKernelExpr.app fn major
 
 inductive PsKernelReduceTask where
+  | sumMinors (original : PsKernelExpr) (rules : PsKernelList PsKernelSumRule)
+      (args : PsKernelList PsKernelExpr) (branches : PsKernelList PsKernelSumBranch)
+  | sumMajor (fn : PsKernelExpr) (branches : PsKernelList PsKernelSumBranch)
+  | sumSpine (fn major cursor : PsKernelExpr) (args : PsKernelList PsKernelExpr)
+      (branches : PsKernelList PsKernelSumBranch)
+  | sumFind (fn major : PsKernelExpr) (name : PsKernelName) (args : PsKernelList PsKernelExpr)
+      (branches : PsKernelList PsKernelSumBranch)
+  | sumName (fn major : PsKernelExpr) (name : PsKernelName) (args : PsKernelList PsKernelExpr)
+      (fields : PsKernelNatural) (minor : PsKernelExpr)
+      (remaining : PsKernelList PsKernelSumBranch) (work : PsKernelList PsKernelOrderTask)
+  | sumFields (minor : PsKernelExpr) (args : PsKernelList PsKernelExpr) (remaining : PsKernelNatural)
   | enumSpine (original cursor : PsKernelExpr) (args : PsKernelList PsKernelExpr)
   | enumLookup (original : PsKernelExpr) (args : PsKernelList PsKernelExpr)
       (levels : PsKernelList PsKernelLevel) (state : PsKernelLookupState)
@@ -157,6 +171,8 @@ def psKernelReduceValueTask
   | PsKernelList.nil => psKernelReduceReject PsKernelCheckError.invalidState
   | PsKernelList.cons top rest =>
       match task with
+      | PsKernelReduceTask.sumMajor fn branches => psKernelReduceNext env
+          (PsKernelList.cons (PsKernelReduceTask.sumSpine fn top top PsKernelList.nil branches) tasks) rest
       | PsKernelReduceTask.enumMajor fn branches =>
           match top with
           | PsKernelExpr.constE name levels =>
@@ -263,6 +279,17 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                   (PsKernelList.cons (PsKernelReduceTask.enumLookup original args levels next) rest) values
               | PsKernelLookupStep.found entry =>
                   match entry with
+                  | PsKernelDefinition.sumRecursor unusedName unusedParameters unusedType rules =>
+                      match levels with
+                      | PsKernelList.cons unusedLevel tail =>
+                          match tail with
+                          | PsKernelList.nil =>
+                              match args with
+                              | PsKernelList.cons unusedMotive tailArgs => psKernelReduceNext env
+                                  (PsKernelList.cons (PsKernelReduceTask.sumMinors original rules tailArgs PsKernelList.nil) rest) values
+                              | _ => psKernelReducePush env rest values original
+                          | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
+                      | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
                   | PsKernelDefinition.enumRecursor unusedName unusedParameters unusedType constructors =>
                       match levels with
                       | PsKernelList.cons unusedLevel tail =>
@@ -277,6 +304,71 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                   | _ => psKernelReducePush env rest values original
               | PsKernelLookupStep.missing => psKernelReduceReject PsKernelCheckError.unknownConstant
               | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.sumMinors original rules args branches =>
+              match rules with
+              | PsKernelList.cons rule tail =>
+                  match rule with
+                  | PsKernelSumRule.rule ctorName unusedFields count =>
+                      match args with
+                      | PsKernelList.cons minor tailArgs => psKernelReduceNext env
+                          (PsKernelList.cons (PsKernelReduceTask.sumMinors original tail tailArgs
+                            (PsKernelList.cons (PsKernelSumBranch.branch ctorName count minor) branches)) rest) values
+                      | _ => psKernelReducePush env rest values original
+              | PsKernelList.nil =>
+                  match args with
+                  | PsKernelList.cons major tail =>
+                      match tail with
+                      | PsKernelList.nil =>
+                          match original with
+                          | PsKernelExpr.app fn unusedMajor => psKernelReduceNext env
+                              (PsKernelList.cons (PsKernelReduceTask.whnf major)
+                                (PsKernelList.cons (PsKernelReduceTask.sumMajor fn branches) rest)) values
+                          | _ => psKernelReduceReject PsKernelCheckError.invalidState
+                      | _ => psKernelReducePush env rest values original
+                  | _ => psKernelReducePush env rest values original
+          | PsKernelReduceTask.sumSpine fn major cursor args branches =>
+              match cursor with
+              | PsKernelExpr.app head arg => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.sumSpine fn major head
+                    (PsKernelList.cons arg args) branches) rest) values
+              | PsKernelExpr.constE name levels =>
+                  match levels with
+                  | PsKernelList.nil => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.sumFind fn major name args branches) rest) values
+                  | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
+              | _ => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+          | PsKernelReduceTask.sumFind fn major name args branches =>
+              match branches with
+              | PsKernelList.nil => psKernelReducePush env rest values (PsKernelExpr.app fn major)
+              | PsKernelList.cons branch tail =>
+                  match branch with
+                  | PsKernelSumBranch.branch ctorName count minor => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.sumName fn major name args count minor tail
+                        (PsKernelList.cons (PsKernelOrderTask.name name ctorName) PsKernelList.nil)) rest) values
+          | PsKernelReduceTask.sumName fn major name args count minor remaining work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.sumName fn major name args count minor remaining next) rest) values
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.sumFields minor args count) rest) values
+                  | _ => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.sumFind fn major name args remaining) rest) values
+              | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.sumFields minor args remaining =>
+              match remaining with
+              | PsKernelNatural.zero =>
+                  match args with
+                  | PsKernelList.nil => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.whnf minor) rest) values
+                  | _ => psKernelReduceReject PsKernelCheckError.typeMismatch
+              | _ =>
+                  match args with
+                  | PsKernelList.cons arg tail => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.sumFields (PsKernelExpr.app minor arg)
+                        tail (psKernelNaturalPred remaining)) rest) values
+                  | _ => psKernelReduceReject PsKernelCheckError.typeMismatch
           | PsKernelReduceTask.enumMinors original constructors args branches =>
               match constructors with
               | PsKernelList.cons ctorName tail =>

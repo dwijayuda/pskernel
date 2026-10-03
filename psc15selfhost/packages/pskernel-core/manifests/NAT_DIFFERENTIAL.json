@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "Monomorphic zero/successor strictly positive unary recursive family in Type, derived dependent recursor and owned checked Nat initialization; not general inductive completeness",
-  "sourceManifestSha256": "cfcf3dbf7c8e1908aaf644398ecffc1806b56c5049464a73686877dc37700183",
+  "sourceManifestSha256": "8c21e6dcb8dc8a967abba7d81b3bef97b4f9cab57d548cf331c55fd8ea4f00d0",
   "harnessSha256": "0623e2155d2285a4f8dd3d528f26a63e40d377e4fa3d232fd868de3a89a9e4ac",
   "provider": {
     "protocol": "pskernel-lean/1",

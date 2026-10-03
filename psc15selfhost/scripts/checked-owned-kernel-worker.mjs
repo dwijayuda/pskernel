@@ -105,11 +105,9 @@ try {
         entries.push(k.PsKernelJointEntry[route](k.PsKernelUnitDeclaration.declaration(
           name(family.n), list(d.lp.map(item => name(item))), level(family.t.l), name(ctor.n), expr(ctor.t))));
       } else {
-        if (family.cs.length !== 2) fail('unsupported-inductive-shape');
-        if (d.lp.length !== 0) fail('unsupported-inductive-parameters');
-        const [zero, succ] = family.cs;
-        entries.push(k.PsKernelJointEntry.natInductive(k.PsKernelNatDeclaration.declaration(
-          name(family.n), expr(family.t), name(zero.n), expr(zero.t), name(succ.n), expr(succ.t))));
+        entries.push(k.PsKernelJointEntry.sumInductive(k.PsKernelEnumDeclaration.declaration(
+          name(family.n), list(d.lp.map(item => name(item))), level(family.t.l),
+          list(family.cs.map(ctor => k.PsKernelEnumConstructor.ctor(name(ctor.n), expr(ctor.t)))))));
       }
       admissionIndex++;
       continue;

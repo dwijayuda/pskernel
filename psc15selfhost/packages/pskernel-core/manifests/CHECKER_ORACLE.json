@@ -10,11 +10,11 @@
     "status": "version"
   },
   "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
-  "sourceManifestSha256": "cfcf3dbf7c8e1908aaf644398ecffc1806b56c5049464a73686877dc37700183",
+  "sourceManifestSha256": "8c21e6dcb8dc8a967abba7d81b3bef97b4f9cab57d548cf331c55fd8ea4f00d0",
   "fixtureSha256": "4174ff3b69b8f682f5e4ecf2e3897d08d1ece8f1553c534a6828bb52aeb6333e",
   "harnessSha256": "d75228abef13822ea437746776ab33b9dec0323f4fef8687ba6468a01ab57235",
   "sharedHarnessSha256": "4202c9806d6678366b9d10a6eae9f2181861f2b3bdd1ac0d3fcdcdc2ada2b6ff",
-  "sourceAdmissionCount": 227,
+  "sourceAdmissionCount": 242,
   "positiveCases": 68,
   "positiveLabels": [
     "sort-successor-0",
@@ -87,7 +87,7 @@
     "conversion-shared-budget-zero"
   ],
   "positive": {
-    "requestSha256": "63a1780a351651bef1bdece7dc675842e2a0b3450087340b69ff19be3a3cde0a",
+    "requestSha256": "1de93218f48d0bddb6a5a6bc4a703c53d0e83b60f0d48be114bff24dc53deb6d",
     "result": {
       "protocol": "pskernel-lean/1",
       "provider": "lean4-cpp",
@@ -100,7 +100,7 @@
   "negativeControls": [
     {
       "label": "false-claim-Type-in-Type-accepted",
-      "requestSha256": "5b92190fefaaabd8f44f8d72ff3cde83efb5078fa3c8aa729e2a665be7af5e2f",
+      "requestSha256": "a55acf1b3ab5b01e9f561b954a689991c75db0403ccdc02f62be11fe513ae408",
       "result": {
         "protocol": "pskernel-lean/1",
         "provider": "lean4-cpp",
@@ -109,13 +109,13 @@
         "profile": "lean4.34-core",
         "accepted": false,
         "errorKind": "kernel-rejection",
-        "declarationIndex": 233,
-        "message": "Lean 4.34 kernel rejected declaration 233 (declaration-type-mismatch)"
+        "declarationIndex": 248,
+        "message": "Lean 4.34 kernel rejected declaration 248 (declaration-type-mismatch)"
       }
     },
     {
       "label": "false-claim-illtyped-definition-admitted",
-      "requestSha256": "99a95a96821821cfc6cee844426bb70ba45e91d9e7d05648944168740604fcdf",
+      "requestSha256": "6c1c5bed76db22687b45203e97819583c7658770d29bfdbccce8a504f9ca1a08",
       "result": {
         "protocol": "pskernel-lean/1",
         "provider": "lean4-cpp",
@@ -124,13 +124,13 @@
         "profile": "lean4.34-core",
         "accepted": false,
         "errorKind": "kernel-rejection",
-        "declarationIndex": 233,
-        "message": "Lean 4.34 kernel rejected declaration 233 (declaration-type-mismatch)"
+        "declarationIndex": 248,
+        "message": "Lean 4.34 kernel rejected declaration 248 (declaration-type-mismatch)"
       }
     },
     {
       "label": "false-claim-nonconvertible-sorts-equal",
-      "requestSha256": "eb46af625bfc3ebeb14dd8801ce1e53aff97be0753e63d918e4e68aaf890f3ae",
+      "requestSha256": "29504910f0fca63b7da95efa9ca56af9fb46013303c6d18dcbfdcf8de46f612e",
       "result": {
         "protocol": "pskernel-lean/1",
         "provider": "lean4-cpp",
@@ -139,8 +139,8 @@
         "profile": "lean4.34-core",
         "accepted": false,
         "errorKind": "kernel-rejection",
-        "declarationIndex": 233,
-        "message": "Lean 4.34 kernel rejected declaration 233 (declaration-type-mismatch)"
+        "declarationIndex": 248,
+        "message": "Lean 4.34 kernel rejected declaration 248 (declaration-type-mismatch)"
       }
     }
   ]

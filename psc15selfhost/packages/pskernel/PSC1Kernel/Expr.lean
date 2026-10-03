@@ -12,7 +12,7 @@ inductive Literal where
   | nat (value : Nat)
   | str (value : String)
 
-abbrev Metadata := Nat
+def Metadata : Type := Nat
 
 inductive Expr where
   | bvar (index : Nat)

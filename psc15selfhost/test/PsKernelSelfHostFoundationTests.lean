@@ -1,5 +1,5 @@
-import Ps.KernelSelfHost.Expr
-import PSC1Kernel.Expr
+import Ps.KernelSelfHost.Instantiate
+import PSC1Kernel.Instantiate
 
 def psKernelNameToReference
     (name : PsKernelName) : PSC1Kernel.Name :=
@@ -319,6 +319,125 @@ def psKernelSelfHostExprTests : Bool :=
           (psKernelExprToReference
             (PsKernelExpr.const alphaName List.nil)))))
 
+def psKernelExprListToReference
+    (values : List PsKernelExpr) :
+    List PSC1Kernel.Expr :=
+  match values with
+  | List.nil =>
+      List.nil
+  | List.cons head tail =>
+      List.cons
+        (psKernelExprToReference head)
+        (psKernelExprListToReference tail)
+
+def psKernelNameListToReference
+    (values : List PsKernelName) :
+    List PSC1Kernel.Name :=
+  match values with
+  | List.nil =>
+      List.nil
+  | List.cons head tail =>
+      List.cons
+        (psKernelNameToReference head)
+        (psKernelNameListToReference tail)
+
+def psKernelExprReferenceEq
+    (portable : PsKernelExpr)
+    (reference : PSC1Kernel.Expr) : Bool :=
+  PSC1Kernel.Expr.eq
+    (psKernelExprToReference portable)
+    reference
+
+def psKernelSelfHostInstantiateTests : Bool :=
+  let typeExpr :=
+    PsKernelExpr.sort PsKernelLevel.zero
+  let alphaName :=
+    PsKernelName.str PsKernelName.anonymous "alpha"
+  let betaName :=
+    PsKernelName.str PsKernelName.anonymous "beta"
+  let nested :=
+    PsKernelExpr.lam
+      alphaName
+      typeExpr
+      (PsKernelExpr.app
+        (PsKernelExpr.bvar 1)
+        (PsKernelExpr.bvar 0))
+      PsKernelBinderInfo.default
+  let lifted :=
+    psKernelExprLiftLooseBVars
+      nested
+      0
+      2
+  let referenceLifted :=
+    PSC1Kernel.Expr.liftLooseBVars
+      (psKernelExprToReference nested)
+      0
+      2
+  let replacement :=
+    PsKernelExpr.lit (PsKernelLiteral.nat 9)
+  let instantiateSource :=
+    PsKernelExpr.app
+      (PsKernelExpr.bvar 1)
+      (PsKernelExpr.bvar 0)
+  let subst :=
+    List.cons replacement List.nil
+  let instantiated :=
+    psKernelExprInstantiateAt
+      instantiateSource
+      0
+      subst
+      0
+  let referenceInstantiated :=
+    PSC1Kernel.Expr.instantiateAt
+      (psKernelExprToReference instantiateSource)
+      0
+      (psKernelExprListToReference subst)
+      0
+  let betaSource :=
+    PsKernelExpr.app
+      (PsKernelExpr.lam
+        alphaName
+        typeExpr
+        (PsKernelExpr.bvar 0)
+        PsKernelBinderInfo.default)
+      replacement
+  let betaReduced :=
+    psKernelExprCheapBetaReduce betaSource
+  let referenceBetaReduced :=
+    PSC1Kernel.Expr.cheapBetaReduce
+      (psKernelExprToReference betaSource)
+  let abstractSource :=
+    PsKernelExpr.app
+      (PsKernelExpr.fvar alphaName)
+      (PsKernelExpr.fvar betaName)
+  let fvars :=
+    List.cons
+      alphaName
+      (List.cons betaName List.nil)
+  let abstracted :=
+    psKernelExprAbstractFVars
+      abstractSource
+      fvars
+  let referenceAbstracted :=
+    PSC1Kernel.Expr.abstractFVars
+      (psKernelExprToReference abstractSource)
+      (psKernelNameListToReference fvars)
+  Bool.and
+    (psKernelExprReferenceEq
+      lifted
+      referenceLifted)
+    (Bool.and
+      (psKernelExprReferenceEq
+        instantiated
+        referenceInstantiated)
+      (Bool.and
+        (psKernelExprReferenceEq
+          betaReduced
+          referenceBetaReduced)
+        (psKernelExprReferenceEq
+          abstracted
+          referenceAbstracted)))
+
 def main : IO Unit :=
   if !psKernelSelfHostNameTests then
     throw
@@ -332,6 +451,10 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_EXPR_DIFFERENTIAL: FAIL")
+  else if !psKernelSelfHostInstantiateTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_INSTANTIATE_DIFFERENTIAL: FAIL")
   else
     IO.println
       "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"

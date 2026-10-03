@@ -89,7 +89,7 @@ def psKernelLevelToOffset
     Prod PsKernelLevel Nat :=
   match level with
   | PsKernelLevel.succ inner =>
-      let pair := psKernelLevelToOffset inner
+      let pair := psKernelLevelToOffset inner;
       Prod.mk pair.fst (pair.snd + 1)
   | _ =>
       Prod.mk level 0
@@ -117,8 +117,8 @@ def psKernelLevelMkMax
         psKernelLevelIsExplicit right
       else
         false then
-    let leftPair := psKernelLevelToOffset left
-    let rightPair := psKernelLevelToOffset right
+    let leftPair := psKernelLevelToOffset left;
+    let rightPair := psKernelLevelToOffset right;
     if psKernelNatGe leftPair.snd rightPair.snd then left else right
   else if psKernelLevelEq left right then
     left
@@ -145,15 +145,15 @@ def psKernelLevelMkMax
                     psKernelLevelEq leftRight right then
                 left
               else
-                let leftPair := psKernelLevelToOffset left
-                let rightPair := psKernelLevelToOffset right
+                let leftPair := psKernelLevelToOffset left;
+                let rightPair := psKernelLevelToOffset right;
                 if psKernelLevelEq leftPair.fst rightPair.fst then
                   if psKernelNatGt leftPair.snd rightPair.snd then left else right
                 else
                   PsKernelLevel.max left right
           | _ =>
-              let leftPair := psKernelLevelToOffset left
-              let rightPair := psKernelLevelToOffset right
+              let leftPair := psKernelLevelToOffset left;
+              let rightPair := psKernelLevelToOffset right;
               if psKernelLevelEq leftPair.fst rightPair.fst then
                 if psKernelNatGt leftPair.snd rightPair.snd then left else right
               else
@@ -168,15 +168,15 @@ def psKernelLevelMkMax
                   psKernelLevelEq leftRight right then
               left
             else
-              let leftPair := psKernelLevelToOffset left
-              let rightPair := psKernelLevelToOffset right
+              let leftPair := psKernelLevelToOffset left;
+              let rightPair := psKernelLevelToOffset right;
               if psKernelLevelEq leftPair.fst rightPair.fst then
                 if psKernelNatGt leftPair.snd rightPair.snd then left else right
               else
                 PsKernelLevel.max left right
         | _ =>
-            let leftPair := psKernelLevelToOffset left
-            let rightPair := psKernelLevelToOffset right
+            let leftPair := psKernelLevelToOffset left;
+            let rightPair := psKernelLevelToOffset right;
             if psKernelLevelEq leftPair.fst rightPair.fst then
               if psKernelNatGt leftPair.snd rightPair.snd then left else right
             else
@@ -217,10 +217,10 @@ partial def psKernelLevelNormCmp
   if psKernelLevelEq left right then
     Ordering.eq
   else
-    let leftPair := psKernelLevelToOffset left
-    let rightPair := psKernelLevelToOffset right
-    let leftRoot := leftPair.fst
-    let rightRoot := rightPair.fst
+    let leftPair := psKernelLevelToOffset left;
+    let rightPair := psKernelLevelToOffset right;
+    let leftRoot := leftPair.fst;
+    let rightRoot := rightPair.fst;
     if psKernelLevelEq leftRoot rightRoot then
       psKernelNatCmp leftPair.snd rightPair.snd
     else if
@@ -402,13 +402,13 @@ def psKernelLevelAnyOffsetAtLeast
 def psKernelLevelTrimExplicit
     (values : List PsKernelLevel) :
     List PsKernelLevel :=
-  let explicit := psKernelLevelTakeExplicit values
-  let rest := psKernelLevelDropExplicit values
+  let explicit := psKernelLevelTakeExplicit values;
+  let rest := psKernelLevelDropExplicit values;
   match psKernelLevelLast explicit with
   | Option.none =>
       values
   | Option.some maximum =>
-      let amount := (psKernelLevelToOffset maximum).snd
+      let amount := (psKernelLevelToOffset maximum).snd;
       if psKernelLevelAnyOffsetAtLeast rest amount then
         rest
       else
@@ -467,9 +467,9 @@ def psKernelLevelMkMaxList
 
 partial def psKernelLevelNormalize
     (level : PsKernelLevel) : PsKernelLevel :=
-  let pair := psKernelLevelToOffset level
-  let root := pair.fst
-  let amount := pair.snd
+  let pair := psKernelLevelToOffset level;
+  let root := pair.fst;
+  let amount := pair.snd;
   match root with
   | PsKernelLevel.zero =>
       level
@@ -496,16 +496,16 @@ partial def psKernelLevelNormalize
             psKernelLevelListAppend
               (psKernelLevelFlattenMax
                 (psKernelLevelNormalize head))
-              (normalizeList tail)
+              (normalizeList tail);
       let normalized :=
         normalizeList
-          (psKernelLevelFlattenMax root)
+          (psKernelLevelFlattenMax root);
       let sorted :=
-        psKernelLevelSortLevels normalized
+        psKernelLevelSortLevels normalized;
       let trimmed :=
-        psKernelLevelTrimExplicit sorted
+        psKernelLevelTrimExplicit sorted;
       let unique :=
-        psKernelLevelDedupOffsets trimmed
+        psKernelLevelDedupOffsets trimmed;
       psKernelLevelAddOffset
         (psKernelLevelMkMaxList unique)
         amount
@@ -531,9 +531,9 @@ partial def psKernelLevelGeqCore
                 fallbackRight
           | _ =>
               let leftPair :=
-                psKernelLevelToOffset fallbackLeft
+                psKernelLevelToOffset fallbackLeft;
               let rightPair :=
-                psKernelLevelToOffset fallbackRight
+                psKernelLevelToOffset fallbackRight;
               if
                   if psKernelLevelEq
                       leftPair.fst
@@ -552,7 +552,7 @@ partial def psKernelLevelGeqCore
                   leftPair.fst
                   rightPair.fst
               else
-                false
+                false;
   if
       if psKernelLevelEq left right then
         true
@@ -643,7 +643,7 @@ def psKernelLevelInstantiateParams
         psKernelLevelInstantiateParams
           inner
           params
-          values
+          values;
       if psKernelLevelEq inner changed then
         root
       else
@@ -653,12 +653,12 @@ def psKernelLevelInstantiateParams
         psKernelLevelInstantiateParams
           left
           params
-          values
+          values;
       let changedRight :=
         psKernelLevelInstantiateParams
           right
           params
-          values
+          values;
       if
           if psKernelLevelEq left changedLeft then
             psKernelLevelEq right changedRight
@@ -674,12 +674,12 @@ def psKernelLevelInstantiateParams
         psKernelLevelInstantiateParams
           left
           params
-          values
+          values;
       let changedRight :=
         psKernelLevelInstantiateParams
           right
           params
-          values
+          values;
       if
           if psKernelLevelEq left changedLeft then
             psKernelLevelEq right changedRight

@@ -516,99 +516,99 @@ def psKernelSessionWithLocal
     (Prod.fst opened)
     nextSession
 
-def psKernelOpenSimpleHeaderParamsWithFuel
-    (fuel : Nat) :
+def psKernelOpenSimpleHeaderParamsWorker
+    (remainingParams : Nat) :
     Nat ->
     PsKernelCheckerSession ->
     PsKernelExpr ->
     List PsKernelOpenBinder ->
     Except String PsKernelOpenBindersResult :=
-  match fuel with
+  match remainingParams with
   | Nat.zero =>
       fun
-        (_remainingParams : Nat)
-        (_session : PsKernelCheckerSession)
-        (_type : PsKernelExpr)
-        (_revParams : List PsKernelOpenBinder) =>
-        Except.error
-          "simple inductive parameter budget exhausted"
-  | Nat.succ smallerFuel =>
-      let smaller :=
-        psKernelOpenSimpleHeaderParamsWithFuel smallerFuel;
-      fun
-        (remainingParams : Nat)
+        (fuel : Nat)
         (session : PsKernelCheckerSession)
         (type : PsKernelExpr)
         (revParams : List PsKernelOpenBinder) =>
-        match remainingParams with
-        | Nat.zero =>
-            match
-                psKernelSessionWhnf
-                  smallerFuel
-                  session
-                  type with
-            | Except.error error =>
-                Except.error error
-            | Except.ok reduced =>
-                Except.ok
-                  (PsKernelOpenBindersResult.mk
-                    (Prod.snd reduced)
-                    (List.reverse revParams)
-                    (Prod.fst reduced))
-        | Nat.succ remaining =>
-            match
-                psKernelSessionWhnf
-                  smallerFuel
-                  session
-                  type with
-            | Except.error error =>
-                Except.error error
-            | Except.ok reduced =>
-                match Prod.fst reduced with
-                | PsKernelExpr.forallE userName domain body binderInfo =>
+        match
+            psKernelSessionWhnf
+              fuel
+              session
+              type with
+        | Except.error error =>
+            Except.error error
+        | Except.ok reduced =>
+            Except.ok
+              (PsKernelOpenBindersResult.mk
+                (Prod.snd reduced)
+                (List.reverse revParams)
+                (Prod.fst reduced))
+  | Nat.succ remaining =>
+      let smaller :
+          Nat ->
+          PsKernelCheckerSession ->
+          PsKernelExpr ->
+          List PsKernelOpenBinder ->
+          Except String PsKernelOpenBindersResult :=
+        psKernelOpenSimpleHeaderParamsWorker remaining;
+      fun
+        (fuel : Nat)
+        (session : PsKernelCheckerSession)
+        (type : PsKernelExpr)
+        (revParams : List PsKernelOpenBinder) =>
+        match
+            psKernelSessionWhnf
+              fuel
+              session
+              type with
+        | Except.error error =>
+            Except.error error
+        | Except.ok reduced =>
+            match Prod.fst reduced with
+            | PsKernelExpr.forallE userName domain body binderInfo =>
+                match
+                    psKernelSessionCheck
+                      fuel
+                      (Prod.snd reduced)
+                      domain with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok domainType =>
                     match
-                        psKernelSessionCheck
-                          smallerFuel
-                          (Prod.snd reduced)
-                          domain with
+                        psKernelSessionEnsureSort
+                          fuel
+                          (Prod.snd domainType)
+                          (Prod.fst domainType) with
                     | Except.error error =>
                         Except.error error
-                    | Except.ok domainType =>
-                        match
-                            psKernelSessionEnsureSort
-                              smallerFuel
-                              (Prod.snd domainType)
-                              (Prod.fst domainType) with
-                        | Except.error error =>
-                            Except.error error
-                        | Except.ok sortResult =>
-                            let localDomain :=
-                              psKernelExprConsumeTypeAnnotations
-                                domain;
-                            let localResult :=
-                              psKernelSessionWithLocal
-                                (Prod.snd sortResult)
-                                userName
-                                localDomain
-                                binderInfo;
-                            let fresh :=
-                              Prod.fst localResult;
-                            let binder :=
-                              PsKernelOpenBinder.mk
-                                fresh
-                                userName
-                                localDomain
-                                binderInfo;
-                            smaller
-                              remaining
-                              (Prod.snd localResult)
-                              (psKernelExprInstantiate1
-                                body
-                                (PsKernelExpr.fvar fresh))
-                              (List.cons binder revParams)
-                | _ =>
-                    Except.error
-                      "simple inductive declaration has fewer parameters than declared"
+                    | Except.ok sortResult =>
+                        let localDomain :=
+                          psKernelExprConsumeTypeAnnotations
+                            domain;
+                        let localResult :=
+                          psKernelSessionWithLocal
+                            (Prod.snd sortResult)
+                            userName
+                            localDomain
+                            binderInfo;
+                        let fresh :=
+                          Prod.fst localResult;
+                        let binder :=
+                          PsKernelOpenBinder.mk
+                            fresh
+                            userName
+                            localDomain
+                            binderInfo;
+                        smaller
+                          fuel
+                          (Prod.snd localResult)
+                          (psKernelExprInstantiate1
+                            body
+                            (PsKernelExpr.fvar fresh))
+                          (List.cons binder revParams)
+            | _ =>
+                Except.error
+                  "simple inductive declaration has fewer parameters than declared"
 
 def psKernelOpenSimpleHeaderParams
     (fuel : Nat)
@@ -616,9 +616,9 @@ def psKernelOpenSimpleHeaderParams
     (type : PsKernelExpr)
     (numParams : Nat) :
     Except String PsKernelOpenBindersResult :=
-  psKernelOpenSimpleHeaderParamsWithFuel
-    (Nat.succ fuel)
+  psKernelOpenSimpleHeaderParamsWorker
     numParams
+    fuel
     session
     type
     List.nil

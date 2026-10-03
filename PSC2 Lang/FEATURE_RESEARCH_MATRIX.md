@@ -1,5 +1,11 @@
 # PSC2 Feature Research Matrix
 
+> **Superseded research input for the r3 branch.** This file is preserved for historical design evidence and PSC2 feature research only. It is **not normative** for `ps-0.9-r3`, `psc2-compiler-v1`, or `lean-subset-psc2-v1`. The sole normative language/compiler-design authority on this branch is:
+>
+> `study/proofscript-v0.9-r3-research/ProofScript_Language_Reference_v0.9.0_r3.md`
+>
+> When this file conflicts with that standalone reference, the standalone reference wins. In particular, features may now be classified as compiler-owned, library-owned, Standard prover/extension, controlled plugin, bounded Lean compatibility, post-PSC2 platform work, or deferred.
+
 Status: **research input for PSC2 scope; not yet a normative language spec**
 
 This document asks a narrower question than "what features do Lean and

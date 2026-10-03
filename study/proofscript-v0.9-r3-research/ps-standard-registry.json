@@ -1,0 +1,74 @@
+{
+  "profile": "ps-standard",
+  "version": "0.9-r3",
+  "grammarIdentity": "ps-0.9-r3",
+  "leanSemantics": {
+    "version": "4.34.0",
+    "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "featureRegistry": "r3-feature-registry.json",
+  "environmentRoots": [
+    "Lean.Init@4.34.0",
+    "Lean.Std@4.34.0",
+    "ProofScript.Standard@0.9-r3"
+  ],
+  "sourcePolicy": {
+    "arbitrarySyntaxRegistration": false,
+    "arbitraryMacroRegistration": false,
+    "arbitraryElaboratorRegistration": false,
+    "arbitraryNotationRegistration": false,
+    "arbitraryTacticSyntaxRegistration": false,
+    "arbitraryDerivingHandlerRegistration": false,
+    "arbitraryAttributeHandlerRegistration": false,
+    "arbitraryPrettyPrinterRegistration": false,
+    "semanticDeclarations": true,
+    "instances": true,
+    "fixedRegisteredAttributes": true,
+    "fixedRegisteredTactics": true
+  },
+  "importKinds": [
+    "ps-standard-source",
+    "pinned-standard-native-module",
+    "semantic-bundle"
+  ],
+  "semanticBundleRequirements": {
+    "syntaxEffectsMustBeEmpty": true,
+    "metaRegistrationEffectsMustBeEmpty": true,
+    "hostBuildEffectsMustBeEmpty": true,
+    "exactIdentityRequired": true
+  },
+  "registryClosure": {
+    "materializedManifestRequired": true,
+    "digestAlgorithm": "sha256",
+    "releaseMustPublishDigest": true
+  },
+  "cacheIdentity": [
+    "grammarIdentity",
+    "profileVersion",
+    "registrationClosureSha256",
+    "leanSemanticCommit",
+    "moduleSourceIdentities",
+    "semanticBundleIdentities",
+    "options",
+    "semanticRegistrations",
+    "axiomPolicy",
+    "compilerRevision",
+    "checkerRevision"
+  ],
+  "forbiddenCommandFamilies": [
+    "syntax-declaration",
+    "macro-declaration",
+    "macro-rules-registration",
+    "elaborator-registration",
+    "parser-extension-registration",
+    "notation-registration",
+    "new-tactic-syntax-registration",
+    "new-deriving-handler-registration",
+    "new-attribute-handler-registration",
+    "new-pretty-printer-or-delaborator-registration"
+  ],
+  "hostSecurity": {
+    "semanticImportGrantsHostPermissions": false,
+    "arbitraryDependencyInstallScriptRequired": false
+  }
+}

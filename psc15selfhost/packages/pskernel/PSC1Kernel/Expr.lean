@@ -50,7 +50,7 @@ Lean 4.34 `Expr.eqv`-compatible structural equality. Binder display names and
 binder annotations on lambda/forall/let nodes are deliberately ignored; they
 are not part of kernel alpha-equivalence. Metadata payloads remain structural.
 -/
-partial def Expr.eq : Expr → Expr → Bool
+def Expr.eq : Expr → Expr → Bool
   | .bvar a, .bvar b => a == b
   | .fvar a, .fvar b => Name.eq a b
   | .mvar a, .mvar b => Name.eq a b
@@ -73,7 +73,7 @@ Lean 4.34 `Expr.equal`-compatible binder-aware structural equality. Use this
 only when binder names/annotations are semantically relevant to the caller.
 Kernel quick-defeq/progress checks use `Expr.eq` instead.
 -/
-partial def Expr.equal : Expr → Expr → Bool
+def Expr.equal : Expr → Expr → Bool
   | .bvar a, .bvar b => a == b
   | .fvar a, .fvar b => Name.eq a b
   | .mvar a, .mvar b => Name.eq a b
@@ -95,7 +95,7 @@ partial def Expr.equal : Expr → Expr → Bool
     Name.eq n₁ n₂ && i₁ == i₂ && Expr.equal e₁ e₂
   | _, _ => false
 
-partial def Expr.hasLooseAt (e : Expr) (offset : Nat) : Bool :=
+def Expr.hasLooseAt (e : Expr) (offset : Nat) : Bool :=
   match e with
   | .bvar i => i ≥ offset
   | .app f a => f.hasLooseAt offset || a.hasLooseAt offset
@@ -109,7 +109,7 @@ partial def Expr.hasLooseAt (e : Expr) (offset : Nat) : Bool :=
 def Expr.hasLooseBVar (e : Expr) : Bool :=
   e.hasLooseAt 0
 
-partial def Expr.hasLooseBVarAtCore
+def Expr.hasLooseBVarAtCore
     (e : Expr) (index depth : Nat) : Bool :=
   match e with
   | .bvar i => i == index + depth
@@ -130,7 +130,7 @@ partial def Expr.hasLooseBVarAtCore
 def Expr.hasLooseBVarAt (e : Expr) (index : Nat) : Bool :=
   e.hasLooseBVarAtCore index 0
 
-partial def Expr.hasLooseBVarInExplicitDomain
+def Expr.hasLooseBVarInExplicitDomain
     (e : Expr) (bvarIdx : Nat) (considerRange : Bool) : Bool :=
   match e with
   | .forallE _ domain body binderInfo =>
@@ -143,7 +143,7 @@ partial def Expr.hasLooseBVarInExplicitDomain
   | other =>
       considerRange && other.hasLooseBVarAt bvarIdx
 
-partial def Expr.inferImplicit
+def Expr.inferImplicit
     (e : Expr) (numParams : Nat) (considerRange : Bool) : Expr :=
   match e, numParams with
   | .forallE name domain body binderInfo, n + 1 =>
@@ -157,7 +157,7 @@ partial def Expr.inferImplicit
       .forallE name domain body' binderInfo'
   | other, _ => other
 
-partial def Expr.inferImplicitAll
+def Expr.inferImplicitAll
     (e : Expr) (considerRange : Bool) : Expr :=
   match e with
   | .forallE name domain body binderInfo =>
@@ -171,7 +171,7 @@ partial def Expr.inferImplicitAll
       .forallE name domain body' binderInfo'
   | other => other
 
-partial def Expr.getAppFn : Expr → Expr
+def Expr.getAppFn : Expr → Expr
   | .app fn _ => fn.getAppFn
   | e => e
 
@@ -217,7 +217,7 @@ partial def Expr.consumeTypeAnnotations (e : Expr) : Expr :=
         e
   | _, _ => e
 
-partial def Expr.hasFVar (e : Expr) : Bool :=
+def Expr.hasFVar (e : Expr) : Bool :=
   match e with
   | .fvar _ => true
   | .app f a => f.hasFVar || a.hasFVar
@@ -226,7 +226,7 @@ partial def Expr.hasFVar (e : Expr) : Bool :=
   | .mdata _ b | .proj _ _ b => b.hasFVar
   | .bvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => false
 
-partial def Expr.instantiateLevelParams
+def Expr.instantiateLevelParams
     (e : Expr) (params : List Name) (values : List Level) : Expr :=
   match e with
   | .sort u => .sort (u.instantiateParams params values)

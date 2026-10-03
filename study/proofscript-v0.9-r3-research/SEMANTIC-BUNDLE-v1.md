@@ -41,9 +41,13 @@ The manifest binds:
 - transitive/declared axiom dependencies;
 - runtime exports and their artifact hashes, if any;
 - evidence status;
-- syntax/meta export list.
+- syntax/meta export list;
+- build/host execution effect list;
+- runtime/external assumption list.
 
-For a bundle imported by `ps-standard`, `syntaxMetaExports` MUST be empty.
+For a bundle imported by `ps-standard`, both `syntaxMetaExports` and `hostBuildEffects` MUST be empty.
+
+A semantic import therefore cannot install syntax/meta handlers and cannot require arbitrary dependency build/install code to execute merely to make checked declarations available.
 
 ## Import protocol
 
@@ -57,7 +61,9 @@ A Standard importer performs, in order:
 6. verify that imported declaration names/kinds/type/body identities match the checked payload;
 7. recompute/report assumption dependencies under the active axiom policy;
 8. accept runtime exports only under their separately declared runtime/ABI/evidence profile;
-9. reject any syntax/meta export when importing into `ps-standard`.
+9. reject any syntax/meta export when importing into `ps-standard`;
+10. reject any nonempty `hostBuildEffects` list for Standard semantic import;
+11. record runtime/external assumptions separately from logical axiom dependencies.
 
 A manifest Boolean such as `admitted: true` is never proof authority.
 
@@ -66,6 +72,8 @@ A manifest Boolean such as `admitted: true` is never proof authority.
 The bundle carries **no executable parser registration**.
 
 The schema reserves `syntaxMetaExports` so an Extensible-to-Extensible transport can identify such exports, but Standard requires the array to be empty.
+
+`hostBuildEffects` is separately recorded because logical syntax/meta side effects and operating-system/build execution permissions are different trust boundaries. Standard semantic import requires that list to be empty as well.
 
 A theorem/type imported through the bundle cannot implicitly register notation, a macro, command elaborator, tactic or build script.
 
@@ -81,6 +89,8 @@ A runtime export records:
 - preservation/evidence status.
 
 Logical admission does not imply target preservation.
+
+The manifest-level `runtimeAssumptions` field records external/runtime relationships that are not logical axioms—for example a foreign library implementation assumption or a target ABI assumption.
 
 ## Canonical identity
 

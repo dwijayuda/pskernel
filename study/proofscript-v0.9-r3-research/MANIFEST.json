@@ -1,10 +1,10 @@
 {
-  "workstream": "ProofScript v0.9 r3 research",
-  "status": "research-not-language-release",
+  "workstream": "ProofScript v0.9 r3 accepted design",
+  "status": "accepted-design-baseline-not-implementation-release",
   "branch": "research/proofscript-v0.9-r3",
   "baseCommit": "65369c75c7b63124f1ba7f2289e573181db281f0",
   "baselineGrammar": "ps-0.9-r2",
-  "candidateGrammar": "ps-0.9-r3-research",
+  "candidateGrammar": "ps-0.9-r3",
   "leanSemantics": {
     "version": "4.34.0",
     "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
@@ -27,11 +27,8 @@
     "contractImplementationCompleted": false,
     "applicationRuntimeImplemented": false,
     "interfaceIRImporterImplemented": false,
-    "integratedR3CandidateCreated": true,
-    "applicationTracePrototypePassed": true,
-    "interfaceIRShapePrototypePassed": true,
-    "npmPackageShapeWorkflowPassed": true,
-    "inventoryDomainProofPassed": true
+    "integratedR3CandidateCreated": false,
+    "acceptedR3ReferenceCreated": true
   },
   "repositorySafety": {
     "mainModified": false,
@@ -40,28 +37,12 @@
     "compilerChangedToMatchDocs": false,
     "kernelChangedToMatchDocs": false
   },
-  "prototypeEvidence": {
-    "applicationModel": {
-      "resourceCases": 7,
-      "raceCases": 1
-    },
-    "interfaceIR": {
-      "interfacesParsed": 1,
-      "functionsParsed": 2,
-      "conditionalTypeRejected": true
-    },
-    "npmPackage": {
-      "typescript": "7.0.2",
-      "npm": "12.0.2",
-      "node": "v26.7.0",
-      "pack": true,
-      "install": true,
-      "strictTsc": true,
-      "runtime": true
-    },
-    "inventory": {
-      "toolchain": "Lean 4.34.0",
-      "invariantTheorem": true
-    }
+  "acceptance": {
+    "acceptedIntoR3": true,
+    "acceptedDate": "2026-10-03",
+    "scope": "language/design documentation baseline",
+    "implementationClaim": false,
+    "proofClaim": false,
+    "humanStudyClaim": false
   }
 }

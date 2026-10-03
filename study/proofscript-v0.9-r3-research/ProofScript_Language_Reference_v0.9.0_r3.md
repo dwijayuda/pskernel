@@ -133,8 +133,8 @@ Ordinary dependencies cannot silently mutate the parser.
 Exact profile rules are in:
 
 ~~~text
-18-PS-STANDARD-REGISTRY.md
-ps-standard-registry.json
+06-STANDARD-VS-EXTENSIBLE-PROFILES.md
+PS-STANDARD-REGISTRY-r3.json
 ~~~
 
 ### 4.2 ps-lean-extensible
@@ -806,8 +806,8 @@ The importer rechecks/reconstructs declarations or consumes them through an expl
 Normative schema:
 
 ~~~text
-19-SEMANTIC-BUNDLE-FORMAT.md
-semantic-bundle.schema.json
+SEMANTIC-BUNDLE-v1.md
+SEMANTIC-BUNDLE-v1.schema.json
 ~~~
 
 ## 17. Primitive and data semantics

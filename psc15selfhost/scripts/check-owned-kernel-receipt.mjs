@@ -7,7 +7,7 @@ import { defaultCheckedKernel } from './checked-kernel-provider.mjs';
 import '../packages/pskernel-core/scripts/verify-evidence.mjs';
 
 const manifest = JSON.parse(await readFile(new URL('../packages/pskernel-core/package.json', import.meta.url), 'utf8'));
-assert.equal(manifest.version, '0.1.0-checker.9');
+assert.equal(manifest.version, '0.1.0-checker.10');
 assert.equal(manifest.private, true);
 assert.equal(manifest.proofscript.authoritative, false);
 assert.equal(manifest.proofscript.bootstrap, true);
@@ -80,5 +80,14 @@ assert(!/psKernel(?:Type|Lookup|Order)Run/u.test(record));
 assert(record.includes('psKernelCheckStart env field'));
 assert(record.includes('PsKernelDefinition.recordFamily name ctorName fields'));
 assert(worker.includes("ctor.t?.k === 'forall' ? 'recordInductive' : 'unitInductive'"));
+
+assert(typing.includes('PsKernelDefinition.recordFamily unusedName unusedCtor fields'));
+assert(typing.includes('PsKernelTypeTask.projectField'));
+assert(reduction.includes('PsKernelReduceTask.projectBound'));
+assert(reduction.includes('PsKernelReduceTask.recordArity'));
+assert(reduction.includes('PsKernelReduceTask.recordApply'));
+assert(worker.includes('E.proj(name(value.n, depth + 1), natural(value.i), sub(value.e))'));
+assert(!/psKernel(?:Type|Lookup|Order|Binding|Conversion|Reduce)Run/u.test(reduction.slice(0,reduction.indexOf('def psKernelReduceRun'))));
+assert(!/psKernel(?:Type|Lookup|Order|Binding|Conversion|Reduce)Run/u.test(typing.slice(0,typing.indexOf('def psKernelTypeRun'))));
 
 console.log('PSC2_OWNED_KERNEL_RECEIPT: PASS (checker identities, retired legacy routing, owned bootstrap closure and default; release gates remain closed)');

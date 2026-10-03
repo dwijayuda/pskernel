@@ -1,6 +1,6 @@
 {
   "name": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.9",
+  "version": "0.1.0-checker.10",
   "private": true,
   "description": "Owned PSC-compiled dependent term-checker fragment; private experimental checkpoint, not an authoritative kernel",
   "type": "module",

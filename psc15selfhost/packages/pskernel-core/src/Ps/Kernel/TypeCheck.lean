@@ -28,6 +28,10 @@ inductive PsKernelTypeTask where
   | binding (state : PsKernelBindingState)
   | reduce (state : PsKernelReduceState)
   | reduceTop
+  | projectType (family : PsKernelName) (index : PsKernelNatural)
+  | projectName (family : PsKernelName) (index : PsKernelNatural) (work : PsKernelList PsKernelOrderTask)
+  | projectLookup (index : PsKernelNatural) (state : PsKernelLookupState)
+  | projectField (index : PsKernelNatural) (fields : PsKernelList PsKernelExpr)
   | conversion (state : PsKernelConversionState)
   | returnE (value : PsKernelExpr)
   | lamSort (context : PsKernelList PsKernelExpr) (name : PsKernelName)
@@ -101,11 +105,14 @@ def psKernelTypeInfer
       psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context fn)
         (PsKernelList.cons PsKernelTypeTask.reduceTop
           (PsKernelList.cons (PsKernelTypeTask.appPi context arg) tasks))) values
+  | PsKernelExpr.proj family index major =>
+      psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context major)
+        (PsKernelList.cons PsKernelTypeTask.reduceTop
+          (PsKernelList.cons (PsKernelTypeTask.projectType family index) tasks))) values
   | PsKernelExpr.letE unusedName type val body =>
       psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.infer context type)
         (PsKernelList.cons PsKernelTypeTask.reduceTop
           (PsKernelList.cons (PsKernelTypeTask.letSort context type val body) tasks))) values
-  | _ => psKernelTypeReject PsKernelCheckError.unsupported
 
 def psKernelTypeValueTask
     (env : PsKernelTypingContext) (task : PsKernelTypeTask)
@@ -116,6 +123,15 @@ def psKernelTypeValueTask
       match task with
       | PsKernelTypeTask.reduceTop =>
           psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.reduce (psKernelWhnfStart (psKernelTypingDeclarations env) top)) tasks) rest
+      | PsKernelTypeTask.projectType family index =>
+          match top with
+          | PsKernelExpr.constE majorFamily levels =>
+              match levels with
+              | PsKernelList.nil => psKernelTypeNext env
+                  (PsKernelList.cons (PsKernelTypeTask.projectName family index
+                    (PsKernelList.cons (PsKernelOrderTask.name family majorFamily) PsKernelList.nil)) tasks) rest
+              | _ => psKernelTypeReject PsKernelCheckError.unsupported
+          | _ => psKernelTypeReject PsKernelCheckError.typeMismatch
       | PsKernelTypeTask.lamSort context name type body binder =>
           match top with
           | PsKernelExpr.sortE unusedLevel =>
@@ -200,6 +216,36 @@ def psKernelTypeStep (state : PsKernelTypeState) : PsKernelTypeStep :=
           | _ => psKernelTypeReject PsKernelCheckError.invalidState
       | PsKernelList.cons task rest =>
           match task with
+          | PsKernelTypeTask.projectName family index work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelTypeNext env
+                  (PsKernelList.cons (PsKernelTypeTask.projectName family index next) rest) values
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelTypeNext env
+                      (PsKernelList.cons (PsKernelTypeTask.projectLookup index
+                        (PsKernelLookupState.search family (psKernelTypingDeclarations env))) rest) values
+                  | _ => psKernelTypeReject PsKernelCheckError.typeMismatch
+              | _ => psKernelTypeReject PsKernelCheckError.invalidState
+          | PsKernelTypeTask.projectLookup index current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next => psKernelTypeNext env
+                  (PsKernelList.cons (PsKernelTypeTask.projectLookup index next) rest) values
+              | PsKernelLookupStep.found entry =>
+                  match entry with
+                  | PsKernelDefinition.recordFamily unusedName unusedCtor fields => psKernelTypeNext env
+                      (PsKernelList.cons (PsKernelTypeTask.projectField index fields) rest) values
+                  | _ => psKernelTypeReject PsKernelCheckError.unsupported
+              | PsKernelLookupStep.missing => psKernelTypeReject PsKernelCheckError.unknownConstant
+              | _ => psKernelTypeReject PsKernelCheckError.invalidState
+          | PsKernelTypeTask.projectField index fields =>
+              match fields with
+              | PsKernelList.nil => psKernelTypeReject PsKernelCheckError.typeMismatch
+              | PsKernelList.cons field tail =>
+                  match index with
+                  | PsKernelNatural.zero => psKernelTypePush env rest values field
+                  | _ => psKernelTypeNext env
+                      (PsKernelList.cons (PsKernelTypeTask.projectField (psKernelNaturalPred index) tail) rest) values
           | PsKernelTypeTask.natural current =>
               match psKernelBuiltinNatStep current with
               | PsKernelBuiltinNatStep.next next => psKernelTypeNext env

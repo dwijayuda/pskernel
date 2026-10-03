@@ -1,0 +1,13 @@
+{
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "--test",
+    "--test-reporter=tap",
+    "scripts/checked-owned-projection.test.mjs",
+    "scripts/checked-projection-build.test.mjs"
+  ],
+  "exitCode": 0,
+  "logSha256": "7ab81962c17332fd788c35a8d34b29c6cd805c579e7fd0d6380713e137bfe5af",
+  "recorded": "2026-10-03T07:50:45.555Z",
+  "ownedJointSelfHosted": false
+}

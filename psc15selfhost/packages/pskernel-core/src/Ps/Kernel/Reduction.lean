@@ -9,7 +9,31 @@ import Ps.Kernel.Environment
 /- First-order beta/zeta/delta and supported inductive recursor reduction.
 No primitive or quotient reduction is asserted. Type checking validates discarded terms.
 All nested substitutions and lookups consume the caller's transition budget. -/
+/- Closed record metadata is installed only by RecordInductive admission.
+The field types are closed: projection types need no contextual substitution.
+Record elimination still traverses and validates the full constructor spine. -/
+inductive PsKernelRecordAction where
+  | project (family : PsKernelName) (index : PsKernelNatural)
+  | eliminate (fn : PsKernelExpr) (minor : PsKernelExpr)
+
+def psKernelRecordNeutral (action : PsKernelRecordAction) (major : PsKernelExpr) : PsKernelExpr :=
+  match action with
+  | PsKernelRecordAction.project family index => PsKernelExpr.proj family index major
+  | PsKernelRecordAction.eliminate fn unusedMinor => PsKernelExpr.app fn major
+
 inductive PsKernelReduceTask where
+  | projectLookup (family : PsKernelName) (index : PsKernelNatural) (major : PsKernelExpr) (state : PsKernelLookupState)
+  | projectBound (family : PsKernelName) (index : PsKernelNatural) (major : PsKernelExpr)
+      (ctor : PsKernelName) (fields pending : PsKernelList PsKernelExpr) (cursor : PsKernelNatural)
+  | recordMajor (action : PsKernelRecordAction) (ctor : PsKernelName) (fields : PsKernelList PsKernelExpr)
+  | recordSpine (action : PsKernelRecordAction) (major cursor : PsKernelExpr)
+      (ctor : PsKernelName) (fields args : PsKernelList PsKernelExpr)
+  | recordName (action : PsKernelRecordAction) (major : PsKernelExpr)
+      (fields args : PsKernelList PsKernelExpr) (work : PsKernelList PsKernelOrderTask)
+  | recordArity (action : PsKernelRecordAction) (major : PsKernelExpr) (fields args original : PsKernelList PsKernelExpr)
+  | recordSelect (index : PsKernelNatural) (args : PsKernelList PsKernelExpr)
+  | recordApply (minor : PsKernelExpr) (args : PsKernelList PsKernelExpr)
+  | proj (family : PsKernelName) (index : PsKernelNatural)
   | natural (value : PsKernelNatural) (state : PsKernelBuiltinNatState)
   | whnf (value : PsKernelExpr)
   | apply (arg : PsKernelExpr)
@@ -84,7 +108,8 @@ def psKernelReduceWhnf
       | PsKernelLiteral.natural number => psKernelReduceNext env
           (PsKernelList.cons (PsKernelReduceTask.natural number (psKernelBuiltinNatStart env)) tasks) values
       | _ => psKernelReduceReject PsKernelCheckError.unsupported
-  | PsKernelExpr.proj unusedName unusedIndex unusedValue => psKernelReduceReject PsKernelCheckError.unsupported
+  | PsKernelExpr.proj family index major => psKernelReduceNext env
+      (PsKernelList.cons (PsKernelReduceTask.projectLookup family index major (PsKernelLookupState.search family env)) tasks) values
   | _ => psKernelReducePush env tasks values value
 
 def psKernelReduceNeutralApply
@@ -114,6 +139,9 @@ def psKernelReduceValueTask
   | PsKernelList.nil => psKernelReduceReject PsKernelCheckError.invalidState
   | PsKernelList.cons top rest =>
       match task with
+      | PsKernelReduceTask.recordMajor action ctor fields => psKernelReduceNext env
+          (PsKernelList.cons (PsKernelReduceTask.recordSpine action top top ctor fields PsKernelList.nil) tasks) rest
+      | PsKernelReduceTask.proj family index => psKernelReducePush env tasks rest (PsKernelExpr.proj family index top)
       | PsKernelReduceTask.resumeWhnf =>
           psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf top) tasks) rest
       | PsKernelReduceTask.apply arg =>
@@ -161,6 +189,9 @@ def psKernelReduceValueTask
               psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.normal type)
                 (PsKernelList.cons (PsKernelReduceTask.normal body)
                   (PsKernelList.cons (PsKernelReduceTask.lam name binder) tasks))) rest
+          | PsKernelExpr.proj family index major => psKernelReduceNext env
+              (PsKernelList.cons (PsKernelReduceTask.normal major)
+                (PsKernelList.cons (PsKernelReduceTask.proj family index) tasks)) rest
           | PsKernelExpr.forallE name type body binder =>
               psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.normal type)
                 (PsKernelList.cons (PsKernelReduceTask.normal body)
@@ -193,6 +224,78 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
           | _ => psKernelReduceReject PsKernelCheckError.invalidState
       | PsKernelList.cons task rest =>
           match task with
+          | PsKernelReduceTask.projectLookup family index major current =>
+              match psKernelLookupStep current with
+              | PsKernelLookupStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.projectLookup family index major next) rest) values
+              | PsKernelLookupStep.found entry =>
+                  match entry with
+                  | PsKernelDefinition.recordFamily unusedName ctor fields => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.projectBound family index major ctor fields fields index) rest) values
+                  | _ => psKernelReduceReject PsKernelCheckError.unsupported
+              | PsKernelLookupStep.missing => psKernelReduceReject PsKernelCheckError.unknownConstant
+              | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.projectBound family index major ctor fields pending cursor =>
+              match pending with
+              | PsKernelList.nil => psKernelReduceReject PsKernelCheckError.typeMismatch
+              | PsKernelList.cons unusedField tail =>
+                  match cursor with
+                  | PsKernelNatural.zero => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.whnf major)
+                        (PsKernelList.cons (PsKernelReduceTask.recordMajor
+                          (PsKernelRecordAction.project family index) ctor fields) rest)) values
+                  | _ => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.projectBound family index major ctor fields tail (psKernelNaturalPred cursor)) rest) values
+          | PsKernelReduceTask.recordSpine action major cursor ctor fields args =>
+              match cursor with
+              | PsKernelExpr.app fn arg => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.recordSpine action major fn ctor fields (PsKernelList.cons arg args)) rest) values
+              | PsKernelExpr.constE name levels =>
+                  match levels with
+                  | PsKernelList.nil => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.recordName action major fields args
+                        (PsKernelList.cons (PsKernelOrderTask.name ctor name) PsKernelList.nil)) rest) values
+                  | _ => psKernelReducePush env rest values (psKernelRecordNeutral action major)
+              | _ => psKernelReducePush env rest values (psKernelRecordNeutral action major)
+          | PsKernelReduceTask.recordName action major fields args work =>
+              match psKernelOrderStep work with
+              | PsKernelOrderStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.recordName action major fields args next) rest) values
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.recordArity action major fields args args) rest) values
+                  | _ => psKernelReducePush env rest values (psKernelRecordNeutral action major)
+              | _ => psKernelReduceReject PsKernelCheckError.invalidState
+          | PsKernelReduceTask.recordArity action major fields args original =>
+              match fields with
+              | PsKernelList.nil =>
+                  match args with
+                  | PsKernelList.nil =>
+                      match action with
+                      | PsKernelRecordAction.project unusedFamily index => psKernelReduceNext env
+                          (PsKernelList.cons (PsKernelReduceTask.recordSelect index original) rest) values
+                      | PsKernelRecordAction.eliminate unusedFn minor => psKernelReduceNext env
+                          (PsKernelList.cons (PsKernelReduceTask.recordApply minor original) rest) values
+                  | _ => psKernelReduceReject PsKernelCheckError.typeMismatch
+              | PsKernelList.cons unusedField fieldTail =>
+                  match args with
+                  | PsKernelList.cons unusedArg argTail => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.recordArity action major fieldTail argTail original) rest) values
+                  | _ => psKernelReduceReject PsKernelCheckError.typeMismatch
+          | PsKernelReduceTask.recordSelect index args =>
+              match args with
+              | PsKernelList.nil => psKernelReduceReject PsKernelCheckError.typeMismatch
+              | PsKernelList.cons arg tail =>
+                  match index with
+                  | PsKernelNatural.zero => psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf arg) rest) values
+                  | _ => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.recordSelect (psKernelNaturalPred index) tail) rest) values
+          | PsKernelReduceTask.recordApply minor args =>
+              match args with
+              | PsKernelList.nil => psKernelReduceNext env (PsKernelList.cons (PsKernelReduceTask.whnf minor) rest) values
+              | PsKernelList.cons arg tail => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.recordApply (PsKernelExpr.app minor arg) tail) rest) values
           | PsKernelReduceTask.natLookup fn major zeroCase succCase current =>
               match psKernelLookupStep current with
               | PsKernelLookupStep.next next => psKernelReduceNext env
@@ -230,6 +333,16 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                   (PsKernelList.cons (PsKernelReduceTask.unitLookup fn major minor levels next) rest) values
               | PsKernelLookupStep.found entry =>
                   match entry with
+                  | PsKernelDefinition.recordRecursor unusedName unusedParameters unusedType ctorName fields =>
+                      match levels with
+                      | PsKernelList.cons unusedLevel tail =>
+                          match tail with
+                          | PsKernelList.nil => psKernelReduceNext env
+                              (PsKernelList.cons (PsKernelReduceTask.whnf major)
+                                (PsKernelList.cons (PsKernelReduceTask.recordMajor
+                                  (PsKernelRecordAction.eliminate fn minor) ctorName fields) rest)) values
+                          | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
+                      | _ => psKernelReduceReject PsKernelCheckError.invalidUniverse
                   | PsKernelDefinition.unitRecursor unusedName unusedParameters unusedType ctorName => psKernelReduceNext env
                       (PsKernelList.cons (PsKernelReduceTask.whnf major)
                         (PsKernelList.cons (PsKernelReduceTask.unitMajor fn minor ctorName levels) rest)) values

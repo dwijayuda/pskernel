@@ -1299,7 +1299,26 @@ def psKernelBuiltinNatStep (state : PsKernelBuiltinNatState) : PsKernelBuiltinNa
 };
 };
 
+inductive PsKernelRecordAction where {
+  | project (family : PsKernelName) (index : PsKernelNatural);
+  | eliminate (fn : PsKernelExpr) (minor : PsKernelExpr);
+};
+
+def psKernelRecordNeutral (action : PsKernelRecordAction) (major : PsKernelExpr) : PsKernelExpr := match action with {
+  | PsKernelRecordAction.project family index => PsKernelExpr.proj(family, index, major);
+  | PsKernelRecordAction.eliminate fn unusedMinor => PsKernelExpr.app(fn, major);
+};
+
 inductive PsKernelReduceTask where {
+  | projectLookup (family : PsKernelName) (index : PsKernelNatural) (major : PsKernelExpr) (state : PsKernelLookupState);
+  | projectBound (family : PsKernelName) (index : PsKernelNatural) (major : PsKernelExpr) (ctor : PsKernelName) (fields : PsKernelList(PsKernelExpr)) (pending : PsKernelList(PsKernelExpr)) (cursor : PsKernelNatural);
+  | recordMajor (action : PsKernelRecordAction) (ctor : PsKernelName) (fields : PsKernelList(PsKernelExpr));
+  | recordSpine (action : PsKernelRecordAction) (major : PsKernelExpr) (cursor : PsKernelExpr) (ctor : PsKernelName) (fields : PsKernelList(PsKernelExpr)) (args : PsKernelList(PsKernelExpr));
+  | recordName (action : PsKernelRecordAction) (major : PsKernelExpr) (fields : PsKernelList(PsKernelExpr)) (args : PsKernelList(PsKernelExpr)) (work : PsKernelList(PsKernelOrderTask));
+  | recordArity (action : PsKernelRecordAction) (major : PsKernelExpr) (fields : PsKernelList(PsKernelExpr)) (args : PsKernelList(PsKernelExpr)) (original : PsKernelList(PsKernelExpr));
+  | recordSelect (index : PsKernelNatural) (args : PsKernelList(PsKernelExpr));
+  | recordApply (minor : PsKernelExpr) (args : PsKernelList(PsKernelExpr));
+  | proj (family : PsKernelName) (index : PsKernelNatural);
   | natural (value : PsKernelNatural) (state : PsKernelBuiltinNatState);
   | whnf (value : PsKernelExpr);
   | apply (arg : PsKernelExpr);
@@ -1354,7 +1373,7 @@ def psKernelReduceWhnf (env : PsKernelList(PsKernelDefinition)) (tasks : PsKerne
   | PsKernelLiteral.natural number => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.natural(number, psKernelBuiltinNatStart(env)), tasks), values);
   | _ => psKernelReduceReject(PsKernelCheckError.unsupported);
 };
-  | PsKernelExpr.proj unusedName unusedIndex unusedValue => psKernelReduceReject(PsKernelCheckError.unsupported);
+  | PsKernelExpr.proj family index major => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.projectLookup(family, index, major, PsKernelLookupState.search(family, env)), tasks), values);
   | _ => psKernelReducePush(env, tasks, values, value);
 };
 
@@ -1376,6 +1395,8 @@ def psKernelReduceNeutralApply (env : PsKernelList(PsKernelDefinition)) (tasks :
 def psKernelReduceValueTask (env : PsKernelList(PsKernelDefinition)) (task : PsKernelReduceTask) (tasks : PsKernelList(PsKernelReduceTask)) (values : PsKernelList(PsKernelExpr)) : PsKernelReduceStep := match values with {
   | PsKernelList.nil => psKernelReduceReject(PsKernelCheckError.invalidState);
   | PsKernelList.cons top rest => match task with {
+  | PsKernelReduceTask.recordMajor action ctor fields => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.recordSpine(action, top, top, ctor, fields, PsKernelList.nil), tasks), rest);
+  | PsKernelReduceTask.proj family index => psKernelReducePush(env, tasks, rest, PsKernelExpr.proj(family, index, top));
   | PsKernelReduceTask.resumeWhnf => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.whnf(top), tasks), rest);
   | PsKernelReduceTask.apply arg => match top with {
   | PsKernelExpr.lam unusedName unusedType body unusedBinder => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.binding(psKernelBindingStart(PsKernelBindingMode.instantiate(arg), PsKernelNatural.zero, body)), PsKernelList.cons(PsKernelReduceTask.resumeWhnf, tasks)), rest);
@@ -1405,6 +1426,7 @@ def psKernelReduceValueTask (env : PsKernelList(PsKernelDefinition)) (task : PsK
   | PsKernelReduceTask.expand => match top with {
   | PsKernelExpr.app fn arg => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.normal(fn), PsKernelList.cons(PsKernelReduceTask.normal(arg), PsKernelList.cons(PsKernelReduceTask.app, tasks))), rest);
   | PsKernelExpr.lam name type body binder => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.normal(type), PsKernelList.cons(PsKernelReduceTask.normal(body), PsKernelList.cons(PsKernelReduceTask.lam(name, binder), tasks))), rest);
+  | PsKernelExpr.proj family index major => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.normal(major), PsKernelList.cons(PsKernelReduceTask.proj(family, index), tasks)), rest);
   | PsKernelExpr.forallE name type body binder => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.normal(type), PsKernelList.cons(PsKernelReduceTask.normal(body), PsKernelList.cons(PsKernelReduceTask.forallE(name, binder), tasks))), rest);
   | _ => psKernelReducePush(env, tasks, rest, top);
 };
@@ -1434,6 +1456,62 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep := mat
   | _ => psKernelReduceReject(PsKernelCheckError.invalidState);
 };
   | PsKernelList.cons task rest => match task with {
+  | PsKernelReduceTask.projectLookup family index major current => match psKernelLookupStep(current) with {
+  | PsKernelLookupStep.next next => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.projectLookup(family, index, major, next), rest), values);
+  | PsKernelLookupStep.found entry => match entry with {
+  | PsKernelDefinition.recordFamily unusedName ctor fields => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.projectBound(family, index, major, ctor, fields, fields, index), rest), values);
+  | _ => psKernelReduceReject(PsKernelCheckError.unsupported);
+};
+  | PsKernelLookupStep.missing => psKernelReduceReject(PsKernelCheckError.unknownConstant);
+  | _ => psKernelReduceReject(PsKernelCheckError.invalidState);
+};
+  | PsKernelReduceTask.projectBound family index major ctor fields pending cursor => match pending with {
+  | PsKernelList.nil => psKernelReduceReject(PsKernelCheckError.typeMismatch);
+  | PsKernelList.cons unusedField tail => match cursor with {
+  | PsKernelNatural.zero => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.whnf(major), PsKernelList.cons(PsKernelReduceTask.recordMajor(PsKernelRecordAction.project(family, index), ctor, fields), rest)), values);
+  | _ => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.projectBound(family, index, major, ctor, fields, tail, psKernelNaturalPred(cursor)), rest), values);
+};
+};
+  | PsKernelReduceTask.recordSpine action major cursor ctor fields args => match cursor with {
+  | PsKernelExpr.app fn arg => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.recordSpine(action, major, fn, ctor, fields, PsKernelList.cons(arg, args)), rest), values);
+  | PsKernelExpr.constE name levels => match levels with {
+  | PsKernelList.nil => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.recordName(action, major, fields, args, PsKernelList.cons(PsKernelOrderTask.name(ctor, name), PsKernelList.nil)), rest), values);
+  | _ => psKernelReducePush(env, rest, values, psKernelRecordNeutral(action, major));
+};
+  | _ => psKernelReducePush(env, rest, values, psKernelRecordNeutral(action, major));
+};
+  | PsKernelReduceTask.recordName action major fields args work => match psKernelOrderStep(work) with {
+  | PsKernelOrderStep.next next => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.recordName(action, major, fields, args, next), rest), values);
+  | PsKernelOrderStep.done order => match order with {
+  | PsKernelOrder.same => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.recordArity(action, major, fields, args, args), rest), values);
+  | _ => psKernelReducePush(env, rest, values, psKernelRecordNeutral(action, major));
+};
+  | _ => psKernelReduceReject(PsKernelCheckError.invalidState);
+};
+  | PsKernelReduceTask.recordArity action major fields args original => match fields with {
+  | PsKernelList.nil => match args with {
+  | PsKernelList.nil => match action with {
+  | PsKernelRecordAction.project unusedFamily index => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.recordSelect(index, original), rest), values);
+  | PsKernelRecordAction.eliminate unusedFn minor => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.recordApply(minor, original), rest), values);
+};
+  | _ => psKernelReduceReject(PsKernelCheckError.typeMismatch);
+};
+  | PsKernelList.cons unusedField fieldTail => match args with {
+  | PsKernelList.cons unusedArg argTail => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.recordArity(action, major, fieldTail, argTail, original), rest), values);
+  | _ => psKernelReduceReject(PsKernelCheckError.typeMismatch);
+};
+};
+  | PsKernelReduceTask.recordSelect index args => match args with {
+  | PsKernelList.nil => psKernelReduceReject(PsKernelCheckError.typeMismatch);
+  | PsKernelList.cons arg tail => match index with {
+  | PsKernelNatural.zero => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.whnf(arg), rest), values);
+  | _ => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.recordSelect(psKernelNaturalPred(index), tail), rest), values);
+};
+};
+  | PsKernelReduceTask.recordApply minor args => match args with {
+  | PsKernelList.nil => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.whnf(minor), rest), values);
+  | PsKernelList.cons arg tail => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.recordApply(PsKernelExpr.app(minor, arg), tail), rest), values);
+};
   | PsKernelReduceTask.natLookup fn major zeroCase succCase current => match psKernelLookupStep(current) with {
   | PsKernelLookupStep.next next => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.natLookup(fn, major, zeroCase, succCase, next), rest), values);
   | PsKernelLookupStep.found entry => match entry with {
@@ -1461,6 +1539,13 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep := mat
   | PsKernelReduceTask.unitLookup fn major minor levels current => match psKernelLookupStep(current) with {
   | PsKernelLookupStep.next next => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.unitLookup(fn, major, minor, levels, next), rest), values);
   | PsKernelLookupStep.found entry => match entry with {
+  | PsKernelDefinition.recordRecursor unusedName unusedParameters unusedType ctorName fields => match levels with {
+  | PsKernelList.cons unusedLevel tail => match tail with {
+  | PsKernelList.nil => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.whnf(major), PsKernelList.cons(PsKernelReduceTask.recordMajor(PsKernelRecordAction.eliminate(fn, minor), ctorName, fields), rest)), values);
+  | _ => psKernelReduceReject(PsKernelCheckError.invalidUniverse);
+};
+  | _ => psKernelReduceReject(PsKernelCheckError.invalidUniverse);
+};
   | PsKernelDefinition.unitRecursor unusedName unusedParameters unusedType ctorName => psKernelReduceNext(env, PsKernelList.cons(PsKernelReduceTask.whnf(major), PsKernelList.cons(PsKernelReduceTask.unitMajor(fn, minor, ctorName, levels), rest)), values);
   | _ => psKernelReducePush(env, rest, values, PsKernelExpr.app(fn, major));
 };
@@ -1600,6 +1685,10 @@ def psKernelConversionExpr (left : PsKernelExpr) (right : PsKernelExpr) (tasks :
   | PsKernelExpr.app otherFn otherArg => psKernelConversionTasks(PsKernelList.cons(PsKernelConversionTask.expr(fn, otherFn), PsKernelList.cons(PsKernelConversionTask.expr(arg, otherArg), tasks)));
   | _ => PsKernelConversionStep.final(PsKernelConversionResult.different);
 };
+  | PsKernelExpr.proj family index value => match right with {
+  | PsKernelExpr.proj otherFamily otherIndex otherValue => psKernelConversionTasks(PsKernelList.cons(PsKernelConversionTask.names(PsKernelList.cons(PsKernelOrderTask.name(family, otherFamily), PsKernelList.nil)), PsKernelList.cons(PsKernelConversionTask.natural(PsKernelNumericState.order(index, otherIndex, PsKernelOrder.same)), PsKernelList.cons(PsKernelConversionTask.expr(value, otherValue), tasks))));
+  | _ => PsKernelConversionStep.final(PsKernelConversionResult.different);
+};
   | PsKernelExpr.lam unusedName type body unusedBinder => match right with {
   | PsKernelExpr.lam unusedOtherName otherType otherBody unusedOtherBinder => psKernelConversionTasks(PsKernelList.cons(PsKernelConversionTask.expr(type, otherType), PsKernelList.cons(PsKernelConversionTask.expr(body, otherBody), tasks)));
   | _ => PsKernelConversionStep.final(PsKernelConversionResult.different);
@@ -1694,6 +1783,10 @@ inductive PsKernelTypeTask where {
   | binding (state : PsKernelBindingState);
   | reduce (state : PsKernelReduceState);
   | reduceTop;
+  | projectType (family : PsKernelName) (index : PsKernelNatural);
+  | projectName (family : PsKernelName) (index : PsKernelNatural) (work : PsKernelList(PsKernelOrderTask));
+  | projectLookup (index : PsKernelNatural) (state : PsKernelLookupState);
+  | projectField (index : PsKernelNatural) (fields : PsKernelList(PsKernelExpr));
   | conversion (state : PsKernelConversionState);
   | returnE (value : PsKernelExpr);
   | lamSort (context : PsKernelList(PsKernelExpr)) (name : PsKernelName) (type : PsKernelExpr) (body : PsKernelExpr) (binder : PsKernelBinder);
@@ -1742,14 +1835,21 @@ def psKernelTypeInfer (env : PsKernelTypingContext) (context : PsKernelList(PsKe
   | PsKernelExpr.lam name type body binder => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.infer(context, type), PsKernelList.cons(PsKernelTypeTask.reduceTop, PsKernelList.cons(PsKernelTypeTask.lamSort(context, name, type, body, binder), tasks))), values);
   | PsKernelExpr.forallE unusedName type body unusedBinder => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.infer(context, type), PsKernelList.cons(PsKernelTypeTask.reduceTop, PsKernelList.cons(PsKernelTypeTask.piDomain(context, type, body), tasks))), values);
   | PsKernelExpr.app fn arg => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.infer(context, fn), PsKernelList.cons(PsKernelTypeTask.reduceTop, PsKernelList.cons(PsKernelTypeTask.appPi(context, arg), tasks))), values);
+  | PsKernelExpr.proj family index major => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.infer(context, major), PsKernelList.cons(PsKernelTypeTask.reduceTop, PsKernelList.cons(PsKernelTypeTask.projectType(family, index), tasks))), values);
   | PsKernelExpr.letE unusedName type val body => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.infer(context, type), PsKernelList.cons(PsKernelTypeTask.reduceTop, PsKernelList.cons(PsKernelTypeTask.letSort(context, type, val, body), tasks))), values);
-  | _ => psKernelTypeReject(PsKernelCheckError.unsupported);
 };
 
 def psKernelTypeValueTask (env : PsKernelTypingContext) (task : PsKernelTypeTask) (tasks : PsKernelList(PsKernelTypeTask)) (values : PsKernelList(PsKernelExpr)) : PsKernelTypeStep := match values with {
   | PsKernelList.nil => psKernelTypeReject(PsKernelCheckError.invalidState);
   | PsKernelList.cons top rest => match task with {
   | PsKernelTypeTask.reduceTop => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.reduce(psKernelWhnfStart(psKernelTypingDeclarations(env), top)), tasks), rest);
+  | PsKernelTypeTask.projectType family index => match top with {
+  | PsKernelExpr.constE majorFamily levels => match levels with {
+  | PsKernelList.nil => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.projectName(family, index, PsKernelList.cons(PsKernelOrderTask.name(family, majorFamily), PsKernelList.nil)), tasks), rest);
+  | _ => psKernelTypeReject(PsKernelCheckError.unsupported);
+};
+  | _ => psKernelTypeReject(PsKernelCheckError.typeMismatch);
+};
   | PsKernelTypeTask.lamSort context name type body binder => match top with {
   | PsKernelExpr.sortE unusedLevel => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.infer(PsKernelList.cons(type, context), body), PsKernelList.cons(PsKernelTypeTask.lamFinish(name, type, binder), tasks)), rest);
   | _ => psKernelTypeReject(PsKernelCheckError.typeExpected);
@@ -1804,6 +1904,30 @@ def psKernelTypeStep (state : PsKernelTypeState) : PsKernelTypeStep := match sta
   | _ => psKernelTypeReject(PsKernelCheckError.invalidState);
 };
   | PsKernelList.cons task rest => match task with {
+  | PsKernelTypeTask.projectName family index work => match psKernelOrderStep(work) with {
+  | PsKernelOrderStep.next next => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.projectName(family, index, next), rest), values);
+  | PsKernelOrderStep.done order => match order with {
+  | PsKernelOrder.same => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.projectLookup(index, PsKernelLookupState.search(family, psKernelTypingDeclarations(env))), rest), values);
+  | _ => psKernelTypeReject(PsKernelCheckError.typeMismatch);
+};
+  | _ => psKernelTypeReject(PsKernelCheckError.invalidState);
+};
+  | PsKernelTypeTask.projectLookup index current => match psKernelLookupStep(current) with {
+  | PsKernelLookupStep.next next => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.projectLookup(index, next), rest), values);
+  | PsKernelLookupStep.found entry => match entry with {
+  | PsKernelDefinition.recordFamily unusedName unusedCtor fields => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.projectField(index, fields), rest), values);
+  | _ => psKernelTypeReject(PsKernelCheckError.unsupported);
+};
+  | PsKernelLookupStep.missing => psKernelTypeReject(PsKernelCheckError.unknownConstant);
+  | _ => psKernelTypeReject(PsKernelCheckError.invalidState);
+};
+  | PsKernelTypeTask.projectField index fields => match fields with {
+  | PsKernelList.nil => psKernelTypeReject(PsKernelCheckError.typeMismatch);
+  | PsKernelList.cons field tail => match index with {
+  | PsKernelNatural.zero => psKernelTypePush(env, rest, values, field);
+  | _ => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.projectField(psKernelNaturalPred(index), tail), rest), values);
+};
+};
   | PsKernelTypeTask.natural current => match psKernelBuiltinNatStep(current) with {
   | PsKernelBuiltinNatStep.next next => psKernelTypeNext(env, PsKernelList.cons(PsKernelTypeTask.natural(next), rest), values);
   | PsKernelBuiltinNatStep.ready => psKernelTypePush(env, rest, values, PsKernelExpr.constE(psKernelBuiltinNatName, PsKernelList.nil));

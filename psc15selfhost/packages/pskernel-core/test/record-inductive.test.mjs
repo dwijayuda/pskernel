@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {k,list,expression,drive,tag,decodeExpr,normal} from './checker-values.mjs';
+import {k,list,expression,drive,tag,decodeExpr,normal,convert} from './checker-values.mjs';
 import {runtimeName} from './fixture-values.mjs';
 import {unit,definition} from './unit-values.mjs';
 import {N,Z,S,U,B,C,app,pi,lam,record,member,literal,value,firstFieldRec,bootstrap,joint} from './record-values.mjs';
@@ -84,10 +84,7 @@ test('record rejection and previous success expose no fresh-session authority',(
  assert.equal(bootstrap([definition('Use',[],C('R'),value('R',[literal(0)]))]).error,'unknownConstant');
  const rejected=bootstrap([record('R'),definition('Bad',[],C('R'),literal(0))]);assert.equal(rejected.status,'rejected');assert.equal(rejected.result.environment,undefined);
 });
-test('record iota is not silently supplied by the host or unit rule',()=>{
- const admitted=bootstrap([record('R')]);const term=firstFieldRec('R',1);assert.equal(admitted.status,'admitted');
- const result=normal(term,admitted.result.environment);assert.equal(result.status,'done');
- // The record eliminator remains neutral in this admission-only fragment.
- let head=result.result.value;while(tag(head)==='app')head=head.fn;
- assert.deepEqual(head,expression(C(member('R','rec'),[S(Z)])));
+test('record iota now executes the source-owned record rule',()=>{
+ const admitted=bootstrap([record('R')]);assert.equal(admitted.status,'admitted');
+ const result=convert(firstFieldRec('R',1),literal(0),admitted.result.environment);assert.equal(result.status,'equal');
 });

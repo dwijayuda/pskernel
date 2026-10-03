@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "scope": "Closed monomorphic Type-valued record fields, constructor applications and derived dependent eliminator typing; admission-only suite; projection and iota have separate evidence; not general inductive completeness",
+  "scope": "Closed-record projection typing, bounds, substitution and iota with dependent computed-result witnesses; not general inductive completeness",
   "sourceManifestSha256": "f1768c4a43bfd6bcbfa54b2107e0e9bad719c8718eb5ab63c4f6e4954b975c28",
-  "harnessSha256": "3cc745e76132fcf8dd702452c7ff3d45a52a1fd7b8cd6cc02fc4dc084fe480bf",
+  "harnessSha256": "52266f3ee24f1313b48f4e0a47f97d8de9caa51f482f2d772e5309652369cbe1",
   "provider": {
     "protocol": "pskernel-lean/1",
     "provider": "lean4-cpp",
@@ -12,16 +12,16 @@
     "status": "version"
   },
   "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
-  "cases": 102,
-  "matched": 102,
-  "accepted": 42,
-  "rejected": 60,
+  "cases": 128,
+  "matched": 128,
+  "accepted": 53,
+  "rejected": 75,
   "deliberatelyUnsupported": [
     "dependent constructor fields",
     "parameters and indices",
     "recursive records",
     "Prop or higher-universe families"
   ],
-  "recordsPath": "dist/evidence/record-differential-records.json",
-  "recordsSha256": "6a76cc5654f90600f3b3174306a0067da6272db98bfdd1b23e1a5ccd25c66f90"
+  "recordsPath": "dist/evidence/record-elimination-differential-records.json",
+  "recordsSha256": "a44651d2fbef076a9386c62e2a03d847fd46f3b5fdc86611a07a134c8904d622"
 }

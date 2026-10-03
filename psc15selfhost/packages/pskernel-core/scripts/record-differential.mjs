@@ -54,8 +54,8 @@ for(const c of cases){const ours=bootstrap(c.entries,1000000);if(!['admitted','r
  records.push(result);if(records.length%20===0)console.log('RECORD_DIFFERENTIAL_PROGRESS: '+records.length+'/'+cases.length);
 }
 const recordsPath='dist/evidence/record-differential-records.json',recordsText=JSON.stringify(records,null,2)+'\n';fs.mkdirSync(path.join(root,'dist/evidence'),{recursive:true});fs.writeFileSync(path.join(root,recordsPath),recordsText);
-const report={schemaVersion:1,scope:'Closed monomorphic Type-valued record fields, constructor applications and derived dependent eliminator typing; not record iota, projection or general inductive completeness',
+const report={schemaVersion:1,scope:'Closed monomorphic Type-valued record fields, constructor applications and derived dependent eliminator typing; admission-only suite; projection and iota have separate evidence; not general inductive completeness',
  sourceManifestSha256:sha256(fs.readFileSync(path.join(root,'manifests/SOURCE.json'))),harnessSha256:sha256(fs.readFileSync(fileURLToPath(import.meta.url))),provider:identity,providerSha256:pin.leanProviderSha256,
  cases:records.length,matched:records.length,accepted:records.filter(x=>x.native.accepted).length,rejected:records.filter(x=>!x.native.accepted).length,
- deliberatelyUnsupported:['dependent constructor fields','parameters and indices','recursive records','Prop or higher-universe families','record iota and projections'],recordsPath,recordsSha256:sha256(recordsText)};
+ deliberatelyUnsupported:['dependent constructor fields','parameters and indices','recursive records','Prop or higher-universe families'],recordsPath,recordsSha256:sha256(recordsText)};
 fs.writeFileSync(path.join(root,'manifests/RECORD_DIFFERENTIAL.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));

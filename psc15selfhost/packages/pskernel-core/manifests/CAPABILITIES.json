@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "package": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.9",
+  "version": "0.1.0-checker.10",
   "status": "experimental-term-checker",
   "canCheckProofs": false,
   "authoritative": false,
@@ -33,7 +33,9 @@
     "natural-literal-typing-after-checked-Nat-admission",
     "bounded-natural-literal-constructor-conversion-and-recursor-reduction",
     "closed-monomorphic-nonrecursive-record-constructor-field-admission",
-    "source-derived-record-field-metadata-and-dependent-eliminator-typing"
+    "source-derived-record-field-metadata-and-dependent-eliminator-typing",
+    "validated-closed-record-projection-typing-and-reduction",
+    "bounded-closed-record-iota-and-neutral-projection-conversion"
   ],
   "boundedEvidence": [
     "BUILD.json",
@@ -46,7 +48,8 @@
     "UNIT_DIFFERENTIAL.json",
     "NAT_DIFFERENTIAL.json",
     "LITERAL_DIFFERENTIAL.json",
-    "RECORD_DIFFERENTIAL.json"
+    "RECORD_DIFFERENTIAL.json",
+    "RECORD_ELIMINATION_DIFFERENTIAL.json"
   ],
   "releaseGates": {
     "term-checking": {
@@ -111,11 +114,11 @@
     "function-and-structure-eta",
     "general-mutual-indexed-and-recursive-inductive-admission",
     "quotient-admission",
-    "text-literal-and-projection-typing",
+    "text-literal-and-general-projection-typing",
     "remaining-prelude-and-primitive-validation",
     "axiom-and-opaque-declaration-admission",
     "hostile-input-decoder",
     "public-CheckedModule",
-    "record-iota-and-dependent-record-fields"
+    "dependent-parameterized-indexed-and-recursive-record-fields"
   ]
 }

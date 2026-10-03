@@ -61,6 +61,15 @@ def psKernelConversionExpr
           (PsKernelList.cons (PsKernelConversionTask.expr fn otherFn)
             (PsKernelList.cons (PsKernelConversionTask.expr arg otherArg) tasks))
       | _ => PsKernelConversionStep.final PsKernelConversionResult.different
+  | PsKernelExpr.proj family index value =>
+      match right with
+      | PsKernelExpr.proj otherFamily otherIndex otherValue => psKernelConversionTasks
+          (PsKernelList.cons (PsKernelConversionTask.names
+            (PsKernelList.cons (PsKernelOrderTask.name family otherFamily) PsKernelList.nil))
+            (PsKernelList.cons (PsKernelConversionTask.natural
+              (PsKernelNumericState.order index otherIndex PsKernelOrder.same))
+              (PsKernelList.cons (PsKernelConversionTask.expr value otherValue) tasks)))
+      | _ => PsKernelConversionStep.final PsKernelConversionResult.different
   | PsKernelExpr.lam unusedName type body unusedBinder =>
       match right with
       | PsKernelExpr.lam unusedOtherName otherType otherBody unusedOtherBinder => psKernelConversionTasks

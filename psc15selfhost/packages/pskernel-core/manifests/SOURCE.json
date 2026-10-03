@@ -51,15 +51,15 @@
     },
     {
       "path": "src/Ps/Kernel/Reduction.lean",
-      "sha256": "3029e26f6403e68923e002ccd8f646ffdb2069a9f44ca8e2f86cc8157e7125fe"
+      "sha256": "425dfaef6e62ee7955df6b0551bc2d287638ba403ffc7dfc609c0ae0cc3a44b2"
     },
     {
       "path": "src/Ps/Kernel/Conversion.lean",
-      "sha256": "a699c1d8322f399bc96403650568f91432b1a22f1d438ade6f539d804958ba54"
+      "sha256": "886e63ab3375fef4d7986c81803f6168980c3f0159035967c37a44080d8f5207"
     },
     {
       "path": "src/Ps/Kernel/TypeCheck.lean",
-      "sha256": "1743f4b1cb2b2e3606e024b9517306e3751741a3d42122b6d35c3de1f1a69405"
+      "sha256": "0b03198a6f92c0b9980a5f53f787567edc59621f2af58a83175786d3b059e5ea"
     },
     {
       "path": "src/Ps/Kernel/Admission.lean",

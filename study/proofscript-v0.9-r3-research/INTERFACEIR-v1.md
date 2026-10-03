@@ -1,6 +1,6 @@
 # InterfaceIR v1 — npm / TypeScript Boundary
 
-Status: **normative r3 binding interchange format**
+Status: **normative foreign-binding interchange protocol only; not a ProofScript source-language authority**
 
 Schema: `INTERFACEIR-v1.schema.json`  
 Schema identity: `proofscript-interface-ir-1.0.0`

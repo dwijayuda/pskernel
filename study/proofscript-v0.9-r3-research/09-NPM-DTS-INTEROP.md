@@ -1,6 +1,6 @@
 # r3 npm and TypeScript Declaration Interoperability
 
-Status: recommended InterfaceIR architecture; importer/exporter implementation pending.
+Status: **accepted r3 interop architecture; InterfaceIR schema/importer/exporter implementation pending.**
 
 ## Goal
 

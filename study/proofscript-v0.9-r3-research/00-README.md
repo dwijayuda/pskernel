@@ -64,6 +64,15 @@ psc2-compiler-v1 is a compiler/product claim. Its source-language requirement is
 
 psc2-standard-v1 is a packaged distribution claim. Its language-facing Standard profile is psc2-standard-language-v1; libraries/provers/runtimes remain separately versioned packages rather than hidden additions to the base language.
 
+The TypeScript-replacement platform target is intentionally separate from the language:
+
+~~~text
+../../docs/plans/08_JS_PLATFORM_PROFILE.md
+profile: psc-js-platform-v1
+~~~
+
+It covers npm/JS module resolution, InterfaceIR/.d.ts ingestion, foreign adapters, Node/Web bindings, publication, and tooling without enlarging `psc2-language-v1`.
+
 ## Post-PSC2 language roadmap
 
 Language evolution after PSC2 is isolated in:

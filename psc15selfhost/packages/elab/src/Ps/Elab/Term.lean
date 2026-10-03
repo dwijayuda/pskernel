@@ -328,9 +328,10 @@ def psElabProjectionReference
           let baseName :=
             psNameAppendStr PsName.anonymous base;
           match
-              psResolveName
+              psResolveNameScoped
                 context.localContext
                 context.environment
+                context.namespacePrefix
                 baseName with
           | none => Except.error (PsElabError.unknownName baseName)
           | some resolved =>
@@ -358,7 +359,12 @@ def psElabNamedReference
   match psSyntaxNameToName sourceName with
   | none => Except.error PsElabError.emptyName
   | some name =>
-      match psResolveName context.localContext context.environment name with
+      match
+          psResolveNameScoped
+            context.localContext
+            context.environment
+            context.namespacePrefix
+            name with
       | none =>
           psElabProjectionReference context sourceName expected
       | some resolved =>
@@ -2664,9 +2670,10 @@ def psElabSyntaxLocalId
       | Option.none => Option.none
       | Option.some name =>
           match
-              psResolveName
+              psResolveNameScoped
                 context.localContext
                 context.environment
+                context.namespacePrefix
                 name with
           | Option.none => Option.none
           | Option.some resolved =>

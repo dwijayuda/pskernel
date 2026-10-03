@@ -35,7 +35,7 @@ def Name.bucketHash : Name → Nat
       (parent.bucketHash * 33 + (value % environmentBucketCount) + 17) %
         environmentBucketCount
 
-abbrev EnvironmentIndex := Array (List ConstantInfo)
+def EnvironmentIndex : Type := Array (List ConstantInfo)
 
 def emptyEnvironmentIndex : EnvironmentIndex :=
   Array.replicate environmentBucketCount []

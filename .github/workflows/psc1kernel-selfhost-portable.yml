@@ -10,6 +10,7 @@ on:
       - psc15selfhost/scripts/psc1-source-profile.mjs
       - psc15selfhost/scripts/psc1kernel-reference-inventory.mjs
       - psc15selfhost/scripts/psc1kernel-port-batch-check.mjs
+      - psc15selfhost/scripts/psc1kernel-port-translate-check.mjs
       - psc15selfhost/check-psc1-source.mjs
       - psc15selfhost/lakefile.lean
       - psc15selfhost/test/PsKernelSelfHostFoundationTests.lean
@@ -75,10 +76,4 @@ jobs:
       - name: Require canonical ProofScript translation
         run: |
           set -euo pipefail
-          for module in Name Level Expr Instantiate; do
-            source="packages/pskernel-selfhost/src/Ps/KernelSelfHost/${module}.lean"
-            output="/tmp/Ps.KernelSelfHost.${module}.ps"
-            lake exe psc1 translate "${source}" --to ps --out "${output}"
-            test -s "${output}"
-            lake exe psc1 check "${output}"
-          done
+          node scripts/psc1kernel-port-translate-check.mjs

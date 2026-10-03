@@ -1,5 +1,8 @@
 # ProofScript / pskernel plans
 
+> **r3 authority note.** These files are implementation plans, not competing language specifications. The sole normative language/compiler-design authority on this branch is `study/proofscript-v0.9-r3-research/ProofScript_Language_Reference_v0.9.0_r3.md`. Its compiler-capability/ownership matrix decides whether a feature belongs in PSC2 compiler core, library/prover/extension/plugin, bounded Lean compatibility, host boundary, post-PSC2 platform work, or deferred scope.
+
+
 These documents are living plans. They are intentionally versionable and may be revised as Full Std, Arena, ProofScript language work, and npm integration expose better designs.
 
 ## Planning rules

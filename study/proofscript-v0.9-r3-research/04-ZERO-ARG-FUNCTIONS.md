@@ -11,10 +11,10 @@ function now(): Time :=
   ...
 ~~~
 
-as explicit source sugar for a function with one Unit binder:
+as explicit source sugar for a function with one **optional Unit binder whose default is Unit**:
 
 ~~~lean
-def now (_ : Unit) : Time :=
+def now (_ : Unit := ()) : Time :=
   ...
 ~~~
 
@@ -24,7 +24,7 @@ The declaration sugar is independent from the more general r3 empty-call rule.
 now()
 ~~~
 
-is an empty source-level invocation. For this Unit-taking function, the empty-call elaborator synthesizes the required `()`.
+is an empty source-level invocation. It lowers to the r3 empty-call application request; native optional-parameter insertion supplies the hidden default Unit.
 
 This preserves Lean's unary/curried core model; r3 does not introduce a zero-arity core function.
 
@@ -47,7 +47,7 @@ FunctionExplicitGroup ::=
 
 Semantic predicate:
 - exactly one empty explicit group is allowed in a <code>function</code> declaration;
-- the empty group denotes one synthesized explicit Unit binder;
+- the empty group denotes one synthesized explicit `Unit` binder encoded as native `optParam Unit ()`;
 - an empty group cannot be mixed with another explicit group.
 
 Rejected:
@@ -67,23 +67,23 @@ function factory {α: Type}(): Box α :=
 lowers conceptually to:
 
 ~~~lean
-def factory {α : Type} (_ : Unit) : Box α :=
+def factory {α : Type} (_ : Unit := ()) : Box α :=
   ...
 ~~~
 
 No source name is introduced for the Unit binder unless diagnostics need a synthetic provenance identifier.
 ## Empty invocation, defaults, and partial application
 
-The accepted r3 rule deliberately distinguishes declaration sugar, empty invocation, and explicit Unit application.
+The accepted r3 rule distinguishes declaration sugar, empty invocation, and explicit Unit application.
 
 ~~~proofscript
 function answer(): Nat := 42
-answer()     -- complete empty invocation; supplies Unit
+answer()     -- zero source arguments; hidden optional Unit defaults to ()
 answer       -- the function value
 answer(())   -- ordinary explicit Unit application
 ~~~
 
-Optional/default parameters also participate in empty invocation:
+Optional/default parameters use the same empty-call mechanism:
 
 ~~~proofscript
 function greeting(name: String := "world"): String :=
@@ -92,30 +92,24 @@ function greeting(name: String := "world"): String :=
 const x: String := greeting()
 ~~~
 
-Here `greeting()` inserts the native default rather than passing Unit.
+Canonical empty-call lowering uses native high-level application ellipsis and then requires that no ordinary required explicit parameter was omitted.
 
-A required non-Unit parameter is not silently abstracted:
+A required non-default parameter therefore rejects:
 
 ~~~proofscript
 function addOne(x: Nat): Nat := x + 1
-addOne()     -- PS_EMPTY_CALL_REQUIRES_ARGUMENT
+addOne()     -- PS_EMPTY_CALL_REQUIRED_ARGUMENT
 ~~~
 
-To obtain a partial function, use the function value or a nonempty application whose native semantics leaves parameters unapplied.
+To obtain a partial function, use the function value or an ordinary nonempty/native application form.
 
-For a function with a Unit parameter followed by a required parameter:
+The hidden Unit binder is encoded with native `optParam`. If an explicit type ascription erases that optional-parameter metadata, the empty-call convenience can also be erased; ordinary explicit `()` application remains available.
 
-~~~proofscript
-function staged(_: Unit, x: Nat): Nat := x
-staged()     -- reject: x remains required
-staged(())   -- explicit Unit application; may yield a partial function
-~~~
-
-Implicit/instance parameters and optional/automatic parameters retain native-compatible insertion.
+Implicit/instance parameters and optional/automatic parameters retain the pinned native insertion semantics.
 
 ## Methods
 
-A Unit-taking generalized-field function can be called with an empty argument list after receiver resolution when the empty-call algorithm can satisfy every required explicit parameter according to its Unit/default rules.
+A generalized-field function can use an empty call after receiver resolution when the resulting high-level application can complete all omitted explicit parameters through native optional/automatic insertion under the r3 acceptance rule.
 
 The frontend constructs native field/application syntax; it does not hard-code receiver position.
 
@@ -152,7 +146,7 @@ Only <code>answer()</code> uses the Unit sugar. Ordinary currying remains unchan
 
 - <code>PS_FUNCTION_MULTIPLE_EMPTY_GROUPS</code>;
 - <code>PS_FUNCTION_EMPTY_GROUP_MIXED</code>;
-- <code>PS_UNIT_CALL_NONFUNCTION</code> is an elaboration-facing explanation when <code>f()</code> lowers to Unit application but the resulting head cannot accept Unit.
+- <code>PS_EMPTY_CALL_REQUIRED_ARGUMENT</code> is an elaboration-facing explanation when <code>f()</code> lowers to Unit application but the resulting head cannot accept Unit.
 
 ## Migration
 

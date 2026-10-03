@@ -12,6 +12,10 @@ Status: **active anti-drift execution plan**
 > one checked-core compiler path. Kernel hardening continues separately on
 > `kernel/lean434-study-hardening`.
 
+## PSC2 language-freeze boundary
+
+On the r3 branch, `psc2-language-v1` should not grow merely to chase TypeScript feature parity. The remaining TypeScript-replacement work is tracked by `08_JS_PLATFORM_PROFILE.md` as `psc-js-platform-v1`: npm/module resolution, `.d.ts` normalization, callbacks/async/resource adapters, Node/Web bindings, package publication, bundler/tooling integration, and representative applications. Language growth requires an independently justified versioned language/extension profile.
+
 Goal:
 
 > Build a small, coherent general-purpose language for the JavaScript

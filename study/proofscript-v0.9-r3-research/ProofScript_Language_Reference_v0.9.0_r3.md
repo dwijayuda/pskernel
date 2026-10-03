@@ -4,6 +4,35 @@ Status: **accepted r3 language/design baseline; documentation/specification scop
 Grammar identity: `ps-0.9-r3`.
 Semantic pin: Lean 4.34.0, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b.
 
+## 0. Completeness, inheritance, and authority
+
+r3 is a **complete delta specification** over one immutable r2 baseline:
+
+~~~text
+baseline/ProofScript_Language_Reference_v0.9.0_r2.md
+SHA-256 d29c0b2d5780e6cdb08a4c9ac00cc7442a64b1c8133b51c5f0c0e9a343b11b8d
+~~~
+
+Everything in that r2 reference remains normative unless explicitly amended/overridden by r3.
+
+The exact section-by-section authority map is `R3-R2-INHERITANCE-MATRIX.md`. The precedence rules are in `R3-AUTHORITY-AND-DELTA.md`.
+
+This restores, without approximate re-transcription, all unchanged r2 rules for primitives, exact Nat/Int behavior, strings/bytes, modules/source identity, recursion/partiality/unsafe behavior, theorem/axiom policy, compiler phases, transactional admission, source maps, erasure, primitive matrices, preservation, artifact binding, resource limits, diagnostics and evidence manifests.
+
+Normative r3 companions are:
+
+~~~text
+R3-GRAMMAR-AND-FEATURE-REGISTRY.md
+FEATURE-REGISTRY-r3.json
+PS-STANDARD-REGISTRY-r3.json
+SEMANTIC-BUNDLE-v1.md
+SEMANTIC-BUNDLE-v1.schema.json
+INTERFACEIR-v1.md
+INTERFACEIR-v1.schema.json
+~~~
+
+Design acceptance remains distinct from implementation/proof/testing evidence.
+
 ## 1. Design commitment
 
 ProofScript remains a general-purpose programming and theorem-proving language whose logical meaning is defined through Lean-compatible elaboration and kernel admission.
@@ -32,13 +61,15 @@ Any .psx or other dialect requires an explicit grammar/profile and does not auto
 
 ## 3. Source profiles
 
-r3 defines two .ps profiles over the same logic.
+r3 defines two `.ps` profiles over the same logic.
 
 ### ps-standard
 
-For applications, packages, AI-generated code, stable formatting/LSP, and reproducible builds.
+The exact Standard registry is `PS-STANDARD-REGISTRY-r3.json` with registry identity `ps-standard-0.9-r3`.
 
-It has a closed/versioned syntax environment and does not import arbitrary parser/macro/elaborator mutation from ordinary dependencies.
+Its parser is a closed/versioned snapshot. Ordinary package imports do not mutate parser, notation, macro, tactic-elaborator or command/term elaborator tables.
+
+The registry enumerates the accepted r3 surface features, native command heads, term families, tactic heads, allowed attributes, and forbidden dynamic syntax mechanisms.
 
 ### ps-lean-extensible
 
@@ -46,7 +77,13 @@ For theorem proving, custom notation/macros/tactics/elaborators, Lean compatibil
 
 Every extension identity/order/options set is part of the environment identity.
 
-A Standard package can consume semantic/runtime exports from an Extensible package without importing its syntax/meta exports.
+### Crossing profiles
+
+A Standard package consumes an Extensible library's checked semantic exports through `PSC Semantic Bundle v1`.
+
+A Standard-importable bundle must have no syntax/meta exports and must pass schema, dependency, payload-hash and genuine checker import/recheck validation.
+
+The exact protocol is `SEMANTIC-BUNDLE-v1.md` / `SEMANTIC-BUNDLE-v1.schema.json`.
 
 ## 4. Definitions
 
@@ -58,7 +95,7 @@ const is retained in r3 as a top-level/namespace parameterless native-definition
 
 No ProofScript-wide declaration semicolon is introduced.
 
-## 5. Zero-argument function sugar
+## 5. Zero-argument function sugar and empty invocation
 
 r3 permits:
 
@@ -67,22 +104,41 @@ function now(): Time :=
   ...
 ~~~
 
-with canonical meaning equivalent to:
+with canonical declaration meaning equivalent to:
 
 ~~~lean
 def now (_ : Unit) : Time :=
   ...
 ~~~
 
-The invocation:
+However `f()` is more general than textual `f ()`: it is a **complete empty source-level invocation**.
+
+The empty-call elaborator:
+1. inserts implicit and instance arguments normally;
+2. inserts omitted optional/default and automatic arguments;
+3. if the next still-required explicit parameter is definitionally `Unit`, synthesizes exactly one `()`;
+4. continues inserting trailing implicit/default/automatic arguments;
+5. rejects if any required non-Unit explicit parameter remains;
+6. never eta-abstracts a missing required parameter for an empty call.
+
+Examples:
 
 ~~~proofscript
-now()
+function now(): Time := ...
+now()                         -- Unit sugar
+
+function greet(name: String := "world"): String := ...
+greet()                       -- uses default
+
+function add(x: Nat): Nat := x + 1
+add()                         -- reject
+
+function staged(_: Unit, x: Nat): Nat := x
+staged()                      -- reject
+staged(())                    -- explicit Unit; ordinary partial-application rules may apply
 ~~~
 
-remains a Unit application.
-
-This is surface sugar, not a zero-arity core function concept.
+`f(())` remains an ordinary nonempty call with an explicit Unit term.
 
 ## 6. Parenthesized calls
 
@@ -110,9 +166,20 @@ One tuple argument requires explicit extra grouping:
 f((x, y))
 ~~~
 
-The call parser may admit ordinary whitespace/comments and a legal expression-continuation newline between a completed callable head and its opening parenthesis.
+The call gap permits spaces/tabs and Lean comments containing no physical line terminator.
 
-It must not delete trivia and reparse text blindly. The active enclosing grammar category controls whether a newline can continue the expression.
+A physical line terminator between the completed callable head and `(` breaks r3 parenthesized-call ownership. A block comment containing a newline also breaks the gap.
+
+Multiline argument lists remain valid after the opening parenthesis.
+
+Thus `f (x)` is the same r3 call as `f(x)`, but:
+
+~~~proofscript
+f
+(x)
+~~~
+
+is not one r3 parenthesized call.
 
 The canonical formatter prints:
 
@@ -144,6 +211,13 @@ A trailing comma remains allowed in a nonempty owned call or explicit parameter 
 Nested application groups remain distinct.
 
 Generalized field notation is delegated to compatible Lean elaboration; the frontend does not hard-code receiver position.
+
+r3 does **not** make the dot whitespace-insensitive:
+
+~~~proofscript
+users.map(render)    -- field notation + r3 call
+users .map(render)   -- not added by r3
+~~~
 
 Patterns remain native and do not acquire constructor-call syntax.
 
@@ -223,25 +297,44 @@ Definitional equality, propositional equality, and Boolean comparison remain dis
 
 ## 11. Stable PSC-owned contracts
 
-requires, ensures, assert, invariant, and termination/specification metadata have PSC-owned semantics.
+The normative base-r3 contract surface is deliberately narrow:
 
-For a total pure function:
-
-~~~proofscript
-function withdraw(balance: Nat, amount: Nat): Nat
-  requires amount <= balance
-  ensures result => result = balance - amount
-:=
-  balance - amount
+~~~text
+requires P
+ensures result => Q
 ~~~
 
-the accepted evidence must establish the approved property of the actual implementation declaration.
+for **total pure functions**.
 
-The stable semantic layer is expressed through ordinary checkable theorems/program logic.
+For preconditions `P₁..Pₙ` and postconditions `Q₁..Qₘ`, the final accepted evidence establishes the conjunction of postconditions for the **actual admitted implementation** under the conjunction of preconditions.
 
-Lean intrinsic verification may be an oracle or implementation path but is not the sole semantic definition.
+Zero `requires` means `True`. Zero `ensures` means no contract theorem is requested.
 
-Specification identity includes referenced predicates/types, imports, program-logic version, environment, and axiom policy.
+### Frame/effect semantics
+
+Every contract has a semantic `FrameSpec` containing read capabilities/locations, write/modified locations, and foreign effects. A total pure r3 contract has an empty frame.
+
+Future stateful/application contract profiles must make their frame/effect relation explicit; a postcondition about the returned value never grants arbitrary unrelated mutation.
+
+### Higher-order contracts
+
+r3 accepts the ordinary logical model:
+
+~~~text
+CallableSpec args result
+callRequires(f, args) : Prop
+callEnsures(f, args, result) : Prop
+~~~
+
+These are ordinary definitions/predicates, not kernel primitives. Higher-order verification must prove the connection between a function value and these predicates.
+
+### Staged contract features
+
+Surface `assert`, loop `invariant`, state `modifies`, old-state notation, async trace clauses and termination-specific convenience syntax are **not part of the frozen base-r3 contract grammar**. They require later versioned program-logic profiles.
+
+Lean intrinsic verification may remain an oracle/implementation path but is not the semantic definition of PSC contracts.
+
+Specification identity includes implementation identity, normalized contract AST, frame/effect data, referenced predicates/types, imports, program-logic version, environment and axiom policy.
 
 ## 12. Assurance states
 
@@ -251,52 +344,79 @@ Malformed, unsupported, incompatible, failed, exhausted, cancelled, and internal
 
 ## 13. Application model
 
-r3 standardizes an application-library model around the concepts:
+The accepted r3 Standard application semantics is conceptually:
 
 ~~~text
-App error result
-Exit error result
-Fiber error result
-Resource error value
-Stream error item
-Capability capabilityId
+App (caps : CapabilitySet) (err : Type) (result : Type)
+
+Exit err result
+  | success result
+  | failure err
+  | cancelled CancelReason
+
+Fiber err result
+RuntimeFault
+Resource caps err value
+Stream caps err item
 ~~~
 
-These are ordinary library/runtime concepts, not new kernel primitives.
+### Cold App / started Fiber
 
-Execution distinguishes success, typed failure, cancellation, and unexpected runtime failure.
+`App` is **cold**. Constructing, copying or reusing an App value does not start external work.
 
-Capabilities are explicit.
+Work starts only through explicit execution/start operations such as `run` or `fork`.
 
-Resource cleanup is deterministic and not defined by garbage collection.
+`Fiber` denotes started work. `join` observes terminal `Exit`; `cancel` requests cancellation and is not itself terminal completion.
 
-Child fibers are structured/scoped by default; detach is explicit.
+### Structured concurrency
 
-Promise, AbortController, AsyncIterable, WASI future/stream, and other target mechanisms are adapters rather than source semantics.
+A lexical task scope owns child fibers unless detach explicitly transfers ownership. Scope completion requests cancellation of unfinished children, waits for terminal outcome/cleanup under the semantic resource policy, and does not silently leak children.
 
-Convenience async/resource syntax is deferred until the library model and usability evidence justify it.
+### Typed failure and RuntimeFault
+
+`failure err` is ordinary recoverable application failure.
+
+Unexpected host/runtime faults are represented separately as `RuntimeFault` and are not caught by ordinary typed-error handlers unless an explicit adapter translates them.
+
+### Resource cleanup
+
+After successful acquisition, release is attempted exactly once on success, typed failure and cancellation.
+
+Once release starts, ordinary cooperative cancellation is **shielded** until release terminates. Body failure plus cleanup failure must preserve both causes rather than silently discard one.
+
+### Capabilities
+
+Capabilities are visible in `App caps err result` through a canonical type-level `CapabilitySet`. Package/runtime manifests aggregate reachable capability requirements.
+
+### Native IO/Task
+
+Lean `IO`/`Task` remain the low-level native substrate.
+
+Portable `ps-standard` application APIs expose App/Fiber/Resource/Stream. Direct native IO/Task is reserved for explicitly nonportable/native-adapter modules (or the Extensible profile) and carries explicit capability/assumption metadata.
+
+JavaScript Promise and WASI 0.3 `async func`/`future<T>`/`stream<T>` are target adapters, not the source definition of PSC async.
 
 ## 14. npm and .d.ts
 
-A versioned InterfaceIR sits between TypeScript declaration interpretation and native PSC APIs.
+The normative boundary format is `InterfaceIR v1`:
 
-Bindings separate:
+~~~text
+INTERFACEIR-v1.md
+INTERFACEIR-v1.schema.json
+schemaVersion = proofscript-interface-ir-1.0.0
+~~~
 
-1. raw foreign interface;
-2. safe runtime adapter/codec;
-3. optional logical specification/model.
+Its resolution identity binds TypeScript version/module-resolution mode, custom and ordered effective conditions, package name/version, package.json SHA-256, export subpath, selected runtime entry/format, selected type entry, declaration-file hashes and target runtime/platform.
 
-Unsupported TypeScript machinery fails closed rather than becoming any.
+Bindings separate raw foreign shape, safe runtime adapter/codec, and optional logical specification/model.
 
-Presence can distinguish missing, undefined, null, and value.
+Every imported construct is classified as native, specialized, runtime-adapter, opaque-handle, import-normalization, or unsupported.
 
-Identity-bearing objects become foreign handles.
+Unsupported TypeScript machinery fails closed rather than becoming native `any`.
 
-Promise/callback/receiver/resource semantics are explicit.
+Presence can distinguish missing, undefined, null and value. Identity-bearing objects become foreign handles. Promise/callback/receiver/resource behavior is explicit.
 
-Generated PSC npm packages may contain ESM JS, .d.ts, source maps, validators, assurance metadata, and proof bundles.
-
-A .d.ts file is not runtime validation or proof.
+A `.d.ts` file is not runtime validation or proof.
 
 ## 15. Targets and preservation
 
@@ -318,7 +438,7 @@ Owning a backend does not prove it. Using an external compiler does not invalida
 
 ## 16. Planned first formal evidence
 
-r3 deliberately does not claim a production proof in this documentation-only workstream.
+The r3 design is now specification-complete enough to define its first proof targets, but it deliberately does not claim those proofs have been completed.
 
 The proposed first frontend theorem should formalize a small parenthesized-call model and establish ownership/lowering properties before relating that model to the production parser.
 
@@ -362,8 +482,20 @@ ProofScript should not claim r3 full-app readiness until the CLI, HTTP service, 
 
 Those applications are not yet completed on this documentation branch. No end-to-end r3 application evidence is claimed here.
 
-## 20. Open status
+## 20. Status and remaining evidence work
 
-This document is the accepted r3 design/specification baseline. It is not a production compiler release and does not claim implementation, proof, or full-application completion.
+The r3 **specification-completion pass is complete** for the ten identified design gaps.
 
-Remaining implementation/evidence work includes the production parser/lowerer, Standard profile closure, contract implementation, App runtime, InterfaceIR importer/exporter, real reference applications, production-refinement proofs, real JS/Wasm preservation, and human usability results.
+The language remains a documentation/specification baseline, not an implementation release.
+
+Remaining work is evidence/implementation rather than an unresolved base-language design dependency:
+- production parser/lowerer and Standard registry implementation;
+- contract checker/VC implementation;
+- App/Fiber/Resource/Stream library/runtime implementation;
+- InterfaceIR importer/exporter;
+- real reference applications;
+- formal overlay/refinement/preservation proofs;
+- JS/Wasm preservation;
+- TypeScript/Lean human usability study before stable/1.0 freeze.
+
+Any new syntax or semantic change discovered during implementation/evidence work requires an explicit r3 amendment or later revision; it is not silently inferred.

@@ -8,7 +8,7 @@ Use ordinary Lean-compatible library/runtime definitions rather than new kernel 
 
 ~~~text
 App (caps : CapabilitySet) (err : Type) (result : Type)
-Fiber err result
+Fiber (caps : CapabilitySet) (err : Type) (result : Type)
 Exit err result
   | success result
   | failure err
@@ -28,15 +28,17 @@ The exact Lean library encoding may use equivalent ordinary definitions, but it 
 
 Work starts only through an explicit execution/start operation such as `run` or `fork`.
 
-`Fiber err result` denotes already-started work.
+Each `run`/`fork` starts a distinct execution; `App` does not imply memoization. Re-executing an App that captures a stateful/foreign resource remains subject to that resource's explicit validity/lifetime semantics.
+
+`Fiber caps err result` denotes already-started work and records the capability set of the child computation.
 
 Conceptually:
 
 ~~~text
 run  : CapEnv caps -> App caps err a -> native IO (Exit err a)
-fork : App caps err a -> App parentCaps parentErr (Fiber err a)
-join : Fiber err a -> App caps parentErr (Exit err a)
-cancel : Fiber err a -> App caps parentErr Unit
+fork : App childCaps err a -> App parentCaps parentErr (Fiber childCaps err a)
+join : Fiber childCaps err a -> App parentCaps parentErr (Exit err a)
+cancel : Fiber childCaps err a -> App parentCaps parentErr Unit
 ~~~
 
 The final library types may refine parent/child capability/error relationships, but they may not change the cold/start distinction.
@@ -108,7 +110,9 @@ Cancelling
 
 `cancel fiber` requests cancellation. It is not itself proof that the fiber is terminal.
 
-`join fiber` observes the terminal `Exit`.
+Cancellation requests are idempotent at the semantic level. A cancellation request after terminal completion does not alter the already selected terminal result.
+
+`join fiber` observes the terminal `Exit`; it does not restart the computation. Repeated joins observe the same terminal `Exit` (subject only to separately reported runtime faults/resource limits in the joining operation itself).
 
 A normal completion or typed failure may race with a cancellation request according to the scheduler trace; the terminal outcome is whichever the semantic scheduler relation selects.
 

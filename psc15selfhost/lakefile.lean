@@ -183,7 +183,8 @@ lean_lib PsKernelSelfHost where
   roots := #[
     `Ps.KernelSelfHost.Name,
     `Ps.KernelSelfHost.Level,
-    `Ps.KernelSelfHost.Expr
+    `Ps.KernelSelfHost.Expr,
+    `Ps.KernelSelfHost.Instantiate
   ]
 
 @[default_target]

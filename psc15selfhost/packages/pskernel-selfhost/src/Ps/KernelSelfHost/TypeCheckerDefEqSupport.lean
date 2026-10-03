@@ -134,7 +134,7 @@ def psKernelDefEqLambdaSpineWithFuel
                             true
                           else
                             psKernelExprHasLooseBVar rightBody then
-                        let local :=
+                        let openedLocal :=
                           psKernelDefEqWithLocal
                             context
                             (Prod.snd domains)
@@ -142,11 +142,11 @@ def psKernelDefEqLambdaSpineWithFuel
                             rightOpened
                             rightBinderInfo;
                         let fresh :=
-                          Prod.fst local;
+                          Prod.fst openedLocal;
                         let child :=
-                          Prod.fst (Prod.snd local);
+                          Prod.fst (Prod.snd openedLocal);
                         let nextState :=
-                          Prod.snd (Prod.snd local);
+                          Prod.snd (Prod.snd openedLocal);
                         smaller
                           defeq
                           child
@@ -297,7 +297,7 @@ def psKernelDefEqForallSpineWithFuel
                             true
                           else
                             psKernelExprHasLooseBVar rightBody then
-                        let local :=
+                        let openedLocal :=
                           psKernelDefEqWithLocal
                             context
                             (Prod.snd domains)
@@ -305,11 +305,11 @@ def psKernelDefEqForallSpineWithFuel
                             rightOpened
                             rightBinderInfo;
                         let fresh :=
-                          Prod.fst local;
+                          Prod.fst openedLocal;
                         let child :=
-                          Prod.fst (Prod.snd local);
+                          Prod.fst (Prod.snd openedLocal);
                         let nextState :=
-                          Prod.snd (Prod.snd local);
+                          Prod.snd (Prod.snd openedLocal);
                         smaller
                           defeq
                           child
@@ -1330,7 +1330,7 @@ def psKernelDefEqLazyStep
             rightDef
 
 def psKernelDefEqLazyReductionAfterPred
-    (continue :
+    (resume :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
       PsKernelExpr ->
@@ -1458,7 +1458,7 @@ def psKernelDefEqLazyReductionAfterPred
                   | Except.ok stepResult =>
                       match Prod.fst stepResult with
                       | PsKernelDeltaStepResult.continue nextLeft nextRight =>
-                          continue
+                          resume
                             context
                             (Prod.snd stepResult)
                             nextLeft
@@ -1576,7 +1576,7 @@ def psKernelDefEqLazyReductionWithFuel
               (PsKernelDeltaResult.decided true)
               state)
         else
-          let continue :
+          let resume :
               PsKernelCheckerContext ->
               PsKernelCheckerState ->
               PsKernelExpr ->
@@ -1606,7 +1606,7 @@ def psKernelDefEqLazyReductionWithFuel
                           (Prod.snd result))
               | Option.none =>
                   psKernelDefEqLazyReductionAfterPred
-                    continue
+                    resume
                     defeq
                     whnf
                     coreWhnf
@@ -1616,7 +1616,7 @@ def psKernelDefEqLazyReductionWithFuel
                     right
           | Option.none =>
               psKernelDefEqLazyReductionAfterPred
-                continue
+                resume
                 defeq
                 whnf
                 coreWhnf

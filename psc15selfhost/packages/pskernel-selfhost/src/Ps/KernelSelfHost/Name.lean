@@ -8,39 +8,48 @@ inductive PsKernelNameComponent where
   | num (value : Nat)
 
 def psKernelStringEqFromWithFuel
-    (fuel : Nat)
-    (left : String)
-    (right : String)
-    (leftPos : Nat)
-    (rightPos : Nat) : Bool :=
+    (fuel : Nat) :
+    String -> String -> Nat -> Nat -> Bool :=
   match fuel with
   | Nat.zero =>
-      false
-  | Nat.succ remaining =>
-      if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
-        String.Internal.atEnd right (String.Pos.Raw.mk rightPos)
-      else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
+      fun
+        (_left : String)
+        (_right : String)
+        (_leftPos : Nat)
+        (_rightPos : Nat) =>
         false
-      else
-        let leftChar :=
-          String.Internal.get left (String.Pos.Raw.mk leftPos);
-        let rightChar :=
-          String.Internal.get right (String.Pos.Raw.mk rightPos);
-        if Nat.beq (Char.toNat leftChar) (Char.toNat rightChar) then
-          psKernelStringEqFromWithFuel
-            remaining
-            left
-            right
-            (String.Pos.Raw.byteIdx
-              (String.Internal.next
-                left
-                (String.Pos.Raw.mk leftPos)))
-            (String.Pos.Raw.byteIdx
-              (String.Internal.next
-                right
-                (String.Pos.Raw.mk rightPos)))
-        else
+  | Nat.succ remaining =>
+      let smaller :
+          String -> String -> Nat -> Nat -> Bool :=
+        psKernelStringEqFromWithFuel remaining;
+      fun
+        (left : String)
+        (right : String)
+        (leftPos : Nat)
+        (rightPos : Nat) =>
+        if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
+          String.Internal.atEnd right (String.Pos.Raw.mk rightPos)
+        else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
           false
+        else
+          let leftChar :=
+            String.Internal.get left (String.Pos.Raw.mk leftPos);
+          let rightChar :=
+            String.Internal.get right (String.Pos.Raw.mk rightPos);
+          if Nat.beq (Char.toNat leftChar) (Char.toNat rightChar) then
+            smaller
+              left
+              right
+              (String.Pos.Raw.byteIdx
+                (String.Internal.next
+                  left
+                  (String.Pos.Raw.mk leftPos)))
+              (String.Pos.Raw.byteIdx
+                (String.Internal.next
+                  right
+                  (String.Pos.Raw.mk rightPos)))
+          else
+            false
 
 def psKernelStringEq
     (left : String)
@@ -84,50 +93,59 @@ def psKernelNatGe
   Nat.ble right left
 
 def psKernelStringCmpWithFuel
-    (fuel : Nat)
-    (left : String)
-    (right : String)
-    (leftPos : Nat)
-    (rightPos : Nat) : Ordering :=
+    (fuel : Nat) :
+    String -> String -> Nat -> Nat -> Ordering :=
   match fuel with
   | Nat.zero =>
-      Ordering.eq
+      fun
+        (_left : String)
+        (_right : String)
+        (_leftPos : Nat)
+        (_rightPos : Nat) =>
+        Ordering.eq
   | Nat.succ remaining =>
-      if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
-        if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
-          Ordering.eq
-        else
-          Ordering.lt
-      else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
-        Ordering.gt
-      else
-        let leftChar :=
-          Char.toNat
-            (String.Internal.get
-              left
-              (String.Pos.Raw.mk leftPos));
-        let rightChar :=
-          Char.toNat
-            (String.Internal.get
-              right
-              (String.Pos.Raw.mk rightPos));
-        if Nat.beq leftChar rightChar then
-          psKernelStringCmpWithFuel
-            remaining
-            left
-            right
-            (String.Pos.Raw.byteIdx
-              (String.Internal.next
-                left
-                (String.Pos.Raw.mk leftPos)))
-            (String.Pos.Raw.byteIdx
-              (String.Internal.next
-                right
-                (String.Pos.Raw.mk rightPos)))
-        else if Nat.ble leftChar rightChar then
-          Ordering.lt
-        else
+      let smaller :
+          String -> String -> Nat -> Nat -> Ordering :=
+        psKernelStringCmpWithFuel remaining;
+      fun
+        (left : String)
+        (right : String)
+        (leftPos : Nat)
+        (rightPos : Nat) =>
+        if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
+          if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
+            Ordering.eq
+          else
+            Ordering.lt
+        else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
           Ordering.gt
+        else
+          let leftChar :=
+            Char.toNat
+              (String.Internal.get
+                left
+                (String.Pos.Raw.mk leftPos));
+          let rightChar :=
+            Char.toNat
+              (String.Internal.get
+                right
+                (String.Pos.Raw.mk rightPos));
+          if Nat.beq leftChar rightChar then
+            smaller
+              left
+              right
+              (String.Pos.Raw.byteIdx
+                (String.Internal.next
+                  left
+                  (String.Pos.Raw.mk leftPos)))
+              (String.Pos.Raw.byteIdx
+                (String.Internal.next
+                  right
+                  (String.Pos.Raw.mk rightPos)))
+          else if Nat.ble leftChar rightChar then
+            Ordering.lt
+          else
+            Ordering.gt
 
 def psKernelStringCmp
     (left : String)

@@ -1,13 +1,13 @@
-# ProofScript v0.9 r3 Research Workstream
+# ProofScript v0.9 r3 Accepted Design Workstream
 
-Status: **research branch; not a language release, compiler release, or proof of soundness**  
+Status: **accepted r3 design baseline; documentation/specification only; not a compiler release or proof of soundness**  
 Branch: <code>research/proofscript-v0.9-r3</code>  
 Baseline: ProofScript v0.9.0 draft revision 2 (<code>ps-0.9-r2</code>)  
 Semantic pin: Lean 4.34.0, commit <code>293d5d0c0c3f3dded4688b3ccd6a33939ac5102b</code>
 
 ## Mission
 
-This workstream tests a possible r3 surface and platform revision without changing ProofScript's logical foundation.
+This workstream researched the r3 surface/platform revision and now records the accepted r3 design baseline without changing ProofScript's logical foundation.
 
 The invariant is:
 
@@ -27,9 +27,9 @@ The invariant is:
 ~~~
 
 The project does **not** equate parser success, elaboration, proof acceptance, compiler correctness, backend correctness, self-hosting, hashes, tests, or AI confidence.
-## Research questions
+## Accepted research decisions
 
-The r3 study is organized around ten linked decisions:
+The r3 study was organized around ten linked decisions, now accepted as the r3 design baseline:
 
 1. Make native <code>.ps</code> parenthesized calls insensitive to ordinary trivia, with explicit tuple grouping.
 2. Make ProofScript-owned braces genuinely structural instead of visually brace-delimited but secretly layout-delimited.
@@ -42,15 +42,15 @@ The r3 study is organized around ten linked decisions:
 9. Complete a first formal overlay theorem and a first backend-preservation slice.
 10. Design a real TypeScript-developer usability study before syntax freeze.
 
-## Current recommended direction
+## Accepted r3 direction
 
-The current research recommendation is deliberately opinionated but remains reviewable:
+The following research results are accepted into r3:
 
 - replace r2 <code>D-CALL</code> with an r3 parenthesized-call **surface exception**, because <code>f (x, y)</code> will no longer retain the r2 native-tuple neighbor inside <code>.ps</code>;
 - keep <code>.lean</code> entirely unchanged;
-- make owned brace bodies explicitly delimited with category-specific separators;
+- make owned brace bodies explicitly delimited with category-specific separators; structure/class fields use commas only **between** fields, with no trailing field comma;
 - add Unit-function sugar;
-- provisionally retain top-level <code>const</code>, with a usability gate before 1.0;
+- retain top-level <code>const</code> in r3, while keeping it subject to reconsideration before stable/1.0 if usability evidence shows harmful false familiarity;
 - freeze a closed-syntax Standard profile and a separately extensible Lean-oriented profile;
 - define contracts as ordinary checkable logical artifacts tied to the actual implementation;
 - standardize <code>App</code>, <code>Fiber</code>, <code>Resource</code>, <code>Stream</code>, and explicit execution outcomes as library/runtime concepts, not kernel primitives.
@@ -90,7 +90,8 @@ A green test does not promote itself into a theorem.
 - <code>DECISIONS.md</code> — compact decision ledger.
 - <code>MANIFEST.json</code> — machine-readable identities and evidence.
 - <code>RESEARCH-SOURCES.md</code> — local and current official research sources.
-- <code>ProofScript_Language_Reference_v0.9.0_r3_candidate.md</code> — integrated candidate, created after the decision documents.\n- <code>proofs/</code> — checked narrow formal models and evidence.\n- <code>prototypes/</code> — bounded executable research prototypes, explicitly not production components.\n- <code>reference-apps/Inventory.lean</code> — checked canonical domain-transition theorem.
+- <code>ProofScript_Language_Reference_v0.9.0_r3.md</code> — accepted integrated r3 language/design reference.
+- <code>R3-ACCEPTANCE.md</code> — acceptance record and evidence boundary.
 ## Research sources
 
 Primary local sources remain the repository's pinned <code>study/</code> material: the v0.7 language lineage, Lean 4.34 parser/source, the Lean language-reference mirror, TypeScript documentation mirror, Lean4Lean divergence notes, theorem-proving material, and language-design books.
@@ -114,4 +115,4 @@ Source popularity is not a language-design proof.
 
 This directory is additive. It must not overwrite v0.7, v0.9-r2, compiler code, kernel code, or main-branch policy. r3 syntax is not activated merely because this documentation exists.
 
-The integrated r3 candidate now exists as documentation research only. Language freeze still requires future implementation work, formal proofs, application experiments, and the human usability study; none of those are claimed by this branch.
+The r3 design is accepted as the documentation/specification baseline. Implementation, formal proof, complete-application, and human-usability evidence remain separate future work and are not implied by design acceptance.

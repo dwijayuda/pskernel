@@ -1,0 +1,175 @@
+{
+  "schemaVersion": "proofscript-feature-registry-1",
+  "language": "ProofScript",
+  "grammarRevision": "ps-0.9-r3",
+  "semanticPin": {
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "inheritedBase": {
+    "grammarRevision": "ps-0.9-r2",
+    "sha256": "d29c0b2d5780e6cdb08a4c9ac00cc7442a64b1c8133b51c5f0c0e9a343b11b8d"
+  },
+  "features": [
+    {
+      "id": "L-CORE-LEAN",
+      "class": "L",
+      "category": "registered-native",
+      "status": "inherited",
+      "target": "same native syntax/meaning"
+    },
+    {
+      "id": "E-CALL-PARENS-R3",
+      "class": "E",
+      "category": "term",
+      "status": "accepted",
+      "discriminator": "CallableHead CallGap (",
+      "target": "one native-compatible application object"
+    },
+    {
+      "id": "E-EMPTY-CALL-R3",
+      "class": "E",
+      "category": "term",
+      "status": "accepted",
+      "discriminator": "CallableHead CallGap ()",
+      "target": "complete empty invocation with default/auto insertion and at most one synthesized Unit"
+    },
+    {
+      "id": "D-NAMED-CALL",
+      "class": "D",
+      "category": "call-argument",
+      "status": "inherited-amended",
+      "target": "native named argument"
+    },
+    {
+      "id": "D-TRAILING-COMMA-CALL",
+      "class": "D",
+      "category": "call-list",
+      "status": "accepted",
+      "target": "no additional argument"
+    },
+    {
+      "id": "D-TRAILING-COMMA-PARAMS",
+      "class": "D",
+      "category": "explicit-binder-list",
+      "status": "accepted",
+      "target": "no additional binder"
+    },
+    {
+      "id": "D-CONST-ALIAS",
+      "class": "D",
+      "category": "command",
+      "status": "accepted",
+      "target": "parameterless native def"
+    },
+    {
+      "id": "D-FUNCTION-ALIAS-R3",
+      "class": "D",
+      "category": "command",
+      "status": "accepted",
+      "target": "native def"
+    },
+    {
+      "id": "D-FUNCTION-UNIT-R3",
+      "class": "D",
+      "category": "function-header",
+      "status": "accepted",
+      "target": "one explicit Unit binder"
+    },
+    {
+      "id": "D-EXPLICIT-PARAMS",
+      "class": "D",
+      "category": "header",
+      "status": "inherited",
+      "target": "ordered explicit native binders"
+    },
+    {
+      "id": "E-IF-BRACE",
+      "class": "E",
+      "category": "term",
+      "status": "inherited",
+      "target": "native conditional; one term per branch"
+    },
+    {
+      "id": "E-STRUCT-BODY-R3",
+      "class": "E",
+      "category": "structure-fields",
+      "status": "accepted",
+      "separator": "comma-between-only",
+      "trailingSeparator": false
+    },
+    {
+      "id": "E-CLASS-BODY-R3",
+      "class": "E",
+      "category": "class-fields",
+      "status": "accepted",
+      "separator": "comma-between-only",
+      "trailingSeparator": false
+    },
+    {
+      "id": "E-INDUCTIVE-BODY-R3",
+      "class": "E",
+      "category": "constructors",
+      "status": "accepted",
+      "separator": "leading-bar"
+    },
+    {
+      "id": "E-MATCH-BODY-R3",
+      "class": "E",
+      "category": "match-alternatives",
+      "status": "accepted",
+      "separator": "leading-bar"
+    },
+    {
+      "id": "E-INSTANCE-BODY-R3",
+      "class": "E",
+      "category": "instance-fields",
+      "status": "accepted",
+      "separator": "native-semicolon",
+      "trailingSeparator": true
+    },
+    {
+      "id": "E-WHERE-BODY-R3",
+      "class": "E",
+      "category": "local-declarations",
+      "status": "accepted",
+      "separator": "native-semicolon",
+      "trailingSeparator": true
+    },
+    {
+      "id": "S-PURE-CONTRACT-R3",
+      "class": "S",
+      "category": "declaration-contract",
+      "status": "accepted",
+      "scope": "total-pure-functions",
+      "clauses": [
+        "requires",
+        "ensures"
+      ]
+    },
+    {
+      "id": "P-STANDARD-R3",
+      "class": "P",
+      "category": "source-profile",
+      "status": "accepted",
+      "registry": "PS-STANDARD-REGISTRY-r3.json"
+    },
+    {
+      "id": "P-LEAN-EXTENSIBLE-R3",
+      "class": "P",
+      "category": "source-profile",
+      "status": "accepted",
+      "extensionPolicy": "declared-and-identity-bound"
+    }
+  ],
+  "retired": [
+    {
+      "id": "D-CALL",
+      "reason": "replaced by E-CALL-PARENS-R3"
+    },
+    {
+      "id": "D-DECL-SEMI",
+      "reason": "retired in r2 and remains retired"
+    }
+  ]
+}

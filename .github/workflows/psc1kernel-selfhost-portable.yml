@@ -9,6 +9,7 @@ on:
       - psc15selfhost/packages/pskernel/PSC1Kernel/**
       - psc15selfhost/scripts/psc1-source-profile.mjs
       - psc15selfhost/scripts/psc1kernel-reference-inventory.mjs
+      - psc15selfhost/scripts/psc1kernel-port-batch-check.mjs
       - psc15selfhost/check-psc1-source.mjs
       - psc15selfhost/lakefile.lean
       - psc15selfhost/test/PsKernelSelfHostFoundationTests.lean
@@ -61,12 +62,10 @@ jobs:
           set -euo pipefail
           lake exe psc1_kernel_selfhost_foundation_tests
 
-      - name: PSC1-check the portable source
+      - name: PSC1-check all portable kernel modules
         run: |
           set -euo pipefail
-          lake exe psc1 check packages/pskernel-selfhost/src/Ps/KernelSelfHost/Name.lean
-          lake exe psc1 check packages/pskernel-selfhost/src/Ps/KernelSelfHost/Level.lean
-          lake exe psc1 check packages/pskernel-selfhost/src/Ps/KernelSelfHost/Expr.lean
+          node scripts/psc1kernel-port-batch-check.mjs
 
       - name: Require canonical ProofScript translation
         run: |

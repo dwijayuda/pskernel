@@ -65,6 +65,24 @@ def psKernelNatCmp
   else
     Ordering.gt
 
+def psKernelNatLt
+    (left : Nat)
+    (right : Nat) : Bool :=
+  if Nat.beq left right then
+    false
+  else
+    Nat.ble left right
+
+def psKernelNatGt
+    (left : Nat)
+    (right : Nat) : Bool :=
+  psKernelNatLt right left
+
+def psKernelNatGe
+    (left : Nat)
+    (right : Nat) : Bool :=
+  Nat.ble right left
+
 def psKernelStringCmpWithFuel
     (fuel : Nat)
     (left : String)

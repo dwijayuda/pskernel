@@ -89,77 +89,135 @@ These precedents inform alternatives; no external system's proof transfers autom
 
 ### Lean application/default arguments
 
-Official Lean function-application documentation states that high-level application is elaborated as one unit; optional parameters are encoded with `optParam`, automatic parameters with `autoParam`, and omitted optional/automatic arguments are inserted by the application elaborator.
+The official Lean function-application reference states that core functions are unary/curried while the high-level application elaborator handles positional, named, implicit, instance, strict-implicit, optional and automatic parameters as one application unit.
+
+It also documents the native application ellipsis form:
+
+~~~lean
+f ..
+~~~
+
+and states that optional parameters use optParam and automatic parameters use autoParam.
 
 Source:
 https://lean-lang.org/doc/reference/latest/Terms/Function-Application/
 
 r3 consequence:
-`f()` is specified as an empty source-level invocation that can use native optional/default/automatic insertion, with one special Unit synthesis for Unit-callable functions. Missing required non-Unit parameters make the empty call fail rather than eta-abstract.
+- nonempty parenthesized calls lower to one native high-level application object;
+- empty parenthesized calls lower to a native ellipsis application and then apply the r3 rule that forbids omission of ordinary required explicit parameters;
+- zero-source-argument function sugar lowers to an optional Unit binder with default ();
+- default-only functions can therefore be called with f() without introducing JavaScript undefined.
 
 ### Lean field-notation adjacency
 
-The same official reference states that generalized field notation is a term followed by `.` and an identifier **not separated by spaces**.
+The official Lean function-application reference states that generalized field notation uses a dot not separated by spaces from the receiver.
 
 Source:
 https://lean-lang.org/doc/reference/latest/Terms/Function-Application/
 
 r3 consequence:
-`users.map(render)` is supported; `users .map(render)` is not added by r3.
+users.map(render) is supported; users .map(render) is not added by r3.
 
-### Lean elaborator power
+### Lean syntax/elaborator extensibility
 
-Lean's official elaborator reference states that term/command elaborators can access the same machinery used by Lean itself; command elaborators can mutate environment tables and use IO.
+Official Lean documentation states that:
 
-Source:
+- macros extend syntax by translation;
+- elaborators can use the same machinery as Lean's own features;
+- command elaborators can modify global environment tables and use IO;
+- low-level parser extensions can even alter token/whitespace rules or replace concrete syntax.
+
+Sources:
+https://lean-lang.org/doc/reference/latest/Notations-and-Macros/
 https://lean-lang.org/doc/reference/latest/Notations-and-Macros/Elaborators/
 
 r3 consequence:
-the Standard parser/extension environment is fixed by `PS-STANDARD-REGISTRY-r3.json`; package imports cannot silently mutate parser/elaborator tables.
+ps-standard has a fixed/versioned registration closure, while ps-lean-extensible carries declared extension identities/order/options/host permissions.
 
-### Node and TypeScript package resolution
+### TypeScript optional/default parameters
 
-Node's current package documentation defines conditional `exports`, ordered condition matching, package `type`, subpath exports and import/require distinctions.
+Current TypeScript function documentation confirms that JavaScript/TypeScript default-initialized parameters can be omitted at a call and that JavaScript missing parameters otherwise become undefined.
+
+Sources:
+https://www.typescriptlang.org/docs/handbook/2/functions.html
+https://www.typescriptlang.org/docs/handbook/functions
+
+r3 consequence:
+f() must not be Unit-only when the callable has native optional/default parameters. PSC uses Lean optParam/autoParam insertion and never introduces JavaScript undefined into native semantics.
+
+### TypeScript compatibility
+
+Official TypeScript documentation describes structural compatibility and deliberate unsoundness tradeoffs made to model JavaScript practice.
+
+Source:
+https://www.typescriptlang.org/docs/handbook/type-compatibility.html
+
+r3 consequence:
+npm/d.ts interoperability remains an explicit InterfaceIR/adapter boundary rather than a new structural native PSC type system.
+
+### Node package exports and conditions
+
+Current Node package documentation specifies main/exports, subpath exports, conditional exports, condition ordering, import/require distinctions, custom conditions and the community types condition.
 
 Source:
 https://nodejs.org/api/packages.html
 
-TypeScript's current module-resolution reference says modern `node16`, `nodenext`, and `bundler` modes consult package `exports`; TypeScript additionally considers `types`, versioned `types@` conditions and configured custom conditions while prioritizing type files after runtime-style resolution.
+r3 consequence:
+InterfaceIR binding identity records package.json bytes/hash, export subpath, condition trace, selected runtime entry and runtime module mode.
+
+### TypeScript package/module resolution
+
+Current TypeScript module-reference documentation states that node16/nodenext/bundler resolution follows package exports when enabled, adds types/default and versioned types conditions, supports custom conditions, and can use different import/require branches.
 
 Source:
 https://www.typescriptlang.org/docs/handbook/modules/reference
 
 r3 consequence:
-InterfaceIR v1 binds TypeScript version/resolver mode, conditions, package.json identity, export subpath, selected runtime entry and selected type entry. A package name plus one `.d.ts` path is insufficient identity.
+InterfaceIR separately records runtime and declaration resolution traces, TypeScript resolver/profile identity, selected type entry and selected runtime entry. A package name plus one d.ts path is insufficient identity.
 
 ### Stateful frames
 
-Dafny's current reference uses explicit read/modify frame specifications to bound heap effects.
+Dafny's current reference gives explicit requires/ensures specifications and read/write frame concepts, including modifies clauses that bound which memory locations a method may change.
 
 Source:
 https://dafny.org/dafny/DafnyRef/DafnyRef
 
 r3 consequence:
-PSC contract semantics now includes a `FrameSpec` concept even though only pure `requires`/`ensures` surface syntax is frozen in base r3.
+psc-contract-core-v1 carries normalized effect/read/write frames even though base r3 freezes only requires/ensures surface clauses. Effect/frame semantics can therefore constrain unrelated side effects without prematurely adding a large clause syntax.
 
 ### Higher-order contracts
 
-Verus documents generic pre/post predicates for function values through `call_requires` and `call_ensures`.
+Verus documents generic pre/post specification predicates for callable values through call_requires and call_ensures.
 
 Sources:
 https://verus-lang.github.io/verus/guide/exec_funs_as_values.html
 https://verus-lang.github.io/verus/guide/reference-signature-fnonce.html
 
 r3 consequence:
-PSC defines its own ordinary logical `CallableSpec`, `callRequires`, and `callEnsures` model for future higher-order verification; these are not kernel primitives.
+PSC defines its own ordinary logical callable relations: callRequires, callEnsures, callEffects, callReads and callWrites. These are PSC semantics, not imported Verus kernel primitives.
 
 ### WASI 0.3 async
 
-WASI 0.3 was ratified in June 2026. Current Component Model documentation exposes `async func`, `future<T>`, and `stream<T>` as Canonical ABI primitives.
+WASI 0.3 was ratified in June 2026. Current Component Model documentation exposes async func, future<T>, and stream<T> as Canonical ABI primitives, with host/runtime scheduling.
 
 Sources:
 https://bytecodealliance.org/articles/WASI-0.3
 https://component-model.bytecodealliance.org/design/async.html
+https://component-model.bytecodealliance.org/advanced/canonical-abi.html
 
 r3 consequence:
-these are target mechanisms for implementing the already-defined PSC App/Fiber/Stream model, not the source semantics of those abstractions.
+these primitives are target mechanisms for implementing psc-app-v1. They do not define PSC App/Fiber/Stream semantics.
+
+### Methodological conclusion
+
+The completion pass therefore freezes:
+- exact r2-delta authority;
+- exact r3 call/brace grammar;
+- closed Standard profile;
+- semantic bundles;
+- narrow contract core plus frames/higher-order relations;
+- cold App / hot Fiber application semantics;
+- InterfaceIR v1 with deterministic package/runtime/type identity;
+- pre-stable evidence gates.
+
+No external system's proof or runtime behavior is assumed to transfer automatically to PSC.

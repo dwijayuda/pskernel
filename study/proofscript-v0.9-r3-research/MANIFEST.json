@@ -97,7 +97,22 @@
       "bareLineTerminator": false,
       "tabsAddedByR3": false
     },
-    "postPsc2LanguageRoadmap": "POST_PSC2_LANGUAGE_ROADMAP.md"
+    "postPsc2LanguageRoadmap": "POST_PSC2_LANGUAGE_ROADMAP.md",
+    "bracedDefinitionBodies": {
+      "status": "accepted-current-language",
+      "featureId": "D-DECL-BODY-BRACE-R3",
+      "declarations": [
+        "def",
+        "const",
+        "function"
+      ],
+      "unbraced": ":= PSTerm",
+      "braced": ":= { PSTerm }",
+      "semanticRelation": "identical",
+      "statementBlock": false,
+      "implicitReturn": false,
+      "preservesExistingBracedTermOwnership": true
+    }
   },
   "primaryReference": {
     "path": "ProofScript_Language_Reference_v0.9.0_r3.md",

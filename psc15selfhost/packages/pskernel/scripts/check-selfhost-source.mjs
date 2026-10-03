@@ -9,6 +9,7 @@ const visited = new Set();
 const ordered = [];
 const failures = [];
 let partialDefinitions = 0;
+const partialDefinitionBaseline = 139;
 
 function modulePath(name) {
   if (name === 'PSC1KernelSelfHost') return entry;
@@ -63,6 +64,7 @@ if (failures.length) {
 console.log('PSC1KERNEL_SELFHOST_SOURCE: PASS');
 console.log(`modules=${ordered.length}`);
 console.log(`partialDefinitions=${partialDefinitions}`);
+console.log(`partialDefinitionBaseline=${partialDefinitionBaseline}`);
 console.log(
   'note=partial definitions remain migration debt; this gate forbids host/runtime trust escapes',
 );

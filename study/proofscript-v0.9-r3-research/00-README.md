@@ -13,9 +13,9 @@ Start with:
 ProofScript_Language_Reference_v0.9.0_r3.md
 ~~~
 
-That single Markdown document now consolidates the normative language surface, inherited semantic obligations, source profiles, exact r3 calls/braces/default behavior, contract core, application model, npm/InterfaceIR boundary, compiler phase architecture, AST/lowering requirements, diagnostics, migration, conformance/evidence rules, and an explicit AI/compiler implementation contract.
+That single Markdown document is now **fully standalone**: it embeds the exact r3 authority/delta rules, inheritance matrix, exact grammar, feature and Standard registries, contract/application/interop specifications, semantic-bundle and InterfaceIR schemas, pre-stable evidence gates, and the complete inherited r2 baseline.
 
-Companion documents remain useful for machine-readable schemas, historical rationale, and focused research, but an implementation agent should not need to reconstruct the compiler design by stitching them together manually.
+A human or AI compiler agent does not need to open another ProofScript design document to understand the r3 language/compiler contract. Companion files remain only as convenient machine-readable mirrors, research history, and maintenance views.
 
 ## Mission
 

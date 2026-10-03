@@ -1,5 +1,18 @@
 # ProofScript self-hosting foundation plan
 
+## r3 language-authority reconciliation
+
+On `research/proofscript-v0.9-r3`, this file is a bootstrap/self-host implementation plan, **not** a competing language specification.
+
+The sole normative language/compiler-design authority is:
+
+~~~text
+study/proofscript-v0.9-r3-research/ProofScript_Language_Reference_v0.9.0_r3.md
+~~~
+
+Historical PSC1 language/reference statements below describe the bootstrap work that produced this plan. They MUST NOT override `ps-0.9-r3`, `psc2-compiler-v1`, `psc2-standard-v1`, or `lean-subset-psc2-v1`.
+
+
 Status: **highest-priority ProofScript execution plan**
 
 This plan supersedes the previous package/infrastructure-first ordering for

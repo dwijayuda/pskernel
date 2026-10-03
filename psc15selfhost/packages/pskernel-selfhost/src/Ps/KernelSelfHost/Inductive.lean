@@ -157,29 +157,45 @@ def psKernelOpenBinderExprs
         (PsKernelExpr.fvar binder.internalName)
         (psKernelOpenBinderExprs rest)
 
+def psKernelSimpleUniformParamArgsMatchWorker
+    (args : List PsKernelExpr) :
+    Nat -> Nat -> Bool :=
+  match args with
+  | List.nil =>
+      fun
+        (_offset : Nat)
+        (_index : Nat) =>
+        true
+  | List.cons arg rest =>
+      let smaller :
+          Nat -> Nat -> Bool :=
+        psKernelSimpleUniformParamArgsMatchWorker rest;
+      fun
+        (offset : Nat)
+        (index : Nat) =>
+        match arg with
+        | PsKernelExpr.bvar bvarIndex =>
+            let expected :=
+              Nat.sub
+                (Nat.sub offset 1)
+                index;
+            if Nat.beq bvarIndex expected then
+              smaller
+                offset
+                (Nat.succ index)
+            else
+              false
+        | _ =>
+            false
+
 def psKernelSimpleUniformParamArgsMatch
     (offset : Nat)
     (args : List PsKernelExpr)
     (index : Nat) : Bool :=
-  match args with
-  | List.nil =>
-      true
-  | List.cons arg rest =>
-      match arg with
-      | PsKernelExpr.bvar bvarIndex =>
-          let expected :=
-            Nat.sub
-              (Nat.sub offset 1)
-              index;
-          if Nat.beq bvarIndex expected then
-            psKernelSimpleUniformParamArgsMatch
-              offset
-              rest
-              (Nat.succ index)
-          else
-            false
-      | _ =>
-          false
+  psKernelSimpleUniformParamArgsMatchWorker
+    args
+    offset
+    index
 
 def psKernelSimpleCheckUniformOccurrenceWithFuel
     (fuel : Nat) :

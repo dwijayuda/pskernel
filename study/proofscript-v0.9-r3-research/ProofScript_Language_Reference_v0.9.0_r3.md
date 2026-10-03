@@ -300,7 +300,7 @@ def double(n : Nat) : Nat :=
 
 ## 7.2 const
 
-const is a parameterless definition alias.
+const is a module/namespace-level parameterless definition alias. It is not a local term-binding form.
 
 ~~~proofscript
 const answer : Nat := 42
@@ -401,6 +401,21 @@ unsafe is not part of ps-standard-0.9-r3.
 
 A separately named extensible or host-adapter profile may admit unsafe source with explicit nonportable/unverified status.
 
+## 7.13 local where declarations
+
+A supported declaration may use the selected native local where-declaration form.
+
+In ProofScript brace mode:
+
+~~~ebnf
+WhereBody :=
+  "{" WhereField (";" WhereField)* ";"? "}"
+~~~
+
+At least one local declaration is required.
+
+These declarations are lexically local to the owning declaration according to the selected native scope rules.
+
 # 8. Binders and universes
 
 psc2-language-v1 includes:
@@ -415,6 +430,9 @@ psc2-language-v1 includes:
 ProofScript explicit parameter groups use:
 
 ~~~ebnf
+DefaultSuffix :=
+  ":=" PSTerm
+
 ExplicitGroup :=
   "(" ExplicitEntry ("," ExplicitEntry)* ","? ")"
 
@@ -1042,6 +1060,9 @@ A required item cannot be omitted while retaining that claim.
 | parenthesized/named/default/empty calls | required |
 | generalized field notation | required |
 | record construction/update | required |
+| local where declarations | required |
+| parenthesized/tuple/type-ascription terms | required |
+| forall/exists/dependent-function syntax | required |
 | native/braced if | required |
 | psc2-pattern-v1 single-scrutinee match | required |
 | basic do notation | required |

@@ -839,7 +839,6 @@ def psKernelDefEqUnfold
     Prod (Option PsKernelExpr) PsKernelCheckerState :=
   match
       psKernelExprMapGet
-        PsKernelExpr
         state.unfold
         expr with
   | Option.some cached =>
@@ -856,7 +855,6 @@ def psKernelDefEqUnfold
       | Option.some value =>
           let cache :=
             psKernelExprMapInsert
-              PsKernelExpr
               state.unfold
               expr
               value;

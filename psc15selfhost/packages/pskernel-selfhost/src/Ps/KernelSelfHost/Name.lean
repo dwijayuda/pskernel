@@ -165,29 +165,36 @@ def psKernelNatToString
   Int.repr (Int.ofNat value)
 
 def psKernelNameEq
-    (left : PsKernelName)
-    (right : PsKernelName) : Bool :=
+    (left : PsKernelName) :
+    PsKernelName -> Bool :=
   match left with
   | PsKernelName.anonymous =>
-      match right with
-      | PsKernelName.anonymous => true
-      | _ => false
+      fun (right : PsKernelName) =>
+        match right with
+        | PsKernelName.anonymous => true
+        | _ => false
   | PsKernelName.str leftParent leftValue =>
-      match right with
-      | PsKernelName.str rightParent rightValue =>
-          if psKernelStringEq leftValue rightValue then
-            psKernelNameEq leftParent rightParent
-          else
-            false
-      | _ => false
+      let smaller : PsKernelName -> Bool :=
+        psKernelNameEq leftParent;
+      fun (right : PsKernelName) =>
+        match right with
+        | PsKernelName.str rightParent rightValue =>
+            if psKernelStringEq leftValue rightValue then
+              smaller rightParent
+            else
+              false
+        | _ => false
   | PsKernelName.num leftParent leftValue =>
-      match right with
-      | PsKernelName.num rightParent rightValue =>
-          if Nat.beq leftValue rightValue then
-            psKernelNameEq leftParent rightParent
-          else
-            false
-      | _ => false
+      let smaller : PsKernelName -> Bool :=
+        psKernelNameEq leftParent;
+      fun (right : PsKernelName) =>
+        match right with
+        | PsKernelName.num rightParent rightValue =>
+            if Nat.beq leftValue rightValue then
+              smaller rightParent
+            else
+              false
+        | _ => false
 
 def psKernelNameAppendAfter
     (name : PsKernelName)
@@ -320,29 +327,31 @@ def psKernelNameComponentCmp
           psKernelStringCmp leftValue rightValue
 
 def psKernelCompareNameComponents
-    (left : List PsKernelNameComponent)
-    (right : List PsKernelNameComponent) :
-    Ordering :=
+    (left : List PsKernelNameComponent) :
+    List PsKernelNameComponent -> Ordering :=
   match left with
   | List.nil =>
-      match right with
-      | List.nil => Ordering.eq
-      | List.cons _ _ => Ordering.lt
+      fun (right : List PsKernelNameComponent) =>
+        match right with
+        | List.nil => Ordering.eq
+        | List.cons _ _ => Ordering.lt
   | List.cons leftHead leftTail =>
-      match right with
-      | List.nil =>
-          Ordering.gt
-      | List.cons rightHead rightTail =>
-          match
-              psKernelNameComponentCmp
-                leftHead
-                rightHead with
-          | Ordering.eq =>
-              psKernelCompareNameComponents
-                leftTail
-                rightTail
-          | ordering =>
-              ordering
+      let smaller :
+          List PsKernelNameComponent -> Ordering :=
+        psKernelCompareNameComponents leftTail;
+      fun (right : List PsKernelNameComponent) =>
+        match right with
+        | List.nil =>
+            Ordering.gt
+        | List.cons rightHead rightTail =>
+            match
+                psKernelNameComponentCmp
+                  leftHead
+                  rightHead with
+            | Ordering.eq =>
+                smaller rightTail
+            | ordering =>
+                ordering
 
 def psKernelNameCmp
     (left : PsKernelName)

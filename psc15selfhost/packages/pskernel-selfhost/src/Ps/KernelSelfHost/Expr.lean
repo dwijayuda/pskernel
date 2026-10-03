@@ -451,7 +451,7 @@ def psKernelExprHasLooseBVarInExplicitDomain
               0
               considerRange
         else
-          false
+          false;
       if dependency then
         true
       else
@@ -481,7 +481,7 @@ def psKernelExprInferImplicit
             psKernelExprInferImplicit
               body
               remaining
-              considerRange
+              considerRange;
           let changedInfo :=
             if
                 psKernelBinderInfoEq
@@ -496,7 +496,7 @@ def psKernelExprInferImplicit
               else
                 binderInfo
             else
-              binderInfo
+              binderInfo;
           PsKernelExpr.forallE
             name
             domain
@@ -513,7 +513,7 @@ def psKernelExprInferImplicitAll
       let changedBody :=
         psKernelExprInferImplicitAll
           body
-          considerRange
+          considerRange;
       let changedInfo :=
         if
             psKernelBinderInfoEq
@@ -528,7 +528,7 @@ def psKernelExprInferImplicitAll
           else
             binderInfo
         else
-          binderInfo
+          binderInfo;
       PsKernelExpr.forallE
         name
         domain
@@ -591,8 +591,8 @@ def psKernelTypeAnnotationAutoParamName : PsKernelName :=
 
 def psKernelExprConsumeTypeAnnotations
     (expr : PsKernelExpr) : PsKernelExpr :=
-  let fn := psKernelExprGetAppFn expr
-  let args := psKernelExprGetAppArgs expr
+  let fn := psKernelExprGetAppFn expr;
+  let args := psKernelExprGetAppArgs expr;
   match fn with
   | PsKernelExpr.const name _ =>
       match args with

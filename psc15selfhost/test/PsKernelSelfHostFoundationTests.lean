@@ -1,5 +1,7 @@
-import Ps.KernelSelfHost.Level
-import PSC1Kernel.Level
+[Reading 337 lines from start (total: 337 lines, 0 remaining)]
+
+import Ps.KernelSelfHost.Expr
+import PSC1Kernel.Expr
 
 def psKernelNameToReference
     (name : PsKernelName) : PSC1Kernel.Name :=
@@ -199,6 +201,126 @@ def psKernelSelfHostLevelTests : Bool :=
         left
         right))
 
+def psKernelBinderInfoToReference
+    (info : PsKernelBinderInfo) : PSC1Kernel.BinderInfo :=
+  match info with
+  | PsKernelBinderInfo.default => PSC1Kernel.BinderInfo.default
+  | PsKernelBinderInfo.implicit => PSC1Kernel.BinderInfo.implicit
+  | PsKernelBinderInfo.strictImplicit => PSC1Kernel.BinderInfo.strictImplicit
+  | PsKernelBinderInfo.instImplicit => PSC1Kernel.BinderInfo.instImplicit
+
+def psKernelLiteralToReference
+    (literal : PsKernelLiteral) : PSC1Kernel.Literal :=
+  match literal with
+  | PsKernelLiteral.nat value => PSC1Kernel.Literal.nat value
+  | PsKernelLiteral.str value => PSC1Kernel.Literal.str value
+
+def psKernelLevelListToReference
+    (levels : List PsKernelLevel) : List PSC1Kernel.Level :=
+  match levels with
+  | List.nil => List.nil
+  | List.cons head tail =>
+      List.cons
+        (psKernelLevelToReference head)
+        (psKernelLevelListToReference tail)
+
+def psKernelExprToReference
+    (expr : PsKernelExpr) : PSC1Kernel.Expr :=
+  match expr with
+  | PsKernelExpr.bvar index =>
+      PSC1Kernel.Expr.bvar index
+  | PsKernelExpr.fvar name =>
+      PSC1Kernel.Expr.fvar (psKernelNameToReference name)
+  | PsKernelExpr.mvar name =>
+      PSC1Kernel.Expr.mvar (psKernelNameToReference name)
+  | PsKernelExpr.sort level =>
+      PSC1Kernel.Expr.sort (psKernelLevelToReference level)
+  | PsKernelExpr.const name levels =>
+      PSC1Kernel.Expr.const
+        (psKernelNameToReference name)
+        (psKernelLevelListToReference levels)
+  | PsKernelExpr.app fn arg =>
+      PSC1Kernel.Expr.app
+        (psKernelExprToReference fn)
+        (psKernelExprToReference arg)
+  | PsKernelExpr.lam name type body binderInfo =>
+      PSC1Kernel.Expr.lam
+        (psKernelNameToReference name)
+        (psKernelExprToReference type)
+        (psKernelExprToReference body)
+        (psKernelBinderInfoToReference binderInfo)
+  | PsKernelExpr.forallE name type body binderInfo =>
+      PSC1Kernel.Expr.forallE
+        (psKernelNameToReference name)
+        (psKernelExprToReference type)
+        (psKernelExprToReference body)
+        (psKernelBinderInfoToReference binderInfo)
+  | PsKernelExpr.letE name type value body nondep =>
+      PSC1Kernel.Expr.letE
+        (psKernelNameToReference name)
+        (psKernelExprToReference type)
+        (psKernelExprToReference value)
+        (psKernelExprToReference body)
+        nondep
+  | PsKernelExpr.lit literal =>
+      PSC1Kernel.Expr.lit (psKernelLiteralToReference literal)
+  | PsKernelExpr.mdata metadata body =>
+      PSC1Kernel.Expr.mdata metadata (psKernelExprToReference body)
+  | PsKernelExpr.proj typeName index body =>
+      PSC1Kernel.Expr.proj
+        (psKernelNameToReference typeName)
+        index
+        (psKernelExprToReference body)
+
+def psKernelExprDifferentialPair
+    (left right : PsKernelExpr) : Bool :=
+  let referenceLeft := psKernelExprToReference left
+  let referenceRight := psKernelExprToReference right
+  Bool.and
+    ((psKernelExprEq left right) ==
+      PSC1Kernel.Expr.eq referenceLeft referenceRight)
+    ((psKernelExprEqual left right) ==
+      PSC1Kernel.Expr.equal referenceLeft referenceRight)
+
+def psKernelSelfHostExprTests : Bool :=
+  let typeExpr := PsKernelExpr.sort PsKernelLevel.zero
+  let alphaName := PsKernelName.str PsKernelName.anonymous "alpha"
+  let betaName := PsKernelName.str PsKernelName.anonymous "beta"
+  let alphaLam :=
+    PsKernelExpr.lam
+      alphaName
+      typeExpr
+      (PsKernelExpr.bvar 0)
+      PsKernelBinderInfo.default
+  let betaLam :=
+    PsKernelExpr.lam
+      betaName
+      typeExpr
+      (PsKernelExpr.bvar 0)
+      PsKernelBinderInfo.implicit
+  let app :=
+    PsKernelExpr.app
+      (PsKernelExpr.app
+        (PsKernelExpr.const alphaName List.nil)
+        (PsKernelExpr.bvar 2))
+      (PsKernelExpr.lit (PsKernelLiteral.nat 7))
+  Bool.and
+    (psKernelExprDifferentialPair alphaLam betaLam)
+    (Bool.and
+      ((psKernelExprHasLooseAt app 2) ==
+        PSC1Kernel.Expr.hasLooseAt
+          (psKernelExprToReference app)
+          2)
+      (Bool.and
+        (psKernelExprGetAppNumArgs app ==
+          (PSC1Kernel.Expr.getAppArgs
+            (psKernelExprToReference app)).length)
+        (PSC1Kernel.Expr.eq
+          (psKernelExprToReference
+            (psKernelExprGetAppFn app))
+          (psKernelExprToReference
+            (PsKernelExpr.const alphaName List.nil)))))
+
 def main : IO Unit :=
   if !psKernelSelfHostNameTests then
     throw
@@ -208,6 +330,12 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_LEVEL_DIFFERENTIAL: FAIL")
+  else if !psKernelSelfHostExprTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_EXPR_DIFFERENTIAL: FAIL")
   else
     IO.println
       "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"
+
+[executed on device: box (459eb03d-a4f9-4033-b2ed-5fa4ec9998df)]

@@ -7,7 +7,7 @@ inductive PsKernelNameComponent where
   | str (value : String)
   | num (value : Nat)
 
-inductive PsKernelPsKernelOrdering where
+inductive PsKernelOrdering where
   | lt
   | eq
   | gt

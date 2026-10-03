@@ -17,6 +17,7 @@ function walk(directory) {
 
 const rules = [
   ["local-let-rec", /\blet\s+rec\b/gu],
+  ["runtime-type-parameter", /:\s*Type\b/gu],
   ["record-update", /\{\s*[A-Za-z_][A-Za-z0-9_]*\s+with\b/gu],
   ["parenthesized-projection", /\)\.[A-Za-z_][A-Za-z0-9_]*/gu],
   ["operator-equality", /==|!=/gu],

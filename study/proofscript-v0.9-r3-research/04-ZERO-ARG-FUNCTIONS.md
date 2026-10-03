@@ -1,6 +1,6 @@
 # r3 Zero-Argument Function Sugar
 
-Status: **recommend adoption; surface sugar only**
+Status: **accepted r3 design; surface sugar only; not implemented**
 
 ## Decision
 
@@ -162,4 +162,4 @@ A rejected r2 <code>function f()</code> may become valid under r3 only when the 
 - JS ABI and <code>.d.ts</code> conformance;
 - usability study.
 
-Current evidence: **specified recommendation; no production parser implementation claimed**.
+Current status: **accepted r3 design rule; no production parser implementation claimed**.

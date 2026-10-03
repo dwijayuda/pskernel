@@ -4,11 +4,11 @@ namespace PSC1Kernel
 
 namespace StatefulDefEq
 
-abbrev DefEqFn :=
+def DefEqFn : Type :=
   CheckerContext → CheckerState → Expr → Expr →
     Except String (Bool × CheckerState)
 
-private def finish
+def finish
     (state : CheckerState)
     (left right : Expr)
     (value : Bool) : Bool × CheckerState :=
@@ -19,7 +19,7 @@ private def finish
   else
     (false, state)
 
-private def withLocal
+def withLocal
     (ctx : CheckerContext)
     (state : CheckerState)
     (userName : Name)

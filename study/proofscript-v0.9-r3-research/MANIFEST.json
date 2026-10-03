@@ -112,6 +112,20 @@
       "statementBlock": false,
       "implicitReturn": false,
       "preservesExistingBracedTermOwnership": true
+    },
+    "moduleApi": {
+      "status": "accepted-current-language",
+      "featureId": "M-PUBLIC-IMPORT-R3",
+      "defaultTopLevelVisibility": "public-unless-private",
+      "ordinaryImportReexports": false,
+      "publicImportReexports": true,
+      "publicImportClosure": "transitive",
+      "openReexports": false,
+      "selectiveExportListsInCore": false
+    },
+    "contractBodyGrammar": {
+      "status": "corrected",
+      "rule": "ContractedFunction := FunctionHeader ContractClause* DefinitionBody"
     }
   },
   "primaryReference": {
@@ -165,5 +179,12 @@
     "semanticBundle": "normative semantic-import protocol only; not source-language authority",
     "evidenceGates": "release/evidence policy only; not source-language authority",
     "architecture": "implementation anti-drift guidance only; not source-language authority"
+  },
+  "platformProfiles": {
+    "psc-js-platform-v1": {
+      "status": "planned-platform-profile-not-language-profile",
+      "plan": "../../docs/plans/08_JS_PLATFORM_PROFILE.md",
+      "changesPsc2Language": false
+    }
   }
 }

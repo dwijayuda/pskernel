@@ -50,12 +50,24 @@ Ordinary functions remain pure with respect to application effects. A Standard-p
 Ordinary recoverable application execution has exactly these terminal outcomes:
 
 ~~~text
-Success value
-Failure typedError
-Cancelled reason
+Exit err result
+  | success result
+  | failure err
+  | cancelled CancelReason
 ~~~
 
 Unexpected host/runtime failures are represented separately as `RuntimeFault`.
+
+A root runtime may therefore report a wider `RunOutcome` such as:
+
+~~~text
+completed (Exit err result)
+runtimeFault RuntimeFault
+resourceLimit ResourceLimit
+hostTerminated HostTermination
+~~~
+
+without pretending those runtime outcomes inhabit the typed application error `err`.
 
 A `RuntimeFault` is **not** catchable by ordinary typed-error handlers. A foreign/runtime adapter may explicitly translate selected faults into the declared typed error channel, and that translation is part of the adapter contract.
 
@@ -69,6 +81,8 @@ Capabilities are visible in the application type through `App caps err result`, 
 
 `CapabilitySet` is a canonical finite type-level capability set. Its concrete Lean encoding may be a normalized list/set index, but equivalent sets must have a deterministic canonical identity for manifests/caches.
 
+A computation requiring capability set `C1` can execute in an environment `C2` only when the selected capability relation establishes `C1 ⊆ C2` or an explicit adapter implements the missing capability.
+
 A package manifest aggregates the capabilities reachable from its exported/runtime entry points. Availability of a host global does not grant a PSC capability automatically.
 
 ## Resource
@@ -76,6 +90,10 @@ A package manifest aggregates the capabilities reachable from its exported/runti
 `Resource caps err a` describes acquisition and deterministic release.
 
 After successful acquisition, release is attempted exactly once on normal success, typed failure, and cancellation, subject only to explicitly reported fatal runtime limitations.
+
+Once required deterministic cleanup begins, ordinary cooperative cancellation is **shielded/masked** until cleanup reaches a terminal result. This prevents cancellation from recursively interrupting release and silently leaking an owned resource.
+
+Cleanup may still encounter an explicitly modeled timeout, typed release failure, RuntimeFault, resource limit, or host termination according to the selected runtime profile.
 
 ### Cancellation
 
@@ -106,9 +124,25 @@ Timeout is a race with an explicit clock/deadline computation. Clock assumptions
 
 ## Stream
 
-Stream is an asynchronous sequence with explicit completion, typed failure, cancellation, resource lifetime, and backpressure/demand semantics.
+`Stream caps err item` is **cold** until a consumer subscribes/starts consumption.
 
-JS AsyncIterable and ReadableStream, and Wasm stream/future mechanisms, are adapters rather than the definition of PSC Stream.
+A subscription creates an owned running scope.
+
+Stream semantics distinguishes:
+
+~~~text
+item
+normal end
+typed failure
+cancelled
+runtime fault at the runtime-reporting layer
+~~~
+
+The model includes backpressure/demand: an unbounded push producer is not assumed unless a separately named buffering policy says so.
+
+Cancelling/closing a subscription triggers the same deterministic/shielded resource-cleanup discipline as other owned scopes.
+
+JS `AsyncIterable` / `ReadableStream` and Wasm stream/future mechanisms are adapters rather than the definition of PSC Stream.
 
 ## Callbacks
 

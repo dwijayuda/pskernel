@@ -432,7 +432,6 @@ def psKernelWhnfCoreFinish
   else
     let nextCache :=
       psKernelExprMapInsert
-        PsKernelExpr
         state.whnfCore
         original
         result;
@@ -451,7 +450,6 @@ def psKernelWhnfFinish
       (Prod PsKernelExpr PsKernelCheckerState) :=
   let nextCache :=
     psKernelExprMapInsert
-      PsKernelExpr
       state.whnf
       original
       result;
@@ -591,7 +589,6 @@ def psKernelWhnfCoreWithFuel
             | _ =>
                 match
                     psKernelExprMapGet
-                      PsKernelExpr
                       state.whnfCore
                       expr with
                 | Option.some cached =>
@@ -912,7 +909,6 @@ def psKernelWhnfWithFuel
                 | Option.some _ =>
                     match
                         psKernelExprMapGet
-                          PsKernelExpr
                           state.whnf
                           expr with
                     | Option.some cached =>
@@ -989,7 +985,6 @@ def psKernelWhnfWithFuel
         | _ =>
             match
                 psKernelExprMapGet
-                  PsKernelExpr
                   state.whnf
                   expr with
             | Option.some cached =>

@@ -89,24 +89,29 @@ def psKernelLiteralEq
           false
 
 def psKernelLevelListEq
-    (left : List PsKernelLevel)
-    (right : List PsKernelLevel) : Bool :=
+    (left : List PsKernelLevel) :
+    List PsKernelLevel -> Bool :=
   match left with
   | List.nil =>
-      match right with
-      | List.nil => true
-      | List.cons _ _ => false
+      fun (right : List PsKernelLevel) =>
+        match right with
+        | List.nil => true
+        | List.cons _ _ => false
   | List.cons leftHead leftTail =>
-      match right with
-      | List.nil =>
-          false
-      | List.cons rightHead rightTail =>
-          if psKernelLevelEq leftHead rightHead then
-            psKernelLevelListEq leftTail rightTail
-          else
+      let smaller :
+          List PsKernelLevel -> Bool :=
+        psKernelLevelListEq leftTail;
+      fun (right : List PsKernelLevel) =>
+        match right with
+        | List.nil =>
             false
+        | List.cons rightHead rightTail =>
+            if psKernelLevelEq leftHead rightHead then
+              smaller rightTail
+            else
+              false
 
-def psKernelExprEq
+partial def psKernelExprEq
     (left : PsKernelExpr)
     (right : PsKernelExpr) : Bool :=
   match left with
@@ -201,7 +206,7 @@ def psKernelExprEq
             false
       | _ => false
 
-def psKernelExprEqual
+partial def psKernelExprEqual
     (left : PsKernelExpr)
     (right : PsKernelExpr) : Bool :=
   match left with
@@ -311,7 +316,7 @@ def psKernelExprEqual
             false
       | _ => false
 
-def psKernelExprHasLooseAt
+partial def psKernelExprHasLooseAt
     (expr : PsKernelExpr)
     (offset : Nat) : Bool :=
   match expr with
@@ -350,7 +355,7 @@ def psKernelExprHasLooseBVar
     (expr : PsKernelExpr) : Bool :=
   psKernelExprHasLooseAt expr 0
 
-def psKernelExprHasLooseBVarAtCore
+partial def psKernelExprHasLooseBVarAtCore
     (expr : PsKernelExpr)
     (index : Nat)
     (depth : Nat) : Bool :=
@@ -432,7 +437,7 @@ def psKernelExprHasLooseBVarAt
     index
     0
 
-def psKernelExprHasLooseBVarInExplicitDomain
+partial def psKernelExprHasLooseBVarInExplicitDomain
     (expr : PsKernelExpr)
     (bvarIndex : Nat)
     (considerRange : Bool) : Bool :=
@@ -467,7 +472,7 @@ def psKernelExprHasLooseBVarInExplicitDomain
       else
         false
 
-def psKernelExprInferImplicit
+partial def psKernelExprInferImplicit
     (expr : PsKernelExpr)
     (numParams : Nat)
     (considerRange : Bool) : PsKernelExpr :=
@@ -505,7 +510,7 @@ def psKernelExprInferImplicit
   | _ =>
       expr
 
-def psKernelExprInferImplicitAll
+partial def psKernelExprInferImplicitAll
     (expr : PsKernelExpr)
     (considerRange : Bool) : PsKernelExpr :=
   match expr with
@@ -537,7 +542,7 @@ def psKernelExprInferImplicitAll
   | _ =>
       expr
 
-def psKernelExprGetAppFn
+partial def psKernelExprGetAppFn
     (expr : PsKernelExpr) : PsKernelExpr :=
   match expr with
   | PsKernelExpr.app fn _ =>
@@ -545,7 +550,7 @@ def psKernelExprGetAppFn
   | _ =>
       expr
 
-def psKernelExprGetAppArgsWorker
+partial def psKernelExprGetAppArgsWorker
     (expr : PsKernelExpr)
     (args : List PsKernelExpr) :
     List PsKernelExpr :=
@@ -633,7 +638,7 @@ partial def psKernelExprConsumeTypeAnnotations
   | _ =>
       expr
 
-def psKernelExprHasFVar
+partial def psKernelExprHasFVar
     (expr : PsKernelExpr) : Bool :=
   match expr with
   | PsKernelExpr.fvar _ =>
@@ -686,7 +691,7 @@ def psKernelInstantiateLevelList
           params
           values)
 
-def psKernelExprInstantiateLevelParams
+partial def psKernelExprInstantiateLevelParams
     (expr : PsKernelExpr)
     (params : List PsKernelName)
     (values : List PsKernelLevel) :

@@ -216,6 +216,8 @@ const outputTsPath =
     ? requestedOutputPath.replace(/\.js$/u, ".ts")
     : requestedOutputPath;
 
+const emitOnly = process.argv.slice(5).includes("--emit-only");
+
 if (!existsSync(compilerPath)) {
   throw new Error(`PSC2_SELFHOST_COMPILER_MISSING: ${compilerPath}`);
 }
@@ -238,7 +240,7 @@ const typeScript = unwrapExcept(compiler.psCompilerTypeScriptFromPrepared(prepar
 
 await mkdir(path.dirname(outputTsPath), { recursive: true });
 await writeFile(outputTsPath, typeScript, "utf8");
-compileTypeScript(outputTsPath);
+if (!emitOnly) compileTypeScript(outputTsPath);
 
 process.stdout.write(
   [
@@ -247,6 +249,8 @@ process.stdout.write(
     `PSC2_SELFHOST_MODULES: ${project.moduleCount}`,
     ...(project.closureSha256 ? [`PSC2_SELFHOST_SOURCE_CLOSURE_SHA256: ${project.closureSha256}`] : []),
     `PSC2_SELFHOST_TS: ${path.relative(selfhostRoot, outputTsPath)}`,
-    `PSC2_SELFHOST_JS: ${path.relative(selfhostRoot, outputTsPath.replace(/\.ts$/u, ".js"))}`,
+    ...(emitOnly
+      ? ["PSC2_SELFHOST_TYPESCRIPT_CHECK: SKIPPED (emit-only)"]
+      : [`PSC2_SELFHOST_JS: ${path.relative(selfhostRoot, outputTsPath.replace(/\.ts$/u, ".js"))}`]),
   ].join("\n") + "\n",
 );

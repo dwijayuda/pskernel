@@ -22,7 +22,7 @@ Comments/trivia move structurally with source maps.
 
 ## Structural braces
 
-r2 owned structure/class fields are emitted with r3 comma separators.
+r2 owned structure/class fields are emitted with commas **between** r3 fields; the migrator does not add a trailing field comma.
 
 Match/inductive markers remain bars.
 

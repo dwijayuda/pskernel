@@ -83,3 +83,83 @@ The design continues to use:
 - compiler-preservation and translation-validation literature for backend assurance.
 
 These precedents inform alternatives; no external system's proof transfers automatically to PSC.
+
+
+## Specification-completion research (October 2026)
+
+### Lean application/default arguments
+
+Official Lean function-application documentation states that high-level application is elaborated as one unit; optional parameters are encoded with `optParam`, automatic parameters with `autoParam`, and omitted optional/automatic arguments are inserted by the application elaborator.
+
+Source:
+https://lean-lang.org/doc/reference/latest/Terms/Function-Application/
+
+r3 consequence:
+`f()` is specified as an empty source-level invocation that can use native optional/default/automatic insertion, with one special Unit synthesis for Unit-callable functions. Missing required non-Unit parameters make the empty call fail rather than eta-abstract.
+
+### Lean field-notation adjacency
+
+The same official reference states that generalized field notation is a term followed by `.` and an identifier **not separated by spaces**.
+
+Source:
+https://lean-lang.org/doc/reference/latest/Terms/Function-Application/
+
+r3 consequence:
+`users.map(render)` is supported; `users .map(render)` is not added by r3.
+
+### Lean elaborator power
+
+Lean's official elaborator reference states that term/command elaborators can access the same machinery used by Lean itself; command elaborators can mutate environment tables and use IO.
+
+Source:
+https://lean-lang.org/doc/reference/latest/Notations-and-Macros/Elaborators/
+
+r3 consequence:
+the Standard parser/extension environment is fixed by `PS-STANDARD-REGISTRY-r3.json`; package imports cannot silently mutate parser/elaborator tables.
+
+### Node and TypeScript package resolution
+
+Node's current package documentation defines conditional `exports`, ordered condition matching, package `type`, subpath exports and import/require distinctions.
+
+Source:
+https://nodejs.org/api/packages.html
+
+TypeScript's current module-resolution reference says modern `node16`, `nodenext`, and `bundler` modes consult package `exports`; TypeScript additionally considers `types`, versioned `types@` conditions and configured custom conditions while prioritizing type files after runtime-style resolution.
+
+Source:
+https://www.typescriptlang.org/docs/handbook/modules/reference
+
+r3 consequence:
+InterfaceIR v1 binds TypeScript version/resolver mode, conditions, package.json identity, export subpath, selected runtime entry and selected type entry. A package name plus one `.d.ts` path is insufficient identity.
+
+### Stateful frames
+
+Dafny's current reference uses explicit read/modify frame specifications to bound heap effects.
+
+Source:
+https://dafny.org/dafny/DafnyRef/DafnyRef
+
+r3 consequence:
+PSC contract semantics now includes a `FrameSpec` concept even though only pure `requires`/`ensures` surface syntax is frozen in base r3.
+
+### Higher-order contracts
+
+Verus documents generic pre/post predicates for function values through `call_requires` and `call_ensures`.
+
+Sources:
+https://verus-lang.github.io/verus/guide/exec_funs_as_values.html
+https://verus-lang.github.io/verus/guide/reference-signature-fnonce.html
+
+r3 consequence:
+PSC defines its own ordinary logical `CallableSpec`, `callRequires`, and `callEnsures` model for future higher-order verification; these are not kernel primitives.
+
+### WASI 0.3 async
+
+WASI 0.3 was ratified in June 2026. Current Component Model documentation exposes `async func`, `future<T>`, and `stream<T>` as Canonical ABI primitives.
+
+Sources:
+https://bytecodealliance.org/articles/WASI-0.3
+https://component-model.bytecodealliance.org/design/async.html
+
+r3 consequence:
+these are target mechanisms for implementing the already-defined PSC App/Fiber/Stream model, not the source semantics of those abstractions.

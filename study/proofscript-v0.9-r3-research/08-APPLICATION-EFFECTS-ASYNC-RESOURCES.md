@@ -97,6 +97,21 @@ Once required deterministic cleanup begins, ordinary cooperative cancellation is
 
 Cleanup may still encounter an explicitly modeled timeout, typed release failure, RuntimeFault, resource limit, or host termination according to the selected runtime profile.
 
+### Body/cleanup failure combination
+
+The Standard semantics never silently drops one cause when both body and cleanup fail.
+
+Conceptually the final cause relation distinguishes at least:
+
+~~~text
+body failure
+release failure
+body + release failure
+cancellation + release failure
+~~~
+
+The exact public Lean datatype/API name can be chosen during library implementation, but preservation of both causes is normative.
+
 ### Cancellation
 
 Cancellation is cooperative and two-phase:
@@ -198,7 +213,7 @@ Do not add async, await, using, or other convenience syntax first. Prove and use
 
 ## Required conformance traces
 
-The cross-target suite must cover success, typed failure, panic, cancellation timing, timeout, races, child failure, detach, cleanup on every outcome, cleanup failure, stream backpressure, and late callbacks after disposal.
+The cross-target suite must cover success, typed failure, RuntimeFault, cancellation timing, timeout, races, child failure, detach, cleanup on every outcome, combined body/cleanup failure, stream backpressure, and late callbacks after disposal.
 
 ## Evidence status
 

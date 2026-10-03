@@ -360,6 +360,65 @@ def psKernelReduceNatWith
       Except.ok
         (Prod.mk Option.none state)
 
+def psKernelWhnfCountLambdasWithFuel
+    (fuel : Nat) :
+    PsKernelExpr ->
+    Nat ->
+    Nat ->
+    Prod PsKernelExpr Nat :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (current : PsKernelExpr)
+        (_argCount : Nat)
+        (count : Nat) =>
+        Prod.mk current count
+  | Nat.succ remaining =>
+      let smaller :
+          PsKernelExpr ->
+          Nat ->
+          Nat ->
+          Prod PsKernelExpr Nat :=
+        psKernelWhnfCountLambdasWithFuel remaining;
+      fun
+        (current : PsKernelExpr)
+        (argCount : Nat)
+        (count : Nat) =>
+        match current with
+        | PsKernelExpr.lam _ _ body _ =>
+            if psKernelNatLt count argCount then
+              let nextCount :=
+                Nat.succ count;
+              if psKernelNatLt nextCount argCount then
+                match body with
+                | PsKernelExpr.lam _ _ _ _ =>
+                    smaller
+                      body
+                      argCount
+                      nextCount
+                | _ =>
+                    Prod.mk
+                      current
+                      nextCount
+              else
+                Prod.mk
+                  current
+                  nextCount
+            else
+              Prod.mk current count
+        | _ =>
+            Prod.mk current count
+
+def psKernelWhnfCountLambdas
+    (current : PsKernelExpr)
+    (argCount : Nat) :
+    Prod PsKernelExpr Nat :=
+  psKernelWhnfCountLambdasWithFuel
+    (Nat.succ (psKernelExprNodeCount current))
+    current
+    argCount
+    0
+
 def psKernelWhnfCoreFinish
     (original : PsKernelExpr)
     (cheapProj : Bool)
@@ -672,10 +731,9 @@ def psKernelWhnfCoreWithFuel
                             match fn with
                             | PsKernelExpr.lam _ _ _ _ =>
                                 let consumedResult :=
-                                  psKernelExprConsumeLambdaSpine
+                                  psKernelWhnfCountLambdas
                                     fn
-                                    args
-                                    0;
+                                    (psKernelExprListLength args);
                                 let lastLam :=
                                   Prod.fst consumedResult;
                                 let consumed :=

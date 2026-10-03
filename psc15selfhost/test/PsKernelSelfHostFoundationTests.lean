@@ -871,6 +871,208 @@ def psKernelSelfHostInferTests : Bool :=
                 (psKernelInferDifferentialCase letExpr)
                 (psKernelInferDifferentialCase appliedNested)))))))
 
+def psKernelProjectionBoxName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "PortableProjectionBox"
+
+def psKernelProjectionCtorName : PsKernelName :=
+  PsKernelName.str
+    psKernelProjectionBoxName
+    "mk"
+
+def psKernelProjectionBoxExpr : PsKernelExpr :=
+  PsKernelExpr.const
+    psKernelProjectionBoxName
+    List.nil
+
+def psKernelProjectionCtorType : PsKernelExpr :=
+  let firstName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "first";
+  let secondName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "second";
+  PsKernelExpr.forallE
+    firstName
+    (PsKernelExpr.sort PsKernelLevel.zero)
+    (PsKernelExpr.forallE
+      secondName
+      (PsKernelExpr.bvar 0)
+      psKernelProjectionBoxExpr
+      PsKernelBinderInfo.default)
+    PsKernelBinderInfo.default
+
+def psKernelProjectionEnvironment : PsKernelEnvironment :=
+  let inductBase : PsKernelConstantBase :=
+    {
+      name := psKernelProjectionBoxName
+      levelParams := List.nil
+      type :=
+        PsKernelExpr.sort
+          (PsKernelLevel.succ PsKernelLevel.zero)
+    };
+  let inductInfo : PsKernelInductiveInfo :=
+    {
+      base := inductBase
+      numParams := 0
+      numIndices := 0
+      all :=
+        List.cons
+          psKernelProjectionBoxName
+          List.nil
+      ctors :=
+        List.cons
+          psKernelProjectionCtorName
+          List.nil
+      numNested := 0
+      isRec := false
+      isReflexive := false
+      isUnsafe := false
+    };
+  let ctorBase : PsKernelConstantBase :=
+    {
+      name := psKernelProjectionCtorName
+      levelParams := List.nil
+      type := psKernelProjectionCtorType
+    };
+  let ctorInfo : PsKernelConstructorInfo :=
+    {
+      base := ctorBase
+      induct := psKernelProjectionBoxName
+      cidx := 0
+      numParams := 0
+      numFields := 2
+      isUnsafe := false
+    };
+  psKernelEnvironmentAddUnchecked
+    (psKernelEnvironmentAddUnchecked
+      psKernelEnvironmentEmpty
+      (PsKernelConstantInfo.inductInfo
+        inductInfo))
+    (PsKernelConstantInfo.ctorInfo
+      ctorInfo)
+
+def psKernelProjectionReferenceEnvironment :
+    PSC1Kernel.Environment :=
+  let boxName :=
+    psKernelNameToReference
+      psKernelProjectionBoxName;
+  let ctorName :=
+    psKernelNameToReference
+      psKernelProjectionCtorName;
+  let inductBase : PSC1Kernel.ConstantBase :=
+    {
+      name := boxName
+      levelParams := List.nil
+      type :=
+        psKernelExprToReference
+          (PsKernelExpr.sort
+            (PsKernelLevel.succ
+              PsKernelLevel.zero))
+    };
+  let inductInfo : PSC1Kernel.InductiveInfo :=
+    {
+      base := inductBase
+      numParams := 0
+      numIndices := 0
+      all := List.cons boxName List.nil
+      ctors := List.cons ctorName List.nil
+      numNested := 0
+      isRec := false
+      isReflexive := false
+      isUnsafe := false
+    };
+  let ctorBase : PSC1Kernel.ConstantBase :=
+    {
+      name := ctorName
+      levelParams := List.nil
+      type :=
+        psKernelExprToReference
+          psKernelProjectionCtorType
+    };
+  let ctorInfo : PSC1Kernel.ConstructorInfo :=
+    {
+      base := ctorBase
+      induct := boxName
+      cidx := 0
+      numParams := 0
+      numFields := 2
+      isUnsafe := false
+    };
+  (PSC1Kernel.Environment.empty.addUnchecked
+    (PSC1Kernel.ConstantInfo.inductInfo
+      inductInfo)).addUnchecked
+        (PSC1Kernel.ConstantInfo.ctorInfo
+          ctorInfo)
+
+def psKernelProjectionDifferential
+    (index : Nat) : Bool :=
+  let userName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "boxValue";
+  let portableAdded :=
+    psKernelCheckerContextWithLocal
+      (psKernelCheckerContextEmpty
+        psKernelProjectionEnvironment)
+      userName
+      psKernelProjectionBoxExpr
+      PsKernelBinderInfo.default;
+  let portableName :=
+    Prod.fst portableAdded;
+  let portableContext :=
+    Prod.snd portableAdded;
+  let referenceAdded :=
+    (PSC1Kernel.CheckerContext.empty
+      psKernelProjectionReferenceEnvironment).withLocal
+        (psKernelNameToReference userName)
+        (psKernelExprToReference
+          psKernelProjectionBoxExpr)
+        PSC1Kernel.BinderInfo.default;
+  let referenceName :=
+    Prod.fst referenceAdded;
+  let referenceContext :=
+    Prod.snd referenceAdded;
+  let portableExpr :=
+    PsKernelExpr.proj
+      psKernelProjectionBoxName
+      index
+      (PsKernelExpr.fvar portableName);
+  let referenceExpr :=
+    PSC1Kernel.Expr.proj
+      (psKernelNameToReference
+        psKernelProjectionBoxName)
+      index
+      (PSC1Kernel.Expr.fvar
+        referenceName);
+  match
+      psKernelInferWithFuel
+        512
+        psKernelInferenceWhnf
+        psKernelInferenceStructuralDefEq
+        portableContext
+        psKernelCheckerStateEmpty
+        portableExpr,
+      PSC1Kernel.infer
+        referenceContext
+        referenceExpr with
+  | Except.ok portableResult, Except.ok referenceResult =>
+      psKernelExprReferenceEq
+        (Prod.fst portableResult)
+        referenceResult
+  | Except.error portableError, Except.error referenceError =>
+      portableError == referenceError
+  | _, _ =>
+      false
+
+def psKernelSelfHostProjectionTests : Bool :=
+  Bool.and
+    (psKernelProjectionDifferential 0)
+    (psKernelProjectionDifferential 1)
+
 def main : IO Unit :=
   if !psKernelSelfHostNameTests then
     throw
@@ -900,6 +1102,10 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_INFER_DIFFERENTIAL: FAIL")
+  else if !psKernelSelfHostProjectionTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_PROJECTION_DIFFERENTIAL: FAIL")
   else
     IO.println
       "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"

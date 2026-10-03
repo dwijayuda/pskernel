@@ -203,7 +203,7 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.TypeCheckerDefEqSupport,
     `Ps.KernelSelfHost.TypeCheckerDefEq,
     `Ps.KernelSelfHost.CheckerSession,
-    `Ps.KernelSelfHost.Kernel
+    `Ps.KernelSelfHost.Kernel,
     `Ps.KernelSelfHost.Quot
   ]
 

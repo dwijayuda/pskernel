@@ -80,7 +80,8 @@
       "class": "D",
       "category": "function-header",
       "status": "accepted",
-      "target": "native def with one optional Unit binder defaulting to ()"
+      "target": "native def with one optional Unit binder defaulting to ()",
+      "headerRule": "native non-explicit binders may precede the final empty explicit group"
     },
     {
       "id": "D-EXPLICIT-PARAMS",
@@ -179,10 +180,10 @@
     }
   ],
   "callGap": {
-    "horizontalWhitespace": [
-      "space",
-      "tab"
+    "inheritedHorizontalWhitespace": [
+      "space"
     ],
+    "tabsIntroducedByR3": false,
     "comments": "Lean comments with no physical line terminator",
     "bareLineTerminator": false
   }

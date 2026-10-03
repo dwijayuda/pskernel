@@ -3,13 +3,15 @@ import Ps.KernelSelfHost.Expr
 structure PsKernelExprMap (alpha : Type) where
   entries : List (Prod PsKernelExpr alpha)
 
-def psKernelExprMapEmpty :
+def psKernelExprMapEmpty PsKernelExpr
+    (alpha : Type) :
     PsKernelExprMap alpha :=
   {
     entries := List.nil
   }
 
 def psKernelExprMapGetIn
+    (alpha : Type)
     (expr : PsKernelExpr)
     (entries : List (Prod PsKernelExpr alpha)) :
     Option alpha :=
@@ -24,18 +26,22 @@ def psKernelExprMapGetIn
         Option.some (Prod.snd entry)
       else
         psKernelExprMapGetIn
+          alpha
           expr
           rest
 
 def psKernelExprMapGet
+    (alpha : Type)
     (cache : PsKernelExprMap alpha)
     (expr : PsKernelExpr) :
     Option alpha :=
   psKernelExprMapGetIn
+    alpha
     expr
     cache.entries
 
 def psKernelExprMapInsertIn
+    (alpha : Type)
     (expr : PsKernelExpr)
     (value : alpha)
     (entries : List (Prod PsKernelExpr alpha)) :
@@ -57,11 +63,13 @@ def psKernelExprMapInsertIn
         List.cons
           entry
           (psKernelExprMapInsertIn
+            alpha
             expr
             value
             rest)
 
 def psKernelExprMapInsert
+    (alpha : Type)
     (cache : PsKernelExprMap alpha)
     (expr : PsKernelExpr)
     (value : alpha) :
@@ -69,6 +77,7 @@ def psKernelExprMapInsert
   {
     entries :=
       psKernelExprMapInsertIn
+        alpha
         expr
         value
         cache.entries
@@ -157,11 +166,11 @@ def psKernelCheckerStateEmpty :
     PsKernelCheckerState :=
   {
     nextFresh := 0
-    inferOnly := psKernelExprMapEmpty
-    checkedInfer := psKernelExprMapEmpty
-    whnfCore := psKernelExprMapEmpty
-    whnf := psKernelExprMapEmpty
-    unfold := psKernelExprMapEmpty
+    inferOnly := psKernelExprMapEmpty PsKernelExpr
+    checkedInfer := psKernelExprMapEmpty PsKernelExpr
+    whnfCore := psKernelExprMapEmpty PsKernelExpr
+    whnf := psKernelExprMapEmpty PsKernelExpr
+    unfold := psKernelExprMapEmpty PsKernelExpr
     success := psKernelExprPairSetEmpty
     failure := psKernelExprPairSetEmpty
   }

@@ -460,7 +460,15 @@ r2 native f (x, y)  -> r3 f((x, y))
 
 when the r2 AST establishes tuple intent.
 
-Existing r2 D-CALL remains an r3 call.
+A nonempty r2 D-CALL remains an r3 call.
+
+An empty r2 D-CALL `f()` meant explicit Unit application, so the mechanical semantics-preserving migration is:
+
+~~~text
+r2 f()  -> r3 f(())
+~~~
+
+The new r3 `f()` empty-invocation/default semantics is not retroactively assigned to r2 source.
 
 Structural braces receive the category separator required by r3.
 

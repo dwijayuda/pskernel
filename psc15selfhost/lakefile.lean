@@ -178,6 +178,12 @@ lean_lib PSC1KernelReferenceFoundations where
     `PSC1Kernel.Expr
   ]
 
+lean_lib PsKernelSelfHost where
+  srcDir := "packages/pskernel-selfhost/src"
+  roots := #[
+    `PsKernel.Name
+  ]
+
 @[default_target]
 lean_exe psc1 where
   srcDir := "packages/cli/src"
@@ -246,6 +252,10 @@ lean_exe psc2_minimal_selfhost_tests where
 lean_exe psc2_prod_match_selfhost_tests where
   srcDir := "test"
   root := `ProdMatchSelfHostTests
+
+lean_exe psc1_kernel_selfhost_foundation_tests where
+  srcDir := "test"
+  root := `PsKernelSelfHostFoundationTests
 
 -- Host-only diagnostics; this executable is not a portable bootstrap module.
 lean_exe psc2_joint_closure_inventory where

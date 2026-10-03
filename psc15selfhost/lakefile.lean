@@ -175,7 +175,8 @@ lean_lib PSC1KernelReferenceFoundations where
   roots := #[
     `PSC1Kernel.Name,
     `PSC1Kernel.Level,
-    `PSC1Kernel.Expr
+    `PSC1Kernel.Expr,
+    `PSC1Kernel.Instantiate
   ]
 
 lean_lib PsKernelSelfHost where

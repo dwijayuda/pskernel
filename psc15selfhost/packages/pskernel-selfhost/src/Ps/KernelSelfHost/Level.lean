@@ -1,5 +1,3 @@
-[Reading 896 lines from start (total: 896 lines, 0 remaining)]
-
 import Ps.KernelSelfHost.Name
 
 inductive PsKernelLevel where

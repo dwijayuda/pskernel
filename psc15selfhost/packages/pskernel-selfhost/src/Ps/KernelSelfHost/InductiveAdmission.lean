@@ -515,7 +515,8 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
                                     child0.context
                                     continuationLocal)
                                   analysis.session.state;
-                              let nextRecursive :=
+                              let nextRecursive :
+                                  List PsKernelSimpleRecursiveField :=
                                 match analysis.recursiveInfo with
                                 | Option.none =>
                                     revRecursive

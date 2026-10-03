@@ -294,8 +294,9 @@ def has the selected native definition meaning.
 Example:
 
 ~~~proofscript
-def double(n : Nat) : Nat :=
+def double(n : Nat) : Nat := {
   n + n
+}
 ~~~
 
 ## 7.2 const
@@ -303,7 +304,9 @@ def double(n : Nat) : Nat :=
 const is a module/namespace-level parameterless definition alias. It is not a local term-binding form.
 
 ~~~proofscript
-const answer : Nat := 42
+const answer : Nat := {
+  42
+}
 ~~~
 
 It has the same semantic category as an ordinary parameterless definition.
@@ -320,13 +323,92 @@ const does not mean:
 function is a declaration-head alias for an ordinary function definition with ProofScript explicit-parameter syntax.
 
 ~~~proofscript
-function add(x: Nat, y: Nat): Nat :=
+function add(x: Nat, y: Nat): Nat := {
   x + y
+}
 ~~~
 
 Its core function meaning remains curried/dependent function application.
 
 It does not introduce JavaScript multi-argument function semantics, hoisting, this, or prototypes.
+
+## 7.3.1 Braced definition bodies
+
+The body of a def, const, or function declaration may be written in either form:
+
+~~~proofscript
+function add(x: Nat, y: Nat): Nat :=
+  x + y
+~~~
+
+or:
+
+~~~proofscript
+function add(x: Nat, y: Nat): Nat := {
+  x + y
+}
+~~~
+
+The forms are semantically identical.
+
+For these declarations:
+
+~~~text
+:= { term }
+≡
+:= term
+~~~
+
+The braces are a single-term declaration-body wrapper. They do not create a statement block, implicit return, new scope rule, sequencing rule, or JavaScript/TypeScript function-body semantics.
+
+Exactly one PSTerm is contained by the wrapper. The contained term may itself be multiline or may be a construct such as if, match, do, let, or another term whose own grammar permits internal sequencing.
+
+Therefore this is valid:
+
+~~~proofscript
+function classify(x: Nat): Nat := {
+  if (x == 0) {
+    0
+  } else {
+    1
+  }
+}
+~~~
+
+but braces alone do not make unrelated adjacent terms valid:
+
+~~~proofscript
+function invalid(): Nat := {
+  1
+  2
+}
+~~~
+
+The declaration-body wrapper does not steal ownership from existing braced terms. In particular, a record literal or record update remains a PSTerm including its own braces:
+
+~~~proofscript
+const user: User := {
+  id := 1,
+  name := "Alice"
+}
+~~~
+
+The example above is an unwrapped record-literal body, not a declaration-body wrapper around field statements.
+
+To explicitly wrap a record literal as the one body term, use two brace layers:
+
+~~~proofscript
+const user: User := {
+  {
+    id := 1,
+    name := "Alice"
+  }
+}
+~~~
+
+Both record examples have the same value meaning.
+
+If a future extensible grammar makes the same token sequence valid both as a complete PSTerm and as a braced declaration-body wrapper containing another PSTerm, the complete PSTerm keeps ownership in ps-standard. An extensible profile must resolve or reject any additional ambiguity explicitly.
 
 ## 7.4 theorem
 
@@ -1049,6 +1131,7 @@ A required item cannot be omitted while retaining that claim.
 | def | required |
 | const | required |
 | function | required |
+| single-term braced def/const/function bodies | required |
 | theorem/example | required |
 | abbrev | required |
 | opaque | required |
@@ -1315,6 +1398,12 @@ ExplicitEntry :=
 FunctionHeader :=
   "function" Ident NativeNonExplicitBinder* (ExplicitGroup | EmptyExplicitGroup) (":" PSTerm)?
 
+DefinitionBody :=
+  ":=" (PSTerm | BracedDefinitionBody)
+
+BracedDefinitionBody :=
+  "{" PSTerm "}"
+
 CallArguments :=
   CallArgument ("," CallArgument)* ","?
 
@@ -1374,6 +1463,7 @@ A physical line break terminates this owned relation.
 |---|---|---|
 | nonempty parenthesized call | comma | allowed |
 | nonempty explicit parameter group | comma | allowed |
+| braced def/const/function body | exactly one PSTerm | not applicable |
 | structure fields | comma | rejected |
 | class fields | comma | rejected |
 | inductive constructors | leading bar | not applicable |
@@ -1389,17 +1479,23 @@ There is no universal ProofScript semicolon or trailing-comma rule.
 ## 29.1 Values and functions
 
 ~~~proofscript
-const answer: Nat := 42
+const answer: Nat := {
+  42
+}
 
-function add(x: Nat, y: Nat): Nat :=
+function add(x: Nat, y: Nat): Nat := {
   x + y
+}
 
 function greet(name: String := "world"): String :=
   "Hello, " ++ name
 
-function now(): Time :=
+function now(): Time := {
   clockValue
+}
 ~~~
+
+The braced and unbraced declaration-body forms are equivalent; short definitions may still use `:= term`.
 
 Calls:
 
@@ -1420,8 +1516,9 @@ structure User where {
   active: Bool
 }
 
-function activate(user: User): User :=
+function activate(user: User): User := {
   { user with active := true }
+}
 ~~~
 
 ## 29.3 Classes and instances

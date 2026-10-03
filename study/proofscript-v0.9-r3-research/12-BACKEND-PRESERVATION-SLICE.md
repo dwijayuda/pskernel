@@ -1,6 +1,6 @@
 # r3 Backend Preservation Slice Plan
 
-Status: **documentation and proof-design plan only; no backend preservation theorem is claimed by the final branch state**
+Status: **accepted r3 backend-proof plan; no backend preservation theorem is claimed by this documentation branch**
 
 ## Purpose
 

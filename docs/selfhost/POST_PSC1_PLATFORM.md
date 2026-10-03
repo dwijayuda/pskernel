@@ -1,6 +1,6 @@
 # ProofScript post-PSC1 platform architecture
 
-> **r3 reconciliation note.** This remains a post-PSC2/platform roadmap. The standalone r3 reference owns current semantics. In particular, its `psc-app-v1` model (`App` cold, `Fiber` started, `Stream` cold, explicit `Resource`, `CapabilitySet`, `RuntimeFault`) supersedes Task-only sketches here; its InterfaceIR rules supersede looser foreign-interface sketches. P1–P7 remain useful sequencing, not PSC2 compiler-core requirements.
+> **r3 reconciliation note.** This remains a post-PSC2 platform roadmap, not a language roadmap. The standalone r3 language reference owns source syntax and language meaning only. Accepted application library/runtime semantics live in `study/proofscript-v0.9-r3-research/08-APPLICATION-EFFECTS-ASYNC-RESOURCES.md`; InterfaceIR is scoped to its own interop protocol. Future source-language candidates are tracked separately in `study/proofscript-v0.9-r3-research/POST_PSC2_LANGUAGE_ROADMAP.md`. P1–P7 here are platform sequencing, not PSC2 language requirements.
 
 
 

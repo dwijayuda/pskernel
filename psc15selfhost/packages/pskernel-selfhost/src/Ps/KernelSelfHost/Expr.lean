@@ -1,3 +1,5 @@
+[Reading 910 lines from start (total: 910 lines, 0 remaining)]
+
 import Ps.KernelSelfHost.Level
 
 inductive PsKernelBinderInfo where
@@ -111,323 +113,347 @@ def psKernelLevelListEq
             else
               false
 
-partial def psKernelExprEq
-    (left : PsKernelExpr)
-    (right : PsKernelExpr) : Bool :=
+def psKernelExprEq
+    (left : PsKernelExpr) :
+    PsKernelExpr -> Bool :=
   match left with
   | PsKernelExpr.bvar leftIndex =>
-      match right with
-      | PsKernelExpr.bvar rightIndex =>
-          Nat.beq leftIndex rightIndex
-      | _ => false
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.bvar rightIndex =>
+            Nat.beq leftIndex rightIndex
+        | _ => false
   | PsKernelExpr.fvar leftName =>
-      match right with
-      | PsKernelExpr.fvar rightName =>
-          psKernelNameEq leftName rightName
-      | _ => false
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.fvar rightName =>
+            psKernelNameEq leftName rightName
+        | _ => false
   | PsKernelExpr.mvar leftName =>
-      match right with
-      | PsKernelExpr.mvar rightName =>
-          psKernelNameEq leftName rightName
-      | _ => false
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.mvar rightName =>
+            psKernelNameEq leftName rightName
+        | _ => false
   | PsKernelExpr.sort leftLevel =>
-      match right with
-      | PsKernelExpr.sort rightLevel =>
-          psKernelLevelEq leftLevel rightLevel
-      | _ => false
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.sort rightLevel =>
+            psKernelLevelEq leftLevel rightLevel
+        | _ => false
   | PsKernelExpr.const leftName leftLevels =>
-      match right with
-      | PsKernelExpr.const rightName rightLevels =>
-          if psKernelNameEq leftName rightName then
-            psKernelLevelListEq leftLevels rightLevels
-          else
-            false
-      | _ => false
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.const rightName rightLevels =>
+            if psKernelNameEq leftName rightName then
+              psKernelLevelListEq leftLevels rightLevels
+            else
+              false
+        | _ => false
   | PsKernelExpr.app leftFn leftArg =>
-      match right with
-      | PsKernelExpr.app rightFn rightArg =>
-          if psKernelExprEq leftFn rightFn then
-            psKernelExprEq leftArg rightArg
-          else
-            false
-      | _ => false
+      let fnEq : PsKernelExpr -> Bool :=
+        psKernelExprEq leftFn;
+      let argEq : PsKernelExpr -> Bool :=
+        psKernelExprEq leftArg;
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.app rightFn rightArg =>
+            if fnEq rightFn then argEq rightArg else false
+        | _ => false
   | PsKernelExpr.lam _ leftType leftBody _ =>
-      match right with
-      | PsKernelExpr.lam _ rightType rightBody _ =>
-          if psKernelExprEq leftType rightType then
-            psKernelExprEq leftBody rightBody
-          else
-            false
-      | _ => false
+      let typeEq : PsKernelExpr -> Bool :=
+        psKernelExprEq leftType;
+      let bodyEq : PsKernelExpr -> Bool :=
+        psKernelExprEq leftBody;
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.lam _ rightType rightBody _ =>
+            if typeEq rightType then bodyEq rightBody else false
+        | _ => false
   | PsKernelExpr.forallE _ leftType leftBody _ =>
-      match right with
-      | PsKernelExpr.forallE _ rightType rightBody _ =>
-          if psKernelExprEq leftType rightType then
-            psKernelExprEq leftBody rightBody
-          else
-            false
-      | _ => false
+      let typeEq : PsKernelExpr -> Bool :=
+        psKernelExprEq leftType;
+      let bodyEq : PsKernelExpr -> Bool :=
+        psKernelExprEq leftBody;
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.forallE _ rightType rightBody _ =>
+            if typeEq rightType then bodyEq rightBody else false
+        | _ => false
   | PsKernelExpr.letE _ leftType leftValue leftBody leftNondep =>
-      match right with
-      | PsKernelExpr.letE _ rightType rightValue rightBody rightNondep =>
-          if psKernelExprEq leftType rightType then
-            if psKernelExprEq leftValue rightValue then
-              if psKernelExprEq leftBody rightBody then
-                psKernelBoolEq leftNondep rightNondep
-              else
-                false
-            else
-              false
-          else
-            false
-      | _ => false
+      let typeEq : PsKernelExpr -> Bool :=
+        psKernelExprEq leftType;
+      let valueEq : PsKernelExpr -> Bool :=
+        psKernelExprEq leftValue;
+      let bodyEq : PsKernelExpr -> Bool :=
+        psKernelExprEq leftBody;
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.letE _ rightType rightValue rightBody rightNondep =>
+            if typeEq rightType then
+              if valueEq rightValue then
+                if bodyEq rightBody then
+                  psKernelBoolEq leftNondep rightNondep
+                else false
+              else false
+            else false
+        | _ => false
   | PsKernelExpr.lit leftValue =>
-      match right with
-      | PsKernelExpr.lit rightValue =>
-          psKernelLiteralEq leftValue rightValue
-      | _ => false
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.lit rightValue =>
+            psKernelLiteralEq leftValue rightValue
+        | _ => false
   | PsKernelExpr.mdata leftMetadata leftExpr =>
-      match right with
-      | PsKernelExpr.mdata rightMetadata rightExpr =>
-          if Nat.beq leftMetadata rightMetadata then
-            psKernelExprEq leftExpr rightExpr
-          else
-            false
-      | _ => false
+      let exprEq : PsKernelExpr -> Bool :=
+        psKernelExprEq leftExpr;
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.mdata rightMetadata rightExpr =>
+            if Nat.beq leftMetadata rightMetadata then
+              exprEq rightExpr
+            else false
+        | _ => false
   | PsKernelExpr.proj leftName leftIndex leftExpr =>
-      match right with
-      | PsKernelExpr.proj rightName rightIndex rightExpr =>
-          if psKernelNameEq leftName rightName then
-            if Nat.beq leftIndex rightIndex then
-              psKernelExprEq leftExpr rightExpr
-            else
-              false
-          else
-            false
-      | _ => false
+      let exprEq : PsKernelExpr -> Bool :=
+        psKernelExprEq leftExpr;
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.proj rightName rightIndex rightExpr =>
+            if psKernelNameEq leftName rightName then
+              if Nat.beq leftIndex rightIndex then
+                exprEq rightExpr
+              else false
+            else false
+        | _ => false
 
-partial def psKernelExprEqual
-    (left : PsKernelExpr)
-    (right : PsKernelExpr) : Bool :=
+def psKernelExprEqual
+    (left : PsKernelExpr) :
+    PsKernelExpr -> Bool :=
   match left with
   | PsKernelExpr.bvar leftIndex =>
-      match right with
-      | PsKernelExpr.bvar rightIndex =>
-          Nat.beq leftIndex rightIndex
-      | _ => false
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.bvar rightIndex =>
+            Nat.beq leftIndex rightIndex
+        | _ => false
   | PsKernelExpr.fvar leftName =>
-      match right with
-      | PsKernelExpr.fvar rightName =>
-          psKernelNameEq leftName rightName
-      | _ => false
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.fvar rightName =>
+            psKernelNameEq leftName rightName
+        | _ => false
   | PsKernelExpr.mvar leftName =>
-      match right with
-      | PsKernelExpr.mvar rightName =>
-          psKernelNameEq leftName rightName
-      | _ => false
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.mvar rightName =>
+            psKernelNameEq leftName rightName
+        | _ => false
   | PsKernelExpr.sort leftLevel =>
-      match right with
-      | PsKernelExpr.sort rightLevel =>
-          psKernelLevelEq leftLevel rightLevel
-      | _ => false
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.sort rightLevel =>
+            psKernelLevelEq leftLevel rightLevel
+        | _ => false
   | PsKernelExpr.const leftName leftLevels =>
-      match right with
-      | PsKernelExpr.const rightName rightLevels =>
-          if psKernelNameEq leftName rightName then
-            psKernelLevelListEq leftLevels rightLevels
-          else
-            false
-      | _ => false
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.const rightName rightLevels =>
+            if psKernelNameEq leftName rightName then
+              psKernelLevelListEq leftLevels rightLevels
+            else false
+        | _ => false
   | PsKernelExpr.app leftFn leftArg =>
-      match right with
-      | PsKernelExpr.app rightFn rightArg =>
-          if psKernelExprEqual leftFn rightFn then
-            psKernelExprEqual leftArg rightArg
-          else
-            false
-      | _ => false
+      let fnEq : PsKernelExpr -> Bool :=
+        psKernelExprEqual leftFn;
+      let argEq : PsKernelExpr -> Bool :=
+        psKernelExprEqual leftArg;
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.app rightFn rightArg =>
+            if fnEq rightFn then argEq rightArg else false
+        | _ => false
   | PsKernelExpr.lam leftName leftType leftBody leftInfo =>
-      match right with
-      | PsKernelExpr.lam rightName rightType rightBody rightInfo =>
-          if psKernelNameEq leftName rightName then
-            if psKernelExprEqual leftType rightType then
-              if psKernelExprEqual leftBody rightBody then
-                psKernelBinderInfoEq leftInfo rightInfo
-              else
-                false
-            else
-              false
-          else
-            false
-      | _ => false
+      let typeEq : PsKernelExpr -> Bool :=
+        psKernelExprEqual leftType;
+      let bodyEq : PsKernelExpr -> Bool :=
+        psKernelExprEqual leftBody;
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.lam rightName rightType rightBody rightInfo =>
+            if psKernelNameEq leftName rightName then
+              if typeEq rightType then
+                if bodyEq rightBody then
+                  psKernelBinderInfoEq leftInfo rightInfo
+                else false
+              else false
+            else false
+        | _ => false
   | PsKernelExpr.forallE leftName leftType leftBody leftInfo =>
-      match right with
-      | PsKernelExpr.forallE rightName rightType rightBody rightInfo =>
-          if psKernelNameEq leftName rightName then
-            if psKernelExprEqual leftType rightType then
-              if psKernelExprEqual leftBody rightBody then
-                psKernelBinderInfoEq leftInfo rightInfo
-              else
-                false
-            else
-              false
-          else
-            false
-      | _ => false
+      let typeEq : PsKernelExpr -> Bool :=
+        psKernelExprEqual leftType;
+      let bodyEq : PsKernelExpr -> Bool :=
+        psKernelExprEqual leftBody;
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.forallE rightName rightType rightBody rightInfo =>
+            if psKernelNameEq leftName rightName then
+              if typeEq rightType then
+                if bodyEq rightBody then
+                  psKernelBinderInfoEq leftInfo rightInfo
+                else false
+              else false
+            else false
+        | _ => false
   | PsKernelExpr.letE leftName leftType leftValue leftBody leftNondep =>
-      match right with
-      | PsKernelExpr.letE rightName rightType rightValue rightBody rightNondep =>
-          if psKernelNameEq leftName rightName then
-            if psKernelExprEqual leftType rightType then
-              if psKernelExprEqual leftValue rightValue then
-                if psKernelExprEqual leftBody rightBody then
-                  psKernelBoolEq leftNondep rightNondep
-                else
-                  false
-              else
-                false
-            else
-              false
-          else
-            false
-      | _ => false
+      let typeEq : PsKernelExpr -> Bool :=
+        psKernelExprEqual leftType;
+      let valueEq : PsKernelExpr -> Bool :=
+        psKernelExprEqual leftValue;
+      let bodyEq : PsKernelExpr -> Bool :=
+        psKernelExprEqual leftBody;
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.letE rightName rightType rightValue rightBody rightNondep =>
+            if psKernelNameEq leftName rightName then
+              if typeEq rightType then
+                if valueEq rightValue then
+                  if bodyEq rightBody then
+                    psKernelBoolEq leftNondep rightNondep
+                  else false
+                else false
+              else false
+            else false
+        | _ => false
   | PsKernelExpr.lit leftValue =>
-      match right with
-      | PsKernelExpr.lit rightValue =>
-          psKernelLiteralEq leftValue rightValue
-      | _ => false
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.lit rightValue =>
+            psKernelLiteralEq leftValue rightValue
+        | _ => false
   | PsKernelExpr.mdata leftMetadata leftExpr =>
-      match right with
-      | PsKernelExpr.mdata rightMetadata rightExpr =>
-          if Nat.beq leftMetadata rightMetadata then
-            psKernelExprEqual leftExpr rightExpr
-          else
-            false
-      | _ => false
+      let exprEq : PsKernelExpr -> Bool :=
+        psKernelExprEqual leftExpr;
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.mdata rightMetadata rightExpr =>
+            if Nat.beq leftMetadata rightMetadata then
+              exprEq rightExpr
+            else false
+        | _ => false
   | PsKernelExpr.proj leftName leftIndex leftExpr =>
-      match right with
-      | PsKernelExpr.proj rightName rightIndex rightExpr =>
-          if psKernelNameEq leftName rightName then
-            if Nat.beq leftIndex rightIndex then
-              psKernelExprEqual leftExpr rightExpr
-            else
-              false
-          else
-            false
-      | _ => false
+      let exprEq : PsKernelExpr -> Bool :=
+        psKernelExprEqual leftExpr;
+      fun (right : PsKernelExpr) =>
+        match right with
+        | PsKernelExpr.proj rightName rightIndex rightExpr =>
+            if psKernelNameEq leftName rightName then
+              if Nat.beq leftIndex rightIndex then
+                exprEq rightExpr
+              else false
+            else false
+        | _ => false
 
-partial def psKernelExprHasLooseAt
-    (expr : PsKernelExpr)
-    (offset : Nat) : Bool :=
+def psKernelExprHasLooseAt
+    (expr : PsKernelExpr) :
+    Nat -> Bool :=
   match expr with
   | PsKernelExpr.bvar index =>
-      Nat.ble offset index
+      fun (offset : Nat) =>
+        Nat.ble offset index
   | PsKernelExpr.app fn arg =>
-      if psKernelExprHasLooseAt fn offset then
-        true
-      else
-        psKernelExprHasLooseAt arg offset
+      let fnHas : Nat -> Bool :=
+        psKernelExprHasLooseAt fn;
+      let argHas : Nat -> Bool :=
+        psKernelExprHasLooseAt arg;
+      fun (offset : Nat) =>
+        if fnHas offset then true else argHas offset
   | PsKernelExpr.lam _ type body _ =>
-      if psKernelExprHasLooseAt type offset then
-        true
-      else
-        psKernelExprHasLooseAt body (Nat.succ offset)
+      let typeHas : Nat -> Bool :=
+        psKernelExprHasLooseAt type;
+      let bodyHas : Nat -> Bool :=
+        psKernelExprHasLooseAt body;
+      fun (offset : Nat) =>
+        if typeHas offset then true
+        else bodyHas (Nat.succ offset)
   | PsKernelExpr.forallE _ type body _ =>
-      if psKernelExprHasLooseAt type offset then
-        true
-      else
-        psKernelExprHasLooseAt body (Nat.succ offset)
+      let typeHas : Nat -> Bool :=
+        psKernelExprHasLooseAt type;
+      let bodyHas : Nat -> Bool :=
+        psKernelExprHasLooseAt body;
+      fun (offset : Nat) =>
+        if typeHas offset then true
+        else bodyHas (Nat.succ offset)
   | PsKernelExpr.letE _ type value body _ =>
-      if psKernelExprHasLooseAt type offset then
-        true
-      else if psKernelExprHasLooseAt value offset then
-        true
-      else
-        psKernelExprHasLooseAt body (Nat.succ offset)
+      let typeHas : Nat -> Bool :=
+        psKernelExprHasLooseAt type;
+      let valueHas : Nat -> Bool :=
+        psKernelExprHasLooseAt value;
+      let bodyHas : Nat -> Bool :=
+        psKernelExprHasLooseAt body;
+      fun (offset : Nat) =>
+        if typeHas offset then true
+        else if valueHas offset then true
+        else bodyHas (Nat.succ offset)
   | PsKernelExpr.mdata _ body =>
-      psKernelExprHasLooseAt body offset
+      psKernelExprHasLooseAt body
   | PsKernelExpr.proj _ _ body =>
-      psKernelExprHasLooseAt body offset
+      psKernelExprHasLooseAt body
   | _ =>
-      false
+      fun (_offset : Nat) => false
 
 def psKernelExprHasLooseBVar
     (expr : PsKernelExpr) : Bool :=
   psKernelExprHasLooseAt expr 0
 
-partial def psKernelExprHasLooseBVarAtCore
-    (expr : PsKernelExpr)
-    (index : Nat)
-    (depth : Nat) : Bool :=
+def psKernelExprHasLooseBVarAtCore
+    (expr : PsKernelExpr) :
+    Nat -> Nat -> Bool :=
   match expr with
   | PsKernelExpr.bvar value =>
-      Nat.beq value (Nat.add index depth)
+      fun (index : Nat) (depth : Nat) =>
+        Nat.beq value (Nat.add index depth)
   | PsKernelExpr.app fn arg =>
-      if
-          psKernelExprHasLooseBVarAtCore
-            fn
-            index
-            depth then
-        true
-      else
-        psKernelExprHasLooseBVarAtCore
-          arg
-          index
-          depth
+      let fnHas : Nat -> Nat -> Bool :=
+        psKernelExprHasLooseBVarAtCore fn;
+      let argHas : Nat -> Nat -> Bool :=
+        psKernelExprHasLooseBVarAtCore arg;
+      fun (index : Nat) (depth : Nat) =>
+        if fnHas index depth then true
+        else argHas index depth
   | PsKernelExpr.lam _ type body _ =>
-      if
-          psKernelExprHasLooseBVarAtCore
-            type
-            index
-            depth then
-        true
-      else
-        psKernelExprHasLooseBVarAtCore
-          body
-          index
-          (Nat.succ depth)
+      let typeHas : Nat -> Nat -> Bool :=
+        psKernelExprHasLooseBVarAtCore type;
+      let bodyHas : Nat -> Nat -> Bool :=
+        psKernelExprHasLooseBVarAtCore body;
+      fun (index : Nat) (depth : Nat) =>
+        if typeHas index depth then true
+        else bodyHas index (Nat.succ depth)
   | PsKernelExpr.forallE _ type body _ =>
-      if
-          psKernelExprHasLooseBVarAtCore
-            type
-            index
-            depth then
-        true
-      else
-        psKernelExprHasLooseBVarAtCore
-          body
-          index
-          (Nat.succ depth)
+      let typeHas : Nat -> Nat -> Bool :=
+        psKernelExprHasLooseBVarAtCore type;
+      let bodyHas : Nat -> Nat -> Bool :=
+        psKernelExprHasLooseBVarAtCore body;
+      fun (index : Nat) (depth : Nat) =>
+        if typeHas index depth then true
+        else bodyHas index (Nat.succ depth)
   | PsKernelExpr.letE _ type value body _ =>
-      if
-          psKernelExprHasLooseBVarAtCore
-            type
-            index
-            depth then
-        true
-      else if
-          psKernelExprHasLooseBVarAtCore
-            value
-            index
-            depth then
-        true
-      else
-        psKernelExprHasLooseBVarAtCore
-          body
-          index
-          (Nat.succ depth)
+      let typeHas : Nat -> Nat -> Bool :=
+        psKernelExprHasLooseBVarAtCore type;
+      let valueHas : Nat -> Nat -> Bool :=
+        psKernelExprHasLooseBVarAtCore value;
+      let bodyHas : Nat -> Nat -> Bool :=
+        psKernelExprHasLooseBVarAtCore body;
+      fun (index : Nat) (depth : Nat) =>
+        if typeHas index depth then true
+        else if valueHas index depth then true
+        else bodyHas index (Nat.succ depth)
   | PsKernelExpr.mdata _ body =>
-      psKernelExprHasLooseBVarAtCore
-        body
-        index
-        depth
+      psKernelExprHasLooseBVarAtCore body
   | PsKernelExpr.proj _ _ body =>
-      psKernelExprHasLooseBVarAtCore
-        body
-        index
-        depth
+      psKernelExprHasLooseBVarAtCore body
   | _ =>
-      false
+      fun (_index : Nat) (_depth : Nat) => false
 
 def psKernelExprHasLooseBVarAt
     (expr : PsKernelExpr)
@@ -437,112 +463,113 @@ def psKernelExprHasLooseBVarAt
     index
     0
 
-partial def psKernelExprHasLooseBVarInExplicitDomain
-    (expr : PsKernelExpr)
-    (bvarIndex : Nat)
-    (considerRange : Bool) : Bool :=
+def psKernelExprHasLooseBVarInExplicitDomain
+    (expr : PsKernelExpr) :
+    Nat -> Bool -> Bool :=
   match expr with
   | PsKernelExpr.forallE _ domain body binderInfo =>
-      let dependency :=
-        if psKernelExprHasLooseBVarAt domain bvarIndex then
-          if
-              psKernelBinderInfoEq
-                binderInfo
-                PsKernelBinderInfo.default then
-            true
-          else
-            psKernelExprHasLooseBVarInExplicitDomain
-              body
-              0
-              considerRange
-        else
-          false;
-      if dependency then
-        true
-      else
-        psKernelExprHasLooseBVarInExplicitDomain
-          body
-          (Nat.succ bvarIndex)
-          considerRange
-  | _ =>
-      if considerRange then
-        psKernelExprHasLooseBVarAt
-          expr
-          bvarIndex
-      else
-        false
-
-partial def psKernelExprInferImplicit
-    (expr : PsKernelExpr)
-    (numParams : Nat)
-    (considerRange : Bool) : PsKernelExpr :=
-  match expr with
-  | PsKernelExpr.forallE name domain body binderInfo =>
-      match numParams with
-      | Nat.zero =>
-          expr
-      | Nat.succ remaining =>
-          let changedBody :=
-            psKernelExprInferImplicit
-              body
-              remaining
-              considerRange;
-          let changedInfo :=
+      let smaller : Nat -> Bool -> Bool :=
+        psKernelExprHasLooseBVarInExplicitDomain body;
+      fun (bvarIndex : Nat) (considerRange : Bool) =>
+        let dependency :=
+          if psKernelExprHasLooseBVarAt domain bvarIndex then
             if
                 psKernelBinderInfoEq
                   binderInfo
                   PsKernelBinderInfo.default then
-              if
-                  psKernelExprHasLooseBVarInExplicitDomain
-                    changedBody
-                    0
-                    considerRange then
-                PsKernelBinderInfo.implicit
-              else
-                binderInfo
+              true
             else
-              binderInfo;
-          PsKernelExpr.forallE
-            name
-            domain
-            changedBody
-            changedInfo
+              smaller 0 considerRange
+          else
+            false;
+        if dependency then
+          true
+        else
+          smaller
+            (Nat.succ bvarIndex)
+            considerRange
   | _ =>
-      expr
+      fun (bvarIndex : Nat) (considerRange : Bool) =>
+        if considerRange then
+          psKernelExprHasLooseBVarAt
+            expr
+            bvarIndex
+        else
+          false
 
-partial def psKernelExprInferImplicitAll
-    (expr : PsKernelExpr)
-    (considerRange : Bool) : PsKernelExpr :=
+def psKernelExprInferImplicit
+    (expr : PsKernelExpr) :
+    Nat -> Bool -> PsKernelExpr :=
   match expr with
   | PsKernelExpr.forallE name domain body binderInfo =>
-      let changedBody :=
-        psKernelExprInferImplicitAll
-          body
-          considerRange;
-      let changedInfo :=
-        if
-            psKernelBinderInfoEq
-              binderInfo
-              PsKernelBinderInfo.default then
-          if
-              psKernelExprHasLooseBVarInExplicitDomain
-                changedBody
-                0
-                considerRange then
-            PsKernelBinderInfo.implicit
-          else
-            binderInfo
-        else
-          binderInfo;
-      PsKernelExpr.forallE
-        name
-        domain
-        changedBody
-        changedInfo
+      let smaller : Nat -> Bool -> PsKernelExpr :=
+        psKernelExprInferImplicit body;
+      fun (numParams : Nat) (considerRange : Bool) =>
+        match numParams with
+        | Nat.zero =>
+            expr
+        | Nat.succ remaining =>
+            let changedBody :=
+              smaller remaining considerRange;
+            let changedInfo :=
+              if
+                  psKernelBinderInfoEq
+                    binderInfo
+                    PsKernelBinderInfo.default then
+                if
+                    psKernelExprHasLooseBVarInExplicitDomain
+                      changedBody
+                      0
+                      considerRange then
+                  PsKernelBinderInfo.implicit
+                else
+                  binderInfo
+              else
+                binderInfo;
+            PsKernelExpr.forallE
+              name
+              domain
+              changedBody
+              changedInfo
   | _ =>
-      expr
+      fun (_numParams : Nat) (_considerRange : Bool) =>
+        expr
 
-partial def psKernelExprGetAppFn
+def psKernelExprInferImplicitAll
+    (expr : PsKernelExpr) :
+    Bool -> PsKernelExpr :=
+  match expr with
+  | PsKernelExpr.forallE name domain body binderInfo =>
+      let smaller : Bool -> PsKernelExpr :=
+        psKernelExprInferImplicitAll body;
+      fun (considerRange : Bool) =>
+        let changedBody :=
+          smaller considerRange;
+        let changedInfo :=
+          if
+              psKernelBinderInfoEq
+                binderInfo
+                PsKernelBinderInfo.default then
+            if
+                psKernelExprHasLooseBVarInExplicitDomain
+                  changedBody
+                  0
+                  considerRange then
+              PsKernelBinderInfo.implicit
+            else
+              binderInfo
+          else
+            binderInfo;
+        PsKernelExpr.forallE
+          name
+          domain
+          changedBody
+          changedInfo
+  | _ =>
+      fun (_considerRange : Bool) =>
+        expr
+
+def psKernelExprGetAppFn
     (expr : PsKernelExpr) : PsKernelExpr :=
   match expr with
   | PsKernelExpr.app fn _ =>
@@ -550,17 +577,19 @@ partial def psKernelExprGetAppFn
   | _ =>
       expr
 
-partial def psKernelExprGetAppArgsWorker
-    (expr : PsKernelExpr)
-    (args : List PsKernelExpr) :
-    List PsKernelExpr :=
+def psKernelExprGetAppArgsWorker
+    (expr : PsKernelExpr) :
+    List PsKernelExpr -> List PsKernelExpr :=
   match expr with
   | PsKernelExpr.app fn arg =>
-      psKernelExprGetAppArgsWorker
-        fn
-        (List.cons arg args)
+      let smaller :
+          List PsKernelExpr -> List PsKernelExpr :=
+        psKernelExprGetAppArgsWorker fn;
+      fun (args : List PsKernelExpr) =>
+        smaller (List.cons arg args)
   | _ =>
-      args
+      fun (args : List PsKernelExpr) =>
+        args
 
 def psKernelExprGetAppArgs
     (expr : PsKernelExpr) :
@@ -594,51 +623,98 @@ def psKernelTypeAnnotationOptParamName : PsKernelName :=
 def psKernelTypeAnnotationAutoParamName : PsKernelName :=
   PsKernelName.str PsKernelName.anonymous "autoParam"
 
-partial def psKernelExprConsumeTypeAnnotations
-    (expr : PsKernelExpr) : PsKernelExpr :=
-  let fn := psKernelExprGetAppFn expr;
-  let args := psKernelExprGetAppArgs expr;
-  match fn with
-  | PsKernelExpr.const name _ =>
-      match args with
-      | List.cons first rest =>
-          match rest with
-          | List.nil =>
-              if
-                  if psKernelNameEq
-                      name
-                      psKernelTypeAnnotationOutParamName then
-                    true
-                  else
-                    psKernelNameEq
-                      name
-                      psKernelTypeAnnotationSemiOutParamName then
-                psKernelExprConsumeTypeAnnotations first
-              else
-                expr
-          | List.cons _ secondRest =>
-              match secondRest with
-              | List.nil =>
-                  if
-                      if psKernelNameEq
-                          name
-                          psKernelTypeAnnotationOptParamName then
-                        true
-                      else
-                        psKernelNameEq
-                          name
-                          psKernelTypeAnnotationAutoParamName then
-                    psKernelExprConsumeTypeAnnotations first
-                  else
-                    expr
-              | List.cons _ _ =>
-                  expr
-      | List.nil =>
-          expr
+def psKernelExprNodeCount
+    (expr : PsKernelExpr) : Nat :=
+  match expr with
+  | PsKernelExpr.app fn arg =>
+      Nat.succ
+        (Nat.add
+          (psKernelExprNodeCount fn)
+          (psKernelExprNodeCount arg))
+  | PsKernelExpr.lam _ type body _ =>
+      Nat.succ
+        (Nat.add
+          (psKernelExprNodeCount type)
+          (psKernelExprNodeCount body))
+  | PsKernelExpr.forallE _ type body _ =>
+      Nat.succ
+        (Nat.add
+          (psKernelExprNodeCount type)
+          (psKernelExprNodeCount body))
+  | PsKernelExpr.letE _ type value body _ =>
+      Nat.succ
+        (Nat.add
+          (psKernelExprNodeCount type)
+          (Nat.add
+            (psKernelExprNodeCount value)
+            (psKernelExprNodeCount body)))
+  | PsKernelExpr.mdata _ body =>
+      Nat.succ (psKernelExprNodeCount body)
+  | PsKernelExpr.proj _ _ body =>
+      Nat.succ (psKernelExprNodeCount body)
   | _ =>
-      expr
+      1
 
-partial def psKernelExprHasFVar
+def psKernelExprConsumeTypeAnnotationsWithFuel
+    (fuel : Nat) :
+    PsKernelExpr -> PsKernelExpr :=
+  match fuel with
+  | Nat.zero =>
+      fun (expr : PsKernelExpr) =>
+        expr
+  | Nat.succ remaining =>
+      let smaller : PsKernelExpr -> PsKernelExpr :=
+        psKernelExprConsumeTypeAnnotationsWithFuel remaining;
+      fun (expr : PsKernelExpr) =>
+        let fn := psKernelExprGetAppFn expr;
+        let args := psKernelExprGetAppArgs expr;
+        match fn with
+        | PsKernelExpr.const name _ =>
+            match args with
+            | List.cons first rest =>
+                match rest with
+                | List.nil =>
+                    if
+                        if psKernelNameEq
+                            name
+                            psKernelTypeAnnotationOutParamName then
+                          true
+                        else
+                          psKernelNameEq
+                            name
+                            psKernelTypeAnnotationSemiOutParamName then
+                      smaller first
+                    else
+                      expr
+                | List.cons _ secondRest =>
+                    match secondRest with
+                    | List.nil =>
+                        if
+                            if psKernelNameEq
+                                name
+                                psKernelTypeAnnotationOptParamName then
+                              true
+                            else
+                              psKernelNameEq
+                                name
+                                psKernelTypeAnnotationAutoParamName then
+                          smaller first
+                        else
+                          expr
+                    | List.cons _ _ =>
+                        expr
+            | List.nil =>
+                expr
+        | _ =>
+            expr
+
+def psKernelExprConsumeTypeAnnotations
+    (expr : PsKernelExpr) : PsKernelExpr :=
+  psKernelExprConsumeTypeAnnotationsWithFuel
+    (Nat.succ (psKernelExprNodeCount expr))
+    expr
+
+def psKernelExprHasFVar
     (expr : PsKernelExpr) : Bool :=
   match expr with
   | PsKernelExpr.fvar _ =>
@@ -673,107 +749,166 @@ partial def psKernelExprHasFVar
       false
 
 def psKernelInstantiateLevelList
-    (levels : List PsKernelLevel)
-    (params : List PsKernelName)
-    (values : List PsKernelLevel) :
+    (levels : List PsKernelLevel) :
+    List PsKernelName ->
+    List PsKernelLevel ->
     List PsKernelLevel :=
   match levels with
   | List.nil =>
-      List.nil
+      fun
+        (_params : List PsKernelName)
+        (_values : List PsKernelLevel) =>
+        List.nil
   | List.cons level rest =>
-      List.cons
-        (psKernelLevelInstantiateParams
-          level
-          params
-          values)
-        (psKernelInstantiateLevelList
-          rest
-          params
-          values)
+      let smaller :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          List PsKernelLevel :=
+        psKernelInstantiateLevelList rest;
+      fun
+        (params : List PsKernelName)
+        (values : List PsKernelLevel) =>
+        List.cons
+          (psKernelLevelInstantiateParams
+            level
+            params
+            values)
+          (smaller params values)
 
-partial def psKernelExprInstantiateLevelParams
-    (expr : PsKernelExpr)
-    (params : List PsKernelName)
-    (values : List PsKernelLevel) :
+def psKernelExprInstantiateLevelParams
+    (expr : PsKernelExpr) :
+    List PsKernelName ->
+    List PsKernelLevel ->
     PsKernelExpr :=
   match expr with
   | PsKernelExpr.sort level =>
-      PsKernelExpr.sort
-        (psKernelLevelInstantiateParams
-          level
-          params
-          values)
+      fun
+        (params : List PsKernelName)
+        (values : List PsKernelLevel) =>
+        PsKernelExpr.sort
+          (psKernelLevelInstantiateParams
+            level
+            params
+            values)
   | PsKernelExpr.const name levels =>
-      PsKernelExpr.const
-        name
-        (psKernelInstantiateLevelList
-          levels
-          params
-          values)
+      fun
+        (params : List PsKernelName)
+        (values : List PsKernelLevel) =>
+        PsKernelExpr.const
+          name
+          (psKernelInstantiateLevelList
+            levels
+            params
+            values)
   | PsKernelExpr.app fn arg =>
-      PsKernelExpr.app
-        (psKernelExprInstantiateLevelParams
-          fn
-          params
-          values)
-        (psKernelExprInstantiateLevelParams
-          arg
-          params
-          values)
+      let instantiateFn :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          PsKernelExpr :=
+        psKernelExprInstantiateLevelParams fn;
+      let instantiateArg :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          PsKernelExpr :=
+        psKernelExprInstantiateLevelParams arg;
+      fun
+        (params : List PsKernelName)
+        (values : List PsKernelLevel) =>
+        PsKernelExpr.app
+          (instantiateFn params values)
+          (instantiateArg params values)
   | PsKernelExpr.lam name type body binderInfo =>
-      PsKernelExpr.lam
-        name
-        (psKernelExprInstantiateLevelParams
-          type
-          params
-          values)
-        (psKernelExprInstantiateLevelParams
-          body
-          params
-          values)
-        binderInfo
+      let instantiateType :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          PsKernelExpr :=
+        psKernelExprInstantiateLevelParams type;
+      let instantiateBody :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          PsKernelExpr :=
+        psKernelExprInstantiateLevelParams body;
+      fun
+        (params : List PsKernelName)
+        (values : List PsKernelLevel) =>
+        PsKernelExpr.lam
+          name
+          (instantiateType params values)
+          (instantiateBody params values)
+          binderInfo
   | PsKernelExpr.forallE name type body binderInfo =>
-      PsKernelExpr.forallE
-        name
-        (psKernelExprInstantiateLevelParams
-          type
-          params
-          values)
-        (psKernelExprInstantiateLevelParams
-          body
-          params
-          values)
-        binderInfo
+      let instantiateType :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          PsKernelExpr :=
+        psKernelExprInstantiateLevelParams type;
+      let instantiateBody :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          PsKernelExpr :=
+        psKernelExprInstantiateLevelParams body;
+      fun
+        (params : List PsKernelName)
+        (values : List PsKernelLevel) =>
+        PsKernelExpr.forallE
+          name
+          (instantiateType params values)
+          (instantiateBody params values)
+          binderInfo
   | PsKernelExpr.letE name type value body nondep =>
-      PsKernelExpr.letE
-        name
-        (psKernelExprInstantiateLevelParams
-          type
-          params
-          values)
-        (psKernelExprInstantiateLevelParams
-          value
-          params
-          values)
-        (psKernelExprInstantiateLevelParams
-          body
-          params
-          values)
-        nondep
+      let instantiateType :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          PsKernelExpr :=
+        psKernelExprInstantiateLevelParams type;
+      let instantiateValue :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          PsKernelExpr :=
+        psKernelExprInstantiateLevelParams value;
+      let instantiateBody :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          PsKernelExpr :=
+        psKernelExprInstantiateLevelParams body;
+      fun
+        (params : List PsKernelName)
+        (values : List PsKernelLevel) =>
+        PsKernelExpr.letE
+          name
+          (instantiateType params values)
+          (instantiateValue params values)
+          (instantiateBody params values)
+          nondep
   | PsKernelExpr.mdata metadata body =>
-      PsKernelExpr.mdata
-        metadata
-        (psKernelExprInstantiateLevelParams
-          body
-          params
-          values)
+      let instantiateBody :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          PsKernelExpr :=
+        psKernelExprInstantiateLevelParams body;
+      fun
+        (params : List PsKernelName)
+        (values : List PsKernelLevel) =>
+        PsKernelExpr.mdata
+          metadata
+          (instantiateBody params values)
   | PsKernelExpr.proj typeName index body =>
-      PsKernelExpr.proj
-        typeName
-        index
-        (psKernelExprInstantiateLevelParams
-          body
-          params
-          values)
+      let instantiateBody :
+          List PsKernelName ->
+          List PsKernelLevel ->
+          PsKernelExpr :=
+        psKernelExprInstantiateLevelParams body;
+      fun
+        (params : List PsKernelName)
+        (values : List PsKernelLevel) =>
+        PsKernelExpr.proj
+          typeName
+          index
+          (instantiateBody params values)
   | _ =>
-      expr
+      fun
+        (_params : List PsKernelName)
+        (_values : List PsKernelLevel) =>
+        expr
+
+[executed on device: box (459eb03d-a4f9-4033-b2ed-5fa4ec9998df)]

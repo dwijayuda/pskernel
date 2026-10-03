@@ -207,8 +207,12 @@ def psKernelNameAppendAfter
   match name with
   | PsKernelName.str parent value =>
       PsKernelName.str parent (String.Internal.append value suffix)
-  | other =>
-      PsKernelName.str other suffix
+  | PsKernelName.anonymous =>
+      PsKernelName.str PsKernelName.anonymous suffix
+  | PsKernelName.num parent value =>
+      PsKernelName.str
+        (PsKernelName.num parent value)
+        suffix
 
 def psKernelNameAppend
     (base : PsKernelName)
@@ -355,8 +359,10 @@ def psKernelCompareNameComponents
                   rightHead with
             | PsKernelOrdering.eq =>
                 smaller rightTail
-            | ordering =>
-                ordering
+            | PsKernelOrdering.lt =>
+                PsKernelOrdering.lt
+            | PsKernelOrdering.gt =>
+                PsKernelOrdering.gt
 
 def psKernelNameCmp
     (left : PsKernelName)

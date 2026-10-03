@@ -1,5 +1,3 @@
-[Reading 337 lines from start (total: 337 lines, 0 remaining)]
-
 import Ps.KernelSelfHost.Expr
 import PSC1Kernel.Expr
 

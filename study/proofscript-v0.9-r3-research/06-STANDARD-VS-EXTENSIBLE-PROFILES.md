@@ -22,6 +22,8 @@ registryId = ps-standard-0.9-r3
 
 The Standard parser is a **closed snapshot**. Package imports do not mutate its parser tables.
 
+A release claiming `ps-standard-0.9-r3` MUST publish a materialized registration-closure manifest plus its SHA-256. Extra host-installed parser/tactic/attribute registrations are not part of Standard merely because they are available locally.
+
 The registry explicitly lists:
 - accepted r3 surface features;
 - accepted native command heads;
@@ -102,7 +104,7 @@ SEMANTIC-BUNDLE-v1.schema.json
 schemaVersion = psc-semantic-bundle-1.0.0
 ~~~
 
-A Standard importer requires `syntaxMetaExports = []`, validates all manifest/dependency/payload hashes, and rechecks/imports the declaration payload through the selected genuine checker protocol.
+A Standard importer requires `syntaxMetaExports = []` and `hostBuildEffects = []`, validates all manifest/dependency/payload hashes, and rechecks/imports the declaration payload through the selected genuine checker protocol. Runtime/external assumptions remain separately reported.
 
 Standard may consume compatible semantic/runtime exports. It may not implicitly consume syntax/meta exports.
 
@@ -128,7 +130,7 @@ Proposed conceptual manifest fragment:
 
 An extensible project can instead list exact extension packages and their identities.
 
-Profile, edition, syntax registry, import closure, options, and extension identities are part of parser/elaboration cache keys.
+Profile, edition, syntax registry, materialized registration-closure SHA-256, semantic-bundle identities, import closure, options, semantic registrations, axiom policy, and extension identities are part of the appropriate parser/elaboration/proof cache keys.
 
 ## Standard official notation
 

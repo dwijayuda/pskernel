@@ -7,37 +7,37 @@
   "leanVersion": "4.34.0",
   "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
   "profile": "lean4.34-core",
-  "sourceCommit": "139fcb4dea65a3cca3779e5821157525520f0029",
+  "sourceCommit": "a31081352737628951fe37010a79752c658c7a1e",
   "targets": {
     "linux-x64": {
       "path": "prebuilt/linux-x64/psc2_lean_kernel_provider",
-      "sha256": "a88ae88c8475f70c68b2a510de46a3fb49afaec0a9f04ae97621cbcbdab3a5c3",
-      "size": 4177360,
-      "sourceCommit": "139fcb4dea65a3cca3779e5821157525520f0029"
+      "sha256": "f67fad83d6732c5eab3e7435e1a4b600693e8dbb1313134c3d777044e6d721e1",
+      "size": 4178832,
+      "sourceCommit": "a31081352737628951fe37010a79752c658c7a1e"
     },
     "linux-arm64": {
       "path": "prebuilt/linux-arm64/psc2_lean_kernel_provider",
-      "sha256": "6133252510be58434eb8140ff7dba94a44eb47172783db9fd7ad395f5e76b0bd",
-      "size": 4269152,
-      "sourceCommit": "139fcb4dea65a3cca3779e5821157525520f0029"
+      "sha256": "ca3933d9b4ff440b7a654da2444eb1aeda05b18ba3bab84818971ed563b82372",
+      "size": 4270688,
+      "sourceCommit": "a31081352737628951fe37010a79752c658c7a1e"
     },
     "darwin-x64": {
       "path": "prebuilt/darwin-x64/psc2_lean_kernel_provider",
-      "sha256": "c6286606892a912b78664587ea71309de60ccf77a26bd4f800518c788fd67da2",
-      "size": 2817408,
-      "sourceCommit": "139fcb4dea65a3cca3779e5821157525520f0029"
+      "sha256": "cfa3daeba7958905d9dc5718ab9bf83934ec6dd354dbd00f8df8111ba986ec97",
+      "size": 2817416,
+      "sourceCommit": "a31081352737628951fe37010a79752c658c7a1e"
     },
     "darwin-arm64": {
       "path": "prebuilt/darwin-arm64/psc2_lean_kernel_provider",
-      "sha256": "a0a9a7c1fa318e0327e34a8b9e286daba6d0801bdabcbd02853d2bdf39f5cef3",
+      "sha256": "744213e7196419ac28f7e2572064573cb2c124843c99ec265f9da01694c20d0a",
       "size": 2868872,
-      "sourceCommit": "139fcb4dea65a3cca3779e5821157525520f0029"
+      "sourceCommit": "a31081352737628951fe37010a79752c658c7a1e"
     },
     "win32-x64": {
       "path": "prebuilt/win32-x64/psc2_lean_kernel_provider.exe",
-      "sha256": "12e12763360b24157e3f179b267cca5e0f0ef92c157941c2e776aceee6c8daad",
-      "size": 4006912,
-      "sourceCommit": "139fcb4dea65a3cca3779e5821157525520f0029"
+      "sha256": "99ac28dbfc323007c8114b712b6bf1ae0e97498e2bdfeffe6282a0fdd9fbee81",
+      "size": 4008448,
+      "sourceCommit": "a31081352737628951fe37010a79752c658c7a1e"
     }
   }
 }

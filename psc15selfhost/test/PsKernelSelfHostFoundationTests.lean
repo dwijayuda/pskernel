@@ -40,8 +40,7 @@ def psKernelReferenceNameOptionEq
 def psKernelNameDifferentialCase
     (left right : PsKernelName) : Bool :=
   Bool.and
-    (Bool.beq
-      (psKernelNameEq left right)
+    ((psKernelNameEq left right) ==
       (PSC1Kernel.Name.eq
         (psKernelNameToReference left)
         (psKernelNameToReference right)))
@@ -52,8 +51,7 @@ def psKernelNameDifferentialCase
 
 def psKernelNamePrefixDifferentialCase
     (needle candidate : PsKernelName) : Bool :=
-  Bool.beq
-    (psKernelNameIsPrefixOf needle candidate)
+  (psKernelNameIsPrefixOf needle candidate) ==
     (PSC1Kernel.Name.isPrefixOf
       (psKernelNameToReference needle)
       (psKernelNameToReference candidate))

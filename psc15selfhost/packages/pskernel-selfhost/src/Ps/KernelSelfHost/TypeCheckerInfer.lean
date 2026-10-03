@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.TypeCheckerWhnf
+import Ps.KernelSelfHost.TypeCheckerProjection
 
 structure PsKernelForallView where
   name : PsKernelName
@@ -862,9 +862,41 @@ def psKernelInferCoreWithFuel
                                   inferOnly
                                   expr
                                   result))
-                | PsKernelExpr.proj _ _ _ =>
-                    Except.error
-                      "projection inference not yet ported"
+                | PsKernelExpr.proj typeName index structValue =>
+                    let inferType :=
+                      fun
+                        (projectionContext : PsKernelCheckerContext)
+                        (projectionState : PsKernelCheckerState)
+                        (projectionExpr : PsKernelExpr) =>
+                        smaller
+                          whnf
+                          defeq
+                          projectionContext
+                          projectionState
+                          projectionExpr
+                          inferOnly;
+                    match
+                        psKernelInferProjectionWith
+                          whnf
+                          inferType
+                          nextContext
+                          state
+                          typeName
+                          index
+                          structValue with
+                    | Except.error error =>
+                        Except.error error
+                    | Except.ok projectionResult =>
+                        let result :=
+                          Prod.fst projectionResult;
+                        Except.ok
+                          (Prod.mk
+                            result
+                            (psKernelCacheInferResult
+                              (Prod.snd projectionResult)
+                              inferOnly
+                              expr
+                              result))
 
 def psKernelInferWithFuel
     (fuel : Nat)

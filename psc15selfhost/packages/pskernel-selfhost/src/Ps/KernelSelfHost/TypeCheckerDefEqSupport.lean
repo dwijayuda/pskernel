@@ -482,6 +482,85 @@ def psKernelDefEqArgs
     left
     right
 
+def psKernelDefEqCompareExprListsWithFuel
+    (fuel : Nat) :
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState)) ->
+    PsKernelCheckerContext ->
+    PsKernelCheckerState ->
+    List PsKernelExpr ->
+    List PsKernelExpr ->
+    Except String
+      (Prod Bool PsKernelCheckerState) :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_defeq :
+          PsKernelCheckerContext ->
+          PsKernelCheckerState ->
+          PsKernelExpr ->
+          PsKernelExpr ->
+          Except String
+            (Prod Bool PsKernelCheckerState))
+        (_context : PsKernelCheckerContext)
+        (_state : PsKernelCheckerState)
+        (_left : List PsKernelExpr)
+        (_right : List PsKernelExpr) =>
+        Except.error
+          "kernel defeq argument-list budget exhausted"
+  | Nat.succ remaining =>
+      let smaller :=
+        psKernelDefEqCompareExprListsWithFuel remaining;
+      fun
+        (defeq :
+          PsKernelCheckerContext ->
+          PsKernelCheckerState ->
+          PsKernelExpr ->
+          PsKernelExpr ->
+          Except String
+            (Prod Bool PsKernelCheckerState))
+        (context : PsKernelCheckerContext)
+        (state : PsKernelCheckerState)
+        (left : List PsKernelExpr)
+        (right : List PsKernelExpr) =>
+        match left with
+        | List.nil =>
+            match right with
+            | List.nil =>
+                Except.ok
+                  (Prod.mk true state)
+            | List.cons _ _ =>
+                Except.ok
+                  (Prod.mk false state)
+        | List.cons leftHead leftTail =>
+            match right with
+            | List.nil =>
+                Except.ok
+                  (Prod.mk false state)
+            | List.cons rightHead rightTail =>
+                match
+                    defeq
+                      context
+                      state
+                      leftHead
+                      rightHead with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok headResult =>
+                    if Prod.fst headResult then
+                      smaller
+                        defeq
+                        context
+                        (Prod.snd headResult)
+                        leftTail
+                        rightTail
+                    else
+                      Except.ok headResult
+
 def psKernelDefEqCompareExprLists
     (defeq :
       PsKernelCheckerContext ->
@@ -492,49 +571,20 @@ def psKernelDefEqCompareExprLists
         (Prod Bool PsKernelCheckerState))
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
-    (left : List PsKernelExpr) :
-    List PsKernelExpr ->
+    (left : List PsKernelExpr)
+    (right : List PsKernelExpr) :
     Except String
       (Prod Bool PsKernelCheckerState) :=
-  match left with
-  | List.nil =>
-      fun (right : List PsKernelExpr) =>
-        match right with
-        | List.nil =>
-            Except.ok
-              (Prod.mk true state)
-        | List.cons _ _ =>
-            Except.ok
-              (Prod.mk false state)
-  | List.cons leftHead leftTail =>
-      let smaller :=
-        psKernelDefEqCompareExprLists
-          defeq
-          context;
-      fun (right : List PsKernelExpr) =>
-        match right with
-        | List.nil =>
-            Except.ok
-              (Prod.mk false state)
-        | List.cons rightHead rightTail =>
-            match
-                defeq
-                  context
-                  state
-                  leftHead
-                  rightHead with
-            | Except.error error =>
-                Except.error error
-            | Except.ok headResult =>
-                if Prod.fst headResult then
-                  psKernelDefEqCompareExprLists
-                    defeq
-                    context
-                    (Prod.snd headResult)
-                    leftTail
-                    rightTail
-                else
-                  Except.ok headResult
+  psKernelDefEqCompareExprListsWithFuel
+    (Nat.succ
+      (Nat.add
+        (psKernelExprListLength left)
+        (psKernelExprListLength right)))
+    defeq
+    context
+    state
+    left
+    right
 
 def psKernelDefEqApp
     (defeq :

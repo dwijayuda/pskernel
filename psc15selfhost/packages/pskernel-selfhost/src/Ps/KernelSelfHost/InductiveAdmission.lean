@@ -641,44 +641,62 @@ def psKernelBindOpenLambdas
     binders
     body
 
+def psKernelMakeSimpleIHBindersWorker
+    (fields : List PsKernelSimpleRecursiveField) :
+    PsKernelExpr -> Nat -> List PsKernelOpenBinder :=
+  match fields with
+  | List.nil =>
+      fun
+        (_motive : PsKernelExpr)
+        (_index : Nat) =>
+        List.nil
+  | List.cons recursive rest =>
+      let smaller :
+          PsKernelExpr ->
+          Nat ->
+          List PsKernelOpenBinder :=
+        psKernelMakeSimpleIHBindersWorker rest;
+      fun
+        (motive : PsKernelExpr)
+        (index : Nat) =>
+        let internalName :=
+          PsKernelName.num
+            (psKernelSimpleInternalName "ih")
+            index;
+        let appliedField :=
+          psKernelApplyArgs
+            (PsKernelExpr.fvar
+              recursive.field.internalName)
+            (psKernelOpenBinderExprs
+              recursive.args);
+        let binder :=
+          PsKernelOpenBinder.mk
+            internalName
+            (psKernelNameAppendAfter
+              recursive.field.userName
+              "_ih")
+            (psKernelCloseOpenBinders
+              recursive.args
+              (psKernelSimpleMotiveApp
+                motive
+                recursive.indices
+                appliedField))
+            PsKernelBinderInfo.default;
+        List.cons
+          binder
+          (smaller
+            motive
+            (Nat.succ index))
+
 def psKernelMakeSimpleIHBindersWithIndex
     (motive : PsKernelExpr)
     (fields : List PsKernelSimpleRecursiveField)
     (index : Nat) :
     List PsKernelOpenBinder :=
-  match fields with
-  | List.nil =>
-      List.nil
-  | List.cons recursive rest =>
-      let internalName :=
-        PsKernelName.num
-          (psKernelSimpleInternalName "ih")
-          index;
-      let appliedField :=
-        psKernelApplyArgs
-          (PsKernelExpr.fvar
-            recursive.field.internalName)
-          (psKernelOpenBinderExprs
-            recursive.args);
-      let binder :=
-        PsKernelOpenBinder.mk
-          internalName
-          (psKernelNameAppendAfter
-            recursive.field.userName
-            "_ih")
-          (psKernelCloseOpenBinders
-            recursive.args
-            (psKernelSimpleMotiveApp
-              motive
-              recursive.indices
-              appliedField))
-          PsKernelBinderInfo.default;
-      List.cons
-        binder
-        (psKernelMakeSimpleIHBindersWithIndex
-          motive
-          rest
-          (Nat.succ index))
+  psKernelMakeSimpleIHBindersWorker
+    fields
+    motive
+    index
 
 def psKernelMakeSimpleIHBinders
     (motive : PsKernelExpr)
@@ -729,6 +747,68 @@ def psKernelSimpleHasReflexiveFields
       else
         psKernelSimpleHasReflexiveFields rest
 
+def psKernelMakeSimpleMinorBindersWorker
+    (shapes : List PsKernelSimpleConstructorShape) :
+    PsKernelExpr ->
+    List PsKernelLevel ->
+    List PsKernelOpenBinder ->
+    Nat ->
+    List PsKernelOpenBinder :=
+  match shapes with
+  | List.nil =>
+      fun
+        (_motive : PsKernelExpr)
+        (_levels : List PsKernelLevel)
+        (_params : List PsKernelOpenBinder)
+        (_index : Nat) =>
+        List.nil
+  | List.cons shape rest =>
+      let smaller :
+          PsKernelExpr ->
+          List PsKernelLevel ->
+          List PsKernelOpenBinder ->
+          Nat ->
+          List PsKernelOpenBinder :=
+        psKernelMakeSimpleMinorBindersWorker rest;
+      fun
+        (motive : PsKernelExpr)
+        (levels : List PsKernelLevel)
+        (params : List PsKernelOpenBinder)
+        (index : Nat) =>
+        let internalName :=
+          PsKernelName.num
+            (psKernelSimpleInternalName "minor")
+            index;
+        let ihBinders :=
+          psKernelMakeSimpleIHBinders
+            motive
+            shape;
+        let allBinders :=
+          psKernelOpenBinderListAppend
+            shape.fields
+            ihBinders;
+        let binder :=
+          PsKernelOpenBinder.mk
+            internalName
+            shape.ctor.name
+            (psKernelCloseOpenBinders
+              allBinders
+              (psKernelSimpleMotiveApp
+                motive
+                shape.resultIndices
+                (psKernelSimpleCtorApp
+                  levels
+                  params
+                  shape)))
+            PsKernelBinderInfo.default;
+        List.cons
+          binder
+          (smaller
+            motive
+            levels
+            params
+            (Nat.succ index))
+
 def psKernelMakeSimpleMinorBindersWithIndex
     (motive : PsKernelExpr)
     (levels : List PsKernelLevel)
@@ -736,44 +816,12 @@ def psKernelMakeSimpleMinorBindersWithIndex
     (shapes : List PsKernelSimpleConstructorShape)
     (index : Nat) :
     List PsKernelOpenBinder :=
-  match shapes with
-  | List.nil =>
-      List.nil
-  | List.cons shape rest =>
-      let internalName :=
-        PsKernelName.num
-          (psKernelSimpleInternalName "minor")
-          index;
-      let ihBinders :=
-        psKernelMakeSimpleIHBinders
-          motive
-          shape;
-      let allBinders :=
-        psKernelOpenBinderListAppend
-          shape.fields
-          ihBinders;
-      let binder :=
-        PsKernelOpenBinder.mk
-          internalName
-          shape.ctor.name
-          (psKernelCloseOpenBinders
-            allBinders
-            (psKernelSimpleMotiveApp
-              motive
-              shape.resultIndices
-              (psKernelSimpleCtorApp
-                levels
-                params
-                shape)))
-          PsKernelBinderInfo.default;
-      List.cons
-        binder
-        (psKernelMakeSimpleMinorBindersWithIndex
-          motive
-          levels
-          params
-          rest
-          (Nat.succ index))
+  psKernelMakeSimpleMinorBindersWorker
+    shapes
+    motive
+    levels
+    params
+    index
 
 def psKernelMakeSimpleMinorBinders
     (motive : PsKernelExpr)

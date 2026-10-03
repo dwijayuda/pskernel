@@ -14,6 +14,7 @@
   "closedGrammar": true,
   "dependencyMayMutateGrammar": false,
   "allowedSurfaceFeatures": [
+    "M-PUBLIC-IMPORT-R3",
     "E-CALL-PARENS-R3",
     "E-EMPTY-CALL-R3",
     "D-NAMED-CALL",
@@ -232,5 +233,20 @@
     "unrelatedAdjacentTerms": false,
     "completeBracedTermOwnership": "preserved",
     "wrappedRecordLiteralRequiresDoubleBrace": true
+  },
+  "allowedImportModifiers": [
+    "public"
+  ],
+  "moduleApiPolicy": {
+    "ordinaryTopLevelDeclarationVisibility": "public-unless-private",
+    "ordinaryImportReexports": false,
+    "publicImportReexports": true,
+    "publicImportClosure": "transitive-public-import-closure",
+    "privateDeclarationsReexported": false,
+    "openAffectsExports": false,
+    "selectiveExportListsInCore": false,
+    "defaultExportsInCore": false,
+    "namespaceExportsInCore": false,
+    "curatedApiPattern": "facade module with public declarations or public imports"
   }
 }

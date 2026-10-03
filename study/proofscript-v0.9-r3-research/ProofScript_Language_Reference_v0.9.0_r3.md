@@ -809,7 +809,9 @@ psc2-standard-language-v1 selects a fixed Standard prover surface. The fixed tac
 ~~~text
 rfl
 exact
+exact?
 apply
+refine
 intro
 intros
 assumption
@@ -818,18 +820,30 @@ cases
 induction
 rw
 simp
+simpa
 simp_all
 unfold
 change
+dsimp
 have
 show
 suffices
+by_cases
+by_contra
+exfalso
+subst
+generalize
+rcases
+rintro
+obtain
+use
+ext
 decide
 omega
 grind
 ~~~
 
-These tactics may fail, search, or construct proof terms according to their selected Standard semantics. Successful theorem acceptance still requires a valid proof term.
+These tactics may fail, search, or construct proof terms according to their selected Standard semantics. The form simp only is a fixed variant of simp. Explicit classical proof mode is also part of the Standard prover surface. Successful theorem acceptance still requires a valid proof term.
 
 Additional tactic names are not automatically Standard merely because a package is installed.
 
@@ -997,6 +1011,37 @@ A required item cannot be omitted while retaining that claim.
 | stateful/loop/async contract sugar | not current language |
 
 This table is the closure rule. "Useful in Lean" is not an implicit inclusion rule.
+
+## 23.1 Explicit ownership of broader PSC2 plans
+
+The following table records where broader PSC2 research capabilities live without turning them into hidden psc2-language-v1 requirements.
+
+| Capability family | Current language/profile status |
+|---|---|
+| multi-scrutinee match, pattern alternatives, if-let, rich pattern bindings | Post-PSC2 language / official-extension candidates |
+| equation-style function definitions | Post-PSC2 language / official-extension candidate |
+| let mut, assignment, for, while, break, continue | Post-PSC2 language candidates over explicit state/iteration semantics |
+| typed recovery/try syntax | not current syntax; Except/application-error libraries first, future sugar optional |
+| generic reader/state/error/effect abstractions | Standard libraries; no new language semantics required |
+| Task/App/Fiber/Resource/Stream APIs | Standard library/runtime semantics; no current dedicated keywords |
+| async/await/using/defer | Post-PSC2 language candidates |
+| have/show/suffices/calc | current proof source |
+| refine/exact?/by_cases/by_contra/exfalso/subst/generalize/dsimp/rcases/rintro/obtain/use/ext | psc2-standard-language-v1 Standard prover surface |
+| rw/simp/simpa/simp only/cases/induction | psc2-standard-language-v1 Standard prover surface |
+| omega/grind | selected Standard prover automation |
+| ring/linarith/SMT/AI/general search families | libraries or controlled prover plugins unless a later Standard profile selects them |
+| classical proof mode | psc2-standard-language-v1 Standard prover surface |
+| fixed notation and fixed attributes | psc2-standard-language-v1 closed registration set |
+| deriving | future official extension or controlled extension; not psc2-language-v1 |
+| arbitrary macros/custom syntax/custom elaborators/Meta authoring | ps-lean-extensible or later controlled extension; not Standard |
+| interactive #check/#print/#reduce/#eval | tooling profile, not program declarations |
+| assert/invariant/old/ghost/stateful/effectful/async contract syntax | Post-PSC2 verification-language candidates |
+| verification-condition generation | prover/library process; not source semantics by itself |
+| runtime contract checking | Standard library/diagnostic facility; not proof |
+| FFI declarations, generated npm/WIT/Rust bindings | host/interop profiles; not base language semantics |
+| quotient/extensionality theorem support | pinned logical foundation plus libraries/prover theorems; no separate PSC2 syntax required |
+| kernel-provider choice or dual checking | assurance policy; not source language |
+| self-hosting/compiler generations | implementation/release topic; not source language |
 
 # 24. lean-subset-psc2-v1
 

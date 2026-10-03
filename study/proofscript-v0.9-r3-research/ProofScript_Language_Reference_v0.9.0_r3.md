@@ -264,7 +264,8 @@ A spelling introduced for one owned form MUST NOT become globally reserved in un
 
 psc2-language-v1 includes:
 
-- import declarations;
+- ordinary import declarations;
+- public import declarations for module re-export;
 - qualified names;
 - namespace declarations and end;
 - section declarations and end;
@@ -274,14 +275,56 @@ psc2-language-v1 includes:
 - universe declarations;
 - deterministic lexical/local scope;
 - deterministic name resolution;
-- public/private API visibility for supported declarations;
-- re-exported names through the selected module/package rules.
+- public/private API visibility for supported declarations.
+
+## 6.1 Module import and re-export
+
+ProofScript uses the selected Lean-compatible distinction:
+
+~~~proofscript
+import Foo.Bar
+public import Foo.Api
+~~~
+
+The rules are:
+
+1. `import M` makes the public declarations of `M` available to the importing module but does **not** re-export `M` as part of this module's public dependency surface.
+2. `public import M` imports `M` and re-exports the public declarations reachable through `M`'s public-import closure.
+3. `private` declarations are never exported or re-exported.
+4. `open M` affects local name resolution only; it never changes the module's exported API.
+5. re-export does not copy declarations, change declaration identity, or create new proof authority.
+6. import/re-export ambiguity rejects deterministically; there is no last-import-wins rule.
+7. package configuration may select package entry modules, but package metadata does not change declaration visibility semantics.
+
+A library that wants a curated public API SHOULD use a small facade module:
+
+~~~proofscript
+import Internal.BigModule
+
+def selectedValue := Internal.BigModule.selectedValue
+theorem selectedLaw := Internal.BigModule.selectedLaw
+~~~
+
+or public-import a whole intentionally public module:
+
+~~~proofscript
+public import Public.Core
+public import Public.Data
+~~~
+
+PSC2 does not require TypeScript/ECMAScript-style selective export lists, default exports, or namespace exports as core language syntax.
+
+## 6.2 Source identity
 
 A logical module resolves to one authoritative source file.
 
-If both M.ps and M.lean are candidates for the same module, the selected project/profile must choose one. Ambiguous source ownership rejects.
+If both `M.ps` and `M.lean` are candidates for the same module, the selected project/profile must choose one. Ambiguous source ownership rejects.
+
+## 6.3 Import and grammar isolation
 
 Imports do not grant new Standard grammar registrations.
+
+A module reached through `public import` contributes declarations according to the module API rules above; it does not inject parser, macro, tactic-elaborator, or arbitrary Meta registrations into `ps-standard`.
 
 # 7. Declaration forms
 
@@ -1058,7 +1101,7 @@ ContractClause :=
   | "ensures" Ident "=>" PSTerm
 
 ContractedFunction :=
-  FunctionHeader ContractClause* ":=" PSTerm
+  FunctionHeader ContractClause* DefinitionBody
 ~~~
 
 Example:
@@ -1123,6 +1166,7 @@ A required item cannot be omitted while retaining that claim.
 |---|---|
 | lexical/native identifiers/literals/comments | required |
 | modules/imports/qualified names | required |
+| public import / transitive module re-export | required |
 | namespace/section/open/variable/include/omit/universe | required |
 | private declaration visibility | required |
 | attribute command over registered attributes | required |

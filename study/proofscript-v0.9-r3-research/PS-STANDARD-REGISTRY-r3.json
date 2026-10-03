@@ -51,11 +51,7 @@
     "instance",
     "mutual",
     "attribute",
-    "set_option",
-    "#check",
-    "#print",
-    "#reduce",
-    "#eval"
+    "set_option"
   ],
   "allowedTermFamilies": [
     "identifier",
@@ -245,5 +241,26 @@
     ]
   },
   "unsafePolicy": "not-part-of-ps-standard-0.9-r3",
-  "profileAuthority": "ProofScript_Language_Reference_v0.9.0_r3.md"
+  "profileAuthority": "ProofScript_Language_Reference_v0.9.0_r3.md",
+  "toolingCommandHeads": [
+    "#check",
+    "#print",
+    "#reduce",
+    "#eval"
+  ],
+  "toolingCommandsAreLanguage": false,
+  "allowedDeclarationModifiers": [
+    "private",
+    "partial",
+    "noncomputable"
+  ],
+  "excludedDeclarationModifiers": [
+    "unsafe"
+  ],
+  "operatorPolicy": {
+    "source": "fixed Standard registration closure",
+    "dependencyMayAddOperatorNotation": false,
+    "equalityProposition": "=",
+    "booleanEquality": "=="
+  }
 }

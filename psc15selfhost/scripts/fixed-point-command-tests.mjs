@@ -62,6 +62,8 @@ for (const required of [
   "check:source:bootstrap",
   "check:layout",
   "check:bootstrap-closure",
+  "check:selfhost-profile",
+  "check:selfhost-contract",
   "check:ir-neutrality",
   "build:lean",
   "build:lake",

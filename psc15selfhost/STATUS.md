@@ -3,6 +3,13 @@
 Status (2026-10-04): the project uses a **compiler-only bootstrap**. The generated
 compiler closure contains **55 source modules** and no kernel package.
 
+The active compiler source profile is now machine-enforced as `PSC1-selfhost-stable/1`.
+Every bootstrap change is expected to pass the static profile, the whole-closure
+Lean→PSC executable contract, and the generated-compiler fixed point. The generic
+contract freezes the historical set of 75 one-off self-host repair guards: it may
+shrink, but new repair-guard names are rejected. Future self-host failures must become
+profile/contract invariants rather than new per-file repair tests. See `docs/SELFHOST_SOURCE_STANDARD.md`.
+
 The active toolchain policy is now native-first:
 
 - **default checked kernel:** `lean434` / `@proofscript/pskernel-lean`;

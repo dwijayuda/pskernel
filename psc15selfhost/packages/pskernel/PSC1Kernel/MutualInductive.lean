@@ -43,7 +43,7 @@ structure SimpleMutualConstructorShape where
 def simpleMutualNames (decl : SimpleMutualInductiveDecl) : List Name :=
   decl.types.map (fun type => type.name)
 
-partial def simpleMutualContainsConst
+def simpleMutualContainsConst
     (targets : List Name) : Expr → Bool
   | .const name _ => nameMember name targets
   | .app fn arg =>

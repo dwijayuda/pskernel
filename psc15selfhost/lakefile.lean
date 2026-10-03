@@ -190,7 +190,8 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.LocalContext,
     `Ps.KernelSelfHost.Environment,
     `Ps.KernelSelfHost.CheckerState,
-    `Ps.KernelSelfHost.TypeCheckerBase
+    `Ps.KernelSelfHost.TypeCheckerBase,
+    `Ps.KernelSelfHost.TypeCheckerPrimitives
   ]
 
 @[default_target]

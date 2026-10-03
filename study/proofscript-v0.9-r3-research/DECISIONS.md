@@ -1,5 +1,7 @@
 # r3 Decision Ledger
 
+> **Historical design record.** Current source syntax and language meaning are defined only by `ProofScript_Language_Reference_v0.9.0_r3.md`. This file records accepted research decisions and may also mention platform/runtime/protocol decisions that are scoped to their own documents.
+
 Status: **accepted r3 design baseline**
 
 These decisions are accepted into the r3 language design. They define the documentation/specification baseline, not an implemented compiler claim.

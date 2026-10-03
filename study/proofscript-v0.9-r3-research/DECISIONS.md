@@ -34,3 +34,11 @@ These decisions are accepted into the r3 language design. They define the docume
 Any reversal of R3-001 through R3-010 must update the relevant design document, migration/conformance plans, this ledger, <code>MANIFEST.json</code>, and the accepted r3 language reference.
 
 Human-study results may still justify a later pre-1.0 change to <code>const</code> or other high-risk surface syntax without implying a change to Lean semantics.
+
+| R3-011 | Complete-delta authority | r3 is a complete exact delta over vendored r2 SHA-256 d29c0b2d...; unchanged r2 rules remain normative. | accepted | authority + 89-section matrix |
+| R3-012 | Empty call | `f()` is a complete empty invocation: defaults/auto inserted, at most one Unit synthesized, required non-Unit remainder rejects; `f(())` is explicit Unit. | accepted | source/reference research |
+| R3-013 | Call boundary / field dot | CallGap is horizontal only; line terminator breaks r3 call ownership. Lean field-dot adjacency is unchanged. | accepted | Lean reference research |
+| R3-014 | Standard registry / bundles | `ps-standard-0.9-r3` uses a closed machine-readable registry; Extensible libraries cross through Semantic Bundle v1 with no syntax/meta exports. | accepted | architecture/specification |
+| R3-015 | Contract core | Base r3 freezes total-pure requires/ensures, semantic FrameSpec and higher-order CallableSpec; state/loop/async surface clauses are staged. | accepted | verification-language research |
+| R3-016 | Application semantics | App is cold; Fiber is started; Exit excludes RuntimeFault; cancellation is two-phase; cleanup is shielded; capabilities are type-visible; native IO/Task are low-level/nonportable substrate. | accepted | async/resource research |
+| R3-017 | InterfaceIR v1 | Versioned JSON schema binds TS resolver/version, package/export conditions, runtime/type entries and declaration hashes with explicit support classes. | accepted | Node/TypeScript research |

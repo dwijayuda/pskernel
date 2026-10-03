@@ -1,5 +1,7 @@
 # ProofScript v0.9 r3 Design Acceptance
 
+> **Historical design record.** Current source syntax and language meaning are defined only by `ProofScript_Language_Reference_v0.9.0_r3.md`. This file records accepted research decisions and may also mention platform/runtime/protocol decisions that are scoped to their own documents.
+
 Date: 3 October 2026  
 Status: **accepted language/design baseline; documentation/specification scope**
 

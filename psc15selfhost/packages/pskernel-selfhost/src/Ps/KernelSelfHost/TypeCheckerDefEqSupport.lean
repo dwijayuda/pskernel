@@ -941,6 +941,279 @@ def psKernelDefEqFinishLazyStep
                 right)
               (Prod.snd quickResult))
 
+def psKernelDefEqLazyStepLeftOnly
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left : PsKernelExpr)
+    (right : PsKernelExpr) :
+    Except String
+      (Prod PsKernelDeltaStepResult PsKernelCheckerState) :=
+  match
+      psKernelDefEqTryUnfoldProjApp
+        coreWhnf
+        context
+        state
+        right with
+  | Except.error error =>
+      Except.error error
+  | Except.ok rightProj =>
+      match Prod.fst rightProj with
+      | Option.some rightValue =>
+          psKernelDefEqFinishLazyStep
+            defeq
+            context
+            (Prod.snd rightProj)
+            left
+            rightValue
+      | Option.none =>
+          match
+              psKernelDefEqDeltaOnce
+                coreWhnf
+                context
+                (Prod.snd rightProj)
+                left with
+          | Except.error error =>
+              Except.error error
+          | Except.ok leftResult =>
+              psKernelDefEqFinishLazyStep
+                defeq
+                context
+                (Prod.snd leftResult)
+                (Prod.fst leftResult)
+                right
+
+def psKernelDefEqLazyStepRightOnly
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left : PsKernelExpr)
+    (right : PsKernelExpr) :
+    Except String
+      (Prod PsKernelDeltaStepResult PsKernelCheckerState) :=
+  match
+      psKernelDefEqTryUnfoldProjApp
+        coreWhnf
+        context
+        state
+        left with
+  | Except.error error =>
+      Except.error error
+  | Except.ok leftProj =>
+      match Prod.fst leftProj with
+      | Option.some leftValue =>
+          psKernelDefEqFinishLazyStep
+            defeq
+            context
+            (Prod.snd leftProj)
+            leftValue
+            right
+      | Option.none =>
+          match
+              psKernelDefEqDeltaOnce
+                coreWhnf
+                context
+                (Prod.snd leftProj)
+                right with
+          | Except.error error =>
+              Except.error error
+          | Except.ok rightResult =>
+              psKernelDefEqFinishLazyStep
+                defeq
+                context
+                (Prod.snd rightResult)
+                left
+                (Prod.fst rightResult)
+
+def psKernelDefEqLazyStepBoth
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left : PsKernelExpr)
+    (right : PsKernelExpr)
+    (leftDef : PsKernelDefinitionInfo)
+    (rightDef : PsKernelDefinitionInfo) :
+    Except String
+      (Prod PsKernelDeltaStepResult PsKernelCheckerState) :=
+  if
+      psKernelReducibilityHintsLt
+        leftDef.hints
+        rightDef.hints then
+    match
+        psKernelDefEqDeltaOnce
+          coreWhnf
+          context
+          state
+          left with
+    | Except.error error =>
+        Except.error error
+    | Except.ok leftResult =>
+        psKernelDefEqFinishLazyStep
+          defeq
+          context
+          (Prod.snd leftResult)
+          (Prod.fst leftResult)
+          right
+  else if
+      psKernelReducibilityHintsLt
+        rightDef.hints
+        leftDef.hints then
+    match
+        psKernelDefEqDeltaOnce
+          coreWhnf
+          context
+          state
+          right with
+    | Except.error error =>
+        Except.error error
+    | Except.ok rightResult =>
+        psKernelDefEqFinishLazyStep
+          defeq
+          context
+          (Prod.snd rightResult)
+          left
+          (Prod.fst rightResult)
+  else
+    let sameShortcut :=
+      if
+          if psKernelNatGt
+              (psKernelExprGetAppNumArgs left)
+              0 then
+            psKernelNatGt
+              (psKernelExprGetAppNumArgs right)
+              0
+          else
+            false then
+        if
+            psKernelSameDeltaDefinition
+              leftDef
+              rightDef then
+          if
+              psKernelReducibilityHintsIsRegular
+                leftDef.hints then
+            psKernelAppHeadLevelsEquivalent
+              left
+              right
+          else
+            false
+        else
+          false
+      else
+        false;
+    let argsResult :
+        Except String
+          (Prod Bool PsKernelCheckerState) :=
+      if sameShortcut then
+        if
+            psKernelExprPairSetContains
+              state.failure
+              left
+              right then
+          Except.ok
+            (Prod.mk false state)
+        else
+          psKernelDefEqArgs
+            defeq
+            context
+            state
+            left
+            right
+      else
+        Except.ok
+          (Prod.mk false state);
+    match argsResult with
+    | Except.error error =>
+        Except.error error
+    | Except.ok compared =>
+        if
+            if sameShortcut then
+              Prod.fst compared
+            else
+              false then
+          Except.ok
+            (Prod.mk
+              PsKernelDeltaStepResult.equal
+              (Prod.snd compared))
+        else
+          let comparedState :=
+            Prod.snd compared;
+          let afterFailure :=
+            if sameShortcut then
+              psKernelCheckerStateWithFailure
+                comparedState
+                (psKernelExprPairSetInsert
+                  comparedState.failure
+                  left
+                  right)
+            else
+              comparedState;
+          match
+              psKernelDefEqDeltaOnce
+                coreWhnf
+                context
+                afterFailure
+                left with
+          | Except.error error =>
+              Except.error error
+          | Except.ok leftResult =>
+              match
+                  psKernelDefEqDeltaOnce
+                    coreWhnf
+                    context
+                    (Prod.snd leftResult)
+                    right with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok rightResult =>
+                  psKernelDefEqFinishLazyStep
+                    defeq
+                    context
+                    (Prod.snd rightResult)
+                    (Prod.fst leftResult)
+                    (Prod.fst rightResult)
+
 def psKernelDefEqLazyStep
     (defeq :
       PsKernelCheckerContext ->
@@ -962,224 +1235,201 @@ def psKernelDefEqLazyStep
     (left : PsKernelExpr)
     (right : PsKernelExpr) :
     Except String
-      (Prod
-        PsKernelDeltaStepResult
-        PsKernelCheckerState) :=
-  match
-      psKernelDeltaDefinition context left,
-      psKernelDeltaDefinition context right with
-  | Option.none, Option.none =>
-      Except.ok
-        (Prod.mk
-          (PsKernelDeltaStepResult.unknown
+      (Prod PsKernelDeltaStepResult PsKernelCheckerState) :=
+  let leftDefinition :=
+    psKernelDeltaDefinition context left;
+  let rightDefinition :=
+    psKernelDeltaDefinition context right;
+  match leftDefinition with
+  | Option.none =>
+      match rightDefinition with
+      | Option.none =>
+          Except.ok
+            (Prod.mk
+              (PsKernelDeltaStepResult.unknown
+                left
+                right)
+              state)
+      | Option.some _ =>
+          psKernelDefEqLazyStepRightOnly
+            defeq
+            coreWhnf
+            context
+            state
             left
-            right)
-          state)
-  | Option.some _, Option.none =>
-      match
-          psKernelDefEqTryUnfoldProjApp
+            right
+  | Option.some leftDef =>
+      match rightDefinition with
+      | Option.none =>
+          psKernelDefEqLazyStepLeftOnly
+            defeq
             coreWhnf
             context
             state
-            right with
-      | Except.error error =>
-          Except.error error
-      | Except.ok rightProj =>
-          match Prod.fst rightProj with
-          | Option.some rightValue =>
-              psKernelDefEqFinishLazyStep
-                defeq
-                context
-                (Prod.snd rightProj)
-                left
-                rightValue
-          | Option.none =>
-              match
-                  psKernelDefEqDeltaOnce
-                    coreWhnf
-                    context
-                    (Prod.snd rightProj)
-                    left with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok leftResult =>
-                  psKernelDefEqFinishLazyStep
-                    defeq
-                    context
-                    (Prod.snd leftResult)
-                    (Prod.fst leftResult)
-                    right
-  | Option.none, Option.some _ =>
-      match
-          psKernelDefEqTryUnfoldProjApp
+            left
+            right
+      | Option.some rightDef =>
+          psKernelDefEqLazyStepBoth
+            defeq
             coreWhnf
             context
             state
-            left with
-      | Except.error error =>
-          Except.error error
-      | Except.ok leftProj =>
-          match Prod.fst leftProj with
-          | Option.some leftValue =>
-              psKernelDefEqFinishLazyStep
-                defeq
-                context
-                (Prod.snd leftProj)
-                leftValue
-                right
-          | Option.none =>
-              match
-                  psKernelDefEqDeltaOnce
-                    coreWhnf
-                    context
-                    (Prod.snd leftProj)
-                    right with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok rightResult =>
-                  psKernelDefEqFinishLazyStep
-                    defeq
-                    context
-                    (Prod.snd rightResult)
-                    left
-                    (Prod.fst rightResult)
-  | Option.some leftDef, Option.some rightDef =>
-      if
-          psKernelReducibilityHintsLt
-            leftDef.hints
-            rightDef.hints then
-        match
-            psKernelDefEqDeltaOnce
-              coreWhnf
-              context
-              state
-              left with
-        | Except.error error =>
-            Except.error error
-        | Except.ok leftResult =>
-            psKernelDefEqFinishLazyStep
+            left
+            right
+            leftDef
+            rightDef
+
+def psKernelDefEqLazyReductionAfterPred
+    (continue :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelDeltaResult PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState))
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left : PsKernelExpr)
+    (right : PsKernelExpr) :
+    Except String
+      (Prod PsKernelDeltaResult PsKernelCheckerState) :=
+  let eager :=
+    if context.eagerReduce then
+      true
+    else if psKernelExprHasFVar left then
+      false
+    else if psKernelExprHasFVar right then
+      false
+    else
+      true;
+  let leftNat :
+      Except String
+        (Prod
+          (Option PsKernelExpr)
+          PsKernelCheckerState) :=
+    if eager then
+      psKernelReduceNatWith
+        whnf
+        context
+        state
+        left
+    else
+      Except.ok
+        (Prod.mk Option.none state);
+  match leftNat with
+  | Except.error error =>
+      Except.error error
+  | Except.ok leftNatResult =>
+      match Prod.fst leftNatResult with
+      | Option.some value =>
+          match
               defeq
-              context
-              (Prod.snd leftResult)
-              (Prod.fst leftResult)
-              right
-      else if
-          psKernelReducibilityHintsLt
-            rightDef.hints
-            leftDef.hints then
-        match
-            psKernelDefEqDeltaOnce
-              coreWhnf
-              context
-              state
-              right with
-        | Except.error error =>
-            Except.error error
-        | Except.ok rightResult =>
-            psKernelDefEqFinishLazyStep
-              defeq
-              context
-              (Prod.snd rightResult)
-              left
-              (Prod.fst rightResult)
-      else
-        let sameShortcut :=
-          if
-              if psKernelNatGt
-                  (psKernelExprGetAppNumArgs left)
-                  0 then
-                psKernelNatGt
-                  (psKernelExprGetAppNumArgs right)
-                  0
-              else
-                false then
-            if
-                psKernelSameDeltaDefinition
-                  leftDef
-                  rightDef then
-              if
-                  psKernelReducibilityHintsIsRegular
-                    leftDef.hints then
-                psKernelAppHeadLevelsEquivalent
-                  left
-                  right
-              else
-                false
-            else
-              false
-          else
-            false;
-        let argsResult :
-            Except String
-              (Prod Bool PsKernelCheckerState) :=
-          if sameShortcut then
-            if
-                psKernelExprPairSetContains
-                  state.failure
-                  left
-                  right then
-              Except.ok
-                (Prod.mk false state)
-            else
-              psKernelDefEqArgs
-                defeq
                 context
-                state
-                left
-                right
-          else
-            Except.ok
-              (Prod.mk false state);
-        match argsResult with
-        | Except.error error =>
-            Except.error error
-        | Except.ok compared =>
-            if
-                if sameShortcut then
-                  Prod.fst compared
-                else
-                  false then
+                (Prod.snd leftNatResult)
+                value
+                right with
+          | Except.error error =>
+              Except.error error
+          | Except.ok result =>
               Except.ok
                 (Prod.mk
-                  PsKernelDeltaStepResult.equal
-                  (Prod.snd compared))
+                  (PsKernelDeltaResult.decided
+                    (Prod.fst result))
+                  (Prod.snd result))
+      | Option.none =>
+          let rightNat :
+              Except String
+                (Prod
+                  (Option PsKernelExpr)
+                  PsKernelCheckerState) :=
+            if eager then
+              psKernelReduceNatWith
+                whnf
+                context
+                (Prod.snd leftNatResult)
+                right
             else
-              let comparedState :=
-                Prod.snd compared;
-              let afterFailure :=
-                if sameShortcut then
-                  psKernelCheckerStateWithFailure
-                    comparedState
-                    (psKernelExprPairSetInsert
-                      comparedState.failure
-                      left
-                      right)
-                else
-                  comparedState;
-              match
-                  psKernelDefEqDeltaOnce
-                    coreWhnf
-                    context
-                    afterFailure
-                    left with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok leftResult =>
+              Except.ok
+                (Prod.mk
+                  Option.none
+                  (Prod.snd leftNatResult));
+          match rightNat with
+          | Except.error error =>
+              Except.error error
+          | Except.ok rightNatResult =>
+              match Prod.fst rightNatResult with
+              | Option.some value =>
                   match
-                      psKernelDefEqDeltaOnce
+                      defeq
+                        context
+                        (Prod.snd rightNatResult)
+                        left
+                        value with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok result =>
+                      Except.ok
+                        (Prod.mk
+                          (PsKernelDeltaResult.decided
+                            (Prod.fst result))
+                          (Prod.snd result))
+              | Option.none =>
+                  match
+                      psKernelDefEqLazyStep
+                        defeq
                         coreWhnf
                         context
-                        (Prod.snd leftResult)
+                        (Prod.snd rightNatResult)
+                        left
                         right with
                   | Except.error error =>
                       Except.error error
-                  | Except.ok rightResult =>
-                      psKernelDefEqFinishLazyStep
-                        defeq
-                        context
-                        (Prod.snd rightResult)
-                        (Prod.fst leftResult)
-                        (Prod.fst rightResult)
+                  | Except.ok stepResult =>
+                      match Prod.fst stepResult with
+                      | PsKernelDeltaStepResult.continue nextLeft nextRight =>
+                          continue
+                            context
+                            (Prod.snd stepResult)
+                            nextLeft
+                            nextRight
+                      | PsKernelDeltaStepResult.unknown nextLeft nextRight =>
+                          Except.ok
+                            (Prod.mk
+                              (PsKernelDeltaResult.residual
+                                nextLeft
+                                nextRight)
+                              (Prod.snd stepResult))
+                      | PsKernelDeltaStepResult.equal =>
+                          Except.ok
+                            (Prod.mk
+                              (PsKernelDeltaResult.decided true)
+                              (Prod.snd stepResult))
+                      | PsKernelDeltaStepResult.different _ _ =>
+                          Except.ok
+                            (Prod.mk
+                              (PsKernelDeltaResult.decided false)
+                              (Prod.snd stepResult))
 
 def psKernelDefEqLazyReductionWithFuel
     (fuel : Nat) :
@@ -1206,9 +1456,7 @@ def psKernelDefEqLazyReductionWithFuel
     PsKernelExpr ->
     PsKernelExpr ->
     Except String
-      (Prod
-        PsKernelDeltaResult
-        PsKernelCheckerState) :=
+      (Prod PsKernelDeltaResult PsKernelCheckerState) :=
   match fuel with
   | Nat.zero =>
       fun
@@ -1278,145 +1526,60 @@ def psKernelDefEqLazyReductionWithFuel
               (PsKernelDeltaResult.decided true)
               state)
         else
-          match
-              psKernelExprNatPred left,
-              psKernelExprNatPred right with
-          | Option.some leftPred, Option.some rightPred =>
-              match
-                  defeq
-                    context
-                    state
-                    leftPred
-                    rightPred with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok result =>
-                  Except.ok
-                    (Prod.mk
-                      (PsKernelDeltaResult.decided
-                        (Prod.fst result))
-                      (Prod.snd result))
-          | _, _ =>
-              let eager :=
-                if context.eagerReduce then
-                  true
-                else if psKernelExprHasFVar left then
-                  false
-                else
-                  if psKernelExprHasFVar right then
-                    false
-                  else
-                    true;
-              let leftNat :
-                  Except String
-                    (Prod
-                      (Option PsKernelExpr)
-                      PsKernelCheckerState) :=
-                if eager then
-                  psKernelReduceNatWith
+          match psKernelExprNatPred left with
+          | Option.some leftPred =>
+              match psKernelExprNatPred right with
+              | Option.some rightPred =>
+                  match
+                      defeq
+                        context
+                        state
+                        leftPred
+                        rightPred with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok result =>
+                      Except.ok
+                        (Prod.mk
+                          (PsKernelDeltaResult.decided
+                            (Prod.fst result))
+                          (Prod.snd result))
+              | Option.none =>
+                  psKernelDefEqLazyReductionAfterPred
+                    (fun nextContext nextState nextLeft nextRight =>
+                      smaller
+                        defeq
+                        whnf
+                        coreWhnf
+                        nextContext
+                        nextState
+                        nextLeft
+                        nextRight)
+                    defeq
                     whnf
+                    coreWhnf
                     context
                     state
                     left
-                else
-                  Except.ok
-                    (Prod.mk Option.none state);
-              match leftNat with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok leftNatResult =>
-                  match Prod.fst leftNatResult with
-                  | Option.some value =>
-                      match
-                          defeq
-                            context
-                            (Prod.snd leftNatResult)
-                            value
-                            right with
-                      | Except.error error =>
-                          Except.error error
-                      | Except.ok result =>
-                          Except.ok
-                            (Prod.mk
-                              (PsKernelDeltaResult.decided
-                                (Prod.fst result))
-                              (Prod.snd result))
-                  | Option.none =>
-                      let rightNat :
-                          Except String
-                            (Prod
-                              (Option PsKernelExpr)
-                              PsKernelCheckerState) :=
-                        if eager then
-                          psKernelReduceNatWith
-                            whnf
-                            context
-                            (Prod.snd leftNatResult)
-                            right
-                        else
-                          Except.ok
-                            (Prod.mk
-                              Option.none
-                              (Prod.snd leftNatResult));
-                      match rightNat with
-                      | Except.error error =>
-                          Except.error error
-                      | Except.ok rightNatResult =>
-                          match Prod.fst rightNatResult with
-                          | Option.some value =>
-                              match
-                                  defeq
-                                    context
-                                    (Prod.snd rightNatResult)
-                                    left
-                                    value with
-                              | Except.error error =>
-                                  Except.error error
-                              | Except.ok result =>
-                                  Except.ok
-                                    (Prod.mk
-                                      (PsKernelDeltaResult.decided
-                                        (Prod.fst result))
-                                      (Prod.snd result))
-                          | Option.none =>
-                              match
-                                  psKernelDefEqLazyStep
-                                    defeq
-                                    coreWhnf
-                                    context
-                                    (Prod.snd rightNatResult)
-                                    left
-                                    right with
-                              | Except.error error =>
-                                  Except.error error
-                              | Except.ok stepResult =>
-                                  match Prod.fst stepResult with
-                                  | PsKernelDeltaStepResult.continue nextLeft nextRight =>
-                                      smaller
-                                        defeq
-                                        whnf
-                                        coreWhnf
-                                        context
-                                        (Prod.snd stepResult)
-                                        nextLeft
-                                        nextRight
-                                  | PsKernelDeltaStepResult.unknown nextLeft nextRight =>
-                                      Except.ok
-                                        (Prod.mk
-                                          (PsKernelDeltaResult.residual
-                                            nextLeft
-                                            nextRight)
-                                          (Prod.snd stepResult))
-                                  | PsKernelDeltaStepResult.equal =>
-                                      Except.ok
-                                        (Prod.mk
-                                          (PsKernelDeltaResult.decided true)
-                                          (Prod.snd stepResult))
-                                  | PsKernelDeltaStepResult.different _ _ =>
-                                      Except.ok
-                                        (Prod.mk
-                                          (PsKernelDeltaResult.decided false)
-                                          (Prod.snd stepResult))
+                    right
+          | Option.none =>
+              psKernelDefEqLazyReductionAfterPred
+                (fun nextContext nextState nextLeft nextRight =>
+                  smaller
+                    defeq
+                    whnf
+                    coreWhnf
+                    nextContext
+                    nextState
+                    nextLeft
+                    nextRight)
+                defeq
+                whnf
+                coreWhnf
+                context
+                state
+                left
+                right
 
 def psKernelDefEqLazyProjFinish
     (defeq :
@@ -1434,24 +1597,34 @@ def psKernelDefEqLazyProjFinish
     (index : Nat) :
     Except String
       (Prod Bool PsKernelCheckerState) :=
-  match
-      psKernelReduceProjCore
-        context
-        typeName
-        index
-        left,
-      psKernelReduceProjCore
-        context
-        typeName
-        index
-        right with
-  | Option.some leftField, Option.some rightField =>
-      defeq
-        context
-        state
-        leftField
-        rightField
-  | _, _ =>
+  let leftField :=
+    psKernelReduceProjCore
+      context
+      typeName
+      index
+      left;
+  let rightField :=
+    psKernelReduceProjCore
+      context
+      typeName
+      index
+      right;
+  match leftField with
+  | Option.some leftValue =>
+      match rightField with
+      | Option.some rightValue =>
+          defeq
+            context
+            state
+            leftValue
+            rightValue
+      | Option.none =>
+          defeq
+            context
+            state
+            left
+            right
+  | Option.none =>
       defeq
         context
         state

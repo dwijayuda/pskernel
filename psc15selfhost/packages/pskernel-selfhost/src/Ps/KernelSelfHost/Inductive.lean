@@ -516,6 +516,31 @@ def psKernelSessionWithLocal
     (Prod.fst opened)
     nextSession
 
+def psKernelReverseOpenBindersWorker
+    (values : List PsKernelOpenBinder) :
+    List PsKernelOpenBinder -> List PsKernelOpenBinder :=
+  match values with
+  | List.nil =>
+      fun
+        (acc : List PsKernelOpenBinder) =>
+        acc
+  | List.cons head tail =>
+      let smaller :
+          List PsKernelOpenBinder ->
+          List PsKernelOpenBinder :=
+        psKernelReverseOpenBindersWorker tail;
+      fun
+        (acc : List PsKernelOpenBinder) =>
+        smaller
+          (List.cons head acc)
+
+def psKernelReverseOpenBinders
+    (values : List PsKernelOpenBinder) :
+    List PsKernelOpenBinder :=
+  psKernelReverseOpenBindersWorker
+    values
+    List.nil
+
 def psKernelOpenBindersResult
     (session : PsKernelCheckerSession)
     (revBinders : List PsKernelOpenBinder)
@@ -524,7 +549,7 @@ def psKernelOpenBindersResult
   Except.ok
     (PsKernelOpenBindersResult.mk
       session
-      (List.reverse revBinders)
+      (psKernelReverseOpenBinders revBinders)
       result)
 
 def psKernelFinishOpenBindersWithWhnf

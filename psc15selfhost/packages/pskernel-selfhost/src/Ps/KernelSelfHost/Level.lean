@@ -798,6 +798,15 @@ def psKernelLevelEquivalent
       (psKernelLevelNormalize left)
       (psKernelLevelNormalize right)
 
+def psKernelLevelListLength
+    (values : List PsKernelLevel) : Nat :=
+  match values with
+  | List.nil =>
+      0
+  | List.cons _ rest =>
+      Nat.succ
+        (psKernelLevelListLength rest)
+
 def psKernelNameLookupLevel
     (name : PsKernelName)
     (params : List PsKernelName) :

@@ -628,11 +628,16 @@ def psKernelOpenSimpleHeaderParamsWorker
         | Except.error error =>
             Except.error error
         | Except.ok step =>
-            smaller
-              fuel
-              step.session
-              step.result
-              (List.cons step.binder revParams)
+            match step with
+            | PsKernelOpenBinderStepResult.mk
+                nextSession
+                binder
+                nextType =>
+                smaller
+                  fuel
+                  nextSession
+                  nextType
+                  (List.cons binder revParams)
 
 def psKernelOpenSimpleHeaderParams
     (fuel : Nat)

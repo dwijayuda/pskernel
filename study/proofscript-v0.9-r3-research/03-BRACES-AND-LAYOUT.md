@@ -74,13 +74,13 @@ Conceptual grammar:
 
 ~~~ebnf
 BracedStructBody ::=
-  "{" StructField ("," StructField)* "}"
+  "{" (StructField ("," StructField)*)? "}"
 
 BracedClassBody ::=
-  "{" ClassField ("," ClassField)* "}"
+  "{" (ClassField ("," ClassField)*)? "}"
 ~~~
 
-A field type may span lines. A top-level comma at the owned brace depth ends the field; commas nested inside a term do not.
+A field type may span lines. A top-level comma at the owned brace depth ends the field; commas nested inside a term do not. Empty brace bodies are accepted when the corresponding lowered native structure/class declaration is semantically valid.
 
 Canonical lowering removes the commas and constructs the same native field AST.
 
@@ -108,7 +108,7 @@ inductive LoadState(α: Type) where {
 }
 ~~~
 
-The <code>|</code> tokens define constructor boundaries at the owned brace depth. No comma or semicolon is introduced between constructors.
+The <code>|</code> tokens define constructor boundaries at the owned brace depth. No comma or semicolon is introduced between constructors. An empty constructor sequence is permitted where the corresponding native empty inductive is valid.
 ## Matches
 
 ~~~proofscript
@@ -149,7 +149,7 @@ Conceptual grammar:
 
 ~~~ebnf
 BracedInstanceBody ::=
-  "{" InstanceField (";" InstanceField)* ";"? "}"
+  "{" (InstanceField (";" InstanceField)* ";"?)? "}"
 ~~~
 
 Semicolons here are not declaration terminators; they belong to the instance initializer sequence, a role already present in the native category.

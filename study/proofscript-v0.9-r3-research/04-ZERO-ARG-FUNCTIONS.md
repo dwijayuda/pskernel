@@ -11,26 +11,22 @@ function now(): Time :=
   ...
 ~~~
 
-as explicit source sugar for a Unit-taking function:
+as explicit source sugar for a function with one Unit binder:
 
 ~~~lean
 def now (_ : Unit) : Time :=
   ...
 ~~~
 
-and keep:
+The declaration sugar is independent from the more general r3 empty-call rule.
 
 ~~~proofscript
 now()
 ~~~
 
-as one Unit application:
+is an empty source-level invocation. For this Unit-taking function, the empty-call elaborator synthesizes the required `()`.
 
-~~~lean
-now ()
-~~~
-
-The core function model remains Lean's unary/curried model. r3 does not introduce a zero-arity core function.
+This preserves Lean's unary/curried core model; r3 does not introduce a zero-arity core function.
 
 ## Why
 
@@ -76,40 +72,50 @@ def factory {α : Type} (_ : Unit) : Box α :=
 ~~~
 
 No source name is introduced for the Unit binder unless diagnostics need a synthetic provenance identifier.
-## Partial application and inference
+## Empty invocation, defaults, and partial application
 
-A Unit function is still an ordinary function.
-
-The expression:
+The accepted r3 rule deliberately distinguishes declaration sugar, empty invocation, and explicit Unit application.
 
 ~~~proofscript
-now
+function answer(): Nat := 42
+answer()     -- complete empty invocation; supplies Unit
+answer       -- the function value
+answer(())   -- ordinary explicit Unit application
 ~~~
 
-denotes the function value when the context permits it.
-
-The expression:
+Optional/default parameters also participate in empty invocation:
 
 ~~~proofscript
-now()
+function greeting(name: String := "world"): String :=
+  name
+
+const x: String := greeting()
 ~~~
 
-applies Unit.
+Here `greeting()` inserts the native default rather than passing Unit.
 
-The compiler must not automatically call every Unit function when referenced as a value.
-
-Implicit arguments are still inserted by native elaboration:
+A required non-Unit parameter is not silently abstracted:
 
 ~~~proofscript
-function defaultValue {α: Type}[Default α](): α :=
-  default
+function addOne(x: Nat): Nat := x + 1
+addOne()     -- PS_EMPTY_CALL_REQUIRES_ARGUMENT
 ~~~
 
-The explicit Unit application does not replace typeclass synthesis.
+To obtain a partial function, use the function value or a nonempty application whose native semantics leaves parameters unapplied.
+
+For a function with a Unit parameter followed by a required parameter:
+
+~~~proofscript
+function staged(_: Unit, x: Nat): Nat := x
+staged()     -- reject: x remains required
+staged(())   -- explicit Unit application; may yield a partial function
+~~~
+
+Implicit/instance parameters and optional/automatic parameters retain native-compatible insertion.
 
 ## Methods
 
-A Unit-taking generalized-field function can be called with an empty argument list after receiver resolution if the canonical native function type expects Unit at the next explicit position.
+A Unit-taking generalized-field function can be called with an empty argument list after receiver resolution when the empty-call algorithm can satisfy every required explicit parameter according to its Unit/default rules.
 
 The frontend constructs native field/application syntax; it does not hard-code receiver position.
 
@@ -156,10 +162,10 @@ A rejected r2 <code>function f()</code> may become valid under r3 only when the 
 
 ## Evidence required
 
-- native oracle for equivalent Unit-taking functions;
-- parsing tests with implicit/instance binders;
-- method/partial-application tests;
-- JS ABI and <code>.d.ts</code> conformance;
+- parser/elaborator conformance for Unit-only, default-only, mixed Unit/default, and required-non-Unit cases;
+- interactions with implicit/instance/strict-implicit binders;
+- method/receiver cases;
+- JS ABI and generated `.d.ts` mapping;
 - usability study.
 
 Current status: **accepted r3 design rule; no production parser implementation claimed**.

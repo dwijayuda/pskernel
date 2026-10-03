@@ -106,7 +106,7 @@ def psKernelLevelToOffset
   match level with
   | PsKernelLevel.succ inner =>
       let pair := psKernelLevelToOffset inner;
-      Prod.mk pair.fst (pair.snd + 1)
+      Prod.mk pair.fst (Nat.succ pair.snd)
   | _ =>
       Prod.mk level 0
 
@@ -304,8 +304,10 @@ def psKernelLevelNormCmpWithFuel
                     match smaller leftA rightA with
                     | PsKernelOrdering.eq =>
                         smaller leftB rightB
-                    | ordering =>
-                        ordering
+                    | PsKernelOrdering.lt =>
+                        PsKernelOrdering.lt
+                    | PsKernelOrdering.gt =>
+                        PsKernelOrdering.gt
                 | _ =>
                     PsKernelOrdering.eq
             | PsKernelLevel.imax leftA leftB =>
@@ -314,8 +316,10 @@ def psKernelLevelNormCmpWithFuel
                     match smaller leftA rightA with
                     | PsKernelOrdering.eq =>
                         smaller leftB rightB
-                    | ordering =>
-                        ordering
+                    | PsKernelOrdering.lt =>
+                        PsKernelOrdering.lt
+                    | PsKernelOrdering.gt =>
+                        PsKernelOrdering.gt
                 | _ =>
                     PsKernelOrdering.eq
             | _ =>

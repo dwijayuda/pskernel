@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.TypeCheckerInfer
+import Ps.KernelSelfHost.TypeCheckerRecursor
 import PSC1Kernel.TypeChecker
 
 def psKernelNameToReference
@@ -1073,6 +1073,224 @@ def psKernelSelfHostProjectionTests : Bool :=
     (psKernelProjectionDifferential 0)
     (psKernelProjectionDifferential 1)
 
+def psKernelSelfHostRecursorTests : Bool :=
+  let inductName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "RecI";
+  let ctorName :=
+    PsKernelName.str
+      inductName
+      "mk";
+  let recName :=
+    PsKernelName.str
+      inductName
+      "rec";
+  let majorName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "h";
+  let inductType :=
+    PsKernelExpr.sort
+      (PsKernelLevel.succ PsKernelLevel.zero);
+  let inductExpr :=
+    PsKernelExpr.const
+      inductName
+      List.nil;
+  let portableEnv0 :=
+    psKernelEnvironmentAddUnchecked
+      psKernelEnvironmentEmpty
+      (PsKernelConstantInfo.inductInfo {
+        base := {
+          name := inductName
+          levelParams := List.nil
+          type := inductType
+        }
+        numParams := 0
+        numIndices := 0
+        all := List.cons inductName List.nil
+        ctors := List.cons ctorName List.nil
+        numNested := 0
+        isRec := false
+        isReflexive := true
+        isUnsafe := false
+      });
+  let portableEnv1 :=
+    psKernelEnvironmentAddUnchecked
+      portableEnv0
+      (PsKernelConstantInfo.ctorInfo {
+        base := {
+          name := ctorName
+          levelParams := List.nil
+          type := inductExpr
+        }
+        induct := inductName
+        cidx := 0
+        numParams := 0
+        numFields := 0
+        isUnsafe := false
+      });
+  let portableEnv :=
+    psKernelEnvironmentAddUnchecked
+      portableEnv1
+      (PsKernelConstantInfo.recInfo {
+        base := {
+          name := recName
+          levelParams := List.nil
+          type :=
+            PsKernelExpr.forallE
+              majorName
+              inductExpr
+              (PsKernelExpr.sort
+                (PsKernelLevel.succ PsKernelLevel.zero))
+              PsKernelBinderInfo.default
+        }
+        all := List.cons inductName List.nil
+        numParams := 0
+        numIndices := 0
+        numMotives := 0
+        numMinors := 0
+        rules :=
+          List.cons
+            {
+              ctor := ctorName
+              nFields := 0
+              rhs := PsKernelExpr.sort PsKernelLevel.zero
+            }
+            List.nil
+        k := true
+        isUnsafe := false
+      });
+  let portableLocal :=
+    psKernelLocalContextAddLocal
+      psKernelLocalContextEmpty
+      majorName
+      majorName
+      inductExpr
+      PsKernelBinderInfo.default;
+  let portableContext :=
+    psKernelCheckerContextWithLocalContext
+      (psKernelCheckerContextEmpty portableEnv)
+      portableLocal;
+  let portableMajor :=
+    PsKernelExpr.fvar majorName;
+  let portableInput :=
+    PsKernelExpr.app
+      (PsKernelExpr.const recName List.nil)
+      portableMajor;
+  let referenceInductName :=
+    psKernelNameToReference inductName;
+  let referenceCtorName :=
+    psKernelNameToReference ctorName;
+  let referenceRecName :=
+    psKernelNameToReference recName;
+  let referenceMajorName :=
+    psKernelNameToReference majorName;
+  let referenceInductType :=
+    psKernelExprToReference inductType;
+  let referenceInductExpr :=
+    psKernelExprToReference inductExpr;
+  let referenceEnv0 :=
+    PSC1Kernel.Environment.empty.addUnchecked
+      (PSC1Kernel.ConstantInfo.inductInfo {
+        base := {
+          name := referenceInductName
+          levelParams := List.nil
+          type := referenceInductType
+        }
+        numParams := 0
+        numIndices := 0
+        all := List.cons referenceInductName List.nil
+        ctors := List.cons referenceCtorName List.nil
+        numNested := 0
+        isRec := false
+        isReflexive := true
+        isUnsafe := false
+      });
+  let referenceEnv1 :=
+    referenceEnv0.addUnchecked
+      (PSC1Kernel.ConstantInfo.ctorInfo {
+        base := {
+          name := referenceCtorName
+          levelParams := List.nil
+          type := referenceInductExpr
+        }
+        induct := referenceInductName
+        cidx := 0
+        numParams := 0
+        numFields := 0
+        isUnsafe := false
+      });
+  let referenceEnv :=
+    referenceEnv1.addUnchecked
+      (PSC1Kernel.ConstantInfo.recInfo {
+        base := {
+          name := referenceRecName
+          levelParams := List.nil
+          type :=
+            PSC1Kernel.Expr.forallE
+              referenceMajorName
+              referenceInductExpr
+              (PSC1Kernel.Expr.sort
+                (PSC1Kernel.Level.succ PSC1Kernel.Level.zero))
+              PSC1Kernel.BinderInfo.default
+        }
+        all := List.cons referenceInductName List.nil
+        numParams := 0
+        numIndices := 0
+        numMotives := 0
+        numMinors := 0
+        rules :=
+          List.cons
+            {
+              ctor := referenceCtorName
+              nFields := 0
+              rhs := PSC1Kernel.Expr.sort PSC1Kernel.Level.zero
+            }
+            List.nil
+        k := true
+        isUnsafe := false
+      });
+  let referenceLocal :=
+    PSC1Kernel.LocalContext.empty.addLocal
+      referenceMajorName
+      referenceMajorName
+      referenceInductExpr
+      PSC1Kernel.BinderInfo.default;
+  let referenceContext :=
+    {
+      PSC1Kernel.CheckerContext.empty referenceEnv with
+      lctx := referenceLocal
+    };
+  let referenceInput :=
+    PSC1Kernel.Expr.app
+      (PSC1Kernel.Expr.const referenceRecName List.nil)
+      (PSC1Kernel.Expr.fvar referenceMajorName);
+  match
+      psKernelWhnfWithRecursorFuel
+        512
+        psKernelInferenceStructuralDefEq
+        portableContext
+        psKernelCheckerStateEmpty
+        portableInput,
+      PSC1Kernel.whnf
+        referenceContext
+        referenceInput with
+  | Except.ok portableResult, Except.ok referenceResult =>
+      Bool.and
+        (psKernelExprReferenceEq
+          (Prod.fst portableResult)
+          referenceResult)
+        (match
+            psKernelExprMapGet
+              PsKernelExpr
+              (Prod.snd portableResult).inferOnly
+              portableMajor with
+         | Option.some _ => true
+         | Option.none => false)
+  | _, _ =>
+      false
+
 def main : IO Unit :=
   if !psKernelSelfHostNameTests then
     throw
@@ -1106,6 +1324,10 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_PROJECTION_DIFFERENTIAL: FAIL")
+  else if !psKernelSelfHostRecursorTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_RECURSOR_DIFFERENTIAL: FAIL")
   else
     IO.println
       "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"

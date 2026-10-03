@@ -1,6 +1,6 @@
 # r3 Source Profiles: Standard and Lean-Extensible
 
-Status: **recommend adoption**
+Status: **accepted r3 architecture; not implemented**
 
 ## Decision
 

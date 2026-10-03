@@ -32,6 +32,32 @@ def psKernelOpenBinderListAppend
           tail
           right)
 
+def psKernelReverseRecursiveFieldsWorker
+    (values : List PsKernelSimpleRecursiveField) :
+    List PsKernelSimpleRecursiveField ->
+    List PsKernelSimpleRecursiveField :=
+  match values with
+  | List.nil =>
+      fun
+        (acc : List PsKernelSimpleRecursiveField) =>
+        acc
+  | List.cons head tail =>
+      let smaller :
+          List PsKernelSimpleRecursiveField ->
+          List PsKernelSimpleRecursiveField :=
+        psKernelReverseRecursiveFieldsWorker tail;
+      fun
+        (acc : List PsKernelSimpleRecursiveField) =>
+        smaller
+          (List.cons head acc)
+
+def psKernelReverseRecursiveFields
+    (values : List PsKernelSimpleRecursiveField) :
+    List PsKernelSimpleRecursiveField :=
+  psKernelReverseRecursiveFieldsWorker
+    values
+    List.nil
+
 def psKernelSimpleCtorNames
     (ctors : List PsKernelSimpleConstructorDecl) :
     List PsKernelName :=
@@ -265,7 +291,7 @@ def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
                       (Prod.snd reducedResult)
                       (Option.some
                         (Prod.mk
-                          (List.reverse revArgs)
+                          (psKernelReverseOpenBinders revArgs)
                           indices)))
             | Option.none =>
                 match reduced with
@@ -519,8 +545,8 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
                 Except.ok
                   (PsKernelOpenFieldsResult.mk
                     (Prod.snd reducedResult)
-                    (List.reverse revFields)
-                    (List.reverse revRecursive)
+                    (psKernelReverseOpenBinders revFields)
+                    (psKernelReverseRecursiveFields revRecursive)
                     (Prod.fst reducedResult))
 
 def psKernelOpenSimpleConstructorFields

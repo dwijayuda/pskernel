@@ -22,7 +22,7 @@ Native `.lean` syntax remains unchanged.
 
 1. Parenthesized calls in `.ps` are insensitive to ordinary trivia between the callable head and `(`; one tuple argument requires explicit extra grouping.
 2. ProofScript-owned braces are genuinely structural at their outer sequence level. Structure/class fields use commas **between fields only** and do **not** use a trailing field comma.
-3. `function f()` is accepted as explicit Unit-function sugar.
+3. `function f()` is accepted as zero-source-argument sugar, lowering to one native optional Unit binder defaulting to `()`.
 4. `const` is retained for r3 as a top-level/namespace parameterless-definition alias. It remains eligible for reconsideration before stable/1.0 if usability evidence shows harmful false familiarity.
 5. r3 defines `ps-standard` and `ps-lean-extensible` over the same Lean-compatible logical foundation.
 6. Contracts/specifications become a stable PSC-owned semantic layer whose accepted evidence ultimately refers to the actual implementation and kernel-checkable logic.
@@ -90,7 +90,7 @@ Accepted additions:
 - r3 is formally a complete delta over the exact vendored r2 baseline and 89-section inheritance/override matrix;
 - parenthesized-call ownership uses a horizontal CallGap; a physical newline breaks ownership;
 - native field-dot adjacency remains unchanged;
-- `f()` is a complete empty invocation with native default/auto insertion, one possible Unit synthesis, and rejection of unsatisfied required non-Unit parameters;
+- `f()` is a complete empty invocation whose canonical native request is `f ..`; native optional/automatic explicit parameters may be omitted, ordinary required explicit parameters reject, and `function f()` participates via its hidden optional Unit default;
 - r2 `f()` migrates to r3 `f(())` to preserve the old explicit Unit meaning;
 - the exact overlay grammar/feature registry is frozen;
 - `ps-standard-0.9-r3` has a fixed registry and Semantic Bundle v1 import boundary;

@@ -32,11 +32,12 @@ Resolved using a **complete exact r2 delta**, not a lossy re-transcription.
 Resolved:
 
 - `f()` is complete empty invocation;
-- defaults/automatic/implicit parameters can be inserted;
-- one required Unit can be synthesized;
-- unsatisfied required non-Unit parameters reject;
+- its canonical native request is `f ..`;
+- native optional/default, automatic, implicit and instance arguments can be inserted normally;
+- ordinary required explicit parameters are rejected even if ellipsis creates/inference solves a metavariable for them;
+- `function f()` lowers to one optional Unit binder defaulting to `()`;
 - `f(())` is explicit Unit and retains ordinary nonempty-call/partial-application behavior;
-- r2 `f()` migrates to r3 `f(())`.
+- r2 `f()` migrates to r3 `f(())` to preserve the old explicit Unit meaning.
 
 ### 3. Exact call/newline/brace grammar
 

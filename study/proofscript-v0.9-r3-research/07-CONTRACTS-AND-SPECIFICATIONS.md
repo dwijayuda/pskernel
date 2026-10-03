@@ -174,7 +174,7 @@ Then extend to typed failure, loops/state, partial correctness, and application 
 
 ## Evidence status
 
-Semantic architecture: recommended.
-Production contract elaborator: not implemented on this branch.
-General VC correctness theorem: not proved.
-AI policy enforcement: not implemented.
+Semantic architecture: **accepted for r3**.
+Production contract elaborator: **not implemented**.
+General VC correctness theorem: **not proved**.
+AI policy enforcement: **not implemented**.

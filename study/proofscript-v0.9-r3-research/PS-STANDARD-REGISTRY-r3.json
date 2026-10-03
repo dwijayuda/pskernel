@@ -139,7 +139,37 @@
   "quotationPolicy": "not-in-standard-source",
   "semanticImport": {
     "schemaVersion": "psc-semantic-bundle-1.0.0",
-    "syntaxMetaExportsMustBeEmpty": true
+    "syntaxMetaExportsMustBeEmpty": true,
+    "hostBuildEffectsMustBeEmpty": true,
+    "exactBundleIdentityRequired": true
   },
-  "nativeIOPolicy": "direct native IO/Task allowed only in modules explicitly marked nonportable-adapter; portable Standard application APIs use App"
+  "nativeIOPolicy": "direct native IO/Task allowed only in modules explicitly marked nonportable-adapter; portable Standard application APIs use App",
+  "environmentRoots": [
+    "Lean.Init@4.34.0",
+    "Lean.Std@4.34.0",
+    "ProofScript.Standard@0.9-r3"
+  ],
+  "registrationClosure": {
+    "materializedManifestRequired": true,
+    "digestAlgorithm": "sha256",
+    "releaseMustPublishDigest": true,
+    "hostInstalledExtraRegistrationsAllowed": false
+  },
+  "hostSecurity": {
+    "semanticImportGrantsHostPermissions": false,
+    "arbitraryDependencyInstallScriptRequired": false
+  },
+  "cacheIdentity": [
+    "grammarRevision",
+    "registryId",
+    "registrationClosureSha256",
+    "leanSemanticCommit",
+    "moduleSourceIdentities",
+    "semanticBundleIdentities",
+    "options",
+    "semanticRegistrations",
+    "axiomPolicy",
+    "compilerRevision",
+    "checkerRevision"
+  ]
 }

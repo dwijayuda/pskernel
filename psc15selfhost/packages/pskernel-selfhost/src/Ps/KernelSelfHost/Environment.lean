@@ -146,11 +146,11 @@ def psKernelEnvironmentAddUnchecked
     (info : PsKernelConstantInfo) :
     PsKernelEnvironment :=
   {
-    environment with
     constants :=
       List.cons
         info
         environment.constants
+    quotInitialized := environment.quotInitialized
   }
 
 def psKernelEnvironmentReplaceUnchecked
@@ -158,12 +158,12 @@ def psKernelEnvironmentReplaceUnchecked
     (info : PsKernelConstantInfo) :
     PsKernelEnvironment :=
   {
-    environment with
     constants :=
       psKernelReplaceEnvironmentConstant
         (psKernelConstantInfoName info)
         info
         environment.constants
+    quotInitialized := environment.quotInitialized
   }
 
 def psKernelEnvironmentAdd
@@ -192,6 +192,6 @@ def psKernelEnvironmentMarkQuotInitialized
     environment
   else
     {
-      environment with
+      constants := environment.constants
       quotInitialized := true
     }

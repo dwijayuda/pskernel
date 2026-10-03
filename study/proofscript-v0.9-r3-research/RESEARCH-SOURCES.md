@@ -221,3 +221,24 @@ The completion pass therefore freezes:
 - pre-stable evidence gates.
 
 No external system's proof or runtime behavior is assumed to transfer automatically to PSC.
+
+
+### Lean lexical whitespace and structural emptiness
+
+The official Lean source-file reference states that ordinary lexical whitespace consists of spaces, newline sequences, or comments; tabs are not ordinary Lean whitespace.
+
+Source:
+https://lean-lang.org/doc/reference/latest/Source-Files-and-Modules/
+
+The current structure declaration reference and source description show `structFields` as a repeated field sequence, and Lean's structure implementation explicitly accounts for structures with no fields.
+
+Sources:
+https://lean-lang.org/doc/reference/latest/The-Type-System/Inductive-Types/
+https://github.com/leanprover/lean4/blob/master/src/Lean/Elab/Structure.lean
+
+r3 consequence:
+- CallGap does not introduce tab-as-whitespace as a one-off lexical exception;
+- structural structure/class bodies permit zero fields where native semantics permits them;
+- the exact r3 grammar also permits zero constructors for native-valid empty inductive declarations and zero instance fields where native semantics permits them.
+
+The pinned Lean 4.34 source in the repository remains normative over current-master implementation detail.

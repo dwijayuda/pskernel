@@ -50,11 +50,54 @@ Thus ProofScript does not claim that every brace anywhere disables Lean layout.
 | match alternatives | leading <code>|</code> marker |
 | instance field initializers | native semicolon separator, optional trailing semicolon |
 | local <code>where</code> declarations | native semicolon separator, optional trailing semicolon |
+| braced `def`/`const`/`function` body | exactly one term; wrapper is semantically transparent |
 | braced conditional branch | exactly one term, no member sequence |
 | braced native <code>do</code> | native semicolon sequence if using one-line/brace mode |
 | braced tactics | native tactic semicolon / <code>&lt;;&gt;</code> combinators |
 
 This preserves the r2 policy that ProofScript does not invent a general declaration semicolon.
+## Definition bodies
+
+Current r3 also permits a single-term body wrapper on def, const, and function:
+
+~~~proofscript
+function add(x: Nat, y: Nat): Nat := {
+  x + y
+}
+~~~
+
+This is exactly equivalent to:
+
+~~~proofscript
+function add(x: Nat, y: Nat): Nat :=
+  x + y
+~~~
+
+The braces do not introduce a statement sequence, implicit return, or JavaScript block semantics.
+
+Conceptual grammar:
+
+~~~ebnf
+DefinitionBody ::=
+  ":=" (PSTerm | BracedDefinitionBody)
+
+BracedDefinitionBody ::=
+  "{" PSTerm "}"
+~~~
+
+Existing braced terms retain their term ownership. Thus:
+
+~~~proofscript
+const user: User := {
+  id := 1,
+  name := "Alice"
+}
+~~~
+
+is a record-literal term used directly as the declaration body, not a body wrapper containing field statements. An explicit wrapper around that record literal has two brace layers.
+
+The wrapper therefore adds visual structure without creating a second expression or sequencing semantics.
+
 ## Structures and classes
 
 Proposed Standard spelling:

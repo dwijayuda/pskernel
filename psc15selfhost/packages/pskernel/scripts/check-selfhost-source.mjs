@@ -9,7 +9,7 @@ const visited = new Set();
 const ordered = [];
 const failures = [];
 let partialDefinitions = 0;
-const partialDefinitionBaseline = 128;
+const partialDefinitionBaseline = 124;
 
 function modulePath(name) {
   if (name === 'PSC1KernelSelfHost') return entry;

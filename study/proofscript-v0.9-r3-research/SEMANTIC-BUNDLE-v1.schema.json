@@ -20,7 +20,9 @@
     "axiomDependencies",
     "syntaxMetaExports",
     "runtimeExports",
-    "evidence"
+    "evidence",
+    "hostBuildEffects",
+    "runtimeAssumptions"
   ],
   "properties": {
     "schemaVersion": {
@@ -260,6 +262,22 @@
             "assumed"
           ]
         }
+      }
+    },
+    "hostBuildEffects": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "runtimeAssumptions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
       }
     }
   },

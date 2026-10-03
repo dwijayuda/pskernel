@@ -8,7 +8,7 @@ These decisions are accepted into the r3 language design. They define the docume
 |---|---|---|---|---|
 | R3-001 | Parenthesized calls | In <code>.ps</code>, ordinary trivia before <code>(</code> does not change parenthesized-call ownership; tuple argument requires extra grouping. Reclassify as E-class exception. | accepted | reference research; formal proof plan documented |
 | R3-002 | Owned braces | Owned braces define outer member boundaries; structure/class commas appear only between fields (no trailing field comma); use marker alternatives and native semicolons where the native sequence has them. | accepted | reference research; prototype pending |
-| R3-003 | <code>function f()</code> | Lower to one explicit Unit binder; <code>f()</code> remains Unit application. | accepted | semantic design; oracle test pending |
+| R3-003 | <code>function f()</code> | Lower to one native optional Unit binder defaulting to <code>()</code>; empty invocation uses the general r3 default-completion rule. | accepted | semantic design; oracle test pending |
 | R3-004 | <code>const</code> | Retain as top-level/namespace parameterless-def alias in r3. Re-evaluate before stable/1.0 freeze if usability evidence shows harmful false familiarity. | accepted for r3 | design analysis; human study not run |
 | R3-005 | Source profiles | Add <code>ps-standard</code> closed syntax and <code>ps-lean-extensible</code> declared extension profile over the same core. | accepted | architecture/reference research |
 | R3-006 | Contracts | Define PSC-owned stable contract semantics tied to ordinary admitted theorems/program logic. Lean intrinsic verification becomes optional compatibility/oracle. | accepted | design; implementation/proof pending |
@@ -36,7 +36,7 @@ Any reversal of R3-001 through R3-010 must update the relevant design document, 
 Human-study results may still justify a later pre-1.0 change to <code>const</code> or other high-risk surface syntax without implying a change to Lean semantics.
 
 | R3-011 | Complete-delta authority | r3 is a complete exact delta over vendored r2 SHA-256 d29c0b2d...; unchanged r2 rules remain normative. | accepted | authority + 89-section matrix |
-| R3-012 | Empty call | `f()` is a complete empty invocation: defaults/auto inserted, at most one Unit synthesized, required non-Unit remainder rejects; `f(())` is explicit Unit. | accepted | source/reference research |
+| R3-012 | Empty call | `f()` is a complete empty invocation lowered as native high-level `f ..`; only native optional/automatic explicit parameters may be omitted, while ordinary required explicit parameters reject. `function f()` supplies this via an optional Unit default; `f(())` is explicit Unit. | accepted | Lean function-application/default-parameter research |
 | R3-013 | Call boundary / field dot | CallGap is horizontal only; line terminator breaks r3 call ownership. Lean field-dot adjacency is unchanged. | accepted | Lean reference research |
 | R3-014 | Standard registry / bundles | `ps-standard-0.9-r3` uses a closed machine-readable registry; Extensible libraries cross through Semantic Bundle v1 with no syntax/meta exports. | accepted | architecture/specification |
 | R3-015 | Contract core | Base r3 freezes total-pure requires/ensures, semantic FrameSpec and higher-order CallableSpec; state/loop/async surface clauses are staged. | accepted | verification-language research |

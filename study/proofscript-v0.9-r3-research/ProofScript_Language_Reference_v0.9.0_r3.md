@@ -20,6 +20,66 @@ The pinned Lean environment is the semantic authority for the native language ca
 - **reject** — source is not accepted under the selected language/profile.
 - **unsupported** — a recognized feature is outside the selected profile and must reject rather than silently change meaning.
 
+## Table of contents
+
+1. Language identities
+2. Semantic foundation
+3. Source kinds
+4. Source profiles
+5. Lexical rules
+6. Names, modules, and scope
+7. Declaration forms
+8. Binders and universes
+9. Zero-source-argument functions
+10. Functions, lambdas, lets, and application
+11. Field notation and record update
+12. Conditionals
+13. Structures and classes
+14. Inductives
+15. Patterns and match
+16. Classes, instances, coercions, and type-directed resolution
+17. Recursion and termination
+18. Basic do notation
+19. Primitive and data semantics
+20. Propositions and proof source
+21. Notation, attributes, and options
+22. Pure contracts
+23. psc2-language-v1 exact coverage
+24. lean-subset-psc2-v1
+25. psc2-standard-language-v1
+26. Feature ownership rule
+27. Post-PSC2 language roadmap
+28. Grammar summary
+29. Canonical examples
+30. Explicit exclusions
+31. Language completeness rule
+
+## Glossary
+
+**Native** — syntax or semantics taken from the pinned Lean 4.34.0 environment only when the selected ProofScript profile explicitly includes that category.
+
+**Owned syntax** — a ProofScript production whose parsing or surface meaning is defined directly by this specification.
+
+**Source profile** — a versioned set of source grammar/registration rules used to interpret a file.
+
+**Standard** — the closed ps-standard-0.9-r3 source profile. Ordinary dependencies cannot mutate its grammar.
+
+**Extensible** — ps-lean-extensible-0.9-r3, where explicitly declared syntax/Meta extensions are part of the profile/environment identity.
+
+**psc2-language-v1** — the exact source-language capability closure that a psc2-compiler-v1 implementation must support.
+
+**psc2-standard-language-v1** — psc2-language-v1 plus the closed Standard notation, attribute, and prover surface selected in this specification.
+
+**lean-subset-psc2-v1** — the bounded native Lean source compatibility profile corresponding to the supported PSC2 semantic families.
+
+**psc2-pattern-v1** — the required PSC2 pattern family: variable, wildcard, constructor, nested constructor, tuple/product, supported literal, and single-scrutinee match.
+
+**CallGap** — the horizontal trivia allowed between a completed callable head and the opening parenthesis of a ProofScript-owned parenthesized call.
+
+**Post-PSC2 language** — proposed future source-language work that is not current ps-0.9-r3 syntax.
+
+**Tooling command** — a command accepted by development tools but not part of the program-declaration language, such as #check or #eval.
+
 # 1. Language identities
 
 ProofScript separates language identity from compiler and distribution identity.
@@ -847,7 +907,7 @@ These tactics may fail, search, or construct proof terms according to their sele
 
 Additional tactic names are not automatically Standard merely because a package is installed.
 
-# 21. Notation and attributes
+# 21. Notation, attributes, and options
 
 ps-standard-0.9-r3 uses a fixed notation/attribute registration closure.
 
@@ -1218,14 +1278,23 @@ It must remain explicitly bounded. Full Lean parser/macro/Meta compatibility is 
 
 # 28. Grammar summary
 
-The grammar below specifies the ProofScript-owned r3 forms. Native categories referenced as PSTerm, PatternGroup, BinderIdent, StructField, ClassField, ConstructorBody, and InstanceField use the pinned native category restricted by the selected profile.
+The grammar below specifies the ProofScript-owned r3 forms. PSTerm, PatternGroup, BinderIdent, NativeNonExplicitBinder, CallableHead, StructField, ClassField, ConstructorBody, InstanceField, and WhereField denote pinned native categories restricted by the selected profile. CallableHead must be a completed callable term at the parenthesized-call postfix boundary.
 
 ~~~ebnf
+DefaultSuffix :=
+  ":=" PSTerm
+
 ExplicitGroup :=
   "(" ExplicitEntry ("," ExplicitEntry)* ","? ")"
 
+EmptyExplicitGroup :=
+  "(" ")"
+
 ExplicitEntry :=
   BinderIdent ":" PSTerm DefaultSuffix?
+
+FunctionHeader :=
+  "function" Ident NativeNonExplicitBinder* (ExplicitGroup | EmptyExplicitGroup) (":" PSTerm)?
 
 CallArguments :=
   CallArgument ("," CallArgument)* ","?

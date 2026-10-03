@@ -181,7 +181,8 @@ lean_lib PSC1KernelReferenceFoundations where
 lean_lib PsKernelSelfHost where
   srcDir := "packages/pskernel-selfhost/src"
   roots := #[
-    `PsKernel.Name
+    `Ps.KernelSelfHost.Name,
+    `Ps.KernelSelfHost.Level
   ]
 
 @[default_target]

@@ -1526,6 +1526,16 @@ def psKernelDefEqLazyReductionWithFuel
               (PsKernelDeltaResult.decided true)
               state)
         else
+          let continue :
+              PsKernelCheckerContext ->
+              PsKernelCheckerState ->
+              PsKernelExpr ->
+              PsKernelExpr ->
+              Except String
+                (Prod
+                  PsKernelDeltaResult
+                  PsKernelCheckerState) :=
+            smaller defeq whnf coreWhnf;
           match psKernelExprNatPred left with
           | Option.some leftPred =>
               match psKernelExprNatPred right with
@@ -1546,19 +1556,7 @@ def psKernelDefEqLazyReductionWithFuel
                           (Prod.snd result))
               | Option.none =>
                   psKernelDefEqLazyReductionAfterPred
-                    (fun
-                      nextContext
-                      nextState
-                      nextLeft
-                      nextRight =>
-                      smaller
-                        defeq
-                        whnf
-                        coreWhnf
-                        nextContext
-                        nextState
-                        nextLeft
-                        nextRight)
+                    continue
                     defeq
                     whnf
                     coreWhnf
@@ -1568,15 +1566,7 @@ def psKernelDefEqLazyReductionWithFuel
                     right
           | Option.none =>
               psKernelDefEqLazyReductionAfterPred
-                (fun nextContext nextState nextLeft nextRight =>
-                  smaller
-                    defeq
-                    whnf
-                    coreWhnf
-                    nextContext
-                    nextState
-                    nextLeft
-                    nextRight)
+                continue
                 defeq
                 whnf
                 coreWhnf

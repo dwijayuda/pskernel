@@ -24,7 +24,7 @@ Do not recruit only project contributors.
 Within/between-subject counterbalanced tasks compare:
 
 A. v0.9-r2
-B. r3 candidate
+B. accepted r3 design
 C. native Lean
 D. TypeScript equivalent where meaningful
 
@@ -36,7 +36,7 @@ Provide a 15-20 minute standardized tutorial covering:
 
 - := versus =;
 - function, def, provisional const;
-- parenthesized calls and tuple grouping;
+- parenthesized calls, tuple grouping, and empty-call/default completion;
 - fun lambdas;
 - structures/matches;
 - Option/Except;
@@ -52,7 +52,7 @@ No hidden coaching during scored tasks.
 2. Decide whether spacing changes call meaning.
 3. Pass one tuple argument.
 4. Read named/default parameters.
-5. Write a zero-argument Unit function.
+5. Write a zero-source-argument function and distinguish it from an ordinary required-parameter function.
 6. Explain top-level const.
 7. Update a record.
 8. Add a match constructor and repair exhaustiveness.
@@ -75,7 +75,10 @@ Especially measure:
 - f((x,y)) versus f(x,y);
 - braces versus indentation;
 - whether const freezes data;
-- whether function f() is zero-core-arity or Unit sugar;
+- whether `function f()` creates zero core arity or a hidden optional Unit parameter;
+- whether `greet()` uses a declared default;
+- whether `add()` rejects when a required explicit argument remains;
+- whether `f(())` means explicit Unit rather than empty invocation;
 - whether Option.none equals JS undefined;
 - whether typed failure includes arbitrary JS throw;
 - whether ensures is a runtime assertion;
@@ -113,9 +116,16 @@ Current provisional threshold: after tutorial, at least 80% of TypeScript partic
 
 Otherwise remove/reconsider const before 1.0.
 
-### function f()
+### empty call / function f()
 
-Adopt unless the Unit-sugar model causes meaningful type/ABI confusion; test both reference-as-value and invocation.
+Before stable/1.0, test four cases separately:
+
+- zero-source-argument declaration + empty invocation;
+- default-only declaration + empty invocation;
+- required explicit parameter + empty invocation rejection;
+- explicit Unit `f(())` versus empty `f()`.
+
+The rule should be reconsidered if trained users continue to confuse empty invocation with explicit Unit or partial application at a high-confidence rate.
 
 ## Raw-data schema
 

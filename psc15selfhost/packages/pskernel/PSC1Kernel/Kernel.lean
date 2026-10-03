@@ -103,7 +103,7 @@ def mkChecker
     (nativeEvaluator : Option NativeEvaluator := none) : CheckerContext :=
   (mkCheckerSession env levelParams safety maxRecDepth maxNatSize nativeEvaluator).context
 
-private def checkConstantBaseWithSession
+def checkConstantBaseWithSession
     (session : CheckerSession)
     (base : ConstantBase) : Except String CheckerSession := do
   if session.context.env.contains base.name then
@@ -128,7 +128,7 @@ def checkConstantBase
   let _ ← checkConstantBaseWithSession session base
   pure ()
 
-private def checkDefinitionBodyWithSession
+def checkDefinitionBodyWithSession
     (session : CheckerSession)
     (value : DefinitionInfo) : Except String CheckerSession := do
   checkNoMVarNoFVar value.value

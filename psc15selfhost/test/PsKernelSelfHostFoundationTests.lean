@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.TypeCheckerRecursor
+import Ps.KernelSelfHost.TypeCheckerDefEq
 import PSC1Kernel.TypeChecker
 
 def psKernelNameToReference
@@ -1291,6 +1291,319 @@ def psKernelSelfHostRecursorTests : Bool :=
   | _, _ =>
       false
 
+def psKernelDefEqConstName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "defeqValue"
+
+def psKernelDefEqPropName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "DefEqProp"
+
+def psKernelDefEqEnvironment : PsKernelEnvironment :=
+  let natBase : PsKernelConstantBase :=
+    {
+      name := psKernelNatName
+      levelParams := List.nil
+      type :=
+        PsKernelExpr.sort
+          (PsKernelLevel.succ PsKernelLevel.zero)
+    };
+  let propBase : PsKernelConstantBase :=
+    {
+      name := psKernelDefEqPropName
+      levelParams := List.nil
+      type :=
+        PsKernelExpr.sort PsKernelLevel.zero
+    };
+  let defBase : PsKernelConstantBase :=
+    {
+      name := psKernelDefEqConstName
+      levelParams := List.nil
+      type :=
+        PsKernelExpr.const
+          psKernelNatName
+          List.nil
+    };
+  let env1 :=
+    psKernelEnvironmentAddUnchecked
+      psKernelEnvironmentEmpty
+      (PsKernelConstantInfo.axiomInfo {
+        base := natBase
+        isUnsafe := false
+      });
+  let env2 :=
+    psKernelEnvironmentAddUnchecked
+      env1
+      (PsKernelConstantInfo.axiomInfo {
+        base := propBase
+        isUnsafe := false
+      });
+  psKernelEnvironmentAddUnchecked
+    env2
+    (PsKernelConstantInfo.defnInfo {
+      base := defBase
+      value :=
+        PsKernelExpr.lit
+          (PsKernelLiteral.nat 7)
+      hints := PsKernelReducibilityHints.regular 0
+      safety := PsKernelDefinitionSafety.safe
+    })
+
+def psKernelDefEqReferenceEnvironment :
+    PSC1Kernel.Environment :=
+  let natBase : PSC1Kernel.ConstantBase :=
+    {
+      name := PSC1Kernel.kernelNatName
+      levelParams := List.nil
+      type :=
+        PSC1Kernel.Expr.sort
+          (PSC1Kernel.Level.succ
+            PSC1Kernel.Level.zero)
+    };
+  let propName :=
+    psKernelNameToReference
+      psKernelDefEqPropName;
+  let propBase : PSC1Kernel.ConstantBase :=
+    {
+      name := propName
+      levelParams := List.nil
+      type :=
+        PSC1Kernel.Expr.sort
+          PSC1Kernel.Level.zero
+    };
+  let defBase : PSC1Kernel.ConstantBase :=
+    {
+      name :=
+        psKernelNameToReference
+          psKernelDefEqConstName
+      levelParams := List.nil
+      type :=
+        PSC1Kernel.Expr.const
+          PSC1Kernel.kernelNatName
+          List.nil
+    };
+  let env1 :=
+    PSC1Kernel.Environment.empty.addUnchecked
+      (PSC1Kernel.ConstantInfo.axiomInfo {
+        base := natBase
+        isUnsafe := false
+      });
+  let env2 :=
+    env1.addUnchecked
+      (PSC1Kernel.ConstantInfo.axiomInfo {
+        base := propBase
+        isUnsafe := false
+      });
+  env2.addUnchecked
+    (PSC1Kernel.ConstantInfo.defnInfo {
+      base := defBase
+      value :=
+        PSC1Kernel.Expr.lit
+          (PSC1Kernel.Literal.nat 7)
+      hints := PSC1Kernel.ReducibilityHints.regular 0
+      safety := PSC1Kernel.DefinitionSafety.safe
+    })
+
+def psKernelDefEqDifferential
+    (portableContext : PsKernelCheckerContext)
+    (referenceContext : PSC1Kernel.CheckerContext)
+    (left right : PsKernelExpr) : Bool :=
+  match
+      psKernelIsDefEq
+        2048
+        portableContext
+        psKernelCheckerStateEmpty
+        left
+        right,
+      PSC1Kernel.isDefEq
+        referenceContext
+        (psKernelExprToReference left)
+        (psKernelExprToReference right) with
+  | Except.ok portableResult, Except.ok referenceResult =>
+      Bool.and
+        ((Prod.fst portableResult) == referenceResult)
+        (if Prod.fst portableResult then
+          psKernelExprPairSetContains
+            (Prod.snd portableResult).success
+            left
+            right
+         else
+          true)
+  | Except.error portableError, Except.error referenceError =>
+      portableError == referenceError
+  | _, _ =>
+      false
+
+def psKernelSelfHostDefEqTests : Bool :=
+  let portableBase :=
+    psKernelCheckerContextEmpty
+      psKernelDefEqEnvironment;
+  let referenceBase :=
+    PSC1Kernel.CheckerContext.empty
+      psKernelDefEqReferenceEnvironment;
+  let natType :=
+    PsKernelExpr.const
+      psKernelNatName
+      List.nil;
+  let betaLeft :=
+    PsKernelExpr.app
+      (PsKernelExpr.lam
+        PsKernelName.anonymous
+        natType
+        (PsKernelExpr.bvar 0)
+        PsKernelBinderInfo.default)
+      (PsKernelExpr.lit
+        (PsKernelLiteral.nat 9));
+  let betaRight :=
+    PsKernelExpr.lit
+      (PsKernelLiteral.nat 9);
+  let deltaLeft :=
+    PsKernelExpr.const
+      psKernelDefEqConstName
+      List.nil;
+  let deltaRight :=
+    PsKernelExpr.lit
+      (PsKernelLiteral.nat 7);
+  let proofLeftName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "proofLeft";
+  let proofRightName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "proofRight";
+  let propType :=
+    PsKernelExpr.const
+      psKernelDefEqPropName
+      List.nil;
+  let portableProofLctx1 :=
+    psKernelLocalContextAddLocal
+      portableBase.localContext
+      proofLeftName
+      proofLeftName
+      propType
+      PsKernelBinderInfo.default;
+  let portableProofLctx :=
+    psKernelLocalContextAddLocal
+      portableProofLctx1
+      proofRightName
+      proofRightName
+      propType
+      PsKernelBinderInfo.default;
+  let portableProofContext :=
+    psKernelCheckerContextWithLocalContext
+      portableBase
+      portableProofLctx;
+  let referenceProofLeftName :=
+    psKernelNameToReference proofLeftName;
+  let referenceProofRightName :=
+    psKernelNameToReference proofRightName;
+  let referencePropType :=
+    psKernelExprToReference propType;
+  let referenceProofLctx1 :=
+    referenceBase.lctx.addLocal
+      referenceProofLeftName
+      referenceProofLeftName
+      referencePropType
+      PSC1Kernel.BinderInfo.default;
+  let referenceProofLctx :=
+    referenceProofLctx1.addLocal
+      referenceProofRightName
+      referenceProofRightName
+      referencePropType
+      PSC1Kernel.BinderInfo.default;
+  let referenceProofContext :=
+    {
+      referenceBase with
+      lctx := referenceProofLctx
+    };
+  let functionName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "function";
+  let functionType :=
+    PsKernelExpr.forallE
+      PsKernelName.anonymous
+      natType
+      natType
+      PsKernelBinderInfo.default;
+  let portableEtaAdded :=
+    psKernelCheckerContextWithLocal
+      portableBase
+      functionName
+      functionType
+      PsKernelBinderInfo.default;
+  let portableFunctionName :=
+    Prod.fst portableEtaAdded;
+  let portableEtaContext :=
+    Prod.snd portableEtaAdded;
+  let referenceEtaAdded :=
+    referenceBase.withLocal
+      (psKernelNameToReference functionName)
+      (psKernelExprToReference functionType)
+      PSC1Kernel.BinderInfo.default;
+  let referenceFunctionName :=
+    Prod.fst referenceEtaAdded;
+  let referenceEtaContext :=
+    Prod.snd referenceEtaAdded;
+  let etaLeft :=
+    PsKernelExpr.lam
+      PsKernelName.anonymous
+      natType
+      (PsKernelExpr.app
+        (PsKernelExpr.fvar portableFunctionName)
+        (PsKernelExpr.bvar 0))
+      PsKernelBinderInfo.default;
+  let etaRight :=
+    PsKernelExpr.fvar portableFunctionName;
+  let referenceEtaLeft :=
+    PSC1Kernel.Expr.lam
+      PSC1Kernel.Name.anonymous
+      (psKernelExprToReference natType)
+      (PSC1Kernel.Expr.app
+        (PSC1Kernel.Expr.fvar referenceFunctionName)
+        (PSC1Kernel.Expr.bvar 0))
+      PSC1Kernel.BinderInfo.default;
+  let referenceEtaRight :=
+    PSC1Kernel.Expr.fvar referenceFunctionName;
+  let etaDifferential :=
+    match
+        psKernelIsDefEq
+          2048
+          portableEtaContext
+          psKernelCheckerStateEmpty
+          etaLeft
+          etaRight,
+        PSC1Kernel.isDefEq
+          referenceEtaContext
+          referenceEtaLeft
+          referenceEtaRight with
+    | Except.ok portableResult, Except.ok referenceResult =>
+        (Prod.fst portableResult) == referenceResult
+    | _, _ =>
+        false;
+  Bool.and
+    (psKernelDefEqDifferential
+      portableBase
+      referenceBase
+      betaLeft
+      betaRight)
+    (Bool.and
+      (psKernelDefEqDifferential
+        portableBase
+        referenceBase
+        deltaLeft
+        deltaRight)
+      (Bool.and
+        (psKernelDefEqDifferential
+          portableProofContext
+          referenceProofContext
+          (PsKernelExpr.fvar proofLeftName)
+          (PsKernelExpr.fvar proofRightName))
+        etaDifferential))
+
 def main : IO Unit :=
   if !psKernelSelfHostNameTests then
     throw
@@ -1328,6 +1641,10 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_RECURSOR_DIFFERENTIAL: FAIL")
+  else if !psKernelSelfHostDefEqTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_DEFEQ_DIFFERENTIAL: FAIL")
   else
     IO.println
       "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"

@@ -182,6 +182,8 @@ Update/create:
 - `SEMANTIC-BUNDLE-v1.schema.json`
 - `INTERFACEIR-v1.md`
 - `INTERFACEIR-v1.schema.json`
+- `23-PRE-STABLE-EVIDENCE-GATES.md`
+- `R3-SPEC-COMPLETION-REPORT.md`
 - existing topic documents, decision ledger, manifest, open questions and acceptance record.
 
 Do not touch r2 historical content except to vendor an immutable baseline copy under the r3 research directory.

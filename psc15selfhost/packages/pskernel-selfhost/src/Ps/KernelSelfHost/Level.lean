@@ -480,46 +480,29 @@ def psKernelLevelTrimExplicit
       else
         List.cons maximum rest
 
-def psKernelLevelDedupOffsetsWorkerCore
-    (rest : List PsKernelLevel) :
-    PsKernelLevel ->
-    List PsKernelLevel ->
-    List PsKernelLevel :=
-  match rest with
-  | List.nil =>
-      fun
-        (current : PsKernelLevel)
-        (rev : List PsKernelLevel) =>
-        List.reverse
-          (List.cons current rev)
-  | List.cons next tail =>
-      let smaller :
-          PsKernelLevel ->
-          List PsKernelLevel ->
-          List PsKernelLevel :=
-        psKernelLevelDedupOffsetsWorkerCore tail;
-      fun
-        (current : PsKernelLevel)
-        (rev : List PsKernelLevel) =>
-        if
-            psKernelLevelEq
-              (Prod.fst (psKernelLevelToOffset current))
-              (Prod.fst (psKernelLevelToOffset next)) then
-          smaller next rev
-        else
-          smaller
-            next
-            (List.cons current rev)
-
-def psKernelLevelDedupOffsetsWorker
+partial def psKernelLevelDedupOffsetsWorker
     (current : PsKernelLevel)
     (rest : List PsKernelLevel)
     (rev : List PsKernelLevel) :
     List PsKernelLevel :=
-  psKernelLevelDedupOffsetsWorkerCore
-    rest
-    current
-    rev
+  match rest with
+  | List.nil =>
+      List.reverse
+        (List.cons current rev)
+  | List.cons next tail =>
+      if
+          psKernelLevelEq
+            (Prod.fst (psKernelLevelToOffset current))
+            (Prod.fst (psKernelLevelToOffset next)) then
+        psKernelLevelDedupOffsetsWorker
+          next
+          tail
+          rev
+      else
+        psKernelLevelDedupOffsetsWorker
+          next
+          tail
+          (List.cons current rev)
 
 def psKernelLevelDedupOffsets
     (values : List PsKernelLevel) :

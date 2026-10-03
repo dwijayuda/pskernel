@@ -1,0 +1,260 @@
+{
+  "registryVersion": "0.9.0-r3",
+  "grammarIdentity": "ps-0.9-r3",
+  "leanSemantics": {
+    "version": "4.34.0",
+    "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "inheritedR2Sha256": "d29c0b2d5780e6cdb08a4c9ac00cc7442a64b1c8133b51c5f0c0e9a343b11b8d",
+  "active": [
+    {
+      "id": "L-CORE-LEAN",
+      "class": "L",
+      "category": "registered-native",
+      "status": "inherited-profile-scoped",
+      "target": "same-native-syntax-and-meaning"
+    },
+    {
+      "id": "L-DO-BRACKETED-434",
+      "class": "L",
+      "category": "term/do",
+      "status": "inherited",
+      "target": "native-do"
+    },
+    {
+      "id": "L-INTRINSIC-CONTRACTS-434",
+      "class": "L",
+      "category": "declaration/do",
+      "status": "compatibility-only",
+      "target": "native-experimental-intrinsic-verification"
+    },
+    {
+      "id": "L-ERASED-DO-434",
+      "class": "L",
+      "category": "do-element",
+      "status": "inherited-profile-scoped",
+      "target": "native-erased-binding"
+    },
+    {
+      "id": "L-RECALL-434",
+      "class": "L",
+      "category": "command",
+      "status": "inherited-profile-scoped",
+      "target": "native-recall"
+    },
+    {
+      "id": "L-MONOTONICITY-BY-434",
+      "class": "L",
+      "category": "declaration-suffix",
+      "status": "inherited-profile-scoped",
+      "target": "native-monotonicity-suffix"
+    },
+    {
+      "id": "L-LIA-GROBNER-PARAMS-434",
+      "class": "L",
+      "category": "tactic",
+      "status": "inherited-profile-scoped",
+      "target": "native-tactic-parameters"
+    },
+    {
+      "id": "D-EXPLICIT-PARAMS",
+      "class": "D",
+      "category": "declaration-header",
+      "status": "retained",
+      "target": "ordered-native-explicit-binders"
+    },
+    {
+      "id": "D-CONST-ALIAS",
+      "class": "D",
+      "category": "command-head",
+      "status": "retained",
+      "target": "parameterless-native-def"
+    },
+    {
+      "id": "D-FUNCTION-ALIAS",
+      "class": "D",
+      "category": "command-head",
+      "status": "retained-r3-revised",
+      "target": "native-def"
+    },
+    {
+      "id": "D-NAMED-CALL",
+      "class": "D",
+      "category": "parenthesized-call-argument",
+      "status": "retained",
+      "target": "native-named-argument"
+    },
+    {
+      "id": "D-TRAILING-COMMA",
+      "class": "D",
+      "category": "call-or-explicit-header-nonempty-list",
+      "status": "retained-category-specific",
+      "target": "no-semantic-node"
+    },
+    {
+      "id": "E-CALL-PARENS-R3",
+      "class": "E",
+      "category": "term",
+      "status": "new-r3",
+      "target": "native-high-level-application",
+      "dependencies": [
+        "D-NAMED-CALL",
+        "D-TRAILING-COMMA"
+      ]
+    },
+    {
+      "id": "E-CALL-EMPTY-R3",
+      "class": "E",
+      "category": "term",
+      "status": "new-r3",
+      "target": "native-ellipsis-application-plus-r3-acceptance-predicate",
+      "dependencies": [
+        "E-CALL-PARENS-R3"
+      ]
+    },
+    {
+      "id": "E-ZERO-ARG-FUNCTION-R3",
+      "class": "E",
+      "category": "declaration-header",
+      "status": "new-r3",
+      "target": "optional-Unit-native-binder",
+      "dependencies": [
+        "D-FUNCTION-ALIAS"
+      ]
+    },
+    {
+      "id": "E-IF-BRACE",
+      "class": "E",
+      "category": "term",
+      "status": "retained",
+      "target": "native-if"
+    },
+    {
+      "id": "E-STRUCT-BODY-R3",
+      "class": "E",
+      "category": "structure-fields",
+      "status": "r3-revision",
+      "target": "native-struct-fields",
+      "separator": "comma-between-no-trailing"
+    },
+    {
+      "id": "E-CLASS-BODY-R3",
+      "class": "E",
+      "category": "class-fields",
+      "status": "r3-revision",
+      "target": "native-struct-fields",
+      "separator": "comma-between-no-trailing"
+    },
+    {
+      "id": "E-INDUCTIVE-BODY-R3",
+      "class": "E",
+      "category": "constructors",
+      "status": "r3-revision",
+      "target": "native-constructors",
+      "separator": "leading-bar"
+    },
+    {
+      "id": "E-MATCH-BODY-R3",
+      "class": "E",
+      "category": "match-alternatives",
+      "status": "r3-revision",
+      "target": "native-match-alternatives",
+      "separator": "leading-bar"
+    },
+    {
+      "id": "E-INSTANCE-BODY-R3",
+      "class": "E",
+      "category": "instance-fields",
+      "status": "r3-revision",
+      "target": "native-where-struct-inst-fields",
+      "separator": "semicolon-optional-trailing"
+    },
+    {
+      "id": "E-WHERE-BODY-R3",
+      "class": "E",
+      "category": "local-declarations",
+      "status": "r3-revision",
+      "target": "native-where-local-sequence",
+      "separator": "semicolon-optional-trailing"
+    },
+    {
+      "id": "PSC-CONTRACT-CORE-R3",
+      "class": "semantic",
+      "category": "specification",
+      "status": "new-r3",
+      "target": "ordinary-kernel-checkable-logical-evidence"
+    },
+    {
+      "id": "PS-STANDARD-PROFILE-R3",
+      "class": "profile",
+      "category": "source-profile",
+      "status": "new-r3",
+      "target": "closed-registration-environment"
+    },
+    {
+      "id": "PS-LEAN-EXTENSIBLE-R3",
+      "class": "profile",
+      "category": "source-profile",
+      "status": "new-r3",
+      "target": "declared-extension-environment"
+    },
+    {
+      "id": "INTERFACEIR-V1",
+      "class": "interop",
+      "category": "foreign-interface",
+      "status": "new-r3",
+      "target": "versioned-binding-ir"
+    }
+  ],
+  "retired": [
+    {
+      "id": "D-CALL",
+      "reason": "replaced-by-E-CALL-PARENS-R3",
+      "historicalGrammar": "ps-0.9-r2"
+    },
+    {
+      "id": "D-DECL-SEMI",
+      "reason": "retired-in-r2-and-remains-retired",
+      "historicalGrammar": "pre-r2-draft"
+    },
+    {
+      "id": "PS_FUNCTION_WITHOUT_PARAMS:r2-empty-group-case",
+      "reason": "function-empty-group-now-E-ZERO-ARG-FUNCTION-R3"
+    },
+    {
+      "id": "r2-owned-brace-native-outer-layout",
+      "reason": "replaced-by-r3-structural-outer-sequences"
+    }
+  ],
+  "ownership": {
+    "order": [
+      "matching-E",
+      "matching-D",
+      "permitted-native",
+      "diagnostic"
+    ],
+    "committedFailureFallsBack": false
+  },
+  "callGap": {
+    "admits": [
+      "space",
+      "horizontal-tab",
+      "Lean-comment"
+    ],
+    "admitsBareLineTerminator": false,
+    "canonicalPrinterGap": ""
+  },
+  "emptyCall": {
+    "canonicalLeanForm": "head ..",
+    "acceptOmittedExplicitKinds": [
+      "optParam",
+      "autoParam"
+    ],
+    "rejectOrdinaryRequiredExplicit": true,
+    "partialApplicationViaEmptyCall": false
+  },
+  "fieldNotation": {
+    "whitespaceBeforeDot": false,
+    "inheritedFromPinnedLean": true
+  }
+}

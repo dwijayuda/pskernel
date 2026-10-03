@@ -1,6 +1,6 @@
 # r3 Formal Overlay Proof Plan
 
-Status: **documentation and proof-design plan only; no formal proof is claimed by the final branch state**
+Status: **accepted r3 formal-proof plan; no formal proof is claimed by this documentation branch**
 
 ## Purpose
 

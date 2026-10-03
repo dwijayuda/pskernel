@@ -227,74 +227,110 @@ def psKernelLevelKindRank
   | PsKernelLevel.param _ => 4
   | PsKernelLevel.mvar _ => 5
 
-partial def psKernelLevelNormCmp
+def psKernelLevelNodeCount
+    (level : PsKernelLevel) : Nat :=
+  match level with
+  | PsKernelLevel.zero =>
+      1
+  | PsKernelLevel.param _ =>
+      1
+  | PsKernelLevel.mvar _ =>
+      1
+  | PsKernelLevel.succ inner =>
+      Nat.succ (psKernelLevelNodeCount inner)
+  | PsKernelLevel.max left right =>
+      Nat.succ
+        (Nat.add
+          (psKernelLevelNodeCount left)
+          (psKernelLevelNodeCount right))
+  | PsKernelLevel.imax left right =>
+      Nat.succ
+        (Nat.add
+          (psKernelLevelNodeCount left)
+          (psKernelLevelNodeCount right))
+
+def psKernelLevelNormCmpWithFuel
+    (fuel : Nat) :
+    PsKernelLevel -> PsKernelLevel -> PsKernelOrdering :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_left : PsKernelLevel)
+        (_right : PsKernelLevel) =>
+        PsKernelOrdering.eq
+  | Nat.succ remaining =>
+      let smaller :
+          PsKernelLevel -> PsKernelLevel -> PsKernelOrdering :=
+        psKernelLevelNormCmpWithFuel remaining;
+      fun
+        (left : PsKernelLevel)
+        (right : PsKernelLevel) =>
+        if psKernelLevelEq left right then
+          PsKernelOrdering.eq
+        else
+          let leftPair := psKernelLevelToOffset left;
+          let rightPair := psKernelLevelToOffset right;
+          let leftRoot := leftPair.fst;
+          let rightRoot := rightPair.fst;
+          if psKernelLevelEq leftRoot rightRoot then
+            psKernelNatCmp leftPair.snd rightPair.snd
+          else if
+              psKernelNatLt
+                (psKernelLevelKindRank leftRoot)
+                (psKernelLevelKindRank rightRoot) then
+            PsKernelOrdering.lt
+          else if
+              psKernelNatGt
+                (psKernelLevelKindRank leftRoot)
+                (psKernelLevelKindRank rightRoot) then
+            PsKernelOrdering.gt
+          else
+            match leftRoot with
+            | PsKernelLevel.param leftName =>
+                match rightRoot with
+                | PsKernelLevel.param rightName =>
+                    psKernelNameCmp leftName rightName
+                | _ =>
+                    PsKernelOrdering.eq
+            | PsKernelLevel.mvar leftName =>
+                match rightRoot with
+                | PsKernelLevel.mvar rightName =>
+                    psKernelNameCmp leftName rightName
+                | _ =>
+                    PsKernelOrdering.eq
+            | PsKernelLevel.max leftA leftB =>
+                match rightRoot with
+                | PsKernelLevel.max rightA rightB =>
+                    match smaller leftA rightA with
+                    | PsKernelOrdering.eq =>
+                        smaller leftB rightB
+                    | ordering =>
+                        ordering
+                | _ =>
+                    PsKernelOrdering.eq
+            | PsKernelLevel.imax leftA leftB =>
+                match rightRoot with
+                | PsKernelLevel.imax rightA rightB =>
+                    match smaller leftA rightA with
+                    | PsKernelOrdering.eq =>
+                        smaller leftB rightB
+                    | ordering =>
+                        ordering
+                | _ =>
+                    PsKernelOrdering.eq
+            | _ =>
+                PsKernelOrdering.eq
+
+def psKernelLevelNormCmp
     (left : PsKernelLevel)
     (right : PsKernelLevel) : PsKernelOrdering :=
-  if psKernelLevelEq left right then
-    PsKernelOrdering.eq
-  else
-    let leftPair := psKernelLevelToOffset left;
-    let rightPair := psKernelLevelToOffset right;
-    let leftRoot := leftPair.fst;
-    let rightRoot := rightPair.fst;
-    if psKernelLevelEq leftRoot rightRoot then
-      psKernelNatCmp leftPair.snd rightPair.snd
-    else if
-        psKernelNatLt
-          (psKernelLevelKindRank leftRoot)
-          (psKernelLevelKindRank rightRoot) then
-      PsKernelOrdering.lt
-    else if
-        psKernelNatGt
-          (psKernelLevelKindRank leftRoot)
-          (psKernelLevelKindRank rightRoot) then
-      PsKernelOrdering.gt
-    else
-      match leftRoot with
-      | PsKernelLevel.param leftName =>
-          match rightRoot with
-          | PsKernelLevel.param rightName =>
-              psKernelNameCmp leftName rightName
-          | _ =>
-              PsKernelOrdering.eq
-      | PsKernelLevel.mvar leftName =>
-          match rightRoot with
-          | PsKernelLevel.mvar rightName =>
-              psKernelNameCmp leftName rightName
-          | _ =>
-              PsKernelOrdering.eq
-      | PsKernelLevel.max leftA leftB =>
-          match rightRoot with
-          | PsKernelLevel.max rightA rightB =>
-              match
-                  psKernelLevelNormCmp
-                    leftA
-                    rightA with
-              | PsKernelOrdering.eq =>
-                  psKernelLevelNormCmp
-                    leftB
-                    rightB
-              | ordering =>
-                  ordering
-          | _ =>
-              PsKernelOrdering.eq
-      | PsKernelLevel.imax leftA leftB =>
-          match rightRoot with
-          | PsKernelLevel.imax rightA rightB =>
-              match
-                  psKernelLevelNormCmp
-                    leftA
-                    rightA with
-              | PsKernelOrdering.eq =>
-                  psKernelLevelNormCmp
-                    leftB
-                    rightB
-              | ordering =>
-                  ordering
-          | _ =>
-              PsKernelOrdering.eq
-      | _ =>
-          PsKernelOrdering.eq
+  psKernelLevelNormCmpWithFuel
+    (Nat.succ
+      (Nat.add
+        (psKernelLevelNodeCount left)
+        (psKernelLevelNodeCount right)))
+    left
+    right
 
 def psKernelLevelListAppend
     (left : List PsKernelLevel)

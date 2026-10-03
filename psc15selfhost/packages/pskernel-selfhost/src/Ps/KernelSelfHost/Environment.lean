@@ -74,15 +74,6 @@ def psKernelConstantListLength
       Nat.succ
         (psKernelConstantListLength rest)
 
-def psKernelNameListLength
-    (values : List PsKernelName) : Nat :=
-  match values with
-  | List.nil =>
-      0
-  | List.cons _ rest =>
-      Nat.succ
-        (psKernelNameListLength rest)
-
 structure PsKernelEnvironment where
   constants : List PsKernelConstantInfo
   quotInitialized : Bool

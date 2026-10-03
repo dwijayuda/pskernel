@@ -18,7 +18,7 @@ Lean expression structural equality used by the quotient bootstrap shape check.
 Binder display names and binder annotations are intentionally ignored, matching
 Lean 4.34 expression equality; metadata placement/payload still participates.
 -/
-partial def quotExprEqv : Expr → Expr → Bool
+def quotExprEqv : Expr → Expr → Bool
   | .bvar a, .bvar b => a == b
   | .fvar a, .fvar b => Name.eq a b
   | .mvar a, .mvar b => Name.eq a b

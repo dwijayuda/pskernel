@@ -23,9 +23,9 @@ def psKernelStringEqFromWithFuel
         false
       else
         let leftChar :=
-          String.Internal.get left (String.Pos.Raw.mk leftPos)
+          String.Internal.get left (String.Pos.Raw.mk leftPos);
         let rightChar :=
-          String.Internal.get right (String.Pos.Raw.mk rightPos)
+          String.Internal.get right (String.Pos.Raw.mk rightPos);
         if Nat.beq (Char.toNat leftChar) (Char.toNat rightChar) then
           psKernelStringEqFromWithFuel
             remaining
@@ -105,12 +105,12 @@ def psKernelStringCmpWithFuel
           Char.toNat
             (String.Internal.get
               left
-              (String.Pos.Raw.mk leftPos))
+              (String.Pos.Raw.mk leftPos));
         let rightChar :=
           Char.toNat
             (String.Internal.get
               right
-              (String.Pos.Raw.mk rightPos))
+              (String.Pos.Raw.mk rightPos));
         if Nat.beq leftChar rightChar then
           psKernelStringCmpWithFuel
             remaining
@@ -209,13 +209,13 @@ def psKernelNameIsPrefixOf
   | PsKernelName.anonymous =>
       psKernelNameEq needle PsKernelName.anonymous
   | PsKernelName.str parent value =>
-      let current := PsKernelName.str parent value
+      let current := PsKernelName.str parent value;
       if psKernelNameEq needle current then
         true
       else
         psKernelNameIsPrefixOf needle parent
   | PsKernelName.num parent value =>
-      let current := PsKernelName.num parent value
+      let current := PsKernelName.num parent value;
       if psKernelNameEq needle current then
         true
       else

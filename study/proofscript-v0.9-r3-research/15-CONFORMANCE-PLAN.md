@@ -26,7 +26,7 @@ Test implementation identity, valid and false postconditions, contradictory prec
 
 ## Application model
 
-Trace tests cover success, typed failure, panic, cancellation, child scope, detach, timeout, race, cleanup on all exits, cleanup failure, callback disposal, and stream backpressure.
+Trace tests cover success, typed failure, RuntimeFault, cancellation, child scope, detach, timeout, race, shielded cleanup on all exits, combined body/cleanup failure, callback disposal, stream cold-start and backpressure.
 
 Run equivalent tests on direct JS and direct Wasm when both exist.
 

@@ -1,6 +1,6 @@
 # Master package plan
 
-> **r3 reconciliation note.** This file is an implementation/package plan, not the language authority. On `research/proofscript-v0.9-r3`, the sole normative language/compiler-design reference is `study/proofscript-v0.9-r3-research/ProofScript_Language_Reference_v0.9.0_r3.md`. Read implementation milestones through its feature-ownership model: compiler-owned, library-owned, Standard prover/extension, controlled plugin, bounded Lean compatibility, host boundary, post-PSC2, or deferred.
+> **r3 reconciliation note.** This file is an implementation/package plan, not a language authority. On `research/proofscript-v0.9-r3`, source syntax and language meaning are defined only by `study/proofscript-v0.9-r3-research/ProofScript_Language_Reference_v0.9.0_r3.md`. The first PSC2 compiler must implement the exact `psc2-language-v1` closure defined there; package/library/prover/platform milestones in this plan do not silently enlarge that language profile.
 
 
 Status: living plan.

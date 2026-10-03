@@ -1,0 +1,1016 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;syntax-ext&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../index.html">23. Notations and Macros</a><a href="../Custom-Operators/index.html">23.1. Custom Operators</a><a href="../Precedence/index.html">23.2. Precedence</a><a href="../Notations/index.html">23.3. Notations</a><a href="index.html">23.4. Defining New Syntax</a><a href="../Macros/index.html">23.5. Macros</a><a href="../Elaborators/index.html">23.6. Elaborators</a><a href="../Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../../releases/index.html">Release Notes</a><a href="../../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="syntax-ext"></a></p>
+<h1 id="proofscript-23-4-defining-new-syntax">ProofScript — 23.4. Defining New Syntax</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>Use native notation, syntax categories, quotations, macros and elaborators in an explicitly declared extension environment. Macro hygiene preserves binding identity; a convenient generated name is not enough. Quoted parser code remains native code rather than being rewritten as ordinary surface expressions. Extensions produce syntax or candidate declarations and gain no independent proof authority.</p>
+<p><strong>Compiler and coverage boundary.</strong> Register collisions and lifted child slots explicitly. Do not globally rewrite strings, quoted grammar, tactic combinators or host code. Plugin operating-system permissions are separate from logical soundness.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/Notations-and-Macros/Defining-New-Syntax/index.html">Notations-and-Macros/Defining-New-Syntax/index.html</a>. Source Git blob: <code>4c0c54cbdad535aec788e145c5b81d89ad126ed5</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<p><a id="docstring-section-Constructors-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructors-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructors-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructors-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<hr>
+<h2 id="23-4-defining-new-syntax">23.4. Defining New Syntax</h2><p>Lean&#39;s uniform representation of syntax is very general and flexible. This means that extensions to Lean&#39;s parser do not require extensions to the representation of parsed syntax.</p>
+<p><a id="syntax-data"></a></p>
+<h3 id="23-4-1-syntax-model">23.4.1. Syntax Model</h3><p>Lean&#39;s parser produces a concrete syntax tree, of type <code>Lean.Syntax</code>. <code>Lean.Syntax</code> is an inductive type that represents all of Lean&#39;s syntax, including commands, terms, tactics, and any custom extensions. All of these are represented by a few basic building blocks:</p>
+<p><a id="--tech-term-Atoms"></a>
+Atoms</p>
+<p>Atoms are the fundamental terminals of the grammar, including literals (such as those for characters and numbers), parentheses, operators, and keywords.</p>
+<p><a id="--tech-term-Identifiers"></a>
+Identifiers</p>
+<p>Identifiers represent names, such as <code>x</code>, <code>Nat</code>, or <code>Nat.add</code>. Identifier syntax includes a list of pre-resolved names that the identifier might refer to.</p>
+<p><a id="--tech-term-Nodes"></a>
+Nodes</p>
+<p>Nodes represent the parsing of nonterminals. Nodes contain a 
+<a id="--tech-term-syntax-kind"></a>
+<em>syntax kind</em>, which identifies the syntax rule that the node results from, along with an array of child <code>Syntax</code> values.</p>
+<p>  Missing Syntax</p>
+<p>When the parser encounters an error, it returns a partial result, so Lean can provide some feedback about partially-written programs or programs that contain mistakes. Partial results contain one or more instances of missing syntax.</p>
+<p>Atoms and identifiers are collectively referred to as 
+<a id="--tech-term-tokens"></a>
+<em>tokens</em>.</p>
+<p><a id="Lean___Syntax___missing"></a></p>
+<p><strong>inductive type</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax : Type
+</code></pre></div><p>Lean syntax trees.</p>
+<p>Syntax trees are used pervasively throughout Lean: they are produced by the parser, transformed by the macro expander, and elaborated. They are also produced by the delaborator and presented to users.</p>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.missing : Lean.Syntax
+</code></pre></div><p>A portion of the syntax tree that is missing because of a parse error.</p>
+<p>The indexing operator on <code>Syntax</code> also returns <code>Syntax.missing</code> when the index is out of bounds.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.node (info : Lean.SourceInfo)
+  (kind : Lean.SyntaxNodeKind) (args : Array Lean.Syntax) :
+  Lean.Syntax
+</code></pre></div><p>A node in the syntax tree that may have further syntax as child nodes. The node&#39;s <code>kind</code> determines its interpretation.</p>
+<p>For nodes produced by the parser, the <code>info</code> field is typically <code>Lean.SourceInfo.none</code>, and source information is stored in the corresponding fields of identifiers and atoms. This field is used in two ways:</p>
+<ol>
+<li>The delaborator uses it to associate nodes with metadata that are used to implement interactive features.</li>
+<li>Nodes created by quotations use the field to mark the syntax as synthetic (storing the result of <code>Lean.SourceInfo.fromRef</code>) even when its leading or trailing tokens are not.</li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.atom (info : Lean.SourceInfo) (val : String) :
+  Lean.Syntax
+</code></pre></div><p>A non-identifier atomic component of syntax.</p>
+<p>All of the following are atoms:</p>
+<ul>
+<li>keywords, such as <code>def</code>, <code>fun</code>, and <code>inductive</code></li>
+<li>literals, such as numeric or string literals</li>
+<li>punctuation and delimiters, such as <code>(</code>, <code>)</code>, and <code>=&gt;</code>.</li>
+</ul>
+<p>Identifiers are represented by the <code>Lean.Syntax.ident</code> constructor. Atoms also correspond to quoted strings inside <code>syntax</code> declarations.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.ident (info : Lean.SourceInfo)
+  (rawVal : Substring.Raw) (val : Lean.Name)
+  (preresolved : List Lean.Syntax.Preresolved) : Lean.Syntax
+</code></pre></div><p>An identifier.</p>
+<p>In addition to source information, identifiers have the following fields:</p>
+<ul>
+<li><code>rawVal</code> is the literal substring from the input file</li>
+<li><code>val</code> is the parsed Lean name, potentially including macro scopes.</li>
+<li><code>preresolved</code> is the list of possible declarations this could refer to, populated by <a href="https://lean-lang.org/doc/reference/4.34.0-rc2/find/?domain=Verso.Genre.Manual.section&amp;name=quasiquotation">quotations</a>.</li>
+</ul>
+<p><a id="Lean___Syntax___Preresolved___namespace"></a></p>
+<p><strong>inductive type</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.Preresolved : Type
+</code></pre></div><p>A possible binding of an identifier in the context in which it was quoted.</p>
+<p>Identifiers in quotations may refer to either global declarations or to namespaces that are in scope at the site of the quotation. These are saved in the <code>Syntax.ident</code> constructor and are part of the implementation of hygienic macros.</p>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.Preresolved.namespace (ns : Lean.Name) :
+  Lean.Syntax.Preresolved
+</code></pre></div><p>A potential namespace reference</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.Preresolved.decl (n : Lean.Name)
+  (fields : List String) : Lean.Syntax.Preresolved
+</code></pre></div><p>A potential global constant or section variable reference, with additional field accesses</p>
+<p><a id="The-Lean-Language-Reference--Notations-and-Macros--Defining-New-Syntax--Syntax-Node-Kinds"></a></p>
+<h3 id="23-4-2-syntax-node-kinds">23.4.2. Syntax Node Kinds</h3><p>Syntax node kinds typically identify the parser that produced the node. This is one place where the names given to operators or notations (or their automatically-generated internal names) occur. While only nodes contain a field that identifies their kind, identifiers have the kind <code>identKind</code> by convention, while atoms have their internal string as their kind by convention. Lean&#39;s parser wraps each keyword atom <code>KW</code> in a singleton node whose kind is ```token.KW``. The kind of a syntax value can be extracted using <code>Syntax.getKind</code>.</p>
+<p><a id="Lean___SyntaxNodeKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.SyntaxNodeKind : Type
+</code></pre></div><p>Specifies the interpretation of a <code>Syntax.node</code> value. An abbreviation for <code>Name</code>.</p>
+<p>Node kinds may be any name, and do not need to refer to declarations in the environment. Conventionally, however, a node&#39;s kind corresponds to the <code>Parser</code> or <code>ParserDesc</code> declaration that produces it. There are also a number of built-in node kinds that are used by the parsing infrastructure, such as <code>nullKind</code> and <code>choiceKind</code>; these do not correspond to parser declarations.</p>
+<p><a id="Lean___Syntax___isOfKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.isOfKind (stx : Lean.Syntax) (k : Lean.SyntaxNodeKind) :
+  Bool
+</code></pre></div><p>Checks whether syntax has the given kind or pseudo-kind.</p>
+<p>“Pseudo-kinds” are kinds that are assigned by convention to non-<code>Syntax.node</code> values: <code>identKind</code> for <code>Syntax.ident</code>, ```missing`` for <code>Syntax.missing</code>, and the atom&#39;s string literal for atoms.</p>
+<p><a id="Lean___Syntax___getKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.getKind (stx : Lean.Syntax) : Lean.SyntaxNodeKind
+</code></pre></div><p>Gets the kind of a <code>Syntax.node</code> value, or the pseudo-kind of any other <code>Syntax</code> value.</p>
+<p>“Pseudo-kinds” are kinds that are assigned by convention to non-<code>Syntax.node</code> values: <code>identKind</code> for <code>Syntax.ident</code>, ```missing`` for <code>Syntax.missing</code>, and the atom&#39;s string literal for atoms.</p>
+<p><a id="Lean___Syntax___setKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.setKind (stx : Lean.Syntax) (k : Lean.SyntaxNodeKind) :
+  Lean.Syntax
+</code></pre></div><p>Changes the kind at the root of a <code>Syntax.node</code> to <code>k</code>.</p>
+<p>Returns all other <code>Syntax</code> values unchanged.</p>
+<p><a id="The-Lean-Language-Reference--Notations-and-Macros--Defining-New-Syntax--Token-and-Literal-Kinds"></a></p>
+<h3 id="23-4-3-token-and-literal-kinds">23.4.3. Token and Literal Kinds</h3><p>A number of named kinds are associated with the basic tokens produced by the parser. Typically, single-token syntax productions consist of a <code>node</code> that contains a single <code>atom</code>; the kind saved in the node allows the value to be recognized. Atoms for literals are not interpreted by the parser: string atoms include their leading and trailing double-quote characters along with any escape sequences contained within, and hexadecimal numerals are saved as a string that begins with <code>&quot;0x&quot;</code>. <a href="index.html#typed-syntax-helpers">Helpers</a> such as <code>Lean.TSyntax.getString</code> are provided to perform this decoding on demand.</p>
+<p><a id="Lean___identKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.identKind : Lean.SyntaxNodeKind
+</code></pre></div><p>The pseudo-kind assigned to identifiers: ```ident``.</p>
+<p>The name ```ident`` is not actually used as a kind for <code>Syntax.node</code> values. It is used by convention as the kind of <code>Syntax.ident</code> values.</p>
+<p><a id="Lean___strLitKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.strLitKind : Lean.SyntaxNodeKind
+</code></pre></div><p>```str`` is the node kind of string literals like <code>&quot;foo&quot;</code>.</p>
+<p><a id="Lean___interpolatedStrKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.interpolatedStrKind : Lean.SyntaxNodeKind
+</code></pre></div><p>```interpolatedStrKind`` is the node kind of an interpolated string literal like <code>&quot;value = {x}&quot;</code> in <code>s!&quot;value = {x}&quot;</code>.</p>
+<p><a id="Lean___interpolatedStrLitKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.interpolatedStrLitKind : Lean.SyntaxNodeKind
+</code></pre></div><p>```interpolatedStrLitKind`` is the node kind of interpolated string literal fragments like <code>&quot;value = {</code> and <code>}&quot;</code> in <code>s!&quot;value = {x}&quot;</code>.</p>
+<p><a id="Lean___charLitKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.charLitKind : Lean.SyntaxNodeKind
+</code></pre></div><p>```char`` is the node kind of character literals like <code>&#39;A&#39;</code>.</p>
+<p><a id="Lean___numLitKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.numLitKind : Lean.SyntaxNodeKind
+</code></pre></div><p>```num`` is the node kind of number literals like <code>42</code> and <code>0xa1</code></p>
+<p><a id="Lean___scientificLitKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.scientificLitKind : Lean.SyntaxNodeKind
+</code></pre></div><p>```scientific`` is the node kind of floating point literals like <code>1.23e-3</code>.</p>
+<p><a id="Lean___nameLitKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.nameLitKind : Lean.SyntaxNodeKind
+</code></pre></div><p><code>name`` is the node kind of name literals like </code>foo``.</p>
+<p><a id="Lean___fieldIdxKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.fieldIdxKind : Lean.SyntaxNodeKind
+</code></pre></div><p>```fieldIdx`` is the node kind of projection indices like the <code>2</code> in <code>x.2</code>.</p>
+<p><a id="The-Lean-Language-Reference--Notations-and-Macros--Defining-New-Syntax--Internal-Kinds"></a></p>
+<h3 id="23-4-4-internal-kinds">23.4.4. Internal Kinds</h3><p><a id="Lean___groupKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.groupKind : Lean.SyntaxNodeKind
+</code></pre></div><p>The ```group`` kind is used for nodes that result from <code>Lean.Parser.group</code>. This avoids confusion with the null kind when used inside <code>optional</code>.</p>
+<p><a id="Lean___nullKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.nullKind : Lean.SyntaxNodeKind
+</code></pre></div><p>```null`` is the “fallback” kind, used when no other kind applies. Null nodes result from repetition operators, and empty null nodes represent the failure of an optional parse.</p>
+<p>The null kind is used for raw list parsers like <code>many</code>.</p>
+<p><a id="Lean___choiceKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.choiceKind : Lean.SyntaxNodeKind
+</code></pre></div><p>The ```choice`` kind is used to represent ambiguous parse results.</p>
+<p>The parser prioritizes longer matches over shorter ones, but there is not always a unique longest match. All the parse results are saved, and the determination of which to use is deferred until typing information is available.</p>
+<p><a id="Lean___hygieneInfoKind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.hygieneInfoKind : Lean.SyntaxNodeKind
+</code></pre></div><p>```hygieneInfo`` is the node kind of the <code>Lean.Parser.hygieneInfo</code> parser, which produces an “invisible token” that captures the hygiene information at the current point without parsing anything.</p>
+<p>They can be used to generate identifiers (with <code>Lean.HygieneInfo.mkIdent</code>) as if they were introduced in a macro&#39;s input, rather than by its implementation.</p>
+<p><a id="source-info"></a></p>
+<h3 id="23-4-5-source-positions">23.4.5. Source Positions</h3><p>Atoms, identifiers, and nodes optionally contain 
+<a id="--tech-term-source-information"></a>
+source information that tracks their correspondence with the original file. The parser saves source information for all tokens, but not for nodes; position information for parsed nodes is reconstructed from their first and last tokens. Not all <code>Syntax</code> data results from the parser: it may be the result of <a href="../Macros/index.html#--tech-term-macro-expansion">macro expansion</a>, in which case it typically contains a mix of generated and parsed syntax, or it may be the result of <a href="../Extending-Lean___s-Output/index.html#--tech-term-delaborators">delaborating</a> an internal term to display it to a user. In these use cases, nodes may themselves contain source information.</p>
+<p>Source information comes in two varieties:</p>
+<p><a id="--tech-term-Original"></a>
+Original</p>
+<p>Original source information comes from the parser. In addition to the original source location, it also contains leading and trailing whitespace that was skipped by the parser, which allows the original string to be reconstructed. This whitespace is saved as offsets into the string representation of the original source code (that is, as <code>Substring</code>) to avoid having to allocate copies of substrings.</p>
+<p><a id="--tech-term-Synthetic"></a>
+Synthetic</p>
+<p>Synthetic source information comes from metaprograms (including macros) or from Lean&#39;s internals. Because there is no original string to be reconstructed, it does not save leading and trailing whitespace. Synthetic source positions are used to provide accurate feedback even when terms have been automatically transformed, as well as to track the correspondence between elaborated expressions and their presentation in Lean&#39;s output. A synthetic position may be marked 
+<a id="--tech-term-canonical"></a>
+<em>canonical</em>, in which case some operations that would ordinarily ignore synthetic positions will treat it as if it were not.</p>
+<p><a id="Lean___SourceInfo___original"></a></p>
+<p><strong>inductive type</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.SourceInfo : Type
+</code></pre></div><p>Source information that relates syntax to the context that it came from.</p>
+<p>The primary purpose of <code>SourceInfo</code> is to relate the output of the parser and the macro expander to the original source file. When produced by the parser, <code>Syntax.node</code> does not carry source info; the parser associates it only with atoms and identifiers. If a <code>Syntax.node</code> is introduced by a quotation, then it has synthetic source info that both associates it with an original reference position and indicates that the original atoms in it may not originate from the Lean file under elaboration.</p>
+<p>Source info is also used to relate Lean&#39;s output to the internal data that it represents; this is the basis for many interactive features. When used this way, it can occur on <code>Syntax.node</code> as well.</p>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.SourceInfo.original (leading : Substring.Raw)
+  (pos : String.Pos.Raw) (trailing : Substring.Raw)
+  (endPos : String.Pos.Raw) : Lean.SourceInfo
+</code></pre></div><p>A token produced by the parser from original input that includes both leading and trailing whitespace as well as position information.</p>
+<p>The <code>leading</code> whitespace is inferred after parsing by <code>Syntax.updateLeading</code>. This is because the “preceding token” is not well-defined during parsing, especially in the presence of backtracking.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.SourceInfo.synthetic (pos endPos : String.Pos.Raw)
+  (canonical : Bool := false) : Lean.SourceInfo
+</code></pre></div><p>Synthetic syntax is syntax that was produced by a metaprogram or by Lean itself (e.g. by a quotation). Synthetic syntax is annotated with a source span from the original syntax, which relates it to the source file.</p>
+<p>The delaborator uses this constructor to store an encoded indicator of which core language expression gave rise to the syntax.</p>
+<p>The <code>canonical</code> flag on synthetic syntax is enabled for syntax that is not literally part of the original input syntax but should be treated “as if” the user really wrote it for the purpose of hovers and error messages. This is usually used on identifiers in order to connect the binding site to the user&#39;s original syntax even if the name of the identifier changes during expansion, as well as on tokens that should receive targeted messages.</p>
+<p>Generally speaking, a macro expansion should only use a given piece of input syntax in a single canonical token. An exception to this rule is when the same identifier is used to declare two binders, as in the macro expansion for dependent if:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`(if $h : $cond then $t else $e) ~&gt;
+`(dite $cond (fun $h =&gt; $t) (fun $h =&gt; $t))
+</code></pre></div><p>In these cases, if the user hovers over <code>h</code> they will see information about both binding sites.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.SourceInfo.none : Lean.SourceInfo
+</code></pre></div><p>A synthesized token without position information.</p>
+<p><a id="The-Lean-Language-Reference--Notations-and-Macros--Defining-New-Syntax--Inspecting-Syntax"></a></p>
+<h3 id="23-4-6-inspecting-syntax">23.4.6. Inspecting Syntax</h3><p>There are three primary ways to inspect <code>Syntax</code> values:</p>
+<p>  The <code>Repr</code> Instance</p>
+<p>The <code>Repr Syntax</code> instance produces a very detailed representation of syntax in terms of the constructors of the <code>Syntax</code> type.</p>
+<p>  The <code>ToString</code> Instance</p>
+<p>The <code>ToString Syntax</code> instance produces a compact view, representing certain syntax kinds with particular conventions that can make it easier to read at a glance. This instance suppresses source position information.</p>
+<p>  The Pretty Printer</p>
+<p>Lean&#39;s pretty printer attempts to render the syntax as it would look in a source file, but fails if the nesting structure of the syntax doesn&#39;t match the expected shape.</p>
+<p><a id="Representing-Syntax-as-Constructors"></a>
+Representing Syntax as Constructors </p>
+<p>The <code>Repr</code> instance&#39;s representation of syntax can be inspected by quoting it in the context of <a href="../../Interacting-with-Lean/index.html#Lean___Parser___Command___eval"><code>#eval</code></a>, which can run actions in the command elaboration monad <code>CommandElabM</code>. To reduce the size of the example output, the helper <code>removeSourceInfo</code> is used to remove source information prior to display.
+<a id="removeSourceInfo-_LPAR_in-Representing-Syntax-as-Constructors_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">partial def removeSourceInfo : Syntax → Syntax
+  | .atom _ str =&gt; .atom .none str
+  | .ident _ str x pre =&gt; .ident .none str x pre
+  | .node _ k children =&gt; .node .none k (children.map removeSourceInfo)
+  | .missing =&gt; .missing
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval do
+  let stx ← `(2 + $(⟨.missing⟩))
+  logInfo (repr (removeSourceInfo stx.raw))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Lean.Syntax.node
+  (Lean.SourceInfo.none)
+  `«term_+_»
+  #[Lean.Syntax.node (Lean.SourceInfo.none) `num #[Lean.Syntax.atom (Lean.SourceInfo.none) &quot;2&quot;],
+    Lean.Syntax.atom (Lean.SourceInfo.none) &quot;+&quot;, Lean.Syntax.missing]
+</code></pre></div><p>In the second example, <a href="../Macros/index.html#--tech-term-macro-scopes">macro scopes</a> inserted by quotation are visible on the call to <code>List.length</code>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval do
+  let stx ← `(List.length [&quot;Rose&quot;, &quot;Daffodil&quot;, &quot;Lily&quot;])
+  logInfo (repr (removeSourceInfo stx.raw))
+</code></pre></div><p>The contents of the <a href="../Macros/index.html#--tech-term-pre-resolved-identifiers">pre-resolved identifier</a> <code>List.length</code> are visible here:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Lean.Syntax.node
+  (Lean.SourceInfo.none)
+  `Lean.Parser.Term.app
+  #[Lean.Syntax.ident
+      (Lean.SourceInfo.none)
+      &quot;List.length&quot;.toRawSubstring
+      (Lean.Name.mkNum (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `List.length.«_@».Manual.NotationsMacros.SyntaxDef 1704743902) &quot;_hygCtx&quot;) &quot;_hyg&quot;) 2)
+      [Lean.Syntax.Preresolved.decl `List.length []],
+    Lean.Syntax.node
+      (Lean.SourceInfo.none)
+      `null
+      #[Lean.Syntax.node
+          (Lean.SourceInfo.none)
+          `«term[_]»
+          #[Lean.Syntax.atom (Lean.SourceInfo.none) &quot;[&quot;,
+            Lean.Syntax.node
+              (Lean.SourceInfo.none)
+              `null
+              #[Lean.Syntax.node (Lean.SourceInfo.none) `str #[Lean.Syntax.atom (Lean.SourceInfo.none) &quot;\&quot;Rose\&quot;&quot;],
+                Lean.Syntax.atom (Lean.SourceInfo.none) &quot;,&quot;,
+                Lean.Syntax.node (Lean.SourceInfo.none) `str #[Lean.Syntax.atom (Lean.SourceInfo.none) &quot;\&quot;Daffodil\&quot;&quot;],
+                Lean.Syntax.atom (Lean.SourceInfo.none) &quot;,&quot;,
+                Lean.Syntax.node (Lean.SourceInfo.none) `str #[Lean.Syntax.atom (Lean.SourceInfo.none) &quot;\&quot;Lily\&quot;&quot;]],
+            Lean.Syntax.atom (Lean.SourceInfo.none) &quot;]&quot;]]]
+</code></pre></div><p>The <code>ToString</code> instance represents the constructors of <code>Syntax</code> as follows:</p>
+<ul>
+<li>The <code>ident</code> constructor is represented as the underlying name. Source information and pre-resolved names are not shown.</li>
+<li>The <code>atom</code> constructor is represented as a string.</li>
+<li>The <code>missing</code> constructor is represented by <code>&lt;missing&gt;</code>.</li>
+<li>The representation of the <code>node</code> constructor depends on the kind. If the kind is ```null``, then the node is represented by its child nodes order in square brackets. Otherwise, the node is represented by its kind followed by its child nodes, both surrounded by parentheses.</li>
+</ul>
+<p><a id="Syntax-as-Strings"></a>
+Syntax as Strings </p>
+<p>The string representation of syntax can be inspected by quoting it in the context of <a href="../../Interacting-with-Lean/index.html#Lean___Parser___Command___eval"><code>#eval</code></a>, which can run actions in the command elaboration monad <code>CommandElabM</code>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval do
+  let stx ← `(2 + $(⟨.missing⟩))
+  logInfo (toString stx)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(«term_+_» (num &quot;2&quot;) &quot;+&quot; &lt;missing&gt;)
+</code></pre></div><p>In the second example, <a href="../Macros/index.html#--tech-term-macro-scopes">macro scopes</a> inserted by quotation are visible on the call to <code>List.length</code>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval do
+  let stx ← `(List.length [&quot;Rose&quot;, &quot;Daffodil&quot;, &quot;Lily&quot;])
+  logInfo (toString stx)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(Term.app
+ `List.length._@.Manual.NotationsMacros.SyntaxDef.3168789510._hygCtx._hyg.2
+ [(«term[_]» &quot;[&quot; [(str &quot;\&quot;Rose\&quot;&quot;) &quot;,&quot; (str &quot;\&quot;Daffodil\&quot;&quot;) &quot;,&quot; (str &quot;\&quot;Lily\&quot;&quot;)] &quot;]&quot;)])
+</code></pre></div><p>Pretty printing syntax is typically most useful when including it in a message to a user. Normally, Lean automatically invokes the pretty printer when necessary. However, <code>ppTerm</code> can be explicitly invoked if needed.</p>
+<p><a id="Pretty-Printed-Syntax"></a>
+Pretty-Printed Syntax </p>
+<p>The string representation of syntax can be inspected by quoting it in the context of <a href="../../Interacting-with-Lean/index.html#Lean___Parser___Command___eval"><code>#eval</code></a>, which can run actions in the command elaboration monad <code>CommandElabM</code>. Because new syntax declarations also equip the pretty printer with instructions for displaying them, the pretty printer requires a configuration object. This context can be constructed with a helper:</p>
+<p><a id="getPPContext-_LPAR_in-Pretty-Printed-Syntax_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const getPPContext : CommandElabM PPContext := do
+  return {
+    env := (← getEnv),
+    opts := (← getOptions),
+    currNamespace := (← getCurrNamespace),
+    openDecls := (← getOpenDecls)
+  }
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show CommandElabM Unit from do
+  let stx ← `(2 + 5)
+  let fmt ← ppTerm (← getPPContext) stx
+  logInfo fmt
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">2 + 5
+</code></pre></div><p>In the second example, the <a href="../Macros/index.html#--tech-term-macro-scopes">macro scopes</a> inserted on <code>List.length</code> by quotation cause it to be displayed with a dagger (<code>✝</code>).</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval do
+  let stx ← `(List.length [&quot;Rose&quot;, &quot;Daffodil&quot;, &quot;Lily&quot;])
+  let fmt ← ppTerm (← getPPContext) stx
+  logInfo fmt
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">List.length✝ [&quot;Rose&quot;, &quot;Daffodil&quot;, &quot;Lily&quot;]
+</code></pre></div><p>Pretty printing wraps lines and inserts indentation automatically. A <a href="../../Coercions/index.html#--tech-term-coercion">coercion</a> typically converts the pretty printer&#39;s output to the type expected by <code>logInfo</code>, using a default layout width. The width can be controlled by explicitly calling <code>pretty</code> with a named argument.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval do
+  let flowers := #[&quot;Rose&quot;, &quot;Daffodil&quot;, &quot;Lily&quot;]
+  let manyFlowers := flowers ++ flowers ++ flowers
+  let stx ← `(List.length [$(manyFlowers.map (quote (k := `term))),*])
+  let fmt ← ppTerm (← getPPContext) stx
+  logInfo (fmt.pretty (width := 40))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">List.length✝
+  [&quot;Rose&quot;, &quot;Daffodil&quot;, &quot;Lily&quot;, &quot;Rose&quot;,
+    &quot;Daffodil&quot;, &quot;Lily&quot;, &quot;Rose&quot;,
+    &quot;Daffodil&quot;, &quot;Lily&quot;]
+</code></pre></div><p><a id="typed-syntax"></a></p>
+<h3 id="23-4-7-typed-syntax">23.4.7. Typed Syntax</h3><p>Syntax may additionally be annotated with a type that specifies which <a href="index.html#--tech-term-syntax-categories">syntax category</a> it belongs to. The <code>TSyntax</code> structure contains a type-level list of syntax categories along with a syntax tree. The list of syntax categories typically contains precisely one element, in which case the list structure itself is not shown.</p>
+<p><a id="Lean___TSyntax___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.TSyntax (ks : Lean.SyntaxNodeKinds) : Type
+</code></pre></div><p>Typed syntax, which tracks the potential kinds of the <code>Syntax</code> it contains.</p>
+<p>While syntax quotations produce or expect <code>TSyntax</code> values of the correct kinds, this is not otherwise enforced; it can easily be circumvented by direct use of the constructor.</p>
+<p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.TSyntax.mk
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">raw : Lean.Syntax
+</code></pre></div><p>The underlying <code>Syntax</code> value.</p>
+<p><a id="Lean___SyntaxNodeKinds"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.SyntaxNodeKinds : Type
+</code></pre></div><p><code>SyntaxNodeKinds</code> is a set of <code>SyntaxNodeKind</code>, implemented as a list.</p>
+<p>Singleton <code>SyntaxNodeKinds</code> are extremely common. They are written as name literals, rather than as lists; list syntax is required only for empty or non-singleton sets of kinds.</p>
+<p><a href="../Macros/index.html#--tech-term-Quasiquotation">Quasiquotations</a> prevent the substitution of typed syntax that does not come from the correct syntactic category. For many of Lean&#39;s built-in syntactic categories, there is a set of <a href="../../Coercions/index.html#--tech-term-coercion">coercions</a> that appropriately wrap one kind of syntax for another category, such as a coercion from the syntax of string literals to the syntax of terms. Additionally, many helper functions that are only valid on some syntactic categories are defined for the appropriate typed syntax only.</p>
+<p>The constructor of <code>TSyntax</code> is public, and nothing prevents users from constructing values that break internal invariants. The use of <code>TSyntax</code> should be seen as a way to reduce common mistakes, rather than rule them out entirely.</p>
+<p>In addition to <code>TSyntax</code>, there are types that represent arrays of syntax, with or without separators. These correspond to repeated elements in syntax declarations or antiquotations. <code>TSyntaxArray ks</code> is an <a href="../../Definitions/Definitions/index.html#--tech-term-Abbreviations">abbreviation</a> for <code>Array (TSyntax ks)</code>, while <code>TSepArray ks sep</code> is a structure; this means that <a href="../../Terms/Function-Application/index.html#--tech-term-generalized-field-notation">generalized field notation</a> can be used to apply array functions to <code>TSyntaxArray</code> but not <code>TSepArray</code>. There is a <a href="../../Coercions/index.html#--tech-term-coercion">coercion</a> between <code>TSepArray ks</code> and <code>TSyntaxArray ks</code>, as well as explicit conversion functions. This conversion inserts or removes separator elements from the underlying array, and takes time linear in the number of elements.</p>
+<p><a id="Lean___TSyntaxArray"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.TSyntaxArray (ks : Lean.SyntaxNodeKinds) : Type
+</code></pre></div><p>An array of syntaxes of kind <code>ks</code>.</p>
+<p><a id="Lean___TSyntaxArray___raw"></a></p>
+<p><strong>opaque</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.TSyntaxArray.raw {ks : Lean.SyntaxNodeKinds}
+  (as : Lean.TSyntaxArray ks) : Array Lean.Syntax
+</code></pre></div><p>Converts a <code>TSyntaxArray</code> to an <code>Array Syntax</code>, without reallocation.</p>
+<p><a id="Lean___Syntax___TSepArray___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.TSepArray (ks : Lean.SyntaxNodeKinds) (sep : String) : Type
+</code></pre></div><p>An array of syntax elements that alternate with the given separator. Each syntax element has a kind drawn from <code>ks</code>.</p>
+<p>Separator arrays result from repetition operators such as <code>,*</code>. <a href="https://lean-lang.org/doc/reference/4.34.0-rc2/find/?domain=Verso.Genre.Manual.section&amp;name=coercions">Coercions</a> to and from <code>Array (TSyntax ks)</code> insert or remove separators as required. The untyped equivalent is <code>Lean.Syntax.SepArray</code>.</p>
+<p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.TSepArray.mk
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">elemsAndSeps : Array Lean.Syntax
+</code></pre></div><p>The array of elements and separators, ordered like <code>#[el1, sep1, el2, sep2, el3]</code>.</p>
+<p><a id="Lean___Syntax___TSepArray___getElems"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.TSepArray.getElems {k : Lean.SyntaxNodeKinds} {sep : String}
+  (sa : Lean.Syntax.TSepArray k sep) : Lean.TSyntaxArray k
+</code></pre></div><p>Extracts the non-separator elements of a separated array.</p>
+<p><a id="Lean___Syntax___TSepArray___elemsAndSeps"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.TSepArray.elemsAndSeps {ks : Lean.SyntaxNodeKinds}
+  {sep : String} (self : Lean.Syntax.TSepArray ks sep) :
+  Array Lean.Syntax
+</code></pre></div><p>The array of elements and separators, ordered like <code>#[el1, sep1, el2, sep2, el3]</code>.</p>
+<p><a id="Lean___Syntax___TSepArray___ofElems"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.TSepArray.ofElems {k : Lean.SyntaxNodeKinds} {sep : String}
+  (elems : Array (Lean.TSyntax k)) : Lean.Syntax.TSepArray k sep
+</code></pre></div><p>Constructs a typed separated array from elements by adding suitable separators. The provided array should not include the separators.</p>
+<p>Like <code>Syntax.SepArray.ofElems</code> but for typed syntax.</p>
+<p><a id="Lean___Syntax___TSepArray___push"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.TSepArray.push {k : Lean.SyntaxNodeKinds} {sep : String}
+  (sa : Lean.Syntax.TSepArray k sep) (e : Lean.TSyntax k) :
+  Lean.Syntax.TSepArray k sep
+</code></pre></div><p>Adds an element to the end of a separated array, adding a separator as needed.</p>
+<p><a id="The-Lean-Language-Reference--Notations-and-Macros--Defining-New-Syntax--Aliases"></a></p>
+<h3 id="23-4-8-aliases">23.4.8. Aliases</h3><p>A number of aliases are provided for commonly-used typed syntax varieties. These aliases allow code to be written at a higher level of abstraction.</p>
+<p><a id="Lean___Syntax___Term"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.Term : Type
+</code></pre></div><p>Syntax that represents a Lean term.</p>
+<p><a id="Lean___Syntax___Command"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.Command : Type
+</code></pre></div><p>Syntax that represents a command.</p>
+<p><a id="Lean___Syntax___Level"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.Level : Type
+</code></pre></div><p>Syntax that represents a universe level.</p>
+<p><a id="Lean___Syntax___Tactic"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.Tactic : Type
+</code></pre></div><p>Syntax that represents a tactic.</p>
+<p><a id="Lean___Syntax___Prec"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.Prec : Type
+</code></pre></div><p>Syntax that represents a precedence (e.g. for an operator).</p>
+<p><a id="Lean___Syntax___Prio"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.Prio : Type
+</code></pre></div><p>Syntax that represents a priority (e.g. for an instance declaration).</p>
+<p><a id="Lean___Syntax___Ident"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.Ident : Type
+</code></pre></div><p>Syntax that represents an identifier.</p>
+<p><a id="Lean___Syntax___StrLit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.StrLit : Type
+</code></pre></div><p>Syntax that represents a string literal.</p>
+<p><a id="Lean___Syntax___CharLit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.CharLit : Type
+</code></pre></div><p>Syntax that represents a character literal.</p>
+<p><a id="Lean___Syntax___NameLit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.NameLit : Type
+</code></pre></div><p>Syntax that represents a quoted name literal that begins with a back-tick.</p>
+<p><a id="Lean___Syntax___NumLit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.NumLit : Type
+</code></pre></div><p>Syntax that represents a numeric literal.</p>
+<p><a id="Lean___Syntax___ScientificLit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.ScientificLit : Type
+</code></pre></div><p>Syntax that represents a scientific numeric literal that may have decimal and exponential parts.</p>
+<p><a id="Lean___Syntax___HygieneInfo"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.HygieneInfo : Type
+</code></pre></div><p>Syntax that represents macro hygiene info.</p>
+<p><a id="syntax-construction-helpers"></a></p>
+<h3 id="23-4-9-helpers-for-constructing-syntax">23.4.9. Helpers for Constructing Syntax</h3><p><a id="Lean___mkIdent"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.mkIdent (val : Lean.Name) : Lean.Ident
+</code></pre></div><p>Creates an identifier from a name. The resulting identifier has no source position.</p>
+<p><a id="Lean___mkIdentFrom"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.mkIdentFrom (src : Lean.Syntax) (val : Lean.Name)
+  (canonical : Bool := false) : Lean.Ident
+</code></pre></div><p>Creates an identifier with its position copied from <code>src</code>.</p>
+<p>To refer to a specific constant without a risk of variable capture, use <code>mkCIdentFrom</code> instead.</p>
+<p><a id="Lean___mkIdentFromRef"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.mkIdentFromRef {m : Type → Type} [Monad m] [Lean.MonadRef m]
+  (val : Lean.Name) (canonical : Bool := false) : m Lean.Ident
+</code></pre></div><p>Creates an identifier with its position copied from the syntax returned by <code>getRef</code>.</p>
+<p>To refer to a specific constant without a risk of variable capture, use <code>mkCIdentFromRef</code> instead.</p>
+<p><a id="Lean___mkCIdent"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.mkCIdent (c : Lean.Name) : Lean.Ident
+</code></pre></div><p>Creates an identifier that refers to a constant <code>c</code>. The identifier has no source position.</p>
+<p>This variant of <code>mkIdent</code> makes sure that the identifier cannot accidentally be captured.</p>
+<p><a id="Lean___mkCIdentFrom"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.mkCIdentFrom (src : Lean.Syntax) (c : Lean.Name)
+  (canonical : Bool := false) : Lean.Ident
+</code></pre></div><p>Creates an identifier referring to a constant <code>c</code>. The identifier&#39;s position is copied from <code>src</code>.</p>
+<p>This variant of <code>mkIdentFrom</code> makes sure that the identifier cannot accidentally be captured.</p>
+<p><a id="Lean___mkCIdentFromRef"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.mkCIdentFromRef {m : Type → Type} [Monad m] [Lean.MonadRef m]
+  (c : Lean.Name) (canonical : Bool := false) : m Lean.Syntax
+</code></pre></div><p>Creates an identifier referring to a constant <code>c</code>. The identifier&#39;s position is copied from the syntax returned by <code>getRef</code>.</p>
+<p>This variant of <code>mkIdentFrom</code> makes sure that the identifier cannot accidentally be captured.</p>
+<p><a id="Lean___Syntax___mkApp"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.mkApp (fn : Lean.Term) (args : Lean.TSyntaxArray `term) :
+  Lean.Term
+</code></pre></div><p>Creates syntax representing a Lean term application, but avoids degenerate empty applications.</p>
+<p><a id="Lean___Syntax___mkCApp"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.mkCApp (fn : Lean.Name) (args : Lean.TSyntaxArray `term) :
+  Lean.Term
+</code></pre></div><p>Creates syntax representing a Lean constant application, but avoids degenerate empty applications.</p>
+<p><a id="Lean___Syntax___mkLit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.mkLit (kind : Lean.SyntaxNodeKind) (val : String)
+  (info : Lean.SourceInfo := Lean.SourceInfo.none) : Lean.TSyntax kind
+</code></pre></div><p>Creates a literal of the given kind. It is the caller&#39;s responsibility to ensure that the provided literal is a valid atom for the provided kind.</p>
+<p>If <code>info</code> is provided, then the literal&#39;s source information is copied from it.</p>
+<p><a id="Lean___Syntax___mkCharLit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.mkCharLit (val : Char)
+  (info : Lean.SourceInfo := Lean.SourceInfo.none) : Lean.CharLit
+</code></pre></div><p>Creates literal syntax for the given character.</p>
+<p>If <code>info</code> is provided, then the literal&#39;s source information is copied from it.</p>
+<p><a id="Lean___Syntax___mkStrLit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.mkStrLit (val : String)
+  (info : Lean.SourceInfo := Lean.SourceInfo.none) : Lean.StrLit
+</code></pre></div><p>Creates literal syntax for the given string.</p>
+<p>If <code>info</code> is provided, then the literal&#39;s source information is copied from it.</p>
+<p><a id="Lean___Syntax___mkNumLit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.mkNumLit (val : String)
+  (info : Lean.SourceInfo := Lean.SourceInfo.none) : Lean.NumLit
+</code></pre></div><p>Creates literal syntax for a number, which is provided as a string. The caller must ensure that the string is a valid token for the <code>num</code> token parser.</p>
+<p>If <code>info</code> is provided, then the literal&#39;s source information is copied from it.</p>
+<p><a id="Lean___Syntax___mkNatLit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.mkNatLit (val : Nat)
+  (info : Lean.SourceInfo := Lean.SourceInfo.none) : Lean.NumLit
+</code></pre></div><p>Creates literal syntax for a natural number.</p>
+<p>If <code>info</code> is provided, then the literal&#39;s source information is copied from it.</p>
+<p><a id="Lean___Syntax___mkScientificLit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.mkScientificLit (val : String)
+  (info : Lean.SourceInfo := Lean.SourceInfo.none) :
+  Lean.TSyntax Lean.scientificLitKind
+</code></pre></div><p>Creates literal syntax for a number in scientific notation. The caller must ensure that the provided string is a valid scientific notation literal.</p>
+<p>If <code>info</code> is provided, then the literal&#39;s source information is copied from it.</p>
+<p><a id="Lean___Syntax___mkNameLit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.mkNameLit (val : String)
+  (info : Lean.SourceInfo := Lean.SourceInfo.none) : Lean.NameLit
+</code></pre></div><p>Creates literal syntax for a name. The caller must ensure that the provided string is a valid name literal.</p>
+<p>If <code>info</code> is provided, then the literal&#39;s source information is copied from it.</p>
+<p><a id="Lean___mkOptionalNode"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.mkOptionalNode (arg : Option Lean.Syntax) : Lean.Syntax
+</code></pre></div><p>Creates an optional node.</p>
+<p>Optional nodes consist of null nodes that contain either zero or one element.</p>
+<p><a id="Lean___mkGroupNode"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.mkGroupNode (args : Array Lean.Syntax := #[]) : Lean.Syntax
+</code></pre></div><p>Creates a group node, as if it were parsed by <code>Lean.Parser.group</code>.</p>
+<p><a id="Lean___mkHole"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.mkHole (ref : Lean.Syntax) (canonical : Bool := false) : Lean.Term
+</code></pre></div><p>Creates a hole (<code>_</code>). The hole&#39;s position is copied from <code>ref</code>.</p>
+<p><a id="quote-class"></a></p>
+<h4 id="23-4-9-1-quoting-data">23.4.9.1. Quoting Data</h4><p>The <code>Quote</code> class allows values to be converted into typed syntax that represents them. For example, <code>quote 5</code> represents <code>⟨.node .none `num #[.atom .none &quot;5&quot;]⟩</code>. The class is parameterized over syntax kinds; this allows the same value to be represented appropriately at different kinds. Instance resolution for <code>Quote</code> takes typed syntax <a href="../../Coercions/index.html#--tech-term-coercion">coercions</a> into account. The syntax kind&#39;s default value is ```term``.</p>
+<p>There is no guarantee that the result of <code>Quote.quote</code> will successfully elaborate. Generally speaking, the resulting syntax contains quoted versions of all explicit arguments and omits implicit arguments.</p>
+<p><a id="Lean___Quote___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Quote (α : Type) (k : Lean.SyntaxNodeKind := `term) : Type
+</code></pre></div><p>Converts a runtime value into surface syntax that denotes it.</p>
+<p>Instances do not need to guarantee that the resulting syntax will always re-elaborate into an equivalent value. For example, the syntax may omit implicit arguments that can usually be found automatically.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Quote.mk
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">quote : α → Lean.TSyntax k
+</code></pre></div><p>Returns syntax for the given value.</p>
+<p>When defining instances of <code>Quote</code>, use <code>mkCIdent</code> and <code>mkCApp</code> to avoid variable capture in the generated syntax.</p>
+<p><a id="Defining--Quote--Instances"></a>
+Defining <code>Quote</code> Instances </p>
+<p>To quote a tree of type <code>Tree</code>, <code>mkCIdent</code> and <code>mkCApp</code> are used to ensure that local bindings with similar names cannot interfere. Using double backticks ensures that the constructor names don&#39;t contain typos and are correctly resolved.
+<a id="Tree-_LPAR_in-Defining--Quote--Instances_RPAR_"></a>
+<a id="Tree___leaf-_LPAR_in-Defining--Quote--Instances_RPAR_"></a>
+<a id="Tree___branch-_LPAR_in-Defining--Quote--Instances_RPAR_"></a>
+<a id="instQuoteTreeMkStr1___quoteTree-_LPAR_in-Defining--Quote--Instances_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Tree (α : Type u) : Type u where
+  | leaf
+  | branch (left : Tree α) (val : α) (right : Tree α)
+
+instance [Quote α] : Quote (Tree α) where
+  quote := quoteTree
+where
+  quoteTree
+    | .leaf =&gt;
+      mkCIdent ``Tree.leaf
+    | .branch l v r =&gt;
+      mkCApp ``Tree.branch #[quoteTree l, quote v, quoteTree r]
+</code></pre></div><p><a id="typed-syntax-helpers"></a></p>
+<h3 id="23-4-10-decoding-typed-syntax">23.4.10. Decoding Typed Syntax</h3><p>For literals, Lean&#39;s parser produces a singleton node that contains an <code>atom</code>. The inner atom contains a string with source information, while the node&#39;s kind specifies how the atom is to be interpreted. This may involve decoding string escape sequences or interpreting base-16 numeric literals. The helpers in this section perform the correct interpretation.</p>
+<p><a id="Lean___TSyntax___getId"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.TSyntax.getId (s : Lean.Ident) : Lean.Name
+</code></pre></div><p>Extracts the parsed name from the syntax of an identifier.</p>
+<p>Returns <code>Name.anonymous</code> if the syntax is malformed.</p>
+<p><a id="Lean___TSyntax___getName"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.TSyntax.getName (s : Lean.NameLit) : Lean.Name
+</code></pre></div><p>Decodes a quoted name literal, returning the name.</p>
+<p>Returns <code>Lean.Name.anonymous</code> if the syntax is malformed.</p>
+<p><a id="Lean___TSyntax___getNat"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.TSyntax.getNat (s : Lean.NumLit) : Nat
+</code></pre></div><p>Interprets a numeric literal as a natural number.</p>
+<p>Returns <code>0</code> if the syntax is malformed.</p>
+<p><a id="Lean___TSyntax___getScientific"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.TSyntax.getScientific (s : Lean.ScientificLit) : Nat × Bool × Nat
+</code></pre></div><p>Extracts the components of a scientific numeric literal.</p>
+<p>Returns a triple <code>(n, sign, e) : Nat × Bool × Nat</code>; the number&#39;s value is given by:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">if sign then n * 10 ^ (-e) else n * 10 ^ e
+</code></pre></div><p>Returns <code>(0, false, 0)</code> if the syntax is malformed.</p>
+<p><a id="Lean___TSyntax___getString"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.TSyntax.getString (s : Lean.StrLit) : String
+</code></pre></div><p>Decodes a string literal, removing quotation marks and unescaping escaped characters.</p>
+<p>Returns <code>&quot;&quot;</code> if the syntax is malformed.</p>
+<p><a id="Lean___TSyntax___getChar"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.TSyntax.getChar (s : Lean.CharLit) : Char
+</code></pre></div><p>Decodes a character literal.</p>
+<p>Returns <code>(default : Char)</code> if the syntax is malformed.</p>
+<p><a id="Lean___TSyntax___getHygieneInfo"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.TSyntax.getHygieneInfo (s : Lean.HygieneInfo) : Lean.Name
+</code></pre></div><p>Decodes macro hygiene information.</p>
+<p><a id="syntax-categories"></a></p>
+<h3 id="23-4-11-syntax-categories">23.4.11. Syntax Categories</h3><p>Lean&#39;s parser contains a table of 
+<a id="--tech-term-syntax-categories"></a>
+<em>syntax categories</em>, which correspond to nonterminals in a context-free grammar. Some of the most important categories are terms, commands, universe levels, priorities, precedences, and the categories that represent tokens such as literals. Typically, each <a href="index.html#--tech-term-syntax-kind">syntax kind</a> corresponds to a category. New categories can be declared using <a href="index.html#Lean___Parser___Command___syntaxCat"><code>declare_syntax_cat</code></a>.</p>
+<p><a id="command-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Declaring Syntactic Categories</strong></p>
+<p>Declares a new syntactic category.</p>
+<p><a id="Lean___Parser___Command___syntaxCat"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | docComment?
+      declare_syntax_cat ident ((behavior := (catBehaviorBoth | catBehaviorSymbol)))?
+</code></pre></div><p>The leading identifier behavior is an advanced feature that usually does not need to be modified. It controls the behavior of the parser when it encounters an identifier, and can sometimes cause the identifier to be treated as a non-reserved keyword instead. This is used to avoid turning the name of every <a href="../../Tactic-Proofs/index.html#tactics">tactic</a> into a reserved keyword.</p>
+<p><a id="Lean___Parser___LeadingIdentBehavior___default"></a></p>
+<p><strong>inductive type</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Parser.LeadingIdentBehavior : Type
+</code></pre></div><p>Specifies how the parsing table lookup function behaves for identifiers.</p>
+<p>The function <code>Lean.Parser.prattParser</code> uses two tables: one each for leading and trailing parsers. These tables map tokens to parsers. Because keyword tokens are distinct from identifier tokens, keywords and identifiers cannot be confused, even when they are syntactically identical. Specifying an alternative leading identifier behavior allows greater flexibility and makes it possible to avoid reserved keywords in some situations.</p>
+<p>When the leading token is syntactically an identifier, the current syntax category&#39;s <code>LeadingIdentBehavior</code> specifies how the parsing table lookup function behaves, and allows controlled “punning” between identifiers and keywords. This feature is used to avoid creating a reserved symbol for each built-in tactic (e.g., <code>apply</code> or <code>assumption</code>). As a result, tactic names can be used as identifiers.</p>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Parser.LeadingIdentBehavior.default :
+  Lean.Parser.LeadingIdentBehavior
+</code></pre></div><p>If the leading token is an identifier, then the parser just executes the parsers associated with the auxiliary token “ident”, which parses identifiers.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Parser.LeadingIdentBehavior.symbol :
+  Lean.Parser.LeadingIdentBehavior
+</code></pre></div><p>If the leading token is an identifier <code>&lt;foo&gt;</code>, and there are parsers <code>P</code> associated with the token <code>&lt;foo&gt;</code>, then the parser executes <code>P</code>. Otherwise, it executes only the parsers associated with the auxiliary token “ident”, which parses identifiers.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Parser.LeadingIdentBehavior.both :
+  Lean.Parser.LeadingIdentBehavior
+</code></pre></div><p>If the leading token is an identifier <code>&lt;foo&gt;</code>, then it executes the parsers associated with token <code>&lt;foo&gt;</code> and parsers associated with the auxiliary token “ident”, which parses identifiers.</p>
+<p><a id="syntax-rules"></a></p>
+<h3 id="23-4-12-syntax-rules">23.4.12. Syntax Rules</h3><p>Each <a href="index.html#--tech-term-syntax-categories">syntax category</a> is associated with a set of 
+<a id="--tech-term-syntax-rules"></a>
+<em>syntax rules</em>, which correspond to productions in a context-free grammar. Syntax rules can be defined using the <a href="index.html#Lean___Parser___Command___syntax"><code>syntax</code></a> command.</p>
+<p><a id="command-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Syntax Rules</strong></p>
+<p><a id="Lean___Parser___Command___syntax"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | docComment?
+      attributes?
+      attrKind
+      syntax(:prec)? ((name := ident))? ((priority := prio))? stx* : ident
+</code></pre></div><p>As with operator and notation declarations, the contents of the documentation comments are shown to users while they interact with the new syntax. Attributes may be added to invoke compile-time metaprograms on the resulting definition.</p>
+<p>Syntax rules interact with <a href="../../Namespaces-and-Sections/index.html#--tech-term-section-scope">section scopes</a> in the same manner as attributes, operators, and notations. By default, syntax rules are available to the parser in any module that transitively imports the one in which they are established, but they may be declared <code>scoped</code> or <code>local</code> to restrict their availability either to contexts in which the current namespace has been opened or to the current <a href="../../Namespaces-and-Sections/index.html#--tech-term-section-scope">section scope</a>, respectively.</p>
+<p>When multiple syntax rules for a category can match the current input, the <a href="../Custom-Operators/index.html#--tech-term-local-longest-match-rule">local longest-match rule</a> is used to select one of them. Like notations and operators, if there is a tie for the longest match then the declared priorities are used to determine which parse result applies. If this still does not resolve the ambiguity, then all the results that tied are saved. The elaborator is expected to attempt all of them, succeeding when exactly one can be elaborated.</p>
+<p>The syntax rule&#39;s precedence, written immediately after the <a href="index.html#Lean___Parser___Command___syntax"><code>syntax</code></a> keyword, restricts the parser to use this new syntax only when the precedence context is at least the provided value. Just as with operators and notations, syntax rules may be manually provided with a name; if they are not, an otherwise-unused name is generated. Whether provided or generated, this name is used as the syntax kind in the resulting <code>node</code>.</p>
+<p>The body of a syntax declaration is even more flexible than that of a notation. String literals specify atoms to match. Subterms may be drawn from any syntax category, rather than just terms, and they may be optional or repeated, with or without interleaved comma separators. Identifiers in syntax rules indicate syntax categories, rather than naming subterms as they do in notations.</p>
+<p>Finally, the syntax rule specifies which syntax category it extends. It is an error to declare a syntax rule in a nonexistent category.</p>
+<p><a id="stx"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Syntax Specifiers</strong></p>
+<p>The syntactic category <code>stx</code> is the grammar of specifiers that may occur in the body of a <a href="index.html#Lean___Parser___Command___syntax"><code>syntax</code></a> command.</p>
+<p>String literals are parsed as <a href="index.html#--tech-term-Atoms">atoms</a> (including both keywords such as <code>if</code>, <code>#eval</code>, or <code>where</code>):</p>
+<p><a id="Lean___Parser___Syntax___atom"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::=
+    str
+</code></pre></div><p>Leading and trailing spaces in the strings do not affect parsing, but they cause Lean to insert spaces in the corresponding position when displaying the syntax in <a href="../../Tactic-Proofs/index.html#--tech-term-proof-state">proof states</a> and error messages. Ordinarily, valid identifiers occurring as atoms in syntax rules become reserved keywords. Preceding a string literal with an ampersand (<code>&amp;</code>) suppresses this behavior:</p>
+<p><a id="Lean___Parser___Syntax___nonReserved"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | &amp;str
+</code></pre></div><p>Identifiers specify the syntactic category expected in a given position, and may optionally provide a precedence:</p>
+<p><a id="Lean___Parser___Syntax___cat"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | ident(:prec)?
+</code></pre></div><p>The <code>*</code> modifier is the Kleene star, matching zero or more repetitions of the preceding syntax. It can also be written using <code>many</code>.</p>
+<p><a id="_FLQQ_stx_____FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | stx *
+</code></pre></div><p>The <code>+</code> modifier matches one or more repetitions of the preceding syntax. It can also be written using <code>many1</code>.</p>
+<p><a id="_FLQQ_stx_____FLQQ_-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | stx +
+</code></pre></div><p>The <code>?</code> modifier makes a subterm optional, and matches zero or one, but not more, repetitions of the preceding syntax. It can also be written as <code>optional</code>.</p>
+<p><a id="stx____"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | stx ?
+</code></pre></div><p><a id="Lean___Parser___Syntax___unary"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | optional(stx)
+</code></pre></div><p>The <code>,*</code> modifier matches zero or more repetitions of the preceding syntax with interleaved commas. It can also be written using <code>sepBy</code>.</p>
+<p><a id="_FLQQ_stx________FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | stx ,*
+</code></pre></div><p>The <code>,+</code> modifier matches one or more repetitions of the preceding syntax with interleaved commas. It can also be written using <code>sepBy1</code>.</p>
+<p><a id="_FLQQ_stx________FLQQ_-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | stx ,+
+</code></pre></div><p>The <code>,*,?</code> modifier matches zero or more repetitions of the preceding syntax with interleaved commas, allowing an optional trailing comma after the final repetition. It can also be written using <code>sepBy</code> with the <code>allowTrailingSep</code> modifier.</p>
+<p><a id="_FLQQ_stx______________FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | stx ,*,?
+</code></pre></div><p>The <code>,+,?</code> modifier matches one or more repetitions of the preceding syntax with interleaved commas, allowing an optional trailing comma after the final repetition. It can also be written using <code>sepBy1</code> with the <code>allowTrailingSep</code> modifier.</p>
+<p><a id="_FLQQ_stx______________FLQQ_-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | stx ,+,?
+</code></pre></div><p>The <code>&lt;|&gt;</code> operator, which can be written <code>orelse</code>, matches either syntax. However, if the first branch consumes any tokens, then it is committed to, and failures will not be backtracked:</p>
+<p><a id="_FLQQ_stx__LT_____GT___FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | stx &lt;|&gt; stx
+</code></pre></div><p><a id="Lean___Parser___Syntax___binary"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | orelse(stx, stx)
+</code></pre></div><p>The <code>!</code> operator matches the complement of its argument. If its argument fails, then it succeeds, resetting the parsing state.</p>
+<p><a id="stx____-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | ! stx
+</code></pre></div><p>Syntax specifiers may be grouped using parentheses.</p>
+<p><a id="Lean___Parser___Syntax___paren"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | (stx)
+</code></pre></div><p>Repetitions may be defined using <code>many</code> and <code>many1</code>. The latter requires at least one instance of the repeated syntax.</p>
+<p><a id="Lean___Parser___Syntax___unary-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | many(stx)
+</code></pre></div><p><a id="Lean___Parser___Syntax___unary-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | many1(stx)
+</code></pre></div><p>Repetitions with separators may be defined using <code>sepBy</code> and <code>sepBy1</code>, which respectively match zero or more occurrences and one or more occurrences, separated by some other syntax. They come in three varieties:</p>
+<ul>
+<li>The two-parameter version uses the atom provided in the string literal to parse the separators, and does not allow trailing separators.</li>
+<li>The three-parameter version uses the third parameter to parse the separators, using the atom for pretty-printing.</li>
+<li>The four-parameter version optionally allows the separator to occur an extra time at the end of the sequence. The fourth argument must always literally be the keyword <code>allowTrailingSep</code>.</li>
+</ul>
+<p><a id="Lean___Parser___Syntax___sepBy"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | sepBy(stx, str)
+</code></pre></div><p><a id="Lean___Parser___Syntax___sepBy-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | sepBy(stx, str, stx)
+</code></pre></div><p><a id="Lean___Parser___Syntax___sepBy-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | sepBy(stx, str, stx, allowTrailingSep)
+</code></pre></div><p><a id="Lean___Parser___Syntax___sepBy1"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | sepBy1(stx, str)
+</code></pre></div><p><a id="Lean___Parser___Syntax___sepBy1-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | sepBy1(stx, str, stx)
+</code></pre></div><p><a id="Lean___Parser___Syntax___sepBy1-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">stx ::= ...
+    | sepBy1(stx, str, stx, allowTrailingSep)
+</code></pre></div><p><a id="Parsing-Matched-Parentheses-and-Brackets"></a>
+Parsing Matched Parentheses and Brackets </p>
+<p>A language that consists of matched parentheses and brackets can be defined using syntax rules. The first step is to declare a new <a href="index.html#--tech-term-syntax-categories">syntax category</a>:
+<a id="Lean___Parser___Category___balanced-_LPAR_in-Parsing-Matched-Parentheses-and-Brackets_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">declare_syntax_cat balanced
+</code></pre></div><p>Next, rules can be added for parentheses and square brackets. To rule out empty strings, the base cases consist of empty pairs.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax &quot;(&quot; &quot;)&quot; : balanced
+syntax &quot;[&quot; &quot;]&quot; : balanced
+syntax &quot;(&quot; balanced &quot;)&quot; : balanced
+syntax &quot;[&quot; balanced &quot;]&quot; : balanced
+syntax balanced balanced : balanced
+</code></pre></div><p>In order to invoke Lean&#39;s parser on these rules, there must also be an embedding from the new syntax category into one that may already be parsed:
+<a id="termBalanced-_LPAR_in-Parsing-Matched-Parentheses-and-Brackets_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := termBalanced) &quot;balanced &quot; balanced : term
+</code></pre></div><p>These terms cannot be elaborated, but reaching an elaboration error indicates that parsing succeeded:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">/--
+error: elaboration function for `termBalanced` has not been implemented
+  balanced ()
+-/
+#guard_msgs in
+example := balanced ()
+
+/--
+error: elaboration function for `termBalanced` has not been implemented
+  balanced []
+-/
+#guard_msgs in
+example := balanced []
+
+/--
+error: elaboration function for `termBalanced` has not been implemented
+  balanced [[]()([])]
+-/
+#guard_msgs in
+example := balanced [[] () ([])]
+</code></pre></div><p>Similarly, parsing fails when they are mismatched:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">example := balanced [() (]]
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">&lt;example&gt;:1:25-1:26: unexpected token ']'; expected ')' or balanced
+</code></pre></div><p><a id="Parsing-Comma-Separated-Repetitions"></a>
+Parsing Comma-Separated Repetitions </p>
+<p>A variant of list literals that requires double square brackets and allows a trailing comma can be added with the following syntax:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax &quot;[[&quot; term,*,? &quot;]]&quot; : term
+</code></pre></div><p>Adding a <a href="../Macros/index.html#--tech-term-Macros">macro</a> that describes how to translate it into an ordinary list literal allows it to be used in tests.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">macro_rules
+  | `(term|[[$e:term,*]]) =&gt; `([$e,*])
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval [[&quot;Dandelion&quot;, &quot;Thistle&quot;,]]
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">[&quot;Dandelion&quot;, &quot;Thistle&quot;]
+</code></pre></div><p><a id="syntax-indentation"></a></p>
+<h3 id="23-4-13-indentation">23.4.13. Indentation</h3><p>Internally, the parser maintains a saved source position. Syntax rules may include instructions that interact with these saved positions, causing parsing to fail when a condition is not met. Indentation-sensitive constructs, such as <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>, save a source position, parse their constituent parts while taking this saved position into account, and then restore the original position.</p>
+<p>In particular, Indentation-sensitvity is specified by combining <code>withPosition</code> or <code>withPositionAfterLinebreak</code>, which save the source position at the start of parsing some other syntax, with <code>colGt</code>, <code>colGe</code>, and <code>colEq</code>, which compare the current column with the column from the most recently-saved position. <code>lineEq</code> can also be used to ensure that two positions are on the same line in the source file.</p>
+<p><a id="withPosition"></a></p>
+<p><strong>parser alias</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">withPosition(p)
+</code></pre></div><p>Arity is sum of arguments&#39; arities</p>
+<p><code>withPosition(p)</code> runs <code>p</code> while setting the &quot;saved position&quot; to the current position. This has no effect on its own, but various other parsers access this position to achieve some composite effect:</p>
+<ul>
+<li><code>colGt</code>, <code>colGe</code>, <code>colEq</code> compare the column of the saved position to the current position, used to implement Python-style indentation sensitive blocks</li>
+<li><code>lineEq</code> ensures that the current position is still on the same line as the saved position, used to implement composite tokens</li>
+</ul>
+<p>The saved position is only available in the read-only state, which is why this is a scoping parser: after the <code>withPosition(..)</code> block the saved position will be restored to its original value.</p>
+<p>This parser has the same arity as <code>p</code> - it just forwards the results of <code>p</code>.</p>
+<p><a id="withoutPosition"></a></p>
+<p><strong>parser alias</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">withoutPosition(p)
+</code></pre></div><p>Arity is sum of arguments&#39; arities</p>
+<p><code>withoutPosition(p)</code> runs <code>p</code> without the saved position, meaning that position-checking parsers like <code>colGt</code> will have no effect. This is usually used by bracketing constructs like <code>(...)</code> so that the user can locally override whitespace sensitivity.</p>
+<p>This parser has the same arity as <code>p</code> - it just forwards the results of <code>p</code>.</p>
+<p><a id="withPositionAfterLinebreak"></a></p>
+<p><strong>parser alias</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">withPositionAfterLinebreak
+</code></pre></div><ul>
+<li>Arity: 1</li>
+<li>Automatically wraps arguments in a <code>null</code> node unless there&#39;s exactly one</li>
+</ul>
+<p><a id="colGt"></a></p>
+<p><strong>parser alias</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">colGt
+</code></pre></div><ul>
+<li>Arity: 0</li>
+<li>Automatically wraps arguments in a <code>null</code> node unless there&#39;s exactly one</li>
+</ul>
+<p>The <code>colGt</code> parser requires that the next token starts a strictly greater column than the saved position (see <code>withPosition</code>). This can be used for whitespace sensitive syntax for the arguments to a tactic, to ensure that the following tactic is not interpreted as an argument.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example (x : False) : False := by
+  revert x
+  exact id
+</code></pre></div><p>Here, the <code>revert</code> tactic is followed by a list of <code>colGt ident</code>, because otherwise it would interpret <code>exact</code> as an identifier and try to revert a variable named <code>exact</code>.</p>
+<p>This parser has arity 0 - it does not capture anything.</p>
+<p><a id="colGe"></a></p>
+<p><strong>parser alias</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">colGe
+</code></pre></div><ul>
+<li>Arity: 0</li>
+<li>Automatically wraps arguments in a <code>null</code> node unless there&#39;s exactly one</li>
+</ul>
+<p>The <code>colGe</code> parser requires that the next token starts from at least the column of the saved position (see <code>withPosition</code>), but allows it to be more indented. This can be used for whitespace sensitive syntax to ensure that a block does not go outside a certain indentation scope. For example it is used in the lean grammar for <code>else if</code>, to ensure that the <code>else</code> is not less indented than the <code>if</code> it matches with.</p>
+<p>This parser has arity 0 - it does not capture anything.</p>
+<p><a id="colEq"></a></p>
+<p><strong>parser alias</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">colEq
+</code></pre></div><ul>
+<li>Arity: 0</li>
+<li>Automatically wraps arguments in a <code>null</code> node unless there&#39;s exactly one</li>
+</ul>
+<p>The <code>colEq</code> parser ensures that the next token starts at exactly the column of the saved position (see <code>withPosition</code>). This can be used to do whitespace sensitive syntax like a <code>by</code> block or <code>do</code> block, where all the lines have to line up.</p>
+<p>This parser has arity 0 - it does not capture anything.</p>
+<p><a id="lineEq"></a></p>
+<p><strong>parser alias</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">lineEq
+</code></pre></div><ul>
+<li>Arity: 0</li>
+<li>Automatically wraps arguments in a <code>null</code> node unless there&#39;s exactly one</li>
+</ul>
+<p>The <code>lineEq</code> parser requires that the current token is on the same line as the saved position (see <code>withPosition</code>). This can be used to ensure that composite tokens are not &quot;broken up&quot; across different lines. For example, <code>else if</code> is parsed using <code>lineEq</code> to ensure that the two tokens are on the same line.</p>
+<p>This parser has arity 0 - it does not capture anything.</p>
+<p><a id="Aligned-Columns"></a>
+Aligned Columns </p>
+<p>This syntax for saving notes takes a bulleted list of items, each of which must be aligned at the same column.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax &quot;note &quot; ppLine withPosition((colEq &quot;◦ &quot; str ppLine)+) : term
+</code></pre></div><p>There is no elaborator or macro associated with this syntax, but the following example is accepted by the parser:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check
+  note
+    ◦ &quot;One&quot;
+    ◦ &quot;Two&quot;
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">elaboration function for `«termNote__◦__»` has not been implemented
+  note
+    ◦ &quot;One&quot;
+    ◦ &quot;Two&quot;
+</code></pre></div><p>The syntax does not require that the list is indented with respect to the opening token, which would require an extra <code>withPosition</code> and a <code>colGt</code>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check
+  note
+◦ &quot;One&quot;
+◦ &quot;Two&quot;
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">elaboration function for `«termNote__◦__»` has not been implemented
+  note
+    ◦ &quot;One&quot;
+    ◦ &quot;Two&quot;
+</code></pre></div><p>The following examples are not syntactically valid because the columns of the bullet points do not match.</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">#check  note    ◦ &quot;One&quot;   ◦ &quot;Two&quot;
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">&lt;example&gt;:4:3-4:4: expected end of input
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">#check  note   ◦ &quot;One&quot;     ◦ &quot;Two&quot;
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">&lt;example&gt;:4:5-4:6: expected end of input
+</code></pre></div><h2 id="preserved-grammar-annotations">Preserved grammar annotations</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">A `docComment` parses a &quot;documentation comment&quot; like `/-- foo -/`. This is not treated like
+a regular comment (that is, as whitespace); it is parsed and forms part of the syntax tree structure.
+
+At parse time, `docComment` checks the value of the `doc.verso` option. If it is true, the contents
+are parsed as Verso markup. If not, the contents are treated as plain text or Markdown. Use
+`plainDocComment` to always treat the contents as plain text.
+
+A plain text doc comment node contains a `/--` atom and then the remainder of the comment, `foo -/`
+in this example. Use `TSyntax.getDocString` to extract the body text from a doc string syntax node.
+A Verso comment node contains the `/--` atom, the document's syntax tree, and a closing `-/` atom.
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`attrKind` matches `(&quot;scoped&quot; &lt;|&gt; &quot;local&quot;)?`, used before an attribute like `@[local simp]`.
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`p*` is shorthand for `many(p)`. It uses parser `p` 0 or more times, and produces a
+`nullNode` containing the array of parsed results. This parser has arity 1.
+
+If `p` has arity more than 1, it is auto-grouped in the items generated by the parser.
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Parses the literal symbol.
+
+The symbol is automatically included in the set of reserved tokens (&quot;keywords&quot;).
+Keywords cannot be used as identifiers, unless the identifier is otherwise escaped.
+For example, `&quot;fun&quot;` reserves `fun` as a keyword; to refer an identifier named `fun` one can write `«fun»`.
+Adding a `&amp;` prefix prevents it from being reserved, for example `&amp;&quot;true&quot;`.
+
+Whitespace before or after the atom is used as a pretty printing hint.
+For example, `&quot; + &quot;` parses `+` and pretty prints it with whitespace on both sides.
+The whitespace has no effect on parsing behavior.
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Parses a literal symbol. The `&amp;` prefix prevents it from being included in the set of reserved tokens (&quot;keywords&quot;).
+This means that the symbol can still be recognized as an identifier by other parsers.
+
+Some syntax categories, such as `tactic`, automatically apply `&amp;` to the first symbol.
+
+Whitespace before or after the atom is used as a pretty printing hint.
+For example, `&quot; + &quot;` parses `+` and pretty prints it with whitespace on both sides.
+The whitespace has no effect on parsing behavior.
+
+(Not exposed by parser description syntax:
+If the `includeIdent` argument is true, lets `ident` be reinterpreted as `atom` if it matches.)
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`p+` is shorthand for `many1(p)`. It uses parser `p` 1 or more times, and produces a
+`nullNode` containing the array of parsed results. This parser has arity 1.
+
+If `p` has arity more than 1, it is auto-grouped in the items generated by the parser.
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`(p)?` is shorthand for `optional(p)`. It uses parser `p` 0 or 1 times, and produces a
+`nullNode` containing the array of parsed results. This parser has arity 1.
+
+`p` is allowed to have arity n &gt; 1 (in which case the node will have either 0 or n children),
+but if it has arity 0 then the result will be ambiguous.
+
+Because `?` is an identifier character, `ident?` will not work as intended.
+You have to write either `ident ?` or `(ident)?` for it to parse as the `?` combinator
+applied to the `ident` parser.
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`p,*` is shorthand for `sepBy(p, &quot;,&quot;)`. It parses 0 or more occurrences of
+`p` separated by `,`, that is: `empty | p | p,p | p,p,p | ...`.
+
+It produces a `nullNode` containing a `SepArray` with the interleaved parser
+results. It has arity 1, and auto-groups its component parser if needed.
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`p,+` is shorthand for `sepBy1(p, &quot;,&quot;)`. It parses 1 or more occurrences of
+`p` separated by `,`, that is: `p | p,p | p,p,p | ...`.
+
+It produces a `nullNode` containing a `SepArray` with the interleaved parser
+results. It has arity 1, and auto-groups its component parser if needed.
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`p,*,?` is shorthand for `sepBy(p, &quot;,&quot;, allowTrailingSep)`.
+It parses 0 or more occurrences of `p` separated by `,`, possibly including
+a trailing `,`, that is: `empty | p | p, | p,p | p,p, | p,p,p | ...`.
+
+It produces a `nullNode` containing a `SepArray` with the interleaved parser
+results. It has arity 1, and auto-groups its component parser if needed.
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`p,+,?` is shorthand for `sepBy1(p, &quot;,&quot;, allowTrailingSep)`.
+It parses 1 or more occurrences of `p` separated by `,`, possibly including
+a trailing `,`, that is: `p | p, | p,p | p,p, | p,p,p | ...`.
+
+It produces a `nullNode` containing a `SepArray` with the interleaved parser
+results. It has arity 1, and auto-groups its component parser if needed.
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`p1 &lt;|&gt; p2` is shorthand for `orelse(p1, p2)`, and parses either `p1` or `p2`.
+It does not backtrack, meaning that if `p1` consumes at least one token then
+`p2` will not be tried. Therefore, the parsers should all differ in their first
+token. The `atomic(p)` parser combinator can be used to locally backtrack a parser.
+(For full backtracking, consider using extensible syntax classes instead.)
+
+On success, if the inner parser does not generate exactly one node, it will be
+automatically wrapped in a `group` node, so the result will always be arity 1.
+
+The `&lt;|&gt;` combinator does not generate a node of its own, and in particular
+does not tag the inner parsers to distinguish them, which can present a problem
+when reconstructing the parse. A well formed `&lt;|&gt;` parser should use disjoint
+node kinds for `p1` and `p2`.
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`!p` parses the negation of `p`. That is, it fails if `p` succeeds, and
+otherwise parses nothing. It has arity 0.
+</code></pre></div><h2 id="preserved-native-diagnostic-displays">Preserved native diagnostic displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.node
+  (Lean.SourceInfo.none)
+  `«term_+_»
+  #[Lean.Syntax.node (Lean.SourceInfo.none) `num #[Lean.Syntax.atom (Lean.SourceInfo.none) &quot;2&quot;],
+    Lean.Syntax.atom (Lean.SourceInfo.none) &quot;+&quot;, Lean.Syntax.missing]
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Syntax.node
+  (Lean.SourceInfo.none)
+  `Lean.Parser.Term.app
+  #[Lean.Syntax.ident
+      (Lean.SourceInfo.none)
+      &quot;List.length&quot;.toRawSubstring
+      (Lean.Name.mkNum (Lean.Name.mkStr (Lean.Name.mkStr (Lean.Name.mkNum `List.length.«_@».Manual.NotationsMacros.SyntaxDef 1704743902) &quot;_hygCtx&quot;) &quot;_hyg&quot;) 2)
+      [Lean.Syntax.Preresolved.decl `List.length []],
+    Lean.Syntax.node
+      (Lean.SourceInfo.none)
+      `null
+      #[Lean.Syntax.node
+          (Lean.SourceInfo.none)
+          `«term[_]»
+          #[Lean.Syntax.atom (Lean.SourceInfo.none) &quot;[&quot;,
+            Lean.Syntax.node
+              (Lean.SourceInfo.none)
+              `null
+              #[Lean.Syntax.node (Lean.SourceInfo.none) `str #[Lean.Syntax.atom (Lean.SourceInfo.none) &quot;\&quot;Rose\&quot;&quot;],
+                Lean.Syntax.atom (Lean.SourceInfo.none) &quot;,&quot;,
+                Lean.Syntax.node (Lean.SourceInfo.none) `str #[Lean.Syntax.atom (Lean.SourceInfo.none) &quot;\&quot;Daffodil\&quot;&quot;],
+                Lean.Syntax.atom (Lean.SourceInfo.none) &quot;,&quot;,
+                Lean.Syntax.node (Lean.SourceInfo.none) `str #[Lean.Syntax.atom (Lean.SourceInfo.none) &quot;\&quot;Lily\&quot;&quot;]],
+            Lean.Syntax.atom (Lean.SourceInfo.none) &quot;]&quot;]]]
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(«term_+_» (num &quot;2&quot;) &quot;+&quot; &lt;missing&gt;)
+</code></pre></div><h3 id="display-4-2">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(Term.app
+ `List.length._@.Manual.NotationsMacros.SyntaxDef.3168789510._hygCtx._hyg.2
+ [(«term[_]» &quot;[&quot; [(str &quot;\&quot;Rose\&quot;&quot;) &quot;,&quot; (str &quot;\&quot;Daffodil\&quot;&quot;) &quot;,&quot; (str &quot;\&quot;Lily\&quot;&quot;)] &quot;]&quot;)])
+</code></pre></div><h3 id="display-5-2">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">2 + 5
+</code></pre></div><h3 id="display-6-2">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">List.length✝ [&quot;Rose&quot;, &quot;Daffodil&quot;, &quot;Lily&quot;]
+</code></pre></div><h3 id="display-7-2">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">List.length✝
+  [&quot;Rose&quot;, &quot;Daffodil&quot;, &quot;Lily&quot;, &quot;Rose&quot;,
+    &quot;Daffodil&quot;, &quot;Lily&quot;, &quot;Rose&quot;,
+    &quot;Daffodil&quot;, &quot;Lily&quot;]
+</code></pre></div><h3 id="display-8-2">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[&quot;Dandelion&quot;, &quot;Thistle&quot;]
+</code></pre></div><h3 id="display-9-2">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">elaboration function for `«termNote__◦__»` has not been implemented
+  note
+    ◦ &quot;One&quot;
+    ◦ &quot;Two&quot;
+</code></pre></div><footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

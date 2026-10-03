@@ -1,0 +1,999 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;do-elab&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../index.html">23. Notations and Macros</a><a href="../Custom-Operators/index.html">23.1. Custom Operators</a><a href="../Precedence/index.html">23.2. Precedence</a><a href="../Notations/index.html">23.3. Notations</a><a href="../Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../Macros/index.html">23.5. Macros</a><a href="../Elaborators/index.html">23.6. Elaborators</a><a href="index.html">23.7. Extending do-Notation</a><a href="../Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../../releases/index.html">Release Notes</a><a href="../../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="do-elab"></a></p>
+<h1 id="proofscript-23-7-extending-do-notation">ProofScript — 23.7. Extending do-Notation</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>Use native notation, syntax categories, quotations, macros and elaborators in an explicitly declared extension environment. Macro hygiene preserves binding identity; a convenient generated name is not enough. Quoted parser code remains native code rather than being rewritten as ordinary surface expressions. Extensions produce syntax or candidate declarations and gain no independent proof authority.</p>
+<p><strong>Compiler and coverage boundary.</strong> Register collisions and lifted child slots explicitly. Do not globally rewrite strings, quoted grammar, tactic combinators or host code. Plugin operating-system permissions are separate from logical soundness.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/Notations-and-Macros/Extending--do--Notation/index.html">Notations-and-Macros/Extending--do--Notation/index.html</a>. Source Git blob: <code>7f91e73909212f8e9f8e7450f2031ecb25374407</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<p><a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructors-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructors-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<hr>
+<h2 id="23-7-extending-do-notation">23.7. Extending do-Notation</h2><p>Macros and elaborators can be used to extend Lean with new commands and terms. In addition, <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-notation can be extended. Extensions to <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-notation define new kinds of <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements. Macros translate the new <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements into previously existing <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements, while elaborators have access to more information and can produce arbitrary terms in Lean&#39;s type theory.</p>
+<p>This chapter describes the extension mechanisms that are available for <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-notation. Extensible <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-notation was introduced in Lean version 4.29.0; prior to this release, it was not extensible. The extensible <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a> elaborator is controlled by the option <code>backward.do.legacy</code>, which defaults to <code>false</code>:</p>
+<p><a id="backward___do___legacy"></a></p>
+<p><strong>option</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">backward.do.legacy
+</code></pre></div><p>Default value: <code>false</code></p>
+<p>Use the legacy <code>do</code> elaborator instead of the new, extensible implementation.</p>
+<p>When <code>backward.do.legacy</code> is <code>false</code>, the extensible elaborator is enabled. Custom <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element elaborators extend the desugaring described in <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#do-notation">the section on syntax for monads</a>.</p>
+<p><a id="The-Lean-Language-Reference--Notations-and-Macros--Extending--do--Notation--Elaboration-Overview"></a></p>
+<h3 id="23-7-1-elaboration-overview">23.7.1. Elaboration Overview</h3><p>The <a href="../Defining-New-Syntax/index.html#--tech-term-syntax-kind">syntax kind</a> <code>doElem</code> represents individual <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#--tech-term-do-elements"><code>do</code>-elements</a>. A sequence of these elements is represented by the syntax kind <code>doSeq</code>, which makes up the body of a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block. The elaborator for <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a> invokes a specialized elaboration framework on the <code>doSeq</code> in its body, elaborating each <code>doElem</code> in turn. This specialized framework allows each element in the sequence to modify the elaboration of subsequent elements, as well as to track information such as enclosing loops (for <code>break</code> and <code>continue</code>), the way to escape via <code>return</code>, and the set of mutable variables.</p>
+<p>Elaboration of <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements is very similar to that of terms. First, if the syntax in question is a <a href="../Macros/index.html#--tech-term-Macros">macro</a>, then it is expanded. This is repeated until the result of macro expansion is no longer a macro. Next, an internal table is consulted to find the elaboration procedure associated with the <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element&#39;s syntax kind. This table is separate from the table of term elaborators, because <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element elaborators have a different type. If a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element consists only of a term, then the Lean parser wraps it in the syntax kind <code>doExpr</code>; its elaborator invokes the term elaborator, ensuring that the term has the correct type for the <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block.</p>
+<p><a id="The-Lean-Language-Reference--Notations-and-Macros--Extending--do--Notation--Macros-in--do--Notation"></a></p>
+<h3 id="23-7-2-macros-in-do-notation">23.7.2. Macros in do-Notation</h3><p>Macro expansion occurs during the elaboration of <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements. There is no fundamental difference between <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element macros and term or command macros; they are distinguished by being defined for syntax that is part of the <code>doElem</code> syntax category.</p>
+<p><a id="Multi-Way--if"></a>
+Multi-Way <code>if</code> </p>
+<p>As an alternative to a nested sequence of <code>if</code>-terms, this “multi-way <code>if</code>” places each condition at the same syntactic level:
+<a id="multiIfTerm-_LPAR_in-Multi-Way--if_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := multiIfTerm)
+  &quot;if &quot; withPosition(
+    (colGe atomic(&quot;|&quot; (atomic(ident &quot; : &quot;))? term) &quot; =&gt; &quot; term)+
+    colGe &quot;|&quot; &quot; else &quot; &quot; =&gt; &quot; term
+  ) : term
+</code></pre></div><p>It is <a href="../Defining-New-Syntax/index.html#syntax-indentation">indentation-sensitive</a>. It can be implemented as a recursive macro that emits the expected nested <code>if</code>:
+<a id="mkTermIf-_LPAR_in-Multi-Way--if_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def mkTermIf (h? : Option Ident) (g b e : Term) : MacroM Term :=
+  match h? with
+  | some h =&gt; `(if $h:ident : $g then $b else $e)
+  | none =&gt; `(if $g then $b else $e)
+
+macro_rules
+  | `(if | $[$h?:ident :]? $g:term =&gt; $b:term | else =&gt; $e:term) =&gt;
+      mkTermIf h? g b e
+  | `(if | $[$h?:ident :]? $g:term =&gt; $b:term
+         | $[$h2?:ident :]? $g2:term =&gt; $b2:term
+         $[| $[$hs?:ident :]? $gs:term =&gt; $bs:term]*
+         | else =&gt; $e:term) =&gt; do
+      mkTermIf h? g b
+        (← `(if | $[$h2?:ident :]? $g2 =&gt; $b2
+                $[| $[$hs?:ident :]? $gs =&gt; $bs]*
+                | else =&gt; $e))
+</code></pre></div><p>It can be used like any other term:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval
+  let sign : Int → String := fun n =&gt;
+    if
+      | n &lt; 0 =&gt; &quot;neg&quot;
+      | n = 0 =&gt; &quot;zero&quot;
+      | else =&gt; &quot;pos&quot;
+  (sign (-2), sign 0, sign 5)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(&quot;neg&quot;, &quot;zero&quot;, &quot;pos&quot;)
+</code></pre></div><p>This macro can be adapted to be a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element by placing it in the <code>doElem</code> syntax category and replacing each arm of the multi-way <code>if</code> with a <code>doSeq</code> instead of a <code>Term</code>. The syntax definition is almost the same; however, the <code>else</code> branch is optional:
+<a id="multiIf-_LPAR_in-Multi-Way--if_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := multiIf)
+  &quot;if &quot; withPosition(
+    (colGe atomic(&quot;|&quot; (atomic(ident &quot; : &quot;))? term) &quot; =&gt; &quot; doSeq)+
+    (colGe &quot;|&quot; &quot; else &quot; &quot; =&gt; &quot; doSeq)?
+  ) : doElem
+</code></pre></div><p>Likewise, a helper function to attach the optional condition hypothesis name to <code>if</code> is useful:
+<a id="mkDoIf-_LPAR_in-Multi-Way--if_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def mkDoIf (h? : Option Ident) (g : Term) (b : TSyntax ``doSeq)
+    (els? : Option (TSyntax ``doSeq)) : MacroM (TSyntax `doElem) :=
+  match h? with
+  | some h =&gt;
+    `(doElem| if $h : $g then $b $[else $els?]?)
+  | none =&gt;
+    `(doElem| if $g then $b $[else $els?]?)
+</code></pre></div><p>The implementation as a recursive macro is also nearly the same:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">macro_rules
+  | `(doElem| if | $[$h?:ident :]? $g:term =&gt; $b:doSeq
+                   $[| else =&gt; $e:doSeq]?) =&gt;
+      mkDoIf h? g b e
+  | `(doElem| if | $[$h?:ident :]? $g:term =&gt; $b:doSeq
+                 | $[$h2?:ident :]? $g2:term =&gt; $b2:doSeq
+                 $[| $[$hs?:ident :]? $gs:term =&gt; $bs:doSeq]*
+                 $[| else =&gt; $e:doSeq]?) =&gt; do
+      mkDoIf h? g b &lt;| some
+        (← `(doSeq| if | $[$h2?:ident :]? $g2 =&gt; $b2
+                       $[| $[$hs?:ident :]? $gs =&gt; $bs]*
+                       $[| else =&gt; $e]?))
+</code></pre></div><p>It can be used in <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>:</p>
+<p><a id="getEven-_LPAR_in-Multi-Way--if_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const getEven : IO { n : Nat // n % 2 = 0 ∨ n % 3 = 0} := do
+  let n ← (← IO.getStdin).getLine
+  let some n := n.toNat?
+    | throw &lt;| IO.userError s!&quot;Not a Nat: {n}&quot;
+  if
+    | h : n % 2 = 0 =&gt;
+      IO.println s!&quot;{n} is even.&quot;
+      return ⟨n, .inl h⟩
+    | h : n % 3 = 0 =&gt;
+      IO.println s!&quot;{n} is divisible by 3.&quot;
+      return ⟨n, .inr h⟩
+    | else =&gt;
+      throw &lt;| IO.userError s!&quot;Invalid input {n}&quot;
+</code></pre></div><p><a id="The-Lean-Language-Reference--Notations-and-Macros--Extending--do--Notation--Macros-in--do--Notation--Limitations"></a></p>
+<h4 id="23-7-2-1-limitations">23.7.2.1. Limitations</h4><p>When an extension can be implemented as a macro, it is usually best to do so. Macros are much simpler to maintain, and they inherit bug fixes from the implementation of the syntax that they expand to. However, macros cannot implement all possible extensions:</p>
+<ul>
+<li>They cannot access information about the set of mutable variables, nor can they override it.</li>
+<li>They cannot implement novel control structures that are not expressible in terms of built-in control structures.</li>
+<li>They cannot place a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-sequence into some new context (such as underneath a binder) while keeping it as part of the enclosing <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block for the purposes of early return and mutable variables.</li>
+</ul>
+<p>In these cases, it may be necessary to define an elaborator.</p>
+<p><a id="Freezing-Mutable-Variables-with-a-Macro"></a>
+Freezing Mutable Variables with a Macro </p>
+<p>Within a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a> block, new <code>let</code> bindings may not shadow existing <code>let mut</code> bindings. However, many mutable variables are not modified after they are initialized. It might be convenient to indicate this fact by removing their mutability.</p>
+<p>There is no existing way to replace a mutable variable with an immutable one, so this feature can&#39;t be implemented with a macro that expands to an existing <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element which makes the variable immutable for the remainder of the block. However, the operator can be structured so that it introduces a scope in which the mutable variable is immutable by expanding to a function call:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">macro &quot;freeze &quot; x:ident &quot; in &quot; body:doSeq : doElem =&gt;
+  `(doElem| (fun $x =&gt; do $body) $x)
+</code></pre></div><p>While it may seem promising, this macro-based solution has severe drawbacks. First, the body of the resulting function constitutes a new <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block. This means that mutable variables in the surrounding block cannot be modified:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval Id.run do
+  let mut x : Nat := 0
+  x := x + 1
+  let mut y := 0
+  freeze x in
+    y := 2 * x
+  return y
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Variable `y` cannot be mutated. Only variables declared using `let mut` can be mutated.
+      If you did not intend to mutate but define `y`, consider using `let y` instead
+</code></pre></div><p>Additionally, an early <code>return</code> exits the inner <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>, rather than the surrounding one, as indicated by the fact that it is expected to return a <code>Unit</code> (in this case, the universe-polymorphic <code>PUnit</code>):</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval Id.run do
+  let mut x : Nat := 0
+  x := x + 1
+  let mut y := 0
+  freeze x in
+    return x
+  return y
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Type mismatch
+  x
+has type
+  Nat
+but is expected to have type
+  PUnit
+</code></pre></div><p><a id="The-Lean-Language-Reference--Notations-and-Macros--Extending--do--Notation--Elaboration"></a></p>
+<h3 id="23-7-3-elaboration">23.7.3. Elaboration</h3><p>Elaboration of <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements occurs in the <code>DoElabM</code> monad. This monad is a wrapper around <code>TermElabM</code> that provides one extra <a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html#reader-monad">reader</a> value: a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elaboration context. The elaborators also receive an additional argument: a description of the elaboration 
+<a id="--tech-term-continuation"></a>
+<em>continuation</em>. The continuation represents the remainder of the <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block, after the current element; it includes both a <code>DoElabM</code> action that will elaborate the remainder of the block and the name by which that term will refer to the result of the current elaboration step. Unlike term elaborators, which return the elaborated term to a surrounding elaboration context, <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element elaborators invoke the provided continuation to arrange for the elaboration of the rest of the <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block.</p>
+<p><a id="Lean___Elab___Do___Context___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.Context : Type
+</code></pre></div><p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.Context.mk
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">monadInfo : Elab.Do.MonadInfo
+</code></pre></div><p>Inferred and cached information about the monad.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mutVars : Array Elab.Do.MutVar
+</code></pre></div><p>The mutable variables in declaration order. Kept in sync with <code>mutVarDefs</code>; insertions go through <code>declareMutVar</code> / <code>declareMutVars</code> only.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mutVarDefs : Std.HashMap Name Elab.Do.MutVar
+</code></pre></div><p>Maps mutable variable names to their <code>MutVar</code> record. Kept in sync with <code>mutVars</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">doBlockResultType : Expr
+</code></pre></div><p>The expected type of the current <code>do</code> block. This can be different from <code>ReturnCont.resultType</code> in <code>for</code> loop <code>do</code> blocks, for example.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">contInfo : Elab.Do.ContInfoRef
+</code></pre></div><p>Information about <code>return</code>, <code>break</code> and <code>continue</code> continuations.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">deadCode : Elab.Do.CodeLiveness
+</code></pre></div><p>Whether the current <code>do</code> element is dead code. <code>elabDoElem</code> will emit a warning if not <code>.alive</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ops : Elab.Do.DoOpsRef
+</code></pre></div><p>Pluggable builders for <code>pure</code> and <code>bind</code> applications.</p>
+<p><a id="Lean___Elab___Do___MonadInfo___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.MonadInfo : Type
+</code></pre></div><p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.MonadInfo.mk
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">m : Expr
+</code></pre></div><p>The inferred type of the monad of type <code>Type u → Type v</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">u : Level
+</code></pre></div><p>The <code>u</code> in <code>m : Type u → Type v</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">v : Level
+</code></pre></div><p>The <code>v</code> in <code>m : Type u → Type v</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">cachedPUnit : Expr
+</code></pre></div><p>The cached <code>PUnit</code> expression.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">cachedPUnitUnit : Expr
+</code></pre></div><p>The cached <code>PUnit.unit</code> expression.</p>
+<p><a id="Lean___Elab___Do___CodeLiveness___deadSyntactically"></a></p>
+<p><strong>inductive type</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.CodeLiveness : Type
+</code></pre></div><p>Whether a code block is alive or dead.</p>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.CodeLiveness.deadSyntactically :
+  Elab.Do.CodeLiveness
+</code></pre></div><p>We inferred the code is syntactically dead and don&#39;t need to elaborate it at all.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.CodeLiveness.deadSemantically :
+  Elab.Do.CodeLiveness
+</code></pre></div><p>We inferred the code is semantically dead, but we need to elaborate it to produce a program.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.CodeLiveness.alive : Elab.Do.CodeLiveness
+</code></pre></div><p>The code is alive. (Or it is dead, but we failed to prove it so.)</p>
+<p>To avoid circularity in the implementation, the <code>Context.contInfo</code> and <code>Context.ops</code> fields are references that are filled in after construction. Use <code>ContInfoRef.toContInfo</code> and <code>DoOpsRef.toDoOps</code> to recover the underlying data:</p>
+<p><a id="Lean___Elab___Do___ContInfoRef___toContInfo"></a></p>
+<p><strong>opaque</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.ContInfoRef.toContInfo (m : Elab.Do.ContInfoRef) :
+  Elab.Do.ContInfo
+</code></pre></div><p><a id="Lean___Elab___Do___ContInfo___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.ContInfo : Type
+</code></pre></div><p>Information about a success, <code>return</code>, <code>break</code> or <code>continue</code> continuation that will be filled in after the code using it has been elaborated.</p>
+<p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.ContInfo.mk
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">returnCont : Elab.Do.ReturnCont
+</code></pre></div><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">breakCont : Option (Elab.Do.DoElabM Expr)
+</code></pre></div><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">continueCont : Option (Elab.Do.DoElabM Expr)
+</code></pre></div><p><a id="Lean___Elab___Do___DoOpsRef___toDoOps"></a></p>
+<p><strong>opaque</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoOpsRef.toDoOps (r : Elab.Do.DoOpsRef) : Elab.Do.DoOps
+</code></pre></div><p><a id="Lean___Elab___Do___DoOps___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoOps : Type
+</code></pre></div><p>Pluggable builders for the <code>pure</code> / <code>bind</code> applications emitted by the <code>do</code> elaborator.</p>
+<p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoOps.mk
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mkPureApp : Expr → Expr → Elab.Do.DoElabM Expr
+</code></pre></div><p>Build <code>pure (α:=α) e : m α</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mkBindApp : Expr → Expr → Expr → Expr → Elab.Do.DoElabM Expr
+</code></pre></div><p>Build <code>bind (α:=α) (β:=β) e k : m β</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">isPureApp? : Expr → Option Expr
+</code></pre></div><p>If <code>e</code> is syntactically a <code>pure …</code> application, return the pure value; otherwise <code>none</code>. Used by <code>DoElemCont.mkBindUnlessPure</code> to contract <code>e &gt;&gt;= pure</code> to <code>e</code> and <code>pure e &gt;&gt;= k</code> to <code>let x := e; k x</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">splitMonadApp? : Expr → Elab.TermElabM (Option (Elab.Do.MonadInfo × Expr))
+</code></pre></div><p>Match a monad application <code>m α</code>, returning <code>MonadInfo</code> for <code>m</code> and <code>α</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mkMonadApp : Expr → Elab.Do.DoElabM Expr
+</code></pre></div><p>Construct <code>m α</code> from <code>α</code>.</p>
+<p>Elaborators are associated with syntax kinds using the <code>doElem_elab</code> attribute. They should have type <code>DoElab</code>. In addition to an elaborator, each custom <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element that&#39;s implemented via an elaborator must be provided with <a href="index.html#do-elab-control-info">control information</a>.</p>
+<p><a id="Lean___Elab___Do___DoElab"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElab : Type
+</code></pre></div><p>The type of elaborators for <code>do</code> block elements.</p>
+<p>It is <code>elabTerm `(do $e; $rest) = elabDoElem e dec</code>, where <code>elabDoElem e ·</code> is the elaborator for <code>do</code> element <code>e</code>, and <code>dec</code> is the <code>DoElemCont</code> describing the elaboration of the rest of the block <code>rest</code>.</p>
+<p><a id="attr-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>attribute</strong></p>
+<p><strong>Do Element Elaborators</strong></p>
+<p><a id="Lean___Parser___Attr___simple-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">attr ::= ...
+    | doElem_elab
+</code></pre></div><p>Registers a <code>do</code> element elaborator for the given syntax node kind.</p>
+<p>A <code>do</code> element elaborator should have type <code>DoElab</code> (which is <code>Lean.Syntax → DoElemCont → DoElabM Expr</code>), i.e. should take syntax of the given syntax node kind and a <code>DoElemCont</code> as parameters and produce an expression.</p>
+<p>When elaborating a <code>do</code> block <code>do e; rest</code>, the elaborator for <code>e</code> is invoked with the syntax of <code>e</code> and the <code>DoElemCont</code> representing <code>rest</code>.</p>
+<p>The <code>elab_rules</code> and <code>elab</code> commands should usually be preferred over using this attribute directly.</p>
+<p>Additionally, <a href="../Elaborators/index.html#Lean___Parser___Command___elab_rules"><code>elab_rules</code></a> can be used to simultaneously define an elaborator and associate it with syntax. Just as <code>elab_rules : term &lt;= ty</code> binds the expected type to <code>ty</code>, <code>elab_rules : doElem &lt;= dec</code> binds the continuation to <code>dec</code>.</p>
+<p>Just as term elaborators may recursively invoke elaboration on their sub-terms by calling functions such as <code>elabTerm</code>, <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element elaborators may elaborate nested <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements or sequences of <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements. To elaborate a single <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element, call <code>elabDoElem</code>. To elaborate a non-empty array of <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements, call <code>elabDoElems1</code>. To elaborate a sequence of <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements, call <code>elabDoSeq</code>.</p>
+<p><a id="Lean___Elab___Do___elabDoElem"></a></p>
+<p><strong>opaque</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.elabDoElem (stx : DoElem) (cont : Elab.Do.DoElemCont)
+  (catchExPostpone : Bool := true) : Elab.Do.DoElabM Expr
+</code></pre></div><p><a id="Lean___Elab___Do___elabDoSeq"></a></p>
+<p><strong>opaque</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.elabDoSeq (doSeq : DoSeq) (cont : Elab.Do.DoElemCont)
+  (catchExPostpone : Bool := true) : Elab.Do.DoElabM Expr
+</code></pre></div><p><a id="Lean___Elab___Do___elabDoElems1"></a></p>
+<p><strong>opaque</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.elabDoElems1 (doElems : Array DoElem)
+  (cont : Elab.Do.DoElemCont) (catchExPostpone : Bool := true) :
+  Elab.Do.DoElabM Expr
+</code></pre></div><p><a id="The-Lean-Language-Reference--Notations-and-Macros--Extending--do--Notation--Elaboration--Monad-Operations"></a></p>
+<h4 id="23-7-3-1-monad-operations">23.7.3.1. Monad Operations</h4><p>The elaboration framework provides several helpers that make it more convenient and efficient to construct applications of the current monad and its operations.</p>
+<p><a id="Lean___Elab___Do___mkMonadApp"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.mkMonadApp (resultType : Expr) : Elab.Do.DoElabM Expr
+</code></pre></div><p>Constructs <code>m α</code> from <code>α</code>.</p>
+<p><a id="Lean___Elab___Do___mkPureApp"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.mkPureApp (α e : Expr) : Elab.Do.DoElabM Expr
+</code></pre></div><p>The expression <code>pure (α:=α) e</code>.</p>
+<p><a id="Lean___Elab___Do___mkBindApp"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.mkBindApp (α β e k : Expr) : Elab.Do.DoElabM Expr
+</code></pre></div><p>The expression <code>Bind.bind (α:=α) (β:=β) e k</code>.</p>
+<p><a id="Lean___Elab___Do___mkPUnitUnit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.mkPUnitUnit : Elab.Do.DoElabM Expr
+</code></pre></div><p>The cached <code>PUnit.unit</code> expression.</p>
+<p><a id="The-Lean-Language-Reference--Notations-and-Macros--Extending--do--Notation--Elaboration--Continuations"></a></p>
+<h4 id="23-7-3-2-continuations">23.7.3.2. Continuations</h4><p>A <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elaboration continuation consists of an elaborator that is waiting for the result of the present element together with metadata such as the type that this result is expected to have.</p>
+<p><a id="Lean___Elab___Do___DoElemCont___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElemCont : Type
+</code></pre></div><p>Elaboration of a <code>do</code> block <code>do $e; $rest</code>, results in a call <code>elabTerm `(do $e; $rest) = elabDoElem e dec</code>, where <code>elabDoElem e ·</code> is the elaborator for <code>do</code> element <code>e</code>, and <code>dec</code> is the <code>DoElemCont</code> describing the elaboration of the rest of the block <code>rest</code>.</p>
+<p>If the semantics of <code>e</code> resumes its continuation <code>rest</code>, its elaborator must bind its result to <code>resultName</code>, ensure that it has type <code>resultType</code> and then elaborate <code>rest</code> using <code>dec</code>.</p>
+<p>Clearly, for term elements <code>e : m α</code>, the result has type <code>α</code>. More subtly, for binding elements <code>let x := e</code> or <code>let x ← e</code>, the result has type <code>PUnit</code> and is unrelated to the type of the bound variable <code>x</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>return</code> drops the continuation; <code>return x; pure ()</code> elaborates to <code>pure x</code>.</li>
+<li><code>let x ← e; rest x</code> elaborates to <code>e &gt;&gt;= fun x =&gt; rest x</code>.</li>
+<li><code>let x := 3; let y ← (let x ← e); rest x</code> elaborates to <code>let x := 3; e &gt;&gt;= fun x_1 =&gt; let y := (); rest x</code>, which is immediately zeta-reduced to <code>let x := 3; e &gt;&gt;= fun x_1 =&gt; rest x</code>.</li>
+<li><code>one; two</code> elaborates to <code>one &gt;&gt;= fun (_ : PUnit) =&gt; two</code>; it is an error if <code>one</code> does not have type <code>PUnit</code>.</li>
+</ul>
+<p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElemCont.mk
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">resultName : Name
+</code></pre></div><p>The name of the monadic result variable.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">resultType : Expr
+</code></pre></div><p>The type of the monadic result.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">k : Elab.Do.DoElabM Expr
+</code></pre></div><p>The continuation to elaborate the <code>rest</code> of the block. It assumes that the result of the <code>do</code> block is bound to <code>resultName</code> with the correct type (that is, <code>resultType</code>, potentially refined by a dependent <code>match</code>).</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">kind : Elab.Do.DoElemContKind
+</code></pre></div><p>Whether we are OK with generating the code of the continuation multiple times, e.g. in different branches of a <code>match</code> or <code>if</code>.</p>
+<p><a id="Lean___Elab___Do___DoElemContKind___nonDuplicable"></a></p>
+<p><strong>inductive type</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElemContKind : Type
+</code></pre></div><p>Whether the continuation of a <code>do</code> element is duplicable. Saying <code>nonDuplicable</code> is always safe; <code>duplicable</code> allows for more optimizations.</p>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElemContKind.nonDuplicable :
+  Elab.Do.DoElemContKind
+</code></pre></div><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElemContKind.duplicable :
+  Elab.Do.DoElemContKind
+</code></pre></div><p>Many elaborators require that the continuation is expecting a particular type for its result. It is very common, for example, for an elaborator to result in <code>Unit</code> if it returns no result. Checking the type at an earlier stage can result in better error messages:</p>
+<p><a id="Lean___Elab___Do___DoElemCont___ensureUnit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElemCont.ensureUnit (dec : Elab.Do.DoElemCont) :
+  Elab.Do.DoElabM Elab.Do.DoElemCont
+</code></pre></div><p>Given a continuation <code>dec</code>, returns a continuation derived from <code>dec</code> with result type <code>PUnit</code>. If <code>dec</code> already has result type <code>PUnit</code>, simply returns <code>dec</code>. Otherwise, an error is logged and a new continuation is returned that calls <code>dec</code> with <code>sorry</code> as a result.</p>
+<p><a id="Lean___Elab___Do___DoElemCont___ensureUnitAt"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElemCont.ensureUnitAt (dec : Elab.Do.DoElemCont)
+  (ref : Syntax) : Elab.Do.DoElabM Elab.Do.DoElemCont
+</code></pre></div><p>Given a continuation <code>dec</code> and a reference <code>ref</code>, returns a continuation derived from <code>dec</code> with result type <code>PUnit</code>. If <code>dec</code> already has result type <code>PUnit</code>, simply returns <code>dec</code>. Otherwise, an error is logged and a new continuation is returned that calls <code>dec</code> with <code>sorry</code> as a result. The error is reported at <code>ref</code>.</p>
+<p><a id="Lean___Elab___Do___DoElemCont___ensureHasTypeAt"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElemCont.ensureHasTypeAt (dec : Elab.Do.DoElemCont)
+  (ref : Syntax) (elementType : Expr) :
+  Elab.Do.DoElabM Elab.Do.DoElemCont
+</code></pre></div><p>Given a continuation <code>dec</code>, a reference <code>ref</code>, and an element result type <code>elementType</code>, returns a continuation derived from <code>dec</code> with result type <code>elementType</code>. If <code>dec</code> already has result type <code>elementType</code>, simply returns <code>dec</code>. Otherwise, an error is logged and a new continuation is returned that calls <code>dec</code> with <code>sorry</code> as a result. The error is reported at <code>ref</code>.</p>
+<p>Invoking a continuation consists of providing it with the result of the current <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element. There are three primary ways of doing this. <code>DoElemCont.continueWithUnit</code> ensures that the continuation is expecting <code>Unit</code> and then invokes it. <code>DoElemCont.elabAsSyntacticallyDeadCode</code> invokes the continuation in a context that asserts that the code is unreachable, generally causing the continuation to generate no code and also warning users if there is code present. <code>DoElemCont.mkBindUnlessPure</code> is responsible for the standard desugaring of <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-notation into applications of <code>bind</code>; it is used to invoke a continuation after elaborating a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element that consists of a term with a monadic type, and it contains an optimization that replaces a <code>bind</code> around a <code>pure</code> with a <code>let</code>-binding.</p>
+<p><a id="Lean___Elab___Do___DoElemCont___continueWithUnit"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElemCont.continueWithUnit (dec : Elab.Do.DoElemCont) :
+  Elab.Do.DoElabM Expr
+</code></pre></div><p>Return <code>let $k.resultName : PUnit := PUnit.unit; $(← k.k)</code>, ensuring that the result type of <code>k.k</code> is <code>PUnit</code> and then immediately zeta-reduce the <code>let</code>.</p>
+<p><a id="Lean___Elab___Do___DoElemCont___elabAsSyntacticallyDeadCode"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElemCont.elabAsSyntacticallyDeadCode
+  (dec : Elab.Do.DoElemCont) : Elab.Do.DoElabM Unit
+</code></pre></div><p>Elaborate the <code>DoElemCont</code> with the <code>deadCode</code> flag set to <code>deadSyntactically</code> to emit warnings.</p>
+<p><a id="Lean___Elab___Do___DoElemCont___mkBindUnlessPure"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElemCont.mkBindUnlessPure (dec : Elab.Do.DoElemCont)
+  (e : Expr) : Elab.Do.DoElabM Expr
+</code></pre></div><p>Return <code>$e &gt;&gt;= fun ($dec.resultName : $dec.resultType) =&gt; $(← dec.k)</code>, cancelling the bind if <code>$(← dec.k)</code> is <code>pure $dec.resultName</code> or <code>e</code> is some <code>pure</code> computation.</p>
+<p><a id="Invoking-Continuations"></a>
+Invoking Continuations </p>
+<p>A version of the built-in syntax <code>skip</code>, which is equivalent to <code>pure ()</code>, can be implemented using an elaborator that immediately invokes its continuation with <code>Unit</code>. For better error messages, it also asserts that the continuation is expecting <code>Unit</code>.</p>
+<p><a id="doNothing-_LPAR_in-Invoking-Continuations_RPAR_"></a>
+<a id="elabDoNothing-_LPAR_in-Invoking-Continuations_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := doNothing) &quot;nothing&quot; : doElem
+
+@[doElem_elab doNothing]
+const elabDoNothing : DoElab := fun stx dec =&gt; do
+  let dec ← dec.ensureUnitAt stx
+  dec.continueWithUnit
+</code></pre></div><p>In order to generate code for control structures, the <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element elaboration framework requires information about side effects that might be performed by each element. This <a href="index.html#do-elab-control-info">control info</a> is registered via the <code>doElem_control_info</code> attribute. Because <code>nothing</code> does not modify mutable variables, throw exceptions, terminate loops early, or perform any other action, its control info is <code>ControlInfo.pure</code>.</p>
+<p><a id="doNothing___control-_LPAR_in-Invoking-Continuations_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[doElem_control_info doNothing]
+const doNothing.control : ControlInfoHandler := fun _ =&gt; do return .pure
+</code></pre></div><p>It is indeed equivalent to <code>pure ()</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show Option Unit from do nothing
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">some ()
+</code></pre></div><p><a id="Elaborating--do--elements-with--elab_rules"></a>
+Elaborating <code>do</code>-elements with <code>elab_rules</code> </p>
+<p>An alternative version of <code>nothing</code>, which is equivalent to the built-in syntax <code>skip</code>, can be implemented using <a href="../Elaborators/index.html#Lean___Parser___Command___elab_rules"><code>elab_rules</code></a> as an alternative to an elaborator with the <code>doElem_elab</code> attribute.
+<a id="doNothing-_LPAR_in-Elaborating--do--elements-with--elab_rules_RPAR_"></a>
+<a id="doNothing___control-_LPAR_in-Elaborating--do--elements-with--elab_rules_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := doNothing) &quot;nothing&quot; : doElem
+
+elab_rules : doElem &lt;= dec
+  | `(doElem|nothing%$tk) =&gt; do
+    let dec ← dec.ensureUnitAt tk
+    dec.continueWithUnit
+
+@[doElem_control_info doNothing]
+def doNothing.control : ControlInfoHandler := fun _ =&gt; do return .pure
+</code></pre></div><p>It is equivalent to <code>pure ()</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show Option Unit from do nothing
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">some ()
+</code></pre></div><p>Because the elaborator invokes its continuation explicitly, rather than simply returning a value, it can control the context of elaboration. In particular, it can use <code>withReader</code> to modify the context, and it can invoke the continuation multiple times in order to support control structures with branching. To prevent code size explosions, continuations track whether they may be elaborated multiple times in <code>DoElemCont.kind</code>. A continuation is 
+<a id="--tech-term-duplicable"></a>
+<em>duplicable</em> if it may be invoked multiple times, and 
+<a id="--tech-term-nonduplicable"></a>
+<em>nonduplicable</em> if not. Nonduplicable continuations can be transformed into duplicable continuations using <code>DoElemCont.withDuplicableCont</code>.</p>
+<p><a id="Lean___Elab___Do___DoElemCont___withDuplicableCont"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.DoElemCont.withDuplicableCont
+  (nondupDec : Elab.Do.DoElemCont) (callerInfo : Elab.Do.ControlInfo)
+  (caller : Elab.Do.DoElemCont → Elab.Do.DoElabM Expr) :
+  Elab.Do.DoElabM Expr
+</code></pre></div><p>Call <code>caller</code> with a duplicable proxy of <code>dec</code>. When the proxy is elaborated more than once, a join point is introduced so that <code>dec</code> is only elaborated once to fill in the RHS of this join point.</p>
+<p>This is useful for control-flow constructs like <code>if</code> and <code>match</code>, where multiple tail-called branches share the continuation.</p>
+<p>Unreachable code does not need to be elaborated. When a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element&#39;s elaborator has detected that the result of the continuation&#39;s elaboration is unreachable, it can return its resulting term directly instead of passing it to the elaboration continuation. It should produce a term that justifies abandoning the program, such as a call to <code>False.elim</code>. Before returning this term, it should invoke <code>DoElemCont.elabAsSyntacticallyDeadCode</code> on the continuation, which warns users that the code that the continuation would elaborate is unreachable.</p>
+<p><a id="Unreachable-Code"></a>
+Unreachable Code </p>
+<p>The operator <code>absurd</code> marks code as unreachable when provided with a proof of <code>False</code>, which indicates that the current local context is logically inconsistent. If passed a proof, it uses it; otherwise, it attempts some automation.
+<a id="doAbsurd-_LPAR_in-Unreachable-Code_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := doAbsurd) &quot;absurd&quot; (&quot; by &quot; tacticSeq)? : doElem
+</code></pre></div><p>Because <code>absurd</code> can never return, and control can never proceed past it, its control information sets <code>numRegularExits</code> to <code>0</code> and <code>noFallthrough</code> to <code>true</code>:</p>
+<p><a id="inferAbsurd-_LPAR_in-Unreachable-Code_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[doElem_control_info doAbsurd]
+const inferAbsurd : ControlInfoHandler := fun _ =&gt;
+  return { numRegularExits := 0, noFallthrough := true }
+</code></pre></div><p>The elaborator first extracts the proof syntax, falling back to a default if none is provided. It then elaborates the proof as a proof of false. If this succeeds, it marks the rest of the <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-sequence as dead code using <code>DoElemCont.elabAsSyntacticallyDeadCode</code> and uses <code>False.elim</code> as the resulting term, which it returns directly rather than to the continuation. <code>False.elim</code> is provided with the type that the term is expected to have, which is determined using <code>Lean.Elab.Do.mkMonadApp</code> together with the result type. It is important to use <code>Do.Context.doBlockResultType</code> rather than the continuation&#39;s result type because <a href="index.html#do-elab-effect-lift">effect lifting</a> may have locally modified the type.
+<a id="elabAbsurd-_LPAR_in-Unreachable-Code_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[doElem_elab doAbsurd]
+def elabAbsurd : DoElab := fun stx dec =&gt; do
+  let `(doElem| absurd $[by $tac?]?) := stx
+    | throwUnsupportedSyntax
+  let proofStx : Term ←
+    if let some tac := tac? then
+      `(by $tac)
+    else
+      `(by first | contradiction | grind)
+  let proof ← elabTermEnsuringType proofStx (mkConst ``False)
+  dec.elabAsSyntacticallyDeadCode
+  let ty ← mkMonadApp (← read).doBlockResultType
+  return (← Meta.mkAppOptM ``False.elim #[some ty, some proof])
+</code></pre></div><p><code>absurd</code> allows the accumulated information from the nested conditionals to rule out the <code>else</code> clause as unreachable:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show Id (String × String × String) from do
+  let classify : Nat → String := fun n =&gt; Id.run do
+    if n &lt; 3 then return &quot;small&quot;
+    else if h1 : n &lt; 10 then return &quot;medium&quot;
+    else if h2 : n ≥ 10 then return &quot;large&quot;
+    else absurd
+  return (classify 1, classify 5, classify 99)
+</code></pre></div><p>Due to the call to <code>DoElemCont.elabAsSyntacticallyDeadCode</code>, steps after <code>absurd</code> receive a dead code warning:</p>
+<p><a id="xs-_LPAR_in-Unreachable-Code_RPAR_"></a>
+<a id="xs_all_odd-_LPAR_in-Unreachable-Code_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const xs := #[1, 3, 5]
+theorem xs_all_odd : ∀ x, x ∈ xs → x % 2 = 1 := by
+  simp [xs]
+
+#eval show Id Nat from do
+  for h : n in 0...5 do
+    let k := n * 2
+    if h' : k ∈ xs then
+      absurd by grind [xs_all_odd]
+      return k
+  pure 100
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">This `do` element and its control-flow region are dead code. Consider removing it.
+</code></pre></div><p>However, it does run successfully:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">100
+</code></pre></div><p><a id="do-elab-return-continue-break"></a></p>
+<h4 id="23-7-3-3-control-flow-return-break-and-continue">23.7.3.3. Control Flow: return, break, and continue</h4><p>Three non-local jump instructions are supported in <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-notation: <code>return</code>, which terminates the entire <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block early; <code>break</code>, which terminates a loop early; and <code>continue</code>, which terminates a single iteration of a loop early. A <code>return</code> is always allowed, while <code>break</code> and <code>continue</code> are only valid inside the body of a loop. During elaboration, each of these three jumps is represented by a continuation.</p>
+<p><a id="Lean___Elab___Do___getReturnCont"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.getReturnCont : Elab.Do.DoElabM Elab.Do.ReturnCont
+</code></pre></div><p><a id="Lean___Elab___Do___getBreakCont"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.getBreakCont :
+  Elab.Do.DoElabM (Option (Elab.Do.DoElabM Expr))
+</code></pre></div><p><a id="Lean___Elab___Do___getContinueCont"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.getContinueCont :
+  Elab.Do.DoElabM (Option (Elab.Do.DoElabM Expr))
+</code></pre></div><p>The three continuations are installed in the context using the helper <code>enterLoopBody</code>.</p>
+<p><a id="Lean___Elab___Do___enterLoopBody"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.enterLoopBody {α : Type}
+  (breakCont continueCont : Elab.Do.DoElabM Expr)
+  (returnCont : Elab.Do.ReturnCont) (body : Elab.Do.DoElabM α) :
+  Elab.Do.DoElabM α
+</code></pre></div><p>Prepare the context for elaborating the body of a loop. This includes setting the return continuation, break continuation, continue continuation, as well as the changed result type of the <code>do</code> block in the loop body.</p>
+<p><a id="Single-Iteration-Loop"></a>
+Single-Iteration Loop </p>
+<p>The single-iteration loop <code>once</code> executes its body a single time, skipping to the end of the loop on <code>break</code> or <code>continue</code>:
+<a id="doOnce-_LPAR_in-Single-Iteration-Loop_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := doOnce) &quot;once &quot; doSeq : doElem
+</code></pre></div><p>Its control info is based on that of the body. A <code>once</code> never breaks or continues itself, because it handles <code>break</code> and <code>continue</code> in its body; thus, it sets <code>breaks</code> and <code>continues</code> to <code>false</code>. <code>numRegularExits</code> is the number of times that control can reach the code following the <code>once</code>. The body&#39;s normal fallthrough, <code>break</code>, and <code>continue</code> all transfer control to the end of the loop, so control leaves a <code>once</code> at most once. <code>numRegularExits</code> is therefore <code>1</code> when the body can exit in any of these ways and <code>0</code> otherwise, in which case <code>noFallthrough</code> is set.
+<a id="inferOnce-_LPAR_in-Single-Iteration-Loop_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[doElem_control_info doOnce]
+def inferOnce : ControlInfoHandler := fun stx =&gt; do
+  let `(doElem| once $body) := stx | throwUnsupportedSyntax
+  let bodyInfo ← InferControlInfo.ofSeq body
+  let exits :=
+    bodyInfo.numRegularExits &gt; 0 ||
+    bodyInfo.breaks ||
+    bodyInfo.continues
+  return { bodyInfo with
+    breaks := false
+    continues := false
+    numRegularExits := if exits then 1 else 0
+    noFallthrough := !exits
+  }
+</code></pre></div><p>The actual elaborator for <code>once</code> uses <code>enterLoopBody</code> to associate the elaborator&#39;s overall continuation with the <code>break</code> and <code>continue</code> continuations inside the body. Because the elaborated body can reach that continuation from several places, the elaborator counts these uses. The body&#39;s control info does not indicate how many times <code>break</code> and <code>continue</code> may be invoked, so they are approximated as two exits each, safely ensuring that the continuation will be duplicated if either is used. The total approximated use count is passed to <code>DoElemCont.withDuplicableCont</code>, which shares the continuation rather than duplicating it at each use when the use count is greater than one, and so avoids code explosion. It computes this count from the body directly, since the value reported by the control info handler is at most <code>1</code> and does not reflect the number of internal uses.
+<a id="elabOnce-_LPAR_in-Single-Iteration-Loop_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[doElem_elab doOnce]
+def elabOnce : DoElab := fun stx dec =&gt; do
+  let `(doElem| once $body) := stx | throwUnsupportedSyntax
+  let dec ← dec.ensureUnit
+  let bodyInfo ← InferControlInfo.ofSeq body
+  let numRegularExits :=
+    bodyInfo.numRegularExits +
+    (if bodyInfo.breaks then 2 else 0) +
+    (if bodyInfo.continues then 2 else 0)
+  dec.withDuplicableCont { bodyInfo with numRegularExits } fun dec =&gt; do
+    let returnCont ← getReturnCont
+    let exitCont := dec.continueWithUnit
+    enterLoopBody exitCont exitCont returnCont do
+      elabDoSeq body dec
+</code></pre></div><p><code>once</code> can be used to terminate some part of a computation without terminating the entire <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block with <code>return</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show Id Nat from do
+  let mut x := 0
+  once
+    x := x + 2
+    if x % 2 = 0 then break
+    x := 0
+  return x
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">2
+</code></pre></div><p><a id="do-elab-control-info"></a></p>
+<h4 id="23-7-3-4-control-information">23.7.3.4. Control Information</h4><p>In addition to an elaborator, custom <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements must provide 
+<a id="--tech-term-control-information"></a>
+<em>control information</em>. This describes how the custom element interacts with surrounding control structures and mutable variables. The control information allows Lean to generate appropriate code; in particular, it allows <code>DoElemCont.withDuplicableCont</code> to analyze the code to be elaborated by the continuation, which enables better code generation. Control information is separate from elaborators because an elaborator needs to be able to analyze the <em>syntax</em> of sub-elements before elaborating them in order to know how to structure its continuations. <strong>Custom <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements must provide accurate control information. Incorrect control information can result in incorrect code generation.</strong></p>
+<p><a id="attr-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>attribute</strong></p>
+<p><strong>Do Element Control Information</strong></p>
+<p><a id="Lean___Parser___Attr___simple-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">attr ::= ...
+    | doElem_control_info
+</code></pre></div><p>Registers a <code>ControlInfo</code> inference handler for the given <code>doElem</code> syntax node kind.</p>
+<p>A handler should have type <code>ControlInfoHandler</code> (i.e. <code>DoElem → TermElabM ControlInfo</code>). For pure handlers, use <code>fun stx =&gt; return ControlInfo.pure</code>.</p>
+<p><a id="Lean___Elab___Do___ControlInfoHandler"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.ControlInfoHandler : Type
+</code></pre></div><p>A handler for inferring <code>ControlInfo</code> from a <code>doElem</code> syntax. Register with <code>@[doElem_control_info parserName]</code>.</p>
+<p>If a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element neither reassigns variables nor causes early return or termination, the handler can return <code>ControlInfo.pure</code>. If it represents code with no regular exits and no other control effects, then the handler can return <code>ControlInfo.empty</code>; otherwise, set <code>ControlInfo.numRegularExits</code> to <code>0</code> and <code>ControlInfo.noFallthrough</code> to <code>true</code> while also recording any early returns, reassignments, or loop terminations.</p>
+<p><a id="Lean___Elab___Do___ControlInfo___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.ControlInfo : Type
+</code></pre></div><p>Represents information about what control effects a <code>do</code> block has.</p>
+<p>The fields split by flavor:</p>
+<ul>
+<li><code>breaks</code>, <code>continues</code>, <code>returnsEarly</code>, and <code>reassigns</code> are <strong>syntactic</strong>: <code>true</code>/non-empty iff the corresponding construct appears anywhere in the source text of the block, independent of whether it is semantically reachable. Downstream elaborators must assume every such syntactic effect may occur, because the elaborator visits every doElem (only top-level <code>return</code>/<code>break</code>/<code>continue</code> short-circuit via <code>elabAsSyntacticallyDeadCode</code>).</li>
+<li><code>numRegularExits</code> is also <strong>syntactic</strong>: the number of times the block wires the enclosing continuation into its elaborated expression. <code>withDuplicableCont</code> reads it as a join-point duplication trigger (<code>&gt; 1</code>).</li>
+<li><code>noFallthrough = true</code> asserts that the next doElem in the enclosing sequence is semantically irrelevant (control never falls through to it). <code>noFallthrough = false</code> makes no such assertion. The dead-code warning fires on the next element when this is <code>true</code>.</li>
+</ul>
+<p>Invariant: <code>numRegularExits = 0 → noFallthrough</code>. The converse does not hold.</p>
+<p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.ControlInfo.mk
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">breaks : Bool
+</code></pre></div><p>The <code>do</code> block syntactically contains a <code>break</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">continues : Bool
+</code></pre></div><p>The <code>do</code> block syntactically contains a <code>continue</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">returnsEarly : Bool
+</code></pre></div><p>The <code>do</code> block syntactically contains an early <code>return</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">numRegularExits : Nat
+</code></pre></div><p>The number of times the block wires the enclosing continuation into its elaborated expression. Consumed by <code>withDuplicableCont</code> to decide whether to introduce a join point (<code>&gt; 1</code>).</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">noFallthrough : Bool
+</code></pre></div><p>When <code>true</code>, asserts that the next doElem in the enclosing sequence is semantically irrelevant (control never falls through to it). <code>false</code> asserts nothing.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">reassigns : NameSet
+</code></pre></div><p>The variables that are syntactically reassigned somewhere in the <code>do</code> block.</p>
+<p><a id="Lean___Elab___Do___ControlInfo___pure"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.ControlInfo.pure : Elab.Do.ControlInfo
+</code></pre></div><p>The left identity of <code>ControlInfo.sequence</code>: a <code>ControlInfo</code> describing an element that always falls through normally with a single regular exit.</p>
+<p><a id="Lean___Elab___Do___ControlInfo___empty"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.ControlInfo.empty : Elab.Do.ControlInfo
+</code></pre></div><p>The identity of <code>ControlInfo.alternative</code>: a <code>ControlInfo</code> describing a block with no branches at all (so no regular exits and the next element is trivially unreachable).</p>
+<p>If a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element itself contains other <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements, then it can use the combinators <code>ControlInfo.sequence</code> and <code>ControlInfo.alternative</code> to combine the control information from their sub-elements. <code>ControlInfo.sequence</code> is used for sequential steps, and <code>ControlInfo.alternative</code> is used to merge control-flow branches.</p>
+<p><a id="Lean___Elab___Do___ControlInfo___sequence"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.ControlInfo.sequence (a b : Elab.Do.ControlInfo) :
+  Elab.Do.ControlInfo
+</code></pre></div><p>The <code>ControlInfo</code> of a sequence <code>a; b</code>: effect flags are unioned, the regular exits are those of <code>b</code>, and the sequence falls through iff both parts fall through.</p>
+<p><a id="Lean___Elab___Do___ControlInfo___alternative"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.ControlInfo.alternative (a b : Elab.Do.ControlInfo) :
+  Elab.Do.ControlInfo
+</code></pre></div><p>The <code>ControlInfo</code> of branches <code>a | b</code>: effect flags are unioned, the regular exits are summed, and the alternative falls through iff at least one branch falls through.</p>
+<p>Generally speaking, control information should be computed using <code>inferControlInfoElem</code> or <code>inferControlInfoSeq</code>.</p>
+<p><a id="Lean___Elab___Do___inferControlInfoElem"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.inferControlInfoElem (doElem : DoElem) :
+  Elab.TermElabM Elab.Do.ControlInfo
+</code></pre></div><p>Infer the <code>ControlInfo</code> of a single doElem.</p>
+<p><a id="Lean___Elab___Do___inferControlInfoSeq"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.inferControlInfoSeq (doSeq : DoSeq) :
+  Elab.TermElabM Elab.Do.ControlInfo
+</code></pre></div><p>Infer the <code>ControlInfo</code> of <code>doSeq</code>.</p>
+<p>In some advanced cases, one of the functions in <code>Lean.Elab.Do.InferControlInfo</code> may be necessary:</p>
+<p><a id="Lean___Elab___Do___InferControlInfo___ofElem"></a></p>
+<p><strong>opaque</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.InferControlInfo.ofElem (stx : DoElem) :
+  Elab.TermElabM Elab.Do.ControlInfo
+</code></pre></div><p><a id="Lean___Elab___Do___InferControlInfo___ofSeq"></a></p>
+<p><strong>opaque</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.InferControlInfo.ofSeq (stx : DoSeq) :
+  Elab.TermElabM Elab.Do.ControlInfo
+</code></pre></div><p><a id="Lean___Elab___Do___InferControlInfo___ofOptionSeq"></a></p>
+<p><strong>opaque</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.InferControlInfo.ofOptionSeq (stx? : Option DoSeq) :
+  Elab.TermElabM Elab.Do.ControlInfo
+</code></pre></div><p><a id="Lean___Elab___Do___InferControlInfo___ofLetOrReassign"></a></p>
+<p><strong>opaque</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.InferControlInfo.ofLetOrReassign (reassigned : Array Ident)
+  (rhs? : Option DoElem)
+  (otherwise? body? : Option (TSyntax `Lean.Parser.Term.doSeqIndent)) :
+  Elab.TermElabM Elab.Do.ControlInfo
+</code></pre></div><p><a id="Lean___Elab___Do___InferControlInfo___ofLetOrReassignArrow"></a></p>
+<p><strong>opaque</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.InferControlInfo.ofLetOrReassignArrow (reassignment : Bool)
+  (decl :
+    TSyntax [`Lean.Parser.Term.doIdDecl, `Lean.Parser.Term.doPatDecl]) :
+  Elab.TermElabM Elab.Do.ControlInfo
+</code></pre></div><p><a id="The-Lean-Language-Reference--Notations-and-Macros--Extending--do--Notation--Elaboration--Mutable-Variables"></a></p>
+<h4 id="23-7-3-5-mutable-variables">23.7.3.5. Mutable Variables</h4><p><a id="Lean___Elab___Do___MutVar___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.MutVar : Type
+</code></pre></div><p>A mutable variable declared by <code>let mut</code> in a <code>do</code> block.</p>
+<p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.MutVar.mk
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ident : Ident
+</code></pre></div><p>The identifier of the <code>let mut</code> declaration.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">baseId : FVarId
+</code></pre></div><p>The <code>FVarId</code> of the initial binding produced by <code>let mut</code>.</p>
+<p>Each mutable variable corresponds to at least one elaborated variable (<code>Expr.fvar</code>). These elaborated variables exist in a local context that tracks their user-visible names. Mutation is implemented via a shadowing <code>let</code>-binding, and subsequent steps in the <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block are elaborated in a context in which this shadowing <code>let</code> is the binding for the variable&#39;s user-visible name. Use the standard elaboration helpers <code>Lean.Meta.getFVarFromUserName</code> and <code>Lean.Meta.getLocalDeclFromUserName</code> to retrieve the local variable associated with a user name, and <code>TSyntax.getId</code> to convert an <code>Ident</code> to a user name that can be looked up.</p>
+<p>When a mutable variable is established with <code>let mut</code>, a <code>let</code>-binding is created to represent it, and the initial variable&#39;s binding identifier and <code>Expr.fvar</code> are added to the context that is used around the continuation, which is invoked under <code>withReader</code> to add the new variable. After establishing the <code>let</code>-binding, use <code>declareMutVar</code> to register one mutable variable or an array of them.</p>
+<p><a id="Lean___Elab___Do___declareMutVar"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.declareMutVar {α : Type} (x : Ident)
+  (k : Elab.Do.DoElabM α) : Elab.Do.DoElabM α
+</code></pre></div><p>Register the given name as that of a <code>mut</code> variable.</p>
+<p><a id="Lean___Elab___Do___declareMutVars"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.declareMutVars {α : Type} (xs : Array Ident)
+  (k : Elab.Do.DoElabM α) : Elab.Do.DoElabM α
+</code></pre></div><p>Register the given names as that of <code>mut</code> variables.</p>
+<p>To ensure that an identifier refers to a mutable variable, use <code>throwUnlessMutVarDeclared</code>:</p>
+<p><a id="Lean___Elab___Do___throwUnlessMutVarDeclared"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.throwUnlessMutVarDeclared (x : Ident) :
+  Elab.Do.DoElabM Unit
+</code></pre></div><p>Throw an error if the given name is not a declared <code>mut</code> variable.</p>
+<p><a id="Lean___Elab___Do___throwUnlessMutVarsDeclared"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.throwUnlessMutVarsDeclared (xs : Array Ident) :
+  Elab.Do.DoElabM Unit
+</code></pre></div><p>Throw an error if the given names are not declared <code>mut</code> variables.</p>
+<p><a id="Tracing-Mutable-Variables"></a>
+Tracing Mutable Variables </p>
+<p>The new syntax <code>dbg_mut</code> traces the current values of all mutable variables.
+<a id="dbgMut-_LPAR_in-Tracing-Mutable-Variables_RPAR_"></a>
+<a id="elabDbgMut-_LPAR_in-Tracing-Mutable-Variables_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := dbgMut) &quot;dbg_mut&quot; : doElem
+
+@[doElem_elab dbgMut] def elabDbgMut : DoElab := fun _stx cont =&gt; do
+  let ctx ← readThe Do.Context
+  let parts : Array Term ← ctx.mutVars.mapM fun (x : MutVar) =&gt; do
+    let nameLit := x.getId.simpMacroScopes.toString
+    `(term| s!&quot;{$(quote nameLit)} = {repr $(x.ident)}&quot;)
+  let msg ← `(term| String.intercalate &quot;, &quot; [$parts,*])
+  elabDoElem (← `(doElem| dbg_trace $msg)) cont
+</code></pre></div><p>There is no interesting control information for <code>dbg_mut</code>.</p>
+<p><a id="dbgMut___control-_LPAR_in-Tracing-Mutable-Variables_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[doElem_control_info dbgMut]
+const dbgMut.control : ControlInfoHandler := fun _ =&gt; do return .pure
+</code></pre></div><p>Tracing a loop that computes Fibonacci numbers shows all the intermediate states:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show IO Unit from do
+  let mut x := 1
+  let mut y := 1
+  for _ in 0...5 do
+    let z := y
+    dbg_mut
+    y := x + y
+    x := z
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">x = 1, y = 1
+x = 1, y = 2
+x = 2, y = 3
+x = 3, y = 5
+x = 5, y = 8
+</code></pre></div><p>The built-in elaborators for mutable variables take care of many subtle details, such as registering each resulting <code>let</code>-binding of the mutable variable as aliases so that IDEs can give appropriate feedback. If at all possible, it is best to reuse these built-in elaborators, either via a macro or by invoking <code>elabDoElem</code> on the appropriate syntax.</p>
+<p><a id="Mutating-Variables"></a>
+Mutating Variables </p>
+<p>The operator <code>censor</code> replaces all mutable variables with the default value defined in their type&#39;s <code>Inhabited</code> instance.
+<a id="doCensor-_LPAR_in-Mutating-Variables_RPAR_"></a>
+<a id="elabCensor-_LPAR_in-Mutating-Variables_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := doCensor) &quot;censor&quot; : doElem
+
+@[doElem_elab doCensor]
+def elabCensor : DoElab := fun stx dec =&gt; do
+  let vars := (← readThe Do.Context).mutVars
+  let dec ← dec.ensureUnitAt stx
+  if h : vars.size = 0 then
+    logErrorAt stx &quot;There are no mutable variables to censor.&quot;
+    dec.continueWithUnit
+  else
+    let assigns ← vars.mapM fun v =&gt;
+      `(doElem| $(v.ident):ident := Inhabited.default)
+    elabDoElems1 assigns dec
+</code></pre></div><p>The <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elaboration context is not available in the control info handler, so there is no way to precisely return the set of all mutable variables as being modified. However, the user names of all local variables are a suitable overapproximation:</p>
+<p><a id="doCensor___control-_LPAR_in-Mutating-Variables_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[doElem_control_info doCensor]
+const doCensor.control : ControlInfoHandler := fun _ =&gt; do
+  return { ControlInfo.pure with
+      reassigns := (← getLCtx).decls.map (·.map (·.userName))
+        |&gt;.foldl (init := .empty) fun
+          | names, some n =&gt; names.insert n
+          | names, none =&gt; names
+    }
+</code></pre></div><p>After using <code>censor</code>, all mutable variables have been reset to their types&#39; default values:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show IO Unit from do
+  let mut x := 0
+  let mut c := 'm'
+  x := x + 1
+  IO.println s!&quot;x: {x}, c: {c}&quot;
+  c := 'f'
+  IO.println s!&quot;x: {x}, c: {c}&quot;
+  censor
+  IO.println s!&quot;x: {x}, c: {c}&quot;
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">x: 1, c: m
+x: 1, c: f
+x: 0, c: A
+</code></pre></div><p><a id="do-elab-effect-lift"></a></p>
+<h4 id="23-7-3-6-lifting-effects">23.7.3.6. Lifting Effects</h4><p>Many useful monadic operators take a function whose return type is within the monad, running this function in some modified way. Examples include <code>withReader</code>, <code>tryCatch</code>, and <code>IO.FS.withFile</code>. Functions like <code>tryCatch</code> have dedicated syntax that allows both the code that might throw an exception and the code that handles it to be part of the surrounding <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block, and thus be able to, for example, reassign mutable variables or return early. These other operators have no such syntax.</p>
+<p>A <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-element elaborator can arrange for the body of the function that is passed to one of these operators in the elaborated expression to be part of the source <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block, just as the exception-handling syntax does. This is done using a <code>EffectForwarder</code>, which generates suitable wrapper code around both the inner sequence of <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements and the function itself. There are three steps:</p>
+<ol>
+<li>A <code>EffectForwarder</code> for the inner sequence is created based on its control info and the current element&#39;s continuation, using <code>EffectForwarder.ofCont</code>.</li>
+<li>The inner sequence is elaborated using <code>EffectForwarder.lift</code>, which supplies the inner elaborator with a suitable continuation that generates the wrapping code.</li>
+<li>Instead of invoking the original continuation, the elaborator invokes a continuation generated by <code>EffectForwarder.restoreCont</code>, which adds suitable unwrapping code to the result.</li>
+</ol>
+<p>The lifting code resembles the implementation of Lean&#39;s built-in <a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html#monad-transformers">monad transformers</a>. For example, if the inner <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-sequence mutates a variable, then the wrapping and unwrapping code arranges for the variable to be passed to the lifted code and returned in a tuple, just like <code>StateT</code>. If the inner <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-sequence could throw an exception, then the lifted version resembles a use of <code>ExceptT</code>.</p>
+<p><a id="Lean___Elab___Do___EffectForwarder___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.EffectForwarder : Type
+</code></pre></div><p>Plan for embedding a non-tail-resumptive body inside <code>origCont</code> via a monad-transformer stack.</p>
+<p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.EffectForwarder.mk
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">origCont : Elab.Do.DoElemCont
+</code></pre></div><p>Continuation of the surrounding <code>do</code> block; restored after the body.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">returnBase? : Option Elab.Do.ControlStack
+</code></pre></div><p>Substack at which the early-return handler was installed, if any.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">breakBase? : Option Elab.Do.ControlStack
+</code></pre></div><p>Substack at which the <code>break</code> handler was installed, if any.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">continueBase? : Option Elab.Do.ControlStack
+</code></pre></div><p>Substack at which the <code>continue</code> handler was installed, if any.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">liftedStack : Elab.Do.ControlStack
+</code></pre></div><p>The full transformer stack over the base monad.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">liftedDoBlockResultType : Expr
+</code></pre></div><p>The body&#39;s elaboration type, <code>stM dec.resultType</code>.</p>
+<p><a id="Lean___Elab___Do___EffectForwarder___ofCont"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.EffectForwarder.ofCont (info : Elab.Do.ControlInfo)
+  (dec : Elab.Do.DoElemCont) : Elab.Do.DoElabM Elab.Do.EffectForwarder
+</code></pre></div><p>Build the lifter plan for a body whose effects are summarised by <code>info</code>.</p>
+<p><a id="Lean___Elab___Do___EffectForwarder___lift"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.EffectForwarder.lift (l : Elab.Do.EffectForwarder)
+  (elabElem : Elab.Do.DoElemCont → Elab.Do.DoElabM Expr) :
+  Elab.Do.DoElabM Expr
+</code></pre></div><p>Elaborate <code>elabElem</code> in the lifted stack: install <code>break</code>/<code>continue</code>/<code>return</code> handlers funnelling into <code>liftedStack</code> and set the doBlock result type to <code>liftedDoBlockResultType</code>. Semantically <code>MonadControl.liftWith fun runInBase =&gt; elabElem (runInBase pure)</code>. Conts passed to <code>elabElem</code> are implicitly wrapped in <code>runInBase</code>, realised later by <code>ControlStack.mkBreak</code>/<code>mkContinue</code>/<code>mkReturn</code> once the transformer stack <code>t</code> is fixed by aggregating effects across <em>all</em> <code>lift</code> sites for this lifter.</p>
+<p><a id="Lean___Elab___Do___EffectForwarder___restoreCont"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Elab.Do.EffectForwarder.restoreCont (l : Elab.Do.EffectForwarder) :
+  Elab.Do.DoElabM Elab.Do.DoElemCont
+</code></pre></div><p>Build a <code>DoElemCont</code> that unpacks the lifted body&#39;s result and resumes <code>origCont.k</code>.</p>
+<p><a id="Syntax-for--withReader"></a>
+Syntax for <code>withReader</code> </p>
+<p>In a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block, <code>locally</code> allows a sequence of <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements to be run with a modified <code>MonadReader</code> context:
+<a id="doLocally-_LPAR_in-Syntax-for--withReader_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := doLocally)
+  &quot;locally &quot; ident &quot; =&gt; &quot; termBeforeDo &quot; do &quot; doSeq : doElem
+</code></pre></div><p>The <code>termBeforeDo</code> parser matches Lean terms that do not themselves contain <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a> outside of parentheses or brackets. Because this new syntax contains a sequence of <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-elements, its control info must be computed from these elements:
+<a id="inferLocally-_LPAR_in-Syntax-for--withReader_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[doElem_control_info doLocally]
+def inferLocally : ControlInfoHandler := fun stx =&gt; do
+  let `(doElem| locally $_:ident =&gt; $_ do $seq) := stx
+    | throwUnsupportedSyntax
+  InferControlInfo.ofSeq seq
+</code></pre></div><p>The actual elaborator starts by computing the control information for the body, and then derives a control lifter from the control information and the original continuation. This control lifter can elaborate the body; it provides its own continuation to the elaborator. Ordinary term elaboration techniques are used to construct the application of <code>withReader</code>, with special attention paid to ensuring that the function argument is elaborated with a non-dependent function type in the correct universe for the monad (which is available in <code>Context.monadInfo</code> as <code>MonadInfo.u</code>). Finally, the control lifter is used once again to reconstruct a suitable continuation for the full elaboration result:
+<a id="elabDoLocally-_LPAR_in-Syntax-for--withReader_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[doElem_elab doLocally] def elabDoLocally : DoElab := fun stx dec =&gt; do
+  let `(doElem| locally $x:ident =&gt; $e do $seq) := stx
+    | throwUnsupportedSyntax
+  let lifter ← EffectForwarder.ofCont (← inferControlInfoElem stx) dec
+  let body ← lifter.lift (elabDoSeq seq)
+  let ρ ← Meta.mkFreshExprMVar (mkSort (.succ (← read).monadInfo.u))
+  let f ← Term.elabTermEnsuringType (← `(fun $x =&gt; $e)) (← mkArrow ρ ρ)
+  Term.synthesizeSyntheticMVarsNoPostponing
+  let wrapped ← Meta.mkAppM ``MonadWithReaderOf.withReader #[f, body]
+  (← lifter.restoreCont).mkBindUnlessPure wrapped
+</code></pre></div><p>With this elaborator in place, the value provided by a <code>ReaderT</code> can be locally overridden while still permitting effects that are tied to the surrounding <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block:
+<a id="App-_LPAR_in-Syntax-for--withReader_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">abbrev App := ReaderT Nat Id
+
+#eval show Id Nat from do
+  Id.run &lt;| (·.run 5) &lt;| show App Nat from do
+    let mut total := 0
+    total := total + (← read)
+    locally r =&gt; r + 100 do
+      -- Mutates an outer variable
+      total := total + (← read)
+      if (← read) &gt; 1000 then
+        -- Early return from the outer block
+        return 999
+    return total
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">110
+</code></pre></div><p><a id="Locally-Violating-Invariants"></a>
+Locally Violating Invariants </p>
+<p>When some invariant of a mutable variable needs to be maintained, it is typically most convenient to use a subtype. However, subtypes have the drawback that the invariant must <em>always</em> be maintained; it cannot be broken locally and re-established. While it is possible to use a second mutable variable for this purpose, this clutters the code and is error-prone. With a suitable extension to <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-notation, local breaking and re-establishment of invariants can be made convenient.</p>
+<p>The first step is to establish syntax for this operation. An <code>open mut</code> will “open” the subtype, freeing the contained data from the restrictions of the predicate in the nested block. After the block is complete, the user must either prove or check that the invariant holds; placing a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a> block in the <code>invariant</code> section indicates that a dynamic check is to be performed. The second syntax definition has an explicit high priority to avoid ambiguity, which ensures that it is used whenever a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a>-block is present.
+<a id="openMutPure-_LPAR_in-Locally-Violating-Invariants_RPAR_"></a>
+<a id="openMutMon-_LPAR_in-Locally-Violating-Invariants_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := openMutPure)
+  &quot;open&quot; &quot;mut&quot; ident &quot;do&quot; doSeq &quot;invariant&quot; term : doElem
+
+syntax (name := openMutMon) (priority := high)
+  &quot;open&quot; &quot;mut&quot; ident &quot;do&quot; doSeq &quot;invariant&quot; &quot;do&quot; doSeq : doElem
+</code></pre></div><p>The control info handlers for these operations are a function of the embedded <code>doSeq</code> syntax:
+<a id="openMutInfo-_LPAR_in-Locally-Violating-Invariants_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[doElem_control_info openMutPure, doElem_control_info openMutMon]
+def openMutInfo : ControlInfoHandler := fun
+  | `(doElem|open mut $x do $steps invariant do $steps') =&gt; do
+    let info ← inferControlInfoSeq steps
+    let info' ← inferControlInfoSeq steps'
+    return info.sequence info'
+  | `(doElem|open mut $x do $steps invariant $tm:term) =&gt;
+    inferControlInfoSeq steps
+  | _ =&gt; throwUnsupportedSyntax
+</code></pre></div><p>The workhorse of the elaborator is a helper that does the following:</p>
+<ol>
+<li>It ensures that the provided name in fact refers to a variable with a subtype, extracting the base type and predicate.</li>
+<li>It extracts the inner value from the subtype.</li>
+<li>It <code>let</code>-binds the inner value, establishing the <code>let</code>-bound variable as an alias and arranging for it to be mutable.</li>
+<li>It elaborates the body with a continuation that invokes the provided elaborator that “closes” the subtype, re-establishing the invariant.</li>
+</ol>
+<p><a id="openMutBody-_LPAR_in-Locally-Violating-Invariants_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def openMutBody (x : Ident) (seq : TSyntax ``doSeq)
+    (mkClose : (p outerTy : Expr) → (base : FVarId) → DoElabM Expr) :
+    DoElabM Expr := do
+  -- Ensure that it is mutable
+  throwUnlessMutVarDeclared x
+  -- Ensure that it is a subtype
+  let outerDecl ← getLocalDeclFromUserName x.getId
+  let ty ← whnf outerDecl.type
+  let (``Subtype, #[α, p]) := ty.getAppFnArgs
+    | throwError &quot;`open mut`: `{x}` is not a subtype, but is a `{ty}`&quot;
+
+  -- Get the value from the subtype
+  let base := outerDecl.fvarId
+  let init ← mkAppM ``Subtype.val #[outerDecl.toExpr]
+
+  -- Let-bind and continue
+  withLetDecl x.getId α init (nondep := false) fun innerX =&gt; do
+    addLocalVarInfo x innerX
+    pushInfoLeaf &lt;| .ofFVarAliasInfo {
+      userName := x.getId, id := innerX.fvarId!, baseId := base
+    }
+    let bodyCont : DoElemCont := {
+      resultName := ← mkFreshUserName `__r, resultType := ← mkPUnit
+      k := mkClose p outerDecl.type base
+    }
+    mkLetFVars #[innerX] (← declareMutVar x do elabDoSeq seq bodyCont)
+</code></pre></div><p>The call to <code>addLocalVarInfo</code> informs the language server about the connection between the elaborated <code>let</code>-bound variable and the identifier in the source code, enabling features such as type information on hover. The <code>pushInfoLeaf</code> combined with <code>Info.ofFVarAliasInfo</code> registers the <code>let</code>-bound variable as an alias of existing bindings.</p>
+<p>Closing the pure version consists of introducing a new <code>let</code>-binding, shadowing and aliasing the mutable variable, with the updated value and proof.</p>
+<p><a id="rebindMut-_LPAR_in-Locally-Violating-Invariants_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function rebindMut (x : Ident) (outerTy repacked : Expr) (base : FVarId)
+    (dec : DoElemCont) : DoElabM Expr :=
+  withLetDecl x.getId outerTy repacked (nondep := false) fun newX =&gt; do
+    addLocalVarInfo x newX
+    pushInfoLeaf &lt;| .ofFVarAliasInfo {
+      userName := x.getId, id := newX.fvarId!, baseId := base
+    }
+    mkLetFVars #[newX] (← dec.continueWithUnit)
+</code></pre></div><p>The elaborator for the pure version connects the two pieces:
+<a id="elabOpenMutPure-_LPAR_in-Locally-Violating-Invariants_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[doElem_elab openMutPure]
+def elabOpenMutPure : DoElab := fun stx dec =&gt; do
+  let `(doElem| open mut $x:ident do $seq invariant $prf:term) := stx
+    | throwUnsupportedSyntax
+  let dec ← dec.ensureUnitAt x
+  openMutBody x seq fun p outerTy base =&gt; do
+    let cur ← getFVarFromUserName x.getId
+    let proof ← Term.elabTermEnsuringType prf (mkApp p cur)
+    rebindMut x outerTy (← mkAppM ``Subtype.mk #[cur, proof]) base dec
+</code></pre></div><p>To demonstrate this feature in action, take the type <code>Pos</code> of nonzero natural numbers:
+<a id="Pos-_LPAR_in-Locally-Violating-Invariants_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">abbrev Pos := { n : Nat // 0 &lt; n }
+</code></pre></div><p>Within the <code>open</code> block, <code>x</code> has type <code>Nat</code>. Both it and other mutable variables can be reassigned:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show Id (Pos × Nat) from do
+  let mut other := 100
+  let mut x : Pos := ⟨10, by grind⟩
+  open mut x do
+    x := x * 2
+    other := other + x
+    x := x + 1
+  invariant by grind
+  return (x, other)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(21, 120)
+</code></pre></div><p>Likewise, the inner block can <code>return</code> from the outer <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a> block:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show Id (Nat × Nat) from do
+  let mut other := 100
+  let mut x : Pos := ⟨10, by grind⟩
+  open mut x do
+    x := x * 2
+    other := other + x
+    if other &gt; 0 then return (0, other)
+    x := x + 1
+  invariant by grind
+  return (x.val, other)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(0, 120)
+</code></pre></div><p>For cases where it is impossible to prove that the returned value satisfies the predicate, it can still be useful to <em>check</em> that it does. The elaborator for the monadic variant expects a <code>PLift</code>&#39;ed proof to be returned:
+<a id="closeInvariant-_LPAR_in-Locally-Violating-Invariants_RPAR_"></a>
+<a id="elabOpenMutMon-_LPAR_in-Locally-Violating-Invariants_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def closeInvariant {α : Type} {P : α → Prop} [Monad m]
+    (val : α) (act : m (PLift (P val))) : m (Subtype P) :=
+  return ⟨val, (← act).down⟩
+
+@[doElem_elab openMutMon]
+def elabOpenMutMon : DoElab := fun stx dec =&gt; do
+  let `(doElem| open mut $x:ident do $seq invariant do $invSeq) := stx
+    | throwUnsupportedSyntax
+  let dec ← dec.ensureUnitAt x
+  openMutBody x seq fun _p outerTy base =&gt; do
+    let cur ← getFVarFromUserName x.getId
+    let actionStx ←
+      ``(closeInvariant $(← Term.exprToSyntax cur) (do $invSeq))
+    let action ← elabTermEnsuringType actionStx (← mkMonadApp outerTy)
+    let rn ← mkFreshUserName `__repacked
+    let closeCont : DoElemCont := {
+      resultName := rn, resultType := outerTy
+      k := do
+        let d ← getLocalDeclFromUserName rn
+        rebindMut x outerTy d.toExpr base dec
+    }
+    closeCont.mkBindUnlessPure action
+</code></pre></div><p>Now, a runtime check can ensure the invariant, or throw an exception if it does not hold:</p>
+<p><a id="trySub3-_LPAR_in-Locally-Violating-Invariants_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function trySub3 (x : Pos) : IO Pos := do
+  let mut x := x
+  open mut x do
+    x := x - 3
+  invariant do
+    if h : 0 &lt; x then pure ⟨h⟩
+    else throw (IO.userError s!&quot;Not positive: x = {x}&quot;)
+  return x
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval trySub3 ⟨10, by grind⟩
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">7
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval trySub3 ⟨3, by grind⟩
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Not positive: x = 0
+</code></pre></div><h2 id="preserved-native-diagnostic-displays">Preserved native diagnostic displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(&quot;neg&quot;, &quot;zero&quot;, &quot;pos&quot;)
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Variable `y` cannot be mutated. Only variables declared using `let mut` can be mutated.
+      If you did not intend to mutate but define `y`, consider using `let y` instead
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Type mismatch
+  x
+has type
+  Nat
+but is expected to have type
+  PUnit
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">some ()
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(&quot;small&quot;, &quot;medium&quot;, &quot;large&quot;)
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">100
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">This `do` element and its control-flow region are dead code. Consider removing it.
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">2
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">x = 1, y = 1
+x = 1, y = 2
+x = 2, y = 3
+x = 3, y = 5
+x = 5, y = 8
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">x: 1, c: m
+x: 1, c: f
+x: 0, c: A
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">110
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(21, 120)
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(0, 120)
+</code></pre></div><h3 id="display-14">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">7
+</code></pre></div><h3 id="display-15">Display 15</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Not positive: x = 0
+</code></pre></div><h2 id="preserved-native-proof-state-displays">Preserved native proof-state displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ ∀ (x : Nat), x ∈ xs → x % 2 = 1
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">All goals completed! 🐙
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">other:Nat := 100⊢ 0 &lt; 10
+</code></pre></div><h3 id="display-4-2">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">other✝:Nat := 100x✝²:Pos := ⟨10, _eval._proof_1⟩x✝¹:Nat := x✝².valx✝:Nat := x✝¹ * 2other:Nat := other✝ + x✝x:Nat := x✝ + 1⊢ (fun n =&gt; 0 &lt; n) x
+</code></pre></div><h3 id="display-5-2">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">other✝:Nat := 100x✝²:Pos := ⟨10, _eval._proof_1⟩x✝¹:Nat := x✝².valx✝:Nat := x✝¹ * 2other:Nat := other✝ + x✝__r✝¹:Unitx:Nat := x✝ + 1⊢ (fun n =&gt; 0 &lt; n) x
+</code></pre></div><h3 id="display-6-2">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ 0 &lt; 10
+</code></pre></div><h3 id="display-7-2">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ 0 &lt; 3
+</code></pre></div><footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

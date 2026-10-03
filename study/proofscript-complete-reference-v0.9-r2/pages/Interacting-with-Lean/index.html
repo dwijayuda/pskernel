@@ -1,0 +1,1684 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;interaction&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../Introduction/index.html">1. Introduction</a><a href="../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="index.html">3. Interacting with Lean</a><a href="../The-Type-System/index.html">4. The Type System</a><a href="../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../Definitions/index.html">7. Definitions</a><a href="../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../Axioms/index.html">8. Axioms</a><a href="../Attributes/index.html">9. Attributes</a><a href="../Type-Classes/index.html">10. Type Classes</a><a href="../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../Coercions/index.html">11. Coercions</a><a href="../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../Terms/index.html">13. Terms</a><a href="../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../Terms/Functions/index.html">13.3. Functions</a><a href="../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../Terms/Holes/index.html">13.9. Holes</a><a href="../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../Terms/Proofs/index.html">13.13. Proofs</a><a href="../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../The-Simplifier/index.html">15. The Simplifier</a><a href="../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../The--grind--tactic/index.html">16. The grind tactic</a><a href="../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../Basic-Types/index.html">20. Basic Types</a><a href="../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../IO/index.html">21. IO</a><a href="../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../IO/Console-Output/index.html">21.3. Console Output</a><a href="../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../IO/Timing/index.html">21.8. Timing</a><a href="../IO/Processes/index.html">21.9. Processes</a><a href="../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../Iterators/index.html">22. Iterators</a><a href="../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../Notations-and-Macros/index.html">23. Notations and Macros</a><a href="../Notations-and-Macros/Custom-Operators/index.html">23.1. Custom Operators</a><a href="../Notations-and-Macros/Precedence/index.html">23.2. Precedence</a><a href="../Notations-and-Macros/Notations/index.html">23.3. Notations</a><a href="../Notations-and-Macros/Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../Notations-and-Macros/Macros/index.html">23.5. Macros</a><a href="../Notations-and-Macros/Elaborators/index.html">23.6. Elaborators</a><a href="../Notations-and-Macros/Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../Notations-and-Macros/Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../Error-Explanations/index.html">Error Explanations</a><a href="../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../releases/index.html">Release Notes</a><a href="../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../platforms/index.html">Supported Platforms</a><a href="../the-index/index.html">Index</a><a href="../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="interaction"></a></p>
+<h1 id="proofscript-3-interacting-with-lean">ProofScript — 3. Interacting with Lean</h1><p><a href="../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>Use native inspection commands in supported lifted command slots. A #check result describes typing; #reduce performs logical reduction; #eval uses an execution route. Runtime output is not automatically evidence of a proposition. Source maps should report original .ps locations, and theorem inspection should expose exact assumptions. Commands and command-line switches belonging to the Lean executable are reference-tool operations, not newly implemented PSC commands.</p>
+<h2 id="proofscript-way-of-writing-it">ProofScript way of writing it</h2><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check Nat
+#check Nat.add
+
+#reduce Nat.add(2, 3)
+#eval Nat.add(2, 3)
+</code></pre></div><p><strong>Compiler and coverage boundary.</strong> D-CALL in command term positions requires an explicit lifted category. Preserve options and imported registrations during incremental checking.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/Interacting-with-Lean/index.html">Interacting-with-Lean/index.html</a>. Source Git blob: <code>dd92d04daf4ed6bd54c50fd05dbb70e8cc145c26</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<p><a id="docstring-section-Instance-Constructor"></a>
+<a id="docstring-section-Methods"></a>
+<a id="docstring-section-Instance-Constructor-next"></a>
+<a id="docstring-section-Methods-next"></a>
+<a id="docstring-section-Constructors-next"></a>
+<a id="docstring-section-Constructors-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next"></a>
+<a id="docstring-section-Methods-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next"></a></p>
+<hr>
+<h2 id="3-interacting-with-lean">3. Interacting with Lean</h2><p>Lean is designed for interactive use, rather than as a batch-mode system in which whole files are fed in and then translated to either object code or error messages. Many programming languages designed for interactive use provide a 
+<a id="--tech-term-REPL"></a>
+REPL,Short for “<strong>R</strong>ead-<strong>E</strong>val-<strong>P</strong>rint <strong>L</strong>oop”, because code is parsed (“read”), evaluated, and the result displayed, with this process repeated as many times as desired. at which code can be input and tested, along with commands for loading source files, type checking terms, or querying the environment. Lean&#39;s interactive features are based on a different paradigm. Rather than a separate command prompt outside of the program, Lean provides <a href="../Source-Files-and-Modules/index.html#--tech-term-commands">commands</a> for accomplishing the same tasks in the context of a source file. By convention, commands that are intended for interactive use rather than as part of a durable code artifact are prefixed with <code>#</code>.</p>
+<p>Information from Lean commands is available in the 
+<a id="--tech-term-message-log"></a>
+<em>message log</em>, which accumulates output from the <a href="../Terms/index.html#--tech-term-elaborator">elaborator</a>. Each entry in the message log is associated with a specific source range and has a 
+<a id="--tech-term-severity"></a>
+<em>severity</em>. There are three severities: <code>information</code> is used for messages that do not indicate a problem, <code>warning</code> indicates a potential problem, and <code>error</code> indicates a definite problem. For interactive commands, results are typically returned as informational messages that are associated with the command&#39;s leading keyword.</p>
+<p><a id="hash-eval"></a></p>
+<h3 id="3-1-evaluating-terms">3.1. Evaluating Terms</h3><p>The <a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a> command is used to run code as a program. In particular, it is capable of executing <code>IO</code> actions, it uses a call-by-value evaluation strategy, <a href="../Definitions/Recursive-Definitions/index.html#partial-unsafe"><code>partial</code> functions are executed</a>, and both types and proofs are erased. Use <a href="index.html#Lean___reduceCmd"><code>#reduce</code></a> to instead reduce terms using the reduction rules that are part of <a href="../The-Type-System/index.html#--tech-term-definitional-equality">definitional equality</a>.</p>
+<p><a id="command-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Evaluating Terms</strong></p>
+<p><a id="Lean___Parser___Command___eval"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #eval term
+</code></pre></div><p><a id="Lean___Parser___Command___evalBang"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #eval! term
+</code></pre></div><p><code>#eval e</code> evaluates the expression <code>e</code> by compiling it and running the compiled code. It then prints the resulting value.</p>
+<ul>
+<li>The command attempts to use <code>ToExpr</code>, <code>Repr</code>, or <code>ToString</code> instances to print the result.</li>
+<li>If <code>e</code> is a monadic value of type <code>m ty</code>, then the command tries to adapt the monad <code>m</code> to one of the monads that <code>#eval</code> supports, which include <code>IO</code>, <code>CoreM</code>, <code>MetaM</code>, <code>TermElabM</code>, and <code>CommandElabM</code>. Users can define <code>MonadEval</code> instances to extend the list of supported monads.</li>
+</ul>
+<p>The <code>#eval</code> command gracefully degrades in capability depending on what is imported. Importing the <code>Lean.Elab.Command</code> module provides full capabilities.</p>
+<p>Due to unsoundness, <code>#eval</code> refuses to evaluate expressions that depend on <code>sorry</code>, even indirectly, since the presence of <code>sorry</code> can lead to runtime instability and crashes. This check can be overridden with the <code>#eval! e</code> command.</p>
+<p>Options:</p>
+<ul>
+<li>If <code>eval.pp</code> is true (default: true) then tries to use <code>ToExpr</code> instances to make use of the usual pretty printer. Otherwise, only tries using <code>Repr</code> and <code>ToString</code> instances.</li>
+<li>If <code>eval.type</code> is true (default: false) then pretty prints the type of the evaluated value.</li>
+<li>If <code>eval.derive.repr</code> is true (default: true) then attempts to auto-derive a <code>Repr</code> instance when there is no other way to print the result.</li>
+</ul>
+<p>See also: <code>#reduce e</code> for evaluation by term reduction.</p>
+<p><a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a> always <a href="../Terms/index.html#--tech-term-elaborator">elaborates</a> and compiles the provided term. It then checks whether the term transitively depends on any uses of <code>sorry</code>, in which case evaluation is terminated unless the command was invoked as <a href="index.html#Lean___Parser___Command___eval"><code>#eval!</code></a>. This is because compiled code may rely on compile-time invariants (such as array lookups being in-bounds) that are ensured by proofs of suitable statements, and running code that contains incomplete proofs (or uses of <code>sorry</code> that “prove” incorrect statements) can cause Lean itself to crash.</p>
+<p>The way the code is run depends on its type:</p>
+<ul>
+<li>If the type is in the <code>IO</code> monad, then it is executed in a context where <a href="../IO/Files___-File-Handles___-and-Streams/index.html#--tech-term-standard-output">standard output</a> and <a href="../IO/Files___-File-Handles___-and-Streams/index.html#--tech-term-standard-error">standard error</a> are captured and redirected to the Lean <a href="index.html#--tech-term-message-log">message log</a>. If the returned value&#39;s type is not <code>Unit</code>, then it is displayed as if it were the result of a non-monadic expression.</li>
+<li>If the type is in one of the internal Lean metaprogramming monads (<code>CommandElabM</code>, <code>TermElabM</code>, <code>MetaM</code>, or <code>CoreM</code>), then it is run in the current context. For example, the environment will contain the definitions that are in scope where <a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a> is invoked. As with <code>IO</code>, the resulting value is displayed as if it were the result of a non-monadic expression. When Lean is running under <a href="../Build-Tools-and-Distribution/Lake/index.html#lake">Lake</a>, its working directory (and thus the working directory for <code>IO</code> actions) is the current <a href="../Build-Tools-and-Distribution/Lake/index.html#--tech-term-workspace"><code>workspace</code></a>.</li>
+<li>If the type is in some other monad <code>m</code>, and there is a <code>MonadLiftT m CommandElabM</code> or <code>MonadEvalT m CommandElabM</code> instance, then <code>MonadLiftT.monadLift</code> or <code>MonadEvalT.monadEval</code> is used to transform the monad into one that may be run with <a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a>, after which it is run as usual.</li>
+<li>If the term&#39;s type is not in any of the supported monads, then it is treated as a pure value. The compiled code is run, and the result is displayed.</li>
+</ul>
+<p>Auxiliary definitions or other environment modifications that result from elaborating the term in <a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a> are discarded. If the term is an action in a metaprogramming monad, then changes made to the environment by running the monadic action are preserved.</p>
+<p>When used in a <a href="../Source-Files-and-Modules/index.html#--tech-term-module"><code>module</code></a>, <a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a> reveals a difference between the way the Lean language server and the Lean compiler process files. Because it runs code at compile time, <a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a> requires that its code is available in the <a href="../Source-Files-and-Modules/index.html#--tech-term-meta-phase">meta phase</a>. To make easier to experiment with a module, the language server makes all imported modules available in the meta phase, while the compiler strictly adheres to the <code>meta</code> declarations. As a result, modules that use <a href="index.html#Lean___guardMsgsCmd"><code>#guard_msgs</code></a> together with <a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a> to embed lightweight tests may elaborate successfully in the language server but fail during a build. To fix this, the definitions can be imported with <code>meta import</code> in the module that contains the test:</p>
+<p><a id="Evaluation-and-Meta"></a>
+Evaluation and Meta  <code>Eval/Even.lean</code></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">module
+public section
+function isEven (n : Nat) : Bool :=
+  n % 2 = 0
+</code></pre></div><p>  <code>Eval.lean</code></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">module
+import Eval.Even
+
+/-- info: [true, false] -/
+#guard_msgs in
+#eval [isEven 4, isEven 5]
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">❌️ Docstring on `#guard_msgs` does not match generated message:
+
+- info: [true, false]
++ error: Invalid `meta` definition `_eval`, `isEven` is not accessible here; consider adding `public meta import Eval.Even`
+</code></pre></div><p>Importing <code>isEven</code> to the meta phase fixes the problem:</p>
+<p>  <code>Eval/Even.lean</code></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">module
+public section
+function isEven (n : Nat) : Bool :=
+  n % 2 = 0
+</code></pre></div><p>  <code>Eval.lean</code></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">module
+meta import Eval.Even
+
+/-- info: [true, false] -/
+#guard_msgs in
+#eval [isEven 4, isEven 5]
+</code></pre></div><p>Results are displayed using a <code>ToExpr</code>, <code>ToString</code>, or <code>Repr</code> instance, if they exist. If not, and <code>eval.derive.repr</code> is <code>true</code>, Lean attempts to derive a suitable <code>Repr</code> instance. It is an error if no suitable instance can be found or derived. Setting <code>eval.pp</code> to <code>false</code> disables the use of <code>ToExpr</code> instances by <a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a>.</p>
+<p><a id="Displaying-Output"></a>
+Displaying Output </p>
+<p><a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a> cannot display functions:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval fun x =&gt; x + 1
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Could not synthesize a `ToExpr`, `Repr`, or `ToString` instance for type
+  Nat → Nat
+</code></pre></div><p>It is capable of deriving instances to display output that has no <code>ToString</code> or <code>Repr</code> instance:
+<a id="Quadrant-_LPAR_in-Displaying-Output_RPAR_"></a>
+<a id="Quadrant___nw-_LPAR_in-Displaying-Output_RPAR_"></a>
+<a id="Quadrant___sw-_LPAR_in-Displaying-Output_RPAR_"></a>
+<a id="Quadrant___se-_LPAR_in-Displaying-Output_RPAR_"></a>
+<a id="Quadrant___ne-_LPAR_in-Displaying-Output_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Quadrant where
+  | nw | sw | se | ne
+
+#eval Quadrant.nw
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Quadrant.nw
+</code></pre></div><p>The derived instance is not saved. Disabling <code>eval.derive.repr</code> causes <a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a> to fail:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">set_option eval.derive.repr false
+#eval Quadrant.nw
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Could not synthesize a `ToExpr`, `Repr`, or `ToString` instance for type
+  Quadrant
+</code></pre></div><p><a id="eval___pp"></a></p>
+<p><strong>option</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">eval.pp
+</code></pre></div><p>Default value: <code>true</code></p>
+<p>(&#39;#eval&#39; command) enables using &#39;ToExpr&#39; instances to pretty print the result, otherwise uses &#39;Repr&#39; or &#39;ToString&#39; instances</p>
+<p><a id="eval___type"></a></p>
+<p><strong>option</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">eval.type
+</code></pre></div><p>Default value: <code>false</code></p>
+<p>(&#39;#eval&#39; command) enables pretty printing the type of the result</p>
+<p><a id="eval___derive___repr"></a></p>
+<p><strong>option</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">eval.derive.repr
+</code></pre></div><p>Default value: <code>true</code></p>
+<p>(&#39;#eval&#39; command) enables auto-deriving &#39;Repr&#39; instances as a fallback</p>
+<p>Monads can be given the ability to execute in <a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a> by defining a suitable <code>MonadLift``MonadLift</code> is described in <a href="../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html#lifting-monads">the section on lifting monads.</a> or <code>MonadEval</code> instance. Just as <code>MonadLiftT</code> is the transitive closure of <code>MonadLift</code> instances, <code>MonadEvalT</code> is the transitive closure of <code>MonadEval</code> instances. As with <code>MonadLiftT</code> users should not define additional instances of <code>MonadEvalT</code> directly.</p>
+<p><a id="MonadEval___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">MonadEval.{u, v, w} (m : semiOutParam (Type u → Type v))
+  (n : Type u → Type w) : Type (max (max (u + 1) v) w)
+</code></pre></div><p>Typeclass used for adapting monads. This is similar to <code>MonadLift</code>, but instances are allowed to make use of default state for the purpose of synthesizing such an instance, if necessary. Every <code>MonadLift</code> instance gives a <code>MonadEval</code> instance.</p>
+<p>The purpose of this class is for the <code>#eval</code> command, which looks for a <code>MonadEval m CommandElabM</code> or <code>MonadEval m IO</code> instance.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">MonadEval.mk.{u, v, w}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">monadEval : {α : Type u} → m α → n α
+</code></pre></div><p>Evaluates a value from monad <code>m</code> into monad <code>n</code>.</p>
+<p><a id="MonadEvalT___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">MonadEvalT.{u, v, w} (m : Type u → Type v) (n : Type u → Type w) :
+  Type (max (max (u + 1) v) w)
+</code></pre></div><p>The transitive closure of <code>MonadEval</code>.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">MonadEvalT.mk.{u, v, w}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">monadEval : {α : Type u} → m α → n α
+</code></pre></div><p>Evaluates a value from monad <code>m</code> into monad <code>n</code>.</p>
+<p><a id="hash-reduce"></a></p>
+<h3 id="3-2-reducing-terms">3.2. Reducing Terms</h3><p>The <a href="index.html#Lean___reduceCmd"><code>#reduce</code></a> command repeatedly applies reductions to a term until no further reductions are possible. Reductions are performed under binders, but to avoid unexpected slowdowns, proofs and types are skipped unless the corresponding options to <a href="index.html#Lean___reduceCmd"><code>#reduce</code></a> are enabled. Unlike <a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a> command, reduction cannot have side effects and the result is displayed as a term rather than via a <code>ToString</code> or <code>Repr</code> instance.</p>
+<p>Generally speaking, <a href="index.html#Lean___reduceCmd"><code>#reduce</code></a> is primarily useful for diagnosing issues with definitional equality and proof terms, while <a href="index.html#Lean___Parser___Command___eval"><code>#eval</code></a> is more suitable for computing the value of a term. In particular, functions defined using <a href="../Definitions/Recursive-Definitions/index.html#--tech-term-well-founded-recursion">well-founded recursion</a> or as <a href="../Definitions/Recursive-Definitions/index.html#--tech-term-partial-fixpoint">partial fixpoints</a> are either very slow to compute with the reduction engine, or will not reduce at all.</p>
+<p><a id="command-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Reducing Terms</strong></p>
+<p><a id="Lean___reduceCmd"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #reduce ((ident := term))* term
+</code></pre></div><p><code>#reduce &lt;expression&gt;</code> reduces the expression <code>&lt;expression&gt;</code> to its normal form. This involves applying reduction rules until no further reduction is possible.</p>
+<p>By default, proofs and types within the expression are not reduced. Use modifiers <code>(proofs := true)</code> and <code>(types := true)</code> to reduce them. Recall that propositions are types in Lean.</p>
+<p><strong>Warning:</strong> This can be a computationally expensive operation, especially for complex expressions.</p>
+<p>Consider using <code>#eval &lt;expression&gt;</code> for simple evaluation/execution of expressions.</p>
+<p><a id="Reducing-Functions"></a>
+Reducing Functions </p>
+<p>Reducing a term results in its normal form in Lean&#39;s logic. Because the underlying term is reduced and then displayed, there is no need for a <code>ToString</code> or <code>Repr</code> instance. Functions can be displayed just as well as any other term.</p>
+<p>In some cases, this normal form is short and resembles a term that a person might write:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#reduce (fun x =&gt; x + 1)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">fun x =&gt; x.succ
+</code></pre></div><p>In other cases, the details of <a href="../Definitions/Recursive-Definitions/index.html#elab-as-course-of-values">the elaboration of functions</a> such as addition to Lean&#39;s core logic are exposed:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#reduce (fun x =&gt; 1 + x)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">fun x =&gt; (Nat.rec ⟨fun x =&gt; x, PUnit.unit⟩ (fun n n_ih =&gt; ⟨fun x =&gt; (n_ih.1 x).succ, n_ih⟩) x).1 1
+</code></pre></div><p><a id="hash-check"></a></p>
+<h3 id="3-3-checking-types">3.3. Checking Types</h3><p><a id="command-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Checking Types</strong></p>
+<p><code>#check</code> can be used to elaborate a term and check its type.</p>
+<p><a id="Lean___Parser___Command___check"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #check term
+</code></pre></div><p>If the provided term is an identifier that is the name of a global constant, then <code>#check</code> prints its signature. Otherwise, the term is elaborated as a Lean term and its type is printed.</p>
+<p>Elaboration of the term in <a href="index.html#Lean___Parser___Command___check"><code>#check</code></a> does not require that the term is fully elaborated; it may contain metavariables. If the term as written <em>could</em> have a type, elaboration succeeds. If a required instance could never be synthesized, then elaboration fails; synthesis problems that are due to metavariables do not block elaboration.</p>
+<p><a id="___check--and-Underdetermined-Types"></a>
+<code>#check</code> and Underdetermined Types </p>
+<p>In this example, the type of the list&#39;s elements is not determined, so the type contains a metavariable:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check fun x =&gt; [x]
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">fun x =&gt; [x] : ?m.4 → List ?m.4
+</code></pre></div><p>In this example, both the type of the terms being added and the result type of the addition are unknown, because <code>HAdd</code> allows terms of different types to be added. Behind the scenes, a metavariable represents the unknown <code>HAdd</code> instance.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check fun x =&gt; x + x
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">fun x =&gt; x + x : (x : ?m.7) → ?m.8 x
+</code></pre></div><p><a id="command-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Testing Type Errors</strong></p>
+<p><a id="Lean___Parser___Command___check_failure"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #check_failure term
+</code></pre></div><p>This variant of <a href="index.html#Lean___Parser___Command___check"><code>#check</code></a> elaborates the term using the same process as <a href="index.html#Lean___Parser___Command___check"><code>#check</code></a>. If elaboration succeeds, it is an error; if it fails, there is no error. The partially-elaborated term and any type information that was discovered are added to the <a href="index.html#--tech-term-message-log">message log</a>.</p>
+<p><a id="Checking-for-Type-Errors"></a>
+Checking for Type Errors </p>
+<p>Attempting to add a string to a natural number fails, as expected:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check_failure &quot;one&quot; + 1
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">failed to synthesize instance of type class
+  HAdd String Nat ?m.5
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+</code></pre></div><p>Nonetheless, a partially-elaborated term is available:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">&quot;one&quot; + 1 : ?m.5
+</code></pre></div><p><a id="hash-synth"></a></p>
+<h3 id="3-4-synthesizing-instances">3.4. Synthesizing Instances</h3><p><a id="command-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Synthesizing Instances</strong></p>
+<p><a id="Lean___Parser___Command___synth"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #synth term
+</code></pre></div><p>The <a href="index.html#Lean___Parser___Command___synth"><code>#synth</code></a> command invokes Lean&#39;s <a href="../Type-Classes/index.html#--tech-term-type-class">type class</a> resolution machinery and attempts to perform <a href="../Type-Classes/Instance-Synthesis/index.html#instance-synth">instance synthesis</a> to find an instance for the given type class. If it succeeds, then the resulting instance term is output.</p>
+<p><a id="Synthesizing-a-Type-Class-Instance"></a>
+Synthesizing a Type Class Instance  </p>
+<p>Lean uses type classes to overload operations like addition. The <code>+</code> operator is notation for a call to <code>HAdd.hAdd</code>, which is the single method in the <code>HAdd</code> type class. This example shows that Lean will let us add two integers, and the result will be an integer:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#synth HAdd Int Int Int
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">instHAdd
+</code></pre></div><p>By default, Lean does not show the implicit arguments in the output term. Instance arguments are implicit, however, which decreases the usefulness of this output for understanding instance synthesis. Setting the option <code>pp.explicit</code> to <code>true</code> causes Lean to display implicit arguments, including instances:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">set_option pp.explicit true in
+#synth HAdd Int Int Int
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">@instHAdd Int Int.instAdd
+</code></pre></div><p>Lean does not allow the addition of integers and strings, as demonstrated by this failure of type class instance synthesis:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#synth HAdd Int String String
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">failed to synthesize
+  HAdd Int String String
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+</code></pre></div><p><a id="hash-print"></a></p>
+<h3 id="3-5-querying-the-context">3.5. Querying the Context</h3><p>The <code>#print</code> family of commands are used to query Lean for information about definitions.</p>
+<p><a id="command-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Printing Definitions</strong></p>
+<p><a id="Lean___Parser___Command___print"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #print ident
+</code></pre></div><p>Prints the definition of a constant.</p>
+<p>Printing a definition with <code>#print</code> prints the definition as a term. Theorems that were proved using <a href="../Tactic-Proofs/index.html#tactics">tactics</a> may be very large when printed as terms.</p>
+<p><a id="command-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Printing Strings</strong></p>
+<p><a id="Lean___Parser___Command___print-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #print str
+</code></pre></div><p>Adds the string literal to Lean&#39;s <a href="index.html#--tech-term-message-log">message log</a>.</p>
+<p><a id="command-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Printing Axioms</strong></p>
+<p><a id="Lean___Parser___Command___printAxioms"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #print axioms ident
+</code></pre></div><p>Lists all axioms that the constant transitively relies on. See <a href="../Axioms/index.html#print-axioms">the documentation for axioms</a> for more information.</p>
+<p><a id="Printing-Axioms"></a>
+Printing Axioms </p>
+<p>These two functions each swap the elements in a pair of bitvectors:</p>
+<p><a id="swap-_LPAR_in-Printing-Axioms_RPAR_"></a>
+<a id="swap___-_LPAR_in-Printing-Axioms_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function swap (x y : BitVec 32) : BitVec 32 × BitVec 32 :=
+  (y, x)
+
+function swap' (x y : BitVec 32) : BitVec 32 × BitVec 32 :=
+  let x := x ^^^ y
+  let y := x ^^^ y
+  let x := x ^^^ y
+  (x, y)
+</code></pre></div><p>They can be proven equal using <a href="../The-Type-System/Functions/index.html#function-extensionality">function extensionality</a>, the <a href="../The-Simplifier/index.html#the-simplifier">simplifier</a>, and <code>bv_decide</code>:
+<a id="swap_eq_swap___-_LPAR_in-Printing-Axioms_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">theorem swap_eq_swap' : swap = swap' := by
+  funext x y
+  simp only [swap, swap', Prod.mk.injEq]
+  bv_decide
+</code></pre></div><p>The resulting proof makes use of a number of axioms:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#print axioms swap_eq_swap'
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">'swap_eq_swap'' depends on axioms: [propext, Classical.choice, Quot.sound, swap_eq_swap'._native.bv_decide.ax_3]
+</code></pre></div><p>The axiom <code>swap_eq_swap&#39;._native.bv_decide.ax_3</code> was generated by <code>bv_decide</code>, showing that native code was used to translate an external proof certificate into a Lean proof term.</p>
+<p><a id="command-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Printing Equations</strong></p>
+<p>The command <code>#print equations</code>, which can be abbreviated <code>#print eqns</code>, displays the <a href="../Elaboration-and-Compilation/index.html#--tech-term-equational-lemmas">equational lemmas</a> for a function.</p>
+<p><a id="Lean___Parser___Command___printEqns"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #print equations ident
+</code></pre></div><p><a id="Lean___Parser___Command___printEqns-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #print eqns ident
+</code></pre></div><p><a id="Printing-Equations"></a>
+Printing Equations 
+<a id="intersperse-_LPAR_in-Printing-Equations_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def intersperse (x : α) : List α → List α
+  | y :: z :: zs =&gt; y :: x :: intersperse x (z :: zs)
+  | xs =&gt; xs
+
+#print equations intersperse
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">equations:
+@[backward_defeq] theorem intersperse.eq_1.{u_1} : ∀ {α : Type u_1} (x y z : α) (zs : List α),
+  intersperse x (y :: z :: zs) = y :: x :: intersperse x (z :: zs)
+theorem intersperse.eq_2.{u_1} : ∀ {α : Type u_1} (x : α) (x_1 : List α),
+  (∀ (y z : α) (zs : List α), x_1 = y :: z :: zs → False) → intersperse x x_1 = x_1
+</code></pre></div><p>It does not print the defining equation, nor the unfolding equation:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check intersperse.eq_def
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">intersperse.eq_def.{u_1} {α : Type u_1} (x : α) (x✝ : List α) :
+  intersperse x x✝ =
+    match x✝ with
+    | y :: z :: zs =&gt; y :: x :: intersperse x (z :: zs)
+    | xs =&gt; xs
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check intersperse.eq_unfold
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">intersperse.eq_unfold.{u_1} :
+  @intersperse = fun {α} x x_1 =&gt;
+    match x_1 with
+    | y :: z :: zs =&gt; y :: x :: intersperse x (z :: zs)
+    | xs =&gt; xs
+</code></pre></div><p><a id="command-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Scope Information</strong></p>
+<p><code>#where</code> gives a description of the state of the current scope scope. This includes the current namespace, <code>open</code> namespaces, <code>universe</code> and <code>variable</code> commands, and options set with <code>set_option</code>.</p>
+<p><a id="Lean___Parser___Command___where"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #where
+</code></pre></div><p><a id="Scope-Information"></a>
+Scope Information </p>
+<p>The <a href="index.html#Lean___Parser___Command___where"><code>#where</code></a> command displays all the modifications made to the current <a href="../Namespaces-and-Sections/index.html#--tech-term-section-scope">section scope</a>, both in the current scope and in the scopes in which it is nested.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">public section
+open Nat
+
+namespace A
+variable (n : Nat)
+namespace B
+
+open List
+set_option pp.tagAppFns true
+
+#where
+
+end A.B
+end
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">public section
+
+namespace A.B
+
+open Nat List
+
+variable (n : Nat)
+
+set_option pp.tagAppFns true
+</code></pre></div><p><a id="command-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Checking the Lean Version</strong></p>
+<p>Shows the current Lean version. Prints <code>Lean.versionString</code>.</p>
+<p><a id="Lean___Parser___Command___version"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | #version
+</code></pre></div><p><a id="hash-guard_msgs"></a></p>
+<h3 id="3-6-testing-output-with-guard-msgs">3.6. Testing Output with #guard_msgs</h3><p>The <a href="index.html#Lean___guardMsgsCmd"><code>#guard_msgs</code></a> command can be used to ensure that the messages output by a command are as expected. Together with the interaction commands in this section, it can be used to construct a file that will only elaborate if the output is as expected; such a file can be used as a <a href="../Build-Tools-and-Distribution/Lake/index.html#--tech-term-test-driver">test driver</a> in <a href="../Build-Tools-and-Distribution/Lake/index.html#lake">Lake</a>.</p>
+<p><a id="command-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Documenting Expected Output</strong></p>
+<p><a id="Lean___guardMsgsCmd"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | docComment?
+      #guard_msgs ((guardMsgsSpecElt,*))? in
+      command
+</code></pre></div><p><code>/-- ... -/ #guard_msgs in cmd</code> captures the messages generated by the command <code>cmd</code> and checks that they match the contents of the docstring.</p>
+<p>Basic example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">/--
+error: Unknown identifier `x`
+-/
+#guard_msgs in
+example : α := x
+</code></pre></div><p>This checks that there is such an error and then consumes the message.</p>
+<p>By default, the command captures all messages, but the filter condition can be adjusted. For example, we can select only warnings:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">/--
+warning: declaration uses 'sorry'
+-/
+#guard_msgs(warning) in
+example : α := sorry
+</code></pre></div><p>or only errors</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#guard_msgs(error) in
+example : α := sorry
+</code></pre></div><p>In the previous example, since warnings are not captured there is a warning on <code>sorry</code>. We can drop the warning completely with</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#guard_msgs(error, drop warning) in
+example : α := sorry
+</code></pre></div><p>In general, <code>#guard_msgs</code> accepts a comma-separated list of configuration clauses in parentheses:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#guard_msgs (
+</code></pre></div><p>By default, the configuration list is <code>(check all, whitespace := normalized, ordering := exact, positions := false)</code>.</p>
+<p>Message filters select messages by severity:</p>
+<ul>
+<li><code>info</code>, <code>warning</code>, <code>error</code>: (non-trace) messages with the given severity level.</li>
+<li><code>trace</code>: trace messages</li>
+<li><code>all</code>: all messages.</li>
+</ul>
+<p>The filters can be prefixed with the action to take:</p>
+<ul>
+<li><code>check</code> (the default): capture and check the message</li>
+<li><code>drop</code>: drop the message</li>
+<li><code>pass</code>: let the message pass through</li>
+</ul>
+<p>If no filter is specified, <code>check all</code> is assumed. Otherwise, these filters are processed in left-to-right order, with an implicit <code>pass all</code> at the end.</p>
+<p>Whitespace handling (after trimming leading and trailing whitespace):</p>
+<ul>
+<li><code>whitespace := exact</code> requires an exact whitespace match.</li>
+<li><code>whitespace := normalized</code> converts all newline characters to a space before matching (the default). This allows breaking long lines.</li>
+<li><code>whitespace := lax</code> collapses whitespace to a single space before matching.</li>
+</ul>
+<p>Message ordering:</p>
+<ul>
+<li><code>ordering := exact</code> uses the exact ordering of the messages (the default).</li>
+<li><code>ordering := sorted</code> sorts the messages in lexicographic order. This helps with testing commands that are non-deterministic in their ordering.</li>
+</ul>
+<p>Position reporting:</p>
+<ul>
+<li><code>positions := true</code> reports the ranges of all messages relative to the line on which <code>#guard_msgs</code> appears.</li>
+<li><code>positions := false</code> does not report position info.</li>
+</ul>
+<p>Substring matching:</p>
+<ul>
+<li><code>substring := true</code> checks that the docstring appears as a substring of the output (after whitespace normalization). This is useful when you only care about part of the message.</li>
+<li><code>substring := false</code> (the default) requires exact matching (modulo whitespace normalization).</li>
+</ul>
+<p>Stabilizing output: When messages contain autogenerated names (e.g., metavariables like <code>?m.47</code>), the output may differ between runs or Lean versions. Use <code>set_option pp.mvars.anonymous false</code> to replace anonymous metavariables with <code>?_</code> while preserving user-named metavariables like <code>?a</code>. Alternatively, <code>set_option pp.mvars false</code> replaces all metavariables with <code>?_</code>. Similarly, <code>set_option pp.fvars.anonymous false</code> replaces loose free variable names like <code>_fvar.22</code> with <code>_fvar._</code>.</p>
+<p>For example, <code>#guard_msgs (error, drop all) in cmd</code> means to check errors and drop everything else.</p>
+<p>The command elaborator has special support for <code>#guard_msgs</code> for linting. The <code>#guard_msgs</code> itself wants to capture linter warnings, so it elaborates the command it is attached to as if it were a top-level command. However, the command elaborator runs linters for <em>all</em> top-level commands, which would include <code>#guard_msgs</code> itself, and would cause duplicate and/or uncaptured linter warnings. The top-level command elaborator only runs the linters if <code>#guard_msgs</code> is not present.</p>
+<p><a id="Testing-Return-Values"></a>
+Testing Return Values </p>
+<p>The <a href="index.html#Lean___guardMsgsCmd"><code>#guard_msgs</code></a> command can ensure that a set of test cases pass:</p>
+<p><a id="reverse-_LPAR_in-Testing-Return-Values_RPAR_"></a>
+<a id="reverse___helper-_LPAR_in-Testing-Return-Values_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const reverse : List α → List α := helper []
+where
+  helper acc
+    | [] =&gt; acc
+    | x :: xs =&gt; helper (x :: acc) xs
+
+/-- info: [] -/
+#guard_msgs in
+#eval reverse ([] : List Nat)
+
+/-- info: ['c', 'b', 'a'] -/
+#guard_msgs in
+#eval reverse &quot;abc&quot;.toList
+</code></pre></div><p>The behavior of the <a href="index.html#Lean___guardMsgsCmd"><code>#guard_msgs</code></a> command can be specified in three ways:</p>
+<ol>
+<li>Providing a filter that selects a subset of messages to be checked</li>
+<li>Specifying a whitespace comparison strategy</li>
+<li>Deciding to sort messages by their content or by the order in which they were produced</li>
+</ol>
+<p>These configuration options are provided in parentheses, separated by commas.</p>
+<p><a id="Lean___guardMsgsSpecElt"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Specifying #guard_msgs Behavior</strong></p>
+<p><a id="Lean___guardMsgsSpecElt-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">guardMsgsSpecElt ::=
+    guardMsgsFilter
+</code></pre></div><p><a id="Lean___guardMsgsSpecElt-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">guardMsgsSpecElt ::= ...
+    | whitespace := guardMsgsWhitespaceArg
+</code></pre></div><p><a id="Lean___guardMsgsSpecElt-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">guardMsgsSpecElt ::= ...
+    | ordering := guardMsgsOrderingArg
+</code></pre></div><p>There are three kinds of options for <a href="index.html#Lean___guardMsgsCmd"><code>#guard_msgs</code></a>: filters, whitespace comparison strategies, and orderings.</p>
+<p><a id="Lean___guardMsgsFilter"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Output Filters for #guard_msgs</strong></p>
+<p><a id="Lean___guardMsgsFilter-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">guardMsgsFilter ::=
+    drop? all
+</code></pre></div><p><a id="Lean___guardMsgsFilter-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">guardMsgsFilter ::= ...
+    | drop? info
+</code></pre></div><p><a id="Lean___guardMsgsFilter-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">guardMsgsFilter ::= ...
+    | drop? warning
+</code></pre></div><p><a id="Lean___guardMsgsFilter-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">guardMsgsFilter ::= ...
+    | drop? error
+</code></pre></div><p>A message filter specification for <code>#guard_msgs</code>.</p>
+<ul>
+<li><code>info</code>, <code>warning</code>, <code>error</code>: capture (non-trace) messages with the given severity level.</li>
+<li><code>trace</code>: captures trace messages</li>
+<li><code>all</code>: capture all messages.</li>
+</ul>
+<p>The filters can be prefixed with</p>
+<ul>
+<li><code>check</code> (the default): capture and check the message</li>
+<li><code>drop</code>: drop the message</li>
+<li><code>pass</code>: let the message pass through</li>
+</ul>
+<p>If no filter is specified, <code>check all</code> is assumed. Otherwise, these filters are processed in left-to-right order, with an implicit <code>pass all</code> at the end.</p>
+<p><a id="Lean___guardMsgsWhitespaceArg"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Whitespace Comparison for #guard_msgs</strong></p>
+<p><a id="Lean___guardMsgsWhitespaceArg-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">guardMsgsWhitespaceArg ::=
+    exact
+</code></pre></div><p><a id="Lean___guardMsgsWhitespaceArg-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">guardMsgsWhitespaceArg ::= ...
+    | lax
+</code></pre></div><p><a id="Lean___guardMsgsWhitespaceArg-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">guardMsgsWhitespaceArg ::= ...
+    | normalized
+</code></pre></div><p>Leading and trailing whitespace is always ignored when comparing messages. On top of that, the following settings are available:</p>
+<ul>
+<li><code>whitespace := exact</code> requires an exact whitespace match.</li>
+<li><code>whitespace := normalized</code> converts all newline characters to a space before matching (the default). This allows breaking long lines.</li>
+<li><code>whitespace := lax</code> collapses whitespace to a single space before matching.</li>
+</ul>
+<p>The option <code>guard_msgs.diff</code> controls the content of the error message that <a href="index.html#Lean___guardMsgsCmd"><code>#guard_msgs</code></a> produces when the expected message doesn&#39;t match the produced message. By default, <a href="index.html#Lean___guardMsgsCmd"><code>#guard_msgs</code></a> shows a line-by-line difference, with a leading <code>+</code> used to indicate lines from the produced message and a leading <code>-</code> used to indicate lines from the expected message. When messages are large and only differ by a small amount, this can make it easier to notice where they differ. Setting <code>guard_msgs.diff</code> to <code>false</code> causes <a href="index.html#Lean___guardMsgsCmd"><code>#guard_msgs</code></a> to instead show just the produced message, which can be compared with the expected message in the source file. This can be convenient if the difference between the message is confusing or overwhelming.</p>
+<p><a id="guard_msgs___diff"></a></p>
+<p><strong>option</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">guard_msgs.diff
+</code></pre></div><p>Default value: <code>true</code></p>
+<p>When true, show a diff between expected and actual messages if they don&#39;t match.</p>
+<p><a id="Displaying-Differences"></a>
+Displaying Differences </p>
+<p>The <a href="index.html#Lean___guardMsgsCmd"><code>#guard_msgs</code></a> command can be used to test definition of a rose tree <code>Tree</code> and a function <code>Tree.big</code> that creates them:</p>
+<p><a id="Tree-_LPAR_in-Displaying-Differences_RPAR_"></a>
+<a id="Tree___val-_LPAR_in-Displaying-Differences_RPAR_"></a>
+<a id="Tree___branches-_LPAR_in-Displaying-Differences_RPAR_"></a>
+<a id="Tree___big-_LPAR_in-Displaying-Differences_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Tree (α : Type u) : Type u where
+  | val : α → Tree α
+  | branches : List (Tree α) → Tree α
+
+function Tree.big (n : Nat) : Tree Nat :=
+  if n &lt; 5 then .branches [.val n, .val (n - 1), .val n, .val (n - 2)]
+  else .branches [.big (n / 2),  .big (n / 3)]
+</code></pre></div><p>However, it can be difficult to spot where test failures come from when the output is large:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">set_option guard_msgs.diff false
+/--
+info: Tree.branches
+  [Tree.branches
+     [Tree.branches
+        [Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0],
+         Tree.branches [Tree.val 1, Tree.val 0, Tree.val 1, Tree.val 0],
+      Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1]],
+   Tree.branches
+     [Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1],
+      Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0]]]
+-/
+#guard_msgs in
+#eval Tree.big 20
+</code></pre></div><p>The evaluation produces:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Tree.branches
+  [Tree.branches
+     [Tree.branches
+        [Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0],
+         Tree.branches [Tree.val 1, Tree.val 0, Tree.val 1, Tree.val 0]],
+      Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1]],
+   Tree.branches
+     [Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1],
+      Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0]]]
+</code></pre></div><p>Without <code>guard_msgs.diff</code>, the <a href="index.html#Lean___guardMsgsCmd"><code>#guard_msgs</code></a> command reports this error:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">❌️ Docstring on `#guard_msgs` does not match generated message:
+
+info: Tree.branches
+  [Tree.branches
+     [Tree.branches
+        [Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0],
+         Tree.branches [Tree.val 1, Tree.val 0, Tree.val 1, Tree.val 0]],
+      Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1]],
+   Tree.branches
+     [Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1],
+      Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0]]]
+</code></pre></div><p>Enabling <code>guard_msgs.diff</code> highlights the differences instead, making the error more apparent:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">set_option guard_msgs.diff true in
+/--
+info: Tree.branches
+  [Tree.branches
+     [Tree.branches
+        [Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0],
+         Tree.branches [Tree.val 1, Tree.val 0, Tree.val 1, Tree.val 0,
+      Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1]],
+   Tree.branches
+     [Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1],
+      Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0]]]
+-/
+#guard_msgs in
+#eval Tree.big 20
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">❌️ Docstring on `#guard_msgs` does not match generated message:
+
+  info: Tree.branches
+    [Tree.branches
+       [Tree.branches
+          [Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0],
+-          Tree.branches [Tree.val 1, Tree.val 0, Tree.val 1, Tree.val 0,
++          Tree.branches [Tree.val 1, Tree.val 0, Tree.val 1, Tree.val 0]],
+        Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1]],
+     Tree.branches
+       [Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1],
+        Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0]]]
+</code></pre></div><p><a id="format-repr"></a></p>
+<h3 id="3-7-formatted-output">3.7. Formatted Output</h3><p>The <code>Repr</code> type class is used to provide a standard representation for data that can be parsed and evaluated to obtain an equivalent value. This is not a strict correctness criterion: for some types, especially those with embedded propositions, it is impossible to achieve. However, the output produced by a <code>Repr</code> instance should be as close as possible to something that can be parsed and evaluated.</p>
+<p>In addition to being machine-readable, this representation should be convenient for humans to understand—in particular, lines should not be too long, and nested values should be indented. This is achieved through a two-step process:</p>
+<ol>
+<li>The <code>Repr</code> instance produces an intermediate document of type <code>Std.Format</code>, which compactly represents a <em>set</em> of strings that differ with respect to the placement of newlines and indentation.</li>
+<li>A rendering process selects the “best” representative from the set, according to criteria such as a desired maximum line length.</li>
+</ol>
+<p>In particular, <code>Std.Format</code> can be built compositionally, so <code>Repr</code> instances don&#39;t need to take the surrounding indentation context into account.</p>
+<p><a id="Format"></a></p>
+<h4 id="3-7-1-format">3.7.1. Format</h4><p>A <code>Format</code>The API described here is an adaptation of Wadler&#39;s (Philip Wadler, 2003. <a href="https://homepages.inf.ed.ac.uk/wadler/papers/prettier/prettier.pdf">“A Prettier Printer”</a>. In <em>The Fun of Programming, A symposium in honour of Professor Richard Bird&#39;s 60th birthday.</em>) It has been modified to be efficient in a strict language and with support for additional features such as metadata tags. is a compact representation of a set of strings. The most important <code>Format</code> operations are:</p>
+<p>  Strings</p>
+<p>A <code>String</code> can be made into a <code>Format</code> using the <code>text</code> constructor. This constructor is registered as a <a href="../Coercions/index.html#coercions">coercion</a> from <code>String</code> to <code>Format</code>, so it is often unnecessary to invoke it explicitly. <code>text str</code> represents the singleton set that contains only <code>str</code>. If the string contains newline characters (<code>&#39;\n&#39;</code>), then they are unconditionally inserted as newlines into the resulting output, regardless of groups. They are, however, indented according to the current indentation level.</p>
+<p>  Appending</p>
+<p>Two <code>Format</code>s can be appended using the <code>++</code> operator from the <code>Append Format</code> instance.</p>
+<p>  Groups and Newlines</p>
+<p>The constructor <code>line</code> represents the set that contains both <code>&quot;\n&quot; ++ indent</code> and <code>&quot; &quot;</code>, where <code>indent</code> is a string with enough spaces to indent the line correctly. Imperatively, it can be thought of as a newline that will be “flattened” to a space if there is sufficient room on the current line. Newlines occur in <em>groups</em>: the nearest enclosing application of the <code>group</code> operator determines which group the newline belongs to. By default, either all <code>line</code>s in a group represent <code>&quot;\n&quot;</code> or all represent <code>&quot; &quot;</code>; groups may also be configured to fill lines, in which case the minimal number of <code>line</code>s in the group represent <code>&quot;\n&quot;</code>. Uses of <code>line</code> that do not belong to a group always represent <code>&quot;\n&quot;</code>.</p>
+<p>  Indentation</p>
+<p>When a newline is inserted, the output is also indented. <code>nest n</code> increases the indentation of a document by <code>n</code> spaces. This is not sufficient to represent all Lean syntax, which sometimes requires that columns align exactly. <code>align</code> is a document that ensures that the output string is at the current indentation level, inserting just spaces if possible, or a newline followed by spaces if needed.</p>
+<p>  Tagging</p>
+<p>Lean&#39;s interactive features require the ability to associate output with the underlying values that they represent. This allows Lean development environments to present elaborated terms when hovering over terms proof states or error messages, for example. Documents can be <em>tagged</em> with a <code>Nat</code> value <code>n</code> using <code>tag n</code>; these <code>Nat</code>s should be mapped to the underlying value in a side table.</p>
+<p><a id="Widths-and-Newlines"></a>
+Widths and Newlines </p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">open Std Format
+</code></pre></div><p>The helper <code>parenSeq</code> creates a parenthesized sequence, with grouping and indentation to make it responsive to different output widths.</p>
+<p><a id="parenSeq-_LPAR_in-Widths-and-Newlines_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function parenSeq (xs : List Format) : Format :=
+  group &lt;|
+    nest 2 (text &quot;(&quot; ++ line ++ joinSep xs line) ++
+    line ++
+    &quot;)&quot;
+</code></pre></div><p>This document represents a parenthesized sequence of numbers:</p>
+<p><a id="lst-_LPAR_in-Widths-and-Newlines_RPAR_"></a>
+<a id="lst___nums-_LPAR_in-Widths-and-Newlines_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const lst : Format := parenSeq nums
+where nums := [1, 2, 3, 4, 5].map (text s!&quot;{·}&quot;)
+</code></pre></div><p>Rendering it with the default line width of 120 characters places the entire sequence on one line:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println lst.pretty
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">( 1 2 3 4 5 )
+</code></pre></div><p>Because all the <code>line</code>s belong to the same <code>group</code>, they will either all be rendered as spaces or all be rendered as newlines. If only 9 characters are available, all of the <code>line</code>s in <code>lst</code> become newlines:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (lst.pretty (width := 9))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(
+  1
+  2
+  3
+  4
+  5
+)
+</code></pre></div><p>This document contains three copies of <code>lst</code> in a further parenthesized sequence:</p>
+<p><a id="lsts-_LPAR_in-Widths-and-Newlines_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const lsts := parenSeq [lst, lst, lst]
+</code></pre></div><p>At the default width, it remains on one line:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println lsts.pretty
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">( ( 1 2 3 4 5 ) ( 1 2 3 4 5 ) ( 1 2 3 4 5 ) )
+</code></pre></div><p>If only 20 characters are available, each occurrence of <code>lst</code> ends up on its own line. This is because converting the outer <code>group</code> to newlines is sufficient to keep the string within 20 columns:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (lsts.pretty (width := 20))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(
+  ( 1 2 3 4 5 )
+  ( 1 2 3 4 5 )
+  ( 1 2 3 4 5 )
+)
+</code></pre></div><p>If only 10 characters are available, each number must be on its own line:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (lsts.pretty (width := 10))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(
+  (
+    1
+    2
+    3
+    4
+    5
+  )
+  (
+    1
+    2
+    3
+    4
+    5
+  )
+  (
+    1
+    2
+    3
+    4
+    5
+  )
+)
+</code></pre></div><p><a id="Grouping-and-Filling"></a>
+Grouping and Filling </p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">open Std Format
+</code></pre></div><p>The helper <code>parenSeq</code> creates a parenthesized sequence, with each element placed on a new line and indented:</p>
+<p><a id="parenSeq-_LPAR_in-Grouping-and-Filling_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function parenSeq (xs : List Format) : Format :=
+  nest 2 (text &quot;(&quot; ++ line ++ joinSep xs line) ++
+  line ++
+  &quot;)&quot;
+</code></pre></div><p><code>nums</code> contains the numbers one through twenty, as a list of formats:</p>
+<p><a id="nums-_LPAR_in-Grouping-and-Filling_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const nums : List Format :=
+  Nat.fold 20 (init := []) fun i _ ys =&gt;
+    text s!&quot;{20 - i}&quot; :: ys
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval nums
+</code></pre></div><p>Because <code>parenSeq</code> does not introduce any groups, the resulting document is rendered on a single line:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (pretty (parenSeq nums))
+</code></pre></div><p>This can be fixed by grouping them. <code>grouped</code> does so with <code>group</code>, while <code>filled</code> does so with <code>fill</code>.</p>
+<p><a id="grouped-_LPAR_in-Grouping-and-Filling_RPAR_"></a>
+<a id="filled-_LPAR_in-Grouping-and-Filling_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const grouped := group (parenSeq nums)
+const filled := fill (parenSeq nums)
+</code></pre></div><p>Both grouping operators cause uses of <code>line</code> to render as spaces. Given sufficient space, both render on a single line:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (pretty grouped)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">( 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 )
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (pretty filled)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">( 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 )
+</code></pre></div><p>However, difference become apparent when there is not sufficient space on a single line. Unless <em>all</em> newlines in a <code>group</code> can be spaces, none can:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (pretty (width := 30) grouped)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(
+  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+  10
+  11
+  12
+  13
+  14
+  15
+  16
+  17
+  18
+  19
+  20
+)
+</code></pre></div><p>Using <code>fill</code>, on the other hand, only inserts newlines as required to avoid being two wide:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (pretty (width := 30) filled)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">( 1 2 3 4 5 6 7 8 9 10 11 12
+  13 14 15 16 17 18 19 20 )
+</code></pre></div><p>The behavior of <code>fill</code> can be seen clearly with longer sequences:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println &lt;|
+  pretty (width := 30) (fill (parenSeq (nums ++ nums ++ nums ++ nums)))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">( 1 2 3 4 5 6 7 8 9 10 11 12
+  13 14 15 16 17 18 19 20 1 2
+  3 4 5 6 7 8 9 10 11 12 13 14
+  15 16 17 18 19 20 1 2 3 4 5
+  6 7 8 9 10 11 12 13 14 15 16
+  17 18 19 20 1 2 3 4 5 6 7 8
+  9 10 11 12 13 14 15 16 17 18
+  19 20 )
+</code></pre></div><p><a id="Newline-Characters-in-Strings"></a>
+Newline Characters in Strings </p>
+<p>Including a newline character in a string causes the rendering process to unconditionally insert a newline. These newlines do, however, respect the current indentation level.</p>
+<p>The document <code>str</code> consists of an embedded string with two newlines:</p>
+<p><a id="str-_LPAR_in-Newline-Characters-in-Strings_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">open Std Format
+
+const str : Format := text &quot;abc\nxyz\n123&quot;
+</code></pre></div><p>Printing the string both with and without grouping results in the newlines being used:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println str.pretty
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">abc
+xyz
+123
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (group str).pretty
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">abc
+xyz
+123
+</code></pre></div><p>Because the string does not terminate with a newline, the last line of the first string is on the same line as the first line of the second string:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (str ++ str).pretty
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">abc
+xyz
+123abc
+xyz
+123
+</code></pre></div><p>Increasing the indentation level, however, causes all three lines of the string to begin at the same column:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (text &quot;It is:&quot; ++ indentD str).pretty
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">It is:
+  abc
+  xyz
+  123
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (nest 8 &lt;| text &quot;It is:&quot; ++ align true ++ str).pretty
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">It is:  abc
+        xyz
+        123
+</code></pre></div><p><a id="format-api"></a></p>
+<h5 id="3-7-1-1-documents">3.7.1.1. Documents</h5><p><a id="Std___Format___nil"></a></p>
+<p><strong>inductive type</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format : Type
+</code></pre></div><p>A representation of a set of strings, in which the placement of newlines and indentation differ.</p>
+<p>Given a specific line width, specified in columns, the string that uses the fewest lines can be selected.</p>
+<p>The pretty-printing algorithm is based on Wadler&#39;s paper <a href="https://homepages.inf.ed.ac.uk/wadler/papers/prettier/prettier.pdf"><em>A Prettier Printer</em></a>.</p>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.nil : Std.Format
+</code></pre></div><p>The empty format.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.line : Std.Format
+</code></pre></div><p>A position where a newline may be inserted if the current group does not fit within the allotted column width.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.align (force : Bool) : Std.Format
+</code></pre></div><p><code>align</code> tells the formatter to pad with spaces to the current indentation level, or else add a newline if we are already at or past the indent.</p>
+<p>If <code>force</code> is true, then it will pad to the indent even if it is in a flattened group.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">open Std Format in
+#eval IO.println (nest 2 &lt;| &quot;.&quot; ++ align ++ &quot;a&quot; ++ line ++ &quot;b&quot;)
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">. a
+  b
+</code></pre></div><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.text : String → Std.Format
+</code></pre></div><p>A node containing a plain string.</p>
+<p>If the string contains newlines, the formatter emits them and then indents to the current level.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.nest (indent : Int) (f : Std.Format) : Std.Format
+</code></pre></div><p><code>nest indent f</code> increases the current indentation level by <code>indent</code> while rendering <code>f</code>.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">open Std Format in
+function fmtList (l : List Format) : Format :=
+  let f := joinSep l  (&quot;,&quot; ++ Format.line)
+  group (nest 1 &lt;| &quot;[&quot; ++ f ++ &quot;]&quot;)
+</code></pre></div><p>This will be written all on one line, but if the text is too large, the formatter will put in linebreaks after the commas and indent later lines by 1.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.append : Std.Format → Std.Format → Std.Format
+</code></pre></div><p>Concatenation of two <code>Format</code>s.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.group :
+  Std.Format →
+    (behavior :
+        optParam Std.Format.FlattenBehavior
+          Std.Format.FlattenBehavior.allOrNone) →
+      Std.Format
+</code></pre></div><p>Creates a new flattening group for the given inner <code>Format</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.tag : Nat → Std.Format → Std.Format
+</code></pre></div><p>Used for associating auxiliary information (e.g. <code>Expr</code>s) with <code>Format</code> objects.</p>
+<p><a id="Std___Format___FlattenBehavior___allOrNone"></a></p>
+<p><strong>inductive type</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.FlattenBehavior : Type
+</code></pre></div><p>Determines how groups should have linebreaks inserted when the text would overfill its remaining space.</p>
+<ul>
+<li><p><code>allOrNone</code> will make a linebreak on every <code>Format.line</code> in the group or none of them.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">[1,
+ 2,
+ 3]
+</code></pre></div></li>
+<li><p><code>fill</code> will only make linebreaks on as few <code>Format.line</code>s as possible:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">[1, 2,
+ 3]
+</code></pre></div></li>
+</ul>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.FlattenBehavior.allOrNone :
+  Std.Format.FlattenBehavior
+</code></pre></div><p>Either all <code>Format.line</code>s in the group will be newlines, or all of them will be spaces.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.FlattenBehavior.fill : Std.Format.FlattenBehavior
+</code></pre></div><p>As few <code>Format.line</code>s in the group as possible will be newlines.</p>
+<p><a id="Std___Format___fill"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.fill (f : Std.Format) : Std.Format
+</code></pre></div><p>Creates a group in which as few <code>Format.line</code>s as possible are rendered as newlines.</p>
+<p>This is an alias for <code>Format.group</code>, with <code>FlattenBehavior</code> set to <code>fill</code>.</p>
+<p><a id="format-empty"></a></p>
+<h5 id="3-7-1-2-empty-documents">3.7.1.2. Empty Documents</h5><p>The empty string does not have a single unique representative in <code>Std.Format</code>. All of the following represent the empty string:</p>
+<ul>
+<li><code>.nil</code></li>
+<li><code>.text &quot;&quot;</code></li>
+<li><code>.text &quot;&quot; ++ .nil</code></li>
+<li><code>.nil ++ .text &quot;&quot;</code></li>
+</ul>
+<p>Use <code>Std.Format.isEmpty</code> to check whether a document contains zero characters, and <code>Std.Format.isNil</code> to specifically check whether it is the constructor <code>Std.Format.nil</code>.</p>
+<p><a id="Std___Format___isEmpty"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.isEmpty : Std.Format → Bool
+</code></pre></div><p>Checks whether the given format contains no characters.</p>
+<p><a id="Std___Format___isNil"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.isNil : Std.Format → Bool
+</code></pre></div><p>Checks whether a <code>Format</code> is the constructor <code>Format.nil</code>.</p>
+<p>This does not check whether the resulting rendered strings are always empty. To do that, use <code>Format.isEmpty</code>.</p>
+<p><a id="format-join"></a></p>
+<h5 id="3-7-1-3-sequences">3.7.1.3. Sequences</h5><p>The operators in this section are useful when there is some kind of repeated content, such as the elements of a list. This is typically done by including <code>line</code> in their separator parameters, using a <a href="index.html#format-brackets">bracketing operator</a></p>
+<p><a id="Std___Format___join"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.join (xs : List Std.Format) : Std.Format
+</code></pre></div><p>Concatenates a list of <code>Format</code>s with <code>++</code>.</p>
+<p><a id="Std___Format___joinSep"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.joinSep.{u} {α : Type u} [Std.ToFormat α] :
+  List α → Std.Format → Std.Format
+</code></pre></div><p>Intercalates the given list with the given <code>sep</code> format.</p>
+<p>The list items are formatting using <code>ToFormat.format</code>.</p>
+<p><a id="Std___Format___prefixJoin"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.prefixJoin.{u} {α : Type u} [Std.ToFormat α]
+  (pre : Std.Format) : List α → Std.Format
+</code></pre></div><p>Concatenates the given list after prepending <code>pre</code> to each element.</p>
+<p>The list items are formatting using <code>ToFormat.format</code>.</p>
+<p><a id="Std___Format___joinSuffix"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.joinSuffix.{u} {α : Type u} [Std.ToFormat α] :
+  List α → Std.Format → Std.Format
+</code></pre></div><p>Concatenates the given list after appending the given suffix to each element.</p>
+<p>The list items are formatting using <code>ToFormat.format</code>.</p>
+<p><a id="format-indent"></a></p>
+<h5 id="3-7-1-4-indentation">3.7.1.4. Indentation</h5><p>These operators make it easier to achieve a consistent indentation style on top of <code>Std.Format.nest</code>.</p>
+<p><a id="Std___Format___nestD"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.nestD (f : Std.Format) : Std.Format
+</code></pre></div><p>Increases the indentation level by the default amount.</p>
+<p><a id="Std___Format___defIndent"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.defIndent : Nat
+</code></pre></div><p>The default indentation level, which is two spaces.</p>
+<p><a id="Std___Format___indentD"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.indentD (f : Std.Format) : Std.Format
+</code></pre></div><p>Insert a newline and then <code>f</code>, all nested by the default indent amount.</p>
+<p><a id="format-brackets"></a></p>
+<h5 id="3-7-1-5-brackets-and-parentheses">3.7.1.5. Brackets and Parentheses</h5><p>These operators make it easier to achieve a consistent parenthesization style.</p>
+<p><a id="Std___Format___bracket"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.bracket (l : String) (f : Std.Format) (r : String) :
+  Std.Format
+</code></pre></div><p>Creates a format <code>l ++ f ++ r</code> with a flattening group, nesting the contents by the length of <code>l</code>.</p>
+<p>The group&#39;s <code>FlattenBehavior</code> is <code>allOrNone</code>; for <code>fill</code> use <code>Std.Format.bracketFill</code>.</p>
+<p><a id="Std___Format___sbracket"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.sbracket (f : Std.Format) : Std.Format
+</code></pre></div><p>Creates the format <code>&quot;[&quot; ++ f ++ &quot;]&quot;</code> with a flattening group, nesting by one space.</p>
+<p><code>sbracket</code> is short for “square bracket”.</p>
+<p><a id="Std___Format___paren"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.paren (f : Std.Format) : Std.Format
+</code></pre></div><p>Creates the format <code>&quot;(&quot; ++ f ++ &quot;)&quot;</code> with a flattening group, nesting by one space.</p>
+<p><a id="Std___Format___bracketFill"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.bracketFill (l : String) (f : Std.Format) (r : String) :
+  Std.Format
+</code></pre></div><p>Creates a format <code>l ++ f ++ r</code> with a flattening group, nesting the contents by the length of <code>l</code>.</p>
+<p>The group&#39;s <code>FlattenBehavior</code> is <code>fill</code>; for <code>allOrNone</code> use <code>Std.Format.bracket</code>.</p>
+<p><a id="format-render"></a></p>
+<h5 id="3-7-1-6-rendering">3.7.1.6. Rendering</h5><p>The <code>ToString Std.Format</code> instance invokes <code>Std.Format.pretty</code> with its default arguments.</p>
+<p>There are two ways to render a document:</p>
+<ul>
+<li>Use <code>pretty</code> to construct a <code>String</code>. The entire string must be constructed up front before any can be sent to a user.</li>
+<li>Use <code>prettyM</code> to incrementally emit the <code>String</code>, using effects in some <code>Monad</code>. As soon as each line is rendered, it is emitted. This is suitable for streaming output.</li>
+</ul>
+<p><a id="Std___Format___pretty"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.pretty (f : Std.Format) (width : Nat := Std.Format.defWidth)
+  (indent column : Nat := 0) : String
+</code></pre></div><p>Renders a <code>Format</code> to a string.</p>
+<ul>
+<li><code>width</code>: the total width</li>
+<li><code>indent</code>: the initial indentation to use for wrapped lines (subsequent wrapping may increase the indentation)</li>
+<li><code>column</code>: begin the first line wrap <code>column</code> characters earlier than usual (this is useful when the output String will be printed starting at <code>column</code>)</li>
+</ul>
+<p><a id="Std___Format___defWidth"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.defWidth : Nat
+</code></pre></div><p>The default width of the targeted output, which is 120 columns.</p>
+<p><a id="Std___Format___prettyM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.prettyM {m : Type → Type} (f : Std.Format) (w : Nat)
+  (indent : Nat := 0) [Monad m] [Std.Format.MonadPrettyFormat m] :
+  m Unit
+</code></pre></div><p>Renders a <code>Format</code> using effects in the monad <code>m</code>, using the methods of <code>MonadPrettyFormat</code>.</p>
+<p>Each line is emitted as soon as it is rendered, rather than waiting for the entire document to be rendered.</p>
+<ul>
+<li><code>w</code>: the total width</li>
+<li><code>indent</code>: the initial indentation to use for wrapped lines (subsequent wrapping may increase the indentation)</li>
+</ul>
+<p><a id="Std___Format___MonadPrettyFormat___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.MonadPrettyFormat (m : Type → Type) : Type
+</code></pre></div><p>A monad that can be used to incrementally render <code>Format</code> objects.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Format.MonadPrettyFormat.mk
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pushOutput : String → m Unit
+</code></pre></div><p>Emits the string <code>s</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pushNewline : Nat → m Unit
+</code></pre></div><p>Emits a newline followed by <code>indent</code> columns of indentation.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">currColumn : m Nat
+</code></pre></div><p>Gets the current column at which the next string will be emitted.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">startTag : Nat → m Unit
+</code></pre></div><p>Starts a region tagged with <code>tag</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">endTags : Nat → m Unit
+</code></pre></div><p>Exits the scope of <code>count</code> opened tags.</p>
+<p><a id="The-Lean-Language-Reference--Interacting-with-Lean--Formatted-Output--Format--The--ToFormat--Class"></a></p>
+<h5 id="3-7-1-7-the-toformat-class">3.7.1.7. The ToFormat Class</h5><p>The <code>Std.ToFormat</code> class is used to provide a standard means to format a value, with no expectation that this formatting be valid Lean syntax. These instances are used in error messages and by some of the <a href="index.html#format-join">sequence concatenation operators</a>.</p>
+<p><a id="Std___ToFormat___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.ToFormat.{u} (α : Type u) : Type u
+</code></pre></div><p>Specifies a “user-facing” way to convert from the type <code>α</code> to a <code>Format</code> object. There is no expectation that the resulting string is valid code.</p>
+<p>The <code>Repr</code> class is similar, but the expectation is that instances produce valid Lean code.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.ToFormat.mk.{u}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">format : α → Std.Format
+</code></pre></div><p>Converts a value to a <code>Format</code> object, with no expectation that the resulting string is valid code.</p>
+<p><a id="repr"></a></p>
+<h4 id="3-7-2-repr">3.7.2. Repr</h4><p>A <code>Repr</code> instance describes how to represent a value as a <code>Std.Format</code>. Because they should emit valid Lean syntax, these instances need to take <a href="../Notations-and-Macros/Custom-Operators/index.html#--tech-term-precedence">precedence</a> into account. Inserting the maximal number of parentheses would work, but it makes it more difficult for humans to read the resulting output.</p>
+<p><a id="Repr___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Repr.{u} (α : Type u) : Type u
+</code></pre></div><p>The standard way of turning values of some type into <code>Format</code>.</p>
+<p>When rendered this <code>Format</code> should be as close as possible to something that can be parsed as the input value.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Repr.mk.{u}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">reprPrec : α → Nat → Std.Format
+</code></pre></div><p>Turn a value of type <code>α</code> into a <code>Format</code> at a given precedence. The precedence value can be used to avoid parentheses if they are not necessary.</p>
+<p><a id="repr-next"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">repr.{u_1} {α : Type u_1} [Repr α] (a : α) : Std.Format
+</code></pre></div><p>Turns <code>a</code> into a <code>Format</code> using its <code>Repr</code> instance. The precedence level is initially set to 0.</p>
+<p><a id="reprStr"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">reprStr.{u_1} {α : Type u_1} [Repr α] (a : α) : String
+</code></pre></div><p>Turns <code>a</code> into a <code>String</code> using its <code>Repr</code> instance, rendering the <code>Format</code> at the default width of 120 columns.</p>
+<p>The precedence level is initially set to 0.</p>
+<p><a id="Maximal-Parentheses"></a>
+Maximal Parentheses </p>
+<p>The type <code>NatOrInt</code> can contain a <code>Nat</code> or an <code>Int</code>:
+<a id="NatOrInt-_LPAR_in-Maximal-Parentheses_RPAR_"></a>
+<a id="NatOrInt___nat-_LPAR_in-Maximal-Parentheses_RPAR_"></a>
+<a id="NatOrInt___int-_LPAR_in-Maximal-Parentheses_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive NatOrInt where
+  | nat : Nat → NatOrInt
+  | int : Int → NatOrInt
+</code></pre></div><p>This <code>Repr NatOrInt</code> instance ensures that the output is valid Lean syntax by inserting many parentheses:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance : Repr NatOrInt where
+  reprPrec x _ :=
+    .nestD &lt;| .group &lt;|
+      match x with
+      | .nat n =&gt;
+          .text &quot;(&quot; ++ &quot;NatOrInt.nat&quot; ++ .line ++ &quot;(&quot; ++ repr n ++ &quot;))&quot;
+      | .int i =&gt;
+          .text &quot;(&quot; ++ &quot;NatOrInt.int&quot; ++ .line ++ &quot;(&quot; ++ repr i ++ &quot;))&quot;
+</code></pre></div><p>Whether it contains a <code>Nat</code>, a non-negative <code>Int</code>, or a negative <code>Int</code>, the result can be parsed:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">open NatOrInt in
+#eval do
+  IO.println &lt;| repr &lt;| nat 3
+  IO.println &lt;| repr &lt;| int 5
+  IO.println &lt;| repr &lt;| int (-5)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(NatOrInt.nat (3))
+(NatOrInt.int (5))
+(NatOrInt.int (-5))
+</code></pre></div><p>However, <code>(NatOrInt.nat (3))</code> is not particularly idiomatic Lean, and redundant parentheses can make it difficult to read large expressions.</p>
+<p>The method <code>Repr.reprPrec</code> has the following signature:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Repr.reprPrec.{u} {α : Type u} [Repr α] : α → Nat → Std.Format
+</code></pre></div><p>The first explicit parameter is the value to be represented, while the second is the <a href="../Notations-and-Macros/Custom-Operators/index.html#--tech-term-precedence">precedence</a> of the context in which it occurs. This precedence can be used to decide whether to insert parentheses: if the precedence of the syntax being produced by the instance is greater than that of its context, parentheses are necessary.</p>
+<p><a id="repr-instance-howto"></a></p>
+<h5 id="3-7-2-1-how-to-write-a-repr-instance">3.7.2.1. How To Write a Repr Instance</h5><p>Lean can produce an appropriate <code>Repr</code> instance for most types automatically using <a href="../Type-Classes/Deriving-Instances/index.html#deriving-instances">instance deriving</a>. In some cases, however, it&#39;s necessary to write an instance by hand:</p>
+<p>When writing a custom <code>Repr</code> instance, please follow these conventions:</p>
+<p>  Precedence</p>
+<p>Check precedence, adding parentheses as needed, and pass the correct precedence to the <code>reprPrec</code> instances of embedded data. Each instance is responsible for surrounding itself in parentheses if needed; instances should generally not parenthesize recursive calls to <code>reprPrec</code>.</p>
+<p>Function application has the maximum precedence, <code>max_prec</code>. The helpers <code>Repr.addAppParen</code> and <code>reprArg</code> respectively insert parentheses around applications when needed and pass the appropriate precedence to function arguments.</p>
+<p>  Fully-Qualified Names</p>
+<p>A <code>Repr</code> instance does have access to the set of open namespaces in a given position. All names of constants in the environment should be fully qualified to remove ambiguity.</p>
+<p>  Default Nesting</p>
+<p>Nested data should be indented using <code>nestD</code> to ensure consistent indentation across instances.</p>
+<p>  Grouping and Line Breaks</p>
+<p>The output of every <code>Repr</code> instance that includes line breaks should be surrounded in a <code>group</code>. Furthermore, if the resulting code contains notional expressions that are nested, a <code>group</code> should be inserted around each nested level. Line breaks should usually be inserted in the following positions:</p>
+<ul>
+<li><p>Between a constructor and each of its arguments</p>
+</li>
+<li><p>After <code>:=</code></p>
+</li>
+<li><p>After <code>,</code></p>
+</li>
+<li><p>Between the opening and closing braces of <a href="../The-Type-System/Inductive-Types/index.html#--tech-term-structure-instance">structure instance</a> notation and its contents</p>
+</li>
+<li><p>After, but not before, an infix operator</p>
+<p>Parentheses and Brackets</p>
+</li>
+</ul>
+<p>Parentheses and brackets should be inserted using <code>Std.Format.bracket</code> or its specializations <code>Std.Format.paren</code> for parentheses and <code>Std.Format.sbracket</code> for square brackets. These operators align the contents of the parenthesized or bracketed expression in the same way that Lean&#39;s do. Trailing parentheses and brackets should not be placed on their own line, but rather stay with their contents.</p>
+<p><a id="Repr___addAppParen"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Repr.addAppParen (f : Std.Format) (prec : Nat) : Std.Format
+</code></pre></div><p>Adds parentheses to <code>f</code> if the precedence <code>prec</code> from the context is at least that of function application.</p>
+<p>Together with <code>reprArg</code>, this can be used to correctly parenthesize function application syntax.</p>
+<p><a id="reprArg"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">reprArg.{u_1} {α : Type u_1} [Repr α] (a : α) : Std.Format
+</code></pre></div><p>Turns <code>a</code> into a <code>Format</code> using its <code>Repr</code> instance, with the precedence level set to that of function application.</p>
+<p>Together with <code>Repr.addAppParen</code>, this can be used to correctly parenthesize function application syntax.</p>
+<p><a id="Inductive-Types-with-Constructors"></a>
+Inductive Types with Constructors </p>
+<p>The inductive type <code>N.NatOrInt</code> can contain a <code>Nat</code> or an <code>Int</code>:
+<a id="N___NatOrInt-_LPAR_in-Inductive-Types-with-Constructors_RPAR_"></a>
+<a id="N___NatOrInt___nat-_LPAR_in-Inductive-Types-with-Constructors_RPAR_"></a>
+<a id="N___NatOrInt___int-_LPAR_in-Inductive-Types-with-Constructors_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">namespace N
+
+inductive NatOrInt where
+  | nat : Nat → NatOrInt
+  | int : Int → NatOrInt
+</code></pre></div><p>The <code>Repr NatOrInt</code> instance adheres to the conventions:</p>
+<ul>
+<li>The right-hand side is a function application, so it uses <code>Repr.addAppParen</code> to add parentheses if necessary.</li>
+<li>Parentheses are wrapped around the entire body with no additional <code>line</code>s.</li>
+<li>The entire function application is grouped, and it is nested the default amount.</li>
+<li>The function is separated from its parameters by a use of <code>line</code>; this newline will usually be a space because the <code>Repr Nat</code> and <code>Repr Int</code> instances are unlikely to produce long output.</li>
+<li>Recursive calls to <code>reprPrec</code> pass <code>max_prec</code> because they are in function parameter positions, and function application has the highest precedence.</li>
+</ul>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance : Repr NatOrInt where
+  reprPrec
+    | .nat n =&gt;
+      Repr.addAppParen &lt;|
+        .group &lt;| .nestD &lt;|
+          &quot;N.NatOrInt.nat&quot; ++ .line ++ reprPrec n max_prec
+    | .int i =&gt;
+      Repr.addAppParen &lt;|
+        .group &lt;| .nestD &lt;|
+          &quot;N.NatOrInt.int&quot; ++ .line ++ reprPrec i max_prec
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (repr (NatOrInt.nat 5))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">N.NatOrInt.nat 5
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (repr (NatOrInt.int 5))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">N.NatOrInt.int 5
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (repr (NatOrInt.int (-5)))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">N.NatOrInt.int (-5)
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (repr (some (NatOrInt.int (-5))))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">some (N.NatOrInt.int (-5))
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (repr &lt;| (List.range 10).map (NatOrInt.nat))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">[N.NatOrInt.nat 0,
+ N.NatOrInt.nat 1,
+ N.NatOrInt.nat 2,
+ N.NatOrInt.nat 3,
+ N.NatOrInt.nat 4,
+ N.NatOrInt.nat 5,
+ N.NatOrInt.nat 6,
+ N.NatOrInt.nat 7,
+ N.NatOrInt.nat 8,
+ N.NatOrInt.nat 9]
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println &lt;|
+  Std.Format.pretty (width := 3) &lt;|
+    repr &lt;| (List.range 10).map NatOrInt.nat
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">[N.NatOrInt.nat
+   0,
+ N.NatOrInt.nat
+   1,
+ N.NatOrInt.nat
+   2,
+ N.NatOrInt.nat
+   3,
+ N.NatOrInt.nat
+   4,
+ N.NatOrInt.nat
+   5,
+ N.NatOrInt.nat
+   6,
+ N.NatOrInt.nat
+   7,
+ N.NatOrInt.nat
+   8,
+ N.NatOrInt.nat
+   9]
+</code></pre></div><p><a id="Infix-Syntax"></a>
+Infix Syntax </p>
+<p>This example demonstrates the use of precedences to encode a left-associative pretty printer. The type <code>AddExpr</code> represents expressions with constants and addition:
+<a id="AddExpr-_LPAR_in-Infix-Syntax_RPAR_"></a>
+<a id="AddExpr___nat-_LPAR_in-Infix-Syntax_RPAR_"></a>
+<a id="AddExpr___add-_LPAR_in-Infix-Syntax_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive AddExpr where
+  | nat : Nat → AddExpr
+  | add : AddExpr → AddExpr → AddExpr
+</code></pre></div><p>The <code>OfNat</code> and <code>Add</code> instances provide a more convenient syntax for <code>AddExpr</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance : OfNat AddExpr n where
+  ofNat := .nat n
+
+instance : Add AddExpr where
+  add := .add
+</code></pre></div><p>The <code>Repr AddExpr</code> instance should insert only the necessary parentheses. Lean&#39;s addition operator is left-associative, with precedence 65, so the recursive call to the left uses precedence 64 and the operator itself is parenthesized if the current context has precedence greater than or equal to 65:
+<a id="AddExpr___reprPrec-_LPAR_in-Infix-Syntax_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">protected def AddExpr.reprPrec : AddExpr → Nat → Std.Format
+  | .nat n, p  =&gt;
+    Repr.reprPrec n p
+  | .add e1 e2, p =&gt;
+    let out : Std.Format :=
+      .nestD &lt;| .group &lt;|
+        AddExpr.reprPrec e1 64 ++ &quot; &quot; ++ &quot;+&quot; ++ .line ++
+        AddExpr.reprPrec e2 65
+    if p ≥ 65 then out.paren else out
+
+instance : Repr AddExpr := ⟨AddExpr.reprPrec⟩
+</code></pre></div><p>Regardless of the input&#39;s parenthesization, this instance inserts only the necessary parentheses:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (repr (((2 + 3) + 4) : AddExpr))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">2 + 3 + 4
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (repr ((2 + 3 + 4) : AddExpr))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">2 + 3 + 4
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (repr ((2 + (3 + 4)) : AddExpr))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">2 + (3 + 4)
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval IO.println (repr ([2 + (3 + 4), (2 + 3) + 4] : List AddExpr))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">[2 + (3 + 4), 2 + 3 + 4]
+</code></pre></div><p>The uses of <code>group</code>, <code>nestD</code>, and <code>line</code> in the implementation lead to the expected newlines and indentation in a narrow context:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval ([2 + (3 + 4), (2 + 3) + 4] : List AddExpr)
+  |&gt; repr
+  |&gt;.pretty (width := 0)
+  |&gt; IO.println
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">[2 +
+   (3 +
+      4),
+ 2 +
+     3 +
+   4]
+</code></pre></div><p><a id="ReprAtom"></a></p>
+<h5 id="3-7-2-2-atomic-types">3.7.2.2. Atomic Types</h5><p>When the elements of a list are sufficiently small, it can be both difficult to read and wasteful of space to render the list with one element per line. To improve readability, <code>List</code> has two <code>Repr</code> instances: one that uses <code>Std.Format.bracket</code> for its contents, and one that uses <code>Std.Format.bracketFill</code>. The latter is defined after the former and is thus selected when possible; however, it requires an instance of the empty type class <code>ReprAtom</code>.</p>
+<p>If the <code>Repr</code> instance for a type never generates spaces or newlines, then it should have a <code>ReprAtom</code> instance. Lean has <code>ReprAtom</code> instances for types such as <code>String</code>, <code>UInt8</code>, <code>Nat</code>, <code>Char</code>, and <code>Bool</code>.</p>
+<p><a id="ReprAtom___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ReprAtom.{u} (α : Type u) : Type
+</code></pre></div><p>Auxiliary class for marking types that should be considered atomic by <code>Repr</code> methods. We use it at <code>Repr (List α)</code> to decide whether <code>bracketFill</code> should be used or not.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ReprAtom.mk.{u}
+</code></pre></div><p><a id="Atomic-Types-and--Repr"></a>
+Atomic Types and <code>Repr</code> </p>
+<p>All constructors of the inductive type <code>ABC</code> are without parameters:
+<a id="ABC-_LPAR_in-Atomic-Types-and--Repr_RPAR_"></a>
+<a id="ABC___a-_LPAR_in-Atomic-Types-and--Repr_RPAR_"></a>
+<a id="ABC___b-_LPAR_in-Atomic-Types-and--Repr_RPAR_"></a>
+<a id="ABC___c-_LPAR_in-Atomic-Types-and--Repr_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive ABC where
+  | a
+  | b
+  | c
+deriving Repr
+</code></pre></div><p>The derived <code>Repr ABC</code> instance is used to display lists:</p>
+<p><a id="abc-_LPAR_in-Atomic-Types-and--Repr_RPAR_"></a>
+<a id="abcs-_LPAR_in-Atomic-Types-and--Repr_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const abc : List ABC := [.a, .b, .c]
+
+const abcs : List ABC := abc ++ abc ++ abc
+
+#eval IO.println ((repr abcs).pretty (width := 14))
+</code></pre></div><p>Because of the narrow width, line breaks are inserted:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">[ABC.a,
+ ABC.b,
+ ABC.c,
+ ABC.a,
+ ABC.b,
+ ABC.c,
+ ABC.a,
+ ABC.b,
+ ABC.c]
+</code></pre></div><p>However, converting the list to a <code>List Nat</code> leads to a differently-formatted result.
+<a id="ABC___toNat-_LPAR_in-Atomic-Types-and--Repr_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def ABC.toNat : ABC → Nat
+  | .a =&gt; 0
+  | .b =&gt; 1
+  | .c =&gt; 2
+
+#eval IO.print ((repr (abcs.map ABC.toNat)).pretty (width := 14))
+</code></pre></div><p>There are far fewer line breaks:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">[0, 1, 2, 0,
+ 1, 2, 0, 1,
+ 2]
+</code></pre></div><p>This is because of the existence of a <code>ReprAtom Nat</code> instance. Adding one for <code>ABC</code> leads to similar behavior:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance : ReprAtom ABC := ⟨⟩
+
+#eval IO.println ((repr abcs).pretty (width := 14))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">[ABC.a, ABC.b,
+ ABC.c, ABC.a,
+ ABC.b, ABC.c,
+ ABC.a, ABC.b,
+ ABC.c]
+</code></pre></div><h2 id="preserved-grammar-annotations">Preserved grammar annotations</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`#eval e` evaluates the expression `e` by compiling it and running the compiled code. It then
+prints the resulting value.
+
+* The command attempts to use `ToExpr`, `Repr`, or `ToString` instances to print the result.
+* If `e` is a monadic value of type `m ty`, then the command tries to adapt the monad `m`
+  to one of the monads that `#eval` supports, which include `IO`, `CoreM`, `MetaM`, `TermElabM`, and `CommandElabM`.
+  Users can define `MonadEval` instances to extend the list of supported monads.
+
+The `#eval` command gracefully degrades in capability depending on what is imported.
+Importing the `Lean.Elab.Command` module provides full capabilities.
+
+Due to unsoundness, `#eval` refuses to evaluate expressions that depend on `sorry`, even indirectly,
+since the presence of `sorry` can lead to runtime instability and crashes.
+This check can be overridden with the `#eval! e` command.
+
+Options:
+* If `eval.pp` is true (default: true) then tries to use `ToExpr` instances to make use of the
+  usual pretty printer. Otherwise, only tries using `Repr` and `ToString` instances.
+* If `eval.type` is true (default: false) then pretty prints the type of the evaluated value.
+* If `eval.derive.repr` is true (default: true) then attempts to auto-derive a `Repr` instance
+  when there is no other way to print the result.
+
+See also: `#reduce e` for evaluation by term reduction.
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`#reduce &lt;expression&gt;` reduces the expression `&lt;expression&gt;` to its normal form. This
+involves applying reduction rules until no further reduction is possible.
+
+By default, proofs and types within the expression are not reduced. Use modifiers
+`(proofs := true)`  and `(types := true)` to reduce them.
+Recall that propositions are types in Lean.
+
+**Warning:** This can be a computationally expensive operation,
+especially for complex expressions.
+
+Consider using `#eval &lt;expression&gt;` for simple evaluation/execution
+of expressions.
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Configuration for the `#reduce` command.
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Prints the axioms used by a declaration, directly or indirectly.
+Please consult [the reference manual](https://lean-lang.org/doc/reference/4.34.0-rc2/find/?domain=Verso.Genre.Manual.section&amp;name=validating-proofs) to understand the significance of the output.
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`#where` gives a description of the state of the current scope scope.
+This includes the current namespace, `open` namespaces, `universe` and `variable` commands,
+and options set with `set_option`.
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Shows the current Lean version. Prints `Lean.versionString`.
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`/-- ... -/ #guard_msgs in cmd` captures the messages generated by the command `cmd`
+and checks that they match the contents of the docstring.
+
+Basic example:
+```lean
+/--
+error: Unknown identifier `x`
+-/
+#guard_msgs in
+example : α := x
+```
+This checks that there is such an error and then consumes the message.
+
+By default, the command captures all messages, but the filter condition can be adjusted.
+For example, we can select only warnings:
+```lean
+/--
+warning: declaration uses 'sorry'
+-/
+#guard_msgs(warning) in
+example : α := sorry
+```
+or only errors
+```lean
+#guard_msgs(error) in
+example : α := sorry
+```
+In the previous example, since warnings are not captured there is a warning on `sorry`.
+We can drop the warning completely with
+```lean
+#guard_msgs(error, drop warning) in
+example : α := sorry
+```
+
+In general, `#guard_msgs` accepts a comma-separated list of configuration clauses in parentheses:
+```
+#guard_msgs (configElt,*) in cmd
+```
+By default, the configuration list is
+`(check all, whitespace := normalized, ordering := exact, positions := false)`.
+
+Message filters select messages by severity:
+- `info`, `warning`, `error`: (non-trace) messages with the given severity level.
+- `trace`: trace messages
+- `all`: all messages.
+
+The filters can be prefixed with the action to take:
+- `check` (the default): capture and check the message
+- `drop`: drop the message
+- `pass`: let the message pass through
+
+If no filter is specified, `check all` is assumed.  Otherwise, these filters are processed in
+left-to-right order, with an implicit `pass all` at the end.
+
+Whitespace handling (after trimming leading and trailing whitespace):
+- `whitespace := exact` requires an exact whitespace match.
+- `whitespace := normalized` converts all newline characters to a space before matching
+  (the default). This allows breaking long lines.
+- `whitespace := lax` collapses whitespace to a single space before matching.
+
+Message ordering:
+- `ordering := exact` uses the exact ordering of the messages (the default).
+- `ordering := sorted` sorts the messages in lexicographic order.
+  This helps with testing commands that are non-deterministic in their ordering.
+
+Position reporting:
+- `positions := true` reports the ranges of all messages relative to the line on which
+  `#guard_msgs` appears.
+- `positions := false` does not report position info.
+
+Substring matching:
+- `substring := true` checks that the docstring appears as a substring of the output
+  (after whitespace normalization). This is useful when you only care about part of the message.
+- `substring := false` (the default) requires exact matching (modulo whitespace normalization).
+
+Stabilizing output:
+When messages contain autogenerated names (e.g., metavariables like `?m.47`), the output may
+differ between runs or Lean versions. Use `set_option pp.mvars.anonymous false` to replace
+anonymous metavariables with `?_` while preserving user-named metavariables like `?a`.
+Alternatively, `set_option pp.mvars false` replaces all metavariables with `?_`.
+Similarly, `set_option pp.fvars.anonymous false` replaces loose free variable names like
+`_fvar.22` with `_fvar._`.
+
+For example, `#guard_msgs (error, drop all) in cmd` means to check errors and drop
+everything else.
+
+The command elaborator has special support for `#guard_msgs` for linting.
+The `#guard_msgs` itself wants to capture linter warnings,
+so it elaborates the command it is attached to as if it were a top-level command.
+However, the command elaborator runs linters for *all* top-level commands,
+which would include `#guard_msgs` itself, and would cause duplicate and/or uncaptured linter warnings.
+The top-level command elaborator only runs the linters if `#guard_msgs` is not present.
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">A `docComment` parses a &quot;documentation comment&quot; like `/-- foo -/`. This is not treated like
+a regular comment (that is, as whitespace); it is parsed and forms part of the syntax tree structure.
+
+At parse time, `docComment` checks the value of the `doc.verso` option. If it is true, the contents
+are parsed as Verso markup. If not, the contents are treated as plain text or Markdown. Use
+`plainDocComment` to always treat the contents as plain text.
+
+A plain text doc comment node contains a `/--` atom and then the remainder of the comment, `foo -/`
+in this example. Use `TSyntax.getDocString` to extract the body text from a doc string syntax node.
+A Verso comment node contains the `/--` atom, the document's syntax tree, and a closing `-/` atom.
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">A message filter specification for `#guard_msgs`.
+- `info`, `warning`, `error`: capture (non-trace) messages with the given severity level.
+- `trace`: captures trace messages
+- `all`: capture all messages.
+
+The filters can be prefixed with
+- `check` (the default): capture and check the message
+- `drop`: drop the message
+- `pass`: let the message pass through
+
+If no filter is specified, `check all` is assumed.  Otherwise, these filters are processed in
+left-to-right order, with an implicit `pass all` at the end.
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Whitespace handling for `#guard_msgs`:
+- `whitespace := exact` requires an exact whitespace match.
+- `whitespace := normalized` converts all newline characters to a space before matching
+  (the default). This allows breaking long lines.
+- `whitespace := lax` collapses whitespace to a single space before matching.
+In all cases, leading and trailing whitespace is trimmed before matching.
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Message ordering for `#guard_msgs`:
+- `ordering := exact` uses the exact ordering of the messages (the default).
+- `ordering := sorted` sorts the messages in lexicographic order.
+  This helps with testing commands that are non-deterministic in their ordering.
+</code></pre></div><h2 id="preserved-native-diagnostic-displays">Preserved native diagnostic displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">❌️ Docstring on `#guard_msgs` does not match generated message:
+
+- info: [true, false]
++ error: Invalid `meta` definition `_eval`, `isEven` is not accessible here; consider adding `public meta import Eval.Even`
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Invalid `meta` definition `_eval`, `isEven` is not accessible here; consider adding `public meta import Eval.Even`
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Could not synthesize a `ToExpr`, `Repr`, or `ToString` instance for type
+  Nat → Nat
+</code></pre></div><h3 id="display-4-2">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Quadrant.nw
+</code></pre></div><h3 id="display-5-2">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Could not synthesize a `ToExpr`, `Repr`, or `ToString` instance for type
+  Quadrant
+</code></pre></div><h3 id="display-6-2">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">fun x =&gt; x.succ
+</code></pre></div><h3 id="display-7-2">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">fun x =&gt; (Nat.rec ⟨fun x =&gt; x, PUnit.unit⟩ (fun n n_ih =&gt; ⟨fun x =&gt; (n_ih.1 x).succ, n_ih⟩) x).1 1
+</code></pre></div><h3 id="display-8-2">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">fun x =&gt; [x] : ?m.4 → List ?m.4
+</code></pre></div><h3 id="display-9-2">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">fun x =&gt; x + x : (x : ?m.7) → ?m.8 x
+</code></pre></div><h3 id="display-10-2">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">&quot;one&quot; + 1 : ?m.5
+</code></pre></div><h3 id="display-11-2">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">failed to synthesize instance of type class
+  HAdd String Nat ?m.5
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">instHAdd
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">@instHAdd Int Int.instAdd
+</code></pre></div><h3 id="display-14">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">failed to synthesize
+  HAdd Int String String
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+</code></pre></div><h3 id="display-15">Display 15</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">'swap_eq_swap'' depends on axioms: [propext, Classical.choice, Quot.sound, swap_eq_swap'._native.bv_decide.ax_3]
+</code></pre></div><h3 id="display-16">Display 16</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">equations:
+@[backward_defeq] theorem intersperse.eq_1.{u_1} : ∀ {α : Type u_1} (x y z : α) (zs : List α),
+  intersperse x (y :: z :: zs) = y :: x :: intersperse x (z :: zs)
+theorem intersperse.eq_2.{u_1} : ∀ {α : Type u_1} (x : α) (x_1 : List α),
+  (∀ (y z : α) (zs : List α), x_1 = y :: z :: zs → False) → intersperse x x_1 = x_1
+</code></pre></div><h3 id="display-17">Display 17</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">intersperse.eq_def.{u_1} {α : Type u_1} (x : α) (x✝ : List α) :
+  intersperse x x✝ =
+    match x✝ with
+    | y :: z :: zs =&gt; y :: x :: intersperse x (z :: zs)
+    | xs =&gt; xs
+</code></pre></div><h3 id="display-18">Display 18</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">intersperse.eq_unfold.{u_1} :
+  @intersperse = fun {α} x x_1 =&gt;
+    match x_1 with
+    | y :: z :: zs =&gt; y :: x :: intersperse x (z :: zs)
+    | xs =&gt; xs
+</code></pre></div><h3 id="display-19">Display 19</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">public section
+
+namespace A.B
+
+open Nat List
+
+variable (n : Nat)
+
+set_option pp.tagAppFns true
+</code></pre></div><h3 id="display-20">Display 20</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">declaration uses `sorry`
+</code></pre></div><h3 id="display-21">Display 21</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">❌️ Docstring on `#guard_msgs` does not match generated message:
+
+info: Tree.branches
+  [Tree.branches
+     [Tree.branches
+        [Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0],
+         Tree.branches [Tree.val 1, Tree.val 0, Tree.val 1, Tree.val 0]],
+      Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1]],
+   Tree.branches
+     [Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1],
+      Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0]]]
+</code></pre></div><h3 id="display-22">Display 22</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Tree.branches
+  [Tree.branches
+     [Tree.branches
+        [Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0],
+         Tree.branches [Tree.val 1, Tree.val 0, Tree.val 1, Tree.val 0]],
+      Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1]],
+   Tree.branches
+     [Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1],
+      Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0]]]
+</code></pre></div><h3 id="display-23">Display 23</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">❌️ Docstring on `#guard_msgs` does not match generated message:
+
+  info: Tree.branches
+    [Tree.branches
+       [Tree.branches
+          [Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0],
+-          Tree.branches [Tree.val 1, Tree.val 0, Tree.val 1, Tree.val 0,
++          Tree.branches [Tree.val 1, Tree.val 0, Tree.val 1, Tree.val 0]],
+        Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1]],
+     Tree.branches
+       [Tree.branches [Tree.val 3, Tree.val 2, Tree.val 3, Tree.val 1],
+        Tree.branches [Tree.val 2, Tree.val 1, Tree.val 2, Tree.val 0]]]
+</code></pre></div><h3 id="display-24">Display 24</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">( 1 2 3 4 5 )
+</code></pre></div><h3 id="display-25">Display 25</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(
+  1
+  2
+  3
+  4
+  5
+)
+</code></pre></div><h3 id="display-26">Display 26</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">( ( 1 2 3 4 5 ) ( 1 2 3 4 5 ) ( 1 2 3 4 5 ) )
+</code></pre></div><h3 id="display-27">Display 27</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(
+  ( 1 2 3 4 5 )
+  ( 1 2 3 4 5 )
+  ( 1 2 3 4 5 )
+)
+</code></pre></div><h3 id="display-28">Display 28</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(
+  (
+    1
+    2
+    3
+    4
+    5
+  )
+  (
+    1
+    2
+    3
+    4
+    5
+  )
+  (
+    1
+    2
+    3
+    4
+    5
+  )
+)
+</code></pre></div><h3 id="display-29">Display 29</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[Std.Format.text &quot;1&quot;,
+ Std.Format.text &quot;2&quot;,
+ Std.Format.text &quot;3&quot;,
+ Std.Format.text &quot;4&quot;,
+ Std.Format.text &quot;5&quot;,
+ Std.Format.text &quot;6&quot;,
+ Std.Format.text &quot;7&quot;,
+ Std.Format.text &quot;8&quot;,
+ Std.Format.text &quot;9&quot;,
+ Std.Format.text &quot;10&quot;,
+ Std.Format.text &quot;11&quot;,
+ Std.Format.text &quot;12&quot;,
+ Std.Format.text &quot;13&quot;,
+ Std.Format.text &quot;14&quot;,
+ Std.Format.text &quot;15&quot;,
+ Std.Format.text &quot;16&quot;,
+ Std.Format.text &quot;17&quot;,
+ Std.Format.text &quot;18&quot;,
+ Std.Format.text &quot;19&quot;,
+ Std.Format.text &quot;20&quot;]
+</code></pre></div><h3 id="display-30">Display 30</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(
+  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+  10
+  11
+  12
+  13
+  14
+  15
+  16
+  17
+  18
+  19
+  20
+)
+</code></pre></div><h3 id="display-31">Display 31</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">( 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 )
+</code></pre></div><h3 id="display-32">Display 32</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">( 1 2 3 4 5 6 7 8 9 10 11 12
+  13 14 15 16 17 18 19 20 )
+</code></pre></div><h3 id="display-33">Display 33</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">( 1 2 3 4 5 6 7 8 9 10 11 12
+  13 14 15 16 17 18 19 20 1 2
+  3 4 5 6 7 8 9 10 11 12 13 14
+  15 16 17 18 19 20 1 2 3 4 5
+  6 7 8 9 10 11 12 13 14 15 16
+  17 18 19 20 1 2 3 4 5 6 7 8
+  9 10 11 12 13 14 15 16 17 18
+  19 20 )
+</code></pre></div><h3 id="display-34">Display 34</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">abc
+xyz
+123
+</code></pre></div><h3 id="display-35">Display 35</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">abc
+xyz
+123abc
+xyz
+123
+</code></pre></div><h3 id="display-36">Display 36</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">It is:
+  abc
+  xyz
+  123
+</code></pre></div><h3 id="display-37">Display 37</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">It is:  abc
+        xyz
+        123
+</code></pre></div><h3 id="display-38">Display 38</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(NatOrInt.nat (3))
+(NatOrInt.int (5))
+(NatOrInt.int (-5))
+</code></pre></div><h3 id="display-39">Display 39</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">N.NatOrInt.nat 5
+</code></pre></div><h3 id="display-40">Display 40</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">N.NatOrInt.int 5
+</code></pre></div><h3 id="display-41">Display 41</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">N.NatOrInt.int (-5)
+</code></pre></div><h3 id="display-42">Display 42</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">some (N.NatOrInt.int (-5))
+</code></pre></div><h3 id="display-43">Display 43</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[N.NatOrInt.nat 0,
+ N.NatOrInt.nat 1,
+ N.NatOrInt.nat 2,
+ N.NatOrInt.nat 3,
+ N.NatOrInt.nat 4,
+ N.NatOrInt.nat 5,
+ N.NatOrInt.nat 6,
+ N.NatOrInt.nat 7,
+ N.NatOrInt.nat 8,
+ N.NatOrInt.nat 9]
+</code></pre></div><h3 id="display-44">Display 44</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[N.NatOrInt.nat
+   0,
+ N.NatOrInt.nat
+   1,
+ N.NatOrInt.nat
+   2,
+ N.NatOrInt.nat
+   3,
+ N.NatOrInt.nat
+   4,
+ N.NatOrInt.nat
+   5,
+ N.NatOrInt.nat
+   6,
+ N.NatOrInt.nat
+   7,
+ N.NatOrInt.nat
+   8,
+ N.NatOrInt.nat
+   9]
+</code></pre></div><h3 id="display-45">Display 45</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">2 + 3 + 4
+</code></pre></div><h3 id="display-46">Display 46</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">2 + (3 + 4)
+</code></pre></div><h3 id="display-47">Display 47</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[2 + (3 + 4), 2 + 3 + 4]
+</code></pre></div><h3 id="display-48">Display 48</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[2 +
+   (3 +
+      4),
+ 2 +
+     3 +
+   4]
+</code></pre></div><h3 id="display-49">Display 49</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[ABC.a,
+ ABC.b,
+ ABC.c,
+ ABC.a,
+ ABC.b,
+ ABC.c,
+ ABC.a,
+ ABC.b,
+ ABC.c]
+</code></pre></div><h3 id="display-50">Display 50</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[0, 1, 2, 0,
+ 1, 2, 0, 1,
+ 2]
+</code></pre></div><h3 id="display-51">Display 51</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[ABC.a, ABC.b,
+ ABC.c, ABC.a,
+ ABC.b, ABC.c,
+ ABC.a, ABC.b,
+ ABC.c]
+</code></pre></div><h2 id="preserved-native-proof-state-displays">Preserved native proof-state displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-3">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ swap = swap'
+</code></pre></div><h3 id="display-2-3">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">x:BitVec 32y:BitVec 32⊢ swap x y = swap' x y
+</code></pre></div><h3 id="display-3-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">x:BitVec 32y:BitVec 32⊢ y = x ^^^ y ^^^ (x ^^^ y ^^^ y) ∧ x = x ^^^ y ^^^ y
+</code></pre></div><h3 id="display-4-3">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">All goals completed! 🐙
+</code></pre></div><footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

@@ -1,0 +1,639 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;The-Lean-Language-Reference--Iterators--Iterator-Definitions&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../index.html">22. Iterators</a><a href="../Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="index.html">22.2. Iterator Definitions</a><a href="../Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../../Notations-and-Macros/index.html">23. Notations and Macros</a><a href="../../Notations-and-Macros/Custom-Operators/index.html">23.1. Custom Operators</a><a href="../../Notations-and-Macros/Precedence/index.html">23.2. Precedence</a><a href="../../Notations-and-Macros/Notations/index.html">23.3. Notations</a><a href="../../Notations-and-Macros/Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../../Notations-and-Macros/Macros/index.html">23.5. Macros</a><a href="../../Notations-and-Macros/Elaborators/index.html">23.6. Elaborators</a><a href="../../Notations-and-Macros/Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../../Notations-and-Macros/Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../../releases/index.html">Release Notes</a><a href="../../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="The-Lean-Language-Reference--Iterators--Iterator-Definitions"></a></p>
+<h1 id="proofscript-22-2-iterator-definitions">ProofScript — 22.2. Iterator Definitions</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>Iterator definitions describe state and stepping; consumers observe a sequence through the permitted interfaces. Combinators such as mapping and filtering transform that process without automatically inheriting termination, productivity, effect or allocation guarantees. Preserve the distinction between finite consumers and potentially unbounded iteration. Iterator proofs belong to the native abstraction and its law dependencies.</p>
+<p><strong>Compiler and coverage boundary.</strong> Version the iterator library and its instances. A foreign async stream additionally needs backpressure, cancellation and lifetime contracts; it is not an ordinary iterator by spelling alone.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/Iterators/Iterator-Definitions/index.html">Iterators/Iterator-Definitions/index.html</a>. Source Git blob: <code>328bd9a3b7936400c689e07e476633af45df404b</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<p><a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructors-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<hr>
+<h2 id="22-2-iterator-definitions">22.2. Iterator Definitions</h2><p>Iterators may be either monadic or pure, and they may be finite, productive, or potentially infinite. 
+<a id="--tech-term-Monadic"></a>
+<em>Monadic</em> iterators use side effects in some <a href="../../Functors___-Monads-and--do--Notation/index.html#--tech-term-Monad">monad</a> to emit each value, and must therefore be used in the monad, while 
+<a id="--tech-term-pure"></a>
+<em>pure</em> iterators do not require side effects. For example, iterating over all files in a directory requires the <code>IO</code> monad. Pure iterators have type <code>Iter</code>, while monadic iterators are represented by <code>IterM</code>.</p>
+<p><a id="Std___Iter___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Iter.{w} {α : Type w} (β : Type w) : Type w
+</code></pre></div><p>An iterator that sequentially emits values of type <code>β</code>. It may be finite or infinite.</p>
+<p>See the root module <code>Std.Data.Iterators</code> for a more comprehensive overview over the iterator framework.</p>
+<p>See <code>Std.Data.Iterators.Producers</code> for ways to iterate over common data structures. By convention, the monadic iterator associated with an object can be obtained via dot notation. For example, <code>List.iterM IO</code> creates an iterator over a list in the monad <code>IO</code>.</p>
+<p>See <code>Init.Data.Iterators.Consumers</code> for ways to use an iterator. For example, <code>it.toList</code> will convert an iterator <code>it</code> into a list and <code>it.ensureTermination.toList</code> guarantees that this operation will terminate, given a proof that the iterator is finite. It is also always possible to manually iterate using <code>it.step</code>, relying on the termination measures <code>it.finitelyManySteps</code> and <code>it.finitelyManySkips</code>.</p>
+<p>See <code>IterM</code> for iterators that operate in a monad.</p>
+<p>Internally, <code>Iter β</code> wraps an element of type <code>α</code> containing state information. The type <code>α</code> determines the implementation of the iterator using a typeclass mechanism. The concrete typeclass implementing the iterator is <code>Iterator α m β</code>.</p>
+<p>When using combinators, <code>α</code> can become very complicated. It is an implicit parameter of <code>α</code> so that the pretty printer will not print this large type by default. If a declaration returns an iterator, the following will not work:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def x : Iter Nat := [1, 2, 3].iter
+</code></pre></div><p>Instead the declaration type needs to be completely omitted:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def x := [1, 2, 3].iter
+
+-- if you want to ensure that `x` is an iterator emitting `Nat`
+def x := ([1, 2, 3].iter : Iter Nat)
+</code></pre></div><p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Iter.mk.{w}
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">internalState : α
+</code></pre></div><p>Internal implementation detail of the iterator.</p>
+<p><a id="Std___IterM___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IterM.{w, w'} {α : Type w} (m : Type w → Type w') (β : Type w) :
+  Type w
+</code></pre></div><p>An iterator that sequentially emits values of type <code>β</code> in the monad <code>m</code>. It may be finite or infinite.</p>
+<p>See the root module <code>Std.Data.Iterators</code> for a more comprehensive overview over the iterator framework.</p>
+<p>See <code>Std.Data.Iterators.Producers</code> for ways to iterate over common data structures. By convention, the monadic iterator associated with an object can be obtained via dot notation. For example, <code>List.iterM IO</code> creates an iterator over a list in the monad <code>IO</code>.</p>
+<p>See <code>Init.Data.Iterators.Consumers</code> for ways to use an iterator. For example, <code>it.toList</code> will convert an iterator <code>it</code> into a list and <code>it.ensureTermination.toList</code> guarantees that this operation will terminate, given a proof that the iterator is finite. It is also always possible to manually iterate using <code>it.step</code>, relying on the termination measures <code>it.finitelyManySteps</code> and <code>it.finitelyManySkips</code>.</p>
+<p>See <code>Iter</code> for a more convenient interface in case that no monadic effects are needed (<code>m = Id</code>).</p>
+<p>Internally, <code>IterM m β</code> wraps an element of type <code>α</code> containing state information. The type <code>α</code> determines the implementation of the iterator using a typeclass mechanism. The concrete typeclass implementing the iterator is <code>Iterator α m β</code>.</p>
+<p>When using combinators, <code>α</code> can become very complicated. It is an implicit parameter of <code>α</code> so that the pretty printer will not print this large type by default. If a declaration returns an iterator, the following will not work:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def x : IterM IO Nat := [1, 2, 3].iterM IO
+</code></pre></div><p>Instead the declaration type needs to be completely omitted:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def x := [1, 2, 3].iterM IO
+
+-- if you want to ensure that `x` is an iterator in `IO` emitting `Nat`
+def x := ([1, 2, 3].iterM IO : IterM IO Nat)
+</code></pre></div><p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IterM.mk.{w, w'}
+</code></pre></div><p>Wraps the state of an iterator into an <code>Iter</code> object.</p>
+<p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">internalState : α
+</code></pre></div><p>Internal implementation detail of the iterator.</p>
+<p>The types <code>Iter</code> and <code>IterM</code> are merely wrappers around an internal state. This inner state type is the implicit parameter to the iterator types. For basic producer iterators, like the one that results from <code>List.iter</code>, this type is fairly simple; however, iterators that result from <a href="../index.html#--tech-term-Combinators">combinators</a> use polymorphic state types that can grow large. Because Lean elaborates the specified return type of a function before elaborating its body, it may not be possible to automatically determine the internal state type of an iterator type returned by a function. In these cases, it can be helpful to omit the return type from the signature and instead place a type annotation on the definition&#39;s body, which allows the specific iterator combinators invoked from the body to be used to determine the state type.</p>
+<p><a id="Iterator-State-Types"></a>
+Iterator State Types </p>
+<p>Writing the internal state type explicitly for list and array iterators is feasible:</p>
+<p><a id="reds-_LPAR_in-Iterator-State-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const reds := [&quot;red&quot;, &quot;crimson&quot;]
+
+example : @Iter (ListIterator String) String := reds.iter
+
+example : @Iter (ArrayIterator String) String := reds.toArray.iter
+</code></pre></div><p>However, the internal state type of a use of the <code>Iter.map</code> combinator is quite complicated:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example :
+    @Iter
+      (Map (ListIterator String) Id Id @id fun x : String =&gt;
+        pure x.length)
+      Nat :=
+  reds.iter.map String.length
+</code></pre></div><p>Omitting the state type leads to an error:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example : Iter Nat := reds.iter.map String.length
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">don't know how to synthesize implicit argument `α`
+  @Iter ?m.1 Nat
+context:
+⊢ Type
+
+Note: Because this declaration's type has been explicitly provided, all parameter types and holes (e.g., `_`) in its header are resolved before its body is processed; information from the declaration body cannot be used to infer what these values should be
+</code></pre></div><p>Rather than writing the state type by hand, it can be convenient to omit the return type and instead provide the annotation around the term:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example := (reds.iter.map String.length : Iter Nat)
+
+example :=
+  show Iter Nat from
+  reds.iter.map String.length
+</code></pre></div><p>The actual process of iteration consists of producing a sequence of iteration steps when requested. Each step returns an updated iterator with a new internal state along with either a data value (in <code>IterStep.yield</code>), an indicator that the caller should request a data value again (<code>IterStep.skip</code>), or an indication that iteration is finished (<code>IterStep.done</code>). Without the ability to <code>skip</code>, it would be much more difficult to work with iterator combinators such as <code>Iter.filter</code> that do not yield values for all of those yielded by the underlying iterator. With <code>skip</code>, the implementation of <code>filter</code> doesn&#39;t need to worry about whether the underlying iterator is <a href="index.html#--tech-term-Finite">finite</a> in order to be a well-defined function, and reasoning about its finiteness can be carried out in separate proofs. Additionally, <code>filter</code> would require an inner loop, which is much more difficult for the compiler to inline.</p>
+<p><a id="Std___IterStep___yield"></a></p>
+<p><strong>inductive type</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IterStep.{u_1, u_2} (α : Sort u_1) (β : Sort u_2) :
+  Sort (max (max 1 u_1) u_2)
+</code></pre></div><p><code>IterStep α β</code> represents a step taken by an iterator (<code>Iter β</code> or <code>IterM m β</code>).</p>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IterStep.yield.{u_1, u_2} {α : Sort u_1} {β : Sort u_2}
+  (it : α) (out : β) : IterStep α β
+</code></pre></div><p><code>IterStep.yield it out</code> describes the situation that an iterator emits <code>out</code> and provides <code>it</code> as the succeeding iterator.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IterStep.skip.{u_1, u_2} {α : Sort u_1} {β : Sort u_2}
+  (it : α) : IterStep α β
+</code></pre></div><p><code>IterStep.skip it</code> describes the situation that an iterator does not emit anything in this iteration and provides <code>it&#39;</code> as the succeeding iterator.</p>
+<p>Allowing <code>skip</code> steps is necessary to generate efficient code from a loop over an iterator.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IterStep.done.{u_1, u_2} {α : Sort u_1} {β : Sort u_2} :
+  IterStep α β
+</code></pre></div><p><code>IterStep.done</code> describes the situation that an iterator has finished and will neither emit more values nor cause any monadic effects. In this case, no succeeding iterator is provided.</p>
+<p>Steps taken by <code>Iter</code> and <code>IterM</code> are respectively represented by the types <code>Iter.Step</code> and <code>IterM.Step</code>. Both types of step are wrappers around <code>IterStep</code> that include <a href="index.html#iterator-plausibility">additional proofs</a> that are used to track termination behavior.</p>
+<p><a id="Std___Iter___Step"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Iter.Step.{w} {α β : Type w} [Iterator α Id β] (it : Iter β) :
+  Type w
+</code></pre></div><p>The type of the step object returned by <code>Iter.step</code>, containing an <code>IterStep</code> and a proof that this is a plausible step for the given iterator.</p>
+<p><a id="Std___IterM___Step"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IterM.Step.{w, w'} {α : Type w} {m : Type w → Type w'} {β : Type w}
+  [Iterator α m β] (it : IterM m β) : Type w
+</code></pre></div><p>The type of the step object returned by <code>IterM.step</code>, containing an <code>IterStep</code> and a proof that this is a plausible step for the given iterator.</p>
+<p>Steps are produced from iterators using <code>Iterator.step</code>, which is a method of the <code>Iterator</code> type class. <code>Iterator</code> is used for both pure and monadic iterators; pure iterators can be completely polymorphic in the choice of monad, which allows callers to instantiate it with <code>Id</code>.</p>
+<p><a id="Std___Iterator___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Iterator.{w, w'} (α : Type w) (m : Type w → Type w')
+  (β : outParam (Type w)) : Type (max w w')
+</code></pre></div><p>The step function of an iterator in <code>Iter (α := α) β</code> or <code>IterM (α := α) m β</code>.</p>
+<p>In order to allow intrinsic termination proofs when iterating with the <code>step</code> function, the step object is bundled with a proof that it is a &quot;plausible&quot; step for the given current iterator.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Iterator.mk.{w, w'}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">IsPlausibleStep : IterM m β → IterStep (IterM m β) β → Prop
+</code></pre></div><p>A relation that governs the allowed steps from a given iterator.</p>
+<p>The &quot;plausible&quot; steps are those which make sense for a given state; plausibility can ensure properties such as the successor iterator being drawn from the same collection, that an iterator resulting from a skip will return the same next value, or that the next item yielded is next one in the original collection.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">step : (it : IterM m β) → m (Std.Shrink (PlausibleIterStep (Iterator.IsPlausibleStep it)))
+</code></pre></div><p>Carries out a step of iteration.</p>
+<p><a id="iterator-plausibility"></a></p>
+<h3 id="22-2-1-plausibility">22.2.1. Plausibility</h3><p>In addition to the step function, instances of <code>Iterator</code> include a relation <code>Iterator.IsPlausibleStep</code>. This relation exists because most iterators both maintain invariants over their internal state and yield values in a predictable manner. For example, array iterators track both an array and a current index into it. Stepping an array iterator results in an iterator over the same underlying array; it yields a value when the index is small enough, or is done otherwise. The 
+<a id="--tech-term-plausible-steps"></a>
+<em>plausible steps</em> from an iterator state are those which are related to it via the iterator&#39;s implementation of <code>IsPlausibleStep</code>. Tracking plausibility at the logical level makes it feasible to reason about termination behavior for monadic iterators.</p>
+<p>Both <code>Iter.Step</code> and <code>IterM.Step</code> are defined in terms of <code>PlausibleIterStep</code>; thus, both types can be used with <a href="../../Terms/Identifiers/index.html#--tech-term-leading-dot-notation">leading dot notation</a> for its namespace. An <code>Iter.Step</code> or <code>IterM.Step</code> can be analyzed using the three <a href="../../Terms/Pattern-Matching/index.html#match_pattern-functions">match pattern functions</a> <code>PlausibleIterStep.yield</code>, <code>PlausibleIterStep.skip</code>, and <code>PlausibleIterStep.done</code>. These functions pair the information in the underlying <code>IterStep</code> with the surrounding proof object.</p>
+<p><a id="Std___PlausibleIterStep"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.PlausibleIterStep.{u, w} {α : Type u} {β : Type w}
+  (IsPlausibleStep : IterStep α β → Prop) : Type (max 0 u w)
+</code></pre></div><p>A variant of <code>IterStep</code> that bundles the step together with a proof that it is &quot;plausible&quot;. The plausibility predicate will later be chosen to assert that a state is a plausible successor of another state. Having this proof bundled up with the step is important for termination proofs.</p>
+<p>See <code>IterM.Step</code> and <code>Iter.Step</code> for the concrete choice of the plausibility predicate.</p>
+<p><a id="Std___PlausibleIterStep___yield"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.PlausibleIterStep.yield.{u, w} {α : Type u} {β : Type w}
+  {IsPlausibleStep : IterStep α β → Prop} (it' : α) (out : β)
+  (h : IsPlausibleStep (IterStep.yield it' out)) :
+  PlausibleIterStep IsPlausibleStep
+</code></pre></div><p>Match pattern for the <code>yield</code> case. See also <code>IterStep.yield</code>.</p>
+<p><a id="Std___PlausibleIterStep___skip"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.PlausibleIterStep.skip.{u, w} {α : Type u} {β : Type w}
+  {IsPlausibleStep : IterStep α β → Prop} (it' : α)
+  (h : IsPlausibleStep (IterStep.skip it')) :
+  PlausibleIterStep IsPlausibleStep
+</code></pre></div><p>Match pattern for the <code>skip</code> case. See also <code>IterStep.skip</code>.</p>
+<p><a id="Std___PlausibleIterStep___done"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.PlausibleIterStep.done.{u, w} {α : Type u} {β : Type w}
+  {IsPlausibleStep : IterStep α β → Prop}
+  (h : IsPlausibleStep IterStep.done) :
+  PlausibleIterStep IsPlausibleStep
+</code></pre></div><p>Match pattern for the <code>done</code> case. See also <code>IterStep.done</code>.</p>
+<p><a id="The-Lean-Language-Reference--Iterators--Iterator-Definitions--Finite-and-Productive-Iterators"></a></p>
+<h3 id="22-2-2-finite-and-productive-iterators">22.2.2. Finite and Productive Iterators</h3><p>Not all iterators are guaranteed to return a finite number of results; it is perfectly sensible to iterate over all of the natural numbers. Similarly, not all iterators are guaranteed to either return a single result or terminate; iterators may be defined using arbitrary programs. Thus, Lean divides iterators into three termination classes:</p>
+<ul>
+<li><a id="--tech-term-Finite"></a>
+<em>Finite</em> iterators are guaranteed to finish iterating after a finite number of steps. These iterators have a <code>Finite</code> instance.</li>
+<li><a id="--tech-term-Productive"></a>
+<em>Productive</em> iterators are guaranteed to yield a value or terminate in finitely many steps, but they may yield infinitely many values. These iterators have a <code>Productive</code> instance.</li>
+<li>All other iterators, whose termination behavior is unknown. These iterators have neither instance.</li>
+</ul>
+<p>All finite iterators are necessarily productive.</p>
+<p><a id="Std___Iterators___Finite___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Iterators.Finite.{w, w'} (α : Type w) (m : Type w → Type w')
+  {β : Type w} [Iterator α m β] : Prop
+</code></pre></div><p><code>Finite α m</code> asserts that <code>IterM (α := α) m</code> terminates after finitely many steps. Technically, this means that the relation of plausible successors is well-founded. Given this typeclass, termination proofs for well-founded recursion over an iterator <code>it</code> can use <code>it.finitelyManySteps</code> as a termination measure.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Iterators.Finite.mk.{w, w'}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">wf : WellFounded IterM.IsPlausibleSuccessorOf
+</code></pre></div><p>The relation of plausible successors is well-founded.</p>
+<p><a id="Std___Iterators___Productive___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Iterators.Productive.{u_1, u_2} (α : Type u_1)
+  (m : Type u_1 → Type u_2) {β : Type u_1} [Iterator α m β] : Prop
+</code></pre></div><p><code>Productive α m</code> asserts that <code>IterM (α := α) m</code> terminates or emits a value after finitely many skips. Technically, this means that the relation of plausible successors during skips is well-founded. Given this typeclass, termination proofs for well-founded recursion over an iterator <code>it</code> can use <code>it.finitelyManySkips</code> as a termination measure.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Iterators.Productive.mk.{u_1, u_2}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">wf : WellFounded IterM.IsPlausibleSkipSuccessorOf
+</code></pre></div><p>The relation of plausible successors during skips is well-founded.</p>
+<p>Lean&#39;s standard library provides many functions that iterate over an iterator. These consumer functions usually do not make any assumptions about the underlying iterator. In particular, such functions may run forever for certain iterators.</p>
+<p>Sometimes, it is of utmost importance that a function does terminate. For these cases, the combinator <code>Iter.ensureTermination</code> results in an iterator that provides variants of consumers that are guaranteed to terminate. They usually require proof that the involved iterator is finite.</p>
+<p><a id="Std___Iter___ensureTermination"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Iter.ensureTermination.{w} {α β : Type w} (it : Iter β) :
+  Iter.Total β
+</code></pre></div><p>For an iterator <code>it</code>, <code>it.ensureTermination</code> provides variants of consumers that always terminate.</p>
+<p><a id="Std___IterM___ensureTermination"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IterM.ensureTermination.{w, w'} {α β : Type w}
+  {m : Type w → Type w'} (it : IterM m β) : IterM.Total m β
+</code></pre></div><p>For an iterator <code>it</code>, <code>it.ensureTermination</code> provides variants of consumers that always terminate.</p>
+<p><a id="Iterating-Over--Nat"></a>
+Iterating Over <code>Nat</code>  </p>
+<p>To write an iterator that yields each natural number in turn, the first step is to implement its internal state. This iterator only needs to remember the next natural number:
+<a id="Nats-_LPAR_in-Iterating-Over--Nat_RPAR_"></a>
+<a id="Nats___next-_LPAR_in-Iterating-Over--Nat_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure Nats where
+  next : Nat
+</code></pre></div><p>This iterator will only ever yield the next natural number. Thus, its step function will never return <code>skip</code> or <code>done</code>. Whenever it yields a value, the value will be the internal state&#39;s <code>next</code> field, and the successor iterator&#39;s <code>next</code> field will be one greater. The <code>grind</code> tactic suffices to show that the step is indeed plausible:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance [Pure m] : Iterator Nats m Nat where
+  IsPlausibleStep it
+    | .yield it' n =&gt;
+      n = it.internalState.next ∧
+      it'.internalState.next = n + 1
+    | _ =&gt; False
+  step it :=
+    let n := it.internalState.next
+    pure &lt;| .deflate &lt;|
+      .yield { it with internalState.next := n + 1 } n (by grind)
+</code></pre></div><p>Whenever an iterator is defined, an <code>IteratorLoop</code> instance should be provided. They are required for most consumers of iterators such as <code>Iter.toList</code> or the <code>for</code> loops. One can use their default implementations as follows:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance [Pure m] [Monad n] : IteratorLoop Nats m n :=
+  .defaultImplementation
+</code></pre></div><p>This <code>step</code> function is productive because it never returns <code>skip</code>. Thus, the proof that each chain of <code>skip</code>s has finite length can rely on the fact that when <code>it</code> is a <code>Nats</code> iterator, <code>Iterator.IsPlausibleStep it (.skip it&#39;) = False</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance [Pure m] : Productive Nats m where
+  wf := .intro &lt;| fun _ =&gt; .intro _ nofun
+</code></pre></div><p>Because there are infinitely many <code>Nat</code>s, the iterator is not finite.</p>
+<p>A <code>Nats</code> iterator can be created using this function:</p>
+<p><a id="Nats___iter-_LPAR_in-Iterating-Over--Nat_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const Nats.iter : Iter (α := Nats) Nat :=
+  IterM.mk { next := 0 } |&gt;.toIter
+</code></pre></div><p>One can print all natural numbers by running the following function:</p>
+<p><a id="f-_LPAR_in-Iterating-Over--Nat_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const f : IO Unit := do
+  for x in Nats.iter do
+    IO.println s!&quot;{x}&quot;
+</code></pre></div><p>This function never terminates, printing all natural numbers in increasing order, one after another.</p>
+<p>This iterator is most useful with combinators such as <code>Iter.zip</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show IO Unit from do
+  let xs : List String := [&quot;cat&quot;, &quot;dog&quot;, &quot;pachycephalosaurus&quot;]
+  for (x, y) in Nats.iter.zip xs.iter do
+    IO.println s!&quot;{x}: {y}&quot;
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">0: cat
+1: dog
+2: pachycephalosaurus
+</code></pre></div><p>In contrast to the previous example, this loop terminates because <code>xs.iter</code> is a finite iterator, One can make sure that a loop actually terminates by providing a <code>Finite</code> instance:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check type_of% (Nats.iter.zip [&quot;cat&quot;, &quot;dog&quot;].iter).internalState
+
+#synth Finite (Zip Nats Id (ListIterator String) String) Id
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Zip Nats Id (ListIterator String) String : Type
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Zip.instFinite₂
+</code></pre></div><p>In contrast, <code>Nats.iter</code> has no <code>Finite</code> instance because it yields infinitely many values:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#synth Finite Nats Id
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">failed to synthesize
+  Finite Nats Id
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+</code></pre></div><p>Because there are infinitely many <code>Nat</code>s, using <code>Iter.ensureTermination</code> results in an error:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show IO Unit from do
+  for x in Nats.iter.ensureTermination do
+    IO.println s!&quot;{x}&quot;
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">failed to synthesize instance of type class
+  ForIn IO (Iter.Total Nat) ?α
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+</code></pre></div><p><a id="Iterating-Over-Triples"></a>
+Iterating Over Triples </p>
+<p>The type <code>Triple</code> contains three values of the same type:
+<a id="Triple-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="Triple___fst-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="Triple___snd-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="Triple___thd-_LPAR_in-Iterating-Over-Triples_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure Triple α where
+  fst : α
+  snd : α
+  thd : α
+</code></pre></div><p>The internal state of an iterator over <code>Triple</code> can consist of a triple paired with a current position. This position may either be one of the fields or an indication that iteration is finished.
+<a id="TriplePos-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="TriplePos___fst-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="TriplePos___snd-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="TriplePos___thd-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="TriplePos___done-_LPAR_in-Iterating-Over-Triples_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive TriplePos where
+  | fst | snd | thd | done
+</code></pre></div><p>Positions can be used to look up elements:
+<a id="Triple___get___-_LPAR_in-Iterating-Over-Triples_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def Triple.get? (xs : Triple α) (pos : TriplePos) : Option α :=
+  match pos with
+  | .fst =&gt; some xs.fst
+  | .snd =&gt; some xs.snd
+  | .thd =&gt; some xs.thd
+  | _ =&gt; none
+</code></pre></div><p>Each field&#39;s position has a successor position:
+<a id="TriplePos___Succ-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="TriplePos___Succ___fst-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="TriplePos___Succ___snd-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="TriplePos___Succ___thd-_LPAR_in-Iterating-Over-Triples_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[grind, grind cases]
+inductive TriplePos.Succ : TriplePos → TriplePos → Prop where
+  | fst : Succ .fst .snd
+  | snd : Succ .snd .thd
+  | thd : Succ .thd .done
+</code></pre></div><p>The iterator itself pairs a triple with the position of the next element:
+<a id="TripleIterator-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="TripleIterator___triple-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="TripleIterator___pos-_LPAR_in-Iterating-Over-Triples_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure TripleIterator α where
+  triple : Triple α
+  pos : TriplePos
+</code></pre></div><p>Iteration begins at <code>fst</code>:</p>
+<p><a id="Triple___iter-_LPAR_in-Iterating-Over-Triples_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function Triple.iter (xs : Triple α) : Iter (α := TripleIterator α) α :=
+  IterM.mk {triple := xs, pos := .fst : TripleIterator α} |&gt;.toIter
+</code></pre></div><p>There are two plausible steps: either the iterator&#39;s position has a successor, in which case the next iterator is one that points at the same triple with the successor position, or it does not, in which case iteration is complete.
+<a id="TripleIterator___IsPlausibleStep-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="TripleIterator___IsPlausibleStep___yield-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="TripleIterator___IsPlausibleStep___done-_LPAR_in-Iterating-Over-Triples_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[grind]
+inductive TripleIterator.IsPlausibleStep :
+    @IterM (TripleIterator α) m α →
+    IterStep (@IterM (TripleIterator α) m α) α →
+    Prop where
+  | yield :
+    it.internalState.triple = it'.internalState.triple →
+    it.internalState.pos.Succ it'.internalState.pos →
+    it.internalState.triple.get? it.internalState.pos = some out →
+    IsPlausibleStep it (.yield it' out)
+  | done :
+    it.internalState.pos = .done →
+    IsPlausibleStep it .done
+</code></pre></div><p>The corresponding step function yields the iterator and value describe by the relation:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance [Pure m] : Iterator (TripleIterator α) m α where
+  IsPlausibleStep := TripleIterator.IsPlausibleStep
+  step
+    | ⟨xs, pos⟩ =&gt;
+      pure &lt;| .deflate &lt;|
+      match pos with
+      | .fst =&gt; .yield ⟨xs, .snd⟩ xs.fst ?_
+      | .snd =&gt; .yield ⟨xs, .thd⟩ xs.snd ?_
+      | .thd =&gt; .yield ⟨xs, .done⟩ xs.thd ?_
+      | .done =&gt; .done &lt;| ?_
+where finally
+  all_goals grind [Triple.get?]
+</code></pre></div><p>This iterator can now be converted to an array:</p>
+<p><a id="abc-_LPAR_in-Iterating-Over-Triples_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const abc : Triple Char := ⟨'a', 'b', 'c'⟩
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval abc.iter.toArray
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">#['a', 'b', 'c']
+</code></pre></div><p>In general, <code>Iter.toArray</code> might run forever. One can prove that <code>abc</code> is finite, and the above example will terminate after finitely many steps, by constructing a <code>Finite (Triple Char) Id</code> instance. It&#39;s easiest to start at <code>TriplePos.done</code> and work backwards toward <code>TriplePos.fst</code>, showing that each position in turn has a finite chain of successors:
+<a id="acc_done-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="acc_thd-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="acc_snd-_LPAR_in-Iterating-Over-Triples_RPAR_"></a>
+<a id="acc_fst-_LPAR_in-Iterating-Over-Triples_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[grind! .]
+theorem acc_done [Pure m] :
+    Acc (IterM.IsPlausibleSuccessorOf (m := m))
+      ⟨{ triple, pos := .done : TripleIterator α}⟩ :=
+  Acc.intro _ fun
+    | _, ⟨_, ⟨_, h⟩⟩ =&gt; by
+      cases h &lt;;&gt; grind [IterStep.successor_done]
+
+@[grind! .]
+theorem acc_thd [Pure m] :
+    Acc (IterM.IsPlausibleSuccessorOf (m := m))
+      ⟨{ triple, pos := .thd : TripleIterator α}⟩ :=
+  Acc.intro _ fun
+    | ⟨{ triple, pos }⟩, ⟨h, h', h''⟩ =&gt; by
+      cases h'' &lt;;&gt; grind [IterStep.successor_yield]
+
+@[grind! .]
+theorem acc_snd [Pure m] :
+    Acc (IterM.IsPlausibleSuccessorOf (m := m))
+      ⟨{ triple, pos := .snd : TripleIterator α}⟩ :=
+  Acc.intro _ fun
+    | ⟨{ triple, pos }⟩, ⟨h, h', h''⟩ =&gt; by
+      cases h'' &lt;;&gt; grind [IterStep.successor_yield]
+
+@[grind! .]
+theorem acc_fst [Pure m] :
+    Acc (IterM.IsPlausibleSuccessorOf (m := m))
+      ⟨{ triple, pos := .fst : TripleIterator α}⟩ :=
+  Acc.intro _ fun
+    | ⟨{ triple, pos }⟩, ⟨h, h', h''⟩ =&gt; by
+      cases h'' &lt;;&gt; grind [IterStep.successor_yield]
+
+instance [Pure m] : Finite (TripleIterator α) m where
+  wf := .intro &lt;| fun
+    | { internalState := { triple, pos } } =&gt; by
+      cases pos &lt;;&gt; grind
+</code></pre></div><p>To enable the iterator in <code>for</code> loops, an instance of <code>IteratorLoop</code> are needed:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance [Monad m] [Monad n] :
+    IteratorLoop (TripleIterator α) m n :=
+  .defaultImplementation
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show IO Unit from do
+  for x in abc.iter do
+    IO.println x
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">a
+b
+c
+</code></pre></div><p><a id="Iterators-and-Effects"></a>
+Iterators and Effects </p>
+<p>One way to iterate over the contents of a file is to read a specified number of bytes from a <code>Stream</code> at each step. When EOF is reached, the iterator can close the file by letting its reference count drop to zero:
+<a id="FileIterator-_LPAR_in-Iterators-and-Effects_RPAR_"></a>
+<a id="FileIterator___stream___-_LPAR_in-Iterators-and-Effects_RPAR_"></a>
+<a id="FileIterator___count-_LPAR_in-Iterators-and-Effects_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure FileIterator where
+  stream? : Option IO.FS.Stream
+  count : USize := 8192
+</code></pre></div><p>An iterator can be created by opening a file and converting its handle to a stream:</p>
+<p><a id="iterFile-_LPAR_in-Iterators-and-Effects_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function iterFile
+    (path : System.FilePath)
+    (count : USize := 8192) :
+    IO (IterM (α := FileIterator) IO ByteArray) := do
+  let h ← IO.FS.Handle.mk path .read
+  let stream? := some (IO.FS.Stream.ofHandle h)
+  return IterM.mk { stream?, count }
+</code></pre></div><p>For this iterator, a <code>yield</code> is plausible when the file is still open, and <code>done</code> is plausible when the file is closed. The actual step function performs a read and closes the file if no bytes were returned:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance : Iterator FileIterator IO ByteArray where
+  IsPlausibleStep it
+    | .yield .. =&gt;
+      it.internalState.stream?.isSome
+    | .skip .. =&gt; False
+    | .done =&gt; it.internalState.stream?.isNone
+  step it := do
+    match h : it.internalState.stream? with
+    | none =&gt; return .deflate &lt;| .done (by simp [h])
+    | some stream =&gt;
+      let bytes ← stream.read it.internalState.count
+      let it' :=
+        { it with internalState.stream? :=
+          if bytes.size == 0 then none else some stream
+        }
+      return .deflate &lt;| .yield it' bytes (by simp [h])
+</code></pre></div><p>To use it in loops, an <code>IteratorLoop</code> instance will be necessary.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance [Monad n] : IteratorLoop FileIterator IO n :=
+  .defaultImplementation
+</code></pre></div><p>This is enough support code to use the iterator to calculate file sizes:</p>
+<p><a id="fileSize-_LPAR_in-Iterators-and-Effects_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function fileSize (name : System.FilePath) : IO Nat := do
+  let mut size := 0
+  let f := (← iterFile name)
+  for bytes in f do
+    size := size + bytes.size
+  return size
+</code></pre></div><p><a id="The-Lean-Language-Reference--Iterators--Iterator-Definitions--Accessing-Elements"></a></p>
+<h3 id="22-2-3-accessing-elements">22.2.3. Accessing Elements</h3><p>Some iterators support efficient random access. For example, an array iterator can skip any number of elements in constant time by incrementing the index that it maintains into the array.</p>
+<p><a id="Std___IteratorAccess___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IteratorAccess.{w, w'} (α : Type w) (m : Type w → Type w')
+  {β : Type w} [Iterator α m β] : Type (max w w')
+</code></pre></div><p><code>IteratorAccess α m</code> provides efficient implementations for random access or iterators that support it. <code>it.nextAtIdx? n</code> either returns the step in which the <code>n</code>th value of <code>it</code> is emitted (necessarily of the form <code>.yield _ _</code>) or <code>.done</code> if <code>it</code> terminates before emitting the <code>n</code>th value.</p>
+<p>For monadic iterators, the monadic effects of this operation may differ from manually iterating to the <code>n</code>-th value because <code>nextAtIdx?</code> can take shortcuts. By the signature, the return value is guaranteed to plausible in the sense of <code>IterM.IsPlausibleNthOutputStep</code>.</p>
+<p>This class is experimental and users of the iterator API should not explicitly depend on it.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IteratorAccess.mk.{w, w'}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">nextAtIdx? : (it : IterM m β) → (n : Nat) → m (PlausibleIterStep (IterM.IsPlausibleNthOutputStep n it))
+</code></pre></div><p><code>nextAtIdx? it n</code> either returns the step in which the <code>n</code>th value of <code>it</code> is emitted (necessarily of the form <code>.yield _ _</code>) or <code>.done</code> if <code>it</code> terminates before emitting the <code>n</code>th value.</p>
+<p><a id="Std___IterM___nextAtIdx___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IterM.nextAtIdx?.{u_1, u_2} {α : Type u_1} {m : Type u_1 → Type u_2}
+  {β : Type u_1} [Iterator α m β] [IteratorAccess α m] (it : IterM m β)
+  (n : Nat) :
+  m (PlausibleIterStep (IterM.IsPlausibleNthOutputStep n it))
+</code></pre></div><p>Returns the step in which <code>it</code> yields its <code>n</code>-th element, or <code>.done</code> if it terminates earlier. In contrast to <code>step</code>, this function will always return either <code>.yield</code> or <code>.done</code> but never a <code>.skip</code> step.</p>
+<p>For monadic iterators, the monadic effects of this operation may differ from manually iterating to the <code>n</code>-th value because <code>nextAtIdx?</code> can take shortcuts. By the signature, the return value is guaranteed to plausible in the sense of <code>IterM.IsPlausibleNthOutputStep</code>.</p>
+<p>This function is only available for iterators that explicitly support it by implementing the <code>IteratorAccess</code> typeclass.</p>
+<p><a id="The-Lean-Language-Reference--Iterators--Iterator-Definitions--Loops"></a></p>
+<h3 id="22-2-4-loops">22.2.4. Loops</h3><p><a id="Std___IteratorLoop___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IteratorLoop.{w, w', x, x'} (α : Type w) (m : Type w → Type w')
+  {β : Type w} [Iterator α m β] (n : Type x → Type x') :
+  Type (max (max (max (w + 1) w') (x + 1)) x')
+</code></pre></div><p><code>IteratorLoop α m</code> provides efficient implementations of loop-based consumers for <code>α</code>-based iterators. The basis is a <code>ForIn</code>-style loop construct.</p>
+<p>Its behavior for well-founded loops is fully characterized by the <code>LawfulIteratorLoop</code> type class.</p>
+<p>This class is experimental and users of the iterator API should not explicitly depend on it. They can, however, assume that consumers that require an instance will work for all iterators provided by the standard library.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IteratorLoop.mk.{w, w', x, x'}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">forIn : ((γ : Type w) → (δ : Type x) → (γ → n δ) → m γ → n δ) →
+  (γ : Type x) →
+    (plausible_forInStep : β → γ → ForInStep γ → Prop) →
+      (it : IterM m β) →
+        γ → ((b : β) → it.IsPlausibleIndirectOutput b → (c : γ) → n (Subtype (plausible_forInStep b c))) → n γ
+</code></pre></div><p>Iteration over the iterator <code>it</code> in the manner expected by <code>for</code> loops.</p>
+<p><a id="Std___IteratorLoop___defaultImplementation"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IteratorLoop.defaultImplementation.{w, w', x, x'} {β α : Type w}
+  {m : Type w → Type w'} {n : Type x → Type x'} [Monad n]
+  [Iterator α m β] : IteratorLoop α m n
+</code></pre></div><p>This is the default implementation of the <code>IteratorLoop</code> class. It simply iterates through the iterator using <code>IterM.step</code>. For certain iterators, more efficient implementations are possible and should be used instead.</p>
+<p><a id="Std___LawfulIteratorLoop___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.LawfulIteratorLoop.{w, w', x, x'} {β : Type w} (α : Type w)
+  (m : Type w → Type w') (n : Type x → Type x') [Monad m] [Monad n]
+  [Iterator α m β] [i : IteratorLoop α m n] : Prop
+</code></pre></div><p>Asserts that a given <code>IteratorLoop</code> instance is equal to <code>IteratorLoop.defaultImplementation</code>. (Even though equal, the given instance might be vastly more efficient.)</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.LawfulIteratorLoop.mk.{w, w', x, x'}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">lawful : ∀ (lift : (γ : Type w) → (δ : Type x) → (γ → n δ) → m γ → n δ) [Std.Internal.LawfulMonadLiftBindFunction lift]
+  (γ : Type x) (it : IterM m β) (init : γ) (Pl : β → γ → ForInStep γ → Prop),
+  IteratorLoop.WellFounded α m Pl →
+    ∀ (f : (b : β) → it.IsPlausibleIndirectOutput b → (c : γ) → n (Subtype (Pl b c))),
+      IteratorLoop.forIn lift γ Pl it init f = IteratorLoop.forIn lift γ Pl it init f
+</code></pre></div><p>The implementation of <code>IteratorLoop.forIn</code> in <code>i</code> is equal to the default implementation.</p>
+<p><a id="The-Lean-Language-Reference--Iterators--Iterator-Definitions--Universe-Levels"></a></p>
+<h3 id="22-2-5-universe-levels">22.2.5. Universe Levels</h3><p>To make the <a href="../../The-Type-System/Universes/index.html#--tech-term-level">universe levels</a> of iterators more flexible, a wrapper type <code>Shrink</code> is applied around the result of <code>Iterator.step</code>. This type is presently a placeholder. It is present to reduce the scope of the breaking change when the full implementation is available.</p>
+<p><a id="Std___Shrink"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Shrink.{u} (α : Type u) : Type u
+</code></pre></div><p>Currently, <code>Shrink α</code> is just a wrapper around <code>α</code>.</p>
+<p>In the future, <code>Shrink</code> should allow shrinking <code>α</code> into a potentially smaller universe, given a proof that <code>α</code> is actually small, just like Mathlib&#39;s <code>Shrink</code>, except that the latter&#39;s conversion functions are noncomputable. Until then, <code>Shrink α</code> is always in the same universe as <code>α</code>.</p>
+<p>This no-op type exists so that fewer breaking changes will be needed when the real <code>Shrink</code> type is available and the iterators will be made more flexible with regard to universes.</p>
+<p>The conversion functions <code>Shrink.deflate</code> and <code>Shrink.inflate</code> form an equivalence between <code>α</code> and <code>Shrink α</code>, but this equivalence is intentionally not definitional.</p>
+<p><a id="Std___Shrink___inflate"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Shrink.inflate.{u_1} {α : Type u_1} (x : Std.Shrink α) : α
+</code></pre></div><p>Converts elements of <code>Shrink α</code> into elements of <code>α</code>.</p>
+<p><a id="Std___Shrink___deflate"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Shrink.deflate.{u_1} {α : Type u_1} (x : α) : Std.Shrink α
+</code></pre></div><p>Converts elements of <code>α</code> into elements of <code>Shrink α</code>.</p>
+<p><a id="The-Lean-Language-Reference--Iterators--Iterator-Definitions--Basic-Iterators"></a></p>
+<h3 id="22-2-6-basic-iterators">22.2.6. Basic Iterators</h3><p>In addition to the iterators provided by collection types, there are two basic iterators that are not connected to any underlying data structure. <code>Iter.empty</code> finishes iteration immediately after yielding no data, and <code>Iter.repeat</code> yields the same element forever. These iterators are primarily useful as parts of larger iterators built with combinators.</p>
+<p><a id="Std___Iter___empty"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Iter.empty.{w} (β : Type w) : Iter β
+</code></pre></div><p>Returns an iterator that terminates immediately.</p>
+<p><strong>Termination properties:</strong></p>
+<ul>
+<li><code>Finite</code> instance: always</li>
+<li><code>Productive</code> instance: always</li>
+</ul>
+<p><a id="Std___IterM___empty"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.IterM.empty.{w, w'} (m : Type w → Type w') (β : Type w) : IterM m β
+</code></pre></div><p>Returns an iterator that terminates immediately.</p>
+<p><strong>Termination properties:</strong></p>
+<ul>
+<li><code>Finite</code> instance: always</li>
+<li><code>Productive</code> instance: always</li>
+</ul>
+<p><a id="Std___Iter___repeat"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Iter.repeat.{w} {α : Type w} (f : α → α) (init : α) : Iter α
+</code></pre></div><p>Creates an infinite iterator from an initial value <code>init</code> and a function <code>f : α → α</code>. First it yields <code>init</code>, and in each successive step, the iterator applies <code>f</code> to the previous value. So if the iterator just emitted <code>a</code>, in the next step it will yield <code>f a</code>. In other words, the <code>n</code>-th value is <code>Nat.repeat f n init</code>.</p>
+<p>For example, if <code>f := (· + 1)</code> and <code>init := 0</code>, then the iterator emits all natural numbers in order.</p>
+<p><strong>Termination properties:</strong></p>
+<ul>
+<li><code>Finite</code> instance: not available and never possible</li>
+<li><code>Productive</code> instance: always</li>
+</ul>
+<h2 id="preserved-native-diagnostic-displays">Preserved native diagnostic displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">don't know how to synthesize implicit argument `α`
+  @Iter ?m.1 Nat
+context:
+⊢ Type
+
+Note: Because this declaration's type has been explicitly provided, all parameter types and holes (e.g., `_`) in its header are resolved before its body is processed; information from the declaration body cannot be used to infer what these values should be
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">0: cat
+1: dog
+2: pachycephalosaurus
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Zip Nats Id (ListIterator String) String : Type
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Zip.instFinite₂
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">failed to synthesize
+  Finite Nats Id
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">failed to synthesize instance of type class
+  ForIn IO (Iter.Total Nat) ?α
+
+Hint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#['a', 'b', 'c']
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">a
+b
+c
+</code></pre></div><h2 id="preserved-native-proof-state-displays">Preserved native proof-state displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">m:Type → Type ?u.3inst✝:Pure mit:IterM m Natn:Nat := it.internalState.next⊢ match
+  IterStep.yield
+    {
+      internalState :=
+        let __src := it.internalState;
+        { next := n + 1 } }
+    n with
+| IterStep.yield it' n =&gt; n = it.internalState.next ∧ it'.internalState.next = n + 1
+| x =&gt; False
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">All goals completed! 🐙
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">m:Type u_1 → Type u_2α:Type u_1triple:Triple αinst✝:Pure mx✝:IterM m αw✝:IterStep (IterM m α) αleft✝:w✝.successor = some x✝h:{ internalState := { triple := triple, pos := TriplePos.done } }.IsPlausibleStep w✝⊢ Acc IterM.IsPlausibleSuccessorOf x✝
+</code></pre></div><h3 id="display-4-2">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">yieldm:Type u_1 → Type u_2α:Type u_1triple:Triple αinst✝:Pure mx✝:IterM m αout✝:αit'✝:IterM m αa✝²:{ internalState := { triple := triple, pos := TriplePos.done } }.internalState.triple = it'✝.internalState.triplea✝¹:{ internalState := { triple := triple, pos := TriplePos.done } }.internalState.pos.Succ it'✝.internalState.posa✝:{ internalState := { triple := triple, pos := TriplePos.done } }.internalState.triple.get?
+    { internalState := { triple := triple, pos := TriplePos.done } }.internalState.pos =
+  some out✝left✝:(IterStep.yield it'✝ out✝).successor = some x✝⊢ Acc IterM.IsPlausibleSuccessorOf x✝donem:Type u_1 → Type u_2α:Type u_1triple:Triple αinst✝:Pure mx✝:IterM m αa✝:{ internalState := { triple := triple, pos := TriplePos.done } }.internalState.pos = TriplePos.doneleft✝:IterStep.done.successor = some x✝⊢ Acc IterM.IsPlausibleSuccessorOf x✝
+</code></pre></div><h3 id="display-5-2">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">m:Type u_1 → Type u_2α:Type u_1triple✝:Triple αinst✝:Pure mtriple:Triple αpos:TriplePosh:IterStep (IterM m α) αh':h.successor = some { internalState := { triple := triple, pos := pos } }h'':{ internalState := { triple := triple✝, pos := TriplePos.thd } }.IsPlausibleStep h⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := pos } }
+</code></pre></div><h3 id="display-6-2">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">yieldm:Type u_1 → Type u_2α:Type u_1triple✝:Triple αinst✝:Pure mtriple:Triple αpos:TriplePosout✝:αit'✝:IterM m αa✝²:{ internalState := { triple := triple✝, pos := TriplePos.thd } }.internalState.triple = it'✝.internalState.triplea✝¹:{ internalState := { triple := triple✝, pos := TriplePos.thd } }.internalState.pos.Succ it'✝.internalState.posa✝:{ internalState := { triple := triple✝, pos := TriplePos.thd } }.internalState.triple.get?
+    { internalState := { triple := triple✝, pos := TriplePos.thd } }.internalState.pos =
+  some out✝h':(IterStep.yield it'✝ out✝).successor = some { internalState := { triple := triple, pos := pos } }⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := pos } }donem:Type u_1 → Type u_2α:Type u_1triple✝:Triple αinst✝:Pure mtriple:Triple αpos:TriplePosa✝:{ internalState := { triple := triple✝, pos := TriplePos.thd } }.internalState.pos = TriplePos.doneh':IterStep.done.successor = some { internalState := { triple := triple, pos := pos } }⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := pos } }
+</code></pre></div><h3 id="display-7-2">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">m:Type u_1 → Type u_2α:Type u_1triple✝:Triple αinst✝:Pure mtriple:Triple αpos:TriplePosh:IterStep (IterM m α) αh':h.successor = some { internalState := { triple := triple, pos := pos } }h'':{ internalState := { triple := triple✝, pos := TriplePos.snd } }.IsPlausibleStep h⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := pos } }
+</code></pre></div><h3 id="display-8-2">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">yieldm:Type u_1 → Type u_2α:Type u_1triple✝:Triple αinst✝:Pure mtriple:Triple αpos:TriplePosout✝:αit'✝:IterM m αa✝²:{ internalState := { triple := triple✝, pos := TriplePos.snd } }.internalState.triple = it'✝.internalState.triplea✝¹:{ internalState := { triple := triple✝, pos := TriplePos.snd } }.internalState.pos.Succ it'✝.internalState.posa✝:{ internalState := { triple := triple✝, pos := TriplePos.snd } }.internalState.triple.get?
+    { internalState := { triple := triple✝, pos := TriplePos.snd } }.internalState.pos =
+  some out✝h':(IterStep.yield it'✝ out✝).successor = some { internalState := { triple := triple, pos := pos } }⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := pos } }donem:Type u_1 → Type u_2α:Type u_1triple✝:Triple αinst✝:Pure mtriple:Triple αpos:TriplePosa✝:{ internalState := { triple := triple✝, pos := TriplePos.snd } }.internalState.pos = TriplePos.doneh':IterStep.done.successor = some { internalState := { triple := triple, pos := pos } }⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := pos } }
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">m:Type u_1 → Type u_2α:Type u_1triple✝:Triple αinst✝:Pure mtriple:Triple αpos:TriplePosh:IterStep (IterM m α) αh':h.successor = some { internalState := { triple := triple, pos := pos } }h'':{ internalState := { triple := triple✝, pos := TriplePos.fst } }.IsPlausibleStep h⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := pos } }
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">yieldm:Type u_1 → Type u_2α:Type u_1triple✝:Triple αinst✝:Pure mtriple:Triple αpos:TriplePosout✝:αit'✝:IterM m αa✝²:{ internalState := { triple := triple✝, pos := TriplePos.fst } }.internalState.triple = it'✝.internalState.triplea✝¹:{ internalState := { triple := triple✝, pos := TriplePos.fst } }.internalState.pos.Succ it'✝.internalState.posa✝:{ internalState := { triple := triple✝, pos := TriplePos.fst } }.internalState.triple.get?
+    { internalState := { triple := triple✝, pos := TriplePos.fst } }.internalState.pos =
+  some out✝h':(IterStep.yield it'✝ out✝).successor = some { internalState := { triple := triple, pos := pos } }⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := pos } }donem:Type u_1 → Type u_2α:Type u_1triple✝:Triple αinst✝:Pure mtriple:Triple αpos:TriplePosa✝:{ internalState := { triple := triple✝, pos := TriplePos.fst } }.internalState.pos = TriplePos.doneh':IterStep.done.successor = some { internalState := { triple := triple, pos := pos } }⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := pos } }
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">m:Type u_1 → Type u_2α:Type u_1inst✝:Pure mtriple:Triple αpos:TriplePos⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := pos } }
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">fstm:Type u_1 → Type u_2α:Type u_1inst✝:Pure mtriple:Triple α⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := TriplePos.fst } }sndm:Type u_1 → Type u_2α:Type u_1inst✝:Pure mtriple:Triple α⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := TriplePos.snd } }thdm:Type u_1 → Type u_2α:Type u_1inst✝:Pure mtriple:Triple α⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := TriplePos.thd } }donem:Type u_1 → Type u_2α:Type u_1inst✝:Pure mtriple:Triple α⊢ Acc IterM.IsPlausibleSuccessorOf { internalState := { triple := triple, pos := TriplePos.done } }
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">it:IterM IO ByteArrayh:it.internalState.stream? = none⊢ match IterStep.done with
+| IterStep.yield it_1 out =&gt; it.internalState.stream?.isSome = true
+| IterStep.skip it =&gt; False
+| IterStep.done =&gt; it.internalState.stream?.isNone = true
+</code></pre></div><h3 id="display-14">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">it:IterM IO ByteArraystream:IO.FS.Streamh:it.internalState.stream? = some streambytes:ByteArrayit':IterM IO ByteArray := 
+  {
+    internalState :=
+      let __src := it.internalState;
+      { stream? := if (bytes.size == 0) = true then none else some stream, count := __src.count } }⊢ match IterStep.yield it' bytes with
+| IterStep.yield it_1 out =&gt; it.internalState.stream?.isSome = true
+| IterStep.skip it =&gt; False
+| IterStep.done =&gt; it.internalState.stream?.isNone = true
+</code></pre></div><footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

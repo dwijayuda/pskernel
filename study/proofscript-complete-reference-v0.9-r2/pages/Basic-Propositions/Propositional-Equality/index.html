@@ -1,0 +1,339 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;propositional-equality&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../index.html">19. Basic Propositions</a><a href="../Truth/index.html">19.1. Truth</a><a href="../Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../Quantifiers/index.html">19.3. Quantifiers</a><a href="index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../../Notations-and-Macros/index.html">23. Notations and Macros</a><a href="../../Notations-and-Macros/Custom-Operators/index.html">23.1. Custom Operators</a><a href="../../Notations-and-Macros/Precedence/index.html">23.2. Precedence</a><a href="../../Notations-and-Macros/Notations/index.html">23.3. Notations</a><a href="../../Notations-and-Macros/Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../../Notations-and-Macros/Macros/index.html">23.5. Macros</a><a href="../../Notations-and-Macros/Elaborators/index.html">23.6. Elaborators</a><a href="../../Notations-and-Macros/Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../../Notations-and-Macros/Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../../releases/index.html">Release Notes</a><a href="../../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="propositional-equality"></a></p>
+<h1 id="proofscript-19-4-propositional-equality">ProofScript — 19.4. Propositional Equality</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>Truth and falsity, conjunction/disjunction, implication, negation, universal/existential quantification and equality keep their native definitions. An existential proof contains logical witness evidence, but elimination restrictions determine when it can construct runtime data. Equality transports dependent values only through justified terms. Computed Boolean comparison does not automatically produce equality evidence.</p>
+<p><strong>Compiler and coverage boundary.</strong> Preserve Prop elimination, proof irrelevance and universe rules. Erasure may remove irrelevant proofs but not the data they certify.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/Basic-Propositions/Propositional-Equality/index.html">Basic-Propositions/Propositional-Equality/index.html</a>. Source Git blob: <code>4aa615418c8ca5954cf167b66e2627dd946d2fdc</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<p><a id="docstring-section-Constructors-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructors-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<hr>
+<h2 id="19-4-propositional-equality">19.4. Propositional Equality</h2><p><a id="--tech-term-Propositional-equality"></a>
+<em>Propositional equality</em> is the operator that allows the equality of two terms to be stated as a proposition. <a href="../../The-Type-System/index.html#--tech-term-definitional-equality">Definitional equality</a> is checked automatically where necessary. As a result, its expressive power is limited in order to keep the algorithm that checks it fast and understandable. Propositional equality, on the other hand, must be explicitly proved and explicitly used—Lean checks the validity of the proofs, rather than determining whether the statement is true. In exchange, it is much more expressive: many terms are propositionally equal without being definitionally equal.</p>
+<p>Propositional equality is defined as an inductive type. Its sole constructor <code>Eq.refl</code> requires that both of the equated values be the same; this is implicitly an appeal to <a href="../../The-Type-System/index.html#--tech-term-definitional-equality">definitional equality</a>. Propositional equality can also be thought of as the least reflexive relation modulo definitional equality. In addition to <code>Eq.refl</code>, equality proofs are generated by the <code>propext</code> and <code>Quot.sound</code> axioms.</p>
+<p><a id="Eq___refl"></a></p>
+<p><strong>inductive predicate</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Eq.{u_1} {α : Sort u_1} : α → α → Prop
+</code></pre></div><p>The equality relation. It has one introduction rule, <code>Eq.refl</code>. We use <code>a = b</code> as notation for <code>Eq a b</code>. A fundamental property of equality is that it is an equivalence relation.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">variable (α : Type) (a b c d : α)
+variable (hab : a = b) (hcb : c = b) (hcd : c = d)
+
+example : a = d :=
+  Eq.trans (Eq.trans hab (Eq.symm hcb)) hcd
+</code></pre></div><p>Equality is much more than an equivalence relation, however. It has the important property that every assertion respects the equivalence, in the sense that we can substitute equal expressions without changing the truth value. That is, given <code>h1 : a = b</code> and <code>h2 : p a</code>, we can construct a proof for <code>p b</code> using substitution: <code>Eq.subst h1 h2</code>. Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example (α : Type) (a b : α) (p : α → Prop)
+        (h1 : a = b) (h2 : p a) : p b :=
+  Eq.subst h1 h2
+
+example (α : Type) (a b : α) (p : α → Prop)
+    (h1 : a = b) (h2 : p a) : p b :=
+  h1 ▸ h2
+</code></pre></div><p>The triangle in the second presentation is a macro built on top of <code>Eq.subst</code> and <code>Eq.symm</code>, and you can enter it by typing <code>\t</code>. For more information: <a href="https://lean-lang.org/theorem_proving_in_lean4/quantifiers_and_equality.html#equality">Equality</a></p>
+<p>Conventions for notations in identifiers:</p>
+<ul>
+<li>The recommended spelling of <code>=</code> in identifiers is <code>eq</code>.</li>
+</ul>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Eq.refl.{u_1} {α : Sort u_1} (a : α) : a = a
+</code></pre></div><p><code>Eq.refl a : a = a</code> is reflexivity, the unique constructor of the equality type. See also <code>rfl</code>, which is usually used instead.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Propositional Equality</strong></p>
+<p><a id="_FLQQ_term______FLQQ_-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term = term
+</code></pre></div><p>Propositional equality is typically denoted by the infix <code>=</code> operator.</p>
+<p><a id="rfl-next"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">rfl.{u} {α : Sort u} {a : α} : a = a
+</code></pre></div><p><code>rfl : a = a</code> is the unique constructor of the equality type. This is the same as <code>Eq.refl</code> except that it takes <code>a</code> implicitly instead of explicitly.</p>
+<p>This is a more powerful theorem than it may appear at first, because although the statement of the theorem is <code>a = a</code>, Lean will allow anything that is definitionally equal to that type. So, for instance, <code>2 + 2 = 4</code> is proven in Lean by <code>rfl</code>, because both sides are the same up to definitional equality.</p>
+<p><a id="Eq___symm"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Eq.symm.{u} {α : Sort u} {a b : α} (h : a = b) : b = a
+</code></pre></div><p>Equality is symmetric: if <code>a = b</code> then <code>b = a</code>.</p>
+<p>Because this is in the <code>Eq</code> namespace, if you have a variable <code>h : a = b</code>, <code>h.symm</code> can be used as shorthand for <code>Eq.symm h</code> as a proof of <code>b = a</code>.</p>
+<p>For more information: <a href="https://lean-lang.org/theorem_proving_in_lean4/quantifiers_and_equality.html#equality">Equality</a></p>
+<p><a id="Eq___trans"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Eq.trans.{u} {α : Sort u} {a b c : α} (h₁ : a = b) (h₂ : b = c) : a = c
+</code></pre></div><p>Equality is transitive: if <code>a = b</code> and <code>b = c</code> then <code>a = c</code>.</p>
+<p>Because this is in the <code>Eq</code> namespace, if you have variables or expressions <code>h₁ : a = b</code> and <code>h₂ : b = c</code>, you can use <code>h₁.trans h₂ : a = c</code> as shorthand for <code>Eq.trans h₁ h₂</code>.</p>
+<p>For more information: <a href="https://lean-lang.org/theorem_proving_in_lean4/quantifiers_and_equality.html#equality">Equality</a></p>
+<p><a id="Eq___subst"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Eq.subst.{u} {α : Sort u} {motive : α → Prop} {a b : α} (h₁ : a = b)
+  (h₂ : motive a) : motive b
+</code></pre></div><p>The substitution principle for equality. If <code>a = b</code> and <code>P a</code> holds, then <code>P b</code> also holds. We conventionally use the name <code>motive</code> for <code>P</code> here, so that you can specify it explicitly using e.g. <code>Eq.subst (motive := fun x =&gt; x &lt; 5)</code> if it is not otherwise inferred correctly.</p>
+<p>This theorem is the underlying mechanism behind the <code>rw</code> tactic, which is essentially a fancy algorithm for finding good <code>motive</code> arguments to usefully apply this theorem to replace occurrences of <code>a</code> with <code>b</code> in the goal or hypotheses.</p>
+<p>For more information: <a href="https://lean-lang.org/theorem_proving_in_lean4/quantifiers_and_equality.html#equality">Equality</a></p>
+<p><a id="cast"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">cast.{u} {α β : Sort u} (h : α = β) (a : α) : β
+</code></pre></div><p>Cast across a type equality. If <code>h : α = β</code> is an equality of types, and <code>a : α</code>, then <code>a : β</code> will usually not typecheck directly, but this function will allow you to work around this and embed <code>a</code> in type <code>β</code> as <code>cast h a : β</code>.</p>
+<p>It is best to avoid this function if you can, because it is more complicated to reason about terms containing casts, but if the types don&#39;t match up definitionally sometimes there isn&#39;t anything better you can do.</p>
+<p>For more information: <a href="https://lean-lang.org/theorem_proving_in_lean4/quantifiers_and_equality.html#equality">Equality</a></p>
+<p><a id="congr-next"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">congr.{u, v} {α : Sort u} {β : Sort v} {f₁ f₂ : α → β} {a₁ a₂ : α}
+  (h₁ : f₁ = f₂) (h₂ : a₁ = a₂) : f₁ a₁ = f₂ a₂
+</code></pre></div><p>Congruence in both function and argument. If <code>f₁ = f₂</code> and <code>a₁ = a₂</code> then <code>f₁ a₁ = f₂ a₂</code>. This only works for nondependent functions; the theorem statement is more complex in the dependent case.</p>
+<p>For more information: <a href="https://lean-lang.org/theorem_proving_in_lean4/quantifiers_and_equality.html#equality">Equality</a></p>
+<p><a id="congrFun"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">congrFun.{u, v} {α : Sort u} {β : α → Sort v} {f g : (x : α) → β x}
+  (h : f = g) (a : α) : f a = g a
+</code></pre></div><p>Congruence in the function part of an application: If <code>f = g</code> then <code>f a = g a</code>.</p>
+<p><a id="congrArg"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">congrArg.{u, v} {α : Sort u} {β : Sort v} {a₁ a₂ : α} (f : α → β)
+  (h : a₁ = a₂) : f a₁ = f a₂
+</code></pre></div><p>Congruence in the function argument: if <code>a₁ = a₂</code> then <code>f a₁ = f a₂</code> for any (nondependent) function <code>f</code>. This is more powerful than it might look at first, because you can also use a lambda expression for <code>f</code> to prove that <code>&lt;something containing a₁&gt; = &lt;something containing a₂&gt;</code>. This function is used internally by tactics like <code>congr</code> and <code>simp</code> to apply equalities inside subterms.</p>
+<p>For more information: <a href="https://lean-lang.org/theorem_proving_in_lean4/quantifiers_and_equality.html#equality">Equality</a></p>
+<p><a id="Eq___mp"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Eq.mp.{u} {α β : Sort u} (h : α = β) (a : α) : β
+</code></pre></div><p>If <code>h : α = β</code> is a proof of type equality, then <code>h.mp : α → β</code> is the induced &quot;cast&quot; operation, mapping elements of <code>α</code> to elements of <code>β</code>.</p>
+<p>You can prove theorems about the resulting element by induction on <code>h</code>, since <code>rfl.mp</code> is definitionally the identity function.</p>
+<p><a id="Eq___mpr"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Eq.mpr.{u} {α β : Sort u} (h : α = β) (b : β) : α
+</code></pre></div><p>If <code>h : α = β</code> is a proof of type equality, then <code>h.mpr : β → α</code> is the induced &quot;cast&quot; operation in the reverse direction, mapping elements of <code>β</code> to elements of <code>α</code>.</p>
+<p>You can prove theorems about the resulting element by induction on <code>h</code>, since <code>rfl.mpr</code> is definitionally the identity function.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Casting</strong></p>
+<p><a id="Lean___Parser___Term___subst"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term ▸ term
+</code></pre></div><p>When a term&#39;s type includes one side of an equality as a sub-term, it can be rewritten using the <code>▸</code> operator. If both sides of the equality occur in the term&#39;s type, then the left side is rewritten to the right.</p>
+<p><a id="UIP"></a></p>
+<h3 id="19-4-1-uniqueness-of-equality-proofs">19.4.1. Uniqueness of Equality Proofs</h3><p>Because of definitional proof irrelevance, propositional equality proofs are <em>unique</em>: two mathematical objects cannot be equal in different ways.
+<a id="Eq___unique"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">theorem Eq.unique {α : Sort u}
+    (x y : α)
+    (p1 p2 : x = y) :
+    p1 = p2 := by
+  rfl
+</code></pre></div><p>Streicher&#39;s axiom K (Streicher, 1993)Thomas Streicher, 1993. <em><a href="https://www2.mathematik.tu-darmstadt.de/~streicher/HabilStreicher.pdf">Investigations into Intensional Type Theory</a></em>. Habilitation, Ludwig-Maximilians-Universität München is also a consequence of definitional proof irrelevance, as is its computation rule. Axiom K is a principle that&#39;s logically equivalent to <code>Eq.unique</code>, implemented as an alternative <a href="../../The-Type-System/Inductive-Types/index.html#--tech-term-recursor">recursor</a> for propositional equality.</p>
+<p><a id="K"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function K {α : Sort u}
+    {motive : {x : α} → x = x → Sort v}
+    (d : {x : α} → motive (Eq.refl x))
+    (x : α) (z : x = x) :
+    motive z :=
+  d
+
+example {α : Sort u} {a : α}
+    {motive : {x : α} → x = x → Sort u}
+    {d : {x : α} → motive (Eq.refl x)} :
+    K (motive := motive) d a rfl = d := by
+  rfl
+</code></pre></div><p><a id="HEq"></a></p>
+<h3 id="19-4-2-heterogeneous-equality">19.4.2. Heterogeneous Equality</h3><p><a id="--tech-term-Heterogeneous-equality"></a>
+<em>Heterogeneous equality</em> is a version of <a href="index.html#--tech-term-Propositional-equality">propositional equality</a> that does not require that the two equated terms have the same type. However, <em>proving</em> that the terms are equal using its version of <code>rfl</code> requires that both the types and the terms are definitionally equal. In other words, it allows more statements to be formulated.</p>
+<p>Heterogeneous equality is typically less convenient in practice than ordinary propositional equality. The greater flexibility afforded by not requiring both sides of the equality to have the same type means that it has fewer useful properties. It is often encountered as a result of dependent pattern matching: the <code>split</code> tactic and functional induction add heterogeneous equality assumptions to the context when the ordinary equality assumptions that are needed to accurate reflect the corresponding control flow would not be type correct. In these cases, the built-in automation has no choice but to use heterogeneous equality.</p>
+<p><a id="HEq___refl"></a></p>
+<p><strong>inductive predicate</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">HEq.{u} {α : Sort u} : α → {β : Sort u} → β → Prop
+</code></pre></div><p>Heterogeneous equality. <code>a ≍ b</code> asserts that <code>a</code> and <code>b</code> have the same type, and casting <code>a</code> across the equality yields <code>b</code>, and vice versa.</p>
+<p>You should avoid using this type if you can. Heterogeneous equality does not have all the same properties as <code>Eq</code>, because the assumption that the types of <code>a</code> and <code>b</code> are equal is often too weak to prove theorems of interest. One public important non-theorem is the analogue of <code>congr</code>: If <code>f ≍ g</code> and <code>x ≍ y</code> and <code>f x</code> and <code>g y</code> are well typed it does not follow that <code>f x ≍ g y</code>. (This does follow if you have <code>f = g</code> instead.) However if <code>a</code> and <code>b</code> have the same type then <code>a = b</code> and <code>a ≍ b</code> are equivalent.</p>
+<p>Conventions for notations in identifiers:</p>
+<ul>
+<li>The recommended spelling of <code>≍</code> in identifiers is <code>heq</code>.</li>
+</ul>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">HEq.refl.{u} {α : Sort u} (a : α) : a ≍ a
+</code></pre></div><p>Reflexivity of heterogeneous equality.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Heterogeneous Equality</strong></p>
+<p><a id="_FLQQ_term______FLQQ_-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term ≍ term
+</code></pre></div><p>Heterogeneous equality <code>HEq x y</code> can be written <code>x ≍ y</code>.</p>
+<p><a id="HEq___rfl"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">HEq.rfl.{u} {α : Sort u} {a : α} : a ≍ a
+</code></pre></div><p>A version of <code>HEq.refl</code> with an implicit argument.</p>
+<p><a id="Heterogeneous-Equality"></a>
+Heterogeneous Equality </p>
+<p>The type <code>Vector α n</code> is a wrapper around an <code>Array α</code> that includes a proof that the array has size <code>n</code>. Appending <code>Vector</code>s is associative, but this fact cannot be straightforwardly stated using ordinary propositional equality:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">variable
+  {xs : Vector α l₁} {ys : Vector α l₂} {zs : Vector α l₃}
+set_option linter.unusedVariables false
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">theorem Vector.append_associative :
+    xs ++ (ys ++ zs) = (xs ++ ys) ++ zs := by sorry
+</code></pre></div><p>The problem is that the associativity of addition of natural numbers holds propositionally, but not definitionally:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Type mismatch
+  xs ++ ys ++ zs
+has type
+  Vector α (l₁ + l₂ + l₃)
+but is expected to have type
+  Vector α (l₁ + (l₂ + l₃))
+</code></pre></div><p>One solution to this problem is to use the associativity of natural number addition in the statement:
+<a id="Vector___append_associative___-_LPAR_in-Heterogeneous-Equality_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">theorem Vector.append_associative' :
+    xs ++ (ys ++ zs) =
+    Nat.add_assoc _ _ _ ▸ ((xs ++ ys) ++ zs) := by
+  sorry
+</code></pre></div><p>However, such proof statements can be difficult to work with in certain circumstances.</p>
+<p>Another is to use heterogeneous equality:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">theorem Vector.append_associative :
+    HEq (xs ++ (ys ++ zs)) ((xs ++ ys) ++ zs) := by sorry
+</code></pre></div><p>In this case, <a href="../../The-Simplifier/index.html#the-simplifier">the simplifier</a> can rewrite both sides of the equation without having to preserve their types. However, proving the theorem does require eventually proving that the lengths nonetheless match.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">theorem Vector.append_associative :
+    HEq (xs ++ (ys ++ zs)) ((xs ++ ys) ++ zs) := by
+  cases xs; cases ys; cases zs
+  simp
+  congr 1
+  . omega
+  . apply heq_of_eqRec_eq
+    . rfl
+    . apply propext
+      constructor &lt;;&gt; intro h &lt;;&gt; simp_all +arith
+</code></pre></div><p><a id="HEq___elim"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">HEq.elim.{u, v} {α : Sort u} {a : α} {p : α → Sort v} {b : α}
+  (h₁ : a ≍ b) (h₂ : p a) : p b
+</code></pre></div><p><code>HEq.ndrec</code> variant</p>
+<p><a id="HEq___ndrec"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">HEq.ndrec.{u1, u2} {α : Sort u2} {a : α}
+  {motive : {β : Sort u2} → β → Sort u1} (m : motive a) {β : Sort u2}
+  {b : β} (h : a ≍ b) : motive b
+</code></pre></div><p>Non-dependent recursor for <code>HEq</code></p>
+<p><a id="HEq___ndrecOn"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">HEq.ndrecOn.{u1, u2} {α : Sort u2} {a : α}
+  {motive : {β : Sort u2} → β → Sort u1} {β : Sort u2} {b : β}
+  (h : a ≍ b) (m : motive a) : motive b
+</code></pre></div><p><code>HEq.ndrec</code> variant</p>
+<p><a id="HEq___subst"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">HEq.subst.{u} {α β : Sort u} {a : α} {b : β}
+  {p : (T : Sort u) → T → Prop} (h₁ : a ≍ b) (h₂ : p α a) : p β b
+</code></pre></div><p>Substitution with heterogeneous equality.</p>
+<p><a id="eq_of_heq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">eq_of_heq.{u} {α : Sort u} {a a' : α} (h : a ≍ a') : a = a'
+</code></pre></div><p>If two heterogeneously equal terms have the same type, then they are propositionally equal.</p>
+<p><a id="heq_of_eq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">heq_of_eq.{u_1} {α✝ : Sort u_1} {a a' : α✝} (h : a = a') : a ≍ a'
+</code></pre></div><p>Propositionally equal terms are also heterogeneously equal.</p>
+<p><a id="heq_of_eqRec_eq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">heq_of_eqRec_eq.{u} {α β : Sort u} {a : α} {b : β} (h₁ : α = β)
+  (h₂ : h₁ ▸ a = b) : a ≍ b
+</code></pre></div><p>If casting a term with <code>Eq.rec</code> to another type makes it equal to some other term, then the two terms are heterogeneously equal.</p>
+<p><a id="eqRec_heq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">eqRec_heq.{u, v} {α : Sort u} {φ : α → Sort v} {a a' : α} (h : a = a')
+  (p : φ a) : Eq.recOn h p ≍ p
+</code></pre></div><p>Rewriting inside <code>φ</code> using <code>Eq.recOn</code> yields a term that&#39;s heterogeneously equal to the original term.</p>
+<p><a id="cast_heq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">cast_heq.{u} {α β : Sort u} (h : α = β) (a : α) : cast h a ≍ a
+</code></pre></div><p>The result of casting a term with <code>cast</code> is heterogeneously equal to the original term.</p>
+<p><a id="heq_of_heq_of_eq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">heq_of_heq_of_eq.{u} {α β : Sort u} {a : α} {b b' : β} (h₁ : a ≍ b)
+  (h₂ : b = b') : a ≍ b'
+</code></pre></div><p>Heterogeneous equality precomposes with propositional equality.</p>
+<p><a id="type_eq_of_heq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">type_eq_of_heq.{u} {α β : Sort u} {a : α} {b : β} (h : a ≍ b) : α = β
+</code></pre></div><p>If two terms are heterogeneously equal then their types are propositionally equal.</p>
+<h2 id="preserved-grammar-annotations">Preserved grammar annotations</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">The equality relation. It has one introduction rule, `Eq.refl`.
+We use `a = b` as notation for `Eq a b`.
+A fundamental property of equality is that it is an equivalence relation.
+```
+variable (α : Type) (a b c d : α)
+variable (hab : a = b) (hcb : c = b) (hcd : c = d)
+
+example : a = d :=
+  Eq.trans (Eq.trans hab (Eq.symm hcb)) hcd
+```
+Equality is much more than an equivalence relation, however. It has the important property that every assertion
+respects the equivalence, in the sense that we can substitute equal expressions without changing the truth value.
+That is, given `h1 : a = b` and `h2 : p a`, we can construct a proof for `p b` using substitution: `Eq.subst h1 h2`.
+Example:
+```
+example (α : Type) (a b : α) (p : α → Prop)
+        (h1 : a = b) (h2 : p a) : p b :=
+  Eq.subst h1 h2
+
+example (α : Type) (a b : α) (p : α → Prop)
+    (h1 : a = b) (h2 : p a) : p b :=
+  h1 ▸ h2
+```
+The triangle in the second presentation is a macro built on top of `Eq.subst` and `Eq.symm`, and you can enter it by typing `\t`.
+For more information: [Equality](https://lean-lang.org/theorem_proving_in_lean4/quantifiers_and_equality.html#equality)
+
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `=` in identifiers is `eq`.
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`h ▸ e` is a macro built on top of `Eq.rec` and `Eq.symm` definitions.
+Given `h : a = b` and `e : p a`, the term `h ▸ e` has type `p b`.
+You can also view `h ▸ e` as a &quot;type casting&quot; operation
+where you change the type of `e` by using `h`.
+
+The macro tries both orientations of `h`. If the context provides an
+expected type, it rewrites the expected type, else it rewrites the type of e`.
+
+See the Chapter &quot;Quantifiers and Equality&quot; in the manual
+&quot;Theorem Proving in Lean&quot; for additional information.
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Heterogeneous equality. `a ≍ b` asserts that `a` and `b` have the same
+type, and casting `a` across the equality yields `b`, and vice versa.
+
+You should avoid using this type if you can. Heterogeneous equality does not
+have all the same properties as `Eq`, because the assumption that the types of
+`a` and `b` are equal is often too weak to prove theorems of interest. One
+public important non-theorem is the analogue of `congr`: If `f ≍ g` and `x ≍ y`
+and `f x` and `g y` are well typed it does not follow that `f x ≍ g y`.
+(This does follow if you have `f = g` instead.) However if `a` and `b` have
+the same type then `a = b` and `a ≍ b` are equivalent.
+
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `≍` in identifiers is `heq`.
+</code></pre></div><h2 id="preserved-native-diagnostic-displays">Preserved native diagnostic displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Type mismatch
+  xs ++ ys ++ zs
+has type
+  Vector α (l₁ + l₂ + l₃)
+but is expected to have type
+  Vector α (l₁ + (l₂ + l₃))
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">declaration uses `sorry`
+</code></pre></div><h2 id="preserved-native-proof-state-displays">Preserved native proof-state displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-3">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Sort ux:αy:αp1:x = yp2:x = y⊢ p1 = p2
+</code></pre></div><h3 id="display-2-3">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">All goals completed! 🐙
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Sort ua:αmotive:{x : α} → x = x → Sort ud:{x : α} → motive ⋯⊢ K (fun {x} =&gt; d) a ⋯ = d
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ sorry
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type ul₁:Natl₂:Natl₃:Natxs:Vector α l₁ys:Vector α l₂zs:Vector α l₃⊢ xs ++ (ys ++ zs) = ⋯ ▸ (xs ++ ys ++ zs)
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type ul₁:Natl₂:Natl₃:Natxs:Vector α l₁ys:Vector α l₂zs:Vector α l₃⊢ xs ++ (ys ++ zs) ≍ xs ++ ys ++ zs
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mkα:Type ul₁:Natl₂:Natl₃:Natys:Vector α l₂zs:Vector α l₃toArray✝:Array αsize_toArray✝:toArray✝.size = l₁⊢ mk toArray✝ size_toArray✝ ++ (ys ++ zs) ≍ mk toArray✝ size_toArray✝ ++ ys ++ zs
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mkα:Type ul₁:Natl₂:Natl₃:Natzs:Vector α l₃toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₁toArray✝:Array αsize_toArray✝:toArray✝.size = l₂⊢ mk toArray✝¹ size_toArray✝¹ ++ (mk toArray✝ size_toArray✝ ++ zs) ≍
+  mk toArray✝¹ size_toArray✝¹ ++ mk toArray✝ size_toArray✝ ++ zs
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mk.mkα:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ mk toArray✝² size_toArray✝² ++ (mk toArray✝¹ size_toArray✝¹ ++ mk toArray✝ size_toArray✝) ≍
+  mk toArray✝² size_toArray✝² ++ mk toArray✝¹ size_toArray✝¹ ++ mk toArray✝ size_toArray✝
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mk.mkα:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ mk (toArray✝² ++ (toArray✝¹ ++ toArray✝)) ⋯ ≍ mk (toArray✝² ++ (toArray✝¹ ++ toArray✝)) ⋯
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mk.mk.e_2α:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ l₁ + (l₂ + l₃) = l₁ + l₂ + l₃mk.mk.mk.e_4α:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ ⋯ ≍ ⋯
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mk.mk.e_2α:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ l₁ + (l₂ + l₃) = l₁ + l₂ + l₃
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mk.mk.e_4α:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ ⋯ ≍ ⋯
+</code></pre></div><h3 id="display-14">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mk.mk.e_4.h₂α:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ ⋯ = ⋯mk.mk.mk.e_4.h₁α:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ ((toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + (l₂ + l₃)) =
+  ((toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + l₂ + l₃)
+</code></pre></div><h3 id="display-15">Display 15</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mk.mk.e_4.h₂α:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ ⋯ = ⋯
+</code></pre></div><h3 id="display-16">Display 16</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mk.mk.e_4.h₁α:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ ((toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + (l₂ + l₃)) =
+  ((toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + l₂ + l₃)
+</code></pre></div><h3 id="display-17">Display 17</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mk.mk.e_4.h₁α:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ (toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + (l₂ + l₃) ↔
+  (toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + l₂ + l₃
+</code></pre></div><h3 id="display-18">Display 18</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mk.mk.e_4.h₁.mpα:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ (toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + (l₂ + l₃) →
+  (toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + l₂ + l₃mk.mk.mk.e_4.h₁.mprα:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃⊢ (toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + l₂ + l₃ →
+  (toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + (l₂ + l₃)
+</code></pre></div><h3 id="display-19">Display 19</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mk.mk.e_4.h₁.mprα:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃h:(toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + l₂ + l₃⊢ (toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + (l₂ + l₃)
+</code></pre></div><h3 id="display-20">Display 20</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mk.mk.mk.e_4.h₁.mpα:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃h:(toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + (l₂ + l₃)⊢ (toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + l₂ + l₃mk.mk.mk.e_4.h₁.mprα:Type ul₁:Natl₂:Natl₃:NattoArray✝²:Array αsize_toArray✝²:toArray✝.size = l₁toArray✝¹:Array αsize_toArray✝¹:toArray✝.size = l₂toArray✝:Array αsize_toArray✝:toArray✝.size = l₃h:(toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + l₂ + l₃⊢ (toArray✝² ++ (toArray✝¹ ++ toArray✝)).size = l₁ + (l₂ + l₃)
+</code></pre></div><footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

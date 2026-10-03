@@ -1,0 +1,2229 @@
+{
+  "sourceCommit": "65369c75c7b63124f1ba7f2289e573181db281f0",
+  "sourceTree": "fb6add969b65756fb656780690c8153f4c524a8f",
+  "htmlPaths": 222,
+  "substantiveArticles": 218,
+  "missingArticleStubs": 4,
+  "pages": [
+    {
+      "sourcePath": "study/lean4-language-reference/Attributes/index.html",
+      "sourceBlob": "f42e5af784c3087365dc0b115af5aef21bbc9967",
+      "sourceBytes": 107999,
+      "status": "article-adapted",
+      "output": "pages/Attributes/index.md",
+      "title": "9. Attributes",
+      "headings": 4,
+      "referenceEntries": 5
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Axioms/index.html",
+      "sourceBlob": "59cae2ce97416b64c1ff327912473c7734f1b93c",
+      "sourceBytes": 323734,
+      "status": "article-adapted",
+      "output": "pages/Axioms/index.md",
+      "title": "8. Axioms",
+      "headings": 6,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Propositions/Logical-Connectives/index.html",
+      "sourceBlob": "ea6e0ad22ede4fa664857ec0df9ea2e99e0632fa",
+      "sourceBytes": 255706,
+      "status": "article-adapted",
+      "output": "pages/Basic-Propositions/Logical-Connectives/index.md",
+      "title": "19.2. Logical Connectives",
+      "headings": 1,
+      "referenceEntries": 11
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Propositions/Propositional-Equality/index.html",
+      "sourceBlob": "4aa615418c8ca5954cf167b66e2627dd946d2fdc",
+      "sourceBytes": 624650,
+      "status": "article-adapted",
+      "output": "pages/Basic-Propositions/Propositional-Equality/index.md",
+      "title": "19.4. Propositional Equality",
+      "headings": 3,
+      "referenceEntries": 27
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Propositions/Quantifiers/index.html",
+      "sourceBlob": "412adffb5f57e236f32bb6c9f823f704ac92cbe1",
+      "sourceBytes": 153828,
+      "status": "article-adapted",
+      "output": "pages/Basic-Propositions/Quantifiers/index.md",
+      "title": "19.3. Quantifiers",
+      "headings": 1,
+      "referenceEntries": 4
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Propositions/Truth/index.html",
+      "sourceBlob": "c9a2f43cd9e2144392a2f6f566d51cd49c08d4da",
+      "sourceBytes": 132833,
+      "status": "article-adapted",
+      "output": "pages/Basic-Propositions/Truth/index.md",
+      "title": "19.1. Truth",
+      "headings": 1,
+      "referenceEntries": 3
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Propositions/index.html",
+      "sourceBlob": "77d424aa3d8cdf6bb042769e8c97823e3a969b85",
+      "sourceBytes": 93744,
+      "status": "article-adapted",
+      "output": "pages/Basic-Propositions/index.md",
+      "title": "19. Basic Propositions",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Arrays/index.html",
+      "sourceBlob": "c517c2320321b62a1280c4e9d6c34d3a97fe4995",
+      "sourceBytes": 2059477,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Arrays/index.md",
+      "title": "20.16. Arrays",
+      "headings": 27,
+      "referenceEntries": 167
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Bitvectors/index.html",
+      "sourceBlob": "2ec6c093fdd13994fb3e2e8aeeb7683d8639fd03",
+      "sourceBytes": 784547,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Bitvectors/index.md",
+      "title": "20.5. Bitvectors",
+      "headings": 20,
+      "referenceEntries": 84
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Booleans/index.html",
+      "sourceBlob": "fae23f306a50b51544050aa6016fd491e96b118a",
+      "sourceBytes": 223728,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Booleans/index.md",
+      "title": "20.11. Booleans",
+      "headings": 8,
+      "referenceEntries": 22
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Byte-Arrays/index.html",
+      "sourceBlob": "9baf9a990ef054dbd4824a4e169753d0e0e3968c",
+      "sourceBytes": 407308,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Byte-Arrays/index.md",
+      "title": "20.17. Byte Arrays",
+      "headings": 12,
+      "referenceEntries": 62
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Characters/index.html",
+      "sourceBlob": "5685a57d1c19504d074088002f7b8a97b2cbbe6e",
+      "sourceBytes": 175735,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Characters/index.md",
+      "title": "20.7. Characters",
+      "headings": 10,
+      "referenceEntries": 19
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Finite-Natural-Numbers/index.html",
+      "sourceBlob": "834fd49f7fdc3dc06d87a835aa161aba81a12ea7",
+      "sourceBytes": 640573,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Finite-Natural-Numbers/index.md",
+      "title": "20.3. Finite Natural Numbers",
+      "headings": 10,
+      "referenceEntries": 42
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Fixed-Precision-Integers/index.html",
+      "sourceBlob": "c5abee0398e194113f8d3cfa144ca2e40fcf073b",
+      "sourceBytes": 1749284,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Fixed-Precision-Integers/index.md",
+      "title": "20.4. Fixed-Precision Integers",
+      "headings": 20,
+      "referenceEntries": 348
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Floating-Point-Numbers/index.html",
+      "sourceBlob": "dde2704d989fa0565095cd7a9fb91861c717aa7a",
+      "sourceBytes": 764641,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Floating-Point-Numbers/index.md",
+      "title": "20.6. Floating-Point Numbers",
+      "headings": 20,
+      "referenceEntries": 158
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Integers/index.html",
+      "sourceBlob": "2aa9b92e254f17ea12c30d737a943a040d658459",
+      "sourceBytes": 597905,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Integers/index.md",
+      "title": "20.2. Integers",
+      "headings": 11,
+      "referenceEntries": 34
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Lazy-Computations/index.html",
+      "sourceBlob": "e08cffdd9cd1b4a05fae759e1c101eebd77b1427",
+      "sourceBytes": 199107,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Lazy-Computations/index.md",
+      "title": "20.21. Lazy Computations",
+      "headings": 5,
+      "referenceEntries": 5
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Linked-Lists/index.html",
+      "sourceBlob": "5da14e0212966f5eef0aa3084eaf86f469b94cb9",
+      "sourceBytes": 2392511,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Linked-Lists/index.md",
+      "title": "20.15. Linked Lists",
+      "headings": 22,
+      "referenceEntries": 180
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Maps-and-Sets/index.html",
+      "sourceBlob": "5576275e5a80873480e546aae8a06b284cef7972",
+      "sourceBytes": 4716218,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Maps-and-Sets/index.md",
+      "title": "20.19. Maps and Sets",
+      "headings": 75,
+      "referenceEntries": 405
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Natural-Numbers/index.html",
+      "sourceBlob": "478b65968d44f99ea8a16ba6adfd90370600cc2e",
+      "sourceBytes": 744629,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Natural-Numbers/index.md",
+      "title": "20.1. Natural Numbers",
+      "headings": 20,
+      "referenceEntries": 75
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Optional-Values/index.html",
+      "sourceBlob": "e77c408a96dfbffb6ab27d2f73e871232fa68f5c",
+      "sourceBytes": 574649,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Optional-Values/index.md",
+      "title": "20.12. Optional Values",
+      "headings": 10,
+      "referenceEntries": 43
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Ranges/index.html",
+      "sourceBlob": "4121448366602757c815f496386d3fdb1378c55e",
+      "sourceBytes": 4595697,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Ranges/index.md",
+      "title": "20.18. Ranges",
+      "headings": 5,
+      "referenceEntries": 75
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Strings/index.html",
+      "sourceBlob": "d6c44113aaece9869709b7a850dc3e3d02a42115",
+      "sourceBytes": 2310722,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Strings/index.md",
+      "title": "20.8. Strings",
+      "headings": 63,
+      "referenceEntries": 276
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Subtypes/index.html",
+      "sourceBlob": "27ebb5f8b36ace6d86fa1b0a3ec10c00ae5bf7bc",
+      "sourceBytes": 167821,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Subtypes/index.md",
+      "title": "20.20. Subtypes",
+      "headings": 1,
+      "referenceEntries": 2
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Sum-Types/index.html",
+      "sourceBlob": "64783d444858a6be8dacf711a7c28582b9db02d1",
+      "sourceBytes": 231671,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Sum-Types/index.md",
+      "title": "20.14. Sum Types",
+      "headings": 7,
+      "referenceEntries": 17
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/The-Empty-Type/index.html",
+      "sourceBlob": "9056b6ec315524b8cd8176524f67701a492fefa6",
+      "sourceBytes": 120422,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/The-Empty-Type/index.md",
+      "title": "20.10. The Empty Type",
+      "headings": 2,
+      "referenceEntries": 4
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/The-Unit-Type/index.html",
+      "sourceBlob": "3207151450ba94aceaca817590d1c1981d99655c",
+      "sourceBytes": 134543,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/The-Unit-Type/index.md",
+      "title": "20.9. The Unit Type",
+      "headings": 2,
+      "referenceEntries": 3
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/Tuples/index.html",
+      "sourceBlob": "46db209c4935f3794447c6b38c1cb3fbea269c8c",
+      "sourceBytes": 341729,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/Tuples/index.md",
+      "title": "20.13. Tuples",
+      "headings": 7,
+      "referenceEntries": 16
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Basic-Types/index.html",
+      "sourceBlob": "e571f3422076bf6f0446c89a8ad346a51c47a4ab",
+      "sourceBytes": 97792,
+      "status": "article-adapted",
+      "output": "pages/Basic-Types/index.md",
+      "title": "20. Basic Types",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Build-Tools-and-Distribution/Lake/index.html",
+      "sourceBlob": "f41eea647d9429423a57c2093124295349d2487f",
+      "sourceBytes": 912860,
+      "status": "article-adapted",
+      "output": "pages/Build-Tools-and-Distribution/Lake/index.md",
+      "title": "24.1. Lake",
+      "headings": 60,
+      "referenceEntries": 108
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html",
+      "sourceBlob": "cf935eb8b2a2b3c1f8e81cf93c0259d11b5ab767",
+      "sourceBytes": 129750,
+      "status": "article-adapted",
+      "output": "pages/Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.md",
+      "title": "24.2. Managing Toolchains with Elan",
+      "headings": 12,
+      "referenceEntries": 15
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Build-Tools-and-Distribution/index.html",
+      "sourceBlob": "c839388a5d38c1b69f34481f9ffcb3477ae485ac",
+      "sourceBytes": 94784,
+      "status": "article-adapted",
+      "output": "pages/Build-Tools-and-Distribution/index.md",
+      "title": "24. Build Tools and Distribution",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Coercions/Coercing-Between-Types/index.html",
+      "sourceBlob": "1ce6b242f38cc101a1f0e926c2d8f92c4283a486",
+      "sourceBytes": 345214,
+      "status": "article-adapted",
+      "output": "pages/Coercions/Coercing-Between-Types/index.md",
+      "title": "11.2. Coercing Between Types",
+      "headings": 3,
+      "referenceEntries": 11
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Coercions/Coercing-to-Function-Types/index.html",
+      "sourceBlob": "d48c1062f102442688e9a4c16558c5cc73ed0f3e",
+      "sourceBytes": 245329,
+      "status": "article-adapted",
+      "output": "pages/Coercions/Coercing-to-Function-Types/index.md",
+      "title": "11.4. Coercing to Function Types",
+      "headings": 1,
+      "referenceEntries": 2
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Coercions/Coercing-to-Sorts/index.html",
+      "sourceBlob": "353268ae547769d0855d347845bfb68f8590f6c1",
+      "sourceBytes": 156862,
+      "status": "article-adapted",
+      "output": "pages/Coercions/Coercing-to-Sorts/index.md",
+      "title": "11.3. Coercing to Sorts",
+      "headings": 1,
+      "referenceEntries": 2
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Coercions/Coercion-Insertion/index.html",
+      "sourceBlob": "b6ae045a05627ba64dc8793aac13e6d9d0e1d151",
+      "sourceBytes": 143348,
+      "status": "article-adapted",
+      "output": "pages/Coercions/Coercion-Insertion/index.md",
+      "title": "11.1. Coercion Insertion",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Coercions/Implementation-Details/index.html",
+      "sourceBlob": "5effbd5c8ffefc9d6179221d230a0d5475f15911",
+      "sourceBytes": 142112,
+      "status": "article-adapted",
+      "output": "pages/Coercions/Implementation-Details/index.md",
+      "title": "11.5. Implementation Details",
+      "headings": 3,
+      "referenceEntries": 4
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Coercions/index.html",
+      "sourceBlob": "104c99440bfb0fd7ed40f255a1059d929d3aba3f",
+      "sourceBytes": 186991,
+      "status": "article-adapted",
+      "output": "pages/Coercions/index.md",
+      "title": "11. Coercions",
+      "headings": 1,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Definitions/Definitions/index.html",
+      "sourceBlob": "3fd846a9d43ddff1ca9e8ad384ccb1fb94ef3c31",
+      "sourceBytes": 125473,
+      "status": "article-adapted",
+      "output": "pages/Definitions/Definitions/index.md",
+      "title": "7.3. Definitions",
+      "headings": 1,
+      "referenceEntries": 3
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Definitions/Example-Declarations/index.html",
+      "sourceBlob": "46d915f30d7ce5a51a47b401e64aa57bd03e7b87",
+      "sourceBytes": 103112,
+      "status": "article-adapted",
+      "output": "pages/Definitions/Example-Declarations/index.md",
+      "title": "7.5. Example Declarations",
+      "headings": 1,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Definitions/Headers-and-Signatures/index.html",
+      "sourceBlob": "6f3f661eec1c02ab33ccc7f10add3de3295409f9",
+      "sourceBytes": 260483,
+      "status": "article-adapted",
+      "output": "pages/Definitions/Headers-and-Signatures/index.md",
+      "title": "7.2. Headers and Signatures",
+      "headings": 5,
+      "referenceEntries": 10
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Definitions/Modifiers/index.html",
+      "sourceBlob": "1fcafd0ff6afff5df82b591bce29403965d8f05c",
+      "sourceBytes": 107382,
+      "status": "article-adapted",
+      "output": "pages/Definitions/Modifiers/index.md",
+      "title": "7.1. Modifiers",
+      "headings": 1,
+      "referenceEntries": 2
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Definitions/Recursive-Definitions/index.html",
+      "sourceBlob": "c51e1fc358a01a560fd0d9a98d3528f0b2b3855c",
+      "sourceBytes": 3149429,
+      "status": "article-adapted",
+      "output": "pages/Definitions/Recursive-Definitions/index.md",
+      "title": "7.6. Recursive Definitions",
+      "headings": 42,
+      "referenceEntries": 36
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Definitions/Theorems/index.html",
+      "sourceBlob": "ff48488f9e4a31dea338e2c55e04ada9815dbe16",
+      "sourceBytes": 106193,
+      "status": "article-adapted",
+      "output": "pages/Definitions/Theorems/index.md",
+      "title": "7.4. Theorems",
+      "headings": 1,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Definitions/index.html",
+      "sourceBlob": "74d032d82c34ae45be3521e912a0188f74e98ff2",
+      "sourceBytes": 95296,
+      "status": "article-adapted",
+      "output": "pages/Definitions/index.md",
+      "title": "7. Definitions",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Elaboration-and-Compilation/index.html",
+      "sourceBlob": "5012e7d6d30da5e5cfb0d32f3af958b6f79ed85d",
+      "sourceBytes": 208734,
+      "status": "article-adapted",
+      "output": "pages/Elaboration-and-Compilation/index.md",
+      "title": "2. Elaboration and Compilation",
+      "headings": 7,
+      "referenceEntries": 3
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--ctorResultingTypeMismatch/index.html",
+      "sourceBlob": "75a1bc444ac2e9997b43d90dcc5c57afb7271a60",
+      "sourceBytes": 116382,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--ctorResultingTypeMismatch/index.md",
+      "title": "About: ctorResultingTypeMismatch",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--dependsOnNoncomputable/index.html",
+      "sourceBlob": "c922ff3c9f39c8c3e43f2f88bd9019a1c40ef3cd",
+      "sourceBytes": 138225,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--dependsOnNoncomputable/index.md",
+      "title": "About: dependsOnNoncomputable",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--inductionWithNoAlts/index.html",
+      "sourceBlob": "5eb8248c6fa41c576d6b9ef9369d588aeed6887e",
+      "sourceBytes": 109420,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--inductionWithNoAlts/index.md",
+      "title": "About: inductionWithNoAlts",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--inductiveParamMismatch/index.html",
+      "sourceBlob": "977269d1c0f9fac6227749a1735840687b9baf13",
+      "sourceBytes": 112297,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--inductiveParamMismatch/index.md",
+      "title": "About: inductiveParamMismatch",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--inductiveParamMissing/index.html",
+      "sourceBlob": "527b0a3c6d137d4dcfa533a02966e72a3ba34430",
+      "sourceBytes": 130007,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--inductiveParamMissing/index.md",
+      "title": "About: inductiveParamMissing",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--inferBinderTypeFailed/index.html",
+      "sourceBlob": "9d2bdab0c26e6e85dc23e20823052d2154cc2597",
+      "sourceBytes": 132936,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--inferBinderTypeFailed/index.md",
+      "title": "About: inferBinderTypeFailed",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--inferDefTypeFailed/index.html",
+      "sourceBlob": "dea290e2474d7b403489f58233b4cc0ae2081836",
+      "sourceBytes": 112235,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--inferDefTypeFailed/index.md",
+      "title": "About: inferDefTypeFailed",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--invalidDottedIdent/index.html",
+      "sourceBlob": "5b0bc3f4eb5be5bf68fdcb4ad937a90a8cffabff",
+      "sourceBytes": 131961,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--invalidDottedIdent/index.md",
+      "title": "About: invalidDottedIdent",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--invalidField/index.html",
+      "sourceBlob": "1ae0f360a93edfc5a7b05fd5b95ef79a130e5c2f",
+      "sourceBytes": 135574,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--invalidField/index.md",
+      "title": "About: invalidField",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--projNonPropFromProp/index.html",
+      "sourceBlob": "6650be93aea159e201a4bb17e9a099f948b90a9a",
+      "sourceBytes": 125548,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--projNonPropFromProp/index.md",
+      "title": "About: projNonPropFromProp",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--propRecLargeElim/index.html",
+      "sourceBlob": "3303b5ef0fcc584876a6f3822d3effb2ae7524da",
+      "sourceBytes": 165806,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--propRecLargeElim/index.md",
+      "title": "About: propRecLargeElim",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--redundantMatchAlt/index.html",
+      "sourceBlob": "0b0c55c42339fcb8469f191830274bc250610829",
+      "sourceBytes": 143684,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--redundantMatchAlt/index.md",
+      "title": "About: redundantMatchAlt",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--synthInstanceFailed/index.html",
+      "sourceBlob": "772b8e43a365e8ffbb16fd3042b0b059ced8831e",
+      "sourceBytes": 139725,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--synthInstanceFailed/index.md",
+      "title": "About: synthInstanceFailed",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/About___--unknownIdentifier/index.html",
+      "sourceBlob": "6dd529e3cfa58c88f703e5bb6e39d3f35609d524",
+      "sourceBytes": 186571,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/About___--unknownIdentifier/index.md",
+      "title": "About: unknownIdentifier",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Error-Explanations/index.html",
+      "sourceBlob": "23c432eb32358dda7b97afb4b1d39e76ff6ce688",
+      "sourceBytes": 102181,
+      "status": "article-adapted",
+      "output": "pages/Error-Explanations/index.md",
+      "title": "Error Explanations",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Functors___-Monads-and--do--Notation/API-Reference/index.html",
+      "sourceBlob": "0c28fab09fc6e6f8001883cb1fa0a20977a68f71",
+      "sourceBytes": 192283,
+      "status": "article-adapted",
+      "output": "pages/Functors___-Monads-and--do--Notation/API-Reference/index.md",
+      "title": "18.4. API Reference",
+      "headings": 6,
+      "referenceEntries": 10
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Functors___-Monads-and--do--Notation/Laws/index.html",
+      "sourceBlob": "333c667a2693f8897c539d9e12d33740f165ac26",
+      "sourceBytes": 301749,
+      "status": "article-adapted",
+      "output": "pages/Functors___-Monads-and--do--Notation/Laws/index.md",
+      "title": "18.1. Laws",
+      "headings": 1,
+      "referenceEntries": 4
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Functors___-Monads-and--do--Notation/Lifting-Monads/index.html",
+      "sourceBlob": "02085765f1898971f58e037d801fbab85187be90",
+      "sourceBytes": 345033,
+      "status": "article-adapted",
+      "output": "pages/Functors___-Monads-and--do--Notation/Lifting-Monads/index.md",
+      "title": "18.2. Lifting Monads",
+      "headings": 4,
+      "referenceEntries": 9
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Functors___-Monads-and--do--Notation/Syntax/index.html",
+      "sourceBlob": "cb34a939c411367c788cf48aa7d45e5bd0b3f868",
+      "sourceBytes": 393511,
+      "status": "article-adapted",
+      "output": "pages/Functors___-Monads-and--do--Notation/Syntax/index.md",
+      "title": "18.3. Syntax",
+      "headings": 13,
+      "referenceEntries": 24
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html",
+      "sourceBlob": "4b71a74465e788a29a323934c2639cfa1edf64d8",
+      "sourceBytes": 1186654,
+      "status": "article-adapted",
+      "output": "pages/Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.md",
+      "title": "18.5. Varieties of Monads",
+      "headings": 20,
+      "referenceEntries": 114
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Functors___-Monads-and--do--Notation/index.html",
+      "sourceBlob": "df5888c30950ae9b3a4b3f650a011476844a777e",
+      "sourceBytes": 410996,
+      "status": "article-adapted",
+      "output": "pages/Functors___-Monads-and--do--Notation/index.md",
+      "title": "18. Functors, Monads and do-Notation",
+      "headings": 1,
+      "referenceEntries": 9
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/IO/Console-Output/index.html",
+      "sourceBlob": "23e4343caa9945675b9660418db9bc79ea6924c1",
+      "sourceBytes": 120796,
+      "status": "article-adapted",
+      "output": "pages/IO/Console-Output/index.md",
+      "title": "21.3. Console Output",
+      "headings": 1,
+      "referenceEntries": 4
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/IO/Control-Structures/index.html",
+      "sourceBlob": "5a7ff1511edaf26c09d1e4b1261e7a408927c457",
+      "sourceBytes": 102408,
+      "status": "article-adapted",
+      "output": "pages/IO/Control-Structures/index.md",
+      "title": "21.2. Control Structures",
+      "headings": 1,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/IO/Environment-Variables/index.html",
+      "sourceBlob": "98daeeee7872423603066ba3491ef2c4485192ca",
+      "sourceBytes": 98243,
+      "status": "article-adapted",
+      "output": "pages/IO/Environment-Variables/index.md",
+      "title": "21.7. Environment Variables",
+      "headings": 1,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/IO/Files___-File-Handles___-and-Streams/index.html",
+      "sourceBlob": "890e76bf2fdf84109401b6080e9acf0bc009561f",
+      "sourceBytes": 549842,
+      "status": "article-adapted",
+      "output": "pages/IO/Files___-File-Handles___-and-Streams/index.md",
+      "title": "21.5. Files, File Handles, and Streams",
+      "headings": 7,
+      "referenceEntries": 85
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/IO/Logical-Model/index.html",
+      "sourceBlob": "f8a92e0f658732899d651a89ca4ed25bee88d202",
+      "sourceBytes": 242101,
+      "status": "article-adapted",
+      "output": "pages/IO/Logical-Model/index.md",
+      "title": "21.1. Logical Model",
+      "headings": 3,
+      "referenceEntries": 15
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/IO/Mutable-References/index.html",
+      "sourceBlob": "7866174bf5004aac79388e0bb56270fe446eb115",
+      "sourceBytes": 275454,
+      "status": "article-adapted",
+      "output": "pages/IO/Mutable-References/index.md",
+      "title": "21.4. Mutable References",
+      "headings": 6,
+      "referenceEntries": 16
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/IO/Processes/index.html",
+      "sourceBlob": "a5826ee866d41995a57f8a79490fc4164585325a",
+      "sourceBytes": 256517,
+      "status": "article-adapted",
+      "output": "pages/IO/Processes/index.md",
+      "title": "21.9. Processes",
+      "headings": 3,
+      "referenceEntries": 17
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/IO/Random-Numbers/index.html",
+      "sourceBlob": "c50f9b6ea316ab2e84bd555500323a036dac2f0e",
+      "sourceBytes": 140355,
+      "status": "article-adapted",
+      "output": "pages/IO/Random-Numbers/index.md",
+      "title": "21.10. Random Numbers",
+      "headings": 3,
+      "referenceEntries": 11
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/IO/System-and-Platform-Information/index.html",
+      "sourceBlob": "21621d8a6d5fcf512e645da9482c52351ca3ab8c",
+      "sourceBytes": 102974,
+      "status": "article-adapted",
+      "output": "pages/IO/System-and-Platform-Information/index.md",
+      "title": "21.6. System and Platform Information",
+      "headings": 1,
+      "referenceEntries": 5
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/IO/Tasks-and-Threads/index.html",
+      "sourceBlob": "e0ebb353dc1c5d17bfc61430ee04727bf26fd392",
+      "sourceBytes": 578127,
+      "status": "article-adapted",
+      "output": "pages/IO/Tasks-and-Threads/index.md",
+      "title": "21.11. Tasks and Threads",
+      "headings": 13,
+      "referenceEntries": 61
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/IO/Timing/index.html",
+      "sourceBlob": "c8770631e085401bea7ce91b531572939a39e1f4",
+      "sourceBytes": 106993,
+      "status": "article-adapted",
+      "output": "pages/IO/Timing/index.md",
+      "title": "21.8. Timing",
+      "headings": 1,
+      "referenceEntries": 5
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/IO/index.html",
+      "sourceBlob": "5e9cdcfd997097fd16dd6ae1229fae9ef2b62eff",
+      "sourceBytes": 97314,
+      "status": "article-adapted",
+      "output": "pages/IO/index.md",
+      "title": "21. IO",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Interacting-with-Lean/index.html",
+      "sourceBlob": "dd92d04daf4ed6bd54c50fd05dbb70e8cc145c26",
+      "sourceBytes": 832679,
+      "status": "article-adapted",
+      "output": "pages/Interacting-with-Lean/index.md",
+      "title": "3. Interacting with Lean",
+      "headings": 19,
+      "referenceEntries": 48
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Introduction/index.html",
+      "sourceBlob": "f3cecda0e66e35638190da49c7aff6d879794eae",
+      "sourceBytes": 147703,
+      "status": "article-adapted",
+      "output": "pages/Introduction/index.md",
+      "title": "1. Introduction",
+      "headings": 21,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Iterators/Consuming-Iterators/index.html",
+      "sourceBlob": "58e02c6eff2a38d137a1216b7592126e05482c98",
+      "sourceBytes": 677475,
+      "status": "article-adapted",
+      "output": "pages/Iterators/Consuming-Iterators/index.md",
+      "title": "22.3. Consuming Iterators",
+      "headings": 6,
+      "referenceEntries": 40
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Iterators/Iterator-Combinators/index.html",
+      "sourceBlob": "16170664a2f12e7702d3a952b661219cc2e1a4f1",
+      "sourceBytes": 997760,
+      "status": "article-adapted",
+      "output": "pages/Iterators/Iterator-Combinators/index.md",
+      "title": "22.4. Iterator Combinators",
+      "headings": 3,
+      "referenceEntries": 51
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Iterators/Iterator-Definitions/index.html",
+      "sourceBlob": "328bd9a3b7936400c689e07e476633af45df404b",
+      "sourceBytes": 1072580,
+      "status": "article-adapted",
+      "output": "pages/Iterators/Iterator-Definitions/index.md",
+      "title": "22.2. Iterator Definitions",
+      "headings": 7,
+      "referenceEntries": 25
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Iterators/Reasoning-About-Iterators/index.html",
+      "sourceBlob": "df3011337c3777854e345671b572ea3046b2fdf6",
+      "sourceBytes": 418710,
+      "status": "article-adapted",
+      "output": "pages/Iterators/Reasoning-About-Iterators/index.md",
+      "title": "22.5. Reasoning About Iterators",
+      "headings": 5,
+      "referenceEntries": 20
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Iterators/Run-Time-Considerations/index.html",
+      "sourceBlob": "9dcbe995f43c55958b53103b0eefd6a6526a2b4f",
+      "sourceBytes": 94801,
+      "status": "article-adapted",
+      "output": "pages/Iterators/Run-Time-Considerations/index.md",
+      "title": "22.1. Run-Time Considerations",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Iterators/index.html",
+      "sourceBlob": "554e539971750a09513dfddcf1bd789a3f2cdd23",
+      "sourceBytes": 126944,
+      "status": "article-adapted",
+      "output": "pages/Iterators/index.md",
+      "title": "22. Iterators",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Namespaces-and-Sections/index.html",
+      "sourceBlob": "559642a93ac9b7b2fe63120e7f22573bfa68a7ba",
+      "sourceBytes": 389992,
+      "status": "article-adapted",
+      "output": "pages/Namespaces-and-Sections/index.md",
+      "title": "6. Namespaces and Sections",
+      "headings": 7,
+      "referenceEntries": 13
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Notations-and-Macros/Custom-Operators/index.html",
+      "sourceBlob": "2854a4db8e4a058bb32cc754e095b6f4991a5862",
+      "sourceBytes": 207029,
+      "status": "article-adapted",
+      "output": "pages/Notations-and-Macros/Custom-Operators/index.md",
+      "title": "23.1. Custom Operators",
+      "headings": 1,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Notations-and-Macros/Defining-New-Syntax/index.html",
+      "sourceBlob": "4c0c54cbdad535aec788e145c5b81d89ad126ed5",
+      "sourceBytes": 567555,
+      "status": "article-adapted",
+      "output": "pages/Notations-and-Macros/Defining-New-Syntax/index.md",
+      "title": "23.4. Defining New Syntax",
+      "headings": 15,
+      "referenceEntries": 79
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Notations-and-Macros/Elaborators/index.html",
+      "sourceBlob": "119b7c8841c183dbc05b7f74621e31ff129a905c",
+      "sourceBytes": 177900,
+      "status": "article-adapted",
+      "output": "pages/Notations-and-Macros/Elaborators/index.md",
+      "title": "23.6. Elaborators",
+      "headings": 5,
+      "referenceEntries": 2
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Notations-and-Macros/Extending--do--Notation/index.html",
+      "sourceBlob": "7f91e73909212f8e9f8e7450f2031ecb25374407",
+      "sourceBytes": 913843,
+      "status": "article-adapted",
+      "output": "pages/Notations-and-Macros/Extending--do--Notation/index.md",
+      "title": "23.7. Extending do-Notation",
+      "headings": 11,
+      "referenceEntries": 53
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Notations-and-Macros/Extending-Lean___s-Output/index.html",
+      "sourceBlob": "409cfda0f19f5a17e582055eddb05ce822296737",
+      "sourceBytes": 194822,
+      "status": "article-adapted",
+      "output": "pages/Notations-and-Macros/Extending-Lean___s-Output/index.md",
+      "title": "23.8. Extending Lean's Output",
+      "headings": 3,
+      "referenceEntries": 4
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Notations-and-Macros/Macros/index.html",
+      "sourceBlob": "92a98002362f233aa7d91bfbe27e3caeeea708b8",
+      "sourceBytes": 498518,
+      "status": "article-adapted",
+      "output": "pages/Notations-and-Macros/Macros/index.md",
+      "title": "23.5. Macros",
+      "headings": 16,
+      "referenceEntries": 20
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Notations-and-Macros/Notations/index.html",
+      "sourceBlob": "b3da47b44ee95e8c9ad7047fc6b0b7a7d5706bf6",
+      "sourceBytes": 143049,
+      "status": "article-adapted",
+      "output": "pages/Notations-and-Macros/Notations/index.md",
+      "title": "23.3. Notations",
+      "headings": 2,
+      "referenceEntries": 2
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Notations-and-Macros/Precedence/index.html",
+      "sourceBlob": "7df7ea2d300a988574964b8eb289c89a01a8426a",
+      "sourceBytes": 101504,
+      "status": "article-adapted",
+      "output": "pages/Notations-and-Macros/Precedence/index.md",
+      "title": "23.2. Precedence",
+      "headings": 1,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Notations-and-Macros/index.html",
+      "sourceBlob": "510cedeaf2e96c92a8405dfe0a700b3db3f9c942",
+      "sourceBytes": 97422,
+      "status": "article-adapted",
+      "output": "pages/Notations-and-Macros/index.md",
+      "title": "23. Notations and Macros",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Run-Time-Code/Boxing/index.html",
+      "sourceBlob": "6b3f0d6e650b5b8ef4bd0330b7aad5761849f6f4",
+      "sourceBytes": 96877,
+      "status": "article-adapted",
+      "output": "pages/Run-Time-Code/Boxing/index.md",
+      "title": "12.1. Boxing",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Run-Time-Code/Foreign-Function-Interface/index.html",
+      "sourceBlob": "56d6d5658e2358331ca9aa77af46ffdcbb6fd81d",
+      "sourceBytes": 124868,
+      "status": "article-adapted",
+      "output": "pages/Run-Time-Code/Foreign-Function-Interface/index.md",
+      "title": "12.4. Foreign Function Interface",
+      "headings": 6,
+      "referenceEntries": 3
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Run-Time-Code/Multi-Threaded-Execution/index.html",
+      "sourceBlob": "0129ff5db7d1ab5a208ca63b8b91b41982573e60",
+      "sourceBytes": 93386,
+      "status": "article-adapted",
+      "output": "pages/Run-Time-Code/Multi-Threaded-Execution/index.md",
+      "title": "12.3. Multi-Threaded Execution",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Run-Time-Code/Reference-Counting/index.html",
+      "sourceBlob": "6dca9e07aece952e5ea6ff35dd4dbc7fa0305952",
+      "sourceBytes": 161155,
+      "status": "article-adapted",
+      "output": "pages/Run-Time-Code/Reference-Counting/index.md",
+      "title": "12.2. Reference Counting",
+      "headings": 3,
+      "referenceEntries": 2
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Run-Time-Code/index.html",
+      "sourceBlob": "1e871b2ef8f253c2512e00267112ed7fd445e0f5",
+      "sourceBytes": 95651,
+      "status": "article-adapted",
+      "output": "pages/Run-Time-Code/index.md",
+      "title": "12. Run-Time Code",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Source-Files-and-Modules/index.html",
+      "sourceBlob": "b1a2916cc4f44897caaaa5114f52e4519f90e2f1",
+      "sourceBytes": 390372,
+      "status": "article-adapted",
+      "output": "pages/Source-Files-and-Modules/index.md",
+      "title": "5. Source Files and Modules",
+      "headings": 15,
+      "referenceEntries": 7
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Tactic-Proofs/Custom-Tactics/index.html",
+      "sourceBlob": "a8332470619e8406d632a693bb6865f879c79656",
+      "sourceBytes": 139841,
+      "status": "article-adapted",
+      "output": "pages/Tactic-Proofs/Custom-Tactics/index.md",
+      "title": "14.8. Custom Tactics",
+      "headings": 3,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Tactic-Proofs/Naming-Bound-Variables/index.html",
+      "sourceBlob": "0ccd1ccf5cd57eb7287ef5a08136c2d0294af15c",
+      "sourceBytes": 108886,
+      "status": "article-adapted",
+      "output": "pages/Tactic-Proofs/Naming-Bound-Variables/index.md",
+      "title": "14.7. Naming Bound Variables",
+      "headings": 1,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Tactic-Proofs/Options/index.html",
+      "sourceBlob": "ca2f32647ef286135a356122defbaec1f3c08d2b",
+      "sourceBytes": 99712,
+      "status": "article-adapted",
+      "output": "pages/Tactic-Proofs/Options/index.md",
+      "title": "14.4. Options",
+      "headings": 1,
+      "referenceEntries": 3
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Tactic-Proofs/Reading-Proof-States/index.html",
+      "sourceBlob": "0eaba3b3b2feaf43ec23d3b01c984e3a6a05d4da",
+      "sourceBytes": 265228,
+      "status": "article-adapted",
+      "output": "pages/Tactic-Proofs/Reading-Proof-States/index.md",
+      "title": "14.2. Reading Proof States",
+      "headings": 3,
+      "referenceEntries": 7
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Tactic-Proofs/Running-Tactics/index.html",
+      "sourceBlob": "419cd6c5b571e6ad423bc4959d2deccb53f7d5f3",
+      "sourceBytes": 98130,
+      "status": "article-adapted",
+      "output": "pages/Tactic-Proofs/Running-Tactics/index.md",
+      "title": "14.1. Running Tactics",
+      "headings": 1,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Tactic-Proofs/Tactic-Reference/index.html",
+      "sourceBlob": "b085cf3ee7ea00881d31c5b4051825ff71a15b86",
+      "sourceBytes": 1613435,
+      "status": "article-adapted",
+      "output": "pages/Tactic-Proofs/Tactic-Reference/index.md",
+      "title": "14.5. Tactic Reference",
+      "headings": 39,
+      "referenceEntries": 179
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Tactic-Proofs/Targeted-Rewriting-with--conv/index.html",
+      "sourceBlob": "3a386c8ff7f806bdcc8b42ec4b551e266e2bd535",
+      "sourceBytes": 307281,
+      "status": "article-adapted",
+      "output": "pages/Tactic-Proofs/Targeted-Rewriting-with--conv/index.md",
+      "title": "14.6. Targeted Rewriting with conv",
+      "headings": 11,
+      "referenceEntries": 52
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Tactic-Proofs/The-Tactic-Language/index.html",
+      "sourceBlob": "00fd6fb6500c928cc504cb7b628e08b292ff029f",
+      "sourceBytes": 320820,
+      "status": "article-adapted",
+      "output": "pages/Tactic-Proofs/The-Tactic-Language/index.md",
+      "title": "14.3. The Tactic Language",
+      "headings": 16,
+      "referenceEntries": 38
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Tactic-Proofs/index.html",
+      "sourceBlob": "a0ff5e4e2e5d4030ff69efef0727e721d00f7319",
+      "sourceBytes": 98893,
+      "status": "article-adapted",
+      "output": "pages/Tactic-Proofs/index.md",
+      "title": "14. Tactic Proofs",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/Conditionals/index.html",
+      "sourceBlob": "b3e3b55f02f6422c14e480098d9b547da7d9dc23",
+      "sourceBytes": 130886,
+      "status": "article-adapted",
+      "output": "pages/Terms/Conditionals/index.md",
+      "title": "13.7. Conditionals",
+      "headings": 1,
+      "referenceEntries": 3
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/Function-Application/index.html",
+      "sourceBlob": "6481a3445b37e3b7813407da92050350e07dc23a",
+      "sourceBytes": 244771,
+      "status": "article-adapted",
+      "output": "pages/Terms/Function-Application/index.md",
+      "title": "13.4. Function Application",
+      "headings": 3,
+      "referenceEntries": 9
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/Function-Types/index.html",
+      "sourceBlob": "b7ac5f8b6e6c09fbb9989fb093d17651bd07e752",
+      "sourceBytes": 116610,
+      "status": "article-adapted",
+      "output": "pages/Terms/Function-Types/index.md",
+      "title": "13.2. Function Types",
+      "headings": 1,
+      "referenceEntries": 3
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/Functions/index.html",
+      "sourceBlob": "5bc971afd60bba9da8746c2c94d7695c5caf0a47",
+      "sourceBytes": 159876,
+      "status": "article-adapted",
+      "output": "pages/Terms/Functions/index.md",
+      "title": "13.3. Functions",
+      "headings": 2,
+      "referenceEntries": 4
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/Holes/index.html",
+      "sourceBlob": "e184e50d25381b3ea8605f8d4032d22c0806b28c",
+      "sourceBytes": 112947,
+      "status": "article-adapted",
+      "output": "pages/Terms/Holes/index.md",
+      "title": "13.9. Holes",
+      "headings": 1,
+      "referenceEntries": 2
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/Identifiers/index.html",
+      "sourceBlob": "59f200382a46d1e62f07f6221f5f485fee684f4a",
+      "sourceBytes": 166482,
+      "status": "article-adapted",
+      "output": "pages/Terms/Identifiers/index.md",
+      "title": "13.1. Identifiers",
+      "headings": 2,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/Numeric-Literals/index.html",
+      "sourceBlob": "99afd0909fe40fca7c932be82ce239a52d179697",
+      "sourceBytes": 214981,
+      "status": "article-adapted",
+      "output": "pages/Terms/Numeric-Literals/index.md",
+      "title": "13.5. Numeric Literals",
+      "headings": 5,
+      "referenceEntries": 4
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/Pattern-Matching/index.html",
+      "sourceBlob": "58f9c04d8dbacbdda4cb3fcf534cbeeda1d40dec",
+      "sourceBytes": 348760,
+      "status": "article-adapted",
+      "output": "pages/Terms/Pattern-Matching/index.md",
+      "title": "13.8. Pattern Matching",
+      "headings": 9,
+      "referenceEntries": 9
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/Proofs/index.html",
+      "sourceBlob": "6cc8f7a9a8372d76750587689f3cd393e457dc3a",
+      "sourceBytes": 94603,
+      "status": "article-adapted",
+      "output": "pages/Terms/Proofs/index.md",
+      "title": "13.13. Proofs",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/Quotation-and-Antiquotation/index.html",
+      "sourceBlob": "48f1d2bc3d1b52dfe190cc945e33f68aa0806057",
+      "sourceBytes": 94545,
+      "status": "article-adapted",
+      "output": "pages/Terms/Quotation-and-Antiquotation/index.md",
+      "title": "13.11. Quotation and Antiquotation",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/Structures-and-Constructors/index.html",
+      "sourceBlob": "2b8e31491e63437994a78916e1a1eecd3f201c48",
+      "sourceBytes": 94622,
+      "status": "article-adapted",
+      "output": "pages/Terms/Structures-and-Constructors/index.md",
+      "title": "13.6. Structures and Constructors",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/Type-Ascription/index.html",
+      "sourceBlob": "63e17c8b58f1ea432ed5b16c845ea0c61fc33859",
+      "sourceBytes": 182091,
+      "status": "article-adapted",
+      "output": "pages/Terms/Type-Ascription/index.md",
+      "title": "13.10. Type Ascription",
+      "headings": 1,
+      "referenceEntries": 2
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/do--Notation/index.html",
+      "sourceBlob": "724e4b50f3890fc589761d3b169baae19f7dd770",
+      "sourceBytes": 94777,
+      "status": "article-adapted",
+      "output": "pages/Terms/do--Notation/index.md",
+      "title": "13.12. do-Notation",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Terms/index.html",
+      "sourceBlob": "f13ff314f1c387de84c38db29dd56eb9b24e4521",
+      "sourceBytes": 96478,
+      "status": "article-adapted",
+      "output": "pages/Terms/index.md",
+      "title": "13. Terms",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html",
+      "sourceBlob": "fe6aceb18e5bc92838995ed277b6036164bb6f0f",
+      "sourceBytes": 1067262,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.md",
+      "title": "16.10. Algebraic Solver (Commutative Rings, Fields)",
+      "headings": 8,
+      "referenceEntries": 9
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Annotating-Libraries-for--grind/index.html",
+      "sourceBlob": "3fae8b1fc3b3693ef0d891ddfb67c599da3ca57e",
+      "sourceBytes": 153576,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Annotating-Libraries-for--grind/index.md",
+      "title": "16.12. Annotating Libraries for grind",
+      "headings": 3,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Associativity-and-Commutativity/index.html",
+      "sourceBlob": "623c443efb7827a0cc242336a143000cd822c0b0",
+      "sourceBytes": 380882,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Associativity-and-Commutativity/index.md",
+      "title": "16.8. Associativity and Commutativity",
+      "headings": 4,
+      "referenceEntries": 8
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Bigger-Examples/index.html",
+      "sourceBlob": "660470282132d6b003c5744c0cff1a07f7aee8cc",
+      "sourceBytes": 436965,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Bigger-Examples/index.md",
+      "title": "16.14. Bigger Examples",
+      "headings": 7,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Case-Analysis/index.html",
+      "sourceBlob": "1d0ea1eba3d5da3fc12b7746cb38e4f336eb6772",
+      "sourceBytes": 312077,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Case-Analysis/index.md",
+      "title": "16.6. Case Analysis",
+      "headings": 3,
+      "referenceEntries": 3
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Congruence-Closure/index.html",
+      "sourceBlob": "57860055e32909db4c33b041dae47c97ef2d9d59",
+      "sourceBytes": 124624,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Congruence-Closure/index.md",
+      "title": "16.4. Congruence Closure",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Constraint-Propagation/index.html",
+      "sourceBlob": "8b5b998cfcd0eb04ec1b725e770ff52601c8a680",
+      "sourceBytes": 197652,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Constraint-Propagation/index.md",
+      "title": "16.5. Constraint Propagation",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/E___matching/index.html",
+      "sourceBlob": "89295266464c9b1ce86094a2137b84b5f5a72151",
+      "sourceBytes": 1450334,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/E___matching/index.md",
+      "title": "16.7. E‑matching",
+      "headings": 4,
+      "referenceEntries": 20
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Error-Messages/index.html",
+      "sourceBlob": "4a337ed20d0b9752f9b3a6f2a4ccbd6fae9a2faa",
+      "sourceBytes": 95265,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Error-Messages/index.md",
+      "title": "16.1. Error Messages",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Linear-Arithmetic-Solver/index.html",
+      "sourceBlob": "a454f421798fe5b192bcae9c7ef2fc217c51f88c",
+      "sourceBytes": 300341,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Linear-Arithmetic-Solver/index.md",
+      "title": "16.11. Linear Arithmetic Solver",
+      "headings": 2,
+      "referenceEntries": 4
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Linear-Integer-Arithmetic/index.html",
+      "sourceBlob": "48479f0bafaa536aa9850e51cea3e90205fa9b80",
+      "sourceBytes": 464412,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Linear-Integer-Arithmetic/index.md",
+      "title": "16.9. Linear Integer Arithmetic",
+      "headings": 8,
+      "referenceEntries": 2
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Local-Definitions/index.html",
+      "sourceBlob": "56f51972e76866dbab5f9726f500501c7ce0f482",
+      "sourceBytes": 103919,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Local-Definitions/index.md",
+      "title": "16.3. Local Definitions",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Minimizing--grind--calls/index.html",
+      "sourceBlob": "2d61d77a0e9e83a831fa2b6c7f17a545dfdeb80b",
+      "sourceBytes": 96135,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Minimizing--grind--calls/index.md",
+      "title": "16.2. Minimizing grind calls",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/Reducibility/index.html",
+      "sourceBlob": "2134ebbf445abaab6234c61a4e371764cf96a31b",
+      "sourceBytes": 154901,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/Reducibility/index.md",
+      "title": "16.13. Reducibility",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--grind--tactic/index.html",
+      "sourceBlob": "9d28eeee3d1d24db04cb9a9d7617f708b8d62a8d",
+      "sourceBytes": 156413,
+      "status": "article-adapted",
+      "output": "pages/The--grind--tactic/index.md",
+      "title": "16. The grind tactic",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html",
+      "sourceBlob": "646c5b795c2aea8ef1f8a93975ce2854daaf264a",
+      "sourceBytes": 329493,
+      "status": "article-adapted",
+      "output": "pages/The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.md",
+      "title": "17.4. Enabling mvcgen For Monads",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--mvcgen--tactic/Overview/index.html",
+      "sourceBlob": "67e7e57e3b7954ef03e6d7ee6d9832edb139e233",
+      "sourceBytes": 97942,
+      "status": "article-adapted",
+      "output": "pages/The--mvcgen--tactic/Overview/index.md",
+      "title": "17.1. Overview",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--mvcgen--tactic/Predicate-Transformers/index.html",
+      "sourceBlob": "2c1c3649ab763d9261e4f7eed560003937c447b2",
+      "sourceBytes": 917323,
+      "status": "article-adapted",
+      "output": "pages/The--mvcgen--tactic/Predicate-Transformers/index.md",
+      "title": "17.2. Predicate Transformers",
+      "headings": 14,
+      "referenceEntries": 69
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--mvcgen--tactic/Proof-Mode/index.html",
+      "sourceBlob": "d063a327c71ccba868086b71a5f4c18905a589bd",
+      "sourceBytes": 216957,
+      "status": "article-adapted",
+      "output": "pages/The--mvcgen--tactic/Proof-Mode/index.md",
+      "title": "17.5. Proof Mode",
+      "headings": 1,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--mvcgen--tactic/Verification-Conditions/index.html",
+      "sourceBlob": "f9d352a392b83af744cde375d87d684a2f21549e",
+      "sourceBytes": 103040,
+      "status": "article-adapted",
+      "output": "pages/The--mvcgen--tactic/Verification-Conditions/index.md",
+      "title": "17.3. Verification Conditions",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The--mvcgen--tactic/index.html",
+      "sourceBlob": "7ead82c6c5262d3dcc4a48686e73267b5aee95eb",
+      "sourceBytes": 96102,
+      "status": "article-adapted",
+      "output": "pages/The--mvcgen--tactic/index.md",
+      "title": "17. The mvcgen tactic",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Simplifier/Configuring-Simplification/index.html",
+      "sourceBlob": "2881767f61d5bebc99e3fe4650a430b71bc4686f",
+      "sourceBytes": 220252,
+      "status": "article-adapted",
+      "output": "pages/The-Simplifier/Configuring-Simplification/index.md",
+      "title": "15.6. Configuring Simplification",
+      "headings": 2,
+      "referenceEntries": 8
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Simplifier/Invoking-the-Simplifier/index.html",
+      "sourceBlob": "8080ac0f75eea6f01586b04fadc19d1b1d7dfc9c",
+      "sourceBytes": 162410,
+      "status": "article-adapted",
+      "output": "pages/The-Simplifier/Invoking-the-Simplifier/index.md",
+      "title": "15.1. Invoking the Simplifier",
+      "headings": 2,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Simplifier/Rewrite-Rules/index.html",
+      "sourceBlob": "472664001ec882f36c80d537fd6b8b47698279ac",
+      "sourceBytes": 118652,
+      "status": "article-adapted",
+      "output": "pages/The-Simplifier/Rewrite-Rules/index.md",
+      "title": "15.2. Rewrite Rules",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Simplifier/Simp-Normal-Forms/index.html",
+      "sourceBlob": "d240674cf7adfdeb41f10b9d3f5a080e554346f7",
+      "sourceBytes": 97811,
+      "status": "article-adapted",
+      "output": "pages/The-Simplifier/Simp-Normal-Forms/index.md",
+      "title": "15.4. Simp Normal Forms",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Simplifier/Simp-sets/index.html",
+      "sourceBlob": "8d6a7c30fd97425e03e17c4af01e288f1c5b07fb",
+      "sourceBytes": 121027,
+      "status": "article-adapted",
+      "output": "pages/The-Simplifier/Simp-sets/index.md",
+      "title": "15.3. Simp sets",
+      "headings": 1,
+      "referenceEntries": 3
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Simplifier/Simplification-vs-Rewriting/index.html",
+      "sourceBlob": "0bdf92397da62716346e27676548923fc00a8519",
+      "sourceBytes": 97979,
+      "status": "article-adapted",
+      "output": "pages/The-Simplifier/Simplification-vs-Rewriting/index.md",
+      "title": "15.7. Simplification vs Rewriting",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html",
+      "sourceBlob": "ba6a85ff4e25d64706ad5c47be79c9b859600328",
+      "sourceBytes": 148496,
+      "status": "article-adapted",
+      "output": "pages/The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.md",
+      "title": "15.5. Terminal vs Non-Terminal Positions",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Simplifier/index.html",
+      "sourceBlob": "c071a77e58f9507aaaee036b6f61b13797c7ce07",
+      "sourceBytes": 94162,
+      "status": "article-adapted",
+      "output": "pages/The-Simplifier/index.md",
+      "title": "15. The Simplifier",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Type-System/Functions/index.html",
+      "sourceBlob": "74773c55fd7be7f0f512e557bef5e6ce242e424a",
+      "sourceBytes": 257293,
+      "status": "article-adapted",
+      "output": "pages/The-Type-System/Functions/index.md",
+      "title": "4.1. Functions",
+      "headings": 7,
+      "referenceEntries": 11
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Type-System/Inductive-Types/index.html",
+      "sourceBlob": "492a70fb1c08fb325d94032e1db23f8622f5cdbf",
+      "sourceBytes": 916375,
+      "status": "article-adapted",
+      "output": "pages/The-Type-System/Inductive-Types/index.md",
+      "title": "4.4. Inductive Types",
+      "headings": 37,
+      "referenceEntries": 8
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Type-System/Propositions/index.html",
+      "sourceBlob": "39dcac72c18a0b1224585afe35e2655f76e4ae31",
+      "sourceBytes": 102428,
+      "status": "article-adapted",
+      "output": "pages/The-Type-System/Propositions/index.md",
+      "title": "4.2. Propositions",
+      "headings": 1,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Type-System/Quotients/index.html",
+      "sourceBlob": "f6bdb20086cef8eb11e177ee73cb6ce21490486a",
+      "sourceBytes": 1105384,
+      "status": "article-adapted",
+      "output": "pages/The-Type-System/Quotients/index.md",
+      "title": "4.5. Quotients",
+      "headings": 14,
+      "referenceEntries": 36
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Type-System/Universes/index.html",
+      "sourceBlob": "b620183483ba04f6f45b24d35650f02bd1d9631f",
+      "sourceBytes": 258875,
+      "status": "article-adapted",
+      "output": "pages/The-Type-System/Universes/index.md",
+      "title": "4.3. Universes",
+      "headings": 6,
+      "referenceEntries": 3
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/The-Type-System/index.html",
+      "sourceBlob": "6637c7e60db0f41c0ab3e1afc4c11f157935c5e5",
+      "sourceBytes": 117912,
+      "status": "article-adapted",
+      "output": "pages/The-Type-System/index.md",
+      "title": "4. The Type System",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Type-Classes/Basic-Classes/index.html",
+      "sourceBlob": "bda55f20ce77656129faf264a50cf5aea8265011",
+      "sourceBytes": 849159,
+      "status": "article-adapted",
+      "output": "pages/Type-Classes/Basic-Classes/index.md",
+      "title": "10.5. Basic Classes",
+      "headings": 11,
+      "referenceEntries": 85
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Type-Classes/Class-Declarations/index.html",
+      "sourceBlob": "b3a55bd5dc344116d2242e8b7e3c45b15daf4c40",
+      "sourceBytes": 257226,
+      "status": "article-adapted",
+      "output": "pages/Type-Classes/Class-Declarations/index.md",
+      "title": "10.1. Class Declarations",
+      "headings": 3,
+      "referenceEntries": 2
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Type-Classes/Deriving-Instances/index.html",
+      "sourceBlob": "4752616ca4d10df1df272b216df21442e4c0423d",
+      "sourceBytes": 165350,
+      "status": "article-adapted",
+      "output": "pages/Type-Classes/Deriving-Instances/index.md",
+      "title": "10.4. Deriving Instances",
+      "headings": 2,
+      "referenceEntries": 3
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Type-Classes/Instance-Declarations/index.html",
+      "sourceBlob": "6e15d2264178f40e251cfa1f2caa0573099e1c58",
+      "sourceBytes": 336420,
+      "status": "article-adapted",
+      "output": "pages/Type-Classes/Instance-Declarations/index.md",
+      "title": "10.2. Instance Declarations",
+      "headings": 6,
+      "referenceEntries": 4
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Type-Classes/Instance-Synthesis/index.html",
+      "sourceBlob": "f861d8057ea66f6cd414a0ca73d98aabff5fb077",
+      "sourceBytes": 368506,
+      "status": "article-adapted",
+      "output": "pages/Type-Classes/Instance-Synthesis/index.md",
+      "title": "10.3. Instance Synthesis",
+      "headings": 10,
+      "referenceEntries": 11
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/Type-Classes/index.html",
+      "sourceBlob": "a12bec839654d8a01fe2f85f5be487e5a5437951",
+      "sourceBytes": 109062,
+      "status": "article-adapted",
+      "output": "pages/Type-Classes/index.md",
+      "title": "10. Type Classes",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/ValidatingProofs/index.html",
+      "sourceBlob": "964667e91b2ed531544e96ae7422930f5f6a1298",
+      "sourceBytes": 135137,
+      "status": "article-adapted",
+      "output": "pages/ValidatingProofs/index.md",
+      "title": "Validating a Lean Proof",
+      "headings": 26,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/const-ABC.html",
+      "sourceBlob": "04b53ab9f45a9a12e803f15ab660a9bb9d252035",
+      "sourceBytes": 3449,
+      "status": "upstream-mirror-page-not-found",
+      "output": null,
+      "title": "Page not found",
+      "headings": 0,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/const-Array.html",
+      "sourceBlob": "04b53ab9f45a9a12e803f15ab660a9bb9d252035",
+      "sourceBytes": 3449,
+      "status": "upstream-mirror-page-not-found",
+      "output": null,
+      "title": "Page not found",
+      "headings": 0,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/const-List.html",
+      "sourceBlob": "04b53ab9f45a9a12e803f15ab660a9bb9d252035",
+      "sourceBytes": 3449,
+      "status": "upstream-mirror-page-not-found",
+      "output": null,
+      "title": "Page not found",
+      "headings": 0,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/const-Std.Iter.html",
+      "sourceBlob": "04b53ab9f45a9a12e803f15ab660a9bb9d252035",
+      "sourceBytes": 3449,
+      "status": "upstream-mirror-page-not-found",
+      "output": null,
+      "title": "Page not found",
+      "headings": 0,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/index.html",
+      "sourceBlob": "351059186f54d753ab010bb092a74439c045693b",
+      "sourceBytes": 98181,
+      "status": "article-adapted",
+      "output": "pages/index.md",
+      "title": "The Lean Language Reference",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/platforms/index.html",
+      "sourceBlob": "f92cda3cea8b37cd640cbf9762287ee17ee7a4e4",
+      "sourceBytes": 94488,
+      "status": "article-adapted",
+      "output": "pages/platforms/index.md",
+      "title": "Supported Platforms",
+      "headings": 3,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/index.html",
+      "sourceBlob": "bb29136f78e7455bee8b800a42c0a58022b8af56",
+      "sourceBytes": 105099,
+      "status": "article-adapted",
+      "output": "pages/releases/index.md",
+      "title": "Release Notes",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.0.0-m1/index.html",
+      "sourceBlob": "5fa5f259eea4f49827637afa35df30a24ee12973",
+      "sourceBytes": 100638,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.0.0-m1/index.md",
+      "title": "Lean 4.0.0-m1 (2021-01-04)",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.0.0-m2/index.html",
+      "sourceBlob": "328094215eaa8e9df75a6624a22bbae9826f3d93",
+      "sourceBytes": 98644,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.0.0-m2/index.md",
+      "title": "Lean 4.0.0-m2 (2021-03-02)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.0.0-m3/index.html",
+      "sourceBlob": "19402b2e9ded543bc159d51a2cb617e9b0bda195",
+      "sourceBytes": 99754,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.0.0-m3/index.md",
+      "title": "Lean 4.0.0-m3 (2022-01-31)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.0.0-m4/index.html",
+      "sourceBlob": "d04daf785e5993737d6808367efb24d0b4eaced2",
+      "sourceBytes": 115436,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.0.0-m4/index.md",
+      "title": "Lean 4.0.0-m4 (2022-03-27)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.0.0-m5/index.html",
+      "sourceBlob": "82b80fda91f04da8c7c5723acf5cbd4f2c2227bc",
+      "sourceBytes": 134978,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.0.0-m5/index.md",
+      "title": "Lean 4.0.0-m5 (2022-08-22)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.0.0/index.html",
+      "sourceBlob": "eae885bc367807febb6f6edc56cf03b828817996",
+      "sourceBytes": 109279,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.0.0/index.md",
+      "title": "Lean 4.0.0 (2023-09-08)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.1.0/index.html",
+      "sourceBlob": "60c86fa568ad3df93fc236147332a333fc105397",
+      "sourceBytes": 101355,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.1.0/index.md",
+      "title": "Lean 4.1.0 (2023-09-26)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.10.0/index.html",
+      "sourceBlob": "9748f8f91fc8185c2ca9b6ad0fbac78ffebce37c",
+      "sourceBytes": 148442,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.10.0/index.md",
+      "title": "Lean 4.10.0 (2024-07-31)",
+      "headings": 10,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.11.0/index.html",
+      "sourceBlob": "7de63fece1c192f97d358e695bfb3606f236a869",
+      "sourceBytes": 167006,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.11.0/index.md",
+      "title": "Lean 4.11.0 (2024-09-02)",
+      "headings": 10,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.12.0/index.html",
+      "sourceBlob": "618208a410bbdd02549b936dd988c9e7d46e5278",
+      "sourceBytes": 164985,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.12.0/index.md",
+      "title": "Lean 4.12.0 (2024-10-01)",
+      "headings": 10,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.13.0/index.html",
+      "sourceBlob": "69fe899b18cbfa5cb3496dfb5513f2a9dc6de14b",
+      "sourceBytes": 162804,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.13.0/index.md",
+      "title": "Lean 4.13.0 (2024-11-01)",
+      "headings": 9,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.14.0/index.html",
+      "sourceBlob": "480a39b1092427b49f6f7baa11bd8ea086c487c7",
+      "sourceBytes": 162235,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.14.0/index.md",
+      "title": "Lean 4.14.0 (2024-12-02)",
+      "headings": 9,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.15.0/index.html",
+      "sourceBlob": "c5c71e3d71f4eeca90c2b685f4b7377d11855ee0",
+      "sourceBytes": 159929,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.15.0/index.md",
+      "title": "Lean 4.15.0 (2025-01-04)",
+      "headings": 9,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.16.0/index.html",
+      "sourceBlob": "73d1e26a122208bdade08c34071a6cc6f997aeeb",
+      "sourceBytes": 153780,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.16.0/index.md",
+      "title": "Lean 4.16.0 (2025-02-03)",
+      "headings": 15,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.17.0/index.html",
+      "sourceBlob": "14f872801e23ecdd9e947479269a7bbf4ef0d8ae",
+      "sourceBytes": 191430,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.17.0/index.md",
+      "title": "Lean 4.17.0 (2025-03-03)",
+      "headings": 13,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.18.0/index.html",
+      "sourceBlob": "90e52694d845387ac7a3fe1bf44af6389c81a0ec",
+      "sourceBytes": 198750,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.18.0/index.md",
+      "title": "Lean 4.18.0 (2025-04-02)",
+      "headings": 17,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.19.0/index.html",
+      "sourceBlob": "3ff8a5182d85c4d7b09247353213c3f6ce6a77a1",
+      "sourceBytes": 217546,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.19.0/index.md",
+      "title": "Lean 4.19.0 (2025-05-01)",
+      "headings": 26,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.2.0/index.html",
+      "sourceBlob": "362e38cddf23dee3295b4b33518e587a8b4ac821",
+      "sourceBytes": 102069,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.2.0/index.md",
+      "title": "Lean 4.2.0 (2023-10-31)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.20.0/index.html",
+      "sourceBlob": "6a6fdaf02d6d8b264e8cdcd19262c2a9cd3cb112",
+      "sourceBytes": 195977,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.20.0/index.md",
+      "title": "Lean 4.20.0 (2025-06-02)",
+      "headings": 14,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.21.0/index.html",
+      "sourceBlob": "7faec66370f293d17884e30af5784193a0e7b147",
+      "sourceBytes": 178543,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.21.0/index.md",
+      "title": "Lean 4.21.0 (2025-06-30)",
+      "headings": 10,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.22.0/index.html",
+      "sourceBlob": "246ed0f2732f897bfebff8beb0c70a6521c3955c",
+      "sourceBytes": 238017,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.22.0/index.md",
+      "title": "Lean 4.22.0 (2025-08-14)",
+      "headings": 26,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.23.0/index.html",
+      "sourceBlob": "414f121352be3f034ee782f934799095367cce9f",
+      "sourceBytes": 209661,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.23.0/index.md",
+      "title": "Lean 4.23.0 (2025-09-15)",
+      "headings": 11,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.24.0/index.html",
+      "sourceBlob": "357b28e37426e0ef219d0dd0274bc1c0d993fb4f",
+      "sourceBytes": 183008,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.24.0/index.md",
+      "title": "Lean 4.24.0 (2025-10-14)",
+      "headings": 16,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.25.0/index.html",
+      "sourceBlob": "dfb59549287e92098671ff5f1ee1689baffb1f60",
+      "sourceBytes": 222490,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.25.0/index.md",
+      "title": "Lean 4.25.0 (2025-11-14)",
+      "headings": 29,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.25.1/index.html",
+      "sourceBlob": "521ca50bee416952cd0d0c98628491bfd0c53c19",
+      "sourceBytes": 98454,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.25.1/index.md",
+      "title": "Lean 4.25.1 (2025-11-18)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.26.0/index.html",
+      "sourceBlob": "c320df2426a4f2ee4c34400ec408150c96428f1b",
+      "sourceBytes": 181446,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.26.0/index.md",
+      "title": "Lean 4.26.0 (2025-12-13)",
+      "headings": 20,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.27.0/index.html",
+      "sourceBlob": "0dba7b7bf4e4e48d0f54ad6c64e9c0fbf679d3bf",
+      "sourceBytes": 243194,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.27.0/index.md",
+      "title": "Lean 4.27.0 (2026-01-24)",
+      "headings": 23,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.28.0/index.html",
+      "sourceBlob": "9442147636e718ca2b35bb3413cdebf4a8f8d781",
+      "sourceBytes": 202240,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.28.0/index.md",
+      "title": "Lean 4.28.0 (2026-02-17)",
+      "headings": 24,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.28.1/index.html",
+      "sourceBlob": "5457d474c9bd3476353d910dad2094549dfb2a60",
+      "sourceBytes": 99909,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.28.1/index.md",
+      "title": "Lean 4.28.1 (2026-04-14)",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.29.0/index.html",
+      "sourceBlob": "de1292e05db29b17ab6f2b92a203b01d70cd6b35",
+      "sourceBytes": 231037,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.29.0/index.md",
+      "title": "Lean 4.29.0 (2026-03-27)",
+      "headings": 23,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.29.1/index.html",
+      "sourceBlob": "83c258b7b872b1cbf2607dfaeb55fb0ae855665c",
+      "sourceBytes": 99911,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.29.1/index.md",
+      "title": "Lean 4.29.1 (2026-04-14)",
+      "headings": 2,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.3.0/index.html",
+      "sourceBlob": "bb85db11b6c1728e70cd534301786ccdd1be4f9c",
+      "sourceBytes": 105679,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.3.0/index.md",
+      "title": "Lean 4.3.0 (2023-11-30)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.30.0/index.html",
+      "sourceBlob": "34636cc60f47dabf20a8512f1d26265d40659bf0",
+      "sourceBytes": 270808,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.30.0/index.md",
+      "title": "Lean 4.30.0 (2026-05-26)",
+      "headings": 24,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.31.0/index.html",
+      "sourceBlob": "2a89740d8f32ef65293641c267a9dd3a1d0c2fc5",
+      "sourceBytes": 273013,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.31.0/index.md",
+      "title": "Lean 4.31.0 (2026-06-13)",
+      "headings": 20,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.32.0/index.html",
+      "sourceBlob": "750020dc1f4016ea89ec0d9907bbd8ddd04303e9",
+      "sourceBytes": 193180,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.32.0/index.md",
+      "title": "Lean 4.32.0 (2026-07-13)",
+      "headings": 22,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.32.1/index.html",
+      "sourceBlob": "616946d180b9dc56cf0eb3b9f3a5d771bda40575",
+      "sourceBytes": 99317,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.32.1/index.md",
+      "title": "Lean 4.32.1 (2026-07-22)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.32.2/index.html",
+      "sourceBlob": "9c44fcfddb95ee1c700865bf8a9945f9f950df9b",
+      "sourceBytes": 99969,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.32.2/index.md",
+      "title": "Lean 4.32.2 (2026-07-28)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.33.0/index.html",
+      "sourceBlob": "4d3e440672c2ec53d1da4f4c3f3b09346ce31587",
+      "sourceBytes": 247292,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.33.0/index.md",
+      "title": "Lean 4.33.0 (2026-08-10)",
+      "headings": 20,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.33.1/index.html",
+      "sourceBlob": "8494aeb33242d2c06a0ffe5053e3ae3334ce7087",
+      "sourceBytes": 107865,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.33.1/index.md",
+      "title": "Lean 4.33.1 (2026-08-21)",
+      "headings": 4,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.34.0/index.html",
+      "sourceBlob": "f7a381cc6efdea753b5dda81fca23db5b5ac453d",
+      "sourceBytes": 163944,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.34.0/index.md",
+      "title": "Lean 4.34.0-rc2 (2026-08-21)",
+      "headings": 9,
+      "referenceEntries": 1
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.4.0/index.html",
+      "sourceBlob": "398523bc5349a8cfb7a0994167b066e4332bc589",
+      "sourceBytes": 105155,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.4.0/index.md",
+      "title": "Lean 4.4.0 (2023-12-31)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.5.0/index.html",
+      "sourceBlob": "a95b45b9e237665515f0485dcf1854dd32d9c942",
+      "sourceBytes": 105311,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.5.0/index.md",
+      "title": "Lean 4.5.0 (2024-02-01)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.6.0/index.html",
+      "sourceBlob": "1dad6a302a6702334ac39fadc9450c485274484e",
+      "sourceBytes": 113261,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.6.0/index.md",
+      "title": "Lean 4.6.0 (2024-02-29)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.7.0/index.html",
+      "sourceBlob": "16ef4cd8a69d561bc8e914f585f5b4212738c36d",
+      "sourceBytes": 116112,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.7.0/index.md",
+      "title": "Lean 4.7.0 (2024-04-03)",
+      "headings": 1,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.8.0/index.html",
+      "sourceBlob": "5ac0b7b812ee2bbb8ce8718e342f36c990d21fa2",
+      "sourceBytes": 177079,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.8.0/index.md",
+      "title": "Lean 4.8.0 (2024-06-05)",
+      "headings": 10,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/releases/v4.9.0/index.html",
+      "sourceBlob": "cefd0e870124f5f31b7e9a3718afcbe798109686",
+      "sourceBytes": 158524,
+      "status": "article-adapted",
+      "output": "pages/releases/v4.9.0/index.md",
+      "title": "Lean 4.9.0 (2024-07-01)",
+      "headings": 9,
+      "referenceEntries": 0
+    },
+    {
+      "sourcePath": "study/lean4-language-reference/the-index/index.html",
+      "sourceBlob": "d5d7a4f57fe2cd0d107be0f0945535f3052bebb4",
+      "sourceBytes": 2436080,
+      "status": "article-adapted",
+      "output": "pages/the-index/index.md",
+      "title": "Index",
+      "headings": 28,
+      "referenceEntries": 0
+    }
+  ]
+}

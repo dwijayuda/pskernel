@@ -1,0 +1,1742 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;Array&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../index.html">20. Basic Types</a><a href="../Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../Integers/index.html">20.2. Integers</a><a href="../Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../Bitvectors/index.html">20.5. Bitvectors</a><a href="../Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../Characters/index.html">20.7. Characters</a><a href="../Strings/index.html">20.8. Strings</a><a href="../The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../Booleans/index.html">20.11. Booleans</a><a href="../Optional-Values/index.html">20.12. Optional Values</a><a href="../Tuples/index.html">20.13. Tuples</a><a href="../Sum-Types/index.html">20.14. Sum Types</a><a href="../Linked-Lists/index.html">20.15. Linked Lists</a><a href="index.html">20.16. Arrays</a><a href="../Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../Ranges/index.html">20.18. Ranges</a><a href="../Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../Subtypes/index.html">20.20. Subtypes</a><a href="../Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../../Notations-and-Macros/index.html">23. Notations and Macros</a><a href="../../Notations-and-Macros/Custom-Operators/index.html">23.1. Custom Operators</a><a href="../../Notations-and-Macros/Precedence/index.html">23.2. Precedence</a><a href="../../Notations-and-Macros/Notations/index.html">23.3. Notations</a><a href="../../Notations-and-Macros/Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../../Notations-and-Macros/Macros/index.html">23.5. Macros</a><a href="../../Notations-and-Macros/Elaborators/index.html">23.6. Elaborators</a><a href="../../Notations-and-Macros/Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../../Notations-and-Macros/Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../../releases/index.html">Release Notes</a><a href="../../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="Array"></a></p>
+<h1 id="proofscript-20-16-arrays">ProofScript — 20.16. Arrays</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>Nat, Int, machine integers, floats, characters, strings, bytes, options, products, sums, lists, arrays, maps, ranges, subtypes and lazy computations retain their distinct native contracts. A target representation is not their meaning. Nat subtraction saturates at zero; the selected Int quotient differs from JavaScript BigInt truncation for some negative inputs. String offsets and Unicode conversions require explicit mappings.</p>
+<p><strong>Compiler and coverage boundary.</strong> The full API entries below retain exact names and signature metadata. Distinguish a signature display from executable source. Unknown reachable primitives reject the requested executable profile.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/Basic-Types/Arrays/index.html">Basic-Types/Arrays/index.html</a>. Source Git blob: <code>c517c2320321b62a1280c4e9d6c34d3a97fe4995</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<p><a id="docstring-section-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<hr>
+<h2 id="20-16-arrays">20.16. Arrays</h2><p>The <code>Array</code> type represents sequences of elements, addressable by their position in the sequence. Arrays are specially supported by Lean:</p>
+<ul>
+<li>They have a <em>logical model</em> that specifies their behavior in terms of lists of elements, which specifies the meaning of each operation on arrays.</li>
+<li>They have an optimized run-time representation in compiled code as <a href="index.html#--tech-term-dynamic-arrays">dynamic arrays</a>, and the Lean runtime specially optimizes array operations.</li>
+<li>There is <a href="index.html#array-syntax">array literal syntax</a> for writing arrays.</li>
+</ul>
+<p>Arrays can be vastly more efficient than lists or other sequences in compiled code. In part, this is because they offer good locality: because all the elements of the sequence are next to each other in memory, the processor&#39;s caches can be used efficiently. Even more importantly, if there is only a single reference to an array, operations that might otherwise copy or allocate a data structure can be implemented via mutation. Lean code that uses an array in such a way that there&#39;s only ever one unique reference (that is, uses it 
+<a id="--tech-term-linearly"></a>
+<em>linearly</em>) avoids the performance overhead of persistent data structures while still being as convenient to write, read, and prove things about as ordinary pure functional programs.</p>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--Logical-Model"></a></p>
+<h3 id="20-16-1-logical-model">20.16.1. Logical Model</h3><p><a id="Array___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.{u} (α : Type u) : Type u
+</code></pre></div><p><code>Array α</code> is the type of <a href="https://en.wikipedia.org/wiki/Dynamic_array">dynamic arrays</a> with elements from <code>α</code>. This type has special support in the runtime.</p>
+<p>Arrays perform best when unshared. As long as there is never more than one reference to an array, all updates will be performed <em>destructively</em>. This results in performance comparable to mutable arrays in imperative programming languages.</p>
+<p>An array has a size and a capacity. The size is the number of elements present in the array, while the capacity is the amount of memory currently allocated for elements. The size is accessible via <code>Array.size</code>, but the capacity is not observable from Lean code. <code>Array.emptyWithCapacity n</code> creates an array which is equal to <code>#[]</code>, but internally allocates an array of capacity <code>n</code>. When the size exceeds the capacity, allocation is required to grow the array.</p>
+<p>From the point of view of proofs, <code>Array α</code> is just a wrapper around <code>List α</code>.</p>
+<p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.mk.{u}
+</code></pre></div><p>Converts a <code>List α</code> into an <code>Array α</code>.</p>
+<p>The function <code>List.toArray</code> is preferred.</p>
+<p>At runtime, this constructor is overridden by <code>List.toArrayImpl</code> and is <code>O(n)</code> in the length of the list.</p>
+<p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">toList : List α
+</code></pre></div><p>Converts an <code>Array α</code> into a <code>List α</code> that contains the same elements in the same order.</p>
+<p>At runtime, this is implemented by <code>Array.toListImpl</code> and is <code>O(n)</code> in the length of the array.</p>
+<p>The logical model of arrays is a structure that contains a single field, which is a list of elements. This is convenient when specifying and proving properties of array-processing functions at a low level.</p>
+<p><a id="array-runtime"></a></p>
+<h3 id="20-16-2-run-time-representation">20.16.2. Run-Time Representation</h3><p>Lean&#39;s arrays are 
+<a id="--tech-term-dynamic-arrays"></a>
+<em>dynamic arrays</em>, which are blocks of continuous memory with a defined capacity, not all of which is typically in use. As long as the number of elements in the array is less than the capacity, new items can be added to the end without reallocating or moving the data. Adding items to an array that has no extra space results in a reallocation that doubles the capacity. The amortized overhead scales linearly with the size of the array. The values in the array are represented as described in the <a href="../../The-Type-System/Inductive-Types/index.html#inductive-types-ffi">section on the foreign function interface</a>.</p>
+<p><a id="arrayffi"></a>
+  Memory layout of arrays</p>
+<p>After the object header, an array contains:</p>
+<p>  size</p>
+<p>The number of objects currently stored in the array</p>
+<p>  capacity</p>
+<p>The number of objects that fit in the memory allocated for the array</p>
+<p>  data</p>
+<p>The values in the array</p>
+<p>Many array functions in the Lean runtime check whether they have exclusive access to their argument by consulting the reference count in the object header. If they do, and the array&#39;s capacity is sufficient, then the existing array can be mutated rather than allocating fresh memory. Otherwise, a new array must be allocated.</p>
+<p><a id="array-performance"></a></p>
+<h4 id="20-16-2-1-performance-notes">20.16.2.1. Performance Notes</h4><p>Despite the fact that they appear to be an ordinary constructor and projection, <code>Array.mk</code> and <code>Array.toList</code> take <strong>time linear in the size of the array</strong> in compiled code. This is because converting between linked lists and packed arrays must necessarily visit each element.</p>
+<p>Mutable arrays can be used to write very efficient code. However, they are a poor persistent data structure. Updating a shared array rules out mutation, and requires time linear in the size of the array. When using arrays in performance-critical code, it&#39;s important to ensure that they are used <a href="index.html#--tech-term-linearly">linearly</a>.</p>
+<p><a id="array-syntax"></a></p>
+<h3 id="20-16-3-syntax">20.16.3. Syntax</h3><p>Array literals allow arrays to be written directly in code. They may be used in expression or pattern contexts.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Array Literals</strong></p>
+<p>Array literals begin with <code>#[</code> and contain a comma-separated sequence of terms, terminating with <code>]</code>.</p>
+<p><a id="_FLQQ_term____LSQ______RSQ__FLQQ_-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | #[term,*]
+</code></pre></div><p><a id="Array-Literals"></a>
+Array Literals </p>
+<p>Array literals may be used as expressions or as patterns.</p>
+<p><a id="oneTwoThree-_LPAR_in-Array-Literals_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const oneTwoThree : Array Nat := #[1, 2, 3]
+
+#eval
+  match oneTwoThree with
+  | #[x, y, z] =&gt; some ((x + z) / y)
+  | _ =&gt; none
+</code></pre></div><p>Additionally, <a href="index.html#subarray">sub-arrays</a> may be extracted using the following syntax:</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Sub-Arrays</strong></p>
+<p>A start index followed by a colon constructs a sub-array that contains the values from the start index onwards (inclusive):</p>
+<p><a id="Array____FLQQ_term___LSQ______RSQ__FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term[term :]
+</code></pre></div><p>Providing start and end indices constructs a sub-array that contains the values from the start index (inclusive) to the end index (exclusive):</p>
+<p><a id="Array____FLQQ_term___LSQ_______RSQ__FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term[term : term]
+</code></pre></div><p><a id="Sub-Array-Syntax"></a>
+Sub-Array Syntax </p>
+<p>The array <code>ten</code> contains the first ten natural numbers.</p>
+<p><a id="ten-_LPAR_in-Sub-Array-Syntax_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const ten : Array Nat :=
+  .range 10
+</code></pre></div><p>A sub-array that represents the second half of <code>ten</code> can be constructed using the sub-array syntax:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval ten[5:]
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">#[5, 6, 7, 8, 9].toSubarray
+</code></pre></div><p>Similarly, sub-array that contains two through five can be constructed by providing a stopping point:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval ten[2:6]
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">#[2, 3, 4, 5].toSubarray
+</code></pre></div><p>Because sub-arrays merely store the start and end indices of interest in the underlying array, the array itself can be recovered:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval ten[2:6].array == ten
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">true
+</code></pre></div><p><a id="array-api"></a></p>
+<h3 id="20-16-4-api-reference">20.16.4. API Reference</h3><p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Constructing-Arrays"></a></p>
+<h4 id="20-16-4-1-constructing-arrays">20.16.4.1. Constructing Arrays</h4><p><a id="Array___empty"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.empty.{u} {α : Type u} : Array α
+</code></pre></div><p>Constructs a new empty array with initial capacity <code>0</code>.</p>
+<p>Use <code>Array.emptyWithCapacity</code> to create an array with a greater initial capacity.</p>
+<p><a id="Array___emptyWithCapacity"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.emptyWithCapacity.{u} {α : Type u} (c : Nat) : Array α
+</code></pre></div><p>Constructs a new empty array with initial capacity <code>c</code>.</p>
+<p><a id="Array___singleton"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.singleton.{u} {α : Type u} (v : α) : Array α
+</code></pre></div><p>Constructs a single-element array that contains <code>v</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>Array.singleton 5 = #[5]</code></li>
+<li><code>Array.singleton &quot;one&quot; = #[&quot;one&quot;]</code></li>
+</ul>
+<p><a id="Array___range"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.range (n : Nat) : Array Nat
+</code></pre></div><p>Constructs an array that contains all the numbers from <code>0</code> to <code>n</code>, exclusive.</p>
+<p>Examples:</p>
+<ul>
+<li><code>Array.range 5 := #[0, 1, 2, 3, 4]</code></li>
+<li><code>Array.range 0 := #[]</code></li>
+<li><code>Array.range 1 := #[0]</code></li>
+</ul>
+<p><a id="Array___range___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.range' (start size : Nat) (step : Nat := 1) : Array Nat
+</code></pre></div><p>Constructs an array of numbers of size <code>size</code>, starting at <code>start</code> and increasing by <code>step</code> at each element.</p>
+<p>In other words, <code>Array.range&#39; start size step</code> is <code>#[start, start+step, ..., start+(len-1)*step]</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>Array.range&#39; 0 3 (step := 1) = #[0, 1, 2]</code></li>
+<li><code>Array.range&#39; 0 3 (step := 2) = #[0, 2, 4]</code></li>
+<li><code>Array.range&#39; 0 4 (step := 2) = #[0, 2, 4, 6]</code></li>
+<li><code>Array.range&#39; 3 4 (step := 2) = #[3, 5, 7, 9]</code></li>
+</ul>
+<p><a id="Array___finRange"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.finRange (n : Nat) : Array (Fin n)
+</code></pre></div><p>Returns an array of all elements of <code>Fin n</code> in order, starting at <code>0</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>Array.finRange 0 = (#[] : Array (Fin 0))</code></li>
+<li><code>Array.finRange 2 = (#[0, 1] : Array (Fin 2))</code></li>
+</ul>
+<p><a id="Array___ofFn"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.ofFn.{u} {α : Type u} {n : Nat} (f : Fin n → α) : Array α
+</code></pre></div><p>Creates an array by applying <code>f</code> to each potential index in order, starting at <code>0</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>Array.ofFn (n := 3) toString = #[&quot;0&quot;, &quot;1&quot;, &quot;2&quot;]</code></li>
+<li><code>Array.ofFn (fun i =&gt; #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].get i.val i.isLt) = #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;]</code></li>
+</ul>
+<p><a id="Array___replicate"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.replicate.{u} {α : Type u} (n : Nat) (v : α) : Array α
+</code></pre></div><p>Creates an array that contains <code>n</code> repetitions of <code>v</code>.</p>
+<p>The corresponding <code>List</code> function is <code>List.replicate</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>Array.replicate 2 true = #[true, true]</code></li>
+<li><code>Array.replicate 3 () = #[(), (), ()]</code></li>
+<li><code>Array.replicate 0 &quot;anything&quot; = #[]</code></li>
+</ul>
+<p><a id="Array___append"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.append.{u} {α : Type u} (as bs : Array α) : Array α
+</code></pre></div><p>Appends two arrays. Normally used via the <code>++</code> operator.</p>
+<p>Appending arrays takes time proportional to the length of the second array.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 3] ++ #[4, 5] = #[1, 2, 3, 4, 5]</code>.</li>
+<li><code>#[] ++ #[4, 5] = #[4, 5]</code>.</li>
+<li><code>#[1, 2, 3] ++ #[] = #[1, 2, 3]</code>.</li>
+</ul>
+<p><a id="Array___appendList"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.appendList.{u} {α : Type u} (as : Array α) (bs : List α) : Array α
+</code></pre></div><p>Appends an array and a list.</p>
+<p>Takes time proportional to the length of the list..</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 3].appendList [4, 5] = #[1, 2, 3, 4, 5]</code>.</li>
+<li><code>#[].appendList [4, 5] = #[4, 5]</code>.</li>
+<li><code>#[1, 2, 3].appendList [] = #[1, 2, 3]</code>.</li>
+</ul>
+<p><a id="Array___leftpad"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.leftpad.{u} {α : Type u} (n : Nat) (a : α) (xs : Array α) :
+  Array α
+</code></pre></div><p>Pads <code>xs : Array α</code> on the left with repeated occurrences of <code>a : α</code> until it is of size <code>n</code>. If <code>xs</code> already has at least <code>n</code> elements, it is returned unmodified.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 3].leftpad 5 0 = #[0, 0, 1, 2, 3]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].leftpad 4 &quot;blank&quot; = #[&quot;blank&quot;, &quot;red&quot;, &quot;green&quot;, &quot;blue&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].leftpad 3 &quot;blank&quot; = #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].leftpad 1 &quot;blank&quot; = #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;]</code></li>
+</ul>
+<p><a id="Array___rightpad"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.rightpad.{u} {α : Type u} (n : Nat) (a : α) (xs : Array α) :
+  Array α
+</code></pre></div><p>Pads <code>xs : Array α</code> on the right with repeated occurrences of <code>a : α</code> until it is of length <code>n</code>. If <code>l</code> already has at least <code>n</code> elements, it is returned unmodified.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 3].rightpad 5 0 = #[1, 2, 3, 0, 0]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].rightpad 4 &quot;blank&quot; = #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;blank&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].rightpad 3 &quot;blank&quot; = #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].rightpad 1 &quot;blank&quot; = #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;]</code></li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Size"></a></p>
+<h4 id="20-16-4-2-size">20.16.4.2. Size</h4><p><a id="Array___size"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.size.{u} {α : Type u} (a : Array α) : Nat
+</code></pre></div><p>Gets the number of elements stored in an array.</p>
+<p>This is a cached value, so it is <code>O(1)</code> to access. The space allocated for an array, referred to as its <em>capacity</em>, is at least as large as its size, but may be larger. The capacity of an array is an internal detail that&#39;s not observable by Lean code.</p>
+<p><a id="Array___usize"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.usize.{u} {α : Type u} (xs : Array α) : USize
+</code></pre></div><p>Returns the size of the array as a platform-native unsigned integer.</p>
+<p>This is a low-level version of <code>Array.size</code> that directly queries the runtime system&#39;s representation of arrays. While this is not provable, <code>Array.usize</code> always returns the exact size of the array since the implementation only supports arrays of size less than <code>USize.size</code>.</p>
+<p><a id="Array___isEmpty"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.isEmpty.{u} {α : Type u} (xs : Array α) : Bool
+</code></pre></div><p>Checks whether an array is empty.</p>
+<p>An array is empty if its size is <code>0</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>(#[] : Array String).isEmpty = true</code></li>
+<li><code>#[1, 2].isEmpty = false</code></li>
+<li><code>#[()].isEmpty = false</code></li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Lookups"></a></p>
+<h4 id="20-16-4-3-lookups">20.16.4.3. Lookups</h4><p><a id="Array___extract"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.extract.{u_1} {α : Type u_1} (as : Array α) (start : Nat := 0)
+  (stop : Nat := as.size) : Array α
+</code></pre></div><p>Returns the slice of <code>as</code> from indices <code>start</code> to <code>stop</code> (exclusive). The resulting array has size <code>(min stop as.size) - start</code>.</p>
+<p>If <code>start</code> is greater or equal to <code>stop</code>, the result is empty. If <code>stop</code> is greater than the size of <code>as</code>, the size is used instead.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[0, 1, 2, 3, 4].extract 1 3 = #[1, 2]</code></li>
+<li><code>#[0, 1, 2, 3, 4].extract 1 30 = #[1, 2, 3, 4]</code></li>
+<li><code>#[0, 1, 2, 3, 4].extract 0 0 = #[]</code></li>
+<li><code>#[0, 1, 2, 3, 4].extract 2 1 = #[]</code></li>
+<li><code>#[0, 1, 2, 3, 4].extract 2 2 = #[]</code></li>
+<li><code>#[0, 1, 2, 3, 4].extract 2 3 = #[2]</code></li>
+<li><code>#[0, 1, 2, 3, 4].extract 2 4 = #[2, 3]</code></li>
+</ul>
+<p><a id="Array___getD"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.getD.{u_1} {α : Type u_1} (a : Array α) (i : Nat) (v₀ : α) : α
+</code></pre></div><p>Returns the element at the provided index, counting from <code>0</code>. Returns the fallback value <code>v₀</code> if the index is out of bounds.</p>
+<p>To return an <code>Option</code> depending on whether the index is in bounds, use <code>a[i]?</code>. To panic if the index is out of bounds, use <code>a[i]!</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;spring&quot;, &quot;summer&quot;, &quot;fall&quot;, &quot;winter&quot;].getD 2 &quot;never&quot; = &quot;fall&quot;</code></li>
+<li><code>#[&quot;spring&quot;, &quot;summer&quot;, &quot;fall&quot;, &quot;winter&quot;].getD 0 &quot;never&quot; = &quot;spring&quot;</code></li>
+<li><code>#[&quot;spring&quot;, &quot;summer&quot;, &quot;fall&quot;, &quot;winter&quot;].getD 4 &quot;never&quot; = &quot;never&quot;</code></li>
+</ul>
+<p><a id="Array___uget"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.uget.{u} {α : Type u} (xs : Array α) (i : USize)
+  (h : i.toNat &lt; xs.size) : α
+</code></pre></div><p>Low-level indexing operator which is as fast as a C array read.</p>
+<p>This avoids overhead due to unboxing a <code>Nat</code> used as an index.</p>
+<p><a id="Array___back"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.back.{u} {α : Type u} (xs : Array α)
+  (h : 0 &lt; xs.size := by get_elem_tactic) : α
+</code></pre></div><p>Returns the last element of an array, given a proof that the array is not empty.</p>
+<p>See <code>Array.back!</code> for the version that panics if the array is empty, or <code>Array.back?</code> for the version that returns an option.</p>
+<p><a id="Array___back___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.back?.{u} {α : Type u} (xs : Array α) : Option α
+</code></pre></div><p>Returns the last element of an array, or <code>none</code> if the array is empty.</p>
+<p>See <code>Array.back!</code> for the version that panics if the array is empty, or <code>Array.back</code> for the version that requires a proof the array is non-empty.</p>
+<p><a id="Array___back___-next"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.back!.{u} {α : Type u} [Inhabited α] (xs : Array α) : α
+</code></pre></div><p>Returns the last element of an array, or panics if the array is empty.</p>
+<p>Safer alternatives include <code>Array.back</code>, which requires a proof the array is non-empty, and <code>Array.back?</code>, which returns an <code>Option</code>.</p>
+<p><a id="Array___getMax___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.getMax?.{u} {α : Type u} (as : Array α) (lt : α → α → Bool) :
+  Option α
+</code></pre></div><p>Returns the largest element of the array, as determined by the comparison <code>lt</code>, or <code>none</code> if the array is empty.</p>
+<p>Examples:</p>
+<ul>
+<li><code>(#[] : Array Nat).getMax? (· &lt; ·) = none</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].getMax? (·.length &lt; ·.length) = some &quot;green&quot;</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].getMax? (· &lt; ·) = some &quot;red&quot;</code></li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Queries"></a></p>
+<h4 id="20-16-4-4-queries">20.16.4.4. Queries</h4><p><a id="Array___count"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.count.{u} {α : Type u} [BEq α] (a : α) (as : Array α) : Nat
+</code></pre></div><p>Counts the number of times an element occurs in an array.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 1, 2, 3, 5].count 1 = 2</code></li>
+<li><code>#[1, 1, 2, 3, 5].count 5 = 1</code></li>
+<li><code>#[1, 1, 2, 3, 5].count 4 = 0</code></li>
+</ul>
+<p><a id="Array___countP"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.countP.{u} {α : Type u} (p : α → Bool) (as : Array α) : Nat
+</code></pre></div><p>Counts the number of elements in the array <code>as</code> that satisfy the Boolean predicate <code>p</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 3, 4, 5].countP (· % 2 == 0) = 2</code></li>
+<li><code>#[1, 2, 3, 4, 5].countP (· &lt; 5) = 4</code></li>
+<li><code>#[1, 2, 3, 4, 5].countP (· &gt; 5) = 0</code></li>
+</ul>
+<p><a id="Array___idxOf"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.idxOf.{u} {α : Type u} [BEq α] (a : α) : Array α → Nat
+</code></pre></div><p>Returns the index of the first element equal to <code>a</code>, or the size of the array if no element is equal to <code>a</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;carrot&quot;, &quot;potato&quot;, &quot;broccoli&quot;].idxOf &quot;carrot&quot; = 0</code></li>
+<li><code>#[&quot;carrot&quot;, &quot;potato&quot;, &quot;broccoli&quot;].idxOf &quot;broccoli&quot; = 2</code></li>
+<li><code>#[&quot;carrot&quot;, &quot;potato&quot;, &quot;broccoli&quot;].idxOf &quot;tomato&quot; = 3</code></li>
+<li><code>#[&quot;carrot&quot;, &quot;potato&quot;, &quot;broccoli&quot;].idxOf &quot;anything else&quot; = 3</code></li>
+</ul>
+<p><a id="Array___idxOf___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.idxOf?.{u} {α : Type u} [BEq α] (xs : Array α) (v : α) :
+  Option Nat
+</code></pre></div><p>Returns the index of the first element equal to <code>a</code>, or <code>none</code> if no element is equal to <code>a</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;carrot&quot;, &quot;potato&quot;, &quot;broccoli&quot;].idxOf? &quot;carrot&quot; = some 0</code></li>
+<li><code>#[&quot;carrot&quot;, &quot;potato&quot;, &quot;broccoli&quot;].idxOf? &quot;broccoli&quot; = some 2</code></li>
+<li><code>#[&quot;carrot&quot;, &quot;potato&quot;, &quot;broccoli&quot;].idxOf? &quot;tomato&quot; = none</code></li>
+<li><code>#[&quot;carrot&quot;, &quot;potato&quot;, &quot;broccoli&quot;].idxOf? &quot;anything else&quot; = none</code></li>
+</ul>
+<p><a id="Array___finIdxOf___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.finIdxOf?.{u} {α : Type u} [BEq α] (xs : Array α) (v : α) :
+  Option (Fin xs.size)
+</code></pre></div><p>Returns the index of the first element equal to <code>a</code>, or <code>none</code> if no element is equal to <code>a</code>. The index is returned as a <code>Fin</code>, which guarantees that it is in bounds.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;carrot&quot;, &quot;potato&quot;, &quot;broccoli&quot;].finIdxOf? &quot;carrot&quot; = some 0</code></li>
+<li><code>#[&quot;carrot&quot;, &quot;potato&quot;, &quot;broccoli&quot;].finIdxOf? &quot;broccoli&quot; = some 2</code></li>
+<li><code>#[&quot;carrot&quot;, &quot;potato&quot;, &quot;broccoli&quot;].finIdxOf? &quot;tomato&quot; = none</code></li>
+<li><code>#[&quot;carrot&quot;, &quot;potato&quot;, &quot;broccoli&quot;].finIdxOf? &quot;anything else&quot; = none</code></li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Conversions"></a></p>
+<h4 id="20-16-4-5-conversions">20.16.4.5. Conversions</h4><p><a id="Array___toList"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.toList.{u} {α : Type u} (self : Array α) : List α
+</code></pre></div><p>Converts an <code>Array α</code> into a <code>List α</code> that contains the same elements in the same order.</p>
+<p>At runtime, this is implemented by <code>Array.toListImpl</code> and is <code>O(n)</code> in the length of the array.</p>
+<p><a id="Array___toListRev"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.toListRev.{u_1} {α : Type u_1} (xs : Array α) : List α
+</code></pre></div><p>Converts an array to a list that contains the same elements in the opposite order.</p>
+<p>This is equivalent to, but more efficient than, <code>Array.toList ∘ List.reverse</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 3].toListRev = [3, 2, 1]</code></li>
+<li><code>#[&quot;blue&quot;, &quot;yellow&quot;].toListRev = [&quot;yellow&quot;, &quot;blue&quot;]</code></li>
+</ul>
+<p><a id="Array___toListAppend"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.toListAppend.{u} {α : Type u} (as : Array α) (l : List α) : List α
+</code></pre></div><p>Prepends an array to a list. The elements of the array are at the beginning of the resulting list.</p>
+<p>Equivalent to <code>as.toList ++ l</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2].toListAppend [3, 4] = [1, 2, 3, 4]</code></li>
+<li><code>#[1, 2].toListAppend [] = [1, 2]</code></li>
+<li><code>#[].toListAppend [3, 4, 5] = [3, 4, 5]</code></li>
+</ul>
+<p><a id="Array___toVector"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.toVector.{u_1} {α : Type u_1} (xs : Array α) : Vector α xs.size
+</code></pre></div><p>Converts an array to a vector. The resulting vector&#39;s size is the array&#39;s size.</p>
+<p><a id="Array___toSubarray"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.toSubarray.{u} {α : Type u} (as : Array α) (start : Nat := 0)
+  (stop : Nat := as.size) : Subarray α
+</code></pre></div><p>Returns a subarray of an array, with the given bounds.</p>
+<p>If <code>start</code> or <code>stop</code> are not valid bounds for a subarray, then they are clamped to array&#39;s size. Additionally, the starting index is clamped to the ending index.</p>
+<p><a id="Array___ofSubarray"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.ofSubarray.{u} {α : Type u} (s : Subarray α) : Array α
+</code></pre></div><p>Allocates a new array that contains the contents of the subarray.</p>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Modification"></a></p>
+<h4 id="20-16-4-6-modification">20.16.4.6. Modification</h4><p><a id="Array___push"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.push.{u} {α : Type u} (a : Array α) (v : α) : Array α
+</code></pre></div><p>Adds an element to the end of an array. The resulting array&#39;s size is one greater than the input array. If there are no other references to the array, then it is modified in-place.</p>
+<p>This takes amortized <code>O(1)</code> time because <code>Array α</code> is represented by a dynamic array.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[].push &quot;apple&quot; = #[&quot;apple&quot;]</code></li>
+<li><code>#[&quot;apple&quot;].push &quot;orange&quot; = #[&quot;apple&quot;, &quot;orange&quot;]</code></li>
+</ul>
+<p><a id="Array___pop"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.pop.{u} {α : Type u} (xs : Array α) : Array α
+</code></pre></div><p>Removes the last element of an array. If the array is empty, then it is returned unmodified. The modification is performed in-place when the reference to the array is unique.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 3].pop = #[1, 2]</code></li>
+<li><code>#[&quot;orange&quot;, &quot;yellow&quot;].pop = #[&quot;orange&quot;]</code></li>
+<li><code>(#[] : Array String).pop = #[]</code></li>
+</ul>
+<p><a id="Array___popWhile"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.popWhile.{u} {α : Type u} (p : α → Bool) (as : Array α) : Array α
+</code></pre></div><p>Removes all the elements that satisfy a predicate from the end of an array.</p>
+<p>The longest contiguous sequence of elements that all satisfy the predicate is removed.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[0, 1, 2, 3, 4].popWhile (· &gt; 2) = #[0, 1, 2]</code></li>
+<li><code>#[3, 2, 3, 4].popWhile (· &gt; 2) = #[3, 2]</code></li>
+<li><code>(#[] : Array Nat).popWhile (· &gt; 2) = #[]</code></li>
+</ul>
+<p><a id="Array___erase"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.erase.{u} {α : Type u} [BEq α] (as : Array α) (a : α) : Array α
+</code></pre></div><p>Removes the first occurrence of a specified element from an array, or does nothing if it is not present.</p>
+<p>This function takes worst-case <code>O(n)</code> time because it back-shifts all later elements.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 3].erase 2 = #[1, 3]</code></li>
+<li><code>#[1, 2, 3].erase 5 = #[1, 2, 3]</code></li>
+<li><code>#[1, 2, 3, 2, 1].erase 2 = #[1, 3, 2, 1]</code></li>
+<li><code>(#[] : List Nat).erase 2 = #[]</code></li>
+</ul>
+<p><a id="Array___eraseP"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.eraseP.{u} {α : Type u} (as : Array α) (p : α → Bool) : Array α
+</code></pre></div><p>Removes the first element that satisfies the predicate <code>p</code>. If no element satisfies <code>p</code>, the array is returned unmodified.</p>
+<p>This function takes worst-case <code>O(n)</code> time because it back-shifts all later elements.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;&quot;, &quot;blue&quot;].eraseP (·.isEmpty) = #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;&quot;, &quot;blue&quot;, &quot;&quot;].eraseP (·.isEmpty) = #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].eraseP (·.length % 2 == 0) = #[&quot;red&quot;, &quot;green&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].eraseP (fun _ =&gt; true) = #[&quot;green&quot;, &quot;blue&quot;]</code></li>
+<li><code>(#[] : Array String).eraseP (fun _ =&gt; true) = #[]</code></li>
+</ul>
+<p><a id="Array___eraseIdx"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.eraseIdx.{u} {α : Type u} (xs : Array α) (i : Nat)
+  (h : i &lt; xs.size := by get_elem_tactic) : Array α
+</code></pre></div><p>Removes the element at a given index from an array without a run-time bounds check.</p>
+<p>This function takes worst-case <code>O(n)</code> time because it back-shifts all elements at positions greater than <code>i</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;apple&quot;, &quot;pear&quot;, &quot;orange&quot;].eraseIdx 0 = #[&quot;pear&quot;, &quot;orange&quot;]</code></li>
+<li><code>#[&quot;apple&quot;, &quot;pear&quot;, &quot;orange&quot;].eraseIdx 1 = #[&quot;apple&quot;, &quot;orange&quot;]</code></li>
+<li><code>#[&quot;apple&quot;, &quot;pear&quot;, &quot;orange&quot;].eraseIdx 2 = #[&quot;apple&quot;, &quot;pear&quot;]</code></li>
+</ul>
+<p><a id="Array___eraseIdx___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.eraseIdx!.{u} {α : Type u} (xs : Array α) (i : Nat) : Array α
+</code></pre></div><p>Removes the element at a given index from an array. Panics if the index is out of bounds.</p>
+<p>This function takes worst-case <code>O(n)</code> time because it back-shifts all elements at positions greater than <code>i</code>.</p>
+<p><a id="Array___eraseIdxIfInBounds"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.eraseIdxIfInBounds.{u} {α : Type u} (xs : Array α) (i : Nat) :
+  Array α
+</code></pre></div><p>Removes the element at a given index from an array. Does nothing if the index is out of bounds.</p>
+<p>This function takes worst-case <code>O(n)</code> time because it back-shifts all elements at positions greater than <code>i</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;apple&quot;, &quot;pear&quot;, &quot;orange&quot;].eraseIdxIfInBounds 0 = #[&quot;pear&quot;, &quot;orange&quot;]</code></li>
+<li><code>#[&quot;apple&quot;, &quot;pear&quot;, &quot;orange&quot;].eraseIdxIfInBounds 1 = #[&quot;apple&quot;, &quot;orange&quot;]</code></li>
+<li><code>#[&quot;apple&quot;, &quot;pear&quot;, &quot;orange&quot;].eraseIdxIfInBounds 2 = #[&quot;apple&quot;, &quot;pear&quot;]</code></li>
+<li><code>#[&quot;apple&quot;, &quot;pear&quot;, &quot;orange&quot;].eraseIdxIfInBounds 3 = #[&quot;apple&quot;, &quot;pear&quot;, &quot;orange&quot;]</code></li>
+<li><code>#[&quot;apple&quot;, &quot;pear&quot;, &quot;orange&quot;].eraseIdxIfInBounds 5 = #[&quot;apple&quot;, &quot;pear&quot;, &quot;orange&quot;]</code></li>
+</ul>
+<p><a id="Array___eraseReps"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.eraseReps.{u_1} {α : Type u_1} [BEq α] (as : Array α) : Array α
+</code></pre></div><p>Erases repeated elements, keeping the first element of each run.</p>
+<p><code>O(|as|)</code>.</p>
+<p>Example:</p>
+<ul>
+<li><code>#[1, 3, 2, 2, 2, 3, 3, 5].eraseReps = #[1, 3, 2, 3, 5]</code></li>
+</ul>
+<p><a id="Array___swap"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.swap.{u} {α : Type u} (xs : Array α) (i j : Nat)
+  (hi : i &lt; xs.size := by get_elem_tactic)
+  (hj : j &lt; xs.size := by get_elem_tactic) : Array α
+</code></pre></div><p>Swaps two elements of an array. The modification is performed in-place when the reference to the array is unique.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;brown&quot;].swap 0 3 = #[&quot;brown&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;red&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;brown&quot;].swap 0 2 = #[&quot;blue&quot;, &quot;green&quot;, &quot;red&quot;, &quot;brown&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;brown&quot;].swap 1 2 = #[&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;brown&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;brown&quot;].swap 3 0 = #[&quot;brown&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;red&quot;]</code></li>
+</ul>
+<p><a id="Array___swapIfInBounds"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.swapIfInBounds.{u} {α : Type u} (xs : Array α) (i j : Nat) :
+  Array α
+</code></pre></div><p>Swaps two elements of an array, returning the array unchanged if either index is out of bounds. The modification is performed in-place when the reference to the array is unique.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;brown&quot;].swapIfInBounds 0 3 = #[&quot;brown&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;red&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;brown&quot;].swapIfInBounds 0 2 = #[&quot;blue&quot;, &quot;green&quot;, &quot;red&quot;, &quot;brown&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;brown&quot;].swapIfInBounds 1 2 = #[&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, &quot;brown&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;brown&quot;].swapIfInBounds 0 4 = #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;brown&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;brown&quot;].swapIfInBounds 9 2 = #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;brown&quot;]</code></li>
+</ul>
+<p><a id="Array___swapAt"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.swapAt.{u} {α : Type u} (xs : Array α) (i : Nat) (v : α)
+  (hi : i &lt; xs.size := by get_elem_tactic) : α × Array α
+</code></pre></div><p>Swaps a new element with the element at the given index.</p>
+<p>Returns the value formerly found at <code>i</code>, paired with an array in which the value at <code>i</code> has been replaced with <code>v</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;spinach&quot;, &quot;broccoli&quot;, &quot;carrot&quot;].swapAt 1 &quot;pepper&quot; = (&quot;broccoli&quot;, #[&quot;spinach&quot;, &quot;pepper&quot;, &quot;carrot&quot;])</code></li>
+<li><code>#[&quot;spinach&quot;, &quot;broccoli&quot;, &quot;carrot&quot;].swapAt 2 &quot;pepper&quot; = (&quot;carrot&quot;, #[&quot;spinach&quot;, &quot;broccoli&quot;, &quot;pepper&quot;])</code></li>
+</ul>
+<p><a id="Array___swapAt___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.swapAt!.{u} {α : Type u} (xs : Array α) (i : Nat) (v : α) :
+  α × Array α
+</code></pre></div><p>Swaps a new element with the element at the given index. Panics if the index is out of bounds.</p>
+<p>Returns the value formerly found at <code>i</code>, paired with an array in which the value at <code>i</code> has been replaced with <code>v</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;spinach&quot;, &quot;broccoli&quot;, &quot;carrot&quot;].swapAt! 1 &quot;pepper&quot; = (#[&quot;spinach&quot;, &quot;pepper&quot;, &quot;carrot&quot;], &quot;broccoli&quot;)</code></li>
+<li><code>#[&quot;spinach&quot;, &quot;broccoli&quot;, &quot;carrot&quot;].swapAt! 2 &quot;pepper&quot; = (#[&quot;spinach&quot;, &quot;broccoli&quot;, &quot;pepper&quot;], &quot;carrot&quot;)</code></li>
+</ul>
+<p><a id="Array___replace"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.replace.{u} {α : Type u} [BEq α] (xs : Array α) (a b : α) :
+  Array α
+</code></pre></div><p>Replaces the first occurrence of <code>a</code> with <code>b</code> in an array. The modification is performed in-place when the reference to the array is unique. Returns the array unmodified when <code>a</code> is not present.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 3, 2, 1].replace 2 5 = #[1, 5, 3, 2, 1]</code></li>
+<li><code>#[1, 2, 3, 2, 1].replace 0 5 = #[1, 2, 3, 2, 1]</code></li>
+<li><code>#[].replace 2 5 = #[]</code></li>
+</ul>
+<p><a id="Array___set"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.set.{u_1} {α : Type u_1} (xs : Array α) (i : Nat) (v : α)
+  (h : i &lt; xs.size := by get_elem_tactic) : Array α
+</code></pre></div><p>Replaces the element at a given index in an array.</p>
+<p>No bounds check is performed, but the function requires a proof that the index is in bounds. This proof can usually be omitted, and will be synthesized automatically.</p>
+<p>The array is modified in-place if there are no other references to it.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[0, 1, 2].set 1 5 = #[0, 5, 2]</code></li>
+<li><code>#[&quot;orange&quot;, &quot;apple&quot;].set 1 &quot;grape&quot; = #[&quot;orange&quot;, &quot;grape&quot;]</code></li>
+</ul>
+<p><a id="Array___set___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.set!.{u_1} {α : Type u_1} (xs : Array α) (i : Nat) (v : α) :
+  Array α
+</code></pre></div><p>Set an element in an array, or panic if the index is out of bounds.</p>
+<p>This will perform the update destructively provided that <code>a</code> has a reference count of 1 when called.</p>
+<p><a id="Array___setIfInBounds"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.setIfInBounds.{u_1} {α : Type u_1} (xs : Array α) (i : Nat)
+  (v : α) : Array α
+</code></pre></div><p>Replaces the element at the provided index in an array. The array is returned unmodified if the index is out of bounds.</p>
+<p>The array is modified in-place if there are no other references to it.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[0, 1, 2].setIfInBounds 1 5 = #[0, 5, 2]</code></li>
+<li><code>#[&quot;orange&quot;, &quot;apple&quot;].setIfInBounds 1 &quot;grape&quot; = #[&quot;orange&quot;, &quot;grape&quot;]</code></li>
+<li><code>#[&quot;orange&quot;, &quot;apple&quot;].setIfInBounds 5 &quot;grape&quot; = #[&quot;orange&quot;, &quot;apple&quot;]</code></li>
+</ul>
+<p><a id="Array___uset"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.uset.{u} {α : Type u} (xs : Array α) (i : USize) (v : α)
+  (h : i.toNat &lt; xs.size) : Array α
+</code></pre></div><p>Low-level modification operator which is as fast as a C array write. The modification is performed in-place when the reference to the array is unique.</p>
+<p>This avoids overhead due to unboxing a <code>Nat</code> used as an index.</p>
+<p><a id="Array___modify"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.modify.{u} {α : Type u} (xs : Array α) (i : Nat) (f : α → α) :
+  Array α
+</code></pre></div><p>Replaces the element at the given index, if it exists, with the result of applying <code>f</code> to it. If the index is invalid, the array is returned unmodified.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 3].modify 0 (· * 10) = #[10, 2, 3]</code></li>
+<li><code>#[1, 2, 3].modify 2 (· * 10) = #[1, 2, 30]</code></li>
+<li><code>#[1, 2, 3].modify 3 (· * 10) = #[1, 2, 3]</code></li>
+</ul>
+<p><a id="Array___modifyM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.modifyM.{u, u_1} {α : Type u} {m : Type u → Type u_1} [Monad m]
+  (xs : Array α) (i : Nat) (f : α → m α) : m (Array α)
+</code></pre></div><p>Replaces the element at the given index, if it exists, with the result of applying the monadic function <code>f</code> to it. If the index is invalid, the array is returned unmodified and <code>f</code> is not called.</p>
+<p>Examples:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[1, 2, 3, 4].modifyM 2 fun x =&gt; do
+  IO.println s!&quot;It was {x}&quot;
+  return x * 10
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">It was 3
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#[1, 2, 30, 4]
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[1, 2, 3, 4].modifyM 6 fun x =&gt; do
+  IO.println s!&quot;It was {x}&quot;
+  return x * 10
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#[1, 2, 3, 4]
+</code></pre></div><p><a id="Array___modifyOp"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.modifyOp.{u} {α : Type u} (xs : Array α) (idx : Nat) (f : α → α) :
+  Array α
+</code></pre></div><p>Replaces the element at the given index, if it exists, with the result of applying <code>f</code> to it. If the index is invalid, the array is returned unmodified.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 3].modifyOp 0 (· * 10) = #[10, 2, 3]</code></li>
+<li><code>#[1, 2, 3].modifyOp 2 (· * 10) = #[1, 2, 30]</code></li>
+<li><code>#[1, 2, 3].modifyOp 3 (· * 10) = #[1, 2, 3]</code></li>
+</ul>
+<p><a id="Array___insertIdx"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.insertIdx.{u} {α : Type u} (as : Array α) (i : Nat) (a : α) :
+  autoParam (i ≤ as.size) Array.insertIdx._auto_1 → Array α
+</code></pre></div><p>Inserts an element into an array at the specified index. If the index is greater than the size of the array, then the array is returned unmodified.</p>
+<p>In other words, the new element is inserted into the array <code>as</code> after the first <code>i</code> elements of <code>as</code>.</p>
+<p>This function takes worst case <code>O(n)</code> time because it has to swap the inserted element into place.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;].insertIdx 1 &quot;wed&quot; = #[&quot;tues&quot;, &quot;wed&quot;, &quot;thur&quot;, &quot;sat&quot;]</code></li>
+<li><code>#[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;].insertIdx 2 &quot;wed&quot; = #[&quot;tues&quot;, &quot;thur&quot;, &quot;wed&quot;, &quot;sat&quot;]</code></li>
+<li><code>#[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;].insertIdx 3 &quot;wed&quot; = #[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;, &quot;wed&quot;]</code></li>
+</ul>
+<p><a id="Array___insertIdx___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.insertIdx!.{u} {α : Type u} (as : Array α) (i : Nat) (a : α) :
+  Array α
+</code></pre></div><p>Inserts an element into an array at the specified index. Panics if the index is greater than the size of the array.</p>
+<p>In other words, the new element is inserted into the array <code>as</code> after the first <code>i</code> elements of <code>as</code>.</p>
+<p>This function takes worst case <code>O(n)</code> time because it has to swap the inserted element into place. <code>Array.insertIdx</code> and <code>Array.insertIdxIfInBounds</code> are safer alternatives.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;].insertIdx! 1 &quot;wed&quot; = #[&quot;tues&quot;, &quot;wed&quot;, &quot;thur&quot;, &quot;sat&quot;]</code></li>
+<li><code>#[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;].insertIdx! 2 &quot;wed&quot; = #[&quot;tues&quot;, &quot;thur&quot;, &quot;wed&quot;, &quot;sat&quot;]</code></li>
+<li><code>#[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;].insertIdx! 3 &quot;wed&quot; = #[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;, &quot;wed&quot;]</code></li>
+</ul>
+<p><a id="Array___insertIdxIfInBounds"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.insertIdxIfInBounds.{u} {α : Type u} (as : Array α) (i : Nat)
+  (a : α) : Array α
+</code></pre></div><p>Inserts an element into an array at the specified index. The array is returned unmodified if the index is greater than the size of the array.</p>
+<p>In other words, the new element is inserted into the array <code>as</code> after the first <code>i</code> elements of <code>as</code>.</p>
+<p>This function takes worst case <code>O(n)</code> time because it has to swap the inserted element into place.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;].insertIdxIfInBounds 1 &quot;wed&quot; = #[&quot;tues&quot;, &quot;wed&quot;, &quot;thur&quot;, &quot;sat&quot;]</code></li>
+<li><code>#[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;].insertIdxIfInBounds 2 &quot;wed&quot; = #[&quot;tues&quot;, &quot;thur&quot;, &quot;wed&quot;, &quot;sat&quot;]</code></li>
+<li><code>#[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;].insertIdxIfInBounds 3 &quot;wed&quot; = #[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;, &quot;wed&quot;]</code></li>
+<li><code>#[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;].insertIdxIfInBounds 4 &quot;wed&quot; = #[&quot;tues&quot;, &quot;thur&quot;, &quot;sat&quot;]</code></li>
+</ul>
+<p><a id="Array___reverse"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.reverse.{u} {α : Type u} (as : Array α) : Array α
+</code></pre></div><p>Reverses an array by repeatedly swapping elements.</p>
+<p>The original array is modified in place if there are no other references to it.</p>
+<p>Examples:</p>
+<ul>
+<li><code>(#[] : Array Nat).reverse = #[]</code></li>
+<li><code>#[0, 1].reverse = #[1, 0]</code></li>
+<li><code>#[0, 1, 2].reverse = #[2, 1, 0]</code></li>
+</ul>
+<p><a id="Array___take"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.take.{u} {α : Type u} (xs : Array α) (i : Nat) : Array α
+</code></pre></div><p>Returns a new array that contains the first <code>i</code> elements of <code>xs</code>. If <code>xs</code> has fewer than <code>i</code> elements, the new array contains all the elements of <code>xs</code>.</p>
+<p>The returned array is always a new array, even if it contains the same elements as the input array.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].take 1 = #[&quot;red&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].take 2 = #[&quot;red&quot;, &quot;green&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].take 5 = #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;]</code></li>
+</ul>
+<p><a id="Array___takeWhile"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.takeWhile.{u} {α : Type u} (p : α → Bool) (as : Array α) : Array α
+</code></pre></div><p>Returns a new array that contains the longest prefix of elements that satisfy the predicate <code>p</code> from an array.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[0, 1, 2, 3, 2, 1].takeWhile (· &lt; 2) = #[0, 1]</code></li>
+<li><code>#[0, 1, 2, 3, 2, 1].takeWhile (· &lt; 20) = #[0, 1, 2, 3, 2, 1]</code></li>
+<li><code>#[0, 1, 2, 3, 2, 1].takeWhile (· &lt; 0) = #[]</code></li>
+</ul>
+<p><a id="Array___drop"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.drop.{u} {α : Type u} (xs : Array α) (i : Nat) : Array α
+</code></pre></div><p>Removes the first <code>i</code> elements of <code>xs</code>. If <code>xs</code> has fewer than <code>i</code> elements, the new array is empty.</p>
+<p>The returned array is always a new array, even if it contains the same elements as the input array.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].drop 1 = #[&quot;green&quot;, &quot;blue&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].drop 2 = #[&quot;blue&quot;]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].drop 5 = #[]</code></li>
+</ul>
+<p><a id="Array___shrink"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.shrink.{u} {α : Type u} (xs : Array α) (n : Nat) : Array α
+</code></pre></div><p>Returns the first <code>n</code> elements of an array. The resulting array is produced by repeatedly calling <code>Array.pop</code>. If <code>n</code> is greater than the size of the array, it is returned unmodified.</p>
+<p>If the reference to the array is unique, then this function uses in-place modification.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[0, 1, 2, 3, 4].shrink 2 = #[0, 1]</code></li>
+<li><code>#[0, 1, 2, 3, 4].shrink 0 = #[]</code></li>
+<li><code>#[0, 1, 2, 3, 4].shrink 10 = #[0, 1, 2, 3, 4]</code></li>
+</ul>
+<p><a id="Array___flatten"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.flatten.{u} {α : Type u} (xss : Array (Array α)) : Array α
+</code></pre></div><p>Appends the contents of array of arrays into a single array. The resulting array contains the same elements as the nested arrays in the same order.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[#[5], #[4], #[3, 2]].flatten = #[5, 4, 3, 2]</code></li>
+<li><code>#[#[0, 1], #[], #[2], #[1, 0, 1]].flatten = #[0, 1, 2, 1, 0, 1]</code></li>
+<li><code>(#[] : Array Nat).flatten = #[]</code></li>
+</ul>
+<p><a id="Array___getEvenElems"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.getEvenElems.{u} {α : Type u} (as : Array α) : Array α
+</code></pre></div><p>Returns a new array that contains the elements at even indices in <code>as</code>, starting with the element at index <code>0</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[0, 1, 2, 3, 4].getEvenElems = #[0, 2, 4]</code></li>
+<li><code>#[1, 2, 3, 4].getEvenElems = #[1, 3]</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].getEvenElems = #[&quot;red&quot;, &quot;blue&quot;]</code></li>
+<li><code>(#[] : Array String).getEvenElems = #[]</code></li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Sorted-Arrays"></a></p>
+<h4 id="20-16-4-7-sorted-arrays">20.16.4.7. Sorted Arrays</h4><p><a id="Array___qsort"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.qsort.{u_1} {α : Type u_1} (as : Array α)
+  (lt : α → α → Bool := by exact (· &lt; ·)) (lo : Nat := 0)
+  (hi : Nat := as.size - 1) : Array α
+</code></pre></div><p>In-place quicksort.</p>
+<p><code>qsort as lt lo hi</code> sorts the subarray <code>as[lo...=hi]</code> in-place using <code>lt</code> to compare elements.</p>
+<p><a id="Array___qsortOrd"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.qsortOrd.{u_1} {α : Type u_1} [ord : Ord α] (xs : Array α) :
+  Array α
+</code></pre></div><p>Sort an array using <code>compare</code> to compare elements.</p>
+<p><a id="Array___insertionSort"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.insertionSort.{u_1} {α : Type u_1} (xs : Array α)
+  (lt : α → α → Bool := by exact (· &lt; ·)) : Array α
+</code></pre></div><p>Sorts an array using insertion sort.</p>
+<p>The optional parameter <code>lt</code> specifies an ordering predicate. It defaults to <code>LT.lt</code>, which must be decidable to be used for sorting.</p>
+<p><a id="Array___binInsert"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.binInsert.{u} {α : Type u} (lt : α → α → Bool) (as : Array α)
+  (k : α) : Array α
+</code></pre></div><p>Inserts an element into a sorted array such that the resulting array is sorted. If the element is already present in the array, it is not inserted.</p>
+<p>The ordering predicate <code>lt</code> should be a total order on elements, and the array <code>as</code> should be sorted with respect to <code>lt</code>.</p>
+<p><code>Array.binInsertM</code> is a more general operator that provides greater control over the handling of duplicate elements in addition to running in a monad.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[0, 1, 3, 5].binInsert (· &lt; ·) 2 = #[0, 1, 2, 3, 5]</code></li>
+<li><code>#[0, 1, 3, 5].binInsert (· &lt; ·) 1 = #[0, 1, 3, 5]</code></li>
+<li><code>#[].binInsert (· &lt; ·) 1 = #[1]</code></li>
+</ul>
+<p><a id="Array___binInsertM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.binInsertM.{u, v} {α : Type u} {m : Type u → Type v} [Monad m]
+  (lt : α → α → Bool) (merge : α → m α) (add : Unit → m α)
+  (as : Array α) (k : α) : m (Array α)
+</code></pre></div><p>Inserts an element <code>k</code> into a sorted array <code>as</code> such that the resulting array is sorted.</p>
+<p>The ordering predicate <code>lt</code> should be a total order on elements, and the array <code>as</code> should be sorted with respect to <code>lt</code>.</p>
+<p>If an element that <code>lt</code> equates to <code>k</code> is already present in <code>as</code>, then <code>merge</code> is applied to the existing element to determine the value of that position in the resulting array. If no element equal to <code>k</code> is present, then <code>add</code> is used to determine the value to be inserted.</p>
+<p><a id="Array___binSearch"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.binSearch {α : Type} (as : Array α) (k : α) (lt : α → α → Bool)
+  (lo : Nat := 0) (hi : Nat := as.size - 1) : Option α
+</code></pre></div><p>Binary search for an element equivalent to <code>k</code> in the sorted array <code>as</code>. Returns the element from the array, if it is found, or <code>none</code> otherwise.</p>
+<p>The array <code>as</code> must be sorted according to the comparison operator <code>lt</code>, which should be a total order.</p>
+<p>The optional parameters <code>lo</code> and <code>hi</code> determine the region of the array indices to be searched. Both are inclusive, and default to searching the entire array.</p>
+<p><a id="Array___binSearchContains"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.binSearchContains {α : Type} (as : Array α) (k : α)
+  (lt : α → α → Bool) (lo : Nat := 0) (hi : Nat := as.size - 1) : Bool
+</code></pre></div><p>Binary search for an element equivalent to <code>k</code> in the sorted array <code>as</code>. Returns <code>true</code> if the element is found, or <code>false</code> otherwise.</p>
+<p>The array <code>as</code> must be sorted according to the comparison operator <code>lt</code>, which should be a total order.</p>
+<p>The optional parameters <code>lo</code> and <code>hi</code> determine the region of the array indices to be searched. Both are inclusive, and default to searching the entire array.</p>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Iteration"></a></p>
+<h4 id="20-16-4-8-iteration">20.16.4.8. Iteration</h4><p><a id="Array___iter"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.iter.{w} {α : Type w} (l : Array α) : Std.Iter α
+</code></pre></div><p>Returns a finite iterator for the given array. The iterator yields the elements of the array in order and then terminates.</p>
+<p>The monadic version of this iterator is <code>Array.iterM</code>.</p>
+<p><strong>Termination properties:</strong></p>
+<ul>
+<li><code>Finite</code> instance: always</li>
+<li><code>Productive</code> instance: always</li>
+</ul>
+<p><a id="Array___iterFromIdx"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.iterFromIdx.{w} {α : Type w} (l : Array α) (pos : Nat) :
+  Std.Iter α
+</code></pre></div><p>Returns a finite iterator for the given array starting at the given index. The iterator yields the elements of the array in order and then terminates.</p>
+<p>The monadic version of this iterator is <code>Array.iterFromIdxM</code>.</p>
+<p><strong>Termination properties:</strong></p>
+<ul>
+<li><code>Finite</code> instance: always</li>
+<li><code>Productive</code> instance: always</li>
+</ul>
+<p><a id="Array___iterM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.iterM.{w, w'} {α : Type w} (array : Array α)
+  (m : Type w → Type w') [Pure m] : Std.IterM m α
+</code></pre></div><p>Returns a finite monadic iterator for the given array. The iterator yields the elements of the array in order and then terminates. There are no side effects.</p>
+<p>The pure version of this iterator is <code>Array.iter</code>.</p>
+<p><strong>Termination properties:</strong></p>
+<ul>
+<li><code>Finite</code> instance: always</li>
+<li><code>Productive</code> instance: always</li>
+</ul>
+<p><a id="Array___iterFromIdxM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.iterFromIdxM.{w, w'} {α : Type w} (array : Array α)
+  (m : Type w → Type w') (pos : Nat) [Pure m] : Std.IterM m α
+</code></pre></div><p>Returns a finite monadic iterator for the given array starting at the given index. The iterator yields the elements of the array in order and then terminates.</p>
+<p>The pure version of this iterator is <code>Array.iterFromIdx</code>.</p>
+<p><strong>Termination properties:</strong></p>
+<ul>
+<li><code>Finite</code> instance: always</li>
+<li><code>Productive</code> instance: always</li>
+</ul>
+<p><a id="Array___foldr"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.foldr.{u, v} {α : Type u} {β : Type v} (f : α → β → β) (init : β)
+  (as : Array α) (start : Nat := as.size) (stop : Nat := 0) : β
+</code></pre></div><p>Folds a function over an array from the right, accumulating a value starting with <code>init</code>. The accumulated value is combined with the each element of the array in reverse order, using <code>f</code>.</p>
+<p>The optional parameters <code>start</code> and <code>stop</code> control the region of the array to be folded. Folding proceeds from <code>start</code> (exclusive) to <code>stop</code> (inclusive), so no folding occurs unless <code>start &gt; stop</code>. By default, the entire array is used.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[a, b, c].foldr f init  = f a (f b (f c init))</code></li>
+<li><code>#[1, 2, 3].foldr (toString · ++ ·) &quot;&quot; = &quot;123&quot;</code></li>
+<li><code>#[1, 2, 3].foldr (s!&quot;({·} {·})&quot;) &quot;!&quot; = &quot;(1 (2 (3 !)))&quot;</code></li>
+</ul>
+<p><a id="Array___foldrM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.foldrM.{u, v, w} {α : Type u} {β : Type v} {m : Type v → Type w}
+  [Monad m] (f : α → β → m β) (init : β) (as : Array α)
+  (start : Nat := as.size) (stop : Nat := 0) : m β
+</code></pre></div><p>Folds a monadic function over an array from the right, accumulating a value starting with <code>init</code>. The accumulated value is combined with the each element of the list in reverse order, using <code>f</code>.</p>
+<p>The optional parameters <code>start</code> and <code>stop</code> control the region of the array to be folded. Folding proceeds from <code>start</code> (exclusive) to <code>stop</code> (inclusive), so no folding occurs unless <code>start &gt; stop</code>. By default, the entire array is folded.</p>
+<p>Examples:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example [Monad m] (f : α → β → m β) :
+  Array.foldrM (m := m) f x₀ #[a, b, c] = (do
+    let x₁ ← f c x₀
+    let x₂ ← f b x₁
+    let x₃ ← f a x₂
+    pure x₃)
+  := by rfl
+</code></pre></div><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example [Monad m] (f : α → β → m β) :
+  Array.foldrM (m := m) f x₀ #[a, b, c] (start := 2) = (do
+    let x₁ ← f b x₀
+    let x₂ ← f a x₁
+    pure x₂)
+  := by rfl
+</code></pre></div><p><a id="Array___foldl"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.foldl.{u, v} {α : Type u} {β : Type v} (f : β → α → β) (init : β)
+  (as : Array α) (start : Nat := 0) (stop : Nat := as.size) : β
+</code></pre></div><p>Folds a function over an array from the left, accumulating a value starting with <code>init</code>. The accumulated value is combined with the each element of the array in order, using <code>f</code>.</p>
+<p>The optional parameters <code>start</code> and <code>stop</code> control the region of the array to be folded. Folding proceeds from <code>start</code> (inclusive) to <code>stop</code> (exclusive), so no folding occurs unless <code>start &lt; stop</code>. By default, the entire array is used.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[a, b, c].foldl f z  = f (f (f z a) b) c</code></li>
+<li><code>#[1, 2, 3].foldl (· ++ toString ·) &quot;&quot; = &quot;123&quot;</code></li>
+<li><code>#[1, 2, 3].foldl (s!&quot;({·} {·})&quot;) &quot;&quot; = &quot;((( 1) 2) 3)&quot;</code></li>
+</ul>
+<p><a id="Array___foldlM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.foldlM.{u, v, w} {α : Type u} {β : Type v} {m : Type v → Type w}
+  [Monad m] (f : β → α → m β) (init : β) (as : Array α)
+  (start : Nat := 0) (stop : Nat := as.size) : m β
+</code></pre></div><p>Folds a monadic function over a list from the left, accumulating a value starting with <code>init</code>. The accumulated value is combined with the each element of the list in order, using <code>f</code>.</p>
+<p>The optional parameters <code>start</code> and <code>stop</code> control the region of the array to be folded. Folding proceeds from <code>start</code> (inclusive) to <code>stop</code> (exclusive), so no folding occurs unless <code>start &lt; stop</code>. By default, the entire array is folded.</p>
+<p>Examples:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example [Monad m] (f : α → β → m α) :
+    Array.foldlM (m := m) f x₀ #[a, b, c] = (do
+      let x₁ ← f x₀ a
+      let x₂ ← f x₁ b
+      let x₃ ← f x₂ c
+      pure x₃)
+  := by rfl
+</code></pre></div><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example [Monad m] (f : α → β → m α) :
+    Array.foldlM (m := m) f x₀ #[a, b, c] (start := 1) = (do
+      let x₁ ← f x₀ b
+      let x₂ ← f x₁ c
+      pure x₂)
+  := by rfl
+</code></pre></div><p><a id="Array___forM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.forM.{u, v, w} {α : Type u} {m : Type v → Type w} [Monad m]
+  (f : α → m PUnit) (as : Array α) (start : Nat := 0)
+  (stop : Nat := as.size) : m PUnit
+</code></pre></div><p>Applies the monadic action <code>f</code> to each element of an array, in order.</p>
+<p>The optional parameters <code>start</code> and <code>stop</code> control the region of the array to which <code>f</code> should be applied. Iteration proceeds from <code>start</code> (inclusive) to <code>stop</code> (exclusive), so <code>f</code> is not invoked unless <code>start &lt; stop</code>. By default, the entire array is used.</p>
+<p><a id="Array___forRevM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.forRevM.{u, v, w} {α : Type u} {m : Type v → Type w} [Monad m]
+  (f : α → m PUnit) (as : Array α) (start : Nat := as.size)
+  (stop : Nat := 0) : m PUnit
+</code></pre></div><p>Applies the monadic action <code>f</code> to each element of an array from right to left, in reverse order.</p>
+<p>The optional parameters <code>start</code> and <code>stop</code> control the region of the array to which <code>f</code> should be applied. Iteration proceeds from <code>start</code> (exclusive) to <code>stop</code> (inclusive), so no <code>f</code> is not invoked unless <code>start &gt; stop</code>. By default, the entire array is used.</p>
+<p><a id="Array___firstM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.firstM.{u, v, w} {β : Type v} {α : Type u} {m : Type v → Type w}
+  [Alternative m] (f : α → m β) (as : Array α) : m β
+</code></pre></div><p>Maps <code>f</code> over the array and collects the results with <code>&lt;|&gt;</code>. The result for the end of the array is <code>failure</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[[], [1, 2], [], [2]].firstM List.head? = some 1</code></li>
+<li><code>#[[], [], []].firstM List.head? = none</code></li>
+<li><code>#[].firstM List.head? = none</code></li>
+</ul>
+<p><a id="Array___sum"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.sum.{u_1} {α : Type u_1} [Add α] [Zero α] : Array α → α
+</code></pre></div><p>Computes the sum of the elements of an array.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[a, b, c].sum = a + (b + (c + 0))</code></li>
+<li><code>#[1, 2, 5].sum = 8</code></li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Transformation"></a></p>
+<h4 id="20-16-4-9-transformation">20.16.4.9. Transformation</h4><p><a id="Array___map"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.map.{u, v} {α : Type u} {β : Type v} (f : α → β) (as : Array α) :
+  Array β
+</code></pre></div><p>Applies a function to each element of the array, returning the resulting array of values.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[a, b, c].map f = #[f a, f b, f c]</code></li>
+<li><code>#[].map Nat.succ = #[]</code></li>
+<li><code>#[&quot;one&quot;, &quot;two&quot;, &quot;three&quot;].map (·.length) = #[3, 3, 5]</code></li>
+<li><code>#[&quot;one&quot;, &quot;two&quot;, &quot;three&quot;].map (·.reverse) = #[&quot;eno&quot;, &quot;owt&quot;, &quot;eerht&quot;]</code></li>
+</ul>
+<p><a id="Array___mapMono"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.mapMono.{u_1} {α : Type u_1} (as : Array α) (f : α → α) : Array α
+</code></pre></div><p>Applies a function to each element of an array, returning the array of results. The function is monomorphic: it is required to return a value of the same type. The internal implementation uses pointer equality, and does not allocate a new array if the result of each function call is pointer-equal to its argument.</p>
+<p><a id="Array___mapM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.mapM.{u, v, w} {α : Type u} {β : Type v} {m : Type v → Type w}
+  [Monad m] (f : α → m β) (as : Array α) : m (Array β)
+</code></pre></div><p>Applies the monadic action <code>f</code> to every element in the array, left-to-right, and returns the array of results.</p>
+<p><a id="Array___mapM___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.mapM'.{u_1, u_2, u_3} {m : Type u_1 → Type u_2} {α : Type u_3}
+  {β : Type u_1} [Monad m] (f : α → m β) (as : Array α) :
+  m { bs // bs.size = as.size }
+</code></pre></div><p>Applies the monadic action <code>f</code> to every element in the array, left-to-right, and returns the array of results. Furthermore, the resulting array&#39;s type guarantees that it contains the same number of elements as the input array.</p>
+<p><a id="Array___mapMonoM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.mapMonoM.{u_1, u_2} {m : Type u_1 → Type u_2} {α : Type u_1}
+  [Monad m] (as : Array α) (f : α → m α) : m (Array α)
+</code></pre></div><p>Applies a monadic function to each element of an array, returning the array of results. The function is monomorphic: it is required to return a value of the same type. The internal implementation uses pointer equality, and does not allocate a new array if the result of each function call is pointer-equal to its argument.</p>
+<p><a id="Array___mapIdx"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.mapIdx.{u, v} {α : Type u} {β : Type v} (f : Nat → α → β)
+  (as : Array α) : Array β
+</code></pre></div><p>Applies a function to each element of the array along with the index at which that element is found, returning the array of results.</p>
+<p><code>Array.mapFinIdx</code> is a variant that additionally provides the function with a proof that the index is valid.</p>
+<p><a id="Array___mapIdxM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.mapIdxM.{u, v, w} {α : Type u} {β : Type v} {m : Type v → Type w}
+  [Monad m] (f : Nat → α → m β) (as : Array α) : m (Array β)
+</code></pre></div><p>Applies the monadic action <code>f</code> to every element in the array, along with the element&#39;s index, from left to right. Returns the array of results.</p>
+<p><a id="Array___mapFinIdx"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.mapFinIdx.{u, v} {α : Type u} {β : Type v} (as : Array α)
+  (f : (i : Nat) → α → i &lt; as.size → β) : Array β
+</code></pre></div><p>Applies a function to each element of the array along with the index at which that element is found, returning the array of results. In addition to the index, the function is also provided with a proof that the index is valid.</p>
+<p><code>Array.mapIdx</code> is a variant that does not provide the function with evidence that the index is valid.</p>
+<p><a id="Array___mapFinIdxM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.mapFinIdxM.{u, v, w} {α : Type u} {β : Type v}
+  {m : Type v → Type w} [Monad m] (as : Array α)
+  (f : (i : Nat) → α → i &lt; as.size → m β) : m (Array β)
+</code></pre></div><p>Applies the monadic action <code>f</code> to every element in the array, along with the element&#39;s index and a proof that the index is in bounds, from left to right. Returns the array of results.</p>
+<p><a id="Array___flatMap"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.flatMap.{u, u_1} {α : Type u} {β : Type u_1} (f : α → Array β)
+  (as : Array α) : Array β
+</code></pre></div><p>Applies a function that returns an array to each element of an array. The resulting arrays are appended.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[2, 3, 2].flatMap Array.range = #[0, 1, 0, 1, 2, 0, 1]</code></li>
+<li><code>#[[&#39;a&#39;, &#39;b&#39;], [&#39;c&#39;, &#39;d&#39;, &#39;e&#39;]].flatMap List.toArray = #[&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;]</code></li>
+</ul>
+<p><a id="Array___flatMapM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.flatMapM.{u, u_1, u_2} {α : Type u} {m : Type u_1 → Type u_2}
+  {β : Type u_1} [Monad m] (f : α → m (Array β)) (as : Array α) :
+  m (Array β)
+</code></pre></div><p>Applies a monadic function that returns an array to each element of an array, from left to right. The resulting arrays are appended.</p>
+<p><a id="Array___zip"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.zip.{u, u_1} {α : Type u} {β : Type u_1} (as : Array α)
+  (bs : Array β) : Array (α × β)
+</code></pre></div><p>Combines two arrays into an array of pairs in which the first and second components are the corresponding elements of each input array. The resulting array is the length of the shorter of the input arrays.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;Mon&quot;, &quot;Tue&quot;, &quot;Wed&quot;].zip #[1, 2, 3] = #[(&quot;Mon&quot;, 1), (&quot;Tue&quot;, 2), (&quot;Wed&quot;, 3)]</code></li>
+<li><code>#[&quot;Mon&quot;, &quot;Tue&quot;, &quot;Wed&quot;].zip #[1, 2] = #[(&quot;Mon&quot;, 1), (&quot;Tue&quot;, 2)]</code></li>
+<li><code>#[x₁, x₂, x₃].zip #[y₁, y₂, y₃, y₄] = #[(x₁, y₁), (x₂, y₂), (x₃, y₃)]</code></li>
+</ul>
+<p><a id="Array___zipWith"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.zipWith.{u, u_1, u_2} {α : Type u} {β : Type u_1} {γ : Type u_2}
+  (f : α → β → γ) (as : Array α) (bs : Array β) : Array γ
+</code></pre></div><p>Applies a function to the corresponding elements of two arrays, stopping at the end of the shorter array.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2].zipWith (· + ·) #[5, 6] = #[6, 8]</code></li>
+<li><code>#[1, 2, 3].zipWith (· + ·) #[5, 6, 10] = #[6, 8, 13]</code></li>
+<li><code>#[].zipWith (· + ·) #[5, 6] = #[]</code></li>
+<li><code>#[x₁, x₂, x₃].zipWith f #[y₁, y₂, y₃, y₄] = #[f x₁ y₁, f x₂ y₂, f x₃ y₃]</code></li>
+</ul>
+<p><a id="Array___zipWithAll"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.zipWithAll.{u, u_1, u_2} {α : Type u} {β : Type u_1}
+  {γ : Type u_2} (f : Option α → Option β → γ) (as : Array α)
+  (bs : Array β) : Array γ
+</code></pre></div><p>Applies a function to the corresponding elements of both arrays, stopping when there are no more elements in either array. If one array is shorter than the other, the function is passed <code>none</code> for the missing elements.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 6].zipWithAll min #[5, 2] = #[some 1, some 2]</code></li>
+<li><code>#[1, 2, 3].zipWithAll Prod.mk #[5, 6] = #[(some 1, some 5), (some 2, some 6), (some 3, none)]</code></li>
+<li><code>#[x₁, x₂].zipWithAll f #[y] = #[f (some x₁) (some y), f (some x₂) none]</code></li>
+</ul>
+<p><a id="Array___zipIdx"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.zipIdx.{u} {α : Type u} (xs : Array α) (start : Nat := 0) :
+  Array (α × Nat)
+</code></pre></div><p>Pairs each element of an array with its index, optionally starting from an index other than <code>0</code>.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[a, b, c].zipIdx = #[(a, 0), (b, 1), (c, 2)]</code></li>
+<li><code>#[a, b, c].zipIdx 5 = #[(a, 5), (b, 6), (c, 7)]</code></li>
+</ul>
+<p><a id="Array___unzip"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.unzip.{u, u_1} {α : Type u} {β : Type u_1} (as : Array (α × β)) :
+  Array α × Array β
+</code></pre></div><p>Separates an array of pairs into two arrays that contain the respective first and second components.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[(&quot;Monday&quot;, 1), (&quot;Tuesday&quot;, 2)].unzip = (#[&quot;Monday&quot;, &quot;Tuesday&quot;], #[1, 2])</code></li>
+<li><code>#[(x₁, y₁), (x₂, y₂), (x₃, y₃)].unzip = (#[x₁, x₂, x₃], #[y₁, y₂, y₃])</code></li>
+<li><code>(#[] : Array (Nat × String)).unzip = ((#[], #[]) : List Nat × List String)</code></li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Filtering"></a></p>
+<h4 id="20-16-4-10-filtering">20.16.4.10. Filtering</h4><p><a id="Array___filter"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.filter.{u} {α : Type u} (p : α → Bool) (as : Array α)
+  (start : Nat := 0) (stop : Nat := as.size) : Array α
+</code></pre></div><p>Returns the array of elements in <code>as</code> for which <code>p</code> returns <code>true</code>.</p>
+<p>Only elements from <code>start</code> (inclusive) to <code>stop</code> (exclusive) are considered. Elements outside that range are discarded. By default, the entire array is considered.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 5, 2, 7, 7].filter (· &gt; 2) = #[5, 7, 7]</code></li>
+<li><code>#[1, 2, 5, 2, 7, 7].filter (fun _ =&gt; false) = #[]</code></li>
+<li><code>#[1, 2, 5, 2, 7, 7].filter (fun _ =&gt; true) = #[1, 2, 5, 2, 7, 7]</code></li>
+<li><code>#[1, 2, 5, 2, 7, 7].filter (· &gt; 2) (start := 3) = #[7, 7]</code></li>
+<li><code>#[1, 2, 5, 2, 7, 7].filter (fun _ =&gt; true) (start := 3) = #[2, 7, 7]</code></li>
+<li><code>#[1, 2, 5, 2, 7, 7].filter (fun _ =&gt; true) (stop := 3) = #[1, 2, 5]</code></li>
+</ul>
+<p><a id="Array___filterM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.filterM.{u_1} {m : Type → Type u_1} {α : Type} [Monad m]
+  (p : α → m Bool) (as : Array α) (start : Nat := 0)
+  (stop : Nat := as.size) : m (Array α)
+</code></pre></div><p>Applies the monadic predicate <code>p</code> to every element in the array, in order from left to right, and returns the array of elements for which <code>p</code> returns <code>true</code>.</p>
+<p>Only elements from <code>start</code> (inclusive) to <code>stop</code> (exclusive) are considered. Elements outside that range are discarded. By default, the entire array is checked.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[1, 2, 5, 2, 7, 7].filterM fun x =&gt; do
+  IO.println s!&quot;Checking {x}&quot;
+  return x &lt; 3
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Checking 1
+Checking 2
+Checking 5
+Checking 2
+Checking 7
+Checking 7
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#[1, 2, 2]
+</code></pre></div><p><a id="Array___filterRevM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.filterRevM.{u_1} {m : Type → Type u_1} {α : Type} [Monad m]
+  (p : α → m Bool) (as : Array α) (start : Nat := as.size)
+  (stop : Nat := 0) : m (Array α)
+</code></pre></div><p>Applies the monadic predicate <code>p</code> on every element in the array in reverse order, from right to left, and returns those elements for which <code>p</code> returns <code>true</code>. The elements of the returned list are in the same order as in the input list.</p>
+<p>Only elements from <code>start</code> (exclusive) to <code>stop</code> (inclusive) are considered. Elements outside that range are discarded. Because the array is examined in reverse order, elements are only examined when <code>start &gt; stop</code>. By default, the entire array is considered.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[1, 2, 5, 2, 7, 7].filterRevM fun x =&gt; do
+  IO.println s!&quot;Checking {x}&quot;
+  return x &lt; 3
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Checking 7
+Checking 7
+Checking 2
+Checking 5
+Checking 2
+Checking 1
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#[1, 2, 2]
+</code></pre></div><p><a id="Array___filterMap"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.filterMap.{u, u_1} {α : Type u} {β : Type u_1} (f : α → Option β)
+  (as : Array α) (start : Nat := 0) (stop : Nat := as.size) : Array β
+</code></pre></div><p>Applies a function that returns an <code>Option</code> to each element of an array, collecting the non-<code>none</code> values.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[1, 2, 5, 2, 7, 7].filterMap fun x =&gt;
+  if x &gt; 2 then some (2 * x) else none
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#[10, 14, 14]
+</code></pre></div><p><a id="Array___filterMapM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.filterMapM.{u, u_1, u_2} {α : Type u} {m : Type u_1 → Type u_2}
+  {β : Type u_1} [Monad m] (f : α → m (Option β)) (as : Array α)
+  (start : Nat := 0) (stop : Nat := as.size) : m (Array β)
+</code></pre></div><p>Applies a monadic function that returns an <code>Option</code> to each element of an array, collecting the non-<code>none</code> values.</p>
+<p>Only elements from <code>start</code> (inclusive) to <code>stop</code> (exclusive) are considered. Elements outside that range are discarded. By default, the entire array is considered.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[1, 2, 5, 2, 7, 7].filterMapM fun x =&gt; do
+  IO.println s!&quot;Examining {x}&quot;
+  if x &gt; 2 then return some (2 * x)
+  else return none
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Examining 1
+Examining 2
+Examining 5
+Examining 2
+Examining 7
+Examining 7
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#[10, 14, 14]
+</code></pre></div><p><a id="Array___filterSepElems"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.filterSepElems (a : Array Lean.Syntax) (p : Lean.Syntax → Bool) :
+  Array Lean.Syntax
+</code></pre></div><p>Filters an array of syntax, treating every other element as a separator rather than an element to test with the predicate <code>p</code>. The resulting array contains the tested elements for which <code>p</code> returns <code>true</code>, separated by the corresponding separator elements.</p>
+<p><a id="Array___filterSepElemsM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.filterSepElemsM {m : Type → Type} [Monad m]
+  (a : Array Lean.Syntax) (p : Lean.Syntax → m Bool) :
+  m (Array Lean.Syntax)
+</code></pre></div><p>Filters an array of syntax, treating every other element as a separator rather than an element to test with the monadic predicate <code>p</code>. The resulting array contains the tested elements for which <code>p</code> returns <code>true</code>, separated by the corresponding separator elements.</p>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Partitioning"></a></p>
+<h4 id="20-16-4-11-partitioning">20.16.4.11. Partitioning</h4><p><a id="Array___partition"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.partition.{u} {α : Type u} (p : α → Bool) (as : Array α) :
+  Array α × Array α
+</code></pre></div><p>Returns a pair of arrays that together contain all the elements of <code>as</code>. The first array contains those elements for which <code>p</code> returns <code>true</code>, and the second contains those for which <code>p</code> returns <code>false</code>.</p>
+<p><code>as.partition p</code> is equivalent to <code>(as.filter p, as.filter (not ∘ p))</code>, but it is more efficient since it only has to do one pass over the array.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 5, 2, 7, 7].partition (· &gt; 2) = (#[5, 7, 7], #[1, 2, 2])</code></li>
+<li><code>#[1, 2, 5, 2, 7, 7].partition (fun _ =&gt; false) = (#[], #[1, 2, 5, 2, 7, 7])</code></li>
+<li><code>#[1, 2, 5, 2, 7, 7].partition (fun _ =&gt; true) = (#[1, 2, 5, 2, 7, 7], #[])</code></li>
+</ul>
+<p><a id="Array___groupByKey"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.groupByKey.{u, v} {α : Type u} {β : Type v} [BEq α] [Hashable α]
+  (key : β → α) (xs : Array β) : Std.HashMap α (Array β)
+</code></pre></div><p>Groups the elements of an array <code>xs</code> according to the function <code>key</code>, returning a hash map in which each group is associated with its key. Groups preserve the relative order of elements in <code>xs</code>.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[0, 1, 2, 3, 4, 5, 6].groupByKey (· % 2)
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Std.HashMap.ofList [(0, #[0, 2, 4, 6]), (1, #[1, 3, 5])]
+</code></pre></div><p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Element-Predicates"></a></p>
+<h4 id="20-16-4-12-element-predicates">20.16.4.12. Element Predicates</h4><p><a id="Array___contains"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.contains.{u} {α : Type u} [BEq α] (as : Array α) (a : α) : Bool
+</code></pre></div><p>Checks whether <code>a</code> is an element of <code>as</code>, using <code>==</code> to compare elements.</p>
+<p><code>Array.elem</code> is a synonym that takes the element before the array.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 4, 2, 3, 3, 7].contains 3 = true</code></li>
+<li><code>Array.contains #[1, 4, 2, 3, 3, 7] 5 = false</code></li>
+</ul>
+<p><a id="Array___elem"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.elem.{u} {α : Type u} [BEq α] (a : α) (as : Array α) : Bool
+</code></pre></div><p>Checks whether <code>a</code> is an element of <code>as</code>, using <code>==</code> to compare elements.</p>
+<p><code>Array.contains</code> is a synonym that takes the array before the element.</p>
+<p>For verification purposes, <code>Array.elem</code> is simplified to <code>Array.contains</code>.</p>
+<p>Example:</p>
+<ul>
+<li><code>Array.elem 3 #[1, 4, 2, 3, 3, 7] = true</code></li>
+<li><code>Array.elem 5 #[1, 4, 2, 3, 3, 7] = false</code></li>
+</ul>
+<p><a id="Array___find___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.find?.{u} {α : Type u} (p : α → Bool) (as : Array α) : Option α
+</code></pre></div><p>Returns the first element of the array for which the predicate <code>p</code> returns <code>true</code>, or <code>none</code> if no such element is found.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[7, 6, 5, 8, 1, 2, 6].find? (· &lt; 5) = some 1</code></li>
+<li><code>#[7, 6, 5, 8, 1, 2, 6].find? (· &lt; 1) = none</code></li>
+</ul>
+<p><a id="Array___findRev___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.findRev? {α : Type} (p : α → Bool) (as : Array α) : Option α
+</code></pre></div><p>Returns the last element of the array for which the predicate <code>p</code> returns <code>true</code>, or <code>none</code> if no such element is found.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[7, 6, 5, 8, 1, 2, 6].findRev? (· &lt; 5) = some 2</code></li>
+<li><code>#[7, 6, 5, 8, 1, 2, 6].findRev? (· &lt; 1) = none</code></li>
+</ul>
+<p><a id="Array___findIdx"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.findIdx.{u} {α : Type u} (p : α → Bool) (as : Array α) : Nat
+</code></pre></div><p>Returns the index of the first element for which <code>p</code> returns <code>true</code>, or the size of the array if there is no such element.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[7, 6, 5, 8, 1, 2, 6].findIdx (· &lt; 5) = 4</code></li>
+<li><code>#[7, 6, 5, 8, 1, 2, 6].findIdx (· &lt; 1) = 7</code></li>
+</ul>
+<p><a id="Array___findIdx___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.findIdx?.{u} {α : Type u} (p : α → Bool) (as : Array α) :
+  Option Nat
+</code></pre></div><p>Returns the index of the first element for which <code>p</code> returns <code>true</code>, or <code>none</code> if there is no such element.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[7, 6, 5, 8, 1, 2, 6].findIdx (· &lt; 5) = some 4</code></li>
+<li><code>#[7, 6, 5, 8, 1, 2, 6].findIdx (· &lt; 1) = none</code></li>
+</ul>
+<p><a id="Array___findIdxM___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.findIdxM?.{u, u_1} {α : Type u} {m : Type → Type u_1} [Monad m]
+  (p : α → m Bool) (as : Array α) : m (Option Nat)
+</code></pre></div><p>Finds the index of the first element of an array for which the monadic predicate <code>p</code> returns <code>true</code>. Elements are examined in order from left to right, and the search is terminated when an element that satisfies <code>p</code> is found. If no such element exists in the array, then <code>none</code> is returned.</p>
+<p><a id="Array___findFinIdx___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.findFinIdx?.{u} {α : Type u} (p : α → Bool) (as : Array α) :
+  Option (Fin as.size)
+</code></pre></div><p>Returns the index of the first element for which <code>p</code> returns <code>true</code>, or <code>none</code> if there is no such element. The index is returned as a <code>Fin</code>, which guarantees that it is in bounds.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[7, 6, 5, 8, 1, 2, 6].findFinIdx? (· &lt; 5) = some (4 : Fin 7)</code></li>
+<li><code>#[7, 6, 5, 8, 1, 2, 6].findFinIdx? (· &lt; 1) = none</code></li>
+</ul>
+<p><a id="Array___findM___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.findM?.{u_1} {m : Type → Type u_1} {α : Type} [Monad m]
+  (p : α → m Bool) (as : Array α) : m (Option α)
+</code></pre></div><p>Returns the first element of the array for which the monadic predicate <code>p</code> returns <code>true</code>, or <code>none</code> if no such element is found. Elements of the array are checked in order.</p>
+<p>The monad <code>m</code> is restricted to <code>Type → Type</code> to avoid needing to use <code>ULift Bool</code> in <code>p</code>&#39;s type.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[7, 6, 5, 8, 1, 2, 6].findM? fun i =&gt; do
+  if i &lt; 5 then
+    return true
+  if i ≤ 6 then
+    IO.println s!&quot;Almost! {i}&quot;
+  return false
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Almost! 6
+Almost! 5
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">some 1
+</code></pre></div><p><a id="Array___findRevM___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.findRevM?.{w} {α : Type} {m : Type → Type w} [Monad m]
+  (p : α → m Bool) (as : Array α) : m (Option α)
+</code></pre></div><p>Returns the last element of the array for which the monadic predicate <code>p</code> returns <code>true</code>, or <code>none</code> if no such element is found. Elements of the array are checked in reverse, from right to left..</p>
+<p>The monad <code>m</code> is restricted to <code>Type → Type</code> to avoid needing to use <code>ULift Bool</code> in <code>p</code>&#39;s type.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[7, 5, 8, 1, 2, 6, 5, 8].findRevM? fun i =&gt; do
+  if i &lt; 5 then
+    return true
+  if i ≤ 6 then
+    IO.println s!&quot;Almost! {i}&quot;
+  return false
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Almost! 5
+Almost! 6
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">some 2
+</code></pre></div><p><a id="Array___findSome___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.findSome?.{u, v} {α : Type u} {β : Type v} (f : α → Option β)
+  (as : Array α) : Option β
+</code></pre></div><p>Returns the first non-<code>none</code> result of applying the function <code>f</code> to each element of the array, in order. Returns <code>none</code> if <code>f</code> returns <code>none</code> for all elements.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[7, 6, 5, 8, 1, 2, 6].findSome? fun i =&gt;
+  if i &lt; 5 then
+    some (i * 10)
+  else
+    none
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">some 10
+</code></pre></div><p><a id="Array___findSome___-next"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.findSome!.{u, v} {α : Type u} {β : Type v} [Inhabited β]
+  (f : α → Option β) (xs : Array α) : β
+</code></pre></div><p>Returns the first non-<code>none</code> result of applying the function <code>f</code> to each element of the array, in order. Panics if <code>f</code> returns <code>none</code> for all elements.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[7, 6, 5, 8, 1, 2, 6].findSome? fun i =&gt;
+  if i &lt; 5 then
+    some (i * 10)
+  else
+    none
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">some 10
+</code></pre></div><p><a id="Array___findSomeM___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.findSomeM?.{u, v, w} {α : Type u} {β : Type v}
+  {m : Type v → Type w} [Monad m] (f : α → m (Option β))
+  (as : Array α) : m (Option β)
+</code></pre></div><p>Returns the first non-<code>none</code> result of applying the monadic function <code>f</code> to each element of the array, in order. Returns <code>none</code> if <code>f</code> returns <code>none</code> for all elements.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[7, 6, 5, 8, 1, 2, 6].findSomeM? fun i =&gt; do
+  if i &lt; 5 then
+    return some (i * 10)
+  if i ≤ 6 then
+    IO.println s!&quot;Almost! {i}&quot;
+  return none
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Almost! 6
+Almost! 5
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">some 10
+</code></pre></div><p><a id="Array___findSomeRev___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.findSomeRev?.{u, v} {α : Type u} {β : Type v} (f : α → Option β)
+  (as : Array α) : Option β
+</code></pre></div><p>Returns the first non-<code>none</code> result of applying <code>f</code> to each element of the array in reverse order, from right to left. Returns <code>none</code> if <code>f</code> returns <code>none</code> for all elements of the array.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[7, 6, 5, 8, 1, 2, 6].findSome? (fun x =&gt; if x &lt; 5 then some (10 * x) else none) = some 10</code></li>
+<li><code>#[7, 6, 5, 8, 1, 2, 6].findSome? (fun x =&gt; if x &lt; 1 then some (10 * x) else none) = none</code></li>
+</ul>
+<p><a id="Array___findSomeRevM___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.findSomeRevM?.{u, v, w} {α : Type u} {β : Type v}
+  {m : Type v → Type w} [Monad m] (f : α → m (Option β))
+  (as : Array α) : m (Option β)
+</code></pre></div><p>Returns the first non-<code>none</code> result of applying the monadic function <code>f</code> to each element of the array in reverse order, from right to left. Once a non-<code>none</code> result is found, no further elements are checked. Returns <code>none</code> if <code>f</code> returns <code>none</code> for all elements of the array.</p>
+<p>Examples:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[1, 2, 0, -4, 1].findSomeRevM? (m := Except String) fun x =&gt; do
+  if x = 0 then throw &quot;Zero!&quot;
+  else if x &lt; 0 then return (some x)
+  else return none
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Except.ok (some (-4))
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[1, 2, 0, 4, 1].findSomeRevM? (m := Except String) fun x =&gt; do
+  if x = 0 then throw &quot;Zero!&quot;
+  else if x &lt; 0 then return (some x)
+  else return none
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Except.error &quot;Zero!&quot;
+</code></pre></div><p><a id="Array___all"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.all.{u} {α : Type u} (as : Array α) (p : α → Bool)
+  (start : Nat := 0) (stop : Nat := as.size) : Bool
+</code></pre></div><p>Returns <code>true</code> if <code>p</code> returns <code>true</code> for every element of <code>as</code>.</p>
+<p>Short-circuits upon encountering the first <code>false</code>.</p>
+<p>The optional parameters <code>start</code> and <code>stop</code> control the region of the array to be checked. Only the elements with indices from <code>start</code> (inclusive) to <code>stop</code> (exclusive) are checked. By default, the entire array is checked.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[a, b, c].all p = (p a &amp;&amp; (p b &amp;&amp; p c))</code></li>
+<li><code>#[2, 4, 6].all (· % 2 = 0) = true</code></li>
+<li><code>#[2, 4, 5, 6].all (· % 2 = 0) = false</code></li>
+</ul>
+<p><a id="Array___allM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.allM.{u, w} {α : Type u} {m : Type → Type w} [Monad m]
+  (p : α → m Bool) (as : Array α) (start : Nat := 0)
+  (stop : Nat := as.size) : m Bool
+</code></pre></div><p>Returns <code>true</code> if the monadic predicate <code>p</code> returns <code>true</code> for every element of <code>as</code>.</p>
+<p>Short-circuits upon encountering the first <code>false</code>. The elements in <code>as</code> are examined in order from left to right.</p>
+<p>The optional parameters <code>start</code> and <code>stop</code> control the region of the array to be checked. Only the elements with indices from <code>start</code> (inclusive) to <code>stop</code> (exclusive) are checked. By default, the entire array is checked.</p>
+<p><a id="Array___any"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.any.{u} {α : Type u} (as : Array α) (p : α → Bool)
+  (start : Nat := 0) (stop : Nat := as.size) : Bool
+</code></pre></div><p>Returns <code>true</code> if <code>p</code> returns <code>true</code> for any element of <code>as</code>.</p>
+<p>Short-circuits upon encountering the first <code>true</code>.</p>
+<p>The optional parameters <code>start</code> and <code>stop</code> control the region of the array to be checked. Only the elements with indices from <code>start</code> (inclusive) to <code>stop</code> (exclusive) are checked. By default, the entire array is checked.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[2, 4, 6].any (· % 2 = 0) = true</code></li>
+<li><code>#[2, 4, 6].any (· % 2 = 1) = false</code></li>
+<li><code>#[2, 4, 5, 6].any (· % 2 = 0) = true</code></li>
+<li><code>#[2, 4, 5, 6].any (· % 2 = 1) = true</code></li>
+</ul>
+<p><a id="Array___anyM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.anyM.{u, w} {α : Type u} {m : Type → Type w} [Monad m]
+  (p : α → m Bool) (as : Array α) (start : Nat := 0)
+  (stop : Nat := as.size) : m Bool
+</code></pre></div><p>Returns <code>true</code> if the monadic predicate <code>p</code> returns <code>true</code> for any element of <code>as</code>.</p>
+<p>Short-circuits upon encountering the first <code>true</code>. The elements in <code>as</code> are examined in order from left to right.</p>
+<p>The optional parameters <code>start</code> and <code>stop</code> control the region of the array to be checked. Only the elements with indices from <code>start</code> (inclusive) to <code>stop</code> (exclusive) are checked. By default, the entire array is checked.</p>
+<p><a id="Array___allDiff"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.allDiff.{u} {α : Type u} [BEq α] (as : Array α) : Bool
+</code></pre></div><p>Returns <code>true</code> if no two elements of <code>as</code> are equal according to the <code>==</code> operator.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].allDiff = true</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;red&quot;].allDiff = false</code></li>
+<li><code>(#[] : Array Nat).allDiff = true</code></li>
+</ul>
+<p><a id="Array___isEqv"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.isEqv.{u} {α : Type u} (xs ys : Array α) (p : α → α → Bool) : Bool
+</code></pre></div><p>Returns <code>true</code> if <code>as</code> and <code>bs</code> have the same length and they are pairwise related by <code>eqv</code>.</p>
+<p>Short-circuits at the first non-related pair of elements.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1, 2, 3].isEqv #[2, 3, 4] (· &lt; ·) = true</code></li>
+<li><code>#[1, 2, 3].isEqv #[2, 2, 4] (· &lt; ·) = false</code></li>
+<li><code>#[1, 2, 3].isEqv #[2, 3] (· &lt; ·) = false</code></li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Comparisons"></a></p>
+<h4 id="20-16-4-13-comparisons">20.16.4.13. Comparisons</h4><p><a id="Array___isPrefixOf"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.isPrefixOf.{u} {α : Type u} [BEq α] (as bs : Array α) : Bool
+</code></pre></div><p>Return <code>true</code> if <code>as</code> is a prefix of <code>bs</code>, or <code>false</code> otherwise.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[0, 1, 2].isPrefixOf #[0, 1, 2, 3] = true</code></li>
+<li><code>#[0, 1, 2].isPrefixOf #[0, 1, 2] = true</code></li>
+<li><code>#[0, 1, 2].isPrefixOf #[0, 1] = false</code></li>
+<li><code>#[].isPrefixOf #[0, 1] = true</code></li>
+</ul>
+<p><a id="Array___lex"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.lex.{u_1} {α : Type u_1} [BEq α] (as bs : Array α)
+  (lt : α → α → Bool := by exact (· &lt; ·)) : Bool
+</code></pre></div><p>Compares arrays lexicographically with respect to a comparison <code>lt</code> on their elements.</p>
+<p>Specifically, <code>Array.lex as bs lt</code> is true if</p>
+<ul>
+<li><code>bs</code> is larger than <code>as</code> and <code>as</code> is pairwise equivalent via <code>==</code> to the initial segment of <code>bs</code>, or</li>
+<li>there is an index <code>i</code> such that <code>lt as[i] bs[i]</code>, and for all <code>j &lt; i</code>, <code>as[j] == bs[j]</code>.</li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--API-Reference--Termination-Helpers"></a></p>
+<h4 id="20-16-4-14-termination-helpers">20.16.4.14. Termination Helpers</h4><p><a id="Array___attach"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.attach.{u_1} {α : Type u_1} (xs : Array α) : Array { x // x ∈ xs }
+</code></pre></div><p>“Attaches” the proof that the elements of <code>xs</code> are in fact elements of <code>xs</code>, producing a new array with the same elements but in the subtype <code>{ x // x ∈ xs }</code>.</p>
+<p><code>O(1)</code>.</p>
+<p>This function is primarily used to allow definitions by <a href="https://lean-lang.org/doc/reference/4.34.0-rc2/find/?domain=Verso.Genre.Manual.section&amp;name=well-founded-recursion">well-founded recursion</a> that use higher-order functions (such as <code>Array.map</code>) to prove that an value taken from a list is smaller than the list. This allows the well-founded recursion mechanism to prove that the function terminates.</p>
+<p><a id="Array___attachWith"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.attachWith.{u_1} {α : Type u_1} (xs : Array α) (P : α → Prop)
+  (H : ∀ (x : α), x ∈ xs → P x) : Array { x // P x }
+</code></pre></div><p>“Attaches” individual proofs to an array of values that satisfy a predicate <code>P</code>, returning an array of elements in the corresponding subtype <code>{ x // P x }</code>.</p>
+<p><code>O(1)</code>.</p>
+<p><a id="Array___unattach"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.unattach.{u_1} {α : Type u_1} {p : α → Prop}
+  (xs : Array { x // p x }) : Array α
+</code></pre></div><p>Maps an array of terms in a subtype to the corresponding terms in the type by forgetting that they satisfy the predicate.</p>
+<p>This is the inverse of <code>Array.attachWith</code> and a synonym for <code>xs.map (·.val)</code>.</p>
+<p>Mostly this should not be needed by users. It is introduced as an intermediate step by lemmas such as <code>map_subtype</code>, and is ideally subsequently simplified away by <code>unattach_attach</code>.</p>
+<p>This function is usually inserted automatically by Lean as an intermediate step while proving termination. It is rarely used explicitly in code. It is introduced as an intermediate step during the elaboration of definitions by <a href="https://lean-lang.org/doc/reference/4.34.0-rc2/find/?domain=Verso.Genre.Manual.section&amp;name=well-founded-recursion">well-founded recursion</a>. If this function is encountered in a proof state, the right approach is usually the tactic <code>simp [Array.unattach, -Array.map_subtype]</code>.</p>
+<p><a id="Array___pmap"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Array.pmap.{u_1, u_2} {α : Type u_1} {β : Type u_2} {P : α → Prop}
+  (f : (a : α) → P a → β) (xs : Array α) (H : ∀ (a : α), a ∈ xs → P a) :
+  Array β
+</code></pre></div><p>Maps a partially defined function (defined on those terms of <code>α</code> that satisfy a predicate <code>P</code>) over an array <code>xs : Array α</code>, given a proof that every element of <code>xs</code> in fact satisfies <code>P</code>.</p>
+<p><code>Array.pmap</code>, named for “partial map,” is the equivalent of <code>Array.map</code> for such partial functions.</p>
+<p><a id="subarray"></a></p>
+<h3 id="20-16-5-subarrays">20.16.5. Subarrays</h3><p>The type <code>Subarray α</code> is an abbreviations for <code>Std.Slice α</code>. This means that, in addition to the operators in this section, <a href="../../Terms/Function-Application/index.html#--tech-term-generalized-field-notation">generalized field notation</a> can be used to call functions in the <code>Std.Slice</code> namespace, such as <code>Std.Slice.foldl</code>.</p>
+<p><a id="Subarray"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.{u} (α : Type u) : Type u
+</code></pre></div><p>A region of some underlying array.</p>
+<p>A subarray contains an array together with the start and end indices of a region of interest. Subarrays can be used to avoid copying or allocating space, while being more convenient than tracking the bounds by hand. The region of interest consists of every index that is both greater than or equal to <code>start</code> and strictly less than <code>stop</code>.</p>
+<p><a id="Subarray___empty"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.empty.{u_1} {α : Type u_1} : Subarray α
+</code></pre></div><p>The empty subarray.</p>
+<p>This empty subarray is backed by an empty array.</p>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--Subarrays--Array-Data"></a></p>
+<h4 id="20-16-5-1-array-data">20.16.5.1. Array Data</h4><p><a id="Subarray___array"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.array.{u_1} {α : Type u_1} (xs : Subarray α) : Array α
+</code></pre></div><p>The underlying array.</p>
+<p><a id="Subarray___start"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.start.{u_1} {α : Type u_1} (xs : Subarray α) : Nat
+</code></pre></div><p>The starting index of the region of interest (inclusive).</p>
+<p><a id="Subarray___stop"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.stop.{u_1} {α : Type u_1} (xs : Subarray α) : Nat
+</code></pre></div><p>The ending index of the region of interest (exclusive).</p>
+<p><a id="Subarray___start_le_stop"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.start_le_stop.{u_1} {α : Type u_1} (xs : Subarray α) :
+  xs.start ≤ xs.stop
+</code></pre></div><p>The starting index is no later than the ending index.</p>
+<p>The ending index is exclusive. If the starting and ending indices are equal, then the subarray is empty.</p>
+<p><a id="Subarray___stop_le_array_size"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.stop_le_array_size.{u_1} {α : Type u_1} (xs : Subarray α) :
+  xs.stop ≤ xs.array.size
+</code></pre></div><p>The stopping index is no later than the end of the array.</p>
+<p>The ending index is exclusive. If it is equal to the size of the array, then the last element of the array is in the subarray.</p>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--Subarrays--Resizing"></a></p>
+<h4 id="20-16-5-2-resizing">20.16.5.2. Resizing</h4><p><a id="Subarray___drop"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.drop.{u_1} {α : Type u_1} (arr : Subarray α) (i : Nat) :
+  Subarray α
+</code></pre></div><p>Removes the first <code>i</code> elements of the subarray. If there are <code>i</code> or fewer elements, the resulting subarray is empty.</p>
+<p><a id="Subarray___take"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.take.{u_1} {α : Type u_1} (arr : Subarray α) (i : Nat) :
+  Subarray α
+</code></pre></div><p>Keeps only the first <code>i</code> elements of the subarray. If there are <code>i</code> or fewer elements, the resulting subarray is empty.</p>
+<p><a id="Subarray___popFront"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.popFront.{u_1} {α : Type u_1} (s : Subarray α) : Subarray α
+</code></pre></div><p>Shrinks the subarray by incrementing its starting index if possible, returning it unchanged if not.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[1,2,3].toSubarray.popFront.toArray = #[2, 3]</code></li>
+<li><code>#[1,2,3].toSubarray.popFront.popFront.toArray = #[3]</code></li>
+<li><code>#[1,2,3].toSubarray.popFront.popFront.popFront.toArray = #[]</code></li>
+<li><code>#[1,2,3].toSubarray.popFront.popFront.popFront.popFront.toArray = #[]</code></li>
+</ul>
+<p><a id="Subarray___split"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.split.{u_1} {α : Type u_1} (s : Subarray α)
+  (i : Fin (Std.Slice.size s).succ) : Subarray α × Subarray α
+</code></pre></div><p>Splits a subarray into two parts, the first of which contains the first <code>i</code> elements and the second of which contains the remainder.</p>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--Subarrays--Lookups"></a></p>
+<h4 id="20-16-5-3-lookups">20.16.5.3. Lookups</h4><p><a id="Subarray___get"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.get.{u_1} {α : Type u_1} (s : Subarray α)
+  (i : Fin (Std.Slice.size s)) : α
+</code></pre></div><p>Extracts an element from the subarray.</p>
+<p>The index is relative to the start of the subarray, rather than the underlying array.</p>
+<p><a id="Subarray___get___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.get!.{u_1} {α : Type u_1} [Inhabited α] (s : Subarray α)
+  (i : Nat) : α
+</code></pre></div><p>Extracts an element from the subarray, or returns a default value when the index is out of bounds.</p>
+<p>The index is relative to the start and end of the subarray, rather than the underlying array. The default value is that provided by the <code>Inhabited α</code> instance.</p>
+<p><a id="Subarray___getD"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.getD.{u_1} {α : Type u_1} (s : Subarray α) (i : Nat) (v₀ : α) :
+  α
+</code></pre></div><p>Extracts an element from the subarray, or returns a default value <code>v₀</code> when the index is out of bounds.</p>
+<p>The index is relative to the start and end of the subarray, rather than the underlying array.</p>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--Subarrays--Iteration"></a></p>
+<h4 id="20-16-5-4-iteration">20.16.5.4. Iteration</h4><p><a id="Subarray___foldr"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.foldr.{u, v} {α : Type u} {β : Type v} (f : α → β → β)
+  (init : β) (as : Subarray α) : β
+</code></pre></div><p>Folds an operation from right to left over the elements in a subarray.</p>
+<p>An accumulator of type <code>β</code> is constructed by starting with <code>init</code> and combining each element of the subarray with the current accumulator value in turn, moving from the end to the start.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].toSubarray.foldr (·.length + ·) 0 = 12</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].toSubarray.popFront.foldr (·.length + ·) 0 = 9</code></li>
+</ul>
+<p><a id="Subarray___foldrM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.foldrM.{u, v, w} {α : Type u} {β : Type v}
+  {m : Type v → Type w} [Monad m] (f : α → β → m β) (init : β)
+  (as : Subarray α) : m β
+</code></pre></div><p>Folds a monadic operation from right to left over the elements in a subarray.</p>
+<p>An accumulator of type <code>β</code> is constructed by starting with <code>init</code> and monadically combining each element of the subarray with the current accumulator value in turn, moving from the end to the start. The monad in question may permit early termination or repetition.</p>
+<p>Examples:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].toSubarray.foldrM (init := &quot;&quot;) fun x acc =&gt; do
+  let l ← Option.guard (· ≠ 0) x.length
+  return s!&quot;{acc}({l}){x} &quot;
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">some &quot;(4)blue (5)green (3)red &quot;
+</code></pre></div><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#eval #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].toSubarray.foldrM (init := 0) fun x acc =&gt; do
+  let l ← Option.guard (· ≠ 5) x.length
+  return s!&quot;{acc}({l}){x} &quot;
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">none
+</code></pre></div><p><a id="Subarray___forM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.forM.{u, v, w} {α : Type u} {m : Type v → Type w} [Monad m]
+  (f : α → m PUnit) (as : Subarray α) : m PUnit
+</code></pre></div><p>Runs a monadic action on each element of a subarray.</p>
+<p>The elements are processed starting at the lowest index and moving up.</p>
+<p><a id="Subarray___forRevM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.forRevM.{u, v, w} {α : Type u} {m : Type v → Type w} [Monad m]
+  (f : α → m PUnit) (as : Subarray α) : m PUnit
+</code></pre></div><p>Runs a monadic action on each element of a subarray, in reverse order.</p>
+<p>The elements are processed starting at the highest index and moving down.</p>
+<p><a id="Subarray___forIn"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.forIn.{v, w, u} {α : Type u} {β : Type v} {m : Type v → Type w}
+  [Monad m] (s : Subarray α) (b : β) (f : α → β → m (ForInStep β)) : m β
+</code></pre></div><p>The implementation of <code>ForIn.forIn</code> for <code>Subarray</code>, which allows it to be used with <code>for</code> loops in <code>do</code>-notation.</p>
+<p><a id="The-Lean-Language-Reference--Basic-Types--Arrays--Subarrays--Element-Predicates"></a></p>
+<h4 id="20-16-5-5-element-predicates">20.16.5.5. Element Predicates</h4><p><a id="Subarray___findRev___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.findRev? {α : Type} (as : Subarray α) (p : α → Bool) : Option α
+</code></pre></div><p>Tests each element in a subarray with a Boolean predicate in reverse order, stopping at the first element that satisfies the predicate. The element that satisfies the predicate is returned, or <code>none</code> if no element satisfies the predicate.</p>
+<p>Examples:</p>
+<ul>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].toSubarray.findRev? (·.length ≠ 4) = some &quot;green&quot;</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].toSubarray.findRev? (fun _ =&gt; true) = some &quot;blue&quot;</code></li>
+<li><code>#[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].toSubarray 0 0 |&gt;.findRev? (fun _ =&gt; true) = none</code></li>
+</ul>
+<p><a id="Subarray___findRevM___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.findRevM?.{w} {α : Type} {m : Type → Type w} [Monad m]
+  (as : Subarray α) (p : α → m Bool) : m (Option α)
+</code></pre></div><p>Applies a monadic Boolean predicate to each element in a subarray in reverse order, stopping at the first element that satisfies the predicate. The element that satisfies the predicate is returned, or <code>none</code> if no element satisfies it.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].toSubarray.findRevM? fun x =&gt; do
+  IO.println x
+  return (x.length = 5)
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">blue
+green
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">some 5
+</code></pre></div><p><a id="Subarray___findSomeRevM___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.findSomeRevM?.{u, v, w} {α : Type u} {β : Type v}
+  {m : Type v → Type w} [Monad m] (as : Subarray α)
+  (f : α → m (Option β)) : m (Option β)
+</code></pre></div><p>Applies a monadic function to each element in a subarray in reverse order, stopping at the first element for which the function succeeds by returning a value other than <code>none</code>. The succeeding value is returned, or <code>none</code> if there is no success.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;].toSubarray.findSomeRevM? fun x =&gt; do
+  IO.println x
+  return Option.guard (· = 5) x.length
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">blue
+green
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">some 5
+</code></pre></div><p><a id="Subarray___all"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.all.{u} {α : Type u} (p : α → Bool) (as : Subarray α) : Bool
+</code></pre></div><p>Checks whether all of the elements in a subarray satisfy a Boolean predicate.</p>
+<p>The elements are tested starting at the lowest index and moving up. The search terminates as soon as an element that does not satisfy the predicate is found.</p>
+<p><a id="Subarray___allM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.allM.{u, w} {α : Type u} {m : Type → Type w} [Monad m]
+  (p : α → m Bool) (as : Subarray α) : m Bool
+</code></pre></div><p>Checks whether all of the elements in a subarray satisfy a monadic Boolean predicate.</p>
+<p>The elements are tested starting at the lowest index and moving up. The search terminates as soon as an element that does not satisfy the predicate is found.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;orange&quot;].toSubarray.popFront.allM fun x =&gt; do
+  IO.println x
+  pure (x.length == 5)
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">green
+blue
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">false
+</code></pre></div><p><a id="Subarray___any"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.any.{u} {α : Type u} (p : α → Bool) (as : Subarray α) : Bool
+</code></pre></div><p>Checks whether any of the elements in a subarray satisfy a Boolean predicate.</p>
+<p>The elements are tested starting at the lowest index and moving up. The search terminates as soon as an element that satisfies the predicate is found.</p>
+<p><a id="Subarray___anyM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Subarray.anyM.{u, w} {α : Type u} {m : Type → Type w} [Monad m]
+  (p : α → m Bool) (as : Subarray α) : m Bool
+</code></pre></div><p>Checks whether any of the elements in a subarray satisfy a monadic Boolean predicate.</p>
+<p>The elements are tested starting at the lowest index and moving up. The search terminates as soon as an element that satisfies the predicate is found.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval #[&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;, &quot;orange&quot;].toSubarray.popFront.anyM fun x =&gt; do
+  IO.println x
+  pure (x == &quot;blue&quot;)
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">green
+blue
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">true
+</code></pre></div><p><a id="array-ffi"></a></p>
+<h3 id="20-16-6-ffi">20.16.6. FFI</h3><p><a id="lean_string_object-next"></a></p>
+<p><strong>FFI type</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">typedef struct {
+    lean_object   m_header;
+    size_t        m_size;
+    size_t        m_capacity;
+    lean_object * m_data[];
+} lean_array_object;
+</code></pre></div><p>The representation of arrays in C. See <a href="index.html#array-runtime">the description of run-time <code>Array</code>s</a> for more details.</p>
+<p><a id="lean_is_array"></a></p>
+<p><strong>FFI function</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">bool lean_is_array(lean_object * o)
+</code></pre></div><p>Returns <code>true</code> if <code>o</code> is an array, or <code>false</code> otherwise.</p>
+<p><a id="lean_to_array"></a></p>
+<p><strong>FFI function</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">lean_array_object * lean_to_array(lean_object * o)
+</code></pre></div><p>Performs a runtime check that <code>o</code> is indeed an array. If <code>o</code> is not an array, an assertion fails.</p>
+<h2 id="preserved-grammar-annotations">Preserved grammar annotations</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Syntax for `Array α`. 
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `#[]` in identifiers is `empty`.
+
+ * The recommended spelling of `#[x]` in identifiers is `singleton`.
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">A subarray with the provided lower bound that extends to the rest of the array.
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">A subarray with the provided bounds.
+</code></pre></div><h2 id="preserved-native-diagnostic-displays">Preserved native diagnostic displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">some 2
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#[5, 6, 7, 8, 9].toSubarray
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#[2, 3, 4, 5].toSubarray
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">true
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#[1, 2, 30, 4]It was 3
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#[1, 2, 3, 4]
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#[1, 2, 2]Checking 1
+Checking 2
+Checking 5
+Checking 2
+Checking 7
+Checking 7
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#[1, 2, 2]Checking 7
+Checking 7
+Checking 2
+Checking 5
+Checking 2
+Checking 1
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#[10, 14, 14]
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#[10, 14, 14]Examining 1
+Examining 2
+Examining 5
+Examining 2
+Examining 7
+Examining 7
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.HashMap.ofList [(0, #[0, 2, 4, 6]), (1, #[1, 3, 5])]
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">some 1Almost! 6
+Almost! 5
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">some 2Almost! 5
+Almost! 6
+</code></pre></div><h3 id="display-14">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">some 10
+</code></pre></div><h3 id="display-15">Display 15</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">some 10Almost! 6
+Almost! 5
+</code></pre></div><h3 id="display-16">Display 16</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Except.ok (some (-4))
+</code></pre></div><h3 id="display-17">Display 17</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Except.error &quot;Zero!&quot;
+</code></pre></div><h3 id="display-18">Display 18</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">some &quot;(4)blue (5)green (3)red &quot;
+</code></pre></div><h3 id="display-19">Display 19</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">some &quot;green&quot;blue
+green
+</code></pre></div><h3 id="display-20">Display 20</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">some 5blue
+green
+</code></pre></div><h3 id="display-21">Display 21</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">falsegreen
+blue
+</code></pre></div><h3 id="display-22">Display 22</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">truegreen
+blue
+</code></pre></div><h2 id="inherited-reference-figures">Inherited reference figures</h2><p>These figures describe the native reference, not a claim about an implemented PSC runtime.</p>
+<p><img loading="lazy" src="../../../assets/figures/figure-01.svg" alt="m_header Lean object header m_size Byte countsize_t m_capacity Allocated spacesize_t m_data Array dataArray of lean_object *"></p>
+<p>Caption labels: m_header Lean object header m_size Byte countsize_t m_capacity Allocated spacesize_t m_data Array dataArray of lean_object *</p>
+<footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

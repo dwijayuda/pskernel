@@ -1,0 +1,1108 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;grind-ring&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../index.html">16. The grind tactic</a><a href="../Error-Messages/index.html">16.1. Error Messages</a><a href="../Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../Local-Definitions/index.html">16.3. Local Definitions</a><a href="../Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../Case-Analysis/index.html">16.6. Case Analysis</a><a href="../E___matching/index.html">16.7. E‑matching</a><a href="../Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../Reducibility/index.html">16.13. Reducibility</a><a href="../Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../../Notations-and-Macros/index.html">23. Notations and Macros</a><a href="../../Notations-and-Macros/Custom-Operators/index.html">23.1. Custom Operators</a><a href="../../Notations-and-Macros/Precedence/index.html">23.2. Precedence</a><a href="../../Notations-and-Macros/Notations/index.html">23.3. Notations</a><a href="../../Notations-and-Macros/Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../../Notations-and-Macros/Macros/index.html">23.5. Macros</a><a href="../../Notations-and-Macros/Elaborators/index.html">23.6. Elaborators</a><a href="../../Notations-and-Macros/Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../../Notations-and-Macros/Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../../releases/index.html">Release Notes</a><a href="../../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="grind-ring"></a></p>
+<h1 id="proofscript-16-10-algebraic-solver-commutative-rings-fields">ProofScript — 16.10. Algebraic Solver (Commutative Rings, Fields)</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>grind combines reasoning such as congruence closure, propagation, case analysis, E-matching and algebraic/arithmetic procedures. Its selected lemmas, annotations and solver parameters determine the search problem. Keep these as native proof-producing facilities, not as a replacement for the kernel. The mirrored subchapters and examples retain their individual scopes and failure cases.</p>
+<p><strong>Compiler and coverage boundary.</strong> Lean 4.34 stable parameter-list changes for lia/grobner are inherited only under the selected tactic capability. A timeout must remain an incomplete-search result.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">The--grind--tactic/Algebraic-Solver-<em>LPAR_Commutative-Rings</em>_<em>-Fields_RPAR</em>/index.html</a>. Source Git blob: <code>fe6aceb18e5bc92838995ed277b6036164bb6f0f</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<p><a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Extends-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Extends-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Extends-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Extends-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Extends-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<hr>
+<h2 id="16-10-algebraic-solver-commutative-rings-fields">16.10. Algebraic Solver (Commutative Rings, Fields)</h2><p>The <code>ring</code> solver in <code>grind</code> is inspired by Gröbner basis computation procedures and term rewriting completion. It views multivariate polynomials as rewriting rules. For example, the polynomial equality <code>x * y + x - 2 = 0</code> is treated as a rewriting rule <code>x * y ↦ -x + 2</code>. It uses superposition to ensure the rewriting system is confluent.</p>
+<p>The following examples demonstrate goals that can be decided by the <code>ring</code> solver. In these examples, the <code>Lean</code> and <code>Lean.Grind</code> namespaces are open:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">open Lean Grind
+</code></pre></div><p><a id="Commutative-Rings"></a>
+Commutative Rings </p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [CommRing α] (x : α) : (x + 1) * (x - 1) = x ^ 2 - 1 := by
+  grind
+</code></pre></div><p><a id="Ring-Characteristics"></a>
+Ring Characteristics </p>
+<p>The solver “knows” that <code>16*16 = 0</code> because the <a href="https://en.wikipedia.org/wiki/Characteristic_%28algebra%29">ring characteristic</a> (that is, the minimum number of copies of the multiplicative identity that sum to the additive identity) is <code>256</code>, which is provided by the <code>IsCharP</code> instance.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [CommRing α] [IsCharP α 256] (x : α) :
+    (x + 16)*(x - 16) = x^2 := by
+  grind
+</code></pre></div><p><a id="Standard-Library-Types"></a>
+Standard Library Types </p>
+<p>Types in the standard library are supported by the solver out of the box. <code>UInt8</code> is a commutative ring with characteristic <code>256</code>, and thus has instances of <code>CommRing UInt8</code> and <code>IsCharP UInt8 256</code>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example (x : UInt8) : (x + 16) * (x - 16) = x ^ 2 := by
+  grind
+</code></pre></div><p><a id="More-Commutative-Ring-Proofs"></a>
+More Commutative Ring Proofs </p>
+<p>The axioms of a commutative ring are sufficient to prove these statements.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [CommRing α] (a b c : α) :
+    a + b + c = 3 →
+    a ^ 2 + b ^ 2 + c ^ 2 = 5 →
+    a ^ 3 + b ^ 3 + c ^ 3 = 7 →
+    a ^ 4 + b ^ 4 = 9 - c ^ 4 := by
+  grind
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [CommRing α] (x y : α) :
+    x ^ 2 * y = 1 →
+    x * y ^ 2 = y →
+    y * x = 1 := by
+  grind
+</code></pre></div><p><a id="Characteristic-Zero"></a>
+Characteristic Zero </p>
+<p><code>ring</code> proves that <code>a + 1 = 2 + a</code> is unsatisfiable because the characteristic is known to be 0.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [CommRing α] [IsCharP α 0] (a : α) :
+    a + 1 = 2 + a → False := by
+  grind
+</code></pre></div><p><a id="Inferred-Characteristic"></a>
+Inferred Characteristic </p>
+<p>Even when the characteristic is not initially known, when <code>grind</code> discovers that <code>n = 0</code> for some numeral <code>n</code>, it makes inferences about the characteristic:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [CommRing α] (a b c : α)
+    (h₁ : a + 6 = a) (h₂ : c = c + 9) (h : b + 3*c = 0) :
+    27*a + b = 0 := by
+  grind
+</code></pre></div><p><a id="grind-ring-classes"></a></p>
+<h3 id="16-10-1-solver-type-classes">16.10.1. Solver Type Classes</h3><p>Users can enable the <code>ring</code> solver for their own types by providing instances of the following <a href="../../Type-Classes/index.html#--tech-term-type-class">type classes</a>, all in the <code>Lean.Grind</code> namespace:</p>
+<ul>
+<li><code>Semiring</code></li>
+<li><code>Ring</code></li>
+<li><code>CommSemiring</code></li>
+<li><code>CommRing</code></li>
+<li><code>IsCharP</code></li>
+<li><code>AddRightCancel</code></li>
+<li><code>NoNatZeroDivisors</code></li>
+<li><code>Field</code></li>
+</ul>
+<p>The algebraic solvers will self-configure depending on the availability of these instances, so not all need to be provided. The capabilities of the algebraic solvers will, of course, degrade when some are not available.</p>
+<p>The Lean standard library contains the applicable instances for the types defined in the standard library. By providing these instances, other libraries can also enable <code>grind</code>&#39;s <code>ring</code> solver. For example, the Mathlib <code>CommRing</code> type class implements <code>Lean.Grind.CommRing</code> to ensure the <code>ring</code> solver works out-of-the-box.</p>
+<p><a id="The-Lean-Language-Reference--The--grind--tactic--Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_--Solver-Type-Classes--Algebraic-Structures"></a></p>
+<h4 id="16-10-1-1-algebraic-structures">16.10.1.1. Algebraic Structures</h4><p>To enable the algebraic solver, a type should have an instance of the most specific possible algebraic structure that the solver supports. In order of increasing specificity, that is <code>Semiring</code>, <code>Ring</code>, <code>CommSemiring</code>, <code>CommRing</code>, and <code>Field</code>.</p>
+<p><a id="Lean___Grind___Semiring___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.Semiring.{u} (α : Type u) : Type u
+</code></pre></div><p>A semiring, i.e. a type equipped with addition, multiplication, and a map from the natural numbers, satisfying appropriate compatibilities.</p>
+<p>Use <code>Ring</code> instead if the type also has negation, <code>CommSemiring</code> if the multiplication is commutative, or <code>CommRing</code> if the type has negation and multiplication is commutative.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.Semiring.mk.{u}
+</code></pre></div><p><strong>Extends</strong></p>
+<ul>
+<li><a id="0-Add-Lean.Grind.Semiring"></a>
+<code>Add α</code></li>
+<li><a id="1-Mul-Lean.Grind.Semiring"></a>
+<code>Mul α</code></li>
+</ul>
+<p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Add α</code></li>
+<li><code>Mul α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Add α</code></li>
+<li><code>Mul α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">natCast : NatCast α
+</code></pre></div><p>In every semiring there is a canonical map from the natural numbers to the semiring, providing the values of <code>0</code> and <code>1</code>. Note that this function need not be injective.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat : (n : Nat) → OfNat α n
+</code></pre></div><p>Natural number numerals in the semiring. The field <code>ofNat_eq_natCast</code> ensures that these are (propositionally) equal to the values of <code>natCast</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">nsmul : SMul Nat α
+</code></pre></div><p>Scalar multiplication by natural numbers.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">npow : HPow α Nat α
+</code></pre></div><p>Exponentiation by a natural number.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_zero : ∀ (a : α), a + 0 = a
+</code></pre></div><p>Zero is the right identity for addition.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_comm : ∀ (a b : α), a + b = b + a
+</code></pre></div><p>Addition is commutative.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_assoc : ∀ (a b c : α), a + b + c = a + (b + c)
+</code></pre></div><p>Addition is associative.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_assoc : ∀ (a b c : α), a * b * c = a * (b * c)
+</code></pre></div><p>Multiplication is associative.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_one : ∀ (a : α), a * 1 = a
+</code></pre></div><p>One is the right identity for multiplication.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">one_mul : ∀ (a : α), 1 * a = a
+</code></pre></div><p>One is the left identity for multiplication.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">left_distrib : ∀ (a b c : α), a * (b + c) = a * b + a * c
+</code></pre></div><p>Left distributivity of multiplication over addition.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">right_distrib : ∀ (a b c : α), (a + b) * c = a * c + b * c
+</code></pre></div><p>Right distributivity of multiplication over addition.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zero_mul : ∀ (a : α), 0 * a = 0
+</code></pre></div><p>Zero is right absorbing for multiplication.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_zero : ∀ (a : α), a * 0 = 0
+</code></pre></div><p>Zero is left absorbing for multiplication.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pow_zero : ∀ (a : α), a ^ 0 = 1
+</code></pre></div><p>The zeroth power of any element is one.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pow_succ : ∀ (a : α) (n : Nat), a ^ (n + 1) = a ^ n * a
+</code></pre></div><p>The successor power law for exponentiation.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat_succ : ∀ (a : Nat), OfNat.ofNat (a + 1) = OfNat.ofNat a + 1
+</code></pre></div><p>Numerals are consistently defined with respect to addition.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat_eq_natCast : ∀ (n : Nat), OfNat.ofNat n = ↑n
+</code></pre></div><p>Numerals are consistently defined with respect to the canonical map from natural numbers.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">nsmul_eq_natCast_mul : ∀ (n : Nat) (a : α), n • a = ↑n * a
+</code></pre></div><p>Multiplying by a numeral is consistently defined with respect to the canonical map from natural numbers.</p>
+<p><a id="Lean___Grind___CommSemiring___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.CommSemiring.{u} (α : Type u) : Type u
+</code></pre></div><p>A commutative semiring, i.e. a semiring with commutative multiplication.</p>
+<p>Use <code>CommRing</code> if the type has negation.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.CommSemiring.mk.{u}
+</code></pre></div><p><strong>Extends</strong></p>
+<ul>
+<li><a id="0-Lean.Grind.Semiring-Lean.Grind.CommSemiring"></a>
+<code>Lean.Grind.Semiring α</code></li>
+</ul>
+<p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">natCast : NatCast α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat : (n : Nat) → OfNat α n
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">nsmul : SMul Nat α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">npow : HPow α Nat α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_zero : ∀ (a : α), a + 0 = a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_comm : ∀ (a b : α), a + b = b + a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_assoc : ∀ (a b c : α), a + b + c = a + (b + c)
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_assoc : ∀ (a b c : α), a * b * c = a * (b * c)
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_one : ∀ (a : α), a * 1 = a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">one_mul : ∀ (a : α), 1 * a = a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">left_distrib : ∀ (a b c : α), a * (b + c) = a * b + a * c
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">right_distrib : ∀ (a b c : α), (a + b) * c = a * c + b * c
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zero_mul : ∀ (a : α), 0 * a = 0
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_zero : ∀ (a : α), a * 0 = 0
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pow_zero : ∀ (a : α), a ^ 0 = 1
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pow_succ : ∀ (a : α) (n : Nat), a ^ (n + 1) = a ^ n * a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat_succ : ∀ (a : Nat), OfNat.ofNat (a + 1) = OfNat.ofNat a + 1
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat_eq_natCast : ∀ (n : Nat), OfNat.ofNat n = ↑n
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">nsmul_eq_natCast_mul : ∀ (n : Nat) (a : α), n • a = ↑n * a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_comm : ∀ (a b : α), a * b = b * a
+</code></pre></div><p>Multiplication is commutative.</p>
+<p><a id="Lean___Grind___Ring___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.Ring.{u} (α : Type u) : Type u
+</code></pre></div><p>A ring, i.e. a type equipped with addition, negation, multiplication, and a map from the integers, satisfying appropriate compatibilities.</p>
+<p>Use <code>CommRing</code> if the multiplication is commutative.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.Ring.mk.{u}
+</code></pre></div><p><strong>Extends</strong></p>
+<ul>
+<li><a id="0-Lean.Grind.Semiring-Lean.Grind.Ring"></a>
+<code>Lean.Grind.Semiring α</code></li>
+<li><a id="1-Neg-Lean.Grind.Ring"></a>
+<code>Neg α</code></li>
+<li><a id="2-Sub-Lean.Grind.Ring"></a>
+<code>Sub α</code></li>
+</ul>
+<p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">natCast : NatCast α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat : (n : Nat) → OfNat α n
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">nsmul : SMul Nat α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">npow : HPow α Nat α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_zero : ∀ (a : α), a + 0 = a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_comm : ∀ (a b : α), a + b = b + a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_assoc : ∀ (a b c : α), a + b + c = a + (b + c)
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_assoc : ∀ (a b c : α), a * b * c = a * (b * c)
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_one : ∀ (a : α), a * 1 = a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">one_mul : ∀ (a : α), 1 * a = a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">left_distrib : ∀ (a b c : α), a * (b + c) = a * b + a * c
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">right_distrib : ∀ (a b c : α), (a + b) * c = a * c + b * c
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zero_mul : ∀ (a : α), 0 * a = 0
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_zero : ∀ (a : α), a * 0 = 0
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pow_zero : ∀ (a : α), a ^ 0 = 1
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pow_succ : ∀ (a : α) (n : Nat), a ^ (n + 1) = a ^ n * a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat_succ : ∀ (a : Nat), OfNat.ofNat (a + 1) = OfNat.ofNat a + 1
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat_eq_natCast : ∀ (n : Nat), OfNat.ofNat n = ↑n
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">nsmul_eq_natCast_mul : ∀ (n : Nat) (a : α), n • a = ↑n * a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">neg : α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">sub : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Semiring α</code></li>
+<li><code>Neg α</code></li>
+<li><code>Sub α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">intCast : IntCast α
+</code></pre></div><p>In every ring there is a canonical map from the integers to the ring.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zsmul : SMul Int α
+</code></pre></div><p>Scalar multiplication by integers.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">neg_add_cancel : ∀ (a : α), -a + a = 0
+</code></pre></div><p>Negation is the left inverse of addition.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">sub_eq_add_neg : ∀ (a b : α), a - b = a + -b
+</code></pre></div><p>Subtraction is addition of the negative.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">neg_zsmul : ∀ (i : Int) (a : α), -i • a = -(i • a)
+</code></pre></div><p>Scalar multiplication by the negation of an integer is the negation of scalar multiplication by that integer.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zsmul_natCast_eq_nsmul : ∀ (n : Nat) (a : α), ↑n • a = n • a
+</code></pre></div><p>Scalar multiplication by natural numbers is consistent with scalar multiplication by integers.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">intCast_ofNat : ∀ (n : Nat), ↑(OfNat.ofNat n) = OfNat.ofNat n
+</code></pre></div><p>The canonical map from the integers is consistent with the canonical map from the natural numbers.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">intCast_neg : ∀ (i : Int), ↑(-i) = -↑i
+</code></pre></div><p>The canonical map from the integers is consistent with negation.</p>
+<p><a id="Lean___Grind___CommRing___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.CommRing.{u} (α : Type u) : Type u
+</code></pre></div><p>A commutative ring, i.e. a ring with commutative multiplication.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.CommRing.mk.{u}
+</code></pre></div><p><strong>Extends</strong></p>
+<ul>
+<li><a id="0-Lean.Grind.Ring-Lean.Grind.CommRing"></a>
+<code>Lean.Grind.Ring α</code></li>
+<li><a id="1-Lean.Grind.CommSemiring-Lean.Grind.CommRing"></a>
+<code>Lean.Grind.CommSemiring α</code></li>
+</ul>
+<p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">natCast : NatCast α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat : (n : Nat) → OfNat α n
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">nsmul : SMul Nat α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">npow : HPow α Nat α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_zero : ∀ (a : α), a + 0 = a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_comm : ∀ (a b : α), a + b = b + a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_assoc : ∀ (a b c : α), a + b + c = a + (b + c)
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_assoc : ∀ (a b c : α), a * b * c = a * (b * c)
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_one : ∀ (a : α), a * 1 = a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">one_mul : ∀ (a : α), 1 * a = a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">left_distrib : ∀ (a b c : α), a * (b + c) = a * b + a * c
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">right_distrib : ∀ (a b c : α), (a + b) * c = a * c + b * c
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zero_mul : ∀ (a : α), 0 * a = 0
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_zero : ∀ (a : α), a * 0 = 0
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pow_zero : ∀ (a : α), a ^ 0 = 1
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pow_succ : ∀ (a : α) (n : Nat), a ^ (n + 1) = a ^ n * a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat_succ : ∀ (a : Nat), OfNat.ofNat (a + 1) = OfNat.ofNat a + 1
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat_eq_natCast : ∀ (n : Nat), OfNat.ofNat n = ↑n
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">nsmul_eq_natCast_mul : ∀ (n : Nat) (a : α), n • a = ↑n * a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">neg : α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">sub : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">intCast : IntCast α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zsmul : SMul Int α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">neg_add_cancel : ∀ (a : α), -a + a = 0
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">sub_eq_add_neg : ∀ (a b : α), a - b = a + -b
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">neg_zsmul : ∀ (i : Int) (a : α), -i • a = -(i • a)
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zsmul_natCast_eq_nsmul : ∀ (n : Nat) (a : α), ↑n • a = n • a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">intCast_ofNat : ∀ (n : Nat), ↑(OfNat.ofNat n) = OfNat.ofNat n
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">intCast_neg : ∀ (i : Int), ↑(-i) = -↑i
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.Ring α</code></li>
+<li><code>Lean.Grind.CommSemiring α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_comm : ∀ (a b : α), a * b = b * a
+</code></pre></div><p>Multiplication is commutative.</p>
+<p><a id="grind-ring-field"></a></p>
+<h5 id="16-10-1-1-1-fields">16.10.1.1.1. Fields</h5><p>The <code>ring</code> solver also has support for <code>Field</code>s. If a <code>Field</code> instance is available, the solver preprocesses the term <code>a / b</code> into <code>a * b⁻¹</code>. It also rewrites every disequality <code>p ≠ 0</code> as the equality <code>p * p⁻¹ = 1</code>.</p>
+<p><a id="Fields-and--grind"></a>
+Fields and <code>grind</code> </p>
+<p>This example requires its <code>Field</code> instance:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [Field α] (a : α) :
+    a ^ 2 = 0 →
+    a = 0 := by
+  grind
+</code></pre></div><p><a id="Lean___Grind___Field___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.Field.{u} (α : Type u) : Type u
+</code></pre></div><p>A field is a commutative ring with inverses for all non-zero elements.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.Field.mk.{u}
+</code></pre></div><p><strong>Extends</strong></p>
+<ul>
+<li><a id="0-Lean.Grind.CommRing-Lean.Grind.Field"></a>
+<code>Lean.Grind.CommRing α</code></li>
+<li><a id="1-Inv-Lean.Grind.Field"></a>
+<code>Inv α</code></li>
+<li><a id="2-Div-Lean.Grind.Field"></a>
+<code>Div α</code></li>
+</ul>
+<p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">natCast : NatCast α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat : (n : Nat) → OfNat α n
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">nsmul : SMul Nat α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">npow : HPow α Nat α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_zero : ∀ (a : α), a + 0 = a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_comm : ∀ (a b : α), a + b = b + a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_assoc : ∀ (a b c : α), a + b + c = a + (b + c)
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_assoc : ∀ (a b c : α), a * b * c = a * (b * c)
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_one : ∀ (a : α), a * 1 = a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">one_mul : ∀ (a : α), 1 * a = a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">left_distrib : ∀ (a b c : α), a * (b + c) = a * b + a * c
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">right_distrib : ∀ (a b c : α), (a + b) * c = a * c + b * c
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zero_mul : ∀ (a : α), 0 * a = 0
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_zero : ∀ (a : α), a * 0 = 0
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pow_zero : ∀ (a : α), a ^ 0 = 1
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pow_succ : ∀ (a : α) (n : Nat), a ^ (n + 1) = a ^ n * a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat_succ : ∀ (a : Nat), OfNat.ofNat (a + 1) = OfNat.ofNat a + 1
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat_eq_natCast : ∀ (n : Nat), OfNat.ofNat n = ↑n
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">nsmul_eq_natCast_mul : ∀ (n : Nat) (a : α), n • a = ↑n * a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">neg : α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">sub : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">intCast : IntCast α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zsmul : SMul Int α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">neg_add_cancel : ∀ (a : α), -a + a = 0
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">sub_eq_add_neg : ∀ (a b : α), a - b = a + -b
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">neg_zsmul : ∀ (i : Int) (a : α), -i • a = -(i • a)
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zsmul_natCast_eq_nsmul : ∀ (n : Nat) (a : α), ↑n • a = n • a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">intCast_ofNat : ∀ (n : Nat), ↑(OfNat.ofNat n) = OfNat.ofNat n
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">intCast_neg : ∀ (i : Int), ↑(-i) = -↑i
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_comm : ∀ (a b : α), a * b = b * a
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inv : α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">div : α → α → α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>Lean.Grind.CommRing α</code></li>
+<li><code>Inv α</code></li>
+<li><code>Div α</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zpow : HPow α Int α
+</code></pre></div><p>An exponentiation operator.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">div_eq_mul_inv : ∀ (a b : α), a / b = a * b⁻¹
+</code></pre></div><p>Division is multiplication by the inverse.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zero_ne_one : 0 ≠ 1
+</code></pre></div><p>Zero is not equal to one: fields are non trivial.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inv_zero : 0⁻¹ = 0
+</code></pre></div><p>The inverse of zero is zero. This is a &quot;junk value&quot; convention.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mul_inv_cancel : ∀ {a : α}, a ≠ 0 → a * a⁻¹ = 1
+</code></pre></div><p>The inverse of a non-zero element is a right inverse.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zpow_zero : ∀ (a : α), a ^ 0 = 1
+</code></pre></div><p>The zeroth power of any element is one.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zpow_succ : ∀ (a : α) (n : Nat), a ^ (↑n + 1) = a ^ ↑n * a
+</code></pre></div><p>The (n+1)-st power of any element is the element multiplied by the n-th power.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">zpow_neg : ∀ (a : α) (n : Int), a ^ (-n) = (a ^ n)⁻¹
+</code></pre></div><p>Raising to a negative power is the inverse of raising to the positive power.</p>
+<p><a id="The-Lean-Language-Reference--The--grind--tactic--Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_--Solver-Type-Classes--Ring-Characteristics"></a></p>
+<h4 id="16-10-1-2-ring-characteristics">16.10.1.2. Ring Characteristics</h4><p><a id="Lean___Grind___IsCharP___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.IsCharP.{u} (α : Type u) [Lean.Grind.Semiring α]
+  (p : outParam Nat) : Prop
+</code></pre></div><p>A ring <code>α</code> has characteristic <code>p</code> if <code>OfNat.ofNat x = 0</code> iff <code>x % p = 0</code>.</p>
+<p>Note that for <code>p = 0</code>, we have <code>x % p = x</code>, so this says that <code>OfNat.ofNat</code> is injective from <code>Nat</code> to <code>α</code>.</p>
+<p>In the case of a semiring, we take the stronger condition that <code>OfNat.ofNat x = OfNat.ofNat y</code> iff <code>x % p = y % p</code>.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.IsCharP.mk.{u}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ofNat_ext_iff : ∀ {x y : Nat}, OfNat.ofNat x = OfNat.ofNat y ↔ x % p = y % p
+</code></pre></div><p>Two numerals in a semiring are equal iff they are congruent module <code>p</code> in the natural numbers.</p>
+<p><a id="NoNatZeroDivisors"></a></p>
+<h4 id="16-10-1-3-natural-number-zero-divisors">16.10.1.3. Natural Number Zero Divisors</h4><p>The class <code>NoNatZeroDivisors</code> is used to control coefficient growth. For example, the polynomial <code>2 * x * y + 4 * z = 0</code> is simplified to <code>x * y + 2 * z = 0</code>. It also used when processing disequalities.</p>
+<p><a id="Using--NoNatZeroDivisors"></a>
+Using <code>NoNatZeroDivisors</code> </p>
+<p>In this example, <code>grind</code> relies on the <code>NoNatZeroDivisors</code> instance to simplify the goal:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [CommRing α] [NoNatZeroDivisors α] (a b : α) :
+    2 * a + 2 * b = 0 →
+    b ≠ -a → False := by
+  grind
+</code></pre></div><p>Without it, the proof fails:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [CommRing α] (a b : α) :
+    2 * a + 2 * b = 0 →
+    b ≠ -a → False := by
+  grind
+</code></pre></div><p><a id="--verso-unique-1673"></a></p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">`grind` failed
+grindα:Type u_1inst:CommRing αa b:αh:2 * a + 2 * b = 0h_1:¬b = -a⊢ False
+[grind] Goal diagnostics[facts] Asserted facts[prop] 2 * a + 2 * b = 0[prop] ¬b = -a[eqc] False propositions[prop] b = -a[eqc] Equivalence classes[eqc] {0, 2 * a + 2 * b}[ring] Ring `α`[basis] Basis[_] 2 * a + 2 * b = 0[diseqs] Disequalities[_] ¬a + b = 0
+</code></pre></div><p><a id="Lean___Grind___NoNatZeroDivisors___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.NoNatZeroDivisors.{u} (α : Type u) [Lean.Grind.NatModule α] :
+  Prop
+</code></pre></div><p>We say a module has no natural number zero divisors if <code>k ≠ 0</code> and <code>k * a = k * b</code> implies <code>a = b</code> (here <code>k</code> is a natural number and <code>a</code> and <code>b</code> are element of the module).</p>
+<p>For a module over the integers this is equivalent to <code>k ≠ 0</code> and <code>k * a = 0</code> implies <code>a = 0</code>. (See the alternative constructor <code>NoNatZeroDivisors.mk&#39;</code>, and the theorem <code>eq_zero_of_mul_eq_zero</code>.)</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.NoNatZeroDivisors.mk.{u}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">no_nat_zero_divisors : ∀ (k : Nat) (a b : α), k ≠ 0 → k • a = k • b → a = b
+</code></pre></div><p>If <code>k * a ≠ k * b</code> then <code>k ≠ 0</code> or <code>a ≠ b</code>.</p>
+<p><a id="Lean___Grind___NoNatZeroDivisors___mk___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.NoNatZeroDivisors.mk'.{u_1} {α : Type u_1}
+  [Lean.Grind.IntModule α]
+  (eq_zero_of_mul_eq_zero :
+    ∀ (k : Nat) (a : α), k ≠ 0 → k • a = 0 → a = 0) :
+  Lean.Grind.NoNatZeroDivisors α
+</code></pre></div><p>Alternative constructor for <code>NoNatZeroDivisors</code> when we have an <code>IntModule</code>.</p>
+<p>The <code>ring</code> module also performs case-analysis for terms <code>a⁻¹</code> on whether <code>a</code> is zero or not. In the following example, if <code>2*a</code> is zero, then <code>a</code> is also zero since we have <code>NoNatZeroDivisors α</code>, and all terms are zero and the equality hold. Otherwise, <code>ring</code> adds the equalities <code>a*a⁻¹ = 1</code> and <code>2*a*(2*a)⁻¹ = 1</code>, and closes the goal.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [Field α] [NoNatZeroDivisors α] (a : α) :
+    1 / a + 1 / (2 * a) = 3 / (2 * a) := by
+  grind
+</code></pre></div><p>Without <code>NoNatZeroDivisors</code>, <code>grind</code> will perform case splits on numerals being zero as needed:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [Field α] (a : α) : (2 * a)⁻¹ = a⁻¹ / 2 := by grind
+</code></pre></div><p>In the following example, <code>ring</code> does not need to perform any case split because the goal contains the disequalities <code>y ≠ 0</code> and <code>w ≠ 0</code>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [Field α] {x y z w : α} :
+    x / y = z / w →
+    y ≠ 0 → w ≠ 0 →
+    x * w = z * y := by
+  grind (splits := 0)
+</code></pre></div><p>You can disable the <code>ring</code> solver using the option <code>grind -ring</code>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [CommRing α] (x y : α) :
+    x ^ 2 * y = 1 →
+    x * y ^ 2 = y →
+    y * x = 1 := by
+  grind -ring
+</code></pre></div><p><a id="--verso-unique-1687"></a></p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">`grind` failed
+grindα:Type u_1inst:CommRing αx y:αh:x ^ 2 * y = 1h_1:x * y ^ 2 = yh_2:¬y * x = 1⊢ False
+[grind] Goal diagnostics[facts] Asserted facts[prop] x ^ 2 * y = 1[prop] x * y ^ 2 = y[prop] ¬y * x = 1[eqc] False propositions[prop] y * x = 1[eqc] Equivalence classes[eqc] {y, x * y ^ 2}[eqc] {1, x ^ 2 * y}[ematch] E-matching patterns[thm] Nat.pow_pos: [@HPow.hPow `[Nat] `[Nat] `[Nat] `[instHPow] #2 #1][thm] Nat.div_pow_of_pos: [@HPow.hPow `[Nat] `[Nat] `[Nat] `[instHPow] #2 #1][linarith] Linarith assignment for `α`[assign] x := 2[assign] y := 3[assign] 「x ^ 2」 := 4[assign] 「y ^ 2」 := 6
+</code></pre></div><p><a id="AddRightCancel"></a></p>
+<h5 id="16-10-1-3-1-right-cancellative-addition">16.10.1.3.1. Right-Cancellative Addition</h5><p>The <code>ring</code> solver automatically embeds <code>CommSemiring</code>s into a <code>CommRing</code> envelope (using the construction <code>Lean.Grind.Ring.OfSemiring.Q</code>). However, the embedding is injective only when the <code>CommSemiring</code> implements the type class <code>AddRightCancel</code>. <code>Nat</code> is an example of a commutative semiring that implements <code>AddRightCancel</code>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example (x y : Nat) :
+    x ^ 2 * y = 1 →
+    x * y ^ 2 = y →
+    y * x = 1 := by
+  grind
+</code></pre></div><p><a id="Lean___Grind___AddRightCancel___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.AddRightCancel.{u} (M : Type u) [Add M] : Prop
+</code></pre></div><p>A type where addition is right-cancellative, i.e. <code>a + c = b + c</code> implies <code>a = b</code>.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Grind.AddRightCancel.mk.{u}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">add_right_cancel : ∀ (a b c : M), a + c = b + c → a = b
+</code></pre></div><p>Addition is right-cancellative.</p>
+<p><a id="The-Lean-Language-Reference--The--grind--tactic--Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_--Resource-Limits"></a></p>
+<h3 id="16-10-2-resource-limits">16.10.2. Resource Limits</h3><p>Gröbner basis computation can be very expensive. You can limit the number of steps performed by the <code>ring</code> solver using the option <code>grind (ringSteps := &lt;num&gt;)</code></p>
+<p><a id="Limiting--ring--Steps"></a>
+Limiting <code>ring</code> Steps </p>
+<p>This example cannot be solved by performing at most 100 steps:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example [CommRing α] [IsCharP α 0] (d t c : α) (d_inv PSO3_inv : α) :
+    d ^ 2 * (d + t - d * t - 2) * (d + t + d * t) = 0 →
+    -d ^ 4 * (d + t - d * t - 2) *
+      (2 * d + 2 * d * t - 4 * d * t ^ 2 + 2 * d * t^4 +
+      2 * d^2 * t^4 - c * (d + t + d * t)) = 0 →
+    d * d_inv = 1 →
+    (d + t - d * t - 2) * PSO3_inv = 1 →
+    t^2 = t + 1 := by
+  grind (ringSteps := 100)
+</code></pre></div><p><a id="--verso-unique-1695"></a></p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">`grind` failed
+grindα:Type u_1inst:CommRing αinst_1:IsCharP α 0d t c d_inv PSO3_inv:αh:d ^ 2 * (d + t - d * t - 2) * (d + t + d * t) = 0h_1:-d ^ 4 * (d + t - d * t - 2) *
+    (2 * d + 2 * d * t - 4 * d * t ^ 2 + 2 * d * t ^ 4 + 2 * d ^ 2 * t ^ 4 - c * (d + t + d * t)) =
+  0h_2:d * d_inv = 1h_3:(d + t - d * t - 2) * PSO3_inv = 1h_4:¬t ^ 2 = t + 1⊢ False
+[grind] Goal diagnostics[facts] Asserted facts[prop] IsCharP α 0[prop] d ^ 2 * (d + t - d * t - 2) * (d + t + d * t) = 0[prop] -d ^ 4 * (d + t - d * t - 2) *
+        (2 * d + 2 * d * t - 4 * d * t ^ 2 + 2 * d * t ^ 4 + 2 * d ^ 2 * t ^ 4 - c * (d + t + d * t)) =
+      0[prop] d * d_inv = 1[prop] (d + t - d * t - 2) * PSO3_inv = 1[prop] ¬t ^ 2 = t + 1[eqc] True propositions[prop] IsCharP α 0[eqc] False propositions[prop] t ^ 2 = t + 1[eqc] Equivalence classes[eqc] {0,
+    -d ^ 4 * (d + t - d * t - 2) *
+      (2 * d + 2 * d * t - 4 * d * t ^ 2 + 2 * d * t ^ 4 + 2 * d ^ 2 * t ^ 4 - c * (d + t + d * t)),
+    d ^ 2 * (d + t - d * t - 2) * (d + t + d * t)}[eqc] {1, d * d_inv, (d + t - d * t - 2) * PSO3_inv}[ematch] E-matching patterns[thm] Nat.pow_pos: [@HPow.hPow `[Nat] `[Nat] `[Nat] `[instHPow] #2 #1][thm] Nat.div_pow_of_pos: [@HPow.hPow `[Nat] `[Nat] `[Nat] `[instHPow] #2 #1][ring] Ring `α`[basis] Basis[_] t ^ 2 * d_inv ^ 2 + -2 * (t * d_inv ^ 2) + -1 * t ^ 2 + -2 * d_inv + 1 = 0[_] d * t ^ 2 + -1 * (t ^ 2 * d_inv) + 2 * (t * d_inv) + -1 * d + 2 = 0[_] d * t * PSO3_inv + -1 * (d * PSO3_inv) + -1 * (t * PSO3_inv) + 2 * PSO3_inv + 1 = 0[_] t * d_inv * PSO3_inv + -1 * (t * PSO3_inv) + -2 * (d_inv * PSO3_inv) + -1 * d_inv + PSO3_inv = 0[_] d * d_inv + -1 = 0[diseqs] Disequalities[_] ¬t ^ 2 + -1 * t + -1 = 0[limits] Thresholds reached[limit] maximum number of ring steps has been reached, threshold: `(ringSteps := 100)`
+</code></pre></div><p>The <code>ring</code> solver propagates equalities back to the <code>grind</code> core by normalizing terms using the computed Gröbner basis. In the following example, the equations <code>x ^ 2 * y = 1</code> and <code>x * y ^ 2 = y</code> imply the equalities <code>x = 1</code> and <code>y = 1</code>. Thus, the terms <code>x * y</code> and <code>1</code> are equal, and consequently <code>some (x * y) = some 1</code> by congruence.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example (x y : Int) :
+    x ^ 2 * y = 1 →
+    x * y ^ 2 = y →
+    some (y * x) = some 1 := by
+  grind
+</code></pre></div><h2 id="preserved-native-diagnostic-displays">Preserved native diagnostic displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`grind` failed
+grindα:Type u_1inst:CommRing αa b:αh:2 * a + 2 * b = 0h_1:¬b = -a⊢ False
+[grind] Goal diagnostics[facts] Asserted facts[prop] 2 * a + 2 * b = 0[prop] ¬b = -a[eqc] False propositions[prop] b = -a[eqc] Equivalence classes[eqc] {0, 2 * a + 2 * b}[ring] Ring `α`[basis] Basis[_] 2 * a + 2 * b = 0[diseqs] Disequalities[_] ¬a + b = 0
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`grind` failed
+grindα:Type u_1inst:CommRing αx y:αh:x ^ 2 * y = 1h_1:x * y ^ 2 = yh_2:¬y * x = 1⊢ False
+[grind] Goal diagnostics[facts] Asserted facts[prop] x ^ 2 * y = 1[prop] x * y ^ 2 = y[prop] ¬y * x = 1[eqc] False propositions[prop] y * x = 1[eqc] Equivalence classes[eqc] {y, x * y ^ 2}[eqc] {1, x ^ 2 * y}[ematch] E-matching patterns[thm] Nat.pow_pos: [@HPow.hPow `[Nat] `[Nat] `[Nat] `[instHPow] #2 #1][thm] Nat.div_pow_of_pos: [@HPow.hPow `[Nat] `[Nat] `[Nat] `[instHPow] #2 #1][linarith] Linarith assignment for `α`[assign] x := 2[assign] y := 3[assign] 「x ^ 2」 := 4[assign] 「y ^ 2」 := 6
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`grind` failed
+grindα:Type u_1inst:CommRing αinst_1:IsCharP α 0d t c d_inv PSO3_inv:αh:d ^ 2 * (d + t - d * t - 2) * (d + t + d * t) = 0h_1:-d ^ 4 * (d + t - d * t - 2) *
+    (2 * d + 2 * d * t - 4 * d * t ^ 2 + 2 * d * t ^ 4 + 2 * d ^ 2 * t ^ 4 - c * (d + t + d * t)) =
+  0h_2:d * d_inv = 1h_3:(d + t - d * t - 2) * PSO3_inv = 1h_4:¬t ^ 2 = t + 1⊢ False
+[grind] Goal diagnostics[facts] Asserted facts[prop] IsCharP α 0[prop] d ^ 2 * (d + t - d * t - 2) * (d + t + d * t) = 0[prop] -d ^ 4 * (d + t - d * t - 2) *
+        (2 * d + 2 * d * t - 4 * d * t ^ 2 + 2 * d * t ^ 4 + 2 * d ^ 2 * t ^ 4 - c * (d + t + d * t)) =
+      0[prop] d * d_inv = 1[prop] (d + t - d * t - 2) * PSO3_inv = 1[prop] ¬t ^ 2 = t + 1[eqc] True propositions[prop] IsCharP α 0[eqc] False propositions[prop] t ^ 2 = t + 1[eqc] Equivalence classes[eqc] {0,
+    -d ^ 4 * (d + t - d * t - 2) *
+      (2 * d + 2 * d * t - 4 * d * t ^ 2 + 2 * d * t ^ 4 + 2 * d ^ 2 * t ^ 4 - c * (d + t + d * t)),
+    d ^ 2 * (d + t - d * t - 2) * (d + t + d * t)}[eqc] {1, d * d_inv, (d + t - d * t - 2) * PSO3_inv}[ematch] E-matching patterns[thm] Nat.pow_pos: [@HPow.hPow `[Nat] `[Nat] `[Nat] `[instHPow] #2 #1][thm] Nat.div_pow_of_pos: [@HPow.hPow `[Nat] `[Nat] `[Nat] `[instHPow] #2 #1][ring] Ring `α`[basis] Basis[_] t ^ 2 * d_inv ^ 2 + -2 * (t * d_inv ^ 2) + -1 * t ^ 2 + -2 * d_inv + 1 = 0[_] d * t ^ 2 + -1 * (t ^ 2 * d_inv) + 2 * (t * d_inv) + -1 * d + 2 = 0[_] d * t * PSO3_inv + -1 * (d * PSO3_inv) + -1 * (t * PSO3_inv) + 2 * PSO3_inv + 1 = 0[_] t * d_inv * PSO3_inv + -1 * (t * PSO3_inv) + -2 * (d_inv * PSO3_inv) + -1 * d_inv + PSO3_inv = 0[_] d * d_inv + -1 = 0[diseqs] Disequalities[_] ¬t ^ 2 + -1 * t + -1 = 0[limits] Thresholds reached[limit] maximum number of ring steps has been reached, threshold: `(ringSteps := 100)`
+</code></pre></div><h2 id="preserved-native-proof-state-displays">Preserved native proof-state displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝:CommRing αx:α⊢ (x + 1) * (x - 1) = x ^ 2 - 1
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">All goals completed! 🐙
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝¹:CommRing αinst✝:IsCharP α 256x:α⊢ (x + 16) * (x - 16) = x ^ 2
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">x:UInt8⊢ (x + 16) * (x - 16) = x ^ 2
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝:CommRing αa:αb:αc:α⊢ a + b + c = 3 → a ^ 2 + b ^ 2 + c ^ 2 = 5 → a ^ 3 + b ^ 3 + c ^ 3 = 7 → a ^ 4 + b ^ 4 = 9 - c ^ 4
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝:CommRing αx:αy:α⊢ x ^ 2 * y = 1 → x * y ^ 2 = y → y * x = 1
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝¹:CommRing αinst✝:IsCharP α 0a:α⊢ a + 1 = 2 + a → False
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝:CommRing αa:αb:αc:αh₁:a + 6 = ah₂:c = c + 9h:b + 3 * c = 0⊢ 27 * a + b = 0
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝:Field αa:α⊢ a ^ 2 = 0 → a = 0
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝¹:CommRing αinst✝:NoNatZeroDivisors αa:αb:α⊢ 2 * a + 2 * b = 0 → b ≠ -a → False
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝:CommRing αa:αb:α⊢ 2 * a + 2 * b = 0 → b ≠ -a → False
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝¹:Field αinst✝:NoNatZeroDivisors αa:α⊢ 1 / a + 1 / (2 * a) = 3 / (2 * a)
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝:Field αa:α⊢ (2 * a)⁻¹ = a⁻¹ / 2
+</code></pre></div><h3 id="display-14">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝:Field αx:αy:αz:αw:α⊢ x / y = z / w → y ≠ 0 → w ≠ 0 → x * w = z * y
+</code></pre></div><h3 id="display-15">Display 15</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">x:Naty:Nat⊢ x ^ 2 * y = 1 → x * y ^ 2 = y → y * x = 1
+</code></pre></div><h3 id="display-16">Display 16</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type u_1inst✝¹:CommRing αinst✝:IsCharP α 0d:αt:αc:αd_inv:αPSO3_inv:α⊢ d ^ 2 * (d + t - d * t - 2) * (d + t + d * t) = 0 →
+  -d ^ 4 * (d + t - d * t - 2) *
+        (2 * d + 2 * d * t - 4 * d * t ^ 2 + 2 * d * t ^ 4 + 2 * d ^ 2 * t ^ 4 - c * (d + t + d * t)) =
+      0 →
+    d * d_inv = 1 → (d + t - d * t - 2) * PSO3_inv = 1 → t ^ 2 = t + 1
+</code></pre></div><h3 id="display-17">Display 17</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">x:Inty:Int⊢ x ^ 2 * y = 1 → x * y ^ 2 = y → some (y * x) = some 1
+</code></pre></div><footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

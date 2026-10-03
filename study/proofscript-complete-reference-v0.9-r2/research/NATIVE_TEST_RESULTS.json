@@ -1,0 +1,68 @@
+{
+  "toolchain": "Lean (version 4.34.0, x86_64-w64-windows-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+  "scope": "hand-authored native Lean counterparts only; no production ProofScript parser or checker execution",
+  "results": [
+    {
+      "name": "CanonicalWritingExamples",
+      "expectedAccept": true,
+      "status": 0,
+      "stdout": "'CompleteReferenceExamples.equalityChain' depends on axioms: [propext, Classical.choice, Quot.sound]\n'CompleteReferenceExamples.totalExample' depends on axioms: [propext]\n",
+      "stderr": "",
+      "sourceSha256": "3322183e8456537ae562d72d455811b136e1f6d48b1fa0ed179196148d6e73ab"
+    },
+    {
+      "name": "RejectFalseProof",
+      "expectedAccept": false,
+      "status": 1,
+      "stdout": "examples\\RejectFalseProof.lean:2:30: error: Type mismatch\n  True.intro\nhas type\n  True\nbut is expected to have type\n  False\n",
+      "stderr": "",
+      "sourceSha256": "d137619cde1a76afc9eefb80d8de58a232a06a57b6a20d3c58c4420d5b65a1a6",
+      "error": ""
+    },
+    {
+      "name": "RejectDependentUpdate",
+      "expectedAccept": false,
+      "status": 1,
+      "stdout": "examples\\RejectDependentUpdate.lean:5:45: error: Type mismatch\n  s.data\nhas type\n  Fin s.n → Nat\nbut is expected to have type\n  Fin (s.n + 1) → Nat\n",
+      "stderr": "",
+      "sourceSha256": "508a20dfd345f304c445dcc8a2d0bf6092d0e51fd6159110361e505669883a9f",
+      "error": ""
+    },
+    {
+      "name": "RejectExtraTerminator",
+      "expectedAccept": false,
+      "status": 1,
+      "stdout": "examples\\RejectExtraTerminator.lean:2:22: error: unexpected token ';'; expected command\n",
+      "stderr": "",
+      "sourceSha256": "07d41da4fd3352da36a60a692b6066cd2744b48771661761df00e17bfbd52a16",
+      "error": ""
+    },
+    {
+      "name": "RejectTruthiness",
+      "expectedAccept": false,
+      "status": 1,
+      "stdout": "examples\\RejectTruthiness.lean:2:24: error: Application type mismatch: The argument\n  1\nhas type\n  Nat\nbut is expected to have type\n  Prop\nin the application\n  @ite ?m.4 1\n",
+      "stderr": "",
+      "sourceSha256": "a8344995cf0aff17409364b10c20b43244ea24c5ac45d4e0bd34b8f5ca9182f5",
+      "error": ""
+    },
+    {
+      "name": "RejectTupleArity",
+      "expectedAccept": false,
+      "status": 1,
+      "stdout": "examples\\RejectTupleArity.lean:3:25: error: Application type mismatch: The argument\n  (1, 2)\nhas type\n  ?m.3 × ?m.5\nbut is expected to have type\n  Nat\nin the application\n  add (1, 2)\n",
+      "stderr": "",
+      "sourceSha256": "cf432bc868883901c55a2cda80201447d29e548966a3e21d512e8af4fa1b31b5",
+      "error": ""
+    },
+    {
+      "name": "RejectSingleGoalSequence",
+      "expectedAccept": false,
+      "status": 1,
+      "stdout": "examples\\RejectSingleGoalSequence.lean:2:51: error: unsolved goals\ncase right\n⊢ True\n",
+      "stderr": "",
+      "sourceSha256": "5e7d445d32a9bf504b39ea7da34351bba3ffd13b580c27730a63dd3823aa7057",
+      "error": ""
+    }
+  ]
+}

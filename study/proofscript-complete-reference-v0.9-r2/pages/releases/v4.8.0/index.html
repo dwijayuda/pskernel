@@ -1,0 +1,461 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;release-v4___8___0&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../../Notations-and-Macros/index.html">23. Notations and Macros</a><a href="../../Notations-and-Macros/Custom-Operators/index.html">23.1. Custom Operators</a><a href="../../Notations-and-Macros/Precedence/index.html">23.2. Precedence</a><a href="../../Notations-and-Macros/Notations/index.html">23.3. Notations</a><a href="../../Notations-and-Macros/Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../../Notations-and-Macros/Macros/index.html">23.5. Macros</a><a href="../../Notations-and-Macros/Elaborators/index.html">23.6. Elaborators</a><a href="../../Notations-and-Macros/Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../../Notations-and-Macros/Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../index.html">Release Notes</a><a href="../v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="index.html">Lean 4.8.0 (2024-06-05)</a><a href="../v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="release-v4___8___0"></a></p>
+<h1 id="proofscript-lean-4-8-0-2024-06-05">ProofScript — Lean 4.8.0 (2024-06-05)</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>These articles are the mirrored Lean release notes, not ProofScript releases. They document historical syntax, APIs, implementations and changes. The page named v4.34.0 in this mirror still identifies itself as rc2. Native source at the selected stable commit overrides stale details for a current ProofScript conformance claim. Historical examples remain native and are not silently modernized.</p>
+<p><strong>Compiler and coverage boundary.</strong> The stable delta note explicitly excludes the old native-reduction kernel hooks. Upgrading the pin requires a new reference/profile review and regenerated evidence.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/releases/v4.8.0/index.html">releases/v4.8.0/index.html</a>. Source Git blob: <code>5ac0b7b812ee2bbb8ce8718e342f36c990d21fa2</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<hr>
+<h2 id="lean-4-8-0-2024-06-05">Lean 4.8.0 (2024-06-05)</h2><p><a id="The-Lean-Language-Reference--Release-Notes--Lean-4___8___0-_LPAR_2024-06-05_RPAR_--Language-features___-tactics___-and-metaprograms"></a></p>
+<h3 id="language-features-tactics-and-metaprograms">Language features, tactics, and metaprograms</h3><ul>
+<li><p><strong>Functional induction principles.</strong> <a href="https://github.com/leanprover/lean4/pull/3432">#3432</a>, <a href="https://github.com/leanprover/lean4/pull/3620">#3620</a>, <a href="https://github.com/leanprover/lean4/pull/3754">#3754</a>, <a href="https://github.com/leanprover/lean4/pull/3762">#3762</a>, <a href="https://github.com/leanprover/lean4/pull/3738">#3738</a>, <a href="https://github.com/leanprover/lean4/pull/3776">#3776</a>, <a href="https://github.com/leanprover/lean4/pull/3898">#3898</a>.</p>
+<p>Derived from the definition of a (possibly mutually) recursive function, a <strong>functional induction principle</strong> is created that is tailored to proofs about that function.</p>
+<p>For example from:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def ackermann : Nat → Nat → Nat
+  | 0, m =&gt; m + 1
+  | n+1, 0 =&gt; ackermann n 1
+  | n+1, m+1 =&gt; ackermann n (ackermann (n + 1) m)
+</code></pre></div><p>we get</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ackermann.induct (motive : Nat → Nat → Prop) (case1 : ∀ (m : Nat), motive 0 m)
+  (case2 : ∀ (n : Nat), motive n 1 → motive (Nat.succ n) 0)
+  (case3 : ∀ (n m : Nat), motive (n + 1) m → motive n (ackermann (n + 1) m) → motive (Nat.succ n) (Nat.succ m))
+  (x x : Nat) : motive x x
+</code></pre></div><p>It can be used in the <code>induction</code> tactic using the <code>using</code> syntax:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">induction n, m using ackermann.induct
+</code></pre></div></li>
+<li><p>The termination checker now recognizes more recursion patterns without an explicit <code>termination_by</code>. In particular the idiom of counting up to an upper bound, as in</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def Array.sum (arr : Array Nat) (i acc : Nat) : Nat :=
+  if _ : i &lt; arr.size then
+    Array.sum arr (i+1) (acc + arr[i])
+  else
+    acc
+</code></pre></div><p>is recognized without having to say <code>termination_by arr.size - i</code>.</p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3630">#3630</a> makes <code>termination_by?</code> not use <code>sizeOf</code> when not needed</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3652">#3652</a> improves the <code>termination_by</code> syntax.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3658">#3658</a> changes how termination arguments are elaborated.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3665">#3665</a> refactors GuessLex to allow inferring more complex termination arguments</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3666">#3666</a> infers termination arguments such as <code>xs.size - i</code></li>
+</ul>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3629">#3629</a>, <a href="https://github.com/leanprover/lean4/pull/3655">#3655</a>, <a href="https://github.com/leanprover/lean4/pull/3747">#3747</a>: Adds <code>@[induction_eliminator]</code> and <code>@[cases_eliminator]</code> attributes to be able to define custom eliminators for the <code>induction</code> and <code>cases</code> tactics, replacing the <code>@[eliminator]</code> attribute. Gives custom eliminators for <code>Nat</code> so that <code>induction</code> and <code>cases</code> put goal states into terms of <code>0</code> and <code>n + 1</code> rather than <code>Nat.zero</code> and <code>Nat.succ n</code>. Added option <code>tactic.customEliminators</code> to control whether to use custom eliminators. Added a hack for <code>rcases</code>/<code>rintro</code>/<code>obtain</code> to use the custom eliminator for <code>Nat</code>.</p>
+</li>
+<li><p><strong>Shorter instances names.</strong> There is a new algorithm for generating names for anonymous instances. Across Std and Mathlib, the median ratio between lengths of new names and of old names is about 72%. With the old algorithm, the longest name was 1660 characters, and now the longest name is 202 characters. The new algorithm&#39;s 95th percentile name length is 67 characters, versus 278 for the old algorithm. While the new algorithm produces names that are 1.2% less unique, it avoids cross-project collisions by adding a module-based suffix when it does not refer to declarations from the same &quot;project&quot; (modules that share the same root). <a href="https://github.com/leanprover/lean4/pull/3089">#3089</a> and <a href="https://github.com/leanprover/lean4/pull/3934">#3934</a>.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/commit/8d2adf521d2b7636347a5b01bfe473bf0fcfaf31">8d2adf</a> Importing two different files containing proofs of the same theorem is no longer considered an error. This feature is particularly useful for theorems that are automatically generated on demand (e.g., equational theorems).</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/commit/84b0919a116e9be12f933e764474f45d964ce85c">84b091</a> Lean now generates an error if the type of a theorem is <strong>not</strong> a proposition.</p>
+</li>
+<li><p><strong>Definition transparency.</strong> <a href="https://github.com/leanprover/lean4/commit/47a34316fc03ce936fddd2d3dce44784c5bcdfa9">47a343</a>. <code>@[reducible]</code>, <code>@[semireducible]</code>, and <code>@[irreducible]</code> are now scoped and able to be set for imported declarations.</p>
+</li>
+<li><p><code>simp</code>/<code>dsimp</code></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3607">#3607</a> enables kernel projection reduction in <code>dsimp</code></li>
+<li><a href="https://github.com/leanprover/lean4/commit/b24fbf44f3aaa112f5d799ef2a341772d1eb222d">b24fbf</a> and <a href="https://github.com/leanprover/lean4/commit/acdb0054d5a0efa724cff596ac26852fad5724c4">acdb00</a>: <code>dsimproc</code> command to define defeq-preserving simplification procedures.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3624">#3624</a> makes <code>dsimp</code> normalize raw nat literals as <code>OfNat.ofNat</code> applications.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3628">#3628</a> makes <code>simp</code> correctly handle <code>OfScientific.ofScientific</code> literals.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3654">#3654</a> makes <code>dsimp?</code> report used simprocs.</li>
+<li><a href="https://github.com/leanprover/lean4/commit/dee074dcde03a37b7895a4901df2e4fa490c73c7">dee074</a> fixes equation theorem handling in <code>simp</code> for non-recursive definitions.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3819">#3819</a> improved performance when simp encounters a loop.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3821">#3821</a> fixes discharger/cache interaction.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3824">#3824</a> keeps <code>simp</code> from breaking <code>Char</code> literals.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3838">#3838</a> allows <code>Nat</code> instances matching to be more lenient.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3870">#3870</a> documentation for <code>simp</code> configuration options.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3972">#3972</a> fixes simp caching.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4044">#4044</a> improves cache behavior for &quot;well-behaved&quot; dischargers.</li>
+</ul>
+</li>
+<li><p><code>omega</code></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3639">#3639</a>, <a href="https://github.com/leanprover/lean4/pull/3766">#3766</a>, <a href="https://github.com/leanprover/lean4/pull/3853">#3853</a>, <a href="https://github.com/leanprover/lean4/pull/3875">#3875</a>: introduces a term canonicalizer.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3736">#3736</a> improves handling of positivity for the modulo operator for <code>Int</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3828">#3828</a> makes it work as a <code>simp</code> discharger.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3847">#3847</a> adds helpful error messages.</li>
+</ul>
+</li>
+<li><p><code>rfl</code></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3671">#3671</a>, <a href="https://github.com/leanprover/lean4/pull/3708">#3708</a>: upstreams the <code>@[refl]</code> attribute and the <code>rfl</code> tactic.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3751">#3751</a> makes <code>apply_rfl</code> not operate on <code>Eq</code> itself.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4067">#4067</a> improves error message when there are no goals.</li>
+</ul>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3719">#3719</a> upstreams the <code>rw?</code> tactic, with fixes and improvements in <a href="https://github.com/leanprover/lean4/pull/3783">#3783</a>, <a href="https://github.com/leanprover/lean4/pull/3794">#3794</a>, <a href="https://github.com/leanprover/lean4/pull/3911">#3911</a>.</p>
+</li>
+<li><p><code>conv</code></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3659">#3659</a> adds a <code>conv</code> version of the <code>calc</code> tactic.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3763">#3763</a> makes <code>conv</code> clean up using <code>try with_reducible rfl</code> instead of <code>try rfl</code>.</li>
+</ul>
+</li>
+<li><p><code>#guard_msgs</code></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3617">#3617</a> introduces whitespace protection using the <code>⏎</code> character.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3883">#3883</a>: The <code>#guard_msgs</code> command now has options to change whitespace normalization and sensitivity to message ordering. For example, <code>#guard_msgs (whitespace := lax) in cmd</code> collapses whitespace before checking messages, and <code>#guard_msgs (ordering := sorted) in cmd</code> sorts the messages in lexicographic order before checking.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3931">#3931</a> adds an unused variables ignore function for <code>#guard_msgs</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3912">#3912</a> adds a diff between the expected and actual outputs. This feature is currently disabled by default, but can be enabled with <code>set_option guard_msgs.diff true</code>. Depending on user feedback, this option may default to <code>true</code> in a future version of Lean.</li>
+</ul>
+</li>
+<li><p><code>do</code> <strong>notation</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3820">#3820</a> makes it an error to lift <code>(&lt;- ...)</code> out of a pure <code>if ... then ... else ...</code></li>
+</ul>
+</li>
+<li><p><strong>Lazy discrimination trees</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3610">#3610</a> fixes a name collision for <code>LazyDiscrTree</code> that could lead to cache poisoning.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3677">#3677</a> simplifies and fixes <code>LazyDiscrTree</code> handling for <code>exact?</code>/<code>apply?</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3685">#3685</a> moves general <code>exact?</code>/<code>apply?</code> functionality into <code>LazyDiscrTree</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3769">#3769</a> has lemma selection improvements for <code>rw?</code> and <code>LazyDiscrTree</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3818">#3818</a> improves ordering of matches.</li>
+</ul>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3590">#3590</a> adds <code>inductive.autoPromoteIndices</code> option to be able to disable auto promotion of indices in the <code>inductive</code> command.</p>
+</li>
+<li><p><strong>Miscellaneous bug fixes and improvements</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3606">#3606</a> preserves <code>cache</code> and <code>dischargeDepth</code> fields in <code>Lean.Meta.Simp.Result.mkEqSymm</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3633">#3633</a> makes <code>elabTermEnsuringType</code> respect <code>errToSorry</code>, improving error recovery of the <code>have</code> tactic.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3647">#3647</a> enables <code>noncomputable unsafe</code> definitions, for deferring implementations until later.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3672">#3672</a> adjust namespaces of tactics.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3725">#3725</a> fixes <code>Ord</code> derive handler for indexed inductive types with unused alternatives.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3893">#3893</a> improves performance of derived <code>Ord</code> instances.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3771">#3771</a> changes error reporting for failing tactic macros. Improves <code>rfl</code> error message.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3745">#3745</a> fixes elaboration of generalized field notation if the object of the notation is an optional parameter.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3799">#3799</a> makes commands such as <code>universe</code>, <code>variable</code>, <code>namespace</code>, etc. require that their argument appear in a later column. Commands that can optionally parse an <code>ident</code> or parse any number of <code>ident</code>s generally should require that the <code>ident</code> use <code>colGt</code>. This keeps typos in commands from being interpreted as identifiers.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3815">#3815</a> lets the <code>split</code> tactic be used for writing code.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3822">#3822</a> adds missing info in <code>induction</code> tactic for <code>with</code> clauses of the form <code>| cstr a b c =&gt; ?_</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3806">#3806</a> fixes <code>withSetOptionIn</code> combinator.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3844">#3844</a> removes unused <code>trace.Elab.syntax</code> option.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3896">#3896</a> improves hover and go-to-def for <code>attribute</code> command.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3989">#3989</a> makes linter options more discoverable.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3916">#3916</a> fixes go-to-def for syntax defined with <code>@[builtin_term_parser]</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3962">#3962</a> fixes how <code>solveByElim</code> handles <code>symm</code> lemmas, making <code>exact?</code>/<code>apply?</code> usable again.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3968">#3968</a> improves the <code>@[deprecated]</code> attribute, adding <code>(since := &quot;&lt;date&gt;&quot;)</code> field.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3768">#3768</a> makes <code>#print</code> command show structure fields.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3974">#3974</a> makes <code>exact?%</code> behave like <code>by exact?</code> rather than <code>by apply?</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3994">#3994</a> makes elaboration of <code>he ▸ h</code> notation more predictable.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3991">#3991</a> adjusts transparency for <code>decreasing_trivial</code> macros.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4092">#4092</a> improves performance of <code>binop%</code> and <code>binrel%</code> expression tree elaborators.</li>
+</ul>
+</li>
+<li><p><strong>Docs:</strong> <a href="https://github.com/leanprover/lean4/pull/3748">#3748</a>, <a href="https://github.com/leanprover/lean4/pull/3796">#3796</a>, <a href="https://github.com/leanprover/lean4/pull/3800">#3800</a>, <a href="https://github.com/leanprover/lean4/pull/3874">#3874</a>, <a href="https://github.com/leanprover/lean4/pull/3863">#3863</a>, <a href="https://github.com/leanprover/lean4/pull/3862">#3862</a>, <a href="https://github.com/leanprover/lean4/pull/3891">#3891</a>, <a href="https://github.com/leanprover/lean4/pull/3873">#3873</a>, <a href="https://github.com/leanprover/lean4/pull/3908">#3908</a>, <a href="https://github.com/leanprover/lean4/pull/3872">#3872</a>.</p>
+</li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Release-Notes--Lean-4___8___0-_LPAR_2024-06-05_RPAR_--Language-server-and-IDE-extensions"></a></p>
+<h3 id="language-server-and-ide-extensions">Language server and IDE extensions</h3><ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3602">#3602</a> enables <code>import</code> auto-completions.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3608">#3608</a> fixes issue <a href="https://github.com/leanprover/vscode-lean4/issues/392">leanprover/vscode-lean4#392</a>. Diagnostic ranges had an off-by-one error that would misplace goal states for example.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3014">#3014</a> introduces snapshot trees, foundational work for incremental tactics and parallelism. <a href="https://github.com/leanprover/lean4/pull/3849">#3849</a> adds basic incrementality API.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3271">#3271</a> adds support for server-to-client requests.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3656">#3656</a> fixes jump to definition when there are conflicting names from different files. Fixes issue <a href="https://github.com/leanprover/lean4/issues/1170">#1170</a>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3691">#3691</a>, <a href="https://github.com/leanprover/lean4/pull/3925">#3925</a>, <a href="https://github.com/leanprover/lean4/pull/3932">#3932</a> keep semantic tokens synchronized (used for semantic highlighting), with performance improvements.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3247">#3247</a> and <a href="https://github.com/leanprover/lean4/pull/3730">#3730</a> add diagnostics to run &quot;Restart File&quot; when a file dependency is saved.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3722">#3722</a> uses the correct module names when displaying references.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3728">#3728</a> makes errors in header reliably appear and makes the &quot;Import out of date&quot; warning be at &quot;hint&quot; severity. <a href="https://github.com/leanprover/lean4/pull/3739">#3739</a> simplifies the text of this warning.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3778">#3778</a> fixes <a href="https://github.com/leanprover/lean4/issues/3462">#3462</a>, where info nodes from before the cursor would be used for computing completions.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3985">#3985</a> makes trace timings appear in Infoview.</li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Release-Notes--Lean-4___8___0-_LPAR_2024-06-05_RPAR_--Pretty-printing"></a></p>
+<h3 id="pretty-printing">Pretty printing</h3><ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3797">#3797</a> fixes the hovers over binders so that they show their types.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3640">#3640</a> and <a href="https://github.com/leanprover/lean4/pull/3735">#3735</a>: Adds attribute <code>@[pp_using_anonymous_constructor]</code> to make structures pretty print as <code>⟨x, y, z⟩</code> rather than as <code>{a := x, b := y, c := z}</code>. This attribute is applied to <code>Sigma</code>, <code>PSigma</code>, <code>PProd</code>, <code>Subtype</code>, <code>And</code>, and <code>Fin</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3749">#3749</a> Now structure instances pretty print with parent structures&#39; fields inlined. That is, if <code>B</code> extends <code>A</code>, then <code>{ toA := { x := 1 }, y := 2 }</code> now pretty prints as <code>{ x := 1, y := 2 }</code>. Setting option <code>pp.structureInstances.flatten</code> to false turns this off.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3737">#3737</a>, <a href="https://github.com/leanprover/lean4/pull/3744">#3744</a> and <a href="https://github.com/leanprover/lean4/pull/3750">#3750</a>: Option <code>pp.structureProjections</code> is renamed to <code>pp.fieldNotation</code>, and there is now a suboption <code>pp.fieldNotation.generalized</code> to enable pretty printing function applications using generalized field notation (defaults to true). Field notation can be disabled on a function-by-function basis using the <code>@[pp_nodot]</code> attribute. The notation is not used for theorems.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4071">#4071</a> fixes interaction between app unexpanders and <code>pp.fieldNotation.generalized</code></li>
+<li><a href="https://github.com/leanprover/lean4/pull/3625">#3625</a> makes <code>delabConstWithSignature</code> (used by <code>#check</code>) have the ability to put arguments &quot;after the colon&quot; to avoid printing inaccessible names.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3798">#3798</a>, <a href="https://github.com/leanprover/lean4/pull/3978">#3978</a>, <a href="https://github.com/leanprover/lean4/pull/3980">#3798</a>: Adds options <code>pp.mvars</code> (default: true) and <code>pp.mvars.withType</code> (default: false). When <code>pp.mvars</code> is false, expression metavariables pretty print as <code>?_</code> and universe metavariables pretty print as <code>_</code>. When <code>pp.mvars.withType</code> is true, expression metavariables pretty print with a type ascription. These can be set when using <code>#guard_msgs</code> to make tests not depend on the particular names of metavariables.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3917">#3917</a> makes binders hoverable and gives them docstrings.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4034">#4034</a> makes hovers for RHS terms in <code>match</code> expressions in the Infoview reliably show the correct term.</li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Release-Notes--Lean-4___8___0-_LPAR_2024-06-05_RPAR_--Library"></a></p>
+<h3 id="library">Library</h3><ul>
+<li><p><code>Bool</code>/<code>Prop</code></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3508">#3508</a> improves <code>simp</code> confluence for <code>Bool</code> and <code>Prop</code> terms.</li>
+<li>Theorems: <a href="https://github.com/leanprover/lean4/pull/3604">#3604</a></li>
+</ul>
+</li>
+<li><p><code>Nat</code></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3579">#3579</a> makes <code>Nat.succ_eq_add_one</code> be a simp lemma, now that <code>induction</code>/<code>cases</code> uses <code>n + 1</code> instead of <code>Nat.succ n</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3808">#3808</a> replaces <code>Nat.succ</code> simp rules with simprocs.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3876">#3876</a> adds faster <code>Nat.repr</code> implementation in C.</li>
+</ul>
+</li>
+<li><p><code>Int</code></p>
+<ul>
+<li>Theorems: <a href="https://github.com/leanprover/lean4/pull/3890">#3890</a></li>
+</ul>
+</li>
+<li><p><code>UInt</code>s</p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3960">#3960</a> improves performance of upcasting.</li>
+</ul>
+</li>
+<li><p><code>Array</code> and <code>Subarray</code></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3676">#3676</a> removes <code>Array.eraseIdxAux</code>, <code>Array.eraseIdxSzAux</code>, and <code>Array.eraseIdx&#39;</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3648">#3648</a> simplifies <code>Array.findIdx?</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3851">#3851</a> renames fields of <code>Subarray</code>.</li>
+</ul>
+</li>
+<li><p><code>List</code></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3785">#3785</a> upstreams tail-recursive List operations and <code>@[csimp]</code> lemmas.</li>
+</ul>
+</li>
+<li><p><code>BitVec</code></p>
+<ul>
+<li>Theorems: <a href="https://github.com/leanprover/lean4/pull/3593">#3593</a>, <a href="https://github.com/leanprover/lean4/pull/3593">#3593</a>, <a href="https://github.com/leanprover/lean4/pull/3597">#3597</a>, <a href="https://github.com/leanprover/lean4/pull/3598">#3598</a>, <a href="https://github.com/leanprover/lean4/pull/3721">#3721</a>, <a href="https://github.com/leanprover/lean4/pull/3729">#3729</a>, <a href="https://github.com/leanprover/lean4/pull/3880">#3880</a>, <a href="https://github.com/leanprover/lean4/pull/4039">#4039</a>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3884">#3884</a> protects <code>Std.BitVec</code>.</li>
+</ul>
+</li>
+<li><p><code>String</code></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3832">#3832</a> fixes <code>String.splitOn</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3959">#3959</a> adds <code>String.Pos.isValid</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3959">#3959</a> UTF-8 string validation.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3961">#3961</a> adds a model implementation for UTF-8 encoding and decoding.</li>
+</ul>
+</li>
+<li><p><code>IO</code></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/4097">#4097</a> adds <code>IO.getTaskState</code> which returns whether a task is finished, actively running, or waiting on other Tasks to finish.</li>
+</ul>
+</li>
+<li><p><strong>Refactors</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3605">#3605</a> reduces imports for <code>Init.Data.Nat</code> and <code>Init.Data.Int</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3613">#3613</a> reduces imports for <code>Init.Omega.Int</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3634">#3634</a> upstreams <code>Std.Data.Nat</code> and <a href="https://github.com/leanprover/lean4/pull/3635">#3635</a> upstreams <code>Std.Data.Int</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3790">#3790</a> reduces more imports for <code>omega</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3694">#3694</a> extends <code>GetElem</code> interface with <code>getElem!</code> and <code>getElem?</code> to simplify containers like <code>RBMap</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3865">#3865</a> renames <code>Option.toMonad</code> (see breaking changes below).</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3882">#3882</a> unifies <code>lexOrd</code> with <code>compareLex</code>.</li>
+</ul>
+</li>
+<li><p><strong>Other fixes or improvements</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3765">#3765</a> makes <code>Quotient.sound</code> be a <code>theorem</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3645">#3645</a> fixes <code>System.FilePath.parent</code> in the case of absolute paths.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3660">#3660</a> <code>ByteArray.toUInt64LE!</code> and <code>ByteArray.toUInt64BE!</code> were swapped.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3881">#3881</a>, <a href="https://github.com/leanprover/lean4/pull/3887">#3887</a> fix linearity issues in <code>HashMap.insertIfNew</code>, <code>HashSet.erase</code>, and <code>HashMap.erase</code>. The <code>HashMap.insertIfNew</code> fix improves <code>import</code> performance.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3830">#3830</a> ensures linearity in <code>Parsec.many*Core</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3930">#3930</a> adds <code>FS.Stream.isTty</code> field.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3866">#3866</a> deprecates <code>Option.toBool</code> in favor of <code>Option.isSome</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3975">#3975</a> upstreams <code>Data.List.Init</code> and <code>Data.Array.Init</code> material from Std.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3942">#3942</a> adds instances that make <code>ac_rfl</code> work without Mathlib.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4010">#4010</a> changes <code>Fin.induction</code> to use structural induction.</li>
+<li><a href="https://github.com/leanprover/lean4/commit/02753f6e4c510c385efcbf71fa9a6bec50fce9ab">02753f</a> fixes bug in <code>reduceLeDiff</code> simproc.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4097">#4097</a> adds <code>IO.TaskState</code> and <code>IO.getTaskState</code> to get the task from the Lean runtime&#39;s task manager.</li>
+</ul>
+</li>
+<li><p><strong>Docs:</strong> <a href="https://github.com/leanprover/lean4/pull/3615">#3615</a>, <a href="https://github.com/leanprover/lean4/pull/3664">#3664</a>, <a href="https://github.com/leanprover/lean4/pull/3707">#3707</a>, <a href="https://github.com/leanprover/lean4/pull/3734">#3734</a>, <a href="https://github.com/leanprover/lean4/pull/3868">#3868</a>, <a href="https://github.com/leanprover/lean4/pull/3861">#3861</a>, <a href="https://github.com/leanprover/lean4/pull/3869">#3869</a>, <a href="https://github.com/leanprover/lean4/pull/3858">#3858</a>, <a href="https://github.com/leanprover/lean4/pull/3856">#3856</a>, <a href="https://github.com/leanprover/lean4/pull/3857">#3857</a>, <a href="https://github.com/leanprover/lean4/pull/3867">#3867</a>, <a href="https://github.com/leanprover/lean4/pull/3864">#3864</a>, <a href="https://github.com/leanprover/lean4/pull/3860">#3860</a>, <a href="https://github.com/leanprover/lean4/pull/3859">#3859</a>, <a href="https://github.com/leanprover/lean4/pull/3871">#3871</a>, <a href="https://github.com/leanprover/lean4/pull/3919">#3919</a>.</p>
+</li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Release-Notes--Lean-4___8___0-_LPAR_2024-06-05_RPAR_--Lean-internals"></a></p>
+<h3 id="lean-internals">Lean internals</h3><ul>
+<li><p><strong>Defeq and WHNF algorithms</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3616">#3616</a> gives better support for reducing <code>Nat.rec</code> expressions.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3774">#3774</a> add tracing for &quot;non-easy&quot; WHNF cases.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3807">#3807</a> fixes an <code>isDefEq</code> performance issue, now trying structure eta <em>after</em> lazy delta reduction.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3816">#3816</a> fixes <code>.yesWithDeltaI</code> behavior to prevent increasing transparency level when reducing projections.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3837">#3837</a> improves heuristic at <code>isDefEq</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3965">#3965</a> improves <code>isDefEq</code> for constraints of the form <code>t.i =?= s.i</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3977">#3977</a> improves <code>isDefEqProj</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3981">#3981</a> adds universe constraint approximations to be able to solve <code>u =?= max u ?v</code> using <code>?v = u</code>. These approximations are only applied when universe constraints cannot be postponed anymore.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4004">#4004</a> improves <code>isDefEqProj</code> during type class resolution.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4012">#4012</a> adds <code>backward.isDefEq.lazyProjDelta</code> and <code>backward.isDefEq.lazyWhnfCore</code> backwards compatibility flags.</li>
+</ul>
+</li>
+<li><p><strong>Kernel</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3966">#3966</a> removes dead code.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4035">#4035</a> fixes mismatch for <code>TheoremVal</code> between Lean and C++.</li>
+</ul>
+</li>
+<li><p><strong>Discrimination trees</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/commit/423fed79a9de75705f34b3e8648db7e076c688d7">423fed</a> and <a href="https://github.com/leanprover/lean4/commit/3218b25974d33e92807af3ce42198911c256ff1d">3218b2</a>: simplify handling of dependent/non-dependent pi types.</li>
+</ul>
+</li>
+<li><p><strong>Typeclass instance synthesis</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3638">#3638</a> eta-reduces synthesized instances</li>
+<li><a href="https://github.com/leanprover/lean4/commit/ce350f348161e63fccde6c4a5fe1fd2070e7ce0f">ce350f</a> fixes a linearity issue</li>
+<li><a href="https://github.com/leanprover/lean4/commit/917a31f694f0db44d6907cc2b1485459afe74d49">917a31</a> improves performance by considering at most one answer for subgoals not containing metavariables. <a href="https://github.com/leanprover/lean4/pull/4008">#4008</a> adds <code>backward.synthInstance.canonInstances</code> backward compatibility flag.</li>
+</ul>
+</li>
+<li><p><strong>Definition processing</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3661">#3661</a>, <a href="https://github.com/leanprover/lean4/pull/3767">#3767</a> changes automatically generated equational theorems to be named using suffix <code>.eq_&lt;idx&gt;</code> instead of <code>._eq_&lt;idx&gt;</code>, and <code>.eq_def</code> instead of <code>._unfold</code>. (See breaking changes below.) <a href="https://github.com/leanprover/lean4/pull/3675">#3675</a> adds a mechanism to reserve names. <a href="https://github.com/leanprover/lean4/pull/3803">#3803</a> fixes reserved name resolution inside namespaces and fixes handling of <code>match</code>er declarations and equation lemmas.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3662">#3662</a> causes auxiliary definitions nested inside theorems to become <code>def</code>s if they are not proofs.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4006">#4006</a> makes proposition fields of <code>structure</code>s be theorems.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4018">#4018</a> makes it an error for a theorem to be <code>extern</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4047">#4047</a> improves performance making equations for well-founded recursive definitions.</li>
+</ul>
+</li>
+<li><p><strong>Refactors</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3614">#3614</a> avoids unfolding in <code>Lean.Meta.evalNat</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3621">#3621</a> centralizes functionality for <code>Fix</code>/<code>GuessLex</code>/<code>FunInd</code> in the <code>ArgsPacker</code> module.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3186">#3186</a> rewrites the UnusedVariable linter to be more performant.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3589">#3589</a> removes coercion from <code>String</code> to <code>Name</code> (see breaking changes below).</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3237">#3237</a> removes the <code>lines</code> field from <code>FileMap</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3951">#3951</a> makes msg parameter to <code>throwTacticEx</code> optional.</li>
+</ul>
+</li>
+<li><p><strong>Diagnostics</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/4016">#4016</a>, <a href="https://github.com/leanprover/lean4/pull/4019">#4019</a>, <a href="https://github.com/leanprover/lean4/pull/4020">#4020</a>, <a href="https://github.com/leanprover/lean4/pull/4030">#4030</a>, <a href="https://github.com/leanprover/lean4/pull/4031">#4031</a>, <a href="https://github.com/leanprover/lean4/commit/c3714bdc6d46845c0428735b283c5b48b23cbcf7">c3714b</a>, <a href="https://github.com/leanprover/lean4/pull/4049">#4049</a> adds <code>set_option diagnostics true</code> for diagnostic counters. Tracks number of unfolded declarations, instances, reducible declarations, used instances, recursor reductions, <code>isDefEq</code> heuristic applications, among others. This option is suggested in exceptional situations, such as at deterministic timeout and maximum recursion depth.</li>
+<li><a href="https://github.com/leanprover/lean4/commit/283587987ab2eb3b56fbc3a19d5f33ab9e04a2ef">283587</a> adds diagnostic information for <code>simp</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4043">#4043</a> adds diagnostic information for congruence theorems.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4048">#4048</a> display diagnostic information for <code>set_option diagnostics true in &lt;tactic&gt;</code> and <code>set_option diagnostics true in &lt;term&gt;</code>.</li>
+</ul>
+</li>
+<li><p><strong>Other features</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3800">#3800</a> adds environment extension to record which definitions use structural or well-founded recursion.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3801">#3801</a> <code>trace.profiler</code> can now export to Firefox Profiler.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3918">#3918</a>, <a href="https://github.com/leanprover/lean4/pull/3953">#3953</a> adds <code>@[builtin_doc]</code> attribute to make docs and location of a declaration available as a builtin.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3939">#3939</a> adds the <code>lean --json</code> CLI option to print messages as JSON.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3075">#3075</a> improves <code>test_extern</code> command.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3970">#3970</a> gives monadic generalization of <code>FindExpr</code>.</li>
+</ul>
+</li>
+<li><p><strong>Docs:</strong> <a href="https://github.com/leanprover/lean4/pull/3743">#3743</a>, <a href="https://github.com/leanprover/lean4/pull/3921">#3921</a>, <a href="https://github.com/leanprover/lean4/pull/3954">#3954</a>.</p>
+</li>
+<li><p><strong>Other fixes:</strong> <a href="https://github.com/leanprover/lean4/pull/3622">#3622</a>, <a href="https://github.com/leanprover/lean4/pull/3726">#3726</a>, <a href="https://github.com/leanprover/lean4/pull/3823">#3823</a>, <a href="https://github.com/leanprover/lean4/pull/3897">#3897</a>, <a href="https://github.com/leanprover/lean4/pull/3964">#3964</a>, <a href="https://github.com/leanprover/lean4/pull/3946">#3946</a>, <a href="https://github.com/leanprover/lean4/pull/4007">#4007</a>, <a href="https://github.com/leanprover/lean4/pull/4026">#4026</a>.</p>
+</li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Release-Notes--Lean-4___8___0-_LPAR_2024-06-05_RPAR_--Compiler___-runtime___-and-FFI"></a></p>
+<h3 id="compiler-runtime-and-ffi">Compiler, runtime, and FFI</h3><ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3632">#3632</a> makes it possible to allocate and free thread-local runtime resources for threads not started by Lean itself.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3627">#3627</a> improves error message about compacting closures.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3692">#3692</a> fixes deadlock in <code>IO.Promise.resolve</code>.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3753">#3753</a> catches error code from <code>MoveFileEx</code> on Windows.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4028">#4028</a> fixes a double <code>reset</code> bug in <code>ResetReuse</code> transformation.</li>
+<li><a href="https://github.com/leanprover/lean4/commit/6e731b4370000a8e7a5cfb675a7f3d7635d21f58">6e731b</a> removes <code>interpreter</code> copy constructor to avoid potential memory safety issues.</li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Release-Notes--Lean-4___8___0-_LPAR_2024-06-05_RPAR_--Lake"></a></p>
+<h3 id="lake">Lake</h3><ul>
+<li><p><strong>TOML Lake configurations</strong>. <a href="https://github.com/leanprover/lean4/pull/3298">#3298</a>, <a href="https://github.com/leanprover/lean4/pull/4104">#4104</a>.</p>
+<p>Lake packages can now use TOML as a alternative configuration file format instead of Lean. If the default <code>lakefile.lean</code> is missing, Lake will also look for a <code>lakefile.toml</code>. The TOML version of the configuration supports a restricted set of the Lake configuration options, only including those which can easily mapped to a TOML data structure. The TOML syntax itself fully compiles with the TOML v1.0.0 specification.</p>
+<p>As part of the introduction of this new feature, we have been helping maintainers of some major packages within the ecosystem switch to this format. For example, the following is Aesop&#39;s new <code>lakefile.toml</code>:</p>
+<p><strong><a href="https://raw.githubusercontent.com/leanprover-community/aesop/de11e0ecf372976e6d627c210573146153090d2d/lakefile.toml">leanprover-community/aesop/lakefile.toml</a></strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">name = &quot;aesop&quot;
+defaultTargets = [&quot;Aesop&quot;]
+testRunner = &quot;test&quot;
+precompileModules = false
+
+[[require]]
+name = &quot;batteries&quot;
+git = &quot;https://github.com/leanprover-community/batteries&quot;
+rev = &quot;main&quot;
+
+[[lean_lib]]
+name = &quot;Aesop&quot;
+
+[[lean_lib]]
+name = &quot;AesopTest&quot;
+globs = [&quot;AesopTest.+&quot;]
+leanOptions = {linter.unusedVariables = false}
+
+[[lean_exe]]
+name = &quot;test&quot;
+srcDir = &quot;scripts&quot;
+</code></pre></div><p>To assist users who wish to transition their packages between configuration file formats, there is also a new <code>lake translate-config</code> command for migrating to/from TOML.</p>
+<p>Running <code>lake translate-config toml</code> will produce a <code>lakefile.toml</code> version of a package&#39;s <code>lakefile.lean</code>. Any configuration options unsupported by the TOML format will be discarded during translation, but the original <code>lakefile.lean</code> will remain so that you can verify the translation looks good before deleting it.</p>
+</li>
+<li><p><strong>Build progress overhaul.</strong> <a href="https://github.com/leanprover/lean4/pull/3835">#3835</a>, <a href="https://github.com/leanprover/lean4/pull/4115">#4115</a>, <a href="https://github.com/leanprover/lean4/pull/4127">#4127</a>, <a href="https://github.com/leanprover/lean4/pull/4220">#4220</a>, <a href="https://github.com/leanprover/lean4/pull/4232">#4232</a>, <a href="https://github.com/leanprover/lean4/pull/4236">#4236</a>.</p>
+<p>Builds are now managed by a top-level Lake build monitor, this makes the output of Lake builds more standardized and enables producing prettier and more configurable progress reports.</p>
+<p>As part of this change, job isolation has improved. Stray I/O and other build related errors in custom targets are now properly isolated and caught as part of their job. Import errors no longer cause Lake to abort the entire build and are instead localized to the build jobs of the modules in question.</p>
+<p>Lake also now uses ANSI escape sequences to add color and produce progress lines that update in-place; this can be toggled on and off using <code>--ansi</code> / <code>--no-ansi</code>.</p>
+<p><code>--wfail</code> and <code>--iofail</code> options have been added that causes a build to fail if any of the jobs log a warning (<code>--wfail</code>) or produce any output or log information messages (<code>--iofail</code>). Unlike some other build systems, these options do <strong>NOT</strong> convert these logs into errors, and Lake does not abort jobs on such a log (i.e., dependent jobs will still continue unimpeded).</p>
+</li>
+<li><p><code>lake test</code>. <a href="https://github.com/leanprover/lean4/pull/3779">#3779</a>.</p>
+<p>Lake now has a built-in <code>test</code> command which will run a script or executable labelled <code>@[test_runner]</code> (in Lean) or defined as the <code>testRunner</code> (in TOML) in the root package.</p>
+<p>Lake also provides a <code>lake check-test</code> command which will exit with code <code>0</code> if the package has a properly configured test runner or error with <code>1</code> otherwise.</p>
+</li>
+<li><p><code>lake lean</code>. <a href="https://github.com/leanprover/lean4/pull/3793">#3793</a>.</p>
+<p>The new command <code>lake lean &lt;file&gt; [-- &lt;args...&gt;]</code> functions like <code>lake env lean &lt;file&gt; &lt;args...&gt;</code>, except that it builds the imports of <code>file</code> before running <code>lean</code>. This makes it very useful for running test or example code that imports modules that are not guaranteed to have been built beforehand.</p>
+</li>
+<li><p><strong>Miscellaneous bug fixes and improvements</strong></p>
+<ul>
+<li><a href="https://github.com/leanprover/lean4/pull/3609">#3609</a> <code>LEAN_GITHASH</code> environment variable to override the detected Git hash for Lean when computing traces, useful for testing custom builds of Lean.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3795">#3795</a> improves relative package directory path normalization in the pre-rename check.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3957">#3957</a> fixes handling of packages that appear multiple times in a dependency tree.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/3999">#3999</a> makes it an error for there to be a mismatch between a package name and what it is required as. Also adds a special message for the <code>std</code>-to-<code>batteries</code> rename.</li>
+<li><a href="https://github.com/leanprover/lean4/pull/4033">#4033</a> fixes quiet mode.</li>
+</ul>
+</li>
+<li><p><strong>Docs:</strong> <a href="https://github.com/leanprover/lean4/pull/3704">#3704</a>.</p>
+</li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Release-Notes--Lean-4___8___0-_LPAR_2024-06-05_RPAR_--DevOps"></a></p>
+<h3 id="devops">DevOps</h3><ul>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3536">#3536</a> and <a href="https://github.com/leanprover/lean4/pull/3833">#3833</a> add a checklist for the release process.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3600">#3600</a> runs nix-ci more uniformly.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3612">#3612</a> avoids argument limits when building on Windows.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3682">#3682</a> builds Lean&#39;s <code>.o</code> files in parallel to rest of core.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3601">#3601</a> changes the way Lean is built on Windows (see breaking changes below). As a result, Lake now dynamically links executables with <code>supportInterpreter := true</code> on Windows to <code>libleanshared.dll</code> and <code>libInit_shared.dll</code>. Therefore, such executables will not run unless those shared libraries are co-located with the executables or part of <code>PATH</code>. Running the executable via <code>lake exe</code> will ensure these libraries are part of <code>PATH</code>.</p>
+<p>In a related change, the signature of the <code>nativeFacets</code> Lake configuration options has changed from a static <code>Array</code> to a function <code>(shouldExport : Bool) → Array</code>. See its docstring or Lake&#39;s <a href="https://github.com/leanprover/lean4/blob/releases/v4.8.0/src/lake/README.md">README</a> for further details on the changed option.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3690">#3690</a> marks &quot;Build matrix complete&quot; as canceled if the build is canceled.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3700">#3700</a>, <a href="https://github.com/leanprover/lean4/pull/3702">#3702</a>, <a href="https://github.com/leanprover/lean4/pull/3701">#3701</a>, <a href="https://github.com/leanprover/lean4/pull/3834">#3834</a>, <a href="https://github.com/leanprover/lean4/pull/3923">#3923</a>: fixes and improvements for std and mathlib CI.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3712">#3712</a> fixes <code>nix build .</code> on macOS.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3717">#3717</a> replaces <code>shell.nix</code> in devShell with <code>flake.nix</code>.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3715">#3715</a> and <a href="https://github.com/leanprover/lean4/pull/3790">#3790</a> add test result summaries.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3971">#3971</a> prevents stage0 changes via the merge queue.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3979">#3979</a> adds handling for <code>changes-stage0</code> label.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/3952">#3952</a> adds a script to summarize GitHub issues.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/commit/18a69914da53dbe37c91bc2b9ce65e1dc01752b6">18a699</a> fixes asan linking</p>
+</li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Release-Notes--Lean-4___8___0-_LPAR_2024-06-05_RPAR_--Breaking-changes"></a></p>
+<h3 id="breaking-changes">Breaking changes</h3><ul>
+<li>Due to the major Lake build refactor, code using the affected parts of the Lake API or relying on the previous output format of Lake builds is likely to have been broken. We have tried to minimize the breakages and, where possible, old definitions have been marked <code>@[deprecated]</code> with a reference to the new alternative.</li>
+<li>Executables configured with <code>supportInterpreter := true</code> on Windows should now be run via <code>lake exe</code> to function properly.</li>
+<li>Automatically generated equational theorems are now named using suffix <code>.eq_&lt;idx&gt;</code> instead of <code>._eq_&lt;idx&gt;</code>, and <code>.eq_def</code> instead of <code>._unfold</code>. Example:</li>
+</ul>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def fact : Nat → Nat
+  | 0 =&gt; 1
+  | n+1 =&gt; (n+1) * fact n
+
+theorem ex : fact 0 = 1 := by unfold fact; decide
+
+#check fact.eq_1
+-- fact.eq_1 : fact 0 = 1
+
+#check fact.eq_2
+-- fact.eq_2 (n : Nat) : fact (Nat.succ n) = (n + 1) * fact n
+
+#check fact.eq_def
+/-
+fact.eq_def :
+  ∀ (x : Nat),
+    fact x =
+      match x with
+      | 0 =&gt; 1
+      | Nat.succ n =&gt; (n + 1) * fact n
+-/
+</code></pre></div><ul>
+<li>The coercion from <code>String</code> to <code>Name</code> was removed. Previously, it was <code>Name.mkSimple</code>, which does not separate strings at dots, but experience showed that this is not always the desired coercion. For the previous behavior, manually insert a call to <code>Name.mkSimple</code>.</li>
+<li>The <code>Subarray</code> fields <code>as</code>, <code>h₁</code> and <code>h₂</code> have been renamed to <code>array</code>, <code>start_le_stop</code>, and <code>stop_le_array_size</code>, respectively. This more closely follows standard Lean conventions. Deprecated aliases for the field projections were added; these will be removed in a future release.</li>
+<li>The change to the instance name algorithm (described above) can break projects that made use of the auto-generated names.</li>
+<li><code>Option.toMonad</code> has been renamed to <code>Option.getM</code> and the unneeded <code>[Monad m]</code> instance argument has been removed.</li>
+</ul>
+<footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

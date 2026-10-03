@@ -1,0 +1,393 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;ordinary-coercion&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../index.html">11. Coercions</a><a href="../Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="index.html">11.2. Coercing Between Types</a><a href="../Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../../Notations-and-Macros/index.html">23. Notations and Macros</a><a href="../../Notations-and-Macros/Custom-Operators/index.html">23.1. Custom Operators</a><a href="../../Notations-and-Macros/Precedence/index.html">23.2. Precedence</a><a href="../../Notations-and-Macros/Notations/index.html">23.3. Notations</a><a href="../../Notations-and-Macros/Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../../Notations-and-Macros/Macros/index.html">23.5. Macros</a><a href="../../Notations-and-Macros/Elaborators/index.html">23.6. Elaborators</a><a href="../../Notations-and-Macros/Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../../Notations-and-Macros/Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../../releases/index.html">Release Notes</a><a href="../../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="ordinary-coercion"></a></p>
+<h1 id="proofscript-11-2-coercing-between-types">ProofScript — 11.2. Coercing Between Types</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>Coercions are native elaboration mechanisms, including coercion between types, to sorts and to function types. They are not JavaScript conversions based on truthiness or object prototypes. An implementation must preserve the selected coercion or reject the unsupported case. A foreign value needs an appropriate decoder or model before it can satisfy an owned logical invariant.</p>
+<p><strong>Compiler and coverage boundary.</strong> Record inserted coercions and their dependencies. Do not replace dependent coercions with unchecked target casts.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/Coercions/Coercing-Between-Types/index.html">Coercions/Coercing-Between-Types/index.html</a>. Source Git blob: <code>1ce6b242f38cc101a1f0e926c2d8f92c4283a486</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<p><a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<hr>
+<h2 id="11-2-coercing-between-types">11.2. Coercing Between Types</h2><p>Coercions between types are inserted when the Lean elaborator successfully constructs a term, inferring its type, in a context where a term of some other type was expected. Before signaling an error, the elaborator attempts to insert a coercion from the inferred type to the expected type by synthesizing an instance of <code>CoeT</code>. There are two ways that this might succeed:</p>
+<ol>
+<li>There could be a chain of coercions from the inferred type to the expected type through a number of intermediate types. These chained coercions are selected based on the inferred type and the expected type, but not the term being coerced.</li>
+<li>There could be a single dependent coercion from the inferred type to the expected type. Dependent coercions take the term being coerced into account as well as the inferred and expected types, but they cannot be chained.</li>
+</ol>
+<p>The simplest way to define a non-dependent coercion is by implementing a <code>Coe</code> instance, which is enough to synthesize a <code>CoeT</code> instance. This instance participates in chaining, and may be applied any number of times. The expected type of the expression is used to drive synthesis of <code>Coe</code> instances, rather than the inferred type. For instances that can be used at most once, or instances in which the inferred type should drive synthesis, one of the other coercion classes may be needed.</p>
+<p><a id="Defining-Coercions"></a>
+Defining Coercions </p>
+<p>The type <code>Even</code> represents the even natural numbers.
+<a id="Even-_LPAR_in-Defining-Coercions_RPAR_"></a>
+<a id="Even___number-_LPAR_in-Defining-Coercions_RPAR_"></a>
+<a id="Even___isEven-_LPAR_in-Defining-Coercions_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure Even where
+  number : Nat
+  isEven : number % 2 = 0
+</code></pre></div><p>A coercion allows even numbers to be used where natural numbers are expected. The <code>coe</code> attribute marks the projection as a coercion so that it can be shown accordingly in proof states and error messages, as described in the <a href="index.html#coercion-impl">section on implementing coercions</a>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">attribute [coe] Even.number
+
+instance : Coe Even Nat where
+  coe := Even.number
+</code></pre></div><p>With this coercion in place, even numbers can be used where natural numbers are expected.</p>
+<p><a id="four-_LPAR_in-Defining-Coercions_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const four : Even := ⟨4, by omega⟩
+
+#eval (four : Nat) + 1
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">5
+</code></pre></div><p>Due to coercion chaining, there is also a coercion from <code>Even</code> to <code>Int</code> formed by chaining the <code>Coe Even Nat</code> instance with the existing coercion from <code>Nat</code> to <code>Int</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval (four : Int) - 5
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">-1
+</code></pre></div><p><a id="--tech-term-Dependent-coercions"></a>
+Dependent coercions are needed when the specific term being coerced is required in order to determine whether or how to coerce the term: for example, only decidable propositions can be coerced to <code>Bool</code>, so the proposition in question must occur as part of the instance&#39;s type so that it can require the <code>Decidable</code> instance. Non-dependent coercions are used whenever all values of the inferred type can be coerced to the target type.</p>
+<p><a id="Defining-Dependent-Coercions"></a>
+Defining Dependent Coercions </p>
+<p>The string <code>&quot;four&quot;</code> can be coerced into the natural number <code>4</code> with this instance declaration:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance : CoeDep String &quot;four&quot; Nat where
+  coe := 4
+
+#eval (&quot;four&quot; : Nat)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">4
+</code></pre></div><p>Ordinary type errors are produced for other strings:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval (&quot;three&quot; : Nat)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Type mismatch
+  &quot;three&quot;
+has type
+  String
+but is expected to have type
+  Nat
+</code></pre></div><p>Non-dependent coercions may be chained: if there is a coercion from <code>α</code> to <code>β</code> and from <code>β</code> to <code>γ</code>, then there is also a coercion from <code>α</code> to <code>γ</code>. 
+<a id="--index--next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+ The chain should be in the form <code>CoeHead</code>?<code>CoeOut</code><em><code>Coe</code></em><code>CoeTail</code>?, which is to say it may consist of:</p>
+<ul>
+<li>An optional instance of <code>CoeHead α α&#39;</code>, followed by</li>
+<li>Zero or more instances of <code>CoeOut α&#39; …</code>, …, <code>CoeOut … α&#39;&#39;</code>, followed by</li>
+<li>Zero or more instances of <code>Coe α&#39;&#39; …</code>, …, <code>Coe … β&#39;</code>, followed by</li>
+<li>An optional instance of <code>CoeTail β&#39; γ</code></li>
+</ul>
+<p>Most coercions can be implemented as instances of <code>Coe</code>. <code>CoeHead</code>, <code>CoeOut</code>, and <code>CoeTail</code> are needed in certain special situations.</p>
+<p><code>CoeHead</code> and <code>CoeOut</code> instances are chained from the inferred type towards the expected type. In other words, information in the type found for the term is used to resolve a chain of instances. <code>Coe</code> and <code>CoeTail</code> instances are chained from the expected type towards the inferred type, so information in the expected type is used to resolve a chain of instances. If these chains meet in the middle, a coercion has been found. This is reflected in their type signatures: <code>CoeHead</code> and <code>CoeOut</code> use <a href="../../Type-Classes/Instance-Synthesis/index.html#--tech-term-Semi-output-parameters">semi-output parameters</a> for the coercion&#39;s target, while <code>Coe</code> and <code>CoeTail</code> use <a href="../../Type-Classes/Instance-Synthesis/index.html#--tech-term-Semi-output-parameters">semi-output parameters</a> for the coercions&#39; source.</p>
+<p>When an instance provides a value for a <a href="../../Type-Classes/Instance-Synthesis/index.html#--tech-term-Semi-output-parameters">semi-output parameter</a>, the value is used during instance synthesis. However, if no value is provided, then a value may be assigned by the synthesis algorithm. Consequently, every semi-output parameter should be assigned a type when an instance is selected. This means that <code>CoeOut</code> should be used when the variables that occur in the coercion&#39;s output are a subset of those in its input, and <code>Coe</code> should be used when the variables in the input are a subset of those in the output.</p>
+<p><a id="CoeOut--vs--Coe--instances"></a>
+<code>CoeOut</code> vs <code>Coe</code> instances </p>
+<p>A <code>Truthy</code> value is a value paired with an indication of whether it should be considered to be true or false. A <code>Decision</code> is either <code>yes</code>, <code>no</code>, or <code>maybe</code>, with the latter containing further data for consideration.
+<a id="Truthy-_LPAR_in-CoeOut--vs--Coe--instances_RPAR_"></a>
+<a id="Truthy___val-_LPAR_in-CoeOut--vs--Coe--instances_RPAR_"></a>
+<a id="Truthy___isTrue-_LPAR_in-CoeOut--vs--Coe--instances_RPAR_"></a>
+<a id="Decision-_LPAR_in-CoeOut--vs--Coe--instances_RPAR_"></a>
+<a id="Decision___yes-_LPAR_in-CoeOut--vs--Coe--instances_RPAR_"></a>
+<a id="Decision___maybe-_LPAR_in-CoeOut--vs--Coe--instances_RPAR_"></a>
+<a id="Decision___no-_LPAR_in-CoeOut--vs--Coe--instances_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure Truthy (α : Type) where
+  val : α
+  isTrue : Bool
+
+inductive Decision (α : Type) where
+  | yes
+  | maybe (val : α)
+  | no
+</code></pre></div><p>“Truthy” values can be converted to <code>Bool</code>s by forgetting the contained value. <code>Bool</code>s can be converted to <code>Decision</code>s by discounting the <code>maybe</code> case.</p>
+<p><a id="Truthy___toBool-_LPAR_in-CoeOut--vs--Coe--instances_RPAR_"></a>
+<a id="Decision___ofBool-_LPAR_in-CoeOut--vs--Coe--instances_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">@[coe]
+const Truthy.toBool : Truthy α → Bool :=
+  Truthy.isTrue
+
+@[coe]
+def Decision.ofBool : Bool → Decision α
+  | true =&gt; .yes
+  | false =&gt; .no
+</code></pre></div><p><code>Truthy.toBool</code> must be a <code>CoeOut</code> instance, because the target of the coercion contains fewer unknown type variables than the source, while <code>Decision.ofBool</code> must be a <code>Coe</code> instance, because the source of the coercion contains fewer variables than the target:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance : CoeOut (Truthy α) Bool := ⟨Truthy.isTrue⟩
+
+instance : Coe Bool (Decision α) := ⟨Decision.ofBool⟩
+</code></pre></div><p>With these instances, coercion chaining works:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval ({ val := 1, isTrue := true : Truthy Nat } : Decision String)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Decision.yes
+</code></pre></div><p>Attempting to use the wrong class leads to an error:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance : Coe (Truthy α) Bool := ⟨Truthy.isTrue⟩
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">instance does not provide concrete values for (semi-)out-params
+  Coe (Truthy ?α) Bool
+</code></pre></div><p><a id="CoeHead___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">CoeHead.{u, v} (α : Sort u) (β : semiOutParam (Sort v)) :
+  Sort (max (max 1 u) v)
+</code></pre></div><p><code>CoeHead α β</code> is for coercions that are applied from left-to-right at most once at beginning of the coercion chain.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">CoeHead.mk.{u, v}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">coe : α → β
+</code></pre></div><p>Coerces a value of type <code>α</code> to type <code>β</code>. Accessible by the notation <code>↑x</code>, or by double type ascription <code>((x : α) : β)</code>.</p>
+<p><a id="CoeOut___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">CoeOut.{u, v} (α : Sort u) (β : semiOutParam (Sort v)) :
+  Sort (max (max 1 u) v)
+</code></pre></div><p><code>CoeOut α β</code> is for coercions that are applied from left-to-right.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">CoeOut.mk.{u, v}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">coe : α → β
+</code></pre></div><p>Coerces a value of type <code>α</code> to type <code>β</code>. Accessible by the notation <code>↑x</code>, or by double type ascription <code>((x : α) : β)</code>.</p>
+<p><a id="CoeTail___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">CoeTail.{u, v} (α : semiOutParam (Sort u)) (β : Sort v) :
+  Sort (max (max 1 u) v)
+</code></pre></div><p><code>CoeTail α β</code> is for coercions that can only appear at the end of a sequence of coercions. That is, <code>α</code> can be further coerced via <code>Coe σ α</code> and <code>CoeHead τ σ</code> instances but <code>β</code> will only be the expected type of the expression.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">CoeTail.mk.{u, v}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">coe : α → β
+</code></pre></div><p>Coerces a value of type <code>α</code> to type <code>β</code>. Accessible by the notation <code>↑x</code>, or by double type ascription <code>((x : α) : β)</code>.</p>
+<p>Instances of <code>CoeT</code> can be synthesized when an appropriate chain of instances exists, or when there is a single applicable <code>CoeDep</code> instance.When coercing from <code>Nat</code> to another type, a <code>NatCast</code> instances also suffices. If both exist, then the <code>CoeDep</code> instance takes priority.</p>
+<p><a id="CoeT___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">CoeT.{u, v} (α : Sort u) : α → (β : Sort v) → Sort (max 1 v)
+</code></pre></div><p><code>CoeT</code> is the core typeclass which is invoked by Lean to resolve a type error. It can also be triggered explicitly with the notation <code>↑x</code> or by double type ascription <code>((x : α) : β)</code>.</p>
+<p>A <code>CoeT</code> chain has the grammar <code>CoeHead? CoeOut* Coe* CoeTail? | CoeDep</code>.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">CoeT.mk.{u, v}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">coe : β
+</code></pre></div><p>The resulting value of type <code>β</code>. The input <code>x : α</code> is a parameter to the type class, so the value of type <code>β</code> may possibly depend on additional typeclasses on <code>x</code>.</p>
+<p>Dependent coercions may not be chained. As an alternative to a chain of coercions, a term <code>e</code> of type <code>α</code> can be coerced to <code>β</code> using an instance of <code>CoeDep α e β</code>. Dependent coercions are useful in situations where only some of the values can be coerced; this mechanism is used to coerce only decidable propositions to <code>Bool</code>. They are also useful when the value itself occurs in the coercion&#39;s target type.</p>
+<p><a id="CoeDep___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">CoeDep.{u, v} (α : Sort u) : α → (β : Sort v) → Sort (max 1 v)
+</code></pre></div><p><code>CoeDep α (x : α) β</code> is a typeclass for dependent coercions, that is, the type <code>β</code> can depend on <code>x</code> (or rather, the value of <code>x</code> is available to typeclass search so an instance that relates <code>β</code> to <code>x</code> is allowed).</p>
+<p>Dependent coercions do not participate in the transitive chaining process of regular coercions: they must exactly match the type mismatch on both sides.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">CoeDep.mk.{u, v}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">coe : β
+</code></pre></div><p>The resulting value of type <code>β</code>. The input <code>x : α</code> is a parameter to the type class, so the value of type <code>β</code> may possibly depend on additional typeclasses on <code>x</code>.</p>
+<p><a id="Dependent-Coercion"></a>
+Dependent Coercion </p>
+<p>A type of non-empty lists can be defined as a pair of a list and a proof that it is not empty. This type can be coerced to ordinary lists by applying the projection:
+<a id="NonEmptyList-_LPAR_in-Dependent-Coercion_RPAR_"></a>
+<a id="NonEmptyList___contents-_LPAR_in-Dependent-Coercion_RPAR_"></a>
+<a id="NonEmptyList___non_empty-_LPAR_in-Dependent-Coercion_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure NonEmptyList (α : Type u) : Type u where
+  contents : List α
+  non_empty : contents ≠ []
+
+instance : Coe (NonEmptyList α) (List α) where
+  coe xs := xs.contents
+</code></pre></div><p>The coercion works as expected:</p>
+<p><a id="oneTwoThree-_LPAR_in-Dependent-Coercion_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const oneTwoThree : NonEmptyList Nat := ⟨[1, 2, 3], by simp⟩
+
+#eval (oneTwoThree : List Nat) ++ [4]
+</code></pre></div><p>Arbitrary lists cannot, however, be coerced to non-empty lists, because some arbitrarily-chosen lists may indeed be empty:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance : Coe (List α) (NonEmptyList α) where
+  coe xs := ⟨xs, _⟩
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">don't know how to synthesize placeholder for argument `non_empty`
+context:
+α:Type u_1xs:List α⊢ xs ≠ []
+</code></pre></div><p>A dependent coercion can restrict the domain of the coercion to only lists that are not empty:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance : CoeDep (List α) (x :: xs) (NonEmptyList α) where
+  coe := ⟨x :: xs, by simp⟩
+
+#eval ([1, 2, 3] : NonEmptyList Nat)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">{ contents := [1, 2, 3], non_empty := _ }
+</code></pre></div><p>Dependent coercion insertion requires that the term to be coerced syntactically matches the term in the instance header. Lists that are known to be non-empty, but which are not syntactically instances of <code>(· :: ·)</code>, cannot be coerced with this instance.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check
+  fun (xs : List Nat) =&gt;
+    let ys : List Nat := xs ++ [4]
+    (ys : NonEmptyList Nat)
+</code></pre></div><p>When coercion insertion fails, the original type error is reported:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Type mismatch
+  ys
+has type
+  List Nat
+but is expected to have type
+  NonEmptyList Nat
+</code></pre></div><p><a id="term-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Coercions</strong></p>
+<p><a id="coeNotation"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | ↑term
+</code></pre></div><p>Coercions can be explicitly placed using the prefix operator <a href="index.html#coeNotation"><code>↑</code></a>.</p>
+<p>Unlike using nested <a href="../../Terms/Type-Ascription/index.html#--tech-term-Type-ascriptions">type ascriptions</a>, the <a href="index.html#coeNotation"><code>↑</code></a> syntax for placing coercions does not require the involved types to be written explicitly.</p>
+<p><a id="Controlling-Coercion-Insertion"></a>
+Controlling Coercion Insertion </p>
+<p>Instance synthesis and coercion insertion interact with one another. Synthesizing an instance may make type information known that later triggers coercion insertion. The specific placement of coercions may matter.</p>
+<p>In this definition of <code>sub</code>, the <code>Sub Int</code> instance is synthesized based on the function&#39;s return type. This instance requires that the two parameters also be <code>Int</code>s, but they are <code>Nat</code>s. Coercions are inserted around each argument to the subtraction operator. This can be seen in the output of <code>#print</code>.</p>
+<p><a id="sub-_LPAR_in-Controlling-Coercion-Insertion_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function sub (n k : Nat) : Int := n - k
+
+#print sub
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">def sub : Nat → Nat → Int :=
+fun n k =&gt; ↑n - ↑k
+</code></pre></div><p>Placing the coercion operator outside the subtraction causes the elaborator to attempt to infer a type for the subtraction and then insert a coercion. Because the arguments are both <code>Nat</code>s, the <code>Sub Nat</code> instance is selected, leading to the difference being a <code>Nat</code>. The difference is then coerced to an <code>Int</code>.</p>
+<p><a id="sub___-_LPAR_in-Controlling-Coercion-Insertion_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function sub' (n k : Nat) : Int := ↑ (n - k)
+
+#print sub'
+</code></pre></div><p>These two functions are not equivalent because subtraction of natural numbers truncates at zero:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval sub 4 8
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">-4
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval sub' 4 8
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">0
+</code></pre></div><p><a id="coercion-impl"></a></p>
+<h3 id="11-2-1-implementing-coercions">11.2.1. Implementing Coercions</h3><p>The appropriate <code>CoeHead</code>, <code>CoeOut</code>, <code>Coe</code>, or <code>CoeTail</code> instance is sufficient to cause a desired coercion to be inserted. However, the implementation of the coercion should be registered as a coercion using the <code>coe</code> attribute. This causes Lean to display uses of the coercion with the <a href="index.html#coeNotation"><code>↑</code></a> operator. It also causes the <code>norm_cast</code> tactic to treat the coercion as a cast, rather than as an ordinary function.</p>
+<p><a id="attr-next-next-next-next-next"></a></p>
+<p><strong>attribute</strong></p>
+<p><strong>Coercion Declarations</strong></p>
+<p><a id="Lean___Attr___coe"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">attr ::= ...
+    | coe
+</code></pre></div><p>The <code>@[coe]</code> attribute on a function (which should also appear in a <code>instance : Coe A B := ⟨myFn⟩</code> declaration) allows the delaborator to show applications of this function as <code>↑</code> when printing expressions.</p>
+<p><a id="Implementing-Coercions"></a>
+Implementing Coercions </p>
+<p>The <a href="../../The-Type-System/Inductive-Types/index.html#--tech-term-enum-inductive">enum inductive</a> type <code>Weekday</code> represents the days of the week:
+<a id="Weekday-_LPAR_in-Implementing-Coercions_RPAR_"></a>
+<a id="Weekday___mo-_LPAR_in-Implementing-Coercions_RPAR_"></a>
+<a id="Weekday___tu-_LPAR_in-Implementing-Coercions_RPAR_"></a>
+<a id="Weekday___we-_LPAR_in-Implementing-Coercions_RPAR_"></a>
+<a id="Weekday___th-_LPAR_in-Implementing-Coercions_RPAR_"></a>
+<a id="Weekday___fr-_LPAR_in-Implementing-Coercions_RPAR_"></a>
+<a id="Weekday___sa-_LPAR_in-Implementing-Coercions_RPAR_"></a>
+<a id="Weekday___su-_LPAR_in-Implementing-Coercions_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Weekday where
+  | mo | tu | we | th | fr | sa | su
+</code></pre></div><p>As a seven-element type, it contains the same information as <code>Fin 7</code>. There is a bijection:
+<a id="Weekday___toFin-_LPAR_in-Implementing-Coercions_RPAR_"></a>
+<a id="Weekday___fromFin-_LPAR_in-Implementing-Coercions_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def Weekday.toFin : Weekday → Fin 7
+  | mo =&gt; 0
+  | tu =&gt; 1
+  | we =&gt; 2
+  | th =&gt; 3
+  | fr =&gt; 4
+  | sa =&gt; 5
+  | su =&gt; 6
+
+def Weekday.fromFin : Fin 7 → Weekday
+  | 0 =&gt; mo
+  | 1 =&gt; tu
+  | 2 =&gt; we
+  | 3 =&gt; th
+  | 4 =&gt; fr
+  | 5 =&gt; sa
+  | 6 =&gt; su
+</code></pre></div><p>Each type can be coerced to the other:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance : Coe Weekday (Fin 7) where
+  coe := Weekday.toFin
+
+instance : Coe (Fin 7) Weekday where
+  coe := Weekday.fromFin
+</code></pre></div><p>While this works, instances of the coercions that occur in Lean&#39;s output are not presented using the coercion operator, which is what Lean users expect. Instead, the name <code>Weekday.fromFin</code> is used explicitly:</p>
+<p><a id="wednesday-_LPAR_in-Implementing-Coercions_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const wednesday : Weekday := (2 : Fin 7)
+
+#print wednesday
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">def wednesday : Weekday :=
+Weekday.fromFin 2
+</code></pre></div><p>Adding the <code>coe</code> attribute to the definition of a coercion causes it to be displayed using the coercion operator:</p>
+<p><a id="friday-_LPAR_in-Implementing-Coercions_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">attribute [coe] Weekday.fromFin
+attribute [coe] Weekday.toFin
+
+const friday : Weekday := (5 : Fin 7)
+
+#print friday
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">def friday : Weekday :=
+↑5
+</code></pre></div><p><a id="nat-api-cast"></a></p>
+<h3 id="11-2-2-coercions-from-natural-numbers-and-integers">11.2.2. Coercions from Natural Numbers and Integers</h3><p>The type classes <code>NatCast</code> and <code>IntCast</code> are special cases of <code>Coe</code> that are used to define a coercion from <code>Nat</code> or <code>Int</code> to some other type that is in some sense canonical. They exist to enable better integration with large libraries of mathematics, such as <a href="https://github.com/leanprover-community/mathlib4">Mathlib</a>, that make heavy use of coercions to map from the natural numbers or integers to other structures (typically rings). Ideally, the coercion of a natural number or integer into these structures is a <a href="../../The-Simplifier/Simp-Normal-Forms/index.html#--tech-term-simp-normal-form">simp normal form</a>, because it is a convenient way to denote them.</p>
+<p>When the coercion application is expected to be the <a href="../../The-Simplifier/Simp-Normal-Forms/index.html#--tech-term-simp-normal-form">simp normal form</a> for a type, it is important that <em>all</em> such coercions are <a href="../../The-Type-System/index.html#--tech-term-definitional-equality">definitionally equal</a> in practice. Otherwise, the <a href="../../The-Simplifier/Simp-Normal-Forms/index.html#--tech-term-simp-normal-form">simp normal form</a> would need to choose a single chained coercion path, but lemmas could accidentally be stated using a different path. Because <code>simp</code>&#39;s internal index is based on the underlying structure of the term, rather than its presentation in the surface syntax, these differences would cause the lemmas to not be applied where expected. <code>NatCast</code> and <code>IntCast</code> instances, on the other hand, should be defined such that they are always <a href="../../The-Type-System/index.html#--tech-term-definitional-equality">definitionally equal</a>, avoiding the problem. The Lean standard library&#39;s instances are arranged such that <code>NatCast</code> or <code>IntCast</code> instances are chosen preferentially over chains of coercion instances during coercion insertion. They can also be used as <code>CoeOut</code> instances, allowing a graceful fallback to coercion chaining when needed.</p>
+<p><a id="NatCast___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">NatCast.{u} (R : Type u) : Type u
+</code></pre></div><p>The canonical homomorphism <code>Nat → R</code>. In most use cases, the target type will have a (semi)ring structure, and this homomorphism should be a (semi)ring homomorphism.</p>
+<p><code>NatCast</code> and <code>IntCast</code> exist to allow different libraries with their own types that can be notated as natural numbers to have consistent <code>simp</code> normal forms without needing to create coercion simplification sets that are aware of all combinations. Libraries should make it easy to work with <code>NatCast</code> where possible. For instance, in Mathlib there will be such a homomorphism (and thus a <code>NatCast R</code> instance) whenever <code>R</code> is an additive monoid with a <code>1</code>.</p>
+<p>The prototypical example is <code>Int.ofNat</code>.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">NatCast.mk.{u}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">natCast : Nat → R
+</code></pre></div><p>The canonical map <code>Nat → R</code>.</p>
+<p><a id="Nat___cast"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Nat.cast.{u} {R : Type u} [NatCast R] : Nat → R
+</code></pre></div><p>The canonical homomorphism <code>Nat → R</code>. In most use cases, the target type will have a (semi)ring structure, and this homomorphism should be a (semi)ring homomorphism.</p>
+<p><code>NatCast</code> and <code>IntCast</code> exist to allow different libraries with their own types that can be notated as natural numbers to have consistent <code>simp</code> normal forms without needing to create coercion simplification sets that are aware of all combinations. Libraries should make it easy to work with <code>NatCast</code> where possible. For instance, in Mathlib there will be such a homomorphism (and thus a <code>NatCast R</code> instance) whenever <code>R</code> is an additive monoid with a <code>1</code>.</p>
+<p>The prototypical example is <code>Int.ofNat</code>.</p>
+<p><a id="IntCast___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">IntCast.{u} (R : Type u) : Type u
+</code></pre></div><p>The canonical homomorphism <code>Int → R</code>. In most use cases, the target type will have a ring structure, and this homomorphism should be a ring homomorphism.</p>
+<p><code>IntCast</code> and <code>NatCast</code> exist to allow different libraries with their own types that can be notated as natural numbers to have consistent <code>simp</code> normal forms without needing to create coercion simplification sets that are aware of all combinations. Libraries should make it easy to work with <code>IntCast</code> where possible. For instance, in Mathlib there will be such a homomorphism (and thus an <code>IntCast R</code> instance) whenever <code>R</code> is an additive group with a <code>1</code>.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">IntCast.mk.{u}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">intCast : Int → R
+</code></pre></div><p>The canonical map <code>Int → R</code>.</p>
+<p><a id="Int___cast"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Int.cast.{u} {R : Type u} [IntCast R] : Int → R
+</code></pre></div><p>The canonical homomorphism <code>Int → R</code>. In most use cases, the target type will have a ring structure, and this homomorphism should be a ring homomorphism.</p>
+<p><code>IntCast</code> and <code>NatCast</code> exist to allow different libraries with their own types that can be notated as natural numbers to have consistent <code>simp</code> normal forms without needing to create coercion simplification sets that are aware of all combinations. Libraries should make it easy to work with <code>IntCast</code> where possible. For instance, in Mathlib there will be such a homomorphism (and thus an <code>IntCast R</code> instance) whenever <code>R</code> is an additive group with a <code>1</code>.</p>
+<h2 id="preserved-grammar-annotations">Preserved grammar annotations</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`↑x` represents a coercion, which converts `x` of type `α` to type `β`, using
+typeclasses to resolve a suitable conversion function. You can often leave the
+`↑` off entirely, since coercion is triggered implicitly whenever there is a
+type error, but in ambiguous cases it can be useful to use `↑` to disambiguate
+between e.g. `↑x + ↑y` and `↑(x + y)`.
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">The `@[coe]` attribute on a function (which should also appear in a
+`instance : Coe A B := ⟨myFn⟩` declaration) allows the delaborator to show
+applications of this function as `↑` when printing expressions.
+</code></pre></div><h2 id="preserved-native-diagnostic-displays">Preserved native diagnostic displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">5
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">-1
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">4
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Type mismatch
+  &quot;three&quot;
+has type
+  String
+but is expected to have type
+  Nat
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Decision.yes
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">instance does not provide concrete values for (semi-)out-params
+  Coe (Truthy ?α) Bool
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[1, 2, 3, 4]
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">don't know how to synthesize placeholder for argument `non_empty`
+context:
+α:Type u_1xs:List α⊢ xs ≠ []
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">{ contents := [1, 2, 3], non_empty := _ }
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">fun xs =&gt;
+  let ys := xs ++ [4];
+  sorry : (xs : List Nat) → ?m.14 xs
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Type mismatch
+  ys
+has type
+  List Nat
+but is expected to have type
+  NonEmptyList Nat
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def sub : Nat → Nat → Int :=
+fun n k =&gt; ↑n - ↑k
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def sub' : Nat → Nat → Int :=
+fun n k =&gt; ↑(n - k)
+</code></pre></div><h3 id="display-14">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">-4
+</code></pre></div><h3 id="display-15">Display 15</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">0
+</code></pre></div><h3 id="display-16">Display 16</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def wednesday : Weekday :=
+Weekday.fromFin 2
+</code></pre></div><h3 id="display-17">Display 17</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def friday : Weekday :=
+↑5
+</code></pre></div><h2 id="preserved-native-proof-state-displays">Preserved native proof-state displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-3">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ 4 % 2 = 0
+</code></pre></div><h3 id="display-2-3">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">All goals completed! 🐙
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ [1, 2, 3] ≠ []
+</code></pre></div><h3 id="display-4-2">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type ?u.7x:αxs:List α⊢ x :: xs ≠ []
+</code></pre></div><footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

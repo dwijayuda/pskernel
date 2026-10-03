@@ -1,0 +1,602 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;macros&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../index.html">23. Notations and Macros</a><a href="../Custom-Operators/index.html">23.1. Custom Operators</a><a href="../Precedence/index.html">23.2. Precedence</a><a href="../Notations/index.html">23.3. Notations</a><a href="../Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="index.html">23.5. Macros</a><a href="../Elaborators/index.html">23.6. Elaborators</a><a href="../Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../../releases/index.html">Release Notes</a><a href="../../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="macros"></a></p>
+<h1 id="proofscript-23-5-macros">ProofScript — 23.5. Macros</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>Use native notation, syntax categories, quotations, macros and elaborators in an explicitly declared extension environment. Macro hygiene preserves binding identity; a convenient generated name is not enough. Quoted parser code remains native code rather than being rewritten as ordinary surface expressions. Extensions produce syntax or candidate declarations and gain no independent proof authority.</p>
+<p><strong>Compiler and coverage boundary.</strong> Register collisions and lifted child slots explicitly. Do not globally rewrite strings, quoted grammar, tactic combinators or host code. Plugin operating-system permissions are separate from logical soundness.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/Notations-and-Macros/Macros/index.html">Notations-and-Macros/Macros/index.html</a>. Source Git blob: <code>92a98002362f233aa7d91bfbe27e3caeeea708b8</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<hr>
+<h2 id="23-5-macros">23.5. Macros</h2><p><a id="--tech-term-Macros"></a>
+<em>Macros</em> are transformations from <code>Syntax</code> to <code>Syntax</code> that occur during <a href="../Elaborators/index.html#--tech-term-elaborators">elaboration</a> and during <a href="../../Tactic-Proofs/Custom-Tactics/index.html#tactic-macros">tactic execution</a>. Replacing syntax with the result of transforming it with a macro is called 
+<a id="--tech-term-macro-expansion"></a>
+<em>macro expansion</em>. Multiple macros may be associated with a single <a href="../Defining-New-Syntax/index.html#--tech-term-syntax-kind">syntax kind</a>, and they are attempted in order of definition. Macros are run in a <a href="../../Functors___-Monads-and--do--Notation/index.html#--tech-term-Monad">monad</a> that has access to some compile-time metadata and has the ability to either emit an error message or to delegate to subsequent macros, but the macro monad is much less powerful than the elaboration monads.</p>
+<p>Macros are associated with <a href="../Defining-New-Syntax/index.html#--tech-term-syntax-kind">syntax kinds</a>. An internal table maps syntax kinds to macros of type <code>Syntax → MacroM Syntax</code>. Macros delegate to the next entry in the table by throwing the <code>unsupportedSyntax</code> exception. A given <code>Syntax</code> value <em>is a macro</em> when there is a macro associated with its syntax kind that does not throw <code>unsupportedSyntax</code>. If a macro throws any other exception, an error is reported to the user. <a href="../Defining-New-Syntax/index.html#--tech-term-syntax-categories">Syntax categories</a> are irrelevant to macro expansion; however, because each syntax kind is typically associated with a single syntax category, they do not interfere in practice.</p>
+<p><a id="Macro-Error-Reporting"></a>
+Macro Error Reporting </p>
+<p>The following macro reports an error when its parameter is the literal numeral five. It expands to its argument in all other cases.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax &amp;&quot;notFive&quot; term:arg : term
+open Lean in
+macro_rules
+  | `(term|notFive 5) =&gt;
+    Macro.throwError &quot;'5' is not allowed here&quot;
+  | `(term|notFive $e) =&gt;
+    pure e
+</code></pre></div><p>When applied to terms that are not syntactically the numeral five, elaboration succeeds:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval notFive (2 + 3)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">5
+</code></pre></div><p>When the error case is triggered, the user receives an error message:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval notFive 5
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">'5' is not allowed here
+</code></pre></div><p>Before elaborating a piece of syntax, the elaborator checks whether its <a href="../Defining-New-Syntax/index.html#--tech-term-syntax-kind">syntax kind</a> has macros associated with it. These are attempted in order. If a macro succeeds, potentially returning syntax with a different kind, the check is repeated and macros are expanded again until the outermost layer of syntax is no longer a macro. Elaboration or tactic execution can then proceed. Only the outermost layer of syntax (typically a <code>node</code>) is expanded, and the output of macro expansion may contain nested syntax that is a macro. These nested macros are expanded in turn when the elaborator reaches them.</p>
+<p>In particular, macro expansion occurs in three situations in Lean:</p>
+<ol>
+<li>During term elaboration, macros in the outermost layer of the syntax to be elaborated are expanded prior to invoking the <a href="../Elaborators/index.html#elaborators">syntax&#39;s term elaborator</a>.</li>
+<li>During command elaboration, macros in the outermost layer of the syntax to be elaborated are expanded prior to invoking the <a href="../Elaborators/index.html#elaborators">syntax&#39;s command elaborator</a>.</li>
+<li>During tactic execution, macros in the outermost layer of the syntax to be elaborated are expanded <a href="../../Tactic-Proofs/Custom-Tactics/index.html#tactic-macros">prior to executing the syntax as a tactic</a>.</li>
+</ol>
+<p><a id="macro-hygiene"></a></p>
+<h3 id="23-5-1-hygiene">23.5.1. Hygiene</h3><p>A macro is 
+<a id="--tech-term-hygienic"></a>
+<em>hygienic</em> if its expansion cannot result in identifier capture. 
+<a id="--tech-term-Identifier-capture"></a>
+Identifier capture is when an identifier ends up referring to a binding site other than that which is in scope where the identifier occurs in the source code. There are two types of identifier capture:</p>
+<ul>
+<li>If a macro&#39;s expansion introduces binders, then identifiers that are parameters to the macro may end up referring to the introduced binders if their names happen to match.</li>
+<li>If a macro&#39;s expansion is intended to refer to a name, but the macro is used in a context that either locally binds this name or in which a new global name has been introduced, it may end up referring to the wrong name.</li>
+</ul>
+<p>The first kind of variable capture can be avoided by ensuring that every binding introduced by a macro uses a freshly generated, globally-unique name, while the second can be avoided by always using fully-qualified names to refer to constants. The fresh names must be generated again at each invocation of the macro to avoid variable capture in recursive macros. These techniques are error-prone. Variable capture issues are difficult to test for because they rely on coincidences of name choices, and consistently applying these techniques results in noisy code.</p>
+<p>Lean features automatic hygiene: in almost all cases, macros are automatically hygienic. Capture by introduced bindings is avoided by annotating identifiers introduced by a macro with 
+<a id="--tech-term-macro-scopes"></a>
+<em>macro scopes</em>, which uniquely identify each invocation of macro expansion. If the binding and the use of the identifier have the same macro scopes, then they were introduced by the same step of macro expansion and should refer to one another. Similarly, uses of global names in code generated by a macro are not captured by local bindings in the context in which they are expanded because these use sites have macro scopes that are not present in the binding occurrence. Capture by newly-introduced global names is prevented by annotating potential global name references with the set of global names that match at quotation time in code produced in the macro&#39;s body. Identifiers annotated with potential referents are called 
+<a id="--tech-term-pre-resolved-identifiers"></a>
+<em>pre-resolved identifiers</em>, and the <code>Syntax.Preresolved</code> field on the <code>Syntax.ident</code> constructor is used to store the potential referents. During elaboration, if an identifier has pre-resolved global names associated with it, then other global names are not considered as valid reference targets.</p>
+<p>The introduction of macro scopes and pre-resolved identifiers to generated syntax occurs during <a href="index.html#--tech-term-Quotation">quotation</a>. Macros that construct syntax by other means than quotation should also ensure hygiene by some other means. For more details on Lean&#39;s hygiene algorithm, please consult Ullrich and de Moura (2020)Sebastian Ullrich and Leonardo de Moura, 2020. “Beyond notations: Hygienic macro expansion for theorem proving languages”. In <em>Proceedings of the International Joint Conference on Automated Reasoning.</em> and Ullrich (2023)Sebastian Ullrich, 2023. <em><a href="https://www.lean-lang.org/papers/thesis-sebastian.pdf">An Extensible Theorem Proving Frontend</a></em>. Dr. Ing. dissertation, Karlsruhe Institute of Technology.</p>
+<p><a id="macro-monad"></a></p>
+<h3 id="23-5-2-the-macro-monad">23.5.2. The Macro Monad</h3><p>The macro monad <code>MacroM</code> is sufficiently powerful to implement hygiene and report errors. Macro expansion does not have the ability to modify the environment directly, to carry out unification, to examine the current local context, or to do anything else that only makes sense in one particular context. This allows the same macro mechanism to be used throughout Lean, and it makes macros much easier to write than <a href="../Elaborators/index.html#--tech-term-elaborators">elaborators</a>.</p>
+<p><a id="Lean___MacroM"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.MacroM (α : Type) : Type
+</code></pre></div><p>The <code>MacroM</code> monad is the main monad for macro expansion. It has the information needed to handle hygienic name generation, and is the monad that <code>macro</code> definitions live in.</p>
+<p>Notably, this is a (relatively) pure monad: there is no <code>IO</code> and no access to the <code>Environment</code>. That means that things like declaration lookup are impossible here, as well as <code>IO.Ref</code> or other side-effecting operations. For more capabilities, macros can instead be written as <code>elab</code> using <code>adaptExpander</code>.</p>
+<p><a id="Lean___Macro___expandMacro___"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Macro.expandMacro? (stx : Lean.Syntax) :
+  Lean.MacroM (Option Lean.Syntax)
+</code></pre></div><p><code>expandMacro? stx</code> returns <code>some stxNew</code> if <code>stx</code> is a macro, and <code>stxNew</code> is its expansion.</p>
+<p><a id="Lean___Macro___trace"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Macro.trace (clsName : Lean.Name) (msg : String) : Lean.MacroM Unit
+</code></pre></div><p>Add a new trace message, with the given trace class and message.</p>
+<p><a id="macro-exceptions"></a></p>
+<h4 id="23-5-2-1-exceptions-and-errors">23.5.2.1. Exceptions and Errors</h4><p>The <code>unsupportedSyntax</code> exception is used for control flow during macro expansion. It indicates that the current macro is incapable of expanding the received syntax, but that an error has not occurred. The exceptions thrown by <code>throwError</code> and <code>throwErrorAt</code> terminate macro expansion, reporting the error to the user.</p>
+<p><a id="Lean___Macro___throwUnsupported"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Macro.throwUnsupported {α : Type} : Lean.MacroM α
+</code></pre></div><p>Throw an <code>unsupportedSyntax</code> exception.</p>
+<p><a id="Lean___Macro___Exception___unsupportedSyntax"></a></p>
+<p><strong>constructor of Lean.Macro.Exception</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Macro.Exception.unsupportedSyntax : Lean.Macro.Exception
+</code></pre></div><p>An unsupported syntax exception. We keep this separate because it is used for control flow: if one macro does not support a syntax then we try the next one.</p>
+<p><a id="Lean___Macro___throwError"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Macro.throwError {α : Type} (msg : String) : Lean.MacroM α
+</code></pre></div><p>Throw an error with the given message, using the <code>ref</code> for the location information.</p>
+<p><a id="Lean___Macro___throwErrorAt"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Macro.throwErrorAt {α : Type} (ref : Lean.Syntax) (msg : String) :
+  Lean.MacroM α
+</code></pre></div><p>Throw an error with the given message and location information.</p>
+<p><a id="macro-monad-hygiene"></a></p>
+<h4 id="23-5-2-2-hygiene-related-operations">23.5.2.2. Hygiene-Related Operations</h4><p><a href="index.html#--tech-term-hygienic">Hygiene</a> is implemented by adding <a href="index.html#--tech-term-macro-scopes">macro scopes</a> to the identifiers that occur in syntax. Ordinarily, the process of <a href="index.html#--tech-term-Quotation">quotation</a> adds all necessary scopes, but macros that construct syntax directly must add macro scopes to the identifiers that they introduce.</p>
+<p><a id="Lean___Macro___withFreshMacroScope"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Macro.withFreshMacroScope {α : Type} (x : Lean.MacroM α) :
+  Lean.MacroM α
+</code></pre></div><p>Increments the macro scope counter so that inside the body of <code>x</code> the macro scope is fresh.</p>
+<p><a id="Lean___Macro___addMacroScope"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Macro.addMacroScope (n : Lean.Name) : Lean.MacroM Lean.Name
+</code></pre></div><p>Add a new macro scope to the name <code>n</code>.</p>
+<p><a id="macro-environment"></a></p>
+<h4 id="23-5-2-3-querying-the-environment">23.5.2.3. Querying the Environment</h4><p>Macros have only limited support for querying the environment. They can check whether a constant exists and resolve names, but further introspection is unavailable.</p>
+<p><a id="Lean___Macro___hasDecl"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Macro.hasDecl (declName : Lean.Name) : Lean.MacroM Bool
+</code></pre></div><p>Returns <code>true</code> if the environment contains a declaration with name <code>declName</code></p>
+<p><a id="Lean___Macro___getCurrNamespace"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Macro.getCurrNamespace : Lean.MacroM Lean.Name
+</code></pre></div><p>Gets the current namespace given the position in the file.</p>
+<p><a id="Lean___Macro___resolveNamespace"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Macro.resolveNamespace (n : Lean.Name) :
+  Lean.MacroM (List Lean.Name)
+</code></pre></div><p>Resolves the given name to an overload list of namespaces.</p>
+<p><a id="Lean___Macro___resolveGlobalName"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Lean.Macro.resolveGlobalName (n : Lean.Name) :
+  Lean.MacroM (List (Lean.Name × List String))
+</code></pre></div><p>Resolves the given name to an overload list of global definitions. The <code>List String</code> in each alternative is the deduced list of projections (which are ambiguous with name components).</p>
+<p>Remark: it will not trigger actions associated with reserved names. Recall that Lean has reserved names. For example, a definition <code>foo</code> has a reserved name <code>foo.def</code> for theorem containing stating that <code>foo</code> is equal to its definition. The action associated with <code>foo.def</code> automatically proves the theorem. At the macro level, the name is resolved, but the action is not executed. The actions are executed by the elaborator when converting <code>Syntax</code> into <code>Expr</code>.</p>
+<p><a id="quotation"></a></p>
+<h3 id="23-5-3-quotation">23.5.3. Quotation</h3><p><a id="--tech-term-Quotation"></a>
+<em>Quotation</em> marks code for representation as data of type <code>Syntax</code>. Quoted code is parsed, but not elaborated—while it must be syntactically correct, it need not make sense. Quotation makes it much easier to programmatically generate code: rather than reverse-engineering the specific nesting of <code>node</code> values that Lean&#39;s parser would produce, the parser can be directly invoked to create them. This is also more robust in the face of refactoring of the grammar that may change the internals of the parse tree without affecting the user-visible concrete syntax. Quotation in Lean is surrounded by ```(`` and <code>)</code>.</p>
+<p>The syntactic category or parser being quoted may be indicated by placing its name after the opening backtick and parenthesis, followed by a vertical bar (<code>|</code>). As a special case, the name <code>tactic</code> may be used to parse either tactics or sequences of tactics. If no syntactic category or parser is provided, Lean attempts to parse the quotation both as a term and as a non-empty sequence of commands. Term quotations have higher priority than command quotations, so in cases of ambiguity, the interpretation as a term is chosen; this can be overridden by explicitly indicating that the quotation is of a command sequence.</p>
+<p><a id="Term-vs-Command-Quotation-Syntax"></a>
+Term vs Command Quotation Syntax </p>
+<p>In the following example, the contents of the quotation could either be a function application or a sequence of commands. Both match the same region of the file, so the <a href="../Custom-Operators/index.html#--tech-term-local-longest-match-rule">local longest-match rule</a> is not relevant. Term quotation has a higher priority than command quotation, so the quotation is interpreted as a term. Terms expect their <a href="index.html#--tech-term-antiquotations">antiquotations</a> to have type <code>TSyntax `term</code> rather than <code>TSyntax `command</code>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example (cmd1 cmd2 : TSyntax `command) : MacroM (TSyntax `command) :=
+  `($cmd1 $cmd2)
+</code></pre></div><p>The result is two type errors like the following:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Application type mismatch: The argument
+  cmd1
+has type
+  TSyntax `command
+but is expected to have type
+  TSyntax `term
+in the application
+  cmd1.raw
+</code></pre></div><p>The type of the quotation (<code>MacroM (TSyntax `command)</code>) is not used to select a result because syntax priorities are applied prior to elaboration. In this case, specifying that the antiquotations are commands resolves the ambiguity because function application would require terms in these positions:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example (cmd1 cmd2 : TSyntax `command) : MacroM (TSyntax `command) :=
+  `($cmd1:command $cmd2:command)
+</code></pre></div><p>Similarly, inserting a command into the quotation eliminates the possibility that it could be a term:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example (cmd1 cmd2 : TSyntax `command) : MacroM (TSyntax `command) :=
+  `($cmd1 $cmd2 #eval &quot;hello!&quot;)
+</code></pre></div><p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Quotations</strong></p>
+<p>Lean&#39;s syntax includes quotations for terms, commands, tactics, and sequences of tactics, as well as a general quotation syntax that allows any input that Lean can parse to be quoted. Term quotations have the highest priority, followed by tactic quotations, general quotations, and finally command quotations.</p>
+<p><a id="Manual___FreeSyntax___more-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::=
+      `(term)
+    | `(command+)
+    | `(tactic|tactic)
+    | `(tactic|tactic;*)
+    | `(p:ident|Parse a p here )
+</code></pre></div><p>Rather than having type <code>Syntax</code>, quotations are monadic actions with type <code>m Syntax</code>. Quotation is monadic because it implements <a href="index.html#--tech-term-hygienic">hygiene</a> by adding <a href="index.html#--tech-term-macro-scopes">macro scopes</a> and pre-resolving identifiers, as described in <a href="index.html#macro-hygiene">the section on hygiene</a>. The specific monad to be used is an implicit parameter to the quotation, and any monad for which there is an instance of the <code>MonadQuotation</code> type class is suitable. <code>MonadQuotation</code> extends <code>MonadRef</code>, which gives the quotation access to the source location of the syntax that the macro expander or elaborator is currently processing. <code>MonadQuotation</code> additionally includes the ability to add <a href="index.html#--tech-term-macro-scopes">macro scopes</a> to identifiers and use a fresh macro scope for a sub-task. Monads that support quotation include <code>MacroM</code>, <code>TermElabM</code>, <code>CommandElabM</code>, and <code>TacticM</code>.</p>
+<p><a id="quasiquotation"></a></p>
+<h4 id="23-5-3-1-quasiquotation">23.5.3.1. Quasiquotation</h4><p><a id="--tech-term-Quasiquotation"></a>
+<em>Quasiquotation</em> is a form of quotation that may contain 
+<a id="--tech-term-antiquotations"></a>
+<em>antiquotations</em>, which are regions of the quotation that are not quoted, but instead are expressions that are evaluated to yield syntax. A quasiquotation is essentially a template; the outer quoted region provides a fixed framework that always yields the same outer syntax, while the antiquotations yield the parts of the final syntax that vary. All quotations in Lean are quasiquotations, so no special syntax is needed to distinguish quasiquotations from other quotations. The quotation process does not add macro scopes to identifiers that are inserted via antiquotations, because these identifiers either come from another quotation (in which case they already have macro scopes) or from the macro&#39;s input (in which case they should not have macro scopes, because they are not introduced by the macro).</p>
+<p>Basic antiquotations consist of a dollar sign (<code>$</code>) immediately followed by an identifier. This means that the value of the corresponding variable, which should be a syntax tree, is to be substituted into this position of the quoted syntax. Entire expressions may be used as antiquotations by wrapping them in parentheses.</p>
+<p>Lean&#39;s parser assigns every antiquotation a syntax category based on what the parser expects at the given position. If the parser expects syntax category <code>c</code>, then the antiquotation&#39;s type is <code>TSyntax c</code>.</p>
+<p>Some syntax categories can be matched by elements of other categories. For example, numeric and string literals are valid terms in addition to being their own syntax categories. Antiquotations may be annotated with the expected category by suffixing them with a colon and the category name, which causes the parser to validate that the annotated category is acceptable in the given position and construct any intermediate layers that are required in the parse tree.</p>
+<p><a id="antiquot"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Antiquotations</strong></p>
+<p><a id="Manual___FreeSyntax___more-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">antiquot ::=
+      $ident(:ident)?
+    | $(term)(:ident)?
+</code></pre></div><p>Whitespace is not permitted between the dollar sign (&#39;$&#39;) that initiates an antiquotation and the identifier or parenthesized term that follows. Similarly, no whitespace is permitted around the colon that annotates the syntax category of the antiquotation.</p>
+<p><a id="Quasiquotation"></a>
+Quasiquotation </p>
+<p>Both forms of antiquotation are used in this example. Because natural numbers are not syntax, <code>quote</code> is used to transform a number into syntax that represents it.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">open Lean in
+example [Monad m] [MonadQuotation m] (x : Term) (n : Nat) : m Syntax :=
+  `($x + $(quote (n + 2)))
+</code></pre></div><p><a id="Antiquotation-Annotations"></a>
+Antiquotation Annotations </p>
+<p>This example requires that <code>m</code> is a monad that can perform quotation.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">variable {m : Type → Type} [Monad m] [MonadQuotation m]
+</code></pre></div><p>By default, the antiquotation <code>$e</code> is expected to be a term, because that&#39;s the syntactic category that&#39;s immediately expected as the second argument to addition.
+<a id="ex1-_LPAR_in-Antiquotation-Annotations_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def ex1 (e) := show m _ from `(2 + $e)
+#check ex1
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">ex1 {m : Type → Type} [Monad m] [MonadQuotation m] (e : TSyntax `term) : m (TSyntax `term)
+</code></pre></div><p>Annotating <code>$e</code> as a numeric literal succeeds, because numeric literals are also valid terms. The expected type of the parameter <code>e</code> changes to <code>TSyntax `num</code>.
+<a id="ex2-_LPAR_in-Antiquotation-Annotations_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def ex2 (e) := show m _ from `(2 + $e:num)
+#check ex2
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">ex2 {m : Type → Type} [Monad m] [MonadQuotation m] (e : TSyntax `num) : m (TSyntax `term)
+</code></pre></div><p>Spaces are not allowed between the dollar sign and the identifier.</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">def ex2 (e) := show m _ from `(2 + $ e:num)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">&lt;example&gt;:1:34-1:36: unexpected token '$'; expected '`(tactic|', 'do' or no space before spliced term
+</code></pre></div><p>Spaces are also not allowed before the colon:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">def ex2 (e) := show m _ from `(2 + $e :num)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">&lt;example&gt;:1:37-1:39: unexpected token ':'; expected ')'
+</code></pre></div><p><a id="Expanding-Quasiquotation"></a>
+Expanding Quasiquotation </p>
+<p>Printing the definition of <code>f</code> demonstrates the expansion of a quasiquotation.
+<a id="f-_LPAR_in-Expanding-Quasiquotation_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">open Lean in
+def f [Monad m] [MonadQuotation m]
+    (x : Term) (n : Nat) : m Syntax :=
+  `(fun k =&gt; $x + $(quote (n + 2)) + k)
+#print f
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">def f : {m : Type → Type} → [Monad m] → [Lean.MonadQuotation m] → Lean.Term → Nat → m Syntax :=
+fun {m} [Monad m] [Lean.MonadQuotation m] x n =&gt; do
+  let info ← Lean.MonadRef.mkInfoFromRefPos
+  let scp ← Lean.getCurrMacroScope
+  let quotCtx ← Lean.MonadQuotation.getContext
+  pure
+      {
+          raw :=
+            Syntax.node2 info `Lean.Parser.Term.fun (Syntax.atom info &quot;fun&quot;)
+              (Syntax.node4 info `Lean.Parser.Term.basicFun
+                (Syntax.node1 info `null (Syntax.ident info &quot;k&quot;.toRawSubstring' (Lean.addMacroScope quotCtx `k scp) []))
+                (Syntax.node info `null #[]) (Syntax.atom info &quot;=&gt;&quot;)
+                (Syntax.node3 info `«term_+_»
+                  (Syntax.node3 info `«term_+_» x.raw (Syntax.atom info &quot;+&quot;) (Lean.quote `term (n + 2)).raw)
+                  (Syntax.atom info &quot;+&quot;)
+                  (Syntax.ident info &quot;k&quot;.toRawSubstring' (Lean.addMacroScope quotCtx `k scp) []))) }.raw
+</code></pre></div><p>In this output, the quotation is a <a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html#Lean___Parser___Term___do"><code>do</code></a> block. It begins by constructing the source information for the resulting syntax, obtained by querying the compiler about the current user syntax being processed. It then obtains the current macro scope and the name of the module being processed, because macro scopes are added with respect to a module to enable independent compilation and avoid the need for a global counter. It then constructs a node using helpers such as <code>Syntax.node1</code> and <code>Syntax.node2</code>, which create a <code>Syntax.node</code> with the indicated number of children. The macro scope is added to each identifier, and <code>TSyntax.raw</code> is used to extract the contents of typed syntax wrappers. The antiquotations of <code>x</code> and <code>quote (n + 2)</code> occur directly in the expansion, as parameters to <code>Syntax.node3</code>.</p>
+<p><a id="splices"></a></p>
+<h4 id="23-5-3-2-splices">23.5.3.2. Splices</h4><p>In addition to including other syntax via antiquotations, quasiquotations can include 
+<a id="--tech-term-splices"></a>
+<em>splices</em>. Splices indicate that the elements of an array are to be inserted in order. The repeated elements may include separators, such as the commas between list or array elements. Splices may consist of an ordinary antiquotation with a 
+<a id="--tech-term-splice-suffix"></a>
+<em>splice suffix</em>, or they may be 
+<a id="--tech-term-extended-splices"></a>
+<em>extended splices</em> that provide additional repeated structure.</p>
+<p>Splice suffixes consist of either an asterisk or a valid atom followed by an asterisk (<code>*</code>). Suffixes may follow any identifier or term antiquotation. An antiquotation with the splice suffix <code>*</code> corresponds to a use of <code>many</code> or <code>many1</code>; both the <code>*</code> and <code>+</code> suffixes in syntax rules correspond to the <code>*</code> splice suffix. An antiquotation with a splice suffix that includes an atom prior to the asterisk corresponds to a use of <code>sepBy</code> or <code>sepBy1</code>. The splice suffix <code>?</code> corresponds to a use of <code>optional</code> or the <code>?</code> suffix in a syntax rule. Because <code>?</code> is a valid identifier character, identifiers must be parenthesized to use it as a suffix.</p>
+<p>While there is overlap between repetition specifiers for syntax and antiquotation suffixes, they have distinct syntaxes. When defining syntax, the suffixes <code>*</code>, <code>+</code>, <code>,*</code>, <code>,+</code>, <code>,*,?</code>, and <code>,+,?</code> are built in to Lean. There is no shorter way to specify separators other than <code>,</code>. Antiquotation suffixes are either just <code>*</code> or whatever atom was provided to <code>sepBy</code> or <code>sepBy1</code> followed by <code>*</code>. The syntax repetitions <code>+</code> and <code>*</code> correspond to the splice suffix <code>*</code>; the repetitions <code>,*</code>, <code>,+</code>, <code>,*,?</code>, and <code>,+,?</code> correspond to <code>,*</code>. The optional suffix <code>?</code> in syntax and splices correspond with each other.</p>
+<table>
+<thead>
+<tr>
+<th>Syntax Repetition</th>
+<th>Splice Suffix</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>+</code> <code>*</code></td>
+<td><code>*</code></td>
+</tr>
+<tr>
+<td><code>,*</code> <code>,+</code> <code>,*,?</code> <code>,+,?</code></td>
+<td><code>,*</code></td>
+</tr>
+<tr>
+<td><code>sepBy(_, &quot;S&quot;)</code> <code>sepBy1(_, &quot;S&quot;)</code></td>
+<td><code>S*</code></td>
+</tr>
+<tr>
+<td><code>?</code></td>
+<td><code>?</code></td>
+</tr>
+</tbody></table>
+<p><a id="Suffixed-Splices"></a>
+Suffixed Splices </p>
+<p>This example requires that <code>m</code> is a monad that can perform quotation.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">variable {m : Type → Type} [Monad m] [MonadQuotation m]
+</code></pre></div><p>By default, the antiquotation <code>$e</code> is expected to be an array of terms separated by commas, as is expected in the body of a list:
+<a id="ex1-_LPAR_in-Suffixed-Splices_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def ex1 (xs) := show m _ from `(#[$xs,*])
+#check ex1
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">ex1 {m : Type → Type} [Monad m] [MonadQuotation m] (xs : Syntax.TSepArray `term &quot;,&quot;) : m (TSyntax `term)
+</code></pre></div><p>However, Lean includes a collection of coercions between various representations of arrays that will automatically insert or remove separators, so an ordinary array of terms is also acceptable:
+<a id="ex2-_LPAR_in-Suffixed-Splices_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def ex2 (xs : Array (TSyntax `term)) :=
+  show m _ from `(#[$xs,*])
+#check ex2
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">ex2 {m : Type → Type} [Monad m] [MonadQuotation m] (xs : Array (TSyntax `term)) : m (TSyntax `term)
+</code></pre></div><p>Repetition annotations may also be used with term antiquotations and syntax category annotations. This example is in <code>CommandElabM</code> so the result can be conveniently logged.
+<a id="ex3-_LPAR_in-Suffixed-Splices_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def ex3 (size : Nat) := show CommandElabM _ from do
+  let mut nums : Array Nat := #[]
+  for i in [0:size] do
+    nums := nums.push i
+  let stx ← `(#[$(nums.map (Syntax.mkNumLit ∘ toString)):num,*])
+  -- Using logInfo here causes the syntax to be rendered via
+  -- the pretty printer.
+  logInfo stx
+
+#eval ex3 4
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">#[0, 1, 2, 3]
+</code></pre></div><p><a id="Non-Comma-Separators"></a>
+Non-Comma Separators </p>
+<p>The following unconventional syntax for lists separates numeric elements by either em dashes or double asterisks, rather than by commas.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax &quot;⟦&quot; sepBy1(num, &quot; — &quot;) &quot;⟧&quot;: term
+syntax &quot;⟦&quot; sepBy1(num, &quot; ** &quot;) &quot;⟧&quot;: term
+</code></pre></div><p>This means that <code>—*</code> and <code>***</code> are valid splice suffixes between the <code>⟦</code> and <code>⟧</code> atoms. In the case of <code>***</code>, the first two asterisks are the atom in the syntax rule, while the third is the repetition suffix.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">macro_rules
+  | `(⟦$n:num—*⟧) =&gt; `(⟦$n***⟧)
+  | `(⟦$n:num***⟧) =&gt; `([$n,*])
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval ⟦1 — 2 — 3⟧
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">[1, 2, 3]
+</code></pre></div><p><a id="Optional-Splices"></a>
+Optional Splices </p>
+<p>The following syntax declaration optionally matches a term between two tokens. The parentheses around the nested <code>term</code> are needed because <code>term?</code> is a valid identifier.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax &quot;⟨| &quot; (term)? &quot; |⟩&quot;: term
+</code></pre></div><p>The <code>?</code> splice suffix for a term expects an <code>Option Term</code>:
+<a id="mkStx-_LPAR_in-Optional-Splices_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def mkStx [Monad m] [MonadQuotation m]
+    (e : Option Term) : m Term :=
+  `(⟨| $(e)? |⟩)
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check mkStx
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">mkStx {m : Type → Type} [Monad m] [MonadQuotation m] (e : Option Term) : m Term
+</code></pre></div><p>Supplying <code>some</code> results in the optional term being present.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval do logInfo (← mkStx (some (quote 5)))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">⟨| 5 |⟩
+</code></pre></div><p>Supplying <code>none</code> results in the optional term being absent.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval do logInfo (← mkStx none)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">⟨| |⟩
+</code></pre></div><p><a id="token-antiquotations"></a></p>
+<h4 id="23-5-3-3-token-antiquotations">23.5.3.3. Token Antiquotations</h4><p>In addition to antiquotations of complete syntax, Lean features 
+<a id="--tech-term-token-antiquotations"></a>
+<em>token antiquotations</em> which allow the source information of an atom to be replaced with the source information from some other syntax. The resulting synthetic source information is marked <a href="../Defining-New-Syntax/index.html#--tech-term-canonical">canonical</a> so that it will be used for error messages, proof states, and other feedback. This is primarily useful to control the placement of error messages or other information that Lean reports to users. A token antiquotation does not allow an arbitrary atom to be inserted via evaluation. A token antiquotation consists of an atom (that is, a keyword)</p>
+<p><a id="antiquot-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Token Antiquotations</strong></p>
+<p>Token antiquotations replace the source information (of type <code>SourceInfo</code>) on a token with the source information from some other syntax.</p>
+<p><a id="Manual___FreeSyntax___done"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">antiquot ::= ...
+    | atom%$ident
+</code></pre></div><p><a id="quote-patterns"></a></p>
+<h3 id="23-5-4-matching-syntax">23.5.4. Matching Syntax</h3><h2 id="see-also">See Also</h2><p>New syntax is defined using <a href="../Defining-New-Syntax/index.html#syntax-rules">syntax extensions</a>.</p>
+<p>Quasiquotations can be used in pattern matching to recognize syntax that matches a template. Just as antiquotations in a quotation that&#39;s used as a term are regions that are treated as ordinary non-quoted expressions, antiquotations in patterns are regions that are treated as ordinary Lean patterns. Quote patterns are compiled differently from other patterns, so they can&#39;t be intermixed with non-quote patterns in a single <a href="../../Terms/Pattern-Matching/index.html#Lean___Parser___Term___match"><code>match</code></a> expression. Like ordinary quotations, quote patterns are first processed by Lean&#39;s parser. The parser&#39;s output is then compiled into code that determines whether there is a match. Syntax matching assumes that the syntax being matched was produced by Lean&#39;s parser, either via quotation or directly in user code, and uses this to omit some checks. For example, if nothing but a particular keyword can be present in a given position, the check may be omitted.</p>
+<p>Syntax matches a quote pattern in the following cases:</p>
+<p>  Atoms</p>
+<p>Keyword atoms (such as <a href="../../Terms/Conditionals/index.html#termIfThenElse"><code>if</code></a> or <a href="../../Terms/Pattern-Matching/index.html#Lean___Parser___Term___match"><code>match</code></a>) result in singleton nodes whose kind is <code>token.</code> followed by the atom. In many cases, it is not necessary to check for specific atom values because the grammar allows only a single keyword, and no checking will be performed. If the syntax of the term being matched requires the check, then the node kind is compared.</p>
+<p>Literals, such as string or numeric literals, are compared via their underlying string representation. The pattern <code>(0x15)`` and the quotation </code>(21)`` do not match.</p>
+<p>  Nodes</p>
+<p>If both the pattern and the value being matched represent <code>Syntax.node</code>, there is a match when both have the same syntax kind, the same number of children, and each child pattern matches the corresponding child value.</p>
+<p>  Identifiers</p>
+<p>If both the pattern and the value being matched are identifiers, then their literal <code>Name</code> values are compared for equality modulo macro scopes. Identifiers that “look” the same match, and it does not matter if they refer to the same binding. This design choice allows quote pattern matching to be used in contexts that don&#39;t have access to a compile-time environment in which names can be compared by reference.</p>
+<p>Because quotation pattern matching is based on the node kinds emitted by the parser, quotations that look identical may not match if they come from different syntax categories. If in doubt, including the syntax category in the quotation can help.</p>
+<p>Variables bound by syntax pattern matches are of type <code>TSyntax k</code>, where <code>k</code> describes the potential syntax kinds. Variables in repetitions are of type <code>TSyntaxArray k</code>, or <code>TSepArray k sep</code> if the repetition is separated with the string <code>sep</code>. <code>TSyntax</code> is described in more detail in <a href="../Defining-New-Syntax/index.html#typed-syntax">the section on typed syntax</a>.</p>
+<p><a id="Syntax-Pattern-Matching"></a>
+Syntax Pattern Matching </p>
+<p>List comprehensions are a notation for writing lists that is inspired by standard set builder notation. A list comprehension consists of square brackets that contain a result term followed by some nubmer of <em>qualifiers</em>; each qualifier either introduces a variable from some other list or imposes a condition that must be satisfied. Qualifiers are nested: each new variable&#39;s value is evaluated for every prior value.
+<a id="qbind-_LPAR_in-Syntax-Pattern-Matching_RPAR_"></a>
+<a id="qpred-_LPAR_in-Syntax-Pattern-Matching_RPAR_"></a>
+<a id="qualifier-_LPAR_in-Syntax-Pattern-Matching_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax qbind := ident &quot;←&quot; term
+
+syntax qpred := term
+
+syntax qualifier := atomic(qbind) &lt;|&gt; qpred
+
+syntax &quot;[&quot; term &quot;|&quot; qualifier,* &quot;]&quot; : term
+</code></pre></div><p>List comprehensions can be desugared to a sequence of calls to <code>List.flatMap</code>. Variable introductions are translated to a <code>flatMap</code> on the variable&#39;s value expression, while predicates are translated to a conditional that returns one or zero values if the predicate is true or false. The body of the final <code>flatMap</code> is the result term.</p>
+<p>This desugaring can be implemented as a macro that uses quasiquotation patterns:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">macro_rules
+  | `(term|[$e | $qs,* ]) =&gt; do
+    let init ← `([$e])
+    qs.getElems.foldrM (β := Term) (init := init) fun
+      | `(qualifier|$x ← $e'), r =&gt;
+        `(($e' : List _) |&gt;.flatMap fun $x =&gt; $r)
+      | `(qualifier|$e':term), r =&gt;
+        `((if $e' then [()] else []) |&gt;.flatMap fun () =&gt; $r)
+      | other, _ =&gt;
+        Macro.throwErrorAt other &quot;Unknown qualifier&quot;
+</code></pre></div><p>Initially, the sequence of qualifiers has type <code>TSepArray `qualifier &quot;,&quot;</code>, indicating that it represents a comma-separated sequence of qualifiers. <code>TSepArray.getElems</code> transforms it into a <code>TSyntaxArray `qualifier</code>, which is an abbreviation for <code>Array (TSyntax `qualifier)</code>. This allows <a href="../../Terms/Function-Application/index.html#--tech-term-generalized-field-notation">generalized field notation</a> to be used to call <code>Array.foldrM</code>. The <code>term</code> annotation in the branch for predicates is required to prevent the matched value from having syntax kind ```qualifier``; one <code>node</code> must be unwrapped from the value.</p>
+<p>List comprehensions behave as expected:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval [ s!&quot;{x}; {y}&quot; |
+  x ← (1...5).toList,
+  x % 2 = 0,
+  y ← [true, false]
+]
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">[&quot;2; true&quot;, &quot;2; false&quot;, &quot;4; true&quot;, &quot;4; false&quot;]
+</code></pre></div><p><a id="defining-macros"></a></p>
+<h3 id="23-5-5-defining-macros">23.5.5. Defining Macros</h3><p>There are two primary ways to define macros: the <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> command and the <a href="index.html#Lean___Parser___Command___macro"><code>macro</code></a> command. The <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> command associates a macro with existing syntax, while the <a href="index.html#Lean___Parser___Command___macro"><code>macro</code></a> command simultaneously defines new syntax and a macro that translates it to existing syntax. The <a href="index.html#Lean___Parser___Command___macro"><code>macro</code></a> command can be seen as a generalization of <a href="../Notations/index.html#Lean___Parser___Command___notation"><code>notation</code></a> that allows the expansion to be generated programmatically, rather than simply by substitution.</p>
+<p><a id="macro_rules"></a></p>
+<h4 id="23-5-5-1-the-macro-rules-command">23.5.5.1. The macro_rules Command</h4><p><a id="command-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Rule-Based Macros With macro_rules</strong></p>
+<p>The <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> command takes a sequence of rewrite rules, specified as syntax pattern matches, and adds each as a macro. The rules are attempted in order, before previously-defined macros, and later macro definitions may add further macro rules.</p>
+<p><a id="Lean___Parser___Command___macro_rules"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | docComment?
+      (@[attrInstance,*])?
+      attrKind macro_rules ((kind := ident))?
+        (| `((p:ident|)?Suitable syntax for p ) =&gt; term)*
+</code></pre></div><p>The patterns in the macros must be quotation patterns. They may match syntax from any syntax category, but a given pattern can only ever match a single syntax kind. If no category or parser is specified for the quotation, then it may match terms or (sequences of) commands, but never both. In case of ambiguity, the term parser is chosen.</p>
+<p>Internally, macros are tracked in a table that maps each <a href="../Defining-New-Syntax/index.html#--tech-term-syntax-kind">syntax kind</a> to its macros. The <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> command may be explicitly annotated with a syntax kind.</p>
+<p>If a syntax kind is explicitly provided, the macro definition checks that each quotation pattern has that kind. If the parse result for the quotation was a <a href="../../Elaboration-and-Compilation/index.html#--tech-term-choice-node">choice node</a> (that is, if the parse was ambiguous), then the pattern is duplicated once for each alternative with the specified kind. It is an error if none of the alternatives have the specified kind.</p>
+<p>If no kind is provided explicitly, then the kind determined by the parser is used for each pattern. The patterns are not required to all have the same syntax kind; macros are defined for each syntax kind used by at least one of the patterns. It is an error if the parse result for a quotation pattern was a <a href="../../Elaboration-and-Compilation/index.html#--tech-term-choice-node">choice node</a> (that is, if the parse was ambiguous).</p>
+<p>The documentation comment associated with <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> is displayed to users if the syntax itself has no documentation comment. Otherwise, the documentation comment for the syntax itself is shown.</p>
+<p>As with <a href="../Notations/index.html#notations">notations</a> and <a href="../Custom-Operators/index.html#operators">operators</a>, macro rules may be declared <code>scoped</code> or <code>local</code>. Scoped macros are only active when the current namespace is open, and local macro rules are only active in the current <a href="../../Namespaces-and-Sections/index.html#--tech-term-section-scope">section scope</a>.</p>
+<p><a id="Idiom-Brackets"></a>
+Idiom Brackets </p>
+<p>Idiom brackets are an alternative syntax for working with applicative functors. If the idiom brackets contain a function application, then the function is wrapped in <code>pure</code> and applied to each argument using <code>&lt;*&gt;</code>. Lean does not support idiom brackets by default, but they can be defined using a macro.
+<a id="idiom-_LPAR_in-Idiom-Brackets_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := idiom) &quot;⟦&quot; (term:arg)+ &quot;⟧&quot; : term
+
+macro_rules
+  | `(⟦$f $args*⟧) =&gt; do
+    let mut out ← `(pure $f)
+    for arg in args do
+      out ← `($out &lt;*&gt; $arg)
+    return out
+</code></pre></div><p>This new syntax can be used immediately.</p>
+<p><a id="addFirstThird-_LPAR_in-Idiom-Brackets_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function addFirstThird [Add α] (xs : List α) : Option α :=
+  ⟦Add.add xs[0]? xs[2]?⟧
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval addFirstThird (α := Nat) []
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">none
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval addFirstThird [1]
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">none
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval addFirstThird [1,2,3,4]
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">some 4
+</code></pre></div><p><a id="Scoped-Macros"></a>
+Scoped Macros </p>
+<p>Scoped macro rules are active only in their namespace. When the namespace <code>ConfusingNumbers</code> is open, numeric literals will be assigned an incorrect meaning.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">namespace ConfusingNumbers
+</code></pre></div><p>The following macro recognizes terms that are odd numeric literals, and replaces them with double their value. If it unconditionally replaced them with double their value, then macro expansion would become an infinite loop because the same rule would always match the output.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">scoped macro_rules
+  | `($n:num) =&gt; do
+    if n.getNat % 2 = 0 then Lean.Macro.throwUnsupported
+    let n' := (n.getNat * 2)
+    `($(Syntax.mkNumLit (info := n.raw.getHeadInfo) (toString n')))
+</code></pre></div><p>Once the namespace ends, the macro is no longer used.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">end ConfusingNumbers
+</code></pre></div><p>Without opening the namespace, numeric literals function in the usual way.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval (3, 4)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(3, 4)
+</code></pre></div><p>When the namespace is open, the macro replaces <code>3</code> with <code>6</code>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">open ConfusingNumbers
+
+#eval (3, 4)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(6, 4)
+</code></pre></div><p>It is not typically useful to change the interpretation of numeric or other literals in macros. However, scoped macros can be very useful when adding new rules to extensible tactics such as <code>trivial</code> that work well with the contents of the namespaces but should not always be used.</p>
+<p>Behind the scenes, a <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> command generates one macro function for each syntax kind that is matched in its quote patterns. This function has a default case that throws the <code>unsupportedSyntax</code> exception, so further macros may be attempted.</p>
+<p>A single <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> command with two rules is not always equivalent to two separate single-match commands. First, the rules in a <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> are tried from top to bottom, but recently-declared macros are attempted first, so the order would need to be reversed. Additionally, if an earlier rule in the macro throws the <code>unsupportedSyntax</code> exception, then the later rules are not tried; if they were instead in separate <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> commands, then they would be attempted.</p>
+<p><a id="One-vs___-Two-Sets-of-Macro-Rules"></a>
+One vs. Two Sets of Macro Rules </p>
+<p>The <code>arbitrary!</code> macro is intended to expand to some arbitrarily-determined value of a given type.
+<a id="arbitrary___-_LPAR_in-One-vs___-Two-Sets-of-Macro-Rules_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">syntax (name := arbitrary!) &quot;arbitrary! &quot; term:arg : term
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">macro_rules
+  | `(arbitrary! ()) =&gt; `(())
+  | `(arbitrary! Nat) =&gt; `(42)
+  | `(arbitrary! ($t1 × $t2)) =&gt; `((arbitrary! $t1, arbitrary! $t2))
+  | `(arbitrary! Nat) =&gt; `(0)
+</code></pre></div><p>Users may extend it by defining further sets of macro rules, such as this rule for <code>Empty</code> that fails:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">macro_rules
+  | `(arbitrary! Empty) =&gt; throwUnsupported
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval arbitrary! (Nat × Nat)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(42, 42)
+</code></pre></div><p>If all of the macro rules had been defined as individual cases, then the result would have instead used the later case for <code>Nat</code>. This is because the rules in a single <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> command are checked from top to bottom, but more recently-defined <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> commands take precedence over earlier ones.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">macro_rules
+  | `(arbitrary! ()) =&gt;
+    `(())
+macro_rules
+  | `(arbitrary! Nat) =&gt;
+    `(42)
+macro_rules
+  | `(arbitrary! ($t1 × $t2)) =&gt;
+    `((arbitrary! $t1, arbitrary! $t2))
+macro_rules
+  | `(arbitrary! Nat) =&gt;
+    `(0)
+macro_rules
+  | `(arbitrary! Empty) =&gt;
+    throwUnsupported
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval arbitrary! (Nat × Nat)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(0, 0)
+</code></pre></div><p>Additionally, if any rule throws the <code>unsupportedSyntax</code> exception, no further rules in that command are checked.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">macro_rules
+  | `(arbitrary! (List Nat)) =&gt; throwUnsupported
+  | `(arbitrary! (List $_)) =&gt; `([])
+
+macro_rules
+  | `(arbitrary! (Array Nat)) =&gt; `(#[42])
+macro_rules
+  | `(arbitrary! (Array $_)) =&gt; throwUnsupported
+</code></pre></div><p>The case for <code>List Nat</code> fails to elaborate, because macro expansion did not translate the <code>arbitrary!</code> syntax into something supported by the elaborator.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval arbitrary! (List Nat)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">elaboration function for `arbitrary!` has not been implemented
+  arbitrary! (List Nat)
+</code></pre></div><p>The case for <code>Array Nat</code> succeeds, because the first set of macro rules are attempted after the second throws the exception.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval arbitrary! (Array Nat)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">#[42]
+</code></pre></div><p><a id="macro-command"></a></p>
+<h4 id="23-5-5-2-the-macro-command">23.5.5.2. The macro Command</h4><p>The <a href="index.html#Lean___Parser___Command___macro"><code>macro</code></a> command simultaneously defines a new <a href="../Defining-New-Syntax/index.html#--tech-term-syntax-rules">syntax rule</a> and associates it with a <a href="index.html#--tech-term-Macros">macro</a>. Unlike <a href="../Notations/index.html#Lean___Parser___Command___notation"><code>notation</code></a>, which can define only new term syntax and in which the expansion is a term into which the parameters are to be substituted, the <a href="index.html#Lean___Parser___Command___macro"><code>macro</code></a> command may define syntax in any <a href="../Defining-New-Syntax/index.html#--tech-term-syntax-categories">syntax category</a> and it may use arbitrary code in the <code>MacroM</code> monad to generate the expansion. Because macros are so much more flexible than notations, Lean cannot automatically generate an unexpander; this means that new syntax implemented via the <a href="index.html#Lean___Parser___Command___macro"><code>macro</code></a> command is available for use in <em>input</em> to Lean, but Lean&#39;s output does not use it without further work.</p>
+<p><a id="command-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Macro Declarations</strong></p>
+<p><a id="Lean___Parser___Command___macro"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | docComment?
+      (@[attrInstance,*])?
+      attrKind macro(:prec)? ((name := ident))? ((priority := prio))? macroArg* : ident =&gt;
+        macroRhs
+</code></pre></div><p><a id="Lean___Parser___Command___macroArg"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Macro Arguments</strong></p>
+<p>A macro&#39;s arguments are either syntax items (as used in the <a href="../Defining-New-Syntax/index.html#Lean___Parser___Command___syntax"><code>syntax</code></a> command) or syntax items with attached names.</p>
+<p><a id="Lean___Parser___Command___macroArg-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">macroArg ::=
+    stx
+</code></pre></div><p><a id="Lean___Parser___Command___macroArg-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">macroArg ::= ...
+    | ident:stx
+</code></pre></div><p>In the expansion, the names that are attached to syntax items are bound; they have type <code>TSyntax</code> for the appropriate syntax kinds. If the syntax matched by the parser does not have a defined kind (e.g. because the name is applied to a complex specification), then the type is <code>TSyntax Name.anonymous</code>.</p>
+<p>The documentation comment is associated with the new syntax, and the attribute kind (none, <code>local</code>, or <code>scoped</code>) governs the visibility of the macro just as it does for notations: <code>scoped</code> macros are available in the namespace in which they are defined or in any <a href="../../Namespaces-and-Sections/index.html#--tech-term-section-scope">section scope</a> that opens that namespace, while <code>local</code> macros are available only in the local section scope.</p>
+<p>Behind the scenes, the <a href="index.html#Lean___Parser___Command___macro"><code>macro</code></a> command is itself implemented by a macro that expands it to a <a href="../Defining-New-Syntax/index.html#Lean___Parser___Command___syntax"><code>syntax</code></a> command and a <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> command. Any attributes applied to the macro command are applied to the syntax definition, but not to the <a href="index.html#Lean___Parser___Command___macro_rules"><code>macro_rules</code></a> command.</p>
+<p><a id="macro-attribute"></a></p>
+<h4 id="23-5-5-3-the-macro-attribute">23.5.5.3. The Macro Attribute</h4><p><a href="index.html#--tech-term-Macros">Macros</a> can be manually added to a syntax kind using the <a href="index.html#Lean___Parser___Attr___macro"><code>macro</code></a> attribute. This low-level means of specifying macros is typically not useful, except as a result of code generation by macros that themselves generate macro definitions.</p>
+<p><a id="attr-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>attribute</strong></p>
+<p><strong>The macro Attribute</strong></p>
+<p>The <a href="index.html#Lean___Parser___Attr___macro"><code>macro</code></a> attribute specifies that a function is to be considered a <a href="index.html#--tech-term-Macros">macro</a> for the specified syntax kind.</p>
+<p><a id="Lean___Parser___Attr___macro"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">attr ::= ...
+    | macro ident
+</code></pre></div><p><a id="The-Macro-Attribute"></a>
+The Macro Attribute 
+<a id="rep-_LPAR_in-The-Macro-Attribute_RPAR_"></a>
+<a id="expandRep-_LPAR_in-The-Macro-Attribute_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">/-- Generate a list based on N syntactic copies of a term -/
+syntax (name := rep) &quot;[&quot; num &quot; !!! &quot; term &quot;]&quot; : term
+
+@[macro rep]
+def expandRep : Macro
+  | `([ $n:num !!! $e:term]) =&gt;
+    let e' := Array.replicate n.getNat e
+    `([$e',*])
+  | _ =&gt;
+    throwUnsupported
+</code></pre></div><p>Evaluating this new expression demonstrates that the macro is present.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval [3 !!! &quot;hello&quot;]
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">[&quot;hello&quot;, &quot;hello&quot;, &quot;hello&quot;]
+</code></pre></div><h2 id="preserved-grammar-annotations">Preserved grammar annotations</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Syntax quotation for terms.
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">A `docComment` parses a &quot;documentation comment&quot; like `/-- foo -/`. This is not treated like
+a regular comment (that is, as whitespace); it is parsed and forms part of the syntax tree structure.
+
+At parse time, `docComment` checks the value of the `doc.verso` option. If it is true, the contents
+are parsed as Verso markup. If not, the contents are treated as plain text or Markdown. Use
+`plainDocComment` to always treat the contents as plain text.
+
+A plain text doc comment node contains a `/--` atom and then the remainder of the comment, `foo -/`
+in this example. Use `TSyntax.getDocString` to extract the body text from a doc string syntax node.
+A Verso comment node contains the `/--` atom, the document's syntax tree, and a closing `-/` atom.
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`attrKind` matches `(&quot;scoped&quot; &lt;|&gt; &quot;local&quot;)?`, used before an attribute like `@[local simp]`.
+</code></pre></div><h2 id="preserved-native-diagnostic-displays">Preserved native diagnostic displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">5
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">'5' is not allowed here
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Application type mismatch: The argument
+  cmd1
+has type
+  TSyntax `command
+but is expected to have type
+  TSyntax `term
+in the application
+  cmd1.raw
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Application type mismatch: The argument
+  cmd2
+has type
+  TSyntax `command
+but is expected to have type
+  TSyntax `term
+in the application
+  cmd2.raw
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ex1 {m : Type → Type} [Monad m] [MonadQuotation m] (e : TSyntax `term) : m (TSyntax `term)
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ex2 {m : Type → Type} [Monad m] [MonadQuotation m] (e : TSyntax `num) : m (TSyntax `term)
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def f : {m : Type → Type} → [Monad m] → [Lean.MonadQuotation m] → Lean.Term → Nat → m Syntax :=
+fun {m} [Monad m] [Lean.MonadQuotation m] x n =&gt; do
+  let info ← Lean.MonadRef.mkInfoFromRefPos
+  let scp ← Lean.getCurrMacroScope
+  let quotCtx ← Lean.MonadQuotation.getContext
+  pure
+      {
+          raw :=
+            Syntax.node2 info `Lean.Parser.Term.fun (Syntax.atom info &quot;fun&quot;)
+              (Syntax.node4 info `Lean.Parser.Term.basicFun
+                (Syntax.node1 info `null (Syntax.ident info &quot;k&quot;.toRawSubstring' (Lean.addMacroScope quotCtx `k scp) []))
+                (Syntax.node info `null #[]) (Syntax.atom info &quot;=&gt;&quot;)
+                (Syntax.node3 info `«term_+_»
+                  (Syntax.node3 info `«term_+_» x.raw (Syntax.atom info &quot;+&quot;) (Lean.quote `term (n + 2)).raw)
+                  (Syntax.atom info &quot;+&quot;)
+                  (Syntax.ident info &quot;k&quot;.toRawSubstring' (Lean.addMacroScope quotCtx `k scp) []))) }.raw
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ex1 {m : Type → Type} [Monad m] [MonadQuotation m] (xs : Syntax.TSepArray `term &quot;,&quot;) : m (TSyntax `term)
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ex2 {m : Type → Type} [Monad m] [MonadQuotation m] (xs : Array (TSyntax `term)) : m (TSyntax `term)
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#[0, 1, 2, 3]
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[1, 2, 3]
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mkStx {m : Type → Type} [Monad m] [MonadQuotation m] (e : Option Term) : m Term
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⟨| 5 |⟩
+</code></pre></div><h3 id="display-14">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⟨| |⟩
+</code></pre></div><h3 id="display-15">Display 15</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[&quot;2; true&quot;, &quot;2; false&quot;, &quot;4; true&quot;, &quot;4; false&quot;]
+</code></pre></div><h3 id="display-16">Display 16</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">none
+</code></pre></div><h3 id="display-17">Display 17</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">some 4
+</code></pre></div><h3 id="display-18">Display 18</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(3, 4)
+</code></pre></div><h3 id="display-19">Display 19</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(6, 4)
+</code></pre></div><h3 id="display-20">Display 20</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(42, 42)
+</code></pre></div><h3 id="display-21">Display 21</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(0, 0)
+</code></pre></div><h3 id="display-22">Display 22</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">elaboration function for `arbitrary!` has not been implemented
+  arbitrary! (List Nat)
+</code></pre></div><h3 id="display-23">Display 23</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#[42]
+</code></pre></div><h3 id="display-24">Display 24</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">[&quot;hello&quot;, &quot;hello&quot;, &quot;hello&quot;]
+</code></pre></div><footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

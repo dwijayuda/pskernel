@@ -1,0 +1,1528 @@
+{
+  "description": "The mirror uses document-topic fragments without retained static anchors. These resolve at the target article entry, not a fabricated precise source-token location.",
+  "records": [
+    {
+      "page": "Introduction/index.html",
+      "fragments": [
+        "introduction"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Elaboration-and-Compilation/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Elaboration-and-Compilation"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Interacting-with-Lean/index.html",
+      "fragments": [
+        "interaction"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Type-System/index.html",
+      "fragments": [
+        "type-system"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Type-System/Functions/index.html",
+      "fragments": [
+        "functions"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Type-System/Propositions/index.html",
+      "fragments": [
+        "propositions"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Type-System/Universes/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--The-Type-System--Universes"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Type-System/Inductive-Types/index.html",
+      "fragments": [
+        "inductive-types"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Type-System/Quotients/index.html",
+      "fragments": [
+        "quotients"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Source-Files-and-Modules/index.html",
+      "fragments": [
+        "files"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Namespaces-and-Sections/index.html",
+      "fragments": [
+        "namespaces-sections"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Definitions/index.html",
+      "fragments": [
+        "definitions"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Definitions/Modifiers/index.html",
+      "fragments": [
+        "declaration-modifiers"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Definitions/Headers-and-Signatures/index.html",
+      "fragments": [
+        "signature-syntax"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Definitions/Definitions/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Definitions--Definitions"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Definitions/Theorems/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Definitions--Theorems"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Definitions/Example-Declarations/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Definitions--Example-Declarations"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Definitions/Recursive-Definitions/index.html",
+      "fragments": [
+        "recursive-definitions"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Axioms/index.html",
+      "fragments": [
+        "axioms"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Attributes/index.html",
+      "fragments": [
+        "attributes"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Type-Classes/index.html",
+      "fragments": [
+        "type-classes"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Type-Classes/Class-Declarations/index.html",
+      "fragments": [
+        "class"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Type-Classes/Instance-Declarations/index.html",
+      "fragments": [
+        "instance-declarations"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Type-Classes/Instance-Synthesis/index.html",
+      "fragments": [
+        "instance-synth"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Type-Classes/Deriving-Instances/index.html",
+      "fragments": [
+        "deriving-instances"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Type-Classes/Basic-Classes/index.html",
+      "fragments": [
+        "basic-classes"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Coercions/index.html",
+      "fragments": [
+        "coercions"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Coercions/Coercion-Insertion/index.html",
+      "fragments": [
+        "coercion-insertion"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Coercions/Coercing-Between-Types/index.html",
+      "fragments": [
+        "ordinary-coercion"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Coercions/Coercing-to-Sorts/index.html",
+      "fragments": [
+        "sort-coercion"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Coercions/Coercing-to-Function-Types/index.html",
+      "fragments": [
+        "fun-coercion"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Coercions/Implementation-Details/index.html",
+      "fragments": [
+        "coercion-impl-details"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Run-Time-Code/index.html",
+      "fragments": [
+        "runtime"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Run-Time-Code/Boxing/index.html",
+      "fragments": [
+        "boxing"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Run-Time-Code/Reference-Counting/index.html",
+      "fragments": [
+        "reference-counting"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Run-Time-Code/Multi-Threaded-Execution/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Run-Time-Code--Multi-Threaded-Execution"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Run-Time-Code/Foreign-Function-Interface/index.html",
+      "fragments": [
+        "ffi"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/index.html",
+      "fragments": [
+        "terms"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/Identifiers/index.html",
+      "fragments": [
+        "identifiers-and-resolution"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/Function-Types/index.html",
+      "fragments": [
+        "function-types"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/Functions/index.html",
+      "fragments": [
+        "function-terms"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/Function-Application/index.html",
+      "fragments": [
+        "function-application"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/Numeric-Literals/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Terms--Numeric-Literals"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/Structures-and-Constructors/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Terms--Structures-and-Constructors"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/Conditionals/index.html",
+      "fragments": [
+        "if-then-else"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/Pattern-Matching/index.html",
+      "fragments": [
+        "pattern-matching"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/Holes/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Terms--Holes"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/Type-Ascription/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Terms--Type-Ascription"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/Quotation-and-Antiquotation/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Terms--Quotation-and-Antiquotation"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/do--Notation/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Terms--do--Notation"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Terms/Proofs/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Terms--Proofs"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Tactic-Proofs/index.html",
+      "fragments": [
+        "tactics"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Tactic-Proofs/Running-Tactics/index.html",
+      "fragments": [
+        "by"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Tactic-Proofs/Reading-Proof-States/index.html",
+      "fragments": [
+        "proof-states"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Tactic-Proofs/The-Tactic-Language/index.html",
+      "fragments": [
+        "tactic-language"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Tactic-Proofs/Options/index.html",
+      "fragments": [
+        "tactic-language-options"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Tactic-Proofs/Tactic-Reference/index.html",
+      "fragments": [
+        "tactic-ref"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Tactic-Proofs/Targeted-Rewriting-with--conv/index.html",
+      "fragments": [
+        "conv"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Tactic-Proofs/Naming-Bound-Variables/index.html",
+      "fragments": [
+        "bound-variable-name-hints"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Tactic-Proofs/Custom-Tactics/index.html",
+      "fragments": [
+        "custom-tactics"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Simplifier/index.html",
+      "fragments": [
+        "the-simplifier"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Simplifier/Invoking-the-Simplifier/index.html",
+      "fragments": [
+        "simp-tactic-naming"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Simplifier/Rewrite-Rules/index.html",
+      "fragments": [
+        "simp-rewrites"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Simplifier/Simp-sets/index.html",
+      "fragments": [
+        "simp-sets"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Simplifier/Simp-Normal-Forms/index.html",
+      "fragments": [
+        "simp-normal-forms"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html",
+      "fragments": [
+        "terminal-simp"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Simplifier/Configuring-Simplification/index.html",
+      "fragments": [
+        "simp-config"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The-Simplifier/Simplification-vs-Rewriting/index.html",
+      "fragments": [
+        "simp-vs-rw"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/index.html",
+      "fragments": [
+        "grind-tactic",
+        "grind"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Error-Messages/index.html",
+      "fragments": [
+        "grind-errors"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Minimizing--grind--calls/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--The--grind--tactic--Minimizing--grind--calls"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Local-Definitions/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--The--grind--tactic--Local-Definitions"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Congruence-Closure/index.html",
+      "fragments": [
+        "congruence-closure"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Constraint-Propagation/index.html",
+      "fragments": [
+        "grind-propagation"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Case-Analysis/index.html",
+      "fragments": [
+        "grind-split"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/E___matching/index.html",
+      "fragments": [
+        "e-matching"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Associativity-and-Commutativity/index.html",
+      "fragments": [
+        "grind-ac"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Linear-Integer-Arithmetic/index.html",
+      "fragments": [
+        "cutsat"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html",
+      "fragments": [
+        "grind-ring"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Linear-Arithmetic-Solver/index.html",
+      "fragments": [
+        "grind-linarith"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Annotating-Libraries-for--grind/index.html",
+      "fragments": [
+        "grind-annotation"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Reducibility/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--The--grind--tactic--Reducibility"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--grind--tactic/Bigger-Examples/index.html",
+      "fragments": [
+        "grind-bigger-examples"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--mvcgen--tactic/index.html",
+      "fragments": [
+        "mvcgen-tactic"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--mvcgen--tactic/Overview/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--The--mvcgen--tactic--Overview"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--mvcgen--tactic/Predicate-Transformers/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--mvcgen--tactic/Verification-Conditions/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--The--mvcgen--tactic--Verification-Conditions"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--The--mvcgen--tactic--Enabling--mvcgen--For-Monads"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "The--mvcgen--tactic/Proof-Mode/index.html",
+      "fragments": [
+        "mvcgen-proof-mode"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Functors___-Monads-and--do--Notation/index.html",
+      "fragments": [
+        "monads-and-do"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Functors___-Monads-and--do--Notation/Laws/index.html",
+      "fragments": [
+        "monad-laws"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Functors___-Monads-and--do--Notation/Lifting-Monads/index.html",
+      "fragments": [
+        "lifting-monads"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Functors___-Monads-and--do--Notation/Syntax/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Functors___-Monads-and--do--Notation--Syntax"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Functors___-Monads-and--do--Notation/API-Reference/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Functors___-Monads-and--do--Notation--API-Reference"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html",
+      "fragments": [
+        "monad-varieties"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Propositions/index.html",
+      "fragments": [
+        "basic-props"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Propositions/Truth/index.html",
+      "fragments": [
+        "true-false"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Propositions/Logical-Connectives/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Basic-Propositions--Logical-Connectives"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Propositions/Quantifiers/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Basic-Propositions--Quantifiers"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Propositions/Propositional-Equality/index.html",
+      "fragments": [
+        "propositional-equality"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/index.html",
+      "fragments": [
+        "basic-types"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Natural-Numbers/index.html",
+      "fragments": [
+        "Nat"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Integers/index.html",
+      "fragments": [
+        "Int"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Finite-Natural-Numbers/index.html",
+      "fragments": [
+        "Fin"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Fixed-Precision-Integers/index.html",
+      "fragments": [
+        "fixed-ints"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Bitvectors/index.html",
+      "fragments": [
+        "BitVec"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Floating-Point-Numbers/index.html",
+      "fragments": [
+        "Float"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Characters/index.html",
+      "fragments": [
+        "Char"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Strings/index.html",
+      "fragments": [
+        "String"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/The-Unit-Type/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Basic-Types--The-Unit-Type"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/The-Empty-Type/index.html",
+      "fragments": [
+        "empty"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Booleans/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Basic-Types--Booleans"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Optional-Values/index.html",
+      "fragments": [
+        "option"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Tuples/index.html",
+      "fragments": [
+        "tuples"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Sum-Types/index.html",
+      "fragments": [
+        "sum-types"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Linked-Lists/index.html",
+      "fragments": [
+        "List"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Arrays/index.html",
+      "fragments": [
+        "Array"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Byte-Arrays/index.html",
+      "fragments": [
+        "ByteArray"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Ranges/index.html",
+      "fragments": [
+        "ranges"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Maps-and-Sets/index.html",
+      "fragments": [
+        "maps"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Subtypes/index.html",
+      "fragments": [
+        "Subtype"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Basic-Types/Lazy-Computations/index.html",
+      "fragments": [
+        "Thunk"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "IO/index.html",
+      "fragments": [
+        "io"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "IO/Logical-Model/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--IO--Logical-Model"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "IO/Control-Structures/index.html",
+      "fragments": [
+        "io-monad-control"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "IO/Console-Output/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--IO--Console-Output"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "IO/Mutable-References/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--IO--Mutable-References"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "IO/Files___-File-Handles___-and-Streams/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--IO--Files___-File-Handles___-and-Streams"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "IO/System-and-Platform-Information/index.html",
+      "fragments": [
+        "platform-info"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "IO/Environment-Variables/index.html",
+      "fragments": [
+        "io-monad-getenv"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "IO/Timing/index.html",
+      "fragments": [
+        "io-timing"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "IO/Processes/index.html",
+      "fragments": [
+        "io-processes"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "IO/Random-Numbers/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--IO--Random-Numbers"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "IO/Tasks-and-Threads/index.html",
+      "fragments": [
+        "concurrency"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Iterators/index.html",
+      "fragments": [
+        "iterators"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Iterators/Run-Time-Considerations/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Iterators--Run-Time-Considerations"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Iterators/Iterator-Definitions/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Iterators--Iterator-Definitions"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Iterators/Consuming-Iterators/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Iterators--Consuming-Iterators"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Iterators/Iterator-Combinators/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Iterators--Iterator-Combinators"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Iterators/Reasoning-About-Iterators/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Iterators--Reasoning-About-Iterators"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Notations-and-Macros/index.html",
+      "fragments": [
+        "language-extension"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Notations-and-Macros/Custom-Operators/index.html",
+      "fragments": [
+        "operators"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Notations-and-Macros/Precedence/index.html",
+      "fragments": [
+        "precedence"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Notations-and-Macros/Notations/index.html",
+      "fragments": [
+        "notations"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Notations-and-Macros/Defining-New-Syntax/index.html",
+      "fragments": [
+        "syntax-ext"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Notations-and-Macros/Macros/index.html",
+      "fragments": [
+        "macros"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Notations-and-Macros/Elaborators/index.html",
+      "fragments": [
+        "elaborators"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Notations-and-Macros/Extending--do--Notation/index.html",
+      "fragments": [
+        "do-elab"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Notations-and-Macros/Extending-Lean___s-Output/index.html",
+      "fragments": [
+        "unexpand-and-delab"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Build-Tools-and-Distribution/index.html",
+      "fragments": [
+        "build-tools-and-distribution"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Build-Tools-and-Distribution/Lake/index.html",
+      "fragments": [
+        "lake"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html",
+      "fragments": [
+        "elan",
+        "ELAN_HOME-next"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "ValidatingProofs/index.html",
+      "fragments": [
+        "validating-proofs"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Error-Explanations"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--ctorResultingTypeMismatch/index.html",
+      "fragments": [
+        "lean___ctorResultingTypeMismatch"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--dependsOnNoncomputable/index.html",
+      "fragments": [
+        "lean___dependsOnNoncomputable"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--inductionWithNoAlts/index.html",
+      "fragments": [
+        "lean___inductionWithNoAlts"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--inductiveParamMismatch/index.html",
+      "fragments": [
+        "lean___inductiveParamMismatch"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--inductiveParamMissing/index.html",
+      "fragments": [
+        "lean___inductiveParamMissing"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--inferBinderTypeFailed/index.html",
+      "fragments": [
+        "lean___inferBinderTypeFailed"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--inferDefTypeFailed/index.html",
+      "fragments": [
+        "lean___inferDefTypeFailed"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--invalidDottedIdent/index.html",
+      "fragments": [
+        "lean___invalidDottedIdent"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--invalidField/index.html",
+      "fragments": [
+        "lean___invalidField"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--projNonPropFromProp/index.html",
+      "fragments": [
+        "lean___projNonPropFromProp"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--propRecLargeElim/index.html",
+      "fragments": [
+        "lean___propRecLargeElim"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--redundantMatchAlt/index.html",
+      "fragments": [
+        "lean___redundantMatchAlt"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--synthInstanceFailed/index.html",
+      "fragments": [
+        "lean___synthInstanceFailed"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "Error-Explanations/About___--unknownIdentifier/index.html",
+      "fragments": [
+        "lean___unknownIdentifier"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/index.html",
+      "fragments": [
+        "release-notes"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.0.0-m1/index.html",
+      "fragments": [
+        "release-v4___0___0-m1"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.0.0-m2/index.html",
+      "fragments": [
+        "release-v4___0___0-m2"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.0.0-m3/index.html",
+      "fragments": [
+        "release-v4___0___0-m3"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.0.0-m4/index.html",
+      "fragments": [
+        "release-v4___0___0-m4"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.0.0-m5/index.html",
+      "fragments": [
+        "release-v4___0___0-m5"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.0.0/index.html",
+      "fragments": [
+        "release-v4___0___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.1.0/index.html",
+      "fragments": [
+        "release-v4___1___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.2.0/index.html",
+      "fragments": [
+        "release-v4___2___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.3.0/index.html",
+      "fragments": [
+        "release-v4___3___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.4.0/index.html",
+      "fragments": [
+        "release-v4___4___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.5.0/index.html",
+      "fragments": [
+        "release-v4___5___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.6.0/index.html",
+      "fragments": [
+        "release-v4___6___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.7.0/index.html",
+      "fragments": [
+        "release-v4___7___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.8.0/index.html",
+      "fragments": [
+        "release-v4___8___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.9.0/index.html",
+      "fragments": [
+        "release-v4___9___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.10.0/index.html",
+      "fragments": [
+        "release-v4___10___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.11.0/index.html",
+      "fragments": [
+        "release-v4___11___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.12.0/index.html",
+      "fragments": [
+        "release-v4___12___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.13.0/index.html",
+      "fragments": [
+        "release-v4___13___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.14.0/index.html",
+      "fragments": [
+        "release-v4___14___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.15.0/index.html",
+      "fragments": [
+        "release-v4___15___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.16.0/index.html",
+      "fragments": [
+        "release-v4___16___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.17.0/index.html",
+      "fragments": [
+        "release-v4___17___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.18.0/index.html",
+      "fragments": [
+        "release-v4___18___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.19.0/index.html",
+      "fragments": [
+        "release-v4___19___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.20.0/index.html",
+      "fragments": [
+        "release-v4___20___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.21.0/index.html",
+      "fragments": [
+        "release-v4___21___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.22.0/index.html",
+      "fragments": [
+        "release-v4___22___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.23.0/index.html",
+      "fragments": [
+        "release-v4___23___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.24.0/index.html",
+      "fragments": [
+        "release-v4___24___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.25.0/index.html",
+      "fragments": [
+        "release-v4___25___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.25.1/index.html",
+      "fragments": [
+        "release-v4___25___1"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.26.0/index.html",
+      "fragments": [
+        "release-v4___26___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.27.0/index.html",
+      "fragments": [
+        "release-v4___27___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.28.0/index.html",
+      "fragments": [
+        "release-v4___28___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.28.1/index.html",
+      "fragments": [
+        "release-v4___28___1"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.29.0/index.html",
+      "fragments": [
+        "release-v4___29___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.29.1/index.html",
+      "fragments": [
+        "release-v4___29___1"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.30.0/index.html",
+      "fragments": [
+        "release-v4___30___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.31.0/index.html",
+      "fragments": [
+        "release-v4___31___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.32.0/index.html",
+      "fragments": [
+        "release-v4___32___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.32.1/index.html",
+      "fragments": [
+        "release-v4___32___1"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.32.2/index.html",
+      "fragments": [
+        "release-v4___32___2"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.33.0/index.html",
+      "fragments": [
+        "release-v4___33___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.33.1/index.html",
+      "fragments": [
+        "release-v4___33___1"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "releases/v4.34.0/index.html",
+      "fragments": [
+        "release-v4___34___0"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "platforms/index.html",
+      "fragments": [
+        "platforms"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    },
+    {
+      "page": "the-index/index.html",
+      "fragments": [
+        "The-Lean-Language-Reference--Index"
+      ],
+      "mapping": "document-entry navigation aliases; not precise source-token locations"
+    }
+  ],
+  "unmapped": [],
+  "emptyFragmentNormalization": "Source # maps to article entry."
+}

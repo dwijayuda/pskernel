@@ -1,0 +1,86 @@
+{
+  "diagrams": [
+    {
+      "sourcePage": "lean4-language-reference/Basic-Types/Arrays/index.html",
+      "index": 0,
+      "file": "assets/figures/figure-01.svg",
+      "text": " m_header Lean object header m_size Byte countsize_t m_capacity Allocated spacesize_t m_data Array dataArray of lean_object * ",
+      "sha256": "c5ca40395dabc136f74f3b5897c08a65bd7cdc5e245b65054fa8c1b110ab5666"
+    },
+    {
+      "sourcePage": "lean4-language-reference/Basic-Types/Lazy-Computations/index.html",
+      "index": 0,
+      "file": "assets/figures/figure-02.svg",
+      "text": " m_header Lean object header m_value Saved valuelean_object * m_closure Closurelean_object * ",
+      "sha256": "2b2ee215086b859f35ede08a631b3f8f9248b18e2508eece73fd3a4888075bc2"
+    },
+    {
+      "sourcePage": "lean4-language-reference/Basic-Types/Strings/index.html",
+      "index": 0,
+      "file": "assets/figures/figure-03.svg",
+      "text": " m_header Lean object header m_size Byte countsize_t m_capacity Allocated spacesize_t m_length Characterssize_t m_data String datachar array '\\0' ",
+      "sha256": "b93157fb88cf66c874edc29c14d656bcf855f36fb35359729003b4f5909bb43d"
+    },
+    {
+      "sourcePage": "lean4-language-reference/Build-Tools-and-Distribution/Lake/index.html",
+      "index": 0,
+      "file": "assets/figures/figure-04.svg",
+      "text": " Workspace lean-toolchain Root package Package configuration file (lakefile.lean) Libraries Executables Manifest (lake-manifest.json) Lake Directory (.lake) Packages Dependency 1 Package configuration file Libraries Executables Artifacts Dependency 2 Package configuration file Libraries Executables Artifacts ⋯ Artifacts Built libraries Built executables ",
+      "sha256": "08dbf0289d391ee2b716e72928c6b9d11f29371d74d6c1a432142fbd971d4b8a"
+    },
+    {
+      "sourcePage": "lean4-language-reference/Coercions/Implementation-Details/index.html",
+      "index": 0,
+      "file": "assets/figures/figure-05.svg",
+      "text": " CoeHead? CoeOut* Coe* CoeTC CoeOTC CoeHTC CoeTail? CoeHTCT CoeDep or CoeT ",
+      "sha256": "8b97406cfa4af5d6c4c9b2fc6de53c2f9342cb3ea4a3e891f6d32cf468bb5841"
+    },
+    {
+      "sourcePage": "lean4-language-reference/Definitions/Recursive-Definitions/index.html",
+      "index": 0,
+      "file": "assets/figures/figure-06.svg",
+      "text": " b a, b a fail ok ",
+      "sha256": "79b3842955f29708b943250eaa1f676cc84095da0c04605b7a2daf702b7efa73"
+    },
+    {
+      "sourcePage": "lean4-language-reference/Definitions/Recursive-Definitions/index.html",
+      "index": 1,
+      "file": "assets/figures/figure-07.svg",
+      "text": " a, b b b a a fail ok start ",
+      "sha256": "88d8e121d1e489ab5d83e9938e0f93a2b283e6f23fbea389a817bc7c1b78bc6c"
+    },
+    {
+      "sourcePage": "lean4-language-reference/Elaboration-and-Compilation/index.html",
+      "index": 0,
+      "file": "assets/figures/figure-08.svg",
+      "text": " Code.lean SyntaxTree Core TypeTheory Core TypeTheory(no recursion) Executable ✔ / ✖ Parsing Elaboration Compilation RecursionElimination MacroExpansion KernelCheck ",
+      "sha256": "572a378e97c08a8c285892ff61451db6acd716d2f3c6ae985dadfc8b2affa4e8"
+    }
+  ],
+  "screenshots": [
+    {
+      "sourcePage": "lean4-language-reference/Functors___-Monads-and--do--Notation/Syntax/index.html",
+      "sourcePath": "lean4-language-reference/static/screenshots/do-return-hl-1.png",
+      "originalSrc": "../../static/screenshots/do-return-hl-1.png",
+      "file": "assets/figures/do-return-hl-1.png",
+      "alt": "Highlighting do from return",
+      "gitBlob": "efa23e24a8f2d5f1889fce914c2530f9aea623f9"
+    },
+    {
+      "sourcePage": "lean4-language-reference/Functors___-Monads-and--do--Notation/Syntax/index.html",
+      "sourcePath": "lean4-language-reference/static/screenshots/do-return-hl-2.png",
+      "originalSrc": "../../static/screenshots/do-return-hl-2.png",
+      "file": "assets/figures/do-return-hl-2.png",
+      "alt": "Highlighting do from return with errors",
+      "gitBlob": "daf0ba127daba63d7951bf0d6217139a19ab72c4"
+    },
+    {
+      "sourcePage": "lean4-language-reference/ValidatingProofs/index.html",
+      "sourcePath": "lean4-language-reference/static/screenshots/doublecheckmarks.png",
+      "originalSrc": "../static/screenshots/doublecheckmarks.png",
+      "file": "assets/figures/doublecheckmarks.png",
+      "alt": "A theorem with double blue check marks appearing in the editor gutter",
+      "gitBlob": "4f23cf00fc67a3be15eea11c0a80454b1e8c6ccb"
+    }
+  ]
+}

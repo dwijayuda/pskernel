@@ -1,0 +1,911 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../index.html">17. The mvcgen tactic</a><a href="../Overview/index.html">17.1. Overview</a><a href="index.html">17.2. Predicate Transformers</a><a href="../Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../../Notations-and-Macros/index.html">23. Notations and Macros</a><a href="../../Notations-and-Macros/Custom-Operators/index.html">23.1. Custom Operators</a><a href="../../Notations-and-Macros/Precedence/index.html">23.2. Precedence</a><a href="../../Notations-and-Macros/Notations/index.html">23.3. Notations</a><a href="../../Notations-and-Macros/Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../../Notations-and-Macros/Macros/index.html">23.5. Macros</a><a href="../../Notations-and-Macros/Elaborators/index.html">23.6. Elaborators</a><a href="../../Notations-and-Macros/Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../../Notations-and-Macros/Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../../releases/index.html">Release Notes</a><a href="../../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers"></a></p>
+<h1 id="proofscript-17-2-predicate-transformers">ProofScript — 17.2. Predicate Transformers</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>Verification-condition generation connects a computation to a program-logic specification. Predicate transformers, state/error behavior, supported monads and loop interfaces are part of that connection. The final proof must establish the approved property of the actual computation, not merely prove unrelated obligations emitted by a buggy generator. Intrinsic contracts are experimental at the selected pin.</p>
+<p><strong>Compiler and coverage boundary.</strong> Keep the native requires/ensures grammar, generated theorem identities, residual proof sections and assumption reports. The inherited example uses native spelling intentionally; it is already an L-class ProofScript form.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/The--mvcgen--tactic/Predicate-Transformers/index.html">The--mvcgen--tactic/Predicate-Transformers/index.html</a>. Source Git blob: <code>2c1c3649ab763d9261e4f7eed560003937c447b2</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<p><a id="docstring-section-Constructors-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructor-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Extends-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructor-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Fields-next-next-next-next-next-next-next"></a></p>
+<hr>
+<h2 id="17-2-predicate-transformers">17.2. Predicate Transformers</h2><p>A 
+<a id="--tech-term-predicate-transformer-semantics"></a>
+<em>predicate transformer semantics</em> is an interpretation of programs as functions from predicates to predicates, rather than values to values. A 
+<a id="--tech-term-postcondition"></a>
+<em>postcondition</em> is an assertion that holds after running a program, while a 
+<a id="--tech-term-precondition"></a>
+<em>precondition</em> is an assertion that must hold prior to running the program in order for the postcondition to be guaranteed to hold.</p>
+<p>The predicate transformer semantics used by <code>mvcgen</code> transforms postconditions into the 
+<a id="--tech-term-weakest-preconditions"></a>
+<em>weakest preconditions</em> under which the program will ensure the postcondition. An assertion P is weaker than P&#39; if, in all states, P&#39; suffices to prove P, but P does not suffice to prove P&#39;. Logically equivalent assertions are considered to be equal.</p>
+<p>The predicates in question are stateful: they can mention the program&#39;s current state. Furthermore, postconditions can relate the return value and any exceptions thrown by the program to the final state. <code>SPred</code> is a type of predicates that is parameterized over a monadic state, expressed as a list of the types of the fields that make up the state. The usual logical connectives and quantifiers are defined for <code>SPred</code>. Each monad that can be used with <code>mvcgen</code> is assigned a state type by an instance of <code>WP</code>, and <code>Assertion</code> is the corresponding type of assertions for that monad, which is used for preconditions. <code>Assertion</code> is a wrapper around <code>SPred</code>: while <code>SPred</code> is parameterized by a list of states types, <code>Assertion</code> is parameterized by a more informative type that it translates to a list of state types for <code>SPred</code>. A <code>PostCond</code> pairs an <code>Assertion</code> about a return value with assertions about potential exceptions; the available exceptions are also specified by the monad&#39;s <code>WP</code> instance.</p>
+<p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers--Stateful-Predicates"></a></p>
+<h3 id="17-2-1-stateful-predicates">17.2.1. Stateful Predicates</h3><p>The predicate transformer semantics of monadic programs is based on a logic in which propositions may mention the program&#39;s state. Here, “state” refers not only to mutable state, but also to read-only values such as those that are provided via <code>ReaderT</code>. Different monads have different state types available, but each individual state always has a type. Given a list of state types, <code>SPred</code> is a type of predicates over these states.</p>
+<p><code>SPred</code> is not inherently tied to the monadic verification framework. The related <code>Assertion</code> computes a suitable <code>SPred</code> for a monad&#39;s state as expressed via its <code>WP</code> instance&#39;s <code>PostShape</code> output parameter.</p>
+<p><a id="Std___Do___SPred"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SPred.{u} (σs : List (Type u)) : Type u
+</code></pre></div><p>A predicate over states, where each state is defined by a list of component state types.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">SPred [Nat, Bool] = (Nat → Bool → ULift Prop)
+</code></pre></div><p>Ordinary propositions that do not mention the state can be used as stateful predicates by adding a trivial universal quantification. This is written with the syntax <code>⌜P⌝</code>, which is syntactic sugar for <code>SPred.pure</code>.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Notation for SPred</strong></p>
+<p><a id="Std___Do____FLQQ_term________FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | ⌜term⌝
+</code></pre></div><p>Embedding of pure Lean values into <code>SVal</code>. An alias for <code>SPred.pure</code>.</p>
+<p><a id="Std___Do___SPred___pure"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SPred.pure.{u} {σs : List (Type u)} (P : Prop) : SPred σs
+</code></pre></div><p>A pure proposition <code>P : Prop</code> embedded into <code>SPred</code>. Prefer to use notation <code>⌜P⌝</code>.</p>
+<p><a id="Stateful-Predicates"></a>
+Stateful Predicates </p>
+<p>The predicate <code>ItIsSecret</code> expresses that a state of type <code>String</code> is <code>&quot;secret&quot;</code>:</p>
+<p><a id="ItIsSecret-_LPAR_in-Stateful-Predicates_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const ItIsSecret : SPred [String] := fun s =&gt; ⌜s = &quot;secret&quot;⌝
+</code></pre></div><p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers--Stateful-Predicates--Entailment"></a></p>
+<h4 id="17-2-1-1-entailment">17.2.1.1. Entailment</h4><p>Stateful predicates are related by <em>entailment</em>. Entailment of stateful predicates is defined as universally-quantified implication: if P and Q are predicates over a state \sigma, then P entails Q (written P \vdash_s Q) when ∀ s : \sigma, P(s) → Q(s).</p>
+<p><a id="Std___Do___SPred___entails"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SPred.entails.{u} {σs : List (Type u)} (P Q : SPred σs) : Prop
+</code></pre></div><p>Entailment in <code>SPred</code>.</p>
+<p>One predicate <code>P</code> entails another predicate <code>Q</code> if <code>Q</code> is true in every state in which <code>P</code> is true. Unlike implication (<code>SPred.imp</code>), entailment is not itself an <code>SPred</code>, but is instead an ordinary proposition.</p>
+<p><a id="Std___Do___SPred___bientails"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SPred.bientails.{u} {σs : List (Type u)} (P Q : SPred σs) : Prop
+</code></pre></div><p>Logical equivalence of <code>SPred</code>.</p>
+<p>Logically equivalent predicates are equal. Use <code>SPred.bientails.to_eq</code> to convert bi-entailment to equality.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Notation for SPred</strong></p>
+<p><a id="Std___Do____FLQQ_term__VDASH______FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term ⊢ₛ term
+</code></pre></div><p>Entailment in <code>SPred</code>; sugar for <code>SPred.entails</code>.</p>
+<p><a id="Std___Do____FLQQ_term_VDASH______FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | ⊢ₛ term
+</code></pre></div><p>Tautology in <code>SPred</code>; sugar for <code>SPred.entails ⌜True⌝</code>.</p>
+<p><a id="Std___Do____FLQQ_term_____VDASH______FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term ⊣⊢ₛ term
+</code></pre></div><p>Bi-entailment in <code>SPred</code>; sugar for <code>SPred.bientails</code>.</p>
+<p>The logic of stateful predicates includes an implication connective. The difference between entailment and implication is that entailment is a statement in Lean&#39;s logic, while implication is internal to the stateful logic. Given stateful predicates <code>P</code> and <code>Q</code> for state <code>σ</code>, <code>P ⊢ₛ Q</code> is a <code>Prop</code> while <code>spred(P → Q)</code> is an <code>SPred σ</code>.</p>
+<p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers--Stateful-Predicates--Notation"></a></p>
+<h4 id="17-2-1-2-notation">17.2.1.2. Notation</h4><p>The syntax of stateful predicates overlaps with that of ordinary Lean terms. In particular, stateful predicates use the usual syntax for logical connectives and quantifiers. The syntax associated with stateful predicates is automatically enabled in contexts such as pre- and postconditions where they are clearly intended; other contexts must explicitly opt in to the syntax using <code>spred</code>. The usual meanings of these operators can be recovered by using the <a href="index.html#Std___Do____FLQQ_termTerm_LPAR___RPAR__FLQQ_"><code>term</code></a> operator.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Predicate Terms</strong></p>
+<p><code>spred</code> indicates that logical connectives and quantifiers should be understood as those pertaining to stateful predicates, while <a href="index.html#Std___Do____FLQQ_termTerm_LPAR___RPAR__FLQQ_"><code>term</code></a> indicates that they should have the usual meaning.</p>
+<p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(term)
+</code></pre></div><p><a id="Std___Do____FLQQ_termTerm_LPAR___RPAR__FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term(term)
+</code></pre></div><p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers--Stateful-Predicates--Connectives-and-Quantifiers"></a></p>
+<h4 id="17-2-1-3-connectives-and-quantifiers">17.2.1.3. Connectives and Quantifiers</h4><p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Predicate Connectives</strong></p>
+<p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(term ∧ term)
+</code></pre></div><p>Syntactic sugar for <code>SPred.and</code>.</p>
+<p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(term ∨ term)
+</code></pre></div><p>Syntactic sugar for <code>SPred.or</code>.</p>
+<p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(¬ term)
+</code></pre></div><p>Syntactic sugar for <code>SPred.not</code>.</p>
+<p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(term → term)
+</code></pre></div><p>Syntactic sugar for <code>SPred.imp</code>.</p>
+<p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(term ↔ term)
+</code></pre></div><p>Syntactic sugar for <code>SPred.iff</code>.</p>
+<p><a id="Std___Do___SPred___and"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SPred.and.{u} {σs : List (Type u)} (P Q : SPred σs) : SPred σs
+</code></pre></div><p>Conjunction in <code>SPred</code>: states that satisfy <code>P</code> and satisfy <code>Q</code> satisfy <code>spred(P ∧ Q)</code>.</p>
+<p><a id="Std___Do___SPred___conjunction"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SPred.conjunction.{u} {σs : List (Type u)}
+  (env : List (SPred σs)) : SPred σs
+</code></pre></div><p>Conjunction of a list of stateful predicates. A state satisfies <code>conjunction env</code> if it satisfies all predicates in <code>env</code>.</p>
+<p><a id="Std___Do___SPred___or"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SPred.or.{u} {σs : List (Type u)} (P Q : SPred σs) : SPred σs
+</code></pre></div><p>Disjunction in <code>SPred</code>: states that either satisfy <code>P</code> or satisfy <code>Q</code> satisfy <code>spred(P ∨ Q)</code>.</p>
+<p><a id="Std___Do___SPred___not"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SPred.not.{u} {σs : List (Type u)} (P : SPred σs) : SPred σs
+</code></pre></div><p>Negation in <code>SPred</code>: states that do not satisfy <code>P</code> satisfy <code>spred(¬ P)</code>.</p>
+<p><a id="Std___Do___SPred___imp"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SPred.imp.{u} {σs : List (Type u)} (P Q : SPred σs) : SPred σs
+</code></pre></div><p>Implication in <code>SPred</code>: states that satisfy <code>Q</code> whenever they satisfy <code>P</code> satisfy <code>spred(P → Q)</code>.</p>
+<p><a id="Std___Do___SPred___iff"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SPred.iff.{u} {σs : List (Type u)} (P Q : SPred σs) : SPred σs
+</code></pre></div><p>Biimplication in <code>SPred</code>: states that either satisfy both <code>P</code> and <code>Q</code> or satisfy neither satisfy <code>spred(P ↔ Q)</code>.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Predicate Quantifiers</strong></p>
+<p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(∀ ident, term)
+</code></pre></div><p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(∀ ident : term,  term)
+</code></pre></div><p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(∀ (ident (ident | hole)* : term),  term)
+</code></pre></div><p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(∀ _, term)
+</code></pre></div><p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(∀ _ : term,  term)
+</code></pre></div><p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(∀ (_ (ident | hole)* : term),  term)
+</code></pre></div><p>Each form of universal quantification is syntactic sugar for an invocation of <code>SPred.forall</code> on a function that takes the quantified variable as a parameter.</p>
+<p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(∃ ident, term)
+</code></pre></div><p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(∃ ident : term,  term)
+</code></pre></div><p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(∃ (ident binderIdent* : term),  term)
+</code></pre></div><p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(∃ _, term)
+</code></pre></div><p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(∃ _ : term,  term)
+</code></pre></div><p><a id="Std___Do____FLQQ_termSpred_LPAR___RPAR__FLQQ_-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | spred(∃ (_ binderIdent* : term),  term)
+</code></pre></div><p>Each form of existential quantification is syntactic sugar for an invocation of <code>SPred.exists</code> on a function that takes the quantified variable as a parameter.</p>
+<p><a id="Std___Do___SPred___forall"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SPred.forall.{u, v} {α : Sort u} {σs : List (Type v)}
+  (P : α → SPred σs) : SPred σs
+</code></pre></div><p>Universal quantifier in <code>SPred</code>.</p>
+<p><a id="Std___Do___SPred___exists"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SPred.exists.{u, v} {α : Sort u} {σs : List (Type v)}
+  (P : α → SPred σs) : SPred σs
+</code></pre></div><p>Existential quantifier in <code>SPred</code>.</p>
+<p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers--Stateful-Predicates--Stateful-Values"></a></p>
+<h4 id="17-2-1-4-stateful-values">17.2.1.4. Stateful Values</h4><p>Just as <code>SPred</code> represents predicate over states, <code>SVal</code> represents a value that is derived from a state.</p>
+<p><a id="Std___Do___SVal"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SVal.{u} (σs : List (Type u)) (α : Type u) : Type u
+</code></pre></div><p>A value indexed by a curried tuple of states.</p>
+<p>Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example : SVal [Nat, Bool] String = (Nat → Bool → String) := rfl
+</code></pre></div><p><a id="Std___Do___SVal___getThe"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SVal.getThe.{u} {σs : List (Type u)} (σ : Type u)
+  [SVal.GetTy σ σs] : SVal σs σ
+</code></pre></div><p>Gets the top-most state of type <code>σ</code> from an <code>SVal</code>.</p>
+<p><a id="Std___Do___SVal___StateTuple"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SVal.StateTuple.{u} (σs : List (Type u)) : Type u
+</code></pre></div><p>A tuple capturing the whole state of an <code>SVal</code>.</p>
+<p><a id="Std___Do___SVal___curry"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SVal.curry.{u} {α : Type u} {σs : List (Type u)}
+  (f : SVal.StateTuple σs → α) : SVal σs α
+</code></pre></div><p>Curries a function taking a <code>StateTuple</code> into an <code>SVal</code>.</p>
+<p><a id="Std___Do___SVal___uncurry"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.SVal.uncurry.{u} {α : Type u} {σs : List (Type u)}
+  (f : SVal σs α) : SVal.StateTuple σs → α
+</code></pre></div><p>Uncurries an <code>SVal</code> into a function taking a <code>StateTuple</code>.</p>
+<p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers--Assertions"></a></p>
+<h3 id="17-2-2-assertions">17.2.2. Assertions</h3><p>The language of assertions about monadic programs is parameterized by a 
+<a id="--tech-term-postcondition-shape"></a>
+<em>postcondition shape</em>, which describes the inputs to and outputs from a computation in a given monad. Preconditions may mention the initial values of the monad&#39;s state, while postconditions may mention the returned value, the final values of the monad&#39;s state, and must furthermore account for any exceptions that could have been thrown. The postcondition shape of a given monad determines the states and exceptions in the monad. <code>PostShape.pure</code> describes a monad in which assertions may not mention any states, <code>PostShape.arg</code> describes a state value, and <code>PostShape.except</code> describes a possible exception. Because these constructors can be continually added, the postcondition shape of a monad transformer can be defined in terms of the postcondition shape of the underlying transformed monad. Behind the scenes, an <code>Assertion</code> is translated into an appropriate <code>SPred</code> by translating the postcondition shape into a list of state types, discarding exceptions.</p>
+<p><a id="Std___Do___PostShape___pure"></a></p>
+<p><strong>inductive type</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PostShape.{u} : Type (u + 1)
+</code></pre></div><p>The “shape” of the postconditions that are used to reason about a monad.</p>
+<p>A postcondition shape is an abstraction of many possible monadic effects, based on the structure of pure functions that can simulate them. The postcondition shape of a monad is given by its <code>WP</code> instance. This shape is used to determine both its <code>Assertion</code>s and its <code>PostCond</code>s.</p>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PostShape.pure.{u} : PostShape
+</code></pre></div><p>The assertions and postconditions in this monad use neither state nor exceptions.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PostShape.arg.{u} (σ : Type u) :
+  PostShape → PostShape
+</code></pre></div><p>The assertions in this monad may mention the current value of a state of type <code>σ</code>, and postconditions may mention the state&#39;s final value.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PostShape.except.{u} (ε : Type u) :
+  PostShape → PostShape
+</code></pre></div><p>The postconditions in this monad include assertions about exceptional values of type <code>ε</code> that result from premature termination.</p>
+<p><a id="Std___Do___PostShape___args"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PostShape.args.{u} : PostShape → List (Type u)
+</code></pre></div><p>Extracts the list of state types under <code>PostShape.arg</code> constructors, discarding exception types.</p>
+<p>The state types determine the shape of assertions in the monad.</p>
+<p><a id="Std___Do___Assertion"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.Assertion.{u} (ps : PostShape) : Type u
+</code></pre></div><p>An assertion about the state fields for a monad whose postcondition shape is <code>ps</code>.</p>
+<p>Concretely, this is an abbreviation for <code>SPred</code> applied to the <code>.arg</code>s in the given predicate shape, so all theorems about <code>SPred</code> apply.</p>
+<p>Examples:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example : Assertion (.arg ρ .pure) = (ρ → ULift Prop) := rfl
+example : Assertion (.except ε .pure) = ULift Prop := rfl
+example : Assertion (.arg σ (.except ε .pure)) = (σ → ULift Prop) := rfl
+example : Assertion (.except ε (.arg σ .pure)) = (σ → ULift Prop) := rfl
+</code></pre></div><p><a id="Std___Do___PostCond"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PostCond.{u} (α : Type u) (ps : PostShape) : Type u
+</code></pre></div><p>A postcondition for the given predicate shape, with one <code>Assertion</code> for the terminating case and one <code>Assertion</code> for each <code>.except</code> layer in the predicate shape.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">variable (α σ ε : Type)
+example : PostCond α (.arg σ .pure) = ((α → σ → ULift Prop) × PUnit) := rfl
+example : PostCond α (.except ε .pure) = ((α → ULift Prop) × (ε → ULift Prop) × PUnit) := rfl
+example : PostCond α (.arg σ (.except ε .pure)) = ((α → σ → ULift Prop) × (ε → ULift Prop) × PUnit) := rfl
+example : PostCond α (.except ε (.arg σ .pure)) = ((α → σ → ULift Prop) × (ε → σ → ULift Prop) × PUnit) := rfl
+</code></pre></div><p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Postconditions</strong></p>
+<p><a id="Std___Do____FLQQ_term_________GT___FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | ⇓ term* =&gt; term
+</code></pre></div><p>Syntactic sugar for a nested sequence of product constructors, terminating in <code>()</code>, in which the first element is an assertion about non-exceptional return values and the remaining elements are assertions about the exceptional cases for a postcondition.</p>
+<p><a id="Std___Do___ExceptConds"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.ExceptConds.{u} : PostShape → Type u
+</code></pre></div><p>An assertion about each potential exception that&#39;s declared in a postcondition shape.</p>
+<p>Examples:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example : ExceptConds (.pure) = Unit := rfl
+example : ExceptConds (.except ε .pure) = ((ε → ULift Prop) × Unit) := rfl
+example : ExceptConds (.arg σ (.except ε .pure)) = ((ε → ULift Prop) × Unit) := rfl
+example : ExceptConds (.except ε (.arg σ .pure)) = ((ε → σ → ULift Prop) × Unit) := rfl
+</code></pre></div><p>Postconditions for programs that might throw exceptions come in two varieties. The 
+<a id="--tech-term-total-correctness-interpretation"></a>
+<em>total correctness interpretation</em> <code>⦃P⦄ prog ⦃⇓ r =&gt; Q&#39; r⦄</code> asserts that, given <code>P</code> holds, then <code>prog</code> terminates <em>and</em> <code>Q&#39;</code> holds for the result. The 
+<a id="--tech-term-partial-correctness-interpretation"></a>
+<em>partial correctness interpretation</em> <code>⦃P⦄ prog ⦃⇓? r =&gt; Q&#39; r⦄</code> asserts that, given <code>P</code> holds, and <em>if</em> <code>prog</code> terminates <em>then</em> <code>Q&#39;</code> holds for the result.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Exception-Free Postconditions</strong></p>
+<p><a id="Std___Do____FLQQ_term_________GT___FLQQ_-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | ⇓ term* =&gt; term
+</code></pre></div><p>A postcondition expressing total correctness. That is, it expresses that the asserted computation finishes without throwing an exception <em>and</em> the result satisfies the given predicate <code>p</code>.</p>
+<p><a id="Std___Do___PostCond___noThrow"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PostCond.noThrow.{u_1} {α : Type u_1} {ps : PostShape}
+  (p : α → Assertion ps) : PostCond α ps
+</code></pre></div><p>A postcondition expressing total correctness. That is, it expresses that the asserted computation finishes without throwing an exception <em>and</em> the result satisfies the given predicate <code>p</code>.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Partial Postconditions</strong></p>
+<p><a id="Std___Do____FLQQ_term____________GT___FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | ⇓? term* =&gt; term
+</code></pre></div><p>A postcondition expressing partial correctness. That is, it expresses that <em>if</em> the asserted computation finishes without throwing an exception <em>then</em> the result satisfies the given predicate <code>p</code>. Nothing is asserted when the computation throws an exception.</p>
+<p><a id="Std___Do___PostCond___mayThrow"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PostCond.mayThrow.{u_1} {α : Type u_1} {ps : PostShape}
+  (p : α → Assertion ps) : PostCond α ps
+</code></pre></div><p>A postcondition expressing partial correctness. That is, it expresses that <em>if</em> the asserted computation finishes without throwing an exception <em>then</em> the result satisfies the given predicate <code>p</code>. Nothing is asserted when the computation throws an exception.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Postcondition Entailment</strong></p>
+<p><a id="Std___Do____FLQQ_term__VDASH______FLQQ_-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term ⊢ₚ term
+</code></pre></div><p>Syntactic sugar for <code>PostCond.entails</code></p>
+<p><a id="Std___Do___PostCond___entails"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PostCond.entails.{u_1} {α : Type u_1} {ps : PostShape}
+  (p q : PostCond α ps) : Prop
+</code></pre></div><p>Entailment of postconditions.</p>
+<p>This consists of:</p>
+<ul>
+<li>Entailment of the assertion about the return value, for all possible return values.</li>
+<li>Entailment of the exception conditions.</li>
+</ul>
+<p>While implication of postconditions (<code>PostCond.imp</code>) results in a new postcondition, entailment is an ordinary proposition.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Postcondition Conjunction</strong></p>
+<p><a id="Std___Do____FLQQ_term_________FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term ∧ₚ term
+</code></pre></div><p>Syntactic sugar for <code>PostCond.and</code></p>
+<p><a id="Std___Do___PostCond___and"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PostCond.and.{u_1} {α : Type u_1} {ps : PostShape}
+  (p q : PostCond α ps) : PostCond α ps
+</code></pre></div><p>Conjunction of postconditions.</p>
+<p>This is defined pointwise, as the conjunction of the assertions about the return value and the conjunctions of the assertions about each potential exception.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Postcondition Implication</strong></p>
+<p><a id="Std___Do____FLQQ_term__ARR______FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term →ₚ term
+</code></pre></div><p>Syntactic sugar for <code>PostCond.imp</code></p>
+<p><a id="Std___Do___PostCond___imp"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PostCond.imp.{u_1} {α : Type u_1} {ps : PostShape}
+  (p q : PostCond α ps) : PostCond α ps
+</code></pre></div><p>Implication of postconditions.</p>
+<p>This is defined pointwise, as the implication of the assertions about the return value and the implications of each of the assertions about each potential exception.</p>
+<p>While entailment of postconditions (<code>PostCond.entails</code>) is an ordinary proposition, implication of postconditions is itself a postcondition.</p>
+<p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers--Predicate-Transformers"></a></p>
+<h3 id="17-2-3-predicate-transformers">17.2.3. Predicate Transformers</h3><p>A predicate transformer is a function from postconditions for some postcondition state into assertions for that state. The function must be 
+<a id="--tech-term-conjunctive"></a>
+<em>conjunctive</em>, which means it must distribute over <code>PostCond.and</code>.</p>
+<p><a id="Std___Do___PredTrans___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PredTrans.{u} (ps : PostShape) (α : Type u) : Type u
+</code></pre></div><p>The type of predicate transformers for a given <code>ps : PostShape</code> and return type <code>α : Type</code>. A predicate transformer <code>x : PredTrans ps α</code> is a function that takes a postcondition <code>Q : PostCond α ps</code> and returns a precondition <code>x.apply Q : Assertion ps</code>.</p>
+<p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PredTrans.mk.{u}
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">trans : PostCond α ps → Assertion ps
+</code></pre></div><p>The function implementing the predicate transformer.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">conjunctiveRaw : PredTrans.Conjunctive self.trans
+</code></pre></div><p>The predicate transformer is conjunctive: <code>t (Q₁ ∧ₚ Q₂) ⊣⊢ₛ t Q₁ ∧ t Q₂</code>. So the stronger the postcondition, the stronger the resulting precondition.</p>
+<p><a id="Std___Do___PredTrans___Conjunctive"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PredTrans.Conjunctive.{u} {ps : PostShape} {α : Type u}
+  (t : PostCond α ps → Assertion ps) : Prop
+</code></pre></div><p>Transforming a conjunction of postconditions is the same as the conjunction of transformed postconditions.</p>
+<p><a id="Std___Do___PredTrans___Monotonic"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PredTrans.Monotonic.{u} {ps : PostShape} {α : Type u}
+  (t : PostCond α ps → Assertion ps) : Prop
+</code></pre></div><p>The stronger the postcondition, the stronger the transformed precondition.</p>
+<p>Predicate transformers form a monad. The <code>pure</code> operator is the identity transformer; it simply instantiates the postcondition with the its argument. The <code>bind</code> operator composes predicate transformers.</p>
+<p><a id="Std___Do___PredTrans___pure"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PredTrans.pure.{u} {ps : PostShape} {α : Type u} (a : α) :
+  PredTrans ps α
+</code></pre></div><p>The identity predicate transformer that transforms the postcondition&#39;s assertion about the return value into an assertion about <code>a</code>.</p>
+<p><a id="Std___Do___PredTrans___bind"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PredTrans.bind.{u} {ps : PostShape} {α β : Type u}
+  (x : PredTrans ps α) (f : α → PredTrans ps β) : PredTrans ps β
+</code></pre></div><p>Sequences two predicate transformers by composing them.</p>
+<p>The helper operators <code>PredTrans.pushArg</code>, <code>PredTrans.pushExcept</code>, and <code>PredTrans.pushOption</code> modify a predicate transformer by adding a standard side effect. They are used to implement the <code>WP</code> instances for transformers such as <code>StateT</code>, <code>ExceptT</code>, and <code>OptionT</code>; they can also be used to implement monads that can be thought of in terms of one of these. For example, <code>PredTrans.pushArg</code> is typically used for state monads, but can also be used to implement a reader monad&#39;s instance, treating the reader&#39;s value as read-only state.</p>
+<p><a id="Std___Do___PredTrans___pushArg"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PredTrans.pushArg.{u} {ps : PostShape} {α σ : Type u}
+  (x : StateT σ (PredTrans ps) α) : PredTrans (PostShape.arg σ ps) α
+</code></pre></div><p>Adds the ability to make assertions about a state of type <code>σ</code> to a predicate transformer with postcondition shape <code>ps</code>, resulting in postcondition shape <code>.arg σ ps</code>. This is done by interpreting <code>StateT σ (PredTrans ps) α</code> into <code>PredTrans (.arg σ ps) α</code>.</p>
+<p>This can be used to for all kinds of state-like effects, including reader effects or append-only states, by interpreting them as states.</p>
+<p><a id="Std___Do___PredTrans___pushExcept"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PredTrans.pushExcept.{u_1} {ps : PostShape} {α ε : Type u_1}
+  (x : ExceptT ε (PredTrans ps) α) : PredTrans (PostShape.except ε ps) α
+</code></pre></div><p>Adds the ability to make assertions about exceptions of type <code>ε</code> to a predicate transformer with postcondition shape <code>ps</code>, resulting in postcondition shape <code>.except ε ps</code>. This is done by interpreting <code>ExceptT ε (PredTrans ps) α</code> into <code>PredTrans (.except ε ps) α</code>.</p>
+<p>This can be used for all kinds of exception-like effects, such as early termination, by interpreting them as exceptions.</p>
+<p><a id="Std___Do___PredTrans___pushOption"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.PredTrans.pushOption.{u_1} {ps : PostShape} {α : Type u_1}
+  (x : OptionT (PredTrans ps) α) :
+  PredTrans (PostShape.except PUnit ps) α
+</code></pre></div><p>Adds the ability to make assertions about early termination to a predicate transformer with postcondition shape <code>ps</code>, resulting in postcondition shape <code>.except PUnit ps</code>. This is done by interpreting <code>OptionT (PredTrans ps) α</code> into <code>PredTrans (.except PUnit ps) α</code>, which models the type <code>Option</code> as being equivalent to <code>Except PUnit</code>.</p>
+<p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers--Predicate-Transformers--Weakest-Preconditions"></a></p>
+<h4 id="17-2-3-1-weakest-preconditions">17.2.3.1. Weakest Preconditions</h4><p>The <a href="index.html#--tech-term-weakest-preconditions">weakest precondition</a> semantics of a monad are provided by the <code>WP</code> type class. Instances of <code>WP</code> determine the monad&#39;s postcondition shape and provide the logical rules for interpreting the monad&#39;s operations as a predicate transformer in its postcondition shape.</p>
+<p><a id="Std___Do___WP___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.WP.{u, v} (m : Type u → Type v) (ps : outParam PostShape) :
+  Type (max (u + 1) v)
+</code></pre></div><p>A weakest precondition interpretation of a monadic program <code>x : m α</code> in terms of a predicate transformer <code>PredTrans ps α</code>. The monad <code>m</code> determines <code>ps : PostShape</code>.</p>
+<p>For practical reasoning, an instance of <code>WPMonad m ps</code> is typically needed in addition to <code>WP m ps</code>.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.WP.mk.{u, v}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">wp : {α : Type u} → m α → PredTrans ps α
+</code></pre></div><p>Interpret a monadic program <code>x : m α</code> in terms of a predicate transformer <code>PredTrans ps α</code>.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Weakest Preconditions</strong></p>
+<p><a id="Std___Do____FLQQ_termWp____________FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | wp⟦term (: term)?⟧
+</code></pre></div><p><code>wp⟦x⟧ Q</code> is defined as <code>(WP.wp x).apply Q</code>.</p>
+<p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers--Predicate-Transformers--Weakest-Precondition-Monad-Morphisms"></a></p>
+<h4 id="17-2-3-2-weakest-precondition-monad-morphisms">17.2.3.2. Weakest Precondition Monad Morphisms</h4><p>Most of the built-in specification lemmas for <code>mvcgen</code> relies on the presence of a <code>WPMonad</code> instance, in addition to the <code>WP</code> instance. In addition to being lawful, weakest preconditions of the monad&#39;s implementations of <code>pure</code> and <code>bind</code> should correspond to the <code>pure</code> and <code>bind</code> operators for the predicate transformer monad. Without a <code>WPMonad</code> instance, <code>mvcgen</code> typically returns the original proof goal unchanged.</p>
+<p><a id="Std___Do___WPMonad___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.WPMonad.{u, v} (m : Type u → Type v) (ps : outParam PostShape)
+  [Monad m] : Type (max (u + 1) v)
+</code></pre></div><p>A monad with weakest preconditions (<code>WP</code>) that is also a monad morphism, preserving <code>pure</code> and <code>bind</code>.</p>
+<p>In practice, <code>mvcgen</code> is not useful for reasoning about programs in a monad that is without a <code>WPMonad</code> instance. The specification lemmas for <code>Pure.pure</code> and <code>Bind.bind</code>, as well as those for operators like <code>Functor.map</code>, require that their monad have a <code>WPMonad</code> instance.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.WPMonad.mk.{u, v}
+</code></pre></div><p><strong>Extends</strong></p>
+<ul>
+<li><a id="0-LawfulMonad-Std.Do.WPMonad"></a>
+<code>LawfulMonad m</code></li>
+<li><a id="1-Std.Do.WP-Std.Do.WPMonad"></a>
+<code>WP m ps</code></li>
+</ul>
+<p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">map_const : ∀ {α β : Type u}, Functor.mapConst = Functor.map ∘ Function.const β
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">id_map : ∀ {α : Type u} (x : m α), id &lt;$&gt; x = x
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">comp_map : ∀ {α β γ : Type u} (g : α → β) (h : β → γ) (x : m α), (h ∘ g) &lt;$&gt; x = h &lt;$&gt; g &lt;$&gt; x
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">seqLeft_eq : ∀ {α β : Type u} (x : m α) (y : m β), x &lt;* y = Function.const β &lt;$&gt; x &lt;*&gt; y
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">seqRight_eq : ∀ {α β : Type u} (x : m α) (y : m β), x *&gt; y = Function.const α id &lt;$&gt; x &lt;*&gt; y
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pure_seq : ∀ {α β : Type u} (g : α → β) (x : m α), pure g &lt;*&gt; x = g &lt;$&gt; x
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">map_pure : ∀ {α β : Type u} (g : α → β) (x : α), g &lt;$&gt; pure x = pure (g x)
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">seq_pure : ∀ {α β : Type u} (g : m (α → β)) (x : α), g &lt;*&gt; pure x = (fun h =&gt; h x) &lt;$&gt; g
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">seq_assoc : ∀ {α β γ : Type u} (x : m α) (g : m (α → β)) (h : m (β → γ)), h &lt;*&gt; (g &lt;*&gt; x) = Function.comp &lt;$&gt; h &lt;*&gt; g &lt;*&gt; x
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">bind_pure_comp : ∀ {α β : Type u} (f : α → β) (x : m α),
+  (do
+      let a ← x
+      pure (f a)) =
+    f &lt;$&gt; x
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">bind_map : ∀ {α β : Type u} (f : m (α → β)) (x : m α),
+  (do
+      let x_1 ← f
+      x_1 &lt;$&gt; x) =
+    f &lt;*&gt; x
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">pure_bind : ∀ {α β : Type u} (x : α) (f : α → m β), pure x &gt;&gt;= f = f x
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">bind_assoc : ∀ {α β γ : Type u} (x : m α) (f : α → m β) (g : β → m γ), x &gt;&gt;= f &gt;&gt;= g = x &gt;&gt;= fun x =&gt; f x &gt;&gt;= g
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">wp : {α : Type u} → m α → PredTrans ps α
+</code></pre></div><p> Inherited from </p>
+<ol>
+<li><code>LawfulMonad m</code></li>
+<li><code>WP m ps</code></li>
+</ol>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">wp_pure : ∀ {α : Type u} (a : α), wp (pure a) = pure a
+</code></pre></div><p><code>WP.wp</code> preserves <code>pure</code>.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">wp_bind : ∀ {α β : Type u} (x : m α) (f : α → m β),
+  (wp do
+      let a ← x
+      f a) =
+    do
+    let a ← wp x
+    wp (f a)
+</code></pre></div><p><code>WP.wp</code> preserves <code>bind</code>.</p>
+<p><a id="Missing--WPMonad--Instance"></a>
+Missing <code>WPMonad</code> Instance </p>
+<p>The single-field structure <code>Identity</code> acts like the identity monad <code>Id</code>. It has a <code>WP</code> instance, but no <code>WPMonad</code> instance:
+<a id="Identity-_LPAR_in-Missing--WPMonad--Instance_RPAR_"></a>
+<a id="Identity___run-_LPAR_in-Missing--WPMonad--Instance_RPAR_"></a>
+<a id="Identity___of_wp_run_eq-_LPAR_in-Missing--WPMonad--Instance_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure Identity (α : Type u) where
+  run : α
+
+variable {α : Type u}
+
+instance : Monad Identity where
+  pure x := ⟨x⟩
+  bind x f := f x.run
+
+instance : WP Identity .pure where
+  wp x := PredTrans.pure x.run
+
+theorem Identity.of_wp_run_eq {x : α} {prog : Identity α}
+    (h : Identity.run prog = x) (P : α → Prop) :
+    (⊢ₛ wp⟦prog⟧ (⇓ a =&gt; ⟨P a⟩)) → P x := by
+  simp_all [WP.wp, ← h]
+</code></pre></div><p>The missing instance prevents <code>mvcgen</code> from using its specifications for <code>pure</code> and <code>bind</code>. This tends to show up as a verification condition that&#39;s equal to the original goal. This function that reverses a list:</p>
+<p><a id="rev-_LPAR_in-Missing--WPMonad--Instance_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function rev (xs : List α) : Identity (List α) := do
+  let mut out := []
+  for x in xs do
+    out := x :: out
+  return out
+</code></pre></div><p>It is correct if it is equal to <code>List.reverse</code>. However, <code>mvcgen</code> does not make the goal easier to prove:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">theorem rev_correct :
+    (rev xs).run = xs.reverse := by
+  generalize h : (rev xs).run = x
+  apply Identity.of_wp_run_eq h
+  mvcgen [rev]
+</code></pre></div><p><a id="--verso-unique-1767"></a></p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">unsolved goals
+vc1α✝:Type u_1xs x:List α✝h:(rev xs).run = xout✝:List α✝ := []⊢ (wp⟦do
+      let __s ← forIn xs out✝ fun x __s =&gt; pure (ForInStep.yield (x :: __s))
+      pure __s⟧
+    (PostCond.noThrow fun a =&gt; { down := a = xs.reverse })).down
+</code></pre></div><p>When the verification condition is just the original problem, without even any simplification of <code>bind</code>, the problem is usually a missing <code>WPMonad</code> instance. The issue can be resolved by adding a suitable instance:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">instance : WPMonad Identity .pure where
+  wp_pure _ := rfl
+  wp_bind _ _ := rfl
+</code></pre></div><p>With this instance, and a suitable invariant, <code>mvcgen</code> and <code>grind</code> can prove the theorem.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">theorem rev_correct :
+    (rev xs).run = xs.reverse := by
+  generalize h : (rev xs).run = x
+  apply Identity.of_wp_run_eq h
+  simp only [rev]
+  mvcgen invariants
+  · ⇓⟨xs, out⟩ =&gt;
+    ⌜out = xs.prefix.reverse⌝
+  with grind
+</code></pre></div><p><a id="mvcgen-adequacy"></a></p>
+<h4 id="17-2-3-3-adequacy-lemmas">17.2.3.3. Adequacy Lemmas</h4><p>Monads that can be invoked from pure code typically provide a invocation operator that takes any required input state as a parameter and returns either a value paired with an output state or some kind of exceptional value. Examples include <code>StateT.run</code>, <code>ExceptT.run</code>, and <code>Id.run</code>. 
+<a id="--tech-term-Adequacy-lemmas"></a>
+<em>Adequacy lemmas</em> provide a bridge between statements about invocations of monadic programs and those programs&#39; <a href="index.html#--tech-term-weakest-preconditions">weakest precondition</a> semantics as given by their <code>WP</code> instances. They show that a property about the invocation is true if its weakest precondition is true.</p>
+<p><a id="Std___Do___Id___of_wp_run_eq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.Id.of_wp_run_eq.{u} {α : Type u} {x : α} {prog : Id α}
+  (h : prog.run = x) (P : α → Prop) :
+  (⊢ₛ wp⟦prog⟧ (PostCond.noThrow fun a =&gt; { down := P a })) → P x
+</code></pre></div><p>Soundness lemma for <code>Id.run</code>. Derived from <code>WPSound.of_wp_canReturn</code>: <code>Id.run prog = x</code> is the <code>MonadAttach.CanReturn prog x</code> witness.</p>
+<p><a id="Std___Do___StateM___of_wp_run_eq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.StateM.of_wp_run_eq {α σ : Type} {x : α × σ} {s : σ}
+  {prog : StateM σ α} (h : StateT.run prog s = x) (P : α × σ → Prop) :
+  (⊢ₛ wp⟦prog⟧ (PostCond.noThrow fun a s' =&gt; ⌜P (a, s')⌝) s) → P x
+</code></pre></div><p>Soundness lemma for <code>StateM.run</code>: <code>Id</code>-specialization of <code>StateT.of_wp_run</code>.</p>
+<p><a id="Std___Do___StateM___of_wp_run____eq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.StateM.of_wp_run'_eq {α σ : Type} {x : α} {s : σ}
+  {prog : StateM σ α} (h : StateT.run' prog s = x) (P : α → Prop) :
+  (⊢ₛ wp⟦prog⟧ (PostCond.noThrow fun a =&gt; ⌜P a⌝) s) → P x
+</code></pre></div><p>Soundness lemma for <code>StateM.run&#39;</code>: <code>Id</code>-specialization of <code>StateT.of_wp_run</code>.</p>
+<p><a id="Std___Do___ReaderM___of_wp_run_eq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.ReaderM.of_wp_run_eq.{u} {α ρ : Type u} {x : α} {r : ρ}
+  {prog : ReaderM ρ α} (h : ReaderT.run prog r = x) (P : α → Prop) :
+  (⊢ₛ wp⟦prog⟧ (PostCond.noThrow fun a x =&gt; ⌜P a⌝) r) → P x
+</code></pre></div><p>Soundness lemma for <code>ReaderM.run</code>: <code>Id</code>-specialization of <code>ReaderT.of_wp_run</code>.</p>
+<p><a id="Std___Do___Except___of_wp_eq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.Except.of_wp_eq {ε α : Type} {x prog : Except ε α} (h : prog = x)
+  (P : Except ε α → Prop) :
+  (⊢ₛ
+      wp⟦prog⟧
+        (fun a =&gt; ⌜P (Except.ok a)⌝, fun e =&gt; ⌜P (Except.error e)⌝,
+          PUnit.unit)) →
+    P x
+</code></pre></div><p>Soundness lemma for <code>Except</code>: <code>Id</code>-specialization of <code>ExceptT.of_wp_run</code>.</p>
+<p><a id="Std___Do___EStateM___of_wp_run_eq"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.EStateM.of_wp_run_eq.{u_1} {ε σ : Type u_1} {s : σ}
+  {α : Type u_1} {x : EStateM.Result ε σ α} {prog : EStateM ε σ α}
+  (h : prog.run s = x) (P : EStateM.Result ε σ α → Prop) :
+  (⊢ₛ
+      wp⟦prog⟧
+        (fun a s' =&gt; ⌜P (EStateM.Result.ok a s')⌝, fun e s' =&gt;
+          ⌜P (EStateM.Result.error e s')⌝, PUnit.unit)
+        s) →
+    P x
+</code></pre></div><p>Soundness lemma for <code>EStateM.run</code>. Useful if you want to prove a property about an expression <code>x</code> defined as <code>EStateM.run prog s</code> and you want to use <code>mvcgen</code> to reason about <code>prog</code>.</p>
+<p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers--Hoare-Triples"></a></p>
+<h3 id="17-2-4-hoare-triples">17.2.4. Hoare Triples</h3><p>A 
+<a id="--tech-term-Hoare-triple"></a>
+<em>Hoare triple</em> (Hoare, 1969)C. A. R. Hoare (1969). “An Axiomatic Basis for Computer Programming”. <em>Communications of the ACM.</em> <strong>12</strong>(10), pp. 576–583. consists of a precondition, a program, and a postcondition. Running the program in a state for which the precondition is true results in a state where the postcondition is true.</p>
+<p><a id="Std___Do___Triple"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.Triple.{u, v} {m : Type u → Type v} {ps : PostShape} [WP m ps]
+  {α : Type u} (x : m α) (P : Assertion ps) (Q : PostCond α ps) : Prop
+</code></pre></div><p>A Hoare triple for reasoning about monadic programs. A Hoare triple <code>Triple x P Q</code> is a <em>specification</em> for <code>x</code>: if assertion <code>P</code> holds before <code>x</code>, then postcondition <code>Q</code> holds after running <code>x</code>.</p>
+<p><code>⦃P⦄ x ⦃Q⦄</code> is convenient syntax for <code>Triple x P Q</code>.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Hoare Triples</strong></p>
+<p><a id="Std___Do___triple"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | ⦃ term ⦄ term ⦃ term ⦄
+</code></pre></div><p><code>⦃P⦄ x ⦃Q⦄</code> is syntactic sugar for <code>Triple x P Q</code>.</p>
+<p><a id="Std___Do___Triple___and"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.Triple.and.{u, v} {m : Type u → Type v} {ps : PostShape}
+  {α : Type u} {P₁ : Assertion ps} {Q₁ : PostCond α ps}
+  {P₂ : Assertion ps} {Q₂ : PostCond α ps} [WP m ps] (x : m α)
+  (h₁ : ⦃P₁⦄ x ⦃Q₁⦄) (h₂ : ⦃P₂⦄ x ⦃Q₂⦄) : ⦃P₁ ∧ P₂⦄ x ⦃Q₁ ∧ₚ Q₂⦄
+</code></pre></div><p>Conjunction for two Hoare triple specifications of a program <code>x</code>. This theorem is useful for decomposing proofs, because unrelated facts about <code>x</code> can be proven separately and then combined with this theorem.</p>
+<p><a id="Std___Do___Triple___mp"></a></p>
+<p><strong>theorem</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.Triple.mp.{u, v} {m : Type u → Type v} {ps : PostShape}
+  {α : Type u} {P₁ : Assertion ps} {Q₁ : PostCond α ps}
+  {P₂ : Assertion ps} {Q₂ : PostCond α ps} [WP m ps] (x : m α)
+  (h₁ : ⦃P₁⦄ x ⦃Q₁⦄) (h₂ : ⦃P₂⦄ x ⦃Q₁ →ₚ Q₂⦄) : ⦃P₁ ∧ P₂⦄ x ⦃Q₁ ∧ₚ Q₂⦄
+</code></pre></div><p>Modus ponens for two Hoare triple specifications of a program <code>x</code>. This theorem is useful for separating proofs. If <code>h₁ : Triple x P₁ Q₁</code> proves a basic property about <code>x</code> and <code>h₂ : Triple x P₂ (Q₁ →ₚ Q₂)</code> is an advanced proof for <code>Q₂</code> that builds on the basic proof for <code>Q₁</code>, then <code>mp x h₁ h₂</code> is a proof for <code>Q₂</code> about <code>x</code>.</p>
+<p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers--Specification-Lemmas"></a></p>
+<h3 id="17-2-5-specification-lemmas">17.2.5. Specification Lemmas</h3><p><a id="--tech-term-Specification-lemmas"></a>
+<em>Specification lemmas</em> are designated theorems that associate Hoare triples with functions. When <code>mvcgen</code> encounters a function, it checks whether there are any registered specification lemmas and attempts to use them to discharge intermediate <a href="../Overview/index.html#--tech-term-verification-conditions">verification conditions</a>. If there is no applicable specification lemma, then the connection between the statement&#39;s pre- and postconditions will become a verification condition. Specification lemmas allow compositional reasoning about libraries of monadic code.</p>
+<p>When applied to a theorem whose statement is a Hoare triple, the <code>spec</code> attribute registers the theorem as a specification lemma. These lemmas are used in order of priority.</p>
+<p>The <code>spec</code> attribute may also be applied to definitions. On definitions, it indicates that the definition should be unfolded during verification condition generation.</p>
+<p><a id="attr-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>attribute</strong></p>
+<p><strong>Specification Lemmas</strong></p>
+<p><a id="Lean___Parser___Attr___spec"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">attr ::= ...
+    | spec prio?
+</code></pre></div><p>Theorems tagged with the <code>spec</code> attribute are used by the <code>mspec</code> and <code>mvcgen</code> tactics.</p>
+<ul>
+<li>When used on a theorem <code>foo_spec : Triple (foo a b c) P Q</code>, then <code>mspec</code> and <code>mvcgen</code> will use <code>foo_spec</code> as a specification for calls to <code>foo</code>.</li>
+<li>Otherwise, when used on a definition that <code>@[simp]</code> would work on, it is added to the internal simp set of <code>mvcgen</code> that is used within <code>wp⟦·⟧</code> contexts to simplify match discriminants and applications of constants.</li>
+</ul>
+<p>Universally-quantified variables in specification lemmas can be used to relate input states to output states and return values. These variables are referred to as 
+<a id="--tech-term-schematic-variables"></a>
+<em>schematic variables</em>.</p>
+<p><a id="Schematic-Variables"></a>
+Schematic Variables </p>
+<p>The function <code>double</code> doubles the value of a <code>Nat</code> state:</p>
+<p><a id="double-_LPAR_in-Schematic-Variables_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const double : StateM Nat Unit := do
+  modify (2 * ·)
+</code></pre></div><p>Its specification should <em>relate</em> the initial and final states, but it cannot know their precise values. The specification uses a schematic variable to stand for the initial state:
+<a id="double_spec-_LPAR_in-Schematic-Variables_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">theorem double_spec :
+    ⦃ fun s =&gt; ⌜s = n⌝ ⦄ double ⦃ ⇓ () s =&gt; ⌜s = 2 * n⌝ ⦄ := by
+  simp [double]
+  mvcgen with grind
+</code></pre></div><p>The assertion in the precondition is a function because the <code>PostShape</code> of <code>StateM Nat</code> is <code>.arg Nat .pure</code>, and <code>Assertion (.arg Nat .pure)</code> is <code>SPred [Nat]</code>.</p>
+<p><a id="The-Lean-Language-Reference--The--mvcgen--tactic--Predicate-Transformers--Invariant-Specifications"></a></p>
+<h3 id="17-2-6-invariant-specifications">17.2.6. Invariant Specifications</h3><p>These types are used in invariants. The <a href="index.html#--tech-term-Specification-lemmas">specification lemmas</a> for <code>ForIn.forIn</code> and <code>ForIn&#39;.forIn&#39;</code> take parameters of type <code>Invariant</code>, and <code>mvcgen</code> ensures that invariants are not accidentally generated by other automation.</p>
+<p><a id="Std___Do___Invariant"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.Invariant.{u₁, u₂} {α : Type u₁} (xs : List α) (β : Type u₂)
+  (ps : PostShape) : Type (max u₂ u₁)
+</code></pre></div><p>The type of loop invariants used by the specifications of <code>for ... in ...</code> loops. A loop invariant is a <code>PostCond</code> that takes as parameters</p>
+<ul>
+<li>A <code>List.Cursor xs</code> representing the iteration state of the loop. It is parameterized by the list of elements <code>xs</code> that the <code>for</code> loop iterates over.</li>
+<li>A state tuple of type <code>β</code>, which will be a nesting of <code>MProd</code>s representing the elaboration of <code>let mut</code> variables and early return.</li>
+</ul>
+<p>The loop specification lemmas will use this in the following way: Before entering the loop, the cursor&#39;s prefix is empty and the suffix is <code>xs</code>. After leaving the loop, the cursor&#39;s prefix is <code>xs</code> and the suffix is empty. During the induction step, the invariant holds for a suffix with head element <code>x</code>. After running the loop body, the invariant then holds after shifting <code>x</code> to the prefix.</p>
+<p><a id="Std___Do___Invariant___withEarlyReturn"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Std.Do.Invariant.withEarlyReturn.{u₁, u₂} {β : Type (max u₁ u₂)}
+  {ps : PostShape} {α : Type (max u₁ u₂)} {xs : List α}
+  {γ : Type (max u₁ u₂)} (onContinue : xs.Cursor → β → Assertion ps)
+  (onReturn : γ → β → Assertion ps)
+  (onExcept : ExceptConds ps := ExceptConds.false) :
+  Invariant xs (MProd (Option γ) β) ps
+</code></pre></div><p>Helper definition for specifying loop invariants for loops with early return.</p>
+<p><code>for ... in ...</code> loops with early return of type <code>γ</code> elaborate to a call like this:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">forIn (β := MProd (Option γ) ...) (b := ⟨none, ...⟩) collection loopBody
+</code></pre></div><p>Note that the first component of the <code>MProd</code> state tuple is the optional early return value. It is <code>none</code> as long as there was no early return and <code>some r</code> if the loop returned early with <code>r</code>.</p>
+<p>This function allows to specify different invariants for the loop body depending on whether the loop terminated early or not. When there was an early return, the loop has effectively finished, which is encoded by the additional <code>⌜xs.suffix = []⌝</code> assertion in the invariant. This assertion is vital for successfully proving the induction step, as it contradicts with the assumption that <code>xs.suffix = x::rest</code> of the inductive hypothesis at the start of the loop body, meaning that users won&#39;t need to prove anything about the bogus case where the loop has returned early yet takes another iteration of the loop body.</p>
+<p>Invariants use lists to model the sequence of values in a <code>for</code> loop. The current position in the loop is tracked with a <code>List.Cursor</code> that represents a position in a list as a combination of the elements to the left of the position and the elements to the right. This type is not a traditional zipper, in which the prefix is reversed for efficient movement: it is intended for use in specifications and proofs, not in run-time code, so the prefix is in the original order.</p>
+<p><a id="List___Cursor___mk"></a></p>
+<p><strong>structure</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">List.Cursor.{u} {α : Type u} (l : List α) : Type u
+</code></pre></div><p>A pointer at a specific location in a list. List cursors are used in loop invariants for the <code>mvcgen</code> tactic.</p>
+<p>Moving the cursor to the left or right takes time linear in the current position of the cursor, so this data structure is not appropriate for run-time code.</p>
+<p><strong>Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">List.Cursor.mk.{u}
+</code></pre></div><p><strong>Fields</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">prefix : List α
+</code></pre></div><p>The elements before to the current position in the list.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">suffix : List α
+</code></pre></div><p>The elements starting at the current position. If the position is after the last element of the list, then the suffix is empty; otherwise, the first element of the suffix is the current element that the cursor points to.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">property : self.prefix ++ self.suffix = l
+</code></pre></div><p>Appending the prefix to the suffix yields the original list.</p>
+<p><a id="List___Cursor___at"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">List.Cursor.at.{u_1} {α : Type u_1} (l : List α) (n : Nat) : l.Cursor
+</code></pre></div><p>Creates a cursor at position <code>n</code> in the list <code>l</code>. The prefix contains the first <code>n</code> elements, and the suffix contains the remaining elements. If <code>n</code> is larger than the length of the list, the cursor is positioned at the end of the list.</p>
+<p><a id="List___Cursor___pos"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">List.Cursor.pos.{u_1} {α✝ : Type u_1} {l : List α✝} (c : l.Cursor) : Nat
+</code></pre></div><p>The position of the cursor in the list. It&#39;s a shortcut for the number of elements in the prefix.</p>
+<p><a id="List___Cursor___current"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">List.Cursor.current.{u_1} {α : Type u_1} {l : List α} (c : l.Cursor)
+  (h : 0 &lt; c.suffix.length := by get_elem_tactic) : α
+</code></pre></div><p>Returns the element at the current cursor position.</p>
+<p>Requires that is a current element: the suffix must be non-empty, so the cursor is not at the end of the list.</p>
+<p><a id="List___Cursor___tail"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">List.Cursor.tail.{u_1} {α✝ : Type u_1} {l : List α✝} (s : l.Cursor)
+  (h : 0 &lt; s.suffix.length := by get_elem_tactic) : l.Cursor
+</code></pre></div><p>Advances the cursor by one position, moving the current element from the suffix to the prefix.</p>
+<p>Requires that the cursor is not already at the end of the list.</p>
+<p><a id="List___Cursor___begin"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">List.Cursor.begin.{u_1} {α : Type u_1} (l : List α) : l.Cursor
+</code></pre></div><p>Creates a cursor at the beginning of the list (position 0). The prefix is empty and the suffix is the entire list.</p>
+<p><a id="List___Cursor___end"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">List.Cursor.end.{u_1} {α : Type u_1} (l : List α) : l.Cursor
+</code></pre></div><p>Creates a cursor at the end of the list. The prefix is the entire list and the suffix is empty.</p>
+<h2 id="preserved-grammar-annotations">Preserved grammar annotations</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Embedding of pure Lean values into `SVal`. An alias for `SPred.pure`.
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Entailment in `SPred`; sugar for `SPred.entails`.
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Tautology in `SPred`; sugar for `SPred.entails ⌜True⌝`.
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Bi-entailment in `SPred`; sugar for `SPred.bientails`.
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">An embedding of the special syntax for `SPred` into ordinary terms that provides alternative
+interpretations of logical connectives and quantifiers.
+
+Within `spred(...)`, `term(...)` escapes to the ordinary Lean interpretation of this syntax.
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Escapes from a surrounding `spred(...)` term, returning to the usual interpretations of quantifiers
+and connectives.
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`And a b`, or `a ∧ b`, is the conjunction of propositions. It can be
+constructed and destructed like a pair: if `ha : a` and `hb : b` then
+`⟨ha, hb⟩ : a ∧ b`, and if `h : a ∧ b` then `h.left : a` and `h.right : b`.
+
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `∧` in identifiers is `and`.
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`Or a b`, or `a ∨ b`, is the disjunction of propositions. There are two
+constructors for `Or`, called `Or.inl : a → a ∨ b` and `Or.inr : b → a ∨ b`,
+and you can use `match` or `cases` to destruct an `Or` assumption into the
+two cases.
+
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `∨` in identifiers is `or`.
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`Not p`, or `¬p`, is the negation of `p`. It is defined to be `p → False`,
+so if your goal is `¬p` you can use `intro h` to turn the goal into
+`h : p ⊢ False`, and if you have `hn : ¬p` and `h : p` then `hn h : False`
+and `(hn h).elim` will prove anything.
+For more information: [Propositional Logic](https://lean-lang.org/theorem_proving_in_lean4/propositions_and_proofs.html#propositional-logic)
+
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `¬` in identifiers is `not`.
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">If and only if, or logical bi-implication. `a ↔ b` means that `a` implies `b` and vice versa.
+By `propext`, this implies that `a` and `b` are equal and hence any expression involving `a`
+is equivalent to the corresponding expression with `b` instead.
+
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `↔` in identifiers is `iff`.
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Explicit binder, like `(x y : A)` or `(x y)`.
+Default values can be specified using `(x : A := v)` syntax, and tactics using `(x : A := by tac)`.
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">A *hole* (or *placeholder term*), which stands for an unknown term that is expected to be inferred based on context.
+For example, in `@id _ Nat.zero`, the `_` must be the type of `Nat.zero`, which is `Nat`.
+
+The way this works is that holes create fresh metavariables.
+The elaborator is allowed to assign terms to metavariables while it is checking definitional equalities.
+This is often known as *unification*.
+
+Normally, all holes must be solved for. However, there are a few contexts where this is not necessary:
+* In `match` patterns, holes are catch-all patterns.
+* In some tactics, such as `refine'` and `apply`, unsolved-for placeholders become new goals.
+
+Related concept: implicit parameters are automatically filled in with holes during the elaboration process.
+
+See also `?m` syntax (synthetic holes).
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`binderIdent` matches an `ident` or a `_`. It is used for identifiers in binding
+position, where `_` means that the value should be left unnamed and inaccessible.
+</code></pre></div><h3 id="display-14">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">A postcondition expressing total correctness.
+That is, it expresses that the asserted computation finishes without throwing an exception
+*and* the result satisfies the given predicate `p`.
+</code></pre></div><h3 id="display-15">Display 15</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">A postcondition expressing partial correctness.
+That is, it expresses that *if* the asserted computation finishes without throwing an exception
+*then* the result satisfies the given predicate `p`.
+Nothing is asserted when the computation throws an exception.
+</code></pre></div><h3 id="display-16">Display 16</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Entailment of postconditions.
+
+This consists of:
+ * Entailment of the assertion about the return value, for all possible return values.
+ * Entailment of the exception conditions.
+
+While implication of postconditions (`PostCond.imp`) results in a new postcondition, entailment is
+an ordinary proposition.
+</code></pre></div><h3 id="display-17">Display 17</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Conjunction of postconditions.
+
+This is defined pointwise, as the conjunction of the assertions about the return value and the
+conjunctions of the assertions about each potential exception.
+</code></pre></div><h3 id="display-18">Display 18</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Implication of postconditions.
+
+This is defined pointwise, as the implication of the assertions about the return value and the
+implications of each of the assertions about each potential exception.
+
+While entailment of postconditions (`PostCond.entails`) is an ordinary proposition, implication of
+postconditions is itself a postcondition.
+</code></pre></div><h3 id="display-19">Display 19</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`wp⟦x⟧ Q` is defined as `(WP.wp x).apply Q`.
+</code></pre></div><h3 id="display-20">Display 20</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">A Hoare triple for reasoning about monadic programs. A Hoare triple `Triple x P Q` is a
+*specification* for `x`: if assertion `P` holds before `x`, then postcondition `Q` holds after
+running `x`.
+
+`⦃P⦄ x ⦃Q⦄` is convenient syntax for `Triple x P Q`.
+</code></pre></div><h3 id="display-21">Display 21</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Theorems tagged with the `spec` attribute are used by the `mspec` and `mvcgen` tactics.
+
+* When used on a theorem `foo_spec : Triple (foo a b c) P Q`, then `mspec` and `mvcgen` will use
+  `foo_spec` as a specification for calls to `foo`.
+* Otherwise, when used on a definition that `@[simp]` would work on, it is added to the internal
+  simp set of `mvcgen` that is used within `wp⟦·⟧` contexts to simplify match discriminants and
+  applications of constants.
+</code></pre></div><h2 id="preserved-native-diagnostic-displays">Preserved native diagnostic displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">unsolved goals
+vc1α✝:Type u_1xs x:List α✝h:(rev xs).run = xout✝:List α✝ := []⊢ (wp⟦do
+      let __s ← forIn xs out✝ fun x __s =&gt; pure (ForInStep.yield (x :: __s))
+      pure __s⟧
+    (PostCond.noThrow fun a =&gt; { down := a = xs.reverse })).down
+</code></pre></div><h2 id="preserved-native-proof-state-displays">Preserved native proof-state displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-3">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α:Type ux:αprog:Identity αh:prog.run = xP:α → Prop⊢ (⊢ₛ wp⟦prog⟧ (PostCond.noThrow fun a =&gt; { down := P a })) → P x
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">All goals completed! 🐙
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α✝:Type u_1xs:List α✝⊢ (rev xs).run = xs.reverse
+</code></pre></div><h3 id="display-4-2">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α✝:Type u_1xs:List α✝x:List α✝h:(rev xs).run = x⊢ x = xs.reverse
+</code></pre></div><h3 id="display-5-2">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α✝:Type u_1xs:List α✝x:List α✝h:(rev xs).run = x⊢ ⊢ₛ wp⟦rev xs⟧ (PostCond.noThrow fun a =&gt; { down := a = xs.reverse })
+</code></pre></div><h3 id="display-6-2">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">vc1α✝:Type u_1xs:List α✝x:List α✝h:(rev xs).run = xout✝:List α✝ := []⊢ (wp⟦do
+      let __s ← forIn xs out✝ fun x __s =&gt; pure (ForInStep.yield (x :: __s))
+      pure __s⟧
+    (PostCond.noThrow fun a =&gt; { down := a = xs.reverse })).down
+</code></pre></div><h3 id="display-7-2">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">α✝:Type u_1xs:List α✝x:List α✝h:(rev xs).run = x⊢ ⊢ₛ
+  wp⟦do
+      let __s ← forIn xs [] fun x __s =&gt; pure (ForInStep.yield (x :: __s))
+      pure __s⟧
+    (PostCond.noThrow fun a =&gt; { down := a = xs.reverse })
+</code></pre></div><h3 id="display-8-2">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n:Nat⊢ ⦃fun s =&gt; ⌜s = n⌝⦄ double ⦃PostCond.noThrow fun x s =&gt; ⌜s = 2 * n⌝⦄
+</code></pre></div><h3 id="display-9-2">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n:Nat⊢ ⦃fun s =&gt; ⌜s = n⌝⦄ modify fun x =&gt; 2 * x ⦃PostCond.noThrow fun x s =&gt; ⌜s = 2 * n⌝⦄
+</code></pre></div><footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

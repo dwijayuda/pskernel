@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45.75 -69.8 251.5 139.8269">
+<g transform="scale(1,-1)">
+<path d="M170.2 22 C166 52.8 194 52.8 189.8 22" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M187.7088 29.7218 L189.8 22 L193.8824 28.88" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<g transform="matrix(1,0,0,1,180,58.8)">
+<text x="0" y="0" font-family="sans-serif" font-size="12" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">a, b</text>
+</g>
+<path d="M11.8967 -18.5059 C39.7717 -61.8672 140.2283 -61.8672 168.1033 -18.5059" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M166.1015 -26.2514 L168.1033 -18.5059 L161.1523 -22.4662" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<g transform="matrix(1,0,0,1,90,-59.0269)">
+<text x="0" y="0" font-family="sans-serif" font-size="12" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">b</text>
+</g>
+<path d="M112 0 L158 0" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M150.6315 -3.1153 L158 0 L150.6315 3.1153" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<g transform="matrix(1,0,0,1,135,8)">
+<text x="0" y="0" font-family="sans-serif" font-size="12" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">b</text>
+</g>
+<path d="M71.6949 -12.2034 C57.0353 -21.9765 32.9647 -21.9765 18.3051 -12.2034" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M26.279 -12.849 L18.3051 -12.2034 L23.3975 -18.3733" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<g transform="matrix(1,0,0,1,45,-27.5332)">
+<text x="0" y="0" font-family="sans-serif" font-size="12" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">a</text>
+</g>
+<path d="M18.3051 12.2034 C32.9647 21.9765 57.0353 21.9765 71.6949 12.2034" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M63.721 12.849 L71.6949 12.2034 L66.6025 18.3733" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<g transform="matrix(1,0,0,1,45,27.5332)">
+<text x="0" y="0" font-family="sans-serif" font-size="12" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">a</text>
+</g>
+<g transform="matrix(1,0,0,1,180,0)">
+<path d="M20 0 A20 20 0 0 1 -20 0 A20 20 0 0 1 20 0 Z" fill="rgb(230,240,255)" fill-opacity="1" />
+<path d="M20 0 A20 20 0 0 1 -20 0 A20 20 0 0 1 20 0 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<text x="0" y="0" font-family="sans-serif" font-size="14" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">fail</text>
+</g>
+<g transform="matrix(1,0,0,1,90,0)">
+<path d="M20 0 A20 20 0 0 1 -20 0 A20 20 0 0 1 20 0 Z" fill="rgb(200,255,200)" fill-opacity="1" />
+<path d="M20 0 A20 20 0 0 1 -20 0 A20 20 0 0 1 20 0 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M16 0 A16 16 0 0 1 -16 0 A16 16 0 0 1 16 0 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<text x="0" y="0" font-family="sans-serif" font-size="14" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">ok</text>
+</g>
+<g transform="matrix(1,0,0,1,0,0)">
+<path d="M20 0 A20 20 0 0 1 -20 0 A20 20 0 0 1 20 0 Z" fill="rgb(200,255,200)" fill-opacity="1" />
+<path d="M20 0 A20 20 0 0 1 -20 0 A20 20 0 0 1 20 0 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M16 0 A16 16 0 0 1 -16 0 A16 16 0 0 1 16 0 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<text x="0" y="0" font-family="sans-serif" font-size="14" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">start</text>
+</g>
+<path d="M-40 0 L-22 0" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M-29.3685 -3.1153 L-22 0 L-29.3685 3.1153" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+</g>
+</svg>

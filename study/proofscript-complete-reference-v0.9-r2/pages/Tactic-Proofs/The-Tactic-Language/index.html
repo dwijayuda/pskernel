@@ -1,0 +1,354 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;tactic-language&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../index.html">14. Tactic Proofs</a><a href="../Running-Tactics/index.html">14.1. Running Tactics</a><a href="../Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="index.html">14.3. The Tactic Language</a><a href="../Options/index.html">14.4. Options</a><a href="../Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../../Notations-and-Macros/index.html">23. Notations and Macros</a><a href="../../Notations-and-Macros/Custom-Operators/index.html">23.1. Custom Operators</a><a href="../../Notations-and-Macros/Precedence/index.html">23.2. Precedence</a><a href="../../Notations-and-Macros/Notations/index.html">23.3. Notations</a><a href="../../Notations-and-Macros/Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../../Notations-and-Macros/Macros/index.html">23.5. Macros</a><a href="../../Notations-and-Macros/Elaborators/index.html">23.6. Elaborators</a><a href="../../Notations-and-Macros/Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../../Notations-and-Macros/Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../../releases/index.html">Release Notes</a><a href="../../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="tactic-language"></a></p>
+<h1 id="proofscript-14-3-the-tactic-language">ProofScript — 14.3. The Tactic Language</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>Tactics construct proof terms, and the checker decides whether those terms prove the requested claim. Use the inherited tactic language, including goal management, rewriting, induction and conv. Semicolon sequencing and the apply-to-all-goals combinator are distinct. Native grammar displays and tactic signatures below describe the selected environment, not a second ProofScript tactic system.</p>
+<p><strong>Compiler and coverage boundary.</strong> Term decorations may appear only in explicitly lifted tactic term slots. Preserve goal names, hygiene and source maps. Search failure is not proof of falsity.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/Tactic-Proofs/The-Tactic-Language/index.html">Tactic-Proofs/The-Tactic-Language/index.html</a>. Source Git blob: <code>00fd6fb6500c928cc504cb7b628e08b292ff029f</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<hr>
+<h2 id="14-3-the-tactic-language">14.3. The Tactic Language</h2><p>A tactic script consists of a sequence of tactics, separated either by semicolons or newlines. When separated by newlines, tactics must be indented to the same level. Explicit curly braces and semicolons may be used instead of indentation. Tactic sequences may be grouped by parentheses. This allows a sequence of tactics to be used in a position where a single tactic would otherwise be grammatically expected.</p>
+<p>Generally, execution proceeds from top to bottom, with each tactic running in the proof state left behind by the prior tactic. The tactic language contains a number of control structures that can modify this flow.</p>
+<p>Each tactic is a syntax extension in the <code>tactic</code> category. This means that tactics are free to define their own concrete syntax and parsing rules. However, with a few exceptions, the majority of tactics can be identified by a leading keyword; the exceptions are typically frequently-used built-in control structures such as <code>&lt;;&gt;</code>.</p>
+<p><a id="tactic-language-control"></a></p>
+<h3 id="14-3-1-control-structures">14.3.1. Control Structures</h3><p>Strictly speaking, there is no fundamental distinction between control structures and other tactics. Any tactic is free to take others as arguments and arrange for their execution in any context that it sees fit. Even if a distinction is arbitrary, however, it can still be useful. The tactics in this section are those that resemble traditional control structures from programming, or those that <em>only</em> recombine other tactics rather than making progress themselves.</p>
+<p><a id="tactic-language-success-failure"></a></p>
+<h4 id="14-3-1-1-success-and-failure">14.3.1.1. Success and Failure</h4><p>When run in a proof state, every tactic either succeeds or fails. Tactic failure is akin to exceptions: failures typically “bubble up” until handled. Unlike exceptions, there is no operator to distinguish between reasons for failure; <code>first</code> simply takes the first branch that succeeds.</p>
+<p><a id="fail"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">fail
+</code></pre></div><p><code>fail msg</code> is a tactic that always fails, and produces an error using the given message.</p>
+<p><a id="fail_if_success"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">fail_if_success
+</code></pre></div><p><code>fail_if_success t</code> fails if the tactic <code>t</code> succeeds.</p>
+<p><a id="try"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">try
+</code></pre></div><p><code>try tac</code> runs <code>tac</code> and succeeds even if <code>tac</code> failed.</p>
+<p><a id="first"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">first
+</code></pre></div><p><code>first | tac | ...</code> runs each <code>tac</code> until one succeeds, or else fails.</p>
+<p><a id="tactic-language-branching"></a></p>
+<h4 id="14-3-1-2-branching">14.3.1.2. Branching</h4><p>Tactic proofs may use pattern matching and conditionals. However, their meaning is not quite the same as it is in terms. While terms are expected to be executed once the values of their variables are known, proofs are executed with their variables left abstract and should consider <em>all</em> cases simultaneously. Thus, when <code>if</code> and <code>match</code> are used in tactics, their meaning is reasoning by cases rather than selection of a concrete branch. All of their branches are executed, and the condition or pattern match is used to refine the main goal with more information in each branch, rather than to select a single branch.</p>
+<p><a id="if"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">if
+</code></pre></div><p>In tactic mode, <code>if t then tac1 else tac2</code> is alternative syntax for:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">by_cases t
+· tac1
+· tac2
+</code></pre></div><p>It performs case distinction on <code>h† : t</code> or <code>h† : ¬t</code>, where <code>h†</code> is an anonymous hypothesis, and <code>tac1</code> and <code>tac2</code> are the subproofs. (It doesn&#39;t actually use nondependent <code>if</code>, since this wouldn&#39;t add anything to the context and hence would be useless for proving theorems. To actually insert an <code>ite</code> application use <code>refine if t then ?_ else ?_</code>.)</p>
+<p>The assumptions in each subgoal can be named. <code>if h : t then tac1 else tac2</code> can be used as alternative syntax for:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">by_cases h : t
+· tac1
+· tac2
+</code></pre></div><p>It performs case distinction on <code>h : t</code> or <code>h : ¬t</code>.</p>
+<p>You can use <code>?_</code> or <code>_</code> for either subproof to delay the goal to after the tactic, but if a tactic sequence is provided for <code>tac1</code> or <code>tac2</code> then it will require the goal to be closed by the end of the block.</p>
+<p><a id="Reasoning-by-cases-with--if"></a>
+Reasoning by cases with <code>if</code> </p>
+<p>In each branch of the <a href="index.html#if"><code>if</code></a>, an assumption is added that reflects whether <code>n = 0</code>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example (n : Nat) : if n = 0 then n &lt; 1 else n &gt; 0 := by
+  if n = 0 then
+    simp [*]
+  else
+    simp only [↓reduceIte, gt_iff_lt, *]
+    omega
+</code></pre></div><p><a id="match"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">match
+</code></pre></div><p><code>match</code> performs case analysis on one or more expressions. See <a href="https://lean-lang.org/theorem_proving_in_lean4/induction_and_recursion.html">Induction and Recursion</a>. The syntax for the <code>match</code> tactic is the same as term-mode <code>match</code>, except that the match arms are tactics instead of expressions.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example (n : Nat) : n = n := by
+  match n with
+  | 0 =&gt; rfl
+  | i+1 =&gt; simp
+</code></pre></div><p>When pattern matching, instances of the <a href="../../Terms/Pattern-Matching/index.html#--tech-term-match-discriminants">discriminant</a> in the goal are replaced with the patterns that match them in each branch. Each branch must then prove the refined goal. Compared to the <code>cases</code> tactic, using <code>match</code> can allow a greater degree of flexibility in the cases analysis being performed, but the requirement that each branch solve its goal completely makes it more difficult to incorporate into larger automation scripts.</p>
+<p><a id="Reasoning-by-cases-with--match"></a>
+Reasoning by cases with <code>match</code> </p>
+<p>In each branch of the <a href="index.html#match"><code>match</code></a>, the discriminant <code>n</code> has been replaced by either <code>0</code> or <code>k + 1</code>.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example (n : Nat) : if n = 0 then n &lt; 1 else n &gt; 0 := by
+  match n with
+  | 0 =&gt;
+    simp
+  | k + 1 =&gt;
+    simp
+</code></pre></div><p><a id="tactic-language-goal-selection"></a></p>
+<h4 id="14-3-1-3-goal-selection">14.3.1.3. Goal Selection</h4><p>Most tactics affect the <a href="../index.html#--tech-term-main-goal">main goal</a>. Goal selection tactics provide a way to treat a different goal as the main one, rearranging the sequence of goals in the proof state.</p>
+<p><a id="case"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">case
+</code></pre></div><ul>
+<li><code>case tag =&gt; tac</code> focuses on the goal with case name <code>tag</code> and solves it using <code>tac</code>, or else fails.</li>
+<li><code>case tag x₁ ... xₙ =&gt; tac</code> additionally renames the <code>n</code> most recent hypotheses with inaccessible names to the given names.</li>
+<li><code>case tag₁ | tag₂ =&gt; tac</code> is equivalent to <code>(case tag₁ =&gt; tac); (case tag₂ =&gt; tac)</code>.</li>
+</ul>
+<p><a id="case___"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">case'
+</code></pre></div><p><code>case&#39;</code> is similar to the <code>case tag =&gt; tac</code> tactic, but does not ensure the goal has been solved after applying <code>tac</code>, nor admits the goal if <code>tac</code> failed. Recall that <code>case</code> closes the goal using <code>sorry</code> when <code>tac</code> fails, and the tactic execution is not interrupted.</p>
+<p><a id="rotate_left"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">rotate_left
+</code></pre></div><p><code>rotate_left n</code> rotates goals to the left by <code>n</code>. That is, <code>rotate_left 1</code> takes the main goal and puts it to the back of the subgoal list. If <code>n</code> is omitted, it defaults to <code>1</code>.</p>
+<p><a id="rotate_right"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">rotate_right
+</code></pre></div><p>Rotate the goals to the right by <code>n</code>. That is, take the goal at the back and push it to the front <code>n</code> times. If <code>n</code> is omitted, it defaults to <code>1</code>.</p>
+<p><a id="tactic-language-sequencing"></a></p>
+<h5 id="14-3-1-3-1-sequencing">14.3.1.3.1. Sequencing</h5><p>In addition to running tactics one after the other, each being used to solve the main goal, the tactic language supports sequencing tactics according to the way in which goals are produced. The <code>&lt;;&gt;</code> tactic combinator allows a tactic to be applied to <em>every</em> <a href="../index.html#--tech-term-subgoals">subgoal</a> produced by some other tactic. If no new goals are produced, then the second tactic is not run.</p>
+<p><a id="_LT__SEMI__GT_"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">&lt;;&gt;
+</code></pre></div><p><code>tac &lt;;&gt; tac&#39;</code> runs <code>tac</code> on the main goal and <code>tac&#39;</code> on each produced goal, concatenating all goals produced by <code>tac&#39;</code>.</p>
+<p>If the tactic fails on any of the <a href="../index.html#--tech-term-subgoals">subgoals</a>, then the whole <code>&lt;;&gt;</code> tactic fails.</p>
+<p><a id="Subgoal-Sequencing"></a>
+Subgoal Sequencing </p>
+<p>In this proof state:</p>
+<p>the tactic <code>cases h</code> yields the following two goals:</p>
+<p>Running <code>cases h ; simp [*]</code> causes <code>simp</code> to solve the first goal, leaving the second behind:</p>
+<p>Replacing the <code>;</code> with <code>&lt;;&gt;</code> and running <code>cases h &lt;;&gt; simp [*]</code> solves <strong>both</strong> of the new goals with <code>simp</code>:</p>
+<p><a id="tactic-language-multiple-goals"></a></p>
+<h5 id="14-3-1-3-2-working-on-multiple-goals">14.3.1.3.2. Working on Multiple Goals</h5><p>The tactics <code>all_goals</code> and <code>any_goals</code> allow a tactic to be applied to every goal in the proof state. The difference between them is that if the tactic fails for in any of the goals, <code>all_goals</code> itself fails, while <code>any_goals</code> fails only if the tactic fails in all of the goals.</p>
+<p><a id="all_goals"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">all_goals
+</code></pre></div><p><code>all_goals tac</code> runs <code>tac</code> on each goal, concatenating the resulting goals. If the tactic fails on any goal, the entire <code>all_goals</code> tactic fails.</p>
+<p>See also <code>any_goals tac</code>.</p>
+<p><a id="any_goals"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">any_goals
+</code></pre></div><p><code>any_goals tac</code> applies the tactic <code>tac</code> to every goal, concatenating the resulting goals for successful tactic applications. If the tactic fails on all of the goals, the entire <code>any_goals</code> tactic fails.</p>
+<p>This tactic is like <code>all_goals try tac</code> except that it fails if none of the applications of <code>tac</code> succeeds.</p>
+<p><a id="tactic-language-focusing"></a></p>
+<h4 id="14-3-1-4-focusing">14.3.1.4. Focusing</h4><p>Focusing tactics remove some subset of the proof goals (typically leaving only the main goal) from the consideration of some further tactics. In addition to the tactics described here, the <code>case</code> and <code>case&#39;</code> tactics focus on the selected goal.</p>
+<p><a id="___"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">·
+</code></pre></div><p><code>· tac</code> focuses on the main goal and tries to solve it using <code>tac</code>, or else fails.</p>
+<p>It is generally considered good Lean style to use bullets whenever a tactic line results in more than one new subgoal. This makes it easier to read and maintain proofs, because the connections between steps of reasoning are more clear and any change in the number of subgoals while editing the proof will have a localized effect.</p>
+<p><a id="next"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">next
+</code></pre></div><p><code>next =&gt; tac</code> focuses on the next goal and solves it using <code>tac</code>, or else fails. <code>next x₁ ... xₙ =&gt; tac</code> additionally renames the <code>n</code> most recent hypotheses with inaccessible names to the given names.</p>
+<p><a id="focus"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">focus
+</code></pre></div><p><code>focus tac</code> focuses on the main goal, suppressing all other goals, and runs <code>tac</code> on it. Usually <code>· tac</code>, which enforces that the goal is closed by <code>tac</code>, should be preferred.</p>
+<p><a id="tactic-language-iteration"></a></p>
+<h4 id="14-3-1-5-repetition-and-iteration">14.3.1.5. Repetition and Iteration</h4><p><a id="iterate"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">iterate
+</code></pre></div><p><code>iterate n tac</code> runs <code>tac</code> exactly <code>n</code> times. <code>iterate tac</code> runs <code>tac</code> repeatedly until failure.</p>
+<p><code>iterate</code>&#39;s argument is a tactic sequence, so multiple tactics can be run using <code>iterate n (tac₁; tac₂; ⋯)</code> or</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">iterate n
+  tac₁
+  tac₂
+  ⋯
+</code></pre></div><p><a id="repeat"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">repeat
+</code></pre></div><p><code>repeat tac</code> repeatedly applies <code>tac</code> so long as it succeeds. The tactic <code>tac</code> may be a tactic sequence, and if <code>tac</code> fails at any point in its execution, <code>repeat</code> will revert any partial changes that <code>tac</code> made to the tactic state.</p>
+<p>The tactic <code>tac</code> should eventually fail, otherwise <code>repeat tac</code> will run indefinitely.</p>
+<p>See also:</p>
+<ul>
+<li><code>try tac</code> is like <code>repeat tac</code> but will apply <code>tac</code> at most once.</li>
+<li><code>repeat&#39; tac</code> recursively applies <code>tac</code> to each goal.</li>
+<li><code>first | tac1 | tac2</code> implements the backtracking used by <code>repeat</code></li>
+</ul>
+<p><a id="repeat___"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">repeat'
+</code></pre></div><p><code>repeat&#39; tac</code> recursively applies <code>tac</code> on all of the goals so long as it succeeds. That is to say, if <code>tac</code> produces multiple subgoals, then <code>repeat&#39; tac</code> is applied to each of them.</p>
+<p>See also:</p>
+<ul>
+<li><code>repeat tac</code> simply repeatedly applies <code>tac</code>.</li>
+<li><code>repeat1&#39; tac</code> is <code>repeat&#39; tac</code> but requires that <code>tac</code> succeed for some goal at least once.</li>
+</ul>
+<p><a id="repeat1___"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">repeat1'
+</code></pre></div><p><code>repeat1&#39; tac</code> recursively applies to <code>tac</code> on all of the goals so long as it succeeds, but <code>repeat1&#39; tac</code> fails if <code>tac</code> succeeds on none of the initial goals.</p>
+<p>See also:</p>
+<ul>
+<li><code>repeat tac</code> simply applies <code>tac</code> repeatedly.</li>
+<li><code>repeat&#39; tac</code> is like <code>repeat1&#39; tac</code> but it does not require that <code>tac</code> succeed at least once.</li>
+</ul>
+<p><a id="tactic-language-hygiene"></a></p>
+<h3 id="14-3-2-names-and-hygiene">14.3.2. Names and Hygiene</h3><p>Behind the scenes, tactics generate proof terms. These proof terms exist in a local context, because assumptions in proof states correspond to local binders in terms. Uses of assumptions correspond to variable references. It is very important that the naming of assumptions be predictable; otherwise, small changes to the internal implementation of a tactic could either lead to variable capture or to a broken reference if they cause different names to be selected.</p>
+<p>Lean&#39;s tactic language is <em>hygienic</em>. 
+<a id="--index--next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+ This means that the tactic language respects lexical scope: names that occur in a tactic refer to the enclosing binding in the source code, rather than being determined by the generated code, and the tactic framework is responsible for maintaining this property. Variable references in tactic scripts refer either to names that were in scope at the beginning of the script or to bindings that were explicitly introduced as part of the tactics, rather than to the names chosen for use in the proof term behind the scenes.</p>
+<p>A consequence of hygienic tactics is that the only way to refer to an assumption is to explicitly name it. Tactics cannot assign assumption names themselves, but must rather accept names from users; users are correspondingly obligated to provide names for assumptions that they wish to refer to. When an assumption does not have a user-provided name, it is shown in the proof state with a dagger (<code>&#39;†&#39;, DAGGER	0x2020</code>). The dagger indicates that the name is <em>inaccessible</em> and cannot be explicitly referred to.</p>
+<p>Hygiene can be disabled by setting the option <code>tactic.hygienic</code> to <code>false</code>. This is not recommended, as many tactics rely on the hygiene system to prevent capture and thus do not incur the overhead of careful manual name selection.</p>
+<p><a id="tactic___hygienic"></a></p>
+<p><strong>option</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">tactic.hygienic
+</code></pre></div><p>Default value: <code>true</code></p>
+<p>make sure tactics are hygienic</p>
+<p><a id="Tactic-hygiene___-inaccessible-assumptions"></a>
+Tactic hygiene: inaccessible assumptions </p>
+<p>When proving that <code>∀ (n : Nat), 0 + n = n</code>, the initial proof state is:</p>
+<p>The tactic <code>intro</code> results in a proof state with an inaccessible assumption:</p>
+<p><a id="Tactic-hygiene___-accessible-assumptions"></a>
+Tactic hygiene: accessible assumptions </p>
+<p>When proving that <code>∀ (n : Nat), 0 + n = n</code>, the initial proof state is:</p>
+<p>The tactic <code>intro n</code>, with the explicit name <code>n</code>, results in a proof state with an accessibly-named assumption:</p>
+<p><a id="tactic-language-assumptions"></a></p>
+<h4 id="14-3-2-1-accessing-assumptions">14.3.2.1. Accessing Assumptions</h4><p>Many tactics provide a means of specifying names for the assumptions that they introduce. For example, <code>intro</code> and <code>intros</code> take assumption names as arguments, and <code>induction</code>&#39;s <a href="../Tactic-Reference/index.html#induction"><code>with</code></a>-form allows simultaneous case selection, assumption naming, and focusing. When an assumption does not have a name, one can be assigned using <code>next</code>, <code>case</code>, or <code>rename_i</code>.</p>
+<p><a id="rename_i"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">rename_i
+</code></pre></div><p><code>rename_i x_1 ... x_n</code> renames the last <code>n</code> inaccessible names using the given names.</p>
+<p><a id="tactic-language-assumption-management"></a></p>
+<h3 id="14-3-3-assumption-management">14.3.3. Assumption Management</h3><p>Larger proofs can benefit from management of proof states, removing irrelevant assumptions and making their names easier to understand. Along with these operators, <code>rename_i</code> allows inaccessible assumptions to be renamed, and <code>intro</code>, <code>intros</code> and <code>rintro</code> convert goals that are implications or universal quantification into goals with additional assumptions.</p>
+<p><a id="rename"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">rename
+</code></pre></div><p><code>rename t =&gt; x</code> renames the most recent hypothesis whose type matches <code>t</code> (which may contain placeholders) to <code>x</code>, or fails if no such hypothesis could be found.</p>
+<p><a id="revert"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">revert
+</code></pre></div><p><code>revert x...</code> is the inverse of <code>intro x...</code>: it moves the given hypotheses into the main goal&#39;s target type.</p>
+<p><a id="clear"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">clear
+</code></pre></div><p><code>clear x...</code> removes the given hypotheses, or fails if there are remaining references to a hypothesis.</p>
+<p><a id="tactic-language-local-defs"></a></p>
+<h3 id="14-3-4-local-definitions-and-proofs">14.3.4. Local Definitions and Proofs</h3><p><code>have</code> and <code>let</code> both create local assumptions. Generally speaking, <code>have</code> should be used when proving an intermediate lemma; <code>let</code> should be reserved for local definitions.</p>
+<p><a id="have"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">have
+</code></pre></div><p>The <code>have</code> tactic is for adding opaque definitions and hypotheses to the local context of the main goal. The definitions forget their associated value and cannot be unfolded, unlike definitions added by the <code>let</code> tactic.</p>
+<ul>
+<li><code>have h : t := e</code> adds the hypothesis <code>h : t</code> if <code>e</code> is a term of type <code>t</code>.</li>
+<li><code>have h := e</code> uses the type of <code>e</code> for <code>t</code>.</li>
+<li><code>have : t := e</code> and <code>have := e</code> use <code>this</code> for the name of the hypothesis.</li>
+<li><code>have pat := e</code> for a pattern <code>pat</code> is equivalent to <code>match e with | pat =&gt; _</code>, where <code>_</code> stands for the tactics that follow this one. It is convenient for types that have only one applicable constructor. For example, given <code>h : p ∧ q ∧ r</code>, <code>have ⟨h₁, h₂, h₃⟩ := h</code> produces the hypotheses <code>h₁ : p</code>, <code>h₂ : q</code>, and <code>h₃ : r</code>.</li>
+<li>The syntax <code>have (eq := h) pat := e</code> is equivalent to <code>match h : e with | pat =&gt; _</code>, which adds the equation <code>h : e = pat</code> to the local context.</li>
+</ul>
+<p>The tactic supports all the same syntax variants and options as the <code>have</code> term.</p>
+<p><strong>Properties and relations</strong></p>
+<ul>
+<li>It is not possible to unfold a variable introduced using <code>have</code>, since the definition&#39;s value is forgotten. The <code>let</code> tactic introduces definitions that can be unfolded.</li>
+<li>The <code>have h : t := e</code> is like doing <code>let h : t := e; clear_value h</code>.</li>
+<li>The <code>have</code> tactic is preferred for propositions, and <code>let</code> is preferred for non-propositions.</li>
+<li>Sometimes <code>have</code> is used for non-propositions to ensure that the variable is never unfolded, which may be important for performance reasons. Consider using the equivalent <code>let +nondep</code> to indicate the intent.</li>
+</ul>
+<p><a id="have___"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">have'
+</code></pre></div><p>Similar to <code>have</code>, but using <code>refine&#39;</code></p>
+<p><a id="let"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">let
+</code></pre></div><p>The <code>let</code> tactic is for adding definitions to the local context of the main goal. The definition can be unfolded, unlike definitions introduced by <code>have</code>.</p>
+<ul>
+<li><code>let x : t := e</code> adds the definition <code>x : t := e</code> if <code>e</code> is a term of type <code>t</code>.</li>
+<li><code>let x := e</code> uses the type of <code>e</code> for <code>t</code>.</li>
+<li><code>let : t := e</code> and <code>let := e</code> use <code>this</code> for the name of the hypothesis.</li>
+<li><code>let pat := e</code> for a pattern <code>pat</code> is equivalent to <code>match e with | pat =&gt; _</code>, where <code>_</code> stands for the tactics that follow this one. It is convenient for types that let only one applicable constructor. For example, given <code>p : α × β × γ</code>, <code>let ⟨x, y, z⟩ := p</code> produces the local variables <code>x : α</code>, <code>y : β</code>, and <code>z : γ</code>.</li>
+<li>The syntax <code>let (eq := h) pat := e</code> is equivalent to <code>match h : e with | pat =&gt; _</code>, which adds the equation <code>h : e = pat</code> to the local context.</li>
+</ul>
+<p>The tactic supports all the same syntax variants and options as the <code>let</code> term.</p>
+<p><strong>Properties and relations</strong></p>
+<ul>
+<li>Unlike <code>have</code>, it is possible to unfold definitions introduced using <code>let</code>, using tactics such as <code>simp</code>, <code>dsimp</code>, <code>unfold</code>, and <code>subst</code>.</li>
+<li>The <code>clear_value</code> tactic turns a <code>let</code> definition into a <code>have</code> definition after the fact. The tactic might fail if the local context depends on the value of the variable.</li>
+<li>The <code>let</code> tactic is preferred for data (non-propositions).</li>
+<li>Sometimes <code>have</code> is used for non-propositions to ensure that the variable is never unfolded, which may be important for performance reasons.</li>
+</ul>
+<p><a id="let-rec"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">let rec
+</code></pre></div><p><code>let rec f : t := e</code> adds a recursive definition <code>f</code> to the current goal. The syntax is the same as term-mode <code>let rec</code>.</p>
+<p>The tactic supports all the same syntax variants and options as the <code>let</code> term.</p>
+<p><a id="letI"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">letI
+</code></pre></div><p><code>letI</code> behaves like <code>let</code>, but inlines the value instead of producing a <code>let</code> term.</p>
+<p><a id="let___"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">let'
+</code></pre></div><p>Similar to <code>let</code>, but using <code>refine&#39;</code></p>
+<p><a id="tactic-config"></a></p>
+<h3 id="14-3-5-configuration">14.3.5. Configuration</h3><p>Many tactics are configurable.
+<a id="--index--next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+ By convention, tactics share a configuration syntax, described using </p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">optConfig
+</code></pre></div><p>. The specific options available to each tactic are described in the tactic&#39;s documentation.</p>
+<p><a id="Lean___Parser___Tactic___optConfig"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Tactic Configuration</strong></p>
+<p>A tactic configuration consists of zero or more 
+<a id="--tech-term-configuration-items"></a>
+configuration items:</p>
+<p><a id="Lean___Parser___Tactic___optConfig-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">optConfig ::=
+    configItem*
+</code></pre></div><p><a id="Lean___Parser___Tactic___configItem"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Tactic Configuration Items</strong></p>
+<p>Each configuration item has a name that corresponds to an underlying tactic option. Boolean options may be enabled or disabled using prefix <code>+</code> and <code>-</code>:</p>
+<p><a id="Lean___Parser___Tactic___configItem-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">configItem ::=
+    +ident
+</code></pre></div><p><a id="Lean___Parser___Tactic___configItem-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">configItem ::= ...
+    | -ident
+</code></pre></div><p>Options may be assigned specific values using a syntax similar to that for named function arguments:</p>
+<p><a id="Lean___Parser___Tactic___configItem-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">configItem ::= ...
+    | (ident := term)
+</code></pre></div><p>Finally, the name <code>config</code> is reserved; it is used to pass an entire set of options as a data structure. The specific type expected depends on the tactic.</p>
+<p><a id="Lean___Parser___Tactic___configItem-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">configItem ::= ...
+    | (config := term)
+</code></pre></div><p><a id="tactic-language-namespaces-options"></a></p>
+<h3 id="14-3-6-namespace-and-option-management">14.3.6. Namespace and Option Management</h3><p>Namespaces and options can be adjusted in tactic scripts using the same syntax as in terms.</p>
+<p><a id="set_option"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">set_option
+</code></pre></div><p><code>set_option opt val in tacs</code> (the tactic) acts like <code>set_option opt val</code> at the command level, but it sets the option only within the tactics <code>tacs</code>.</p>
+<p><a id="open"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">open
+</code></pre></div><p><code>open Foo in tacs</code> (the tactic) acts like <code>open Foo</code> at command level, but it opens a namespace only within the tactics <code>tacs</code>.</p>
+<p><a id="tactic-language-unfolding"></a></p>
+<h4 id="14-3-6-1-controlling-unfolding">14.3.6.1. Controlling Unfolding</h4><p>By default, only definitions marked reducible are unfolded, except when checking definitional equality. These operators allow this default to be adjusted for some part of a tactic script.</p>
+<p><a id="with_reducible_and_instances"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">with_reducible_and_instances
+</code></pre></div><p><code>with_reducible_and_instances tacs</code> executes <code>tacs</code> using the <code>.instances</code> transparency setting. In this setting only definitions tagged as <code>[reducible]</code> or type class instances are unfolded.</p>
+<p><a id="with_reducible"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">with_reducible
+</code></pre></div><p><code>with_reducible tacs</code> executes <code>tacs</code> using the reducible transparency setting. In this setting only definitions tagged as <code>[reducible]</code> are unfolded.</p>
+<p><a id="with_unfolding_all"></a></p>
+<p><strong>tactic</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">with_unfolding_all
+</code></pre></div><p><code>with_unfolding_all tacs</code> executes <code>tacs</code> using the <code>.all</code> transparency setting. In this setting all definitions that are not opaque are unfolded.</p>
+<h2 id="preserved-grammar-annotations">Preserved grammar annotations</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Configuration options for tactics.
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">A configuration item for a tactic configuration.
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`+opt` is short for `(opt := true)`. It sets the `opt` configuration option to `true`.
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`-opt` is short for `(opt := false)`. It sets the `opt` configuration option to `false`.
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`(opt := val)` sets the `opt` configuration option to `val`.
+
+As a special case, `(config := ...)` sets the entire configuration.
+</code></pre></div><h2 id="preserved-native-proof-state-displays">Preserved native proof-state displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n:Nat⊢ if n = 0 then n &lt; 1 else n &gt; 0
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n:Nath✝:n = 0⊢ if n = 0 then n &lt; 1 else n &gt; 0
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">All goals completed! 🐙
+</code></pre></div><h3 id="display-4-2">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n:Nath✝:¬n = 0⊢ if n = 0 then n &lt; 1 else n &gt; 0
+</code></pre></div><h3 id="display-5-2">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n:Nath✝:¬n = 0⊢ 0 &lt; n
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n:Nat⊢ n = n
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n:Nat⊢ 0 = 0
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n:Nati:Nat⊢ i + 1 = i + 1
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n:Nat⊢ if 0 = 0 then 0 &lt; 1 else 0 &gt; 0
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n:Natk:Nat⊢ if k + 1 = 0 then k + 1 &lt; 1 else k + 1 &gt; 0
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">x:Nath:x = 1 ∨ x = 2⊢ x &lt; 3
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inlx:Nath✝:x = 1⊢ x &lt; 3inrx:Nath✝:x = 2⊢ x &lt; 3
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inrx:Nath✝:x = 2⊢ x &lt; 3
+</code></pre></div><h3 id="display-14">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ ∀ (n : Nat), 0 + n = n
+</code></pre></div><h3 id="display-15">Display 15</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n✝:Nat⊢ 0 + n✝ = n✝
+</code></pre></div><h3 id="display-16">Display 16</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n:Nat⊢ 0 + n = n
+</code></pre></div><footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

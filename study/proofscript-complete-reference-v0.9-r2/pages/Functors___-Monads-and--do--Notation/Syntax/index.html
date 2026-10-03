@@ -1,0 +1,613 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;The-Lean-Language-Reference--Functors___-Monads-and--do--Notation--Syntax&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../index.html">18. Functors, Monads and do-Notation</a><a href="../Laws/index.html">18.1. Laws</a><a href="../Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="index.html">18.3. Syntax</a><a href="../API-Reference/index.html">18.4. API Reference</a><a href="../Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../../Notations-and-Macros/index.html">23. Notations and Macros</a><a href="../../Notations-and-Macros/Custom-Operators/index.html">23.1. Custom Operators</a><a href="../../Notations-and-Macros/Precedence/index.html">23.2. Precedence</a><a href="../../Notations-and-Macros/Notations/index.html">23.3. Notations</a><a href="../../Notations-and-Macros/Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../../Notations-and-Macros/Macros/index.html">23.5. Macros</a><a href="../../Notations-and-Macros/Elaborators/index.html">23.6. Elaborators</a><a href="../../Notations-and-Macros/Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../../Notations-and-Macros/Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../../releases/index.html">Release Notes</a><a href="../../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="The-Lean-Language-Reference--Functors___-Monads-and--do--Notation--Syntax"></a></p>
+<h1 id="proofscript-18-3-syntax">ProofScript — 18.3. Syntax</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>Functor, applicative and monad interfaces are ordinary typeclasses and definitions. Their laws are separate propositions, not automatic consequences of defining methods. The order of StateT and ExceptT changes failure and state behavior. do is native sequencing, not a JavaScript statement language. Local mutation, loops and return use that grammar and its scope.</p>
+<p><strong>Compiler and coverage boundary.</strong> Native semicolons within do and local let expressions remain valid. Do not remove all semicolons, reinterpret every newline, or assume discarding a state value reverses external effects.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/Functors___-Monads-and--do--Notation/Syntax/index.html">Functors___-Monads-and--do--Notation/Syntax/index.html</a>. Source Git blob: <code>cb34a939c411367c788cf48aa7d45e5bd0b3f868</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<p><a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Constructors-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Instance-Constructor-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<hr>
+<h2 id="18-3-syntax">18.3. Syntax</h2><p>Lean supports programming with functors, applicative functors, and monads via special syntax:</p>
+<ul>
+<li>Infix operators are provided for the most common operations.</li>
+<li>An embedded language called <a href="index.html#--tech-term-do-notation"><a href="index.html#Lean___Parser___Term___do"><code>do</code></a>-notation</a> allows the use of imperative syntax when writing programs in a monad.</li>
+</ul>
+<p><a id="The-Lean-Language-Reference--Functors___-Monads-and--do--Notation--Syntax--Infix-Operators"></a></p>
+<h3 id="18-3-1-infix-operators">18.3.1. Infix Operators</h3><p>Infix operators are primarily useful in smaller expressions, or when there is no <code>Monad</code> instance.</p>
+<p><a id="The-Lean-Language-Reference--Functors___-Monads-and--do--Notation--Syntax--Infix-Operators--Functors"></a></p>
+<h4 id="18-3-1-1-functors">18.3.1.1. Functors</h4><p>There are two infix operators for <code>Functor.map</code>.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Functor Operators</strong></p>
+<p><code>g &lt;$&gt; x</code> is short for <code>Functor.map g x</code>.</p>
+<p><a id="_FLQQ_term__LT_____GT___FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term &lt;$&gt; term
+</code></pre></div><p><code>x &lt;&amp;&gt; g</code> is short for <code>Functor.map g x</code>.</p>
+<p><a id="_FLQQ_term__LT_____GT___FLQQ_-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term &lt;&amp;&gt; term
+</code></pre></div><p><a id="The-Lean-Language-Reference--Functors___-Monads-and--do--Notation--Syntax--Infix-Operators--Applicative-Functors"></a></p>
+<h4 id="18-3-1-2-applicative-functors">18.3.1.2. Applicative Functors</h4><p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Applicative Operators</strong></p>
+<p><code>g &lt;*&gt; x</code> is short for <code>Seq.seq g (fun () =&gt; x)</code>. The function is inserted to delay evaluation because control might not reach the argument.</p>
+<p><a id="_FLQQ_term__LT_____GT___FLQQ_-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term &lt;*&gt; term
+</code></pre></div><p><code>e1 *&gt; e2</code> is short for <code>SeqRight.seqRight e1 (fun () =&gt; e2)</code>.</p>
+<p><a id="_FLQQ_term_____GT___FLQQ_-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term *&gt; term
+</code></pre></div><p><code>e1 &lt;* e2</code> is short for <code>SeqLeft.seqLeft e1 (fun () =&gt; e2)</code>.</p>
+<p><a id="_FLQQ_term__LT______FLQQ_-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term &lt;* term
+</code></pre></div><p>Many applicative functors also support failure and recovery via the <code>Alternative</code> type class. This class also has an infix operator.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Alternative Operators</strong></p>
+<p><code>e &lt;|&gt; e&#39;</code> is short for <code>OrElse.orElse e (fun () =&gt; e&#39;)</code>. The function is inserted to delay evaluation because control might not reach the argument.</p>
+<p><a id="_FLQQ_term__LT_____GT___FLQQ_-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term &lt;|&gt; term
+</code></pre></div><p><a id="User"></a>
+<a id="User___name"></a>
+<a id="User___favoriteNat"></a>
+<a id="main"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure User where
+  name : String
+  favoriteNat : Nat
+const main : IO Unit := pure ()
+</code></pre></div><p><a id="Infix--Functor--and--Applicative--Operators"></a>
+Infix <code>Functor</code> and <code>Applicative</code> Operators </p>
+<p>A common functional programming idiom is to use a pure function in some context with effects by applying it via <code>Functor.map</code> and <code>Seq.seq</code>. The function is applied to its sequence of arguments using <code>&lt;$&gt;</code>, and the arguments are separated by <code>&lt;*&gt;</code>.</p>
+<p>In this example, the constructor <code>User.mk</code> is applied via this idiom in the body of <code>main</code>.</p>
+<p><a id="getName-_LPAR_in-Infix--Functor--and--Applicative--Operators_RPAR_"></a>
+<a id="getFavoriteNat-_LPAR_in-Infix--Functor--and--Applicative--Operators_RPAR_"></a>
+<a id="User-_LPAR_in-Infix--Functor--and--Applicative--Operators_RPAR_"></a>
+<a id="User___name-_LPAR_in-Infix--Functor--and--Applicative--Operators_RPAR_"></a>
+<a id="User___favoriteNat-_LPAR_in-Infix--Functor--and--Applicative--Operators_RPAR_"></a>
+<a id="main-_LPAR_in-Infix--Functor--and--Applicative--Operators_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const getName : IO String := do
+  IO.println &quot;What is your name?&quot;
+  return (← (← IO.getStdin).getLine).trimAsciiEnd.copy
+
+partial const getFavoriteNat : IO Nat := do
+  IO.println &quot;What is your favorite natural number?&quot;
+  let line ← (← IO.getStdin).getLine
+  if let some n := line.trimAscii.copy.toNat? then
+    return n
+  else
+    IO.println &quot;Let's try again.&quot;
+    getFavoriteNat
+
+structure User where
+  name : String
+  favoriteNat : Nat
+deriving Repr
+
+const main : IO Unit := do
+  let user ← User.mk &lt;$&gt; getName &lt;*&gt; getFavoriteNat
+  IO.println (repr user)
+</code></pre></div><p>When run with this input:</p>
+<p>  <code>stdin``A. Lean User``None``42</code> </p>
+<p>it produces this output:</p>
+<p>  <code>stdout``What is your name?``What is your favorite natural number?``Let&#39;s try again.``What is your favorite natural number?``{ name := &quot;A. Lean User&quot;, favoriteNat := 42 }</code>    </p>
+<p><a id="The-Lean-Language-Reference--Functors___-Monads-and--do--Notation--Syntax--Infix-Operators--Monads"></a></p>
+<h4 id="18-3-1-3-monads">18.3.1.3. Monads</h4><p>Monads are primarily used via <a href="index.html#--tech-term-do-notation"><a href="index.html#Lean___Parser___Term___do"><code>do</code></a>-notation</a>. However, it can sometimes be convenient to describe monadic computations via operators.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Monad Operators</strong></p>
+<p><code>act &gt;&gt;= f</code> is syntax for <code>Bind.bind act f</code>.</p>
+<p><a id="_FLQQ_term__GT__GT______FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term &gt;&gt;= term
+</code></pre></div><p>Similarly, the reversed operator <code>f =&lt;&lt; act</code> is syntax for <code>Bind.bind act f</code>.</p>
+<p><a id="_FLQQ_term_____LT__LT___FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term =&lt;&lt; term
+</code></pre></div><p>The Kleisli composition operators <code>Bind.kleisliRight</code> and <code>Bind.kleisliLeft</code> also have infix operators.</p>
+<p><a id="_FLQQ_term__GT_____GT___FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term &gt;=&gt; term
+</code></pre></div><p><a id="_FLQQ_term__LT_____LT___FLQQ_"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | term &lt;=&lt; term
+</code></pre></div><p><a id="do-notation"></a></p>
+<h3 id="18-3-2-do-notation">18.3.2. do-Notation</h3><p>Monads are primarily used via 
+<a id="--tech-term-do-notation"></a>
+<a href="index.html#Lean___Parser___Term___do"><code>do</code></a>-notation, which is an embedded language for programming in an imperative style. It provides familiar syntax for sequencing effectful operations, early return, local mutable variables, loops, and exception handling. All of these features are translated to the operations of the <code>Monad</code> type class, with a few of them requiring addition instances of classes such as <code>ForIn</code> that specify iteration over containers. For more details about the design of <a href="index.html#Lean___Parser___Term___do"><code>do</code></a>-notation, please consult Ullrich and de Moura (2022)Sebastian Ullrich and Leonardo de Moura, 2022. <a href="https://dl.acm.org/doi/10.1145/3547640">“<code>do</code> Unchained: Embracing Local Imperativity in a Purely Functional Language”</a>. In <em>Proceedings of the ACM on Programming Languages: ICFP 2022.</em>.</p>
+<p>A <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> term consists of the keyword <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> followed by a sequence of 
+<a id="--tech-term-do-elements"></a>
+<em><a href="index.html#Lean___Parser___Term___do"><code>do</code></a> elements</em>.</p>
+<p><a id="term-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>do-Notation</strong></p>
+<p><a id="Lean___Parser___Term___do"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | do doSeqItem*
+</code></pre></div><p>The elements in a <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> may be separated by semicolons; otherwise, each should be on its own line and they should have equal indentation.</p>
+<p><a id="The-Lean-Language-Reference--Functors___-Monads-and--do--Notation--Syntax--do--Notation--Sequential-Computations"></a></p>
+<h4 id="18-3-2-1-sequential-computations">18.3.2.1. Sequential Computations</h4><p>One form of <a href="index.html#--tech-term-do-elements"><a href="index.html#Lean___Parser___Term___do"><code>do</code></a>-element</a> is a term.</p>
+<p><a id="Lean___Parser___Term___doSeqItem"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Terms in do-Notation</strong></p>
+<p><a id="Lean___Parser___Term___doSeqItem-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | term
+</code></pre></div><p>A term followed by a sequence of elements is translated to a use of <code>bind</code>; in particular, <code>do e1; es</code> is translated to <code>e1 &gt;&gt;= fun () =&gt; do es</code>.</p>
+<table>
+<thead>
+<tr>
+<th><a href="index.html#Lean___Parser___Term___do"><code>do</code></a> Element</th>
+<th>Desugaring</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;e1&lt;br&gt;es&lt;br&gt;</code></td>
+<td><code>proofscript&lt;br&gt;e1 &gt;&gt;= fun () =&gt; do es&lt;br&gt;</code></td>
+</tr>
+</tbody></table>
+<p>The result of the term&#39;s computation may also be named, allowing it to be used in subsequent steps. This is done using <code>let</code>.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Data Dependence in do-Notation</strong></p>
+<p>There are two forms of monadic <code>let</code>-binding in a <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block. The first binds an identifier to the result, with an optional type annotation:</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | let ident(:term)? ← term
+</code></pre></div><p>The second binds a pattern to the result. The fallback clause, beginning with <code>|</code>, specifies the behavior when the pattern does not match the result.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | let term ← term
+        (| doSeqIndent)?
+</code></pre></div><p>This syntax is also translated to a use of <code>bind</code>. <code>do let x ← e1; es</code> is translated to <code>e1 &gt;&gt;= fun x =&gt; do es</code>, and fallback clauses are translated to default pattern matches. <code>let</code> may also be used with the standard definition syntax <code>:=</code> instead of <code>←</code>. This indicates a pure, rather than monadic, definition:</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Local Definitions in do-Notation</strong></p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | let (ident | hole) := term
+</code></pre></div><p><code>do let x := e; es</code> is translated to <code>let x := e; do es</code>.</p>
+<table>
+<thead>
+<tr>
+<th><a href="index.html#Lean___Parser___Term___do"><code>do</code></a> Element</th>
+<th>Desugaring</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let x ← e1&lt;br&gt;es&lt;br&gt;</code></td>
+<td><code>proofscript&lt;br&gt;e1 &gt;&gt;= fun x =&gt;&lt;br&gt;  do es&lt;br&gt;</code></td>
+</tr>
+<tr>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let some x ← e1?&lt;br&gt;  | fallback&lt;br&gt;es&lt;br&gt;</code></td>
+<td><code>proofscript&lt;br&gt;e1? &gt;&gt;= fun&lt;br&gt;  | some x =&gt; do&lt;br&gt;    es&lt;br&gt;  | _ =&gt; fallback&lt;br&gt;</code></td>
+</tr>
+<tr>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let x := e&lt;br&gt;es&lt;br&gt;</code></td>
+<td><code>proofscript&lt;br&gt;let x := e&lt;br&gt;do es&lt;br&gt;</code></td>
+</tr>
+</tbody></table>
+<p>Within a <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block, <code>←</code> may be used as a prefix operator. The expression to which it is applied is replaced with a fresh variable, which is bound using <code>bind</code> just before the current step. This allows monadic effects to be used in positions that otherwise might expect a pure value, while still maintaining the distinction between <em>describing</em> an effectful computation and actually <em>executing</em> its effects. Multiple occurrences of <code>←</code> are processed from left to right, inside to outside.</p>
+<table>
+<thead>
+<tr>
+<th>Example <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> Element</th>
+<th>Desugaring</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;f (← e1) (← e2)&lt;br&gt;es&lt;br&gt;</code></td>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let x ← e1&lt;br&gt;let y ← e2&lt;br&gt;f x y&lt;br&gt;es&lt;br&gt;</code></td>
+</tr>
+<tr>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let x := g (← h (← e1))&lt;br&gt;es&lt;br&gt;</code></td>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let y ← e1&lt;br&gt;let z ← h y&lt;br&gt;let x := g z&lt;br&gt;es&lt;br&gt;</code></td>
+</tr>
+</tbody></table>
+<p>Example Nested Action Desugarings</p>
+<p>In addition to convenient support for sequential computations with data dependencies, <a href="index.html#Lean___Parser___Term___do"><code>do</code></a>-notation also supports the local addition of a variety of effects, including early return, local mutable state, and loops with early termination. These effects are implemented via transformations of the entire <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block in a manner akin to <a href="../Varieties-of-Monads/index.html#--tech-term-monad-transformer">monad transformers</a>, rather than via a local desugaring.</p>
+<p><a id="early-return"></a></p>
+<h4 id="18-3-2-2-early-return">18.3.2.2. Early Return</h4><p>Early return terminates a computation immediately with a given value. The value is returned from the closest containing <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block; however, this may not be the closest <code>do</code> keyword. The rules for determining the extent of a <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block are described <a href="index.html#closest-do-block">in their own section</a>.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Early Return</strong></p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | return term
+</code></pre></div><p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | return
+</code></pre></div><p>Not all monads include early return. Thus, when a <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block contains <code>return</code>, the code needs to be rewritten to simulate the effect. A program that uses early return to compute a value of type <code>α</code> in a monad <code>m</code> can be thought of as a program in the monad <code>ExceptT α m α</code>: early-returned values take the exception pathway, while ordinary returns do not. Then, an outer handler can return the value from either code paths. Internally, the <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> elaborator performs a translation very much like this one.</p>
+<p>On its own, <code>return</code> is short for <code>return</code>​``​<code>()</code>.</p>
+<p><a id="let-mut"></a></p>
+<h4 id="18-3-2-3-local-mutable-state">18.3.2.3. Local Mutable State</h4><p>Local mutable state is mutable state that cannot escape the <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block in which it is defined. The <code>let mut</code> binder introduces a locally-mutable binding.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Local Mutability</strong></p>
+<p>Mutable bindings may be initialized either with pure computations or with monadic computations:</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | let mut (ident | hole) := term
+</code></pre></div><p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | let mut ident ← doElem
+</code></pre></div><p>Similarly, they can be mutated either with pure values or the results of monad computations:</p>
+<p><a id="Lean___Parser___Term___doReassign"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doElem ::= ...
+    | ident(: term)?  := term
+</code></pre></div><p><a id="Lean___Parser___Term___doReassign-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doElem ::= ...
+    | term(: term)? := term
+</code></pre></div><p><a id="Lean___Parser___Term___doReassignArrow"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doElem ::= ...
+    | ident(: term)? ← term
+</code></pre></div><p><a id="Lean___Parser___Term___doReassignArrow-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doElem ::= ...
+    | term ← term
+        (| doSeqIndent)?
+</code></pre></div><p>These locally-mutable bindings are less powerful than a <a href="../Varieties-of-Monads/index.html#--tech-term-State-monads">state monad</a> because they are not mutable outside their lexical scope; this also makes them easier to reason about. When <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> blocks contain mutable bindings, the <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> elaborator transforms the expression similarly to the way that <code>StateT</code> would, constructing a new monad and initializing it with the correct values.</p>
+<p><a id="do-control-structures"></a></p>
+<h4 id="18-3-2-4-control-structures">18.3.2.4. Control Structures</h4><p>There are <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> elements that correspond to most of Lean&#39;s term-level control structures. When they occur as a step in a <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block, they are interpreted as <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> elements rather than terms. Each branch of the control structures is a sequence of <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> elements, rather than a term, and some of them are more syntactically flexible than their corresponding terms.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Conditionals</strong></p>
+<p>In a <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block, <code>if</code> statements may omit their <code>else</code> branch. Omitting an <code>else</code> branch is equivalent to using <code>pure``()</code> as the contents of the branch.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | if ((ident | hole) :)? term then
+        doSeqItem*
+      (else
+        doSeqItem*)?
+</code></pre></div><p>Syntactically, the <code>then</code> branch cannot be omitted. For these cases, <code>unless</code> only executes its body when the condition is false. The <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> in <code>unless</code> is part of its syntax and does not induce a nested <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Reverse Conditionals</strong></p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | unless term do
+        doSeqItem*
+</code></pre></div><p>When <code>match</code> is used in a <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block, each branch is considered to be part of the same block. Otherwise, it is equivalent to the <a href="../../Terms/Pattern-Matching/index.html#Lean___Parser___Term___match"><code>match</code></a> term.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Pattern Matching</strong></p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | match (((ident | hole) :)? term),* with
+        (| term,* =&gt; doSeqItem*)*
+</code></pre></div><p><a id="monad-iteration-syntax"></a></p>
+<h4 id="18-3-2-5-iteration">18.3.2.5. Iteration</h4><p>Within a <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block, <code>for</code>​<code>…</code>​<code>in</code> loops allow iteration over a data structure. The body of the loop is part of the containing <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block, so local effects such as early return and mutable variables may be used.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Iteration over Collections</strong></p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | for ((ident :)? term in term),* do
+        doSeqItem*
+</code></pre></div><p>A <code>for</code>​<code>…</code>​<code>in</code> loop requires at least one clause that specifies the iteration to be performed, which consists of an optional membership proof name followed by a colon (<code>:</code>), a pattern to bind, the keyword <code>in</code>, and a collection term. The pattern, which may just be an <a href="../../Notations-and-Macros/Defining-New-Syntax/index.html#--tech-term-Identifiers">identifier</a>, must match any element of the collection; patterns in this position cannot be used as implicit filters. Further clauses may be provided by separating them with commas. Each collection is iterated over at the same time, and iteration stops when any of the collections runs out of elements.</p>
+<p><a id="Iteration-Over-Multiple-Collections"></a>
+Iteration Over Multiple Collections </p>
+<p>When iterating over multiple collections, iteration stops when any of the collections runs out of elements.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval Id.run do
+  let mut v := #[]
+  for x in [0:43], y in ['a', 'b'] do
+    v := v.push (x, y)
+  return v
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">#[(0, 'a'), (1, 'b')]
+</code></pre></div><p><a id="Iteration-over-Array-Indices-with--for"></a>
+Iteration over Array Indices with <code>for</code> </p>
+<p>When iterating over the valid indices for an array with <code>for</code>, naming the membership proof allows the tactic that searches for proofs that array indices are in bounds to succeed.</p>
+<p><a id="satisfyingIndices-_LPAR_in-Iteration-over-Array-Indices-with--for_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function satisfyingIndices
+    (p : α → Prop) [DecidablePred p]
+    (xs : Array α) : Array Nat := Id.run do
+  let mut out := #[]
+  for h : i in [0:xs.size] do
+    if p xs[i] then out := out.push i
+  return out
+</code></pre></div><p>Omitting the hypothesis name causes the array lookup to fail, because no proof is available in the context that the iteration variable is within the specified range.</p>
+<p>Iteration with <code>for</code>-loops is translated into uses of <code>ForIn.forIn</code>, which is an analogue of <code>ForM.forM</code> with added support for local mutations and early termination. <code>ForIn.forIn</code> receives an initial value for the local mutable state and a monadic action as parameters, along with the collection being iterated over. The monadic action passed to <code>ForIn.forIn</code> takes a current state as a parameter and, after carrying out actions in the monad <code>m</code>, returns either <code>ForInStep.yield</code> to indicate that iteration should continue with an updated set of local mutable values, or <code>ForInStep.done</code> to indicate that <code>break</code> or <code>return</code> was executed. When iteration is complete, <code>ForIn.forIn</code> returns the final values of the local mutable values.</p>
+<p>The specific desugaring of a loop depends on how state and early termination are used in its body. Here are some examples:</p>
+<table>
+<thead>
+<tr>
+<th><a href="index.html#Lean___Parser___Term___do"><code>do</code></a> Element</th>
+<th>Desugaring</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let mut b := …&lt;br&gt;for x in xs do&lt;br&gt;  b ← f x b&lt;br&gt;es&lt;br&gt;</code></td>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let b := …&lt;br&gt;let b ← ForIn.forIn xs b fun x b =&gt; do&lt;br&gt;  let b ← f x b&lt;br&gt;  return ForInStep.yield b&lt;br&gt;es&lt;br&gt;</code></td>
+</tr>
+<tr>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let mut b := …&lt;br&gt;for x in xs do&lt;br&gt;  b ← f x b&lt;br&gt;  break&lt;br&gt;es&lt;br&gt;</code></td>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let b := …&lt;br&gt;let b ← ForIn.forIn xs b fun x b =&gt; do&lt;br&gt;  let b ← f x b&lt;br&gt;  return ForInStep.done b&lt;br&gt;es&lt;br&gt;</code></td>
+</tr>
+<tr>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let mut b := …&lt;br&gt;for h : x in xs do&lt;br&gt;  b ← f&#39; x h b&lt;br&gt;es&lt;br&gt;</code></td>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let b := …&lt;br&gt;let b ← ForIn&#39;.forIn&#39; xs b fun x h b =&gt; do&lt;br&gt;  let b ← f&#39; x h b&lt;br&gt;  return ForInStep.yield b&lt;br&gt;es&lt;br&gt;</code></td>
+</tr>
+<tr>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let mut b := …&lt;br&gt;for h : x in xs do&lt;br&gt;  b ← f&#39; x h b&lt;br&gt;  break&lt;br&gt;es&lt;br&gt;</code></td>
+<td><code>proofscript&lt;br&gt;do&lt;br&gt;let b := …&lt;br&gt;let b ← ForIn&#39;.forIn&#39; xs b fun x h b =&gt; do&lt;br&gt;  let b ← f&#39; x h b&lt;br&gt;  return ForInStep.done b&lt;br&gt;es&lt;br&gt;</code></td>
+</tr>
+</tbody></table>
+<p>The body of a <code>while</code> loop is repeated while the condition remains true. It is possible to write infinite loops using them in functions that are not marked <code>partial</code>. This is because the <code>partial</code> modifier only applies to non-termination or infinite regress induced by the function being defined, and not by those that it calls. The translation of <code>while</code> loops relies on a separate helper.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Conditional Loops</strong></p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | while term do
+        doSeqItem*
+</code></pre></div><p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | while (ident | hole) : term do
+        doSeqItem*
+</code></pre></div><p>The body of a <code>repeat</code>-<code>until</code> loop is always executed at least once. After each iteration, the condition is checked, and the loop is repeated when the condition is <strong>false</strong>. When the condition becomes true, iteration stops.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Post-Tested Loops</strong></p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | repeat
+        doSeq
+      until term
+</code></pre></div><p>The body of a <code>repeat</code> loop is repeated until a <code>break</code> statement is executed. Just like <code>while</code> loops, these loops can be used in functions that are not marked <code>partial</code>.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Unconditional Loops</strong></p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | repeat
+        doSeq
+</code></pre></div><p>The <code>continue</code> statement skips the rest of the body of the closest enclosing <code>repeat</code>, <code>while</code>, or <code>for</code> loop, moving on to the next iteration. The <code>break</code> statement terminates the closest enclosing <code>repeat</code>, <code>while</code>, or <code>for</code> loop, stopping iteration.</p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Loop Control Statements</strong></p>
+<p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | continue
+</code></pre></div><p><a id="Lean___Parser___Term___doSeqItem-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">doSeqItem ::= ...
+    | break
+</code></pre></div><p>In addition to <code>break</code>, loops can always be terminated by effects in the current monad. Throwing an exception from a loop terminates the loop.</p>
+<p><a id="Terminating-Loops-in-the--Option--Monad"></a>
+Terminating Loops in the <code>Option</code> Monad </p>
+<p>The <code>failure</code> method from the <code>Alternative</code> class can be used to terminate an otherwise-infinite loop in the <code>Option</code> monad.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval show Option Nat from do
+  let mut i := 0
+  repeat
+    if i &gt; 1000 then failure
+    else i := 2 * (i + 1)
+  return i
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">none
+</code></pre></div><p><a id="closest-do-block"></a></p>
+<h4 id="18-3-2-6-identifying-do-blocks">18.3.2.6. Identifying do Blocks</h4><p>Many features of <a href="index.html#Lean___Parser___Term___do"><code>do</code></a>-notation have an effect on the 
+<a id="--tech-term-current-do-block"></a>
+current <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block. In particular, early return aborts the current block, causing it to evaluate to the returned value, and mutable bindings can only be mutated in the block in which they are defined. Understanding these features requires a precise definition of what it means to be in the “same” block.</p>
+<p>Empirically, this can be checked using the Lean language server. When the cursor is on a <code>return</code> statement, the corresponding <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> keyword is highlighted. Attempting to mutate a mutable binding outside of the same <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block results in an error message.</p>
+<p><img loading="lazy" src="../../../assets/figures/do-return-hl-1.png" alt="Highlighting do from return"></p>
+<p><img loading="lazy" src="../../../assets/figures/do-return-hl-2.png" alt="Highlighting do from return with errors"></p>
+<p> Highlighting <a href="index.html#Lean___Parser___Term___do"><code>do</code></a></p>
+<p>The rules are as follows:</p>
+<ul>
+<li>Each element immediately nested under the <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> keyword that begins a block belongs to that block.</li>
+<li>Each element immediately nested under the <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> keyword that is an element in a containing <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block belongs to the outer block.</li>
+<li>Elements in the branches of an <code>if</code>, <code>match</code>, or <code>unless</code> element belong to the same <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block as the control structure that contains them. The <code>do</code> keyword that is part of the syntax of <code>unless</code> does not introduce a new <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block.</li>
+<li>Elements in the body of <code>repeat</code>, <code>while</code>, and <code>for</code> belong to the same <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block as the loop that contains them. The <code>do</code> keyword that is part of the syntax of <code>while</code> and <code>for</code> does not introduce a new <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> block.</li>
+</ul>
+<p><a id="Nested--do--and-Branches"></a>
+Nested <code>do</code> and Branches </p>
+<p>The following example outputs <code>6</code> rather than <code>7</code>:</p>
+<p><a id="test-_LPAR_in-Nested--do--and-Branches_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const test : StateM Nat Unit := do
+  set 5
+  if true then
+    set 6
+    do return
+  set 7
+  return
+
+#eval test.run 0
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">((), 6)
+</code></pre></div><p>This is because the <code>return</code> statement under the <code>if</code> belongs to the same <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> as its immediate parent, which itself belongs to the same <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> as the <code>if</code>. If <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> blocks that occurred as elements in other <a href="index.html#Lean___Parser___Term___do"><code>do</code></a> blocks instead created new blocks, then the example would output <code>7</code>.</p>
+<p><a id="The-Lean-Language-Reference--Functors___-Monads-and--do--Notation--Syntax--do--Notation--Type-Classes-for-Iteration"></a></p>
+<h4 id="18-3-2-7-type-classes-for-iteration">18.3.2.7. Type Classes for Iteration</h4><p>To be used with <code>for</code> loops without membership proofs, collections must implement the <code>ForIn</code> type class. Implementing <code>ForIn&#39;</code> additionally allows the use of <code>for</code> loops with membership proofs.</p>
+<p><a id="ForIn___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ForIn.{u, v, u₁, u₂} (m : Type u₁ → Type u₂) (ρ : Type u)
+  (α : outParam (Type v)) : Type (max (max (max u (u₁ + 1)) u₂) v)
+</code></pre></div><p>Monadic iteration in <code>do</code>-blocks, using the <code>for x in xs</code> notation.</p>
+<p>The parameter <code>m</code> is the monad of the <code>do</code>-block in which iteration is performed, <code>ρ</code> is the type of the collection being iterated over, and <code>α</code> is the type of elements.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ForIn.mk.{u, v, u₁, u₂}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">forIn : {β : Type u₁} → ρ → β → (α → β → m (ForInStep β)) → m β
+</code></pre></div><p>Monadically iterates over the contents of a collection <code>xs</code>, with a local state <code>b</code> and the possibility of early termination.</p>
+<p>Because a <code>do</code> block supports local mutable bindings along with <code>return</code>, and <code>break</code>, the monadic action passed to <code>ForIn.forIn</code> takes a starting state in addition to the current element of the collection and returns an updated state together with an indication of whether iteration should continue or terminate. If the action returns <code>ForInStep.done</code>, then <code>ForIn.forIn</code> should stop iteration and return the updated state. If the action returns <code>ForInStep.yield</code>, then <code>ForIn.forIn</code> should continue iterating if there are further elements, passing the updated state to the action.</p>
+<p>More information about the translation of <code>for</code> loops into <code>ForIn.forIn</code> is available in <a href="https://lean-lang.org/doc/reference/4.34.0-rc2/find/?domain=Verso.Genre.Manual.section&amp;name=monad-iteration-syntax">the Lean reference manual</a>.</p>
+<p><a id="ForIn______mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ForIn'.{u, v, u₁, u₂} (m : Type u₁ → Type u₂) (ρ : Type u)
+  (α : outParam (Type v)) (d : outParam (Membership α ρ)) :
+  Type (max (max (max u (u₁ + 1)) u₂) v)
+</code></pre></div><p>Monadic iteration in <code>do</code>-blocks with a membership proof, using the <code>for h : x in xs</code> notation.</p>
+<p>The parameter <code>m</code> is the monad of the <code>do</code>-block in which iteration is performed, <code>ρ</code> is the type of the collection being iterated over, <code>α</code> is the type of elements, and <code>d</code> is the specific membership predicate to provide.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ForIn'.mk.{u, v, u₁, u₂}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">forIn' : {β : Type u₁} → (x : ρ) → β → ((a : α) → a ∈ x → β → m (ForInStep β)) → m β
+</code></pre></div><p>Monadically iterates over the contents of a collection <code>xs</code>, with a local state <code>b</code> and the possibility of early termination. At each iteration, the body of the loop is provided with a proof that the current element is in the collection.</p>
+<p>Because a <code>do</code> block supports local mutable bindings along with <code>return</code>, and <code>break</code>, the monadic action passed to <code>ForIn&#39;.forIn&#39;</code> takes a starting state in addition to the current element of the collection with its membership proof. The action returns an updated state together with an indication of whether iteration should continue or terminate. If the action returns <code>ForInStep.done</code>, then <code>ForIn&#39;.forIn&#39;</code> should stop iteration and return the updated state. If the action returns <code>ForInStep.yield</code>, then <code>ForIn&#39;.forIn&#39;</code> should continue iterating if there are further elements, passing the updated state to the action.</p>
+<p>More information about the translation of <code>for</code> loops into <code>ForIn&#39;.forIn&#39;</code> is available in <a href="https://lean-lang.org/doc/reference/4.34.0-rc2/find/?domain=Verso.Genre.Manual.section&amp;name=monad-iteration-syntax">the Lean reference manual</a>.</p>
+<p><a id="ForInStep___done"></a></p>
+<p><strong>inductive type</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ForInStep.{u} (α : Type u) : Type u
+</code></pre></div><p>An indication of whether a loop&#39;s body terminated early that&#39;s used to compile the <code>for x in xs</code> notation.</p>
+<p>A collection&#39;s <code>ForIn</code> or <code>ForIn&#39;</code> instance describes how to iterate over its elements. The monadic action that represents the body of the loop returns a <code>ForInStep α</code>, where <code>α</code> is the local state used to implement features such as <code>let mut</code>.</p>
+<p><strong>Constructors</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ForInStep.done.{u} {α : Type u} : α → ForInStep α
+</code></pre></div><p>The loop should terminate early.</p>
+<p><code>ForInStep.done</code> is produced by uses of <code>break</code> or <code>return</code> in the loop body.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ForInStep.yield.{u} {α : Type u} : α → ForInStep α
+</code></pre></div><p>The loop should continue with the next iteration, using the returned state.</p>
+<p><code>ForInStep.yield</code> is produced by <code>continue</code> and by reaching the bottom of the loop body.</p>
+<p><a id="ForInStep___value"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ForInStep.value.{u_1} {α : Type u_1} (x : ForInStep α) : α
+</code></pre></div><p>Extracts the value from a <code>ForInStep</code>, ignoring whether it is <code>ForInStep.done</code> or <code>ForInStep.yield</code>.</p>
+<p><a id="ForM___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ForM.{u, v, w₁, w₂} (m : Type u → Type v) (γ : Type w₁)
+  (α : outParam (Type w₂)) : Type (max (max v w₁) w₂)
+</code></pre></div><p>Overloaded monadic iteration over some container type.</p>
+<p>An instance of <code>ForM m γ α</code> describes how to iterate a monadic operator over a container of type <code>γ</code> with elements of type <code>α</code> in the monad <code>m</code>. The element type should be uniquely determined by the monad and the container.</p>
+<p>Use <code>ForM.forIn</code> to construct a <code>ForIn</code> instance from a <code>ForM</code> instance, thus enabling the use of the <code>for</code> operator in <code>do</code>-notation.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ForM.mk.{u, v, w₁, w₂}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">forM : γ → (α → m PUnit) → m PUnit
+</code></pre></div><p>Runs the monadic action <code>f</code> on each element of the collection <code>coll</code>.</p>
+<p><a id="ForM___forIn"></a></p>
+<p><strong>def</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ForM.forIn.{u_1, u_2, u_3, u_4} {m : Type u_1 → Type u_2} {β : Type u_1}
+  {ρ : Type u_3} {α : Type u_4} [Monad m]
+  [ForM (StateT β (ExceptT β m)) ρ α] (x : ρ) (b : β)
+  (f : α → β → m (ForInStep β)) : m β
+</code></pre></div><p>Creates a suitable implementation of <code>ForIn.forIn</code> from a <code>ForM</code> instance.</p>
+<h2 id="preserved-grammar-annotations">Preserved grammar annotations</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Applies a function inside a functor. This is used to overload the `&lt;$&gt;` operator.
+
+When mapping a constant function, use `Functor.mapConst` instead, because it may be more
+efficient.
+
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `&lt;$&gt;` in identifiers is `map`.
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Maps a function over a functor, with parameters swapped so that the function comes last.
+
+This function is `Functor.map` with the parameters reversed, typically used via the `&lt;&amp;&gt;` operator.
+
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `&lt;&amp;&gt;` in identifiers is `mapRev`.
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">The implementation of the `&lt;*&gt;` operator.
+
+In a monad, `mf &lt;*&gt; mx` is the same as `do let f ← mf; x ← mx; pure (f x)`: it evaluates the
+function first, then the argument, and applies one to the other.
+
+To avoid surprising evaluation semantics, `mx` is taken &quot;lazily&quot;, using a `Unit → f α` function.
+
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `&lt;*&gt;` in identifiers is `seq`.
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Sequences the effects of two terms, discarding the value of the first. This function is usually
+invoked via the `*&gt;` operator.
+
+Given `x : f α` and `y : f β`, `x *&gt; y` runs `x`, then runs `y`, and finally returns the result of
+`y`.
+
+The evaluation of the second argument is delayed by wrapping it in a function, enabling
+“short-circuiting” behavior from `f`.
+
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `*&gt;` in identifiers is `seqRight`.
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Sequences the effects of two terms, discarding the value of the second. This function is usually
+invoked via the `&lt;*` operator.
+
+Given `x : f α` and `y : f β`, `x &lt;* y` runs `x`, then runs `y`, and finally returns the result of
+`x`.
+
+The evaluation of the second argument is delayed by wrapping it in a function, enabling
+“short-circuiting” behavior from `f`.
+
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `&lt;*` in identifiers is `seqLeft`.
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`a &lt;|&gt; b` executes `a` and returns the result, unless it fails in which
+case it executes and returns `b`. Because `b` is not always executed, it
+is passed as a thunk so it can be forced only when needed.
+The meaning of this notation is type-dependent. 
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `&lt;|&gt;` in identifiers is `orElse`.
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Sequences two computations, allowing the second to depend on the value computed by the first.
+
+If `x : m α` and `f : α → m β`, then `x &gt;&gt;= f : m β` represents the result of executing `x` to get
+a value of type `α` and then passing it to `f`.
+
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `&gt;&gt;=` in identifiers is `bind`.
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Same as `Bind.bind` but with arguments swapped. 
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `=&lt;&lt;` in identifiers is `bindLeft`.
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Left-to-right composition of Kleisli arrows. 
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `&gt;=&gt;` in identifiers is `kleisliRight`.
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Right-to-left composition of Kleisli arrows. 
+
+Conventions for notations in identifiers:
+
+ * The recommended spelling of `&lt;=&lt;` in identifiers is `kleisliLeft`.
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Configuration options for `let` tactics.
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`letDecl` matches the body of a let declaration `let f x1 x2 := e`,
+`let pat := e` (where `pat` is an arbitrary term) or `let f | pat1 =&gt; e1 | pat2 =&gt; e2 ...`
+(a pattern matching declaration), except for the `let` keyword itself.
+`let rec` declarations are not handled here.
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">A *hole* (or *placeholder term*), which stands for an unknown term that is expected to be inferred based on context.
+For example, in `@id _ Nat.zero`, the `_` must be the type of `Nat.zero`, which is `Nat`.
+
+The way this works is that holes create fresh metavariables.
+The elaborator is allowed to assign terms to metavariables while it is checking definitional equalities.
+This is often known as *unification*.
+
+Normally, all holes must be solved for. However, there are a few contexts where this is not necessary:
+* In `match` patterns, holes are catch-all patterns.
+* In some tactics, such as `refine'` and `apply`, unsolved-for placeholders become new goals.
+
+Related concept: implicit parameters are automatically filled in with holes during the elaboration process.
+
+See also `?m` syntax (synthetic holes).
+</code></pre></div><h3 id="display-14">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`return e` inside of a `do` block makes the surrounding block evaluate to `pure e`,
+skipping any further statements.
+Note that uses of the `do` keyword in other syntax like in `for _ in _ do`
+do not constitute a surrounding block in this sense;
+in supported editors, the corresponding `do` keyword of the surrounding block
+is highlighted when hovering over `return`.
+
+`return` not followed by a term starting on the same line is equivalent to `return ()`.
+</code></pre></div><h3 id="display-15">Display 15</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`matchDiscr` matches a &quot;match discriminant&quot;, either `h : tm` or `tm`, used in `match` as
+`match h1 : e1, e2, h3 : e3 with ...`.
+</code></pre></div><h3 id="display-16">Display 16</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`for x in e do s` iterates over `e` assuming `e`'s type has an instance of the `ForIn` typeclass.
+`break` and `continue` are supported inside `for` loops.
+`for x in e, x2 in e2, ... do s` iterates over the given collections in parallel,
+until at least one of them is exhausted.
+The types of `e2` etc. must implement the `Std.ToStream` typeclass.
+</code></pre></div><h3 id="display-17">Display 17</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`continue` skips to the next iteration of the surrounding `for` loop.
+</code></pre></div><h3 id="display-18">Display 18</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`break` exits the surrounding `for` loop.
+</code></pre></div><h2 id="preserved-native-diagnostic-displays">Preserved native diagnostic displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#[(0, 'a'), (1, 'b')]
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">none
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">((), 6)
+</code></pre></div><footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

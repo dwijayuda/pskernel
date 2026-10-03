@@ -1,0 +1,1465 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;inductive-types&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../index.html">4. The Type System</a><a href="../Functions/index.html">4.1. Functions</a><a href="../Propositions/index.html">4.2. Propositions</a><a href="../Universes/index.html">4.3. Universes</a><a href="index.html">4.4. Inductive Types</a><a href="../Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../../Notations-and-Macros/index.html">23. Notations and Macros</a><a href="../../Notations-and-Macros/Custom-Operators/index.html">23.1. Custom Operators</a><a href="../../Notations-and-Macros/Precedence/index.html">23.2. Precedence</a><a href="../../Notations-and-Macros/Notations/index.html">23.3. Notations</a><a href="../../Notations-and-Macros/Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../../Notations-and-Macros/Macros/index.html">23.5. Macros</a><a href="../../Notations-and-Macros/Elaborators/index.html">23.6. Elaborators</a><a href="../../Notations-and-Macros/Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../../Notations-and-Macros/Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../../releases/index.html">Release Notes</a><a href="../../releases/v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../../releases/v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../../releases/v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../../releases/v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="../../releases/v4.0.0-m5/index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../../releases/v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../../releases/v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../../releases/v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../../releases/v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../../releases/v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../../releases/v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../../releases/v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../../releases/v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../../releases/v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../../releases/v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../../releases/v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../../releases/v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../../releases/v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../../releases/v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../../releases/v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../../releases/v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../../releases/v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../../releases/v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../../releases/v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../../releases/v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../../releases/v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../../releases/v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../../releases/v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../../releases/v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../../releases/v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../../releases/v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../../releases/v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../../releases/v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../../releases/v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../../releases/v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../../releases/v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../../releases/v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../../releases/v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../../releases/v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../../releases/v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../../releases/v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../../releases/v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../../releases/v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../../releases/v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../../releases/v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../../releases/v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="inductive-types"></a></p>
+<h1 id="proofscript-4-4-inductive-types">ProofScript — 4.4. Inductive Types</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>Functions, propositions, universes, inductives and quotients retain their Lean meaning. A proof is an inhabitant of a proposition; Boolean truth is not the same object. Parameters may determine later parameter types. Universe levels cannot be approximated as machine integer ranks. Inductive constructors require the native positivity, universe, parameter and index checks. Quotient eliminators must respect their relation, rather than use runtime object identity.</p>
+<p><strong>Compiler and coverage boundary.</strong> Use exact declared core rules and axiom policies. Library names and hash matches alone cannot authorize primitive reductions. Soundness and exact acceptance equivalence are distinct obligations.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/The-Type-System/Inductive-Types/index.html">The-Type-System/Inductive-Types/index.html</a>. Source Git blob: <code>492a70fb1c08fb325d94032e1db23f8622f5cdbf</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<p><a id="docstring-section-Instance-Constructor-next-next-next-next-next-next"></a>
+<a id="docstring-section-Methods-next-next-next-next-next"></a></p>
+<hr>
+<h2 id="4-4-inductive-types">4.4. Inductive Types</h2><p><a id="--tech-term-Inductive-types"></a>
+<em>Inductive types</em> are the primary means of introducing new types to Lean. While <a href="../Universes/index.html#--tech-term-universes">universes</a>, <a href="../Functions/index.html#--tech-term-Functions">functions</a>, and <a href="../Quotients/index.html#--tech-term-Quotient-types">quotient types</a> are built-in primitives that could not be added by users, every other type in Lean is either an inductive type or defined in terms of universes, functions, and inductive types. Inductive types are specified by their 
+<a id="--tech-term-type-constructors"></a>
+<em>type constructors</em> 
+<a id="--index--next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+ and their 
+<a id="--tech-term-constructors"></a>
+<em>constructors</em>; 
+<a id="--index--next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+ their other properties are derived from these. Each inductive type has a single type constructor, which may take both <a href="../Universes/index.html#--tech-term-universe-parameters">universe parameters</a> and ordinary parameters. Inductive types may have any number of constructors; these constructors introduce new values whose types are headed by the inductive type&#39;s type constructor.</p>
+<p>Based on the type constructor and the constructors for an inductive type, Lean derives a 
+<a id="--tech-term-recursor"></a>
+<em>recursor</em>
+<a id="--index--next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+. Logically, recursors represent induction principles or elimination rules; computationally, they represent primitive recursive computations. The termination of recursive functions is justified by translating them into uses of the recursors, so Lean&#39;s kernel only needs to perform type checking of recursor applications, rather than including a separate termination analysis. Lean additionally produces a number of helper constructions based on the recursor,The term <em>recursor</em> is always used, even for non-recursive types. which are used elsewhere in the system.</p>
+<p><em>Structures</em> are a special case of inductive types that have exactly one constructor. When a structure is declared, Lean generates helpers that enable additional language features to be used with the new structure.</p>
+<p>This section describes the specific details of the syntax used to specify both inductive types and structures, the new constants and definitions in the environment that result from inductive type declarations, and the run-time representation of inductive types&#39; values in compiled code.</p>
+<p><a id="inductive-declarations"></a></p>
+<h3 id="4-4-1-inductive-type-declarations">4.4.1. Inductive Type Declarations</h3><p><a id="command-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Inductive Type Declarations</strong></p>
+<p><a id="Lean___Parser___Command___declaration"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | declModifiers
+      inductive declId optDeclSig where
+        (| declModifiers ident optDeclSig)*
+      (deriving ident,*)?
+</code></pre></div><p>Declares a new inductive type. The meaning of the </p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">declModifiers
+</code></pre></div><p> is as described in the section <a href="../../Definitions/Modifiers/index.html#declaration-modifiers">on declaration modifiers</a>.</p>
+<p>After declaring an inductive type, its type constructor, constructors, and recursor are present in the environment. New inductive types extend Lean&#39;s core logic—they are not encoded or represented by some other already-present data. Inductive type declarations must satisfy <a href="index.html#well-formed-inductives">a number of well-formedness requirements</a> to ensure that the logic remains consistent.</p>
+<p>The first line of the declaration, from <code>inductive</code> to <code>where</code>, specifies the new <a href="index.html#--tech-term-type-constructors">type constructor</a>&#39;s name and type. If a type signature for the type constructor is provided, then its result type must be a <a href="../Universes/index.html#--tech-term-universes">universe</a>, but the parameters do not need to be types. If no signature is provided, then Lean will attempt to infer a universe that&#39;s just big enough to contain the resulting type. In some situations, this process may fail to find a minimal universe or fail to find one at all, necessitating an annotation.</p>
+<p>The constructor specifications follow <code>where</code>. Constructors are not mandatory, as constructorless inductive types such as <code>False</code> and <code>Empty</code> are perfectly sensible. Each constructor specification begins with a vertical bar (<code>&#39;|&#39;</code>, Unicode <code>&#39;VERTICAL BAR&#39; (U+007c)</code>), declaration modifiers, and a name. The name is a <a href="../../Source-Files-and-Modules/index.html#--tech-term-raw-identifier">raw identifier</a>. A declaration signature follows the name. The signature may specify any parameters, modulo the well-formedness requirements for inductive type declarations, but the return type in the signature must be a saturated application of the type constructor of the inductive type being specified. If no signature is provided, then the constructor&#39;s type is inferred by inserting sufficient implicit parameters to construct a well-formed return type.</p>
+<p>The new inductive type&#39;s name is defined in the <a href="../../Namespaces-and-Sections/index.html#--tech-term-current-namespace">current namespace</a>. Each constructor&#39;s name is in the inductive type&#39;s namespace.
+<a id="--index--next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><a id="inductive-datatypes-parameters-and-indices"></a></p>
+<h4 id="4-4-1-1-parameters-and-indices">4.4.1.1. Parameters and Indices</h4><p>Type constructors may take two kinds of arguments: 
+<a id="--tech-term-parameters"></a>
+<em>parameters</em> 
+<a id="--index--next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+ and 
+<a id="--tech-term-indices"></a>
+<em>indices</em>.
+<a id="--index--next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+ Parameters must be used consistently in the entire definition; all occurrences of the type constructor in each constructor in the declaration must take precisely the same argument. Indices may vary among the occurrences of the type constructor. All parameters must precede all indices in the type constructor&#39;s signature.</p>
+<p>Parameters that occur prior to the colon (<code>&#39;:&#39;</code>) in the type constructor&#39;s signature are considered parameters to the entire inductive type declaration. They are always parameters that must be uniform throughout the type&#39;s definition. Generally speaking, parameters that occur after the colon are indices that may vary throughout the definition of the type. However, if the option <code>inductive.autoPromoteIndices</code> is <code>true</code>, then syntactic indices that could have been parameters are made into parameters. An index could have been a parameter if all of its type dependencies are themselves parameters and it is used uniformly as an uninstantiated variable in all occurrences of the inductive type&#39;s type constructor in all constructors.</p>
+<p><a id="inductive___autoPromoteIndices"></a></p>
+<p><strong>option</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inductive.autoPromoteIndices
+</code></pre></div><p>Default value: <code>true</code></p>
+<p>Promote indices to parameters in inductive types whenever possible.</p>
+<p>Indices can be seen as defining a <em>family</em> of types. Each choice of indices selects a type from the family, which has its own set of available constructors. Type constructors with indices are said to specify 
+<a id="--tech-term-indexed-families"></a>
+<em>indexed families</em> 
+<a id="--index--next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+ of types.</p>
+<p><a id="example-inductive-types"></a></p>
+<h4 id="4-4-1-2-example-inductive-types">4.4.1.2. Example Inductive Types</h4><p><a id="A-constructorless-type"></a>
+A constructorless type </p>
+<p><code>Vacant</code> is an empty inductive type, equivalent to Lean&#39;s <code>Empty</code> type:
+<a id="Vacant-_LPAR_in-A-constructorless-type_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Vacant : Type where
+</code></pre></div><p>Empty inductive types are not useless; they can be used to indicate unreachable code.</p>
+<p><a id="A-constructorless-proposition"></a>
+A constructorless proposition </p>
+<p><code>No</code> is a false <a href="../Propositions/index.html#--tech-term-Propositions">proposition</a>, equivalent to Lean&#39;s <code>False</code>:
+<a id="No-_LPAR_in-A-constructorless-proposition_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive No : Prop where
+</code></pre></div><p><a id="A-unit-type"></a>
+A unit type </p>
+<p><code>Solo</code> is equivalent to Lean&#39;s <code>Unit</code> type:
+<a id="Solo-_LPAR_in-A-unit-type_RPAR_"></a>
+<a id="Solo___solo-_LPAR_in-A-unit-type_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Solo where
+  | solo
+</code></pre></div><p>It is an example of an inductive type in which the signatures have been omitted for both the type constructor and the constructor. Lean assigns <code>Solo</code> to <code>Type</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check Solo
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Solo : Type
+</code></pre></div><p>The constructor is named <code>Solo.solo</code>, because constructor names are in the type constructor&#39;s namespace. Because <code>Solo</code> expects no arguments, the signature inferred for <code>Solo.solo</code> is:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check Solo.solo
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Solo.solo : Solo
+</code></pre></div><p><a id="A-true-proposition"></a>
+A true proposition </p>
+<p><code>Yes</code> is equivalent to Lean&#39;s <code>True</code> proposition:
+<a id="Yes-_LPAR_in-A-true-proposition_RPAR_"></a>
+<a id="Yes___intro-_LPAR_in-A-true-proposition_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Yes : Prop where
+  | intro
+</code></pre></div><p>Unlike <code>One</code>, the new inductive type <code>Yes</code> is specified to be in the <code>Prop</code> universe.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check Yes
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Yes : Prop
+</code></pre></div><p>The signature inferred for <code>Yes.intro</code> is:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check Yes.intro
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Yes.intro : Yes
+</code></pre></div><p><a id="A-type-with-parameter-and-index"></a>
+A type with parameter and index </p>
+<p>An <code>EvenOddList α b</code> is a list where <code>α</code> is the type of the data stored in the list and <code>b</code> is <code>true</code> when there are an even number of entries:
+<a id="EvenOddList-_LPAR_in-A-type-with-parameter-and-index_RPAR_"></a>
+<a id="EvenOddList___nil-_LPAR_in-A-type-with-parameter-and-index_RPAR_"></a>
+<a id="EvenOddList___cons-_LPAR_in-A-type-with-parameter-and-index_RPAR_"></a></p>
+<p><a id="EvenOddList-_LPAR_in-Recursor-with-parameters-and-indices_RPAR_"></a>
+<a id="EvenOddList___nil-_LPAR_in-Recursor-with-parameters-and-indices_RPAR_"></a>
+<a id="EvenOddList___cons-_LPAR_in-Recursor-with-parameters-and-indices_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive EvenOddList (α : Type u) : Bool → Type u where
+  | nil : EvenOddList α true
+  | cons : α → EvenOddList α isEven → EvenOddList α (not isEven)
+</code></pre></div><p>This example is well typed because there are two entries in the list:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example : EvenOddList String true :=
+  .cons &quot;a&quot; (.cons &quot;b&quot; .nil)
+</code></pre></div><p>This example is not well typed because there are three entries in the list:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example : EvenOddList String true :=
+  .cons &quot;a&quot; (.cons &quot;b&quot; (.cons &quot;c&quot; .nil))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Type mismatch
+  EvenOddList.cons &quot;a&quot; (EvenOddList.cons &quot;b&quot; (EvenOddList.cons &quot;c&quot; EvenOddList.nil))
+has type
+  EvenOddList String !!!true
+but is expected to have type
+  EvenOddList String true
+</code></pre></div><p>In this declaration, <code>α</code> is a <a href="index.html#--tech-term-parameters">parameter</a>, because it is used consistently in all occurrences of <code>EvenOddList</code>. <code>b</code> is an <a href="index.html#--tech-term-indices">index</a>, because different <code>Bool</code> values are used for it at different occurrences.</p>
+<p><a id="Parameters-before-and-after-the-colon"></a>
+Parameters before and after the colon </p>
+<p>In this example, both parameters are specified before the colon in <code>Either</code>&#39;s signature.
+<a id="Either-_LPAR_in-Parameters-before-and-after-the-colon_RPAR_"></a>
+<a id="Either___left-_LPAR_in-Parameters-before-and-after-the-colon_RPAR_"></a>
+<a id="Either___right-_LPAR_in-Parameters-before-and-after-the-colon_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Either (α : Type u) (β : Type v) : Type (max u v) where
+  | left : α → Either α β
+  | right : β → Either α β
+</code></pre></div><p>In this version, there are two types named <code>α</code> that might not be identical:
+<a id="Either___-_LPAR_in-Parameters-before-and-after-the-colon_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Either' (α : Type u) (β : Type v) : Type (max u v) where
+  | left : {α : Type u} → {β : Type v} → α → Either' α β
+  | right : β → Either' α β
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Mismatched inductive type parameter in
+  Either' α β
+The provided argument
+  α
+is not definitionally equal to the expected parameter
+  α✝
+
+Note: The value of parameter `α✝` must be fixed throughout the inductive declaration. Consider making this parameter an index if it must vary.
+</code></pre></div><p>Placing the parameters after the colon results in parameters that can be instantiated by the constructors:
+<a id="Either______-_LPAR_in-Parameters-before-and-after-the-colon_RPAR_"></a>
+<a id="Either_________left-_LPAR_in-Parameters-before-and-after-the-colon_RPAR_"></a>
+<a id="Either_________right-_LPAR_in-Parameters-before-and-after-the-colon_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Either'' : Type u → Type v → Type (max u v + 1) where
+  | left : {α : Type u} → {β : Type v} → α → Either'' α β
+  | right : β → Either'' α β
+</code></pre></div><p>A larger universe is required for this type because <a href="index.html#inductive-type-universe-levels">constructor parameters must be in universes that are smaller than the inductive type&#39;s universe</a>. <code>Either&#39;&#39;.right</code>&#39;s type parameter is discovered via Lean&#39;s ordinary rules for <a href="../../Definitions/Headers-and-Signatures/index.html#--tech-term-automatic-implicit-parameters">automatic implicit parameters</a>.</p>
+<p><a id="anonymous-constructor-syntax"></a></p>
+<h4 id="4-4-1-3-anonymous-constructor-syntax">4.4.1.3. Anonymous Constructor Syntax</h4><p>If an inductive type has just one constructor, then this constructor is eligible for 
+<a id="--tech-term-anonymous-constructor-syntax"></a>
+<em>anonymous constructor syntax</em>. Instead of writing the constructor&#39;s name applied to its arguments, the explicit arguments can be enclosed in angle brackets (<code>&#39;⟨&#39;</code> and <code>&#39;⟩&#39;</code>, Unicode <code>MATHEMATICAL LEFT ANGLE BRACKET	(U+0x27e8)</code> and <code>MATHEMATICAL RIGHT ANGLE BRACKET	(U+0x27e9)</code>) and separated with commas. This works in both pattern and expression contexts. Providing arguments by name or converting all implicit parameters to explicit parameters with <code>@</code> requires using the ordinary constructor syntax.</p>
+<p><a id="term"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Anonymous Constructors</strong></p>
+<p>Constructors can be invoked anonymously by enclosing their explicit arguments in angle brackets, separated by commas.</p>
+<p><a id="Lean___Parser___Term___anonymousCtor"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | ⟨ term,* ⟩
+</code></pre></div><p><a id="Anonymous-constructors"></a>
+Anonymous constructors </p>
+<p>The type <code>AtLeastOne α</code> is similar to <code>List α</code>, except there&#39;s always at least one element present:
+<a id="AtLeastOne-_LPAR_in-Anonymous-constructors_RPAR_"></a>
+<a id="AtLeastOne___mk-_LPAR_in-Anonymous-constructors_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive AtLeastOne (α : Type u) : Type u where
+  | mk : α → Option (AtLeastOne α) → AtLeastOne α
+</code></pre></div><p>Anonymous constructor syntax can be used to construct them:</p>
+<p><a id="oneTwoThree-_LPAR_in-Anonymous-constructors_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const oneTwoThree : AtLeastOne Nat :=
+  ⟨1, some ⟨2, some ⟨3, none⟩⟩⟩
+</code></pre></div><p>and to match against them:
+<a id="AtLeastOne___head-_LPAR_in-Anonymous-constructors_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def AtLeastOne.head : AtLeastOne α → α
+  | ⟨x, _⟩ =&gt; x
+</code></pre></div><p>Equivalently, traditional constructor syntax could have been used:</p>
+<p><a id="oneTwoThree___-_LPAR_in-Anonymous-constructors_RPAR_"></a>
+<a id="AtLeastOne___head___-_LPAR_in-Anonymous-constructors_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const oneTwoThree' : AtLeastOne Nat :=
+  .mk 1 (some (.mk 2 (some (.mk 3 none))))
+
+def AtLeastOne.head' : AtLeastOne α → α
+  | .mk x _ =&gt; x
+</code></pre></div><p><a id="inductive-declarations-deriving-instances"></a></p>
+<h4 id="4-4-1-4-deriving-instances">4.4.1.4. Deriving Instances</h4><p>The optional <code>deriving</code> clause of an inductive type declaration can be used to derive instances of type classes. Please refer to <a href="../../Type-Classes/Deriving-Instances/index.html#deriving-instances">the section on instance deriving</a> for more information.</p>
+<p><a id="structures"></a></p>
+<h3 id="4-4-2-structure-declarations">4.4.2. Structure Declarations</h3><p><a id="command-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Structure Declarations</strong></p>
+<p><a id="Lean___Parser___Command___declaration-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">command ::= ...
+    | declModifiers
+      structure declId bracketedBinder* (: term)?
+        (extends (ident : )?term,*)?
+        where
+        (declModifiers ident ::)?
+        structFields
+      (deriving derivingClass,*)?
+</code></pre></div><p>Declares a new structure type.</p>
+<p><a id="--tech-term-Structures"></a>
+Structures are inductive types that have only a single constructor and no indices. In exchange for these restrictions, Lean generates code for structures that offers a number of conveniences: projection functions are generated for each field, an additional constructor syntax based on field names rather than positional arguments is available, a similar syntax may be used to replace the values of certain named fields, and structures may extend other structures. Just like other inductive types, structures may be recursive; they are subject to the same restrictions regarding strict positivity. Structures do not add any expressive power to Lean; all of their features are implemented in terms of code generation.</p>
+<p><a id="structure-params"></a></p>
+<h4 id="4-4-2-1-structure-parameters">4.4.2.1. Structure Parameters</h4><p>Just like ordinary inductive type declarations, the header of the structure declaration contains a signature that may specify both parameters and a resulting universe. Structures may not define <a href="index.html#--tech-term-indexed-families">indexed families</a>.</p>
+<p><a id="structure-fields"></a></p>
+<h4 id="4-4-2-2-fields">4.4.2.2. Fields</h4><p>Each field of a structure declaration corresponds to a parameter of the constructor.</p>
+<p><a id="Inferring-Universes"></a>
+Inferring Universes </p>
+<p>The structure <code>MyProd</code> is the same as <code>Prod</code>.
+<a id="MyProd-_LPAR_in-Inferring-Universes_RPAR_"></a>
+<a id="MyProd___fst-_LPAR_in-Inferring-Universes_RPAR_"></a>
+<a id="MyProd___snd-_LPAR_in-Inferring-Universes_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure MyProd (α β : Type _) where
+  fst : α
+  snd : β
+</code></pre></div><p>The two parameters and the two fields are constructor parameters:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">MyProd.mk.{u, v}
+  {α : Type u}
+  {β : Type v}
+  (fst : α)
+  (snd : β)
+  : MyProd.{u, v} α β
+</code></pre></div><p>Additionally, the constructor is <a href="../Universes/index.html#--tech-term-universe-polymorphism">universe polymorphic</a>; the type constructor <code>MyProd</code> takes two universe parameters:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">MyProd.{u, v} (α : Type u) (β : Type v) : Type (max u v)
+</code></pre></div><p>The universe level of each type of each field must be less than or equal to the universe level of the structure. Lean infers that <code>Type (max u v)</code> is the least universe that can accommodate both <code>Type u</code> and <code>Type v</code>.</p>
+<p>Auto-implicit arguments are inserted in each field separately, even if their names coincide, and the fields become constructor parameters that quantify over types.</p>
+<p><a id="Auto-Implicit-Parameters-in-Structure-Fields"></a>
+Auto-Implicit Parameters in Structure Fields </p>
+<p>The structure <code>MyStructure</code> contains fields whose types have auto-implicit parameters:
+<a id="MyStructure-_LPAR_in-Auto-Implicit-Parameters-in-Structure-Fields_RPAR_"></a>
+<a id="MyStructure___field1-_LPAR_in-Auto-Implicit-Parameters-in-Structure-Fields_RPAR_"></a>
+<a id="MyStructure___field2-_LPAR_in-Auto-Implicit-Parameters-in-Structure-Fields_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure MyStructure where
+  field1 : Fin n
+  field2 : Fin n
+</code></pre></div><p>Each fields in the constructor <code>MyStructure.mk</code> takes its own implicit parameter <code>n</code> of type <code>Nat</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">MyStructure.mk
+  (field1 : {n : Nat} → Fin n)
+  (field2 : {n : Nat} → Fin n)
+  : MyStructure
+</code></pre></div><p>The type constructor <code>MyStructure</code> takes no universe parameters, and the resulting type is in <code>Type</code>, which is the universe for <code>Nat</code> and <code>Fin n</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">MyStructure : Type
+</code></pre></div><p>For each field, a 
+<a id="--tech-term-projection-function"></a>
+projection function is generated that extracts the field&#39;s value from the underlying type&#39;s constructor. This function is in the structure&#39;s name&#39;s namespace. Structure field projections are handled specially by the elaborator (as described in the <a href="index.html#structure-inheritance">section on structure inheritance</a>), which performs extra steps beyond looking up a namespace. When field types depend on prior fields, the types of the dependent projection functions are written in terms of earlier projections, rather than explicit pattern matching.</p>
+<p><a id="Dependent-projection-types"></a>
+Dependent projection types </p>
+<p>The structure <code>ArraySized</code> contains a field whose type depends on both a structure parameter and an earlier field:
+<a id="ArraySized-_LPAR_in-Dependent-projection-types_RPAR_"></a>
+<a id="ArraySized___array-_LPAR_in-Dependent-projection-types_RPAR_"></a>
+<a id="ArraySized___size_eq_length-_LPAR_in-Dependent-projection-types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure ArraySized (α : Type u) (length : Nat)  where
+  array : Array α
+  size_eq_length : array.size = length
+</code></pre></div><p>The signature of the projection function <code>size_eq_length</code> takes the structure type&#39;s parameter as an implicit parameter and refers to the earlier field using the corresponding projection:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">ArraySized.size_eq_length.{u}
+  {α : Type u} {length : Nat}
+  (self : ArraySized α length)
+  : self.array.size = length
+</code></pre></div><p>Structure fields may have default values, specified with <code>:=</code>. These values are used if no explicit value is provided.</p>
+<p><a id="Default-values"></a>
+Default values </p>
+<p>An adjacency list representation of a graph can be represented as an array of lists of <code>Nat</code>. The size of the array indicates the number of vertices, and the outgoing edges from each vertex are stored in the array at the vertex&#39;s index. Because the default value <code>#[]</code> is provided for the field <code>adjacency</code>, the empty graph <code>Graph.empty</code> can be constructed without providing any field values.</p>
+<p><a id="Graph-_LPAR_in-Default-values_RPAR_"></a>
+<a id="Graph___adjacency-_LPAR_in-Default-values_RPAR_"></a>
+<a id="Graph___empty-_LPAR_in-Default-values_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure Graph where
+  adjacency : Array (List Nat) := #[]
+
+const Graph.empty : Graph := {}
+</code></pre></div><p>Structure fields may additionally be accessed via their index, using dot notation. Fields are numbered beginning with <code>1</code>.</p>
+<p><a id="structure-constructors"></a></p>
+<h4 id="4-4-2-3-structure-constructors">4.4.2.3. Structure Constructors</h4><p>Structure constructors may be explicitly named by providing the constructor name and <code>::</code> prior to the fields. If no name is explicitly provided, then the constructor is named <code>mk</code> in the structure type&#39;s namespace. <a href="../../Definitions/Modifiers/index.html#declaration-modifiers">Declaration modifiers</a> may additionally be provided along with an explicit constructor name.</p>
+<p><a id="Non-default-constructor-name"></a>
+Non-default constructor name </p>
+<p>The structure <code>Palindrome</code> contains a string and a proof that the string is the same when reversed:
+<a id="Palindrome-_LPAR_in-Non-default-constructor-name_RPAR_"></a>
+<a id="Palindrome___ofString-_LPAR_in-Non-default-constructor-name_RPAR_"></a>
+<a id="Palindrome___text-_LPAR_in-Non-default-constructor-name_RPAR_"></a>
+<a id="Palindrome___is_palindrome-_LPAR_in-Non-default-constructor-name_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure Palindrome where
+  ofString ::
+  text : String
+  is_palindrome : text.data.reverse = text.data
+</code></pre></div><p>Its constructor is named <code>Palindrome.ofString</code>, rather than <code>Palindrome.mk</code>.</p>
+<p><a id="Modifiers-on-structure-constructor"></a>
+Modifiers on structure constructor </p>
+<p>The structure <code>NatStringBimap</code> maintains a finite bijection between natural numbers and strings. It consists of a pair of maps, such that the keys each occur as values exactly once in the other map. Because the constructor is private, code outside the defining module can&#39;t construct new instances and must use the provided API, which maintains the invariants of the type. Additionally, providing the default constructor name explicitly is an opportunity to attach a <a href="../../Definitions/Modifiers/index.html#--tech-term-Documentation-comments">documentation comment</a> to the constructor.</p>
+<p><a id="NatStringBimap-_LPAR_in-Modifiers-on-structure-constructor_RPAR_"></a>
+<a id="_private___Manual___Language___InductiveTypes___Structures___0___NatStringBimap___mk-_LPAR_in-Modifiers-on-structure-constructor_RPAR_"></a>
+<a id="NatStringBimap___natToString-_LPAR_in-Modifiers-on-structure-constructor_RPAR_"></a>
+<a id="NatStringBimap___stringToNat-_LPAR_in-Modifiers-on-structure-constructor_RPAR_"></a>
+<a id="NatStringBimap___empty-_LPAR_in-Modifiers-on-structure-constructor_RPAR_"></a>
+<a id="NatStringBimap___insert-_LPAR_in-Modifiers-on-structure-constructor_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure NatStringBimap where
+  /--
+  Build a finite bijection between some
+  natural numbers and strings
+  -/
+  private mk ::
+  natToString : Std.HashMap Nat String
+  stringToNat : Std.HashMap String Nat
+
+const NatStringBimap.empty : NatStringBimap := ⟨{}, {}⟩
+
+function NatStringBimap.insert
+    (nat : Nat) (string : String)
+    (map : NatStringBimap) :
+    Option NatStringBimap :=
+  if map.natToString.contains nat ||
+      map.stringToNat.contains string then
+    none
+  else
+    some &lt;|
+      NatStringBimap.mk
+        (map.natToString.insert nat string)
+        (map.stringToNat.insert string nat)
+</code></pre></div><p>Because structures are represented by single-constructor inductive types, their constructors can be invoked or matched against using <a href="index.html#--tech-term-anonymous-constructor-syntax">anonymous constructor syntax</a>. Additionally, structures may be constructed or matched against using 
+<a id="--tech-term-structure-instance"></a>
+<em>structure instance</em> notation, which includes the names of the fields together with values for them.</p>
+<p><a id="term-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Structure Instances</strong></p>
+<p><a id="Lean___Parser___Term___structInst"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | { structInstField,*
+        (: term)? }
+</code></pre></div><p>Constructs a value of a constructor type given values for named fields. Field specifiers may take two forms:</p>
+<p><a id="Lean___Parser___Term___structInstField"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">structInstField ::= ...
+    | structInstLVal := private? term
+</code></pre></div><p><a id="Lean___Parser___Term___structInstField-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">structInstField ::= ...
+    | ident
+</code></pre></div><p>A </p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">structInstLVal
+</code></pre></div><p> is a field name (an identifier), a field index (a natural number), or a term in square brackets, followed by a sequence of zero or more subfields. Subfields are either a field name or index preceded by a dot, or a term in square brackets.</p>
+<p>This syntax is elaborated to applications of structure constructors. The values provided for fields are by name, and they may be provided in any order. The values provided for subfields are used to initialize fields of constructors of structures that are themselves found in fields. Terms in square brackets are not allowed when constructing a structure; they are used in structure updates.</p>
+<p>Field specifiers that do not contain <code>:=</code> are field abbreviations. In this context, the identifier <code>f</code> is an abbreviation for <code>f := f</code>; that is, the value of <code>f</code> in the current scope is used to initialize the field <code>f</code>.</p>
+<p>Every field that does not have a default value must be provided. If a tactic is specified as the default argument, then it is run at elaboration time to construct the argument&#39;s value.</p>
+<p>In a pattern context, field names are mapped to patterns that match the corresponding projection, and field abbreviations bind a pattern variable that is the field&#39;s name. Default arguments are still present in patterns; if a pattern does not specify a value for a field with a default value, then the pattern only matches the default.</p>
+<p>When a field definition contains the <code>private</code> modifier, the value is placed in the current module&#39;s <a href="../../Source-Files-and-Modules/index.html#--tech-term-private-scope">private scope</a>, even if the structure value is itself in the public scope. The value is wrapped in a public but non-exposed helper definition. This is particularly useful with instances of type classes, because the implementation of <a href="../../Type-Classes/index.html#--tech-term-methods">methods</a> in public <a href="../../Type-Classes/index.html#--tech-term-instances">instances</a> of type classes are <a href="../../Source-Files-and-Modules/index.html#--tech-term-exposed">exposed</a> by default. This modifier allows them to be made private.</p>
+<p>The optional type annotation allows the structure type to be specified in contexts where it is not otherwise determined.</p>
+<p><a id="Patterns-and-default-values"></a>
+Patterns and default values </p>
+<p>The structure <code>AugmentedIntList</code> contains a list together with some extra information, which is empty if omitted:
+<a id="AugmentedIntList-_LPAR_in-Patterns-and-default-values_RPAR_"></a>
+<a id="AugmentedIntList___list-_LPAR_in-Patterns-and-default-values_RPAR_"></a>
+<a id="AugmentedIntList___augmentation-_LPAR_in-Patterns-and-default-values_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure AugmentedIntList where
+  list : List Int
+  augmentation : String := &quot;&quot;
+</code></pre></div><p>When testing whether the list is empty, the function <code>isEmpty</code> must explicitly match the <code>augmentation</code> field, even though it has a default value:
+<a id="AugmentedIntList___isEmpty-_LPAR_in-Patterns-and-default-values_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def AugmentedIntList.isEmpty : AugmentedIntList → Bool
+  | {list := [], augmentation := &quot;&quot;} =&gt; true
+  | _ =&gt; false
+
+#eval {list := [], augmentation := &quot;extra&quot; : AugmentedIntList}.isEmpty
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">false
+</code></pre></div><p><a id="Private-Field-Values"></a>
+Private Field Values </p>
+<p>Even when a definition of a structure is <a href="../../Source-Files-and-Modules/index.html#--tech-term-exposed">exposed</a>, individual fields may be hidden using the field-level <code>private</code> modifier. In this module, the exposed public definition of <code>x</code> may use the private definition <code>secret</code> because the <code>imaginary</code> field&#39;s value is not exposed:</p>
+<p>  <code>Main.lean</code></p>
+<p><a id="Complex-_LPAR_in-Private-Field-Values_RPAR_"></a>
+<a id="Complex___real-_LPAR_in-Private-Field-Values_RPAR_"></a>
+<a id="Complex___imaginary-_LPAR_in-Private-Field-Values_RPAR_"></a>
+<a id="_private___0___secret-_LPAR_in-Private-Field-Values_RPAR_"></a>
+<a id="x-_LPAR_in-Private-Field-Values_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">module
+
+public structure Complex where
+  real : Float
+  imaginary : Float
+
+private const secret := 2.3
+
+@[expose]
+public const x : Complex := {
+  real := 5.0
+  imaginary := private 2 * secret
+}
+</code></pre></div><p><a id="Private-Methods"></a>
+Private Methods </p>
+<p>In this module, the existence of the <code>State</code> structure is public, but its constructor and field are private. The function <code>State.toString</code> is also private, and is intended to be accessed via the <code>ToString</code> instance. However, because the implementations of <a href="../../Type-Classes/index.html#--tech-term-methods">methods</a> are exposed for public instances, this is not allowed:</p>
+<p>  <code>Main.lean</code></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">module
+
+public structure State where
+  private mk ::
+  private count : Nat
+
+private function State.toString (s : State) : String :=
+  s!&quot;⟨{s.count}⟩&quot;
+
+public instance : ToString State where
+  toString s := s.toString
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Invalid field `toString`: The environment does not contain `State.toString`, so it is not possible to project the field `toString` from an expression
+  s
+of type `State`
+
+Note: A private declaration `State.toString` (from the current module) exists but would need to be public to access here.
+</code></pre></div><p>Marking the implementation of <code>toString</code> as <code>private</code> removes it from the module&#39;s <a href="../../Source-Files-and-Modules/index.html#--tech-term-public-scope">public scope</a>, giving it access to private functions:</p>
+<p>  <code>Main.lean</code></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">module
+
+public structure State where
+  private mk ::
+  private count : Nat
+
+private function State.toString (s : State) : String :=
+  s!&quot;⟨{s.count}⟩&quot;
+
+public instance : ToString State where
+  toString s := private s.toString
+</code></pre></div><p><a id="term-next-next"></a></p>
+<p><strong>syntax</strong></p>
+<p><strong>Structure Updates</strong></p>
+<p><a id="Lean___Parser___Term___structInst-next"></a></p>
+<div class="code"><div class="code-label">Inherited grammar display</div><pre><code class="language-ebnf">term ::= ...
+    | {term with
+        structInstField,*
+        (: term)?}
+</code></pre></div><p>Updates a value of a constructor type. The term that precedes the <code>with</code> clause is expected to have a structure type; it is the value that is being updated. A new instance of the structure is created in which every field not specified is copied from the value that is being updated, and the specified fields are replaced with their new values. When updating a structure, array values may also be replaced by including the index to be updated in square brackets. This updating does not require that the index expression be in bounds for the array, and out-of-bounds updates are discarded.</p>
+<p><a id="Updating-arrays"></a>
+Updating arrays </p>
+<p>Updating structures may use array indices as well as projection names. Updates at indices that are out of bounds are ignored:</p>
+<p><a id="AugmentedIntArray-_LPAR_in-Updating-arrays_RPAR_"></a>
+<a id="AugmentedIntArray___array-_LPAR_in-Updating-arrays_RPAR_"></a>
+<a id="AugmentedIntArray___augmentation-_LPAR_in-Updating-arrays_RPAR_"></a>
+<a id="one-_LPAR_in-Updating-arrays_RPAR_"></a>
+<a id="two-_LPAR_in-Updating-arrays_RPAR_"></a>
+<a id="two___-_LPAR_in-Updating-arrays_RPAR_"></a>
+<a id="two______-_LPAR_in-Updating-arrays_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure AugmentedIntArray where
+  array : Array Int
+  augmentation : String := &quot;&quot;
+deriving Repr
+
+const one : AugmentedIntArray := {array := #[1]}
+const two : AugmentedIntArray := {one with array := #[1, 2]}
+const two' : AugmentedIntArray := {two with array[0] := 2}
+const two'' : AugmentedIntArray := {two with array[99] := 3}
+#eval (one, two, two', two'')
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">({ array := #[1], augmentation := &quot;&quot; },
+ { array := #[1, 2], augmentation := &quot;&quot; },
+ { array := #[2, 2], augmentation := &quot;&quot; },
+ { array := #[1, 2], augmentation := &quot;&quot; })
+</code></pre></div><p>Values of structure types may also be declared using <code>where</code>, followed by definitions for each field. This may only be used as part of a definition, not in an expression context.</p>
+<p><a id="where--for-structures"></a>
+<code>where</code> for structures </p>
+<p>The product type in Lean is a structure named <code>Prod</code>. Products can be defined using their projections:
+<a id="location-_LPAR_in-where--for-structures_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def location : Float × Float where
+  fst := 22.807
+  snd := -13.923
+</code></pre></div><p><a id="structure-inheritance"></a></p>
+<h4 id="4-4-2-4-structure-inheritance">4.4.2.4. Structure Inheritance</h4><p>Structures may be declared as extending other structures using the optional <code>extends</code> clause. The resulting structure type has all of the fields of all of the parent structure types. If the parent structure types have overlapping field names, then all overlapping field names must have the same type.</p>
+<p>The resulting structure has a 
+<a id="--tech-term-field-resolution-order"></a>
+<em>field resolution order</em> that affects the values of fields. When possible, this resolution order is the <a href="https://en.wikipedia.org/wiki/C3_linearization">C3 linearization</a> of the structure&#39;s parents. Essentially, the field resolution order should be a total ordering of the entire set of parents such that every <code>extends</code> list is in order. When there is no C3 linearization, a heuristic is used to find an order nonetheless. Every structure type is first in its own field resolution order.</p>
+<p>The field resolution order is used to compute the default values of optional fields. When the value of a field is not specified, the first default value defined in the resolution order is used. References to fields in the default value use the field resolution order as well; this means that child structures that override default fields of parent constructors may also change the computed default values of parent fields. Because the child structure is the first element of its own resolution order, default values in the child structure take precedence over default values from the parent structures.</p>
+<p>When the new structure extends existing structures, the new structure&#39;s constructor takes the existing structure&#39;s information as additional arguments. Typically, this is in the form of a constructor parameter for each parent structure type. This parent value contains all of the parent&#39;s fields. If the parents&#39; fields overlap, however, then the subset of non-overlapping fields from one or more of the parents is included instead of an entire value of the parent structure to prevent duplicating field information.</p>
+<p>There is no subtyping relation between a parent structure type and its children. Even if structure <code>B</code> extends structure <code>A</code>, a function expecting an <code>A</code> will not accept a <code>B</code>. However, conversion functions are generated that convert a structure into each of its parents. These conversion functions are called 
+<a id="--tech-term-parent-projections"></a>
+<em>parent projections</em>. Parent projections are in the child structure&#39;s namespace, and their name is the parent structure&#39;s name preceded by <code>to</code>.</p>
+<p><a id="Structure-type-inheritance-with-overlapping-fields"></a>
+Structure type inheritance with overlapping fields </p>
+<p>In this example, a <code>Textbook</code> is a <code>Book</code> that is also an <code>AcademicWork</code>:
+<a id="Book-_LPAR_in-Structure-type-inheritance-with-overlapping-fields_RPAR_"></a>
+<a id="Book___title-_LPAR_in-Structure-type-inheritance-with-overlapping-fields_RPAR_"></a>
+<a id="Book___author-_LPAR_in-Structure-type-inheritance-with-overlapping-fields_RPAR_"></a>
+<a id="AcademicWork-_LPAR_in-Structure-type-inheritance-with-overlapping-fields_RPAR_"></a>
+<a id="AcademicWork___author-_LPAR_in-Structure-type-inheritance-with-overlapping-fields_RPAR_"></a>
+<a id="AcademicWork___discipline-_LPAR_in-Structure-type-inheritance-with-overlapping-fields_RPAR_"></a>
+<a id="Textbook-_LPAR_in-Structure-type-inheritance-with-overlapping-fields_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure Book where
+  title : String
+  author : String
+
+structure AcademicWork where
+  author : String
+  discipline : String
+
+structure Textbook extends Book, AcademicWork
+
+#check Textbook.toBook
+</code></pre></div><p>Because the field <code>author</code> occurs in both <code>Book</code> and <code>AcademicWork</code>, the constructor <code>Textbook.mk</code> does not take both parents as arguments. Its signature is:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Textbook.mk (toBook : Book) (discipline : String) : Textbook
+</code></pre></div><p>The conversion functions are:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Textbook.toBook (self : Textbook) : Book
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Textbook.toAcademicWork (self : Textbook) : AcademicWork
+</code></pre></div><p>The latter combines the <code>author</code> field of the included <code>Book</code> with the unbundled <code>Discipline</code> field, and is equivalent to:</p>
+<p><a id="toAcademicWork-_LPAR_in-Structure-type-inheritance-with-overlapping-fields_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function toAcademicWork (self : Textbook) : AcademicWork :=
+  let .mk book discipline := self
+  let .mk _title author := book
+  .mk author discipline
+</code></pre></div><p>The resulting structure&#39;s projections can be used as if its fields are simply the union of the parents&#39; fields. The Lean elaborator automatically generates an appropriate projection when fields are used. Likewise, the field-based initialization and structure update notations hide the details of the encoding of inheritance. The encoding is, however, visible when using the constructor&#39;s name, when using <a href="index.html#--tech-term-anonymous-constructor-syntax">anonymous constructor syntax</a>, or when referring to fields by their index rather than their name.</p>
+<p><a id="Field-Indices-and-Structure-Inheritance"></a>
+Field Indices and Structure Inheritance </p>
+<p><a id="Pair-_LPAR_in-Field-Indices-and-Structure-Inheritance_RPAR_"></a>
+<a id="Pair___fst-_LPAR_in-Field-Indices-and-Structure-Inheritance_RPAR_"></a>
+<a id="Pair___snd-_LPAR_in-Field-Indices-and-Structure-Inheritance_RPAR_"></a>
+<a id="Triple-_LPAR_in-Field-Indices-and-Structure-Inheritance_RPAR_"></a>
+<a id="Triple___thd-_LPAR_in-Field-Indices-and-Structure-Inheritance_RPAR_"></a>
+<a id="coords-_LPAR_in-Field-Indices-and-Structure-Inheritance_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure Pair (α : Type u) where
+  fst : α
+  snd : α
+deriving Repr
+
+structure Triple (α : Type u) extends Pair α where
+  thd : α
+deriving Repr
+
+const coords : Triple Nat := {fst := 17, snd := 2, thd := 95}
+</code></pre></div><p>Evaluating the first field index of <code>coords</code> yields the underlying <code>Pair</code>, rather than the contents of the field <code>fst</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#eval coords.1
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">{ fst := 17, snd := 2 }
+</code></pre></div><p>The elaborator translates <code>coords.fst</code> into <code>coords.toPair.fst</code>.</p>
+<p><a id="No-structure-subtyping"></a>
+No structure subtyping </p>
+<p>Given these definitions of even numbers, even prime numbers, and a concrete even prime:</p>
+<p><a id="EvenNumber-_LPAR_in-No-structure-subtyping_RPAR_"></a>
+<a id="EvenNumber___val-_LPAR_in-No-structure-subtyping_RPAR_"></a>
+<a id="EvenNumber___isEven-_LPAR_in-No-structure-subtyping_RPAR_"></a>
+<a id="EvenPrime-_LPAR_in-No-structure-subtyping_RPAR_"></a>
+<a id="EvenPrime___notOne-_LPAR_in-No-structure-subtyping_RPAR_"></a>
+<a id="EvenPrime___isPrime-_LPAR_in-No-structure-subtyping_RPAR_"></a>
+<a id="two-_LPAR_in-No-structure-subtyping_RPAR_"></a>
+<a id="printEven-_LPAR_in-No-structure-subtyping_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure EvenNumber where
+  val : Nat
+  isEven : 2 ∣ val := by decide
+
+structure EvenPrime extends EvenNumber where
+  notOne : val ≠ 1 := by decide
+  isPrime : ∀ n, n ≤ val → n ∣ val  → n = 1 ∨ n = val
+
+def two : EvenPrime where
+  val := 2
+  isPrime := by
+    intros
+    repeat' (cases ‹Nat.le _ _›)
+    all_goals omega
+
+function printEven (num : EvenNumber) : IO Unit :=
+  IO.print num.val
+</code></pre></div><p>it is a type error to apply <code>printEven</code> directly to <code>two</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#check printEven two
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Application type mismatch: The argument
+  two
+has type
+  EvenPrime
+but is expected to have type
+  EvenNumber
+in the application
+  printEven two
+</code></pre></div><p>because values of type <code>EvenPrime</code> are not also values of type <code>EvenNumber</code>.</p>
+<p>The <code>#print</code> command displays the most important information about structure types, including the <a href="index.html#--tech-term-parent-projections">parent projections</a>, all the fields with their default values, the constructor, and the <a href="index.html#--tech-term-field-resolution-order">field resolution order</a>. When working with deep hierarchies that contain inheritance diamonds, this information can be very useful.</p>
+<p><a id="___print--and-Structure-Types"></a>
+<code>#print</code> and Structure Types </p>
+<p>This collection of structure types models a variety of bicycles, both electric and non-electric and both ordinary-sized and large family bicycles. The final structure type, <code>ElectricFamilyBike</code>, contains a diamond in its inheritance graph, because both <code>FamilyBike</code> and <code>ElectricBike</code> extend <code>Bicycle</code>.
+<a id="Vehicle-_LPAR_in-___print--and-Structure-Types_RPAR_"></a>
+<a id="Vehicle___wheels-_LPAR_in-___print--and-Structure-Types_RPAR_"></a>
+<a id="Bicycle-_LPAR_in-___print--and-Structure-Types_RPAR_"></a>
+<a id="ElectricVehicle-_LPAR_in-___print--and-Structure-Types_RPAR_"></a>
+<a id="ElectricVehicle___batteries-_LPAR_in-___print--and-Structure-Types_RPAR_"></a>
+<a id="FamilyBike-_LPAR_in-___print--and-Structure-Types_RPAR_"></a>
+<a id="ElectricBike-_LPAR_in-___print--and-Structure-Types_RPAR_"></a>
+<a id="ElectricFamilyBike-_LPAR_in-___print--and-Structure-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">structure Vehicle where
+  wheels : Nat
+
+structure Bicycle extends Vehicle where
+  wheels := 2
+
+structure ElectricVehicle extends Vehicle where
+  batteries : Nat := 1
+
+structure FamilyBike extends Bicycle where
+  wheels := 3
+
+structure ElectricBike extends Bicycle, ElectricVehicle
+
+structure ElectricFamilyBike
+    extends FamilyBike, ElectricBike where
+  batteries := 2
+</code></pre></div><p>The <code>#print</code> command displays the important information about each structure type:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#print ElectricBike
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">structure ElectricBike : Type
+number of parameters: 0
+parents:
+  ElectricBike.toBicycle : Bicycle
+  ElectricBike.toElectricVehicle : ElectricVehicle
+fields:
+  Vehicle.wheels : Nat :=
+    2
+  ElectricVehicle.batteries : Nat :=
+    1
+constructor:
+  ElectricBike.mk (toBicycle : Bicycle) (batteries : Nat) : ElectricBike
+field notation resolution order:
+  ElectricBike, Bicycle, ElectricVehicle, Vehicle
+</code></pre></div><p>An <code>ElectricFamilyBike</code> has three wheels by default because <code>FamilyBike</code> precedes <code>Bicycle</code> in its resolution order:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">#print ElectricFamilyBike
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">structure ElectricFamilyBike : Type
+number of parameters: 0
+parents:
+  ElectricFamilyBike.toFamilyBike : FamilyBike
+  ElectricFamilyBike.toElectricBike : ElectricBike
+fields:
+  Vehicle.wheels : Nat :=
+    3
+  ElectricVehicle.batteries : Nat :=
+    2
+constructor:
+  ElectricFamilyBike.mk (toFamilyBike : FamilyBike) (batteries : Nat) : ElectricFamilyBike
+field notation resolution order:
+  ElectricFamilyBike, FamilyBike, ElectricBike, Bicycle, ElectricVehicle, Vehicle
+</code></pre></div><p><a id="inductive-types-logical-model"></a></p>
+<h3 id="4-4-3-logical-model">4.4.3. Logical Model</h3><p><a id="recursors"></a></p>
+<h4 id="4-4-3-1-recursors">4.4.3.1. Recursors</h4><p>Every inductive type is equipped with a <a href="index.html#--tech-term-recursor">recursor</a>. The recursor is completely determined by the signatures of the type constructor and the constructors. Recursors have function types, but they are primitive and are not definable using <code>fun</code>.</p>
+<p><a id="recursor-types"></a></p>
+<h5 id="4-4-3-1-1-recursor-types">4.4.3.1.1. Recursor Types</h5><p>The recursor takes the following parameters:</p>
+<p>  The inductive type&#39;s <a href="index.html#--tech-term-parameters">parameters</a></p>
+<p>Because parameters are consistent, they can be abstracted over the entire recursor.</p>
+<p>  The 
+<a id="--tech-term-motive"></a>
+<em>motive</em></p>
+<p>The motive determines the type of an application of the recursor. The motive is a function whose arguments are the type&#39;s indices and an instance of the type with these indices instantiated. The specific universe for the type that the motive determines depends on the inductive type&#39;s universe and the specific constructors—see the section on <a href="index.html#subsingleton-elimination"><a href="index.html#--tech-term-subsingleton">subsingleton</a> elimination</a> for details.</p>
+<p>  A 
+<a id="--tech-term-minor-premise"></a>
+<em>minor premise</em> for each constructor</p>
+<p>For each constructor, the recursor expects a function that satisfies the motive for an arbitrary application of the constructor. Each minor premise abstracts over all of the constructor&#39;s parameters. If the constructor&#39;s parameter&#39;s type is the inductive type itself, then the minor premise additionally takes a parameter whose type is the motive applied to that parameter&#39;s value—this will receive the result of recursively processing the recursive parameter.</p>
+<p>  The 
+<a id="--tech-term-major-premise"></a>
+<em>major premise</em>, or target</p>
+<p>Finally, the recursor takes an instance of the type as an argument, along with any index values.</p>
+<p>The result type of the recursor is the motive applied to these indices and the major premise.</p>
+<p><a id="The-recursor-for--Bool"></a>
+The recursor for <code>Bool</code> </p>
+<p><code>Bool</code>&#39;s recursor <code>Bool.rec</code> has the following parameters:</p>
+<ul>
+<li>The motive computes a type in any universe, given a <code>Bool</code>.</li>
+<li>There are minor premises for both constructors, in which the motive is satisfied for both <code>false</code> and <code>true</code>.</li>
+<li>The major premise is some <code>Bool</code>.</li>
+</ul>
+<p>The return type is the motive applied to the major premise.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Bool.rec.{u} {motive : Bool → Sort u}
+  (false : motive false)
+  (true : motive true)
+  (t : Bool) : motive t
+</code></pre></div><p><a id="The-recursor-for--List"></a>
+The recursor for <code>List</code> </p>
+<p><code>List</code>&#39;s recursor <code>List.rec</code> has the following parameters:</p>
+<ul>
+<li><p>The parameter <code>α</code> comes first, because the motive, minor premises, and major premise need to refer to it.</p>
+</li>
+<li><p>The motive computes a type in any universe, given a <code>List α</code>. There is no connection between the universe levels <code>u</code> and <code>v</code>.</p>
+</li>
+<li><p>There are minor premises for both constructors:</p>
+<ul>
+<li>The motive is satisfied for <code>List.nil</code></li>
+<li>The motive should be satisfiable for any application of <code>List.cons</code>, given that it is satisfiable for the tail. The extra parameter <code>motive tail</code> is because <code>tail</code>&#39;s type is a recursive occurrence of <code>List</code>.</li>
+</ul>
+</li>
+<li><p>The major premise is some <code>List α</code>.</p>
+</li>
+</ul>
+<p>Once again, the return type is the motive applied to the major premise.</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">List.rec.{u, v} {α : Type v} {motive : List α → Sort u}
+  (nil : motive [])
+  (cons : (head : α) → (tail : List α) → motive tail →
+    motive (head :: tail))
+  (t : List α) : motive t
+</code></pre></div><p><a id="Recursor-with-parameters-and-indices"></a>
+Recursor with parameters and indices </p>
+<p>Given the definition of <code>EvenOddList</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive EvenOddList (α : Type u) : Bool → Type u where
+  | nil : EvenOddList α true
+  | cons : α → EvenOddList α isEven → EvenOddList α (not isEven)
+</code></pre></div><p>The recursor <code>EvenOddList.rec</code> is very similar to that for <code>List</code>. The difference comes from the presence of the index:</p>
+<ul>
+<li>The motive now abstracts over any arbitrary choice of index.</li>
+<li>The minor premise for <code>nil</code> applies the motive to <code>nil</code>&#39;s index value <code>true</code>.</li>
+<li>The minor premise <code>cons</code> abstracts over the index value used in its recursive occurrence, and instantiates the motive with its negation.</li>
+<li>The major premise additionally abstracts over an arbitrary choice of index.</li>
+</ul>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">EvenOddList.rec.{u, v} {α : Type v}
+  {motive : (isEven : Bool) → EvenOddList α isEven → Sort u}
+  (nil : motive true EvenOddList.nil)
+  (cons : {isEven : Bool} →
+    (head : α) →
+    (tail : EvenOddList α isEven) → motive isEven tail →
+    motive (!isEven) (EvenOddList.cons head tail)) :
+  {isEven : Bool} → (t : EvenOddList α isEven) → motive isEven t
+</code></pre></div><p>When using a predicate (that is, a function that returns a <code>Prop</code>) for the motive, recursors express induction. The minor premises for non-recursive constructors are the base cases, and the additional arguments supplied to minor premises for constructors with recursive arguments are the induction hypotheses.</p>
+<p><a id="subsingleton-elimination"></a></p>
+<h6 id="4-4-3-1-1-1-subsingleton-elimination">4.4.3.1.1.1. Subsingleton Elimination</h6><p>Proofs in Lean are computationally irrelevant. In other words, having been provided with <strong>some</strong> proof of a proposition, it should be impossible for a program to check <strong>which</strong> proof it has received. This is reflected in the types of recursors for inductively defined propositions or predicates. For these types, if there&#39;s more than one potential proof of the theorem then the motive may only return another <code>Prop</code>. If the type is structured such that there&#39;s only at most one proof anyway, then the motive may return a type in any universe. A proposition that has at most one inhabitant is called a 
+<a id="--tech-term-subsingleton"></a>
+<em>subsingleton</em>. Rather than obligating users to <em>prove</em> that there&#39;s only one possible proof, a conservative syntactic approximation is used to check whether a proposition is a subsingleton. Propositions that fulfill both of the following requirements are considered to be subsingletons:</p>
+<ul>
+<li>There is at most one constructor.</li>
+<li>Each of the constructor&#39;s parameter types is either a <code>Prop</code>, a parameter, or an index.</li>
+</ul>
+<p><a id="True--is-a-subsingleton"></a>
+<code>True</code> is a subsingleton </p>
+<p><code>True</code> is a subsingleton because it has one constructor, and this constructor has no parameters. Its recursor has the following signature:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">True.rec.{u} {motive : True → Sort u}
+  (intro : motive True.intro)
+  (t : True) : motive t
+</code></pre></div><p><a id="False--is-a-subsingleton"></a>
+<code>False</code> is a subsingleton </p>
+<p><code>False</code> is a subsingleton because it has no constructors. Its recursor has the following signature:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">False.rec.{u} (motive : False → Sort u) (t : False) : motive t
+</code></pre></div><p>Note that the motive is an explicit parameter. This is because it is not mentioned in any further parameters&#39; types, so it could not be solved by unification.</p>
+<p><a id="And--is-a-subsingleton"></a>
+<code>And</code> is a subsingleton </p>
+<p><code>And</code> is a subsingleton because it has one constructor, and both of the constructor&#39;s parameters&#39; types are propositions. Its recursor has the following signature:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">And.rec.{u} {a b : Prop} {motive : a ∧ b → Sort u}
+  (intro : (left : a) → (right : b) → motive (And.intro left right))
+  (t : a ∧ b) : motive t
+</code></pre></div><p><a id="Or--is-not-a-subsingleton"></a>
+<code>Or</code> is not a subsingleton </p>
+<p><code>Or</code> is not a subsingleton because it has more than one constructor. Its recursor has the following signature:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Or.rec {a b : Prop} {motive : a ∨ b → Prop}
+  (inl : ∀ (h : a), motive (.inl h))
+  (inr : ∀ (h : b), motive (.inr h))
+  (t : a ∨ b) : motive t
+</code></pre></div><p>The motive&#39;s type indicates that <code>Or.rec</code> can only be used to produce proofs. A proof of a disjunction can be used to prove something else, but there&#39;s no way for a program to inspect <em>which</em> of the two disjuncts was true and used for the proof.</p>
+<p><a id="Eq--is-a-subsingleton"></a>
+<code>Eq</code> is a subsingleton </p>
+<p><code>Eq</code> is a subsingleton because it has just one constructor, <code>Eq.refl</code>. This constructor instantiates <code>Eq</code>&#39;s index with a parameter value, so all arguments are parameters:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Eq.refl.{u} {α : Sort u} (x : α) : Eq x x
+</code></pre></div><p>Its recursor has the following signature:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Eq.rec.{u, v} {α : Sort v} {x : α}
+  {motive : (y : α) → x = y → Sort u}
+  (refl : motive x (.refl x))
+  {y : α} (t : x = y) : motive y t
+</code></pre></div><p>This means that proofs of equality can be used to rewrite the types of non-propositions.</p>
+<p><a id="iota-reduction"></a></p>
+<h5 id="4-4-3-1-2-reduction">4.4.3.1.2. Reduction</h5><p>In addition to adding new constants to the logic, inductive type declarations also add new reduction rules. These rules govern the interaction between recursors and constructors; specifically recursors that have constructors as their major premise. This form of reduction is called 
+<a id="--tech-term-___-reduction"></a>
+<em>ι-reduction</em> (iota reduction)
+<a id="--index--next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a></p>
+<p><a id="--index--next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next-next"></a>
+.</p>
+<p>When the recursor&#39;s major premise is a constructor with no recursive parameters, the recursor application reduces to an application of the constructor&#39;s minor premise to the constructor&#39;s arguments. If there are recursive parameters, then these arguments to the minor premise are found by applying the recursor to the recursive occurrence.</p>
+<p><a id="well-formed-inductives"></a></p>
+<h4 id="4-4-3-2-well-formedness-requirements">4.4.3.2. Well-Formedness Requirements</h4><p>Inductive type declarations are subject to a number of well-formedness requirements. These requirements ensure that Lean remains consistent as a logic when it is extended with the inductive type&#39;s new rules. They are conservative: there exist potential inductive types that do not undermine consistency, but that these requirements nonetheless reject.</p>
+<p><a id="inductive-type-universe-levels"></a></p>
+<h5 id="4-4-3-2-1-universe-levels">4.4.3.2.1. Universe Levels</h5><p>Type constructors of inductive types must either inhabit a <a href="../Universes/index.html#--tech-term-universes">universe</a> or a function type whose return type is a universe. Each constructor must inhabit a function type that returns a saturated application of the inductive type. If the inductive type&#39;s universe is <code>Prop</code>, then there are no further restrictions on universes, because <code>Prop</code> is <a href="../Universes/index.html#--tech-term-impredicative">impredicative</a>. If the universe is not <code>Prop</code>, then the following must hold for each parameter to the constructor:</p>
+<ul>
+<li>If the constructor&#39;s parameter is a parameter (in the sense of parameters vs indices) of the inductive type, then this parameter&#39;s type may be no larger than the type constructor&#39;s universe.</li>
+<li>All other constructor parameters must be smaller than the type constructor&#39;s universe.</li>
+</ul>
+<p><a id="Universes___-constructors___-and-parameters"></a>
+Universes, constructors, and parameters </p>
+<p><code>Either</code> is in the greater of its arguments&#39; universes, because both are parameters to the inductive type:
+<a id="Either-_LPAR_in-Universes___-constructors___-and-parameters_RPAR_"></a>
+<a id="Either___inl-_LPAR_in-Universes___-constructors___-and-parameters_RPAR_"></a>
+<a id="Either___inr-_LPAR_in-Universes___-constructors___-and-parameters_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Either (α : Type u) (β : Type v) : Type (max u v) where
+  | inl : α → Either α β
+  | inr : β → Either α β
+</code></pre></div><p><code>CanRepr</code> is in a larger universe than the constructor parameter <code>α</code>, because <code>α</code> is not one of the inductive type&#39;s parameters:
+<a id="CanRepr-_LPAR_in-Universes___-constructors___-and-parameters_RPAR_"></a>
+<a id="CanRepr___mk-_LPAR_in-Universes___-constructors___-and-parameters_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive CanRepr : Type (u + 1) where
+  | mk : (α : Type u) → [Repr α] → CanRepr
+</code></pre></div><p>Constructorless inductive types may be in universes smaller than their parameters:
+<a id="Spurious-_LPAR_in-Universes___-constructors___-and-parameters_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Spurious (α : Type 5) : Type 0 where
+</code></pre></div><p>It would, however, be impossible to add a constructor to <code>Spurious</code> without changing its levels.</p>
+<p><a id="strict-positivity"></a></p>
+<h5 id="4-4-3-2-2-strict-positivity">4.4.3.2.2. Strict Positivity</h5><p>All occurrences of the type being defined in the types of the parameters of the constructors must be in 
+<a id="--tech-term-strictly-positive"></a>
+<em>strictly positive</em> positions. A position is strictly positive if it is not in a function&#39;s argument type (no matter how many function types are nested around it) and it is not an argument of any expression other than type constructors of inductive types. This restriction rules out unsound inductive type definitions, at the cost of also ruling out some unproblematic ones.</p>
+<p><a id="Non-strictly-positive-inductive-types"></a>
+Non-strictly-positive inductive types </p>
+<p>The type <code>Bad</code> would make Lean inconsistent if it were not rejected:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Bad where
+  | bad : (Bad → Bad) → Bad
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(kernel) arg #1 of 'Bad.bad' has a non positive occurrence of the datatypes being declared
+</code></pre></div><p>This is because it would be possible to write a circular argument that proves <code>False</code> under the assumption <code>Bad</code>. <code>Bad.bad</code> is rejected because the constructor&#39;s parameter has type <code>Bad → Bad</code>, which is a function type in which <code>Bad</code> occurs as an argument type.</p>
+<p>This declaration of a fixed point operator is rejected, because <code>Fix</code> occurs as an argument to <code>f</code>:
+<a id="Fix-_LPAR_in-Non-strictly-positive-inductive-types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive Fix (f : Type u → Type u) where
+  | fix : f (Fix f) → Fix f
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(kernel) arg #2 of 'Fix.fix' contains a non valid occurrence of the datatypes being declared
+</code></pre></div><p><code>Fix.fix</code> is rejected because <code>f</code> is not a type constructor of an inductive type, but <code>Fix</code> itself occurs as an argument to it. In this case, <code>Fix</code> is also sufficient to construct a type equivalent to <code>Bad</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const Bad : Type := Fix fun t =&gt; t → t
+</code></pre></div><p><a id="prop-vs-type"></a></p>
+<h5 id="4-4-3-2-3-prop-vs-type">4.4.3.2.3. Prop vs Type</h5><p>Lean rejects universe-polymorphic types that could not, in practice, be used polymorphically. This could arise if certain instantiations of the universe parameters would cause the type itself to be a <code>Prop</code>. If this type is not a <a href="index.html#--tech-term-subsingleton">subsingleton</a>, then its recursor can only target propositions (that is, the <a href="index.html#--tech-term-motive">motive</a> must return a <code>Prop</code>). These types only really make sense as <code>Prop</code>s themselves, so the universe polymorphism is probably a mistake. Because they are largely useless, Lean&#39;s inductive type elaborator has not been designed to support these types.</p>
+<p>When such universe-polymorphic inductive types are indeed subsingletons, it can make sense to define them. Lean&#39;s standard library defines <code>PUnit</code> and <code>PEmpty</code>. To define a subsingleton that can inhabit <code>Prop</code> or a <code>Type</code>, set the option <code>bootstrap.inductiveCheckResultingUniverse</code> to <code>false</code>.</p>
+<p><a id="bootstrap___inductiveCheckResultingUniverse"></a></p>
+<p><strong>option</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">bootstrap.inductiveCheckResultingUniverse
+</code></pre></div><p>Default value: <code>true</code></p>
+<p>by default the <code>inductive</code>/<code>structure</code> commands report an error if the resulting universe is not zero, but may be zero for some universe parameters. Reason: unless this type is a subsingleton, it is hardly what the user wants since it can only eliminate into <code>Prop</code>. In the <code>Init</code> package, we define subsingletons, and we use this option to disable the check. This option may be deleted in the future after we improve the validator</p>
+<p><a id="Overly-universe-polymorphic--Bool"></a>
+Overly-universe-polymorphic <code>Bool</code> </p>
+<p>Defining a version of <code>Bool</code> that can be in any universe is not allowed:
+<a id="PBool-_LPAR_in-Overly-universe-polymorphic--Bool_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive PBool : Sort u where
+  | true
+  | false
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Invalid universe polymorphic resulting type: The resulting universe is not `Prop`, but it may be `Prop` for some parameter values:
+  Sort u
+
+Hint: A possible solution is to use levels of the form `max 1 _` or `_ + 1` to ensure the universe is of the form `Type _`
+</code></pre></div><p><a id="recursor-elaboration-helpers"></a></p>
+<h4 id="4-4-3-3-constructions-for-termination-checking">4.4.3.3. Constructions for Termination Checking</h4><p>In addition to the type constructor, constructors, and recursors that Lean&#39;s core type theory prescribes for inductive types, Lean constructs a number of useful helpers. First, the equation compiler (which translates recursive functions with pattern matching in to applications of recursors) makes use of these additional constructs:</p>
+<ul>
+<li><code>recOn</code> is a version of the recursor in which the major premise is prior to the minor premise for each constructor.</li>
+<li><code>casesOn</code> is a version of the recursor in which the major premise is prior to the minor premise for each constructor, and recursive arguments do not yield induction hypotheses. It expresses case analysis rather than primitive recursion.</li>
+<li><code>below</code> computes a type that, for some motive, expresses that <em>all</em> inhabitants of the inductive type that are subtrees of the major premise satisfy the motive. It transforms a motive for induction or primitive recursion into a motive for strong recursion or strong induction.</li>
+<li><code>brecOn</code> is a version of the recursor in which <code>below</code> is used to provide access to all subtrees, rather than just immediate recursive parameters. It represents strong induction.</li>
+<li><code>noConfusion</code> is a general statement from which injectivity and disjointness of constructors can be derived.</li>
+<li><code>noConfusionType</code> is the motive used for <code>noConfusion</code> that determines what the consequences of two constructors being equal would be. For separate constructors, this is <code>False</code>; if both constructors are the same, then the consequence is the equality of their respective parameters.</li>
+</ul>
+<p>These constructions follow the description in McBride, Goguen, and McKinna (2004)Conor McBride, Healfdene Goguen, and James McKinna, 2004. <a href="https://doi.org/10.1007/11617990_12">“A Few Constructions on Constructors”</a>. In <em>Types for Proofs and Programs, International Workshop, TYPES 2004.</em> (LNCS 3839).</p>
+<p>For <a href="../../Definitions/Recursive-Definitions/index.html#--tech-term-well-founded-recursion">well-founded recursion</a>, it is frequently useful to have a generic notion of size available. This is captured in the <code>SizeOf</code> class.</p>
+<p><a id="SizeOf___mk"></a></p>
+<p><strong>type class</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">SizeOf.{u} (α : Sort u) : Sort (max 1 u)
+</code></pre></div><p><code>SizeOf</code> is a typeclass automatically derived for every inductive type, which equips the type with a &quot;size&quot; function to <code>Nat</code>. The default instance defines each constructor to be <code>1</code> plus the sum of the sizes of all the constructor fields.</p>
+<p>This is used for proofs by well-founded induction, since every field of the constructor has a smaller size than the constructor itself, and in many cases this will suffice to do the proof that a recursive function is only called on smaller values. If the default proof strategy fails, it is recommended to supply a custom size measure using the <code>termination_by</code> argument on the function definition.</p>
+<p><strong>Instance Constructor</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">SizeOf.mk.{u}
+</code></pre></div><p><strong>Methods</strong></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">sizeOf : α → Nat
+</code></pre></div><p>The &quot;size&quot; of an element, a natural number which decreases on fields of each inductive type.</p>
+<p><a id="run-time-inductives"></a></p>
+<h3 id="4-4-4-run-time-representation">4.4.4. Run-Time Representation</h3><p>An inductive type&#39;s run-time representation depends both on how many constructors it has, how many arguments each constructor takes, and whether these arguments are <a href="index.html#--tech-term-relevant">relevant</a>.</p>
+<p><a id="inductive-types-runtime-special-support"></a></p>
+<h4 id="4-4-4-1-exceptions">4.4.4.1. Exceptions</h4><p>Not every inductive type is represented as indicated here—some inductive types have special support from the Lean compiler:</p>
+<ul>
+<li>The representation of the fixed-width integer types <code>UInt8</code>, …, <code>UInt64</code>, <code>Int8</code>, …, <code>Int64</code>, and <code>USize</code> depends on whether the code is compiled for a 32- or 64-bit architecture. Their representation is described <a href="../../Basic-Types/Fixed-Precision-Integers/index.html#fixed-int-runtime">in a dedicated section</a>.</li>
+<li><code>Char</code> is represented by <code>uint32_t</code>. Because <code>Char</code> values never require more than 21 bits, they are always unboxed.</li>
+<li><code>Float</code> is represented by a pointer to a Lean object that contains a “double”.</li>
+<li>An 
+<a id="--tech-term-enum-inductive"></a>
+<em>enum inductive</em> type of at least 2 and at most 2^{32} constructors, each of which has no parameters, is represented by the first type of <code>uint8_t</code>, <code>uint16_t</code>, <code>uint32_t</code> that is sufficient to assign a unique value to each constructor. For example, the type <code>Bool</code> is represented by <code>uint8_t</code>, with values <code>0</code> for <code>false</code> and <code>1</code> for <code>true</code>.</li>
+<li><code>Decidable α</code> is represented the same way as <code>Bool</code></li>
+<li><code>Nat</code> and <code>Int</code> are represented by <code>lean_object *</code>. Their representations are described in more detail in <a href="../../Basic-Types/Natural-Numbers/index.html#nat-runtime">the section on natural numbers</a> and <a href="../../Basic-Types/Integers/index.html#int-runtime">the section on integers</a>.</li>
+</ul>
+<p><a id="inductive-types-runtime-relevance"></a></p>
+<h4 id="4-4-4-2-relevance">4.4.4.2. Relevance</h4><p>Types and proofs have no run-time representation. That is, if an inductive type is a <code>Prop</code>, then its values are erased prior to compilation. Similarly, all theorem statements and types are erased. Types with run-time representations are called 
+<a id="--tech-term-relevant"></a>
+<em>relevant</em>, while types without run-time representations are called 
+<a id="--tech-term-irrelevant"></a>
+<em>irrelevant</em>.</p>
+<p><a id="Types-are-irrelevant"></a>
+Types are irrelevant </p>
+<p>Even though <code>List.cons</code> has the following signature, which indicates three parameters:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">List.cons.{u} {α : Type u} : α → List α → List α
+</code></pre></div><p>its run-time representation has only two, because the type argument is run-time irrelevant.</p>
+<p><a id="Proofs-are-irrelevant"></a>
+Proofs are irrelevant </p>
+<p>Even though <code>Fin.mk</code> has the following signature, which indicates three parameters:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Fin.mk {n : Nat} (val : Nat) : val &lt; n → Fin n
+</code></pre></div><p>its run-time representation has only two, because the proof is erased.</p>
+<p>In most cases, irrelevant values simply disappear from compiled code. However, in cases where some representation is required (such as when they are arguments to polymorphic constructors), they are represented by a trivial value.</p>
+<p><a id="inductive-types-trivial-wrappers"></a></p>
+<h4 id="4-4-4-3-trivial-wrappers">4.4.4.3. Trivial Wrappers</h4><p>An inductive type is a 
+<a id="--tech-term-trivial-wrapper"></a>
+trivial wrapper if it has has exactly one constructor and that constructor has exactly one run-time relevant parameter. Trivial wrappers are represented identically to their constructor&#39;s parameter in the following circumstances:</p>
+<ul>
+<li>The inductive type is private.</li>
+<li>The type is public, and the <a href="../../Source-Files-and-Modules/index.html#--tech-term-public-scope">public scope</a> of the module in which it is defined contains enough information to determine that it is a trivial wrapper.</li>
+<li>The type is defined in a source file that is not a <a href="../../Source-Files-and-Modules/index.html#--tech-term-module">module</a>.</li>
+</ul>
+<p><a id="Zero-Overhead-Subtypes"></a>
+Zero-Overhead Subtypes </p>
+<p>The structure <code>Subtype</code> bundles an element of some type with a proof that it satisfies a predicate. Its constructor takes four arguments, but three of them are irrelevant:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Subtype.mk.{u} {α : Sort u} {p : α → Prop}
+  (val : α) (property : p val) : Subtype p
+</code></pre></div><p>Thus, subtypes impose no runtime overhead in compiled code, and are represented identically to the type of the <code>val</code> field.</p>
+<p><a id="Signed-Integers"></a>
+Signed Integers </p>
+<p>The signed integer types <code>Int8</code>, ..., <code>Int64</code>, <code>ISize</code> are structures with a single field that wraps the corresponding unsigned integer type. They are represented by the unsigned C types <code>uint8_t</code>, ..., <code>uint64_t</code>, <code>size_t</code>, respectively, because they have a trivial structure.</p>
+<p><a id="inductive-types-standard-representation"></a></p>
+<h4 id="4-4-4-4-other-inductive-types">4.4.4.4. Other Inductive Types</h4><p>If an inductive type doesn&#39;t fall into one of the categories above, then its representation is determined by its constructors. Constructors without relevant parameters are represented by their index into the list of constructors, as unboxed unsigned machine integers (scalars). Constructors with relevant parameters are represented as an object with a header, the constructor&#39;s index, an array of pointers to other objects, and then arrays of scalar fields sorted by their types. The header tracks the object&#39;s reference count and other necessary bookkeeping.</p>
+<p>Recursive functions are compiled as they are in most programming languages, rather than by using the inductive type&#39;s recursor. Elaborating recursive functions to recursors serves to provide reliable termination evidence, not executable code.</p>
+<p><a id="inductive-types-ffi"></a></p>
+<h5 id="4-4-4-4-1-ffi">4.4.4.4.1. FFI</h5><p>From the perspective of C, these other inductive types are represented by <code>lean_object *</code>. Each constructor is stored as a <code>lean_ctor_object</code>, and <code>lean_is_ctor</code> will return true.</p>
+<p>There are no guarantees about the exact layout of fields in a constructor object; the compiler is free to select any layout. Thus, constructor objects should only be created or unpacked by functions defined in Lean code. These functions can be made available to C via the <a href="../../Run-Time-Code/Foreign-Function-Interface/index.html#Lean___Parser___Attr___export"><code>export</code></a> attribute. Because the resulting C and Lean code call symbols defined in each other, they should be linked together. Each C should be compiled to an object file using a custom target in Lake and added to the Lean library configuration&#39;s <code>moreLinkObjs</code> field.</p>
+<p><a id="mutual-inductive-types"></a></p>
+<h3 id="4-4-5-mutual-inductive-types">4.4.5. Mutual Inductive Types</h3><p>Inductive types may be mutually recursive. Mutually recursive definitions of inductive types are specified by defining the types in a <code>mutual ... end</code> block.</p>
+<p><a id="Mutually-Defined-Inductive-Types"></a>
+Mutually Defined Inductive Types </p>
+<p>The type <code>EvenOddList</code> in a prior example used a Boolean index to select whether the list in question should have an even or odd number of elements. This distinction can also be expressed by the choice of one of two mutually inductive types <code>EvenList</code> and <code>OddList</code>:
+<a id="EvenList-_LPAR_in-Mutually-Defined-Inductive-Types_RPAR_"></a>
+<a id="EvenList___nil-_LPAR_in-Mutually-Defined-Inductive-Types_RPAR_"></a>
+<a id="EvenList___cons-_LPAR_in-Mutually-Defined-Inductive-Types_RPAR_"></a>
+<a id="OddList-_LPAR_in-Mutually-Defined-Inductive-Types_RPAR_"></a>
+<a id="OddList___cons-_LPAR_in-Mutually-Defined-Inductive-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">mutual
+  inductive EvenList (α : Type u) : Type u where
+    | nil : EvenList α
+    | cons : α → OddList α → EvenList α
+  inductive OddList (α : Type u) : Type u where
+    | cons : α → EvenList α → OddList α
+end
+
+example : EvenList String := .cons &quot;x&quot; (.cons &quot;y&quot; .nil)
+example : OddList String := .cons &quot;x&quot; (.cons &quot;y&quot; (.cons &quot;z&quot; .nil))
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">example : OddList String := .cons &quot;x&quot; (.cons &quot;y&quot; .nil)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Unknown constant `OddList.nil`
+
+Note: Inferred this name from the expected resulting type of `.nil`:
+  OddList String
+</code></pre></div><p><a id="mutual-inductive-types-requirements"></a></p>
+<h4 id="4-4-5-1-requirements">4.4.5.1. Requirements</h4><p>The inductive types declared in a <code>mutual</code> block are considered as a group; they must collectively satisfy generalized versions of the well-formedness criteria for non-mutually-recursive inductive types. This is true even if they could be defined without the <code>mutual</code> block, because they are not in fact mutually recursive.</p>
+<p><a id="mutual-inductive-types-dependencies"></a></p>
+<h5 id="4-4-5-1-1-mutual-dependencies">4.4.5.1.1. Mutual Dependencies</h5><p>Each type constructor&#39;s signature must be able to be elaborated without reference to the other inductive types in the <code>mutual</code> group. In other words, the inductive types in the <code>mutual</code> group may not take each other as arguments. The constructors of each inductive type may mention the other type constructors in the group in their parameter types, with restrictions that are a generalization of those for recursive occurrences in non-mutual inductive types.</p>
+<p><a id="Mutual-inductive-type-constructors-may-not-mention-each-other"></a>
+Mutual inductive type constructors may not mention each other </p>
+<p>These inductive types are not accepted by Lean:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">mutual
+  inductive FreshList (α : Type) (r : α → α → Prop) : Type where
+    | nil : FreshList α r
+    | cons (x : α) (xs : FreshList α r) (fresh : Fresh r x xs)
+  inductive Fresh
+      (r : α → FreshList α → Prop) :
+      α → FreshList α r → Prop where
+    | nil : Fresh r x .nil
+    | cons : r x y → (f : Fresh r x ys) → Fresh r x (.cons y ys f)
+end
+</code></pre></div><p>The type constructors may not refer to the other type constructors in the <code>mutual</code> group, so <code>FreshList</code> is not in scope in the type constructor of <code>Fresh</code>:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Unknown identifier `FreshList`
+</code></pre></div><p><a id="mutual-inductive-types-same-parameters"></a></p>
+<h5 id="4-4-5-1-2-parameters-must-match">4.4.5.1.2. Parameters Must Match</h5><p>All inductive types in the <code>mutual</code> group must have the same <a href="index.html#--tech-term-parameters">parameters</a>. Their indices may differ.</p>
+<p><a id="Differing-numbers-of-parameters"></a>
+Differing numbers of parameters </p>
+<p>Even though <code>Both</code> and <code>Optional</code> are not mutually recursive, they are declared in the same <code>mutual</code> block and must therefore have identical parameters:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">mutual
+  inductive Both (α : Type u) (β : Type v) where
+    | mk : α → β → Both α β
+  inductive Optional (α : Type u) where
+    | none
+    | some : α → Optional α
+end
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Invalid mutually inductive types: `Optional` has 1 parameter(s), but the preceding type `Both` has 2
+
+Note: All inductive types declared in the same `mutual` block must have the same parameters
+</code></pre></div><p><a id="Differing-parameter-types"></a>
+Differing parameter types </p>
+<p>Even though <code>Many</code> and <code>Optional</code> are not mutually recursive, they are declared in the same <code>mutual</code> block and must therefore have identical parameters. They both have exactly one parameter, but <code>Many</code>&#39;s parameter is not necessarily in the same universe as <code>Optional</code>&#39;s:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">mutual
+  inductive Many (α : Type) : Type u where
+    | nil : Many α
+    | cons : α → Many α → Many α
+  inductive Optional (α : Type u) where
+    | none
+    | some : α → Optional α
+end
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Invalid mutually inductive types: Parameter `α` has type
+  Type u
+of sort `Type (u + 1)` but is expected to have type
+  Type
+of sort `Type 1`
+</code></pre></div><p><a id="mutual-inductive-types-same-universe"></a></p>
+<h5 id="4-4-5-1-3-universe-levels">4.4.5.1.3. Universe Levels</h5><p>The universe levels of each inductive type in a mutual group must obey the same requirements as non-mutually-recursive inductive types. Additionally, all the inductive types in a mutual group must be in the same universe, which implies that their constructors are similarly limited with respect to their parameters&#39; universes.</p>
+<p><a id="Universe-mismatch"></a>
+Universe mismatch </p>
+<p>These mutually-inductive types are a somewhat complicated way to represent run-length encoding of a list:
+<a id="RLE___nil-_LPAR_in-Universe-mismatch_RPAR_"></a>
+<a id="RLE___run-_LPAR_in-Universe-mismatch_RPAR_"></a>
+<a id="PrefixRunOf-_LPAR_in-Universe-mismatch_RPAR_"></a>
+<a id="PrefixRunOf___zero-_LPAR_in-Universe-mismatch_RPAR_"></a>
+<a id="PrefixRunOf___succ-_LPAR_in-Universe-mismatch_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">mutual
+  inductive RLE : List α → Type where
+  | nil : RLE []
+  | run (x : α) (n : Nat) :
+    n ≠ 0 → PrefixRunOf n x xs ys → RLE ys → RLE xs
+
+  inductive PrefixRunOf : Nat → α → List α → List α → Type where
+  | zero
+    (noMore : ¬∃zs, xs = x :: zs := by simp) :
+    PrefixRunOf 0 x xs xs
+  | succ :
+    PrefixRunOf n x xs ys →
+    PrefixRunOf (n + 1) x (x :: xs) ys
+end
+
+example : RLE [1, 1, 2, 2, 3, 1, 1, 1] :=
+  .run 1 2 (by decide) (.succ (.succ .zero)) &lt;|
+  .run 2 2 (by decide) (.succ (.succ .zero)) &lt;|
+  .run 3 1 (by decide) (.succ .zero) &lt;|
+  .run 1 3 (by decide) (.succ (.succ (.succ (.zero)))) &lt;|
+  .nil
+</code></pre></div><p>Specifying <code>PrefixRunOf</code> as a <code>Prop</code> would be sensible, but it cannot be done because the types would be in different universes:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">mutual
+  inductive RLE : List α → Type where
+  | nil : RLE []
+  | run
+    (x : α) (n : Nat) :
+    n ≠ 0 → PrefixRunOf n x xs ys → RLE ys →
+    RLE xs
+
+  inductive PrefixRunOf : Nat → α → List α → List α → Prop where
+  | zero
+    (noMore : ¬∃zs, xs = x :: zs := by simp) :
+    PrefixRunOf 0 x xs xs
+  | succ :
+    PrefixRunOf n x xs ys →
+    PrefixRunOf (n + 1) x (x :: xs) ys
+end
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">Invalid mutually inductive types: The resulting type of this declaration
+  Prop
+differs from a preceding one
+  Type
+
+Note: All inductive types declared in the same `mutual` block must belong to the same type universe
+</code></pre></div><p>This particular property can be expressed by separately defining the well-formedness condition and using a subtype:
+<a id="RunLengths-_LPAR_in-Universe-mismatch_RPAR_"></a>
+<a id="NoRepeats-_LPAR_in-Universe-mismatch_RPAR_"></a>
+<a id="RunsMatch-_LPAR_in-Universe-mismatch_RPAR_"></a>
+<a id="NonZero-_LPAR_in-Universe-mismatch_RPAR_"></a>
+<a id="RLE___rle-_LPAR_in-Universe-mismatch_RPAR_"></a>
+<a id="RLE___noRepeats-_LPAR_in-Universe-mismatch_RPAR_"></a>
+<a id="RLE___runsMatch-_LPAR_in-Universe-mismatch_RPAR_"></a>
+<a id="RLE___nonZero-_LPAR_in-Universe-mismatch_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def RunLengths α := List (α × Nat)
+def NoRepeats : RunLengths α → Prop
+  | [] =&gt; True
+  | [_] =&gt; True
+  | (x, _) :: ((y, n) :: xs) =&gt;
+    x ≠ y ∧ NoRepeats ((y, n) :: xs)
+def RunsMatch : RunLengths α → List α → Prop
+  | [], [] =&gt; True
+  | (x, n) :: xs, ys =&gt;
+    ys.take n = List.replicate n x ∧
+    RunsMatch xs (ys.drop n)
+  | _, _ =&gt; False
+def NonZero : RunLengths α → Prop
+  | [] =&gt; True
+  | (_, n) :: xs =&gt; n ≠ 0 ∧ NonZero xs
+structure RLE (xs : List α) where
+  rle : RunLengths α
+  noRepeats : NoRepeats rle
+  runsMatch : RunsMatch rle xs
+  nonZero : NonZero rle
+
+example : RLE [1, 1, 2, 2, 3, 1, 1, 1] where
+  rle := [(1, 2), (2, 2), (3, 1), (1, 3)]
+  noRepeats := by simp [NoRepeats]
+  runsMatch := by simp [RunsMatch]
+  nonZero := by simp [NonZero]
+</code></pre></div><p><a id="mutual-inductive-types-positivity"></a></p>
+<h5 id="4-4-5-1-4-positivity">4.4.5.1.4. Positivity</h5><p>Each inductive type that is defined in the <code>mutual</code> group may occur only strictly positively in the types of the parameters of the constructors of all the types in the group. In other words, in the type of each parameter to each constructor in all the types of the group, none of the type constructors in the group occur to the left of any arrows, and none of them occur in argument positions unless they are an argument to an inductive type&#39;s type constructor.</p>
+<p><a id="Mutual-strict-positivity"></a>
+Mutual strict positivity </p>
+<p>In the following mutual group, <code>Tm</code> occurs in a negative position in the argument to <code>Binding.scope</code>:
+<a id="Tm-_LPAR_in-Mutual-strict-positivity_RPAR_"></a>
+<a id="Binding-_LPAR_in-Mutual-strict-positivity_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">mutual
+  inductive Tm where
+    | app : Tm → Tm → Tm
+    | lam : Binding → Tm
+  inductive Binding where
+    | scope : (Tm → Tm) → Binding
+end
+</code></pre></div><p>Because <code>Tm</code> is part of the same mutual group, it must occur only strictly positively in the arguments to the constructors of <code>Binding</code>. It occurs, however, negatively:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(kernel) arg #1 of 'Binding.scope' has a non positive occurrence of the datatypes being declared
+</code></pre></div><p><a id="Nested-positions"></a>
+Nested positions </p>
+<p>The definitions of <code>LocatedStx</code> and <code>Stx</code> satisfy the positivity condition because the recursive occurrences are not to the left of any arrows and, when they are arguments, they are arguments to inductive type constructors.
+<a id="LocatedStx-_LPAR_in-Nested-positions_RPAR_"></a>
+<a id="LocatedStx___mk-_LPAR_in-Nested-positions_RPAR_"></a>
+<a id="Stx-_LPAR_in-Nested-positions_RPAR_"></a>
+<a id="Stx___atom-_LPAR_in-Nested-positions_RPAR_"></a>
+<a id="Stx___node-_LPAR_in-Nested-positions_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">mutual
+  inductive LocatedStx where
+    | mk (line col : Nat) (val : Stx)
+  inductive Stx where
+    | atom (str : String)
+    | node (kind : String) (args : List LocatedStx)
+end
+</code></pre></div><p><a id="mutual-inductive-types-recursors"></a></p>
+<h4 id="4-4-5-2-recursors">4.4.5.2. Recursors</h4><p>Mutual inductive types are provided with primitive recursors, just like non-mutually-defined inductive types. These recursors take into account that they must process the other types in the group, and thus will have a motive for each inductive type. Because all inductive types in the <code>mutual</code> group are required to have identical parameters, the recursors still take the parameters first, abstracting them over the motives and the rest of the recursor. Additionally, because the recursor must process the group&#39;s other types, it will require cases for each constructor of each of the types in the group. The actual dependency structure between the types is not taken into account; even if an additional motive or constructor case is not really required due to there being fewer mutual dependencies than there could be, the generated recursor still requires them.</p>
+<p><a id="Even-and-odd"></a>
+Even and odd 
+<a id="Even-_LPAR_in-Even-and-odd_RPAR_"></a>
+<a id="Even___zero-_LPAR_in-Even-and-odd_RPAR_"></a>
+<a id="Even___succ-_LPAR_in-Even-and-odd_RPAR_"></a>
+<a id="Odd-_LPAR_in-Even-and-odd_RPAR_"></a>
+<a id="Odd___succ-_LPAR_in-Even-and-odd_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">mutual
+  inductive Even : Nat → Prop where
+    | zero : Even 0
+    | succ : Odd n → Even (n + 1)
+  inductive Odd : Nat → Prop where
+    | succ : Even n → Odd (n + 1)
+end
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Even.rec
+  {motive_1 : (a : Nat) → Even a → Prop}
+  {motive_2 : (a : Nat) → Odd a → Prop}
+  (zero : motive_1 0 Even.zero)
+  (succ : {n : Nat} → (a : Odd n) → motive_2 n a → motive_1 (n + 1) (Even.succ a)) :
+  (∀ {n : Nat} (a : Even n), motive_1 n a → motive_2 (n + 1) (Odd.succ a)) →
+  ∀ {a : Nat} (t : Even a), motive_1 a t
+</code></pre></div><div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Odd.rec
+  {motive_1 : (a : Nat) → Even a → Prop}
+  {motive_2 : (a : Nat) → Odd a → Prop}
+  (zero : motive_1 0 Even.zero)
+  (succ : ∀ {n : Nat} (a : Odd n), motive_2 n a → motive_1 (n + 1) (Even.succ a)) :
+  (∀ {n : Nat} (a : Even n), motive_1 n a → motive_2 (n + 1) (Odd.succ a)) → ∀ {a : Nat} (t : Odd a), motive_2 a t
+</code></pre></div><p><a id="Spuriously-mutual-types"></a>
+Spuriously mutual types </p>
+<p>The types <code>Two</code> and <code>Three</code> are defined in a mutual block, even though they do not refer to each other:
+<a id="Two-_LPAR_in-Spuriously-mutual-types_RPAR_"></a>
+<a id="Two___mk-_LPAR_in-Spuriously-mutual-types_RPAR_"></a>
+<a id="Three-_LPAR_in-Spuriously-mutual-types_RPAR_"></a>
+<a id="Three___mk-_LPAR_in-Spuriously-mutual-types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">mutual
+  inductive Two (α : Type) where
+    | mk : α → α → Two α
+  inductive Three (α : Type) where
+    | mk : α → α → α → Three α
+end
+</code></pre></div><p><code>Two</code>&#39;s recursor, <code>Two.rec</code>, nonetheless requires a motive and a case for <code>Three</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">Two.rec.{u} {α : Type}
+  {motive_1 : Two α → Sort u}
+  {motive_2 : Three α → Sort u}
+  (mk : (a a_1 : α) → motive_1 (Two.mk a a_1)) :
+  ((a a_1 a_2 : α) → motive_2 (Three.mk a a_1 a_2)) → (t : Two α) → motive_1 t
+</code></pre></div><p><a id="mutual-inductive-types-run-time"></a></p>
+<h4 id="4-4-5-3-run-time-representation">4.4.5.3. Run-Time Representation</h4><p>Mutual inductive types are represented identically to <a href="index.html#run-time-inductives">non-mutual inductive types</a> in compiled code and in the runtime. The restrictions on mutual inductive types exist to ensure Lean&#39;s consistency as a logic, and do not impact compiled code.</p>
+<p><a id="nested-inductive-types"></a></p>
+<h4 id="4-4-5-4-nested-inductive-types">4.4.5.4. Nested Inductive Types</h4><p><a id="--tech-term-Nested-inductive-types"></a>
+<em>Nested inductive types</em> are inductive types in which recursive occurrences of the type being defined are parameters to other inductive type constructors. These recursive occurrences are “nested” underneath the other type constructors. Nested inductive types that satisfy certain requirements can be translated into mutual inductive types; this translation demonstrates that they are sound. Internally, the <a href="../../Elaboration-and-Compilation/index.html#--tech-term-kernel">kernel</a> performs this translation; if it succeeds, then the <em>original</em> nested inductive type is accepted. This avoids performance and usability issues that would arise from details of the translation surfacing.</p>
+<p>Nested recursive occurrences must satisfy the following requirements:</p>
+<ul>
+<li>They must be nested <em>directly</em> under an inductive type&#39;s type constructor. Terms that reduce to such nested occurrences are not accepted.</li>
+<li>Local variables such as the constructor&#39;s parameters may not occur in the arguments to the nested occurrence.</li>
+<li>The nested occurrences must occur strictly positively. They must occur strictly positively in the position in which they are nested, and the type constructor in which they are nested must itself occur in a strictly positive position.</li>
+<li>Constructor parameters whose types include nested occurrences may not be used in ways that rely on the specific choice of outer type constructor. The translated version will not be usable in those contexts.</li>
+<li>Nested occurrences may not be used as parameters to the outer type constructor that occur in the types of the outer type&#39;s indices.</li>
+</ul>
+<p><a id="Nested-Inductive-Types"></a>
+Nested Inductive Types </p>
+<p>Instead of using two constructors, the natural numbers can be defined using <code>Option</code>:
+<a id="ONat-_LPAR_in-Nested-Inductive-Types_RPAR_"></a>
+<a id="ONat___mk-_LPAR_in-Nested-Inductive-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive ONat : Type where
+  | mk (pred : Option ONat)
+</code></pre></div><p>Arbitrarily-branching trees, also known as <em>rose trees</em>, are nested inductive types:
+<a id="RTree-_LPAR_in-Nested-Inductive-Types_RPAR_"></a>
+<a id="RTree___empty-_LPAR_in-Nested-Inductive-Types_RPAR_"></a>
+<a id="RTree___node-_LPAR_in-Nested-Inductive-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive RTree (α : Type u) : Type u where
+  | empty
+  | node (val : α) (children : List (RTree α))
+</code></pre></div><p><a id="Invalid-Nested-Inductive-Types"></a>
+Invalid Nested Inductive Types </p>
+<p>This declaration of arbitrarily-branching rose trees declares an alias for <code>List</code>, rather than using <code>List</code> directly:
+<a id="Children-_LPAR_in-Invalid-Nested-Inductive-Types_RPAR_"></a>
+<a id="RTree-_LPAR_in-Invalid-Nested-Inductive-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">abbrev Children := List
+
+inductive RTree (α : Type u) : Type u where
+  | empty
+  | node (val : α) (children : Children (RTree α))
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(kernel) arg #3 of 'RTree.node' contains a non valid occurrence of the datatypes being declared
+</code></pre></div><p>This declaration of arbitrarily-branching rose trees tracks the depth of the tree using an index. The constructor <code>DRTree.node</code> has an <a href="../../Definitions/Headers-and-Signatures/index.html#--tech-term-automatic-implicit-parameters">automatic implicit parameter</a> <code>n</code> that represents the depths of all sub-trees. However, local variables such as constructor parameters are not permitted as arguments to nested occurrences:
+<a id="DRTree-_LPAR_in-Invalid-Nested-Inductive-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive DRTree (α : Type u) : Nat → Type u where
+  | empty : DRTree α 0
+  | node (val : α) (children : List (DRTree α n)) : DRTree α (n + 1)
+</code></pre></div><p>This declaration includes a non-strictly-positive occurrence of the inductive type, nested under an <code>Option</code>:
+<a id="WithCheck-_LPAR_in-Invalid-Nested-Inductive-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive WithCheck where
+  | done
+  | check (f : Option WithCheck → Bool)
+</code></pre></div><div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(kernel) arg #1 of 'WithCheck.check' has a non positive occurrence of the datatypes being declared
+</code></pre></div><p>This rose tree has a branching factor that&#39;s limited by its parameter:
+<a id="BRTree-_LPAR_in-Invalid-Nested-Inductive-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive BRTree (branches : Nat) (α : Type u) : Type u where
+  | mk :
+    (children : List (BRTree branches α)) →
+    children.length &lt; branches →
+    BRTree branches α
+</code></pre></div><p>Only nested inductive types that can be translated to mutual inductive types are allowed. However, translating this type would require a translation of <code>List.length</code> to the translated types, but function definitions may not occur in mutual blocks with inductive types. The resulting error message shows that the function was not translated, but was applied to a term of the translated type:</p>
+<div class="code"><div class="code-label">Canonical / native Lean reference</div><pre><code class="language-lean">(kernel) application type mismatch
+  List.length children
+argument has type
+  @_nested.List_1 branches α
+but function has type
+  List (@BRTree branches α) → Nat
+</code></pre></div><p>It is acceptable to use the parameter with the nested occurrence with fully polymorphic functions, such as <code>id</code>:
+<a id="RTree______-_LPAR_in-Invalid-Nested-Inductive-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive RTree'' (α : Type u) : Type u where
+  | mk :
+    (children : List (BRTree branches α)) →
+    id children = children →
+    BRTree branches α
+</code></pre></div><p>In this case, the function applies equally well to the translated version as it does to the original.</p>
+<p>The translation from nested inductive types to mutual inductive types proceeds as follows:</p>
+<p>  Nested occurrences become inductive types</p>
+<p>Nested occurrences of the inductive type are translated into new inductive types in the same mutual group, which replace the original nested occurrences. These new inductive types have the same constructors as the outer inductive type, except the original parameters are instantiated by the translated version of the type. The original inductive type becomes an alias for the version in which the nested occurrences have been rewritten. This process is repeated if the resulting type is also a nested inductive type (e.g. a type nested under <code>Array</code> becomes a type nested under <code>List</code>, because <code>Array</code>&#39;s constructor takes a <code>List</code>).</p>
+<p>  Conversions to and from the nested types</p>
+<p>Conversions between the outer inductive type applied to the new alias and the generated auxiliary types are generated. These conversions are then proved to be mutual inverses.</p>
+<p>  Constructor reconstruction</p>
+<p>Each constructor of the original type is defined as a function that returns the constructor of the translated type, after applying the appropriate conversions.</p>
+<p>  Recursor reconstruction</p>
+<p>The recursor for the nested inductive type is constructed from the recursor for the translated type. In the translation, the motives for the nested occurrences are composed with the conversion functions and the <a href="index.html#--tech-term-minor-premise">minor premises</a> use them as needed. The proofs that the conversion functions are mutually inverse are needed because the encoded constructors convert in one direction, but end up applied to the result of the conversion in the other direction.</p>
+<p><a id="Translating-Nested-Inductive-Types"></a>
+Translating Nested Inductive Types </p>
+<p>This nested inductive type represents the natural numbers:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">inductive ONat where
+  | mk (pred : Option ONat) : ONat
+
+#check ONat.rec
+</code></pre></div><p>The first step in the internal translation is to replace the nested occurrences with auxiliary inductive types that “inline” the resulting type. In this case, the nested occurrence is under <code>Option</code>; thus, the auxiliary type has the constructors of <code>Option</code>, with <code>ONat&#39;</code> substituted for the type parameter:
+<a id="ONat___-_LPAR_in-Translating-Nested-Inductive-Types_RPAR_"></a>
+<a id="ONat______mk-_LPAR_in-Translating-Nested-Inductive-Types_RPAR_"></a>
+<a id="OptONat-_LPAR_in-Translating-Nested-Inductive-Types_RPAR_"></a>
+<a id="OptONat___none-_LPAR_in-Translating-Nested-Inductive-Types_RPAR_"></a>
+<a id="OptONat___some-_LPAR_in-Translating-Nested-Inductive-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">mutual
+inductive ONat' where
+  | mk (pred : OptONat) : ONat'
+
+inductive OptONat where
+  | none
+  | some : ONat' → OptONat
+end
+</code></pre></div><p><code>ONat&#39;</code> is the encoding of <code>ONat</code>:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">const ONat := ONat'
+</code></pre></div><p>The next step is to define conversion functions that translate the original nested type to and from the auxiliary type:
+<a id="OptONat___ofOption-_LPAR_in-Translating-Nested-Inductive-Types_RPAR_"></a>
+<a id="OptONat___toOption-_LPAR_in-Translating-Nested-Inductive-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def OptONat.ofOption : Option ONat → OptONat
+  | Option.none =&gt; OptONat.none
+  | Option.some o =&gt; OptONat.some o
+def OptONat.toOption : OptONat → Option ONat
+  | OptONat.none =&gt; Option.none
+  | OptONat.some o =&gt; Option.some o
+</code></pre></div><p>These conversion functions are mutually inverse:
+<a id="OptONat___to_of_eq_id-_LPAR_in-Translating-Nested-Inductive-Types_RPAR_"></a>
+<a id="OptONat___of_to_eq_id-_LPAR_in-Translating-Nested-Inductive-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">def OptONat.to_of_eq_id o :
+    OptONat.toOption (ofOption o) = o := by
+  cases o &lt;;&gt; rfl
+def OptONat.of_to_eq_id o :
+    OptONat.ofOption (OptONat.toOption o) = o := by
+  cases o &lt;;&gt; rfl
+</code></pre></div><p>The original constructor is translated to an application of the translation&#39;s corresponding constructor, with the appropriate conversion applied for the nested occurrence:</p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">function ONat.mk (pred : Option ONat) : ONat :=
+  ONat'.mk (.ofOption pred)
+</code></pre></div><p>Finally, the original type&#39;s recursor can be translated. The translated recursor uses the translated type&#39;s recursor. The original nested occurrences are translated using the conversions, and the proofs that the conversions are mutually inverse are used to rewrite types as needed.</p>
+<p><a id="ONat___rec-_LPAR_in-Translating-Nested-Inductive-Types_RPAR_"></a></p>
+<div class="code"><div class="code-label">ProofScript / inherited example — coverage dependent</div><pre><code class="language-proofscript">noncomputable function ONat.rec
+    {motive1 : ONat → Sort u}
+    {motive2 : Option ONat → Sort u}
+    (h1 :
+      (pred : Option ONat) → motive2 pred →
+      motive1 (ONat.mk pred))
+    (h2 : motive2 none)
+    (h3 : (o : ONat) → motive1 o → motive2 (some o)) :
+    (t : ONat) → motive1 t :=
+  @ONat'.rec motive1 (motive2 ∘ OptONat.toOption)
+    (fun pred ih =&gt;
+      OptONat.of_to_eq_id pred ▸ h1 pred.toOption ih)
+    h2
+    h3
+</code></pre></div><p><a id="The-Lean-Language-Reference--The-Type-System--Inductive-Types--Mutual-Inductive-Types--Lattice-Theoretic-Inductive-and-Coinductive-Predicates"></a></p>
+<h4 id="4-4-5-5-lattice-theoretic-inductive-and-coinductive-predicates">4.4.5.5. Lattice-Theoretic Inductive and Coinductive Predicates</h4><p>The syntax of inductive type declarations can be used to specify both inductive and coinductive predicates. These are not a built-in feature of Lean&#39;s type system, but are instead elaborated to a suitable encoding. They are described in <a href="../../Definitions/Recursive-Definitions/index.html#coinductive-predicates">a dedicated section</a>.</p>
+<h2 id="preserved-grammar-annotations">Preserved grammar annotations</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`declModifiers` is the collection of modifiers on a declaration:
+* a doc comment `/-- ... -/`
+* a list of attributes `@[attr1, attr2]`
+* a visibility specifier, `private` or `public`
+* `protected`
+* `noncomputable`
+* `unsafe`
+* `partial` or `nonrec`
+
+All modifiers are optional, and have to come in the listed order.
+
+`nestedDeclModifiers` is the same as `declModifiers`, but attributes are printed
+on the same line as the declaration. It is used for declarations nested inside other syntax,
+such as inductive constructors, structure projections, and `let rec` / `where` definitions.
+</code></pre></div><h3 id="display-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">In Lean, every concrete type other than the universes
+and every type constructor other than dependent arrows
+is an instance of a general family of type constructions known as inductive types.
+It is remarkable that it is possible to construct a substantial edifice of mathematics
+based on nothing more than the type universes, dependent arrow types, and inductive types;
+everything else follows from those.
+Intuitively, an inductive type is built up from a specified list of constructors.
+For example, `List α` is the list of elements of type `α`, and is defined as follows:
+```
+inductive List (α : Type u) where
+| nil
+| cons (head : α) (tail : List α)
+```
+A list of elements of type `α` is either the empty list, `nil`,
+or an element `head : α` followed by a list `tail : List α`.
+See [Inductive types](https://lean-lang.org/theorem_proving_in_lean4/inductive_types.html)
+for more information.
+</code></pre></div><h3 id="display-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`declId` matches `foo` or `foo.{u,v}`: an identifier possibly followed by a list of universe names
+</code></pre></div><h3 id="display-4">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`optDeclSig` matches the signature of a declaration with optional type: a list of binders and then possibly `: type`
+</code></pre></div><h3 id="display-5">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">The *anonymous constructor* `⟨e, ...⟩` is equivalent to `c e ...` if the
+expected type is an inductive type with a single constructor `c`.
+If more terms are given than `c` has parameters, the remaining arguments
+are turned into a new anonymous constructor application. For example,
+`⟨a, b, c⟩ : α × (β × γ)` is equivalent to `⟨a, ⟨b, c⟩⟩`.
+</code></pre></div><h3 id="display-6">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Structure instance. `{ x := e, ... }` assigns `e` to field `x`, which may be
+inherited. If `e` is itself a variable called `x`, it can be elided:
+`fun y =&gt; { x := 1, y }`.
+A *structure update* of an existing value can be given via `with`:
+`{ point with x := 1 }`.
+The structure type can be specified if not inferable:
+`{ x := 1, y := 2 : Point }`.
+</code></pre></div><h2 id="preserved-native-diagnostic-displays">Preserved native diagnostic displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-2">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Solo : Type
+</code></pre></div><h3 id="display-2-2">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Solo.solo : Solo
+</code></pre></div><h3 id="display-3-2">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Yes : Prop
+</code></pre></div><h3 id="display-4-2">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Yes.intro : Yes
+</code></pre></div><h3 id="display-5-2">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Type mismatch
+  EvenOddList.cons &quot;a&quot; (EvenOddList.cons &quot;b&quot; (EvenOddList.cons &quot;c&quot; EvenOddList.nil))
+has type
+  EvenOddList String !!!true
+but is expected to have type
+  EvenOddList String true
+</code></pre></div><h3 id="display-6-2">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Mismatched inductive type parameter in
+  Either' α β
+The provided argument
+  α
+is not definitionally equal to the expected parameter
+  α✝
+
+Note: The value of parameter `α✝` must be fixed throughout the inductive declaration. Consider making this parameter an index if it must vary.
+</code></pre></div><h3 id="display-7">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">`String.data` has been deprecated: Use `String.toList` instead
+</code></pre></div><h3 id="display-8">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">false
+</code></pre></div><h3 id="display-9">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Invalid field `toString`: The environment does not contain `State.toString`, so it is not possible to project the field `toString` from an expression
+  s
+of type `State`
+
+Note: A private declaration `State.toString` (from the current module) exists but would need to be public to access here.
+</code></pre></div><h3 id="display-10">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">({ array := #[1], augmentation := &quot;&quot; },
+ { array := #[1, 2], augmentation := &quot;&quot; },
+ { array := #[2, 2], augmentation := &quot;&quot; },
+ { array := #[1, 2], augmentation := &quot;&quot; })
+</code></pre></div><h3 id="display-11">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Textbook.toBook (self : Textbook) : Book
+</code></pre></div><h3 id="display-12">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">{ fst := 17, snd := 2 }
+</code></pre></div><h3 id="display-13">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">printEven sorry : IO Unit
+</code></pre></div><h3 id="display-14">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Application type mismatch: The argument
+  two
+has type
+  EvenPrime
+but is expected to have type
+  EvenNumber
+in the application
+  printEven two
+</code></pre></div><h3 id="display-15">Display 15</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">structure ElectricBike : Type
+number of parameters: 0
+parents:
+  ElectricBike.toBicycle : Bicycle
+  ElectricBike.toElectricVehicle : ElectricVehicle
+fields:
+  Vehicle.wheels : Nat :=
+    2
+  ElectricVehicle.batteries : Nat :=
+    1
+constructor:
+  ElectricBike.mk (toBicycle : Bicycle) (batteries : Nat) : ElectricBike
+field notation resolution order:
+  ElectricBike, Bicycle, ElectricVehicle, Vehicle
+</code></pre></div><h3 id="display-16">Display 16</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">structure ElectricFamilyBike : Type
+number of parameters: 0
+parents:
+  ElectricFamilyBike.toFamilyBike : FamilyBike
+  ElectricFamilyBike.toElectricBike : ElectricBike
+fields:
+  Vehicle.wheels : Nat :=
+    3
+  ElectricVehicle.batteries : Nat :=
+    2
+constructor:
+  ElectricFamilyBike.mk (toFamilyBike : FamilyBike) (batteries : Nat) : ElectricFamilyBike
+field notation resolution order:
+  ElectricFamilyBike, FamilyBike, ElectricBike, Bicycle, ElectricVehicle, Vehicle
+</code></pre></div><h3 id="display-17">Display 17</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(kernel) arg #1 of 'Bad.bad' has a non positive occurrence of the datatypes being declared
+</code></pre></div><h3 id="display-18">Display 18</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(kernel) arg #2 of 'Fix.fix' contains a non valid occurrence of the datatypes being declared
+</code></pre></div><h3 id="display-19">Display 19</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Invalid universe polymorphic resulting type: The resulting universe is not `Prop`, but it may be `Prop` for some parameter values:
+  Sort u
+
+Hint: A possible solution is to use levels of the form `max 1 _` or `_ + 1` to ensure the universe is of the form `Type _`
+</code></pre></div><h3 id="display-20">Display 20</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Unknown constant `OddList.nil`
+
+Note: Inferred this name from the expected resulting type of `.nil`:
+  OddList String
+</code></pre></div><h3 id="display-21">Display 21</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Invalid mutually inductive types: Binder annotations for parameter `α` must match
+</code></pre></div><h3 id="display-22">Display 22</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Unknown identifier `FreshList`
+</code></pre></div><h3 id="display-23">Display 23</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Invalid mutually inductive types: `Optional` has 1 parameter(s), but the preceding type `Both` has 2
+
+Note: All inductive types declared in the same `mutual` block must have the same parameters
+</code></pre></div><h3 id="display-24">Display 24</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Invalid mutually inductive types: Parameter `α` has type
+  Type u
+of sort `Type (u + 1)` but is expected to have type
+  Type
+of sort `Type 1`
+</code></pre></div><h3 id="display-25">Display 25</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Invalid mutually inductive types: The resulting type of this declaration
+  Prop
+differs from a preceding one
+  Type
+
+Note: All inductive types declared in the same `mutual` block must belong to the same type universe
+</code></pre></div><h3 id="display-26">Display 26</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(kernel) arg #1 of 'Binding.scope' has a non positive occurrence of the datatypes being declared
+</code></pre></div><h3 id="display-27">Display 27</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(kernel) arg #3 of 'RTree.node' contains a non valid occurrence of the datatypes being declared
+</code></pre></div><h3 id="display-28">Display 28</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(kernel) invalid nested inductive datatype 'List', nested inductive datatypes parameters cannot contain local variables.
+</code></pre></div><h3 id="display-29">Display 29</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(kernel) arg #1 of 'WithCheck.check' has a non positive occurrence of the datatypes being declared
+</code></pre></div><h3 id="display-30">Display 30</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">(kernel) application type mismatch
+  List.length children
+argument has type
+  @_nested.List_1 branches α
+but function has type
+  List (@BRTree branches α) → Nat
+</code></pre></div><h3 id="display-31">Display 31</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Variable name `RTree''` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _RTree''
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+</code></pre></div><h3 id="display-32">Display 32</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">ONat.rec.{u} {motive_1 : ONat → Sort u} {motive_2 : Option ONat → Sort u}
+  (mk : (pred : Option ONat) → motive_2 pred → motive_1 (ONat.mk pred)) (none : motive_2 none)
+  (some : (val : ONat) → motive_1 val → motive_2 (some val)) (t : ONat) : motive_1 t
+</code></pre></div><h3 id="display-33">Display 33</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Definition `OptONat.to_of_eq_id` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+</code></pre></div><h3 id="display-34">Display 34</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">Definition `OptONat.of_to_eq_id` is a proposition; use `theorem` instead of `def`
+
+Note: This linter can be disabled with `set_option linter.defProp false`
+</code></pre></div><h2 id="preserved-native-proof-state-displays">Preserved native proof-state displays</h2><p>These are inherited explanatory/output displays, not additional source programs or newly executed results.</p>
+<h3 id="display-1-3">Display 1</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ ∀ (n : Nat), n ≤ 2 → n ∣ 2 → n = 1 ∨ n = 2
+</code></pre></div><h3 id="display-2-3">Display 2</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">n✝:Nata✝¹:n✝ ≤ 2a✝:n✝ ∣ 2⊢ n✝ = 1 ∨ n✝ = 2
+</code></pre></div><h3 id="display-3-3">Display 3</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">step.step.refl.refla✝:0 ∣ 2⊢ 0 = 1 ∨ 0 = 2
+</code></pre></div><h3 id="display-4-3">Display 4</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">All goals completed! 🐙
+</code></pre></div><h3 id="display-5-3">Display 5</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ 2 ≠ 0
+</code></pre></div><h3 id="display-6-3">Display 6</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ 1 ≠ 0
+</code></pre></div><h3 id="display-7-2">Display 7</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ 3 ≠ 0
+</code></pre></div><h3 id="display-8-2">Display 8</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ NoRepeats [(1, 2), (2, 2), (3, 1), (1, 3)]
+</code></pre></div><h3 id="display-9-2">Display 9</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ RunsMatch [(1, 2), (2, 2), (3, 1), (1, 3)] [1, 1, 2, 2, 3, 1, 1, 1]
+</code></pre></div><h3 id="display-10-2">Display 10</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">⊢ NonZero [(1, 2), (2, 2), (3, 1), (1, 3)]
+</code></pre></div><h3 id="display-11-2">Display 11</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">o:Option ONat⊢ (ofOption o).toOption = o
+</code></pre></div><h3 id="display-12-2">Display 12</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">none⊢ (ofOption Option.none).toOption = Option.nonesomeval✝:ONat⊢ (ofOption (Option.some val✝)).toOption = Option.some val✝
+</code></pre></div><h3 id="display-13-2">Display 13</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">o:OptONat⊢ ofOption o.toOption = o
+</code></pre></div><h3 id="display-14-2">Display 14</h3><div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">none⊢ ofOption none.toOption = nonesomea✝:ONat'⊢ ofOption (some a✝).toOption = some a✝
+</code></pre></div><footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

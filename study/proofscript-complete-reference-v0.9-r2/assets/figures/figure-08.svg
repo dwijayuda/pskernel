@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-226.6009 -209.1 363.4009 418.2">
+<g transform="scale(1,-1)">
+<g transform="matrix(1,0,0,1,-0,153.6)">
+<g transform="matrix(1,0,0,1,-87.6,-0)">
+<path d="M-40 -50 L40 -50 L40 30 L20 50 L-40 50 Z" fill="rgb(255,255,255)" fill-opacity="1" />
+<path d="M-40 -50 L40 -50 L40 30 L20 50 L-40 50 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M20 50 L20 30 L40 30" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<text x="0" y="0" font-family="monospace" font-size="12" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">Code.lean</text>
+<g transform="matrix(1,0,0,1,0,50)">
+</g>
+<g transform="matrix(1,0,0,1,0,-50)">
+</g>
+<g transform="matrix(1,0,0,1,40,0)">
+</g>
+<g transform="matrix(1,0,0,1,-40,0)">
+</g>
+<g transform="matrix(1,0,0,1,20,50)">
+</g>
+<g transform="matrix(1,0,0,1,-40,50)">
+</g>
+<g transform="matrix(1,0,0,1,40,-50)">
+</g>
+<g transform="matrix(1,0,0,1,-40,-50)">
+</g>
+<g transform="matrix(1,0,0,1,166.8,0)">
+</g>
+</g>
+<g transform="matrix(1,0,0,1,0,-126.7)">
+<g transform="matrix(1,0,0,1,-87.6,-0)">
+<g transform="matrix(1,0,0,1,0,0)">
+<path d="M-25.2 25.2 L25.2 25.2 A6 6 0 0 0 31.2 19.2 L31.2 -19.2 A6 6 0 0 0 25.2 -25.2 L-25.2 -25.2 A6 6 0 0 0 -31.2 -19.2 L-31.2 19.2 A6 6 0 0 0 -25.2 25.2 Z" fill="rgb(255,255,255)" fill-opacity="1" />
+<path d="M-25.2 25.2 L25.2 25.2 A6 6 0 0 0 31.2 19.2 L31.2 -19.2 A6 6 0 0 0 25.2 -25.2 L-25.2 -25.2 A6 6 0 0 0 -31.2 -19.2 L-31.2 19.2 A6 6 0 0 0 -25.2 25.2 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+</g>
+<text x="0" y="0" font-family="sans-serif" font-size="12" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)"><tspan x="0" dy="-7.2">Syntax</tspan><tspan x="0" dy="14.4">Tree</tspan></text>
+<g transform="matrix(1,0,0,1,0,26.2)">
+</g>
+<g transform="matrix(1,0,0,1,0,-26.2)">
+</g>
+<g transform="matrix(1,0,0,1,32.2,0)">
+</g>
+<g transform="matrix(1,0,0,1,-32.2,0)">
+</g>
+<g transform="matrix(1,0,0,1,32.2,26.2)">
+</g>
+<g transform="matrix(1,0,0,1,-32.2,26.2)">
+</g>
+<g transform="matrix(1,0,0,1,32.2,-26.2)">
+</g>
+<g transform="matrix(1,0,0,1,-32.2,-26.2)">
+</g>
+<g transform="matrix(1,0,0,1,166.8,0)">
+</g>
+</g>
+</g>
+<g transform="matrix(1,0,0,1,0,-236.3)">
+<g transform="matrix(1,0,0,1,-87.6,-0)">
+<g transform="matrix(1,0,0,1,0,0)">
+<path d="M-34.2 25.2 L34.2 25.2 A6 6 0 0 0 40.2 19.2 L40.2 -19.2 A6 6 0 0 0 34.2 -25.2 L-34.2 -25.2 A6 6 0 0 0 -40.2 -19.2 L-40.2 19.2 A6 6 0 0 0 -34.2 25.2 Z" fill="rgb(255,255,255)" fill-opacity="1" />
+<path d="M-34.2 25.2 L34.2 25.2 A6 6 0 0 0 40.2 19.2 L40.2 -19.2 A6 6 0 0 0 34.2 -25.2 L-34.2 -25.2 A6 6 0 0 0 -40.2 -19.2 L-40.2 19.2 A6 6 0 0 0 -34.2 25.2 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+</g>
+<text x="0" y="0" font-family="sans-serif" font-size="12" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)"><tspan x="0" dy="-7.2">Core Type</tspan><tspan x="0" dy="14.4">Theory</tspan></text>
+<g transform="matrix(1,0,0,1,0,26.2)">
+</g>
+<g transform="matrix(1,0,0,1,0,-26.2)">
+</g>
+<g transform="matrix(1,0,0,1,41.2,0)">
+</g>
+<g transform="matrix(1,0,0,1,-41.2,0)">
+</g>
+<g transform="matrix(1,0,0,1,41.2,26.2)">
+</g>
+<g transform="matrix(1,0,0,1,-41.2,26.2)">
+</g>
+<g transform="matrix(1,0,0,1,41.2,-26.2)">
+</g>
+<g transform="matrix(1,0,0,1,-41.2,-26.2)">
+</g>
+<g transform="matrix(1,0,0,1,166.8,0)">
+<g transform="matrix(1,0,0,1,0,0)">
+<path d="M-45.6 32.4 L45.6 32.4 A6 6 0 0 0 51.6 26.4 L51.6 -26.4 A6 6 0 0 0 45.6 -32.4 L-45.6 -32.4 A6 6 0 0 0 -51.6 -26.4 L-51.6 26.4 A6 6 0 0 0 -45.6 32.4 Z" fill="rgb(255,255,255)" fill-opacity="1" />
+<path d="M-45.6 32.4 L45.6 32.4 A6 6 0 0 0 51.6 26.4 L51.6 -26.4 A6 6 0 0 0 45.6 -32.4 L-45.6 -32.4 A6 6 0 0 0 -51.6 -26.4 L-51.6 26.4 A6 6 0 0 0 -45.6 32.4 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+</g>
+<text x="0" y="0" font-family="sans-serif" font-size="12" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)"><tspan x="0" dy="-14.4">Core Type</tspan><tspan x="0" dy="14.4">Theory</tspan><tspan x="0" dy="14.4">(no recursion)</tspan></text>
+<g transform="matrix(1,0,0,1,0,33.4)">
+</g>
+<g transform="matrix(1,0,0,1,0,-33.4)">
+</g>
+<g transform="matrix(1,0,0,1,52.6,0)">
+</g>
+<g transform="matrix(1,0,0,1,-52.6,0)">
+</g>
+<g transform="matrix(1,0,0,1,52.6,33.4)">
+</g>
+<g transform="matrix(1,0,0,1,-52.6,33.4)">
+</g>
+<g transform="matrix(1,0,0,1,52.6,-33.4)">
+</g>
+<g transform="matrix(1,0,0,1,-52.6,-33.4)">
+</g>
+</g>
+</g>
+</g>
+<g transform="matrix(1,0,0,1,0,-338.7)">
+<g transform="matrix(1,0,0,1,-87.6,-0)">
+<g transform="matrix(1,0,0,1,0,0)">
+<path d="M-37.2 18 L37.2 18 A6 6 0 0 0 43.2 12 L43.2 -12 A6 6 0 0 0 37.2 -18 L-37.2 -18 A6 6 0 0 0 -43.2 -12 L-43.2 12 A6 6 0 0 0 -37.2 18 Z" fill="rgb(255,255,255)" fill-opacity="1" />
+<path d="M-37.2 18 L37.2 18 A6 6 0 0 0 43.2 12 L43.2 -12 A6 6 0 0 0 37.2 -18 L-37.2 -18 A6 6 0 0 0 -43.2 -12 L-43.2 12 A6 6 0 0 0 -37.2 18 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+</g>
+<text x="0" y="0" font-family="sans-serif" font-size="12" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">Executable</text>
+<g transform="matrix(1,0,0,1,0,19)">
+</g>
+<g transform="matrix(1,0,0,1,0,-19)">
+</g>
+<g transform="matrix(1,0,0,1,44.2,0)">
+</g>
+<g transform="matrix(1,0,0,1,-44.2,0)">
+</g>
+<g transform="matrix(1,0,0,1,44.2,19)">
+</g>
+<g transform="matrix(1,0,0,1,-44.2,19)">
+</g>
+<g transform="matrix(1,0,0,1,44.2,-19)">
+</g>
+<g transform="matrix(1,0,0,1,-44.2,-19)">
+</g>
+<g transform="matrix(1,0,0,1,166.8,0)">
+<g transform="matrix(1,0,0,1,-16,-0)">
+<text x="0" y="0" font-family="sans-serif" font-size="20" font-weight="bold" font-style="normal" fill="rgb(0,128,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">✔</text>
+<g transform="matrix(1,0,0,1,16,0)">
+<text x="0" y="0" font-family="sans-serif" font-size="20" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">/</text>
+</g>
+<g transform="matrix(1,0,0,1,32,0)">
+<text x="0" y="0" font-family="sans-serif" font-size="20" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">✖</text>
+</g>
+</g>
+<g transform="matrix(1,0,0,1,0,18)">
+</g>
+<g transform="matrix(1,0,0,1,0,-18)">
+</g>
+<g transform="matrix(1,0,0,1,28,0)">
+</g>
+<g transform="matrix(1,0,0,1,-28,0)">
+</g>
+<g transform="matrix(1,0,0,1,28,18)">
+</g>
+<g transform="matrix(1,0,0,1,-28,18)">
+</g>
+<g transform="matrix(1,0,0,1,28,-18)">
+</g>
+<g transform="matrix(1,0,0,1,-28,-18)">
+</g>
+</g>
+</g>
+</g>
+</g>
+<path d="M-87.6 103.6 L-87.6 57.1" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M-87.6 53.1 L-90.7153 60.4685 L-87.6 57.1 L-84.4847 60.4685 Z" fill="rgb(0,0,0)" fill-opacity="1" />
+<g transform="matrix(1,0,0,1,-61.6,78.35)">
+<text x="0" y="0" font-family="sans-serif" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">Parsing</text>
+</g>
+<path d="M-87.6 0.7 L-87.6 -52.5" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M-87.6 -56.5 L-90.7153 -49.1315 L-87.6 -52.5 L-84.4847 -49.1315 Z" fill="rgb(0,0,0)" fill-opacity="1" />
+<g transform="matrix(1,0,0,1,-51.6,-27.9)">
+<text x="0" y="0" font-family="sans-serif" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">Elaboration</text>
+</g>
+<path d="M-87.6 -108.9 L-87.6 -162.1" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M-87.6 -166.1 L-90.7153 -158.7315 L-87.6 -162.1 L-84.4847 -158.7315 Z" fill="rgb(0,0,0)" fill-opacity="1" />
+<g transform="matrix(1,0,0,1,-51.6,-137.5)">
+<text x="0" y="0" font-family="sans-serif" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">Compilation</text>
+</g>
+<path d="M-46.4 -82.7 L22.6 -82.7" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M26.6 -82.7 L19.2315 -85.8153 L22.6 -82.7 L19.2315 -79.5847 Z" fill="rgb(0,0,0)" fill-opacity="1" />
+<g transform="matrix(1,0,0,1,-9.9,-64.2)">
+<text x="0" y="0" font-family="sans-serif" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)"><tspan x="0" dy="-6">Recursion</tspan><tspan x="0" dy="12">Elimination</tspan></text>
+</g>
+<path d="M-119.8 16.9 C-187.4401 -15.6738 -191.2852 70.5763 -123.6451 38.0025" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M-119.8 36.9 L-127.7417 35.9363 L-123.6451 38.0025 L-126.0244 41.9256 Z" fill="rgb(0,0,0)" fill-opacity="1" />
+<g transform="matrix(1,0,0,1,-198.1009,26.9)">
+<text x="0" y="0" font-family="sans-serif" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)"><tspan x="0" dy="-6">Macro</tspan><tspan x="0" dy="12">Expansion</tspan></text>
+</g>
+<path d="M79.2 -116.1 L79.2 -163.1" fill="none" stroke="rgb(0,0,0)" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+<path d="M79.2 -167.1 L76.0847 -159.7315 L79.2 -163.1 L82.3153 -159.7315 Z" fill="rgb(0,0,0)" fill-opacity="1" />
+<g transform="matrix(1,0,0,1,102.7,-141.6)">
+<text x="0" y="0" font-family="sans-serif" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)"><tspan x="0" dy="-6">Kernel</tspan><tspan x="0" dy="12">Check</tspan></text>
+</g>
+</g>
+</svg>

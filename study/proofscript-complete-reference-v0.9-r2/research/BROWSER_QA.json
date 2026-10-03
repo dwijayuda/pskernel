@@ -1,0 +1,62 @@
+{
+  "scope": "Local-file browser layout and chapter-filter checks, not compiler or semantic validation.",
+  "checks": [
+    {
+      "requestedViewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "file": "pages/Terms/Function-Types/index.html",
+      "metrics": {
+        "viewport": 1440,
+        "bodyWidth": 1425,
+        "articleWidth": 1075,
+        "codeBlocks": 14,
+        "navLinks": 218
+      },
+      "screenshot": "research/previews/reference-desktop.png",
+      "documentHasHorizontalOverflow": false
+    },
+    {
+      "requestedViewport": {
+        "width": 390,
+        "height": 1100
+      },
+      "file": "PROOFSCRIPT_WRITING_GUIDE.html",
+      "metrics": {
+        "viewport": 390,
+        "bodyWidth": 390,
+        "articleWidth": 360,
+        "codeBlocks": 17,
+        "navLinks": 218
+      },
+      "screenshot": "research/previews/reference-mobile.png",
+      "documentHasHorizontalOverflow": false
+    },
+    {
+      "requestedViewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "file": "ProofScript_Complete_Language_Reference_v0.9-r2.html",
+      "metrics": {
+        "viewport": 1440,
+        "bodyWidth": 1425,
+        "articleWidth": 1075,
+        "codeBlocks": 9698,
+        "navLinks": 218
+      },
+      "screenshot": "research/previews/reference-single-book.png",
+      "documentHasHorizontalOverflow": false
+    }
+  ],
+  "filterCheck": {
+    "visible": [
+      "11.4. Coercing to Function Types",
+      "13.2. Function Types"
+    ],
+    "documentWidth": 1425,
+    "viewport": 1440
+  },
+  "initialNonEmulatedNarrowScreenshotSuperseded": true
+}

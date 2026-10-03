@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-164.4 -200.5 328.8 401">
+<g transform="scale(1,-1)">
+<g transform="matrix(1,0,0,1,0,0)">
+<path d="M-154.4 194.5 L154.4 194.5 A4 4 0 0 0 158.4 190.5 L158.4 -190.5 A4 4 0 0 0 154.4 -194.5 L-154.4 -194.5 A4 4 0 0 0 -158.4 -190.5 L-158.4 190.5 A4 4 0 0 0 -154.4 194.5 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+</g>
+<g transform="matrix(1,0,0,1,-148.4,179)">
+<text x="0" y="0" font-family="sans-serif" font-size="11" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Workspace</text>
+<g transform="matrix(1,0,0,1,148.4,-186.5)">
+<g transform="matrix(1,0,0,1,-148.4,172)">
+<text x="0" y="0" font-family="monospace" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">lean-toolchain</text>
+<g transform="matrix(1,0,0,1,112.5,-58)">
+<g transform="matrix(1,0,0,1,0,0)">
+<path d="M-107.5 42 L107.5 42 A4 4 0 0 0 111.5 38 L111.5 -38 A4 4 0 0 0 107.5 -42 L-107.5 -42 A4 4 0 0 0 -111.5 -38 L-111.5 38 A4 4 0 0 0 -107.5 42 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+</g>
+<g transform="matrix(1,0,0,1,-101.5,26.5)">
+<text x="0" y="0" font-family="sans-serif" font-size="11" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Root package</text>
+<g transform="matrix(1,0,0,1,101.5,-34)">
+<g transform="matrix(1,0,0,1,-101.5,19.5)">
+<text x="0" y="0" font-family="sans-serif" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Package configuration file (lakefile.lean)</text>
+<g transform="matrix(1,0,0,1,0,-13)">
+<text x="0" y="0" font-family="sans-serif" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Libraries</text>
+</g>
+<g transform="matrix(1,0,0,1,0,-26)">
+<text x="0" y="0" font-family="sans-serif" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Executables</text>
+</g>
+<g transform="matrix(1,0,0,1,0,-39)">
+<text x="0" y="0" font-family="sans-serif" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Manifest (lake-manifest.json)</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="matrix(1,0,0,1,148.4,-230)">
+<g transform="matrix(1,0,0,1,0,0)">
+<path d="M-143.4 118 L143.4 118 A4 4 0 0 0 147.4 114 L147.4 -114 A4 4 0 0 0 143.4 -118 L-143.4 -118 A4 4 0 0 0 -147.4 -114 L-147.4 114 A4 4 0 0 0 -143.4 118 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+</g>
+<g transform="matrix(1,0,0,1,-137.4,102.5)">
+<text x="0" y="0" font-family="sans-serif" font-size="11" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Lake Directory (.lake)</text>
+<g transform="matrix(1,0,0,1,137.4,-110)">
+<g transform="matrix(1,0,0,1,-0,35)">
+<g transform="matrix(1,0,0,1,0,0)">
+<path d="M-132.4 64.5 L132.4 64.5 A4 4 0 0 0 136.4 60.5 L136.4 -60.5 A4 4 0 0 0 132.4 -64.5 L-132.4 -64.5 A4 4 0 0 0 -136.4 -60.5 L-136.4 60.5 A4 4 0 0 0 -132.4 64.5 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+</g>
+<g transform="matrix(1,0,0,1,-126.4,49)">
+<text x="0" y="0" font-family="sans-serif" font-size="11" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Packages</text>
+<g transform="matrix(1,0,0,1,126.4,-56.5)">
+<g transform="matrix(1,0,0,1,0,11)">
+<g transform="matrix(1,0,0,1,-66.2,-0)">
+<g transform="matrix(1,0,0,1,0,0)">
+<path d="M-55.2 35 L55.2 35 A4 4 0 0 0 59.2 31 L59.2 -31 A4 4 0 0 0 55.2 -35 L-55.2 -35 A4 4 0 0 0 -59.2 -31 L-59.2 31 A4 4 0 0 0 -55.2 35 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+</g>
+<g transform="matrix(1,0,0,1,-51.2,22.5)">
+<text x="0" y="0" font-family="sans-serif" font-size="9" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Dependency 1</text>
+<g transform="matrix(1,0,0,1,51.2,-29)">
+<g transform="matrix(1,0,0,1,-51.2,16.5)">
+<text x="0" y="0" font-family="sans-serif" font-size="8" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Package configuration file</text>
+<g transform="matrix(1,0,0,1,0,-11)">
+<text x="0" y="0" font-family="sans-serif" font-size="8" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Libraries</text>
+</g>
+<g transform="matrix(1,0,0,1,0,-22)">
+<text x="0" y="0" font-family="sans-serif" font-size="8" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Executables</text>
+</g>
+<g transform="matrix(1,0,0,1,0,-33)">
+<text x="0" y="0" font-family="sans-serif" font-size="8" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Artifacts</text>
+</g>
+</g>
+</g>
+</g>
+<g transform="matrix(1,0,0,1,132.4,0)">
+<g transform="matrix(1,0,0,1,0,0)">
+<path d="M-55.2 35 L55.2 35 A4 4 0 0 0 59.2 31 L59.2 -31 A4 4 0 0 0 55.2 -35 L-55.2 -35 A4 4 0 0 0 -59.2 -31 L-59.2 31 A4 4 0 0 0 -55.2 35 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+</g>
+<g transform="matrix(1,0,0,1,-51.2,22.5)">
+<text x="0" y="0" font-family="sans-serif" font-size="9" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Dependency 2</text>
+<g transform="matrix(1,0,0,1,51.2,-29)">
+<g transform="matrix(1,0,0,1,-51.2,16.5)">
+<text x="0" y="0" font-family="sans-serif" font-size="8" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Package configuration file</text>
+<g transform="matrix(1,0,0,1,0,-11)">
+<text x="0" y="0" font-family="sans-serif" font-size="8" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Libraries</text>
+</g>
+<g transform="matrix(1,0,0,1,0,-22)">
+<text x="0" y="0" font-family="sans-serif" font-size="8" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Executables</text>
+</g>
+<g transform="matrix(1,0,0,1,0,-33)">
+<text x="0" y="0" font-family="sans-serif" font-size="8" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Artifacts</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+<g transform="matrix(1,0,0,1,-123.6,-51)">
+<text x="0" y="0" font-family="sans-serif" font-size="14" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="middle" dominant-baseline="central" transform="scale(1,-1)">⋯</text>
+</g>
+</g>
+</g>
+</g>
+<g transform="matrix(1,0,0,1,-83.9,-105.5)">
+<g transform="matrix(1,0,0,1,0,0)">
+<path d="M-48.5 29 L48.5 29 A4 4 0 0 0 52.5 25 L52.5 -25 A4 4 0 0 0 48.5 -29 L-48.5 -29 A4 4 0 0 0 -52.5 -25 L-52.5 25 A4 4 0 0 0 -48.5 29 Z" fill="none" stroke="rgb(0,0,0)" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-opacity="1" stroke-dasharray="none" />
+</g>
+<g transform="matrix(1,0,0,1,-42.5,13.5)">
+<text x="0" y="0" font-family="sans-serif" font-size="11" font-weight="bold" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Artifacts</text>
+<g transform="matrix(1,0,0,1,42.5,-21)">
+<g transform="matrix(1,0,0,1,-42.5,6.5)">
+<text x="0" y="0" font-family="sans-serif" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Built libraries</text>
+<g transform="matrix(1,0,0,1,0,-13)">
+<text x="0" y="0" font-family="sans-serif" font-size="10" font-weight="normal" font-style="normal" fill="rgb(0,0,0)" text-anchor="start" dominant-baseline="central" transform="scale(1,-1)">Built executables</text>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</g>
+</svg>

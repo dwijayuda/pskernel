@@ -1,0 +1,609 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>&lt;a id=&quot;release-v4___0___0-m5&quot;&gt;&lt;/a&gt;</title><style>:root{color-scheme:light;--ink:#1d2b39;--muted:#596b7c;--line:#d9e3ec;--accent:#155e75}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#f5f8fb;color:var(--ink);font:16px/1.65 system-ui,-apple-system,Segoe UI,sans-serif}.masthead{background:#173c50;color:white;padding:24px 32px}.masthead a{color:white}.masthead strong{font-size:25px;display:block}.masthead small{color:#c4dbe6}.layout{display:grid;grid-template-columns:280px minmax(0,1080px);gap:26px;max-width:1440px;margin:auto;padding:26px 22px 60px}.nav{position:sticky;top:12px;max-height:95vh;overflow:auto;align-self:start;padding:8px 12px 10px 0}.nav input{width:100%;padding:10px;margin-bottom:12px;border:1px solid var(--line);border-radius:5px}.nav a{display:block;font-size:12px;line-height:1.4;text-decoration:none;margin:8px 0;color:#446073}.article{min-width:0;padding:30px 36px;background:#fff;border:1px solid var(--line);border-radius:10px}h1{font-size:28px;line-height:1.3;margin:36px 0 18px}h1:first-child{margin-top:0}h2{font-size:23px;line-height:1.35;margin-top:32px}h3{font-size:19px;margin-top:25px}h4,h5,h6{font-size:16px}h1,h2,h3,h4{scroll-margin-top:20px}a{color:var(--accent);text-underline-offset:3px}p{margin:15px 0}.code{border:1px solid var(--line);border-radius:7px;overflow:hidden;margin:20px 0}.code-label{font:600 11px/1.5 system-ui;background:#eaf2f7;color:#365970;padding:7px 14px}pre{white-space:pre;overflow:auto;margin:0;padding:15px;background:#f7fafc;font-size:13px;line-height:1.6;tab-size:2}code{font-family:ui-monospace,Consolas,SFMono-Regular,monospace}p code,li code,td code{font-size:.88em;background:#f0f4f7;padding:1px 4px;border-radius:3px}table{display:block;max-width:100%;overflow:auto;border-collapse:collapse;font-size:13px;margin:20px 0}th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}th{background:#edf4f8}blockquote{margin:24px 0;padding:5px 18px;border-left:4px solid var(--accent);background:#f0f6f9}img{max-width:100%;height:auto}hr{border:0;border-top:1px solid var(--line);margin:34px 0}.footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:20px;margin-top:30px}.hidden{display:none!important}@media(max-width:1000px){.layout{display:block;padding:15px}.nav{position:static;max-height:220px;margin-bottom:16px}.article{padding:23px 18px}.masthead{padding:22px}h1{font-size:25px}}@media print{.nav,.masthead{display:none}.layout{display:block;padding:0}.article{padding:0;border:0}body{background:white;font-size:10pt}pre{font-size:8pt;white-space:pre-wrap;overflow-wrap:anywhere}h1{break-before:page}h1:first-child{break-before:auto}h1,h2,h3{break-after:avoid}.code{break-inside:avoid}table{font-size:9pt}}
+.article{width:100%;overflow-wrap:anywhere}.code{max-width:100%;min-width:0}pre{max-width:100%}.nav{min-width:0}</style></head><body><header class="masthead"><strong>ProofScript · Complete Reference</strong><small>v0.9-r2 · faithful Lean semantics · annotated inherited edition</small></header><div class="layout"><nav class="nav" aria-label="Reference chapters"><a href="../../../index.html"><strong>Reference home</strong></a><input id="chapterFilter" type="search" placeholder="Filter chapters" aria-label="Filter chapter links"><div id="chapterLinks"><a href="../../Introduction/index.html">1. Introduction</a><a href="../../Elaboration-and-Compilation/index.html">2. Elaboration and Compilation</a><a href="../../Interacting-with-Lean/index.html">3. Interacting with Lean</a><a href="../../The-Type-System/index.html">4. The Type System</a><a href="../../The-Type-System/Functions/index.html">4.1. Functions</a><a href="../../The-Type-System/Propositions/index.html">4.2. Propositions</a><a href="../../The-Type-System/Universes/index.html">4.3. Universes</a><a href="../../The-Type-System/Inductive-Types/index.html">4.4. Inductive Types</a><a href="../../The-Type-System/Quotients/index.html">4.5. Quotients</a><a href="../../Source-Files-and-Modules/index.html">5. Source Files and Modules</a><a href="../../Namespaces-and-Sections/index.html">6. Namespaces and Sections</a><a href="../../Definitions/index.html">7. Definitions</a><a href="../../Definitions/Modifiers/index.html">7.1. Modifiers</a><a href="../../Definitions/Headers-and-Signatures/index.html">7.2. Headers and Signatures</a><a href="../../Definitions/Definitions/index.html">7.3. Definitions</a><a href="../../Definitions/Theorems/index.html">7.4. Theorems</a><a href="../../Definitions/Example-Declarations/index.html">7.5. Example Declarations</a><a href="../../Definitions/Recursive-Definitions/index.html">7.6. Recursive Definitions</a><a href="../../Axioms/index.html">8. Axioms</a><a href="../../Attributes/index.html">9. Attributes</a><a href="../../Type-Classes/index.html">10. Type Classes</a><a href="../../Type-Classes/Class-Declarations/index.html">10.1. Class Declarations</a><a href="../../Type-Classes/Instance-Declarations/index.html">10.2. Instance Declarations</a><a href="../../Type-Classes/Instance-Synthesis/index.html">10.3. Instance Synthesis</a><a href="../../Type-Classes/Deriving-Instances/index.html">10.4. Deriving Instances</a><a href="../../Type-Classes/Basic-Classes/index.html">10.5. Basic Classes</a><a href="../../Coercions/index.html">11. Coercions</a><a href="../../Coercions/Coercion-Insertion/index.html">11.1. Coercion Insertion</a><a href="../../Coercions/Coercing-Between-Types/index.html">11.2. Coercing Between Types</a><a href="../../Coercions/Coercing-to-Sorts/index.html">11.3. Coercing to Sorts</a><a href="../../Coercions/Coercing-to-Function-Types/index.html">11.4. Coercing to Function Types</a><a href="../../Coercions/Implementation-Details/index.html">11.5. Implementation Details</a><a href="../../Run-Time-Code/index.html">12. Run-Time Code</a><a href="../../Run-Time-Code/Boxing/index.html">12.1. Boxing</a><a href="../../Run-Time-Code/Reference-Counting/index.html">12.2. Reference Counting</a><a href="../../Run-Time-Code/Multi-Threaded-Execution/index.html">12.3. Multi-Threaded Execution</a><a href="../../Run-Time-Code/Foreign-Function-Interface/index.html">12.4. Foreign Function Interface</a><a href="../../Terms/index.html">13. Terms</a><a href="../../Terms/Identifiers/index.html">13.1. Identifiers</a><a href="../../Terms/Function-Types/index.html">13.2. Function Types</a><a href="../../Terms/Functions/index.html">13.3. Functions</a><a href="../../Terms/Function-Application/index.html">13.4. Function Application</a><a href="../../Terms/Numeric-Literals/index.html">13.5. Numeric Literals</a><a href="../../Terms/Structures-and-Constructors/index.html">13.6. Structures and Constructors</a><a href="../../Terms/Conditionals/index.html">13.7. Conditionals</a><a href="../../Terms/Pattern-Matching/index.html">13.8. Pattern Matching</a><a href="../../Terms/Holes/index.html">13.9. Holes</a><a href="../../Terms/Type-Ascription/index.html">13.10. Type Ascription</a><a href="../../Terms/Quotation-and-Antiquotation/index.html">13.11. Quotation and Antiquotation</a><a href="../../Terms/do--Notation/index.html">13.12. do-Notation</a><a href="../../Terms/Proofs/index.html">13.13. Proofs</a><a href="../../Tactic-Proofs/index.html">14. Tactic Proofs</a><a href="../../Tactic-Proofs/Running-Tactics/index.html">14.1. Running Tactics</a><a href="../../Tactic-Proofs/Reading-Proof-States/index.html">14.2. Reading Proof States</a><a href="../../Tactic-Proofs/The-Tactic-Language/index.html">14.3. The Tactic Language</a><a href="../../Tactic-Proofs/Options/index.html">14.4. Options</a><a href="../../Tactic-Proofs/Tactic-Reference/index.html">14.5. Tactic Reference</a><a href="../../Tactic-Proofs/Targeted-Rewriting-with--conv/index.html">14.6. Targeted Rewriting with conv</a><a href="../../Tactic-Proofs/Naming-Bound-Variables/index.html">14.7. Naming Bound Variables</a><a href="../../Tactic-Proofs/Custom-Tactics/index.html">14.8. Custom Tactics</a><a href="../../The-Simplifier/index.html">15. The Simplifier</a><a href="../../The-Simplifier/Invoking-the-Simplifier/index.html">15.1. Invoking the Simplifier</a><a href="../../The-Simplifier/Rewrite-Rules/index.html">15.2. Rewrite Rules</a><a href="../../The-Simplifier/Simp-sets/index.html">15.3. Simp sets</a><a href="../../The-Simplifier/Simp-Normal-Forms/index.html">15.4. Simp Normal Forms</a><a href="../../The-Simplifier/Terminal-vs-Non-Terminal-Positions/index.html">15.5. Terminal vs Non-Terminal Positions</a><a href="../../The-Simplifier/Configuring-Simplification/index.html">15.6. Configuring Simplification</a><a href="../../The-Simplifier/Simplification-vs-Rewriting/index.html">15.7. Simplification vs Rewriting</a><a href="../../The--grind--tactic/index.html">16. The grind tactic</a><a href="../../The--grind--tactic/Error-Messages/index.html">16.1. Error Messages</a><a href="../../The--grind--tactic/Minimizing--grind--calls/index.html">16.2. Minimizing grind calls</a><a href="../../The--grind--tactic/Local-Definitions/index.html">16.3. Local Definitions</a><a href="../../The--grind--tactic/Congruence-Closure/index.html">16.4. Congruence Closure</a><a href="../../The--grind--tactic/Constraint-Propagation/index.html">16.5. Constraint Propagation</a><a href="../../The--grind--tactic/Case-Analysis/index.html">16.6. Case Analysis</a><a href="../../The--grind--tactic/E___matching/index.html">16.7. E‑matching</a><a href="../../The--grind--tactic/Associativity-and-Commutativity/index.html">16.8. Associativity and Commutativity</a><a href="../../The--grind--tactic/Linear-Integer-Arithmetic/index.html">16.9. Linear Integer Arithmetic</a><a href="../../The--grind--tactic/Algebraic-Solver-_LPAR_Commutative-Rings___-Fields_RPAR_/index.html">16.10. Algebraic Solver (Commutative Rings, Fields)</a><a href="../../The--grind--tactic/Linear-Arithmetic-Solver/index.html">16.11. Linear Arithmetic Solver</a><a href="../../The--grind--tactic/Annotating-Libraries-for--grind/index.html">16.12. Annotating Libraries for grind</a><a href="../../The--grind--tactic/Reducibility/index.html">16.13. Reducibility</a><a href="../../The--grind--tactic/Bigger-Examples/index.html">16.14. Bigger Examples</a><a href="../../The--mvcgen--tactic/index.html">17. The mvcgen tactic</a><a href="../../The--mvcgen--tactic/Overview/index.html">17.1. Overview</a><a href="../../The--mvcgen--tactic/Predicate-Transformers/index.html">17.2. Predicate Transformers</a><a href="../../The--mvcgen--tactic/Verification-Conditions/index.html">17.3. Verification Conditions</a><a href="../../The--mvcgen--tactic/Enabling--mvcgen--For-Monads/index.html">17.4. Enabling mvcgen For Monads</a><a href="../../The--mvcgen--tactic/Proof-Mode/index.html">17.5. Proof Mode</a><a href="../../Functors___-Monads-and--do--Notation/index.html">18. Functors, Monads and do-Notation</a><a href="../../Functors___-Monads-and--do--Notation/Laws/index.html">18.1. Laws</a><a href="../../Functors___-Monads-and--do--Notation/Lifting-Monads/index.html">18.2. Lifting Monads</a><a href="../../Functors___-Monads-and--do--Notation/Syntax/index.html">18.3. Syntax</a><a href="../../Functors___-Monads-and--do--Notation/API-Reference/index.html">18.4. API Reference</a><a href="../../Functors___-Monads-and--do--Notation/Varieties-of-Monads/index.html">18.5. Varieties of Monads</a><a href="../../Basic-Propositions/index.html">19. Basic Propositions</a><a href="../../Basic-Propositions/Truth/index.html">19.1. Truth</a><a href="../../Basic-Propositions/Logical-Connectives/index.html">19.2. Logical Connectives</a><a href="../../Basic-Propositions/Quantifiers/index.html">19.3. Quantifiers</a><a href="../../Basic-Propositions/Propositional-Equality/index.html">19.4. Propositional Equality</a><a href="../../Basic-Types/index.html">20. Basic Types</a><a href="../../Basic-Types/Natural-Numbers/index.html">20.1. Natural Numbers</a><a href="../../Basic-Types/Integers/index.html">20.2. Integers</a><a href="../../Basic-Types/Finite-Natural-Numbers/index.html">20.3. Finite Natural Numbers</a><a href="../../Basic-Types/Fixed-Precision-Integers/index.html">20.4. Fixed-Precision Integers</a><a href="../../Basic-Types/Bitvectors/index.html">20.5. Bitvectors</a><a href="../../Basic-Types/Floating-Point-Numbers/index.html">20.6. Floating-Point Numbers</a><a href="../../Basic-Types/Characters/index.html">20.7. Characters</a><a href="../../Basic-Types/Strings/index.html">20.8. Strings</a><a href="../../Basic-Types/The-Unit-Type/index.html">20.9. The Unit Type</a><a href="../../Basic-Types/The-Empty-Type/index.html">20.10. The Empty Type</a><a href="../../Basic-Types/Booleans/index.html">20.11. Booleans</a><a href="../../Basic-Types/Optional-Values/index.html">20.12. Optional Values</a><a href="../../Basic-Types/Tuples/index.html">20.13. Tuples</a><a href="../../Basic-Types/Sum-Types/index.html">20.14. Sum Types</a><a href="../../Basic-Types/Linked-Lists/index.html">20.15. Linked Lists</a><a href="../../Basic-Types/Arrays/index.html">20.16. Arrays</a><a href="../../Basic-Types/Byte-Arrays/index.html">20.17. Byte Arrays</a><a href="../../Basic-Types/Ranges/index.html">20.18. Ranges</a><a href="../../Basic-Types/Maps-and-Sets/index.html">20.19. Maps and Sets</a><a href="../../Basic-Types/Subtypes/index.html">20.20. Subtypes</a><a href="../../Basic-Types/Lazy-Computations/index.html">20.21. Lazy Computations</a><a href="../../IO/index.html">21. IO</a><a href="../../IO/Logical-Model/index.html">21.1. Logical Model</a><a href="../../IO/Control-Structures/index.html">21.2. Control Structures</a><a href="../../IO/Console-Output/index.html">21.3. Console Output</a><a href="../../IO/Mutable-References/index.html">21.4. Mutable References</a><a href="../../IO/Files___-File-Handles___-and-Streams/index.html">21.5. Files, File Handles, and Streams</a><a href="../../IO/System-and-Platform-Information/index.html">21.6. System and Platform Information</a><a href="../../IO/Environment-Variables/index.html">21.7. Environment Variables</a><a href="../../IO/Timing/index.html">21.8. Timing</a><a href="../../IO/Processes/index.html">21.9. Processes</a><a href="../../IO/Random-Numbers/index.html">21.10. Random Numbers</a><a href="../../IO/Tasks-and-Threads/index.html">21.11. Tasks and Threads</a><a href="../../Iterators/index.html">22. Iterators</a><a href="../../Iterators/Run-Time-Considerations/index.html">22.1. Run-Time Considerations</a><a href="../../Iterators/Iterator-Definitions/index.html">22.2. Iterator Definitions</a><a href="../../Iterators/Consuming-Iterators/index.html">22.3. Consuming Iterators</a><a href="../../Iterators/Iterator-Combinators/index.html">22.4. Iterator Combinators</a><a href="../../Iterators/Reasoning-About-Iterators/index.html">22.5. Reasoning About Iterators</a><a href="../../Notations-and-Macros/index.html">23. Notations and Macros</a><a href="../../Notations-and-Macros/Custom-Operators/index.html">23.1. Custom Operators</a><a href="../../Notations-and-Macros/Precedence/index.html">23.2. Precedence</a><a href="../../Notations-and-Macros/Notations/index.html">23.3. Notations</a><a href="../../Notations-and-Macros/Defining-New-Syntax/index.html">23.4. Defining New Syntax</a><a href="../../Notations-and-Macros/Macros/index.html">23.5. Macros</a><a href="../../Notations-and-Macros/Elaborators/index.html">23.6. Elaborators</a><a href="../../Notations-and-Macros/Extending--do--Notation/index.html">23.7. Extending do-Notation</a><a href="../../Notations-and-Macros/Extending-Lean___s-Output/index.html">23.8. Extending Lean's Output</a><a href="../../Build-Tools-and-Distribution/index.html">24. Build Tools and Distribution</a><a href="../../Build-Tools-and-Distribution/Lake/index.html">24.1. Lake</a><a href="../../Build-Tools-and-Distribution/Managing-Toolchains-with-Elan/index.html">24.2. Managing Toolchains with Elan</a><a href="../../ValidatingProofs/index.html">Validating a Lean Proof</a><a href="../../Error-Explanations/index.html">Error Explanations</a><a href="../../Error-Explanations/About___--ctorResultingTypeMismatch/index.html">About: ctorResultingTypeMismatch</a><a href="../../Error-Explanations/About___--dependsOnNoncomputable/index.html">About: dependsOnNoncomputable</a><a href="../../Error-Explanations/About___--inductionWithNoAlts/index.html">About: inductionWithNoAlts</a><a href="../../Error-Explanations/About___--inductiveParamMismatch/index.html">About: inductiveParamMismatch</a><a href="../../Error-Explanations/About___--inductiveParamMissing/index.html">About: inductiveParamMissing</a><a href="../../Error-Explanations/About___--inferBinderTypeFailed/index.html">About: inferBinderTypeFailed</a><a href="../../Error-Explanations/About___--inferDefTypeFailed/index.html">About: inferDefTypeFailed</a><a href="../../Error-Explanations/About___--invalidDottedIdent/index.html">About: invalidDottedIdent</a><a href="../../Error-Explanations/About___--invalidField/index.html">About: invalidField</a><a href="../../Error-Explanations/About___--projNonPropFromProp/index.html">About: projNonPropFromProp</a><a href="../../Error-Explanations/About___--propRecLargeElim/index.html">About: propRecLargeElim</a><a href="../../Error-Explanations/About___--redundantMatchAlt/index.html">About: redundantMatchAlt</a><a href="../../Error-Explanations/About___--synthInstanceFailed/index.html">About: synthInstanceFailed</a><a href="../../Error-Explanations/About___--unknownIdentifier/index.html">About: unknownIdentifier</a><a href="../index.html">Release Notes</a><a href="../v4.0.0-m1/index.html">Lean 4.0.0-m1 (2021-01-04)</a><a href="../v4.0.0-m2/index.html">Lean 4.0.0-m2 (2021-03-02)</a><a href="../v4.0.0-m3/index.html">Lean 4.0.0-m3 (2022-01-31)</a><a href="../v4.0.0-m4/index.html">Lean 4.0.0-m4 (2022-03-27)</a><a href="index.html">Lean 4.0.0-m5 (2022-08-22)</a><a href="../v4.0.0/index.html">Lean 4.0.0 (2023-09-08)</a><a href="../v4.1.0/index.html">Lean 4.1.0 (2023-09-26)</a><a href="../v4.2.0/index.html">Lean 4.2.0 (2023-10-31)</a><a href="../v4.3.0/index.html">Lean 4.3.0 (2023-11-30)</a><a href="../v4.4.0/index.html">Lean 4.4.0 (2023-12-31)</a><a href="../v4.5.0/index.html">Lean 4.5.0 (2024-02-01)</a><a href="../v4.6.0/index.html">Lean 4.6.0 (2024-02-29)</a><a href="../v4.7.0/index.html">Lean 4.7.0 (2024-04-03)</a><a href="../v4.8.0/index.html">Lean 4.8.0 (2024-06-05)</a><a href="../v4.9.0/index.html">Lean 4.9.0 (2024-07-01)</a><a href="../v4.10.0/index.html">Lean 4.10.0 (2024-07-31)</a><a href="../v4.11.0/index.html">Lean 4.11.0 (2024-09-02)</a><a href="../v4.12.0/index.html">Lean 4.12.0 (2024-10-01)</a><a href="../v4.13.0/index.html">Lean 4.13.0 (2024-11-01)</a><a href="../v4.14.0/index.html">Lean 4.14.0 (2024-12-02)</a><a href="../v4.15.0/index.html">Lean 4.15.0 (2025-01-04)</a><a href="../v4.16.0/index.html">Lean 4.16.0 (2025-02-03)</a><a href="../v4.17.0/index.html">Lean 4.17.0 (2025-03-03)</a><a href="../v4.18.0/index.html">Lean 4.18.0 (2025-04-02)</a><a href="../v4.19.0/index.html">Lean 4.19.0 (2025-05-01)</a><a href="../v4.20.0/index.html">Lean 4.20.0 (2025-06-02)</a><a href="../v4.21.0/index.html">Lean 4.21.0 (2025-06-30)</a><a href="../v4.22.0/index.html">Lean 4.22.0 (2025-08-14)</a><a href="../v4.23.0/index.html">Lean 4.23.0 (2025-09-15)</a><a href="../v4.24.0/index.html">Lean 4.24.0 (2025-10-14)</a><a href="../v4.25.0/index.html">Lean 4.25.0 (2025-11-14)</a><a href="../v4.25.1/index.html">Lean 4.25.1 (2025-11-18)</a><a href="../v4.26.0/index.html">Lean 4.26.0 (2025-12-13)</a><a href="../v4.27.0/index.html">Lean 4.27.0 (2026-01-24)</a><a href="../v4.28.0/index.html">Lean 4.28.0 (2026-02-17)</a><a href="../v4.28.1/index.html">Lean 4.28.1 (2026-04-14)</a><a href="../v4.29.0/index.html">Lean 4.29.0 (2026-03-27)</a><a href="../v4.29.1/index.html">Lean 4.29.1 (2026-04-14)</a><a href="../v4.30.0/index.html">Lean 4.30.0 (2026-05-26)</a><a href="../v4.31.0/index.html">Lean 4.31.0 (2026-06-13)</a><a href="../v4.32.0/index.html">Lean 4.32.0 (2026-07-13)</a><a href="../v4.32.1/index.html">Lean 4.32.1 (2026-07-22)</a><a href="../v4.32.2/index.html">Lean 4.32.2 (2026-07-28)</a><a href="../v4.33.0/index.html">Lean 4.33.0 (2026-08-10)</a><a href="../v4.33.1/index.html">Lean 4.33.1 (2026-08-21)</a><a href="../v4.34.0/index.html">Lean 4.34.0-rc2 (2026-08-21)</a><a href="../../platforms/index.html">Supported Platforms</a><a href="../../the-index/index.html">Index</a><a href="../../index.html">The Lean Language Reference</a></div></nav><main class="article"><p><a id="release-v4___0___0-m5"></a></p>
+<h1 id="proofscript-lean-4-0-0-m5-2022-08-22">ProofScript — Lean 4.0.0-m5 (2022-08-22)</h1><p><a href="../../../README.html">Reference home</a> · <strong>Grammar:</strong> <code>ps-0.9-r2</code> · <strong>Semantic pin:</strong> Lean 4.34.0 stable.</p>
+<p>These articles are the mirrored Lean release notes, not ProofScript releases. They document historical syntax, APIs, implementations and changes. The page named v4.34.0 in this mirror still identifies itself as rc2. Native source at the selected stable commit overrides stale details for a current ProofScript conformance claim. Historical examples remain native and are not silently modernized.</p>
+<p><strong>Compiler and coverage boundary.</strong> The stable delta note explicitly excludes the old native-reduction kernel hooks. Upgrading the pin requires a new reference/profile review and regenerated evidence.</p>
+<p><strong>Inherited detail and attribution.</strong> The section below is adapted from the Apache-2.0 Lean reference mirrored at <a href="https://github.com/dwijayuda/pskernel/blob/65369c75c7b63124f1ba7f2289e573181db281f0/study/lean4-language-reference/releases/v4.0.0-m5/index.html">releases/v4.0.0-m5/index.html</a>. Source Git blob: <code>82b80fda91f04da8c7c5723acf5cbd4f2c2227bc</code>. Its prose, API signatures and native names are retained where they describe the inherited semantics. Selected definition-keyword presentation aliases are recorded separately, not certified by a PSC parser. Native toolchains, intentional errors and historical releases keep their actual identities. The mirror contains rc2 material; the stable pin and stable-delta audit override conflicting claims.</p>
+<hr>
+<h2 id="lean-4-0-0-m5-2022-08-22">Lean 4.0.0-m5 (2022-08-22)</h2><p>This is the fifth milestone release of Lean 4. It contains many improvements and many new features. We had 1495 commits since the last milestone.</p>
+<p>Contributors:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">   885  Leonardo de Moura
+   310  Sebastian Ullrich
+    69  E.W.Ayers
+    66  Wojciech Nawrocki
+    49  Gabriel Ebner
+    38  Mario Carneiro
+    22  larsk21
+    10  tydeu
+     6  Ed Ayers
+     6  Mariana Alanis
+     4  Chris Lovett
+     3  Jannis Limperg
+     2  François G. Dorais
+     2  Henrik Böving
+     2  Jakob von Raumer
+     2  Scott Morrison
+     2  Siddharth
+     1  Andrés Goens
+     1  Arthur Paulino
+     1  Connor Baker
+     1  Joscha
+     1  KaseQuark
+     1  Lars
+     1  Mac
+     1  Marcus Rossel
+     1  Patrick Massot
+     1  Siddharth Bhat
+     1  Timo
+     1  Vincent de Haan
+     1  William Blake
+     1  Yuri de Wit
+     1  ammkrn
+     1  asdasd1dsadsa
+     1  kzvi
+</code></pre></div><ul>
+<li><p>Update Lake to v4.0.0. See the <a href="https://github.com/leanprover/lake/releases/tag/v4.0.0">v4.0.0 release notes</a> for detailed changes.</p>
+</li>
+<li><p>Mutual declarations in different namespaces are now supported. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mutual
+  def Foo.boo (x : Nat) :=
+    match x with
+    | 0 =&gt; 1
+    | x + 1 =&gt; 2*Boo.bla x
+
+  def Boo.bla (x : Nat) :=
+    match x with
+    | 0 =&gt; 2
+    | x+1 =&gt; 3*Foo.boo x
+end
+</code></pre></div><p>A <code>namespace</code> is automatically created for the common prefix. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">mutual
+  def Tst.Foo.boo (x : Nat) := ...
+  def Tst.Boo.bla (x : Nat) := ...
+end
+</code></pre></div><p>expands to</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">namespace Tst
+mutual
+  def Foo.boo (x : Nat) := ...
+  def Boo.bla (x : Nat) := ...
+end
+end Tst
+</code></pre></div></li>
+<li><p>Allow users to install their own <code>deriving</code> handlers for existing type classes. See example at <a href="https://github.com/leanprover/lean4/blob/master/tests/pkg/deriving/UserDeriving/Simple.lean">Simple.lean</a>.</p>
+</li>
+<li><p>Add tactic <code>congr (num)?</code>. See doc string for additional details.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/1390">Missing doc linter</a></p>
+</li>
+<li><p><code>match</code>-syntax notation now checks for unused alternatives. See issue <a href="https://github.com/leanprover/lean4/issues/1371">#1371</a>.</p>
+</li>
+<li><p>Auto-completion for structure instance fields. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example : Nat × Nat := {
+  f -- HERE
+}
+</code></pre></div><p><code>fst</code> now appears in the list of auto-completion suggestions.</p>
+</li>
+<li><p>Auto-completion for dotted identifier notation. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example : Nat :=
+  .su -- HERE
+</code></pre></div><p><code>succ</code> now appears in the list of auto-completion suggestions.</p>
+</li>
+<li><p><code>nat_lit</code> is not needed anymore when declaring <code>OfNat</code> instances. See issues <a href="https://github.com/leanprover/lean4/issues/1389">#1389</a> and <a href="https://github.com/leanprover/lean4/issues/875">#875</a>. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inductive Bit where
+  | zero
+  | one
+
+instance inst0 : OfNat Bit 0 where
+  ofNat := Bit.zero
+
+instance : OfNat Bit 1 where
+  ofNat := Bit.one
+
+example : Bit := 0
+example : Bit := 1
+</code></pre></div></li>
+<li><p>Add <code>[elabAsElim]</code> attribute (it is called <code>elab_as_eliminator</code> in Lean 3). Motivation: simplify the Mathlib port to Lean 4.</p>
+</li>
+<li><p><code>Trans</code> type class now accepts relations in <code>Type u</code>. See this <a href="https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/Calc.20mode/near/291214574">Zulip issue</a>.</p>
+</li>
+<li><p>Accept unescaped keywords as inductive constructor names. Escaping can often be avoided at use sites via dot notation.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inductive MyExpr
+  | let : ...
+
+def f : MyExpr → MyExpr
+  | .let ... =&gt; .let ...
+</code></pre></div></li>
+<li><p>Throw an error message at parametric local instances such as <code>[Nat -&gt; Decidable p]</code>. The type class resolution procedure cannot use this kind of local instance because the parameter does not have a forward dependency. This check can be disabled using <code>set_option checkBinderAnnotations false</code>.</p>
+</li>
+<li><p>Add option <code>pp.showLetValues</code>. When set to <code>false</code>, the info view hides the value of <code>let</code>-variables in a goal. By default, it is <code>true</code> when visualizing tactic goals, and <code>false</code> otherwise. See <a href="https://github.com/leanprover/lean4/issues/1345">issue #1345</a> for additional details.</p>
+</li>
+<li><p>Add option <code>warningAsError</code>. When set to true, warning messages are treated as errors.</p>
+</li>
+<li><p>Support dotted notation and named arguments in patterns. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def getForallBinderType (e : Expr) : Expr :=
+  match e with
+  | .forallE (binderType := type) .. =&gt; type
+  | _ =&gt; panic! &quot;forall expected&quot;
+</code></pre></div></li>
+<li><p>&quot;jump-to-definition&quot; now works for function names embedded in the following attributes <code>@[implementedBy funName]</code>, <code>@[tactic parserName]</code>, <code>@[termElab parserName]</code>, <code>@[commandElab parserName]</code>, <code>@[builtinTactic parserName]</code>, <code>@[builtinTermElab parserName]</code>, and <code>@[builtinCommandElab parserName]</code>. See <a href="https://github.com/leanprover/lean4/issues/1350">issue #1350</a>.</p>
+</li>
+<li><p>Improve <code>MVarId</code> methods discoverability. See <a href="https://github.com/leanprover/lean4/issues/1346">issue #1346</a>. We still have to add similar methods for <code>FVarId</code>, <code>LVarId</code>, <code>Expr</code>, and other objects. Many existing methods have been marked as deprecated.</p>
+</li>
+<li><p>Add attribute <code>[deprecated]</code> for marking deprecated declarations. Examples:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def g (x : Nat) := x + 1
+
+-- Whenever `f` is used, a warning message is generated suggesting to use `g` instead.
+@[deprecated g]
+def f (x : Nat) := x + 1
+
+#check f 0 -- warning: `f` has been deprecated, use `g` instead
+
+-- Whenever `h` is used, a warning message is generated.
+@[deprecated]
+def h (x : Nat) := x + 1
+
+#check h 0 -- warning: `h` has been deprecated
+</code></pre></div></li>
+<li><p>Add type <code>LevelMVarId</code> (and abbreviation <code>LMVarId</code>) for universe level metavariable ids. Motivation: prevent meta-programmers from mixing up universe and expression metavariable ids.</p>
+</li>
+<li><p>Improve <code>calc</code> term and tactic. See <a href="https://github.com/leanprover/lean4/issues/1342">issue #1342</a>.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/1272">Relaxed antiquotation parsing</a> further reduces the need for explicit <code>$x:p</code> antiquotation kind annotations.</p>
+</li>
+<li><p>Add support for computed fields in inductives. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inductive Exp
+  | var (i : Nat)
+  | app (a b : Exp)
+with
+  @[computedField] hash : Exp → Nat
+    | .var i =&gt; i
+    | .app a b =&gt; a.hash * b.hash + 1
+</code></pre></div><p>The result of the <code>Exp.hash</code> function is then stored as an extra &quot;computed&quot; field in the <code>.var</code> and <code>.app</code> constructors; <code>Exp.hash</code> accesses this field and thus runs in constant time (even on dag-like values).</p>
+</li>
+<li><p>Update <code>a[i]</code> notation. It is now based on the type class</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">class GetElem (cont : Type u) (idx : Type v) (elem : outParam (Type w)) (dom : outParam (cont → idx → Prop)) where
+  getElem (xs : cont) (i : idx) (h : dom xs i) : Elem
+</code></pre></div><p>The notation <code>a[i]</code> is now defined as follows</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">macro:max x:term noWs &quot;[&quot; i:term &quot;]&quot; : term =&gt; `(getElem $x $i (by get_elem_tactic))
+</code></pre></div><p>The proof that <code>i</code> is a valid index is synthesized using the tactic <code>get_elem_tactic</code>. For example, the type <code>Array α</code> has the following instances</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">instance : GetElem (Array α) Nat α fun xs i =&gt; LT.lt i xs.size where ...
+instance : GetElem (Array α) USize α fun xs i =&gt; LT.lt i.toNat xs.size where ...
+</code></pre></div><p>You can use the notation <code>a[i]&#39;h</code> to provide the proof manually. Two other notations were introduced: <code>a[i]!</code> and <code>a[i]?</code>, For <code>a[i]!</code>, a panic error message is produced at runtime if <code>i</code> is not a valid index. <code>a[i]?</code> has type <code>Option α</code>, and <code>a[i]?</code> evaluates to <code>none</code> if the index <code>i</code> is not valid. The three new notations are defined as follows:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">@[inline] def getElem' [GetElem cont idx elem dom] (xs : cont) (i : idx) (h : dom xs i) : elem :=
+getElem xs i h
+
+@[inline] def getElem! [GetElem cont idx elem dom] [Inhabited elem] (xs : cont) (i : idx) [Decidable (dom xs i)] : elem :=
+  if h : _ then getElem xs i h else panic! &quot;index out of bounds&quot;
+
+@[inline] def getElem? [GetElem cont idx elem dom] (xs : cont) (i : idx) [Decidable (dom xs i)] : Option elem :=
+  if h : _ then some (getElem xs i h) else none
+
+macro:max x:term noWs &quot;[&quot; i:term &quot;]&quot; noWs &quot;?&quot; : term =&gt; `(getElem? $x $i)
+macro:max x:term noWs &quot;[&quot; i:term &quot;]&quot; noWs &quot;!&quot; : term =&gt; `(getElem! $x $i)
+macro x:term noWs &quot;[&quot; i:term &quot;]'&quot; h:term:max : term =&gt; `(getElem' $x $i $h)
+</code></pre></div><p>See discussion on <a href="https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/String.2EgetOp/near/287855425">Zulip</a>. Examples:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example (a : Array Int) (i : Nat) : Int :=
+  a[i] -- Error: failed to prove index is valid ...
+
+example (a : Array Int) (i : Nat) (h : i &lt; a.size) : Int :=
+  a[i] -- Ok
+
+example (a : Array Int) (i : Nat) : Int :=
+  a[i]! -- Ok
+
+example (a : Array Int) (i : Nat) : Option Int :=
+  a[i]? -- Ok
+
+example (a : Array Int) (h : a.size = 2) : Int :=
+  a[0]'(by rw [h]; decide) -- Ok
+
+example (a : Array Int) (h : a.size = 2) : Int :=
+  have : 0 &lt; a.size := by rw [h]; decide
+  have : 1 &lt; a.size := by rw [h]; decide
+  a[0] + a[1] -- Ok
+
+example (a : Array Int) (i : USize) (h : i.toNat &lt; a.size) : Int :=
+  a[i] -- Ok
+</code></pre></div><p>The <code>get_elem_tactic</code> is defined as</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">macro &quot;get_elem_tactic&quot; : tactic =&gt;
+  `(first
+    | get_elem_tactic_trivial
+    | fail &quot;failed to prove index is valid, ...&quot;
+   )
+</code></pre></div><p>The <code>get_elem_tactic_trivial</code> auxiliary tactic can be extended using <code>macro_rules</code>. By default, it tries <code>trivial</code>, <code>simp_arith</code>, and a special case for <code>Fin</code>. In the future, it will also try <code>linarith</code>. You can extend <code>get_elem_tactic_trivial</code> using <code>my_tactic</code> as follows</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">macro_rules
+| `(tactic| get_elem_tactic_trivial) =&gt; `(tactic| my_tactic)
+</code></pre></div><p>Note that <code>Idx</code>&#39;s type in <code>GetElem</code> does not depend on <code>Cont</code>. So, you cannot write the instance <code>instance : GetElem (Array α) (Fin ??) α fun xs i =&gt; ...</code>, but the Lean library comes equipped with the following auxiliary instance:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">instance [GetElem cont Nat elem dom] : GetElem cont (Fin n) elem fun xs i =&gt; dom xs i where
+  getElem xs i h := getElem xs i.1 h
+</code></pre></div><p>and helper tactic</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">macro_rules
+| `(tactic| get_elem_tactic_trivial) =&gt; `(tactic| apply Fin.val_lt_of_le; get_elem_tactic_trivial; done)
+</code></pre></div><p>Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example (a : Array Nat) (i : Fin a.size) :=
+  a[i] -- Ok
+
+example (a : Array Nat) (h : n ≤ a.size) (i : Fin n) :=
+  a[i] -- Ok
+</code></pre></div></li>
+<li><p>Better support for qualified names in recursive declarations. The following is now supported:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">namespace Nat
+  def fact : Nat → Nat
+  | 0 =&gt; 1
+  | n+1 =&gt; (n+1) * Nat.fact n
+end Nat
+</code></pre></div></li>
+<li><p>Add support for <code>CommandElabM</code> monad at <code>#eval</code>. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">import Lean
+
+open Lean Elab Command
+
+#eval do
+  let id := mkIdent `foo
+  elabCommand (← `(def $id := 10))
+
+#eval foo -- 10
+</code></pre></div></li>
+<li><p>Try to elaborate <code>do</code> notation even if the expected type is not available. We still delay elaboration when the expected type is not available. This change is particularly useful when writing examples such as</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#eval do
+  IO.println &quot;hello&quot;
+  IO.println &quot;world&quot;
+</code></pre></div><p>That is, we don&#39;t have to use the idiom <code>#eval show IO _ from do ...</code> anymore. Note that auto monadic lifting is less effective when the expected type is not available. Monadic polymorphic functions (e.g., <code>ST.Ref.get</code>) also require the expected type.</p>
+</li>
+<li><p>On Linux, panics now print a backtrace by default, which can be disabled by setting the environment variable <code>LEAN_BACKTRACE</code> to <code>0</code>. Other platforms are TBD.</p>
+</li>
+<li><p>The <code>group(·)</code> <code>syntax</code> combinator is now introduced automatically where necessary, such as when using multiple parsers inside <code>(...)+</code>.</p>
+</li>
+<li><p>Add <a href="https://github.com/leanprover/lean4/pull/1251">&quot;Typed Macros&quot;</a>: syntax trees produced and accepted by syntax antiquotations now remember their syntax kinds, preventing accidental production of ill-formed syntax trees and reducing the need for explicit <code>:kind</code> antiquotation annotations. See PR for details.</p>
+</li>
+<li><p>Aliases of protected definitions are protected too. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">protected def Nat.double (x : Nat) := 2*x
+
+namespace Ex
+export Nat (double) -- Add alias Ex.double for Nat.double
+end Ex
+
+open Ex
+#check Ex.double -- Ok
+#check double -- Error, `Ex.double` is alias for `Nat.double` which is protected
+</code></pre></div></li>
+<li><p>Use <code>IO.getRandomBytes</code> to initialize random seed for <code>IO.rand</code>. See discussion at <a href="https://github.com/leanprover/lean4-samples/pull/2">this PR</a>.</p>
+</li>
+<li><p>Improve dot notation and aliases interaction. See discussion on <a href="https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/Namespace-based.20overloading.20does.20not.20find.20exports/near/282946185">Zulip</a> for additional details. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def Set (α : Type) := α → Prop
+def Set.union (s₁ s₂ : Set α) : Set α := fun a =&gt; s₁ a ∨ s₂ a
+def FinSet (n : Nat) := Fin n → Prop
+
+namespace FinSet
+  export Set (union) -- FinSet.union is now an alias for `Set.union`
+end FinSet
+
+example (x y : FinSet 10) : FinSet 10 :=
+  x.union y -- Works
+</code></pre></div></li>
+<li><p><code>ext</code> and <code>enter</code> conv tactics can now go inside let-declarations. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example (g : Nat → Nat) (y : Nat) (h : let x := y + 1; g (0+x) = x) : g (y + 1) = y + 1 := by
+  conv at h =&gt; enter [x, 1, 1]; rw [Nat.zero_add]
+  /-
+    g : Nat → Nat
+    y : Nat
+    h : let x := y + 1;
+        g x = x
+    ⊢ g (y + 1) = y + 1
+  -/
+  exact h
+</code></pre></div></li>
+<li><p>Add <code>zeta</code> conv tactic to expand let-declarations. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example (h : let x := y + 1; 0 + x = y) : False := by
+  conv at h =&gt; zeta; rw [Nat.zero_add]
+  /-
+    y : Nat
+    h : y + 1 = y
+    ⊢ False
+  -/
+  simp_arith at h
+</code></pre></div></li>
+<li><p>Improve namespace resolution. See issue <a href="https://github.com/leanprover/lean4/issues/1224">#1224</a>. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">import Lean
+open Lean Parser Elab
+open Tactic -- now opens both `Lean.Parser.Tactic` and `Lean.Elab.Tactic`
+</code></pre></div></li>
+<li><p>Rename <code>constant</code> command to <code>opaque</code>. See discussion at <a href="https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/What.20is.20.60opaque.60.3F/near/284926171">Zulip</a>.</p>
+</li>
+<li><p>Extend <code>induction</code> and <code>cases</code> syntax: multiple left-hand-sides in a single alternative. This extension is very similar to the one implemented for <code>match</code> expressions. Examples:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inductive Foo where
+  | mk1 (x : Nat) | mk2 (x : Nat) | mk3
+
+def f (v : Foo) :=
+  match v with
+  | .mk1 x =&gt; x + 1
+  | .mk2 x =&gt; 2*x + 1
+  | .mk3   =&gt; 1
+
+theorem f_gt_zero : f v &gt; 0 := by
+  cases v with
+  | mk1 x | mk2 x =&gt; simp_arith!  -- New feature used here!
+  | mk3 =&gt; decide
+</code></pre></div></li>
+<li><p><a href="https://github.com/leanprover/lean4/issues/1120"><code>let/if</code> indentation in <code>do</code> blocks in now supported.</a></p>
+</li>
+<li><p>Add unnamed antiquotation <code>$_</code> for use in syntax quotation patterns.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/pull/1159">Add unused variables linter</a>. Feedback welcome!</p>
+</li>
+<li><p>Lean now generates an error if the body of a declaration body contains a universe parameter that does not occur in the declaration type, nor is an explicit parameter. Examples:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">/-
+The following declaration now produces an error because `PUnit` is universe polymorphic,
+but the universe parameter does not occur in the function type `Nat → Nat`
+-/
+def f (n : Nat) : Nat :=
+  let aux (_ : PUnit) : Nat := n + 1
+  aux ⟨⟩
+
+/-
+The following declaration is accepted because the universe parameter was explicitly provided in the
+function signature.
+-/
+def g.{u} (n : Nat) : Nat :=
+  let aux (_ : PUnit.{u}) : Nat := n + 1
+  aux ⟨⟩
+</code></pre></div></li>
+<li><p>Add <code>subst_vars</code> tactic.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/issues/1158">Fix <code>autoParam</code> in structure fields lost in multiple inheritance.</a>.</p>
+</li>
+<li><p>Add <code>[eliminator]</code> attribute. It allows users to specify default recursor/eliminators for the <code>induction</code> and <code>cases</code> tactics. It is an alternative for the <code>using</code> notation. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">@[eliminator] protected def recDiag {motive : Nat → Nat → Sort u}
+    (zero_zero : motive 0 0)
+    (succ_zero : (x : Nat) → motive x 0 → motive (x + 1) 0)
+    (zero_succ : (y : Nat) → motive 0 y → motive 0 (y + 1))
+    (succ_succ : (x y : Nat) → motive x y → motive (x + 1) (y + 1))
+    (x y : Nat) :  motive x y :=
+  let rec go : (x y : Nat) → motive x y
+    | 0,     0 =&gt; zero_zero
+    | x+1, 0   =&gt; succ_zero x (go x 0)
+    | 0,   y+1 =&gt; zero_succ y (go 0 y)
+    | x+1, y+1 =&gt; succ_succ x y (go x y)
+  go x y
+termination_by go x y =&gt; (x, y)
+
+def f (x y : Nat) :=
+  match x, y with
+  | 0,   0   =&gt; 1
+  | x+1, 0   =&gt; f x 0
+  | 0,   y+1 =&gt; f 0 y
+  | x+1, y+1 =&gt; f x y
+termination_by f x y =&gt; (x, y)
+
+example (x y : Nat) : f x y &gt; 0 := by
+  induction x, y &lt;;&gt; simp [f, *]
+</code></pre></div></li>
+<li><p>Add support for <code>casesOn</code> applications to structural and well-founded recursion modules. This feature is useful when writing definitions using tactics. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inductive Foo where
+  | a | b | c
+  | pair: Foo × Foo → Foo
+
+def Foo.deq (a b : Foo) : Decidable (a = b) := by
+  cases a &lt;;&gt; cases b
+  any_goals apply isFalse Foo.noConfusion
+  any_goals apply isTrue rfl
+  case pair a b =&gt;
+    let (a₁, a₂) := a
+    let (b₁, b₂) := b
+    exact match deq a₁ b₁, deq a₂ b₂ with
+    | isTrue h₁, isTrue h₂ =&gt; isTrue (by rw [h₁,h₂])
+    | isFalse h₁, _ =&gt; isFalse (fun h =&gt; by cases h; cases (h₁ rfl))
+    | _, isFalse h₂ =&gt; isFalse (fun h =&gt; by cases h; cases (h₂ rfl))
+</code></pre></div></li>
+<li><p><code>Option</code> is again a monad. The auxiliary type <code>OptionM</code> has been removed. See <a href="https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/Do.20we.20still.20need.20OptionM.3F/near/279761084">Zulip thread</a>.</p>
+</li>
+<li><p>Improve <code>split</code> tactic. It used to fail on <code>match</code> expressions of the form <code>match h : e with ...</code> where <code>e</code> is not a free variable. The failure used to occur during generalization.</p>
+</li>
+<li><p>New encoding for <code>match</code>-expressions that use the <code>h :</code> notation for discriminants. The information is not lost during delaboration, and it is the foundation for a better <code>split</code> tactic. at delaboration time. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#print Nat.decEq
+/-
+protected def Nat.decEq : (n m : Nat) → Decidable (n = m) :=
+fun n m =&gt;
+  match h : Nat.beq n m with
+  | true =&gt; isTrue (_ : n = m)
+  | false =&gt; isFalse (_ : ¬n = m)
+-/
+</code></pre></div></li>
+<li><p><code>exists</code> tactic is now takes a comma separated list of terms.</p>
+</li>
+<li><p>Add <code>dsimp</code> and <code>dsimp!</code> tactics. They guarantee the result term is definitionally equal, and only apply <code>rfl</code>-theorems.</p>
+</li>
+<li><p>Fix binder information for <code>match</code> patterns that use definitions tagged with <code>[matchPattern]</code> (e.g., <code>Nat.add</code>). We now have proper binder information for the variable <code>y</code> in the following example.</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def f (x : Nat) : Nat :=
+  match x with
+  | 0 =&gt; 1
+  | y + 1 =&gt; y
+</code></pre></div></li>
+<li><p>(Fix) the default value for structure fields may now depend on the structure parameters. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">structure Something (i: Nat) where
+n1: Nat := 1
+n2: Nat := 1 + i
+
+def s : Something 10 := {}
+example : s.n2 = 11 := rfl
+</code></pre></div></li>
+<li><p>Apply <code>rfl</code> theorems at the <code>dsimp</code> auxiliary method used by <code>simp</code>. <code>dsimp</code> can be used anywhere in an expression because it preserves definitional equality.</p>
+</li>
+<li><p>Refine auto bound implicit feature. It does not consider anymore unbound variables that have the same name of a declaration being defined. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def f : f → Bool := -- Error at second `f`
+  fun _ =&gt; true
+
+inductive Foo : List Foo → Type -- Error at second `Foo`
+  | x : Foo []
+</code></pre></div><p>Before this refinement, the declarations above would be accepted and the second <code>f</code> and <code>Foo</code> would be treated as auto implicit variables. That is, <code>f : {f : Sort u} → f → Bool</code>, and <code>Foo : {Foo : Type u} → List Foo → Type</code>.</p>
+</li>
+<li><p>Fix syntax highlighting for recursive declarations. Example</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inductive List (α : Type u) where
+  | nil : List α  -- `List` is not highlighted as a variable anymore
+  | cons (head : α) (tail : List α) : List α
+
+def List.map (f : α → β) : List α → List β
+  | []    =&gt; []
+  | a::as =&gt; f a :: map f as -- `map` is not highlighted as a variable anymore
+</code></pre></div></li>
+<li><p>Add <code>autoUnfold</code> option to <code>Lean.Meta.Simp.Config</code>, and the following macros</p>
+<ul>
+<li><code>simp!</code> for <code>simp (config := { autoUnfold := true })</code></li>
+<li><code>simp_arith!</code> for <code>simp (config := { autoUnfold := true, arith := true })</code></li>
+<li><code>simp_all!</code> for <code>simp_all (config := { autoUnfold := true })</code></li>
+<li><code>simp_all_arith!</code> for <code>simp_all (config := { autoUnfold := true, arith := true })</code></li>
+</ul>
+<p>When the <code>autoUnfold</code> is set to true, <code>simp</code> tries to unfold the following kinds of definition</p>
+<ul>
+<li>Recursive definitions defined by structural recursion.</li>
+<li>Non-recursive definitions where the body is a <code>match</code>-expression. This kind of definition is only unfolded if the <code>match</code> can be reduced. Example:</li>
+</ul>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">def append (as bs : List α) : List α :=
+  match as with
+  | [] =&gt; bs
+  | a :: as =&gt; a :: append as bs
+
+theorem append_nil (as : List α) : append as [] = as := by
+  induction as &lt;;&gt; simp_all!
+
+theorem append_assoc (as bs cs : List α) : append (append as bs) cs = append as (append bs cs) := by
+  induction as &lt;;&gt; simp_all!
+</code></pre></div></li>
+<li><p>Add <code>save</code> tactic for creating checkpoints more conveniently. Example:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example : &lt;some-proposition&gt; := by
+  tac_1
+  tac_2
+  save
+  tac_3
+  ...
+</code></pre></div><p>is equivalent to</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example : &lt;some-proposition&gt; := by
+  checkpoint
+    tac_1
+    tac_2
+  tac_3
+  ...
+</code></pre></div></li>
+<li><p>Remove support for <code>{}</code> annotation from inductive datatype constructors. This annotation was barely used, and we can control the binder information for parameter bindings using the new inductive family indices to parameter promotion. Example: the following declaration using <code>{}</code></p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inductive LE' (n : Nat) : Nat → Prop where
+  | refl {} : LE' n n -- Want `n` to be explicit
+  | succ  : LE' n m → LE' n (m+1)
+</code></pre></div><p>can now be written as</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inductive LE' : Nat → Nat → Prop where
+  | refl (n : Nat) : LE' n n
+  | succ : LE' n m → LE' n (m+1)
+</code></pre></div><p>In both cases, the inductive family has one parameter and one index. Recall that the actual number of parameters can be retrieved using the command <code>#print</code>.</p>
+</li>
+<li><p>Remove support for <code>{}</code> annotation in the <code>structure</code> command.</p>
+</li>
+<li><p>Several improvements to LSP server. Examples: &quot;jump to definition&quot; in mutually recursive sections, fixed incorrect hover information in &quot;match&quot;-expression patterns, &quot;jump to definition&quot; for pattern variables, fixed auto-completion in function headers, etc.</p>
+</li>
+<li><p>In <code>macro ... xs:p* ...</code> and similar macro bindings of combinators, <code>xs</code> now has the correct type <code>Array Syntax</code></p>
+</li>
+<li><p>Identifiers in syntax patterns now ignore macro scopes during matching.</p>
+</li>
+<li><p>Improve binder names for constructor auto implicit parameters. Example, given the inductive datatype</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inductive Member : α → List α → Type u
+  | head : Member a (a::as)
+  | tail : Member a bs → Member a (b::bs)
+</code></pre></div><p>before:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#check @Member.head
+-- @Member.head : {x : Type u_1} → {a : x} → {as : List x} → Member a (a :: as)
+</code></pre></div><p>now:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">#check @Member.head
+-- @Member.head : {α : Type u_1} → {a : α} → {as : List α} → Member a (a :: as)
+</code></pre></div></li>
+<li><p>Improve error message when constructor parameter universe level is too big.</p>
+</li>
+<li><p>Add support for <code>for h : i in [start:stop] do ..</code> where <code>h : i ∈ [start:stop]</code>. This feature is useful for proving termination of functions such as:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">inductive Expr where
+  | app (f : String) (args : Array Expr)
+
+def Expr.size (e : Expr) : Nat := Id.run do
+  match e with
+  | app f args =&gt;
+    let mut sz := 1
+    for h : i in [: args.size] do
+      -- h.upper : i &lt; args.size
+      sz := sz + size (args.get ⟨i, h.upper⟩)
+    return sz
+</code></pre></div></li>
+<li><p>Add tactic <code>case&#39;</code>. It is similar to <code>case</code>, but does not admit the goal on failure. For example, the new tactic is useful when writing tactic scripts where we need to use <code>case&#39;</code> at <code>first | ... | ...</code>, and we want to take the next alternative when <code>case&#39;</code> fails.</p>
+</li>
+<li><p>Add tactic macro</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">macro &quot;stop&quot; s:tacticSeq : tactic =&gt; `(repeat sorry)
+</code></pre></div><p>See discussion on <a href="https://leanprover.zulipchat.com/#narrow/stream/270676-lean4/topic/Partial.20evaluation.20of.20a.20file">Zulip</a>.</p>
+</li>
+<li><p>When displaying goals, we do not display inaccessible proposition names if they do not have forward dependencies. We still display their types. For example, the goal</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">case node.inl.node
+β : Type u_1
+b : BinTree β
+k : Nat
+v : β
+left : Tree β
+key : Nat
+value : β
+right : Tree β
+ihl : BST left → Tree.find? (Tree.insert left k v) k = some v
+ihr : BST right → Tree.find? (Tree.insert right k v) k = some v
+h✝ : k &lt; key
+a✝³ : BST left
+a✝² : ForallTree (fun k v =&gt; k &lt; key) left
+a✝¹ : BST right
+a✝ : ForallTree (fun k v =&gt; key &lt; k) right
+⊢ BST left
+</code></pre></div><p>is now displayed as</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">case node.inl.node
+β : Type u_1
+b : BinTree β
+k : Nat
+v : β
+left : Tree β
+key : Nat
+value : β
+right : Tree β
+ihl : BST left → Tree.find? (Tree.insert left k v) k = some v
+ihr : BST right → Tree.find? (Tree.insert right k v) k = some v
+ : k &lt; key
+ : BST left
+ : ForallTree (fun k v =&gt; k &lt; key) left
+ : BST right
+ : ForallTree (fun k v =&gt; key &lt; k) right
+⊢ BST left
+</code></pre></div></li>
+<li><p>The hypothesis name is now optional in the <code>by_cases</code> tactic.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/issues/1090">Fix inconsistency between <code>syntax</code> and kind names</a>. The node kinds <code>numLit</code>, <code>charLit</code>, <code>nameLit</code>, <code>strLit</code>, and <code>scientificLit</code> are now called <code>num</code>, <code>char</code>, <code>name</code>, <code>str</code>, and <code>scientific</code> respectively. Example: we now write</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">macro_rules | `($n:num) =&gt; `(&quot;hello&quot;)
+</code></pre></div><p>instead of</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">macro_rules | `($n:numLit) =&gt; `(&quot;hello&quot;)
+</code></pre></div></li>
+<li><p>(Experimental) New <code>checkpoint &lt;tactic-seq&gt;</code> tactic for big interactive proofs.</p>
+</li>
+<li><p>Rename tactic <code>nativeDecide</code> =&gt; <code>native_decide</code>.</p>
+</li>
+<li><p>Antiquotations are now accepted in any syntax. The <code>incQuotDepth</code> <code>syntax</code> parser is therefore obsolete and has been removed.</p>
+</li>
+<li><p>Renamed tactic <code>nativeDecide</code> =&gt; <code>native_decide</code>.</p>
+</li>
+<li><p>&quot;Cleanup&quot; local context before elaborating a <code>match</code> alternative right-hand-side. Examples:</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example (x : Nat) : Nat :=
+  match g x with
+  | (a, b) =&gt; _ -- Local context does not contain the auxiliary `_discr := g x` anymore
+
+example (x : Nat × Nat) (h : x.1 &gt; 0) : f x &gt; 0 := by
+  match x with
+  | (a, b) =&gt; _ -- Local context does not contain the `h✝ : x.fst &gt; 0` anymore
+</code></pre></div></li>
+<li><p>Improve <code>let</code>-pattern (and <code>have</code>-pattern) macro expansion. In the following example,</p>
+<div class="code"><div class="code-label">Reference display / signature / diagnostic</div><pre><code class="language-text">example (x : Nat × Nat) : f x &gt; 0 := by
+  let (a, b) := x
+  done
+</code></pre></div><p>The resulting goal is now <code>... |- f (a, b) &gt; 0</code> instead of <code>... |- f x &gt; 0</code>.</p>
+</li>
+<li><p>Add cross-compiled <a href="https://github.com/leanprover/lean4/pull/1066">aarch64 Linux</a> and <a href="https://github.com/leanprover/lean4/pull/1076">aarch64 macOS</a> releases.</p>
+</li>
+<li><p><a href="https://github.com/leanprover/lean4/tree/master/doc/examples">Add tutorial-like examples to our documentation</a>, rendered using LeanInk+Alectryon.</p>
+</li>
+</ul>
+<footer class="footer">Content coverage is not compiler support. The selected grammar, stable semantic pin, assumptions and evidence limits remain explicit. Inherited material: Lean FRO and contributors, Apache-2.0. No website font files or upstream executable website assets are distributed.</footer></main></div><script>const field=document.getElementById("chapterFilter");field.addEventListener("input",()=>{const value=field.value.toLowerCase();document.querySelectorAll("#chapterLinks a").forEach(link=>link.classList.toggle("hidden",!link.textContent.toLowerCase().includes(value)));});</script></body></html>

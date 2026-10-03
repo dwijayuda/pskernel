@@ -1,5 +1,3 @@
-import ProofScript.Data.Ordering
-
 inductive PsKernelName where
   | anonymous
   | str (parent : PsKernelName) (value : String)
@@ -8,6 +6,11 @@ inductive PsKernelName where
 inductive PsKernelNameComponent where
   | str (value : String)
   | num (value : Nat)
+
+inductive PsKernelPsKernelOrdering where
+  | lt
+  | eq
+  | gt
 
 def psKernelStringEqFromWithFuel
     (fuel : Nat) :
@@ -68,13 +71,13 @@ def psKernelStringEq
 
 def psKernelNatCmp
     (left : Nat)
-    (right : Nat) : Ordering :=
+    (right : Nat) : PsKernelOrdering :=
   if Nat.beq left right then
-    Ordering.eq
+    PsKernelOrdering.eq
   else if Nat.ble left right then
-    Ordering.lt
+    PsKernelOrdering.lt
   else
-    Ordering.gt
+    PsKernelOrdering.gt
 
 def psKernelNatLt
     (left : Nat)
@@ -96,7 +99,7 @@ def psKernelNatGe
 
 def psKernelStringCmpWithFuel
     (fuel : Nat) :
-    String -> String -> Nat -> Nat -> Ordering :=
+    String -> String -> Nat -> Nat -> PsKernelOrdering :=
   match fuel with
   | Nat.zero =>
       fun
@@ -104,10 +107,10 @@ def psKernelStringCmpWithFuel
         (_right : String)
         (_leftPos : Nat)
         (_rightPos : Nat) =>
-        Ordering.eq
+        PsKernelOrdering.eq
   | Nat.succ remaining =>
       let smaller :
-          String -> String -> Nat -> Nat -> Ordering :=
+          String -> String -> Nat -> Nat -> PsKernelOrdering :=
         psKernelStringCmpWithFuel remaining;
       fun
         (left : String)
@@ -116,11 +119,11 @@ def psKernelStringCmpWithFuel
         (rightPos : Nat) =>
         if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
           if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
-            Ordering.eq
+            PsKernelOrdering.eq
           else
-            Ordering.lt
+            PsKernelOrdering.lt
         else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then
-          Ordering.gt
+          PsKernelOrdering.gt
         else
           let leftChar :=
             Char.toNat
@@ -145,13 +148,13 @@ def psKernelStringCmpWithFuel
                   right
                   (String.Pos.Raw.mk rightPos)))
           else if Nat.ble leftChar rightChar then
-            Ordering.lt
+            PsKernelOrdering.lt
           else
-            Ordering.gt
+            PsKernelOrdering.gt
 
 def psKernelStringCmp
     (left : String)
-    (right : String) : Ordering :=
+    (right : String) : PsKernelOrdering :=
   psKernelStringCmpWithFuel
     (Nat.succ
       (Nat.add
@@ -313,51 +316,51 @@ def psKernelNameComponents
 
 def psKernelNameComponentCmp
     (left : PsKernelNameComponent)
-    (right : PsKernelNameComponent) : Ordering :=
+    (right : PsKernelNameComponent) : PsKernelOrdering :=
   match left with
   | PsKernelNameComponent.num leftValue =>
       match right with
       | PsKernelNameComponent.num rightValue =>
           psKernelNatCmp leftValue rightValue
       | PsKernelNameComponent.str _ =>
-          Ordering.lt
+          PsKernelOrdering.lt
   | PsKernelNameComponent.str leftValue =>
       match right with
       | PsKernelNameComponent.num _ =>
-          Ordering.gt
+          PsKernelOrdering.gt
       | PsKernelNameComponent.str rightValue =>
           psKernelStringCmp leftValue rightValue
 
 def psKernelCompareNameComponents
     (left : List PsKernelNameComponent) :
-    List PsKernelNameComponent -> Ordering :=
+    List PsKernelNameComponent -> PsKernelOrdering :=
   match left with
   | List.nil =>
       fun (right : List PsKernelNameComponent) =>
         match right with
-        | List.nil => Ordering.eq
-        | List.cons _ _ => Ordering.lt
+        | List.nil => PsKernelOrdering.eq
+        | List.cons _ _ => PsKernelOrdering.lt
   | List.cons leftHead leftTail =>
       let smaller :
-          List PsKernelNameComponent -> Ordering :=
+          List PsKernelNameComponent -> PsKernelOrdering :=
         psKernelCompareNameComponents leftTail;
       fun (right : List PsKernelNameComponent) =>
         match right with
         | List.nil =>
-            Ordering.gt
+            PsKernelOrdering.gt
         | List.cons rightHead rightTail =>
             match
                 psKernelNameComponentCmp
                   leftHead
                   rightHead with
-            | Ordering.eq =>
+            | PsKernelOrdering.eq =>
                 smaller rightTail
             | ordering =>
                 ordering
 
 def psKernelNameCmp
     (left : PsKernelName)
-    (right : PsKernelName) : Ordering :=
+    (right : PsKernelName) : PsKernelOrdering :=
   psKernelCompareNameComponents
     (psKernelNameComponents left)
     (psKernelNameComponents right)

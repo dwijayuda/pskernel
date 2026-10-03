@@ -1,6 +1,9 @@
 # ProofScript canonical architecture
 
-Status: **normative anti-drift architecture**.
+> **r3 reconciliation note.** This architecture document is implementation guidance. The standalone r3 reference is normative. Terminology on this branch is: `Core` -> genuine admission -> `CheckedCore` -> module packaging -> `CheckedModule` -> erasure/lowering -> `RuntimeIR`. Any older use of `VerifiedIR` means RuntimeIR plus separately recorded evidence; the IR name itself has no proof authority.
+
+
+Status: **implementation anti-drift architecture guidance; not source-language authority**.
 
 Reference research for this architecture follows `docs/STUDY_REFERENCE_POLICY.md`.
 

@@ -1,0 +1,250 @@
+{
+  "schemaVersion": "proofscript-feature-registry-2",
+  "language": "ProofScript",
+  "grammarRevision": "ps-0.9-r3",
+  "semanticPin": {
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "languageProfiles": {
+    "standard": "ps-standard-0.9-r3",
+    "extensible": "ps-lean-extensible-0.9-r3",
+    "psc2Required": "psc2-language-v1",
+    "psc2Standard": "psc2-standard-language-v1",
+    "leanCompatibility": "lean-subset-psc2-v1",
+    "pattern": "psc2-pattern-v1"
+  },
+  "features": [
+    {
+      "id": "L-CORE-LEAN",
+      "class": "native",
+      "category": "semantic-foundation",
+      "status": "current",
+      "target": "pinned included native categories"
+    },
+    {
+      "id": "M-PUBLIC-IMPORT-R3",
+      "class": "surface",
+      "category": "module-header",
+      "status": "current",
+      "target": "Lean-compatible exported import dependency",
+      "syntax": "public import Module.Name",
+      "ordinaryImportReexports": false,
+      "publicImportReexports": true,
+      "openReexports": false,
+      "privateDeclarationsReexported": false
+    },
+    {
+      "id": "D-CONST-ALIAS",
+      "class": "surface",
+      "category": "command",
+      "status": "current",
+      "target": "parameterless native definition"
+    },
+    {
+      "id": "D-FUNCTION-ALIAS-R3",
+      "class": "surface",
+      "category": "command",
+      "status": "current",
+      "target": "ordinary native definition"
+    },
+    {
+      "id": "D-FUNCTION-UNIT-R3",
+      "class": "surface",
+      "category": "function-header",
+      "status": "current",
+      "target": "optional Unit binder defaulting to Unit.unit"
+    },
+    {
+      "id": "D-DECL-BODY-BRACE-R3",
+      "class": "surface",
+      "category": "definition-body",
+      "status": "current",
+      "scope": [
+        "def",
+        "const",
+        "function"
+      ],
+      "target": "single PSTerm body with identical meaning to unbraced := PSTerm",
+      "grammar": ":= { PSTerm }",
+      "statementBlock": false,
+      "implicitReturn": false,
+      "preservesExistingBracedTermOwnership": true
+    },
+    {
+      "id": "D-EXPLICIT-PARAMS",
+      "class": "surface",
+      "category": "binder-list",
+      "status": "current",
+      "target": "ordered explicit native binders"
+    },
+    {
+      "id": "E-CALL-PARENS-R3",
+      "class": "surface",
+      "category": "term",
+      "status": "current",
+      "discriminator": "CallableHead CallGap (",
+      "target": "one ordered application form"
+    },
+    {
+      "id": "E-EMPTY-CALL-R3",
+      "class": "surface",
+      "category": "term",
+      "status": "current",
+      "discriminator": "CallableHead CallGap ()",
+      "target": "native omitted optional/automatic completion with required-explicit rejection"
+    },
+    {
+      "id": "D-NAMED-CALL",
+      "class": "surface",
+      "category": "call-argument",
+      "status": "current",
+      "target": "native named argument"
+    },
+    {
+      "id": "D-TRAILING-COMMA-CALL",
+      "class": "surface",
+      "category": "call-list",
+      "status": "current",
+      "target": "no additional argument"
+    },
+    {
+      "id": "D-TRAILING-COMMA-PARAMS",
+      "class": "surface",
+      "category": "parameter-list",
+      "status": "current",
+      "target": "no additional binder"
+    },
+    {
+      "id": "E-IF-BRACE",
+      "class": "surface",
+      "category": "term",
+      "status": "current",
+      "target": "native conditional with one term per branch"
+    },
+    {
+      "id": "E-STRUCT-BODY-R3",
+      "class": "surface",
+      "category": "structure-fields",
+      "status": "current",
+      "separator": "comma-between-only",
+      "trailingSeparator": false
+    },
+    {
+      "id": "E-CLASS-BODY-R3",
+      "class": "surface",
+      "category": "class-fields",
+      "status": "current",
+      "separator": "comma-between-only",
+      "trailingSeparator": false
+    },
+    {
+      "id": "E-INDUCTIVE-BODY-R3",
+      "class": "surface",
+      "category": "constructors",
+      "status": "current",
+      "separator": "leading-bar"
+    },
+    {
+      "id": "E-MATCH-BODY-R3",
+      "class": "surface",
+      "category": "match-alternatives",
+      "status": "current",
+      "separator": "leading-bar"
+    },
+    {
+      "id": "E-INSTANCE-BODY-R3",
+      "class": "surface",
+      "category": "instance-fields",
+      "status": "current",
+      "separator": "native-semicolon",
+      "trailingSeparator": true
+    },
+    {
+      "id": "E-WHERE-BODY-R3",
+      "class": "surface",
+      "category": "local-declarations",
+      "status": "current",
+      "separator": "native-semicolon",
+      "trailingSeparator": true
+    },
+    {
+      "id": "N-BASIC-DO-PSC2",
+      "class": "native-subset",
+      "category": "do",
+      "status": "current",
+      "target": "ordinary Bind/Pure sequencing with simple bindings"
+    },
+    {
+      "id": "S-PURE-CONTRACT-R3",
+      "class": "semantic",
+      "category": "declaration-contract",
+      "status": "current",
+      "scope": "total-pure-functions",
+      "clauses": [
+        "requires",
+        "ensures"
+      ]
+    },
+    {
+      "id": "P-STANDARD-R3",
+      "class": "profile",
+      "category": "source-profile",
+      "status": "current",
+      "registry": "PS-STANDARD-REGISTRY-r3.json"
+    },
+    {
+      "id": "P-LEAN-EXTENSIBLE-R3",
+      "class": "profile",
+      "category": "source-profile",
+      "status": "current",
+      "extensionPolicy": "declared-and-identity-bound"
+    },
+    {
+      "id": "P-PSC2-LANGUAGE-V1",
+      "class": "profile",
+      "category": "language-capability",
+      "status": "current",
+      "authority": "ProofScript_Language_Reference_v0.9.0_r3.md#23-psc2-language-v1-exact-coverage"
+    },
+    {
+      "id": "P-PSC2-STANDARD-LANGUAGE-V1",
+      "class": "profile",
+      "category": "language-capability",
+      "status": "current",
+      "authority": "ProofScript_Language_Reference_v0.9.0_r3.md#25-psc2-standard-language-v1"
+    },
+    {
+      "id": "P-LEAN-SUBSET-PSC2-V1",
+      "class": "profile",
+      "category": "compatibility",
+      "status": "current",
+      "authority": "ProofScript_Language_Reference_v0.9.0_r3.md#24-lean-subset-psc2-v1"
+    },
+    {
+      "id": "P-PATTERN-PSC2-V1",
+      "class": "profile",
+      "category": "pattern",
+      "status": "current",
+      "required": [
+        "variable",
+        "wildcard",
+        "constructor",
+        "nested-constructor",
+        "tuple-product",
+        "supported-literal",
+        "single-scrutinee-match"
+      ]
+    }
+  ],
+  "callGap": {
+    "inheritedHorizontalWhitespace": [
+      "space"
+    ],
+    "tabsIntroducedByR3": false,
+    "comments": "Lean comments with no physical line terminator",
+    "bareLineTerminator": false
+  },
+  "postPsc2LanguageRoadmap": "POST_PSC2_LANGUAGE_ROADMAP.md",
+  "historyIsNonNormative": true
+}

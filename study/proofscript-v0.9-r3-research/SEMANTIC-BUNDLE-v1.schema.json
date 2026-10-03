@@ -1,0 +1,290 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://proofscript.org/schema/psc-semantic-bundle-1.0.0.json",
+  "title": "ProofScript Semantic Bundle v1 manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "moduleName",
+    "sourceProfile",
+    "sourceIdentity",
+    "leanSemantics",
+    "checkerIdentity",
+    "moduleFormatVersion",
+    "environmentIdentity",
+    "registryIdentity",
+    "declarationPayload",
+    "dependencies",
+    "declarations",
+    "axiomDependencies",
+    "syntaxMetaExports",
+    "runtimeExports",
+    "evidence",
+    "hostBuildEffects",
+    "runtimeAssumptions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "psc-semantic-bundle-1.0.0"
+    },
+    "moduleName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sourceProfile": {
+      "enum": [
+        "ps-standard",
+        "ps-lean-extensible",
+        "lean-native"
+      ]
+    },
+    "sourceIdentity": {
+      "$ref": "#/$defs/sha256"
+    },
+    "leanSemantics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "commit"
+      ],
+      "properties": {
+        "version": {
+          "const": "4.34.0"
+        },
+        "commit": {
+          "const": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+        }
+      }
+    },
+    "checkerIdentity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "moduleFormatVersion": {
+      "const": "psc-checked-decls-v1"
+    },
+    "environmentIdentity": {
+      "$ref": "#/$defs/sha256"
+    },
+    "registryIdentity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "declarationPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "format",
+        "sha256",
+        "sizeBytes"
+      ],
+      "properties": {
+        "path": {
+          "const": "declarations.bin"
+        },
+        "format": {
+          "const": "psc-checked-decls-v1"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "moduleName",
+          "bundleManifestSha256"
+        ],
+        "properties": {
+          "moduleName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "bundleManifestSha256": {
+            "$ref": "#/$defs/sha256"
+          }
+        }
+      }
+    },
+    "declarations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "kind",
+          "typeSha256"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "definition",
+              "opaque",
+              "theorem",
+              "axiom",
+              "inductive",
+              "structure",
+              "class",
+              "instance"
+            ]
+          },
+          "typeSha256": {
+            "$ref": "#/$defs/sha256"
+          },
+          "bodySha256": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/sha256"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "axiomDependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "syntaxMetaExports": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "runtimeExports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "targetProfile",
+          "abiIdentity",
+          "artifactSha256",
+          "requiredCapabilities",
+          "preservationStatus"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "targetProfile": {
+            "type": "string",
+            "minLength": 1
+          },
+          "abiIdentity": {
+            "type": "string",
+            "minLength": 1
+          },
+          "artifactSha256": {
+            "$ref": "#/$defs/sha256"
+          },
+          "requiredCapabilities": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "preservationStatus": {
+            "enum": [
+              "not-established",
+              "tested",
+              "translation-validated",
+              "proved-fragment",
+              "assumed"
+            ]
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "logicalAdmission",
+        "sourceCorrespondence",
+        "erasurePreservation",
+        "targetPreservation"
+      ],
+      "properties": {
+        "logicalAdmission": {
+          "enum": [
+            "recheck-required",
+            "checked"
+          ]
+        },
+        "sourceCorrespondence": {
+          "enum": [
+            "not-established",
+            "tested",
+            "proved-fragment"
+          ]
+        },
+        "erasurePreservation": {
+          "enum": [
+            "not-established",
+            "tested",
+            "proved-fragment"
+          ]
+        },
+        "targetPreservation": {
+          "enum": [
+            "not-established",
+            "tested",
+            "translation-validated",
+            "proved-fragment",
+            "assumed"
+          ]
+        }
+      }
+    },
+    "hostBuildEffects": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "runtimeAssumptions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

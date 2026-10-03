@@ -7,6 +7,10 @@ Lean 4.34 analogues:
 - module import/finalization
 - `src/library/module.cpp`
 
+## r3 language boundary
+
+Source-language visibility is already frozen by the r3 language reference: ordinary top-level declarations are public unless `private`; `import M` does not re-export; `public import M` re-exports M's public-import closure; `open` never changes the exported API. This plan implements/artifact-binds those rules but does not redefine them.
+
 ## Goal
 
 Define a portable, deterministic, npm-friendly artifact for checked ProofScript/Lean-compatible declarations.

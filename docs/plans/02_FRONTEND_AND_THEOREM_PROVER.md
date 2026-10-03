@@ -1,5 +1,8 @@
 # Frontend and theorem-prover plan
 
+> **r3 reconciliation note.** This is an implementation plan. The standalone r3 language reference defines `psc2-language-v1`, `psc2-standard-language-v1`, and `lean-subset-psc2-v1`. Proof-term meaning belongs to the language; implementation of prover services and tactic engines belongs here or in Standard prover/plugin packages and must not enlarge the language profile implicitly.
+
+
 Status: post-module/conformance foundation.
 
 Lean 4.34 analogues:

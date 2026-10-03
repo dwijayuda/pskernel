@@ -1,6 +1,14 @@
 # ProofScript PSC2 Language Reference
 
+> **Superseded research input for the r3 branch.** This file is preserved for historical design evidence and PSC2 feature research only. It is **not normative** for `ps-0.9-r3`, `psc2-compiler-v1`, or `lean-subset-psc2-v1`. The sole normative source-language authority on this branch is:
+>
+> `study/proofscript-v0.9-r3-research/ProofScript_Language_Reference_v0.9.0_r3.md`
+>
+> When this file conflicts with that standalone reference, the standalone reference wins. In particular, features may now be classified as compiler-owned, library-owned, Standard prover/extension, controlled plugin, bounded Lean compatibility, post-PSC2 platform work, or deferred.
+
 Status: **comprehensive research-derived PSC2 draft**
+
+> The exact current PSC2 source-language closure is `psc2-language-v1`; the Standard language-facing closure is `psc2-standard-language-v1`. Future source-language candidates are tracked in `study/proofscript-v0.9-r3-research/POST_PSC2_LANGUAGE_ROADMAP.md`. Compiler/platform plans do not add language features by themselves.
 
 Base language: **PSC1**
 
@@ -10,7 +18,7 @@ Language-source lineage: **ProofScript v0.7 with v0.6.1 as the compatible compil
 
 PSC2 is a strict extension profile over PSC1. Valid PSC1 programs SHOULD remain valid PSC2 programs. PSC1 remains the small bootstrap language and implementation subset; PSC2 is the first full productivity/adoption profile for everyday programming, theorem proving, research, and contract-based formal verification.
 
-This reference is normative for the **planned PSC2 language profile** where it uses MUST/MUST NOT/SHOULD/SHOULD NOT/MAY. It is still a design draft until executable conformance gates close.
+This document is retained as a research-derived PSC2 capability catalogue. Its old normative wording is historical and does not override the standalone r3 reference.
 
 ---
 

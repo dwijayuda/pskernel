@@ -1,5 +1,8 @@
 # Compiler, runtime and backend plan
 
+> **r3 reconciliation note.** The standalone r3 reference is normative only for ProofScript source syntax and language semantics. `CheckedCore`, `CheckedModule`, `RuntimeIR`, runtime implementation, artifact binding, and backend-preservation design belong to compiler/runtime documents such as this one. Those implementation layers must preserve `psc2-language-v1`; no target may expand or reinterpret the source language for convenience.
+
+
 Status: after frontend can produce stable checked declarations.
 
 Lean 4.34 analogues:

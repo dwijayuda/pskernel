@@ -314,19 +314,17 @@ The architectural pipeline remains:
 
 Owning a backend does not prove it. Using an external compiler does not invalidate a source theorem. Every relevant transformation has a theorem, validator, test status, or explicit assumption.
 
-## 16. First formal evidence
+## 16. Planned first formal evidence
 
-The r3 research branch contains two checked Lean 4.34.0 models.
+r3 deliberately does not claim a production proof in this documentation-only workstream.
 
-proofs/Overlay.lean formalizes a tiny parenthesized-call lowering model and proves representative empty/single/two-argument lowering plus a curried addition example.
+The proposed first frontend theorem should formalize a small parenthesized-call model and establish ownership/lowering properties before relating that model to the production parser.
 
-proofs/Backend.lean formalizes a tiny RuntimeIR-like language and JS-core-like AST and proves evaluation preservation for Nat literals, addition, one local binding, and one variable.
+The proposed first backend theorem should formalize a very small pure RuntimeIR fragment, a target AST/semantics, and a value-preservation relation, followed later by an exact serializer/artifact connection.
 
-These are real checked theorems for their toy models.
+See 11-FORMAL-OVERLAY-PROOF.md and 12-BACKEND-PRESERVATION-SLICE.md.
 
-They are not production parser/backend proofs and do not establish ECMAScript execution equivalence.
-
-Exact hashes/tool output are recorded in proofs/EVIDENCE.json.
+These are proof plans, not completed production proofs.
 
 ## 17. Migration from r2
 

@@ -176,7 +176,11 @@ lean_lib PSC1KernelReferenceFoundations where
     `PSC1Kernel.Name,
     `PSC1Kernel.Level,
     `PSC1Kernel.Expr,
-    `PSC1Kernel.Instantiate
+    `PSC1Kernel.Instantiate,
+    `PSC1Kernel.Declaration,
+    `PSC1Kernel.Environment,
+    `PSC1Kernel.LocalContext,
+    `PSC1Kernel.TypeChecker
   ]
 
 lean_lib PsKernelSelfHost where

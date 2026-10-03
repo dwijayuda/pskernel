@@ -202,6 +202,8 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.TypeCheckerRecursor,
     `Ps.KernelSelfHost.TypeCheckerDefEqSupport,
     `Ps.KernelSelfHost.TypeCheckerDefEq
+    `Ps.KernelSelfHost.CheckerSession,
+    `Ps.KernelSelfHost.Kernel
   ]
 
 @[default_target]

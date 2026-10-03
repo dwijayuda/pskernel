@@ -20,7 +20,7 @@ def nameMember (target : Name) : List Name → Bool
   | [] => false
   | x :: xs => Name.eq target x || nameMember target xs
 
-partial def findUndefLevelParam (u : Level) (allowed : List Name) : Option Name :=
+def findUndefLevelParam (u : Level) (allowed : List Name) : Option Name :=
   match u with
   | .zero | .mvar _ => none
   | .param n => if nameMember n allowed then none else some n
@@ -38,7 +38,7 @@ def findUndefInLevels (levels : List Level) (allowed : List Name) : Option Name 
       | some n => some n
       | none => findUndefInLevels us allowed
 
-partial def findUndefExprLevelParam (e : Expr) (allowed : List Name) : Option Name :=
+def findUndefExprLevelParam (e : Expr) (allowed : List Name) : Option Name :=
   match e with
   | .bvar _ | .fvar _ | .mvar _ | .lit _ => none
   | .sort u => findUndefLevelParam u allowed
@@ -60,7 +60,7 @@ partial def findUndefExprLevelParam (e : Expr) (allowed : List Name) : Option Na
           | none => findUndefExprLevelParam body allowed
   | .mdata _ body | .proj _ _ body => findUndefExprLevelParam body allowed
 
-partial def levelHasMVar : Level → Bool
+def levelHasMVar : Level → Bool
   | .mvar _ => true
   | .succ level => levelHasMVar level
   | .max left right | .imax left right =>
@@ -71,7 +71,7 @@ def levelsHaveMVar : List Level → Bool
   | [] => false
   | level :: rest => levelHasMVar level || levelsHaveMVar rest
 
-partial def hasMVar : Expr → Bool
+def hasMVar : Expr → Bool
   | .mvar _ => true
   | .sort level => levelHasMVar level
   | .const _ levels => levelsHaveMVar levels

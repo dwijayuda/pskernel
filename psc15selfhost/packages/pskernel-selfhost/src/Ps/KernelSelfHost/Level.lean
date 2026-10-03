@@ -229,9 +229,9 @@ def psKernelLevelKindRank
 
 partial def psKernelLevelNormCmp
     (left : PsKernelLevel)
-    (right : PsKernelLevel) : Ordering :=
+    (right : PsKernelLevel) : PsKernelOrdering :=
   if psKernelLevelEq left right then
-    Ordering.eq
+    PsKernelOrdering.eq
   else
     let leftPair := psKernelLevelToOffset left;
     let rightPair := psKernelLevelToOffset right;
@@ -243,12 +243,12 @@ partial def psKernelLevelNormCmp
         psKernelNatLt
           (psKernelLevelKindRank leftRoot)
           (psKernelLevelKindRank rightRoot) then
-      Ordering.lt
+      PsKernelOrdering.lt
     else if
         psKernelNatGt
           (psKernelLevelKindRank leftRoot)
           (psKernelLevelKindRank rightRoot) then
-      Ordering.gt
+      PsKernelOrdering.gt
     else
       match leftRoot with
       | PsKernelLevel.param leftName =>
@@ -256,13 +256,13 @@ partial def psKernelLevelNormCmp
           | PsKernelLevel.param rightName =>
               psKernelNameCmp leftName rightName
           | _ =>
-              Ordering.eq
+              PsKernelOrdering.eq
       | PsKernelLevel.mvar leftName =>
           match rightRoot with
           | PsKernelLevel.mvar rightName =>
               psKernelNameCmp leftName rightName
           | _ =>
-              Ordering.eq
+              PsKernelOrdering.eq
       | PsKernelLevel.max leftA leftB =>
           match rightRoot with
           | PsKernelLevel.max rightA rightB =>
@@ -270,14 +270,14 @@ partial def psKernelLevelNormCmp
                   psKernelLevelNormCmp
                     leftA
                     rightA with
-              | Ordering.eq =>
+              | PsKernelOrdering.eq =>
                   psKernelLevelNormCmp
                     leftB
                     rightB
               | ordering =>
                   ordering
           | _ =>
-              Ordering.eq
+              PsKernelOrdering.eq
       | PsKernelLevel.imax leftA leftB =>
           match rightRoot with
           | PsKernelLevel.imax rightA rightB =>
@@ -285,16 +285,16 @@ partial def psKernelLevelNormCmp
                   psKernelLevelNormCmp
                     leftA
                     rightA with
-              | Ordering.eq =>
+              | PsKernelOrdering.eq =>
                   psKernelLevelNormCmp
                     leftB
                     rightB
               | ordering =>
                   ordering
           | _ =>
-              Ordering.eq
+              PsKernelOrdering.eq
       | _ =>
-          Ordering.eq
+          PsKernelOrdering.eq
 
 def psKernelLevelListAppend
     (left : List PsKernelLevel)
@@ -328,15 +328,15 @@ def psKernelLevelInsertSorted
       List.cons value List.nil
   | List.cons head tail =>
       match psKernelLevelNormCmp value head with
-      | Ordering.lt =>
+      | PsKernelOrdering.lt =>
           List.cons
             value
             (List.cons head tail)
-      | Ordering.eq =>
+      | PsKernelOrdering.eq =>
           List.cons
             value
             (List.cons head tail)
-      | Ordering.gt =>
+      | PsKernelOrdering.gt =>
           List.cons
             head
             (psKernelLevelInsertSorted

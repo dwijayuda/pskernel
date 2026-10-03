@@ -1,6 +1,8 @@
 # r3 Source Profiles: Standard and Lean-Extensible
 
-Status: **accepted r3 profile specification; implementation pending**
+Status: **accepted profile-design research; non-authoritative companion to the standalone language reference**
+
+> Current profile syntax and semantics are defined by `ProofScript_Language_Reference_v0.9.0_r3.md`; `PS-STANDARD-REGISTRY-r3.json` is now a language-only mirror rather than a release/cache/runtime manifest.
 
 ## Decision
 

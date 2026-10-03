@@ -1,6 +1,6 @@
 # r3 TypeScript-Developer Usability Study
 
-Status: protocol complete; human participant study NOT YET RUN.
+Status: **accepted r3 usability-study protocol; human participant study NOT YET RUN.**
 
 ## Research question
 

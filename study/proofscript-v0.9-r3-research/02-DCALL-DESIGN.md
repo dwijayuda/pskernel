@@ -1,6 +1,6 @@
 # r3 Parenthesized Call Design
 
-Status: **recommended r3 breaking grammar change; not implemented**
+Status: **accepted r3 breaking grammar design; documentation/specification only; not implemented**
 
 ## Decision
 
@@ -45,7 +45,7 @@ This is a source-compatibility cost, not a change to core function semantics.
 | Alternative | Learnability | Lean compatibility inside .ps | Tooling | Decision |
 |---|---|---|---|---|
 | r2 adjacency-sensitive call | surprising for TS developers | preserves <code>f (x,y)</code> tuple neighbor | formatter must preserve trivia ownership | reject for r3 |
-| r3 trivia-insensitive parenthesized call | familiar, explicit tuple grouping | intentionally reinterprets parenthesized native neighbor | simplest standard formatter | **recommend** |
+| r3 trivia-insensitive parenthesized call | familiar, explicit tuple grouping | intentionally reinterprets parenthesized native neighbor | simplest standard formatter | **accepted for r3** |
 | native Lean application only | least overlay complexity | maximal | excellent after Lean learning | keep available as inherited non-parenthesized application |
 | make all calls JS-like and remove native application | familiar but too invasive | poor | simpler grammar, larger migration | reject |
 
@@ -239,4 +239,4 @@ Proposed diagnostics:
 5. interactions with <code>do</code>, tactics, quotations, macros, defaults, named arguments, and partial application;
 6. TypeScript-developer comprehension experiment.
 
-Current evidence: **design recommendation only**. No r3 production parser is claimed.
+Current status: **accepted r3 design rule**. No r3 production parser is claimed.

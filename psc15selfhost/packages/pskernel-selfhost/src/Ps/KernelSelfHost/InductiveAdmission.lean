@@ -1310,6 +1310,27 @@ def psKernelAddSimpleConstructorsWithFuel
                                                   shape
                                                   tailResult.shapes))
 
+def psKernelCheckFreshInductiveNames
+    (names : List PsKernelName) :
+    PsKernelEnvironment -> Except String Unit :=
+  match names with
+  | List.nil =>
+      fun (_environment : PsKernelEnvironment) =>
+        Except.ok ()
+  | List.cons name rest =>
+      let smaller :
+          PsKernelEnvironment -> Except String Unit :=
+        psKernelCheckFreshInductiveNames rest;
+      fun (environment : PsKernelEnvironment) =>
+        if
+            psKernelEnvironmentContains
+              environment
+              name then
+          Except.error
+            "inductive declaration name is already declared"
+        else
+          smaller environment
+
 def psKernelAddSimpleInductive
     (fuel : Nat)
     (environment : PsKernelEnvironment)
@@ -1331,22 +1352,10 @@ def psKernelAddSimpleInductive
     if
         psKernelSimpleNameListUnique
           allNames then
-      let rec checkFresh
-          (names : List PsKernelName) :
-          Except String Unit :=
-        match names with
-        | List.nil =>
-            Except.ok ()
-        | List.cons name rest =>
-            if
-                psKernelEnvironmentContains
-                  environment
-                  name then
-              Except.error
-                "inductive declaration name is already declared"
-            else
-              checkFresh rest;
-      match checkFresh allNames with
+      match
+          psKernelCheckFreshInductiveNames
+            allNames
+            environment with
       | Except.error error =>
           Except.error error
       | Except.ok _ =>

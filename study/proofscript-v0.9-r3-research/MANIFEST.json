@@ -3,7 +3,6 @@
   "status": "accepted-design-baseline-not-implementation-release",
   "branch": "research/proofscript-v0.9-r3",
   "baseCommit": "65369c75c7b63124f1ba7f2289e573181db281f0",
-  "baselineGrammar": "ps-0.9-r2",
   "leanSemantics": {
     "version": "4.34.0",
     "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
@@ -78,8 +77,7 @@
         "optParam",
         "autoParam"
       ],
-      "rejectOrdinaryRequiredExplicit": true,
-      "r2EmptyCallMigration": "f() -> f(())"
+      "rejectOrdinaryRequiredExplicit": true
     },
     "callGap": {
       "inheritedHorizontalWhitespace": [
@@ -105,6 +103,33 @@
     "includesInterfaceIRResolutionIdentity": true,
     "machineReadableMirrorsAreGeneratedNonAuthoritative": true,
     "grammar": "ps-0.9-r3",
-    "semanticPin": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
-  }
+    "semanticPin": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "includesPsc2CompilerCoverageMatrix": true,
+    "includesBoundedLeanCompatibilityProfile": true,
+    "fullLeanSourceCompatibilityClaim": false
+  },
+  "compilerProfiles": {
+    "requiredFirstCompiler": "psc2-compiler-v1",
+    "leanCompatibility": "lean-subset-psc2-v1",
+    "patternProfile": "psc2-pattern-v1",
+    "generationNaming": [
+      "CompilerGen0",
+      "CompilerGen1",
+      "CompilerGen2",
+      "CompilerGen3"
+    ]
+  },
+  "featureOwnership": [
+    "CORE",
+    "PSC2_FRONTEND",
+    "PSC2_ELAB",
+    "STANDARD_LIBRARY",
+    "STANDARD_PROVER",
+    "STANDARD_EXTENSION",
+    "CONTROLLED_PLUGIN",
+    "LEAN_COMPAT",
+    "HOST_BOUNDARY",
+    "POST_PSC2",
+    "DEFERRED"
+  ]
 }

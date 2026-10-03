@@ -89,6 +89,7 @@ A green test does not promote itself into a theorem.
 - <code>16-OPEN-QUESTIONS.md</code> — unresolved items.
 - <code>DECISIONS.md</code> — compact decision ledger.
 - <code>MANIFEST.json</code> — machine-readable identities and evidence.
+- <code>RESEARCH-SOURCES.md</code> — local and current official research sources.
 - <code>ProofScript_Language_Reference_v0.9.0_r3_candidate.md</code> — integrated candidate, created after the decision documents.
 ## Research sources
 
@@ -113,4 +114,4 @@ Source popularity is not a language-design proof.
 
 This directory is additive. It must not overwrite v0.7, v0.9-r2, compiler code, kernel code, or main-branch policy. r3 syntax is not activated merely because this documentation exists.
 
-The candidate becomes eligible for language freeze only after the relevant parser tests, native-oracle comparisons, formal slices, application experiments, and human study are separately reviewed.
+The integrated r3 candidate now exists, and two small formal models have been checked under Lean 4.34.0. This does not activate r3. Language freeze still requires the production parser/lowerer, profile/runtime/interop implementation, complete reference applications, production-refinement/preservation evidence, and the human usability study.

@@ -22,6 +22,7 @@
     "D-CONST-ALIAS",
     "D-FUNCTION-ALIAS-R3",
     "D-FUNCTION-UNIT-R3",
+    "D-DECL-BODY-BRACE-R3",
     "D-EXPLICIT-PARAMS",
     "E-IF-BRACE",
     "E-STRUCT-BODY-R3",
@@ -214,5 +215,22 @@
     "linarith",
     "SMT",
     "AI/general proof search"
-  ]
+  ],
+  "definitionBodyPolicy": {
+    "declarations": [
+      "def",
+      "const",
+      "function"
+    ],
+    "forms": [
+      ":= PSTerm",
+      ":= { PSTerm }"
+    ],
+    "bracedFormMeaning": "single-term wrapper semantically identical to unbraced body",
+    "statementBlock": false,
+    "implicitReturn": false,
+    "unrelatedAdjacentTerms": false,
+    "completeBracedTermOwnership": "preserved",
+    "wrappedRecordLiteralRequiresDoubleBrace": true
+  }
 }

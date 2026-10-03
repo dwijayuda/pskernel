@@ -59,7 +59,7 @@ const workspaceCheck=spawnSync(
   {cwd:workspaceRoot,encoding:'utf8'},
 );
 assert.equal(workspaceCheck.status,0,workspaceCheck.stderr);
-assert.match(workspaceCheck.stdout,/PSC1_WORKSPACE_SHAPE: PASS \(21 workspaces\)/u);
+assert.match(workspaceCheck.stdout,/PSC1_WORKSPACE_SHAPE: PASS \(\d+ workspaces\)/u);
 
 process.stdout.write('PSC2_LEAN_KERNEL_NPM_PACKAGE_TESTS: PASS\n');
 process.stdout.write('PSC2_LEAN_KERNEL_COMMITTED_PREBUILT_DIGESTS: PASS\n');

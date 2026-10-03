@@ -76,7 +76,7 @@ The parser does not delete whitespace and then reparse text. It records the sour
 
 The accepted r3 `CallGap` is deliberately **horizontal**.
 
-It permits spaces, tabs, and Lean comments that contain no physical line terminator. A physical line terminator breaks parenthesized-call ownership between the completed head and `(`.
+It permits spaces, horizontal tabs, and Lean comments treated as lexical trivia nodes. A bare source line terminator outside a comment breaks parenthesized-call ownership between the completed head and `(`.
 
 Thus:
 
@@ -95,7 +95,7 @@ f
 
 is not one r3 parenthesized call.
 
-A block comment containing a newline also breaks the call gap.
+A block comment is an atomic trivia node for call ownership; physical line breaks inside the comment do not create a bare line terminator between the head and `(`.
 
 Multiline calls remain available after the opening parenthesis:
 
@@ -204,37 +204,53 @@ f()
 f(())
 ~~~
 
-`f()` is a complete **empty source-level invocation**.
+`f()` means **zero source-supplied explicit arguments**.
 
-Its elaboration:
-1. inserts implicit and instance arguments normally;
-2. inserts omitted optional/default and automatic parameters;
-3. if the next still-required explicit parameter is definitionally `Unit`, synthesizes exactly one `()`;
-4. continues inserting trailing implicit/default/automatic parameters;
-5. rejects if any required non-Unit explicit parameter remains.
+Its canonical native high-level application request is:
 
-It does **not** eta-abstract missing required parameters.
+~~~lean
+f ..
+~~~
 
-Examples:
+The pinned Lean application elaborator inserts implicit, instance, optional/default, and automatic parameters. r3 then applies an additional acceptance rule:
+
+- every omitted explicit parameter must be backed by native `optParam` or `autoParam`;
+- an ordinary required explicit parameter may not be satisfied merely because native ellipsis created a metavariable;
+- unresolved metavariables remain rejection conditions.
+
+The zero-source-argument declaration sugar:
 
 ~~~proofscript
 function now(): Time := ...
-now()                         -- Unit sugar
+~~~
 
+lowers to:
+
+~~~lean
+def now (_ : Unit := ()) : Time := ...
+~~~
+
+so `now()` can use the hidden default Unit through the same empty-call/default-completion mechanism.
+
+Default-only functions therefore behave naturally:
+
+~~~proofscript
 function greet(name: String := "world"): String := ...
-greet()                       -- uses default
+greet()                       -- native default is inserted
+~~~
 
+Required parameters do not disappear:
+
+~~~proofscript
 function add(x: Nat): Nat := x + 1
-add()                         -- reject
-
-function staged(_: Unit, x: Nat): Nat := x
-staged()                      -- reject: x still required
-staged(())                    -- explicit Unit argument; ordinary partial application rules apply
+add()                         -- PS_EMPTY_CALL_REQUIRED_ARGUMENT
 ~~~
 
 `f(())` is an ordinary nonempty call containing one explicit Unit term.
 
-This resolves the strongest remaining TypeScript false friend while preserving Lean-compatible partial application for ordinary nonempty calls and function values.
+To obtain a function value or partial application, use the function value or an ordinary nonempty/native application form rather than relying on `f()`.
+
+This resolves the default-parameter false friend without introducing JavaScript `undefined` semantics.
 
 ## Imported syntax and quotations
 
@@ -279,7 +295,7 @@ Proposed diagnostics:
 - <code>PS_CALL_EMPTY_ENTRY</code> — doubled/leading comma;
 - <code>PS_CALL_DUPLICATE_NAMED_ARGUMENT</code>;
 - <code>PS_CALL_TUPLE_MIGRATION_REQUIRED</code> — edition mismatch detects old tuple intent;
-- <code>PS_CALL_CROSSES_SEQUENCE_BOUNDARY</code> — recovery diagnostic when a line break cannot continue the current expression.
+- <code>PS_CALL_LINE_BREAK_BEFORE_PAREN</code> — recovery diagnostic when a line break cannot continue the current expression.
 
 ## Evidence required before freeze
 
@@ -290,4 +306,4 @@ Proposed diagnostics:
 5. interactions with <code>do</code>, tactics, quotations, macros, defaults, named arguments, and partial application;
 6. TypeScript-developer comprehension experiment.
 
-Current status: **accepted r3 design rule**. Exact normative grammar is in `R3-GRAMMAR-AND-FEATURE-REGISTRY.md`. No production parser is claimed.
+Current status: **accepted r3 design rule**. Exact normative grammar is in `17-R3-GRAMMAR-AND-FEATURE-REGISTRY.md`. No production parser is claimed.

@@ -3,16 +3,16 @@ import PSC1Kernel.CheckerStateful
 namespace PSC1Kernel
 namespace StatefulReduction
 
-abbrev DefEqFn := CheckerContext → CheckerState → Expr → Expr →
+def DefEqFn : Type := CheckerContext → CheckerState → Expr → Expr →
   Except String (Bool × CheckerState)
 
-abbrev WhnfFn := CheckerContext → CheckerState → Expr →
+def WhnfFn : Type := CheckerContext → CheckerState → Expr →
   Except String (Expr × CheckerState)
 
-abbrev WhnfCoreFn := CheckerContext → CheckerState → Expr → Bool → Bool →
+def WhnfCoreFn : Type := CheckerContext → CheckerState → Expr → Bool → Bool →
   Except String (Expr × CheckerState)
 
-abbrev InferFn := CheckerContext → CheckerState → Expr →
+def InferFn : Type := CheckerContext → CheckerState → Expr →
   Except String (Expr × CheckerState)
 
 /-- Stateful counterpart of Quot recursor reduction. -/

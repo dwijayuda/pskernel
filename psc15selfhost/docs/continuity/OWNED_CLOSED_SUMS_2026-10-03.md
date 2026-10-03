@@ -36,3 +36,7 @@ The complete declaration inventory contains 1916 compiler, 740 kernel and 81 pre
 ## Preserved failures and regression transitions
 
 The first full Windows attempt ran its receipt check while evidence regeneration was in progress and correctly rejected STALE_EVIDENCE:CHECKER_DIFFERENTIAL. Its behavior checks passed. After regeneration, the full clean run passed with the one documented platform skip. The failed run remains in the evidence rather than being relabeled. Previously unsupported valid payload-sum fixtures were retained as positive regressions, with explicit recursive/unknown-field rejection cases added. Original replays, previous checkpoints and protected checkouts were not modified.
+
+## Preserved inputs and recovery
+
+Semantic commit: `0fc8328d0cd97d72c1252152ab802902029cacf8`. The sibling `owned-closed-sums-2026-10-03/receipt.json` binds the exact fresh 77-source snapshot, full admissions, complete declaration/dependency inventory, integrated source partition, exact probes and successful/failing command logs. Gzip entries record compressed and uncompressed hashes. Rebuild only in a new isolated candidate: building replaces dist and invalidates earlier differential evidence. Original replay directories and all preceding checkpoints remain unchanged. This receipt does not claim current CI success or release readiness.

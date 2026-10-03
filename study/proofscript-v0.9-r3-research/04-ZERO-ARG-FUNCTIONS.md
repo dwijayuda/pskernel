@@ -57,7 +57,7 @@ function f()(x: Nat): Nat := x
 function f(x: Nat)(): Nat := x
 ~~~
 
-Allowed implicit/instance binders may surround the Unit binder according to the declared grammar profile:
+Allowed native non-explicit binders may precede the final empty explicit group:
 
 ~~~proofscript
 function factory {α: Type}(): Box α :=

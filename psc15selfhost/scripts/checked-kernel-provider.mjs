@@ -6,8 +6,8 @@ import { checkedKernelIdentity, ownedCheckedIdentity } from './checked-kernel-id
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const nativeSuffix = process.platform === 'win32' ? '.exe' : '';
 
-export const defaultCheckedKernel = 'lean434-wasm';
-export const checkedKernelSelectors = Object.freeze(['lean434-wasm', 'pskernel-core', 'lean434']);
+export const defaultCheckedKernel = 'lean434';
+export const checkedKernelSelectors = Object.freeze(['lean434', 'lean434-wasm', 'pskernel-core']);
 
 const descriptors = Object.freeze({
   'pskernel-core': Object.freeze({
@@ -27,8 +27,8 @@ const descriptors = Object.freeze({
     selector: 'lean434',
     package: '@proofscript/pskernel-lean',
     execution: 'native',
-    sourceCommit: '88b18bbcec82bad02cb3db8ee5b5b96cae91ae86',
-    verificationRun: 36522373312,
+    sourceCommit: '1b21b2483df7e8de7542873c24eaff2501539b1b',
+    verificationCommit: '3c49f7d8a9812175e143c6db15cc3e0e496d23e2',
   }),
 });
 
@@ -78,14 +78,22 @@ export async function checkAdmissionsWithKernel(
       root,
       'lean-checked/.lake/build/bin/psc2_lean_kernel_provider' + nativeSuffix,
     );
-    const binaryPath = options.nativeBinaryPath ?? (
-      !process.env.PSC_LEAN_KERNEL_PROVIDER_BIN && existsSync(developmentBinary)
-        ? developmentBinary
-        : undefined
+    const slimSourceBinary = path.join(
+      root,
+      'packages/pskernel-lean/.lake/build/bin/psc2_lean_kernel_provider' + nativeSuffix,
     );
+    const binaryPath = options.nativeBinaryPath ??
+      process.env.PSC_LEAN_KERNEL_PROVIDER_BIN ??
+      (existsSync(developmentBinary) ? developmentBinary : undefined) ??
+      (existsSync(slimSourceBinary) ? slimSourceBinary : undefined);
+    if (!binaryPath) {
+      throw new Error(
+        'PSC2_CHECKED_NATIVE_PROVIDER_MISSING: build the current native provider or set PSC_LEAN_KERNEL_PROVIDER_BIN; stale package prebuilts are not used by the default checked profile',
+      );
+    }
     result = provider.checkCanonicalAdmissions(admissions, {
       timeoutMs,
-      ...(binaryPath ? { binaryPath } : {}),
+      binaryPath,
     });
   }
 

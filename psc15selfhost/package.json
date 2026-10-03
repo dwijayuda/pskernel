@@ -128,6 +128,8 @@
     "verify:compiler": "node scripts/compare-selfhost.mjs dist/bootstrap/packages/compiler/index.ts dist/selfhost/packages/compiler/index.ts",
     "build:lake": "lake build",
     "build:native-psc": "lake build psc",
+    "build:native-kernel": "node packages/pskernel-lean/scripts/build-native-slim.mjs",
+    "build:native-toolchain": "npm run build:native-psc && npm run build:native-kernel && node scripts/build-native-toolchain-bundle.mjs",
     "psc:native": "lake exe psc --",
     "build:psc": "node scripts/build-current.mjs",
     "build:auto": "node scripts/build-auto.mjs",

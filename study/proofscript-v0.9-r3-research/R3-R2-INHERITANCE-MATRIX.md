@@ -1,6 +1,8 @@
 # r3 → r2 Inheritance / Override Matrix
 
-Status: **normative authority map for `ps-0.9-r3`**
+Status: **historical inheritance/audit matrix; non-normative for current ps-0.9-r3 source meaning**
+
+> Current r3 is standalone. This matrix is retained only as research/migration history and cannot supply missing language rules.
 
 Base artifact: `baseline/ProofScript_Language_Reference_v0.9.0_r2.md`  
 SHA-256: `d29c0b2d5780e6cdb08a4c9ac00cc7442a64b1c8133b51c5f0c0e9a343b11b8d`

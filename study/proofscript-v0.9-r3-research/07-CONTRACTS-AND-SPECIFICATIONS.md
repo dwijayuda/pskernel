@@ -77,19 +77,24 @@ Multiple preconditions conjoin. Result conditions are normalized by outcome rath
 
 ## Typed outcomes
 
-For Except E A, a contract should distinguish successful and failed outcomes.
+For `Except E A` and other sum/result types, the stable r3 surface does **not** add separate success/error clause syntax.
 
-Proposed source direction:
+Outcome-sensitive properties use the ordinary result binder plus native matching:
 
 ~~~proofscript
 function parseUser(input: String): Except ParseError User
-  ensures .ok user => User.valid(user)
-  ensures .error err => ParseError.describes(input, err)
+  ensures result =>
+    match result with {
+      | .ok user => User.valid(user)
+      | .error err => ParseError.describes(input, err)
+    }
 :=
   ...
 ~~~
 
-The exact surface grammar remains subject to parser work. The semantic relation is stable: every permitted terminal outcome receives an explicit predicate.
+This keeps the stable contract grammar to `requires` and `ensures result => ...` while retaining full logical expressiveness.
+
+A future convenience spelling such as separate `.ok`/`.error` postconditions requires an explicitly versioned contract-syntax revision.
 
 ## Caller obligations
 
@@ -110,20 +115,25 @@ Every contract has a semantic frame, even when the pure r3 surface does not spel
 
 ~~~text
 FrameSpec {
-  readCapabilities
-  writeCapabilities
-  modifiedLocations
-  foreignEffects
+  effectFrame
+  readFrame
+  writeFrame
 }
 ~~~
 
-For a total pure function, the normative frame is empty.
+For a total pure function, all three frames are empty.
 
-For future stateful/application contracts, the frame must bound what the computation may read, modify, or invoke. A postcondition about the returned value is not permission to mutate unrelated state.
+`effectFrame` is a finite normalized set of permitted capability-operation identities.
 
-The application type `App caps err result` contributes its declared capability set to the effect frame. More precise location/state framing may be supplied by future library/program-logic clauses.
+`readFrame` identifies abstract mutable regions/foreign resources whose state may influence the result or trace.
 
-Frame/effect information is part of specification identity and evidence invalidation.
+`writeFrame` identifies abstract mutable regions/foreign resources the computation may modify.
+
+For future stateful/application contracts, a postcondition about the returned value is not permission to mutate unrelated state.
+
+The application type `App caps err result` provides an upper bound on permitted capability classes; a contract may narrow that effect frame but may not silently expand it.
+
+Frame identities belong to the versioned program-logic model rather than raw target pointers. Frame/effect information is part of specification identity and evidence invalidation.
 
 ## Higher-order callable contracts
 
@@ -138,10 +148,13 @@ CallableSpec args result := {
 }
 
 callRequires(f, args) : Prop
-callEnsures(f, args, result) : Prop
+callEnsures(f, args, outcome) : Prop
+callEffects(f, args) : EffectFrame
+callReads(f, args) : ReadFrame
+callWrites(f, args) : WriteFrame
 ~~~
 
-A function value carrying/associated with a `CallableSpec` may be used by a higher-order theorem only through ordinary proved relationships connecting that value to `callRequires` and `callEnsures`.
+A function value carrying/associated with a `CallableSpec` may be used by a higher-order theorem only through ordinary proved relationships connecting that value to `callRequires`, `callEnsures`, and any effect/read/write frame guarantees it relies on.
 
 This model is analogous in purpose to higher-order pre/postcondition predicates in verification systems, but PSC defines its own predicates and proof obligations.
 
@@ -252,7 +265,7 @@ Typed-error outcome sugar, mutable-state frames, loops/invariants, termination c
 
 ## Evidence status
 
-Normative pure contract core, frame semantics, and higher-order callable model: **accepted for r3**.
+Normative pure contract core, outcome-through-match rule, frame semantics, and higher-order callable model: **accepted for r3**.
 Production contract elaborator: **not implemented**.
 General VC correctness theorem: **not proved**.
 AI policy enforcement: **not implemented**.

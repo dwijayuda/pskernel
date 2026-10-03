@@ -206,6 +206,7 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Kernel,
     `Ps.KernelSelfHost.Quot,
     `Ps.KernelSelfHost.Inductive,
+    `Ps.KernelSelfHost.InductiveAdmission,
     `Ps.KernelSelfHost.SelfHost
   ]
 

@@ -73,7 +73,15 @@ Normative keywords:
 
 **CapabilitySet** — canonical finite set of application capability identities. Set equality is semantic equality; canonical encoding is deterministic.
 
+**CheckedCore** — canonical admitted Core declarations/terms before executable erasure. A `CheckedModule` contains CheckedCore plus module/environment metadata.
+
 **CheckedModule** — module state constructible only through genuine admission or an explicitly sound recheck/import protocol.
+
+**CompilerGenN** — bootstrap/self-host compiler generation label. Generation names do not identify a language edition or capability profile.
+
+**Core** — elaborated kernel-facing dependent term/declaration language.
+
+**RuntimeIR** — target-neutral executable IR after proof/type erasure and source-semantic lowering. Older planning terminology such as "RuntimeIR" maps to RuntimeIR plus explicit evidence status; the IR name itself does not grant verification authority.
 
 **CompilerCapabilityProfile** — versioned statement of which language/frontend/elaboration/runtime facilities a concrete compiler implementation owns directly.
 
@@ -254,6 +262,22 @@ Excluded unless a later compatibility profile explicitly adds them:
 Every rejection SHOULD identify the unsupported Lean compatibility feature.
 
 The `.lean` frontend and `.ps` frontend MUST converge on one canonical semantic pipeline for their claimed overlap.
+
+### 4.2.1 Lean compatibility reporting levels
+
+Tooling SHOULD report bounded Lean compatibility by level rather than a single Boolean:
+
+| Level | Meaning |
+|---|---|
+| L0 | lexical/basic native syntax recognized |
+| L1 | core declarations/terms/binders |
+| L2 | structures/inductives/classes/instances/owned recursion subset |
+| L3 | selected standard prover/tactics/notation |
+| L4 | Meta/macro/plugin compatibility |
+| L5 | theorem-library compatibility |
+| L6 | kernel/artifact compatibility |
+
+`psc2-compiler-v1` targets **L2 plus explicitly listed L3 forms** for its `.lean` frontend. It does not imply L4–L6.
 
 ### 4.3 .psx and future dialects
 
@@ -474,6 +498,23 @@ The following matrix reconciles the language with the PSC2 compiler and platform
 | arbitrary Lean syntax/macros/custom elaborators | `DEFERRED` or `ps-lean-extensible` | no | never implied by PSC2 conformance |
 | arbitrary Lean compiler intrinsics/runtime representation | `DEFERRED` / `HOST_BOUNDARY` | no | only explicit compatibility adapters may expose them |
 
+| explicit universes/polymorphism used by supported source | `PSC2_ELAB` | yes, bounded | exact universe constraints for supported subset |
+| visibility/public-private API boundaries | `PSC2_FRONTEND` | yes | deterministic package/API surface |
+| quotient/extensionality support | `CORE` / kernel profile | bounded | explicit selected kernel profile, not syntax convenience |
+| interactive `#check`, `#print`, `#reduce`, `#synth` | tooling / `STANDARD_PROVER` | no compiler-core blocker | development commands with no proof authority |
+| interactive `#eval` | `HOST_BOUNDARY` tooling | no | may execute code; MUST NOT alter accepted module semantics |
+| compiler/prover options | profile/configuration layer | bounded | only registered, identity-bound options; unknown options reject |
+| runtime contract checking | `STANDARD_LIBRARY` / diagnostics | no | testing/diagnostic behavior, never formal proof |
+| FFI declarations/adapters | `HOST_BOUNDARY` + InterfaceIR | bounded minimal FFI only | broad generated FFI is post-PSC2 |
+| kernel-provider selection / dual checking | assurance layer | no source-language requirement | multiple checkers MAY validate one canonical semantics |
+| TypeScript backend | backend package | yes for first JS self-host path | consumes RuntimeIR only |
+| Rust backend | backend package / post core closure | no | same RuntimeIR, independent host lane |
+| direct Wasm backend | backend package / post core closure | no | same RuntimeIR, explicit ABI/runtime profile |
+| portable standard libraries | `STANDARD_LIBRARY` | no compiler-core blocker | Option/Result/List/collections/text/codecs/laws |
+| safe compile-time reflection | `POST_PSC2` | no | versioned semantic service, no unchecked admission |
+| plugin self-hosting | `POST_PSC2` | no | plugin implementation can be ProofScript once API stabilizes |
+
+
 ### 8.4 Required PSC2 pattern profile
 
 The first PSC2 compiler pattern profile is:
@@ -540,7 +581,7 @@ Large automation and AI proof search remain plugins/libraries unless a future St
 The recommended platform sequence after the first stable PSC2 compiler/self-host closure is:
 
 ~~~text
-P1  versioned Core / CheckedModule / RuntimeIR contracts
+P1  versioned Core / CheckedCore / CheckedModule / RuntimeIR contracts
 P2  standard-library laws, tests, properties, differential conformance
 P3  Meta API + tactic API + safe reflection
 P4  controlled plugin API
@@ -550,6 +591,24 @@ P7  large math/tactic/FFI/ecosystem expansion
 ~~~
 
 Some work MAY overlap, but P2–P7 are not retroactive requirements for the first PSC2 compiler fixed point unless an actual required compiler module depends on them.
+
+### 8.7.1 Semantic artifact naming
+
+This specification uses:
+
+~~~text
+Core
+  -> genuine admission
+CheckedCore
+  -> module/environment packaging
+CheckedModule
+  -> erasure / executable lowering
+RuntimeIR
+~~~
+
+The older planning name `RuntimeIR` MUST be interpreted as **RuntimeIR plus separately recorded preservation/checking evidence**, not as a second IR semantics and not as a type name that creates proof authority.
+
+Backends consume RuntimeIR (or a versioned serialization of it).
 
 ### 8.8 Naming: language profiles versus compiler generations
 
@@ -572,6 +631,19 @@ compiler source --CompilerGen1--> CompilerGen2
 ~~~
 
 Do not use `PSC2` or `PSC3` to mean compiler generations in new plans, evidence, or release reports.
+
+### 8.9 Coverage rule
+
+A feature can be part of the ProofScript user experience without being built into `psc2-compiler-v1`.
+
+The compiler/profile claim is complete when:
+
+1. every feature in this specification has an owner classification;
+2. every `psc2-compiler-v1` required feature is implemented or explicitly reported unsupported;
+3. library/Standard-prover/extension/post-PSC2 features have stable interfaces/lowering targets where the compiler must interact with them;
+4. the compiler never claims full Lean compatibility merely because an extension/library can provide analogous functionality.
+
+This is intentional architecture, not missing compiler coverage.
 
 ---
 

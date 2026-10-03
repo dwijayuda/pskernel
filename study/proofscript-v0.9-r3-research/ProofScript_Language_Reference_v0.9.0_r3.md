@@ -497,7 +497,6 @@ The following matrix reconciles the language with the PSC2 compiler and platform
 | large stdlib/math/proof ecosystem | `STANDARD_LIBRARY` / ecosystem | no | grows above compiler/kernel |
 | arbitrary Lean syntax/macros/custom elaborators | `DEFERRED` or `ps-lean-extensible` | no | never implied by PSC2 conformance |
 | arbitrary Lean compiler intrinsics/runtime representation | `DEFERRED` / `HOST_BOUNDARY` | no | only explicit compatibility adapters may expose them |
-
 | explicit universes/polymorphism used by supported source | `PSC2_ELAB` | yes, bounded | exact universe constraints for supported subset |
 | visibility/public-private API boundaries | `PSC2_FRONTEND` | yes | deterministic package/API surface |
 | quotient/extensionality support | `CORE` / kernel profile | bounded | explicit selected kernel profile, not syntax convenience |

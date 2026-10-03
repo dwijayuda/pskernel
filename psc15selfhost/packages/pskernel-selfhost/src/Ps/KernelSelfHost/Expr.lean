@@ -589,7 +589,7 @@ def psKernelTypeAnnotationOptParamName : PsKernelName :=
 def psKernelTypeAnnotationAutoParamName : PsKernelName :=
   PsKernelName.str PsKernelName.anonymous "autoParam"
 
-def psKernelExprConsumeTypeAnnotations
+partial def psKernelExprConsumeTypeAnnotations
     (expr : PsKernelExpr) : PsKernelExpr :=
   let fn := psKernelExprGetAppFn expr;
   let args := psKernelExprGetAppArgs expr;

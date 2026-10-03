@@ -1,72 +1,99 @@
-# r3 First Formal Overlay Proof
+# r3 Formal Overlay Proof Plan
 
-Status: first small theorem completed; intentionally narrow.
+Status: **documentation and proof-design plan only; no formal proof is claimed by the final branch state**
 
-## What is proved
+## Purpose
 
-The companion file proofs/Overlay.lean defines:
+The first formal target should be deliberately small: one owned surface construct whose syntax, lowering, and interpretation can be modeled precisely before attempting a theorem about the full ProofScript frontend.
 
-- a tiny source term model;
-- a ParenthesizedCall AST;
-- positional call arguments;
-- lowering into curried application;
-- a tiny evaluator with Nat and curried addition;
-- concrete theorems for empty, one-argument, and two-argument lowering;
-- a theorem that the modeled two-argument add call evaluates to the expected sum.
+The recommended first construct is the r3 parenthesized call.
 
-Lean 4.34.0 accepted the file.
+## Proposed model
 
-Observed toolchain:
+Define a small source AST containing:
 
 ~~~text
-Lean 4.34.0
-293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+Term
+ParenthesizedCall
+CallArgument
 ~~~
 
-The recorded final file hash is in proofs/EVIDENCE.json.
-
-## Why this slice
-
-Parenthesized-call lowering is the highest-risk proposed r3 syntax change. The first theorem therefore establishes a formal model of the semantic idea before trying to prove the whole parser.
-
-The modeled lowering satisfies:
+with enough canonical target structure to represent:
 
 ~~~text
-Call(h, [])      -> App h Unit
-Call(h, [a])     -> App h a
-Call(h, [a,b])   -> App (App h a) b
+f()
+f(x)
+f(x, y)
+f((x, y))
 ~~~
 
-The evaluator models enough curried application to prove a two-argument addition example.
+The model should preserve the intended distinctions:
 
-## What is not proved
+~~~text
+Call(h, [])      -> native application h ()
+Call(h, [a])     -> native application h a
+Call(h, [a,b])   -> native application (native application h a) b
+Tuple argument   -> one ordinary product-valued call argument
+~~~
 
-This does not prove:
+This is a model of the intended lowering, not the production parser.
 
-- trivia-insensitive lexical ownership;
-- interaction with actual Lean parser categories;
-- named/default/implicit arguments;
+## First theorem targets
+
+The first proof package should establish, for the selected formal model:
+
+1. ownership determinism for the modeled call grammar;
+2. lowering well-formedness;
+3. explicit Unit lowering for an empty call;
+4. preservation of argument order/grouping;
+5. a small interpretation-preservation theorem for a minimal callable language.
+
+## Important exclusions
+
+The first theorem should **not** claim to cover:
+
+- the actual Lean lexer/parser;
+- whitespace/comment/newline ownership in the production frontend;
+- native named/default/implicit argument elaboration;
 - generalized field notation;
-- constructor resolution;
-- macro/quotation behavior;
-- binding hygiene;
-- production source maps;
-- the production r3 parser;
-- equivalence to official Lean elaboration.
+- contextual constructors;
+- macros or quotations;
+- source maps;
+- binding hygiene beyond the modeled fragment;
+- production r3 parser refinement;
+- exact equivalence to official Lean elaboration.
 
-Those remain separate obligations.
+These require separate formal relations.
 
-## Next formal targets
+## Production connection that will eventually be needed
 
-1. formalize a tokenizer/category ownership relation;
-2. prove deterministic ownership for the reserved callable-head + parenthesis region;
-3. formalize migration of the r2 tuple neighbor;
-4. relate the model AST to the actual production lowering AST;
-5. add named arguments while preserving one native application argument sequence.
+A useful proof chain is:
 
-## Evidence classification
+~~~text
+actual .ps bytes
+  -> production tokens
+  -> production r3 AST
+  -> formal overlay AST
+  -> modeled canonical Lean AST
+  -> production canonical Lean AST
+~~~
 
-Formal theorem: completed for the toy model.
-Production refinement: not established.
-Frontend equivalence: not established.
-Human usability: not measured.
+Each arrow needs a stated relation. A theorem about an isolated model does not automatically establish the corresponding production implementation.
+
+## Recommended next research
+
+Before implementing the proof:
+
+- finish the exact r3 D-CALL grammar;
+- settle newline continuation rules;
+- settle the callable-head category;
+- document every protected/imported syntax interaction;
+- define the production AST shape;
+- define the formal AST independently enough to audit it.
+
+## Evidence status
+
+Formal proof: **not claimed in the final documentation-only branch state**.
+Production refinement: **not established**.
+Frontend equivalence: **not established**.
+Human usability: **not measured**.

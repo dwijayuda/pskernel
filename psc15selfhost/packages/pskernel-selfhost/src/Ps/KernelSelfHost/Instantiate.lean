@@ -80,162 +80,164 @@ def psKernelExprListDrop
         | List.cons _ tail =>
             smaller tail
 
-partial def psKernelExprLiftLooseBVarsChanged
+def psKernelExprLiftLooseBVarsChangedWithFuel
+    (fuel : Nat) :
+    PsKernelExpr -> Nat -> Nat -> Prod PsKernelExpr Bool :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (expr : PsKernelExpr)
+        (_start : Nat)
+        (_amount : Nat) =>
+        Prod.mk expr false
+  | Nat.succ remaining =>
+      let smaller :
+          PsKernelExpr -> Nat -> Nat -> Prod PsKernelExpr Bool :=
+        psKernelExprLiftLooseBVarsChangedWithFuel remaining;
+      fun
+        (expr : PsKernelExpr)
+        (start : Nat)
+        (amount : Nat) =>
+        if Nat.beq amount 0 then
+          Prod.mk expr false
+        else
+          match expr with
+          | PsKernelExpr.bvar index =>
+              if psKernelNatGe index start then
+                Prod.mk
+                  (PsKernelExpr.bvar
+                    (Nat.add index amount))
+                  true
+              else
+                Prod.mk expr false
+          | PsKernelExpr.app fn arg =>
+              let fnResult := smaller fn start amount;
+              let argResult := smaller arg start amount;
+              if (Prod.snd fnResult) then
+                Prod.mk
+                  (PsKernelExpr.app
+                    (Prod.fst fnResult)
+                    (Prod.fst argResult))
+                  true
+              else if (Prod.snd argResult) then
+                Prod.mk
+                  (PsKernelExpr.app
+                    (Prod.fst fnResult)
+                    (Prod.fst argResult))
+                  true
+              else
+                Prod.mk expr false
+          | PsKernelExpr.lam name type body binderInfo =>
+              let typeResult := smaller type start amount;
+              let bodyResult := smaller body (Nat.succ start) amount;
+              if (Prod.snd typeResult) then
+                Prod.mk
+                  (PsKernelExpr.lam
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst bodyResult)
+                    binderInfo)
+                  true
+              else if (Prod.snd bodyResult) then
+                Prod.mk
+                  (PsKernelExpr.lam
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst bodyResult)
+                    binderInfo)
+                  true
+              else
+                Prod.mk expr false
+          | PsKernelExpr.forallE name type body binderInfo =>
+              let typeResult := smaller type start amount;
+              let bodyResult := smaller body (Nat.succ start) amount;
+              if (Prod.snd typeResult) then
+                Prod.mk
+                  (PsKernelExpr.forallE
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst bodyResult)
+                    binderInfo)
+                  true
+              else if (Prod.snd bodyResult) then
+                Prod.mk
+                  (PsKernelExpr.forallE
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst bodyResult)
+                    binderInfo)
+                  true
+              else
+                Prod.mk expr false
+          | PsKernelExpr.letE name type value body nondep =>
+              let typeResult := smaller type start amount;
+              let valueResult := smaller value start amount;
+              let bodyResult := smaller body (Nat.succ start) amount;
+              if (Prod.snd typeResult) then
+                Prod.mk
+                  (PsKernelExpr.letE
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst valueResult)
+                    (Prod.fst bodyResult)
+                    nondep)
+                  true
+              else if (Prod.snd valueResult) then
+                Prod.mk
+                  (PsKernelExpr.letE
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst valueResult)
+                    (Prod.fst bodyResult)
+                    nondep)
+                  true
+              else if (Prod.snd bodyResult) then
+                Prod.mk
+                  (PsKernelExpr.letE
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst valueResult)
+                    (Prod.fst bodyResult)
+                    nondep)
+                  true
+              else
+                Prod.mk expr false
+          | PsKernelExpr.mdata metadata body =>
+              let bodyResult := smaller body start amount;
+              if (Prod.snd bodyResult) then
+                Prod.mk
+                  (PsKernelExpr.mdata
+                    metadata
+                    (Prod.fst bodyResult))
+                  true
+              else
+                Prod.mk expr false
+          | PsKernelExpr.proj typeName index body =>
+              let bodyResult := smaller body start amount;
+              if (Prod.snd bodyResult) then
+                Prod.mk
+                  (PsKernelExpr.proj
+                    typeName
+                    index
+                    (Prod.fst bodyResult))
+                  true
+              else
+                Prod.mk expr false
+          | _ =>
+              Prod.mk expr false
+
+def psKernelExprLiftLooseBVarsChanged
     (expr : PsKernelExpr)
     (start : Nat)
     (amount : Nat) :
     Prod PsKernelExpr Bool :=
-  if Nat.beq amount 0 then
-    Prod.mk expr false
-  else
-    match expr with
-    | PsKernelExpr.bvar index =>
-        if psKernelNatGe index start then
-          Prod.mk
-            (PsKernelExpr.bvar
-              (Nat.add index amount))
-            true
-        else
-          Prod.mk expr false
-    | PsKernelExpr.app fn arg =>
-        let fnResult :=
-          psKernelExprLiftLooseBVarsChanged
-            fn start amount;
-        let argResult :=
-          psKernelExprLiftLooseBVarsChanged
-            arg start amount;
-        if (Prod.snd fnResult) then
-          Prod.mk
-            (PsKernelExpr.app
-              (Prod.fst fnResult)
-              (Prod.fst argResult))
-            true
-        else if (Prod.snd argResult) then
-          Prod.mk
-            (PsKernelExpr.app
-              (Prod.fst fnResult)
-              (Prod.fst argResult))
-            true
-        else
-          Prod.mk expr false
-    | PsKernelExpr.lam name type body binderInfo =>
-        let typeResult :=
-          psKernelExprLiftLooseBVarsChanged
-            type start amount;
-        let bodyResult :=
-          psKernelExprLiftLooseBVarsChanged
-            body (Nat.succ start) amount;
-        if (Prod.snd typeResult) then
-          Prod.mk
-            (PsKernelExpr.lam
-              name
-              (Prod.fst typeResult)
-              (Prod.fst bodyResult)
-              binderInfo)
-            true
-        else if (Prod.snd bodyResult) then
-          Prod.mk
-            (PsKernelExpr.lam
-              name
-              (Prod.fst typeResult)
-              (Prod.fst bodyResult)
-              binderInfo)
-            true
-        else
-          Prod.mk expr false
-    | PsKernelExpr.forallE name type body binderInfo =>
-        let typeResult :=
-          psKernelExprLiftLooseBVarsChanged
-            type start amount;
-        let bodyResult :=
-          psKernelExprLiftLooseBVarsChanged
-            body (Nat.succ start) amount;
-        if (Prod.snd typeResult) then
-          Prod.mk
-            (PsKernelExpr.forallE
-              name
-              (Prod.fst typeResult)
-              (Prod.fst bodyResult)
-              binderInfo)
-            true
-        else if (Prod.snd bodyResult) then
-          Prod.mk
-            (PsKernelExpr.forallE
-              name
-              (Prod.fst typeResult)
-              (Prod.fst bodyResult)
-              binderInfo)
-            true
-        else
-          Prod.mk expr false
-    | PsKernelExpr.letE name type value body nondep =>
-        let typeResult :=
-          psKernelExprLiftLooseBVarsChanged
-            type start amount;
-        let valueResult :=
-          psKernelExprLiftLooseBVarsChanged
-            value start amount;
-        let bodyResult :=
-          psKernelExprLiftLooseBVarsChanged
-            body (Nat.succ start) amount;
-        if (Prod.snd typeResult) then
-          Prod.mk
-            (PsKernelExpr.letE
-              name
-              (Prod.fst typeResult)
-              (Prod.fst valueResult)
-              (Prod.fst bodyResult)
-              nondep)
-            true
-        else if (Prod.snd valueResult) then
-          Prod.mk
-            (PsKernelExpr.letE
-              name
-              (Prod.fst typeResult)
-              (Prod.fst valueResult)
-              (Prod.fst bodyResult)
-              nondep)
-            true
-        else if (Prod.snd bodyResult) then
-          Prod.mk
-            (PsKernelExpr.letE
-              name
-              (Prod.fst typeResult)
-              (Prod.fst valueResult)
-              (Prod.fst bodyResult)
-              nondep)
-            true
-        else
-          Prod.mk expr false
-    | PsKernelExpr.mdata metadata body =>
-        let bodyResult :=
-          psKernelExprLiftLooseBVarsChanged
-            body start amount;
-        if (Prod.snd bodyResult) then
-          Prod.mk
-            (PsKernelExpr.mdata
-              metadata
-              (Prod.fst bodyResult))
-            true
-        else
-          Prod.mk expr false
-    | PsKernelExpr.proj typeName index body =>
-        let bodyResult :=
-          psKernelExprLiftLooseBVarsChanged
-            body start amount;
-        if (Prod.snd bodyResult) then
-          Prod.mk
-            (PsKernelExpr.proj
-              typeName
-              index
-              (Prod.fst bodyResult))
-            true
-        else
-          Prod.mk expr false
-    | _ =>
-        Prod.mk expr false
+  psKernelExprLiftLooseBVarsChangedWithFuel
+    (Nat.succ (psKernelExprNodeCount expr))
+    expr
+    start
+    amount
 
-partial def psKernelExprLiftLooseBVars
+def psKernelExprLiftLooseBVars
     (expr : PsKernelExpr)
     (start : Nat)
     (amount : Nat) : PsKernelExpr :=
@@ -253,178 +255,191 @@ def psKernelExprLift
     0
     amount
 
-partial def psKernelExprInstantiateAtChanged
+def psKernelExprInstantiateAtChangedWithFuel
+    (fuel : Nat) :
+    PsKernelExpr ->
+    Nat ->
+    List PsKernelExpr ->
+    Nat ->
+    Prod PsKernelExpr Bool :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (expr : PsKernelExpr)
+        (_start : Nat)
+        (_subst : List PsKernelExpr)
+        (_offset : Nat) =>
+        Prod.mk expr false
+  | Nat.succ remaining =>
+      let smaller :
+          PsKernelExpr ->
+          Nat ->
+          List PsKernelExpr ->
+          Nat ->
+          Prod PsKernelExpr Bool :=
+        psKernelExprInstantiateAtChangedWithFuel remaining;
+      fun
+        (expr : PsKernelExpr)
+        (start : Nat)
+        (subst : List PsKernelExpr)
+        (offset : Nat) =>
+        match expr with
+        | PsKernelExpr.bvar index =>
+            let substitutionStart :=
+              Nat.add start offset;
+            if psKernelNatLt index substitutionStart then
+              Prod.mk expr false
+            else
+              let relative :=
+                Nat.sub index substitutionStart;
+              match psKernelExprListGet subst relative with
+              | Option.some replacement =>
+                  Prod.mk
+                    (psKernelExprLiftLooseBVars
+                      replacement
+                      0
+                      offset)
+                    true
+              | Option.none =>
+                  if psKernelExprListIsEmpty subst then
+                    Prod.mk expr false
+                  else
+                    Prod.mk
+                      (PsKernelExpr.bvar
+                        (Nat.sub
+                          index
+                          (psKernelExprListLength subst)))
+                      true
+        | PsKernelExpr.app fn arg =>
+            let fnResult := smaller fn start subst offset;
+            let argResult := smaller arg start subst offset;
+            if (Prod.snd fnResult) then
+              Prod.mk
+                (PsKernelExpr.app
+                  (Prod.fst fnResult)
+                  (Prod.fst argResult))
+                true
+            else if (Prod.snd argResult) then
+              Prod.mk
+                (PsKernelExpr.app
+                  (Prod.fst fnResult)
+                  (Prod.fst argResult))
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.lam name type body binderInfo =>
+            let typeResult := smaller type start subst offset;
+            let bodyResult := smaller body start subst (Nat.succ offset);
+            if (Prod.snd typeResult) then
+              Prod.mk
+                (PsKernelExpr.lam
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst bodyResult)
+                  binderInfo)
+                true
+            else if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.lam
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst bodyResult)
+                  binderInfo)
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.forallE name type body binderInfo =>
+            let typeResult := smaller type start subst offset;
+            let bodyResult := smaller body start subst (Nat.succ offset);
+            if (Prod.snd typeResult) then
+              Prod.mk
+                (PsKernelExpr.forallE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst bodyResult)
+                  binderInfo)
+                true
+            else if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.forallE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst bodyResult)
+                  binderInfo)
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.letE name type value body nondep =>
+            let typeResult := smaller type start subst offset;
+            let valueResult := smaller value start subst offset;
+            let bodyResult := smaller body start subst (Nat.succ offset);
+            if (Prod.snd typeResult) then
+              Prod.mk
+                (PsKernelExpr.letE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst valueResult)
+                  (Prod.fst bodyResult)
+                  nondep)
+                true
+            else if (Prod.snd valueResult) then
+              Prod.mk
+                (PsKernelExpr.letE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst valueResult)
+                  (Prod.fst bodyResult)
+                  nondep)
+                true
+            else if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.letE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst valueResult)
+                  (Prod.fst bodyResult)
+                  nondep)
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.mdata metadata body =>
+            let bodyResult := smaller body start subst offset;
+            if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.mdata
+                  metadata
+                  (Prod.fst bodyResult))
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.proj typeName index body =>
+            let bodyResult := smaller body start subst offset;
+            if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.proj
+                  typeName
+                  index
+                  (Prod.fst bodyResult))
+                true
+            else
+              Prod.mk expr false
+        | _ =>
+            Prod.mk expr false
+
+def psKernelExprInstantiateAtChanged
     (expr : PsKernelExpr)
     (start : Nat)
     (subst : List PsKernelExpr)
     (offset : Nat) :
     Prod PsKernelExpr Bool :=
-  match expr with
-  | PsKernelExpr.bvar index =>
-      let substitutionStart :=
-        Nat.add start offset;
-      if psKernelNatLt index substitutionStart then
-        Prod.mk expr false
-      else
-        let relative :=
-          Nat.sub index substitutionStart;
-        match psKernelExprListGet subst relative with
-        | Option.some replacement =>
-            Prod.mk
-              (psKernelExprLiftLooseBVars
-                replacement
-                0
-                offset)
-              true
-        | Option.none =>
-            if psKernelExprListIsEmpty subst then
-              Prod.mk expr false
-            else
-              Prod.mk
-                (PsKernelExpr.bvar
-                  (Nat.sub
-                    index
-                    (psKernelExprListLength subst)))
-                true
-  | PsKernelExpr.app fn arg =>
-      let fnResult :=
-        psKernelExprInstantiateAtChanged
-          fn start subst offset;
-      let argResult :=
-        psKernelExprInstantiateAtChanged
-          arg start subst offset;
-      if (Prod.snd fnResult) then
-        Prod.mk
-          (PsKernelExpr.app
-            (Prod.fst fnResult)
-            (Prod.fst argResult))
-          true
-      else if (Prod.snd argResult) then
-        Prod.mk
-          (PsKernelExpr.app
-            (Prod.fst fnResult)
-            (Prod.fst argResult))
-          true
-      else
-        Prod.mk expr false
-  | PsKernelExpr.lam name type body binderInfo =>
-      let typeResult :=
-        psKernelExprInstantiateAtChanged
-          type start subst offset;
-      let bodyResult :=
-        psKernelExprInstantiateAtChanged
-          body start subst (Nat.succ offset);
-      if (Prod.snd typeResult) then
-        Prod.mk
-          (PsKernelExpr.lam
-            name
-            (Prod.fst typeResult)
-            (Prod.fst bodyResult)
-            binderInfo)
-          true
-      else if (Prod.snd bodyResult) then
-        Prod.mk
-          (PsKernelExpr.lam
-            name
-            (Prod.fst typeResult)
-            (Prod.fst bodyResult)
-            binderInfo)
-          true
-      else
-        Prod.mk expr false
-  | PsKernelExpr.forallE name type body binderInfo =>
-      let typeResult :=
-        psKernelExprInstantiateAtChanged
-          type start subst offset;
-      let bodyResult :=
-        psKernelExprInstantiateAtChanged
-          body start subst (Nat.succ offset);
-      if (Prod.snd typeResult) then
-        Prod.mk
-          (PsKernelExpr.forallE
-            name
-            (Prod.fst typeResult)
-            (Prod.fst bodyResult)
-            binderInfo)
-          true
-      else if (Prod.snd bodyResult) then
-        Prod.mk
-          (PsKernelExpr.forallE
-            name
-            (Prod.fst typeResult)
-            (Prod.fst bodyResult)
-            binderInfo)
-          true
-      else
-        Prod.mk expr false
-  | PsKernelExpr.letE name type value body nondep =>
-      let typeResult :=
-        psKernelExprInstantiateAtChanged
-          type start subst offset;
-      let valueResult :=
-        psKernelExprInstantiateAtChanged
-          value start subst offset;
-      let bodyResult :=
-        psKernelExprInstantiateAtChanged
-          body start subst (Nat.succ offset);
-      if (Prod.snd typeResult) then
-        Prod.mk
-          (PsKernelExpr.letE
-            name
-            (Prod.fst typeResult)
-            (Prod.fst valueResult)
-            (Prod.fst bodyResult)
-            nondep)
-          true
-      else if (Prod.snd valueResult) then
-        Prod.mk
-          (PsKernelExpr.letE
-            name
-            (Prod.fst typeResult)
-            (Prod.fst valueResult)
-            (Prod.fst bodyResult)
-            nondep)
-          true
-      else if (Prod.snd bodyResult) then
-        Prod.mk
-          (PsKernelExpr.letE
-            name
-            (Prod.fst typeResult)
-            (Prod.fst valueResult)
-            (Prod.fst bodyResult)
-            nondep)
-          true
-      else
-        Prod.mk expr false
-  | PsKernelExpr.mdata metadata body =>
-      let bodyResult :=
-        psKernelExprInstantiateAtChanged
-          body start subst offset;
-      if (Prod.snd bodyResult) then
-        Prod.mk
-          (PsKernelExpr.mdata
-            metadata
-            (Prod.fst bodyResult))
-          true
-      else
-        Prod.mk expr false
-  | PsKernelExpr.proj typeName index body =>
-      let bodyResult :=
-        psKernelExprInstantiateAtChanged
-          body start subst offset;
-      if (Prod.snd bodyResult) then
-        Prod.mk
-          (PsKernelExpr.proj
-            typeName
-            index
-            (Prod.fst bodyResult))
-          true
-      else
-        Prod.mk expr false
-  | _ =>
-      Prod.mk expr false
+  psKernelExprInstantiateAtChangedWithFuel
+    (Nat.succ (psKernelExprNodeCount expr))
+    expr
+    start
+    subst
+    offset
 
-partial def psKernelExprInstantiateAt
+def psKernelExprInstantiateAt
     (expr : PsKernelExpr)
     (start : Nat)
     (subst : List PsKernelExpr)
@@ -484,27 +499,57 @@ def psKernelExprApplyArgsCheap
     args
     fn
 
-partial def psKernelExprConsumeLambdaSpine
+def psKernelExprConsumeLambdaSpineWithFuel
+    (fuel : Nat) :
+    PsKernelExpr ->
+    List PsKernelExpr ->
+    Nat ->
+    Prod PsKernelExpr Nat :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (fn : PsKernelExpr)
+        (_args : List PsKernelExpr)
+        (count : Nat) =>
+        Prod.mk fn count
+  | Nat.succ remaining =>
+      let smaller :
+          PsKernelExpr ->
+          List PsKernelExpr ->
+          Nat ->
+          Prod PsKernelExpr Nat :=
+        psKernelExprConsumeLambdaSpineWithFuel remaining;
+      fun
+        (fn : PsKernelExpr)
+        (args : List PsKernelExpr)
+        (count : Nat) =>
+        match fn with
+        | PsKernelExpr.lam _ _ body _ =>
+            if
+                psKernelNatLt
+                  count
+                  (psKernelExprListLength args) then
+              smaller
+                body
+                args
+                (Nat.succ count)
+            else
+              Prod.mk fn count
+        | _ =>
+            Prod.mk fn count
+
+def psKernelExprConsumeLambdaSpine
     (fn : PsKernelExpr)
     (args : List PsKernelExpr)
     (count : Nat) :
     Prod PsKernelExpr Nat :=
-  match fn with
-  | PsKernelExpr.lam _ _ body _ =>
-      if
-          psKernelNatLt
-            count
-            (psKernelExprListLength args) then
-        psKernelExprConsumeLambdaSpine
-          body
-          args
-          (Nat.succ count)
-      else
-        Prod.mk fn count
-  | _ =>
-      Prod.mk fn count
+  psKernelExprConsumeLambdaSpineWithFuel
+    (Nat.succ (psKernelExprNodeCount fn))
+    fn
+    args
+    count
 
-partial def psKernelExprCheapBetaReduce
+def psKernelExprCheapBetaReduce
     (expr : PsKernelExpr) : PsKernelExpr :=
   match psKernelExprGetAppFn expr with
   | PsKernelExpr.lam _ _ _ _ =>
@@ -594,166 +639,174 @@ def psKernelNameLastIndex
     0
     Option.none
 
-partial def psKernelExprAbstractFVarsAtChanged
+def psKernelExprAbstractFVarsAtChangedWithFuel
+    (fuel : Nat) :
+    PsKernelExpr ->
+    List PsKernelName ->
+    Nat ->
+    Prod PsKernelExpr Bool :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (expr : PsKernelExpr)
+        (_fvars : List PsKernelName)
+        (_offset : Nat) =>
+        Prod.mk expr false
+  | Nat.succ remaining =>
+      let smaller :
+          PsKernelExpr ->
+          List PsKernelName ->
+          Nat ->
+          Prod PsKernelExpr Bool :=
+        psKernelExprAbstractFVarsAtChangedWithFuel remaining;
+      fun
+        (expr : PsKernelExpr)
+        (fvars : List PsKernelName)
+        (offset : Nat) =>
+        match expr with
+        | PsKernelExpr.fvar name =>
+            match psKernelNameLastIndex name fvars with
+            | Option.none =>
+                Prod.mk expr false
+            | Option.some index =>
+                Prod.mk
+                  (PsKernelExpr.bvar
+                    (Nat.sub
+                      (Nat.sub
+                        (Nat.add
+                          offset
+                          (psKernelNameListLength fvars))
+                        index)
+                      1))
+                  true
+        | PsKernelExpr.app fn arg =>
+            let fnResult := smaller fn fvars offset;
+            let argResult := smaller arg fvars offset;
+            if (Prod.snd fnResult) then
+              Prod.mk
+                (PsKernelExpr.app
+                  (Prod.fst fnResult)
+                  (Prod.fst argResult))
+                true
+            else if (Prod.snd argResult) then
+              Prod.mk
+                (PsKernelExpr.app
+                  (Prod.fst fnResult)
+                  (Prod.fst argResult))
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.lam name type body binderInfo =>
+            let typeResult := smaller type fvars offset;
+            let bodyResult := smaller body fvars (Nat.succ offset);
+            if (Prod.snd typeResult) then
+              Prod.mk
+                (PsKernelExpr.lam
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst bodyResult)
+                  binderInfo)
+                true
+            else if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.lam
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst bodyResult)
+                  binderInfo)
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.forallE name type body binderInfo =>
+            let typeResult := smaller type fvars offset;
+            let bodyResult := smaller body fvars (Nat.succ offset);
+            if (Prod.snd typeResult) then
+              Prod.mk
+                (PsKernelExpr.forallE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst bodyResult)
+                  binderInfo)
+                true
+            else if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.forallE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst bodyResult)
+                  binderInfo)
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.letE name type value body nondep =>
+            let typeResult := smaller type fvars offset;
+            let valueResult := smaller value fvars offset;
+            let bodyResult := smaller body fvars (Nat.succ offset);
+            if (Prod.snd typeResult) then
+              Prod.mk
+                (PsKernelExpr.letE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst valueResult)
+                  (Prod.fst bodyResult)
+                  nondep)
+                true
+            else if (Prod.snd valueResult) then
+              Prod.mk
+                (PsKernelExpr.letE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst valueResult)
+                  (Prod.fst bodyResult)
+                  nondep)
+                true
+            else if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.letE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst valueResult)
+                  (Prod.fst bodyResult)
+                  nondep)
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.mdata metadata body =>
+            let bodyResult := smaller body fvars offset;
+            if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.mdata
+                  metadata
+                  (Prod.fst bodyResult))
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.proj typeName index body =>
+            let bodyResult := smaller body fvars offset;
+            if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.proj
+                  typeName
+                  index
+                  (Prod.fst bodyResult))
+                true
+            else
+              Prod.mk expr false
+        | _ =>
+            Prod.mk expr false
+
+def psKernelExprAbstractFVarsAtChanged
     (expr : PsKernelExpr)
     (fvars : List PsKernelName)
     (offset : Nat) :
     Prod PsKernelExpr Bool :=
-  match expr with
-  | PsKernelExpr.fvar name =>
-      match psKernelNameLastIndex name fvars with
-      | Option.none =>
-          Prod.mk expr false
-      | Option.some index =>
-          Prod.mk
-            (PsKernelExpr.bvar
-              (Nat.sub
-                (Nat.sub
-                  (Nat.add
-                    offset
-                    (psKernelNameListLength fvars))
-                  index)
-                1))
-            true
-  | PsKernelExpr.app fn arg =>
-      let fnResult :=
-        psKernelExprAbstractFVarsAtChanged
-          fn fvars offset;
-      let argResult :=
-        psKernelExprAbstractFVarsAtChanged
-          arg fvars offset;
-      if (Prod.snd fnResult) then
-        Prod.mk
-          (PsKernelExpr.app
-            (Prod.fst fnResult)
-            (Prod.fst argResult))
-          true
-      else if (Prod.snd argResult) then
-        Prod.mk
-          (PsKernelExpr.app
-            (Prod.fst fnResult)
-            (Prod.fst argResult))
-          true
-      else
-        Prod.mk expr false
-  | PsKernelExpr.lam name type body binderInfo =>
-      let typeResult :=
-        psKernelExprAbstractFVarsAtChanged
-          type fvars offset;
-      let bodyResult :=
-        psKernelExprAbstractFVarsAtChanged
-          body fvars (Nat.succ offset);
-      if (Prod.snd typeResult) then
-        Prod.mk
-          (PsKernelExpr.lam
-            name
-            (Prod.fst typeResult)
-            (Prod.fst bodyResult)
-            binderInfo)
-          true
-      else if (Prod.snd bodyResult) then
-        Prod.mk
-          (PsKernelExpr.lam
-            name
-            (Prod.fst typeResult)
-            (Prod.fst bodyResult)
-            binderInfo)
-          true
-      else
-        Prod.mk expr false
-  | PsKernelExpr.forallE name type body binderInfo =>
-      let typeResult :=
-        psKernelExprAbstractFVarsAtChanged
-          type fvars offset;
-      let bodyResult :=
-        psKernelExprAbstractFVarsAtChanged
-          body fvars (Nat.succ offset);
-      if (Prod.snd typeResult) then
-        Prod.mk
-          (PsKernelExpr.forallE
-            name
-            (Prod.fst typeResult)
-            (Prod.fst bodyResult)
-            binderInfo)
-          true
-      else if (Prod.snd bodyResult) then
-        Prod.mk
-          (PsKernelExpr.forallE
-            name
-            (Prod.fst typeResult)
-            (Prod.fst bodyResult)
-            binderInfo)
-          true
-      else
-        Prod.mk expr false
-  | PsKernelExpr.letE name type value body nondep =>
-      let typeResult :=
-        psKernelExprAbstractFVarsAtChanged
-          type fvars offset;
-      let valueResult :=
-        psKernelExprAbstractFVarsAtChanged
-          value fvars offset;
-      let bodyResult :=
-        psKernelExprAbstractFVarsAtChanged
-          body fvars (Nat.succ offset);
-      if (Prod.snd typeResult) then
-        Prod.mk
-          (PsKernelExpr.letE
-            name
-            (Prod.fst typeResult)
-            (Prod.fst valueResult)
-            (Prod.fst bodyResult)
-            nondep)
-          true
-      else if (Prod.snd valueResult) then
-        Prod.mk
-          (PsKernelExpr.letE
-            name
-            (Prod.fst typeResult)
-            (Prod.fst valueResult)
-            (Prod.fst bodyResult)
-            nondep)
-          true
-      else if (Prod.snd bodyResult) then
-        Prod.mk
-          (PsKernelExpr.letE
-            name
-            (Prod.fst typeResult)
-            (Prod.fst valueResult)
-            (Prod.fst bodyResult)
-            nondep)
-          true
-      else
-        Prod.mk expr false
-  | PsKernelExpr.mdata metadata body =>
-      let bodyResult :=
-        psKernelExprAbstractFVarsAtChanged
-          body fvars offset;
-      if (Prod.snd bodyResult) then
-        Prod.mk
-          (PsKernelExpr.mdata
-            metadata
-            (Prod.fst bodyResult))
-          true
-      else
-        Prod.mk expr false
-  | PsKernelExpr.proj typeName index body =>
-      let bodyResult :=
-        psKernelExprAbstractFVarsAtChanged
-          body fvars offset;
-      if (Prod.snd bodyResult) then
-        Prod.mk
-          (PsKernelExpr.proj
-            typeName
-            index
-            (Prod.fst bodyResult))
-          true
-      else
-        Prod.mk expr false
-  | _ =>
-      Prod.mk expr false
+  psKernelExprAbstractFVarsAtChangedWithFuel
+    (Nat.succ (psKernelExprNodeCount expr))
+    expr
+    fvars
+    offset
 
-partial def psKernelExprAbstractFVarsAt
+def psKernelExprAbstractFVarsAt
     (expr : PsKernelExpr)
     (fvars : List PsKernelName)
     (offset : Nat) : PsKernelExpr :=

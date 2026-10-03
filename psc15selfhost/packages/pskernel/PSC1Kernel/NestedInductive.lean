@@ -34,7 +34,7 @@ structure SimpleNestedMapState where
 def simpleNestedPrefix : Name :=
   .str .anonymous "_nested"
 
-partial def simpleNestedExprUsesReserved : Expr → Bool
+def simpleNestedExprUsesReserved : Expr → Bool
   | .const name _ => simpleNestedPrefix.isPrefixOf name
   | .app fn arg =>
       simpleNestedExprUsesReserved fn ||
@@ -71,7 +71,7 @@ def simpleNestedCheckReserved
         checkTypes rest
   checkTypes decl.types
 
-partial def simpleNestedInstantiateFirstParams
+def simpleNestedInstantiateFirstParams
     (type : Expr) : List Expr → Except String Expr
   | [] => pure type
   | arg :: rest =>
@@ -94,7 +94,7 @@ def simpleNestedLookupRebase
     | _, _ => none
   go sourceParams targetParams
 
-partial def simpleNestedRebaseParams
+def simpleNestedRebaseParams
     (e : Expr)
     (sourceParams targetParams : List OpenBinder) : Expr :=
   match e with

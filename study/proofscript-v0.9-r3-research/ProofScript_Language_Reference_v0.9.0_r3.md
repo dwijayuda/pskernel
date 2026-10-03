@@ -1069,7 +1069,7 @@ A required item cannot be omitted while retaining that claim.
 | structural/local/mutual recursion | required |
 | partial def boundary | required |
 | noncomputable logical declarations | required |
-| unsafe | excluded from Standard |
+| unsafe | excluded from psc2-language-v1 and Standard; explicit extensible/host profiles only |
 | typeclass search/ordinary instances | required |
 | Lean-compatible coercion insertion | required |
 | Prop/Type/Sort/universes/Pi/Eq | required |
@@ -1080,9 +1080,9 @@ A required item cannot be omitted while retaining that claim.
 | if-let / let-pattern / rich do-pattern sugar | not required |
 | let mut / assignment / for / while / break / continue | not required |
 | arbitrary Lean syntax/macros/elaborators | excluded |
-| arbitrary quotation/Meta source | excluded from Standard |
-| custom parser categories | excluded from Standard |
-| arbitrary user attribute handlers | excluded from Standard |
+| arbitrary quotation/Meta source | excluded from psc2-language-v1; extensible profile only |
+| custom parser categories | excluded from psc2-language-v1; extensible profile only |
+| arbitrary user attribute handlers | excluded from psc2-language-v1; extensible profile only |
 | deriving framework | not required |
 | arbitrary well-founded-recursion elaboration | not required |
 | async/await/using/defer syntax | not current language |

@@ -1,6 +1,6 @@
 # r3 Migration from v0.9-r2
 
-Status: specified migration plan; migrator not implemented.
+Status: **accepted r3 migration plan; migrator not implemented.**
 
 ## Rule
 

@@ -593,14 +593,6 @@ def psKernelExprCheapBetaReduce
   | _ =>
       expr
 
-def psKernelNameListLength
-    (values : List PsKernelName) : Nat :=
-  match values with
-  | List.nil =>
-      0
-  | List.cons _ rest =>
-      Nat.succ (psKernelNameListLength rest)
-
 def psKernelNameLastIndexWorker
     (values : List PsKernelName) :
     PsKernelName -> Nat -> Option Nat -> Option Nat :=

@@ -463,18 +463,6 @@ def psKernelLevelMkMaxList
             head
             (psKernelLevelMkMaxList tail)
 
-def psKernelLevelMapNormalize
-    (values : List PsKernelLevel) :
-    List PsKernelLevel :=
-  match values with
-  | List.nil =>
-      List.nil
-  | List.cons head tail =>
-      psKernelLevelListAppend
-        (psKernelLevelFlattenMax
-          (psKernelLevelNormalize head))
-        (psKernelLevelMapNormalize tail)
-
 partial def psKernelLevelNormalize
     (level : PsKernelLevel) : PsKernelLevel :=
   let pair := psKernelLevelToOffset level
@@ -496,8 +484,19 @@ partial def psKernelLevelNormalize
           (psKernelLevelNormalize right))
         amount
   | PsKernelLevel.max _ _ =>
+      let rec normalizeList
+          (values : List PsKernelLevel) :
+          List PsKernelLevel :=
+        match values with
+        | List.nil =>
+            List.nil
+        | List.cons head tail =>
+            psKernelLevelListAppend
+              (psKernelLevelFlattenMax
+                (psKernelLevelNormalize head))
+              (normalizeList tail)
       let normalized :=
-        psKernelLevelMapNormalize
+        normalizeList
           (psKernelLevelFlattenMax root)
       let sorted :=
         psKernelLevelSortLevels normalized
@@ -512,6 +511,46 @@ partial def psKernelLevelNormalize
 partial def psKernelLevelGeqCore
     (left : PsKernelLevel)
     (right : PsKernelLevel) : Bool :=
+  let fallback :=
+    fun
+      (fallbackLeft : PsKernelLevel)
+      (fallbackRight : PsKernelLevel) =>
+      match fallbackRight with
+      | PsKernelLevel.imax rightA rightB =>
+          if psKernelLevelGeqCore fallbackLeft rightA then
+            psKernelLevelGeqCore fallbackLeft rightB
+          else
+            false
+      | _ =>
+          match fallbackLeft with
+          | PsKernelLevel.imax _ leftRight =>
+              psKernelLevelGeqCore
+                leftRight
+                fallbackRight
+          | _ =>
+              let leftPair :=
+                psKernelLevelToOffset fallbackLeft
+              let rightPair :=
+                psKernelLevelToOffset fallbackRight
+              if
+                  if psKernelLevelEq
+                      leftPair.fst
+                      rightPair.fst then
+                    true
+                  else
+                    psKernelLevelIsZero
+                      rightPair.fst then
+                leftPair.snd >= rightPair.snd
+              else if
+                  if leftPair.snd == rightPair.snd then
+                    leftPair.snd > 0
+                  else
+                    false then
+                psKernelLevelGeqCore
+                  leftPair.fst
+                  rightPair.fst
+              else
+                false
   if
       if psKernelLevelEq left right then
         true
@@ -535,67 +574,9 @@ partial def psKernelLevelGeqCore
                   psKernelLevelGeqCore leftB right then
               true
             else
-              match right with
-              | PsKernelLevel.imax rightA rightB =>
-                  if psKernelLevelGeqCore left rightA then
-                    psKernelLevelGeqCore left rightB
-                  else
-                    false
-              | _ =>
-                  let leftPair := psKernelLevelToOffset left
-                  let rightPair := psKernelLevelToOffset right
-                  if
-                      if psKernelLevelEq
-                          leftPair.fst
-                          rightPair.fst then
-                        true
-                      else
-                        psKernelLevelIsZero
-                          rightPair.fst then
-                    leftPair.snd >= rightPair.snd
-                  else if
-                      if leftPair.snd == rightPair.snd then
-                        leftPair.snd > 0
-                      else
-                        false then
-                    psKernelLevelGeqCore
-                      leftPair.fst
-                      rightPair.fst
-                  else
-                    false
-        | PsKernelLevel.imax _ leftRight =>
-            psKernelLevelGeqCore
-              leftRight
-              right
+              fallback left right
         | _ =>
-            match right with
-            | PsKernelLevel.imax rightA rightB =>
-                if psKernelLevelGeqCore left rightA then
-                  psKernelLevelGeqCore left rightB
-                else
-                  false
-            | _ =>
-                let leftPair := psKernelLevelToOffset left
-                let rightPair := psKernelLevelToOffset right
-                if
-                    if psKernelLevelEq
-                        leftPair.fst
-                        rightPair.fst then
-                      true
-                    else
-                      psKernelLevelIsZero
-                        rightPair.fst then
-                  leftPair.snd >= rightPair.snd
-                else if
-                    if leftPair.snd == rightPair.snd then
-                      leftPair.snd > 0
-                    else
-                      false then
-                  psKernelLevelGeqCore
-                    leftPair.fst
-                    rightPair.fst
-                else
-                  false
+            fallback left right
 
 def psKernelLevelLe
     (left : PsKernelLevel)

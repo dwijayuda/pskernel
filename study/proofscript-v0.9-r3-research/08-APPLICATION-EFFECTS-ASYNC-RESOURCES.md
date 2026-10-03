@@ -1,6 +1,6 @@
 # r3 Application Effects, Errors, Resources and Async
 
-Status: recommended application-model candidate; implementation pending.
+Status: **accepted r3 application-semantics direction; library/runtime implementation pending.**
 
 ## Decision
 

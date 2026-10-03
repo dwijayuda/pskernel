@@ -99,13 +99,15 @@ Do not publish one vague percent-verified metric.
 
 ## Current status
 
-Not built end-to-end because this branch does not implement the r3 parser, contracts, App runtime, or InterfaceIR importer.
+The reference applications have **not** been built end-to-end in this documentation-only specification pass.
 
-Creating TypeScript mocks and calling them PSC applications would be misleading.
+The branch does not claim a production r3 parser, contract implementation, App runtime, InterfaceIR importer/exporter, or full application execution.
 
-Immediate bounded prototypes validate individual layers only: the inventory domain theorem is checked under Lean 4.34.0; the npm package-shape workflow passes a real pack/install/strict-tsc/runtime consumer test; and a small Resource/race trace model passes its Node tests. None is an end-to-end PSC application.
+Any prior exploratory prototype files/results are not part of the final documentation baseline and must not be counted as application evidence.
 
-## Current bounded evidence\n\n- Inventory.lean: success/failure behavior and invariant preservation checked under the pinned Lean oracle.\n- npm-codec prototype: hand-authored ESM + d.ts package shape consumed by TypeScript 7.0.2 and Node.\n- application-model prototype: cleanup/race trace tests passed.\n- full r3 PSC applications: still 0.\n\n## Full-app release gate
+Current full r3 PSC applications completed under this plan: **0**.
+
+## Full-app release gate
 
 ProofScript should not claim r3 full-app readiness until Apps 1 through 4 build and run through supported PSC toolchains and App 5 demonstrates a useful admitted contract.
 

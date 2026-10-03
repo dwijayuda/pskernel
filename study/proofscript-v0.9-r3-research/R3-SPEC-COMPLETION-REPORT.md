@@ -43,7 +43,7 @@ Resolved:
 
 Resolved:
 
-- CallGap is horizontal spaces/tabs + no-newline Lean comments;
+- CallGap uses inherited horizontal Lean space trivia + no-newline Lean comments; r3 does not add tab-as-whitespace;
 - physical newline breaks head-to-parenthesis ownership;
 - multiline arguments begin after `(`;
 - structural brace separators are explicit by category;

@@ -48,29 +48,27 @@
   "specificationCompletion": {
     "completed": true,
     "methodology": "documentation research and normative design only",
-    "r2BaselinePath": "baseline/ProofScript_Language_Reference_v0.9.0_r2.md",
-    "r2BaselineSha256": "d29c0b2d5780e6cdb08a4c9ac00cc7442a64b1c8133b51c5f0c0e9a343b11b8d",
-    "authorityMap": "R3-R2-INHERITANCE-MATRIX.md",
-    "grammar": "R3-GRAMMAR-AND-FEATURE-REGISTRY.md",
-    "featureRegistry": "FEATURE-REGISTRY-r3.json",
+    "authorityMap": "embedded in primary reference; companion matrix non-normative",
+    "grammar": "embedded in primary reference",
+    "featureRegistry": "generated mirror of primary reference",
     "standardRegistry": {
       "id": "ps-standard-0.9-r3",
-      "path": "PS-STANDARD-REGISTRY-r3.json"
+      "path": "generated mirror of primary reference"
     },
     "semanticBundle": {
       "schemaVersion": "psc-semantic-bundle-1.0.0",
-      "doc": "SEMANTIC-BUNDLE-v1.md",
-      "schema": "SEMANTIC-BUNDLE-v1.schema.json"
+      "doc": "embedded in primary reference",
+      "schema": "generated mirror"
     },
     "interfaceIR": {
       "schemaVersion": "proofscript-interface-ir-1.0.0",
-      "doc": "INTERFACEIR-v1.md",
-      "schema": "INTERFACEIR-v1.schema.json"
+      "doc": "embedded in primary reference",
+      "schema": "generated mirror"
     },
-    "authorityDoc": "R3-AUTHORITY-AND-DELTA.md",
-    "contractCore": "07-CONTRACTS-AND-SPECIFICATIONS.md",
-    "applicationSemantics": "08-APPLICATION-EFFECTS-ASYNC-RESOURCES.md",
-    "preStableEvidenceGates": "23-PRE-STABLE-EVIDENCE-GATES.md",
+    "authorityDoc": "ProofScript_Language_Reference_v0.9.0_r3.md",
+    "contractCore": "embedded in primary reference",
+    "applicationSemantics": "embedded in primary reference",
+    "preStableEvidenceGates": "embedded in primary reference",
     "prompt": "R3-SPEC-COMPLETION-PROMPT.md",
     "report": "R3-SPEC-COMPLETION-REPORT.md",
     "emptyCall": {
@@ -94,19 +92,18 @@
   },
   "primaryReference": {
     "path": "ProofScript_Language_Reference_v0.9.0_r3.md",
-    "purpose": "single standalone human and AI/compiler-design reference",
+    "purpose": "sole normative standalone human and AI/compiler-design reference",
     "standalone": true,
-    "embeddedAuthority": true,
-    "embeddedExactGrammar": true,
-    "embeddedFeatureRegistry": true,
-    "embeddedStandardRegistry": true,
-    "embeddedContractSpec": true,
-    "embeddedApplicationSpec": true,
-    "embeddedSemanticBundleSpecAndSchema": true,
-    "embeddedInterfaceIRSpecAndSchema": true,
-    "embeddedPreStableEvidenceGates": true,
-    "embeddedR2Baseline": true,
+    "dependsOnPreviousProofScriptDocs": false,
+    "companionDocsCanOverride": false,
+    "includesNormativeKeywords": true,
+    "includesGlossary": true,
+    "includesTableOfContents": true,
+    "includesExactCallAndBraceRules": true,
     "includesCompilerImplementationContract": true,
+    "includesApplicationRuntimeAlgebra": true,
+    "includesInterfaceIRResolutionIdentity": true,
+    "machineReadableMirrorsAreGeneratedNonAuthoritative": true,
     "grammar": "ps-0.9-r3",
     "semanticPin": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
   }

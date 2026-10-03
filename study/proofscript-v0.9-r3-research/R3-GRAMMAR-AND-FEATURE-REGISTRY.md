@@ -57,36 +57,53 @@ The dot must retain the inherited native adjacency rule.
 
 `f()` is an **empty source-level invocation**, not textually identical to `f(())`.
 
-The elaboration rule is:
+Its canonical high-level Lean application request is:
 
-1. infer the callable head using the native-compatible environment;
-2. insert implicit and instance-implicit arguments according to native rules;
-3. insert optional/default and automatic parameters when they are omitted;
-4. if the next still-required explicit parameter is definitionally `Unit`, synthesize exactly one explicit `()` for the empty-call sugar;
-5. continue inserting trailing implicit, instance, optional/default and automatic parameters;
-6. if any required non-Unit explicit parameter remains unsatisfied, reject with `PS_EMPTY_CALL_REQUIRES_ARGUMENT`;
-7. do not eta-abstract missing required arguments for an empty call.
+~~~lean
+f ..
+~~~
+
+using Lean's native application ellipsis.
+
+The pinned Lean elaborator performs ordinary insertion of implicit, instance-implicit, optional/default, and automatic parameters. r3 then applies an additional source-acceptance predicate:
+
+1. every omitted **explicit** parameter must be represented by native `optParam` or `autoParam`;
+2. an ordinary required explicit parameter may not be accepted merely because ellipsis created/inferred a metavariable for it;
+3. unresolved metavariables remain rejection conditions;
+4. empty-call syntax never eta-abstracts required parameters.
 
 Consequences:
 
 ~~~proofscript
 function now(): Time := ...
-now()                         -- supplies Unit
+now()                         -- hidden optional Unit defaults to ()
 
 function greet(name: String := "world"): String := ...
-greet()                       -- uses the native default
+greet()                       -- native default is inserted
 
 function add(x: Nat): Nat := x + 1
-add()                         -- reject: required non-Unit argument
-
-function staged(_: Unit, x: Nat): Nat := x
-staged()                      -- reject: x remains required
-staged(())                    -- ordinary explicit Unit call; native partial application may remain
+add()                         -- PS_EMPTY_CALL_REQUIRED_ARGUMENT
 ~~~
 
 A nonempty call retains native-compatible partial-application behavior.
 
-`function f()` lowers to one explicit Unit binder. The empty-call rule is what makes the declaration/call pair ergonomic without redefining core arity.
+`function f()` lowers to one **optional Unit binder with default `()`**:
+
+~~~lean
+def f (_ : Unit := ()) := ...
+~~~
+
+This makes the zero-source-argument declaration participate in the same default-completion mechanism as ordinary optional parameters while preserving Lean's unary/curried core model.
+
+An explicit `f(())` remains an ordinary nonempty call with one Unit argument.
+
+An r2 empty D-CALL always meant an explicit Unit argument, so semantics-preserving r2→r3 migration rewrites:
+
+~~~text
+r2 f() -> r3 f(())
+~~~
+
+unless a migration tool has separately established and recorded a stronger source-level intent.
 
 ## 4. Owned grammar
 
@@ -220,7 +237,7 @@ State/loop/async contract syntax is reserved for a later profile revision even t
 Once an owned discriminator commits, failure is a committed ProofScript error rather than silent fallback.
 
 Examples:
-- `function f()` commits to Unit-function sugar;
+- `function f()` commits to zero-source-argument function sugar (optional Unit default);
 - callable head + `CallGap` + `(` commits to r3 call parsing;
 - `structure ... where {` commits to r3 structural field grammar;
 - `function ... requires` commits to the r3 pure contract clause grammar.

@@ -18,11 +18,11 @@
     "productionR3ParserImplemented": false,
     "productionR3LowererImplemented": false,
     "standaloneKernelChanged": false,
-    "formalOverlayProofCompleted": true,
-    "backendPreservationSliceCompleted": true,
+    "formalOverlayProofCompleted": false,
+    "backendPreservationSliceCompleted": false,
     "humanUsabilityStudyRun": false,
     "referenceApplicationsBuilt": false,
-    "formalProofScope": "toy models only; no production parser/backend refinement",
+    "formalProofScope": "research plans only in final branch state; no executable proof artifacts retained",
     "humanUsabilityStudyProtocolComplete": true,
     "contractImplementationCompleted": false,
     "applicationRuntimeImplemented": false,
@@ -35,11 +35,5 @@
     "v09r2Overwritten": false,
     "compilerChangedToMatchDocs": false,
     "kernelChangedToMatchDocs": false
-  },
-  "formalEvidence": {
-    "toolchain": "Lean 4.34.0",
-    "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
-    "overlaySha256": "90e20cd38c132485bb7ac0564a5379522176ab3eb13cd68a3f0ee537f6e99574",
-    "backendSha256": "e1faabe0a463d2a99dcf8bdb9566604c35b9c7152e139a1696d9c4c0b6c89b82"
   }
 }

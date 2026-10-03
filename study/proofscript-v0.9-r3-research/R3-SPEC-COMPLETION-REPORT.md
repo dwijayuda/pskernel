@@ -47,7 +47,9 @@ Resolved:
 - physical newline breaks head-to-parenthesis ownership;
 - multiline arguments begin after `(`;
 - structural brace separators are explicit by category;
-- field commas have no trailing comma.
+- field commas have no trailing comma;
+- empty structure/class/inductive/instance brace bodies remain available where the corresponding native declaration is valid;
+- the exact grammar permits native non-explicit binders before a zero-source-argument function's final empty explicit group.
 
 ### 4. Field notation
 
@@ -128,3 +130,12 @@ Exact URLs are recorded in `RESEARCH-SOURCES.md`.
 ## Evidence boundary
 
 No production implementation, formal theorem, human participant result, or full application execution is claimed by this pass.
+
+
+### Final lexical consistency correction
+
+The focused audit found that the initial completion draft said "spaces/tabs" in CallGap even though the inherited Lean lexer does not treat tabs as ordinary whitespace. The final r3 grammar therefore uses inherited horizontal Lean space trivia and does **not** add tab-as-whitespace as a call-only exception.
+
+The same audit restored native-valid empty structure/class/inductive/instance bodies to the owned brace grammar.
+
+These are specification corrections only; no compiler/runtime experiment was run.

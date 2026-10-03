@@ -397,3 +397,12 @@ def psKernelNameCmp
   psKernelCompareNameComponents
     (psKernelNameComponents left)
     (psKernelNameComponents right)
+
+def psKernelNameListLength
+    (values : List PsKernelName) : Nat :=
+  match values with
+  | List.nil =>
+      0
+  | List.cons _ rest =>
+      Nat.succ
+        (psKernelNameListLength rest)

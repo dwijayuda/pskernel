@@ -5,6 +5,18 @@ Branch: <code>research/proofscript-v0.9-r3</code>
 Baseline: ProofScript v0.9.0 draft revision 2 (<code>ps-0.9-r2</code>)  
 Semantic pin: Lean 4.34.0, commit <code>293d5d0c0c3f3dded4688b3ccd6a33939ac5102b</code>
 
+## Primary reference for humans and AI/compiler agents
+
+Start with:
+
+~~~text
+ProofScript_Language_Reference_v0.9.0_r3.md
+~~~
+
+That single Markdown document now consolidates the normative language surface, inherited semantic obligations, source profiles, exact r3 calls/braces/default behavior, contract core, application model, npm/InterfaceIR boundary, compiler phase architecture, AST/lowering requirements, diagnostics, migration, conformance/evidence rules, and an explicit AI/compiler implementation contract.
+
+Companion documents remain useful for machine-readable schemas, historical rationale, and focused research, but an implementation agent should not need to reconstruct the compiler design by stitching them together manually.
+
 ## Mission
 
 This workstream researched the r3 surface/platform revision and now records the accepted r3 design baseline without changing ProofScript's logical foundation.

@@ -13,6 +13,11 @@
       "PSC1Kernel/Test"
     ],
     "outDir": "dist",
-    "role": "bounded-kernel-assurance-reference"
+    "role": "bounded-kernel-assurance-reference",
+    "selfHostEntry": "PSC1KernelSelfHost.lean",
+    "selfHostMigration": true
+  },
+  "scripts": {
+    "check:selfhost-source": "node scripts/check-selfhost-source.mjs"
   }
 }

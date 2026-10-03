@@ -70,3 +70,4 @@ theorem add_call_preserves (a b : Nat) :
   rfl
 
 end ProofScript.R3.Overlay
+#print axioms ProofScript.R3.Overlay.add_call_preserves

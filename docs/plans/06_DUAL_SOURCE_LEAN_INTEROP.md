@@ -1,6 +1,6 @@
 # Dual-source ProofScript / Lean-subset interoperability plan
 
-> **r3 reconciliation note.** The bounded Lean source target is now named `lean-subset-psc2-v1` in the standalone r3 reference. This plan MUST NOT be read as a promise to compile arbitrary Lean 4 source. Full Lean parser/macro/elaborator/metaprogramming parity is explicitly outside `psc2-compiler-v1` unless a later compatibility profile adds it.
+> **r3 reconciliation note.** The bounded Lean source target is `lean-subset-psc2-v1` in the standalone r3 language reference. Its exact included/excluded semantic families are language-profile rules; this document only plans their implementation and interoperability. Full Lean parser/macro/elaborator/metaprogramming parity is not implied by `psc2-compiler-v1`.
 
 
 Status: **DS6 editor MVP complete through DS6.6 importer diagnostic refresh; later navigation/index optimizations remain; subordinate to the canonical checked-core architecture**

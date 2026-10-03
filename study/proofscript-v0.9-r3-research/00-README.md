@@ -33,14 +33,14 @@ The r3 study was organized around ten linked decisions, now accepted as the r3 d
 
 1. Make native <code>.ps</code> parenthesized calls insensitive to ordinary trivia, with explicit tuple grouping.
 2. Make ProofScript-owned braces genuinely structural instead of visually brace-delimited but secretly layout-delimited.
-3. Study and specify <code>function f()</code> as explicit Unit-function sugar.
-4. Decide whether <code>const</code> remains worth its TypeScript familiarity cost.
+3. Accept <code>function f()</code> as explicit Unit-function sugar.
+4. Retain <code>const</code> in r3 while keeping a pre-stable usability review.
 5. Separate <code>ps-standard</code> from <code>ps-lean-extensible</code> without weakening the type theory.
 6. Define stable PSC-owned contracts rather than relying semantically on experimental Lean intrinsic verification.
 7. Freeze one application error/resource/async model.
 8. Define a versioned npm / <code>.d.ts</code> boundary and exercise it with applications.
-9. Complete a first formal overlay theorem and a first backend-preservation slice.
-10. Design a real TypeScript-developer usability study before syntax freeze.
+9. Adopt the first formal overlay theorem and backend-preservation slice as future evidence obligations.
+10. Adopt the TypeScript-developer usability study protocol as a pre-stable/1.0 evidence gate.
 
 ## Accepted r3 direction
 

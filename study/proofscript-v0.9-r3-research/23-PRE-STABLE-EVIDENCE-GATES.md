@@ -1,6 +1,6 @@
 # r3 Pre-Stable / 1.0 Evidence Gates
 
-Status: **normative release-evidence plan; no gate is claimed completed by this documentation pass**
+Status: **release/evidence policy only; not a ProofScript source-language authority; no gate is claimed completed by this documentation pass**
 
 The accepted r3 design can exist before these gates run.
 

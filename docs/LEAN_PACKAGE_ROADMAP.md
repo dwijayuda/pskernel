@@ -1,5 +1,8 @@
 # Lean 4.34 study → pskernel / ProofScript package roadmap
 
+> **r3 reconciliation note.** This package roadmap remains informative implementation sequencing. Lean package/subsystem presence is not a PSC2 language-support requirement. The standalone r3 reference defines the bounded `lean-subset-psc2-v1` compatibility profile and classifies broader Meta/tactic/library/plugin functionality above the compiler core.
+
+
 This roadmap is derived from the uploaded Lean 4.34.0 source tree and the current
 pskernel architecture. It is intentionally **not** a directory-for-directory port
 of Lean. The goal is to preserve Lean's useful architectural seams while building

@@ -8,8 +8,12 @@
     "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
   },
   "profiles": [
-    "ps-standard",
-    "ps-lean-extensible"
+    "ps-standard-0.9-r3",
+    "ps-lean-extensible-0.9-r3",
+    "psc2-language-v1",
+    "psc2-standard-language-v1",
+    "lean-subset-psc2-v1",
+    "psc2-pattern-v1"
   ],
   "evidence": {
     "researchSourcesReviewed": true,
@@ -56,18 +60,24 @@
     },
     "semanticBundle": {
       "schemaVersion": "psc-semantic-bundle-1.0.0",
-      "doc": "embedded in primary reference",
-      "schema": "generated mirror"
+      "doc": "SEMANTIC-BUNDLE-v1.md",
+      "scope": "semantic-import protocol; separate from source-language authority"
     },
     "interfaceIR": {
       "schemaVersion": "proofscript-interface-ir-1.0.0",
-      "doc": "embedded in primary reference",
-      "schema": "generated mirror"
+      "doc": "INTERFACEIR-v1.md",
+      "scope": "foreign-binding protocol; separate from source-language authority"
     },
     "authorityDoc": "ProofScript_Language_Reference_v0.9.0_r3.md",
     "contractCore": "embedded in primary reference",
-    "applicationSemantics": "embedded in primary reference",
-    "preStableEvidenceGates": "embedded in primary reference",
+    "applicationSemantics": {
+      "doc": "08-APPLICATION-EFFECTS-ASYNC-RESOURCES.md",
+      "scope": "Standard library/runtime semantic model; not base source syntax"
+    },
+    "preStableEvidenceGates": {
+      "doc": "23-PRE-STABLE-EVIDENCE-GATES.md",
+      "scope": "release/evidence policy; not source-language authority"
+    },
     "prompt": "R3-SPEC-COMPLETION-PROMPT.md",
     "report": "R3-SPEC-COMPLETION-REPORT.md",
     "emptyCall": {
@@ -86,7 +96,8 @@
       "comments": "Lean comments with no physical line terminator",
       "bareLineTerminator": false,
       "tabsAddedByR3": false
-    }
+    },
+    "postPsc2LanguageRoadmap": "POST_PSC2_LANGUAGE_ROADMAP.md"
   },
   "primaryReference": {
     "path": "ProofScript_Language_Reference_v0.9.0_r3.md",

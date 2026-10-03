@@ -14,7 +14,7 @@ The Bool reports whether this subtree changed. When no descendant changes we
 return the original node, preserving the sharing Lean's kernel relies on,
 without pointer APIs or host-specific mutation.
 -/
-private partial def Expr.liftLooseBVarsChanged
+private def Expr.liftLooseBVarsChanged
     (e : Expr) (start amount : Nat) : Expr × Bool :=
   if amount == 0 then
     (e, false)
@@ -47,7 +47,7 @@ private partial def Expr.liftLooseBVarsChanged
         if bc then (.proj n i b', true) else (e, false)
     | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => (e, false)
 
-partial def Expr.liftLooseBVars (e : Expr) (start amount : Nat) : Expr :=
+def Expr.liftLooseBVars (e : Expr) (start amount : Nat) : Expr :=
   (e.liftLooseBVarsChanged start amount).1
 
 def Expr.lift (e : Expr) (amount : Nat) : Expr :=
@@ -59,7 +59,7 @@ original node when substitution does not affect the subtree, matching the
 sharing behavior of Lean's `replace`-based implementation without `unsafe` or
 `implemented_by`.
 -/
-private partial def Expr.instantiateAtChanged
+private def Expr.instantiateAtChanged
     (e : Expr) (start : Nat) (subst : List Expr) (offset : Nat) : Expr × Bool :=
   match e with
   | .bvar i =>
@@ -101,7 +101,7 @@ private partial def Expr.instantiateAtChanged
       if bc then (.proj n i b', true) else (e, false)
   | .fvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => (e, false)
 
-partial def Expr.instantiateAt
+def Expr.instantiateAt
     (e : Expr) (start : Nat) (subst : List Expr) (offset : Nat) : Expr :=
   if subst.isEmpty then e else (e.instantiateAtChanged start subst offset).1
 
@@ -131,7 +131,7 @@ kernel type checker:
 
 All other applications are left unchanged.
 -/
-partial def Expr.cheapBetaReduce (e : Expr) : Expr :=
+def Expr.cheapBetaReduce (e : Expr) : Expr :=
   match e.getAppFn with
   | .lam _ _ _ _ =>
       let args := e.getAppArgs
@@ -175,7 +175,7 @@ verbatim instead of being rebuilt. This recovers the important sharing property
 of Lean's pointer-memoized abstraction while staying inside the PSC1 source
 profile.
 -/
-private partial def Expr.abstractFVarsAtChanged
+private def Expr.abstractFVarsAtChanged
     (e : Expr) (fvars : List Name) (offset : Nat) : Expr × Bool :=
   match e with
   | .fvar n =>
@@ -207,7 +207,7 @@ private partial def Expr.abstractFVarsAtChanged
       if bc then (.proj n i b', true) else (e, false)
   | .bvar _ | .mvar _ | .sort _ | .const _ _ | .lit _ => (e, false)
 
-partial def Expr.abstractFVarsAt
+def Expr.abstractFVarsAt
     (e : Expr) (fvars : List Name) (offset : Nat) : Expr :=
   if fvars.isEmpty then e else (e.abstractFVarsAtChanged fvars offset).1
 

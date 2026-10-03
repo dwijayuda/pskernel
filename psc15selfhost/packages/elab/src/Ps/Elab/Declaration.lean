@@ -68,9 +68,10 @@ def psElabStructuralRecursionFromSource
               Option.none
           | some sourceName =>
               match
-                  psResolveName
+                  psResolveNameScoped
                     context.localContext
                     context.environment
+                    context.namespacePrefix
                     sourceName with
               | some resolution =>
                   match resolution with
@@ -121,7 +122,9 @@ def psElabDeclarationParts
       Except.error PsElabError.emptyName
   | some name =>
       let initial : PsElabContext :=
-        psElabContextEmpty environment;
+        psElabContextWithNamespace
+          (psElabContextEmpty environment)
+          (psNameParent name);
       match
           psElabTypedBinders
             psElabDeclarationTermCallback
@@ -250,6 +253,7 @@ def psElabContextWithEnvironment
     instances := context.instances
     metaContext := context.metaContext
     structuralRecursion := context.structuralRecursion
+    namespacePrefix := context.namespacePrefix
   }
 
 def psElabBinderArgument
@@ -1042,7 +1046,10 @@ def psElabInductiveDeclaration
   match psSyntaxNameToName nameSyntax with
   | Option.none => Except.error PsElabError.emptyName
   | Option.some name =>
-      let initial := psElabContextEmpty environment;
+      let initial :=
+        psElabContextWithNamespace
+          (psElabContextEmpty environment)
+          (psNameParent name);
       match psElabTypedBinders
           psElabDeclarationTermCallback
           initial
@@ -1211,7 +1218,10 @@ def psElabPartialDeclaration
   match psSyntaxNameToName nameSyntax with
   | Option.none => Except.error PsElabError.emptyName
   | Option.some name =>
-      let initial := psElabContextEmpty environment;
+      let initial :=
+        psElabContextWithNamespace
+          (psElabContextEmpty environment)
+          (psNameParent name);
       match
           psElabTypedBinders
             psElabDeclarationTermCallback

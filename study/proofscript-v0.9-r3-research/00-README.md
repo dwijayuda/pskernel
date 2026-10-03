@@ -80,7 +80,7 @@ A green test does not promote itself into a theorem.
 - <code>07-CONTRACTS-AND-SPECIFICATIONS.md</code> — stable PSC contracts.
 - <code>08-APPLICATION-EFFECTS-ASYNC-RESOURCES.md</code> — standard application model.
 - <code>09-NPM-DTS-INTEROP.md</code> — InterfaceIR and JS/TS boundaries.
-- <code>10-REFERENCE-APPLICATIONS.md</code> — application corpus and executed prototypes.
+- <code>10-REFERENCE-APPLICATIONS.md</code> — application corpus, acceptance criteria, and future prototype plan.
 - <code>11-FORMAL-OVERLAY-PROOF.md</code> — proposed first overlay theorem and proof plan.
 - <code>12-BACKEND-PRESERVATION-SLICE.md</code> — proposed first backend-preservation theorem plan.
 - <code>13-USABILITY-STUDY.md</code> — human-study protocol and status.

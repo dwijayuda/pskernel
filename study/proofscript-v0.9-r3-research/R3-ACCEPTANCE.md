@@ -80,3 +80,22 @@ ps-0.9-r3
 This is a breaking source revision relative to r2 because `f (x, y)` in native `.ps` no longer means the r2 native tuple-neighbor form. Edition-aware migration must preserve old tuple intent as `f((x, y))`.
 
 r2 and earlier references remain historical artifacts and are not rewritten.
+
+## Specification-completion addendum
+
+The follow-up completion pass resolves the previously identified lingering specification gaps without changing the Lean semantic pin or claiming implementation evidence.
+
+Accepted additions:
+
+- r3 is formally a complete delta over the exact vendored r2 baseline and 89-section inheritance/override matrix;
+- parenthesized-call ownership uses a horizontal CallGap; a physical newline breaks ownership;
+- native field-dot adjacency remains unchanged;
+- `f()` is a complete empty invocation with native default/auto insertion, one possible Unit synthesis, and rejection of unsatisfied required non-Unit parameters;
+- r2 `f()` migrates to r3 `f(())` to preserve the old explicit Unit meaning;
+- the exact overlay grammar/feature registry is frozen;
+- `ps-standard-0.9-r3` has a fixed registry and Semantic Bundle v1 import boundary;
+- the normative base contract core is total-pure `requires`/`ensures`, with semantic frame/effect data and a higher-order CallableSpec model;
+- App/Fiber/Exit/RuntimeFault/Resource/Stream semantics, cancellation shielding, capability visibility and native IO relationship are fixed;
+- InterfaceIR v1 has normative prose and JSON Schema plus exact module-resolution identity.
+
+The remaining gates are implementation and evidence work, not undefined base-r3 semantics.

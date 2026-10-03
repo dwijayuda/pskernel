@@ -30,10 +30,11 @@ f((x, y))
 The model should preserve the intended distinctions:
 
 ~~~text
-Call(h, [])      -> native application h ()
+EmptyCall(h)     -> native high-level application h .. + r3 omitted-required-argument acceptance predicate
 Call(h, [a])     -> native application h a
 Call(h, [a,b])   -> native application (native application h a) b
 Tuple argument   -> one ordinary product-valued call argument
+ZeroArgDecl(f)   -> native def f (_ : Unit := ())
 ~~~
 
 This is a model of the intended lowering, not the production parser.
@@ -44,9 +45,11 @@ The first proof package should establish, for the selected formal model:
 
 1. ownership determinism for the modeled call grammar;
 2. lowering well-formedness;
-3. explicit Unit lowering for an empty call;
-4. preservation of argument order/grouping;
-5. a small interpretation-preservation theorem for a minimal callable language.
+3. correctness of empty-call canonicalization to native ellipsis application;
+4. soundness of rejecting omitted ordinary required explicit parameters;
+5. correctness of zero-source-argument declaration lowering to native optional Unit;
+6. preservation of argument order/grouping;
+7. a small interpretation-preservation theorem for a minimal callable language.
 
 ## Important exclusions
 
@@ -54,7 +57,7 @@ The first theorem should **not** claim to cover:
 
 - the actual Lean lexer/parser;
 - whitespace/comment/newline ownership in the production frontend;
-- native named/default/implicit argument elaboration;
+- the full production native named/default/implicit argument elaborator beyond the modeled relation;
 - generalized field notation;
 - contextual constructors;
 - macros or quotations;
@@ -85,8 +88,8 @@ Each arrow needs a stated relation. A theorem about an isolated model does not a
 Before implementing the proof:
 
 - finish the exact r3 D-CALL grammar;
-- settle newline continuation rules;
-- settle the callable-head category;
+- encode the already-accepted no-bare-newline CallGap rule;
+- encode the accepted callable-head category and field-dot adjacency rule;
 - document every protected/imported syntax interaction;
 - define the production AST shape;
 - define the formal AST independently enough to audit it.

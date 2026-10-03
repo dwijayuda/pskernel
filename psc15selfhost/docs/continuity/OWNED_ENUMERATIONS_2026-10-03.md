@@ -30,3 +30,7 @@ Next required fragments include checked payload sums, parameterized/recursive/ne
 ## Resumption corrections
 
 Two old rejection fixtures describe valid enums under the new fragment. Their original Flag and nullary Counter inputs are retained as positive regression cases. Additional checks reject payload sums, wrong constructor results, Nat-style application and Nat-style recursor misuse; names zero/succ do not grant Nat authority. Earlier failed runs remain preserved. Portable source CRLF normalization was limited to compiler closure files and each normalized file was checked against its unchanged base Git blob; no compiler semantic changes or retired-package edits were introduced.
+
+## Preserved inputs and recovery
+
+Semantic commit: `1705dba1a14fdfd570d1b674bfc94beb04387ff2`. The sibling `owned-enumerations-2026-10-03/receipt.json` binds the exact fresh 77-source snapshot, full admissions, complete declaration/dependency inventory, integrated source partition, exact probes and successful/failing command logs. Gzip entries record compressed and uncompressed hashes. Rebuild only in a new isolated candidate: building replaces dist and invalidates earlier differential evidence. Original replay directories and all preceding checkpoints remain unchanged. This receipt does not claim current CI success or release readiness.

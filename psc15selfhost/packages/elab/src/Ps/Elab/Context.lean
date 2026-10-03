@@ -27,6 +27,7 @@ structure PsElabContext where
   instances : PsInstanceIndex
   metaContext : PsMetaContext
   structuralRecursion : Option PsElabStructuralRecursion
+  namespacePrefix : PsName := PsName.anonymous
 
 def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
   {
@@ -35,6 +36,7 @@ def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
     instances := psInstanceIndexEmpty
     metaContext := psMetaEmpty
     structuralRecursion := Option.none
+    namespacePrefix := PsName.anonymous
   }
 
 def psElabContextWithLocal
@@ -46,6 +48,7 @@ def psElabContextWithLocal
     instances := context.instances
     metaContext := context.metaContext
     structuralRecursion := context.structuralRecursion
+    namespacePrefix := context.namespacePrefix
   }
 
 def psElabContextWithMeta
@@ -69,4 +72,17 @@ def psElabContextWithStructuralRecursion
     instances := context.instances
     metaContext := context.metaContext
     structuralRecursion := structuralRecursion
+    namespacePrefix := context.namespacePrefix
+  }
+
+def psElabContextWithNamespace
+    (context : PsElabContext)
+    (namespacePrefix : PsName) : PsElabContext :=
+  {
+    environment := context.environment
+    localContext := context.localContext
+    instances := context.instances
+    metaContext := context.metaContext
+    structuralRecursion := context.structuralRecursion
+    namespacePrefix := namespacePrefix
   }

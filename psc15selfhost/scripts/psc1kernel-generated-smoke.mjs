@@ -30,6 +30,8 @@ const required = [
   "psKernelCheckerStateEmpty",
   "psKernelWhnfNoRecursor",
   "psKernelAddAxiom",
+  "psKernelAddSimpleInductive",
+  "psKernelSimpleRecName",
   "psKernelLeanNatMaxSizeDefault",
   "psKernelSelfHostSemanticRoot",
 ];
@@ -121,10 +123,53 @@ const duplicate = kernel.psKernelAddAxiom(
 );
 assert.equal(sumTag(duplicate), "error");
 
+const unitName = kernel.PsKernelName.str(anonymous, "SmokeUnit");
+const unitCtorName = kernel.PsKernelName.str(unitName, "unit");
+const unitRecName = kernel.psKernelSimpleRecName(unitName);
+const unitType = kernel.PsKernelExpr.sort(zero);
+const unitValueType = kernel.PsKernelExpr.const(
+  unitName,
+  kernel.List.nil(),
+);
+const unitCtor = {
+  name: unitCtorName,
+  type: unitValueType,
+};
+const unitDecl = {
+  levelParams: kernel.List.nil(),
+  name: unitName,
+  type: unitType,
+  ctors: kernel.List.cons(unitCtor, kernel.List.nil()),
+  isUnsafe: false,
+  numParams: 0n,
+};
+const environment2 = unwrapExcept(
+  kernel.psKernelAddSimpleInductive(
+    16384n,
+    environment1,
+    unitDecl,
+    0n,
+    kernel.psKernelLeanNatMaxSizeDefault,
+  ),
+  "INDUCTIVE",
+);
+assert.equal(kernel.psKernelEnvironmentContains(environment2, unitName), true);
+assert.equal(kernel.psKernelEnvironmentContains(environment2, unitCtorName), true);
+assert.equal(kernel.psKernelEnvironmentContains(environment2, unitRecName), true);
+
+const duplicateInductive = kernel.psKernelAddSimpleInductive(
+  16384n,
+  environment2,
+  unitDecl,
+  0n,
+  kernel.psKernelLeanNatMaxSizeDefault,
+);
+assert.equal(sumTag(duplicateInductive), "error");
+
 process.stdout.write(
   [
     "PSC1KERNEL_GENERATED_SMOKE: PASS",
     `kernel=${path.relative(root, kernelPath)}`,
-    "checks=name,level,expr,subst,nat,whnf,axiom,duplicate-rejection",
+    "checks=name,level,expr,subst,nat,whnf,axiom,inductive,duplicate-rejection",
   ].join("\n") + "\n",
 );

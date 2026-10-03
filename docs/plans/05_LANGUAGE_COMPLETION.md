@@ -1,5 +1,8 @@
 # ProofScript language completion plan
 
+> **r3 reconciliation note.** This plan remains useful as an implementation/evidence roadmap, but it does not make every listed capability a builtin PSC2 compiler feature. The standalone r3 reference defines `psc2-compiler-v1`, `lean-subset-psc2-v1`, and the feature-ownership matrix. Library, Standard prover, Standard extension, controlled-plugin, host-boundary, post-PSC2, and deferred features MUST stay in those layers unless the normative compiler profile explicitly promotes them.
+
+
 Status: **active anti-drift execution plan**
 
 > **Self-hosting priority override (2026-09-24):** this plan is now subordinate

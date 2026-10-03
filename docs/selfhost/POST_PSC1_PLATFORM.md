@@ -1,5 +1,9 @@
 # ProofScript post-PSC1 platform architecture
 
+> **r3 reconciliation note.** This remains a post-PSC2/platform roadmap. The standalone r3 reference owns current semantics. In particular, its `psc-app-v1` model (`App` cold, `Fiber` started, `Stream` cold, explicit `Resource`, `CapabilitySet`, `RuntimeFault`) supersedes Task-only sketches here; its InterfaceIR rules supersede looser foreign-interface sketches. P1–P7 remain useful sequencing, not PSC2 compiler-core requirements.
+
+
+
 Status: **planned, deliberately non-blocking for PSC1 self-host closure**
 
 This document defines the platform work that follows the first stable PSC1

@@ -74,25 +74,39 @@ CallArgument ::=
 The parser does not delete whitespace and then reparse text. It records the source trivia and chooses ownership structurally.
 ## Call trivia and line boundaries
 
-<code>CallTrivia</code> includes spaces, tabs, and Lean comments. A line break is included only when the surrounding parser category has not already established a sequence/member boundary.
+The accepted r3 `CallGap` is deliberately **horizontal**.
 
-Thus these are the same call in an ordinary expression:
+It permits spaces, tabs, and Lean comments that contain no physical line terminator. A physical line terminator breaks parenthesized-call ownership between the completed head and `(`.
+
+Thus:
 
 ~~~proofscript
+f(x)
 f (x)
-f /- comment -/ (x)
+f/- comment -/(x)
+~~~
 
+are the same call form, while:
+
+~~~proofscript
+f
+(x)
+~~~
+
+is not one r3 parenthesized call.
+
+A block comment containing a newline also breaks the call gap.
+
+Multiline calls remain available after the opening parenthesis:
+
+~~~proofscript
 f(
   x,
   y,
 )
 ~~~
 
-A call must not jump across a completed native <code>do</code>, tactic, local-declaration, or other sequence boundary merely because the following element begins with parentheses.
-
-The parser therefore asks the active enclosing category whether continuation remains legal before allowing a line break as call trivia.
-
-This is a parser-state rule, not automatic semicolon insertion.
+This removes the previous parser-state ambiguity around crossing `do`, tactic, local-declaration, match-alternative, or other sequence boundaries. It is not automatic semicolon insertion.
 
 ## Canonical lowering
 
@@ -134,14 +148,16 @@ The first lowers as two application groups. The second lowers to a two-argument 
 
 ## Generalized field notation
 
+r3 changes spacing around the **call parenthesis**, not spacing around Lean field notation.
+
 ~~~proofscript
-users.map(render)
-users .map(render)
+users.map(render)    -- allowed
+users .map(render)   -- not added by r3
 ~~~
 
-The completed head is field/projection syntax. Lowering constructs native generalized-field application syntax; it does **not** decide that <code>users</code> belongs in the first argument position.
+The dot retains Lean's native adjacency requirement. The completed head `users.map` is then called through r3 parenthesized-call syntax.
 
-The compatible elaborator retains authority over receiver placement.
+Lowering constructs native generalized-field application syntax and lets the compatible elaborator determine receiver placement; it does not hard-code `users` as the first explicit parameter.
 
 ## Constructors
 
@@ -179,11 +195,46 @@ A trailing comma in a nonempty owned call remains allowed.
 
 Missing explicit parameters retain native partial-application/default behavior. The implementation must not substitute JavaScript <code>undefined</code>.
 
-## Zero arguments
+## Empty calls, Unit, and defaults
 
-<code>f()</code> still means one Unit argument. Workstream 3 adds a declaration convenience that makes this useful for explicit zero-argument source functions.
+r3 distinguishes:
 
-The core function model remains unary/curried.
+~~~proofscript
+f()
+f(())
+~~~
+
+`f()` is a complete **empty source-level invocation**.
+
+Its elaboration:
+1. inserts implicit and instance arguments normally;
+2. inserts omitted optional/default and automatic parameters;
+3. if the next still-required explicit parameter is definitionally `Unit`, synthesizes exactly one `()`;
+4. continues inserting trailing implicit/default/automatic parameters;
+5. rejects if any required non-Unit explicit parameter remains.
+
+It does **not** eta-abstract missing required parameters.
+
+Examples:
+
+~~~proofscript
+function now(): Time := ...
+now()                         -- Unit sugar
+
+function greet(name: String := "world"): String := ...
+greet()                       -- uses default
+
+function add(x: Nat): Nat := x + 1
+add()                         -- reject
+
+function staged(_: Unit, x: Nat): Nat := x
+staged()                      -- reject: x still required
+staged(())                    -- explicit Unit argument; ordinary partial application rules apply
+~~~
+
+`f(())` is an ordinary nonempty call containing one explicit Unit term.
+
+This resolves the strongest remaining TypeScript false friend while preserving Lean-compatible partial application for ordinary nonempty calls and function values.
 
 ## Imported syntax and quotations
 
@@ -239,4 +290,4 @@ Proposed diagnostics:
 5. interactions with <code>do</code>, tactics, quotations, macros, defaults, named arguments, and partial application;
 6. TypeScript-developer comprehension experiment.
 
-Current status: **accepted r3 design rule**. No r3 production parser is claimed.
+Current status: **accepted r3 design rule**. Exact normative grammar is in `R3-GRAMMAR-AND-FEATURE-REGISTRY.md`. No production parser is claimed.

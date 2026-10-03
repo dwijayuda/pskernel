@@ -185,7 +185,8 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Level,
     `Ps.KernelSelfHost.Expr,
     `Ps.KernelSelfHost.Instantiate,
-    `Ps.KernelSelfHost.Declaration
+    `Ps.KernelSelfHost.Declaration,
+    `Ps.KernelSelfHost.LocalContext
   ]
 
 @[default_target]

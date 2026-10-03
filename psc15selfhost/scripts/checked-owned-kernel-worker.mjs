@@ -11,6 +11,10 @@ const k = await import(kernelUrl.href);
 const tag = value => value?.[Object.getOwnPropertySymbols(value ?? {})[0]];
 const nil = () => k.PsKernelList.nil();
 const list = values => values.reduceRight((tail, head) => k.PsKernelList.cons(head, tail), nil());
+// Sharing immutable decoded values is transport-only: no judgment or environment is cached.
+// Validate every occurrence before consulting a bounded, worker-local cache.
+const naturalCache = new Map(), textCache = new Map(), nameCache = new Map();
+let internedNames = 0;
 let nodes = 0;
 const fail = errorKind => { throw Object.assign(new Error(errorKind), { errorKind }); };
 function shape(value, keys, depth) {
@@ -24,24 +28,40 @@ function natural(value) {
     value = String(value);
   }
   if (typeof value !== 'string' || value.length > 5000 || !/^(0|[1-9][0-9]*)$/u.test(value)) fail('invalid-natural');
+  if (naturalCache.has(value)) return naturalCache.get(value);
   const bits = BigInt(value).toString(2);
   if (bits === '0') return k.PsKernelNatural.zero;
   let out = k.PsKernelPositive.one;
   for (const bit of bits.slice(1)) out = k.PsKernelPositive[bit === '0' ? 'bit0' : 'bit1'](out);
-  return k.PsKernelNatural.positive(out);
+  const decoded = k.PsKernelNatural.positive(out);
+  if (naturalCache.size < 4096) naturalCache.set(value, decoded);
+  return decoded;
 }
 function text(value) {
   if (typeof value !== 'string' || !value.isWellFormed()) fail('invalid-text');
+  if (textCache.has(value)) return textCache.get(value);
   const bytes = new TextEncoder().encode(value);
   let out = k.PsKernelText.empty;
   for (let i = bytes.length - 1; i >= 0; i--) out = k.PsKernelText.byte(natural(bytes[i]), out);
+  if (textCache.size < 8192) textCache.set(value, out);
   return out;
 }
 function name(value, depth = 0) {
   shape(value, value?.k === 'a' ? ['k'] : ['k', 'p', 'v'], depth);
   if (value.k === 'a') return k.PsKernelName.anonymous;
-  if (value.k === 's') return k.PsKernelName.str(name(value.p, depth + 1), text(value.v));
-  if (value.k === 'n') return k.PsKernelName.num(name(value.p, depth + 1), natural(value.v));
+  if (value.k === 's' || value.k === 'n') {
+    const parent = name(value.p, depth + 1);
+    const leaf = value.k === 's' ? text(value.v) : natural(value.v);
+    const key = value.k + ':' + String(value.v);
+    let children = nameCache.get(parent);
+    if (children?.has(key)) return children.get(key);
+    const decoded = k.PsKernelName[value.k === 's' ? 'str' : 'num'](parent, leaf);
+    if (internedNames < 32768) {
+      if (!children) { children = new Map(); nameCache.set(parent, children); }
+      children.set(key, decoded); internedNames++;
+    }
+    return decoded;
+  }
   fail('unsupported-name');
 }
 function level(value, depth = 0) {

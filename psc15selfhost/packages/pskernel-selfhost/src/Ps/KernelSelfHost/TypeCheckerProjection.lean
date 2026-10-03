@@ -1,5 +1,30 @@
 import Ps.KernelSelfHost.TypeCheckerWhnf
 
+def psKernelProjectionEnsureSortWith
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (type : PsKernelExpr) :
+    Except String
+      (Prod PsKernelLevel PsKernelCheckerState) :=
+  match whnf context state type with
+  | Except.error error =>
+      Except.error error
+  | Except.ok result =>
+      match Prod.fst result with
+      | PsKernelExpr.sort level =>
+          Except.ok
+            (Prod.mk
+              level
+              (Prod.snd result))
+      | _ =>
+          Except.error "expected sort"
+
 def psKernelInferIsPropWith
     (whnf :
       PsKernelCheckerContext ->
@@ -23,7 +48,7 @@ def psKernelInferIsPropWith
       Except.error error
   | Except.ok inferResult =>
       match
-          psKernelEnsureSortWith
+          psKernelProjectionEnsureSortWith
             whnf
             context
             (Prod.snd inferResult)

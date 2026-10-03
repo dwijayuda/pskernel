@@ -22,7 +22,7 @@ partial def isDefEqArgsStateful
   | _, .app _ _ => return (false, state)
   | _, _ => return (true, state)
 
-private def lazyDeltaFinishStateful
+def lazyDeltaFinishStateful
     (ctx : CheckerContext)
     (state : CheckerState)
     (left right : Expr) : Except String (DeltaStepResult × CheckerState) := do
@@ -31,7 +31,7 @@ private def lazyDeltaFinishStateful
   | some false => return (.different left right, state)
   | none => return (.continue left right, state)
 
-private def deltaOnceStateful
+def deltaOnceStateful
     (ctx : CheckerContext)
     (state : CheckerState)
     (e : Expr) : Except String (Expr × CheckerState) := do
@@ -39,7 +39,7 @@ private def deltaOnceStateful
     | throw "internal lazy-delta request for non-definition"
   whnfCoreStateful ctx state unfolded false true
 
-private def tryUnfoldProjAppStateful
+def tryUnfoldProjAppStateful
     (ctx : CheckerContext)
     (state : CheckerState)
     (e : Expr) : Except String (Option Expr × CheckerState) := do

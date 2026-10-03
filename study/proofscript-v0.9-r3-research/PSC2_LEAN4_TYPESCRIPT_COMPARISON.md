@@ -174,11 +174,21 @@ CallGap allows horizontal inherited space/comments without a physical line termi
 
 # 5. Modules, names, namespaces, sections, and visibility
 
-## 5.1 Imports
+## 5.1 Imports and re-exports
 
-| Lean 4 | ProofScript | TypeScript |
-|---|---|---|
-| <code>import Foo.Bar</code> | <code>import Foo.Bar</code> | <code>import { x } from "./foo.js"</code> |
+| Meaning | Lean 4 | ProofScript | TypeScript closest form |
+|---|---|---|---|
+| private implementation dependency | <code>import Foo.Bar</code> | <code>import Foo.Bar</code> | <code>import { x } from "./foo.js"</code> |
+| transitive public module re-export | <code>public import Foo.Bar</code> | <code>public import Foo.Bar</code> | <code>export * from "./foo.js"</code> |
+
+ProofScript freezes Lean-compatible module API semantics:
+
+- ordinary top-level declarations are public unless <code>private</code>;
+- ordinary <code>import</code> does not re-export the dependency;
+- <code>public import</code> re-exports the public-import closure;
+- <code>private</code> declarations never re-export;
+- <code>open</code> changes local name resolution only;
+- PSC2 core does not add TypeScript-style selective/default/namespace export syntax.
 
 ProofScript imports do not permit dependencies to mutate Standard grammar.
 
@@ -2595,6 +2605,7 @@ This mirrors the current <code>psc2-language-v1</code> closure.
 |---|---|---|
 | lexical identifiers/literals/comments | required | 4 |
 | modules/imports/qualified names | required | 5 |
+| public import / transitive re-export | required | 5 |
 | namespace/section/open/variable/include/omit/universe | required | 5 |
 | private visibility | required | 5 |
 | attributes over registered set | required | 52 |

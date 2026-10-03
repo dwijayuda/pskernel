@@ -519,23 +519,25 @@ def psKernelReduceNatBinary
           (PsKernelLiteral.nat
             (psKernelNatGcd left right))))
   else if psKernelNameEq op psKernelNatModName then
+    let result :=
+      if Nat.beq right 0 then
+        left
+      else
+        Nat.mod left right;
     Except.ok
       (Option.some
         (PsKernelExpr.lit
-          (PsKernelLiteral.nat
-            (if Nat.beq right 0 then
-              left
-            else
-              Nat.mod left right))))
+          (PsKernelLiteral.nat result)))
   else if psKernelNameEq op psKernelNatDivName then
+    let result :=
+      if Nat.beq right 0 then
+        0
+      else
+        Nat.div left right;
     Except.ok
       (Option.some
         (PsKernelExpr.lit
-          (PsKernelLiteral.nat
-            (if Nat.beq right 0 then
-              0
-            else
-              Nat.div left right))))
+          (PsKernelLiteral.nat result)))
   else if psKernelNameEq op psKernelNatBeqName then
     Except.ok
       (Option.some

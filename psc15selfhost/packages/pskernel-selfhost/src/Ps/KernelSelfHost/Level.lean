@@ -1,3 +1,5 @@
+[Reading 896 lines from start (total: 896 lines, 0 remaining)]
+
 import Ps.KernelSelfHost.Name
 
 inductive PsKernelLevel where
@@ -480,29 +482,67 @@ def psKernelLevelTrimExplicit
       else
         List.cons maximum rest
 
-partial def psKernelLevelDedupOffsetsWorker
+def psKernelLevelListReverseWorker
+    (values : List PsKernelLevel) :
+    List PsKernelLevel -> List PsKernelLevel :=
+  match values with
+  | List.nil =>
+      fun (acc : List PsKernelLevel) =>
+        acc
+  | List.cons head tail =>
+      let smaller :
+          List PsKernelLevel -> List PsKernelLevel :=
+        psKernelLevelListReverseWorker tail;
+      fun (acc : List PsKernelLevel) =>
+        smaller (List.cons head acc)
+
+def psKernelLevelListReverse
+    (values : List PsKernelLevel) :
+    List PsKernelLevel :=
+  psKernelLevelListReverseWorker
+    values
+    List.nil
+
+def psKernelLevelDedupOffsetsWorkerCore
+    (rest : List PsKernelLevel) :
+    PsKernelLevel ->
+    List PsKernelLevel ->
+    List PsKernelLevel :=
+  match rest with
+  | List.nil =>
+      fun
+        (current : PsKernelLevel)
+        (rev : List PsKernelLevel) =>
+        psKernelLevelListReverse
+          (List.cons current rev)
+  | List.cons next tail =>
+      let smaller :
+          PsKernelLevel ->
+          List PsKernelLevel ->
+          List PsKernelLevel :=
+        psKernelLevelDedupOffsetsWorkerCore tail;
+      fun
+        (current : PsKernelLevel)
+        (rev : List PsKernelLevel) =>
+        if
+            psKernelLevelEq
+              (Prod.fst (psKernelLevelToOffset current))
+              (Prod.fst (psKernelLevelToOffset next)) then
+          smaller next rev
+        else
+          smaller
+            next
+            (List.cons current rev)
+
+def psKernelLevelDedupOffsetsWorker
     (current : PsKernelLevel)
     (rest : List PsKernelLevel)
     (rev : List PsKernelLevel) :
     List PsKernelLevel :=
-  match rest with
-  | List.nil =>
-      List.reverse
-        (List.cons current rev)
-  | List.cons next tail =>
-      if
-          psKernelLevelEq
-            (Prod.fst (psKernelLevelToOffset current))
-            (Prod.fst (psKernelLevelToOffset next)) then
-        psKernelLevelDedupOffsetsWorker
-          next
-          tail
-          rev
-      else
-        psKernelLevelDedupOffsetsWorker
-          next
-          tail
-          (List.cons current rev)
+  psKernelLevelDedupOffsetsWorkerCore
+    rest
+    current
+    rev
 
 def psKernelLevelDedupOffsets
     (values : List PsKernelLevel) :
@@ -546,110 +586,202 @@ def psKernelLevelNormalizeListWith
           normalize
           tail)
 
-partial def psKernelLevelNormalize
-    (level : PsKernelLevel) : PsKernelLevel :=
-  let pair := psKernelLevelToOffset level;
-  let root := (Prod.fst pair);
-  let amount := (Prod.snd pair);
-  match root with
-  | PsKernelLevel.zero =>
-      level
-  | PsKernelLevel.param _ =>
-      level
-  | PsKernelLevel.mvar _ =>
-      level
-  | PsKernelLevel.succ _ =>
-      level
-  | PsKernelLevel.imax left right =>
-      psKernelLevelAddOffset
-        (psKernelLevelMkIMax
-          (psKernelLevelNormalize left)
-          (psKernelLevelNormalize right))
-        amount
-  | PsKernelLevel.max _ _ =>
-      let normalized :=
-        psKernelLevelNormalizeListWith
-          psKernelLevelNormalize
-          (psKernelLevelFlattenMax root);
-      let sorted :=
-        psKernelLevelSortLevels normalized;
-      let trimmed :=
-        psKernelLevelTrimExplicit sorted;
-      let unique :=
-        psKernelLevelDedupOffsets trimmed;
-      psKernelLevelAddOffset
-        (psKernelLevelMkMaxList unique)
-        amount
+def psKernelLevelNormalizeWithFuel
+    (fuel : Nat) :
+    PsKernelLevel -> PsKernelLevel :=
+  match fuel with
+  | Nat.zero =>
+      fun (level : PsKernelLevel) =>
+        level
+  | Nat.succ remaining =>
+      let smaller : PsKernelLevel -> PsKernelLevel :=
+        psKernelLevelNormalizeWithFuel remaining;
+      fun (level : PsKernelLevel) =>
+        let pair := psKernelLevelToOffset level;
+        let root := (Prod.fst pair);
+        let amount := (Prod.snd pair);
+        match root with
+        | PsKernelLevel.zero =>
+            level
+        | PsKernelLevel.param _ =>
+            level
+        | PsKernelLevel.mvar _ =>
+            level
+        | PsKernelLevel.succ _ =>
+            level
+        | PsKernelLevel.imax left right =>
+            psKernelLevelAddOffset
+              (psKernelLevelMkIMax
+                (smaller left)
+                (smaller right))
+              amount
+        | PsKernelLevel.max _ _ =>
+            let normalized :=
+              psKernelLevelNormalizeListWith
+                smaller
+                (psKernelLevelFlattenMax root);
+            let sorted :=
+              psKernelLevelSortLevels normalized;
+            let trimmed :=
+              psKernelLevelTrimExplicit sorted;
+            let unique :=
+              psKernelLevelDedupOffsets trimmed;
+            psKernelLevelAddOffset
+              (psKernelLevelMkMaxList unique)
+              amount
 
-partial def psKernelLevelGeqCore
-    (left : PsKernelLevel)
-    (right : PsKernelLevel) : Bool :=
-  let fallback :=
-    fun
-      (fallbackLeft : PsKernelLevel)
-      (fallbackRight : PsKernelLevel) =>
-      match fallbackRight with
-      | PsKernelLevel.imax rightA rightB =>
-          if psKernelLevelGeqCore fallbackLeft rightA then
-            psKernelLevelGeqCore fallbackLeft rightB
-          else
-            false
-      | _ =>
-          match fallbackLeft with
-          | PsKernelLevel.imax _ leftRight =>
-              psKernelLevelGeqCore
-                leftRight
-                fallbackRight
-          | _ =>
-              let leftPair :=
-                psKernelLevelToOffset fallbackLeft;
-              let rightPair :=
-                psKernelLevelToOffset fallbackRight;
-              if
-                  if psKernelLevelEq
-                      (Prod.fst leftPair)
-                      (Prod.fst rightPair) then
-                    true
-                  else
-                    psKernelLevelIsZero
-                      (Prod.fst rightPair) then
-                psKernelNatGe (Prod.snd leftPair) (Prod.snd rightPair)
-              else if
-                  if Nat.beq (Prod.snd leftPair) (Prod.snd rightPair) then
-                    psKernelNatGt (Prod.snd leftPair) 0
-                  else
-                    false then
-                psKernelLevelGeqCore
-                  (Prod.fst leftPair)
-                  (Prod.fst rightPair)
-              else
-                false;
-  if
-      if psKernelLevelEq left right then
-        true
-      else
-        psKernelLevelIsZero right then
-    true
-  else
-    match right with
-    | PsKernelLevel.max rightA rightB =>
-        if psKernelLevelGeqCore left rightA then
-          psKernelLevelGeqCore left rightB
-        else
-          false
-    | _ =>
-        match left with
-        | PsKernelLevel.max leftA leftB =>
-            if
-                if psKernelLevelGeqCore leftA right then
-                  true
-                else
-                  psKernelLevelGeqCore leftB right then
+def psKernelLevelNormalize
+    (level : PsKernelLevel) : PsKernelLevel :=
+  psKernelLevelNormalizeWithFuel
+    (Nat.succ
+      (psKernelLevelNodeCount level))
+    level
+
+inductive PsKernelLevelGeqMode where
+  | core
+  | fallback
+
+def psKernelLevelGeqWithFuel
+    (fuel : Nat) :
+    PsKernelLevelGeqMode ->
+    PsKernelLevel ->
+    PsKernelLevel ->
+    Bool :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_mode : PsKernelLevelGeqMode)
+        (_left : PsKernelLevel)
+        (_right : PsKernelLevel) =>
+        false
+  | Nat.succ remaining =>
+      let smaller :
+          PsKernelLevelGeqMode ->
+          PsKernelLevel ->
+          PsKernelLevel ->
+          Bool :=
+        psKernelLevelGeqWithFuel remaining;
+      fun
+        (mode : PsKernelLevelGeqMode)
+        (left : PsKernelLevel)
+        (right : PsKernelLevel) =>
+        match mode with
+        | PsKernelLevelGeqMode.core =>
+            if psKernelLevelEq left right then
+              true
+            else if psKernelLevelIsZero right then
               true
             else
-              fallback left right
-        | _ =>
-            fallback left right
+              match right with
+              | PsKernelLevel.max rightA rightB =>
+                  if
+                      smaller
+                        PsKernelLevelGeqMode.core
+                        left
+                        rightA then
+                    smaller
+                      PsKernelLevelGeqMode.core
+                      left
+                      rightB
+                  else
+                    false
+              | _ =>
+                  match left with
+                  | PsKernelLevel.max leftA leftB =>
+                      if
+                          smaller
+                            PsKernelLevelGeqMode.core
+                            leftA
+                            right then
+                        true
+                      else if
+                          smaller
+                            PsKernelLevelGeqMode.core
+                            leftB
+                            right then
+                        true
+                      else
+                        smaller
+                          PsKernelLevelGeqMode.fallback
+                          left
+                          right
+                  | _ =>
+                      smaller
+                        PsKernelLevelGeqMode.fallback
+                        left
+                        right
+        | PsKernelLevelGeqMode.fallback =>
+            match right with
+            | PsKernelLevel.imax rightA rightB =>
+                if
+                    smaller
+                      PsKernelLevelGeqMode.core
+                      left
+                      rightA then
+                  smaller
+                    PsKernelLevelGeqMode.core
+                    left
+                    rightB
+                else
+                  false
+            | _ =>
+                match left with
+                | PsKernelLevel.imax _ leftRight =>
+                    smaller
+                      PsKernelLevelGeqMode.core
+                      leftRight
+                      right
+                | _ =>
+                    let leftPair :=
+                      psKernelLevelToOffset left;
+                    let rightPair :=
+                      psKernelLevelToOffset right;
+                    if
+                        if psKernelLevelEq
+                            (Prod.fst leftPair)
+                            (Prod.fst rightPair) then
+                          true
+                        else
+                          psKernelLevelIsZero
+                            (Prod.fst rightPair) then
+                      psKernelNatGe
+                        (Prod.snd leftPair)
+                        (Prod.snd rightPair)
+                    else if
+                        if
+                            Nat.beq
+                              (Prod.snd leftPair)
+                              (Prod.snd rightPair) then
+                          psKernelNatGt
+                            (Prod.snd leftPair)
+                            0
+                        else
+                          false then
+                      smaller
+                        PsKernelLevelGeqMode.core
+                        (Prod.fst leftPair)
+                        (Prod.fst rightPair)
+                    else
+                      false
+
+def psKernelLevelGeqFuel
+    (left : PsKernelLevel)
+    (right : PsKernelLevel) : Nat :=
+  let total :=
+    Nat.add
+      (psKernelLevelNodeCount left)
+      (psKernelLevelNodeCount right);
+  Nat.succ
+    (Nat.add total total)
+
+def psKernelLevelGeqCore
+    (left : PsKernelLevel)
+    (right : PsKernelLevel) : Bool :=
+  psKernelLevelGeqWithFuel
+    (psKernelLevelGeqFuel left right)
+    PsKernelLevelGeqMode.core
+    left
+    right
 
 def psKernelLevelLe
     (left : PsKernelLevel)
@@ -764,3 +896,5 @@ def psKernelLevelInstantiateParams
         psKernelLevelMkIMax
           changedLeft
           changedRight
+
+[executed on device: box (459eb03d-a4f9-4033-b2ed-5fa4ec9998df)]

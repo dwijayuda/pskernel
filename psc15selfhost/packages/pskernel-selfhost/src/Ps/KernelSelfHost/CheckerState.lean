@@ -3,7 +3,7 @@ import Ps.KernelSelfHost.Expr
 structure PsKernelExprMap (alpha : Type) where
   entries : List (Prod PsKernelExpr alpha)
 
-def psKernelExprMapEmpty PsKernelExpr
+def psKernelExprMapEmpty
     (alpha : Type) :
     PsKernelExprMap alpha :=
   {

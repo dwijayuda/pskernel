@@ -1,6 +1,6 @@
 # r3 Stable PSC-Owned Contracts
 
-Status: recommended semantic design; production implementation pending.
+Status: **accepted r3 semantic design; production implementation pending.**
 
 ## Decision
 

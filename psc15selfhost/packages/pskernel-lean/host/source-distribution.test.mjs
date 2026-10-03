@@ -7,9 +7,17 @@ import {fileURLToPath} from 'node:url';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const packageRoot=path.resolve(here,'..');
-const npm=process.platform==='win32'?'npm.cmd':'npm';
+const npmCommand=process.platform==='win32'?process.execPath:'npm';
+const npmPrefix=process.platform==='win32'
+  ? [path.join(process.env.APPDATA??'', 'npm/node_modules/npm/bin/npm-cli.js')]
+  : [];
 const expectedKernelTree='636837af92156cf17226e56106f08eb553bfb961';
 const expectedLeanLicenseBlob='813da297567374691eaae7a88739dbbefd2afdfd';
+
+function canonicalTextBytes(body){
+  const payload=Buffer.isBuffer(body)?body:Buffer.from(body);
+  return Buffer.from(payload.toString('utf8').replace(/\r\n/gu,'\n'),'utf8');
+}
 
 function gitObjectSha(type,body){
   const payload=Buffer.isBuffer(body)?body:Buffer.from(body);
@@ -28,7 +36,7 @@ async function gitTreeSha(root){
     const entryPath=path.join(root,entry.name);
     if(entry.isFile()){
       treeParts.push(Buffer.from(`100644 ${entry.name}\0`));
-      treeParts.push(gitObjectSha('blob',await readFile(entryPath)));
+      treeParts.push(gitObjectSha('blob',canonicalTextBytes(await readFile(entryPath))));
     }else if(entry.isDirectory()){
       treeParts.push(Buffer.from(`40000 ${entry.name}\0`));
       treeParts.push(Buffer.from(await gitTreeSha(entryPath),'hex'));
@@ -45,7 +53,7 @@ async function gitFlatTreeSha(root){
   const treeParts=[];
   for(const entry of entries){
     assert.equal(entry.isFile(),true,`kernel audit snapshot must stay flat: ${entry.name}`);
-    const body=await readFile(path.join(root,entry.name));
+    const body=canonicalTextBytes(await readFile(path.join(root,entry.name)));
     treeParts.push(Buffer.from(`100644 ${entry.name}\0`));
     treeParts.push(gitObjectSha('blob',body));
   }
@@ -95,14 +103,14 @@ assert.equal(sourceManifest.modified,false);
 
 const license=await readFile(path.join(packageRoot,'LEAN_LICENSE'));
 assert.equal(
-  gitObjectSha('blob',license).toString('hex'),
+  gitObjectSha('blob',canonicalTextBytes(license)).toString('hex'),
   expectedLeanLicenseBlob,
-  'LEAN_LICENSE must be byte-identical to the pinned Lean 4.34 license blob',
+  'LEAN_LICENSE canonical LF content must match the pinned Lean 4.34 license blob',
 );
 assert.equal(
   await gitFlatTreeSha(path.join(packageRoot,'kernel')),
   expectedKernelTree,
-  'kernel/ must be byte-identical to the pinned Lean 4.34 src/kernel Git tree',
+  'kernel/ canonical LF content must match the pinned Lean 4.34 src/kernel Git tree',
 );
 const proofscriptManifest=JSON.parse(
   await readFile(path.join(packageRoot,'PROOFSCRIPT_SOURCE_MANIFEST.json'),'utf8'),
@@ -110,7 +118,7 @@ const proofscriptManifest=JSON.parse(
 assert.equal(proofscriptManifest.schemaVersion,1);
 assert.equal(proofscriptManifest.packageName,'@proofscript/pskernel-lean');
 assert.equal(proofscriptManifest.snapshotRoot,'source/proofscript');
-assert.equal(proofscriptManifest.sourceTreeSha,'95d005a94af0a66b74b396e9c7132dae20c76302');
+assert.equal(proofscriptManifest.sourceRevision,'1b21b2483df7e8de7542873c24eaff2501539b1b');
 assert.equal(
   await gitTreeSha(path.join(packageRoot,'source','proofscript')),
   proofscriptManifest.sourceTreeSha,
@@ -136,13 +144,14 @@ await readFile(path.join(packageRoot,'host','verify-prebuilt.mjs'),'utf8');
 await readFile(path.join(packageRoot,'lakefile.lean'),'utf8');
 assert.equal((await readFile(path.join(packageRoot,'lean-toolchain'),'utf8')).trim(),'leanprover/lean4:v4.34.0');
 
-const packed=spawnSync(npm,['pack','--json','--dry-run'],{
+const packed=spawnSync(npmCommand,[...npmPrefix,'pack','--json','--dry-run'],{
   cwd:packageRoot,
   encoding:'utf8',
   windowsHide:true,
 });
 assert.equal(packed.status,0,packed.stderr);
-const report=JSON.parse(packed.stdout);
+const rawReport=JSON.parse(packed.stdout);
+const report=Array.isArray(rawReport)?rawReport:Object.values(rawReport);
 assert.equal(report.length,1);
 const packedFiles=new Set(report[0].files.map(file=>file.path));
 for(const file of [

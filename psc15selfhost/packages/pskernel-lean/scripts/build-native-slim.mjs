@@ -30,6 +30,10 @@ const executable=process.platform==='win32'
   : 'psc2_lean_kernel_provider';
 const outputPath=path.join(outputDir,executable);
 const expectedCommit='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
+const optimizationFlag=process.env.PSC_LEAN_NATIVE_OPT ?? '-Os';
+if(!['-Os','-O2','-O3'].includes(optimizationFlag)){
+  throw new Error(`unsupported PSC_LEAN_NATIVE_OPT: ${optimizationFlag}`);
+}
 
 function run(command,args,options={}){
   const result=spawnSync(command,args,{
@@ -150,7 +154,7 @@ for(const module of modules){
 const objects=[];
 for(let index=0;index<cFiles.length;index++){
   const object=path.join(objRoot,`${index}.o`);
-  run(leanc,['-Os','-DNDEBUG','-c',cFiles[index],'-o',object]);
+  run(leanc,[optimizationFlag,'-DNDEBUG','-c',cFiles[index],'-o',object]);
   objects.push(object);
 }
 
@@ -174,7 +178,7 @@ extern "C" void lean_initialize() {
 }
 `,'utf8');
 run(leanc,[
-  '-Os',
+  optimizationFlag,
   '-DNDEBUG',
   `-I${packageRoot}`,
   '-c',shim,
@@ -229,7 +233,7 @@ const finalArgs=[
   shimObject,
   ...flagGroups.get('internal-link'),
   ...kernelOnlyLinkFlags,
-  '-Os',
+  optimizationFlag,
   '-o',outputPath,
 ];
 run(cc,finalArgs);

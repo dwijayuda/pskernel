@@ -76,6 +76,7 @@ jobs:
             PsDriverTs \
             PsBackendRust \
             PsDriverRust \
+            psc1 \
             psc1_erasure_tests \
             psc2_minimal_selfhost_tests \
             psc1_backend_ts_tests \

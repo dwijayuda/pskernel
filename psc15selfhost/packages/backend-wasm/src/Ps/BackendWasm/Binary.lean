@@ -929,15 +929,15 @@ def psWasmEncodeExports
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | exportItem :: rest =>
-      match psWasmFindFunctionIndex functions exportItem.2 with
+      match psWasmFindFunctionIndex functions (Prod.snd exportItem) with
       | none =>
-          Except.error (PsWasmEncodeError.unknownFunction exportItem.2)
+          Except.error (PsWasmEncodeError.unknownFunction (Prod.snd exportItem))
       | some index =>
           match psWasmEncodeExports functions rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok
-                (psWasmEncodeName exportItem.1
+                (psWasmEncodeName (Prod.fst exportItem)
                   ++ [psWasmByte 0]
                   ++ psWasmEncodeUleb index
                   ++ encodedRest)

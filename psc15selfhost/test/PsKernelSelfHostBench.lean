@@ -254,13 +254,20 @@ partial def psKernelBenchCachePrehashedLoop
           cache
           target
           hash
-      match
-          psKernelExprMapGetIn
-            target
-            (psKernelExprMapIndexBucket
-              16
-              cache.index
-              hash) with
+      let result :=
+        match cache.index with
+        | Option.none =>
+            psKernelExprMapGetIn
+              target
+              cache.small
+        | Option.some index =>
+            psKernelExprMapGetIn
+              target
+              (psKernelExprMapIndexBucket
+                16
+                index
+                hash);
+      match result with
       | Option.some _ =>
           pure (Nat.succ tail)
       | Option.none =>

@@ -857,6 +857,25 @@ def psKernelSimpleNestedBuildAuxCtorsWorker
                 Except.error
                   "nested outer constructor metadata is missing"
 
+def psKernelSimpleNestedRebaseExprList
+    (values : List PsKernelExpr)
+    (sourceParams : List PsKernelOpenBinder)
+    (targetParams : List PsKernelOpenBinder) :
+    List PsKernelExpr :=
+  match values with
+  | List.nil =>
+      List.nil
+  | List.cons head tail =>
+      List.cons
+        (psKernelSimpleNestedRebaseParams
+          head
+          sourceParams
+          targetParams)
+        (psKernelSimpleNestedRebaseExprList
+          tail
+          sourceParams
+          targetParams)
+
 def psKernelSimpleNestedEnsureFamiliesWorker
     (names : List PsKernelName) :
     PsKernelEnvironment ->
@@ -1057,25 +1076,6 @@ def psKernelSimpleNestedEnsureFamiliesWorker
             | _ =>
                 Except.error
                   "invalid outer mutual inductive metadata"
-
-def psKernelSimpleNestedRebaseExprList
-    (values : List PsKernelExpr)
-    (sourceParams : List PsKernelOpenBinder)
-    (targetParams : List PsKernelOpenBinder) :
-    List PsKernelExpr :=
-  match values with
-  | List.nil =>
-      List.nil
-  | List.cons head tail =>
-      List.cons
-        (psKernelSimpleNestedRebaseParams
-          head
-          sourceParams
-          targetParams)
-        (psKernelSimpleNestedRebaseExprList
-          tail
-          sourceParams
-          targetParams)
 
 def psKernelSimpleNestedEnsureFamily
     (environment : PsKernelEnvironment)

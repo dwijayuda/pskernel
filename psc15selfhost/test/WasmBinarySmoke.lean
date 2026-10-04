@@ -1,3 +1,4 @@
+import Ps.BackendWasm.Binary
 import Ps.BackendWasm.Lower
 
 def psWasmSmokeProfile : PsWasmTargetProfile :=

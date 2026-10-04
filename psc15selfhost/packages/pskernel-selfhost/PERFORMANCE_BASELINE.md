@@ -87,6 +87,63 @@ These microbenchmarks are intentionally simple and should be interpreted as
 evidence that indexing/memoization is valuable, not as end-to-end production
 throughput.
 
+## 2.2 Hybrid small-cache baseline
+
+Measured at semantic commit
+`9091c02684a5ee96bda86bd553f46b7a861e5399` with promotion-invariant tests at
+`c49b079d6b2c9ed07d9e39cbffca66a9d3a888c0`.
+
+The runtime cache keeps up to 8 entries as a direct small list and promotes the
+9th distinct entry to the existing persistent hash trie.
+
+Matched 1,000-check delta workload:
+
+```text
+PSKernel WHNF cold : 1,637,300 ns
+PSKernel WHNF warm :   295,700 ns
+Lean 4.34 WHNF     :   406,400 ns
+
+PSKernel DefEq cold: 4,032,900 ns
+PSKernel DefEq warm:   263,400 ns
+Lean 4.34 DefEq    :   975,600 ns
+```
+
+Approximate cold-call ratios on this microcase:
+
+```text
+PSKernel / Lean WHNF : 4.0x
+PSKernel / Lean DefEq: 4.1x
+```
+
+Compared with the pre-promotion representative baseline:
+
+```text
+WHNF cold : 3,810,200 -> 1,637,300 ns  (~2.3x faster)
+DefEq cold: 11,677,100 -> 4,032,900 ns (~2.9x faster)
+```
+
+Warm PSKernel state remains much faster than its cold path because inference,
+WHNF, unfolding and defeq pair caches are reused. The official public kernel API
+benchmark is cold-call only, so warm-vs-Lean numbers are not treated as an
+apples-to-apples product claim.
+
+The promotion invariant is tested directly:
+
+- 8 entries remain in the small representation;
+- the 9th distinct entry promotes to the trie;
+- expression-map lookup remains correct;
+- symmetric pair-set lookup remains correct.
+
+The full portable gate passed for this representation:
+
+- PSC1 source check;
+- Lean build;
+- frozen-reference differential;
+- canonical `.ps` recheck.
+
+The generated fixed-point gate must also remain green before the semantic
+closure is promoted as the new self-host checkpoint.
+
 ## 3. Interpretation
 
 The existing runtime-index work is justified.

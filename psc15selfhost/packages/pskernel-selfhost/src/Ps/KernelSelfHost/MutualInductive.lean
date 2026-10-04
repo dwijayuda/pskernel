@@ -348,3 +348,347 @@ def psKernelSimpleMutualHasReflexiveFields
       else
         psKernelSimpleMutualHasReflexiveFields
           rest
+
+
+def psKernelReverseMutualRecursiveFieldsWorker
+    (values : List PsKernelSimpleMutualRecursiveField) :
+    List PsKernelSimpleMutualRecursiveField ->
+    List PsKernelSimpleMutualRecursiveField :=
+  match values with
+  | List.nil =>
+      fun
+        (acc : List PsKernelSimpleMutualRecursiveField) =>
+        acc
+  | List.cons head tail =>
+      let smaller :
+          List PsKernelSimpleMutualRecursiveField ->
+          List PsKernelSimpleMutualRecursiveField :=
+        psKernelReverseMutualRecursiveFieldsWorker tail;
+      fun
+        (acc : List PsKernelSimpleMutualRecursiveField) =>
+        smaller
+          (List.cons head acc)
+
+def psKernelReverseMutualRecursiveFields
+    (values : List PsKernelSimpleMutualRecursiveField) :
+    List PsKernelSimpleMutualRecursiveField :=
+  psKernelReverseMutualRecursiveFieldsWorker
+    values
+    List.nil
+
+def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
+    (fuel : Nat) :
+    PsKernelCheckerSession ->
+    List PsKernelName ->
+    List PsKernelSimpleMutualTypeShape ->
+    List PsKernelLevel ->
+    List PsKernelOpenBinder ->
+    PsKernelOpenBinder ->
+    PsKernelExpr ->
+    List PsKernelOpenBinder ->
+    PsKernelExpr ->
+    Except String PsKernelMutualRecursiveArgumentResult :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_session : PsKernelCheckerSession)
+        (_targets : List PsKernelName)
+        (_shapes : List PsKernelSimpleMutualTypeShape)
+        (_levels : List PsKernelLevel)
+        (_params : List PsKernelOpenBinder)
+        (_field : PsKernelOpenBinder)
+        (_domain : PsKernelExpr)
+        (_revArgs : List PsKernelOpenBinder)
+        (_applied : PsKernelExpr) =>
+        Except.error
+          "mutual recursive-argument budget exhausted"
+  | Nat.succ remaining =>
+      let smaller :=
+        psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
+          remaining;
+      fun
+        (session : PsKernelCheckerSession)
+        (targets : List PsKernelName)
+        (shapes : List PsKernelSimpleMutualTypeShape)
+        (levels : List PsKernelLevel)
+        (params : List PsKernelOpenBinder)
+        (field : PsKernelOpenBinder)
+        (domain : PsKernelExpr)
+        (revArgs : List PsKernelOpenBinder)
+        (applied : PsKernelExpr) =>
+        match
+            psKernelSessionWhnf
+              remaining
+              session
+              domain with
+        | Except.error error =>
+            Except.error error
+        | Except.ok reduced =>
+            match
+                psKernelSimpleMutualAppInfo
+                  targets
+                  shapes
+                  levels
+                  params
+                  (Prod.fst reduced) with
+            | Option.some info =>
+                Except.ok
+                  (PsKernelMutualRecursiveArgumentResult.mk
+                    (Prod.snd reduced)
+                    (Option.some
+                      (PsKernelSimpleMutualRecursiveField.mk
+                        field
+                        (psKernelReverseOpenBinders revArgs)
+                        info.target
+                        info.indices)))
+            | Option.none =>
+                match Prod.fst reduced with
+                | PsKernelExpr.forallE
+                    userName
+                    argDomain
+                    body
+                    binderInfo =>
+                    if
+                        psKernelSimpleMutualContainsConst
+                          targets
+                          argDomain then
+                      Except.error
+                        "mutual inductive field has a non-positive recursive occurrence"
+                    else
+                      let localDomain :=
+                        psKernelExprConsumeTypeAnnotations
+                          argDomain;
+                      let opened :=
+                        psKernelSessionWithLocal
+                          (Prod.snd reduced)
+                          userName
+                          localDomain
+                          binderInfo;
+                      let fresh :=
+                        Prod.fst opened;
+                      let child :=
+                        Prod.snd opened;
+                      let arg :=
+                        PsKernelOpenBinder.mk
+                          fresh
+                          userName
+                          localDomain
+                          binderInfo;
+                      smaller
+                        child
+                        targets
+                        shapes
+                        levels
+                        params
+                        field
+                        (psKernelExprInstantiate1
+                          body
+                          (PsKernelExpr.fvar fresh))
+                        (List.cons arg revArgs)
+                        (PsKernelExpr.app
+                          applied
+                          (PsKernelExpr.fvar fresh))
+                | _ =>
+                    if
+                        psKernelSimpleMutualContainsConst
+                          targets
+                          domain then
+                      Except.error
+                        "nested or invalid mutual inductive occurrence is not supported"
+                    else if
+                        psKernelSimpleMutualContainsConst
+                          targets
+                          (Prod.fst reduced) then
+                      Except.error
+                        "nested or invalid mutual inductive occurrence is not supported"
+                    else
+                      Except.ok
+                        (PsKernelMutualRecursiveArgumentResult.mk
+                          (Prod.snd reduced)
+                          Option.none)
+
+def psKernelAnalyzeSimpleMutualRecursiveArgument
+    (session : PsKernelCheckerSession)
+    (targets : List PsKernelName)
+    (shapes : List PsKernelSimpleMutualTypeShape)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (field : PsKernelOpenBinder)
+    (domain : PsKernelExpr) :
+    Except String PsKernelMutualRecursiveArgumentResult :=
+  psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
+    (Nat.succ (psKernelExprNodeCount domain))
+    session
+    targets
+    shapes
+    levels
+    params
+    field
+    domain
+    List.nil
+    (PsKernelExpr.fvar field.internalName)
+
+def psKernelOpenSimpleMutualConstructorFieldsWithFuel
+    (fuel : Nat) :
+    PsKernelCheckerSession ->
+    List PsKernelName ->
+    List PsKernelSimpleMutualTypeShape ->
+    List PsKernelLevel ->
+    List PsKernelOpenBinder ->
+    PsKernelLevel ->
+    PsKernelExpr ->
+    List PsKernelOpenBinder ->
+    List PsKernelSimpleMutualRecursiveField ->
+    Except String PsKernelMutualOpenFieldsResult :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_session : PsKernelCheckerSession)
+        (_targets : List PsKernelName)
+        (_shapes : List PsKernelSimpleMutualTypeShape)
+        (_levels : List PsKernelLevel)
+        (_params : List PsKernelOpenBinder)
+        (_resultLevel : PsKernelLevel)
+        (_type : PsKernelExpr)
+        (_revFields : List PsKernelOpenBinder)
+        (_revRecursive : List PsKernelSimpleMutualRecursiveField) =>
+        Except.error
+          "mutual constructor field budget exhausted"
+  | Nat.succ remaining =>
+      let smaller :=
+        psKernelOpenSimpleMutualConstructorFieldsWithFuel
+          remaining;
+      fun
+        (session : PsKernelCheckerSession)
+        (targets : List PsKernelName)
+        (shapes : List PsKernelSimpleMutualTypeShape)
+        (levels : List PsKernelLevel)
+        (params : List PsKernelOpenBinder)
+        (resultLevel : PsKernelLevel)
+        (type : PsKernelExpr)
+        (revFields : List PsKernelOpenBinder)
+        (revRecursive : List PsKernelSimpleMutualRecursiveField) =>
+        match
+            psKernelSessionWhnf
+              remaining
+              session
+              type with
+        | Except.error error =>
+            Except.error error
+        | Except.ok reduced =>
+            match Prod.fst reduced with
+            | PsKernelExpr.forallE
+                userName
+                domain
+                body
+                binderInfo =>
+                match
+                    psKernelSessionCheck
+                      remaining
+                      (Prod.snd reduced)
+                      domain with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok domainType =>
+                    match
+                        psKernelSessionEnsureSort
+                          remaining
+                          (Prod.snd domainType)
+                          (Prod.fst domainType) with
+                    | Except.error error =>
+                        Except.error error
+                    | Except.ok fieldLevel =>
+                        if
+                            if
+                                psKernelLevelLe
+                                  (Prod.fst fieldLevel)
+                                  resultLevel then
+                              true
+                            else
+                              psKernelLevelNormalizesToZero
+                                resultLevel then
+                          let localDomain :=
+                            psKernelExprConsumeTypeAnnotations
+                              domain;
+                          let opened :=
+                            psKernelSessionWithLocal
+                              (Prod.snd fieldLevel)
+                              userName
+                              localDomain
+                              binderInfo;
+                          let fresh :=
+                            Prod.fst opened;
+                          let child :=
+                            Prod.snd opened;
+                          let field :=
+                            PsKernelOpenBinder.mk
+                              fresh
+                              userName
+                              localDomain
+                              binderInfo;
+                          match
+                              psKernelAnalyzeSimpleMutualRecursiveArgument
+                                child
+                                targets
+                                shapes
+                                levels
+                                params
+                                field
+                                domain with
+                          | Except.error error =>
+                              Except.error error
+                          | Except.ok recursiveResult =>
+                              let nextRecursive :=
+                                match
+                                    recursiveResult.recursiveInfo with
+                                | Option.none =>
+                                    revRecursive
+                                | Option.some recursive =>
+                                    List.cons
+                                      recursive
+                                      revRecursive;
+                              smaller
+                                recursiveResult.session
+                                targets
+                                shapes
+                                levels
+                                params
+                                resultLevel
+                                (psKernelExprInstantiate1
+                                  body
+                                  (PsKernelExpr.fvar fresh))
+                                (List.cons field revFields)
+                                nextRecursive
+                        else
+                          Except.error
+                            "mutual inductive constructor field universe is too large"
+            | _ =>
+                Except.ok
+                  (PsKernelMutualOpenFieldsResult.mk
+                    (Prod.snd reduced)
+                    (psKernelReverseOpenBinders revFields)
+                    (psKernelReverseMutualRecursiveFields
+                      revRecursive)
+                    (Prod.fst reduced))
+
+def psKernelOpenSimpleMutualConstructorFields
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (targets : List PsKernelName)
+    (shapes : List PsKernelSimpleMutualTypeShape)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (resultLevel : PsKernelLevel)
+    (type : PsKernelExpr) :
+    Except String PsKernelMutualOpenFieldsResult :=
+  psKernelOpenSimpleMutualConstructorFieldsWithFuel
+    (Nat.succ fuel)
+    session
+    targets
+    shapes
+    levels
+    params
+    resultLevel
+    type
+    List.nil
+    List.nil

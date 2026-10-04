@@ -325,13 +325,30 @@ def psKernelExprMapIndexSet
               (Nat.div hash 2)
               entries)
 
+def psKernelCacheSmallLimit : Nat :=
+  8
+
+def psKernelCacheEntryListLength
+    (entries :
+      List (Prod PsKernelExpr PsKernelExpr)) :
+    Nat :=
+  match entries with
+  | List.nil =>
+      0
+  | List.cons _ rest =>
+      Nat.succ
+        (psKernelCacheEntryListLength rest)
+
 structure PsKernelExprMap where
-  index : PsKernelExprMapIndex
+  small :
+    List (Prod PsKernelExpr PsKernelExpr)
+  index : Option PsKernelExprMapIndex
 
 def psKernelExprMapEmpty :
     PsKernelExprMap :=
   {
-    index := PsKernelExprMapIndex.empty
+    small := List.nil
+    index := Option.none
   }
 
 def psKernelExprMapGetIn
@@ -357,12 +374,18 @@ def psKernelExprMapGet
     (cache : PsKernelExprMap)
     (expr : PsKernelExpr) :
     Option PsKernelExpr :=
-  psKernelExprMapGetIn
-    expr
-    (psKernelExprMapIndexBucket
-      16
-      cache.index
-      (psKernelExprHash expr))
+  match cache.index with
+  | Option.none =>
+      psKernelExprMapGetIn
+        expr
+        cache.small
+  | Option.some index =>
+      psKernelExprMapGetIn
+        expr
+        (psKernelExprMapIndexBucket
+          16
+          index
+          (psKernelExprHash expr))
 
 def psKernelExprMapInsertIn
     (expr : PsKernelExpr)
@@ -391,29 +414,82 @@ def psKernelExprMapInsertIn
             value
             rest)
 
+def psKernelExprMapBuildIndex
+    (entries :
+      List (Prod PsKernelExpr PsKernelExpr)) :
+    PsKernelExprMapIndex :=
+  match entries with
+  | List.nil =>
+      PsKernelExprMapIndex.empty
+  | List.cons entry rest =>
+      let index :=
+        psKernelExprMapBuildIndex rest;
+      let key :=
+        Prod.fst entry;
+      let hash :=
+        psKernelExprHash key;
+      let bucket :=
+        psKernelExprMapIndexBucket
+          16
+          index
+          hash;
+      psKernelExprMapIndexSet
+        16
+        index
+        hash
+        (psKernelExprMapInsertIn
+          key
+          (Prod.snd entry)
+          bucket)
+
 def psKernelExprMapInsert
     (cache : PsKernelExprMap)
     (expr : PsKernelExpr)
     (value : PsKernelExpr) :
     PsKernelExprMap :=
-  let hash :=
-    psKernelExprHash expr;
-  let bucket :=
-    psKernelExprMapIndexBucket
-      16
-      cache.index
-      hash;
-  {
-    index :=
-      psKernelExprMapIndexSet
-        16
-        cache.index
-        hash
-        (psKernelExprMapInsertIn
+  match cache.index with
+  | Option.none =>
+      let next :=
+        psKernelExprMapInsertIn
           expr
           value
-          bucket)
-  }
+          cache.small;
+      if
+          Nat.ble
+            (psKernelCacheEntryListLength next)
+            psKernelCacheSmallLimit then
+        {
+          small := next
+          index := Option.none
+        }
+      else
+        {
+          small := List.nil
+          index :=
+            Option.some
+              (psKernelExprMapBuildIndex next)
+        }
+  | Option.some index =>
+      let hash :=
+        psKernelExprHash expr;
+      let bucket :=
+        psKernelExprMapIndexBucket
+          16
+          index
+          hash;
+      {
+        small := List.nil
+        index :=
+          Option.some
+            (psKernelExprMapIndexSet
+              16
+              index
+              hash
+              (psKernelExprMapInsertIn
+                expr
+                value
+                bucket))
+      }
 
 def psKernelExprPairEq
     (left : PsKernelExpr)
@@ -540,12 +616,15 @@ def psKernelExprPairSetIndexSet
               entries)
 
 structure PsKernelExprPairSet where
-  index : PsKernelExprPairSetIndex
+  small :
+    List (Prod PsKernelExpr PsKernelExpr)
+  index : Option PsKernelExprPairSetIndex
 
 def psKernelExprPairSetEmpty :
     PsKernelExprPairSet :=
   {
-    index := PsKernelExprPairSetIndex.empty
+    small := List.nil
+    index := Option.none
   }
 
 def psKernelExprPairSetContainsIn
@@ -575,40 +654,112 @@ def psKernelExprPairSetContains
     (left : PsKernelExpr)
     (right : PsKernelExpr) :
     Bool :=
-  psKernelExprPairSetContainsIn
-    left
-    right
-    (psKernelExprPairSetIndexBucket
-      16
-      set.index
-      (psKernelExprPairHash left right))
+  match set.index with
+  | Option.none =>
+      psKernelExprPairSetContainsIn
+        left
+        right
+        set.small
+  | Option.some index =>
+      psKernelExprPairSetContainsIn
+        left
+        right
+        (psKernelExprPairSetIndexBucket
+          16
+          index
+          (psKernelExprPairHash left right))
+
+def psKernelExprPairSetBuildIndex
+    (entries :
+      List (Prod PsKernelExpr PsKernelExpr)) :
+    PsKernelExprPairSetIndex :=
+  match entries with
+  | List.nil =>
+      PsKernelExprPairSetIndex.empty
+  | List.cons entry rest =>
+      let index :=
+        psKernelExprPairSetBuildIndex rest;
+      let left :=
+        Prod.fst entry;
+      let right :=
+        Prod.snd entry;
+      let hash :=
+        psKernelExprPairHash left right;
+      let bucket :=
+        psKernelExprPairSetIndexBucket
+          16
+          index
+          hash;
+      if
+          psKernelExprPairSetContainsIn
+            left
+            right
+            bucket then
+        index
+      else
+        psKernelExprPairSetIndexSet
+          16
+          index
+          hash
+          (List.cons entry bucket)
 
 def psKernelExprPairSetInsert
     (set : PsKernelExprPairSet)
     (left : PsKernelExpr)
     (right : PsKernelExpr) :
     PsKernelExprPairSet :=
-  let hash :=
-    psKernelExprPairHash left right;
-  let bucket :=
-    psKernelExprPairSetIndexBucket
-      16
-      set.index
-      hash;
-  if
-      psKernelExprPairSetContainsIn
-        left
-        right
-        bucket then
-    set
-  else
-    {
-      index :=
-        psKernelExprPairSetIndexSet
-          16
-          set.index
-          hash
-          (List.cons
+  match set.index with
+  | Option.none =>
+      if
+          psKernelExprPairSetContainsIn
+            left
+            right
+            set.small then
+        set
+      else
+        let next :=
+          List.cons
             (Prod.mk left right)
-            bucket)
-    }
+            set.small;
+        if
+            Nat.ble
+              (psKernelCacheEntryListLength next)
+              psKernelCacheSmallLimit then
+          {
+            small := next
+            index := Option.none
+          }
+        else
+          {
+            small := List.nil
+            index :=
+              Option.some
+                (psKernelExprPairSetBuildIndex next)
+          }
+  | Option.some index =>
+      let hash :=
+        psKernelExprPairHash left right;
+      let bucket :=
+        psKernelExprPairSetIndexBucket
+          16
+          index
+          hash;
+      if
+          psKernelExprPairSetContainsIn
+            left
+            right
+            bucket then
+        set
+      else
+        {
+          small := List.nil
+          index :=
+            Option.some
+              (psKernelExprPairSetIndexSet
+                16
+                index
+                hash
+                (List.cons
+                  (Prod.mk left right)
+                  bucket))
+        }

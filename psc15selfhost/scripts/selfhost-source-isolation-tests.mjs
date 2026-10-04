@@ -47,13 +47,28 @@ async function scenario(label, configure = async () => {}, expectedError) {
     await put(compiler, `import { writeFileSync } from "node:fs";
 export const PsCompilerSourceKind = { lean: "lean", proofScript: "ps" };
 let translations = 0;
+const chunks = [];
 const ok = value => ({ [Symbol.for("psc2-test-tag")]: "ok", value });
 export function psCompilerTranslateSource(_from, _to, source) { translations++; return ok(source); }
 export const List = { nil: () => ({}), cons: (head, tail) => ({ head, tail }) };
-export function psCompilerPrepareSources(kind, sources) {
-  const chunks = [];
-  for (let value = sources; 'head' in value; value = value.tail) chunks.push(value.head);
-  writeFileSync(process.env.PSC2_TEST_SOURCE_REPORT, JSON.stringify({ kind, source: chunks.join('\\n\\n'), chunks, translations }));
+export const psSelfHostProdPreludeEnvironment = {};
+export function psCompilerParseSource(kind, source) {
+  chunks.push(source);
+  return ok({ kind, source });
+}
+export function psElabModule(environment, _parsed) {
+  return ok({ environment, declarations: List.nil() });
+}
+export function psListReverse(values) { return values; }
+export function psListAppend(_left, right) { return right; }
+export function psCompilerElaborateSourcesWorker(kind, _sources, environment, _declarationsRev) {
+  return ok({ kind, environment, declarations: List.nil() });
+}
+export function psCompilerPrepareElaborated(elaborated) {
+  writeFileSync(
+    process.env.PSC2_TEST_SOURCE_REPORT,
+    JSON.stringify({ kind: elaborated.kind, source: chunks.join('\\n\\n'), chunks, translations }),
+  );
   return ok({});
 }
 export function psCompilerTypeScriptFromPrepared(_prepared) {

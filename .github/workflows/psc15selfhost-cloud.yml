@@ -126,6 +126,10 @@ jobs:
         run: |
           node --test             scripts/checked-algebraic-build.test.mjs             scripts/checked-build.test.mjs             scripts/checked-enum-build.test.mjs             scripts/checked-projection-build.test.mjs             scripts/checked-seed-session.test.mjs             scripts/checked-sum-build.test.mjs             scripts/checked-text-build.test.mjs             scripts/checked-selfhost-preflight.test.mjs
 
+      - name: Run self-host source isolation corpus
+        working-directory: psc15selfhost
+        run: node scripts/selfhost-source-isolation-tests.mjs
+
       - name: Enforce semantic boundaries
         working-directory: psc15selfhost
         run: npm run check:semantic-boundaries

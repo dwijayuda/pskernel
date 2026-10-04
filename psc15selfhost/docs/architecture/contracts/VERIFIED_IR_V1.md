@@ -184,6 +184,8 @@ Pull requests targeting `psc2/selfhost-lean-kernel` run the focused cloud gate:
 
 That workflow checks the portable source profile, builds the relevant semantic/compiler/backend layers, runs the erasure/VerifiedIR, minimal-selfhost and TypeScript-backend corpora, enforces semantic-boundary rules, and asks PSC itself to check the modified compiler IR and compiler API source.
 
+The workflow is installed on the repository default branch so pull requests targeting the PSC2 integration branch can be executed entirely in GitHub Actions rather than relying on a developer workstation.
+
 ## Assurance status
 
 Current evidence includes:

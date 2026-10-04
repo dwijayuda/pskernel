@@ -1887,9 +1887,9 @@ def psKernelSimpleNestedRestoreOpenWithFuel
         (expr : PsKernelExpr) =>
         match expr with
         | PsKernelExpr.app _ _ =>
-            let fn :=
+            let fn : PsKernelExpr :=
               psKernelExprGetAppFn expr;
-            let restoreOne :=
+            let restoreOne : PsKernelExpr -> PsKernelExpr :=
               fun (arg : PsKernelExpr) =>
                 smaller
                   families
@@ -1898,7 +1898,7 @@ def psKernelSimpleNestedRestoreOpenWithFuel
                   currentParams
                   numParams
                   arg;
-            let args :=
+            let args : List PsKernelExpr :=
               psKernelSimpleNestedMapExprList
                 restoreOne
                 (psKernelExprGetAppArgs expr);
@@ -1920,7 +1920,7 @@ def psKernelSimpleNestedRestoreOpenWithFuel
                           name
                           families with
                     | Option.some family =>
-                        let nested :=
+                        let nested : PsKernelExpr :=
                           psKernelSimpleNestedRebaseParams
                             family.nestedTemplate
                             canonicalParams
@@ -1956,7 +1956,7 @@ def psKernelSimpleNestedRestoreOpenWithFuel
                                   levels)
                                 args
                             else
-                              let fixed :=
+                              let fixed : List PsKernelExpr :=
                                 psKernelSimpleNestedRebaseExprList
                                   found.family.fixedParams
                                   canonicalParams
@@ -1971,7 +1971,7 @@ def psKernelSimpleNestedRestoreOpenWithFuel
                                     numParams
                                     args))
                         | Option.none =>
-                            let fnRestored :=
+                            let fnRestored : PsKernelExpr :=
                               smaller
                                 families
                                 renames
@@ -1983,7 +1983,7 @@ def psKernelSimpleNestedRestoreOpenWithFuel
                               fnRestored
                               args
             | _ =>
-                let fnRestored :=
+                let fnRestored : PsKernelExpr :=
                   smaller
                     families
                     renames
@@ -2079,7 +2079,7 @@ def psKernelSimpleNestedRestoreOpenWithFuel
                 numParams
                 body)
         | PsKernelExpr.proj typeName index body =>
-            let restoredTypeName :=
+            let restoredTypeName : PsKernelName :=
               match
                   psKernelSimpleNestedFindAuxByName
                     typeName
@@ -2127,7 +2127,7 @@ def psKernelSimpleNestedRestoreOpenWithFuel
                           families with
                     | Option.some found =>
                         if Nat.beq numParams 0 then
-                          let fixed :=
+                          let fixed : List PsKernelExpr :=
                             psKernelSimpleNestedRebaseExprList
                               found.family.fixedParams
                               canonicalParams

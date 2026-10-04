@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.TypeCheckerDefEqSupport
+import Ps.KernelSelfHost.Theory.DefEq.LazyDelta
 
 /-
 Lean 4.34 final algorithmic-defeq rules.

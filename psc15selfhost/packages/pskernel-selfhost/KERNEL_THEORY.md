@@ -9,6 +9,11 @@ Target:
 - Lean commit: `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`
 - compatibility matrix: `LEAN_4_34_COMPATIBILITY.json`
 
+Project guidance:
+
+- architecture/anti-drift rules: `PSKERNEL_SELFHOST_ARCHITECTURE.md`
+- active roadmap: `DEVELOPMENT_PLAN.md`
+
 The same semantic source is intended to have two primary execution paths:
 
 ```
@@ -81,22 +86,24 @@ These modules define the data manipulated by the checker.
 ### Definitional equality
 
 14. `TypeCheckerDefEqSupport.lean`
-15. `Theory/DefEq/FinalRules.lean`
-16. `TypeCheckerDefEq.lean`
+15. `Theory/DefEq/LazyDelta.lean`
+16. `Theory/DefEq/FinalRules.lean`
+17. `TypeCheckerDefEq.lean`
 
-The final rules module isolates proof/proposition handling, structure eta,
-string literal expansion, and unit-like structures because these are useful
-rules to study independently from lazy-delta mechanics.
+`Theory/DefEq/LazyDelta.lean` isolates Lean's observable lazy-unfolding order.
+The final-rules module isolates proof/proposition handling, structure eta,
+string literal expansion, and unit-like structures. Keeping these rules
+separate makes the algorithm easier to study without changing its ordering.
 
 ### Declaration admission
 
-17. `CheckerSession.lean`
-18. `Kernel.lean`
-19. `Quot.lean`
-20. `Inductive.lean`
-21. `InductiveAdmission.lean`
-22. `MutualInductive.lean`
-23. `NestedInductive.lean`
+18. `CheckerSession.lean`
+19. `Kernel.lean`
+20. `Quot.lean`
+21. `Inductive.lean`
+22. `InductiveAdmission.lean`
+23. `MutualInductive.lean`
+24. `NestedInductive.lean`
 
 ### Backend/runtime mechanisms
 

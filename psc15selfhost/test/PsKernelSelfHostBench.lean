@@ -1222,6 +1222,129 @@ def psKernelBenchLeanRecDecl : Lean.Declaration :=
     false
 
 
+
+def psKernelBenchIndexedName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "BenchIndexed"
+
+def psKernelBenchIndexedReflName : PsKernelName :=
+  PsKernelName.str
+    psKernelBenchIndexedName
+    "refl"
+
+def psKernelBenchIndexedRecName : PsKernelName :=
+  psKernelSimpleRecName
+    psKernelBenchIndexedName
+
+def psKernelBenchIndexedType1 : PsKernelExpr :=
+  PsKernelExpr.sort
+    (PsKernelLevel.succ PsKernelLevel.zero)
+
+def psKernelBenchIndexedExpr : PsKernelExpr :=
+  PsKernelExpr.const
+    psKernelBenchIndexedName
+    List.nil
+
+def psKernelBenchIndexedDecl :
+    PsKernelSimpleInductiveDecl :=
+  {
+    levelParams := List.nil
+    name := psKernelBenchIndexedName
+    type :=
+      PsKernelExpr.forallE
+        PsKernelName.anonymous
+        psKernelBenchIndexedType1
+        (PsKernelExpr.forallE
+          PsKernelName.anonymous
+          (PsKernelExpr.bvar 0)
+          psKernelBenchIndexedType1
+          PsKernelBinderInfo.default)
+        PsKernelBinderInfo.default
+    ctors :=
+      List.cons
+        {
+          name := psKernelBenchIndexedReflName
+          type :=
+            PsKernelExpr.forallE
+              PsKernelName.anonymous
+              psKernelBenchIndexedType1
+              (PsKernelExpr.forallE
+                PsKernelName.anonymous
+                (PsKernelExpr.bvar 0)
+                (PsKernelExpr.app
+                  (PsKernelExpr.app
+                    psKernelBenchIndexedExpr
+                    (PsKernelExpr.bvar 1))
+                  (PsKernelExpr.bvar 0))
+                PsKernelBinderInfo.default)
+              PsKernelBinderInfo.default
+        }
+        List.nil
+    isUnsafe := false
+    numParams := 1
+  }
+
+def psKernelBenchLeanIndexedName : Lean.Name :=
+  Lean.Name.str
+    Lean.Name.anonymous
+    "BenchIndexed"
+
+def psKernelBenchLeanIndexedReflName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanIndexedName
+    "refl"
+
+def psKernelBenchLeanIndexedRecName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanIndexedName
+    "rec"
+
+def psKernelBenchLeanIndexedType1 : Lean.Expr :=
+  Lean.Expr.sort
+    (Lean.Level.succ Lean.Level.zero)
+
+def psKernelBenchLeanIndexedExpr : Lean.Expr :=
+  Lean.Expr.const
+    psKernelBenchLeanIndexedName
+    []
+
+def psKernelBenchLeanIndexedDecl : Lean.Declaration :=
+  Lean.Declaration.inductDecl
+    []
+    1
+    [{
+      name := psKernelBenchLeanIndexedName
+      type :=
+        Lean.Expr.forallE
+          Lean.Name.anonymous
+          psKernelBenchLeanIndexedType1
+          (Lean.Expr.forallE
+            Lean.Name.anonymous
+            (Lean.Expr.bvar 0)
+            psKernelBenchLeanIndexedType1
+            Lean.BinderInfo.default)
+          Lean.BinderInfo.default
+      ctors := [{
+        name := psKernelBenchLeanIndexedReflName
+        type :=
+          Lean.Expr.forallE
+            Lean.Name.anonymous
+            psKernelBenchLeanIndexedType1
+            (Lean.Expr.forallE
+              Lean.Name.anonymous
+              (Lean.Expr.bvar 0)
+              (Lean.Expr.app
+                (Lean.Expr.app
+                  psKernelBenchLeanIndexedExpr
+                  (Lean.Expr.bvar 1))
+                (Lean.Expr.bvar 0))
+              Lean.BinderInfo.default)
+            Lean.BinderInfo.default
+      }]
+    }]
+    false
+
 def psKernelBenchMutualEvenName : PsKernelName :=
   PsKernelName.str
     PsKernelName.anonymous
@@ -1777,6 +1900,62 @@ partial def psKernelBenchLeanInductiveAdmissionLoop
       | .error _ =>
           pure tail
 
+
+
+partial def psKernelBenchIndexedAdmissionLoop
+    (iterations : Nat) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchIndexedAdmissionLoop rest
+      match
+          psKernelAddSimpleInductive
+            65536
+            psKernelEnvironmentEmpty
+            psKernelBenchIndexedDecl
+            0
+            psKernelLeanNatMaxSizeDefault with
+      | Except.ok environment =>
+          if
+              psKernelEnvironmentContains
+                environment
+                psKernelBenchIndexedRecName then
+            pure (Nat.succ tail)
+          else
+            pure tail
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchLeanIndexedAdmissionLoop
+    (iterations : Nat)
+    (environment : Lean.Environment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchLeanIndexedAdmissionLoop
+          rest
+          environment
+      match
+          Lean.Kernel.Environment.addDecl
+            environment.toKernelEnv
+            {}
+            psKernelBenchLeanIndexedDecl with
+      | .ok next =>
+          match
+              next.find?
+                psKernelBenchLeanIndexedRecName with
+          | some (.recInfo _) =>
+              pure (Nat.succ tail)
+          | _ =>
+              pure tail
+      | .error _ =>
+          pure tail
 
 partial def psKernelBenchMutualAdmissionLoop
     (iterations : Nat) :
@@ -2650,6 +2829,40 @@ def main : IO Unit := do
       "/" ++
       toString admissionLeanHits)
 
+
+
+  let indexedAdmissionIterations := 100
+
+  let indexedAdmissionPsStart ← IO.monoNanosNow
+  let indexedAdmissionPsHits ←
+    psKernelBenchIndexedAdmissionLoop
+      indexedAdmissionIterations
+  let indexedAdmissionPsStop ← IO.monoNanosNow
+
+  let indexedAdmissionLeanStart ← IO.monoNanosNow
+  let indexedAdmissionLeanHits ←
+    psKernelBenchLeanIndexedAdmissionLoop
+      indexedAdmissionIterations
+      leanAdmissionBase
+  let indexedAdmissionLeanStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH indexed_inductive_admission_pskernel_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          indexedAdmissionPsStart
+          indexedAdmissionPsStop) ++
+      " indexed_inductive_admission_lean_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          indexedAdmissionLeanStart
+          indexedAdmissionLeanStop) ++
+      " iterations=" ++
+      toString indexedAdmissionIterations ++
+      " hits=" ++
+      toString indexedAdmissionPsHits ++
+      "/" ++
+      toString indexedAdmissionLeanHits)
 
   let mutualAdmissionIterations := 100
 

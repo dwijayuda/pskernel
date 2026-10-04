@@ -112,17 +112,7 @@ def psKernelCheckerContextEnterRecDepth
       context.maxRecDepth
       psKernelRecDepthFactor;
   if Nat.beq context.maxRecDepth 0 then
-    Except.ok {
-      environment := context.environment
-      localContext := context.localContext
-      levelParams := context.levelParams
-      safety := context.safety
-      eagerReduce := context.eagerReduce
-      nativeEvaluator := context.nativeEvaluator
-      maxRecDepth := context.maxRecDepth
-      maxNatSize := context.maxNatSize
-      recDepth := nextDepth
-    }
+    Except.ok context
   else if psKernelNatGt nextDepth limit then
     Except.error
       "deep recursion detected, use maxRecDepth to increase the limit"

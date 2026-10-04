@@ -120,6 +120,8 @@ Theory/DefEq/
     Quick.lean
     LazyDelta.lean
     FinalRules.lean
+    Shortcuts.lean
+    FullShape.lean
 ```
 
 Future useful boundaries may include:

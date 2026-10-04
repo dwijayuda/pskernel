@@ -270,7 +270,9 @@ Physical representations remain backend-private.
 
 Do not make direct JS a string-printer bolted onto VerifiedIR.
 
-Use:
+The first experimental slice now exists as `psc-js-ir/0-experimental`; see `docs/architecture/contracts/JS_IR_EXPERIMENTAL_V0.md`. It is deliberately non-bootstrap and covers only a small primitive/function subset for differential validation.
+
+Target architecture:
 
 ```text
 VerifiedIR

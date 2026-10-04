@@ -41,6 +41,7 @@ const expectedAllowed = [
 const expectedForbidden = [
   "stdlib",
   "project",
+  "backend-js",
   "backend-rust",
   "driver-rust",
   "backend-wasm",

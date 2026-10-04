@@ -96,6 +96,14 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Module
   ]
 
+lean_lib PsBackendJs where
+  srcDir := "packages/backend-js/src"
+  roots := #[
+    `Ps.BackendJs.Model,
+    `Ps.BackendJs.Lower,
+    `Ps.BackendJs.Print
+  ]
+
 lean_lib PsDriverTs where
   srcDir := "packages/driver-ts/src"
   roots := #[`Ps.DriverTs.Compiler]
@@ -214,6 +222,18 @@ lean_exe psc1_bridge_tests where
 lean_exe psc1_backend_ts_tests where
   srcDir := "test"
   root := `BackendTsTests
+
+lean_lib PsBackendJsTestSupport where
+  srcDir := "test"
+  roots := #[`BackendJsFixture]
+
+lean_exe psc1_backend_js_tests where
+  srcDir := "test"
+  root := `BackendJsTests
+
+lean_exe psc1_backend_js_diff_fixture where
+  srcDir := "test"
+  root := `BackendJsDifferentialFixture
 
 lean_exe psc1_backend_wasm_tests where
   srcDir := "test"

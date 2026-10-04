@@ -2040,6 +2040,237 @@ def psKernelSelfHostNestedTests : Bool :=
   | _, _ =>
       false
 
+def psKernelSelfHostNestedMultiFamilyTests : Bool :=
+  let type1 :=
+    PsKernelExpr.sort
+      (PsKernelLevel.succ
+        PsKernelLevel.zero)
+  let boxName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "PortableNestedWideBox"
+  let boxMkName :=
+    PsKernelName.str
+      boxName
+      "mk"
+  let wrapName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "PortableNestedWideWrap"
+  let wrapMkName :=
+    PsKernelName.str
+      wrapName
+      "mk"
+  let alphaName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "alpha"
+  let valueName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "value"
+  let boxType :=
+    PsKernelExpr.forallE
+      alphaName
+      type1
+      type1
+      PsKernelBinderInfo.default
+  let boxCtorType :=
+    PsKernelExpr.forallE
+      alphaName
+      type1
+      (PsKernelExpr.forallE
+        valueName
+        (PsKernelExpr.bvar 0)
+        (PsKernelExpr.app
+          (PsKernelExpr.const
+            boxName
+            List.nil)
+          (PsKernelExpr.bvar 1))
+        PsKernelBinderInfo.default)
+      PsKernelBinderInfo.default
+  let wrapType :=
+    PsKernelExpr.forallE
+      alphaName
+      type1
+      type1
+      PsKernelBinderInfo.default
+  let wrapCtorType :=
+    PsKernelExpr.forallE
+      alphaName
+      type1
+      (PsKernelExpr.forallE
+        valueName
+        (PsKernelExpr.bvar 0)
+        (PsKernelExpr.app
+          (PsKernelExpr.const
+            wrapName
+            List.nil)
+          (PsKernelExpr.bvar 1))
+        PsKernelBinderInfo.default)
+      PsKernelBinderInfo.default
+  let treeName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "PortableNestedWideTree"
+  let leafName :=
+    PsKernelName.str
+      treeName
+      "leaf"
+  let boxNodeName :=
+    PsKernelName.str
+      treeName
+      "boxNode"
+  let wrapNodeName :=
+    PsKernelName.str
+      treeName
+      "wrapNode"
+  let recName :=
+    psKernelSimpleRecName
+      treeName
+  let recAux1Name :=
+    psKernelNameAppendIndexAfter
+      recName
+      1
+  let recAux2Name :=
+    psKernelNameAppendIndexAfter
+      recName
+      2
+  let treeType :=
+    PsKernelExpr.const
+      treeName
+      List.nil
+  let boxTreeType :=
+    PsKernelExpr.app
+      (PsKernelExpr.const
+        boxName
+        List.nil)
+      treeType
+  let wrapTreeType :=
+    PsKernelExpr.app
+      (PsKernelExpr.const
+        wrapName
+        List.nil)
+      treeType
+  let boxNodeType :=
+    PsKernelExpr.forallE
+      PsKernelName.anonymous
+      boxTreeType
+      treeType
+      PsKernelBinderInfo.default
+  let wrapNodeType :=
+    PsKernelExpr.forallE
+      PsKernelName.anonymous
+      wrapTreeType
+      treeType
+      PsKernelBinderInfo.default
+  let boxEnvironment :=
+    psKernelAddSimpleInductive
+      8192
+      psKernelEnvironmentEmpty
+      (PsKernelSimpleInductiveDecl.mk
+        List.nil
+        boxName
+        boxType
+        (List.cons
+          (PsKernelSimpleConstructorDecl.mk
+            boxMkName
+            boxCtorType)
+          List.nil)
+        false
+        1)
+      0
+      psKernelLeanNatMaxSizeDefault
+  let outerEnvironment :=
+    match boxEnvironment with
+    | Except.error error =>
+        Except.error error
+    | Except.ok environment =>
+        psKernelAddSimpleInductive
+          8192
+          environment
+          (PsKernelSimpleInductiveDecl.mk
+            List.nil
+            wrapName
+            wrapType
+            (List.cons
+              (PsKernelSimpleConstructorDecl.mk
+                wrapMkName
+                wrapCtorType)
+              List.nil)
+            false
+            1)
+          0
+          psKernelLeanNatMaxSizeDefault
+  let nested :=
+    match outerEnvironment with
+    | Except.error error =>
+        Except.error error
+    | Except.ok environment =>
+        psKernelAddSimpleNestedInductive
+          8192
+          environment
+          (PsKernelSimpleMutualInductiveDecl.mk
+            List.nil
+            0
+            (List.cons
+              (PsKernelSimpleMutualTypeDecl.mk
+                treeName
+                type1
+                (List.cons
+                  (PsKernelSimpleConstructorDecl.mk
+                    leafName
+                    treeType)
+                  (List.cons
+                    (PsKernelSimpleConstructorDecl.mk
+                      boxNodeName
+                      boxNodeType)
+                    (List.cons
+                      (PsKernelSimpleConstructorDecl.mk
+                        wrapNodeName
+                        wrapNodeType)
+                      List.nil))))
+              List.nil)
+            false)
+          0
+          psKernelLeanNatMaxSizeDefault
+  match nested with
+  | Except.error _ =>
+      false
+  | Except.ok environment =>
+      match
+          psKernelEnvironmentFind
+            environment
+            treeName,
+          psKernelEnvironmentFind
+            environment
+            recName,
+          psKernelEnvironmentFind
+            environment
+            recAux1Name,
+          psKernelEnvironmentFind
+            environment
+            recAux2Name with
+      | Option.some
+          (PsKernelConstantInfo.inductInfo info),
+        Option.some
+          (PsKernelConstantInfo.recInfo mainRec),
+        Option.some
+          (PsKernelConstantInfo.recInfo _),
+        Option.some
+          (PsKernelConstantInfo.recInfo _) =>
+          Bool.and
+            (Nat.beq info.numNested 2)
+            (Bool.and
+              (Nat.beq
+                (psKernelSimpleNestedRuleListLength
+                  mainRec.rules)
+                3)
+              (!(psKernelConstantListUsesNestedPrefix
+                environment.constants)))
+      | _, _, _, _ =>
+          false
+
 def psKernelSelfHostNestedRejectionTests : Bool :=
   let type1 :=
     PsKernelExpr.sort
@@ -3463,6 +3694,10 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_NESTED_DIFFERENTIAL: FAIL")
+  else if !psKernelSelfHostNestedMultiFamilyTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_NESTED_MULTI_FAMILY_CONFORMANCE: FAIL")
   else if !psKernelSelfHostNestedRejectionTests then
     throw
       (IO.userError

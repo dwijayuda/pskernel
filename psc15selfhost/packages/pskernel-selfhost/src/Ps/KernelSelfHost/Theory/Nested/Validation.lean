@@ -101,27 +101,50 @@ def psKernelSimpleNestedValidateTemplates
             maxNatSize
             rest
 
+def psKernelSimpleNestedValidateRulesWorker
+    (rules : List PsKernelRecursorRule) :
+    Nat ->
+    PsKernelCheckerSession ->
+    Except String PsKernelCheckerSession :=
+  match rules with
+  | List.nil =>
+      fun
+        (_fuel : Nat)
+        (session : PsKernelCheckerSession) =>
+        Except.ok session
+  | List.cons rule rest =>
+      let smaller :=
+        psKernelSimpleNestedValidateRulesWorker
+          rest;
+      fun
+        (fuel : Nat)
+        (session : PsKernelCheckerSession) =>
+        match
+            psKernelSessionCheck
+              fuel
+              session
+              rule.rhs with
+        | Except.error error =>
+            Except.error error
+        | Except.ok checked =>
+            smaller
+              fuel
+              (Prod.snd checked)
+
 def psKernelSimpleNestedValidateRules
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (rules : List PsKernelRecursorRule) :
     Except String Unit :=
-  match rules with
-  | List.nil =>
+  match
+      psKernelSimpleNestedValidateRulesWorker
+        rules
+        fuel
+        session with
+  | Except.error error =>
+      Except.error error
+  | Except.ok _ =>
       Except.ok ()
-  | List.cons rule rest =>
-      match
-          psKernelSessionCheck
-            fuel
-            session
-            rule.rhs with
-      | Except.error error =>
-          Except.error error
-      | Except.ok _ =>
-          psKernelSimpleNestedValidateRules
-            fuel
-            session
-            rest
 
 def psKernelSimpleNestedValidateConstructorTypes
     (fuel : Nat)

@@ -115,7 +115,7 @@ def psWasmFunctionTypeListContains
   | none => false
   | some candidateKey =>
       types.any
-        (fun existing =>
+        (fun (existing : PsVerifiedIrType) =>
           match psWasmIrTypeKey existing with
           | none => false
           | some existingKey => existingKey == candidateKey)
@@ -145,7 +145,9 @@ def psWasmCollectFunctionTypesFromTypeWithFuel :
             psWasmInsertFunctionType types type
           let withParameters :=
             parameters.foldl
-              (fun state parameter =>
+              (fun
+                (state : List PsVerifiedIrType)
+                (parameter : PsVerifiedIrType) =>
                 psWasmCollectFunctionTypesFromTypeWithFuel
                   fuel parameter state)
               withSelf
@@ -153,7 +155,9 @@ def psWasmCollectFunctionTypesFromTypeWithFuel :
             fuel result withParameters
       | .named _ arguments =>
           arguments.foldl
-            (fun state argument =>
+            (fun
+              (state : List PsVerifiedIrType)
+              (argument : PsVerifiedIrType) =>
               psWasmCollectFunctionTypesFromTypeWithFuel
                 fuel argument state)
             types
@@ -170,7 +174,9 @@ def psWasmCollectFunctionTypesFromParameters
     (types : List PsVerifiedIrType) :
     List PsVerifiedIrType :=
   parameters.foldl
-    (fun state parameter =>
+    (fun
+      (state : List PsVerifiedIrType)
+      (parameter : PsVerifiedIrParameter) =>
       psWasmCollectFunctionTypesFromType
         parameter.type
         state)
@@ -184,7 +190,9 @@ def psWasmCollectFunctionTypesFromExprWithFuel :
   | 0, _, types => types
   | fuel + 1, expr, types =>
       let collect :=
-        fun expression state =>
+        fun
+        (expression : PsVerifiedIrExpr)
+        (state : List PsVerifiedIrType) =>
           psWasmCollectFunctionTypesFromExprWithFuel
             fuel expression state
       match expr with
@@ -193,11 +201,16 @@ def psWasmCollectFunctionTypesFromExprWithFuel :
       | .intrinsic _ typeArguments arguments =>
           let withTypes :=
             typeArguments.foldl
-              (fun state type =>
+              (fun
+                (state : List PsVerifiedIrType)
+                (type : PsVerifiedIrType) =>
                 psWasmCollectFunctionTypesFromType type state)
               types
           arguments.foldl
-            (fun state argument => collect argument state)
+            (fun
+            (state : List PsVerifiedIrType)
+            (argument : PsVerifiedIrExpr) =>
+              collect argument state)
             withTypes
       | .lambda parameters resultType body =>
           let withParameters :=
@@ -205,7 +218,7 @@ def psWasmCollectFunctionTypesFromExprWithFuel :
               parameters types
           let functionType :=
             PsVerifiedIrType.function
-              (parameters.map (fun parameter => parameter.type))
+              (parameters.map (fun (parameter : PsVerifiedIrParameter) => parameter.type))
               resultType
           let withFunction :=
             psWasmInsertFunctionType
@@ -220,11 +233,16 @@ def psWasmCollectFunctionTypesFromExprWithFuel :
           let withFn := collect fn types
           let withTypes :=
             typeArguments.foldl
-              (fun state type =>
+              (fun
+                (state : List PsVerifiedIrType)
+                (type : PsVerifiedIrType) =>
                 psWasmCollectFunctionTypesFromType type state)
               withFn
           arguments.foldl
-            (fun state argument => collect argument state)
+            (fun
+            (state : List PsVerifiedIrType)
+            (argument : PsVerifiedIrExpr) =>
+              collect argument state)
             withTypes
       | .letE _ type value body =>
           let withType :=
@@ -237,28 +255,41 @@ def psWasmCollectFunctionTypesFromExprWithFuel :
           collect elseBranch withThen
       | .record _ _ fields =>
           fields.foldl
-            (fun state field => collect (Prod.snd field) state)
+            (fun
+            (state : List PsVerifiedIrType)
+            (field : String × PsVerifiedIrExpr) =>
+              collect (Prod.snd field) state)
             types
       | .projection _ _ target _ =>
           collect target types
       | .constructor _ _ typeArguments fields =>
           let withTypes :=
             typeArguments.foldl
-              (fun state type =>
+              (fun
+                (state : List PsVerifiedIrType)
+                (type : PsVerifiedIrType) =>
                 psWasmCollectFunctionTypesFromType type state)
               types
           fields.foldl
-            (fun state field => collect (Prod.snd field) state)
+            (fun
+            (state : List PsVerifiedIrType)
+            (field : String × PsVerifiedIrExpr) =>
+              collect (Prod.snd field) state)
             withTypes
       | .matchE _ _ scrutinee alternatives =>
           let withScrutinee := collect scrutinee types
           alternatives.foldl
-            (fun state alternative =>
+            (fun
+            (state : List PsVerifiedIrType)
+            (alternative :
+              String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
               let bindings := (Prod.fst (Prod.snd alternative))
               let body := (Prod.snd (Prod.snd alternative))
               let withBindings :=
                 bindings.foldl
-                  (fun inner binding =>
+                  (fun
+                  (inner : List PsVerifiedIrType)
+                  (binding : PsVerifiedIrMatchBinding) =>
                     psWasmCollectFunctionTypesFromType
                       binding.type
                       inner)
@@ -277,19 +308,29 @@ def psWasmCollectModuleFunctionTypes
     List PsVerifiedIrType :=
   let fromStructures :=
     module.structures.foldl
-      (fun state structureInfo =>
+      (fun
+      (state : List PsVerifiedIrType)
+      (structureInfo : PsVerifiedIrStructure) =>
         structureInfo.fields.foldl
-          (fun inner field =>
+          (fun
+          (inner : List PsVerifiedIrType)
+          (field : PsVerifiedIrStructureField) =>
             psWasmCollectFunctionTypesFromType field.type inner)
           state)
       []
   let fromInductives :=
     module.inductives.foldl
-      (fun state inductiveInfo =>
+      (fun
+      (state : List PsVerifiedIrType)
+      (inductiveInfo : PsVerifiedIrInductive) =>
         inductiveInfo.constructors.foldl
-          (fun inner constructorInfo =>
+          (fun
+          (inner : List PsVerifiedIrType)
+          (constructorInfo : PsVerifiedIrConstructor) =>
             constructorInfo.fields.foldl
-              (fun fieldsState field =>
+              (fun
+              (fieldsState : List PsVerifiedIrType)
+              (field : PsVerifiedIrConstructorField) =>
                 psWasmCollectFunctionTypesFromType
                   field.type
                   fieldsState)
@@ -297,7 +338,9 @@ def psWasmCollectModuleFunctionTypes
           state)
       fromStructures
   module.declarations.foldl
-    (fun state declaration =>
+    (fun
+    (state : List PsVerifiedIrType)
+    (declaration : PsVerifiedIrDeclaration) =>
       let withParameters :=
         psWasmCollectFunctionTypesFromParameters
           declaration.parameters
@@ -318,7 +361,7 @@ def psWasmArrayTypeListContains
   | none => false
   | some candidateKey =>
       types.any
-        (fun existing =>
+        (fun (existing : PsVerifiedIrType) =>
           match psWasmIrTypeKey existing with
           | none => false
           | some existingKey => existingKey == candidateKey)
@@ -346,7 +389,9 @@ def psWasmCollectArrayTypesFromTypeWithFuel :
       | .function parameters result =>
           let withParameters :=
             parameters.foldl
-              (fun state parameter =>
+              (fun
+                (state : List PsVerifiedIrType)
+                (parameter : PsVerifiedIrType) =>
                 psWasmCollectArrayTypesFromTypeWithFuel
                   fuel parameter state)
               types
@@ -358,7 +403,9 @@ def psWasmCollectArrayTypesFromTypeWithFuel :
             fuel elementType withSelf
       | .named _ arguments =>
           arguments.foldl
-            (fun state argument =>
+            (fun
+              (state : List PsVerifiedIrType)
+              (argument : PsVerifiedIrType) =>
               psWasmCollectArrayTypesFromTypeWithFuel
                 fuel argument state)
             types
@@ -375,7 +422,9 @@ def psWasmCollectArrayTypesFromParameters
     (types : List PsVerifiedIrType) :
     List PsVerifiedIrType :=
   parameters.foldl
-    (fun state parameter =>
+    (fun
+      (state : List PsVerifiedIrType)
+      (parameter : PsVerifiedIrParameter) =>
       psWasmCollectArrayTypesFromType parameter.type state)
     types
 
@@ -387,7 +436,9 @@ def psWasmCollectArrayTypesFromExprWithFuel :
   | 0, _, types => types
   | fuel + 1, expr, types =>
       let collect :=
-        fun expression state =>
+        fun
+        (expression : PsVerifiedIrExpr)
+        (state : List PsVerifiedIrType) =>
           psWasmCollectArrayTypesFromExprWithFuel
             fuel expression state
       match expr with
@@ -396,7 +447,9 @@ def psWasmCollectArrayTypesFromExprWithFuel :
       | .intrinsic operation typeArguments arguments =>
           let withTypes :=
             typeArguments.foldl
-              (fun state type =>
+              (fun
+                (state : List PsVerifiedIrType)
+                (type : PsVerifiedIrType) =>
                 psWasmCollectArrayTypesFromType type state)
               types
           let withArrayTypes :=
@@ -423,7 +476,10 @@ def psWasmCollectArrayTypesFromExprWithFuel :
                   (PsVerifiedIrType.named "Array" [elementType])
             | _, _ => withTypes
           arguments.foldl
-            (fun state argument => collect argument state)
+            (fun
+            (state : List PsVerifiedIrType)
+            (argument : PsVerifiedIrExpr) =>
+              collect argument state)
             withArrayTypes
       | .lambda parameters resultType body =>
           let withParameters :=
@@ -437,11 +493,16 @@ def psWasmCollectArrayTypesFromExprWithFuel :
           let withFn := collect fn types
           let withTypes :=
             typeArguments.foldl
-              (fun state type =>
+              (fun
+                (state : List PsVerifiedIrType)
+                (type : PsVerifiedIrType) =>
                 psWasmCollectArrayTypesFromType type state)
               withFn
           arguments.foldl
-            (fun state argument => collect argument state)
+            (fun
+            (state : List PsVerifiedIrType)
+            (argument : PsVerifiedIrExpr) =>
+              collect argument state)
             withTypes
       | .letE _ type value body =>
           let withType :=
@@ -455,42 +516,61 @@ def psWasmCollectArrayTypesFromExprWithFuel :
       | .record _ typeArguments fields =>
           let withTypes :=
             typeArguments.foldl
-              (fun state type =>
+              (fun
+                (state : List PsVerifiedIrType)
+                (type : PsVerifiedIrType) =>
                 psWasmCollectArrayTypesFromType type state)
               types
           fields.foldl
-            (fun state field => collect (Prod.snd field) state)
+            (fun
+            (state : List PsVerifiedIrType)
+            (field : String × PsVerifiedIrExpr) =>
+              collect (Prod.snd field) state)
             withTypes
       | .projection _ typeArguments target _ =>
           let withTypes :=
             typeArguments.foldl
-              (fun state type =>
+              (fun
+                (state : List PsVerifiedIrType)
+                (type : PsVerifiedIrType) =>
                 psWasmCollectArrayTypesFromType type state)
               types
           collect target withTypes
       | .constructor _ _ typeArguments fields =>
           let withTypes :=
             typeArguments.foldl
-              (fun state type =>
+              (fun
+                (state : List PsVerifiedIrType)
+                (type : PsVerifiedIrType) =>
                 psWasmCollectArrayTypesFromType type state)
               types
           fields.foldl
-            (fun state field => collect (Prod.snd field) state)
+            (fun
+            (state : List PsVerifiedIrType)
+            (field : String × PsVerifiedIrExpr) =>
+              collect (Prod.snd field) state)
             withTypes
       | .matchE _ typeArguments scrutinee alternatives =>
           let withTypes :=
             typeArguments.foldl
-              (fun state type =>
+              (fun
+                (state : List PsVerifiedIrType)
+                (type : PsVerifiedIrType) =>
                 psWasmCollectArrayTypesFromType type state)
               types
           let withScrutinee := collect scrutinee withTypes
           alternatives.foldl
-            (fun state alternative =>
+            (fun
+            (state : List PsVerifiedIrType)
+            (alternative :
+              String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
               let bindings := (Prod.fst (Prod.snd alternative))
               let body := (Prod.snd (Prod.snd alternative))
               let withBindings :=
                 bindings.foldl
-                  (fun inner binding =>
+                  (fun
+                  (inner : List PsVerifiedIrType)
+                  (binding : PsVerifiedIrMatchBinding) =>
                     psWasmCollectArrayTypesFromType
                       binding.type inner)
                   state
@@ -508,26 +588,38 @@ def psWasmCollectModuleArrayTypes
     List PsVerifiedIrType :=
   let fromStructures :=
     module.structures.foldl
-      (fun state structureInfo =>
+      (fun
+      (state : List PsVerifiedIrType)
+      (structureInfo : PsVerifiedIrStructure) =>
         structureInfo.fields.foldl
-          (fun inner field =>
+          (fun
+          (inner : List PsVerifiedIrType)
+          (field : PsVerifiedIrStructureField) =>
             psWasmCollectArrayTypesFromType field.type inner)
           state)
       []
   let fromInductives :=
     module.inductives.foldl
-      (fun state inductiveInfo =>
+      (fun
+      (state : List PsVerifiedIrType)
+      (inductiveInfo : PsVerifiedIrInductive) =>
         inductiveInfo.constructors.foldl
-          (fun inner constructorInfo =>
+          (fun
+          (inner : List PsVerifiedIrType)
+          (constructorInfo : PsVerifiedIrConstructor) =>
             constructorInfo.fields.foldl
-              (fun fieldsState field =>
+              (fun
+              (fieldsState : List PsVerifiedIrType)
+              (field : PsVerifiedIrConstructorField) =>
                 psWasmCollectArrayTypesFromType
                   field.type fieldsState)
               inner)
           state)
       fromStructures
   module.declarations.foldl
-    (fun state declaration =>
+    (fun
+    (state : List PsVerifiedIrType)
+    (declaration : PsVerifiedIrDeclaration) =>
       let withParameters :=
         psWasmCollectArrayTypesFromParameters
           declaration.parameters state

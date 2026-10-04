@@ -451,7 +451,7 @@ def psKernelSimpleNestedOpenRestorationParamsWithFuel
         (rev : List PsKernelOpenBinder) =>
         match count with
         | Nat.zero =>
-            let finalKind :=
+            let finalKind : PsKernelSimpleNestedBinderKind :=
               match kind with
               | Option.some value =>
                   value
@@ -469,7 +469,7 @@ def psKernelSimpleNestedOpenRestorationParamsWithFuel
                 domain
                 body
                 binderInfo =>
-                let conflict :=
+                let conflict : Bool :=
                   match kind with
                   | Option.some value =>
                       match value with
@@ -509,7 +509,7 @@ def psKernelSimpleNestedOpenRestorationParamsWithFuel
                 domain
                 body
                 binderInfo =>
-                let conflict :=
+                let conflict : Bool :=
                   match kind with
                   | Option.some value =>
                       match value with

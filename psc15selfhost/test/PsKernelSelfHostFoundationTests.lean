@@ -2006,6 +2006,432 @@ def psKernelSelfHostNestedTests : Bool :=
   | _, _ =>
       false
 
+def psKernelAdmissionConformanceTests : Bool :=
+  let fuel := 4096
+  let maxNatSize := psKernelLeanNatMaxSizeDefault
+  let natBase : PsKernelConstantBase := {
+    name := psKernelNatName
+    levelParams := List.nil
+    type :=
+      PsKernelExpr.sort
+        (PsKernelLevel.succ PsKernelLevel.zero)
+  }
+  let referenceNatBase : PSC1Kernel.ConstantBase := {
+    name := PSC1Kernel.kernelNatName
+    levelParams := List.nil
+    type :=
+      PSC1Kernel.Expr.sort
+        (PSC1Kernel.Level.succ PSC1Kernel.Level.zero)
+  }
+  match
+      psKernelAddAxiom
+        fuel
+        psKernelEnvironmentEmpty
+        {
+          base := natBase
+          isUnsafe := false
+        }
+        0
+        maxNatSize,
+      PSC1Kernel.Kernel.addAxiom
+        PSC1Kernel.Environment.empty
+        {
+          base := referenceNatBase
+          isUnsafe := false
+        }
+        0
+        PSC1Kernel.leanNatMaxSizeDefault
+        Option.none with
+  | Except.ok portableNatEnv, Except.ok referenceNatEnv =>
+      let duplicatePortable :=
+        psKernelAddAxiom
+          fuel
+          portableNatEnv
+          {
+            base := natBase
+            isUnsafe := false
+          }
+          0
+          maxNatSize
+      let duplicateReference :=
+        PSC1Kernel.Kernel.addAxiom
+          referenceNatEnv
+          {
+            base := referenceNatBase
+            isUnsafe := false
+          }
+          0
+          PSC1Kernel.leanNatMaxSizeDefault
+          Option.none
+      let duplicateParity :=
+        match duplicatePortable, duplicateReference with
+        | Except.error _, Except.error _ => true
+        | _, _ => false
+      let defName :=
+        PsKernelName.str
+          PsKernelName.anonymous
+          "AdmissionDef"
+      let referenceDefName :=
+        psKernelNameToReference defName
+      let defInfo : PsKernelDefinitionInfo := {
+        base := {
+          name := defName
+          levelParams := List.nil
+          type :=
+            PsKernelExpr.const
+              psKernelNatName
+              List.nil
+        }
+        value :=
+          PsKernelExpr.lit
+            (PsKernelLiteral.nat 3)
+        hints := PsKernelReducibilityHints.regular 0
+        safety := PsKernelDefinitionSafety.safe
+      }
+      let referenceDefInfo : PSC1Kernel.DefinitionInfo := {
+        base := {
+          name := referenceDefName
+          levelParams := List.nil
+          type :=
+            PSC1Kernel.Expr.const
+              PSC1Kernel.kernelNatName
+              List.nil
+        }
+        value :=
+          PSC1Kernel.Expr.lit
+            (PSC1Kernel.Literal.nat 3)
+        hints := PSC1Kernel.ReducibilityHints.regular 0
+        safety := PSC1Kernel.DefinitionSafety.safe
+      }
+      match
+          psKernelAddDefinition
+            fuel
+            portableNatEnv
+            defInfo
+            0
+            maxNatSize,
+          PSC1Kernel.Kernel.addDefinition
+            referenceNatEnv
+            referenceDefInfo
+            0
+            PSC1Kernel.leanNatMaxSizeDefault
+            Option.none with
+      | Except.ok portableDefEnv, Except.ok referenceDefEnv =>
+          let propName :=
+            PsKernelName.str
+              PsKernelName.anonymous
+              "AdmissionProp"
+          let proofName :=
+            PsKernelName.str
+              PsKernelName.anonymous
+              "AdmissionProof"
+          let theoremName :=
+            PsKernelName.str
+              PsKernelName.anonymous
+              "AdmissionTheorem"
+          let referencePropName :=
+            psKernelNameToReference propName
+          let referenceProofName :=
+            psKernelNameToReference proofName
+          let referenceTheoremName :=
+            psKernelNameToReference theoremName
+          let propBase : PsKernelConstantBase := {
+            name := propName
+            levelParams := List.nil
+            type := PsKernelExpr.sort PsKernelLevel.zero
+          }
+          let referencePropBase : PSC1Kernel.ConstantBase := {
+            name := referencePropName
+            levelParams := List.nil
+            type := PSC1Kernel.Expr.sort PSC1Kernel.Level.zero
+          }
+          match
+              psKernelAddAxiom
+                fuel
+                portableDefEnv
+                {
+                  base := propBase
+                  isUnsafe := false
+                }
+                0
+                maxNatSize,
+              PSC1Kernel.Kernel.addAxiom
+                referenceDefEnv
+                {
+                  base := referencePropBase
+                  isUnsafe := false
+                }
+                0
+                PSC1Kernel.leanNatMaxSizeDefault
+                Option.none with
+          | Except.ok portablePropEnv, Except.ok referencePropEnv =>
+              let proofBase : PsKernelConstantBase := {
+                name := proofName
+                levelParams := List.nil
+                type :=
+                  PsKernelExpr.const
+                    propName
+                    List.nil
+              }
+              let referenceProofBase : PSC1Kernel.ConstantBase := {
+                name := referenceProofName
+                levelParams := List.nil
+                type :=
+                  PSC1Kernel.Expr.const
+                    referencePropName
+                    List.nil
+              }
+              match
+                  psKernelAddAxiom
+                    fuel
+                    portablePropEnv
+                    {
+                      base := proofBase
+                      isUnsafe := false
+                    }
+                    0
+                    maxNatSize,
+                  PSC1Kernel.Kernel.addAxiom
+                    referencePropEnv
+                    {
+                      base := referenceProofBase
+                      isUnsafe := false
+                    }
+                    0
+                    PSC1Kernel.leanNatMaxSizeDefault
+                    Option.none with
+              | Except.ok portableProofEnv, Except.ok referenceProofEnv =>
+                  let theoremInfo : PsKernelTheoremInfo := {
+                    base := {
+                      name := theoremName
+                      levelParams := List.nil
+                      type :=
+                        PsKernelExpr.const
+                          propName
+                          List.nil
+                    }
+                    value :=
+                      PsKernelExpr.const
+                        proofName
+                        List.nil
+                  }
+                  let referenceTheoremInfo : PSC1Kernel.TheoremInfo := {
+                    base := {
+                      name := referenceTheoremName
+                      levelParams := List.nil
+                      type :=
+                        PSC1Kernel.Expr.const
+                          referencePropName
+                          List.nil
+                    }
+                    value :=
+                      PSC1Kernel.Expr.const
+                        referenceProofName
+                        List.nil
+                  }
+                  match
+                      psKernelAddTheorem
+                        fuel
+                        portableProofEnv
+                        theoremInfo
+                        0
+                        maxNatSize,
+                      PSC1Kernel.Kernel.addTheorem
+                        referenceProofEnv
+                        referenceTheoremInfo
+                        0
+                        PSC1Kernel.leanNatMaxSizeDefault
+                        Option.none with
+                  | Except.ok portableTheoremEnv, Except.ok referenceTheoremEnv =>
+                      let opaqueName :=
+                        PsKernelName.str
+                          PsKernelName.anonymous
+                          "AdmissionOpaque"
+                      let referenceOpaqueName :=
+                        psKernelNameToReference opaqueName
+                      let opaqueInfo : PsKernelOpaqueInfo := {
+                        base := {
+                          name := opaqueName
+                          levelParams := List.nil
+                          type :=
+                            PsKernelExpr.const
+                              psKernelNatName
+                              List.nil
+                        }
+                        value :=
+                          PsKernelExpr.lit
+                            (PsKernelLiteral.nat 5)
+                        isUnsafe := false
+                      }
+                      let referenceOpaqueInfo : PSC1Kernel.OpaqueInfo := {
+                        base := {
+                          name := referenceOpaqueName
+                          levelParams := List.nil
+                          type :=
+                            PSC1Kernel.Expr.const
+                              PSC1Kernel.kernelNatName
+                              List.nil
+                        }
+                        value :=
+                          PSC1Kernel.Expr.lit
+                            (PSC1Kernel.Literal.nat 5)
+                        isUnsafe := false
+                      }
+                      match
+                          psKernelAddOpaque
+                            fuel
+                            portableTheoremEnv
+                            opaqueInfo
+                            0
+                            maxNatSize,
+                          PSC1Kernel.Kernel.addOpaque
+                            referenceTheoremEnv
+                            referenceOpaqueInfo
+                            0
+                            PSC1Kernel.leanNatMaxSizeDefault
+                            Option.none with
+                      | Except.ok portableOpaqueEnv, Except.ok referenceOpaqueEnv =>
+                          let firstMutualName :=
+                            PsKernelName.str
+                              PsKernelName.anonymous
+                              "AdmissionMutualA"
+                          let secondMutualName :=
+                            PsKernelName.str
+                              PsKernelName.anonymous
+                              "AdmissionMutualB"
+                          let referenceFirstMutualName :=
+                            psKernelNameToReference firstMutualName
+                          let referenceSecondMutualName :=
+                            psKernelNameToReference secondMutualName
+                          let firstMutual : PsKernelDefinitionInfo := {
+                            base := {
+                              name := firstMutualName
+                              levelParams := List.nil
+                              type :=
+                                PsKernelExpr.const
+                                  psKernelNatName
+                                  List.nil
+                            }
+                            value :=
+                              PsKernelExpr.lit
+                                (PsKernelLiteral.nat 1)
+                            hints := PsKernelReducibilityHints.regular 0
+                            safety := PsKernelDefinitionSafety.unsafeDef
+                          }
+                          let secondMutual : PsKernelDefinitionInfo := {
+                            base := {
+                              name := secondMutualName
+                              levelParams := List.nil
+                              type :=
+                                PsKernelExpr.const
+                                  psKernelNatName
+                                  List.nil
+                            }
+                            value :=
+                              PsKernelExpr.lit
+                                (PsKernelLiteral.nat 2)
+                            hints := PsKernelReducibilityHints.regular 0
+                            safety := PsKernelDefinitionSafety.unsafeDef
+                          }
+                          let referenceFirstMutual : PSC1Kernel.DefinitionInfo := {
+                            base := {
+                              name := referenceFirstMutualName
+                              levelParams := List.nil
+                              type :=
+                                PSC1Kernel.Expr.const
+                                  PSC1Kernel.kernelNatName
+                                  List.nil
+                            }
+                            value :=
+                              PSC1Kernel.Expr.lit
+                                (PSC1Kernel.Literal.nat 1)
+                            hints := PSC1Kernel.ReducibilityHints.regular 0
+                            safety := PSC1Kernel.DefinitionSafety.unsafeDef
+                          }
+                          let referenceSecondMutual : PSC1Kernel.DefinitionInfo := {
+                            base := {
+                              name := referenceSecondMutualName
+                              levelParams := List.nil
+                              type :=
+                                PSC1Kernel.Expr.const
+                                  PSC1Kernel.kernelNatName
+                                  List.nil
+                            }
+                            value :=
+                              PSC1Kernel.Expr.lit
+                                (PSC1Kernel.Literal.nat 2)
+                            hints := PSC1Kernel.ReducibilityHints.regular 0
+                            safety := PSC1Kernel.DefinitionSafety.unsafeDef
+                          }
+                          match
+                              psKernelAddMutualDefinitions
+                                fuel
+                                portableOpaqueEnv
+                                (List.cons
+                                  firstMutual
+                                  (List.cons secondMutual List.nil))
+                                0
+                                maxNatSize,
+                              PSC1Kernel.Kernel.addMutualDefinitions
+                                referenceOpaqueEnv
+                                (List.cons
+                                  referenceFirstMutual
+                                  (List.cons referenceSecondMutual List.nil))
+                                0
+                                PSC1Kernel.leanNatMaxSizeDefault
+                                Option.none with
+                          | Except.ok portableFinal, Except.ok referenceFinal =>
+                              Bool.and
+                                duplicateParity
+                                (Bool.and
+                                  (psKernelEnvironmentContains
+                                    portableFinal
+                                    defName)
+                                  (Bool.and
+                                    (referenceFinal.contains
+                                      referenceDefName)
+                                    (Bool.and
+                                      (psKernelEnvironmentContains
+                                        portableFinal
+                                        theoremName)
+                                      (Bool.and
+                                        (referenceFinal.contains
+                                          referenceTheoremName)
+                                        (Bool.and
+                                          (psKernelEnvironmentContains
+                                            portableFinal
+                                            opaqueName)
+                                          (Bool.and
+                                            (referenceFinal.contains
+                                              referenceOpaqueName)
+                                            (Bool.and
+                                              (psKernelEnvironmentContains
+                                                portableFinal
+                                                firstMutualName)
+                                              (Bool.and
+                                                (psKernelEnvironmentContains
+                                                  portableFinal
+                                                  secondMutualName)
+                                                (Bool.and
+                                                  (referenceFinal.contains
+                                                    referenceFirstMutualName)
+                                                  (referenceFinal.contains
+                                                    referenceSecondMutualName)))))))))
+                          | _, _ =>
+                              false
+                      | _, _ =>
+                          false
+                  | _, _ =>
+                      false
+              | _, _ =>
+                  false
+          | _, _ =>
+              false
+      | _, _ =>
+          false
+  | _, _ =>
+      false
+
 def psKernelRuntimeCacheInvariantTests : Bool :=
   let nameA :=
     PsKernelName.str
@@ -2198,6 +2624,10 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_PRIMITIVE_DIFFERENTIAL: FAIL")
+  else if !psKernelAdmissionConformanceTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_ADMISSION_CONFORMANCE: FAIL")
   else if !psKernelRuntimeInvariantTests then
     throw
       (IO.userError

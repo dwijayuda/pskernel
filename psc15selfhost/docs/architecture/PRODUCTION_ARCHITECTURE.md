@@ -232,15 +232,24 @@ Filesystem, network, process execution, clock, randomness, tool discovery, signi
 
 ## 5. Runtime semantic architecture
 
-Define one target-neutral `RuntimeSemantics` contract and target-specific ABI profiles.
+The target-neutral runtime contract is now frozen as:
+
+```text
+psc-runtime-semantics/1
+SHA-256 d610e1a1936dd1b090a44a8293a68436bc9300ad5c82872e8faf4e1e6b97ae03
+```
+
+Its normative definition is `docs/architecture/contracts/RUNTIME_SEMANTICS_V1.md`.
+
+Target-specific ABI profiles remain separate contracts and are **not** frozen merely by the runtime-semantics contract:
 
 ```text
 RuntimeSemantics-v1
     |
-    +-- JsRuntimeABI-v1
-    +-- WasmRuntimeABI-v1
-    +-- LeanRuntimeABI-v1
-    +-- RustRuntimeABI-v1
+    +-- future JsRuntimeABI-v1
+    +-- future WasmRuntimeABI-v1
+    +-- future LeanRuntimeABI-v1
+    +-- future RustRuntimeABI-v1
 ```
 
 The target-neutral contract covers observable behavior for:

@@ -370,8 +370,15 @@ def psKernelSimpleNestedCompareRuleTypesWithFuel
                     safety
                     maxRecDepth
                     maxNatSize;
+                /-
+                oldRule comes from the transformed mutual bundle returned by
+                psKernelAddSimpleMutualInductive, whose recursor rules have
+                already passed full checked validation. Here we only need its
+                type as the source side of the restoration comparison; the
+                restored newRule below is still fully checked before defeq.
+                -/
                 match
-                    psKernelSessionCheck
+                    psKernelSessionInfer
                       fuel
                       oldSession
                       oldRule.rhs with

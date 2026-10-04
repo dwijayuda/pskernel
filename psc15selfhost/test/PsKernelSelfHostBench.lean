@@ -780,6 +780,165 @@ def psKernelBenchApplyLeanNatArgs
           (Lean.Expr.lit
             (Lean.Literal.natVal nextValue)))
 
+def psKernelBenchDepFamilyName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "BenchDepFamily"
+
+def psKernelBenchDepAppName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "BenchDepApply"
+
+def psKernelBenchLeanDepFamilyName : Lean.Name :=
+  Lean.Name.str
+    Lean.Name.anonymous
+    "BenchDepFamily"
+
+def psKernelBenchLeanDepAppName : Lean.Name :=
+  Lean.Name.str
+    Lean.Name.anonymous
+    "BenchDepApply"
+
+def psKernelBenchDependentResult
+    (arity : Nat) :
+    PsKernelExpr :=
+  PsKernelExpr.app
+    (PsKernelExpr.const
+      psKernelBenchDepFamilyName
+      List.nil)
+    (PsKernelExpr.bvar
+      (Nat.sub arity 1))
+
+def psKernelBenchDependentArrowType
+    (arity : Nat) :
+    PsKernelExpr :=
+  let result :=
+    psKernelBenchDependentResult arity;
+  let rec wrap
+      (remaining : Nat) :
+      PsKernelExpr :=
+    match remaining with
+    | Nat.zero =>
+        result
+    | Nat.succ rest =>
+        PsKernelExpr.forallE
+          PsKernelName.anonymous
+          psKernelBenchNatType
+          (wrap rest)
+          PsKernelBinderInfo.default;
+  wrap arity
+
+def psKernelBenchLeanDependentResult
+    (arity : Nat) :
+    Lean.Expr :=
+  Lean.Expr.app
+    (Lean.Expr.const
+      psKernelBenchLeanDepFamilyName
+      [])
+    (Lean.Expr.bvar
+      (Nat.sub arity 1))
+
+def psKernelBenchLeanDependentArrowType
+    (arity : Nat) :
+    Lean.Expr :=
+  let result :=
+    psKernelBenchLeanDependentResult arity;
+  let rec wrap
+      (remaining : Nat) :
+      Lean.Expr :=
+    match remaining with
+    | Nat.zero =>
+        result
+    | Nat.succ rest =>
+        Lean.Expr.forallE
+          Lean.Name.anonymous
+          psKernelBenchLeanNatType
+          (wrap rest)
+          Lean.BinderInfo.default;
+  wrap arity
+
+def psKernelBenchDependentApplicationEnvironment
+    (arity : Nat) :
+    PsKernelEnvironment :=
+  let familyType :=
+    PsKernelExpr.forallE
+      PsKernelName.anonymous
+      psKernelBenchNatType
+      (PsKernelExpr.sort PsKernelLevel.zero)
+      PsKernelBinderInfo.default;
+  let environment1 :=
+    psKernelEnvironmentAddUnchecked
+      psKernelBenchCheckerEnvironment
+      (PsKernelConstantInfo.axiomInfo {
+        base := {
+          name := psKernelBenchDepFamilyName
+          levelParams := List.nil
+          type := familyType
+        }
+        isUnsafe := false
+      });
+  psKernelEnvironmentAddUnchecked
+    environment1
+    (PsKernelConstantInfo.axiomInfo {
+      base := {
+        name := psKernelBenchDepAppName
+        levelParams := List.nil
+        type :=
+          psKernelBenchDependentArrowType
+            arity
+      }
+      isUnsafe := false
+    })
+
+def psKernelBenchLeanDependentApplicationEnvironment
+    (arity : Nat) :
+    IO Lean.Environment := do
+  let environment ←
+    psKernelBenchLeanEnvironment
+  let familyType :=
+    Lean.Expr.forallE
+      Lean.Name.anonymous
+      psKernelBenchLeanNatType
+      (Lean.Expr.sort Lean.Level.zero)
+      Lean.BinderInfo.default
+  let withFamily ←
+    match
+        Lean.Kernel.Environment.addDecl
+          environment.toKernelEnv
+          {}
+          (.axiomDecl {
+            name := psKernelBenchLeanDepFamilyName
+            levelParams := []
+            type := familyType
+            isUnsafe := false
+          }) with
+    | .ok next =>
+        pure next
+    | .error _ =>
+        throw
+          (IO.userError
+            "PSKERNEL_BENCH failed to create dependent family fixture")
+  match
+      Lean.Kernel.Environment.addDecl
+        withFamily
+        {}
+        (.axiomDecl {
+          name := psKernelBenchLeanDepAppName
+          levelParams := []
+          type :=
+            psKernelBenchLeanDependentArrowType
+              arity
+          isUnsafe := false
+        }) with
+  | .ok next =>
+      pure
+        (Lean.Environment.ofKernelEnv next)
+  | .error _ =>
+      throw
+        (IO.userError
+          "PSKERNEL_BENCH failed to create dependent application fixture")
+
 def psKernelBenchApplicationEnvironment
     (arity : Nat) :
     PsKernelEnvironment :=
@@ -1459,6 +1618,61 @@ def main : IO Unit := do
       toString (Prod.fst applicationWarmResult) ++
       "/" ++
       toString applicationLeanHits)
+
+  let dependentEnvironment :=
+    psKernelBenchDependentApplicationEnvironment
+      applicationArity
+  let dependentExpr :=
+    psKernelBenchApplyNatArgs
+      applicationArity
+      1
+      (PsKernelExpr.const
+        psKernelBenchDepAppName
+        List.nil)
+  let leanDependentEnvironment ←
+    psKernelBenchLeanDependentApplicationEnvironment
+      applicationArity
+  let leanDependentExpr :=
+    psKernelBenchApplyLeanNatArgs
+      applicationArity
+      1
+      (Lean.Expr.const
+        psKernelBenchLeanDepAppName
+        [])
+
+  let dependentPsStart ← IO.monoNanosNow
+  let dependentPsHits ←
+    psKernelBenchCheckColdLoop
+      checkerIterations
+      dependentEnvironment
+      dependentExpr
+  let dependentPsStop ← IO.monoNanosNow
+
+  let dependentLeanStart ← IO.monoNanosNow
+  let dependentLeanHits ←
+    psKernelBenchLeanCheckLoop
+      checkerIterations
+      leanDependentEnvironment
+      leanDependentExpr
+  let dependentLeanStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH dependent_application_check_pskernel_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          dependentPsStart
+          dependentPsStop) ++
+      " dependent_application_check_lean_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          dependentLeanStart
+          dependentLeanStop) ++
+      " arity=" ++
+      toString applicationArity ++
+      " hits=" ++
+      toString dependentPsHits ++
+      "/" ++
+      toString dependentLeanHits)
 
   IO.println
     ("PSKERNEL_BENCH structural_defeq_pskernel_ns=" ++

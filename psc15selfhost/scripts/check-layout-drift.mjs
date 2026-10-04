@@ -43,7 +43,9 @@ const expected = new Map([
   ["Compiler", "compiler"],
   ["Erasure", "erasure"],
   ["BackendTs", "backend-ts"],
+  ["DriverTs", "driver-ts"],
   ["BackendRust", "backend-rust"],
+  ["DriverRust", "driver-rust"],
   ["BackendWasm", "backend-wasm"],
 ]);
 

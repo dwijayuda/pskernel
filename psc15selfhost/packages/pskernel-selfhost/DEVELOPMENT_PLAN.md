@@ -99,9 +99,10 @@ Do not use giant external replay as the primary completion criterion.
 - PSC1 check green;
 - Lean build green;
 - differential/conformance green;
-- canonical `.ps` round-trip green;
-- fixed point green;
-- generated runtime smoke green.
+- canonical `.ps` round-trip green.
+
+Generated compiler/kernel fixed-point proof is optional/manual and is not a
+Phase A blocker.
 
 ## Phase B — Explainability and readability
 
@@ -277,14 +278,17 @@ JS target:
 - measured performance regression tests exist;
 - environment/cache improvements show real workload gains;
 - native performance is competitive enough for intended deployment;
-- JS remains portable and self-host generated.
+- JS remains portable through the PSC/backend-ts path.
 
-## Continuous self-host gate
+## Continuous portable-source self-host gate
 
 Every phase must preserve:
 
 ```text
 portable .lean source
+      |
+      v
+portable-source profile
       |
       v
 psc1 check
@@ -296,22 +300,12 @@ canonical .ps
 psc1 check again
       |
       v
-generated compiler
-      |
-      v
-kernel TS/JS
-      |
-      v
-source fixed point
-      |
-      v
-artifact fixed point
-      |
-      v
-runtime smoke
+Lean build + differential/conformance
 ```
 
-If a refactor makes this harder, the refactor is suspect.
+The expensive generated compiler/kernel fixed-point workflow is manual-only.
+Use it for explicit bootstrap/release checkpoints, not as a normal
+readability/performance gate.
 
 ## Milestone definitions
 
@@ -342,7 +336,8 @@ Not required for M1–M3, but needed before replacing the current authority:
 - canonical declaration adapter exists;
 - dual-check mode exists;
 - provider parity gate is green;
-- generated self-host kernel remains fixed-point reproducible.
+- generated self-host kernel can be manually reproduced when a release
+  checkpoint requires it.
 
 Until M4 is explicitly accepted, `lean434-wasm` remains the default authority.
 

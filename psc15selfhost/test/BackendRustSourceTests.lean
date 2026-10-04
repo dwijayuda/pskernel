@@ -1,4 +1,4 @@
-import Ps.BackendRust.Compiler
+import Ps.DriverRust.Compiler
 
 def psBackendRustScalarLeanSource : String :=
   "def idUInt8 (x : UInt8) : UInt8 := x\n" ++

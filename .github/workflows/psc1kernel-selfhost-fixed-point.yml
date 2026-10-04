@@ -22,6 +22,8 @@ on:
       - psc15selfhost/scripts/psc1kernel-selfhost-generation.mjs
       - psc15selfhost/scripts/psc1kernel-selfhost-resume.mjs
       - psc15selfhost/scripts/psc1kernel-generated-smoke.mjs
+      - psc15selfhost/scripts/selfhost-replay-runtime.test.mjs
+      - psc15selfhost/scripts/typescript-cli.mjs
       - psc15selfhost/scripts/bootstrap-project.mjs
       - psc15selfhost/scripts/compile-with-generated.mjs
       - psc15selfhost/scripts/reemit-project-with-generated.mjs

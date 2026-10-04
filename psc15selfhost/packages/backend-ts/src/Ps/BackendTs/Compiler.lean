@@ -12,7 +12,7 @@ def psCompilerTypeScriptFromPrepared
   | Except.error error =>
       Except.error (PsCompilerTypeScriptError.compiler error)
   | Except.ok ir =>
-      match psTsEmitModule ir with
+      match psTsEmitValidatedModule ir with
       | Except.error error =>
           Except.error (PsCompilerTypeScriptError.emit error)
       | Except.ok output =>

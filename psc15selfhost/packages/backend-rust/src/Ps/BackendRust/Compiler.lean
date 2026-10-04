@@ -12,7 +12,7 @@ def psCompilerRustFromPrepared
   | Except.error error =>
       Except.error (PsCompilerRustError.compiler error)
   | Except.ok ir =>
-      match psRustEmitModule ir with
+      match psRustEmitValidatedModule ir with
       | Except.error error =>
           Except.error (PsCompilerRustError.emit error)
       | Except.ok output =>

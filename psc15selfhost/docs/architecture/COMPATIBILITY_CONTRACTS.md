@@ -20,7 +20,7 @@ The production system should eventually identify at least these contracts:
 | KernelContract | admission/checking rules/provider protocol; current frozen identity `proofscript-kernel-contract/1` | extremely slow |
 | CheckedCore | checked artifact schema/capability | very slow |
 | ErasedIR | construction/runtime lowering IR | moderate |
-| VerifiedIR | validated target-neutral executable contract | slow |
+| VerifiedIR | validated target-neutral executable contract; current initial contract `psc-verified-ir/1` | slow |
 | RuntimeSemantics | portable observable runtime behavior | slow |
 | TargetRuntimeABI | per-target representation/calling convention | moderate |
 | ModuleInterface | separate compilation/link contract | slow |

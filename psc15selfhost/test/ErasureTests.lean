@@ -310,6 +310,67 @@ def psTestDualSourceLeanNativePartialDefinition : Bool :=
           "export function loop(n: bigint): bigint { while (true) { [n] = [n]; continue; } }"
   | _, _ => false
 
+
+
+def psTestVerifiedIrValidationAcceptsResolved : Bool :=
+  let raw :=
+    PsVerifiedIrModule.mk
+      []
+      []
+      []
+      [
+        PsVerifiedIrDeclaration.mk
+          "answer"
+          []
+          []
+          (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+          (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 42))
+      ]
+  match psValidateErasedIrModule (PsErasedIrModule.mk raw) with
+  | Except.error _ => false
+  | Except.ok validated =>
+      validated.raw.declarations.length == 1
+
+def psTestVerifiedIrValidationRejectsUnknownResult : Bool :=
+  let raw :=
+    PsVerifiedIrModule.mk
+      []
+      []
+      []
+      [
+        PsVerifiedIrDeclaration.mk
+          "bad"
+          []
+          []
+          PsVerifiedIrType.unknown
+          (PsVerifiedIrExpr.literal PsVerifiedIrLiteral.unit)
+      ]
+  match psValidateErasedIrModule (PsErasedIrModule.mk raw) with
+  | Except.error PsVerifiedIrValidationError.unresolvedRuntimeType => true
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsNestedUnknown : Bool :=
+  let raw :=
+    PsVerifiedIrModule.mk
+      []
+      [
+        PsVerifiedIrStructure.mk
+          "Box"
+          []
+          [
+            PsVerifiedIrStructureField.mk
+              "value"
+              (PsVerifiedIrType.function
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                PsVerifiedIrType.unknown)
+          ]
+      ]
+      []
+      []
+  match psValidateErasedIrModule (PsErasedIrModule.mk raw) with
+  | Except.error PsVerifiedIrValidationError.unresolvedRuntimeType => true
+  | _ => false
+
 structure PsErasureNamedTest where
   name : String
   passed : Bool
@@ -330,7 +391,10 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native partial application", passed := psTestDualSourceLeanNativePartialApplication },
   { name := "dual-source Lean-native text primitives", passed := psTestDualSourceLeanNativeTextPrimitives },
   { name := "dual-source Lean-native String raw-position bridge", passed := psTestDualSourceLeanNativeStringRawPositionBridge },
-  { name := "dual-source Lean-native controlled partial def", passed := psTestDualSourceLeanNativePartialDefinition }
+  { name := "dual-source Lean-native controlled partial def", passed := psTestDualSourceLeanNativePartialDefinition },
+  { name := "VerifiedIR accepts resolved construction IR", passed := psTestVerifiedIrValidationAcceptsResolved },
+  { name := "VerifiedIR rejects unknown result type", passed := psTestVerifiedIrValidationRejectsUnknownResult },
+  { name := "VerifiedIR rejects nested unknown runtime type", passed := psTestVerifiedIrValidationRejectsNestedUnknown }
 ]
 
 def psRunErasureTests : List PsErasureNamedTest -> IO Bool

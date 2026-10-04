@@ -40,7 +40,31 @@ assertHas(
   "packages/compiler/src/Ps/Compiler/Api.lean",
   "import Ps.Erasure.Definition\ndef psCompilerVerifiedIrFromPrepared := psEraseCoreModule env declarations\n",
   "PSC2_SEMANTIC_BOUNDARY_ERASURE_WITHOUT_ADMISSION_VALIDATION",
-  "compiler erased without validating the prepared admissions",
+  "compiler erased without validating prepared admissions",
+);
+
+assertHas(
+  "packages/compiler/src/Ps/Compiler/Api.lean",
+  [
+    "import Ps.Erasure.Definition",
+    "def psCompilerValidatePrepared := true",
+    "def psCompilerVerifiedIrFromPrepared :=",
+    "  psEraseCoreModule env declarations",
+  ].join("\n"),
+  "PSC2_SEMANTIC_BOUNDARY_ERASURE_WITHOUT_ERASED_IR_BOUNDARY",
+  "compiler skipped explicit ErasedIR boundary",
+);
+
+assertHas(
+  "packages/compiler/src/Ps/Compiler/Api.lean",
+  [
+    "import Ps.Erasure.Definition",
+    "def psCompilerValidatePrepared := true",
+    "def psCompilerErasedIrFromPrepared := psEraseCoreModule env declarations",
+    "def psCompilerVerifiedIrFromPrepared := psCompilerErasedIrFromPrepared prepared",
+  ].join("\n"),
+  "PSC2_SEMANTIC_BOUNDARY_ERASURE_WITHOUT_IR_VALIDATION",
+  "compiler returned construction IR without validation",
 );
 
 assertSemanticBoundary(
@@ -48,9 +72,24 @@ assertSemanticBoundary(
   [
     "import Ps.Erasure.Definition",
     "def psCompilerValidatePrepared := true",
-    "def psCompilerVerifiedIrFromPrepared :=",
+    "def psCompilerErasedIrFromPrepared :=",
     "  if psCompilerValidatePrepared then psEraseCoreModule env declarations else error",
+    "def psValidateErasedIrModule := true",
+    "def psCompilerVerifiedIrFromPrepared :=",
+    "  psValidateErasedIrModule (psCompilerErasedIrFromPrepared prepared)",
   ].join("\n"),
+);
+
+assertHas(
+  "packages/backend-rust/src/Ps/BackendRust/Compiler.lean",
+  [
+    "import Ps.Compiler.Api",
+    "def emit prepared :=",
+    "  match psCompilerVerifiedIrFromPrepared prepared with",
+    "  | Except.ok ir => psRustEmitModule ir.raw",
+  ].join("\n"),
+  "PSC2_SEMANTIC_BOUNDARY_BACKEND_BYPASSES_VALIDATED_IR",
+  "backend adapter bypassed validated emitter",
 );
 
 assertSemanticBoundary(
@@ -59,7 +98,7 @@ assertSemanticBoundary(
     "import Ps.Compiler.Api",
     "def emit prepared :=",
     "  match psCompilerVerifiedIrFromPrepared prepared with",
-    "  | Except.ok ir => psRustEmitModule ir",
+    "  | Except.ok ir => psRustEmitValidatedModule ir",
   ].join("\n"),
 );
 

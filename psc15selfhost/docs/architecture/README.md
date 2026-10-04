@@ -83,6 +83,7 @@ compiler service / LSP
 - [Implementation Roadmap](IMPLEMENTATION_ROADMAP.md) — staged migration from the current architecture to the production shape without destabilizing the proven fixed point.
 - [Design References](DESIGN_REFERENCES.md) — external compiler/build/security research and the specific ideas PSC should borrow.
 - [KernelContract-v1](contracts/KERNEL_CONTRACT_V1.md) — frozen provider-neutral checked-session request/decision/capability contract.
+- [VerifiedIR validation v1](contracts/VERIFIED_IR_V1.md) — implemented ErasedIR → validated IR boundary and its current fail-closed runtime-type invariant.
 - [Architecture Decision Records](adr/README.md) — concise anti-drift decisions that future implementation work should preserve unless explicitly superseded.
 
 ## What these documents deliberately do not do
@@ -93,7 +94,7 @@ They do not:
 - make JavaScript, TypeScript, Rust, WIT, WASI, npm, or Lean semantics part of Core;
 - move async, FFI, plugin permissions, package metadata, or release signing into the kernel;
 - call `AdmissionReadyModule` a checked artifact before a real kernel provider admits it;
-- call the current `PsVerifiedIrModule` fully verified while unresolved executable types can still survive as `unknown`;
+- treat a raw `PsVerifiedIrModule` construction value as validated merely because of its historical type name; production code must pass through `PsErasedIrModule -> psValidateErasedIrModule -> PsValidatedIrModule`;
 - require every optimizer implementation to be formally proved when a smaller verified validator can establish the required refinement;
 - replace existing fixed-point and regression evidence with documentation.
 

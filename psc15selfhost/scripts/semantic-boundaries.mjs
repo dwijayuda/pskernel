@@ -36,8 +36,20 @@ export function semanticBoundaryViolations(relativePath, source) {
     if (!/\bpsCompilerValidatePrepared\b/u.test(source)) {
       violations.push("PSC2_SEMANTIC_BOUNDARY_ERASURE_WITHOUT_ADMISSION_VALIDATION");
     }
+    if (!/\bpsCompilerErasedIrFromPrepared\b/u.test(source)) {
+      violations.push("PSC2_SEMANTIC_BOUNDARY_ERASURE_WITHOUT_ERASED_IR_BOUNDARY");
+    }
+    if (!/\bpsValidateErasedIrModule\b/u.test(source)) {
+      violations.push("PSC2_SEMANTIC_BOUNDARY_ERASURE_WITHOUT_IR_VALIDATION");
+    }
     if (!/\bpsCompilerVerifiedIrFromPrepared\b/u.test(source)) {
       violations.push("PSC2_SEMANTIC_BOUNDARY_ERASURE_OUTSIDE_VERIFIED_IR_OWNER");
+    }
+  }
+
+  if (isBackend && /\bpsCompilerVerifiedIrFromPrepared\b/u.test(source)) {
+    if (!/\bps(?:Ts|Rust|Wasm|Js)EmitValidatedModule\b/u.test(source)) {
+      violations.push("PSC2_SEMANTIC_BOUNDARY_BACKEND_BYPASSES_VALIDATED_IR");
     }
   }
 

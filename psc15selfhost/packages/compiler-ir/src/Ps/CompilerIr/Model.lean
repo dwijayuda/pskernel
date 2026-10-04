@@ -252,3 +252,269 @@ def psVerifiedIrModuleEmpty : PsVerifiedIrModule :=
     inductives := []
     declarations := []
   }
+
+
+/- Transitional construction/validation boundary.
+
+The existing PsVerifiedIr* node names predate the explicit validator. Treat raw
+PsVerifiedIrModule values as construction IR until wrapped in PsErasedIrModule and
+accepted by psValidateErasedIrModule. Backends on the production compiler path
+consume PsValidatedIrModule. A future schema cleanup may rename the raw node family
+without changing this authority boundary. -/
+structure PsErasedIrModule where
+  raw : PsVerifiedIrModule
+
+structure PsValidatedIrModule where
+  raw : PsVerifiedIrModule
+
+inductive PsVerifiedIrValidationError where
+  | unresolvedRuntimeType
+
+def psVerifiedIrListAll {Value : Type}
+    (check : Value -> Bool)
+    (values : List Value) : Bool :=
+  match values with
+  | List.nil => true
+  | List.cons value rest =>
+      if check value then
+        psVerifiedIrListAll check rest
+      else
+        false
+
+def psVerifiedIrTypeResolvedWithFuel
+    (fuel : Nat) :
+    PsVerifiedIrType -> Bool :=
+  match fuel with
+  | Nat.zero =>
+      fun (_type : PsVerifiedIrType) => false
+  | Nat.succ remaining =>
+      let smaller : PsVerifiedIrType -> Bool :=
+        psVerifiedIrTypeResolvedWithFuel remaining;
+      fun (type : PsVerifiedIrType) =>
+        match type with
+        | PsVerifiedIrType.unknown =>
+            false
+        | PsVerifiedIrType.typeParameter _ =>
+            true
+        | PsVerifiedIrType.primitive _ =>
+            true
+        | PsVerifiedIrType.function parameters result =>
+            if psVerifiedIrListAll smaller parameters then
+              smaller result
+            else
+              false
+        | PsVerifiedIrType.named _ arguments =>
+            psVerifiedIrListAll smaller arguments
+
+def psVerifiedIrTypeResolved
+    (type : PsVerifiedIrType) : Bool :=
+  psVerifiedIrTypeResolvedWithFuel 4096 type
+
+def psVerifiedIrParameterResolved
+    (parameter : PsVerifiedIrParameter) : Bool :=
+  psVerifiedIrTypeResolved parameter.type
+
+def psVerifiedIrMatchBindingResolved
+    (binding : PsVerifiedIrMatchBinding) : Bool :=
+  psVerifiedIrTypeResolved binding.type
+
+def psVerifiedIrParameterResolvedWith
+    (typeResolved : PsVerifiedIrType -> Bool)
+    (parameter : PsVerifiedIrParameter) : Bool :=
+  typeResolved parameter.type
+
+def psVerifiedIrMatchBindingResolvedWith
+    (typeResolved : PsVerifiedIrType -> Bool)
+    (binding : PsVerifiedIrMatchBinding) : Bool :=
+  typeResolved binding.type
+
+def psVerifiedIrExprFieldResolvedWith
+    (exprResolved : PsVerifiedIrExpr -> Bool)
+    (field : String × PsVerifiedIrExpr) : Bool :=
+  match field with
+  | Prod.mk _ value =>
+      exprResolved value
+
+def psVerifiedIrAlternativeResolvedWith
+    (typeResolved : PsVerifiedIrType -> Bool)
+    (exprResolved : PsVerifiedIrExpr -> Bool)
+    (alternative :
+      String ×
+        List PsVerifiedIrMatchBinding ×
+        PsVerifiedIrExpr) : Bool :=
+  match alternative with
+  | Prod.mk _ payload =>
+      match payload with
+      | Prod.mk bindings body =>
+          if
+              psVerifiedIrListAll
+                (psVerifiedIrMatchBindingResolvedWith typeResolved)
+                bindings then
+            exprResolved body
+          else
+            false
+
+def psVerifiedIrStructureFieldResolved
+    (field : PsVerifiedIrStructureField) : Bool :=
+  psVerifiedIrTypeResolved field.type
+
+def psVerifiedIrConstructorFieldResolved
+    (field : PsVerifiedIrConstructorField) : Bool :=
+  psVerifiedIrTypeResolved field.type
+
+def psVerifiedIrExprResolvedWithFuel
+    (fuel : Nat) :
+    PsVerifiedIrExpr -> Bool :=
+  match fuel with
+  | Nat.zero =>
+      fun (_expr : PsVerifiedIrExpr) => false
+  | Nat.succ remaining =>
+      let smaller : PsVerifiedIrExpr -> Bool :=
+        psVerifiedIrExprResolvedWithFuel remaining;
+      let typeResolved : PsVerifiedIrType -> Bool :=
+        psVerifiedIrTypeResolvedWithFuel remaining;
+      fun (expr : PsVerifiedIrExpr) =>
+        match expr with
+        | PsVerifiedIrExpr.literal _ =>
+            true
+        | PsVerifiedIrExpr.var _ =>
+            true
+        | PsVerifiedIrExpr.intrinsic _ typeArguments arguments =>
+            if psVerifiedIrListAll typeResolved typeArguments then
+              psVerifiedIrListAll smaller arguments
+            else
+              false
+        | PsVerifiedIrExpr.lambda parameters resultType body =>
+            if
+                psVerifiedIrListAll
+                  (psVerifiedIrParameterResolvedWith typeResolved)
+                  parameters then
+              if typeResolved resultType then
+                smaller body
+              else
+                false
+            else
+              false
+        | PsVerifiedIrExpr.call fn typeArguments arguments =>
+            if smaller fn then
+              if psVerifiedIrListAll typeResolved typeArguments then
+                psVerifiedIrListAll smaller arguments
+              else
+                false
+            else
+              false
+        | PsVerifiedIrExpr.letE _ type value body =>
+            if typeResolved type then
+              if smaller value then
+                smaller body
+              else
+                false
+            else
+              false
+        | PsVerifiedIrExpr.ifE condition thenBranch elseBranch =>
+            if smaller condition then
+              if smaller thenBranch then
+                smaller elseBranch
+              else
+                false
+            else
+              false
+        | PsVerifiedIrExpr.record _ typeArguments fields =>
+            if psVerifiedIrListAll typeResolved typeArguments then
+              psVerifiedIrListAll
+                (psVerifiedIrExprFieldResolvedWith smaller)
+                fields
+            else
+              false
+        | PsVerifiedIrExpr.projection _ typeArguments target _ =>
+            if psVerifiedIrListAll typeResolved typeArguments then
+              smaller target
+            else
+              false
+        | PsVerifiedIrExpr.constructor _ _ typeArguments fields =>
+            if psVerifiedIrListAll typeResolved typeArguments then
+              psVerifiedIrListAll
+                (psVerifiedIrExprFieldResolvedWith smaller)
+                fields
+            else
+              false
+        | PsVerifiedIrExpr.matchE _ typeArguments scrutinee alternatives =>
+            if psVerifiedIrListAll typeResolved typeArguments then
+              if smaller scrutinee then
+                psVerifiedIrListAll
+                  (psVerifiedIrAlternativeResolvedWith
+                    typeResolved
+                    smaller)
+                  alternatives
+              else
+                false
+            else
+              false
+
+def psVerifiedIrExprResolved
+    (expr : PsVerifiedIrExpr) : Bool :=
+  psVerifiedIrExprResolvedWithFuel 4096 expr
+
+def psVerifiedIrStructureResolved
+    (structureInfo : PsVerifiedIrStructure) : Bool :=
+  psVerifiedIrListAll
+    psVerifiedIrStructureFieldResolved
+    structureInfo.fields
+
+def psVerifiedIrConstructorResolved
+    (constructorInfo : PsVerifiedIrConstructor) : Bool :=
+  psVerifiedIrListAll
+    psVerifiedIrConstructorFieldResolved
+    constructorInfo.fields
+
+def psVerifiedIrInductiveResolved
+    (inductiveInfo : PsVerifiedIrInductive) : Bool :=
+  psVerifiedIrListAll
+    psVerifiedIrConstructorResolved
+    inductiveInfo.constructors
+
+def psVerifiedIrDeclarationResolved
+    (declaration : PsVerifiedIrDeclaration) : Bool :=
+  if
+      psVerifiedIrListAll
+        psVerifiedIrParameterResolved
+        declaration.parameters then
+    if psVerifiedIrTypeResolved declaration.resultType then
+      psVerifiedIrExprResolved declaration.body
+    else
+      false
+  else
+    false
+
+def psVerifiedIrImportResolved
+    (importInfo : PsVerifiedIrExternalImport) : Bool :=
+  psVerifiedIrTypeResolved importInfo.type
+
+def psVerifiedIrModuleResolved
+    (module : PsVerifiedIrModule) : Bool :=
+  if psVerifiedIrListAll psVerifiedIrImportResolved module.imports then
+    if
+        psVerifiedIrListAll
+          psVerifiedIrStructureResolved
+          module.structures then
+      if
+          psVerifiedIrListAll
+            psVerifiedIrInductiveResolved
+            module.inductives then
+        psVerifiedIrListAll
+          psVerifiedIrDeclarationResolved
+          module.declarations
+      else
+        false
+    else
+      false
+  else
+    false
+
+def psValidateErasedIrModule
+    (erased : PsErasedIrModule) :
+    Except PsVerifiedIrValidationError PsValidatedIrModule :=
+  if psVerifiedIrModuleResolved erased.raw then
+    Except.ok (PsValidatedIrModule.mk erased.raw)
+  else
+    Except.error PsVerifiedIrValidationError.unresolvedRuntimeType

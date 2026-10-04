@@ -1154,3 +1154,8 @@ def psRustEmitModule
                           (psRustConcat2
                             (psRustJoin "\n" sections)
                             "\n")
+
+def psRustEmitValidatedModule
+    (module : PsValidatedIrModule) :
+    Except PsRustEmitError String :=
+  psRustEmitModule module.raw

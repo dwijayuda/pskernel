@@ -64,7 +64,10 @@ pairs instead of an equivalence closure.
 
 ## 3. Recommended reading order
 
-### Core syntax and substitution
+The recommended path follows the kernel dependency/theory flow rather than
+historical file creation order.
+
+### 3.1 Core syntax and substitution
 
 1. `Name.lean`
 2. `Level.lean`
@@ -76,7 +79,7 @@ pairs instead of an equivalence closure.
 
 These modules define the data manipulated by the checker.
 
-### Type checking and reduction
+### 3.2 Type checking and reduction
 
 8. `TypeCheckerBase.lean`
 9. `Theory/Reduction/PrimitiveData.lean`
@@ -85,66 +88,82 @@ These modules define the data manipulated by the checker.
 12. `Theory/Reduction/KernelReductions.lean`
 13. `Theory/Reduction/WhnfCore.lean`
 14. `TypeCheckerWhnf.lean`
-13. `TypeCheckerProjection.lean`
-14. `Theory/Inference/Helpers.lean`
-15. `Theory/Inference/Core.lean`
-16. `TypeCheckerInfer.lean`
-17. `Theory/Recursor/Analysis.lean`
-18. `Theory/Recursor/Reduction.lean`
-19. `TypeCheckerRecursor.lean`
+15. `TypeCheckerProjection.lean`
+16. `Theory/Inference/Helpers.lean`
+17. `Theory/Inference/Core.lean`
+18. `TypeCheckerInfer.lean`
+19. `Theory/Recursor/Analysis.lean`
+20. `Theory/Recursor/Reduction.lean`
+21. `TypeCheckerRecursor.lean`
 
-### Definitional equality
+### 3.3 Definitional equality
 
-16. `Theory/DefEq/BinderSpines.lean`
-17. `Theory/DefEq/Quick.lean`
-18. `TypeCheckerDefEqSupport.lean` (compatibility umbrella)
-19. `Theory/DefEq/LazyDelta.lean`
-20. `Theory/DefEq/FinalRules.lean`
-21. `Theory/DefEq/Shortcuts.lean`
-22. `Theory/DefEq/FullShape.lean`
-23. `TypeCheckerDefEq.lean`
+22. `Theory/DefEq/BinderSpines.lean`
+23. `Theory/DefEq/Quick.lean`
+24. `TypeCheckerDefEqSupport.lean` (compatibility umbrella)
+25. `Theory/DefEq/DeltaStep.lean`
+26. `Theory/DefEq/LazyDelta.lean`
+27. `Theory/DefEq/FinalRules.lean`
+28. `Theory/DefEq/Shortcuts.lean`
+29. `Theory/DefEq/FullShape.lean`
+30. `TypeCheckerDefEq.lean`
 
 `Theory/DefEq/BinderSpines.lean` isolates binder/application congruence.
-`Theory/DefEq/Quick.lean` isolates the cheap pre-reduction decisions and pair-cache semantics.
-`Theory/DefEq/DeltaStep.lean` isolates one-step definition selection and unfolding. `Theory/DefEq/LazyDelta.lean` isolates Lean's observable iterative lazy-unfolding order.
-`Theory/DefEq/FinalRules.lean` isolates proof/proposition handling, structure eta,
-string literal expansion, and unit-like structures.
-`Theory/DefEq/Shortcuts.lean` contains reflection, projection, and function-eta shortcuts.
-`Theory/DefEq/FullShape.lean` contains the last same-shape and terminal fallback rules.
-`TypeCheckerDefEq.lean` is intentionally kept small so it reads as the observable
-Lean 4.34 algorithmic-equality order rather than a bag of helper implementations.
+`Theory/DefEq/Quick.lean` isolates cheap pre-reduction decisions and pair-cache
+semantics. `Theory/DefEq/DeltaStep.lean` isolates one-step definition
+selection/unfolding, while `LazyDelta.lean` preserves the observable iterative
+Lean 4.34 unfolding order. `FinalRules.lean` isolates proof/proposition
+handling, structure eta, string literal expansion and unit-like structures.
+`Shortcuts.lean` contains reflection, projection and function-eta shortcuts.
+`FullShape.lean` contains final same-shape/fallback rules.
 
-### Declaration admission
+`TypeCheckerDefEq.lean` stays intentionally small so it reads as the
+observable algorithmic-equality order rather than a collection of helpers.
 
-22. `CheckerSession.lean`
-23. `Theory/Admission/Validation.lean`
-24. `Theory/Admission/Declarations.lean`
-25. `Kernel.lean` (compatibility umbrella)
-26. `Theory/Quot/Bootstrap.lean`
-27. `Theory/Quot/Admission.lean`
-28. `Quot.lean` (compatibility umbrella)
-29. `Inductive.lean`
-28. `Theory/Inductive/Constructor.lean`
-29. `Theory/Inductive/Recursor.lean`
-30. `Theory/Inductive/Elimination.lean`
-31. `InductiveAdmission.lean`
-32. `Theory/Mutual/Analysis.lean`
-33. `Theory/Mutual/Recursor.lean`
-34. `Theory/Mutual/Admission.lean`
-35. `MutualInductive.lean` (compatibility umbrella)
-36. `Theory/Nested/Discover.lean`
-37. `Theory/Nested/Flatten.lean`
-38. `Theory/Nested/Restore.lean`
-39. `Theory/Nested/Admission.lean`
-40. `NestedInductive.lean` (compatibility umbrella)
+### 3.4 Declaration and inductive admission
 
-### Backend/runtime mechanisms
+31. `CheckerSession.lean`
+32. `Theory/Admission/Validation.lean`
+33. `Theory/Admission/Declarations.lean`
+34. `Kernel.lean` (compatibility umbrella)
+35. `Theory/Quot/Bootstrap.lean`
+36. `Theory/Quot/Admission.lean`
+37. `Quot.lean` (compatibility umbrella)
+38. `Inductive.lean`
+39. `Theory/Inductive/Constructor.lean`
+40. `Theory/Inductive/ConstructorAdmission.lean`
+41. `Theory/Inductive/Recursor.lean`
+42. `Theory/Inductive/Elimination.lean`
+43. `InductiveAdmission.lean`
+44. `Theory/Mutual/Analysis.lean`
+45. `Theory/Mutual/Recursor.lean`
+46. `Theory/Mutual/Header.lean`
+47. `Theory/Mutual/AdmissionLoops.lean`
+48. `Theory/Mutual/Admission.lean`
+49. `MutualInductive.lean` (compatibility umbrella)
+50. `Theory/Nested/Types.lean`
+51. `Theory/Nested/ReservedNames.lean`
+52. `Theory/Nested/Rebase.lean`
+53. `Theory/Nested/Discover.lean`
+54. `Theory/Nested/Flatten.lean`
+55. `Theory/Nested/RestoreExpr.lean`
+56. `Theory/Nested/Restore.lean`
+57. `Theory/Nested/Validation.lean`
+58. `Theory/Nested/Commit.lean`
+59. `Theory/Nested/Admission.lean`
+60. `NestedInductive.lean` (compatibility umbrella)
+
+### 3.5 Runtime mechanisms
+
+Read these after the theory modules if the goal is to understand performance
+rather than semantics:
 
 - `Runtime/Cache.lean`
 - `Runtime/EnvironmentIndex.lean`
 - `Runtime/NativeReduction.lean`
 
-These modules are deliberately separated from the theory-facing algorithm.
+Runtime modules are deliberately separated from the theory-facing algorithm.
+
 
 ## 4. Universe levels
 

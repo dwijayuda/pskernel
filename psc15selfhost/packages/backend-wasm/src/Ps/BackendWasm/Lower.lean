@@ -1392,6 +1392,7 @@ def psWasmMatchBindingNames :
   | binding :: rest =>
       List.cons binding.name (psWasmMatchBindingNames rest)
 
+
 def psWasmCollectCapturesWithFuel
     (outerBindings : List PsWasmBinding)
     (boundNames : List String) :
@@ -1401,16 +1402,35 @@ def psWasmCollectCapturesWithFuel
     List PsWasmBinding
   | 0, _, captures => captures
   | fuel + 1, expr, captures =>
-      let collect :=
+      let collect :
+          PsVerifiedIrExpr ->
+          List PsWasmBinding ->
+          List PsWasmBinding :=
         fun
-        (nested : PsVerifiedIrExpr)
-        (state : List PsWasmBinding) =>
+          (nested : PsVerifiedIrExpr)
+          (state : List PsWasmBinding) =>
           psWasmCollectCapturesWithFuel
             outerBindings
             boundNames
             fuel
             nested
-            state
+            state;
+      let collectArgument :
+          List PsWasmBinding ->
+          PsVerifiedIrExpr ->
+          List PsWasmBinding :=
+        fun
+          (state : List PsWasmBinding)
+          (argument : PsVerifiedIrExpr) =>
+          collect argument state;
+      let collectField :
+          List PsWasmBinding ->
+          (String × PsVerifiedIrExpr) ->
+          List PsWasmBinding :=
+        fun
+          (state : List PsWasmBinding)
+          (field : String × PsVerifiedIrExpr) =>
+          collect (Prod.snd field) state;
       match expr with
       | .literal _ => captures
       | .var name =>
@@ -1419,30 +1439,28 @@ def psWasmCollectCapturesWithFuel
             boundNames
             captures
             name
-      | .intrinsic _ typeArguments arguments =>
-          arguments.foldl
-            (fun
-            (state : List PsWasmBinding)
-            (argument : PsVerifiedIrExpr) =>
-              collect argument state)
+      | .intrinsic _ _ arguments =>
+          psWasmListFoldl
+            collectArgument
+            arguments
             captures
       | .lambda parameters _ body =>
           psWasmCollectCapturesWithFuel
             outerBindings
-            (psWasmParameterNames parameters ++ boundNames)
+            (psListAppend
+              (psWasmParameterNames parameters)
+              boundNames)
             fuel
             body
             captures
       | .call fn _ arguments =>
-          let withFn := collect fn captures
-          arguments.foldl
-            (fun
-            (state : List PsWasmBinding)
-            (argument : PsVerifiedIrExpr) =>
-              collect argument state)
+          let withFn := collect fn captures;
+          psWasmListFoldl
+            collectArgument
+            arguments
             withFn
       | .letE name _ value body =>
-          let withValue := collect value captures
+          let withValue := collect value captures;
           psWasmCollectCapturesWithFuel
             outerBindings
             (List.cons name boundNames)
@@ -1450,41 +1468,52 @@ def psWasmCollectCapturesWithFuel
             body
             withValue
       | .ifE condition thenBranch elseBranch =>
-          let withCondition := collect condition captures
-          let withThen := collect thenBranch withCondition
+          let withCondition := collect condition captures;
+          let withThen := collect thenBranch withCondition;
           collect elseBranch withThen
       | .record _ _ fields =>
-          fields.foldl
-            (fun
-            (state : List PsWasmBinding)
-            (field : String × PsVerifiedIrExpr) =>
-              collect (Prod.snd field) state)
+          psWasmListFoldl
+            collectField
+            fields
             captures
       | .projection _ _ target _ =>
           collect target captures
       | .constructor _ _ _ fields =>
-          fields.foldl
-            (fun
-            (state : List PsWasmBinding)
-            (field : String × PsVerifiedIrExpr) =>
-              collect (Prod.snd field) state)
+          psWasmListFoldl
+            collectField
+            fields
             captures
       | .matchE _ _ scrutinee alternatives =>
-          let withScrutinee := collect scrutinee captures
-          alternatives.foldl
-            (fun
-            (state : List PsWasmBinding)
-            (alternative :
-              String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
-              let matchBindings := (Prod.fst (Prod.snd alternative))
-              let body := (Prod.snd (Prod.snd alternative))
+          let withScrutinee := collect scrutinee captures;
+          let collectAlternative :
+              List PsWasmBinding ->
+              (String ×
+                List PsVerifiedIrMatchBinding ×
+                PsVerifiedIrExpr) ->
+              List PsWasmBinding :=
+            fun
+              (state : List PsWasmBinding)
+              (alternative :
+                String ×
+                  List PsVerifiedIrMatchBinding ×
+                  PsVerifiedIrExpr) =>
+              let matchBindings :=
+                Prod.fst (Prod.snd alternative);
+              let body :=
+                Prod.snd (Prod.snd alternative);
               psWasmCollectCapturesWithFuel
                 outerBindings
-                (psWasmMatchBindingNames matchBindings ++ boundNames)
+                (psListAppend
+                  (psWasmMatchBindingNames matchBindings)
+                  boundNames)
                 fuel
                 body
-                state)
+                state;
+          psWasmListFoldl
+            collectAlternative
+            alternatives
             withScrutinee
+
 
 def psWasmCollectCaptures
     (outerBindings : List PsWasmBinding)

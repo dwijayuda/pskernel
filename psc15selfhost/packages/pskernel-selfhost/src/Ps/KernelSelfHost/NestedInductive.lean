@@ -593,24 +593,46 @@ def psKernelSimpleNestedFindFamily
           template
           rest
 
+def psKernelSimpleNestedAuxNameTakenWorker
+    (families : List PsKernelSimpleNestedAuxFamily) :
+    PsKernelEnvironment ->
+    PsKernelName ->
+    Bool :=
+  match families with
+  | List.nil =>
+      fun
+        (environment : PsKernelEnvironment)
+        (name : PsKernelName) =>
+        psKernelEnvironmentContains
+          environment
+          name
+  | List.cons family rest =>
+      let smaller :
+          PsKernelEnvironment ->
+          PsKernelName ->
+          Bool :=
+        psKernelSimpleNestedAuxNameTakenWorker
+          rest;
+      fun
+        (environment : PsKernelEnvironment)
+        (name : PsKernelName) =>
+        if psKernelEnvironmentContains environment name then
+          true
+        else if psKernelNameEq family.auxName name then
+          true
+        else
+          smaller
+            environment
+            name
+
 def psKernelSimpleNestedAuxNameTaken
     (environment : PsKernelEnvironment)
     (families : List PsKernelSimpleNestedAuxFamily)
     (name : PsKernelName) : Bool :=
-  if psKernelEnvironmentContains environment name then
-    true
-  else
-    match families with
-    | List.nil =>
-        false
-    | List.cons family rest =>
-        if psKernelNameEq family.auxName name then
-          true
-        else
-          psKernelSimpleNestedAuxNameTaken
-            environment
-            rest
-            name
+  psKernelSimpleNestedAuxNameTakenWorker
+    families
+    environment
+    name
 
 def psKernelSimpleNestedFreshAuxNameWithFuel
     (fuel : Nat) :

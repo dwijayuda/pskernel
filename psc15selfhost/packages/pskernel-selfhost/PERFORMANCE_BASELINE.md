@@ -373,6 +373,85 @@ engineering conclusions are:
 Next performance work should move to recursor reduction and representative
 inductive admission rather than adding more application-specific special cases.
 
+## 2.7 Recursor and inductive-admission profile
+
+GitHub-native benchmark work on
+`psc2/psc1kernel-selfhost-portable` extended the matched Lean 4.34 harness to
+recursor reduction plus ordinary, indexed, mutual and nested-inductive
+admission.
+
+The important engineering result is not the absolute nanosecond values, which
+vary materially between GitHub runners, but the repeated same-run ratios and
+the stage decomposition.
+
+After the one-pass application-spine recursor cleanup and the constructor-major
+WHNF fast path, two representative GitHub samples of recursive recursor
+reduction measured approximately:
+
+```text
+PSKernel / Lean recursor reduction: ~2.08x-2.18x
+```
+
+Ordinary, indexed and small mutual-inductive admission are not current
+bottlenecks in the benchmark fixture. Nested admission was substantially more
+expensive and was therefore split into:
+
+```text
+preprocess
+transform through ordinary mutual admission
+restore user-facing declarations
+validate restored declarations
+```
+
+Profiling showed that transform and validation dominate; preprocessing and
+restoration are comparatively small. Validation was then split further and
+identified restored recursor-rule checking as the main cost.
+
+The accepted runtime changes from that profile are non-semantic:
+
+- checked lambda inference results are not memoized when the generated rule
+  traversal consumes each growing lambda subtree once;
+- checked forall inference results are likewise not memoized on the one-shot
+  checked path;
+- nested auxiliary comparison uses infer-only **only** for the old transformed
+  rule whose full checked validation is already guaranteed by successful
+  `psKernelAddSimpleMutualInductive` admission;
+- every restored new rule is still fully checked and its restored source type
+  must still be definitionally equal to the new inferred type;
+- the general nested rule-comparison helper retains its conservative
+  fully-checked contract; the faster path is explicitly named for the
+  already-validated invariant.
+
+Two GitHub benchmark samples after these changes measured nested admission at:
+
+```text
+run A:
+  PSKernel nested admission : 39,909,097 ns / 100
+  Lean 4.34 nested admission: 12,063,864 ns / 100
+  ratio                     : ~3.31x
+
+run B:
+  PSKernel nested admission : 54,397,784 ns / 100
+  Lean 4.34 nested admission: 18,355,065 ns / 100
+  ratio                     : ~2.96x
+```
+
+The auxiliary rule-comparison optimization is directly attributable inside the
+same runs. Re-checking both old and new rule lists separately cost about
+`7.07 ms` and `8.83 ms` per 100 iterations, while the production comparison
+path cost about `5.13 ms` and `6.63 ms`, respectively: approximately a
+25-27% reduction in that hotspot without weakening restored-rule checking.
+
+The remaining nested cost is still concentrated in:
+
+- transformed mutual-inductive admission;
+- fully checked restored original recursor rules;
+- fully checked new auxiliary recursor rules.
+
+Do not replace these checks with infer-only shortcuts. Further improvement
+should reduce checked-inference runtime overhead while preserving the same
+accept/reject judgments and algorithmic ordering.
+
 ## 3. Interpretation
 
 The existing runtime-index work is justified.
@@ -394,17 +473,22 @@ No algorithmic-defeq ordering changes are needed to get these gains.
 
 Do **not** add cached expression metadata or interning yet.
 
-WHNF and defeq warm/cold paths are now measured.
+WHNF/defeq, checked application spines, recursor reduction, and representative
+ordinary/indexed/mutual/nested admission are now measured.
 
 Next measurement priority:
 
-1. official Lean 4.34 kernel vs PSKernel-native on matched WHNF/defeq cases;
-2. dependent checked-application spines;
-3. recursor reduction;
-4. indexed/nested-inductive admission on representative declarations.
+1. profile fully checked generated recursor-rule inference without weakening
+   validation;
+2. add a larger nested fixture with multiple nested families/constructors so
+   improvements are not tuned only to the smallest representative declaration;
+3. remeasure transformed mutual admission after any generic checked-inference
+   optimization;
+4. compare the stable semantic corpus across official Lean 4.34,
+   PSKernel Lean-native, and generated JavaScript.
 
 Only optimize expression metadata/hash/sharing if those measurements show
-repeated tree traversal is a dominant cost.
+repeated tree traversal/hash computation is a dominant cost.
 
 ## 5. Future cross-runtime benchmark
 

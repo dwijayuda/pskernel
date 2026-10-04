@@ -1,5 +1,5 @@
 {
-  "name": "@proofscript/psc2-bootstrap",
+  "name": "@proofscript/driver-ts-next",
   "version": "0.0.0-dev",
   "private": true,
   "type": "module",
@@ -9,13 +9,14 @@
     "sourceRoots": [
       "src"
     ],
+    "outDir": "dist",
+    "role": "typescript-compiler-driver",
     "testRoots": [
       "test"
-    ],
-    "outDir": "dist",
-    "role": "psc2-selfhost-composition"
+    ]
   },
   "dependencies": {
-    "@proofscript/driver-ts-next": "0.0.0-dev"
+    "@proofscript/compiler-next": "0.0.0-dev",
+    "@proofscript/backend-ts-next": "0.0.0-dev"
   }
 }

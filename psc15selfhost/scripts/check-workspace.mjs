@@ -64,6 +64,13 @@ for (const packageDir of packageDirs) {
     throw new Error(`PSC1_WORKSPACE_OUT_DIR: ${manifest.name}`);
   }
 
+  if (
+    path.basename(packageDir).startsWith("backend-") &&
+    Object.hasOwn(manifest.dependencies ?? {}, "@proofscript/compiler-next")
+  ) {
+    throw new Error(`PSC1_BACKEND_CORE_COMPILER_DEPENDENCY: ${manifest.name}`);
+  }
+
   for (const sourceRoot of config.sourceRoots) {
     const sourcePath = path.resolve(packageDir, sourceRoot);
     if (!(await exists(sourcePath))) {

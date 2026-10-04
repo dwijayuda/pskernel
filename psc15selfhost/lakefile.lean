@@ -93,9 +93,12 @@ lean_lib PsBackendTs where
   roots := #[
     `Ps.BackendTs.Type,
     `Ps.BackendTs.Expr,
-    `Ps.BackendTs.Module,
-    `Ps.BackendTs.Compiler
+    `Ps.BackendTs.Module
   ]
+
+lean_lib PsDriverTs where
+  srcDir := "packages/driver-ts/src"
+  roots := #[`Ps.DriverTs.Compiler]
 
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"
@@ -110,9 +113,12 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.ValueRefs,
     `Ps.BackendRust.Runtime,
     `Ps.BackendRust.Module,
-    `Ps.BackendRust.Coverage,
-    `Ps.BackendRust.Compiler
+    `Ps.BackendRust.Coverage
   ]
+
+lean_lib PsDriverRust where
+  srcDir := "packages/driver-rust/src"
+  roots := #[`Ps.DriverRust.Compiler]
 
 lean_lib PsBackendWasm where
   srcDir := "packages/backend-wasm/src"

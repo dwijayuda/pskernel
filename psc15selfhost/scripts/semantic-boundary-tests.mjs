@@ -81,7 +81,14 @@ assertSemanticBoundary(
 );
 
 assertHas(
-  "packages/backend-rust/src/Ps/BackendRust/Compiler.lean",
+  "packages/backend-rust/src/Ps/BackendRust/Module.lean",
+  "import Ps.Compiler.Api\n",
+  "PSC2_SEMANTIC_BOUNDARY_BACKEND_IMPORTS_COMPILER",
+  "backend core imported semantic compiler",
+);
+
+assertHas(
+  "packages/driver-rust/src/Ps/DriverRust/Compiler.lean",
   [
     "import Ps.Compiler.Api",
     "def emit prepared :=",
@@ -89,11 +96,11 @@ assertHas(
     "  | Except.ok ir => psRustEmitModule ir.raw",
   ].join("\n"),
   "PSC2_SEMANTIC_BOUNDARY_BACKEND_BYPASSES_VALIDATED_IR",
-  "backend adapter bypassed validated emitter",
+  "driver bypassed validated emitter",
 );
 
 assertSemanticBoundary(
-  "packages/backend-rust/src/Ps/BackendRust/Compiler.lean",
+  "packages/driver-rust/src/Ps/DriverRust/Compiler.lean",
   [
     "import Ps.Compiler.Api",
     "def emit prepared :=",

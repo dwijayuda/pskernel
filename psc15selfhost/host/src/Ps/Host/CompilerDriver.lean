@@ -1,5 +1,5 @@
 import Ps.Compiler.Api
-import Ps.BackendTs.Compiler
+import Ps.DriverTs.Compiler
 import Ps.Host.ProjectCompiler
 import Ps.Host.TypeScriptCompiler
 

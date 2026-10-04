@@ -19,7 +19,8 @@
     "compiler-ir",
     "erasure",
     "compiler",
-    "backend-ts"
+    "backend-ts",
+    "driver-ts"
   ],
   "legacyRepairGuardMaxCount": 75,
   "forbiddenLeanForms": [

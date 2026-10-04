@@ -2768,6 +2768,56 @@ def psKernelSimpleNestedValidateRules
             session
             rest
 
+def psKernelSimpleNestedValidateConstructorTypes
+    (fuel : Nat)
+    (environment : PsKernelEnvironment)
+    (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety)
+    (maxRecDepth : Nat)
+    (maxNatSize : Nat)
+    (ctorNames : List PsKernelName) :
+    Except String Unit :=
+  match ctorNames with
+  | List.nil =>
+      Except.ok ()
+  | List.cons ctorName rest =>
+      match
+          psKernelEnvironmentFind
+            environment
+            ctorName with
+      | Option.none =>
+          Except.error
+            "restored constructor missing during validation"
+      | Option.some infoValue =>
+          match infoValue with
+          | PsKernelConstantInfo.ctorInfo info =>
+              let session :=
+                psKernelMkCheckerSession
+                  environment
+                  levelParams
+                  safety
+                  maxRecDepth
+                  maxNatSize;
+              match
+                  psKernelSessionCheck
+                    fuel
+                    session
+                    info.base.type with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok _ =>
+                  psKernelSimpleNestedValidateConstructorTypes
+                    fuel
+                    environment
+                    levelParams
+                    safety
+                    maxRecDepth
+                    maxNatSize
+                    rest
+          | _ =>
+              Except.error
+                "restored constructor missing during validation"
+
 def psKernelSimpleNestedValidateOriginals
     (fuel : Nat)
     (finalEnvironment : PsKernelEnvironment)
@@ -2861,56 +2911,6 @@ def psKernelSimpleNestedValidateOriginals
           | _ =>
               Except.error
                 "restored inductive missing during validation"
-
-def psKernelSimpleNestedValidateConstructorTypes
-    (fuel : Nat)
-    (environment : PsKernelEnvironment)
-    (levelParams : List PsKernelName)
-    (safety : PsKernelDefinitionSafety)
-    (maxRecDepth : Nat)
-    (maxNatSize : Nat)
-    (ctorNames : List PsKernelName) :
-    Except String Unit :=
-  match ctorNames with
-  | List.nil =>
-      Except.ok ()
-  | List.cons ctorName rest =>
-      match
-          psKernelEnvironmentFind
-            environment
-            ctorName with
-      | Option.none =>
-          Except.error
-            "restored constructor missing during validation"
-      | Option.some infoValue =>
-          match infoValue with
-          | PsKernelConstantInfo.ctorInfo info =>
-              let session :=
-                psKernelMkCheckerSession
-                  environment
-                  levelParams
-                  safety
-                  maxRecDepth
-                  maxNatSize;
-              match
-                  psKernelSessionCheck
-                    fuel
-                    session
-                    info.base.type with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok _ =>
-                  psKernelSimpleNestedValidateConstructorTypes
-                    fuel
-                    environment
-                    levelParams
-                    safety
-                    maxRecDepth
-                    maxNatSize
-                    rest
-          | _ =>
-              Except.error
-                "restored constructor missing during validation"
 
 def psKernelSimpleNestedCompareRuleTypes
     (fuel : Nat)

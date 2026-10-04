@@ -4326,6 +4326,21 @@ def main : IO Unit := do
   let nestedWideLeanBase ←
     psKernelBenchLeanNestedWideBaseEnvironment
 
+  match
+      psKernelAddSimpleNestedInductive
+        65536
+        nestedWidePsBase
+        psKernelBenchNestedWideDecl
+        0
+        psKernelLeanNatMaxSizeDefault with
+  | Except.ok _ =>
+      IO.println
+        "PSKERNEL_BENCH nested_wide_setup=ok"
+  | Except.error error =>
+      IO.println
+        ("PSKERNEL_BENCH nested_wide_setup_error=" ++
+          error)
+
   let nestedWidePsStart ← IO.monoNanosNow
   let nestedWidePsHits ←
     psKernelBenchNestedWideAdmissionLoop

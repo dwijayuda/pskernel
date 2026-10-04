@@ -31,5 +31,7 @@
     "The fixed-point receipt key is compilerSha256:closureSha256.",
     "The smokeCommit changes only the generated-runtime smoke harness; the semantic closure hash is unchanged.",
     "Mutual and nested inductives are included in the 24-source SelfHost closure."
-  ]
+  ],
+  "evidenceKind": "historical-checkpoint",
+  "updatePolicy": "Refresh hashes at promoted semantic/layout milestones; every development head is independently required to pass generated fixed-point CI."
 }

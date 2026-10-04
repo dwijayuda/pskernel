@@ -2208,7 +2208,7 @@ def psKernelSimpleNestedRestoreRule
     (mapCtor : Bool)
     (rule : PsKernelRecursorRule) :
     Except String PsKernelRecursorRule :=
-  let ctor :=
+  let ctor : PsKernelName :=
     if mapCtor then
       match
           psKernelSimpleNestedFindCtorMap

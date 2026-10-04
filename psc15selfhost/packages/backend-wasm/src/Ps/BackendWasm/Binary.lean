@@ -1,4 +1,4 @@
-import Ps.BackendWasm.Model
+import Ps.BackendWasm.Support
 
 inductive PsWasmEncodeError where
   | unsupportedValueType
@@ -916,15 +916,15 @@ def psWasmEncodeExports
     Except PsWasmEncodeError (List UInt8)
   | [] => Except.ok []
   | exportItem :: rest =>
-      match psWasmFindFunctionIndex functions exportItem.2 with
+      match psWasmFindFunctionIndex functions (psWasmPairSecond (exportItem)) with
       | none =>
-          Except.error (PsWasmEncodeError.unknownFunction exportItem.2)
+          Except.error (PsWasmEncodeError.unknownFunction (psWasmPairSecond (exportItem)))
       | some index =>
           match psWasmEncodeExports functions rest with
           | Except.error error => Except.error error
           | Except.ok encodedRest =>
               Except.ok
-                (psWasmEncodeName exportItem.1
+                (psWasmEncodeName (psWasmPairFirst (exportItem))
                   ++ [psWasmByte 0]
                   ++ psWasmEncodeUleb index
                   ++ encodedRest)

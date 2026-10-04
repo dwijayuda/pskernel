@@ -234,11 +234,12 @@ def psWasmCollectFunctionTypesFromExprWithFuel :
               let bindings := alternative.2.1
               let body := alternative.2.2
               let withBindings :=
-                bindings.foldl
+                psWasmListFoldl
                   (fun inner binding =>
                     psWasmCollectFunctionTypesFromType
                       binding.type
                       inner)
+                  bindings
                   state
               collect body withBindings) alternatives withScrutinee
 
@@ -252,22 +253,31 @@ def psWasmCollectModuleFunctionTypes
     (module : PsVerifiedIrModule) :
     List PsVerifiedIrType :=
   let fromStructures :=
-    psWasmListFoldl (fun state structureInfo =>
-        structureInfo.fields.foldl
+    psWasmListFoldl
+      (fun state structureInfo =>
+        psWasmListFoldl
           (fun inner field =>
             psWasmCollectFunctionTypesFromType field.type inner)
-          state) module.structures []
+          structureInfo.fields
+          state)
+      module.structures
+      []
   let fromInductives :=
-    psWasmListFoldl (fun state inductiveInfo =>
-        inductiveInfo.constructors.foldl
+    psWasmListFoldl
+      (fun state inductiveInfo =>
+        psWasmListFoldl
           (fun inner constructorInfo =>
-            constructorInfo.fields.foldl
+            psWasmListFoldl
               (fun fieldsState field =>
                 psWasmCollectFunctionTypesFromType
                   field.type
                   fieldsState)
+              constructorInfo.fields
               inner)
-          state) module.inductives fromStructures
+          inductiveInfo.constructors
+          state)
+      module.inductives
+      fromStructures
   psWasmListFoldl (fun state declaration =>
       let withParameters :=
         psWasmCollectFunctionTypesFromParameters
@@ -431,10 +441,11 @@ def psWasmCollectArrayTypesFromExprWithFuel :
               let bindings := alternative.2.1
               let body := alternative.2.2
               let withBindings :=
-                bindings.foldl
+                psWasmListFoldl
                   (fun inner binding =>
                     psWasmCollectArrayTypesFromType
                       binding.type inner)
+                  bindings
                   state
               collect body withBindings) alternatives withScrutinee
 
@@ -448,21 +459,31 @@ def psWasmCollectModuleArrayTypes
     (module : PsVerifiedIrModule) :
     List PsVerifiedIrType :=
   let fromStructures :=
-    psWasmListFoldl (fun state structureInfo =>
-        structureInfo.fields.foldl
+    psWasmListFoldl
+      (fun state structureInfo =>
+        psWasmListFoldl
           (fun inner field =>
             psWasmCollectArrayTypesFromType field.type inner)
-          state) module.structures []
+          structureInfo.fields
+          state)
+      module.structures
+      []
   let fromInductives :=
-    psWasmListFoldl (fun state inductiveInfo =>
-        inductiveInfo.constructors.foldl
+    psWasmListFoldl
+      (fun state inductiveInfo =>
+        psWasmListFoldl
           (fun inner constructorInfo =>
-            constructorInfo.fields.foldl
+            psWasmListFoldl
               (fun fieldsState field =>
                 psWasmCollectArrayTypesFromType
-                  field.type fieldsState)
+                  field.type
+                  fieldsState)
+              constructorInfo.fields
               inner)
-          state) module.inductives fromStructures
+          inductiveInfo.constructors
+          state)
+      module.inductives
+      fromStructures
   psWasmListFoldl (fun state declaration =>
       let withParameters :=
         psWasmCollectArrayTypesFromParameters
@@ -3073,9 +3094,10 @@ def psWasmExprUsesNatWithFuel :
           psWasmListAny psWasmTypeUsesNat typeArguments
             || uses scrutinee
             || psWasmListAny (fun alternative =>
-                alternative.2.1.any
-                    (fun binding =>
-                      psWasmTypeUsesNat binding.type)
+                psWasmListAny
+                  (fun binding =>
+                    psWasmTypeUsesNat binding.type)
+                  alternative.2.1
                   || uses alternative.2.2) alternatives
 
 def psWasmExprUsesNat
@@ -3153,9 +3175,10 @@ def psWasmExprUsesIntWithFuel :
           psWasmListAny psWasmTypeUsesInt typeArguments
             || uses scrutinee
             || psWasmListAny (fun alternative =>
-                alternative.2.1.any
-                    (fun binding =>
-                      psWasmTypeUsesInt binding.type)
+                psWasmListAny
+                  (fun binding =>
+                    psWasmTypeUsesInt binding.type)
+                  alternative.2.1
                   || uses alternative.2.2) alternatives
 
 def psWasmExprUsesInt
@@ -3166,17 +3189,21 @@ def psWasmModuleUsesNat
     (module : PsVerifiedIrModule) : Bool :=
   psWasmListAny (fun importInfo => psWasmTypeUsesNat importInfo.type) module.imports
     || psWasmListAny (fun structureInfo =>
-        structureInfo.fields.any
-          (fun field => psWasmTypeUsesNat field.type)) module.structures
+        psWasmListAny
+          (fun field => psWasmTypeUsesNat field.type)
+          structureInfo.fields) module.structures
     || psWasmListAny (fun inductiveInfo =>
-        inductiveInfo.constructors.any
+        psWasmListAny
           (fun constructorInfo =>
-            constructorInfo.fields.any
-              (fun field => psWasmTypeUsesNat field.type))) module.inductives
+            psWasmListAny
+              (fun field => psWasmTypeUsesNat field.type)
+              constructorInfo.fields)
+          inductiveInfo.constructors) module.inductives
     || psWasmListAny (fun declaration =>
-        declaration.parameters.any
-            (fun parameter =>
-              psWasmTypeUsesNat parameter.type)
+        psWasmListAny
+          (fun parameter =>
+            psWasmTypeUsesNat parameter.type)
+          declaration.parameters
           || psWasmTypeUsesNat declaration.resultType
           || psWasmExprUsesNat declaration.body) module.declarations
 
@@ -3184,17 +3211,21 @@ def psWasmModuleUsesInt
     (module : PsVerifiedIrModule) : Bool :=
   psWasmListAny (fun importInfo => psWasmTypeUsesInt importInfo.type) module.imports
     || psWasmListAny (fun structureInfo =>
-        structureInfo.fields.any
-          (fun field => psWasmTypeUsesInt field.type)) module.structures
+        psWasmListAny
+          (fun field => psWasmTypeUsesInt field.type)
+          structureInfo.fields) module.structures
     || psWasmListAny (fun inductiveInfo =>
-        inductiveInfo.constructors.any
+        psWasmListAny
           (fun constructorInfo =>
-            constructorInfo.fields.any
-              (fun field => psWasmTypeUsesInt field.type))) module.inductives
+            psWasmListAny
+              (fun field => psWasmTypeUsesInt field.type)
+              constructorInfo.fields)
+          inductiveInfo.constructors) module.inductives
     || psWasmListAny (fun declaration =>
-        declaration.parameters.any
-            (fun parameter =>
-              psWasmTypeUsesInt parameter.type)
+        psWasmListAny
+          (fun parameter =>
+            psWasmTypeUsesInt parameter.type)
+          declaration.parameters
           || psWasmTypeUsesInt declaration.resultType
           || psWasmExprUsesInt declaration.body) module.declarations
 

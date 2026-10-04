@@ -1084,7 +1084,9 @@ def psWasmCollectCapturesWithFuel
   | 0, _, captures => captures
   | fuel + 1, expr, captures =>
       let collect :=
-        fun nested state =>
+        fun
+        (nested : PsVerifiedIrExpr)
+        (state : List PsWasmBinding) =>
           psWasmCollectCapturesWithFuel
             outerBindings
             boundNames
@@ -1101,7 +1103,10 @@ def psWasmCollectCapturesWithFuel
             name
       | .intrinsic _ typeArguments arguments =>
           arguments.foldl
-            (fun state argument => collect argument state)
+            (fun
+            (state : List PsWasmBinding)
+            (argument : PsVerifiedIrExpr) =>
+              collect argument state)
             captures
       | .lambda parameters _ body =>
           psWasmCollectCapturesWithFuel
@@ -1113,7 +1118,10 @@ def psWasmCollectCapturesWithFuel
       | .call fn _ arguments =>
           let withFn := collect fn captures
           arguments.foldl
-            (fun state argument => collect argument state)
+            (fun
+            (state : List PsWasmBinding)
+            (argument : PsVerifiedIrExpr) =>
+              collect argument state)
             withFn
       | .letE name _ value body =>
           let withValue := collect value captures
@@ -1129,18 +1137,27 @@ def psWasmCollectCapturesWithFuel
           collect elseBranch withThen
       | .record _ _ fields =>
           fields.foldl
-            (fun state field => collect (Prod.snd field) state)
+            (fun
+            (state : List PsWasmBinding)
+            (field : String × PsVerifiedIrExpr) =>
+              collect (Prod.snd field) state)
             captures
       | .projection _ _ target _ =>
           collect target captures
       | .constructor _ _ _ fields =>
           fields.foldl
-            (fun state field => collect (Prod.snd field) state)
+            (fun
+            (state : List PsWasmBinding)
+            (field : String × PsVerifiedIrExpr) =>
+              collect (Prod.snd field) state)
             captures
       | .matchE _ _ scrutinee alternatives =>
           let withScrutinee := collect scrutinee captures
           alternatives.foldl
-            (fun state alternative =>
+            (fun
+            (state : List PsWasmBinding)
+            (alternative :
+              String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
               let matchBindings := (Prod.fst (Prod.snd alternative))
               let body := (Prod.snd (Prod.snd alternative))
               psWasmCollectCapturesWithFuel
@@ -2682,7 +2699,7 @@ def psWasmLowerLambdaWith
     (body : PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   let parameterTypes :=
-    parameters.map (fun parameter => parameter.type)
+    parameters.map (fun (parameter : PsVerifiedIrParameter) => parameter.type)
   let functionType :=
     PsVerifiedIrType.function parameterTypes resultType
   match psWasmClosureBaseName functionType with
@@ -2803,7 +2820,11 @@ def psWasmLowerExprWithFuel
       Except.error PsWasmLowerError.unsupportedExpression
   | fuel + 1, state, expr =>
       let lowerWithBindings :=
-        fun nextBindings expectedType nestedState nestedExpr =>
+        fun
+        (nextBindings : List PsWasmBinding)
+        (expectedType : Option PsWasmValueType)
+        (nestedState : PsWasmLowerState)
+        (nestedExpr : PsVerifiedIrExpr) =>
           psWasmLowerExprWithFuel
             profile
             structures

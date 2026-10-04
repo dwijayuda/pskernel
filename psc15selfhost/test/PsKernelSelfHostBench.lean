@@ -4,6 +4,8 @@ import Ps.KernelSelfHost.InductiveAdmission
 import Ps.KernelSelfHost.MutualInductive
 import Ps.KernelSelfHost.NestedInductive
 
+set_option maxRecDepth 100000
+
 def psKernelBenchName
     (index : Nat) :
     PsKernelName :=

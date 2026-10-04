@@ -1,5 +1,21 @@
 # PSKernel Self-Host Development Plan
 
+## Active phase status
+
+- **Phase A — Semantic closure: COMPLETE.**
+  - Lean 4.34 compatibility matrix: 34/34 required rules implemented.
+  - conformance registry: 34/34 rules mapped to direct differential/invariant tests.
+  - `--require-complete` is enforced in CI for both compatibility and conformance audits.
+  - green semantic baseline: `5d684efc33de559045bac74dfc0cb45fcc9a41ee`.
+- **Phase B — Explainability/readability: ACTIVE.**
+  - preserve the Phase A semantic baseline while reorganizing source by theory concept.
+- **Phase C — Competitive performance: STARTED ONLY FOR NON-SEMANTIC RUNTIME SEAMS.**
+  - environment index/cache separation may proceed when it does not disturb Phase B theory work.
+  - larger performance work waits for profiling and a stable explainable module layout.
+
+If a new semantic mismatch with Lean 4.34 is discovered, temporarily return to Phase A only for that defect and add a conformance case before resuming Phase B.
+
+
 This plan is the execution companion to
 `PSKERNEL_SELFHOST_ARCHITECTURE.md`.
 

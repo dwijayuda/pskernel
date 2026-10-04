@@ -1,0 +1,389 @@
+# PSKernel Theory and Implementation Guide
+
+PSKernel is an independent executable implementation of the Lean 4.34 kernel
+semantics written in the PSC1-compatible subset of Lean.
+
+Target:
+
+- Lean version: 4.34.0
+- Lean commit: `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`
+- compatibility matrix: `LEAN_4_34_COMPATIBILITY.json`
+
+The same semantic source is intended to have two primary execution paths:
+
+```
+Ps.KernelSelfHost/*.lean
+        |
+        +-- PSC compiler / backend-ts --> TypeScript / JavaScript
+        |
+        +-- Lean 4 compiler -----------> native executable/library
+```
+
+No separate Rust or C++ kernel is required.
+
+## 1. Trust model
+
+The kernel accepts already elaborated core declarations. Parsing, elaboration,
+tactics, typeclass synthesis, and code generation are outside the semantic
+kernel boundary.
+
+The main trusted operation is conceptually:
+
+```
+checkDeclaration : Environment -> Declaration -> Except KernelError Environment
+```
+
+A successful result extends the environment by one checked declaration (or one
+checked declaration bundle).
+
+Runtime indexes and caches must never create new semantic facts. They may only
+make an already-defined lookup or check faster.
+
+## 2. Core judgments
+
+A reader can understand the implementation around four judgments:
+
+```
+infer  : Γ |- e : A
+whnf   : e -->* weak-head form
+defeq  : Γ |- A <=> B
+admit  : Γ + declaration is a valid environment extension
+```
+
+The `defeq` relation is Lean's algorithmic definitional equality, not ideal
+mathematical equality. In particular it is intentionally incomplete and is not
+transitive. This is why successful equality caching uses plain expression
+pairs instead of an equivalence closure.
+
+## 3. Recommended reading order
+
+### Core syntax and substitution
+
+1. `Name.lean`
+2. `Level.lean`
+3. `Expr.lean`
+4. `Instantiate.lean`
+5. `Declaration.lean`
+6. `LocalContext.lean`
+7. `Environment.lean`
+
+These modules define the data manipulated by the checker.
+
+### Type checking and reduction
+
+8. `TypeCheckerBase.lean`
+9. `TypeCheckerPrimitives.lean`
+10. `TypeCheckerProjection.lean`
+11. `TypeCheckerWhnf.lean`
+12. `TypeCheckerInfer.lean`
+13. `TypeCheckerRecursor.lean`
+
+### Definitional equality
+
+14. `TypeCheckerDefEqSupport.lean`
+15. `Theory/DefEq/FinalRules.lean`
+16. `TypeCheckerDefEq.lean`
+
+The final rules module isolates proof/proposition handling, structure eta,
+string literal expansion, and unit-like structures because these are useful
+rules to study independently from lazy-delta mechanics.
+
+### Declaration admission
+
+17. `CheckerSession.lean`
+18. `Kernel.lean`
+19. `Quot.lean`
+20. `Inductive.lean`
+21. `InductiveAdmission.lean`
+22. `MutualInductive.lean`
+23. `NestedInductive.lean`
+
+### Backend/runtime mechanisms
+
+- `Runtime/Cache.lean`
+- `Runtime/EnvironmentIndex.lean`
+- `Runtime/NativeReduction.lean`
+
+These modules are deliberately separated from the theory-facing algorithm.
+
+## 4. Universe levels
+
+Lean universe levels use:
+
+```
+0
+succ u
+max u v
+imax u v
+parameter
+```
+
+`Level.lean` implements normalization and semantic comparison.
+
+A level comparison is not string/syntax equality. The checker compares the
+meaning of level expressions for all assignments to universe parameters.
+
+## 5. Inference
+
+`TypeCheckerInfer.lean` implements syntax-directed inference for core
+expressions.
+
+Important cases include:
+
+```
+Sort u                 : Sort (u+1)
+Const c levels         : instantiate universe parameters in type(c)
+f a                    : instantiate the codomain of a checked Pi type
+fun x : A => b         : Pi x : A, type(b)
+Pi x : A, B            : Sort (imax level(A) level(B))
+let x : A := v; b      : type(b[v/x])
+literal                : Nat or String
+projection             : dependent field type
+```
+
+When checking applications, inferred and expected argument types are compared
+using algorithmic definitional equality.
+
+## 6. Weak-head reduction
+
+The public WHNF pipeline is intentionally visible in
+`psKernelWhnfAfterCore`:
+
+```
+whnfCore
+   |
+   +-- optional Lean.reduceBool / Lean.reduceNat native provider
+   |
+   +-- optimized Nat primitive reduction
+   |
+   +-- definition unfolding
+   |
+   '-- repeat when unfolding makes progress
+```
+
+This order follows Lean 4.34. The order is observable because definitional
+equality is incomplete.
+
+## 7. Algorithmic definitional equality
+
+The checker does not normalize both terms and compare normal forms.
+
+The high-level algorithm is approximately:
+
+```
+structural equality / successful pair cache
+        |
+quick same-shape checks
+        |
+reflection fast path
+        |
+cheap WHNF
+        |
+proof irrelevance
+        |
+lazy delta reduction
+        |
+projection-specific shortcut
+        |
+full projection WHNF
+        |
+application/binder comparison
+        |
+function eta
+        |
+structure eta
+        |
+string literal expansion
+        |
+unit-like structure equality
+        |
+failure
+```
+
+Successful pairs are cached symmetrically, but never transitively.
+
+## 8. Proof irrelevance
+
+If both terms inhabit definitionally equal propositions, their proof values are
+definitionally equal.
+
+This is a kernel rule. It is not proof erasure performed by the compiler.
+
+## 9. Function and structure eta
+
+Function eta handles equality between a lambda and a non-lambda function by
+expanding the latter at a fresh bound argument.
+
+Structure eta is restricted to non-recursive structures. A constructor applied
+to values definitionally equal to all projections of a structure value is
+definitionally equal to that structure value.
+
+See `Theory/DefEq/FinalRules.lean`.
+
+## 10. Quotients
+
+`Quot.lean` validates and installs the kernel-recognized quotient constants.
+Reduction recognizes `Quot.mk`, `Quot.lift`, and `Quot.ind` through the
+checker reduction layer.
+
+Quotient initialization is explicit state in the environment.
+
+## 11. Inductive declarations
+
+The inductive checker validates:
+
+- universe parameters;
+- common parameters;
+- indices;
+- constructor result shape;
+- positivity of recursive occurrences;
+- recursive-argument universes;
+- elimination restrictions;
+- generated constructor information;
+- recursor types and computation rules.
+
+Ordinary admission deliberately rejects nested recursive occurrences. Nested
+admission preprocesses these occurrences and then validates the resulting
+mutual bundle.
+
+## 12. Mutual inductives
+
+`MutualInductive.lean` supports multiple simultaneously declared families,
+with a separate motive per family and recursive hypotheses for recursive
+arguments that may target any member of the bundle.
+
+The families in one bundle must satisfy Lean's shared-universe constraints.
+
+## 13. Nested inductives
+
+`NestedInductive.lean` performs the kernel-side flatten/restore process:
+
+```
+discover nested family
+      |
+create auxiliary family
+      |
+construct extended mutual bundle
+      |
+validate mutual bundle
+      |
+restore user constructors
+      |
+restore recursors/rules
+      |
+hide temporary flattening declarations
+```
+
+This is necessary to preserve Lean 4 computation behavior for nested
+inductives.
+
+## 14. Declaration admission
+
+`Kernel.lean` checks:
+
+- duplicate declaration names;
+- duplicate/undefined universe parameters;
+- no metavariables or free variables in admitted declarations;
+- declaration types are themselves well-typed sorts;
+- definition bodies have the declared type;
+- theorem declarations have proposition types and valid proofs;
+- opaque values type check but are not delta-reduced;
+- unsafe recursive definitions are checked in the recursive environment;
+- unsafe/partial mutual definitions are checked as one block.
+
+## 15. Runtime modules are non-semantic
+
+### Environment index
+
+`Runtime/EnvironmentIndex.lean` is a persistent hash trie used only to narrow
+name lookup to a collision bucket.
+
+The authoritative ordered list of constants remains in `PsKernelEnvironment`.
+Bucket collisions are resolved with full structural `PsKernelName` equality.
+
+### Defeq/inference caches
+
+`Runtime/Cache.lean` owns memoization structures.
+
+Changing cache representation must not change the result of a check.
+
+### Native reduction
+
+`Runtime/NativeReduction.lean` exposes an optional provider:
+
+```
+Name -> Except String (Option Bool)
+Name -> Except String (Option Nat)
+```
+
+No provider means no native reduction step. This keeps the semantic kernel pure
+and makes the extra compiler/runtime trust explicit.
+
+## 16. Self-host coding discipline
+
+Every module in the semantic closure must remain accepted by the PSC1 source
+profile.
+
+Prefer the patterns already demonstrated by the self-hosted compiler:
+
+- explicit algebraic data;
+- explicit `Except` errors;
+- structural workers;
+- curried workers when invariant arguments change;
+- explicit fuel only where structural recursion is not sufficient;
+- no hidden fallback from failed checking;
+- no generated-JavaScript semantic patches;
+- non-semantic indexes/caches behind narrow modules.
+
+The authoritative gate is:
+
+```
+portable Lean source
+      |
+psc1 check
+      |
+canonical .ps translation
+      |
+psc1 check again
+```
+
+## 17. What feature-complete means
+
+Feature completeness is defined mechanically by
+`LEAN_4_34_COMPATIBILITY.json`.
+
+A feature-complete release requires:
+
+1. every required rule marked implemented;
+2. the compatibility audit passes with `--require-complete`;
+3. the focused conformance/differential suite is green;
+4. the self-host source and generated-artifact fixed points pass.
+
+This definition avoids treating project size or a successful demo as evidence
+of semantic completeness.
+
+## 18. Performance policy
+
+Performance work should first change representations, not theory algorithms.
+
+Preferred order:
+
+1. indexed environment lookup;
+2. indexed expression/defeq caches;
+3. cached expression metadata/hash;
+4. sharing/interning where measurements justify it;
+5. only then algorithmic shortcuts.
+
+Every representation optimization must preserve the semantic result.
+
+## 19. Multi-backend policy
+
+The kernel has one source of truth.
+
+```
+PSC backend-ts -> JS
+Lean compiler   -> native
+```
+
+Backend-specific code may implement runtime capabilities, indexes, allocation,
+or native evaluation. It must not duplicate or redefine type-theory rules.

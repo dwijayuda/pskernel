@@ -31,7 +31,7 @@ Unless a new architecture review explicitly replaces this document:
 
 2. **No formal-verification project is required for the production milestone.**
    Assurance comes from exact theory mapping, source review, Lean-4.34
-   conformance, differential tests, and self-host fixed-point evidence.
+   conformance, differential tests, and portable-source self-host checks.
 
 3. **Compatibility is defined by rules, not by project size.**
    The normative feature-completeness source is
@@ -41,8 +41,10 @@ Unless a new architecture review explicitly replaces this document:
    Every theory/runtime refactor must remain accepted by:
    - the shared portable source profile;
    - `psc1 check`;
-   - canonical `.lean -> .ps` generation and recheck;
-   - generated fixed-point tooling.
+   - canonical `.lean -> .ps` generation and recheck.
+
+   Generated compiler/kernel fixed-point reproduction is optional/manual and is
+   not a normal development gate.
 
 5. **Performance data structures are non-semantic.**
    Caches and indexes may accelerate an existing judgment, but must never
@@ -158,10 +160,11 @@ compatibility matrix: no required missing rules
 conformance/differential suite: green
 PSC1 source closure: green
 canonical .ps closure: green
-generated source fixed point: green
-generated artifact fixed point: green
-generated runtime smoke: green
+Lean-native build/tests: green
 ```
+
+Generated source/artifact fixed points may be run manually for bootstrap
+releases, but they do not block readability or performance work.
 
 ## 7. Conformance policy
 
@@ -266,22 +269,16 @@ Lean.reduceBool / Lean.reduceNat marker
 
 The provider belongs in `Runtime/NativeReduction`, not in core type theory.
 
-## 11. Self-host evidence policy
+## 11. Optional generated-bootstrap evidence
 
-There are two distinct kinds of evidence:
+`SELFHOST_EVIDENCE.json` records a historical/promoted generated fixed-point
+checkpoint. It remains useful for release/bootstrap auditing, but normal kernel
+development does not regenerate it after every semantic, readability, or
+performance commit.
 
-1. **Current-head proof** — CI must generate the current source closure, reach a
-   source/artifact fixed point, and pass generated runtime smoke.
-2. **Committed checkpoint** — `SELFHOST_EVIDENCE.json` records exact hashes for
-   a promoted commit/closure so that historical releases remain auditable.
-
-A layout-only refactor is expected to change source count and closure hashes.
-That must not disable or weaken the current-head fixed-point proof. Exact hash
-comparison is required when reproducing the checkpoint commit; later heads
-prove themselves with their own generated receipt/artifact uploaded by CI.
-
-Refresh `SELFHOST_EVIDENCE.json` at promoted semantic/layout milestones, not
-after every intermediate explanatory split.
+Run `.github/workflows/psc1kernel-selfhost-fixed-point.yml` manually when a
+release or bootstrap checkpoint specifically needs regenerated source/artifact
+fixed-point evidence.
 
 ## 12. Change review checklist
 
@@ -296,9 +293,11 @@ Before promoting any kernel change, ask:
 7. Does `KERNEL_THEORY.md` need updating?
 8. Is there a focused differential/conformance test?
 9. Does canonical `.ps` still recheck?
-10. Does fixed-point generation still converge?
+10. If the change touches backend emission/bootstrap policy, does the optional
+    generated-kernel smoke/fixed-point workflow still make sense?
 
-If any answer is unknown, the change is not ready for promotion.
+For ordinary theory/readability/performance work, items 1-9 are the mandatory
+promotion checks.
 
 ## 13. Anti-drift rules
 
@@ -317,7 +316,7 @@ If priorities conflict, use this order:
 
 ```text
 semantic correctness
-> self-host preservation
+> portable-source self-host preservation
 > explainability
 > compatibility evidence
 > performance

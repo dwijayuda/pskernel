@@ -38,8 +38,6 @@ def psKernelInferCacheEligible
       inferOnly
   | PsKernelExpr.forallE _ _ _ _ =>
       inferOnly
-  | PsKernelExpr.const _ _ =>
-      inferOnly
   | _ =>
       true
 

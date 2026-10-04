@@ -22,6 +22,30 @@ def psJsJoin
               separator
               (psJsJoin separator rest))
 
+def psJsConcat2
+    (a b : String) : String :=
+  String.Internal.append a b
+
+def psJsConcat3
+    (a b c : String) : String :=
+  psJsConcat2 (psJsConcat2 a b) c
+
+def psJsConcat4
+    (a b c d : String) : String :=
+  psJsConcat2 (psJsConcat3 a b c) d
+
+def psJsConcat5
+    (a b c d e : String) : String :=
+  psJsConcat2 (psJsConcat4 a b c d) e
+
+def psJsConcat6
+    (a b c d e f : String) : String :=
+  psJsConcat2 (psJsConcat5 a b c d e) f
+
+def psJsConcat7
+    (a b c d e f g : String) : String :=
+  psJsConcat2 (psJsConcat6 a b c d e f) g
+
 def psJsPrintLiteral
     (literal : PsJsIrLiteral) : String :=
   match literal with
@@ -68,15 +92,12 @@ def psJsPrintExprWithFuel
                 | Except.error error => Except.error error
                 | Except.ok printedRight =>
                     Except.ok
-                      (String.Internal.append
+                      (psJsConcat5
                         "("
-                        (String.Internal.append
-                          printedLeft
-                          (String.Internal.append
-                            " + "
-                            (String.Internal.append
-                              printedRight
-                              ")"))))
+                        printedLeft
+                        " + "
+                        printedRight
+                        ")")
         | PsJsIrExpr.call fn arguments =>
             match smaller fn with
             | Except.error error => Except.error error
@@ -85,13 +106,11 @@ def psJsPrintExprWithFuel
                 | Except.error error => Except.error error
                 | Except.ok printedArguments =>
                     Except.ok
-                      (String.Internal.append
+                      (psJsConcat4
                         printedFn
-                        (String.Internal.append
-                          "("
-                          (String.Internal.append
-                            (psJsJoin ", " printedArguments)
-                            ")")))
+                        "("
+                        (psJsJoin ", " printedArguments)
+                        ")")
         | PsJsIrExpr.ifE
             condition
             thenBranch
@@ -106,19 +125,14 @@ def psJsPrintExprWithFuel
                     | Except.error error => Except.error error
                     | Except.ok printedElse =>
                         Except.ok
-                          (String.Internal.append
+                          (psJsConcat7
                             "("
-                            (String.Internal.append
-                              printedCondition
-                              (String.Internal.append
-                                " ? "
-                                (String.Internal.append
-                                  printedThen
-                                  (String.Internal.append
-                                    " : "
-                                    (String.Internal.append
-                                      printedElse
-                                      ")"))))))
+                            printedCondition
+                            " ? "
+                            printedThen
+                            " : "
+                            printedElse
+                            ")")
 
 def psJsPrintExpr
     (expr : PsJsIrExpr) :
@@ -138,30 +152,24 @@ def psJsPrintDeclaration
       match declaration.parameters with
       | List.nil =>
           Except.ok
-            (String.Internal.append
+            (psJsConcat4
               "export const "
-              (String.Internal.append
-                declaration.name
-                (String.Internal.append
-                  " = "
-                  (String.Internal.append body ";\n"))))
+              declaration.name
+              " = "
+              (psJsConcat2 body ";\n"))
       | List.cons _ _ =>
           let parameters :=
             psListMap
               psJsParameterName
               declaration.parameters;
           Except.ok
-            (String.Internal.append
+            (psJsConcat6
               "export function "
-              (String.Internal.append
-                declaration.name
-                (String.Internal.append
-                  "("
-                  (String.Internal.append
-                    (psJsJoin ", " parameters)
-                    (String.Internal.append
-                      ") { return "
-                      (String.Internal.append body "; }\n")))))
+              declaration.name
+              "("
+              (psJsJoin ", " parameters)
+              ") { return "
+              (psJsConcat2 body "; }\n"))
 
 def psJsPrintDeclarations
     (declarations : List PsJsIrDeclaration) :
@@ -177,7 +185,7 @@ def psJsPrintDeclarations
           | Except.error error => Except.error error
           | Except.ok printedRest =>
               Except.ok
-                (String.Internal.append
+                (psJsConcat2
                   printed
                   printedRest)
 
@@ -188,7 +196,7 @@ def psJsPrintModule
   | Except.error error => Except.error error
   | Except.ok declarations =>
       Except.ok
-        (String.Internal.append
+        (psJsConcat2
           "// generated by ProofScript direct JsIR v1\n"
           declarations)
 

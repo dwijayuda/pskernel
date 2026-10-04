@@ -110,9 +110,12 @@ Lean 4.34 algorithmic-equality order rather than a bag of helper implementations
 23. `Kernel.lean`
 24. `Quot.lean`
 25. `Inductive.lean`
-26. `InductiveAdmission.lean`
-27. `MutualInductive.lean`
-28. `NestedInductive.lean`
+26. `Theory/Inductive/Constructor.lean`
+27. `Theory/Inductive/Recursor.lean`
+28. `Theory/Inductive/Elimination.lean`
+29. `InductiveAdmission.lean`
+30. `MutualInductive.lean`
+31. `NestedInductive.lean`
 
 ### Backend/runtime mechanisms
 
@@ -245,6 +248,27 @@ checker reduction layer.
 Quotient initialization is explicit state in the environment.
 
 ## 11. Inductive declarations
+
+### Ordinary-inductive source layout
+
+```text
+Inductive.lean
+      |
+Theory/Inductive/Constructor.lean
+      |  parameters, fields, positivity, constructor result
+      v
+Theory/Inductive/Recursor.lean
+      |  motives, minors, recursive calls, rules
+      v
+Theory/Inductive/Elimination.lean
+      |  large-elimination and K/reflexivity policy
+      v
+InductiveAdmission.lean
+         top-level checked environment extension
+```
+
+The split is explanatory only: it preserves the same kernel algorithm and
+keeps the PSC1 self-host source profile.
 
 The inductive checker validates:
 

@@ -1,12 +1,8 @@
 import Ps.KernelSelfHost.Expr
 
 structure PsKernelNativeEvaluator where
-  evalBool :
-    PsKernelName ->
-    Except String (Option Bool)
-  evalNat :
-    PsKernelName ->
-    Except String (Option Nat)
+  evalBool : PsKernelName -> Except String (Option Bool)
+  evalNat : PsKernelName -> Except String (Option Nat)
 
 def psKernelNativeBoolExpr
     (trueName : PsKernelName)

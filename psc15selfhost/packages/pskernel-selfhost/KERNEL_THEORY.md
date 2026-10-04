@@ -398,6 +398,14 @@ that may target any member of the bundle.
 
 The families in one bundle must satisfy Lean's shared-universe constraints.
 
+The mutual admission path is layered as:
+
+- `Theory/Mutual/Analysis.lean` — mutual occurrence and family analysis;
+- `Theory/Mutual/Recursor.lean` — motive/minor/recursive-hypothesis construction;
+- `Theory/Mutual/Header.lean` — shared header/name/type setup;
+- `Theory/Mutual/AdmissionLoops.lean` — checked constructor and recursor loops;
+- `Theory/Mutual/Admission.lean` — top-level bundle transaction.
+
 ## 13. Nested inductives
 
 Nested inductives are split by the transformation stages:

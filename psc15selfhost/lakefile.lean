@@ -257,6 +257,8 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Theory.Nested.Discover,
     `Ps.KernelSelfHost.Theory.Nested.Flatten,
     `Ps.KernelSelfHost.Theory.Nested.Restore,
+    `Ps.KernelSelfHost.Theory.Nested.Validation,
+    `Ps.KernelSelfHost.Theory.Nested.Commit,
     `Ps.KernelSelfHost.Theory.Nested.Admission,
     `Ps.KernelSelfHost.NestedInductive,
     `Ps.KernelSelfHost.SelfHost

@@ -2264,7 +2264,7 @@ def psKernelBenchNestedValidateAuxRules
                   | Option.some newValue =>
                       match newValue with
                       | PsKernelConstantInfo.recInfo newInfo =>
-                          psKernelSimpleNestedCompareRuleTypes
+                          psKernelSimpleNestedCompareValidatedRuleTypes
                             65536
                             transformed
                             finalEnvironment

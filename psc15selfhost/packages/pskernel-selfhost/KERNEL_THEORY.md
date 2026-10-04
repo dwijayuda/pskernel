@@ -104,7 +104,7 @@ These modules define the data manipulated by the checker.
 
 `Theory/DefEq/BinderSpines.lean` isolates binder/application congruence.
 `Theory/DefEq/Quick.lean` isolates the cheap pre-reduction decisions and pair-cache semantics.
-`Theory/DefEq/LazyDelta.lean` isolates Lean's observable lazy-unfolding order.
+`Theory/DefEq/DeltaStep.lean` isolates one-step definition selection and unfolding. `Theory/DefEq/LazyDelta.lean` isolates Lean's observable iterative lazy-unfolding order.
 `Theory/DefEq/FinalRules.lean` isolates proof/proposition handling, structure eta,
 string literal expansion, and unit-like structures.
 `Theory/DefEq/Shortcuts.lean` contains reflection, projection, and function-eta shortcuts.

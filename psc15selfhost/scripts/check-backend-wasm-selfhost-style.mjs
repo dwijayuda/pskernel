@@ -81,6 +81,7 @@ const closed = [
   "map",
   "any",
   "foldl",
+  "numericProjection",
 ];
 
 for (const key of closed) {
@@ -107,8 +108,7 @@ process.stdout.write(
   [
     "PSC2_WASM_SELFHOST_STYLE: PASS",
     ...closed.map(key => `${key}=0`),
-    `remaining.append=${totals.append}`,
-    `remaining.numericProjection=${totals.numericProjection}`,
-    `remaining.multiEquationAlternative=${totals.multiEquationAlternative}`,
+    `supported.appendNotation=${totals.append}`,
+    `supported.equationAlternatives=${totals.multiEquationAlternative}`,
   ].join(" ") + "\n",
 );

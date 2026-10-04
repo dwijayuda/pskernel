@@ -241,6 +241,7 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Quot,
     `Ps.KernelSelfHost.Inductive,
     `Ps.KernelSelfHost.Theory.Inductive.Constructor,
+    `Ps.KernelSelfHost.Theory.Inductive.ConstructorAdmission,
     `Ps.KernelSelfHost.Theory.Inductive.Recursor,
     `Ps.KernelSelfHost.Theory.Inductive.Elimination,
     `Ps.KernelSelfHost.InductiveAdmission,

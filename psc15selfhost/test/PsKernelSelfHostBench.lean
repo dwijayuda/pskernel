@@ -3062,6 +3062,89 @@ def psKernelBenchNestedWideRestore
         processed.state.aux
         renames
 
+partial def psKernelBenchNameString
+    (name : PsKernelName) :
+    String :=
+  match name with
+  | PsKernelName.anonymous =>
+      "_"
+  | PsKernelName.str parent value =>
+      psKernelBenchNameString parent ++ "." ++ value
+  | PsKernelName.num parent value =>
+      psKernelBenchNameString parent ++ "." ++ toString value
+
+def psKernelBenchFirstUnknownWithFuel
+    (fuel : Nat) :
+    PsKernelEnvironment ->
+    PsKernelExpr ->
+    Option PsKernelName :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_environment : PsKernelEnvironment)
+        (_expr : PsKernelExpr) =>
+        Option.none
+  | Nat.succ remaining =>
+      let smaller :=
+        psKernelBenchFirstUnknownWithFuel
+          remaining;
+      fun
+        (environment : PsKernelEnvironment)
+        (expr : PsKernelExpr) =>
+        match expr with
+        | PsKernelExpr.const name _ =>
+            if psKernelEnvironmentContains environment name then
+              Option.none
+            else
+              Option.some name
+        | PsKernelExpr.app fn arg =>
+            match smaller environment fn with
+            | Option.some name =>
+                Option.some name
+            | Option.none =>
+                smaller environment arg
+        | PsKernelExpr.lam _ type body _ =>
+            match smaller environment type with
+            | Option.some name =>
+                Option.some name
+            | Option.none =>
+                smaller environment body
+        | PsKernelExpr.forallE _ type body _ =>
+            match smaller environment type with
+            | Option.some name =>
+                Option.some name
+            | Option.none =>
+                smaller environment body
+        | PsKernelExpr.letE _ type value body _ =>
+            match smaller environment type with
+            | Option.some name =>
+                Option.some name
+            | Option.none =>
+                match smaller environment value with
+                | Option.some name =>
+                    Option.some name
+                | Option.none =>
+                    smaller environment body
+        | PsKernelExpr.mdata _ body =>
+            smaller environment body
+        | PsKernelExpr.proj typeName _ body =>
+            if psKernelEnvironmentContains environment typeName then
+              smaller environment body
+            else
+              Option.some typeName
+        | _ =>
+            Option.none
+
+def psKernelBenchFirstUnknown
+    (environment : PsKernelEnvironment)
+    (expr : PsKernelExpr) :
+    Option PsKernelName :=
+  psKernelBenchFirstUnknownWithFuel
+    (Nat.succ
+      (psKernelExprNodeCount expr))
+    environment
+    expr
+
 partial def psKernelBenchReportNestedRules
     (label : String)
     (session : PsKernelCheckerSession)
@@ -3092,6 +3175,20 @@ partial def psKernelBenchReportNestedRules
               toString index ++
               "_error=" ++
               error)
+          match
+              psKernelBenchFirstUnknown
+                session.context.environment
+                rule.rhs with
+          | Option.none =>
+              pure ()
+          | Option.some name =>
+              IO.println
+                ("PSKERNEL_BENCH " ++
+                  label ++
+                  "_rule_" ++
+                  toString index ++
+                  "_unknown=" ++
+                  psKernelBenchNameString name)
       psKernelBenchReportNestedRules
         label
         session
@@ -3135,6 +3232,18 @@ def psKernelBenchReportNestedRecursor
                   label ++
                   "_type_error=" ++
                   error)
+              match
+                  psKernelBenchFirstUnknown
+                    environment
+                    info.base.type with
+              | Option.none =>
+                  pure ()
+              | Option.some name =>
+                  IO.println
+                    ("PSKERNEL_BENCH " ++
+                      label ++
+                      "_type_unknown=" ++
+                      psKernelBenchNameString name)
           psKernelBenchReportNestedRules
             label
             session

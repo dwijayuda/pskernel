@@ -76,12 +76,15 @@ jobs:
             PsDriverTs \
             PsBackendRust \
             PsDriverRust \
+            PsBackendWasm \
             psc1_erasure_tests \
             psc2_minimal_selfhost_tests \
             psc1_backend_ts_tests \
             psc1_backend_js_tests \
             psc1_backend_js_diff_fixture \
-            psc1_backend_rust_source_tests
+            psc1_backend_rust_source_tests \
+            psc1_backend_wasm_tests \
+            psc1_backend_wasm_binary_smoke
 
       - name: Run VerifiedIR and erasure corpus
         working-directory: psc15selfhost
@@ -106,6 +109,16 @@ jobs:
       - name: Run Rust source driver corpus
         working-directory: psc15selfhost
         run: lake exe psc1_backend_rust_source_tests
+
+      - name: Run WebAssembly backend corpus
+        working-directory: psc15selfhost
+        run: |
+          lake exe psc1_backend_wasm_tests
+          lake exe psc1_backend_wasm_binary_smoke
+
+      - name: Self-check WebAssembly lowering source
+        working-directory: psc15selfhost
+        run: lake exe psc1 check packages/backend-wasm/src/Ps/BackendWasm/Lower.lean
 
       - name: Build checked Lean provider integration
         working-directory: psc15selfhost/lean-checked

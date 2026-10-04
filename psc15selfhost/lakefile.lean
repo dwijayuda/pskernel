@@ -340,6 +340,10 @@ lean_exe psc1_kernel_selfhost_foundation_tests where
   srcDir := "test"
   root := `PsKernelSelfHostFoundationTests
 
+lean_exe psc1_kernel_selfhost_bench where
+  srcDir := "test"
+  root := `PsKernelSelfHostBench
+
 -- Host-only diagnostics; this executable is not a portable bootstrap module.
 lean_exe psc2_joint_closure_inventory where
   srcDir := "scripts"

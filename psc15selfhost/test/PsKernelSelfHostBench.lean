@@ -872,3 +872,99 @@ def main : IO Unit := do
       "/" ++
       toString defeqColdHits)
 
+  let betaBinder :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "benchBeta"
+  let psBeta :=
+    PsKernelExpr.app
+      (PsKernelExpr.lam
+        betaBinder
+        (PsKernelExpr.const psKernelNatName List.nil)
+        (PsKernelExpr.bvar 0)
+        PsKernelBinderInfo.default)
+      checkerExpected
+  let leanBeta :=
+    Lean.Expr.app
+      (Lean.Expr.lam
+        (Lean.Name.str Lean.Name.anonymous "benchBeta")
+        (Lean.Expr.const psKernelBenchLeanNatName [])
+        (Lean.Expr.bvar 0)
+        Lean.BinderInfo.default)
+      leanExpected
+
+  let psEmptySession :=
+    psKernelBenchFreshSession
+      checkerEnvironment
+  let psSort :=
+    PsKernelExpr.sort PsKernelLevel.zero
+  let leanSort :=
+    Lean.Expr.sort Lean.Level.zero
+
+  let betaPsStart ← IO.monoNanosNow
+  let betaPsHits ←
+    psKernelBenchWhnfColdLoop
+      checkerIterations
+      checkerEnvironment
+      psBeta
+  let betaPsStop ← IO.monoNanosNow
+
+  let betaLeanStart ← IO.monoNanosNow
+  let betaLeanHits ←
+    psKernelBenchLeanWhnfLoop
+      checkerIterations
+      leanEnvironment
+      leanBeta
+  let betaLeanStop ← IO.monoNanosNow
+
+  let structuralPsStart ← IO.monoNanosNow
+  let structuralPsHits ←
+    psKernelBenchDefEqColdLoop
+      checkerIterations
+      checkerEnvironment
+      psSort
+      psSort
+  let structuralPsStop ← IO.monoNanosNow
+
+  let structuralLeanStart ← IO.monoNanosNow
+  let structuralLeanHits ←
+    psKernelBenchLeanDefEqLoop
+      checkerIterations
+      leanEnvironment
+      leanSort
+      leanSort
+  let structuralLeanStop ← IO.monoNanosNow
+
+  let _ := psEmptySession
+
+  IO.println
+    ("PSKERNEL_BENCH beta_pskernel_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          betaPsStart
+          betaPsStop) ++
+      " beta_lean_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          betaLeanStart
+          betaLeanStop) ++
+      " hits=" ++
+      toString betaPsHits ++
+      "/" ++
+      toString betaLeanHits)
+  IO.println
+    ("PSKERNEL_BENCH structural_defeq_pskernel_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          structuralPsStart
+          structuralPsStop) ++
+      " structural_defeq_lean_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          structuralLeanStart
+          structuralLeanStop) ++
+      " hits=" ++
+      toString structuralPsHits ++
+      "/" ++
+      toString structuralLeanHits)
+

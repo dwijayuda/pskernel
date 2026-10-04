@@ -334,6 +334,45 @@ This workload is now inside the initial native target of approximately
 `<= 1.5-2x` Lean. The next application work should use dependent argument
 types before introducing any more special cases.
 
+## 2.6 Dependent application-spine check
+
+A second application fixture makes the final result type depend on the first
+`Nat` argument. This forces real de Bruijn substitution while keeping the
+argument domains simple and comparable with Lean 4.34.
+
+Two representative matched runs after the `instantiate1` non-dependent fast
+path gave:
+
+```text
+dependent checked spine, run A:
+  PSKernel : 7,049,900 ns
+  Lean     : 5,866,100 ns
+  ratio    : ~1.20x
+
+dependent checked spine, run B:
+  PSKernel : 8,420,000 ns
+  Lean     : 5,885,600 ns
+  ratio    : ~1.43x
+```
+
+The dependent path is therefore already inside the initial ~1.5-2x native
+target on these microcases.
+
+The non-dependent checked-spine numbers show substantial scheduler/system noise
+between runs, including a same-binary repeat moving from a poor outlier to near
+parity with Lean. Do not tune further based on one wall-clock sample. The stable
+engineering conclusions are:
+
+- removing counterproductive checked-app memoization produced a large repeatable
+  improvement from the original ~19.5 ms shape;
+- structural argument/domain equality is a worthwhile cheap fast path;
+- skipping substitution for non-dependent codomains is semantically simple and
+  useful;
+- genuinely dependent substitution is not currently an obvious hotspot.
+
+Next performance work should move to recursor reduction and representative
+inductive admission rather than adding more application-specific special cases.
+
 ## 3. Interpretation
 
 The existing runtime-index work is justified.

@@ -2006,6 +2006,177 @@ def psKernelSelfHostNestedTests : Bool :=
   | _, _ =>
       false
 
+def psKernelRuntimeCacheInvariantTests : Bool :=
+  let nameA :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "cacheA"
+  let nameB :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "cacheB"
+  let type :=
+    PsKernelExpr.sort PsKernelLevel.zero
+  let body :=
+    PsKernelExpr.bvar 0
+  let left :=
+    PsKernelExpr.lam
+      nameA
+      type
+      body
+      PsKernelBinderInfo.default
+  let equalByCacheSemantics :=
+    PsKernelExpr.lam
+      nameB
+      type
+      body
+      PsKernelBinderInfo.implicit
+  let value :=
+    PsKernelExpr.lit
+      (PsKernelLiteral.nat 99)
+  let cache :=
+    psKernelExprMapInsert
+      psKernelExprMapEmpty
+      left
+      value
+  let pairSet :=
+    psKernelExprPairSetInsert
+      psKernelExprPairSetEmpty
+      left
+      value
+  Bool.and
+    (psKernelExprEq
+      left
+      equalByCacheSemantics)
+    (Bool.and
+      (Nat.beq
+        (psKernelExprHash left)
+        (psKernelExprHash equalByCacheSemantics))
+      (Bool.and
+        (match
+            psKernelExprMapGet
+              cache
+              equalByCacheSemantics with
+        | Option.some cached =>
+            psKernelExprEq cached value
+        | Option.none =>
+            false)
+        (Bool.and
+          (Nat.beq
+            (psKernelExprPairHash left value)
+            (psKernelExprPairHash value left))
+          (psKernelExprPairSetContains
+            pairSet
+            value
+            equalByCacheSemantics))))
+
+def psKernelRuntimeEnvironmentIndexInvariantTests : Bool :=
+  let firstName :=
+    PsKernelName.num
+      PsKernelName.anonymous
+      1
+  let collisionName :=
+    PsKernelName.num
+      PsKernelName.anonymous
+      65522
+  let firstType :=
+    PsKernelExpr.sort PsKernelLevel.zero
+  let collisionType :=
+    PsKernelExpr.sort
+      (PsKernelLevel.succ PsKernelLevel.zero)
+  let replacementType :=
+    PsKernelExpr.sort
+      (PsKernelLevel.succ
+        (PsKernelLevel.succ PsKernelLevel.zero))
+  let firstInfo :=
+    PsKernelConstantInfo.axiomInfo {
+      base := {
+        name := firstName
+        levelParams := List.nil
+        type := firstType
+      }
+      isUnsafe := false
+    }
+  let collisionInfo :=
+    PsKernelConstantInfo.axiomInfo {
+      base := {
+        name := collisionName
+        levelParams := List.nil
+        type := collisionType
+      }
+      isUnsafe := false
+    }
+  let replacement :=
+    PsKernelConstantInfo.axiomInfo {
+      base := {
+        name := firstName
+        levelParams := List.nil
+        type := replacementType
+      }
+      isUnsafe := false
+    }
+  let environment0 :=
+    psKernelEnvironmentAddUnchecked
+      psKernelEnvironmentEmpty
+      firstInfo
+  let environment1 :=
+    psKernelEnvironmentAddUnchecked
+      environment0
+      collisionInfo
+  let environment2 :=
+    psKernelEnvironmentReplaceUnchecked
+      environment1
+      replacement
+  Bool.and
+    (Nat.beq
+      (psKernelEnvironmentNameHash firstName)
+      (psKernelEnvironmentNameHash collisionName))
+    (Bool.and
+      (match
+          psKernelEnvironmentFind
+            environment1
+            firstName,
+          psKernelFindConstantInList
+            firstName
+            environment1.constants with
+      | Option.some indexed,
+        Option.some authoritative =>
+          psKernelExprEq
+            (psKernelConstantInfoType indexed)
+            (psKernelConstantInfoType authoritative)
+      | _, _ =>
+          false)
+      (Bool.and
+        (match
+            psKernelEnvironmentFind
+              environment1
+              collisionName,
+            psKernelFindConstantInList
+              collisionName
+              environment1.constants with
+        | Option.some indexed,
+          Option.some authoritative =>
+            psKernelExprEq
+              (psKernelConstantInfoType indexed)
+              (psKernelConstantInfoType authoritative)
+        | _, _ =>
+            false)
+        (match
+            psKernelEnvironmentFind
+              environment2
+              firstName with
+        | Option.some indexed =>
+            psKernelExprEq
+              (psKernelConstantInfoType indexed)
+              replacementType
+        | Option.none =>
+            false)))
+
+def psKernelRuntimeInvariantTests : Bool :=
+  Bool.and
+    psKernelRuntimeCacheInvariantTests
+    psKernelRuntimeEnvironmentIndexInvariantTests
+
 def main : IO Unit :=
   if !psKernelSelfHostNameTests then
     throw
@@ -2027,6 +2198,10 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_PRIMITIVE_DIFFERENTIAL: FAIL")
+  else if !psKernelRuntimeInvariantTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_RUNTIME_INVARIANT: FAIL")
   else if !psKernelSelfHostWhnfTests then
     throw
       (IO.userError

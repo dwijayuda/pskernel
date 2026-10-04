@@ -176,6 +176,96 @@ def psKernelBenchElapsed
     Nat :=
   Nat.sub stop start
 
+partial def psKernelBenchNameHashLoop
+    (iterations : Nat)
+    (name : PsKernelName) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNameHashLoop
+          rest
+          name
+      pure
+        (Nat.add
+          tail
+          (psKernelEnvironmentNameHash name))
+
+partial def psKernelBenchExprHashLoop
+    (iterations : Nat)
+    (expr : PsKernelExpr) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchExprHashLoop
+          rest
+          expr
+      pure
+        (Nat.add
+          tail
+          (psKernelExprHash expr))
+
+partial def psKernelBenchEnvironmentPrehashedLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment)
+    (target : PsKernelName)
+    (hash : Nat) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchEnvironmentPrehashedLoop
+          rest
+          environment
+          target
+          hash
+      match
+          psKernelFindConstantInList
+            target
+            (psKernelEnvironmentIndexFindWorker
+              16
+              environment.index
+              hash) with
+      | Option.some _ =>
+          pure (Nat.succ tail)
+      | Option.none =>
+          pure tail
+
+partial def psKernelBenchCachePrehashedLoop
+    (iterations : Nat)
+    (cache : PsKernelExprMap)
+    (target : PsKernelExpr)
+    (hash : Nat) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchCachePrehashedLoop
+          rest
+          cache
+          target
+          hash
+      match
+          psKernelExprMapGetIn
+            target
+            (psKernelExprMapIndexBucket
+              16
+              cache.index
+              hash) with
+      | Option.some _ =>
+          pure (Nat.succ tail)
+      | Option.none =>
+          pure tail
+
 def psKernelBenchLeanNatName : Lean.Name :=
   Lean.Name.str
     Lean.Name.anonymous
@@ -515,6 +605,43 @@ def main : IO Unit := do
       targetExpr
   let cacheLinearStop ← IO.monoNanosNow
 
+  let targetNameHash :=
+    psKernelEnvironmentNameHash targetName
+  let targetExprHash :=
+    psKernelExprHash targetExpr
+
+  let nameHashStart ← IO.monoNanosNow
+  let nameHashAccumulator ←
+    psKernelBenchNameHashLoop
+      iterations
+      targetName
+  let nameHashStop ← IO.monoNanosNow
+
+  let exprHashStart ← IO.monoNanosNow
+  let exprHashAccumulator ←
+    psKernelBenchExprHashLoop
+      iterations
+      targetExpr
+  let exprHashStop ← IO.monoNanosNow
+
+  let envPrehashedStart ← IO.monoNanosNow
+  let envPrehashedHits ←
+    psKernelBenchEnvironmentPrehashedLoop
+      iterations
+      environment
+      targetName
+      targetNameHash
+  let envPrehashedStop ← IO.monoNanosNow
+
+  let cachePrehashedStart ← IO.monoNanosNow
+  let cachePrehashedHits ←
+    psKernelBenchCachePrehashedLoop
+      iterations
+      cache
+      targetExpr
+      targetExprHash
+  let cachePrehashedStop ← IO.monoNanosNow
+
   IO.println
     ("PSKERNEL_BENCH environment_indexed_ns=" ++
       toString
@@ -545,6 +672,37 @@ def main : IO Unit := do
       toString cacheIndexedHits ++
       "/" ++
       toString cacheLinearHits)
+
+  IO.println
+    ("PSKERNEL_BENCH name_hash_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nameHashStart
+          nameHashStop) ++
+      " expr_hash_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          exprHashStart
+          exprHashStop) ++
+      " accumulators=" ++
+      toString nameHashAccumulator ++
+      "/" ++
+      toString exprHashAccumulator)
+  IO.println
+    ("PSKERNEL_BENCH environment_prehashed_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          envPrehashedStart
+          envPrehashedStop) ++
+      " cache_prehashed_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          cachePrehashedStart
+          cachePrehashedStop) ++
+      " hits=" ++
+      toString envPrehashedHits ++
+      "/" ++
+      toString cachePrehashedHits)
 
   let checkerEnvironment :=
     psKernelBenchCheckerEnvironment

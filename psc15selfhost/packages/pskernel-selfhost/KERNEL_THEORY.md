@@ -365,6 +365,14 @@ Ordinary admission deliberately rejects nested recursive occurrences. Nested
 admission preprocesses these occurrences and then validates the resulting
 mutual bundle.
 
+The ordinary path is split by responsibility:
+
+- `Theory/Inductive/Constructor.lean` — constructor opening, positivity and result analysis;
+- `Theory/Inductive/ConstructorAdmission.lean` — checked constructor loop and working-environment installation;
+- `Theory/Inductive/Recursor.lean` — recursor metadata and rule construction;
+- `Theory/Inductive/Elimination.lean` — elimination restrictions;
+- `InductiveAdmission.lean` — top-level bundle transaction and final commit.
+
 ## 12. Mutual inductives
 
 Mutual inductives are split by theory responsibility:

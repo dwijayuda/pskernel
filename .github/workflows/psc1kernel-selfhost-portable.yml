@@ -13,6 +13,7 @@ on:
       - psc15selfhost/scripts/psc1kernel-port-translate-check.mjs
       - psc15selfhost/scripts/psc1kernel-port-pattern-audit.mjs
       - psc15selfhost/scripts/psc1kernel-compatibility-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-conformance-audit.mjs
       - psc15selfhost/check-psc1-source.mjs
       - psc15selfhost/lakefile.lean
       - psc15selfhost/test/PsKernelSelfHostFoundationTests.lean
@@ -64,6 +65,11 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/psc1kernel-compatibility-audit.mjs --require-complete
+
+      - name: Audit Lean 4.34 conformance coverage
+        run: |
+          set -euo pipefail
+          node scripts/psc1kernel-conformance-audit.mjs
 
       - name: Build proven PSC1 compiler
         run: |

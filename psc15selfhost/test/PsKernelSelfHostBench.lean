@@ -54,7 +54,7 @@ partial def psKernelBenchEnvironmentIndexedLoop
   match iterations with
   | Nat.zero =>
       pure 0
-  | Nat.succ rest =>
+  | Nat.succ rest => do
       let tail ←
         psKernelBenchEnvironmentIndexedLoop
           rest
@@ -77,7 +77,7 @@ partial def psKernelBenchEnvironmentLinearLoop
   match iterations with
   | Nat.zero =>
       pure 0
-  | Nat.succ rest =>
+  | Nat.succ rest => do
       let tail ←
         psKernelBenchEnvironmentLinearLoop
           rest
@@ -137,7 +137,7 @@ partial def psKernelBenchCacheIndexedLoop
   match iterations with
   | Nat.zero =>
       pure 0
-  | Nat.succ rest =>
+  | Nat.succ rest => do
       let tail ←
         psKernelBenchCacheIndexedLoop
           rest
@@ -157,7 +157,7 @@ partial def psKernelBenchCacheLinearLoop
   match iterations with
   | Nat.zero =>
       pure 0
-  | Nat.succ rest =>
+  | Nat.succ rest => do
       let tail ←
         psKernelBenchCacheLinearLoop
           rest

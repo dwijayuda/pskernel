@@ -1,5 +1,4 @@
-import Ps.KernelSelfHost.CheckerState
-import Ps.KernelSelfHost.Environment
+import Ps.KernelSelfHost.CheckerSession
 
 def psKernelBenchName
     (index : Nat) :
@@ -176,6 +175,180 @@ def psKernelBenchElapsed
     Nat :=
   Nat.sub stop start
 
+def psKernelBenchDeltaName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "BenchDelta"
+
+def psKernelBenchCheckerEnvironment :
+    PsKernelEnvironment :=
+  let natBase : PsKernelConstantBase := {
+    name := psKernelNatName
+    levelParams := List.nil
+    type :=
+      PsKernelExpr.sort
+        (PsKernelLevel.succ PsKernelLevel.zero)
+  }
+  let env1 :=
+    psKernelEnvironmentAddUnchecked
+      psKernelEnvironmentEmpty
+      (PsKernelConstantInfo.axiomInfo {
+        base := natBase
+        isUnsafe := false
+      })
+  psKernelEnvironmentAddUnchecked
+    env1
+    (PsKernelConstantInfo.defnInfo {
+      base := {
+        name := psKernelBenchDeltaName
+        levelParams := List.nil
+        type :=
+          PsKernelExpr.const
+            psKernelNatName
+            List.nil
+      }
+      value :=
+        PsKernelExpr.lit
+          (PsKernelLiteral.nat 42)
+      hints := PsKernelReducibilityHints.regular 0
+      safety := PsKernelDefinitionSafety.safe
+    })
+
+def psKernelBenchFreshSession
+    (environment : PsKernelEnvironment) :
+    PsKernelCheckerSession :=
+  psKernelMkCheckerSession
+    environment
+    List.nil
+    PsKernelDefinitionSafety.safe
+    0
+    psKernelLeanNatMaxSizeDefault
+
+partial def psKernelBenchWhnfColdLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment)
+    (expr : PsKernelExpr) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchWhnfColdLoop
+          rest
+          environment
+          expr
+      match
+          psKernelSessionWhnf
+            512
+            (psKernelBenchFreshSession
+              environment)
+            expr with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchWhnfWarmLoop
+    (iterations : Nat)
+    (session : PsKernelCheckerSession)
+    (expr : PsKernelExpr) :
+    IO (Prod Nat PsKernelCheckerSession) :=
+  match iterations with
+  | Nat.zero =>
+      pure (Prod.mk 0 session)
+  | Nat.succ rest =>
+      match
+          psKernelSessionWhnf
+            512
+            session
+            expr with
+      | Except.error _ =>
+          psKernelBenchWhnfWarmLoop
+            rest
+            session
+            expr
+      | Except.ok result => do
+          let tail ←
+            psKernelBenchWhnfWarmLoop
+              rest
+              (Prod.snd result)
+              expr
+          pure
+            (Prod.mk
+              (Nat.succ (Prod.fst tail))
+              (Prod.snd tail))
+
+partial def psKernelBenchDefEqColdLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment)
+    (left right : PsKernelExpr) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchDefEqColdLoop
+          rest
+          environment
+          left
+          right
+      match
+          psKernelSessionIsDefEq
+            1024
+            (psKernelBenchFreshSession
+              environment)
+            left
+            right with
+      | Except.ok result =>
+          if Prod.fst result then
+            pure (Nat.succ tail)
+          else
+            pure tail
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchDefEqWarmLoop
+    (iterations : Nat)
+    (session : PsKernelCheckerSession)
+    (left right : PsKernelExpr) :
+    IO (Prod Nat PsKernelCheckerSession) :=
+  match iterations with
+  | Nat.zero =>
+      pure (Prod.mk 0 session)
+  | Nat.succ rest =>
+      match
+          psKernelSessionIsDefEq
+            1024
+            session
+            left
+            right with
+      | Except.error _ =>
+          psKernelBenchDefEqWarmLoop
+            rest
+            session
+            left
+            right
+      | Except.ok result =>
+          if Prod.fst result then do
+            let tail ←
+              psKernelBenchDefEqWarmLoop
+                rest
+                (Prod.snd result)
+                left
+                right
+            pure
+              (Prod.mk
+                (Nat.succ (Prod.fst tail))
+                (Prod.snd tail))
+          else
+            psKernelBenchDefEqWarmLoop
+              rest
+              (Prod.snd result)
+              left
+              right
+
 def main : IO Unit := do
   let size := 2048
   let iterations := 2000
@@ -257,3 +430,107 @@ def main : IO Unit := do
       toString cacheIndexedHits ++
       "/" ++
       toString cacheLinearHits)
+
+  let checkerEnvironment :=
+    psKernelBenchCheckerEnvironment
+  let checkerExpr :=
+    PsKernelExpr.const
+      psKernelBenchDeltaName
+      List.nil
+  let checkerExpected :=
+    PsKernelExpr.lit
+      (PsKernelLiteral.nat 42)
+  let checkerIterations := 1000
+
+  let whnfColdStart ← IO.monoNanosNow
+  let whnfColdHits ←
+    psKernelBenchWhnfColdLoop
+      checkerIterations
+      checkerEnvironment
+      checkerExpr
+  let whnfColdStop ← IO.monoNanosNow
+
+  let whnfWarmSeed :=
+    psKernelSessionWhnf
+      512
+      (psKernelBenchFreshSession
+        checkerEnvironment)
+      checkerExpr
+  let whnfWarmSession :=
+    match whnfWarmSeed with
+    | Except.ok result =>
+        Prod.snd result
+    | Except.error _ =>
+        psKernelBenchFreshSession
+          checkerEnvironment
+  let whnfWarmStart ← IO.monoNanosNow
+  let whnfWarmResult ←
+    psKernelBenchWhnfWarmLoop
+      checkerIterations
+      whnfWarmSession
+      checkerExpr
+  let whnfWarmStop ← IO.monoNanosNow
+
+  let defeqColdStart ← IO.monoNanosNow
+  let defeqColdHits ←
+    psKernelBenchDefEqColdLoop
+      checkerIterations
+      checkerEnvironment
+      checkerExpr
+      checkerExpected
+  let defeqColdStop ← IO.monoNanosNow
+
+  let defeqWarmSeed :=
+    psKernelSessionIsDefEq
+      1024
+      (psKernelBenchFreshSession
+        checkerEnvironment)
+      checkerExpr
+      checkerExpected
+  let defeqWarmSession :=
+    match defeqWarmSeed with
+    | Except.ok result =>
+        Prod.snd result
+    | Except.error _ =>
+        psKernelBenchFreshSession
+          checkerEnvironment
+  let defeqWarmStart ← IO.monoNanosNow
+  let defeqWarmResult ←
+    psKernelBenchDefEqWarmLoop
+      checkerIterations
+      defeqWarmSession
+      checkerExpr
+      checkerExpected
+  let defeqWarmStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH whnf_cold_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          whnfColdStart
+          whnfColdStop) ++
+      " whnf_warm_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          whnfWarmStart
+          whnfWarmStop) ++
+      " whnf_hits=" ++
+      toString whnfColdHits ++
+      "/" ++
+      toString (Prod.fst whnfWarmResult))
+  IO.println
+    ("PSKERNEL_BENCH defeq_cold_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          defeqColdStart
+          defeqColdStop) ++
+      " defeq_warm_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          defeqWarmStart
+          defeqWarmStop) ++
+      " defeq_hits=" ++
+      toString defeqColdHits ++
+      "/" ++
+      toString (Prod.fst defeqWarmResult))
+

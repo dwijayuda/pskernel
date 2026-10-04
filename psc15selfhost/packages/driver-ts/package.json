@@ -10,7 +10,10 @@
       "src"
     ],
     "outDir": "dist",
-    "role": "typescript-compiler-driver"
+    "role": "typescript-compiler-driver",
+    "testRoots": [
+      "test"
+    ]
   },
   "dependencies": {
     "@proofscript/compiler-next": "0.0.0-dev",

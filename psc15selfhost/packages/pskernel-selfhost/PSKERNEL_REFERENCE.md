@@ -1,58 +1,35 @@
 # PSKernel Reference
 
-> Architecture, Lean 4.34 theory mapping, current implementation audit, and target structure.
+> Canonical architecture review, Lean 4.34 theory map, current-state audit, final target architecture, trust model, dependency law, evidence model, and migration plan for the portable self-host kernel.
 
-## 0. Document status
+## 0. Status and scope
 
-This document is the human-oriented reference for the portable self-host PSKernel architecture.
-
-It combines:
-
-- the relevant Lean 4.34 kernel theory;
-- the exact Lean 4.34 implementation architecture used as compatibility authority;
-- the current PSKernel self-host architecture and source layout;
-- an explicit architectural evaluation;
-- a proposed target source/test structure;
-- migration rules that preserve semantics and PSC1 self-hostability.
-
-This document is descriptive and architectural. Machine-readable semantic completeness remains authoritative in:
-
-- LEAN_4_34_COMPATIBILITY.json
-- LEAN_4_34_CONFORMANCE.json
-
-Normative anti-drift rules remain in:
-
-- PSKERNEL_SELFHOST_ARCHITECTURE.md
-
-The active development roadmap remains in:
-
-- DEVELOPMENT_PLAN.md
-
-The theory reading guide remains in:
-
-- KERNEL_THEORY.md
-
-This reference does not replace those machine gates. It explains how they fit together and records the recommended long-term architecture.
-
-### Audited revisions
-
-PSKernel branch:
+This document is the human architecture reference for:
 
 ~~~text
-psc2/psc1kernel-selfhost-portable
+repository: dwijayuda/pskernel
+branch:     psc2/psc1kernel-selfhost-portable
+package:    psc15selfhost/packages/pskernel-selfhost
 ~~~
 
-PSKernel audited head:
+Audited PSKernel implementation head:
 
 ~~~text
 9611405267dbdaa66812e4dfa7642fc799d2e758
 ~~~
 
-Lean semantic compatibility target:
+PSKernel reference revision:
+
+~~~text
+this document supersedes the first PSKERNEL_REFERENCE.md created at
+9f13c2caf1e5ff55a1f605fe0dc8d54c42a6375b
+~~~
+
+Lean compatibility authority:
 
 ~~~text
 Lean 4.34.0
-293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
 ~~~
 
 Research date:
@@ -61,76 +38,189 @@ Research date:
 2026-10-05
 ~~~
 
-Lean 4.34.1 exists as a later patch release, but this project is intentionally pinned to Lean 4.34.0. The target must not change implicitly while reorganizing PSKernel.
+This reference has four jobs:
+
+1. explain the Lean theory that PSKernel implements;
+2. map that theory to the exact Lean 4.34 kernel implementation;
+3. evaluate the current PSKernel self-host architecture honestly;
+4. define a final target architecture that can be reached without changing semantics.
+
+Machine-readable semantic completion remains authoritative in:
+
+- LEAN_4_34_COMPATIBILITY.json
+- LEAN_4_34_CONFORMANCE.json
+
+Normative anti-drift policy remains in:
+
+- PSKERNEL_SELFHOST_ARCHITECTURE.md
+
+The active work plan remains in:
+
+- DEVELOPMENT_PLAN.md
+
+Detailed algorithm exposition remains in:
+
+- KERNEL_THEORY.md
+
+Generated rule indexing remains in:
+
+- KERNEL_RULE_REFERENCE.md
+
+This document should not duplicate those files unnecessarily. It defines how they fit together.
 
 ---
 
-# 1. Executive judgment
+# 1. Executive conclusion
 
-PSKernel's current architecture is good and materially better than the older flat PSC1Kernel structure.
+## 1.1 Current implementation
 
-Its strongest architectural properties are:
+The current PSKernel self-host implementation is already a credible Lean 4.34-compatible kernel architecture.
 
-1. one semantic source of truth;
-2. exact Lean 4.34 target pinning;
-3. explicit fail-closed checking;
-4. a clean conceptual distinction between semantic algorithms and non-semantic accelerators;
-5. PSC1 portable-source self-hostability;
-6. explicit inference, WHNF, recursor, definitional-equality and admission pipelines;
-7. unusually good nested-inductive decomposition;
-8. rule-to-source-to-test traceability;
-9. frequent direct comparison with Lean behavior;
-10. current 34/34 declared compatibility and conformance coverage.
+Its strongest properties are:
 
-However, the physical file/dependency structure is not yet as clean as the semantic design.
+- one maintained semantic implementation;
+- explicit Lean 4.34 pinning;
+- PSC1-self-hostable source;
+- fail-closed errors and exhaustion;
+- faithful checked-vs-infer-only distinction;
+- a clear WHNF pipeline;
+- a particularly strong definitional-equality decomposition;
+- explicit ordinary, mutual and nested inductive admission;
+- separate cache/index implementation;
+- current 34/34 declared compatibility coverage;
+- current 34/34 conformance mapping;
+- frequent Lean-native performance comparison;
+- a portable-source and canonical-ProofScript closure gate.
 
-The main architecture debt is:
+Current implementation architecture score:
 
-1. the top-level directory mixes foundational data, real implementation modules, public integration modules and compatibility umbrellas;
-2. Theory modules occasionally depend upward through TypeChecker integration modules, so the physical import graph does not enforce the conceptual theory/runtime layering;
-3. the central recursive checker knot is distributed across several TypeChecker*.lean files rather than being named explicitly as one engine boundary;
-4. ordinary, mutual and nested inductive admission are physically separated into inconsistent top-level shapes even though they are one conceptual subsystem;
-5. runtime cache policy is partly located inside theory-facing inference helpers;
-6. Environment physically contains runtime index/provider state, so the semantic/runtime separation is an invariant rather than a strict type-level/module-level boundary;
-7. the 34-rule matrix is excellent as a release checklist but too coarse to describe high-risk internal algorithms such as inductive and nested admission;
-8. much differential coverage uses the frozen PSC1Kernel reference, which is valuable but not sufficiently independent by itself because the self-host implementation was derived from that implementation;
-9. the foundation test and benchmark executables are now large monoliths;
-10. the source still shows migration-era compatibility layers in the primary reading path.
+~~~text
+8.7 / 10
+~~~
 
-## 1.1 Current score
+This score is intentionally below the target score.
 
-Weighted architectural score:
+The main remaining weakness is not missing Lean theory. It is physical architecture:
 
-| Area | Score | Assessment |
-| --- | ---: | --- |
-| Lean 4.34 semantic fidelity and trust discipline | 9.3/10 | Strong |
-| PSC1 self-host portability | 9.6/10 | Excellent |
-| Theory decomposition and readability | 8.9/10 | Strong |
-| Runtime/semantic separation | 8.7/10 | Strong conceptually, imperfect physically |
-| Dependency layering | 7.5/10 | Main source-layout weakness |
-| File/folder coherence | 7.8/10 | Good but still migration-shaped |
-| Conformance/evidence architecture | 8.5/10 | Strong, but oracle independence and subrule granularity should improve |
-| Performance architecture | 8.5/10 | Profiling-driven and semantics-preserving |
-| Test/benchmark organization | 7.0/10 | Correct but too monolithic |
-| Deployment/provider readiness | 7.7/10 | Core is mature; provider authority gate is intentionally not yet promoted |
+- folder ownership;
+- import direction;
+- checker-cycle wiring;
+- migration-era top-level wrappers;
+- trust-boundary classification;
+- independent oracle coverage;
+- very large test/benchmark files.
 
-### Overall: 8.7 / 10
+## 1.2 Previous target-plan score
 
-This is not a 9.8 architecture yet.
+The first PSKERNEL_REFERENCE proposed:
 
-The reason is not missing core functionality. The reason is that a production proof kernel benefits from an import graph and test structure whose correctness boundaries are obvious mechanically, not only explained in documentation.
+- Core
+- Runtime
+- Environment
+- Checker
+- Admission
+- API
+- Compat
 
-A realistic target after a semantics-preserving reorganization is approximately 9.4-9.6/10.
+with an explicit Checker/Engine and a unified inductive hierarchy.
+
+Under the stricter rubric used in this review, that plan scores:
+
+~~~text
+9.44 / 10
+~~~
+
+It was directionally correct but still had important weaknesses:
+
+1. Runtime grouped harmless caches/indexes together with native evaluation, even though native evaluation extends the trusted computing base.
+2. Checker/Engine was described as an integration point but did not precisely define the recursion-knot interface.
+3. Environment/runtime separation was still partly documentary rather than structural.
+4. Compat was still shown as part of the final tree rather than a temporary migration layer.
+5. The target did not define a machine-readable architecture manifest.
+6. The oracle model still needed a stronger official-Lean-first hierarchy.
+7. The target did not explicitly separate source architecture from migration architecture.
+
+## 1.3 Design loop
+
+The architecture was rescored after each redesign pass.
+
+| Iteration | Main improvements | Score |
+| --- | --- | ---: |
+| 1 | first reference target: Core/Runtime/Environment/Checker/Admission/API | 9.44 |
+| 2 | import fences, explicit checker knot, split tests, official Lean oracle, API contract | 9.78 |
+| 3 | acceleration vs trusted-capability separation, semantic environment projection, final tree without Compat, architecture manifest, strict source ownership | **9.90** |
+
+The final target architecture defined by this document therefore clears the requested threshold:
+
+~~~text
+final planned architecture score: 9.90 / 10
+~~~
+
+This is a score for the **planned architecture**.
+
+It is not a claim that the current implementation has already reached 9.90.
 
 ---
 
-# 2. What the Lean kernel actually is
+# 2. Source authority hierarchy
 
-Lean separates a large frontend/compiler ecosystem from a small trusted proof-checking core.
+Architecture decisions need a clear authority order.
 
-The kernel consumes elaborated core expressions and declarations. Parsing, syntax macros, tactics, typeclass search and most elaboration are outside the kernel trust boundary.
+Use:
 
-The kernel's conceptual job is approximately:
+~~~text
+1. exact Lean 4.34.0 kernel source at the pinned commit
+2. Lean 4.34 release hardening notes and direct behavior
+3. Lean core type-system documentation
+4. official Lean kernel differential execution
+5. PSKernel machine compatibility/conformance matrices
+6. frozen PSC1Kernel differential reference
+7. independent checker implementations as comparative evidence
+8. architectural inference and engineering judgment
+~~~
+
+The distinction between items 1 and 3 matters.
+
+The live Lean Language Reference currently follows a newer release line than PSKernel's target. The exact 4.34.0 source is therefore the authority for implementation-order claims.
+
+A particularly important example is native reduction:
+
+- Lean 4.34 supports the deprecated Lean.reduceBool / Lean.reduceNat kernel path.
+- Lean 4.35 removes it.
+- PSKernel is pinned to 4.34.0, so 4.34 behavior must be preserved until the target changes explicitly.
+
+Future-Lean information is useful for architecture isolation, but it must not silently alter current semantics.
+
+---
+
+# 3. Lean's kernel boundary
+
+Lean has a deliberately small trusted logical core.
+
+The kernel receives already elaborated expressions and declarations.
+
+Outside the core kernel are:
+
+~~~text
+surface syntax
+parser
+macros
+elaboration
+unification
+tactics
+typeclass search
+termination elaboration
+compiler
+code generator
+package/build tooling
+IDE/server
+~~~
+
+Recursive source functions are translated into primitive recursor use before kernel checking.
+
+The kernel therefore does not need a general syntactic termination checker.
+
+Conceptually, the main trusted transition is:
 
 ~~~text
 Environment
@@ -138,41 +228,49 @@ Environment
 core Declaration
     |
     v
-validate declaration
+kernel validation
     |
     +-- reject
     |
-    '-- accept -> new Environment
+    '-- accept -> Environment'
 ~~~
 
-The central logical judgments are:
+The corresponding PSKernel architecture should optimize for declaration validation, not attempt to absorb frontend/compiler responsibilities.
+
+---
+
+# 4. Lean theory implemented by the kernel
+
+Lean's core theory is a dependently typed lambda calculus derived from the Calculus of Constructions and extended with inductive types, quotient primitives, proof irrelevance and Lean-specific definitional computation.
+
+The central executable judgments for PSKernel are:
 
 ~~~text
 infer  : Γ |- e : A
+
+check  : Γ |- e valid, returning type A
 
 whnf   : e -->* weak-head form
 
 defeq  : Γ |- A <=> B
 
-admit  : Γ + declaration is a valid environment extension
+admit  : Environment + Declaration -> Environment'
 ~~~
 
-These judgments are mutually dependent at the algorithmic level.
+They are algorithmically mutually dependent.
 
 Inference needs conversion.
-Conversion needs inference and reduction.
-Reduction may need recursor metadata and inference.
+Conversion needs reduction and sometimes inference.
+Reduction needs recursor metadata and sometimes conversion.
 Admission invokes all of them.
 
-This mutual dependency is one reason Lean's official C++ type_checker is a tightly integrated class rather than a collection of completely independent functions.
+This checker recursion knot is fundamental and should be explicit in the architecture.
 
 ---
 
-# 3. Lean 4 core theory relevant to PSKernel
+# 5. Core expression language
 
-Lean's core terms form a dependently typed lambda calculus extended with universes, constants, inductive types, primitive projections, literals, metadata and quotient primitives.
-
-The expression kinds in Lean 4.34 are:
+Lean 4.34 kernel expressions include:
 
 ~~~text
 BVar
@@ -189,188 +287,349 @@ MData
 Proj
 ~~~
 
-Metavariables are not accepted by the kernel type checker as checked proof terms.
+The elaborator may create metavariables while solving a source program.
 
-## 3.1 Universes
+The kernel checker does not accept unresolved metavariables as valid checked terms.
 
-Lean universe levels are built from:
+Important architecture implication:
+
+Core representation should remain independent from checker state, admission policy and runtime caches.
+
+---
+
+# 6. Universes
+
+Lean universe levels contain:
 
 ~~~text
-0
-succ u
-max u v
-imax u v
+zero
+succ
+max
+imax
 parameter
 metavariable
 ~~~
 
-For kernel-checked declarations, level parameters must obey the declaration's universe context.
+Relevant theory properties:
 
-Important architectural consequence:
+- Prop is Sort 0.
+- Type u is Sort (u + 1).
+- Prop is impredicative.
+- Type universes are predicative.
+- Lean universes are non-cumulative.
+- Pi universes use imax.
 
-Universe equality is semantic normalization/equivalence, not text or constructor equality.
+Level equivalence is not mere constructor equality.
 
-PSKernel correctly gives levels their own foundational module instead of treating them as a minor expression helper.
+The kernel uses a semantic level-equivalence algorithm.
 
-## 3.2 Dependent functions
-
-Lean uses dependent Pi types.
-
-The core rules include:
-
-~~~text
-Sort u : Sort (u + 1)
-
-Pi x : A, B : Sort (imax level(A) level(B))
-
-fun x : A => b : Pi x : A, type(b)
-
-f a : B[a/x]
-~~~
-
-Prop is Sort 0 and is impredicative.
-
-## 3.3 Proof irrelevance
-
-Lean has definitional proof irrelevance.
-
-When two expressions are proofs of definitionally equal propositions, the proof terms are definitionally equal.
-
-This is part of kernel definitional equality, not a compiler erasure optimization.
-
-## 3.4 Reduction
-
-Definitional equality includes computation through:
+Therefore:
 
 ~~~text
-beta   function application
-delta  definition unfolding
-iota   recursor computation
-zeta   let reduction
-quotient computation
+Core/Level
 ~~~
 
-It also includes function eta and restricted structure eta.
+is a foundational subsystem, not a utility module.
 
-Lean does not simply normalize both sides to full normal form and compare them.
+---
 
-The observable algorithm is deliberately staged and incomplete.
+# 7. Functions, Pi types and conversion
 
-## 3.5 Algorithmic definitional equality is not transitive
+Core rules include approximately:
 
-This point is critical.
+~~~text
+Sort u : Sort (succ u)
 
-The Lean reference explicitly states that its mechanically implemented definitional-equality procedure is reflexive and symmetric but not transitive.
+A : Sort u
+B : Sort v
+--------------------------
+Pi x : A, B : Sort (imax u v)
 
-Lean 4.34 fixed a soundness issue caused by using a union-find structure for successful conversion queries. A union-find computes a transitive closure; that is invalid for Lean's incomplete algorithmic equality procedure.
+Γ, x : A |- b : B
+--------------------------
+Γ |- fun x : A => b : Pi x : A, B
 
-The 4.34 kernel uses plain successful and failed expression-pair caches instead.
+Γ |- f : Pi x : A, B
+Γ |- a : A'
+A' <=> A
+--------------------------
+Γ |- f a : B[a/x]
+~~~
 
-PSKernel's decision to model success/failure as pair sets rather than equivalence classes is therefore a soundness-relevant architectural rule, not merely a performance choice.
+The final application rule explains why checked application depends on definitional equality.
 
-## 3.6 Inductive types
+Lean also supports function eta as definitional equality.
 
-Inductive declarations extend the kernel environment with:
+---
 
-- inductive type information;
-- constructor information;
-- generated recursor information;
-- computation rules.
+# 8. Proof irrelevance
 
-The kernel checks, among other things:
+Prop is definitionally proof-irrelevant.
 
-- parameter and index shape;
-- constructor well-typedness;
-- recursive occurrences;
+When t and s inhabit definitionally equal propositions:
+
+~~~text
+Γ |- t : P
+Γ |- s : Q
+P <=> Q
+P,Q : Prop
+----------------
+t <=> s
+~~~
+
+Proof irrelevance is not compiler erasure.
+
+It is a kernel conversion rule.
+
+This makes the correctness of isProp and projection restrictions soundness-critical.
+
+---
+
+# 9. Definitional equality
+
+Lean definitional equality includes:
+
+~~~text
+beta
+delta
+iota
+zeta
+Quot computation
+function eta
+restricted structure eta
+proof irrelevance
+literal-specific behavior
+~~~
+
+The implementation is not:
+
+~~~text
+normalize both terms fully
+compare syntax
+~~~
+
+Instead it is a staged, heuristic, sound-but-incomplete decision procedure.
+
+The current Lean documentation explicitly describes the mechanically implemented relation as reflexive and symmetric but not transitive.
+
+That property is architecture-critical.
+
+---
+
+# 10. Why the defeq cache must not use transitive closure
+
+Lean 4.34 fixed a soundness issue caused by caching successful defeq results in a union-find structure.
+
+Union-find creates transitive equivalence classes.
+
+Lean's implemented defeq procedure is not transitive.
+
+Therefore the cache itself changed observable answers depending on query history.
+
+Lean 4.34 replaced this with pair-keyed caching.
+
+PSKernel must preserve:
+
+~~~text
+successful pair cache
+failed pair cache
+~~~
+
+and must never replace them with:
+
+~~~text
+union-find
+equivalence closure
+congruence closure used as semantic acceptance
+~~~
+
+This is a permanent soundness invariant.
+
+---
+
+# 11. Lean 4.34 kernel hardening that matters architecturally
+
+Lean 4.34 specifically hardened the kernel in ways that should drive PSKernel tests and module boundaries.
+
+Important items include:
+
+## 11.1 DefEq cache order independence
+
+Successful conversion facts must be stored as pair facts, not a transitive closure.
+
+## 11.2 isProp must ensure a Sort
+
+A stuck inferred type cannot silently be treated as "not a proposition".
+
+The checker must establish that the type reduces to a Sort before deciding Prop-ness.
+
+## 11.3 Projection from Prop
+
+Projection typing must preserve proof irrelevance restrictions.
+
+A data field must not be extractable from a term whose inductive type may be Prop under the relevant universe conditions.
+
+## 11.4 Recursor rule type preservation
+
+Generated computation-rule RHSs must not merely be well typed.
+
+Their type must be definitionally equal to the expected recursor result type.
+
+## 11.5 Uniform inductive occurrences
+
+A newly declared family must occur with the correct parameter/universe application where required.
+
+## 11.6 Nested auxiliary namespace
+
+User input must not reach into the internal nested-inductive auxiliary namespace.
+
+## 11.7 Dropped nested parameters
+
+Nested transformation cannot let parametric arguments escape type checking.
+
+## 11.8 Nat resource limit
+
+Kernel Nat computation is bounded to avoid compact terms forcing unreasonable giant numeral allocation.
+
+These belong in permanent adversarial regression coverage.
+
+---
+
+# 12. Inductive types
+
+Inductive declarations add:
+
+~~~text
+type former(s)
+constructors
+recursor(s)
+recursor computation rules
+metadata used by projections/reduction
+~~~
+
+Kernel validation includes:
+
+- universe validity;
+- common parameter shape;
+- indices;
+- constructor result shape;
 - strict positivity;
-- universe constraints;
+- recursive argument classification;
 - elimination restrictions;
 - generated recursor type;
-- recursor computation rules.
+- generated computation rules;
+- recursor rule type preservation.
 
-Lean 4.34 specifically added stronger defensive recursor validation so generated computation rules are checked for type preservation, not merely checked for having some type.
+An architecture that hides all of these under one "add inductive" function is difficult to audit.
 
-## 3.7 Mutual inductives
+PSKernel's existing phase decomposition should be preserved.
 
-Mutual inductive groups allow recursive occurrences across multiple simultaneously introduced families.
+---
 
-Architecturally this means recursor generation requires:
+# 13. Mutual inductives
 
-- multiple motives;
-- coordinated minor premises;
-- recursive hypotheses across family boundaries;
-- one shared checked admission transaction.
+Mutual groups require one checked transaction across several families.
 
-Mutual admission is not just a loop over ordinary inductives.
-
-## 3.8 Nested inductives
-
-Nested inductive types contain recursive occurrences underneath previously declared inductive type constructors.
-
-Lean translates supported nested declarations to an auxiliary mutual inductive declaration.
-
-The important conceptual pipeline is:
+They require:
 
 ~~~text
-original nested declaration
+shared parameter/universe discipline
+one motive per family
+minor premises across all constructors
+recursive hypotheses crossing family boundaries
+coordinated recursor generation
+~~~
+
+Mutual admission is not ordinary admission repeated several times.
+
+It deserves a dedicated subsystem inside a common Inductive hierarchy.
+
+---
+
+# 14. Nested inductives
+
+Lean supports nested recursion by transforming nested occurrences into an auxiliary mutual-inductive problem and restoring the public declarations afterward.
+
+The conceptual official path is:
+
+~~~text
+validate original declaration
         |
         v
-discover nested occurrences
+identify nested occurrences
         |
         v
-create auxiliary families
+generate auxiliary nested families
         |
         v
-rewrite/flatten declaration
+rewrite constructors / form auxiliary block
         |
         v
 ordinary/mutual inductive admission
         |
         v
-restore user-facing constructor/recursor expressions
+restore constructor and recursor expressions
         |
         v
-re-check restored material
+validate dropped nested applications
         |
         v
-commit without leaking auxiliary declarations
+re-check rewritten constructor types
+        |
+        v
+re-check rewritten recursor types/rules
+        |
+        v
+return final environment without auxiliary declarations
 ~~~
 
-Lean 4.34 also rejects user declarations that reach directly into the reserved _nested namespace.
+The recent PSKernel multi-family bug demonstrated why restoration state must have two distinct concepts:
 
-PSKernel's current nested architecture closely follows this pipeline.
+~~~text
+pending
+    structurally shrinking iteration queue
 
-## 3.9 Quotients
+allFamilies
+    complete immutable restoration registry
+~~~
 
-Quot is a kernel primitive, with built-in declarations for the quotient former and its introduction/elimination principles.
+Later families can contain references to earlier auxiliary families.
 
-Quot.lift/Quot.ind participate in kernel reduction.
+Restoring against only the pending suffix is incorrect.
 
-It is therefore architecturally correct for PSKernel to keep quotient admission separate from ordinary definition admission while keeping quotient computation in the reduction subsystem.
+This is now a permanent architecture invariant.
 
 ---
 
-# 4. Lean 4.34 official kernel source architecture
+# 15. Quotient theory
 
-At the pinned Lean 4.34 commit, src/kernel contains 36 C++/header source files, approximately 344 KB of C++/header source.
+Lean's built-in quotient core consists of primitives such as:
 
-That number should not be compared directly to Lean source byte counts as a complexity metric. It is useful only to understand source concentration.
+~~~text
+Quot
+Quot.mk
+Quot.lift
+Quot.ind
+Quot.sound
+~~~
 
-The largest kernel implementation files include:
+There is a definitional reduction rule for Quot.lift applied to Quot.mk.
 
-| Lean file | Approx. size | Main responsibility |
-| --- | ---: | --- |
-| src/kernel/inductive.cpp | 69 KB | ordinary/mutual/nested inductive checking, recursor construction/restoration |
-| src/kernel/type_checker.cpp | 54 KB | inference, WHNF, defeq, projections, primitive/recursor reduction |
-| src/kernel/declaration.h | 28 KB | declaration/constant metadata |
-| src/kernel/expr.h | 23 KB | expression representation/API |
-| src/kernel/level.cpp | 18 KB | universe level algorithms |
-| src/kernel/expr.cpp | 18 KB | expression implementation |
-| src/kernel/declaration.cpp | 15 KB | declaration implementation |
-| src/kernel/environment.cpp | 12 KB | environment admission dispatch |
-| src/kernel/instantiate.cpp | 11 KB | substitution/instantiation |
+Architecturally:
 
-The complete kernel directory also contains focused infrastructure:
+- Quot primitive installation belongs to admission.
+- Quot computation belongs to reduction.
+- Quot state belongs to the semantic environment.
+
+PSKernel's current separation already follows this well.
+
+---
+
+# 16. Exact Lean 4.34 source structure
+
+At the pinned Lean commit, src/kernel contains focused representation/infrastructure files and two especially large semantic implementation files.
+
+Representative layout:
 
 ~~~text
 abstract.*
@@ -394,199 +653,263 @@ trace.*
 type_checker.*
 ~~~
 
-## 4.1 Lean's type_checker state
+The largest semantic concentration is approximately:
 
-Lean 4.34's type checker state contains:
+~~~text
+inductive.cpp
+type_checker.cpp
+~~~
+
+This official layout is optimized around C++ implementation concerns.
+
+It is not a pedagogical target for PSKernel.
+
+PSKernel should preserve Lean's algorithm and ordering while exposing more conceptual boundaries.
+
+---
+
+# 17. Lean 4.34 type_checker architecture
+
+Lean's type checker owns a shared state containing:
 
 ~~~text
 environment
 fresh-name generator
-infer cache[checked/infer-only]
-WHNF-core cache
-WHNF cache
-successful defeq pair set
-failed defeq pair set
+
+infer cache:
+    infer-only
+    checked
+
+whnfCore cache
+whnf cache
 unfold cache
+
+successful defeq pair cache
+failed defeq pair cache
 ~~~
 
-This is very close to the current PSKernel CheckerState design.
+Operationally it ties together:
 
-This similarity is good: the PSKernel state model is aligned with the actual observable Lean algorithm rather than being invented independently.
+~~~text
+infer/check
+whnfCore
+whnf
+projection
+recursor reduction
+defeq
+isProp
+unfold
+primitive Nat reduction
+native reduction
+~~~
 
-## 4.2 Lean inference
+This is one recursive algorithmic engine.
 
-Lean has separate checked and infer-only modes.
+PSKernel should preserve modular source files but explicitly represent this one engine boundary.
+
+---
+
+# 18. Checked inference versus infer-only inference
+
+Lean 4.34 has two semantically distinct inference paths.
 
 Checked application:
 
 ~~~text
-infer/check function
+check/infer function
 ensure Pi
-infer/check argument
-compare argument type to Pi domain with defeq
+check/infer argument
+compare argument type against domain
 instantiate codomain
 ~~~
 
-Infer-only application is optimized over the whole application spine and avoids revalidating arguments.
-
-PSKernel's current checked/infer-only distinction is architecturally faithful.
-
-## 4.3 Lean WHNF
-
-Lean's public WHNF loop is approximately:
+Infer-only application:
 
 ~~~text
-whnf_core
+infer function
+walk application spine
+expose Pi types as needed
+avoid re-checking known-valid arguments
+compute result type
+~~~
+
+The infer-only path is valid only under a precondition that the term is already known to be well typed.
+
+PSKernel must continue making that distinction explicit.
+
+Architectural rule:
+
+~~~text
+infer-only is not "fast check"
+infer-only is "type recovery under a previously established validity invariant"
+~~~
+
+Any optimized path that relies on this must name the invariant.
+
+---
+
+# 19. Lean WHNF architecture
+
+Lean's public weak-head reduction pipeline is approximately:
+
+~~~text
+whnfCore
     |
-    +-- native reduction?
+    +-- target-specific native reduction
     |
-    +-- Nat primitive reduction?
+    +-- optimized Nat literal reduction
     |
-    +-- unfold definition?
+    +-- delta unfold
     |      |
     |      '-- loop
     |
     '-- return
 ~~~
 
-PSKernel's current split between WhnfCore and the public WHNF pipeline mirrors this well.
-
-## 4.4 Lean defeq orchestration
-
-The Lean 4.34 source performs, in broad order:
+whnfCore handles structural reduction such as:
 
 ~~~text
-quick equality / success cache
+beta
+zeta
+projection
+recursor/Quot-facing reductions
+~~~
+
+The public order is observable because the defeq algorithm is incomplete and order-sensitive.
+
+PSKernel's existing WhnfCore/public-WHNF split should remain.
+
+---
+
+# 20. Lean defeq orchestration
+
+At a high level, Lean 4.34 performs:
+
+~~~text
+quick structural/cache checks
 reflection shortcut
 cheap/core WHNF
+quick checks again
 proof irrelevance
 lazy delta
-same constant / fvar shortcuts
-projection-sensitive comparison
+same-constant/free-variable shortcuts
+projection-sensitive lazy comparison
 full projection WHNF
-application congruence
+application comparison
 function eta
 structure eta
 string literal expansion
-unit-like equality
+unit-like structure equality
 failure
 ~~~
 
-PSKernel's DefEq decomposition is one of the strongest parts of its current architecture because it exposes this order more clearly than the official monolithic C++ file.
+This sequence should remain easy to read top-to-bottom in PSKernel.
 
-## 4.5 Lean declaration admission
-
-environment.cpp dispatches declarations by kind:
-
-~~~text
-Axiom
-Definition
-Theorem
-Opaque
-MutualDefinition
-Quot
-Inductive
-~~~
-
-Declaration admission is a transaction around the type checker.
-
-Theorem admission additionally requires the declared type to be a proposition.
-
-Unsafe/partial mutual definitions are installed as a block before bodies are checked, so recursive references resolve in the working environment.
-
-PSKernel's Admission layer correctly treats environment extension as a separate concern from expression inference.
-
-## 4.6 Lean nested restoration hardening
-
-Lean's nested path:
-
-1. rejects free variables/metavariables and reserved auxiliary names;
-2. validates uniform occurrences;
-3. creates the auxiliary declaration;
-4. admits the transformed declaration;
-5. restores recursors and constructors into a clean environment;
-6. checks nested applications whose parametric arguments were erased by translation;
-7. re-checks restored constructor types;
-8. re-checks restored recursor types and rule RHSs.
-
-The current PSKernel multi-family restoration fix matches an important invariant visible in this architecture: restoration must retain the complete auxiliary mapping even while iterating through a shrinking work queue.
+The current PSKernel DefEq subsystem already improves on the official source in auditability.
 
 ---
 
-# 5. Useful independent checker architecture lessons
+# 21. Independent checker lesson: lean4lean
 
-PSKernel should not copy another checker blindly, but independent Lean checker projects reveal useful design patterns.
+lean4lean is especially relevant because its executable implementation is derived closely from Lean's official kernel.
 
-## 5.1 lean4lean
-
-lean4lean separates:
+Important architectural features:
 
 ~~~text
-implementation
-Theory
-Verify
+Lean4Lean/
+    executable checker implementation
+
+Lean4Lean/Theory/
+    abstract metatheory
+
+Lean4Lean/Verify/
+    relation between implementation and theory
 ~~~
 
-Its implementation is intentionally close to Lean's kernel algorithm, while Theory contains an abstract formalization and Verify connects implementation to theory.
-
-Useful lesson for PSKernel:
-
-- keep executable checker organization distinct from the mathematical description;
-- do not make the word Theory carry both meanings.
-
-PSKernel does not need to adopt lean4lean's formal-verification scope to benefit from this naming/layering distinction.
-
-## 5.2 ConLeche
-
-ConLeche uses strong import-layer rules separating:
+Its TypeChecker defines an explicit recursive-method interface containing operations corresponding to:
 
 ~~~text
-Kernel
-Cached
-Frontend
-Semantics
-Model
-Verify
+isDefEqCore
+whnfCore
+whnf
+inferType
 ~~~
 
-It explicitly tests/enforces layering.
+and ties the recursive checker through a single monadic knot.
 
-Useful lesson for PSKernel:
+This directly validates one of the improvements PSKernel needs:
 
-- architecture documentation is weaker than an import fence;
-- non-semantic acceleration deserves an explicit dependency contract;
-- a pure conceptual checker and a cached executable checker can be separated if verification requires it.
+The recursive checker interface should have one explicit architectural owner.
 
-PSKernel should not duplicate its semantic checker into pure/cached implementations merely to imitate ConLeche. One semantic source remains the better fit for PSKernel. The useful idea is the enforceable layer boundary.
+PSKernel does not need to adopt lean4lean's formal verification scope.
+
+It should adopt the clarity of the recursive-method boundary.
 
 ---
 
-# 6. Current PSKernel self-host architecture
+# 22. Independent checker lesson: ConLeche
 
-Current source root:
+ConLeche provides a different useful lesson.
+
+Its implementation distinguishes:
+
+~~~text
+Kernel/
+    pure fueled checker
+
+Cached/
+    shipped cached checker
+
+Frontend/
+    input preparation
+
+Model/
+Verify/
+    proof layers
+~~~
+
+and enforces import layering with a CI import fence.
+
+The key lesson for PSKernel is not to duplicate the checker into pure and cached versions.
+
+PSKernel's one-semantic-source rule should remain.
+
+The useful lesson is:
+
+~~~text
+architecture constraints should be executable CI rules
+~~~
+
+A documented dependency rule is weaker than a failing import-fence check.
+
+---
+
+# 23. Current PSKernel physical architecture
+
+Audited source root:
 
 ~~~text
 packages/pskernel-selfhost/src/Ps/KernelSelfHost/
 ~~~
 
-At the audited head there are approximately:
+Approximate current size:
 
 ~~~text
 70 Lean source files
-~795 KB source
+~795 KB source text
 ~~~
 
-Breakdown:
+Current rough distribution:
 
 ~~~text
-Top-level files : 24
-Runtime files   : 3
-Theory files    : 43
+top-level files : 24
+Runtime         : 3
+Theory          : 43
 ~~~
 
-Theory subtrees:
+Theory subtree:
 
-| Subsystem | Files | Approx. source bytes |
+| Area | Files | Approx. bytes |
 | --- | ---: | ---: |
 | Admission | 2 | 24 KB |
 | DefEq | 7 | 90 KB |
@@ -599,344 +922,223 @@ Theory subtrees:
 | Reduction | 4 | 47 KB |
 | Substitution | 5 | 26 KB |
 
-This is more decomposed than Lean's C++ kernel.
+Large current source files include:
 
-That is appropriate for PSKernel's goals: portability, explainability and source-level auditing matter more than minimizing file count.
+~~~text
+Theory/Inference/Core.lean
+Expr.lean
+Theory/Mutual/Analysis.lean
+Level.lean
+Theory/Nested/Validation.lean
+Inductive.lean
+InductiveAdmission.lean
+Theory/Nested/Discover.lean
+Theory/Inductive/Constructor.lean
+TypeCheckerDefEq.lean
+Theory/Nested/Flatten.lean
+Theory/Recursor/Analysis.lean
+TypeCheckerProjection.lean
+Theory/Mutual/AdmissionLoops.lean
+~~~
+
+The issue is not any one file being unreasonably large.
+
+The bigger issue is ownership consistency.
 
 ---
 
-# 7. Current PSKernel source map
+# 24. Current PSKernel conceptual architecture
 
-The current conceptual architecture is:
+Current conceptual map:
 
 ~~~text
-Core data
-  Name
-  Level
-  Expr
-  substitution
-  Declaration
-  LocalContext
-  Environment
+Core representation
+    Name
+    Level
+    Expr
+    substitution
+    Declaration
+    LocalContext
+    Environment
 
-Checker machinery
-  CheckerState
-  TypeCheckerBase
-  WHNF
-  Projection
-  Inference
-  Recursor
-  DefEq
-  CheckerSession
+Checker
+    CheckerState
+    TypeCheckerBase
+    Reduction/WHNF
+    Projection
+    Inference
+    Recursor
+    DefEq
+    CheckerSession
 
 Admission
-  ordinary declarations
-  Quot
-  ordinary inductives
-  mutual inductives
-  nested inductives
+    ordinary declarations
+    Quot
+    ordinary inductives
+    mutual inductives
+    nested inductives
 
-Runtime acceleration
-  Cache
-  EnvironmentIndex
-  NativeReduction
+Execution support
+    cache
+    environment index
+    native evaluation capability
 
-Root/API/compatibility
-  Kernel
-  Instantiate
-  TypeCheckerPrimitives
-  TypeCheckerDefEqSupport
-  Inductive / InductiveAdmission
-  MutualInductive
-  NestedInductive
-  Quot
-  SelfHost
+Wrappers/roots
+    Kernel
+    Instantiate
+    TypeChecker*
+    Quot
+    Inductive*
+    MutualInductive
+    NestedInductive
+    SelfHost
 ~~~
 
-## 7.1 Core representation
+Conceptually this is strong.
 
-Current foundational files:
-
-~~~text
-Name.lean
-Level.lean
-Expr.lean
-
-Theory/Substitution/
-  ListOps.lean
-  Lift.lean
-  Instantiate.lean
-  Beta.lean
-  Abstract.lean
-
-Declaration.lean
-LocalContext.lean
-Environment.lean
-~~~
-
-This layer is conceptually sound.
-
-## 7.2 Environment
-
-PsKernelEnvironment currently contains:
-
-~~~text
-constants
-index
-quotInitialized
-runtime.nativeEvaluator
-~~~
-
-Semantically:
-
-~~~text
-constants = authoritative declaration history
-index     = lookup accelerator only
-~~~
-
-This invariant is good, but the representation physically mixes semantic state and runtime acceleration.
-
-That is acceptable today, but it means semantic/runtime separation is enforced by discipline and tests rather than by the type/module structure.
-
-## 7.3 Checker context
-
-PsKernelCheckerContext contains:
-
-~~~text
-environment
-localContext
-levelParams
-safety
-eagerReduce
-nativeEvaluator
-maxRecDepth
-maxNatSize
-recDepth
-~~~
-
-This is a faithful executable analogue of Lean's checker operating context.
-
-## 7.4 Checker state
-
-PsKernelCheckerState contains:
-
-~~~text
-nextFresh
-inferOnly
-checkedInfer
-whnfCore
-whnf
-unfold
-success
-failure
-~~~
-
-The cache structure is aligned with Lean 4.34.
-
-In particular, success/failure are pair sets and not a transitive equivalence manager.
-
-## 7.5 Checker session
-
-CheckerSession packages:
-
-~~~text
-context + state
-~~~
-
-and exposes state-threading operations:
-
-~~~text
-SessionWhnf
-SessionInfer
-SessionCheck
-SessionEnsureSort
-SessionIsProp
-SessionIsDefEq
-~~~
-
-This is a strong API boundary.
-
-The recent nested-rule session threading change is architecturally correct even though it produced little measurable speedup in the current benchmark. Returning the updated checker state is still the right abstraction.
+Physically the tree does not yet tell this same story.
 
 ---
 
-# 8. Current inference architecture
+# 25. Current PSKernel strengths
 
-Current path:
+## 25.1 One semantic implementation
 
-~~~text
-Theory/Inference/Helpers.lean
-        |
-        v
-Theory/Inference/Core.lean
-        |
-        v
-TypeCheckerInfer.lean
-~~~
+There is no hand-maintained "reference semantics" plus separate "fast semantics" inside the self-host package.
 
-The semantic distinction between checked inference and infer-only inference is explicit.
+That is the right product architecture.
 
-Strengths:
+## 25.2 Exact target pin
 
-- mirrors Lean 4.34 behavior;
-- separates syntax-directed cases from public entry points;
-- makes caching policy explicit;
-- preserves checked-application node ordering.
+Lean behavior is attached to an exact version/commit.
 
-Weakness:
+This prevents silent drift.
 
-Theory/Inference/Helpers.lean imports TypeCheckerProjection.lean, which imports TypeCheckerWhnf.lean.
+## 25.3 PSC1 source closure
 
-This means a Theory module depends upward into the TypeChecker integration layer.
+The kernel is intentionally written within the portable source subset.
 
-That is not a semantic bug, but it is an architectural inversion.
+This directly serves the bootstrap/self-host goal.
 
-The file tree says:
+## 25.4 Fail-closed resource behavior
+
+Fuel/recursion exhaustion rejects.
+
+No fallback converts an unsupported or exhausted computation into acceptance.
+
+## 25.5 DefEq structure
+
+The current DefEq split is excellent:
 
 ~~~text
-Theory -> TypeChecker -> Theory
+BinderSpines
+Quick
+DeltaStep
+LazyDelta
+Shortcuts
+FullShape
+FinalRules
 ~~~
 
-conceptually, even if the actual import graph remains acyclic.
+## 25.6 Nested architecture
 
-A better structure would place Projection, Inference and WHNF in one explicit Checker layer and reserve API wrappers for modules above them.
+The current nested phase split is excellent:
+
+~~~text
+Types
+ReservedNames
+Rebase
+Discover
+Flatten
+RestoreExpr
+Restore
+Validation
+Commit
+Admission
+~~~
+
+## 25.7 Runtime indexing
+
+Environment and expression-cache indexing preserve structural semantic equality and use hashing only as an accelerator.
+
+## 25.8 Performance discipline
+
+Recent optimization work generally follows:
+
+~~~text
+profile
+make one narrow change
+run portable/conformance gates
+measure again
+keep or revert
+~~~
+
+That discipline should become part of the permanent architecture.
 
 ---
 
-# 9. Current reduction architecture
+# 26. Current PSKernel weaknesses
 
-Current reduction modules:
+## 26.1 Top-level ownership is inconsistent
 
-~~~text
-Theory/Reduction/
-  PrimitiveData.lean
-  PrimitiveNat.lean
-  KernelReductions.lean
-  WhnfCore.lean
-
-TypeCheckerPrimitives.lean
-TypeCheckerWhnf.lean
-TypeCheckerProjection.lean
-~~~
-
-Strengths:
-
-- WHNF core is distinct from post-core unfolding/native/Nat pipeline;
-- primitive operations are isolated;
-- observable Lean ordering is documented;
-- projection handling is explicit.
-
-Structural issue:
-
-The Theory/TypeChecker naming split suggests two layers, but the modules actually form one executable checker subsystem.
-
-Recommendation:
-
-Move these under one Checker namespace/folder and keep compatibility modules outside the canonical reading path.
-
----
-
-# 10. Current recursor architecture
-
-Current path:
+The top level mixes:
 
 ~~~text
-Theory/Recursor/Analysis.lean
-        |
-        v
-Theory/Recursor/Reduction.lean
-        |
-        v
-TypeCheckerRecursor.lean
+foundational data
+checker state/context
+real checker integration
+ordinary-inductive data
+ordinary-inductive admission
+API umbrellas
+compatibility umbrellas
+semantic root
 ~~~
 
-This is good.
+This weakens discoverability.
 
-It gives recursor computation its own semantic subsystem instead of hiding all iota logic inside WHNF.
+## 26.2 "Theory" is overloaded
 
-The remaining architectural opportunity is naming: TypeCheckerRecursor is not really a separate conceptual layer; it is the integration point that ties the checker knot.
+Most files under Theory are executable implementation, not abstract metatheory.
 
----
+That differs from projects such as lean4lean, where Theory really means an abstract logical theory.
 
-# 11. Current definitional-equality architecture
+For PSKernel, names such as Checker/Inference or Admission/Inductive are clearer.
 
-Current path:
+## 26.3 Import direction does not fully match conceptual direction
+
+Example:
 
 ~~~text
-Theory/DefEq/
-  BinderSpines.lean
-  Quick.lean
-  DeltaStep.lean
-  LazyDelta.lean
-  FinalRules.lean
-  Shortcuts.lean
-  FullShape.lean
+Theory/Inference/Helpers
+    imports TypeCheckerProjection
 
-TypeCheckerDefEqSupport.lean
-TypeCheckerDefEq.lean
+TypeCheckerProjection
+    imports TypeCheckerWhnf
+
+TypeCheckerWhnf
+    imports Theory/Reduction/WhnfCore
 ~~~
 
-This is the best-organized major subsystem.
+This is acyclic but conceptually inverted.
 
-It improves on the official Lean source for auditability because Lean places most of the algorithm in type_checker.cpp.
+The folder names imply that Theory is below TypeChecker, while the import graph crosses that boundary in both conceptual directions.
 
-Strengths:
+## 26.4 The checker recursion knot has no single owner
 
-- observable algorithmic order is clear;
-- quick structural rules are separated;
-- lazy delta has a named module;
-- final eta/string/unit/proof rules are not mixed with basic cache logic;
-- projection-sensitive behavior is explicit;
-- non-transitive cache policy is visible.
+The mutually dependent checker operations are distributed across several files and callback signatures.
 
-Improvement:
+The code works.
 
-TypeCheckerDefEqSupport.lean is a compatibility umbrella and should not appear in the canonical architecture.
+The architecture does not yet make the knot obvious.
 
-The canonical implementation should live entirely under Checker/DefEq, with one Engine/DefEq entry point.
+## 26.5 Ordinary/mutual/nested source hierarchy is inconsistent
 
----
-
-# 12. Current admission architecture
-
-Ordinary declaration admission:
-
-~~~text
-Theory/Admission/Validation.lean
-Theory/Admission/Declarations.lean
-Kernel.lean
-~~~
-
-This is clean.
-
-The top-level Kernel.lean is only an umbrella, which is acceptable if clearly labeled as API/Compat rather than mixed with implementation files.
-
----
-
-# 13. Current Quot architecture
-
-~~~text
-Theory/Quot/Bootstrap.lean
-Theory/Quot/Admission.lean
-Quot.lean
-~~~
-
-This is appropriately small and conceptually clear.
-
-Quot.lean is an umbrella.
-
-Recommended long-term structure should keep quotient admission under Admission/Quot and quotient reduction under Checker/Reduction.
-
----
-
-# 14. Current inductive architecture
-
-The current physical split is inconsistent:
+Current physical shape:
 
 ~~~text
 Inductive.lean
-Theory/Inductive/*
 InductiveAdmission.lean
+Theory/Inductive/*
 
 Theory/Mutual/*
 MutualInductive.lean
@@ -945,313 +1147,214 @@ Theory/Nested/*
 NestedInductive.lean
 ~~~
 
-Inductive.lean is not merely an umbrella: it defines shared ordinary-inductive declaration/shape structures.
+These are one conceptual admission subsystem.
 
-InductiveAdmission.lean contains actual top-level admission implementation.
+## 26.6 Runtime classification is too broad
 
-MutualInductive.lean and NestedInductive.lean are umbrellas.
+Cache/index and native execution are not the same trust class.
 
-This inconsistency is one of the clearest migration-era structural artifacts.
+Caches/indexes are intended to be observationally irrelevant.
 
-All three belong under one canonical Inductive subsystem.
+Native execution can affect reduction and therefore acceptance if wrong.
 
----
+Native execution extends the trusted computing base.
 
-# 15. Current nested architecture
+They should not share one undifferentiated architectural category.
 
-Current nested pipeline:
+## 26.7 Cache policy ownership is mixed with typing helpers
+
+Inference cache eligibility is a runtime/performance policy.
+
+It currently lives with inference helpers.
+
+The policy is valid, but its ownership should be clearer.
+
+## 26.8 Environment mixes semantic and execution fields
+
+The current environment contains:
 
 ~~~text
-Theory/Nested/Types.lean
-Theory/Nested/ReservedNames.lean
-Theory/Nested/Rebase.lean
-Theory/Nested/Discover.lean
-Theory/Nested/Flatten.lean
-Theory/Nested/RestoreExpr.lean
-Theory/Nested/Restore.lean
-Theory/Nested/Validation.lean
-Theory/Nested/Commit.lean
-Theory/Nested/Admission.lean
+constants
+index
+quotInitialized
+runtime/native evaluator
 ~~~
 
-This decomposition is excellent.
+The semantic authority is constants plus semantic flags.
 
-It directly represents the algorithm's phases.
+Index/provider fields have different trust meaning.
 
-The recently discovered multi-family bug also validates this decomposition: the defect could be localized to restoration state rather than being hidden inside a single huge inductive function.
+That distinction should be visible structurally.
 
-The critical invariant is now:
+## 26.9 Conformance rows are too coarse for high-risk algorithms
 
-~~~text
-pending
-  = structurally decreasing work queue
-
-allFamilies
-  = invariant complete restoration registry
-~~~
-
-Every restored expression must see allFamilies, including later auxiliary recursors that may refer to earlier auxiliary families.
-
-This invariant belongs in the permanent architecture reference and conformance suite.
-
----
-
-# 16. Runtime architecture
-
-Current runtime modules:
+A single row such as:
 
 ~~~text
-Runtime/Cache.lean
-Runtime/EnvironmentIndex.lean
-Runtime/NativeReduction.lean
-~~~
-
-The conceptual contract is excellent:
-
-~~~text
-runtime may accelerate a judgment
-runtime may not create a semantic fact
-~~~
-
-The environment index narrows lookup.
-Full structural name equality resolves collisions.
-
-The expression caches accelerate inference/WHNF/defeq.
-They do not change what is accepted.
-
-NativeReduction is an explicit optional trust extension.
-
-This is exactly the right high-level design.
-
-## 16.1 Current runtime-layer weakness
-
-Cache policy is not completely contained under Runtime.
-
-For example, inference cache eligibility is owned by Theory/Inference/Helpers.lean even though decisions such as not caching checked applications/lambdas/foralls are performance policy.
-
-Recommended target:
-
-~~~text
-Runtime/CachePolicy.lean
-~~~
-
-or:
-
-~~~text
-Checker/CachePolicy.lean
-~~~
-
-with an explicit statement that it is non-semantic.
-
-This makes it harder for a future optimization to be mistaken for a typing rule.
-
----
-
-# 17. Current self-host architecture
-
-The semantic root is:
-
-~~~text
-Ps.KernelSelfHost.SelfHost
-~~~
-
-The portable source is accepted by PSC1 constraints.
-
-Normal promotion gates are:
-
-~~~text
-portable source profile
-        |
-        v
-psc1 check
-        |
-        v
-canonical Lean -> ProofScript translation
-        |
-        v
-psc1 check canonical .ps
-        |
-        v
-Lean native build
-        |
-        v
-compatibility/conformance
-        |
-        v
-differential tests
-~~~
-
-Generated fixed-point reproduction is release/bootstrap evidence, not an every-commit gate.
-
-That is a good balance.
-
-It avoids making development unusably expensive while retaining a reproducible self-host milestone.
-
----
-
-# 18. One source, two execution paths
-
-The intended architecture remains:
-
-~~~text
-portable Lean-subset semantic source
-              |
-      +-------+-------+
-      |               |
-      v               v
-PSC/backend-ts      Lean compiler
-      |               |
-      v               v
-TypeScript/JS       native
-~~~
-
-There should not be separate hand-maintained semantic kernels for JS/native/Rust/WASM.
-
-Backend-specific runtime acceleration is acceptable.
-Backend-specific type theory is not.
-
----
-
-# 19. Current evidence architecture
-
-Current compatibility matrix:
-
-~~~text
-34 required rules
-34 implemented
-~~~
-
-Current conformance matrix:
-
-~~~text
-33 direct-differential
-1 direct-invariant
-0 pending
-~~~
-
-This is strong release engineering.
-
-However, two qualifications matter.
-
-## 19.1 Rule granularity is too coarse for high-risk subsystems
-
-Examples:
-
-~~~text
-PSK-ADMIT-IND
-PSK-ADMIT-MUTIND
 PSK-ADMIT-NESTED
 ~~~
 
-Each row covers a large algorithm containing many soundness-sensitive subrules.
+cannot by itself communicate all soundness-critical subrules.
 
-The matrix is sufficient as a top-level capability index.
-It is not sufficient as the only soundness-oriented rule inventory.
+## 26.10 Differential oracle independence is incomplete
 
-Recommended architecture:
+The frozen PSC1Kernel reference is useful.
 
-Keep the 34-row release matrix, but add a generated subrule inventory for high-risk areas.
+But PSKernel-selfhost was derived from closely related code.
 
-Example nested subrules:
+Shared bugs remain possible.
 
-~~~text
-NESTED-RESERVED-PREFIX
-NESTED-UNIFORM-OCCURRENCE
-NESTED-DISCOVERY
-NESTED-AUX-FRESHNESS
-NESTED-FLATTEN
-NESTED-RESTORE-EXPR
-NESTED-RESTORE-FULL-REGISTRY
-NESTED-RESTORED-CONSTRUCTOR-CHECK
-NESTED-RESTORED-REC-TYPE-CHECK
-NESTED-RESTORED-RULE-CHECK
-NESTED-RULE-TYPE-PRESERVATION
-NESTED-AUX-NO-LEAK
-~~~
+Official pinned Lean must become the primary external behavioral oracle wherever direct differential execution is practical.
 
-Likewise ordinary/mutual inductives should expose positivity, elimination, recursor construction and rule preservation separately.
+## 26.11 Test and benchmark files are monolithic
 
-## 19.2 Differential-oracle independence can improve
-
-The current generated rule reference explains that most direct-differential tests compare the self-host kernel with the frozen Lean-4.34-oriented PSC1Kernel reference.
-
-That is valuable as regression coverage.
-
-But PSC1Kernel and PSKernel-selfhost are closely related implementations.
-
-Therefore they can share the same bug.
-
-Recommended evidence hierarchy:
+Current important files are approximately:
 
 ~~~text
-Authority:
-  official Lean 4.34.0 behavior/source
-
-Primary direct oracle:
-  official pinned Lean 4.34 executable/kernel API where practical
-
-Regression oracle:
-  frozen PSC1Kernel reference
-
-Optional independent secondary evidence:
-  lean4lean / ConLeche / kernel-arena adversarial corpus
+PsKernelSelfHostFoundationTests.lean  ~106 KB
+PsKernelSelfHostBench.lean            ~145 KB
 ~~~
 
-Do not replace the frozen reference.
-Add independence around it.
+They should be split by ownership.
 
 ---
 
-# 20. Current tests and benchmarks
+# 27. Architecture scoring rubric
 
-Two important current files are now large:
+The final design is evaluated against this weighted rubric.
+
+| Dimension | Weight |
+| --- | ---: |
+| Trust boundary and Lean semantic fidelity | 15% |
+| Checker decomposition and recursion-knot wiring | 13% |
+| Dependency layering and machine enforcement | 12% |
+| Separation of semantics, acceleration and trusted capabilities | 10% |
+| Inductive subsystem coherence | 10% |
+| PSC1 portability and self-host closure | 10% |
+| Conformance and oracle independence | 10% |
+| API/provider boundary | 7% |
+| Test/benchmark architecture | 7% |
+| Migration safety and maintainability | 6% |
+
+Scores are engineering judgments, not formal proofs.
+
+A score above 9.8 means the plan has no known major structural weakness under this rubric.
+
+It does not prove semantic correctness.
+
+---
+
+# 28. Iteration 1 evaluation
+
+The first reference target proposed:
 
 ~~~text
-test/PsKernelSelfHostFoundationTests.lean  ~106 KB
-test/PsKernelSelfHostBench.lean            ~145 KB
+Core
+Runtime
+Environment
+Checker
+Admission
+API
+Compat
 ~~~
 
-This is the weakest physical part of the project.
+Strengths:
 
-The tests are useful and currently green, but one large file makes:
+- canonical folders;
+- Checker/Engine;
+- unified inductives;
+- split tests;
+- import fence;
+- official Lean oracle plan.
 
-- ownership unclear;
-- code review harder;
-- fixture reuse awkward;
-- rule-to-test mapping less local;
-- adversarial regression discovery harder;
-- benchmark diagnostics prone to accumulating permanently.
+Weaknesses:
 
-The recent wide-nested debugging sequence is a good example: diagnostic helpers were useful but temporarily enlarged an already large benchmark file.
+- native evaluation incorrectly shared a Runtime category with harmless accelerators;
+- checker-knot abstraction not concrete enough;
+- environment semantic projection not explicit;
+- final tree still contained migration shims;
+- architecture contract was not machine-readable;
+- trust classes were not first-class.
 
----
+Weighted score:
 
-# 21. Architecture comparison
+~~~text
+9.44 / 10
+~~~
 
-| Property | Lean 4.34 official | PSKernel current | Preferred PSKernel target |
-| --- | --- | --- | --- |
-| Semantic source | C++ kernel | portable Lean subset | same portable Lean subset |
-| Main checker | type_checker class | distributed TypeChecker/Theory modules | explicit Checker/Engine knot |
-| DefEq readability | concentrated in type_checker.cpp | strong conceptual split | retain split |
-| Inductive implementation | one large inductive.cpp | ordinary/mutual/nested split | one Inductive subtree with submodes |
-| Runtime caches | inside checker state | explicit Runtime/Cache | retain, strengthen import boundary |
-| Environment index | implementation detail | explicit Runtime/EnvironmentIndex | retain |
-| Native reduction | checker/runtime path | explicit capability provider | retain |
-| Theory docs | language reference + source comments | strong KERNEL_THEORY + rule matrix | consolidate via this reference |
-| Self-host source | C++/Lean runtime | PSC1-compatible Lean | retain |
-| Conformance | Lean's own tests | 34/34 matrix + differential | add official direct oracle tier |
-| Tests | broad Lean test suite | two large kernel test/bench files | split by subsystem |
-| Import-layer enforcement | C++ module boundaries | mostly convention | add machine import fence |
+Result:
+
+~~~text
+reject as final target
+~~~
 
 ---
 
-# 22. Recommended target architecture
+# 29. Iteration 2 evaluation
 
-The best next architecture is not a rewrite.
+Second pass added:
 
-It is a semantics-preserving package reorganization that makes the import graph match the conceptual graph.
+- explicit Checker/Ops interface;
+- Checker/Knot as the one recursive wiring point;
+- import-fence CI;
+- official-Lean-first differential architecture;
+- subsystem test split;
+- API/KernelContractV1;
+- hierarchical conformance subrules.
 
-Recommended canonical tree:
+Weighted score:
+
+~~~text
+9.78 / 10
+~~~
+
+Remaining concerns:
+
+1. native evaluation was still not separated strongly enough from non-semantic acceleration;
+2. final-source and migration-source trees were still conflated;
+3. semantic environment equivalence and accelerator rebuild invariants were not explicit;
+4. module ownership was not yet machine-declared.
+
+Result:
+
+~~~text
+below requested 9.8 threshold
+continue redesign
+~~~
+
+---
+
+# 30. Final target architecture
+
+Final planned score:
+
+~~~text
+9.90 / 10
+~~~
+
+The core idea is to separate five different architectural concerns that the current layout partially mixes:
+
+~~~text
+logical data
+execution environment
+checker algorithm
+admission transactions
+external/public boundary
+~~~
+
+and to further distinguish:
+
+~~~text
+non-semantic acceleration
+from
+trusted external capability
+~~~
+
+---
+
+# 31. Final canonical source tree
+
+The recommended final tree is:
 
 ~~~text
 Ps/KernelSelfHost/
@@ -1270,19 +1373,25 @@ Ps/KernelSelfHost/
 |       '-- Abstract.lean
 |
 +-- Runtime/
-|   +-- Cache.lean
-|   +-- CachePolicy.lean
-|   +-- EnvironmentIndex.lean
-|   '-- NativeReduction.lean
+|   +-- Acceleration/
+|   |   +-- Cache.lean
+|   |   +-- CachePolicy.lean
+|   |   '-- EnvironmentIndex.lean
+|   |
+|   '-- Capability/
+|       +-- Types.lean
+|       '-- Lean434NativeReduction.lean
 |
 +-- Environment/
-|   +-- Model.lean
+|   +-- Semantic.lean
+|   +-- Environment.lean
 |   +-- Lookup.lean
 |   '-- Operations.lean
 |
 +-- Checker/
 |   +-- Context.lean
 |   +-- State.lean
+|   +-- Ops.lean
 |   +-- Projection.lean
 |   |
 |   +-- Reduction/
@@ -1308,7 +1417,7 @@ Ps/KernelSelfHost/
 |   |   +-- FullShape.lean
 |   |   '-- FinalRules.lean
 |   |
-|   +-- Engine.lean
+|   +-- Knot.lean
 |   '-- Session.lean
 |
 +-- Admission/
@@ -1322,22 +1431,24 @@ Ps/KernelSelfHost/
 |   |
 |   '-- Inductive/
 |       +-- Types.lean
+|       |
 |       +-- Common/
 |       |   +-- Parameters.lean
+|       |   +-- Occurrence.lean
 |       |   +-- Positivity.lean
+|       |   +-- Elimination.lean
 |       |   '-- RecursorValidation.lean
 |       |
 |       +-- Ordinary/
 |       |   +-- Constructor.lean
 |       |   +-- ConstructorAdmission.lean
 |       |   +-- Recursor.lean
-|       |   +-- Elimination.lean
 |       |   '-- Admission.lean
 |       |
 |       +-- Mutual/
 |       |   +-- Analysis.lean
-|       |   +-- Recursor.lean
 |       |   +-- Header.lean
+|       |   +-- Recursor.lean
 |       |   +-- AdmissionLoops.lean
 |       |   '-- Admission.lean
 |       |
@@ -1354,221 +1465,785 @@ Ps/KernelSelfHost/
 |           '-- Admission.lean
 |
 +-- API/
+|   +-- KernelContractV1.lean
 |   +-- Kernel.lean
-|   '-- SelfHost.lean
+|   +-- Session.lean
+|   '-- Provider.lean
 |
-'-- Compat/
-    +-- Instantiate.lean
-    +-- TypeCheckerPrimitives.lean
-    +-- TypeCheckerWhnf.lean
-    +-- TypeCheckerProjection.lean
-    +-- TypeCheckerInfer.lean
-    +-- TypeCheckerRecursor.lean
-    +-- TypeCheckerDefEqSupport.lean
-    +-- TypeCheckerDefEq.lean
-    +-- Quot.lean
-    +-- Inductive.lean
-    +-- InductiveAdmission.lean
-    +-- MutualInductive.lean
-    '-- NestedInductive.lean
+'-- SelfHost.lean
 ~~~
 
-The Compat folder may be transitional.
-Long-term consumers should import API or canonical modules.
+This is the final target tree.
+
+Compatibility shims are deliberately absent.
 
 ---
 
-# 23. Why Checker/Engine should exist
+# 32. Temporary migration tree
 
-The current source uses higher-order injection and several public TypeChecker*.lean integration files to avoid recursive module dependencies.
-
-That implementation technique is reasonable.
-
-The architecture problem is that the mutual recursion is not named as one concept.
-
-Lean's official kernel has one type_checker object containing:
-
-- infer;
-- check;
-- whnf;
-- defeq;
-- recursor reduction;
-- caches;
-- local context.
-
-PSKernel should not collapse back into one giant file.
-
-Instead, it should expose one explicit Engine module that ties the already-separated components together:
+During migration only, old import paths may be preserved under:
 
 ~~~text
+Ps/KernelSelfHost/Compat/
+~~~
+
+or as old-path one-line forwarding modules.
+
+Rules:
+
+1. Compat modules may import canonical modules.
+2. Canonical modules may never import Compat.
+3. SelfHost.lean may never import Compat.
+4. Compat is excluded from the canonical semantic-closure manifest.
+5. Every Compat file has a deletion condition.
+6. Compat disappears when repository consumers have moved.
+
+This distinction fixes a weakness in the first plan:
+
+~~~text
+migration architecture != final architecture
+~~~
+
+---
+
+# 33. Final dependency layers
+
+The final dependency graph is:
+
+~~~text
+Layer 0
+Core
+
+Layer 1
+Runtime/Acceleration
+Runtime/Capability interfaces
+
+Layer 2
+Environment
+
+Layer 3
 Checker components
-     |
-     +-- Reduction
-     +-- Inference
-     +-- Recursor
-     '-- DefEq
-          |
-          v
-     Checker/Engine
-          |
-          v
-     Checker/Session
+
+Layer 4
+Checker/Knot
+Checker/Session
+
+Layer 5
+Admission
+
+Layer 6
+API
+
+Layer 7
+SelfHost root
 ~~~
 
-This would make callback injection an implementation detail of the engine rather than a source-layout artifact visible through multiple top-level TypeChecker modules.
-
----
-
-# 24. Recommended dependency law
-
-The target import graph should be enforceable.
-
-Recommended layers:
-
-~~~text
-Layer 0: Core
-
-Layer 1: Runtime primitives
-         Environment representation
-
-Layer 2: Checker components
-
-Layer 3: Checker Engine / Session
-
-Layer 4: Admission
-
-Layer 5: API
-
-Layer 6: Compat
-~~~
-
-Allowed direction:
+Allowed imports:
 
 ~~~text
 Core
-  ^
-  |
-Runtime / Environment
-  ^
-  |
-Checker
-  ^
-  |
+  imports Core only
+
+Runtime/Acceleration
+  imports Core only
+
+Runtime/Capability
+  imports Core only
+
+Environment
+  imports Core
+  imports Runtime/Acceleration
+  may refer to capability types only where unavoidable
+
+Checker components
+  import Core
+  import Environment
+  import Runtime/Acceleration
+  import Runtime/Capability interface
+  do not import Admission or API
+
+Checker/Knot
+  imports Checker components
+  owns recursive checker wiring
+
+Checker/Session
+  imports Knot
+  exposes state-threading operations
+
 Admission
-  ^
-  |
+  imports Core/Environment/Checker
+  does not define alternate checker semantics
+
 API
-  ^
-  |
-Compat consumers
+  imports Admission/Checker
+  contains stable external contracts only
+
+SelfHost
+  imports canonical API/admission roots
+  imports no Compat
 ~~~
-
-Canonical implementation modules must never import Compat.
-
-Admission may import Checker.
-Checker must not import Admission.
-
-Core must not import Runtime, Checker, Admission, API or Compat.
-
-Runtime acceleration must not import Admission.
-
-A small script should verify these import fences in CI.
-
-This would convert architecture documentation into an executable invariant.
 
 ---
 
-# 25. Environment representation recommendation
+# 34. Machine-enforced dependency architecture
 
-Do not immediately rewrite Environment.
+Create a machine-readable architecture file:
 
-The current representation is performant and tested.
+~~~text
+PSKERNEL_ARCHITECTURE.json
+~~~
 
-Long-term cleaner model:
+Recommended fields:
+
+~~~text
+schemaVersion
+semanticRoot
+targetLeanVersion
+targetLeanCommit
+
+layers:
+  name
+  pathPrefix
+  trustClass
+  allowedImportLayers
+
+modules:
+  path
+  owner
+  role
+  semantic
+  public
+  compatibilityShim
+
+invariants:
+  noCompatInSemanticRoot
+  noReferenceKernelInSemanticRoot
+  noTestImportsInSemanticRoot
+  noUpwardImports
+  oneSemanticOwnerPerRule
+~~~
+
+Add CI:
+
+~~~text
+psc1kernel-architecture-audit.mjs
+~~~
+
+It should fail when the source tree violates declared ownership.
+
+This is a major improvement over relying only on prose.
+
+---
+
+# 35. Trust classes
+
+The final architecture uses explicit trust classes.
+
+## T0 - semantic kernel rule
+
+Examples:
+
+~~~text
+universe equivalence
+checked inference
+WHNF order
+defeq order
+recursor reduction
+inductive positivity
+nested restoration validation
+declaration admission
+~~~
+
+A T0 change may alter acceptance.
+
+It requires semantic/conformance review.
+
+## T1 - non-semantic acceleration
+
+Examples:
+
+~~~text
+environment index
+expression-map representation
+pair-set representation
+cache promotion threshold
+cache-eligibility policy
+precomputed structural hash
+~~~
+
+T1 must not create a fact.
+
+Removing every T1 accelerator must preserve answers, modulo performance/resource consumption.
+
+## T2 - trusted capability
+
+Examples in Lean 4.34 compatibility:
+
+~~~text
+compiled execution used by Lean.reduceBool
+compiled execution used by Lean.reduceNat
+~~~
+
+A wrong T2 result can change kernel acceptance.
+
+T2 therefore extends the TCB.
+
+It must never be documented as merely a cache.
+
+## T3 - adapter/protocol
+
+Examples:
+
+~~~text
+provider-neutral API adapter
+serialization
+bridge into npm/JS host
+declaration codec
+~~~
+
+T3 must translate data and calls.
+
+It must not implement an alternate typing rule or fallback acceptance path.
+
+---
+
+# 36. Why native reduction gets its own capability namespace
+
+Lean 4.34's native reduction route executes compiled code for a closed constant.
+
+That makes the compiler/runtime part of the trust boundary for that operation.
+
+Lean 4.35 removes this deprecated route.
+
+Therefore the final 4.34 architecture should isolate it as:
+
+~~~text
+Runtime/Capability/Lean434NativeReduction.lean
+~~~
+
+rather than placing it next to:
+
+~~~text
+Cache
+EnvironmentIndex
+~~~
+
+This provides three benefits:
+
+1. TCB expansion is visible.
+2. A future Lean target can remove the module cleanly.
+3. Cache/index reasoning cannot accidentally be used to justify native evaluation.
+
+No provider remains:
+
+~~~text
+native step unavailable
+-> continue normal kernel reduction
+~~~
+
+A provider must never be used as a fallback after semantic failure.
+
+---
+
+# 37. Environment architecture
+
+The long-term environment should expose a semantic projection.
+
+Recommended conceptual representation:
 
 ~~~text
 PsKernelSemanticEnvironment
-  constants
-  quotInitialized
+    constants
+    quotInitialized
 
 PsKernelEnvironment
-  semantic
-  index
-  runtime capabilities
+    semantic
+    index
 ~~~
 
-Potential benefit:
+Trusted checker capabilities should live in CheckerContext/Session configuration rather than semantic declaration history.
 
-- semantic state becomes explicit;
-- indexes/providers are visibly non-semantic;
-- test oracles can compare semantic environments independently of acceleration;
-- runtime resets become safer.
+Important invariant:
 
-Risk:
+~~~text
+semanticView(environment)
+~~~
 
-- high churn through the whole checker;
-- portable self-host source complexity;
-- possible performance regressions.
+must be sufficient to determine the logical environment.
 
-Recommendation:
+EnvironmentIndex is a derivative of semantic constants.
 
-Do not make this change during the first folder reorganization.
+It may be:
 
-Treat it as a later optional representation milestone only if profiling or provider work justifies it.
+~~~text
+discarded
+rebuilt
+changed in representation
+~~~
+
+without changing semanticView.
+
+All environment mutations should go through one Operations module that updates semantic state and the index together.
+
+## 37.1 Migration rule
+
+Do not begin the architectural migration with this representation change.
+
+First make folder/import ownership clean.
+
+Then, if the environment split remains worthwhile, perform it as a separate measured commit series.
+
+Architecture quality does not justify combining source moves with representation changes.
 
 ---
 
-# 26. Inductive subsystem recommendation
+# 38. Checker context architecture
 
-The strongest source-structure improvement is to unify ordinary, mutual and nested inductive code physically.
-
-Today:
+CheckerContext should contain logical/check configuration:
 
 ~~~text
-Inductive.lean
-InductiveAdmission.lean
-Theory/Inductive/
-Theory/Mutual/
-Theory/Nested/
-MutualInductive.lean
-NestedInductive.lean
+environment
+local context
+universe parameters
+definition safety
+eager-reduction mode
+resource limits
+recursion depth
+trusted capability set
 ~~~
 
-Target:
+Important distinction:
+
+~~~text
+environment semantic content
+!=
+trusted execution capability
+~~~
+
+This is why native-evaluator configuration belongs in the checker context/capability boundary, not in the semantic environment projection.
+
+---
+
+# 39. Checker state architecture
+
+CheckerState should own transient per-session state:
+
+~~~text
+fresh-name state
+
+infer-only cache
+checked-infer cache
+
+whnfCore cache
+whnf cache
+unfold cache
+
+defeq success pair set
+defeq failure pair set
+~~~
+
+State is not part of the logical environment.
+
+A new session may start with empty caches and must produce the same semantic answers.
+
+---
+
+# 40. Checker/Ops and Checker/Knot
+
+This is the most important structural refinement over the first reference.
+
+The checker contains mutually dependent operations.
+
+Instead of exposing this dependency accidentally through top-level import placement, define one internal operations interface.
+
+Conceptually:
+
+~~~text
+CheckerOps
+    infer
+    check
+    whnfCore
+    whnf
+    defeq
+    reduceRecursor
+~~~
+
+Checker components receive only the callbacks they need.
+
+Checker/Knot.lean ties the implementations together exactly once.
+
+Conceptual graph:
+
+~~~text
+Reduction ───────┐
+Inference ───────┤
+Recursor ────────┼──> Checker/Knot
+DefEq ───────────┤          |
+Projection ──────┘          v
+                       Checker/Session
+~~~
+
+This follows the useful pattern visible in lean4lean's explicit TypeChecker.Methods recursion interface.
+
+## 40.1 PSC1 portability constraint
+
+Do not introduce an elegant abstraction that the portable compiler cannot self-host reliably.
+
+The architecture requirement is:
+
+~~~text
+one owned knot
+~~~
+
+not necessarily:
+
+~~~text
+one specific record-of-functions implementation
+~~~
+
+If a function-field structure causes portability or performance problems, keep the existing proven curried callback style but move all wiring into Checker/Knot.lean.
+
+---
+
+# 41. Inference ownership
+
+Canonical inference path:
+
+~~~text
+Checker/Inference/Helpers.lean
+        |
+        v
+Checker/Inference/Core.lean
+        |
+        v
+Checker/Knot.lean
+        |
+        v
+Checker/Session.lean
+~~~
+
+Helpers may expose:
+
+- ensure Sort/Pi views;
+- application-spine utilities;
+- local binder helpers.
+
+Cache publication/eligibility should move to:
+
+~~~text
+Runtime/Acceleration/CachePolicy.lean
+~~~
+
+Inference code may call the policy.
+
+The policy must not be described as a typing rule.
+
+---
+
+# 42. Reduction ownership
+
+Canonical reduction:
+
+~~~text
+Checker/Reduction/PrimitiveData
+Checker/Reduction/PrimitiveNat
+Checker/Reduction/KernelReductions
+Checker/Reduction/WhnfCore
+~~~
+
+Primitive Nat reduction remains a semantic optimization path because it produces definitional reductions.
+
+It is not in the same trust class as memoization.
+
+Resource bounds such as max Nat size belong to checker limits/configuration.
+
+Target-specific native execution remains outside this subtree under Runtime/Capability.
+
+---
+
+# 43. Projection ownership
+
+Projection inference and reduction interact with:
+
+- inductive metadata;
+- WHNF;
+- proof irrelevance;
+- universe normalization.
+
+Projection should be a first-class Checker module:
+
+~~~text
+Checker/Projection.lean
+~~~
+
+not an incidental public TypeChecker wrapper.
+
+Permanent hardening cases should include:
+
+- wrong structure name;
+- out-of-range projection;
+- Prop/imax projection restrictions;
+- large projection index behavior.
+
+---
+
+# 44. Recursor ownership
+
+Recursor subsystem remains:
+
+~~~text
+Checker/Recursor/Analysis.lean
+Checker/Recursor/Reduction.lean
+~~~
+
+Analysis owns:
+
+- major-family discovery;
+- K-like behavior;
+- structure conversion;
+- recursor metadata interpretation.
+
+Reduction owns:
+
+- rule selection;
+- iota computation;
+- Quot/inductive interaction as appropriate.
+
+Knot integrates recursor reduction with inference/WHNF/defeq.
+
+---
+
+# 45. DefEq ownership
+
+Final DefEq tree remains close to the current one because the current decomposition is already excellent:
+
+~~~text
+Checker/DefEq/
+    BinderSpines
+    Quick
+    DeltaStep
+    LazyDelta
+    Shortcuts
+    FullShape
+    FinalRules
+~~~
+
+Checker/Knot owns the public recursive entry.
+
+Important design goal:
+
+A reader should be able to inspect one short orchestration function and see the observable Lean 4.34 ordering.
+
+Do not hide ordering behind generic rewrite registries.
+
+---
+
+# 46. Admission architecture
+
+Admission is not a checker subroutine.
+
+It is an environment transaction that calls the checker.
+
+Final tree:
+
+~~~text
+Admission/
+    Declaration/
+    Quot/
+    Inductive/
+~~~
+
+Admission invariants include:
+
+- duplicate name rejection;
+- universe parameter discipline;
+- closedness;
+- type is a Sort;
+- value has declared type;
+- theorem type is Prop;
+- safety discipline;
+- working-environment rules for recursive/partial declarations;
+- final commit only after all checks pass.
+
+---
+
+# 47. Final inductive hierarchy
+
+Unify ordinary, mutual and nested source physically:
 
 ~~~text
 Admission/Inductive/
-  Types
-  Common
-  Ordinary
-  Mutual
-  Nested
+    Types
+    Common
+    Ordinary
+    Mutual
+    Nested
 ~~~
 
-Advantages:
+Do not merge them into one large file.
 
-1. mirrors Lean's conceptual one-subsystem treatment;
-2. makes shared recursor/positivity rules easier to discover;
-3. prevents ordinary admission from looking more foundational than mutual/nested;
-4. gives nested transformation a clear relationship to the mutual admission it invokes;
-5. makes high-risk conformance subrules easier to organize.
+## 47.1 Common
 
-Do not merge the source files back into a monolith.
+Common owns only truly shared logic:
 
-Unify the namespace/folder hierarchy, not the implementation bodies.
+~~~text
+parameter/header operations
+occurrence analysis
+positivity primitives
+elimination policy
+recursor result/rule validation helpers
+~~~
+
+Do not extract a "common" abstraction merely because two functions look similar.
+
+Shared code should correspond to one shared Lean rule.
+
+## 47.2 Ordinary
+
+Ordinary owns:
+
+~~~text
+constructor shape
+constructor admission
+ordinary recursor construction
+ordinary admission transaction
+~~~
+
+## 47.3 Mutual
+
+Mutual owns:
+
+~~~text
+family analysis
+shared header
+motives/minors
+cross-family recursive hypotheses
+recursor construction
+admission loops
+bundle transaction
+~~~
+
+## 47.4 Nested
+
+Nested preserves the current strong phase split:
+
+~~~text
+Types
+ReservedNames
+Rebase
+Discover
+Flatten
+RestoreExpr
+Restore
+Validation
+Commit
+Admission
+~~~
+
+Nested calls the mutual admission transaction for the transformed bundle.
+
+There must not be a second hidden "nested type checker".
 
 ---
 
-# 27. Test architecture target
+# 48. API architecture
 
-Recommended kernel test tree:
+The final package should expose a small stable API surface.
+
+~~~text
+API/KernelContractV1.lean
+API/Kernel.lean
+API/Session.lean
+API/Provider.lean
+~~~
+
+## 48.1 KernelContractV1
+
+The contract should give the checked-session boundary a stable identity.
+
+It should distinguish clearly between:
+
+~~~text
+unchecked/request state
+checked result
+admission result
+provider capability
+~~~
+
+No status called "ready" should be able to mean both "constructed" and "kernel checked".
+
+The contract should expose target identity:
+
+~~~text
+KernelContract-v1
+Lean 4.34.0
+commit 293d5d...
+~~~
+
+## 48.2 API/Kernel
+
+Own public declaration admission.
+
+## 48.3 API/Session
+
+Own public infer/check/whnf/defeq session operations.
+
+## 48.4 API/Provider
+
+Own provider-neutral adapter contracts.
+
+Provider code may:
+
+- decode;
+- encode;
+- route calls;
+- install declared capabilities.
+
+Provider code may not:
+
+- silently skip checking;
+- fall back from rejection to another semantic implementation;
+- patch generated JavaScript semantics;
+- redefine defeq/reduction.
+
+---
+
+# 49. Self-host semantic root
+
+SelfHost.lean must be a small root importing only canonical semantic/API modules.
+
+It must not import:
+
+~~~text
+Compat
+tests
+benchmarks
+frozen reference kernel
+host adapters
+generated JS
+compiler frontend
+~~~
+
+A semantic-closure audit should compute the transitive import set.
+
+Every file in that closure must pass the portable source profile.
+
+This closure is the canonical source that may be translated through PSC/backend-ts.
+
+---
+
+# 50. Final test architecture
+
+Recommended tree:
 
 ~~~text
 test/KernelSelfHost/
 |
 +-- Fixtures/
-|   +-- Base.lean
+|   +-- Core.lean
+|   +-- Declarations.lean
 |   +-- Inductive.lean
+|   +-- Mutual.lean
 |   '-- Nested.lean
 |
 +-- Conformance/
@@ -1586,235 +2261,638 @@ test/KernelSelfHost/
 |   |   '-- NestedInductive.lean
 |   '-- Main.lean
 |
++-- Hardening/
+|   +-- DefEqCacheOrder.lean
+|   +-- PropProjection.lean
+|   +-- RecursorRulePreservation.lean
+|   +-- UniformOccurrences.lean
+|   +-- NestedAuxNamespace.lean
+|   +-- NestedDroppedParameters.lean
+|   +-- NestedMultiFamilyRestore.lean
+|   '-- NatResourceLimit.lean
+|
++-- Oracle/
+|   +-- Lean434.lean
+|   +-- FrozenPSC1Kernel.lean
+|   '-- Comparison.lean
+|
 +-- Runtime/
 |   +-- CacheInvariant.lean
 |   +-- EnvironmentIndexInvariant.lean
-|   '-- NativeReduction.lean
+|   +-- SemanticProjectionInvariant.lean
+|   '-- CapabilityBoundary.lean
 |
-+-- Adversarial/
-|   +-- Lean434SoundnessRegressions.lean
-|   +-- NestedAuxLeak.lean
-|   '-- DefEqCacheOrder.lean
++-- Architecture/
+|   +-- SemanticClosure.lean
+|   '-- SourceOwnership.lean
 |
 '-- Bench/
     +-- Harness.lean
     +-- Environment.lean
     +-- Cache.lean
     +-- Inference.lean
+    +-- Whnf.lean
     +-- DefEq.lean
     +-- Recursor.lean
     +-- Inductive.lean
+    +-- Mutual.lean
     +-- Nested.lean
     '-- Main.lean
 ~~~
 
-Benefits:
-
-- each compatibility rule has a local home;
-- regression tests remain after debugging helpers are removed;
-- benchmark instrumentation cannot pollute semantic conformance;
-- fixtures are reusable;
-- failures identify the subsystem immediately.
+Main executables should be thin aggregators.
 
 ---
 
-# 28. Conformance architecture target
+# 51. Evidence hierarchy
 
-Recommended evidence stack for each high-risk rule:
+Every high-risk rule should have evidence from several levels.
+
+Recommended order:
 
 ~~~text
-1. source locator
-2. positive case
-3. negative case
-4. edge/adversarial case
-5. official Lean 4.34 result
-6. frozen PSC1Kernel result
-7. PSKernel-selfhost result
-8. invariant checks where runtime representation matters
+A. exact Lean 4.34 source locator
+
+B. official Lean 4.34 differential result
+
+C. PSKernel portable result
+
+D. frozen PSC1Kernel differential result
+
+E. direct invariant test where representation matters
+
+F. adversarial hardening fixture
+
+G. optional third-party checker comparison
 ~~~
 
-For soundness fixes introduced in Lean 4.33/4.34, add named permanent adversarial cases.
+Official Lean is the primary external behavior oracle.
 
-Especially important:
+PSC1Kernel remains useful as a regression oracle.
 
-- non-transitive defeq-cache behavior;
-- isProp must ensure a Sort;
-- projection from Prop guard;
-- recursor rule type preservation;
-- uniform inductive occurrences;
-- reserved nested auxiliary names;
-- multi-family nested restoration;
-- Nat computation size bound.
-
-The release matrix can remain 34 rows.
-The subrule registry can be generated or documented separately.
+Independent checkers are corroborating evidence, not compatibility authority.
 
 ---
 
-# 29. Documentation architecture target
+# 52. Hierarchical rule registry
 
-PSKernel currently has several good documents:
+Keep the current 34-row compatibility matrix.
+
+It is useful as a product/release capability index.
+
+Add a finer machine-readable registry for high-risk implementation rules.
+
+Suggested file:
 
 ~~~text
-README
-PSKERNEL_SELFHOST_ARCHITECTURE
-DEVELOPMENT_PLAN
-KERNEL_THEORY
-KERNEL_RULE_REFERENCE
-PERFORMANCE_BASELINE
-compatibility JSON
-conformance JSON
-SELFHOST_EVIDENCE
+LEAN_4_34_KERNEL_RULES.json
 ~~~
 
-The risk is not lack of documentation.
-It is duplication and drift.
+Suggested fields:
 
-Recommended roles:
+~~~text
+id
+parentCompatibilityId
+area
+statement
+leanCommit
+leanLocator
+pskernelModule
+pskernelSymbol
+trustClass
+
+tests:
+    positive
+    negative
+    adversarial
+
+oracles:
+    officialLean
+    frozenPSC1
+    invariant
+
+status
+~~~
+
+Example nested children:
+
+~~~text
+PSK-NESTED-RESERVED-NAMESPACE
+PSK-NESTED-UNIFORM-OCCURRENCE
+PSK-NESTED-DISCOVERY
+PSK-NESTED-AUX-FRESHNESS
+PSK-NESTED-FLATTEN
+PSK-NESTED-DROPPED-PARAM-CHECK
+PSK-NESTED-RESTORE-EXPR
+PSK-NESTED-FULL-REGISTRY
+PSK-NESTED-RESTORED-CTOR-CHECK
+PSK-NESTED-RESTORED-REC-TYPE-CHECK
+PSK-NESTED-RESTORED-RULE-CHECK
+PSK-NESTED-RULE-TYPE-PRESERVATION
+PSK-NESTED-NO-AUX-LEAK
+~~~
+
+The generated KERNEL_RULE_REFERENCE can include both top-level and subrule views.
+
+---
+
+# 53. Divergence registry
+
+Add:
+
+~~~text
+LEAN_4_34_DIVERGENCES.md
+~~~
+
+Policy:
+
+~~~text
+default: no divergence
+
+any known intentional difference:
+    documented
+    justified
+    tested
+    linked to target upgrade/migration plan
+~~~
+
+This mirrors a useful practice from lean4lean.
+
+A hidden divergence is a bug.
+
+---
+
+# 54. Architecture tests
+
+CI should verify architecture itself.
+
+Required automated checks:
+
+## 54.1 Import fence
+
+Reject upward imports.
+
+## 54.2 Semantic closure
+
+Compute SelfHost transitive imports.
+
+Require only canonical portable modules.
+
+## 54.3 No reference dependency
+
+Canonical semantic code must not import PSC1Kernel reference code.
+
+## 54.4 No test dependency
+
+Semantic source must not import test/benchmark modules.
+
+## 54.5 No Compat dependency
+
+SelfHost closure must contain no compatibility shim.
+
+## 54.6 Unique semantic ownership
+
+Every hierarchical kernel rule maps to one canonical implementation owner.
+
+Multiple helper symbols are fine.
+
+Multiple semantic implementations are not.
+
+## 54.7 Target pin consistency
+
+Architecture manifest, compatibility matrix, conformance matrix and reference document must name the same Lean target.
+
+---
+
+# 55. Documentation architecture
+
+Recommended responsibilities:
 
 ## PSKERNEL_REFERENCE.md
 
-Human canonical reference:
+Human canonical architecture reference.
 
-- architecture;
+Contains:
+
 - theory overview;
-- source structure;
-- trust model;
-- current score/debt;
-- target structure;
-- reading map.
+- current architecture audit;
+- final target architecture;
+- dependency/trust laws;
+- migration map;
+- scoring.
 
 ## PSKERNEL_SELFHOST_ARCHITECTURE.md
 
-Short normative guardrails only.
+Short normative anti-drift policy.
+
+Avoid duplicating long explanatory material.
 
 ## KERNEL_THEORY.md
 
-Detailed explanation of algorithms/rules.
+Algorithm and theory explanation.
 
 ## KERNEL_RULE_REFERENCE.md
 
-Generated machine-linked index only.
+Generated source/rule/test index.
 
 ## DEVELOPMENT_PLAN.md
 
-Only active roadmap and milestones.
+Current work state only.
 
 ## PERFORMANCE_BASELINE.md
 
-Only measurements and performance conclusions.
+Measurements and performance conclusions only.
 
-## JSON matrices
+## Machine JSON
 
-Only machine-readable compatibility/conformance state.
+Compatibility, conformance, architecture and fine-grained rule state.
 
-Avoid copying the same policy paragraphs into every file.
-
----
-
-# 30. What should not change
-
-The architecture review does not recommend changing these decisions:
-
-1. Keep one semantic implementation.
-2. Keep Lean 4.34.0 pinned until an explicit target-version project.
-3. Keep the PSC1 portable-source requirement.
-4. Keep fail-closed exhaustion/error behavior.
-5. Keep pair caches non-transitive.
-6. Keep Environment.constants as semantic authority.
-7. Keep runtime indexes/caches non-semantic.
-8. Keep optional native reduction outside core theory.
-9. Keep checked and infer-only inference semantically distinct.
-10. Keep nested restoration re-validation.
-11. Keep no generated-JS semantic patches.
-12. Keep generated fixed point as promoted release/bootstrap evidence rather than every-commit work.
-13. Do not create a second fast kernel.
-14. Do not optimize by changing observable defeq ordering.
+Documentation should point rather than duplicate.
 
 ---
 
-# 31. Recommended migration sequence
+# 56. Performance architecture
 
-The reorganization should be incremental and semantics-preserving.
+The permanent optimization law should be:
 
-## Stage 0 - freeze invariants
+~~~text
+measure first
+identify exact cost
+change one non-semantic representation/policy when possible
+preserve Lean algorithmic order
+run semantic + portable gates
+remeasure
+keep or revert
+~~~
 
-Before moving files:
+Classes of performance work:
 
-- portable CI green;
-- 34/34 compatibility/conformance green;
-- multi-family nested regression green;
-- benchmarks recorded;
-- canonical .ps recheck green.
+## Safe-by-design acceleration candidates
 
-No semantics change.
+~~~text
+hash indexes
+small-list -> trie promotion
+cache representation
+cache admission policy
+structural hash metadata
+node metadata
+sharing/interning when proven useful
+~~~
 
-## Stage 1 - split tests
+## Semantically sensitive optimization
 
-Move foundation tests and benchmarks into subsystem files.
+~~~text
+reduction shortcut
+infer-only substitution for checked work
+defeq ordering change
+native evaluation
+recursor shortcut
+~~~
 
-This is low semantic risk and immediately improves reviewability.
+These require a proof/invariant argument plus differential coverage.
 
-Maintain one Main executable for each suite.
+The recent validated-old-rule optimization is the right pattern:
 
-## Stage 2 - introduce canonical Checker hierarchy
+~~~text
+full validity established earlier
+only type recovery needed later
+fast path explicitly named for that invariant
+new/restored term still fully checked where required
+~~~
+
+---
+
+# 57. Provider readiness and deployment authority
+
+Core semantic completeness and deployment authority are separate milestones.
+
+The self-host kernel may be:
+
+~~~text
+rule-complete
+portable
+self-hosted
+conformance-green
+~~~
+
+while the product still uses another checker as default authority.
+
+Promotion to provider authority should require:
+
+~~~text
+stable KernelContract-v1
+canonical declaration adapter
+dual-check mode
+official Lean parity corpus
+no fallback-on-reject
+provider capability audit
+JS/native semantic corpus parity
+explicit promotion decision
+~~~
+
+Do not equate self-host fixed point with provider authority.
+
+---
+
+# 58. Migration strategy
+
+Do not execute the final architecture as one giant refactor.
+
+Use small checkpoints.
+
+## Phase M0 - pin baseline
+
+Require green:
+
+~~~text
+compatibility 34/34
+conformance 34/34
+PSC1 check
+canonical .ps recheck
+Lean native build
+foundation differential
+nested multi-family regression
+benchmark baseline
+~~~
+
+## Phase M1 - split tests and benches
+
+No semantic source move yet.
+
+Create subsystem suites and thin Main aggregators.
+
+Delete temporary diagnostic code already represented by permanent regressions.
+
+## Phase M2 - add architecture manifest and import fence
+
+Describe current architecture first.
+
+Make violations visible before moving files.
+
+## Phase M3 - canonical Core and Runtime paths
+
+Move only modules with no algorithmic edits.
+
+Temporary old-path reexports allowed.
+
+## Phase M4 - canonical Checker tree
 
 Move:
 
 ~~~text
-TypeCheckerBase
-TypeCheckerWhnf
-TypeCheckerProjection
-Theory/Inference
-Theory/Reduction
-Theory/Recursor
-Theory/DefEq
-TypeChecker*
-CheckerState
-CheckerSession
+context
+state
+reduction
+projection
+inference
+recursor
+defeq
 ~~~
 
-under Checker without changing function bodies.
+without changing bodies.
 
-Add old-path compatibility umbrellas if needed.
+## Phase M5 - introduce Checker/Knot
 
-## Stage 3 - unify inductive hierarchy
+Centralize existing recursive callback wiring.
 
-Move ordinary/mutual/nested source under Admission/Inductive.
+Do not redesign algorithms in the same commit.
 
-Keep exact public symbols.
+## Phase M6 - canonical Admission tree
 
-Do not alter algorithms.
+Move declaration/Quot/inductive admission.
 
-## Stage 4 - isolate runtime cache policy
+## Phase M7 - unify Inductive hierarchy
 
-Move inference cache eligibility/publication policy out of theory-facing modules.
+Place Ordinary/Mutual/Nested under one owner.
 
-Add an explicit comment/API stating that cache policy cannot change judgments.
+Keep phase files separate.
 
-## Stage 5 - add import-fence audit
+## Phase M8 - isolate cache policy and trusted capability
 
-Machine-check canonical dependencies.
+Move policy/capability code without semantic change.
 
-Fail CI if Core/Checker/Admission layers import upward.
+## Phase M9 - stable API contract
 
-## Stage 6 - improve oracle independence
+Expose KernelContract-v1 and provider-neutral session/admission surface.
 
-Add official Lean 4.34 direct conformance adapters/cases.
+## Phase M10 - oracle and fine-grained rule expansion
 
-Retain frozen PSC1Kernel differential as a second regression oracle.
+Add official Lean fixtures and hierarchical rule registry.
 
-## Stage 7 - optional environment representation cleanup
+## Phase M11 - remove Compat
 
-Only if justified by provider work or profiling.
+Only after no canonical consumer imports old paths.
 
-This is not required to achieve a strong architecture score.
+## Phase M12 - optional environment representation split
+
+Do this only if still valuable after the import cleanup.
+
+Treat as a separate semantic/runtime representation project.
 
 ---
 
-# 32. Suggested canonical reading order after reorganization
+# 59. Migration discipline
 
-A reader should be able to learn the kernel in approximately this order:
+Each migration commit should be exactly one of:
+
+~~~text
+move/rename only
+import-wiring only
+documentation only
+test split only
+architecture gate only
+semantic change only
+performance change only
+~~~
+
+Avoid:
+
+~~~text
+move + semantic fix + optimization
+~~~
+
+in one commit.
+
+This dramatically improves auditability for a proof kernel.
+
+---
+
+# 60. Permanent invariants
+
+## INV-01 One semantic source
+
+There is one maintained semantic kernel implementation.
+
+## INV-02 Exact Lean target
+
+Semantic claims name Lean 4.34.0 and the pinned commit.
+
+## INV-03 Fail closed
+
+Failure, unsupported input and resource exhaustion reject.
+
+## INV-04 No cache authority
+
+A cache can reuse a prior fact but cannot manufacture a fact.
+
+## INV-05 DefEq pair facts are non-transitive
+
+Never use successful-pair transitive closure.
+
+## INV-06 Semantic environment is explicit
+
+Logical environment identity is independent of cache/index representation.
+
+## INV-07 Acceleration and trusted capability are different trust classes
+
+Hashing is not native execution.
+
+## INV-08 Infer-only has a validity precondition
+
+It may not silently replace checking.
+
+## INV-09 Checker recursion knot has one owner
+
+All infer/whnf/defeq/recursor recursive wiring is centralized.
+
+## INV-10 Admission is transactional
+
+Nothing reaches the returned environment unless required checks complete.
+
+## INV-11 Nested restoration uses the full family registry
+
+Pending iteration state cannot shrink restoration knowledge.
+
+## INV-12 Restored nested outputs are validated
+
+Constructor types, recursor types and rule RHSs are rechecked according to Lean 4.34 behavior.
+
+## INV-13 Internal nested declarations do not leak
+
+Final user environment contains no generated nested implementation family.
+
+## INV-14 Runtime index is derivative
+
+Environment index can be rebuilt from semantic declarations.
+
+## INV-15 Native reduction is explicit TCB extension
+
+Provider use is visible and target-specific.
+
+## INV-16 Canonical source imports no Compat
+
+Compatibility shims are downstream migration artifacts.
+
+## INV-17 Canonical source imports no reference kernel
+
+Differential oracle code stays in tests.
+
+## INV-18 Generated JS is never semantically patched
+
+Fix source and regenerate.
+
+## INV-19 Fixed point is evidence, not proof
+
+Generated reproduction is a release/bootstrap receipt.
+
+## INV-20 Official Lean remains primary compatibility authority
+
+Independent checkers and frozen references are secondary evidence.
+
+---
+
+# 61. Final target score
+
+Strict weighted score:
+
+| Dimension | Weight | Final score |
+| --- | ---: | ---: |
+| Trust boundary and semantic fidelity | 15% | 9.90 |
+| Checker decomposition and recursion-knot wiring | 13% | 9.90 |
+| Dependency layering and machine enforcement | 12% | 9.95 |
+| Semantics / acceleration / trusted-capability separation | 10% | 9.90 |
+| Inductive subsystem coherence | 10% | 9.85 |
+| PSC1 portability and self-host closure | 10% | 9.90 |
+| Conformance and oracle independence | 10% | 9.90 |
+| API/provider boundary | 7% | 9.85 |
+| Test/benchmark architecture | 7% | 9.95 |
+| Migration safety and maintainability | 6% | 9.90 |
+
+Weighted result:
+
+~~~text
+9.901 / 10
+rounded architecture score: 9.90 / 10
+~~~
+
+Why it is not 10:
+
+1. the target deliberately remains an executable compatibility kernel, not a fully formally verified implementation;
+2. PSC1 portability constrains some abstraction choices;
+3. exact Lean compatibility necessarily preserves some target-specific implementation complexity;
+4. provider/native behavior in 4.34 has an unavoidable extended trust boundary;
+5. future performance work can reveal representation pressures not visible from architecture review alone.
+
+Those are acceptable tradeoffs.
+
+---
+
+# 62. What would be required for a meaningful 10/10 claim
+
+A genuine 10/10 should not be awarded for rearranging folders.
+
+It would require evidence substantially stronger than this project currently targets, for example:
+
+~~~text
+machine-enforced architecture
++
+independent official differential corpus
++
+fine-grained soundness-rule registry
++
+formal refinement/simulation proof
++
+verified or eliminated trusted native capability
++
+fully specified stable external contract
++
+production provider parity
+~~~
+
+PSKernel does not need that scope to be production-ready.
+
+The 9.90 target is intentionally ambitious but compatible with the project's executable/self-hosting goals.
+
+---
+
+# 63. Recommended implementation order from this point
+
+Highest-value architectural work:
+
+~~~text
+1. split test/benchmark monoliths
+2. create PSKERNEL_ARCHITECTURE.json
+3. add import-fence + semantic-closure CI
+4. establish canonical Checker directory
+5. establish Checker/Ops + Checker/Knot ownership
+6. move cache policy under Runtime/Acceleration
+7. isolate Lean434 native reduction under Runtime/Capability
+8. unify all inductive admission under Admission/Inductive
+9. establish API/KernelContractV1
+10. add fine-grained Lean 4.34 hardening rule registry
+11. increase official-Lean direct differential coverage
+12. remove migration shims
+~~~
+
+Do not start with environment representation changes.
+
+Do not mix architecture moves with new performance algorithms.
+
+---
+
+# 64. Canonical reading order after migration
+
+Recommended learning path:
 
 ~~~text
 1. Core/Name
@@ -1823,399 +2901,168 @@ A reader should be able to learn the kernel in approximately this order:
 4. Core/Substitution/*
 5. Core/Declaration
 6. Core/LocalContext
-7. Environment/*
-8. Checker/Context + State
-9. Checker/Reduction/*
-10. Checker/Projection
-11. Checker/Inference/*
-12. Checker/Recursor/*
-13. Checker/DefEq/*
-14. Checker/Engine
-15. Checker/Session
-16. Admission/Declaration/*
-17. Admission/Quot/*
-18. Admission/Inductive/Common/*
-19. Admission/Inductive/Ordinary/*
-20. Admission/Inductive/Mutual/*
-21. Admission/Inductive/Nested/*
-22. API/Kernel
-23. API/SelfHost
-24. Runtime internals for performance study
+
+7. Environment/Semantic
+8. Environment/Environment
+9. Checker/Context
+10. Checker/State
+
+11. Checker/Reduction/*
+12. Checker/Projection
+13. Checker/Inference/*
+14. Checker/Recursor/*
+15. Checker/DefEq/*
+16. Checker/Ops
+17. Checker/Knot
+18. Checker/Session
+
+19. Admission/Declaration/*
+20. Admission/Quot/*
+21. Admission/Inductive/Common/*
+22. Admission/Inductive/Ordinary/*
+23. Admission/Inductive/Mutual/*
+24. Admission/Inductive/Nested/*
+
+25. API/KernelContractV1
+26. API/Kernel
+27. API/Session
+28. API/Provider
+
+29. Runtime/Acceleration internals
+30. Runtime/Capability/Lean434NativeReduction
+
+31. SelfHost semantic root
 ~~~
 
-The important improvement is that compatibility wrappers disappear from the learning path.
+Compatibility shims are intentionally absent.
 
 ---
 
-# 33. Architecture invariants
+# 65. Source references
 
-These should be considered permanent unless deliberately revised.
+## 65.1 Lean 4.34 exact kernel source
 
-## INV-1 One semantic source
-
-There is exactly one maintained semantic kernel implementation.
-
-## INV-2 Lean target is explicit
-
-Every behavior claim names the Lean target version/commit.
-
-## INV-3 Fail closed
-
-Unsupported terms, malformed declarations, recursion/fuel exhaustion and failed checks reject.
-
-## INV-4 No cache authority
-
-A cache hit may reuse a previously established result.
-A cache miss or cache representation may never create a semantic fact.
-
-## INV-5 DefEq cache is not an equivalence closure
-
-Successful and failed queries are pair facts only.
-
-## INV-6 Environment history is authoritative
-
-The runtime name index is an accelerator, not semantic storage.
-
-## INV-7 Checked means checked
-
-Infer-only results may only replace checked work when a stronger previously established invariant proves validity and the new use needs only the inferred type.
-
-Such paths must be named explicitly, as with validated nested-rule comparison.
-
-## INV-8 Nested restoration sees the complete family registry
-
-Structural recursion over pending families must not shrink the semantic restoration universe.
-
-## INV-9 Restored nested material is revalidated
-
-Restored constructor types, recursor types and computation rules must be checked in the final environment.
-
-## INV-10 Runtime capabilities are explicit
-
-Native reduction is an optional capability at the trust boundary.
-
-## INV-11 Portable source remains authoritative
-
-PSC1-compatible source is maintained directly.
-Generated JavaScript is not patched semantically.
-
-## INV-12 Compatibility wrappers are downstream
-
-Canonical implementation must not depend on legacy/compatibility umbrellas.
-
----
-
-# 34. Evaluation by subsystem
-
-## Core representations: 9.1/10
-
-Strong:
-
-- explicit data;
-- portable;
-- close to Lean;
-- substitution split is readable.
-
-Improve:
-
-- move to Core namespace/folder consistently;
-- keep compatibility umbrella outside canonical path.
-
-## Environment/context/state: 8.5/10
-
-Strong:
-
-- authoritative constants vs index invariant;
-- explicit runtime capability;
-- checker state resembles Lean 4.34.
-
-Improve:
-
-- clarify runtime state physically;
-- optionally split semantic environment later.
-
-## Inference: 8.7/10
-
-Strong:
-
-- checked vs infer-only explicit;
-- faithful application behavior;
-- measurable cache policy.
-
-Improve:
-
-- remove dependency-layer inversion;
-- move cache policy out of theory-facing helper.
-
-## Reduction: 9.0/10
-
-Strong:
-
-- core/post-core split;
-- observable order visible;
-- native/Nat/definition phases explicit.
-
-Improve:
-
-- canonicalize namespace under Checker.
-
-## Recursor reduction: 8.9/10
-
-Strong:
-
-- analysis and computation separated;
-- resource behavior explicit.
-
-Improve:
-
-- integrate through named Engine rather than top-level wrapper pattern.
-
-## DefEq: 9.4/10
-
-Strongest subsystem.
-
-The split makes Lean's difficult observable equality algorithm substantially more auditable.
-
-Main remaining work is dependency/name cleanup, not semantic restructuring.
-
-## Declaration admission: 9.0/10
-
-Clear validation/admission transaction.
-
-Could be nested under Admission/Declaration for consistency.
-
-## Quot: 9.0/10
-
-Small and clear.
-
-## Ordinary inductives: 8.4/10
-
-Semantically strong.
-Physical placement is inconsistent with mutual/nested.
-
-## Mutual inductives: 8.7/10
-
-Good decomposition.
-Should live inside a common Inductive hierarchy.
-
-## Nested inductives: 9.2/10
-
-Excellent phase decomposition after the recent bug-fix work.
-
-Needs finer conformance subrules because this area is too soundness-sensitive for one matrix row.
-
-## Runtime: 8.8/10
-
-Correct principle and good measured indexing strategy.
-
-Cache policy ownership should become more explicit.
-
-## Tests: 7.2/10
-
-High-value coverage but oversized files and mixed fixture/diagnostic/harness concerns.
-
-This is the best low-risk structural improvement to do next.
-
----
-
-# 35. Performance architecture assessment
-
-Current performance engineering has generally followed the right rule:
-
-~~~text
-measure
--> identify hotspot
--> make narrow non-semantic change
--> run portability/conformance
--> keep or revert
-~~~
-
-Good examples:
-
-- hybrid small cache promotion;
-- environment index promotion;
-- skipping counterproductive checked-app/lambda/forall cache publication;
-- structural equality short path before full defeq;
-- non-dependent instantiate fast path;
-- constructor-major recursor WHNF shortcut;
-- validated-old-rule nested comparison;
-- reverting checked-constant cache removal when it harmed general workloads.
-
-This is good engineering discipline.
-
-The architecture should preserve a place for such policies without mixing them with the logical rule descriptions.
-
-Target:
-
-~~~text
-Checker rule
-  = semantic algorithm
-
-Runtime policy
-  = cache/index/allocation choice
-
-Benchmark
-  = evidence for runtime policy
-~~~
-
----
-
-# 36. Provider/deployment boundary
-
-The self-host kernel is semantically mature, but the project intentionally has not yet promoted it as the default checking authority.
-
-Current architecture guidance keeps lean434-wasm as the default authority until the provider-parity milestone is explicitly accepted.
-
-That is a reasonable deployment posture.
-
-Core-kernel completeness and provider-production-readiness are separate questions.
-
-Recommended API layering:
-
-~~~text
-API/Kernel
-  semantic declaration checking
-
-API/Session
-  checked-session operations
-
-Provider adapter
-  representation/protocol conversion only
-
-Runtime provider
-  optional native reduction capability
-~~~
-
-Provider adapters must not contain semantic fallback.
-
----
-
-# 37. Recommended next architecture tasks
-
-Order:
-
-1. Split the foundation test file by subsystem.
-2. Split the benchmark file by workload.
-3. Add import-fence CI.
-4. Create canonical Checker hierarchy and Engine module.
-5. Move runtime cache policy out of inference theory helpers.
-6. Unify ordinary/mutual/nested under Admission/Inductive.
-7. Move compatibility umbrellas to Compat.
-8. Expand high-risk conformance subrules.
-9. Add more official-Lean direct oracle cases.
-10. Only then consider deeper representation changes.
-
-This order maximizes readability gains while minimizing semantic risk.
-
----
-
-# 38. Final assessment
-
-PSKernel should not be rewritten.
-
-The current core design is sound enough that a rewrite would create more risk than value.
-
-The right next step is architectural consolidation:
-
-~~~text
-current semantics
-        +
-strict dependency layers
-        +
-clean canonical folders
-        +
-split conformance/bench suites
-        +
-more independent oracle evidence
-        =
-production-grade reference kernel architecture
-~~~
-
-The current architecture has already crossed the threshold from experimental code into a credible kernel implementation.
-
-What prevents a near-perfect architecture score is mostly not theory.
-It is source topology, dependency enforcement and evidence organization.
-
-The target should therefore be:
-
-- preserve the semantic algorithms;
-- preserve PSC1 portability;
-- preserve current public symbols initially;
-- reorganize modules by true ownership;
-- enforce dependency direction in CI;
-- strengthen independent Lean 4.34 oracle coverage;
-- keep one source of truth.
-
----
-
-# 39. Source references
-
-## Lean 4.34 exact implementation sources
-
-Pinned commit:
+Pinned tree:
 
 https://github.com/leanprover/lean4/tree/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel
 
-Key files:
+Key sources:
 
-- https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/type_checker.cpp
-- https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/type_checker.h
-- https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/inductive.cpp
-- https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/environment.cpp
-- https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/quot.cpp
-- https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/expr.h
-- https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/level.h
+https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/type_checker.cpp
 
-## Lean language/type-system reference
+https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/type_checker.h
 
-- https://lean-lang.org/doc/reference/latest/The-Type-System/
-- https://lean-lang.org/doc/reference/latest/The-Type-System/Universes/
-- https://lean-lang.org/doc/reference/latest/The-Type-System/Propositions/
-- https://lean-lang.org/doc/reference/latest/The-Type-System/Inductive-Types/
-- https://lean-lang.org/doc/reference/latest/The-Type-System/Quotients/
+https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/inductive.cpp
 
-The live language reference may describe a newer Lean release than 4.34. Exact implementation compatibility claims in this document therefore use the pinned 4.34 source as authority.
+https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/environment.cpp
 
-## Lean 4.34 release hardening
+https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/quot.cpp
 
-- https://lean-lang.org/doc/reference/latest/releases/v4.34.0/
+https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/expr.h
 
-Relevant kernel changes include:
+https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/kernel/level.h
 
-- pair-based defeq caching after the non-transitivity soundness issue;
-- stricter proposition/sort checking;
-- recursor computation-rule type-preservation validation;
-- uniform inductive occurrence validation;
-- bounded Nat computation.
+## 65.2 Lean theory documentation
 
-## Independent checker references
+The live reference is useful for theory but may document a newer Lean release than PSKernel's target:
 
-lean4lean:
+https://lean-lang.org/doc/reference/latest/The-Type-System/
 
-- https://github.com/digama0/lean4lean
-- https://arxiv.org/abs/2403.14064
+https://lean-lang.org/doc/reference/latest/The-Type-System/Universes/
 
-ConLeche:
+https://lean-lang.org/doc/reference/latest/The-Type-System/Functions/
 
-- https://github.com/leanprover/con-leche
-- https://github.com/leanprover/con-leche/blob/master/OVERVIEW.md
+https://lean-lang.org/doc/reference/latest/The-Type-System/Inductive-Types/
 
-These are comparative architectural references, not PSKernel semantic authorities.
+https://lean-lang.org/doc/reference/latest/The-Type-System/Quotients/
+
+https://lean-lang.org/doc/reference/latest/Elaboration-and-Compilation/
+
+https://lean-lang.org/doc/reference/latest/ValidatingProofs/
+
+## 65.3 Lean 4.34 hardening
+
+https://lean-lang.org/doc/reference/latest/releases/v4.34.0/
+
+Important architecture-relevant changes:
+
+~~~text
+#14806  pair-based defeq cache
+#14807  isProp requires a Sort
+#14843  corresponding inductive check
+#14808  generated recursor/rule validation
+#14582  uniform inductive occurrence hardening
+#14849  Nat size bound
+~~~
+
+## 65.4 Future-version architecture signal
+
+Lean 4.35 removes Lean.reduceBool / Lean.reduceNat native kernel support.
+
+This does not change PSKernel 4.34 semantics.
+
+It supports isolating the 4.34 native route as a target-specific trusted capability.
+
+## 65.5 lean4lean
+
+Repository:
+
+https://github.com/digama0/lean4lean
+
+Paper:
+
+https://arxiv.org/abs/2403.14064
+
+Particularly relevant:
+
+~~~text
+Lean4Lean/TypeChecker.lean
+Lean4Lean/Theory/
+Lean4Lean/Verify/
+Lean4Lean/Tests/KernelHardening.lean
+divergences.md
+~~~
+
+## 65.6 ConLeche
+
+Repository:
+
+https://github.com/leanprover/con-leche
+
+Architecture overview:
+
+https://github.com/leanprover/con-leche/blob/master/OVERVIEW.md
+
+Particularly relevant lessons:
+
+~~~text
+explicit pure/cached checker boundaries
+CheckerOps-style operation interface
+machine import fence
+inductive subsystem decomposition
+hard separation between implementation and proof tiers
+~~~
+
+PSKernel adopts only the architecture lessons that fit its one-semantic-source and PSC1-portable goals.
 
 ---
 
-# 40. Short architectural rule
+# 66. Final architectural rule
 
-If only one rule from this document is remembered, use this:
+The final architecture can be summarized in one statement:
 
 ~~~text
-Make the file/import architecture tell the same story as the kernel theory.
+Make the dependency graph express the trust model.
 
-Core data
-  -> checker algorithms
-  -> admission
-  -> API
+Core defines the objects.
+Environment stores semantic declarations.
+Checker implements Lean's judgments.
+Admission performs checked environment transactions.
+API exposes only checked contracts.
 
-Runtime accelerators may support that path,
-but must never become an alternate path to acceptance.
+Acceleration may make the same judgment faster.
+Trusted capabilities must be explicit.
+Neither may become a hidden alternate route to acceptance.
 ~~~
+
+That is the architecture PSKernel should converge toward.

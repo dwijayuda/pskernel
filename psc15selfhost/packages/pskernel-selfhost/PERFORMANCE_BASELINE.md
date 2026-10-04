@@ -144,6 +144,89 @@ The full portable gate passed for this representation:
 The generated fixed-point gate must also remain green before the semantic
 closure is promoted as the new self-host checkpoint.
 
+## 2.3 Hybrid small-environment baseline
+
+Measured after semantic commit
+`0b2641e48b9b714c0580c0440ae81e26a81524a1`
+with promotion/collision test hardening through
+`9bdcd8f3e5605d44a4bcecdecaea596da5864740`.
+
+The environment index now mirrors the cache strategy:
+
+```text
+0-8 declarations
+    -> direct small list
+
+9th distinct declaration
+    -> promote once
+    -> persistent name-hash trie
+```
+
+This removes hash/trie overhead from small checker environments while preserving
+the ordered `Environment.constants` list as the semantic source of truth.
+
+A representative local run on the same authorized Windows machine produced:
+
+```text
+PSKernel WHNF cold : 1,260,900 ns
+PSKernel WHNF warm :   466,700 ns
+Lean 4.34 WHNF     :   939,300 ns
+
+PSKernel DefEq cold: 5,925,200 ns
+PSKernel DefEq warm:   477,500 ns
+Lean 4.34 DefEq    : 1,970,900 ns
+```
+
+Approximate cold-call ratios on this microcase:
+
+```text
+PSKernel / Lean WHNF : 1.34x
+PSKernel / Lean DefEq: 3.01x
+```
+
+Compared with the immediately preceding representative run on the same machine:
+
+```text
+WHNF cold : 2,280,800 -> 1,260,900 ns  (~1.8x faster)
+DefEq cold: 13,555,700 -> 5,925,200 ns (~2.3x faster)
+```
+
+The benchmark also isolates core rules:
+
+```text
+beta WHNF:
+  PSKernel : 1,668,200 ns
+  Lean     : 1,176,900 ns
+  ratio    : ~1.42x
+
+structural DefEq of identical sorts:
+  PSKernel :   355,900 ns
+  Lean     :   800,400 ns
+```
+
+The structural-defeq microcase is faster in PSKernel, while the complete cold
+DefEq path remains slower. This strongly suggests the next performance work
+should profile integration costs (inference, WHNF, environment access, state
+construction/publication) rather than changing the equality rules themselves.
+
+The large-environment/index measurements in the same run remained strongly in
+favor of indexing:
+
+```text
+environment indexed :  5,437,300 ns
+environment linear  : 97,990,500 ns
+
+cache indexed       :  4,420,700 ns
+cache linear        : 87,698,700 ns
+```
+
+The first intermediate environment-promotion commit did not yet route
+`Environment.find` through the small representation and failed the Linux
+special-defeq differential. That intermediate commit is **not** a valid
+checkpoint. The corrected semantic commit is `0b2641e48...`, which passes the
+full local frozen-reference differential; CI/fixed-point promotion remains
+required before recording it as the current self-host evidence checkpoint.
+
 ## 3. Interpretation
 
 The existing runtime-index work is justified.

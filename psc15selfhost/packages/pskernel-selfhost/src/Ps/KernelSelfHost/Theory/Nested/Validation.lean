@@ -278,7 +278,7 @@ def psKernelSimpleNestedRuleListLength
         (psKernelSimpleNestedRuleListLength
           rest)
 
-def psKernelSimpleNestedCompareRuleTypesWithFuel
+def psKernelSimpleNestedCompareValidatedRuleTypesWithFuel
     (steps : Nat) :
     Nat ->
     PsKernelEnvironment ->
@@ -325,7 +325,7 @@ def psKernelSimpleNestedCompareRuleTypesWithFuel
               "nested rule comparison budget exhausted"
   | Nat.succ remaining =>
       let smaller :=
-        psKernelSimpleNestedCompareRuleTypesWithFuel
+        psKernelSimpleNestedCompareValidatedRuleTypesWithFuel
           remaining;
       fun
         (fuel : Nat)
@@ -432,7 +432,7 @@ def psKernelSimpleNestedCompareRuleTypesWithFuel
                                   Except.error
                                     "restored nested recursor rule is not type preserving"
 
-def psKernelSimpleNestedCompareRuleTypes
+def psKernelSimpleNestedCompareValidatedRuleTypes
     (fuel : Nat)
     (transformed : PsKernelEnvironment)
     (finalEnvironment : PsKernelEnvironment)
@@ -448,7 +448,7 @@ def psKernelSimpleNestedCompareRuleTypes
     (oldRules : List PsKernelRecursorRule)
     (newRules : List PsKernelRecursorRule) :
     Except String Unit :=
-  psKernelSimpleNestedCompareRuleTypesWithFuel
+  psKernelSimpleNestedCompareValidatedRuleTypesWithFuel
     (Nat.succ
       (psKernelSimpleNestedRuleListLength
         oldRules))
@@ -466,6 +466,53 @@ def psKernelSimpleNestedCompareRuleTypes
     newLevelParams
     oldRules
     newRules
+
+def psKernelSimpleNestedCompareRuleTypes
+    (fuel : Nat)
+    (transformed : PsKernelEnvironment)
+    (finalEnvironment : PsKernelEnvironment)
+    (safety : PsKernelDefinitionSafety)
+    (maxRecDepth : Nat)
+    (maxNatSize : Nat)
+    (families : List PsKernelSimpleNestedAuxFamily)
+    (renames : List (Prod PsKernelName PsKernelName))
+    (canonicalParams : List PsKernelOpenBinder)
+    (numParams : Nat)
+    (oldLevelParams : List PsKernelName)
+    (newLevelParams : List PsKernelName)
+    (oldRules : List PsKernelRecursorRule)
+    (newRules : List PsKernelRecursorRule) :
+    Except String Unit :=
+  let oldSession :=
+    psKernelMkCheckerSession
+      transformed
+      oldLevelParams
+      safety
+      maxRecDepth
+      maxNatSize;
+  match
+      psKernelSimpleNestedValidateRules
+        fuel
+        oldSession
+        oldRules with
+  | Except.error error =>
+      Except.error error
+  | Except.ok _ =>
+      psKernelSimpleNestedCompareValidatedRuleTypes
+        fuel
+        transformed
+        finalEnvironment
+        safety
+        maxRecDepth
+        maxNatSize
+        families
+        renames
+        canonicalParams
+        numParams
+        oldLevelParams
+        newLevelParams
+        oldRules
+        newRules
 
 def psKernelSimpleNestedValidateAux
     (fuel : Nat)
@@ -516,7 +563,7 @@ def psKernelSimpleNestedValidateAux
                       match newValue with
                       | PsKernelConstantInfo.recInfo newInfo =>
                           match
-                              psKernelSimpleNestedCompareRuleTypes
+                              psKernelSimpleNestedCompareValidatedRuleTypes
                                 fuel
                                 transformed
                                 finalEnvironment

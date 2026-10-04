@@ -14,6 +14,7 @@ on:
       - psc15selfhost/scripts/psc1kernel-port-pattern-audit.mjs
       - psc15selfhost/scripts/psc1kernel-compatibility-audit.mjs
       - psc15selfhost/scripts/psc1kernel-conformance-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-generate-rule-reference.mjs
       - psc15selfhost/check-psc1-source.mjs
       - psc15selfhost/lakefile.lean
       - psc15selfhost/test/PsKernelSelfHostFoundationTests.lean
@@ -70,6 +71,11 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/psc1kernel-conformance-audit.mjs --require-complete
+
+      - name: Verify generated kernel rule reference
+        run: |
+          set -euo pipefail
+          node scripts/psc1kernel-generate-rule-reference.mjs --check
 
       - name: Build proven PSC1 compiler
         run: |

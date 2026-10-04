@@ -18,6 +18,7 @@ on:
       - psc15selfhost/check-psc1-source.mjs
       - psc15selfhost/lakefile.lean
       - psc15selfhost/test/PsKernelSelfHostFoundationTests.lean
+      - psc15selfhost/test/PsKernelSelfHostBench.lean
       - .github/workflows/psc1kernel-selfhost-portable.yml
   workflow_dispatch:
 

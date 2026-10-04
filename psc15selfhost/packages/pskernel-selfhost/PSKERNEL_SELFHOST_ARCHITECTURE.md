@@ -3,6 +3,13 @@
 This document is normative project guidance for `packages/pskernel-selfhost`.
 It exists to prevent development drift after the portable self-host milestone.
 
+## Development authority
+
+GitHub is the canonical development state. Follow
+`GITHUB_FIRST_WORKFLOW.md` before starting or integrating work on this branch.
+Local worktrees are optional execution caches only and must not become hidden
+project state.
+
 ## 1. Product goal
 
 Build one readable, self-hostable Lean-4.34-compatible kernel implementation

@@ -38,3 +38,16 @@ def psWasmListFoldl {Alpha State : Type}
         step
         rest
         (step state value)
+
+
+def psWasmPairFirst {Alpha Beta : Type}
+    (value : Prod Alpha Beta) : Alpha :=
+  match value with
+  | Prod.mk first _ =>
+      first
+
+def psWasmPairSecond {Alpha Beta : Type}
+    (value : Prod Alpha Beta) : Beta :=
+  match value with
+  | Prod.mk _ second =>
+      second

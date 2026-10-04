@@ -20,8 +20,9 @@ def psWasmEncodeUlebWithFuel :
       if rest == 0 then
         [psWasmByte low]
       else
-        psWasmByte (low + 128) ::
-          psWasmEncodeUlebWithFuel fuel rest
+        List.cons
+          (psWasmByte (low + 128))
+          (psWasmEncodeUlebWithFuel fuel rest)
 
 def psWasmEncodeUleb (value : Nat) : List UInt8 :=
   psWasmEncodeUlebWithFuel 16 value
@@ -39,8 +40,9 @@ def psWasmEncodeSlebWithFuel :
       if donePositive || doneNegative then
         [psWasmByte low]
       else
-        psWasmByte (low + 128) ::
-          psWasmEncodeSlebWithFuel fuel rest
+        List.cons
+          (psWasmByte (low + 128))
+          (psWasmEncodeSlebWithFuel fuel rest)
 
 def psWasmEncodeSleb (value : Int) : List UInt8 :=
   psWasmEncodeSlebWithFuel 16 value
@@ -293,16 +295,16 @@ def psWasmEncodeInstruction
     Except PsWasmEncodeError (List UInt8) :=
   match instruction with
   | .localGet index =>
-      Except.ok (psWasmByte 32 :: psWasmEncodeUleb index)
+      Except.ok (List.cons (psWasmByte 32) (psWasmEncodeUleb index))
   | .localSet index =>
-      Except.ok (psWasmByte 33 :: psWasmEncodeUleb index)
+      Except.ok (List.cons (psWasmByte 33) (psWasmEncodeUleb index))
   | .drop => Except.ok [psWasmByte 26]
   | .unreachable => Except.ok [psWasmByte 0]
   | .call name =>
       match psWasmFindFunctionIndex functions name with
       | none => Except.error (PsWasmEncodeError.unknownFunction name)
       | some index =>
-          Except.ok (psWasmByte 16 :: psWasmEncodeUleb index)
+          Except.ok (List.cons (psWasmByte 16) (psWasmEncodeUleb index))
   | .return_ => Except.ok [psWasmByte 15]
   | .ifStart result =>
       match result with
@@ -317,10 +319,10 @@ def psWasmEncodeInstruction
   | .end_ => Except.ok [psWasmByte 11]
   | .i32Const value =>
       Except.ok
-        (psWasmByte 65 :: psWasmEncodeI32Constant value)
+        (List.cons (psWasmByte 65) (psWasmEncodeI32Constant value))
   | .i64Const value =>
       Except.ok
-        (psWasmByte 66 :: psWasmEncodeI64Constant value)
+        (List.cons (psWasmByte 66) (psWasmEncodeI64Constant value))
   | .i32Add => Except.ok [psWasmByte 106]
   | .i32Sub => Except.ok [psWasmByte 107]
   | .i32Mul => Except.ok [psWasmByte 108]

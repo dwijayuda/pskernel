@@ -612,8 +612,9 @@ def psVerifiedIrValidateExprListWith
         Except PsVerifiedIrValidationError Unit) :
     List PsVerifiedIrExpr ->
       Except PsVerifiedIrValidationError Unit :=
-  match values : List PsVerifiedIrExpr with
-  | List.nil =>
+  fun (values : List PsVerifiedIrExpr) =>
+    match values with
+    | List.nil =>
       Except.ok Unit.unit
   | List.cons value rest =>
       match validateExpr value with
@@ -629,8 +630,9 @@ def psVerifiedIrValidateRecordFieldsWith
         Except PsVerifiedIrValidationError Unit) :
     List (String × PsVerifiedIrExpr) ->
       Except PsVerifiedIrValidationError Unit :=
-  match fields : List (String × PsVerifiedIrExpr) with
-  | List.nil =>
+  fun (fields : List (String × PsVerifiedIrExpr)) =>
+    match fields with
+    | List.nil =>
       Except.ok Unit.unit
   | List.cons field rest =>
       match field with
@@ -661,8 +663,9 @@ def psVerifiedIrValidateConstructorFieldsWith
         Except PsVerifiedIrValidationError Unit) :
     List (String × PsVerifiedIrExpr) ->
       Except PsVerifiedIrValidationError Unit :=
-  match fields : List (String × PsVerifiedIrExpr) with
-  | List.nil =>
+  fun (fields : List (String × PsVerifiedIrExpr)) =>
+    match fields with
+    | List.nil =>
       Except.ok Unit.unit
   | List.cons field rest =>
       match field with
@@ -692,8 +695,9 @@ def psVerifiedIrValidateBindings
     (constructorFields : List PsVerifiedIrConstructorField) :
     List PsVerifiedIrMatchBinding ->
       Except PsVerifiedIrValidationError Unit :=
-  match bindings : List PsVerifiedIrMatchBinding with
-  | List.nil =>
+  fun (bindings : List PsVerifiedIrMatchBinding) =>
+    match bindings with
+    | List.nil =>
       Except.ok Unit.unit
   | List.cons binding rest =>
       if
@@ -757,12 +761,14 @@ def psVerifiedIrValidateAlternativesWith
         List PsVerifiedIrMatchBinding ×
         PsVerifiedIrExpr) ->
       Except PsVerifiedIrValidationError Unit :=
-  match alternatives :
-      List
-        (String ×
-          List PsVerifiedIrMatchBinding ×
-          PsVerifiedIrExpr) with
-  | List.nil =>
+  fun
+      (alternatives :
+        List
+          (String ×
+            List PsVerifiedIrMatchBinding ×
+            PsVerifiedIrExpr)) =>
+    match alternatives with
+    | List.nil =>
       Except.ok Unit.unit
   | List.cons alternative rest =>
       match
@@ -958,8 +964,9 @@ def psVerifiedIrValidateDeclarationsWith
     (module : PsVerifiedIrModule) :
     List PsVerifiedIrDeclaration ->
       Except PsVerifiedIrValidationError Unit :=
-  match declarations : List PsVerifiedIrDeclaration with
-  | List.nil =>
+  fun (declarations : List PsVerifiedIrDeclaration) =>
+    match declarations with
+    | List.nil =>
       Except.ok Unit.unit
   | List.cons declaration rest =>
       match

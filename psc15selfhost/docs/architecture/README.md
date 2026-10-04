@@ -87,6 +87,7 @@ compiler service / LSP
 - [KernelContract-v1](contracts/KERNEL_CONTRACT_V1.md) — frozen provider-neutral checked-session request/decision/capability contract.
 - [VerifiedIR validation v1](contracts/VERIFIED_IR_V1.md) — implemented ErasedIR → validated IR boundary and its current fail-closed runtime-type invariant.
 - [RuntimeSemantics-v1](contracts/RUNTIME_SEMANTICS_V1.md) — frozen portable runtime behavior for primitives, arrays, records/ADTs, and closures; separate from target ABIs.
+- [Experimental JsIR v0](contracts/JS_IR_EXPERIMENTAL_V0.md) — first direct-JavaScript target slice and TS→tsc differential promotion gates.
 - [Architecture Decision Records](adr/README.md) — concise anti-drift decisions that future implementation work should preserve unless explicitly superseded.
 
 ## What these documents deliberately do not do

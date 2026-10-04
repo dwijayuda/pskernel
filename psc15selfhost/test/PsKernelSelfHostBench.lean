@@ -561,6 +561,59 @@ partial def psKernelBenchDefEqWarmLoop
               left
               right
 
+partial def psKernelBenchInferColdLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment)
+    (expr : PsKernelExpr) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchInferColdLoop
+          rest
+          environment
+          expr
+      match
+          psKernelSessionInfer
+            1024
+            (psKernelBenchFreshSession
+              environment)
+            expr with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchIsPropColdLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment)
+    (expr : PsKernelExpr) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchIsPropColdLoop
+          rest
+          environment
+          expr
+      match
+          psKernelSessionIsProp
+            1024
+            (psKernelBenchFreshSession
+              environment)
+            expr with
+      | Except.ok result =>
+          if Prod.fst result then
+            pure tail
+          else
+            pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
 def main : IO Unit := do
   let size := 2048
   let iterations := 2000
@@ -722,6 +775,27 @@ def main : IO Unit := do
       (PsKernelLiteral.nat 42)
   let checkerIterations := 1000
 
+  let checkerNatType :=
+    PsKernelExpr.const
+      psKernelNatName
+      List.nil
+
+  let inferColdStart ← IO.monoNanosNow
+  let inferColdHits ←
+    psKernelBenchInferColdLoop
+      checkerIterations
+      checkerEnvironment
+      checkerExpr
+  let inferColdStop ← IO.monoNanosNow
+
+  let isPropColdStart ← IO.monoNanosNow
+  let isPropColdHits ←
+    psKernelBenchIsPropColdLoop
+      checkerIterations
+      checkerEnvironment
+      checkerNatType
+  let isPropColdStop ← IO.monoNanosNow
+
   let whnfColdStart ← IO.monoNanosNow
   let whnfColdHits ←
     psKernelBenchWhnfColdLoop
@@ -782,6 +856,22 @@ def main : IO Unit := do
       checkerExpr
       checkerExpected
   let defeqWarmStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH infer_cold_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          inferColdStart
+          inferColdStop) ++
+      " isprop_cold_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          isPropColdStart
+          isPropColdStop) ++
+      " hits=" ++
+      toString inferColdHits ++
+      "/" ++
+      toString isPropColdHits)
 
   IO.println
     ("PSKERNEL_BENCH whnf_cold_ns=" ++

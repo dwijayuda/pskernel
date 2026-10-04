@@ -6,6 +6,12 @@ Inference helper layer.
 This module owns cache publication, WHNF views for Sort/Pi expectations, and the
 application-spine exposure worker used by syntax-directed inference. These
 helpers do not choose the typing rule for an expression.
+
+Checked application nodes are intentionally not memoized. A cold checked spine
+visits each node once, while memoizing every growing application tree can force
+expensive structural hashing/promotion in the portable cache. Infer-only
+application results remain memoized because whole-spine inference is commonly
+reused.
 -/
 
 
@@ -24,6 +30,18 @@ def psKernelCacheInferResult
   match expr with
   | PsKernelExpr.lit _ =>
       state
+  | PsKernelExpr.app _ _ =>
+      if inferOnly then
+        let cache :=
+          psKernelExprMapInsert
+            state.inferOnly
+            expr
+            result;
+        psKernelCheckerStateWithInferOnly
+          state
+          cache
+      else
+        state
   | _ =>
       if inferOnly then
         let cache :=

@@ -700,6 +700,172 @@ partial def psKernelBenchLazyDeltaColdLoop
       | Except.error _ =>
           pure tail
 
+def psKernelBenchAppName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "BenchApply"
+
+def psKernelBenchLeanAppName : Lean.Name :=
+  Lean.Name.str
+    Lean.Name.anonymous
+    "BenchApply"
+
+def psKernelBenchNatType : PsKernelExpr :=
+  PsKernelExpr.const
+    psKernelNatName
+    List.nil
+
+def psKernelBenchNatArrowType
+    (arity : Nat) :
+    PsKernelExpr :=
+  match arity with
+  | Nat.zero =>
+      psKernelBenchNatType
+  | Nat.succ rest =>
+      PsKernelExpr.forallE
+        PsKernelName.anonymous
+        psKernelBenchNatType
+        (psKernelBenchNatArrowType rest)
+        PsKernelBinderInfo.default
+
+def psKernelBenchLeanNatType : Lean.Expr :=
+  Lean.Expr.const
+    psKernelBenchLeanNatName
+    []
+
+def psKernelBenchLeanNatArrowType
+    (arity : Nat) :
+    Lean.Expr :=
+  match arity with
+  | Nat.zero =>
+      psKernelBenchLeanNatType
+  | Nat.succ rest =>
+      Lean.Expr.forallE
+        Lean.Name.anonymous
+        psKernelBenchLeanNatType
+        (psKernelBenchLeanNatArrowType rest)
+        Lean.BinderInfo.default
+
+def psKernelBenchApplyNatArgs
+    (remaining : Nat)
+    (nextValue : Nat)
+    (fn : PsKernelExpr) :
+    PsKernelExpr :=
+  match remaining with
+  | Nat.zero =>
+      fn
+  | Nat.succ rest =>
+      psKernelBenchApplyNatArgs
+        rest
+        (Nat.succ nextValue)
+        (PsKernelExpr.app
+          fn
+          (PsKernelExpr.lit
+            (PsKernelLiteral.nat nextValue)))
+
+def psKernelBenchApplyLeanNatArgs
+    (remaining : Nat)
+    (nextValue : Nat)
+    (fn : Lean.Expr) :
+    Lean.Expr :=
+  match remaining with
+  | Nat.zero =>
+      fn
+  | Nat.succ rest =>
+      psKernelBenchApplyLeanNatArgs
+        rest
+        (Nat.succ nextValue)
+        (Lean.Expr.app
+          fn
+          (Lean.Expr.lit
+            (Lean.Literal.natVal nextValue)))
+
+def psKernelBenchApplicationEnvironment
+    (arity : Nat) :
+    PsKernelEnvironment :=
+  psKernelEnvironmentAddUnchecked
+    psKernelBenchCheckerEnvironment
+    (PsKernelConstantInfo.axiomInfo {
+      base := {
+        name := psKernelBenchAppName
+        levelParams := List.nil
+        type := psKernelBenchNatArrowType arity
+      }
+      isUnsafe := false
+    })
+
+def psKernelBenchLeanApplicationEnvironment
+    (arity : Nat) :
+    IO Lean.Environment := do
+  let environment ←
+    psKernelBenchLeanEnvironment
+  match
+      Lean.Kernel.Environment.addDecl
+        environment.toKernelEnv
+        {}
+        (.axiomDecl {
+          name := psKernelBenchLeanAppName
+          levelParams := []
+          type := psKernelBenchLeanNatArrowType arity
+          isUnsafe := false
+        }) with
+  | .ok next =>
+      pure
+        (Lean.Environment.ofKernelEnv next)
+  | .error _ =>
+      throw
+        (IO.userError
+          "PSKERNEL_BENCH failed to create application fixture")
+
+partial def psKernelBenchCheckColdLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment)
+    (expr : PsKernelExpr) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchCheckColdLoop
+          rest
+          environment
+          expr
+      match
+          psKernelSessionCheck
+            2048
+            (psKernelBenchFreshSession
+              environment)
+            expr with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchLeanCheckLoop
+    (iterations : Nat)
+    (environment : Lean.Environment)
+    (expr : Lean.Expr) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchLeanCheckLoop
+          rest
+          environment
+          expr
+      match
+          Lean.Kernel.check
+            environment
+            ({} : Lean.LocalContext)
+            expr with
+      | .ok _ =>
+          pure (Nat.succ tail)
+      | .error _ =>
+          pure tail
+
 def main : IO Unit := do
   let size := 2048
   let iterations := 2000
@@ -1161,6 +1327,62 @@ def main : IO Unit := do
       toString betaPsHits ++
       "/" ++
       toString betaLeanHits)
+  let applicationArity := 8
+  let applicationEnvironment :=
+    psKernelBenchApplicationEnvironment
+      applicationArity
+  let applicationExpr :=
+    psKernelBenchApplyNatArgs
+      applicationArity
+      1
+      (PsKernelExpr.const
+        psKernelBenchAppName
+        List.nil)
+  let leanApplicationEnvironment ←
+    psKernelBenchLeanApplicationEnvironment
+      applicationArity
+  let leanApplicationExpr :=
+    psKernelBenchApplyLeanNatArgs
+      applicationArity
+      1
+      (Lean.Expr.const
+        psKernelBenchLeanAppName
+        [])
+
+  let applicationPsStart ← IO.monoNanosNow
+  let applicationPsHits ←
+    psKernelBenchCheckColdLoop
+      checkerIterations
+      applicationEnvironment
+      applicationExpr
+  let applicationPsStop ← IO.monoNanosNow
+
+  let applicationLeanStart ← IO.monoNanosNow
+  let applicationLeanHits ←
+    psKernelBenchLeanCheckLoop
+      checkerIterations
+      leanApplicationEnvironment
+      leanApplicationExpr
+  let applicationLeanStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH application_check_pskernel_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          applicationPsStart
+          applicationPsStop) ++
+      " application_check_lean_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          applicationLeanStart
+          applicationLeanStop) ++
+      " arity=" ++
+      toString applicationArity ++
+      " hits=" ++
+      toString applicationPsHits ++
+      "/" ++
+      toString applicationLeanHits)
+
   IO.println
     ("PSKERNEL_BENCH structural_defeq_pskernel_ns=" ++
       toString

@@ -222,6 +222,8 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.TypeCheckerDefEqSupport,
     `Ps.KernelSelfHost.Theory.DefEq.LazyDelta,
     `Ps.KernelSelfHost.Theory.DefEq.FinalRules,
+    `Ps.KernelSelfHost.Theory.DefEq.Shortcuts,
+    `Ps.KernelSelfHost.Theory.DefEq.FullShape,
     `Ps.KernelSelfHost.TypeCheckerDefEq,
     `Ps.KernelSelfHost.CheckerSession,
     `Ps.KernelSelfHost.Kernel,

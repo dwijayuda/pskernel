@@ -227,6 +227,59 @@ checkpoint. The corrected semantic commit is `0b2641e48...`, which passes the
 full local frozen-reference differential; CI/fixed-point promotion remains
 required before recording it as the current self-host evidence checkpoint.
 
+## 2.4 Cold DefEq stage profile
+
+Measured with benchmark instrumentation through
+`d84f8b0b143d4ba61a8c29bfae4f3941a2cfdeae`.
+No semantic kernel change occurred between this instrumentation and the
+small-environment semantic checkpoint.
+
+Representative 1,000-iteration run:
+
+```text
+cold infer(BenchDelta)        : 1,226,100 ns
+cold isProp(Nat)              :   852,900 ns
+combined proof probe          : 3,258,100 ns
+lazy delta only               : 2,334,300 ns
+
+full PSKernel cold DefEq      : 7,043,900 ns
+official Lean 4.34 cold DefEq : 3,742,100 ns
+```
+
+Same-run ratio:
+
+```text
+PSKernel / Lean cold DefEq: ~1.88x
+```
+
+Other same-run rule measurements:
+
+```text
+PSKernel cold WHNF : 1,102,500 ns
+Lean cold WHNF     :   711,500 ns
+ratio              : ~1.55x
+
+PSKernel beta WHNF : 1,560,400 ns
+Lean beta WHNF     :   980,500 ns
+ratio              : ~1.59x
+
+PSKernel structural DefEq : 371,600 ns
+Lean structural DefEq     : 750,700 ns
+```
+
+Interpretation:
+
+- the structural equality rule itself is not the bottleneck;
+- cold inference / proof detection and lazy-delta integration dominate the
+  representative delta-defeq path;
+- absolute timings vary between runs, so optimization decisions should use
+  within-run ratios and multiple representative workloads;
+- this microcase now satisfies the initial ~1.5-2x native target for WHNF and
+  DefEq, so the next priority is broader workloads rather than altering the
+  observable defeq algorithm.
+
+Next benchmark target: checked application-spine inference.
+
 ## 3. Interpretation
 
 The existing runtime-index work is justified.

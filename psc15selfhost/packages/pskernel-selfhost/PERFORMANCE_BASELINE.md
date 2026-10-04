@@ -513,6 +513,13 @@ Further native optimization should focus on the transformed mutual-admission
 path and the fully checked restored auxiliary-recursors, while preserving the
 full-family restoration invariant and the new multi-family conformance case.
 
+A follow-up experiment disabled checked constant-inference caching globally.
+Across two benchmark samples it improved nested-admission ratios but consistently
+regressed the general checked-application and recursive-recursor ratios. The
+change was reverted. Keep checked constant caching enabled globally; any future
+nested-specific optimization must avoid trading away general checker
+performance.
+
 ## 3. Interpretation
 
 The existing runtime-index work is justified.

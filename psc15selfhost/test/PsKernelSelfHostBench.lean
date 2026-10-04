@@ -842,6 +842,36 @@ partial def psKernelBenchCheckColdLoop
       | Except.error _ =>
           pure tail
 
+partial def psKernelBenchCheckWarmLoop
+    (iterations : Nat)
+    (session : PsKernelCheckerSession)
+    (expr : PsKernelExpr) :
+    IO (Prod Nat PsKernelCheckerSession) :=
+  match iterations with
+  | Nat.zero =>
+      pure (Prod.mk 0 session)
+  | Nat.succ rest =>
+      match
+          psKernelSessionCheck
+            2048
+            session
+            expr with
+      | Except.error _ =>
+          psKernelBenchCheckWarmLoop
+            rest
+            session
+            expr
+      | Except.ok result => do
+          let tail ←
+            psKernelBenchCheckWarmLoop
+              rest
+              (Prod.snd result)
+              expr
+          pure
+            (Prod.mk
+              (Nat.succ (Prod.fst tail))
+              (Prod.snd tail))
+
 partial def psKernelBenchLeanCheckLoop
     (iterations : Nat)
     (environment : Lean.Environment)
@@ -1365,6 +1395,27 @@ def main : IO Unit := do
       applicationExpr
   let applicationPsStop ← IO.monoNanosNow
 
+  let applicationWarmSeed :=
+    psKernelSessionCheck
+      2048
+      (psKernelBenchFreshSession
+        applicationEnvironment)
+      applicationExpr
+  let applicationWarmSession :=
+    match applicationWarmSeed with
+    | Except.ok result =>
+        Prod.snd result
+    | Except.error _ =>
+        psKernelBenchFreshSession
+          applicationEnvironment
+  let applicationWarmStart ← IO.monoNanosNow
+  let applicationWarmResult ←
+    psKernelBenchCheckWarmLoop
+      checkerIterations
+      applicationWarmSession
+      applicationExpr
+  let applicationWarmStop ← IO.monoNanosNow
+
   let applicationLeanStart ← IO.monoNanosNow
   let applicationLeanHits ←
     psKernelBenchLeanCheckLoop
@@ -1390,6 +1441,11 @@ def main : IO Unit := do
         (psKernelBenchElapsed
           applicationPsStart
           applicationPsStop) ++
+      " application_check_warm_pskernel_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          applicationWarmStart
+          applicationWarmStop) ++
       " application_check_lean_ns=" ++
       toString
         (psKernelBenchElapsed
@@ -1399,6 +1455,8 @@ def main : IO Unit := do
       toString applicationArity ++
       " hits=" ++
       toString applicationPsHits ++
+      "/" ++
+      toString (Prod.fst applicationWarmResult) ++
       "/" ++
       toString applicationLeanHits)
 

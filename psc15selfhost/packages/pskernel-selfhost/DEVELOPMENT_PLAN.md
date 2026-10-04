@@ -34,6 +34,7 @@ Goal: exact declared Lean-4.34 kernel feature coverage.
 Normative file:
 
 - `LEAN_4_34_COMPATIBILITY.json`
+- `LEAN_4_34_CONFORMANCE.json`
 
 Audit:
 
@@ -115,6 +116,8 @@ Already-started target:
 
 ```text
 Theory/DefEq/
+    BinderSpines.lean
+    Quick.lean
     LazyDelta.lean
     FinalRules.lean
 ```

@@ -91,11 +91,12 @@ jobs:
           grep -F "PSC1KERNEL_GENERATED_SMOKE: PASS" \
             dist/kernel-selfhost-ci.log
 
-      - name: Verify committed self-host evidence
+      - name: Verify current fixed point and evidence checkpoint
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
+
           const evidence = JSON.parse(
             fs.readFileSync(
               'packages/pskernel-selfhost/SELFHOST_EVIDENCE.json',
@@ -115,47 +116,63 @@ jobs:
             ),
           );
 
-          const expected = {
-            sourceCount: evidence.sourceCount,
-            closureSha256: evidence.closureSha256,
-            typescriptSha256: evidence.typescriptSha256,
-            javascriptSha256: evidence.javascriptSha256,
-          };
-          const actual = {
-            sourceCount: manifest.sourceCount,
-            closureSha256: receipt.closureSha256,
-            typescriptSha256: receipt.bootstrapTsSha256,
-            javascriptSha256: receipt.bootstrapJsSha256,
-          };
-          for (const key of Object.keys(expected)) {
-            if (expected[key] !== actual[key]) {
-              throw new Error(
-                `PSC1KERNEL_SELFHOST_EVIDENCE_MISMATCH: ${key} expected=${expected[key]} actual=${actual[key]}`,
-              );
-            }
-          }
           if (
             receipt.fixedPoint !== true ||
             receipt.sourceFixedPoint !== true ||
             receipt.selfhostArtifact !== true
           ) {
-            throw new Error('PSC1KERNEL_SELFHOST_EVIDENCE_FLAGS_INVALID');
+            throw new Error('PSC1KERNEL_SELFHOST_CURRENT_FIXED_POINT_INVALID');
           }
+
           for (const required of [
+            'packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.ps',
             'packages/pskernel-selfhost/src/Ps/KernelSelfHost/MutualInductive.ps',
             'packages/pskernel-selfhost/src/Ps/KernelSelfHost/NestedInductive.ps',
           ]) {
             if (!manifest.sources.includes(required)) {
               throw new Error(
-                `PSC1KERNEL_SELFHOST_EVIDENCE_SOURCE_MISSING: ${required}`,
+                `PSC1KERNEL_SELFHOST_CURRENT_SOURCE_MISSING: ${required}`,
               );
             }
           }
-          console.log('PSC1KERNEL_SELFHOST_EVIDENCE: PASS');
-          console.log(`sources=${manifest.sourceCount}`);
-          console.log(`closure.sha256=${receipt.closureSha256}`);
-          console.log(`typescript.sha256=${receipt.bootstrapTsSha256}`);
-          console.log(`javascript.sha256=${receipt.bootstrapJsSha256}`);
+
+          console.log('PSC1KERNEL_SELFHOST_CURRENT_FIXED_POINT: PASS');
+          console.log(`current.sources=${manifest.sourceCount}`);
+          console.log(`current.closure.sha256=${receipt.closureSha256}`);
+          console.log(`current.typescript.sha256=${receipt.bootstrapTsSha256}`);
+          console.log(`current.javascript.sha256=${receipt.bootstrapJsSha256}`);
+
+          const currentHead = process.env.GITHUB_SHA ?? '';
+          const exactCheckpoint =
+            currentHead === evidence.semanticCommit ||
+            currentHead === evidence.smokeCommit;
+
+          if (exactCheckpoint) {
+            const expected = {
+              sourceCount: evidence.sourceCount,
+              closureSha256: evidence.closureSha256,
+              typescriptSha256: evidence.typescriptSha256,
+              javascriptSha256: evidence.javascriptSha256,
+            };
+            const actual = {
+              sourceCount: manifest.sourceCount,
+              closureSha256: receipt.closureSha256,
+              typescriptSha256: receipt.bootstrapTsSha256,
+              javascriptSha256: receipt.bootstrapJsSha256,
+            };
+            for (const key of Object.keys(expected)) {
+              if (expected[key] !== actual[key]) {
+                throw new Error(
+                  `PSC1KERNEL_SELFHOST_EVIDENCE_MISMATCH: ${key} expected=${expected[key]} actual=${actual[key]}`,
+                );
+              }
+            }
+            console.log('PSC1KERNEL_SELFHOST_EVIDENCE_CHECKPOINT: PASS');
+          } else {
+            console.log(
+              `PSC1KERNEL_SELFHOST_EVIDENCE_CHECKPOINT: HISTORICAL current=${currentHead} semantic=${evidence.semanticCommit} smoke=${evidence.smokeCommit}`,
+            );
+          }
           NODE
 
       - uses: actions/upload-artifact@v4

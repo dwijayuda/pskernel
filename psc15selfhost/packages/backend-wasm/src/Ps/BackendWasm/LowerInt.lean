@@ -32,11 +32,11 @@ def psWasmNormalizeMachineInteger :
     PsVerifiedIrMachineIntegerType -> List PsWasmInstruction
   | .uint8 => [
       PsWasmInstruction.i32Const 255,
-      PsWasmInstructionPsWasmInstruction.i32And
+      PsWasmInstruction.i32And
     ]
   | .uint16 => [
       PsWasmInstruction.i32Const 65535,
-      PsWasmInstructionPsWasmInstruction.i32And
+      PsWasmInstruction.i32And
     ]
   | .int8 => [PsWasmInstruction.i32Extend8S]
   | .int16 => [PsWasmInstruction.i32Extend16S]

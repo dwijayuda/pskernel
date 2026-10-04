@@ -72,12 +72,15 @@ jobs:
             PsErasure \
             PsCompiler \
             PsBackendTs \
+            PsBackendJs \
             PsDriverTs \
             PsBackendRust \
             PsDriverRust \
             psc1_erasure_tests \
             psc2_minimal_selfhost_tests \
             psc1_backend_ts_tests \
+            psc1_backend_js_tests \
+            psc1_backend_js_diff_fixture \
             psc1_backend_rust_source_tests
 
       - name: Run VerifiedIR and erasure corpus
@@ -91,6 +94,14 @@ jobs:
       - name: Run TypeScript backend corpus
         working-directory: psc15selfhost
         run: lake exe psc1_backend_ts_tests
+
+      - name: Run direct JavaScript backend unit corpus
+        working-directory: psc15selfhost
+        run: lake exe psc1_backend_js_tests
+
+      - name: Differential direct JavaScript against TS to tsc
+        working-directory: psc15selfhost
+        run: node scripts/backend-js-differential.test.mjs
 
       - name: Run Rust source driver corpus
         working-directory: psc15selfhost

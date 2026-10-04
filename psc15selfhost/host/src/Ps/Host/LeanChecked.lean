@@ -1,4 +1,4 @@
-import Ps.BackendTs.Compiler
+import Ps.DriverTs.Compiler
 import PsKernelLean.Admission
 
 -- Host-only integration. No import from the portable bootstrap closure.

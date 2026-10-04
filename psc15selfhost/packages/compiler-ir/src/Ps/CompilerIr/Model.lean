@@ -1,3 +1,5 @@
+import Ps.Foundation.Name
+
 inductive PsVerifiedIrPrimitiveType where
   | nat
   | int
@@ -269,6 +271,14 @@ structure PsValidatedIrModule where
 
 inductive PsVerifiedIrValidationError where
   | unresolvedRuntimeType
+  | validationFuelExhausted
+  | unknownStructure (name : String)
+  | unknownInductive (name : String)
+  | unknownConstructor (inductiveName constructorName : String)
+  | unknownStructureField (structureName field : String)
+  | unknownConstructorField
+      (inductiveName constructorName field : String)
+  | typeArgumentArity (name : String)
 
 def psVerifiedIrListAll {Value : Type}
     (check : Value -> Bool)
@@ -511,10 +521,472 @@ def psVerifiedIrModuleResolved
   else
     false
 
+def psVerifiedIrListLength {Value : Type}
+    (values : List Value) : Nat :=
+  match values with
+  | List.nil => 0
+  | List.cons _ rest =>
+      Nat.succ (psVerifiedIrListLength rest)
+
+def psVerifiedIrFindStructure
+    (structures : List PsVerifiedIrStructure) :
+    String -> Option PsVerifiedIrStructure :=
+  match structures with
+  | List.nil =>
+      fun (_target : String) => Option.none
+  | List.cons structureInfo rest =>
+      let smaller : String -> Option PsVerifiedIrStructure :=
+        psVerifiedIrFindStructure rest;
+      fun (target : String) =>
+        if psStringEq structureInfo.name target then
+          Option.some structureInfo
+        else
+          smaller target
+
+def psVerifiedIrFindInductive
+    (inductives : List PsVerifiedIrInductive) :
+    String -> Option PsVerifiedIrInductive :=
+  match inductives with
+  | List.nil =>
+      fun (_target : String) => Option.none
+  | List.cons inductiveInfo rest =>
+      let smaller : String -> Option PsVerifiedIrInductive :=
+        psVerifiedIrFindInductive rest;
+      fun (target : String) =>
+        if psStringEq inductiveInfo.name target then
+          Option.some inductiveInfo
+        else
+          smaller target
+
+def psVerifiedIrFindConstructor
+    (constructors : List PsVerifiedIrConstructor) :
+    String -> Option PsVerifiedIrConstructor :=
+  match constructors with
+  | List.nil =>
+      fun (_target : String) => Option.none
+  | List.cons constructorInfo rest =>
+      let smaller : String -> Option PsVerifiedIrConstructor :=
+        psVerifiedIrFindConstructor rest;
+      fun (target : String) =>
+        if psStringEq constructorInfo.name target then
+          Option.some constructorInfo
+        else
+          smaller target
+
+def psVerifiedIrStructureHasField
+    (fields : List PsVerifiedIrStructureField) :
+    String -> Bool :=
+  match fields with
+  | List.nil =>
+      fun (_target : String) => false
+  | List.cons field rest =>
+      let smaller : String -> Bool :=
+        psVerifiedIrStructureHasField rest;
+      fun (target : String) =>
+        if psStringEq field.name target then true
+        else smaller target
+
+def psVerifiedIrConstructorHasField
+    (fields : List PsVerifiedIrConstructorField) :
+    String -> Bool :=
+  match fields with
+  | List.nil =>
+      fun (_target : String) => false
+  | List.cons field rest =>
+      let smaller : String -> Bool :=
+        psVerifiedIrConstructorHasField rest;
+      fun (target : String) =>
+        if psStringEq field.name target then true
+        else smaller target
+
+def psVerifiedIrTypeArgumentArityMatches
+    (parameters : List PsVerifiedIrTypeParameter)
+    (arguments : List PsVerifiedIrType) : Bool :=
+  Nat.beq
+    (psVerifiedIrListLength parameters)
+    (psVerifiedIrListLength arguments)
+
+def psVerifiedIrValidateExprListWith
+    (validateExpr :
+      PsVerifiedIrExpr ->
+        Except PsVerifiedIrValidationError Unit) :
+    List PsVerifiedIrExpr ->
+      Except PsVerifiedIrValidationError Unit :=
+  match values : List PsVerifiedIrExpr with
+  | List.nil =>
+      Except.ok Unit.unit
+  | List.cons value rest =>
+      match validateExpr value with
+      | Except.error error => Except.error error
+      | Except.ok _ =>
+          psVerifiedIrValidateExprListWith validateExpr rest
+
+def psVerifiedIrValidateRecordFieldsWith
+    (structureName : String)
+    (structureFields : List PsVerifiedIrStructureField)
+    (validateExpr :
+      PsVerifiedIrExpr ->
+        Except PsVerifiedIrValidationError Unit) :
+    List (String × PsVerifiedIrExpr) ->
+      Except PsVerifiedIrValidationError Unit :=
+  match fields : List (String × PsVerifiedIrExpr) with
+  | List.nil =>
+      Except.ok Unit.unit
+  | List.cons field rest =>
+      match field with
+      | Prod.mk fieldName value =>
+          if
+              psVerifiedIrStructureHasField
+                structureFields
+                fieldName then
+            match validateExpr value with
+            | Except.error error => Except.error error
+            | Except.ok _ =>
+                psVerifiedIrValidateRecordFieldsWith
+                  structureName
+                  structureFields
+                  validateExpr
+                  rest
+          else
+            Except.error
+              (PsVerifiedIrValidationError.unknownStructureField
+                structureName
+                fieldName)
+
+def psVerifiedIrValidateConstructorFieldsWith
+    (inductiveName constructorName : String)
+    (constructorFields : List PsVerifiedIrConstructorField)
+    (validateExpr :
+      PsVerifiedIrExpr ->
+        Except PsVerifiedIrValidationError Unit) :
+    List (String × PsVerifiedIrExpr) ->
+      Except PsVerifiedIrValidationError Unit :=
+  match fields : List (String × PsVerifiedIrExpr) with
+  | List.nil =>
+      Except.ok Unit.unit
+  | List.cons field rest =>
+      match field with
+      | Prod.mk fieldName value =>
+          if
+              psVerifiedIrConstructorHasField
+                constructorFields
+                fieldName then
+            match validateExpr value with
+            | Except.error error => Except.error error
+            | Except.ok _ =>
+                psVerifiedIrValidateConstructorFieldsWith
+                  inductiveName
+                  constructorName
+                  constructorFields
+                  validateExpr
+                  rest
+          else
+            Except.error
+              (PsVerifiedIrValidationError.unknownConstructorField
+                inductiveName
+                constructorName
+                fieldName)
+
+def psVerifiedIrValidateBindings
+    (inductiveName constructorName : String)
+    (constructorFields : List PsVerifiedIrConstructorField) :
+    List PsVerifiedIrMatchBinding ->
+      Except PsVerifiedIrValidationError Unit :=
+  match bindings : List PsVerifiedIrMatchBinding with
+  | List.nil =>
+      Except.ok Unit.unit
+  | List.cons binding rest =>
+      if
+          psVerifiedIrConstructorHasField
+            constructorFields
+            binding.field then
+        psVerifiedIrValidateBindings
+          inductiveName
+          constructorName
+          constructorFields
+          rest
+      else
+        Except.error
+          (PsVerifiedIrValidationError.unknownConstructorField
+            inductiveName
+            constructorName
+            binding.field)
+
+def psVerifiedIrValidateAlternativeWith
+    (inductiveName : String)
+    (constructors : List PsVerifiedIrConstructor)
+    (validateExpr :
+      PsVerifiedIrExpr ->
+        Except PsVerifiedIrValidationError Unit)
+    (alternative :
+      String ×
+        List PsVerifiedIrMatchBinding ×
+        PsVerifiedIrExpr) :
+    Except PsVerifiedIrValidationError Unit :=
+  match alternative with
+  | Prod.mk constructorName payload =>
+      match payload with
+      | Prod.mk bindings body =>
+          match
+              psVerifiedIrFindConstructor
+                constructors
+                constructorName with
+          | Option.none =>
+              Except.error
+                (PsVerifiedIrValidationError.unknownConstructor
+                  inductiveName
+                  constructorName)
+          | Option.some constructorInfo =>
+              match
+                  psVerifiedIrValidateBindings
+                    inductiveName
+                    constructorName
+                    constructorInfo.fields
+                    bindings with
+              | Except.error error => Except.error error
+              | Except.ok _ => validateExpr body
+
+def psVerifiedIrValidateAlternativesWith
+    (inductiveName : String)
+    (constructors : List PsVerifiedIrConstructor)
+    (validateExpr :
+      PsVerifiedIrExpr ->
+        Except PsVerifiedIrValidationError Unit) :
+    List
+      (String ×
+        List PsVerifiedIrMatchBinding ×
+        PsVerifiedIrExpr) ->
+      Except PsVerifiedIrValidationError Unit :=
+  match alternatives :
+      List
+        (String ×
+          List PsVerifiedIrMatchBinding ×
+          PsVerifiedIrExpr) with
+  | List.nil =>
+      Except.ok Unit.unit
+  | List.cons alternative rest =>
+      match
+          psVerifiedIrValidateAlternativeWith
+            inductiveName
+            constructors
+            validateExpr
+            alternative with
+      | Except.error error => Except.error error
+      | Except.ok _ =>
+          psVerifiedIrValidateAlternativesWith
+            inductiveName
+            constructors
+            validateExpr
+            rest
+
+def psVerifiedIrValidateExprReferencesWithFuel
+    (module : PsVerifiedIrModule)
+    (fuel : Nat) :
+    PsVerifiedIrExpr ->
+      Except PsVerifiedIrValidationError Unit :=
+  match fuel with
+  | Nat.zero =>
+      fun (_expr : PsVerifiedIrExpr) =>
+        Except.error
+          PsVerifiedIrValidationError.validationFuelExhausted
+  | Nat.succ remaining =>
+      let smaller :
+          PsVerifiedIrExpr ->
+            Except PsVerifiedIrValidationError Unit :=
+        psVerifiedIrValidateExprReferencesWithFuel
+          module
+          remaining;
+      fun (expr : PsVerifiedIrExpr) =>
+        match expr with
+        | PsVerifiedIrExpr.literal _ =>
+            Except.ok Unit.unit
+        | PsVerifiedIrExpr.var _ =>
+            Except.ok Unit.unit
+        | PsVerifiedIrExpr.intrinsic _ _ arguments =>
+            psVerifiedIrValidateExprListWith smaller arguments
+        | PsVerifiedIrExpr.lambda _ _ body =>
+            smaller body
+        | PsVerifiedIrExpr.call fn _ arguments =>
+            match smaller fn with
+            | Except.error error => Except.error error
+            | Except.ok _ =>
+                psVerifiedIrValidateExprListWith
+                  smaller
+                  arguments
+        | PsVerifiedIrExpr.letE _ _ value body =>
+            match smaller value with
+            | Except.error error => Except.error error
+            | Except.ok _ => smaller body
+        | PsVerifiedIrExpr.ifE
+            condition
+            thenBranch
+            elseBranch =>
+            match smaller condition with
+            | Except.error error => Except.error error
+            | Except.ok _ =>
+                match smaller thenBranch with
+                | Except.error error => Except.error error
+                | Except.ok _ => smaller elseBranch
+        | PsVerifiedIrExpr.record
+            structureName
+            typeArguments
+            fields =>
+            match
+                psVerifiedIrFindStructure
+                  module.structures
+                  structureName with
+            | Option.none =>
+                Except.error
+                  (PsVerifiedIrValidationError.unknownStructure
+                    structureName)
+            | Option.some structureInfo =>
+                if
+                    psVerifiedIrTypeArgumentArityMatches
+                      structureInfo.typeParameters
+                      typeArguments then
+                  psVerifiedIrValidateRecordFieldsWith
+                    structureName
+                    structureInfo.fields
+                    smaller
+                    fields
+                else
+                  Except.error
+                    (PsVerifiedIrValidationError.typeArgumentArity
+                      structureName)
+        | PsVerifiedIrExpr.projection
+            structureName
+            typeArguments
+            target
+            field =>
+            match
+                psVerifiedIrFindStructure
+                  module.structures
+                  structureName with
+            | Option.none =>
+                Except.error
+                  (PsVerifiedIrValidationError.unknownStructure
+                    structureName)
+            | Option.some structureInfo =>
+                if
+                    psVerifiedIrTypeArgumentArityMatches
+                      structureInfo.typeParameters
+                      typeArguments then
+                  if
+                      psVerifiedIrStructureHasField
+                        structureInfo.fields
+                        field then
+                    smaller target
+                  else
+                    Except.error
+                      (PsVerifiedIrValidationError.unknownStructureField
+                        structureName
+                        field)
+                else
+                  Except.error
+                    (PsVerifiedIrValidationError.typeArgumentArity
+                      structureName)
+        | PsVerifiedIrExpr.constructor
+            inductiveName
+            constructorName
+            typeArguments
+            fields =>
+            match
+                psVerifiedIrFindInductive
+                  module.inductives
+                  inductiveName with
+            | Option.none =>
+                Except.error
+                  (PsVerifiedIrValidationError.unknownInductive
+                    inductiveName)
+            | Option.some inductiveInfo =>
+                if
+                    psVerifiedIrTypeArgumentArityMatches
+                      inductiveInfo.typeParameters
+                      typeArguments then
+                  match
+                      psVerifiedIrFindConstructor
+                        inductiveInfo.constructors
+                        constructorName with
+                  | Option.none =>
+                      Except.error
+                        (PsVerifiedIrValidationError.unknownConstructor
+                          inductiveName
+                          constructorName)
+                  | Option.some constructorInfo =>
+                      psVerifiedIrValidateConstructorFieldsWith
+                        inductiveName
+                        constructorName
+                        constructorInfo.fields
+                        smaller
+                        fields
+                else
+                  Except.error
+                    (PsVerifiedIrValidationError.typeArgumentArity
+                      inductiveName)
+        | PsVerifiedIrExpr.matchE
+            inductiveName
+            typeArguments
+            scrutinee
+            alternatives =>
+            match
+                psVerifiedIrFindInductive
+                  module.inductives
+                  inductiveName with
+            | Option.none =>
+                Except.error
+                  (PsVerifiedIrValidationError.unknownInductive
+                    inductiveName)
+            | Option.some inductiveInfo =>
+                if
+                    psVerifiedIrTypeArgumentArityMatches
+                      inductiveInfo.typeParameters
+                      typeArguments then
+                  match smaller scrutinee with
+                  | Except.error error => Except.error error
+                  | Except.ok _ =>
+                      psVerifiedIrValidateAlternativesWith
+                        inductiveName
+                        inductiveInfo.constructors
+                        smaller
+                        alternatives
+                else
+                  Except.error
+                    (PsVerifiedIrValidationError.typeArgumentArity
+                      inductiveName)
+
+def psVerifiedIrValidateDeclarationsWith
+    (module : PsVerifiedIrModule) :
+    List PsVerifiedIrDeclaration ->
+      Except PsVerifiedIrValidationError Unit :=
+  match declarations : List PsVerifiedIrDeclaration with
+  | List.nil =>
+      Except.ok Unit.unit
+  | List.cons declaration rest =>
+      match
+          psVerifiedIrValidateExprReferencesWithFuel
+            module
+            4096
+            declaration.body with
+      | Except.error error => Except.error error
+      | Except.ok _ =>
+          psVerifiedIrValidateDeclarationsWith
+            module
+            rest
+
+def psVerifiedIrValidateReferences
+    (module : PsVerifiedIrModule) :
+    Except PsVerifiedIrValidationError Unit :=
+  psVerifiedIrValidateDeclarationsWith
+    module
+    module.declarations
+
 def psValidateErasedIrModule
     (erased : PsErasedIrModule) :
     Except PsVerifiedIrValidationError PsValidatedIrModule :=
   if psVerifiedIrModuleResolved erased.raw then
-    Except.ok (PsValidatedIrModule.mk erased.raw)
+    match psVerifiedIrValidateReferences erased.raw with
+    | Except.error error => Except.error error
+    | Except.ok _ =>
+        Except.ok (PsValidatedIrModule.mk erased.raw)
   else
     Except.error PsVerifiedIrValidationError.unresolvedRuntimeType

@@ -2994,6 +2994,74 @@ partial def psKernelBenchLeanNestedAdmissionLoop
           pure tail
 
 
+def psKernelBenchNestedWideProcess
+    (environment : PsKernelEnvironment) :
+    Except String PsKernelSimpleNestedProcessQueueResult :=
+  psKernelSimpleNestedProcessQueue
+    65536
+    environment
+    psKernelBenchNestedWideDecl.levelParams
+    (psKernelSimpleMutualNames
+      psKernelBenchNestedWideDecl.types)
+    List.nil
+    psKernelBenchNestedWideDecl.numParams
+    psKernelBenchNestedWideDecl.types
+    List.nil
+    (PsKernelSimpleNestedMapState.mk
+      List.nil
+      1
+      List.nil)
+
+def psKernelBenchNestedWideTransform
+    (environment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    Except String PsKernelEnvironment :=
+  psKernelAddSimpleMutualInductive
+    65536
+    environment
+    (PsKernelSimpleMutualInductiveDecl.mk
+      psKernelBenchNestedWideDecl.levelParams
+      psKernelBenchNestedWideDecl.numParams
+      processed.types
+      psKernelBenchNestedWideDecl.isUnsafe)
+    0
+    psKernelLeanNatMaxSizeDefault
+
+def psKernelBenchNestedWideRenames
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    List (Prod PsKernelName PsKernelName) :=
+  psKernelSimpleNestedMakeRenames
+    psKernelBenchNestedWideRecName
+    processed.state.aux
+
+def psKernelBenchNestedWideRestore
+    (base : PsKernelEnvironment)
+    (transformed : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    Except String PsKernelEnvironment :=
+  let renames :=
+    psKernelBenchNestedWideRenames processed;
+  match
+      psKernelSimpleNestedAddOriginals
+        transformed
+        base
+        psKernelBenchNestedWideDecl
+        List.nil
+        processed.state.aux
+        renames with
+  | Except.error error =>
+      Except.error error
+  | Except.ok restoredOriginals =>
+      psKernelSimpleNestedAddAuxRecursors
+        transformed
+        restoredOriginals
+        (psKernelSimpleMutualNames
+          psKernelBenchNestedWideDecl.types)
+        List.nil
+        psKernelBenchNestedWideDecl.numParams
+        processed.state.aux
+        renames
+
 partial def psKernelBenchNestedWideAdmissionLoop
     (iterations : Nat)
     (environment : PsKernelEnvironment) :
@@ -4339,6 +4407,102 @@ def main : IO Unit := do
   | Except.error error =>
       IO.println
         ("PSKERNEL_BENCH nested_wide_setup_error=" ++
+          error)
+
+  let nestedWideProcessed ←
+    match
+        psKernelBenchNestedWideProcess
+          nestedWidePsBase with
+    | Except.ok value =>
+        pure value
+    | Except.error error =>
+        throw
+          (IO.userError
+            ("PSKERNEL_BENCH wide preprocessing failed: " ++
+              error))
+
+  let nestedWideTransformed ←
+    match
+        psKernelBenchNestedWideTransform
+          nestedWidePsBase
+          nestedWideProcessed with
+    | Except.ok value =>
+        pure value
+    | Except.error error =>
+        throw
+          (IO.userError
+            ("PSKERNEL_BENCH wide transform failed: " ++
+              error))
+
+  let nestedWideFinal ←
+    match
+        psKernelBenchNestedWideRestore
+          nestedWidePsBase
+          nestedWideTransformed
+          nestedWideProcessed with
+    | Except.ok value =>
+        pure value
+    | Except.error error =>
+        throw
+          (IO.userError
+            ("PSKERNEL_BENCH wide restore failed: " ++
+              error))
+
+  match
+      psKernelSimpleNestedValidateTemplates
+        65536
+        nestedWideFinal
+        psKernelBenchNestedWideDecl.levelParams
+        PsKernelDefinitionSafety.safe
+        List.nil
+        0
+        psKernelLeanNatMaxSizeDefault
+        nestedWideProcessed.state.aux with
+  | Except.ok _ =>
+      IO.println
+        "PSKERNEL_BENCH nested_wide_validate_templates=ok"
+  | Except.error error =>
+      IO.println
+        ("PSKERNEL_BENCH nested_wide_validate_templates_error=" ++
+          error)
+
+  match
+      psKernelSimpleNestedValidateOriginals
+        65536
+        nestedWideFinal
+        psKernelBenchNestedWideDecl
+        PsKernelDefinitionSafety.safe
+        0
+        psKernelLeanNatMaxSizeDefault
+        psKernelBenchNestedWideDecl.types with
+  | Except.ok _ =>
+      IO.println
+        "PSKERNEL_BENCH nested_wide_validate_originals=ok"
+  | Except.error error =>
+      IO.println
+        ("PSKERNEL_BENCH nested_wide_validate_originals_error=" ++
+          error)
+
+  match
+      psKernelSimpleNestedValidateAux
+        65536
+        nestedWideTransformed
+        nestedWideFinal
+        psKernelBenchNestedWideDecl
+        PsKernelDefinitionSafety.safe
+        List.nil
+        0
+        psKernelLeanNatMaxSizeDefault
+        nestedWideProcessed.state.aux
+        (psKernelBenchNestedWideRenames
+          nestedWideProcessed)
+        nestedWideProcessed.state.aux with
+  | Except.ok _ =>
+      IO.println
+        "PSKERNEL_BENCH nested_wide_validate_aux=ok"
+  | Except.error error =>
+      IO.println
+        ("PSKERNEL_BENCH nested_wide_validate_aux_error=" ++
           error)
 
   let nestedWidePsStart ← IO.monoNanosNow

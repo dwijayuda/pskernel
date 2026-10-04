@@ -52,7 +52,9 @@ def psWasmLowerMachineIntegerLiteral
       PsWasmInstruction.i64Const value
     else
       PsWasmInstruction.i32Const value
-  constant :: psWasmNormalizeMachineInteger type
+  List.cons
+    constant
+    (psWasmNormalizeMachineInteger type)
 
 def psWasmMachineIntegerBinaryInstruction
     (profile : PsWasmTargetProfile)
@@ -81,8 +83,12 @@ def psWasmLowerMachineIntegerBinary
     (type : PsVerifiedIrMachineIntegerType)
     (operation : PsVerifiedIrIntegerBinaryOp) :
     List PsWasmInstruction :=
-  psWasmMachineIntegerBinaryInstruction profile type operation
-    :: psWasmNormalizeMachineInteger type
+  List.cons
+    (psWasmMachineIntegerBinaryInstruction
+      profile
+      type
+      operation)
+    (psWasmNormalizeMachineInteger type)
 
 def psWasmMachineIntegerCompareInstruction
     (profile : PsWasmTargetProfile)

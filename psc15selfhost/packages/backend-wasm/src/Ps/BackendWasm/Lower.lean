@@ -3046,7 +3046,7 @@ def psWasmLowerLambdaWith
     (body : PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   let parameterTypes :=
-    parameters.map (fun (parameter : PsVerifiedIrParameter) => parameter.type)
+    psWasmParameterTypes parameters
   let functionType :=
     PsVerifiedIrType.function parameterTypes resultType
   match psWasmClosureBaseName functionType with

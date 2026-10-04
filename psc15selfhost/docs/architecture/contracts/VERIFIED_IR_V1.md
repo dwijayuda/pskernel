@@ -174,6 +174,16 @@ Strengthening the validator with checks that reject previously malformed/uncontr
 
 A change that gives previously invalid raw forms new executable semantics requires an explicit contract/version decision.
 
+## Cloud execution gate
+
+Pull requests targeting `psc2/selfhost-lean-kernel` run the focused cloud gate:
+
+```text
+.github/workflows/psc15selfhost-cloud.yml
+```
+
+That workflow checks the portable source profile, builds the relevant semantic/compiler/backend layers, runs the erasure/VerifiedIR, minimal-selfhost and TypeScript-backend corpora, enforces semantic-boundary rules, and asks PSC itself to check the modified compiler IR and compiler API source.
+
 ## Assurance status
 
 Current evidence includes:

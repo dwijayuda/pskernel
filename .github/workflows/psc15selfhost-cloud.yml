@@ -76,6 +76,7 @@ jobs:
             PsDriverTs \
             PsBackendRust \
             PsDriverRust \
+            psc1 \
             psc1_erasure_tests \
             psc2_minimal_selfhost_tests \
             psc1_backend_ts_tests \
@@ -129,6 +130,10 @@ jobs:
       - name: Run self-host source isolation corpus
         working-directory: psc15selfhost
         run: node scripts/selfhost-source-isolation-tests.mjs
+
+      - name: Run native workspace isolation corpus
+        working-directory: psc15selfhost
+        run: node scripts/native-workspace-isolation.test.mjs
 
       - name: Enforce semantic boundaries
         working-directory: psc15selfhost

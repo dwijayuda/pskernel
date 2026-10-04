@@ -2859,42 +2859,32 @@ def psKernelAdmissionConformanceTests : Bool :=
                                 PSC1Kernel.leanNatMaxSizeDefault
                                 Option.none with
                           | Except.ok portableFinal, Except.ok referenceFinal =>
-                              Bool.and
-                                duplicateParity
-                                (Bool.and
-                                  (psKernelEnvironmentContains
-                                    portableFinal
-                                    defName)
-                                  (Bool.and
-                                    (referenceFinal.contains
-                                      referenceDefName)
-                                    (Bool.and
-                                      (psKernelEnvironmentContains
-                                        portableFinal
-                                        theoremName)
-                                      (Bool.and
-                                        (referenceFinal.contains
-                                          referenceTheoremName)
-                                        (Bool.and
-                                          (psKernelEnvironmentContains
-                                            portableFinal
-                                            opaqueName)
-                                          (Bool.and
-                                            (referenceFinal.contains
-                                              referenceOpaqueName)
-                                            (Bool.and
-                                              (psKernelEnvironmentContains
-                                                portableFinal
-                                                firstMutualName)
-                                              (Bool.and
-                                                (psKernelEnvironmentContains
-                                                  portableFinal
-                                                  secondMutualName)
-                                                (Bool.and
-                                                  (referenceFinal.contains
-                                                    referenceFirstMutualName)
-                                                  (referenceFinal.contains
-                                                    referenceSecondMutualName)))))))))
+                              duplicateParity &&
+                                psKernelEnvironmentContains
+                                  portableFinal
+                                  defName &&
+                                referenceFinal.contains
+                                  referenceDefName &&
+                                psKernelEnvironmentContains
+                                  portableFinal
+                                  theoremName &&
+                                referenceFinal.contains
+                                  referenceTheoremName &&
+                                psKernelEnvironmentContains
+                                  portableFinal
+                                  opaqueName &&
+                                referenceFinal.contains
+                                  referenceOpaqueName &&
+                                psKernelEnvironmentContains
+                                  portableFinal
+                                  firstMutualName &&
+                                psKernelEnvironmentContains
+                                  portableFinal
+                                  secondMutualName &&
+                                referenceFinal.contains
+                                  referenceFirstMutualName &&
+                                referenceFinal.contains
+                                  referenceSecondMutualName
                           | _, _ =>
                               false
                       | _, _ =>

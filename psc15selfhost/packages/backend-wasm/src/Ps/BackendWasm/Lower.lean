@@ -1,5 +1,4 @@
 import Ps.CompilerIr.Specialize
-import Ps.BackendWasm.Binary
 import Ps.BackendWasm.LowerInt
 import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.RuntimeNat
@@ -82,7 +81,7 @@ def psWasmLowerParameterTypes
           match psWasmLowerParameterTypes profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 def psWasmExpectedResultType :
     List PsWasmValueType ->
@@ -568,7 +567,7 @@ def psWasmLowerArrayTypes
           match psWasmLowerArrayTypes profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 structure PsWasmClosureSignature where
   baseStructure : PsWasmStructType
@@ -586,7 +585,7 @@ def psWasmLowerIrTypeList
           match psWasmLowerIrTypeList profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 def psWasmLowerClosureSignature
     (profile : PsWasmTargetProfile)
@@ -623,7 +622,8 @@ def psWasmLowerClosureSignature
                         codeType := {
                           name := codeTypeName
                           parameters :=
-                            PsWasmValueType.refT baseName ::
+                            List.cons
+                              (PsWasmValueType.refT baseName)
                               loweredParameters
                           results := loweredResults
                         }
@@ -645,8 +645,12 @@ def psWasmLowerClosureSignatures
           | Except.ok loweredRest =>
               Except.ok
                 (
-                  signature.baseStructure :: loweredRest.1,
-                  signature.codeType :: loweredRest.2
+                  List.cons
+                    signature.baseStructure
+                    loweredRest.1,
+                  List.cons
+                    signature.codeType
+                    loweredRest.2
                 )
 
 def psWasmFindStructure :
@@ -727,7 +731,7 @@ def psWasmLowerStructureFields
           match psWasmLowerStructureFields profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 def psWasmLowerStructure
     (profile : PsWasmTargetProfile)
@@ -758,7 +762,7 @@ def psWasmLowerStructures
           match psWasmLowerStructures profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 def psWasmConstructorTypeName
     (inductiveName constructorName : String) : String :=
@@ -828,7 +832,7 @@ def psWasmLowerConstructorFields
           match psWasmLowerConstructorFields profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 def psWasmLowerInductiveConstructors
     (profile : PsWasmTargetProfile)
@@ -859,7 +863,7 @@ def psWasmLowerInductiveConstructors
                 rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 def psWasmLowerInductive
     (profile : PsWasmTargetProfile)
@@ -881,7 +885,7 @@ def psWasmLowerInductive
             inductiveInfo.constructors with
       | Except.error error => Except.error error
       | Except.ok constructors =>
-          Except.ok (base :: constructors)
+          Except.ok (List.cons base constructors)
 
 def psWasmLowerInductives
     (profile : PsWasmTargetProfile) :
@@ -901,12 +905,15 @@ def psWasmParameterBindingsLoop :
     Nat -> List PsVerifiedIrParameter -> List PsWasmBinding
   | _, [] => []
   | index, parameter :: rest =>
-      {
-        name := parameter.name
-        index := index
-        type := parameter.type
-      } ::
-        psWasmParameterBindingsLoop (index + 1) rest
+      List.cons
+        {
+          name := parameter.name
+          index := index
+          type := parameter.type
+        }
+        (psWasmParameterBindingsLoop
+          (index + 1)
+          rest)
 
 def psWasmParameterBindings
     (parameters : List PsVerifiedIrParameter) :
@@ -965,13 +972,13 @@ def psWasmParameterNames :
     List PsVerifiedIrParameter -> List String
   | [] => []
   | parameter :: rest =>
-      parameter.name :: psWasmParameterNames rest
+      List.cons parameter.name (psWasmParameterNames rest)
 
 def psWasmMatchBindingNames :
     List PsVerifiedIrMatchBinding -> List String
   | [] => []
   | binding :: rest =>
-      binding.name :: psWasmMatchBindingNames rest
+      List.cons binding.name (psWasmMatchBindingNames rest)
 
 def psWasmCollectCapturesWithFuel
     (outerBindings : List PsWasmBinding)
@@ -1018,7 +1025,7 @@ def psWasmCollectCapturesWithFuel
           let withValue := collect value captures
           psWasmCollectCapturesWithFuel
             outerBindings
-            (name :: boundNames)
+            (List.cons name boundNames)
             fuel
             body
             withValue
@@ -1067,14 +1074,15 @@ def psWasmParameterBindingsFrom
     List PsVerifiedIrParameter -> List PsWasmBinding
   | [] => []
   | parameter :: rest =>
-      {
-        name := parameter.name
-        index := firstIndex
-        type := parameter.type
-      } ::
-        psWasmParameterBindingsFrom
+      List.cons
+        {
+          name := parameter.name
+          index := firstIndex
+          type := parameter.type
+        }
+        (psWasmParameterBindingsFrom
           (firstIndex + 1)
-          rest
+          rest)
 
 def psWasmAddLocal
     (state : PsWasmLowerState)
@@ -2282,11 +2290,13 @@ def psWasmLowerMatchBindings
                     inductiveName
                     constructorInfo
                     scrutineeLocal
-                    ({
-                      name := binding.name
-                      index := localIndex
-                      type := field.type
-                    } :: baseBindings)
+                    (List.cons
+                      {
+                        name := binding.name
+                        index := localIndex
+                        type := field.type
+                      }
+                      baseBindings)
                     nextState
                     rest with
               | Except.error error => Except.error error
@@ -2440,10 +2450,12 @@ def psWasmLowerCaptureFields
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok
-                ({
-                  name := capture.name
-                  storageType := storageType
-                } :: loweredRest)
+                (List.cons
+                  {
+                    name := capture.name
+                    storageType := storageType
+                  }
+                  loweredRest)
 
 def psWasmPrepareCaptureBindings
     (profile : PsWasmTargetProfile)
@@ -2487,11 +2499,13 @@ def psWasmPrepareCaptureBindings
                   ]
                     ++ loweredRest.instructions
                 bindings :=
-                  {
-                    name := capture.name
-                    index := localIndex
-                    type := capture.type
-                  } :: loweredRest.bindings
+                  List.cons
+                    {
+                      name := capture.name
+                      index := localIndex
+                      type := capture.type
+                    }
+                    loweredRest.bindings
                 state := loweredRest.state
               }
 
@@ -2499,8 +2513,9 @@ def psWasmCaptureConstructionInstructions :
     List PsWasmBinding -> List PsWasmInstruction
   | [] => []
   | capture :: rest =>
-      PsWasmInstruction.localGet capture.index ::
-        psWasmCaptureConstructionInstructions rest
+      List.cons
+        (PsWasmInstruction.localGet capture.index)
+        (psWasmCaptureConstructionInstructions rest)
 
 def psWasmAdvanceLambdaId
     (state : PsWasmLowerState) : PsWasmLowerState :=
@@ -2591,12 +2606,14 @@ def psWasmLowerLambdaWith
                             superType := some baseName
                             isFinal := true
                             fields :=
-                              {
-                                name := "code"
-                                storageType :=
-                                  PsWasmStorageType.value
-                                    PsWasmValueType.funcRef
-                              } :: captureFields
+                              List.cons
+                                {
+                                  name := "code"
+                                  storageType :=
+                                    PsWasmStorageType.value
+                                      PsWasmValueType.funcRef
+                                }
+                                captureFields
                           }
                           let advancedState :=
                             psWasmAdvanceLambdaId state
@@ -2632,7 +2649,8 @@ def psWasmLowerLambdaWith
                                     name := lambdaName
                                     typeName := some codeTypeName
                                     parameters :=
-                                      PsWasmValueType.refT baseName ::
+                                      List.cons
+                                        (PsWasmValueType.refT baseName)
                                         loweredParameters
                                     results := results
                                     locals :=
@@ -2756,11 +2774,13 @@ def psWasmLowerExprWithFuel
                   let localIndex := allocated.1
                   let localState := allocated.2
                   let bodyBindings :=
-                    {
-                      name := name
-                      index := localIndex
-                      type := type
-                    } :: bindings
+                    List.cons
+                      {
+                        name := name
+                        index := localIndex
+                        type := type
+                      }
+                      bindings
                   match
                       psWasmLowerExprWithFuel
                         profile
@@ -3040,7 +3060,9 @@ def psWasmLowerDeclarations
           | Except.ok loweredRest =>
               Except.ok {
                 functions :=
-                  lowered.function :: loweredRest.functions
+                  List.cons
+                    lowered.function
+                    loweredRest.functions
                 state := loweredRest.state
               }
 
@@ -3277,8 +3299,9 @@ def psWasmExportsOfDeclarations :
     List PsVerifiedIrDeclaration -> List (String × String)
   | [] => []
   | declaration :: rest =>
-      (declaration.name, declaration.name) ::
-        psWasmExportsOfDeclarations rest
+      List.cons
+        (declaration.name, declaration.name)
+        (psWasmExportsOfDeclarations rest)
 
 def psWasmModuleHasUnsupportedData
     (module : PsVerifiedIrModule) : Bool :=

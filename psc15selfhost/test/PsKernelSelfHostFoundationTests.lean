@@ -2171,12 +2171,11 @@ def psKernelDefEqSpecialRuleTests : Bool :=
     (PSC1Kernel.CheckerContext.empty
       referenceUnitEnv).withLocal
       (psKernelNameToReference leftName)
-      (psKernelNameToReference leftName)
       referenceUnitType
       PSC1Kernel.BinderInfo.default
   let referenceRight :=
-    (Prod.snd referenceLeft).withLocal
-      (psKernelNameToReference rightName)
+    PSC1Kernel.CheckerContext.withLocal
+      (Prod.snd referenceLeft)
       (psKernelNameToReference rightName)
       referenceUnitType
       PSC1Kernel.BinderInfo.default

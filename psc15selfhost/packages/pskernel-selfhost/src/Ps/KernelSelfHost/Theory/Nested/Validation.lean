@@ -117,10 +117,10 @@ def psKernelSimpleNestedValidateRules
             rule.rhs with
       | Except.error error =>
           Except.error error
-      | Except.ok checked =>
+      | Except.ok _ =>
           psKernelSimpleNestedValidateRules
             fuel
-            (Prod.snd checked)
+            session
             rest
 
 def psKernelSimpleNestedValidateConstructorTypes

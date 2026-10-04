@@ -44,15 +44,26 @@ inspected for:
 No local or remote branch was deleted. No published history was rewritten. No
 force-push was used.
 
-The primary local `psc2/selfhost-lean-kernel` checkout was substantially
-behind GitHub and contained mostly CRLF/build/scratch noise plus a small
-tail-loop development state. The active portable-kernel worktree contained no
-tracked modifications; its untracked files were build outputs and debugging
-snapshots.
+The primary historical checkout, `pskernel-integration`, and the algebraic
+integration worktree showed many apparent modifications caused by Windows
+CRLF normalization; re-checking with end-of-line whitespace ignored found **no
+substantive content diffs** in those worktrees. Their existing archive branch
+tips therefore remain sufficient preservation checkpoints.
+
+The active portable-kernel worktree matched GitHub commit
+`640fe165855056f49c0e854cf3b5520d00289a75` for tracked source. Its remaining
+debugging files were intentionally gitignored scratch; they were preserved on
+`archive/local-pskernel-debug-scratch-20261004` rather than merged into the
+canonical kernel branch.
 
 A large historical `joint-1410` worktree showed mass deletions caused by an
 incomplete/path-length-damaged checkout. That state was not promoted as source
 work and was left untouched locally.
+
+A stale standalone `psc1kernel-selfhost-portable` checkout at
+`ab702ec1bc203b731efc6eb0a8bfa08a59dcbf69` similarly showed a
+path/sparse-checkout-damaged delete/recreate state. It was left untouched and
+is not a canonical development input.
 
 ## Preserved local checkpoints
 
@@ -67,6 +78,9 @@ of being merged into newer remote heads:
 | `archive/local-jsdev-9954fa0e-20261004` | `0f2cd76a7c25acc52e44ea020ee35ee694501c95` | JS self-host profile experiments |
 | `archive/local-ts7-ci-b4d8d875-20261004` | `4b3246fc7bf733d037523d9d15ad92ced539248e` | TypeScript-7/Lean-checked CI experiment |
 | `archive/local-slim-prebuilt-3c49f7d8-20261004` | `0408f18b47e6cf9b42fce023d24fd73ba79c95af` | slim native Lean provider prebuilts and manifest |
+| `archive/local-artifact-transfer-49598e6b-20261004` | `49598e6b34d4725cb119bfc96d330a7fc1a12002` | staged verified PSC2 runtime bundle checkpoint that previously existed only as a detached worktree tip |
+| `archive/local-lean-slim-a3108135-20261004` | `a31081352737628951fe37010a79752c658c7a1e` | slim native provider/compiler-semantics checkpoint that previously existed only as a detached worktree tip |
+| `archive/local-pskernel-debug-scratch-20261004` | `fb12d8bad34c7032e7bbc95447ac419a47b5a3fd` | PSKernel self-host diagnostic scripts, WHNF probe, temporary mutual/nested source snapshots, and isolation scripts preserved without polluting the canonical topic branch |
 
 These branches are preservation checkpoints only. They must not be merged
 blindly into the current integration branch; recover individual changes only

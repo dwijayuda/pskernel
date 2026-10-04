@@ -117,10 +117,9 @@ def psKernelEnvironmentFind
     Option PsKernelConstantInfo :=
   psKernelFindConstantInList
     name
-    (psKernelEnvironmentIndexFindWorker
-      16
+    (psKernelEnvironmentIndexFind
       environment.index
-      (psKernelEnvironmentNameHash name))
+      name)
 
 def psKernelEnvironmentContains
     (environment : PsKernelEnvironment)

@@ -3053,6 +3053,74 @@ def psKernelRuntimeCacheInvariantTests : Bool :=
             value
             equalByCacheSemantics))))
 
+def psKernelRuntimeEnvironmentInfo
+    (index : Nat) :
+    PsKernelConstantInfo :=
+  PsKernelConstantInfo.axiomInfo {
+    base := {
+      name :=
+        PsKernelName.num
+          PsKernelName.anonymous
+          index
+      levelParams := List.nil
+      type := PsKernelExpr.sort PsKernelLevel.zero
+    }
+    isUnsafe := false
+  }
+
+def psKernelRuntimeBuildEnvironment
+    (count : Nat) :
+    PsKernelEnvironment :=
+  match count with
+  | Nat.zero =>
+      psKernelEnvironmentEmpty
+  | Nat.succ rest =>
+      psKernelEnvironmentAddUnchecked
+        (psKernelRuntimeBuildEnvironment rest)
+        (psKernelRuntimeEnvironmentInfo rest)
+
+def psKernelRuntimeEnvironmentPromotionTests : Bool :=
+  let environment8 :=
+    psKernelRuntimeBuildEnvironment 8
+  let environment9 :=
+    psKernelRuntimeBuildEnvironment 9
+  let environment8Small :=
+    match environment8.index with
+    | PsKernelEnvironmentIndex.small _ =>
+        true
+    | _ =>
+        false
+  let environment9Indexed :=
+    match environment9.index with
+    | PsKernelEnvironmentIndex.branch _ _ =>
+        true
+    | PsKernelEnvironmentIndex.bucket _ =>
+        true
+    | _ =>
+        false
+  let target :=
+    PsKernelName.num
+      PsKernelName.anonymous
+      0
+  Bool.and
+    environment8Small
+    (Bool.and
+      environment9Indexed
+      (match
+          psKernelEnvironmentFind
+            environment9
+            target,
+          psKernelFindConstantInList
+            target
+            environment9.constants with
+      | Option.some indexed,
+        Option.some authoritative =>
+          psKernelExprEq
+            (psKernelConstantInfoType indexed)
+            (psKernelConstantInfoType authoritative)
+      | _, _ =>
+          false))
+
 def psKernelRuntimeEnvironmentIndexInvariantTests : Bool :=
   let firstName :=
     PsKernelName.num
@@ -3160,7 +3228,9 @@ def psKernelRuntimeInvariantTests : Bool :=
     psKernelRuntimeCacheInvariantTests
     (Bool.and
       psKernelRuntimeCachePromotionTests
-      psKernelRuntimeEnvironmentIndexInvariantTests)
+      (Bool.and
+        psKernelRuntimeEnvironmentPromotionTests
+        psKernelRuntimeEnvironmentIndexInvariantTests))
 
 def main : IO Unit :=
   if !psKernelSelfHostNameTests then

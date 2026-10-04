@@ -35,7 +35,7 @@ validated backend emitter
 
 The underlying raw node family remains named `PsVerifiedIr*` temporarily to avoid a disruptive whole-tree rename. The wrapper types define the authority boundary.
 
-## Current v1 invariant
+## Current v1 invariants
 
 A `PsValidatedIrModule` contains no `PsVerifiedIrType.unknown` in executable runtime type positions reachable through:
 
@@ -51,7 +51,24 @@ A `PsValidatedIrModule` contains no `PsVerifiedIrType.unknown` in executable run
 - match-binding types;
 - nested function/named type arguments.
 
-Validation is recursive and fuel-bounded. Exhausting validation depth fails closed rather than accepting an incompletely traversed module.
+The validator also establishes these structural-reference invariants for executable expressions:
+
+- every record target names a declared structure;
+- every projection target names a declared structure;
+- every record/projection structure type-argument list has the declared arity;
+- every record field name belongs to the named structure;
+- every projection field name belongs to the named structure;
+- every constructor target names a declared inductive;
+- every match target names a declared inductive;
+- every constructor/match inductive type-argument list has the declared arity;
+- every constructor name belongs to the named inductive;
+- every match-alternative constructor belongs to the named inductive;
+- every constructor field name belongs to the selected constructor;
+- every match binding field name belongs to the selected constructor.
+
+Validation is recursive and fuel-bounded. Exhausting structural-reference validation returns `validationFuelExhausted`; unresolved type traversal also fails closed rather than accepting an incompletely traversed module.
+
+These rules establish ownership/membership and arity only. They do not yet establish field completeness, duplicate-field rejection, field value types, expression result types, or match exhaustiveness.
 
 ## Unknown-type inventory
 
@@ -96,34 +113,45 @@ Compiler backend adapters call target-specific validated emitter entry points, w
 
 ## Error contract
 
-Current validation failure:
+Current validation failures are:
 
 ```text
 PsVerifiedIrValidationError.unresolvedRuntimeType
+PsVerifiedIrValidationError.validationFuelExhausted
+PsVerifiedIrValidationError.unknownStructure
+PsVerifiedIrValidationError.unknownInductive
+PsVerifiedIrValidationError.unknownConstructor
+PsVerifiedIrValidationError.unknownStructureField
+PsVerifiedIrValidationError.unknownConstructorField
+PsVerifiedIrValidationError.typeArgumentArity
 ```
 
-The compiler exposes this through:
+The compiler exposes validator failures through:
 
 ```text
 PsCompilerError.irValidation
 ```
 
-More precise validation errors may be added when subsequent well-formedness checks are introduced.
+Errors identify the malformed target/name where useful so negative tests and future diagnostics can remain stable without depending on backend-specific failure modes.
 
 ## What v1 does not yet establish
 
-This first validator does **not yet claim** complete validation of:
+The current validator does **not yet claim** complete validation of:
 
-- global name uniqueness/resolution;
-- call arity against declaration signatures;
-- structure field existence/order;
-- constructor/inductive consistency;
-- intrinsic arity/type rules;
-- match exhaustiveness/constructor ownership;
+- global declaration/type name uniqueness;
+- general `PsVerifiedIrType.named` name resolution and arity;
+- variable scope/name resolution;
+- call arity or argument/result typing against declaration signatures;
+- exact record/constructor field completeness;
+- duplicate record/constructor fields or duplicate match bindings;
+- field value types against declared field types;
+- intrinsic type-argument/value-argument arity and type rules;
+- condition/result typing for `ifE`;
+- match exhaustiveness, duplicate alternatives, or branch result-type equality;
 - external import identity/ABI compatibility;
 - module-link compatibility.
 
-Those are planned extensions of the ErasedIR → VerifiedIR boundary. Until they are implemented, do not describe `psc-verified-ir/1` as proving those properties.
+Those are planned monotonic extensions of the ErasedIR → VerifiedIR boundary. Until they are implemented, do not describe `psc-verified-ir/1` as proving those properties.
 
 ## Backend rule
 
@@ -146,6 +174,18 @@ Strengthening the validator with checks that reject previously malformed/uncontr
 
 A change that gives previously invalid raw forms new executable semantics requires an explicit contract/version decision.
 
+## Cloud execution gate
+
+Pull requests targeting `psc2/selfhost-lean-kernel` run the focused cloud gate:
+
+```text
+.github/workflows/psc15selfhost-cloud.yml
+```
+
+That workflow checks the portable source profile, builds the relevant semantic/compiler/backend layers, runs the erasure/VerifiedIR, minimal-selfhost and TypeScript-backend corpora, enforces semantic-boundary rules, and asks PSC itself to check the modified compiler IR and compiler API source.
+
+The workflow is installed on the repository default branch so pull requests targeting the PSC2 integration branch can be executed entirely in GitHub Actions rather than relying on a developer workstation.
+
 ## Assurance status
 
 Current evidence includes:
@@ -155,6 +195,11 @@ Current evidence includes:
 - PSC parser/checker acceptance;
 - positive resolved-module validation tests;
 - negative top-level and nested `unknown` tests;
+- positive structural-reference validation;
+- negative unknown structure/field/projection tests;
+- negative structure type-argument arity tests;
+- negative unknown inductive/constructor/constructor-field tests;
+- negative match-constructor and match-binding-field tests;
 - existing erasure corpus;
 - minimal self-host corpus;
 - TypeScript backend corpus;

@@ -28,7 +28,7 @@ assert.equal(execFileSync(process.execPath, [tsc, '--version'], { encoding: 'utf
 const compiler = path.join(root, '.lake/build/bin', process.platform === 'win32' ? 'psc1.exe' : 'psc1');
 const staging = await mkdtemp(path.join(tmpdir(), 'psc2-replay-runtime-'));
 try {
-  for (const fixture of ['selfhost-nat-recursion', 'selfhost-int-repr', 'selfhost-function-results', 'selfhost-text-position', 'selfhost-count-fold']) {
+  for (const fixture of ['selfhost-nat-recursion', 'selfhost-int-repr', 'selfhost-function-results', 'selfhost-text-position', 'selfhost-count-fold', 'selfhost-tail-loop']) {
     const source = execFileSync(compiler, ['typescript', `test/fixtures/${fixture}.lean`], {
       cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 8 * 1024 * 1024,
     });
@@ -38,7 +38,23 @@ try {
       encoding: 'utf8', timeout: 120000,
     });
     const compiled = require(path.join(staging, `${fixture}.js`));
-    if (fixture === 'selfhost-count-fold') {
+    if (fixture === 'selfhost-tail-loop') {
+      for (const name of ['replayTailSwap', 'replayTailReverse', 'replayTailFuel'])
+        assert(!source.includes(`__ps$impl$${name}`), `${name} must use a bounded tail loop`);
+      assert(source.includes('__ps$impl$replayNonTail'), 'non-tail recursion must keep the general path');
+      for (const n of [0n, 1n, 2n, 31n, 20000n]) {
+        assert.equal(compiled.replayTailSwap(n, 11n, 23n), n % 2n === 0n ? 11n : 23n);
+        assert.equal(compiled.replayTailFuel(n, 7n), n + 7n);
+        assert.equal(compiled.replayEscapedTail(n, 7n), n + 7n);
+        assert.equal(compiled.replayNonTail(n), 2n * n + 7n);
+      }
+      let list = compiled.List.nil();
+      for (let n = 0n; n < 20000n; n++) list = compiled.List.cons(n, list);
+      let reversed = compiled.replayTailReverse(list, compiled.List.nil());
+      for (let n = 0n; n < 20000n; n++) { assert.equal(reversed.head, n); reversed = reversed.tail; }
+      assert.equal(Object.keys(reversed).length, 0);
+      assert.throws(() => compiled.replayTailReverse({}, compiled.List.nil()), /invalid ProofScript constructor tag/);
+    } else if (fixture === 'selfhost-count-fold') {
       for (const name of ['countRenamed', 'countSuccessor']) {
         assert(source.includes(`export function ${name}`));
         assert(!source.includes(`__ps$impl$${name}`), `${name} must use the structural count loop`);

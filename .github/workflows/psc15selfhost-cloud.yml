@@ -53,6 +53,7 @@ jobs:
         run: |
           npm run check:workspace
           npm run check:layout
+          npm run check:runtime-semantics
           npm run test:bootstrap-closure-contract
           npm run test:bootstrap-root-minimality
 

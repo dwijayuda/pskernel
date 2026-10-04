@@ -2941,42 +2941,46 @@ def psKernelRuntimeBuildPairSet
         (psKernelRuntimeCacheValue rest)
 
 def psKernelRuntimeCachePromotionTests : Bool :=
-  let map8 :=
-    psKernelRuntimeBuildExprMap 8
-  let map9 :=
-    psKernelRuntimeBuildExprMap 9
-  let pair8 :=
-    psKernelRuntimeBuildPairSet 8
-  let pair9 :=
-    psKernelRuntimeBuildPairSet 9
-  let map8Small :=
-    match map8.index with
+  let smallCount :=
+    psKernelCacheSmallLimit
+  let promotedCount :=
+    Nat.succ psKernelCacheSmallLimit
+  let mapSmall :=
+    psKernelRuntimeBuildExprMap smallCount
+  let mapPromoted :=
+    psKernelRuntimeBuildExprMap promotedCount
+  let pairSmall :=
+    psKernelRuntimeBuildPairSet smallCount
+  let pairPromoted :=
+    psKernelRuntimeBuildPairSet promotedCount
+  let mapSmallDirect :=
+    match mapSmall.index with
     | Option.none => true
     | Option.some _ => false
-  let map9Indexed :=
-    match map9.index with
+  let mapPromotedIndexed :=
+    match mapPromoted.index with
     | Option.none => false
     | Option.some _ => true
-  let pair8Small :=
-    match pair8.index with
+  let pairSmallDirect :=
+    match pairSmall.index with
     | Option.none => true
     | Option.some _ => false
-  let pair9Indexed :=
-    match pair9.index with
+  let pairPromotedIndexed :=
+    match pairPromoted.index with
     | Option.none => false
     | Option.some _ => true
   Bool.and
-    map8Small
+    mapSmallDirect
     (Bool.and
-      map9Indexed
+      mapPromotedIndexed
       (Bool.and
-        pair8Small
+        pairSmallDirect
         (Bool.and
-          pair9Indexed
+          pairPromotedIndexed
           (Bool.and
             (match
                 psKernelExprMapGet
-                  map9
+                  mapPromoted
                   (psKernelRuntimeCacheKey 0) with
             | Option.some value =>
                 psKernelExprEq
@@ -2985,7 +2989,7 @@ def psKernelRuntimeCachePromotionTests : Bool :=
             | Option.none =>
                 false)
             (psKernelExprPairSetContains
-              pair9
+              pairPromoted
               (psKernelRuntimeCacheValue 0)
               (psKernelRuntimeCacheKey 0))))))
 

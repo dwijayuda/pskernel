@@ -3081,6 +3081,133 @@ def psKernelBenchNestedWideValidate
     0
     psKernelLeanNatMaxSizeDefault
 
+def psKernelBenchNestedValidateRulesThreadedWorker
+    (rules : List PsKernelRecursorRule) :
+    Nat ->
+    PsKernelCheckerSession ->
+    Except String PsKernelCheckerSession :=
+  match rules with
+  | List.nil =>
+      fun
+        (_fuel : Nat)
+        (session : PsKernelCheckerSession) =>
+        Except.ok session
+  | List.cons rule rest =>
+      let smaller :=
+        psKernelBenchNestedValidateRulesThreadedWorker
+          rest;
+      fun
+        (fuel : Nat)
+        (session : PsKernelCheckerSession) =>
+        match
+            psKernelSessionCheck
+              fuel
+              session
+              rule.rhs with
+        | Except.error error =>
+            Except.error error
+        | Except.ok checked =>
+            smaller
+              fuel
+              (Prod.snd checked)
+
+def psKernelBenchNestedWideMainRulesCurrent
+    (finalEnvironment : PsKernelEnvironment) :
+    Except String Unit :=
+  match
+      psKernelEnvironmentFind
+        finalEnvironment
+        psKernelBenchNestedWideRecName with
+  | Option.none =>
+      Except.error
+        "PSKERNEL_BENCH wide main recursor missing"
+  | Option.some value =>
+      match value with
+      | PsKernelConstantInfo.recInfo recInfo =>
+          psKernelSimpleNestedValidateRules
+            65536
+            (psKernelMkCheckerSession
+              finalEnvironment
+              recInfo.base.levelParams
+              PsKernelDefinitionSafety.safe
+              0
+              psKernelLeanNatMaxSizeDefault)
+            recInfo.rules
+      | _ =>
+          Except.error
+            "PSKERNEL_BENCH wide main recursor malformed"
+
+def psKernelBenchNestedWideMainRulesThreaded
+    (finalEnvironment : PsKernelEnvironment) :
+    Except String Unit :=
+  match
+      psKernelEnvironmentFind
+        finalEnvironment
+        psKernelBenchNestedWideRecName with
+  | Option.none =>
+      Except.error
+        "PSKERNEL_BENCH wide main recursor missing"
+  | Option.some value =>
+      match value with
+      | PsKernelConstantInfo.recInfo recInfo =>
+          match
+              psKernelBenchNestedValidateRulesThreadedWorker
+                recInfo.rules
+                65536
+                (psKernelMkCheckerSession
+                  finalEnvironment
+                  recInfo.base.levelParams
+                  PsKernelDefinitionSafety.safe
+                  0
+                  psKernelLeanNatMaxSizeDefault) with
+          | Except.error error =>
+              Except.error error
+          | Except.ok _ =>
+              Except.ok ()
+      | _ =>
+          Except.error
+            "PSKERNEL_BENCH wide main recursor malformed"
+
+partial def psKernelBenchNestedWideMainRulesCurrentLoop
+    (iterations : Nat)
+    (finalEnvironment : PsKernelEnvironment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedWideMainRulesCurrentLoop
+          rest
+          finalEnvironment
+      match
+          psKernelBenchNestedWideMainRulesCurrent
+            finalEnvironment with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedWideMainRulesThreadedLoop
+    (iterations : Nat)
+    (finalEnvironment : PsKernelEnvironment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedWideMainRulesThreadedLoop
+          rest
+          finalEnvironment
+      match
+          psKernelBenchNestedWideMainRulesThreaded
+            finalEnvironment with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
 partial def psKernelBenchNestedWidePreprocessLoop
     (iterations : Nat)
     (environment : PsKernelEnvironment) :
@@ -4857,6 +4984,38 @@ def main : IO Unit := do
       toString nestedWideValidateOriginalsHits ++
       "/" ++
       toString nestedWideValidateAuxHits)
+
+  let nestedWideMainRulesCurrentStart ← IO.monoNanosNow
+  let nestedWideMainRulesCurrentHits ←
+    psKernelBenchNestedWideMainRulesCurrentLoop
+      nestedWideIterations
+      nestedWideFinal
+  let nestedWideMainRulesCurrentStop ← IO.monoNanosNow
+
+  let nestedWideMainRulesThreadedStart ← IO.monoNanosNow
+  let nestedWideMainRulesThreadedHits ←
+    psKernelBenchNestedWideMainRulesThreadedLoop
+      nestedWideIterations
+      nestedWideFinal
+  let nestedWideMainRulesThreadedStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH nested_wide_main_rules_current_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedWideMainRulesCurrentStart
+          nestedWideMainRulesCurrentStop) ++
+      " nested_wide_main_rules_threaded_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedWideMainRulesThreadedStart
+          nestedWideMainRulesThreadedStop) ++
+      " iterations=" ++
+      toString nestedWideIterations ++
+      " hits=" ++
+      toString nestedWideMainRulesCurrentHits ++
+      "/" ++
+      toString nestedWideMainRulesThreadedHits)
 
   let nestedProcessed ←
     match

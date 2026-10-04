@@ -5,7 +5,9 @@ on:
     branches:
       - psc2/psc1kernel-selfhost-portable
     paths:
-      - psc15selfhost/packages/pskernel-selfhost/**
+      - psc15selfhost/packages/pskernel-selfhost/src/**
+      - psc15selfhost/packages/pskernel-selfhost/SELFHOST_EVIDENCE.json
+      - psc15selfhost/packages/pskernel-selfhost/package.json
       - psc15selfhost/packages/foundation/**
       - psc15selfhost/packages/syntax/**
       - psc15selfhost/packages/core/**
@@ -19,6 +21,7 @@ on:
       - psc15selfhost/packages/backend-ts/**
       - psc15selfhost/packages/bootstrap/**
       - psc15selfhost/host/**
+      - psc15selfhost/lakefile.lean
       - psc15selfhost/scripts/psc1kernel-selfhost-generation.mjs
       - psc15selfhost/scripts/psc1kernel-selfhost-resume.mjs
       - psc15selfhost/scripts/psc1kernel-generated-smoke.mjs

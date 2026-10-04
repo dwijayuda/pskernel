@@ -34,7 +34,7 @@
     "check:language-r3": "npm run check:language-authority && npm run test:language-r3",
     "test:selfhost-cache": "node scripts/cache-utils-tests.mjs",
     "test:selfhost-resident-cache": "node scripts/generated-compiler-session-tests.mjs",
-    "check:fast": "npm run check:selfhost-profile && npm run check:language-r3 && npm run test:selfhost-cache && npm run test:selfhost-resident-cache",
+    "check:fast": "npm run check:selfhost-profile && npm run check:language-r3 && npm run check:runtime-semantics && npm run test:selfhost-cache && npm run test:selfhost-resident-cache",
     "check:selfhost-contract": "node scripts/selfhost-contract.mjs",
     "selfhost:source-fast": "node scripts/reemit-project-with-generated.mjs dist/bootstrap/packages/compiler/index.js dist/bootstrap/workspace dist/selfhost/workspace && npm run verify:source",
     "selfhost:guard": "npm run check:fast && npm run selfhost:source-fast",
@@ -158,7 +158,9 @@
     "build:auto": "node scripts/build-auto.mjs",
     "build:dual": "npm run build:lake && npm run build:psc",
     "generation:next": "node scripts/selfhost-generation.mjs",
-    "check:ir-neutrality": "node scripts/check-ir-neutrality.mjs"
+    "check:ir-neutrality": "node scripts/check-ir-neutrality.mjs",
+    "test:runtime-semantics": "node --test scripts/runtime-semantics-contract.test.mjs",
+    "check:runtime-semantics": "npm run test:runtime-semantics"
   },
   "devDependencies": {
     "typescript": "7.0.2"

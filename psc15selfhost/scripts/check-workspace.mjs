@@ -2,10 +2,15 @@ import { access, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { forbiddenBootstrapPackages } from "./bootstrap-closure-contract.mjs";
+import {
+  assertRuntimeSemanticsManifest,
+  runtimeSemanticsV1PackageFolders,
+} from "./runtime-semantics-contract.mjs";
 
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptsDir, "..");
 const nonWorkspacePackageDirs = new Set(["pskernel-lean"]);
+const runtimeSemanticsPackages = new Set(runtimeSemanticsV1PackageFolders);
 
 async function exists(file) {
   try {
@@ -64,11 +69,15 @@ for (const packageDir of packageDirs) {
     throw new Error(`PSC1_WORKSPACE_OUT_DIR: ${manifest.name}`);
   }
 
+  const packageFolder = path.basename(packageDir);
   if (
-    path.basename(packageDir).startsWith("backend-") &&
+    packageFolder.startsWith("backend-") &&
     Object.hasOwn(manifest.dependencies ?? {}, "@proofscript/compiler-next")
   ) {
     throw new Error(`PSC1_BACKEND_CORE_COMPILER_DEPENDENCY: ${manifest.name}`);
+  }
+  if (runtimeSemanticsPackages.has(packageFolder)) {
+    assertRuntimeSemanticsManifest(manifest, packageFolder);
   }
 
   for (const sourceRoot of config.sourceRoots) {

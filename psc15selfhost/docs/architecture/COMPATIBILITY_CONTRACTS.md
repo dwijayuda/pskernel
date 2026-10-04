@@ -21,7 +21,7 @@ The production system should eventually identify at least these contracts:
 | CheckedCore | checked artifact schema/capability | very slow |
 | ErasedIR | construction/runtime lowering IR | moderate |
 | VerifiedIR | validated target-neutral executable contract; current initial contract `psc-verified-ir/1` | slow |
-| RuntimeSemantics | portable observable runtime behavior | slow |
+| RuntimeSemantics | portable observable runtime behavior; current frozen identity `psc-runtime-semantics/1` | slow |
 | TargetRuntimeABI | per-target representation/calling convention | moderate |
 | ModuleInterface | separate compilation/link contract | slow |
 | InterfaceIR | foreign API description | moderate |
@@ -53,7 +53,7 @@ psc-build-action/1
 psc-evidence/1
 ```
 
-Names are illustrative until frozen.
+The identities `proofscript-kernel-contract/1`, `psc-verified-ir/1`, and `psc-runtime-semantics/1` are now frozen by their contract documents and executable guards. Other names in the example remain illustrative until separately frozen.
 
 ## 4. Compatibility rules
 

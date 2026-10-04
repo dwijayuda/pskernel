@@ -1872,6 +1872,7 @@ def psKernelAddSimpleMutualTypesWorker
 
 def psKernelBuildSimpleMutualRecInfosFromConstructorsWorker
     (shapes : List PsKernelSimpleMutualTypeShape) :
+    List PsKernelSimpleMutualTypeShape ->
     List PsKernelName ->
     List PsKernelName ->
     List PsKernelLevel ->
@@ -1886,6 +1887,7 @@ def psKernelBuildSimpleMutualRecInfosFromConstructorsWorker
   match shapes with
   | List.nil =>
       fun
+        (_allShapes : List PsKernelSimpleMutualTypeShape)
         (_recLevelParams : List PsKernelName)
         (_typeNames : List PsKernelName)
         (_levels : List PsKernelLevel)
@@ -1902,6 +1904,7 @@ def psKernelBuildSimpleMutualRecInfosFromConstructorsWorker
         psKernelBuildSimpleMutualRecInfosFromConstructorsWorker
           rest;
       fun
+        (allShapes : List PsKernelSimpleMutualTypeShape)
         (recLevelParams : List PsKernelName)
         (typeNames : List PsKernelName)
         (levels : List PsKernelLevel)
@@ -1964,7 +1967,7 @@ def psKernelBuildSimpleMutualRecInfosFromConstructorsWorker
             match
                 psKernelMakeSimpleMutualRules
                   recLevelParams
-                  shapes
+                  allShapes
                   params
                   motives
                   minors
@@ -1992,6 +1995,7 @@ def psKernelBuildSimpleMutualRecInfosFromConstructorsWorker
                     isUnsafe;
                 match
                     smaller
+                      allShapes
                       recLevelParams
                       typeNames
                       levels
@@ -2361,6 +2365,7 @@ def psKernelAddSimpleMutualInductive
                                                                 minors);
                                                           match
                                                               psKernelBuildSimpleMutualRecInfosFromConstructorsWorker
+                                                                typeShapes
                                                                 typeShapes
                                                                 recLevelParams
                                                                 typeNames

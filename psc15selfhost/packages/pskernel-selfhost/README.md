@@ -1,5 +1,18 @@
 # PSC1Kernel portable self-host port
 
+## Project documentation hierarchy
+
+Use these files in this order when making development decisions:
+
+1. **`PSKERNEL_SELFHOST_ARCHITECTURE.md`** — normative architecture decisions and anti-drift guardrails.
+2. **`DEVELOPMENT_PLAN.md`** — active phases, milestones, task-selection rule, and exit gates.
+3. **`KERNEL_THEORY.md`** — theory-oriented explanation and recommended reading order.
+4. **`LEAN_4_34_COMPATIBILITY.json`** — machine-readable feature-completeness matrix for Lean 4.34.0.
+5. **`SELFHOST_EVIDENCE.json`** — fixed-point and generated-runtime evidence for a concrete closure.
+6. **`MIGRATION_INVENTORY.md`** — historical migration baseline only; it is not the active roadmap.
+
+When documents disagree, the architecture guardrails and machine-enforced compatibility/self-host gates take precedence over historical planning text.
+
 This package is the PSC1-profile implementation of the mature
 `packages/pskernel/PSC1Kernel` reference kernel.
 

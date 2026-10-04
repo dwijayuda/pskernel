@@ -223,6 +223,10 @@ lean_exe psc1_backend_ts_tests where
   srcDir := "test"
   root := `BackendTsTests
 
+lean_lib PsBackendJsTestSupport where
+  srcDir := "test"
+  roots := #[`BackendJsFixture]
+
 lean_exe psc1_backend_js_tests where
   srcDir := "test"
   root := `BackendJsTests

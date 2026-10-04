@@ -4,3 +4,6 @@ dist/
 *.zip
 full-std.local.log
 selfhost/out/
+psc15selfhost/.lake/
+psc15selfhost/lake-manifest.json
+psc15selfhost/.continuation/

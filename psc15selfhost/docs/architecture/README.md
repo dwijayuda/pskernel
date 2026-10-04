@@ -86,6 +86,7 @@ compiler service / LSP
 - [GitHub-first Migration Checkpoint](../continuity/GITHUB_FIRST_MIGRATION_2026-10-04.md) — audited local-state preservation record and archive-branch inventory for the workstation-to-cloud migration.
 - [KernelContract-v1](contracts/KERNEL_CONTRACT_V1.md) — frozen provider-neutral checked-session request/decision/capability contract.
 - [VerifiedIR validation v1](contracts/VERIFIED_IR_V1.md) — implemented ErasedIR → validated IR boundary and its current fail-closed runtime-type invariant.
+- [RuntimeSemantics-v1](contracts/RUNTIME_SEMANTICS_V1.md) — frozen portable runtime behavior for primitives, arrays, records/ADTs, and closures; separate from target ABIs.
 - [Architecture Decision Records](adr/README.md) — concise anti-drift decisions that future implementation work should preserve unless explicitly superseded.
 
 ## What these documents deliberately do not do

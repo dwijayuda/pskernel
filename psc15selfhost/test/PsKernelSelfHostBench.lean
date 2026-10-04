@@ -1,5 +1,6 @@
 import Lean
 import Ps.KernelSelfHost.CheckerSession
+import Ps.KernelSelfHost.InductiveAdmission
 
 def psKernelBenchName
     (index : Nat) :
@@ -1055,6 +1056,226 @@ partial def psKernelBenchLeanCheckLoop
       | .error _ =>
           pure tail
 
+def psKernelBenchRecName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "BenchRec"
+
+def psKernelBenchRecZeroName : PsKernelName :=
+  PsKernelName.str
+    psKernelBenchRecName
+    "zero"
+
+def psKernelBenchRecSuccName : PsKernelName :=
+  PsKernelName.str
+    psKernelBenchRecName
+    "succ"
+
+def psKernelBenchRecRecName : PsKernelName :=
+  psKernelSimpleRecName
+    psKernelBenchRecName
+
+def psKernelBenchRecExpr : PsKernelExpr :=
+  PsKernelExpr.const
+    psKernelBenchRecName
+    List.nil
+
+def psKernelBenchRecDecl : PsKernelSimpleInductiveDecl :=
+  {
+    levelParams := List.nil
+    name := psKernelBenchRecName
+    type :=
+      PsKernelExpr.sort
+        (PsKernelLevel.succ PsKernelLevel.zero)
+    ctors :=
+      List.cons
+        {
+          name := psKernelBenchRecZeroName
+          type := psKernelBenchRecExpr
+        }
+        (List.cons
+          {
+            name := psKernelBenchRecSuccName
+            type :=
+              PsKernelExpr.forallE
+                PsKernelName.anonymous
+                psKernelBenchRecExpr
+                psKernelBenchRecExpr
+                PsKernelBinderInfo.default
+          }
+          List.nil)
+    isUnsafe := false
+    numParams := 0
+  }
+
+def psKernelBenchRecEnvironment :
+    Except String PsKernelEnvironment :=
+  psKernelAddSimpleInductive
+    65536
+    psKernelEnvironmentEmpty
+    psKernelBenchRecDecl
+    0
+    psKernelLeanNatMaxSizeDefault
+
+def psKernelBenchRecMotive : PsKernelExpr :=
+  PsKernelExpr.lam
+    PsKernelName.anonymous
+    psKernelBenchRecExpr
+    psKernelBenchRecExpr
+    PsKernelBinderInfo.default
+
+def psKernelBenchRecStep : PsKernelExpr :=
+  PsKernelExpr.lam
+    PsKernelName.anonymous
+    psKernelBenchRecExpr
+    (PsKernelExpr.lam
+      PsKernelName.anonymous
+      psKernelBenchRecExpr
+      (PsKernelExpr.bvar 0)
+      PsKernelBinderInfo.default)
+    PsKernelBinderInfo.default
+
+def psKernelBenchRecMajor : PsKernelExpr :=
+  PsKernelExpr.app
+    (PsKernelExpr.const
+      psKernelBenchRecSuccName
+      List.nil)
+    (PsKernelExpr.app
+      (PsKernelExpr.const
+        psKernelBenchRecSuccName
+        List.nil)
+      (PsKernelExpr.const
+        psKernelBenchRecZeroName
+        List.nil))
+
+def psKernelBenchRecInput : PsKernelExpr :=
+  psKernelApplyArgs
+    (PsKernelExpr.const
+      psKernelBenchRecRecName
+      (List.cons
+        (PsKernelLevel.succ PsKernelLevel.zero)
+        List.nil))
+    (List.cons
+      psKernelBenchRecMotive
+      (List.cons
+        (PsKernelExpr.const
+          psKernelBenchRecZeroName
+          List.nil)
+        (List.cons
+          psKernelBenchRecStep
+          (List.cons
+            psKernelBenchRecMajor
+            List.nil))))
+
+def psKernelBenchLeanRecName : Lean.Name :=
+  Lean.Name.str
+    Lean.Name.anonymous
+    "BenchRec"
+
+def psKernelBenchLeanRecZeroName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanRecName
+    "zero"
+
+def psKernelBenchLeanRecSuccName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanRecName
+    "succ"
+
+def psKernelBenchLeanRecRecName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanRecName
+    "rec"
+
+def psKernelBenchLeanRecExpr : Lean.Expr :=
+  Lean.Expr.const
+    psKernelBenchLeanRecName
+    []
+
+def psKernelBenchLeanRecEnvironment :
+    IO Lean.Environment := do
+  let base :=
+    (← Lean.mkEmptyEnvironment).toKernelEnv
+  match
+      Lean.Kernel.Environment.addDecl
+        base
+        {}
+        (.inductDecl
+          []
+          0
+          [{
+            name := psKernelBenchLeanRecName
+            type :=
+              Lean.Expr.sort
+                (Lean.Level.succ Lean.Level.zero)
+            ctors := [
+              {
+                name := psKernelBenchLeanRecZeroName
+                type := psKernelBenchLeanRecExpr
+              },
+              {
+                name := psKernelBenchLeanRecSuccName
+                type :=
+                  Lean.Expr.forallE
+                    Lean.Name.anonymous
+                    psKernelBenchLeanRecExpr
+                    psKernelBenchLeanRecExpr
+                    Lean.BinderInfo.default
+              }
+            ]
+          }]
+          false) with
+  | .ok environment =>
+      pure
+        (Lean.Environment.ofKernelEnv environment)
+  | .error _ =>
+      throw
+        (IO.userError
+          "PSKERNEL_BENCH failed to create recursive inductive fixture")
+
+def psKernelBenchLeanRecMotive : Lean.Expr :=
+  Lean.Expr.lam
+    Lean.Name.anonymous
+    psKernelBenchLeanRecExpr
+    psKernelBenchLeanRecExpr
+    Lean.BinderInfo.default
+
+def psKernelBenchLeanRecStep : Lean.Expr :=
+  Lean.Expr.lam
+    Lean.Name.anonymous
+    psKernelBenchLeanRecExpr
+    (Lean.Expr.lam
+      Lean.Name.anonymous
+      psKernelBenchLeanRecExpr
+      (Lean.Expr.bvar 0)
+      Lean.BinderInfo.default)
+    Lean.BinderInfo.default
+
+def psKernelBenchLeanRecMajor : Lean.Expr :=
+  Lean.Expr.app
+    (Lean.Expr.const
+      psKernelBenchLeanRecSuccName
+      [])
+    (Lean.Expr.app
+      (Lean.Expr.const
+        psKernelBenchLeanRecSuccName
+        [])
+      (Lean.Expr.const
+        psKernelBenchLeanRecZeroName
+        []))
+
+def psKernelBenchLeanRecInput : Lean.Expr :=
+  Lean.mkAppN
+    (Lean.Expr.const
+      psKernelBenchLeanRecRecName
+      [Lean.Level.succ Lean.Level.zero])
+    #[
+      psKernelBenchLeanRecMotive,
+      Lean.Expr.const psKernelBenchLeanRecZeroName [],
+      psKernelBenchLeanRecStep,
+      psKernelBenchLeanRecMajor
+    ]
+
 def main : IO Unit := do
   let size := 2048
   let iterations := 2000
@@ -1673,6 +1894,92 @@ def main : IO Unit := do
       toString dependentPsHits ++
       "/" ++
       toString dependentLeanHits)
+
+  let recEnvironment ←
+    match psKernelBenchRecEnvironment with
+    | Except.ok value =>
+        pure value
+    | Except.error error =>
+        throw
+          (IO.userError
+            ("PSKERNEL_BENCH recursive PSKernel fixture failed: " ++ error))
+  let leanRecEnvironment ←
+    psKernelBenchLeanRecEnvironment
+
+  match
+      psKernelSessionWhnf
+        4096
+        (psKernelBenchFreshSession recEnvironment)
+        psKernelBenchRecInput with
+  | Except.ok result =>
+      if
+          psKernelExprEq
+            (Prod.fst result)
+            (PsKernelExpr.const
+              psKernelBenchRecZeroName
+              List.nil) then
+        pure ()
+      else
+        throw
+          (IO.userError
+            "PSKERNEL_BENCH PSKernel recursor fixture did not reduce to zero")
+  | Except.error error =>
+      throw
+        (IO.userError
+          ("PSKERNEL_BENCH PSKernel recursor reduction failed: " ++ error))
+
+  match
+      Lean.Kernel.whnf
+        leanRecEnvironment
+        ({} : Lean.LocalContext)
+        psKernelBenchLeanRecInput with
+  | .ok result =>
+      if
+          result ==
+            Lean.Expr.const
+              psKernelBenchLeanRecZeroName
+              [] then
+        pure ()
+      else
+        throw
+          (IO.userError
+            "PSKERNEL_BENCH Lean recursor fixture did not reduce to zero")
+  | .error _ =>
+      throw
+        (IO.userError
+          "PSKERNEL_BENCH Lean recursor reduction failed")
+
+  let recursorPsStart ← IO.monoNanosNow
+  let recursorPsHits ←
+    psKernelBenchWhnfColdLoop
+      checkerIterations
+      recEnvironment
+      psKernelBenchRecInput
+  let recursorPsStop ← IO.monoNanosNow
+
+  let recursorLeanStart ← IO.monoNanosNow
+  let recursorLeanHits ←
+    psKernelBenchLeanWhnfLoop
+      checkerIterations
+      leanRecEnvironment
+      psKernelBenchLeanRecInput
+  let recursorLeanStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH recursor_pskernel_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          recursorPsStart
+          recursorPsStop) ++
+      " recursor_lean_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          recursorLeanStart
+          recursorLeanStop) ++
+      " hits=" ++
+      toString recursorPsHits ++
+      "/" ++
+      toString recursorLeanHits)
 
   IO.println
     ("PSKERNEL_BENCH structural_defeq_pskernel_ns=" ++

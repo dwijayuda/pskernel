@@ -1,4 +1,5 @@
 import Ps.KernelSelfHost.Environment
+import Ps.KernelSelfHost.Runtime.NativeReduction
 import Ps.KernelSelfHost.LocalContext
 import Ps.KernelSelfHost.Instantiate
 import Ps.KernelSelfHost.CheckerState
@@ -14,6 +15,7 @@ structure PsKernelCheckerContext where
   levelParams : List PsKernelName
   safety : PsKernelDefinitionSafety
   eagerReduce : Bool
+  nativeEvaluator : Option PsKernelNativeEvaluator
   maxRecDepth : Nat
   maxNatSize : Nat
   recDepth : Nat
@@ -27,6 +29,7 @@ def psKernelCheckerContextEmpty
     levelParams := List.nil
     safety := PsKernelDefinitionSafety.safe
     eagerReduce := false
+    nativeEvaluator := Option.none
     maxRecDepth := 0
     maxNatSize := psKernelLeanNatMaxSizeDefault
     recDepth := 0
@@ -42,6 +45,7 @@ def psKernelCheckerContextWithEnvironment
     levelParams := context.levelParams
     safety := context.safety
     eagerReduce := context.eagerReduce
+    nativeEvaluator := context.nativeEvaluator
     maxRecDepth := context.maxRecDepth
     maxNatSize := context.maxNatSize
     recDepth := context.recDepth
@@ -57,6 +61,7 @@ def psKernelCheckerContextWithLocalContext
     levelParams := context.levelParams
     safety := context.safety
     eagerReduce := context.eagerReduce
+    nativeEvaluator := context.nativeEvaluator
     maxRecDepth := context.maxRecDepth
     maxNatSize := context.maxNatSize
     recDepth := context.recDepth
@@ -72,6 +77,23 @@ def psKernelCheckerContextWithEagerReduce
     levelParams := context.levelParams
     safety := context.safety
     eagerReduce := eagerReduce
+    nativeEvaluator := context.nativeEvaluator
+    maxRecDepth := context.maxRecDepth
+    maxNatSize := context.maxNatSize
+    recDepth := context.recDepth
+  }
+
+def psKernelCheckerContextWithNativeEvaluator
+    (context : PsKernelCheckerContext)
+    (nativeEvaluator : Option PsKernelNativeEvaluator) :
+    PsKernelCheckerContext :=
+  {
+    environment := context.environment
+    localContext := context.localContext
+    levelParams := context.levelParams
+    safety := context.safety
+    eagerReduce := context.eagerReduce
+    nativeEvaluator := nativeEvaluator
     maxRecDepth := context.maxRecDepth
     maxNatSize := context.maxNatSize
     recDepth := context.recDepth
@@ -96,6 +118,7 @@ def psKernelCheckerContextEnterRecDepth
       levelParams := context.levelParams
       safety := context.safety
       eagerReduce := context.eagerReduce
+      nativeEvaluator := context.nativeEvaluator
       maxRecDepth := context.maxRecDepth
       maxNatSize := context.maxNatSize
       recDepth := nextDepth
@@ -110,6 +133,7 @@ def psKernelCheckerContextEnterRecDepth
       levelParams := context.levelParams
       safety := context.safety
       eagerReduce := context.eagerReduce
+      nativeEvaluator := context.nativeEvaluator
       maxRecDepth := context.maxRecDepth
       maxNatSize := context.maxNatSize
       recDepth := nextDepth
@@ -413,6 +437,7 @@ def psKernelCheckerContextWithLocal
       levelParams := context.levelParams
       safety := context.safety
       eagerReduce := context.eagerReduce
+      nativeEvaluator := context.nativeEvaluator
       maxRecDepth := context.maxRecDepth
       maxNatSize := context.maxNatSize
       recDepth := context.recDepth
@@ -443,6 +468,7 @@ def psKernelCheckerContextWithLet
       levelParams := context.levelParams
       safety := context.safety
       eagerReduce := context.eagerReduce
+      nativeEvaluator := context.nativeEvaluator
       maxRecDepth := context.maxRecDepth
       maxNatSize := context.maxNatSize
       recDepth := context.recDepth

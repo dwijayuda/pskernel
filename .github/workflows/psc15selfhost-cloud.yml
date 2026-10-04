@@ -88,6 +88,20 @@ jobs:
         working-directory: psc15selfhost
         run: lake exe psc1_backend_rust_source_tests
 
+      - name: Build checked Lean provider integration
+        working-directory: psc15selfhost/lean-checked
+        run: |
+          lake build \
+            psc2_lean_checked_seed \
+            psc2_lean_kernel_provider \
+            psc2_lean_kernel_provider_tests
+
+      - name: Run checked Lean provider integration tests
+        working-directory: psc15selfhost/lean-checked
+        run: |
+          lake exe psc2_lean_kernel_provider_tests
+          .lake/build/bin/psc2_lean_checked_seed --test
+
       - name: Enforce semantic boundaries
         working-directory: psc15selfhost
         run: npm run check:semantic-boundaries

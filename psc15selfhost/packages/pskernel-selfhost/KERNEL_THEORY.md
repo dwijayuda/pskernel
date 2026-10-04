@@ -78,21 +78,23 @@ These modules define the data manipulated by the checker.
 
 8. `TypeCheckerBase.lean`
 9. `TypeCheckerPrimitives.lean`
-10. `TypeCheckerProjection.lean`
-11. `TypeCheckerWhnf.lean`
-12. `TypeCheckerInfer.lean`
-13. `TypeCheckerRecursor.lean`
+10. `Theory/Reduction/KernelReductions.lean`
+11. `Theory/Reduction/WhnfCore.lean`
+12. `TypeCheckerWhnf.lean`
+13. `TypeCheckerProjection.lean`
+14. `TypeCheckerInfer.lean`
+15. `TypeCheckerRecursor.lean`
 
 ### Definitional equality
 
-14. `Theory/DefEq/BinderSpines.lean`
-15. `Theory/DefEq/Quick.lean`
-16. `TypeCheckerDefEqSupport.lean` (compatibility umbrella)
-17. `Theory/DefEq/LazyDelta.lean`
-18. `Theory/DefEq/FinalRules.lean`
-19. `Theory/DefEq/Shortcuts.lean`
-20. `Theory/DefEq/FullShape.lean`
-21. `TypeCheckerDefEq.lean`
+16. `Theory/DefEq/BinderSpines.lean`
+17. `Theory/DefEq/Quick.lean`
+18. `TypeCheckerDefEqSupport.lean` (compatibility umbrella)
+19. `Theory/DefEq/LazyDelta.lean`
+20. `Theory/DefEq/FinalRules.lean`
+21. `Theory/DefEq/Shortcuts.lean`
+22. `Theory/DefEq/FullShape.lean`
+23. `TypeCheckerDefEq.lean`
 
 `Theory/DefEq/BinderSpines.lean` isolates binder/application congruence.
 `Theory/DefEq/Quick.lean` isolates the cheap pre-reduction decisions and pair-cache semantics.
@@ -174,10 +176,25 @@ using algorithmic definitional equality.
 
 ## 6. Weak-head reduction
 
-The public WHNF pipeline is intentionally visible in
+Weak-head reduction is split into three layers:
+
+```text
+Theory/Reduction/KernelReductions.lean
+      |
+      | Quot + optimized Nat reductions
+      v
+Theory/Reduction/WhnfCore.lean
+      |
+      | beta / zeta / projection / structural core WHNF
+      v
+TypeCheckerWhnf.lean
+         public cached post-core pipeline
+```
+
+The public post-core order is intentionally explicit in
 `psKernelWhnfAfterCore`:
 
-```
+```text
 whnfCore
    |
    +-- optional Lean.reduceBool / Lean.reduceNat native provider
@@ -189,8 +206,8 @@ whnfCore
    '-- repeat when unfolding makes progress
 ```
 
-This order follows Lean 4.34. The order is observable because definitional
-equality is incomplete.
+This order follows Lean 4.34. The order is observable because algorithmic
+definitional equality is incomplete.
 
 ## 7. Algorithmic definitional equality
 

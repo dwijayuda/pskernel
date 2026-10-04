@@ -38,7 +38,7 @@ def psJsPrintLiteral
   | PsJsIrLiteral.bool value =>
       if value then "true" else "false"
   | PsJsIrLiteral.unit =>
-      "undefined"
+      "(void 0)"
 
 def psJsPrintExprWithFuel
     (fuel : Nat) :

@@ -2444,8 +2444,12 @@ def psWasmLowerIntrinsicWith
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match operation with
   | .machineIntBinary type integerOperation =>
-      match arguments with
-      | [left, right] =>
+      match psWasmListPair? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some pair =>
+          let left := Prod.fst pair;
+          let right := Prod.snd pair;
           let expected :=
             some (psWasmMachineIntegerValueType profile type)
           match
@@ -2460,10 +2464,13 @@ def psWasmLowerIntrinsicWith
                       profile type integerOperation
                 state := lowered.state
               }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | .machineIntCompare type integerOperation =>
-      match arguments with
-      | [left, right] =>
+      match psWasmListPair? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some pair =>
+          let left := Prod.fst pair;
+          let right := Prod.snd pair;
           let expected :=
             some (psWasmMachineIntegerValueType profile type)
           match
@@ -2478,10 +2485,13 @@ def psWasmLowerIntrinsicWith
                       profile type integerOperation
                 state := lowered.state
               }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | .floatBinary type floatOperation =>
-      match arguments with
-      | [left, right] =>
+      match psWasmListPair? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some pair =>
+          let left := Prod.fst pair;
+          let right := Prod.snd pair;
           let expected := some (psWasmFloatingValueType type)
           match
               psWasmLowerExprListWith
@@ -2494,10 +2504,13 @@ def psWasmLowerIntrinsicWith
                     psWasmLowerFloatBinary type floatOperation
                 state := lowered.state
               }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | .floatCompare type floatOperation =>
-      match arguments with
-      | [left, right] =>
+      match psWasmListPair? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some pair =>
+          let left := Prod.fst pair;
+          let right := Prod.snd pair;
           let expected := some (psWasmFloatingValueType type)
           match
               psWasmLowerExprListWith
@@ -2510,7 +2523,6 @@ def psWasmLowerIntrinsicWith
                     psWasmLowerFloatCompare type floatOperation
                 state := lowered.state
               }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | .natAdd =>
       psWasmLowerNatBinaryCallWith
         lower state psWasmNatAddFn arguments

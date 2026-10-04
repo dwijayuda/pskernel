@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.TypeCheckerDefEqSupport
+import Ps.KernelSelfHost.Theory.DefEq.FinalRules
 
 def psKernelDefEqReflectionWith
     (whnf :

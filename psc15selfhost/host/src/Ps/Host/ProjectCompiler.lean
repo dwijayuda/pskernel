@@ -102,6 +102,7 @@ def psHostPackageDirectory : List String -> Option String
   | "Ps" :: "Compiler" :: _ => some "compiler"
   | "Ps" :: "Erasure" :: _ => some "erasure"
   | "Ps" :: "BackendTs" :: _ => some "backend-ts"
+  | "Ps" :: "BackendJs" :: _ => some "backend-js"
   | "Ps" :: "DriverTs" :: _ => some "driver-ts"
   | "Ps" :: "BackendRust" :: _ => some "backend-rust"
   | "Ps" :: "DriverRust" :: _ => some "driver-rust"

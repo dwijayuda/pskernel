@@ -298,13 +298,13 @@ def psKernelExprMapIndexSet
         (hash : Nat)
         (entries :
           List (Prod PsKernelExpr PsKernelExpr)) =>
-        let left :=
+        let left : PsKernelExprMapIndex :=
           match index with
           | PsKernelExprMapIndex.branch value _ =>
               value
           | _ =>
               PsKernelExprMapIndex.empty;
-        let right :=
+        let right : PsKernelExprMapIndex :=
           match index with
           | PsKernelExprMapIndex.branch _ value =>
               value
@@ -512,13 +512,13 @@ def psKernelExprPairSetIndexSet
         (hash : Nat)
         (entries :
           List (Prod PsKernelExpr PsKernelExpr)) =>
-        let left :=
+        let left : PsKernelExprPairSetIndex :=
           match index with
           | PsKernelExprPairSetIndex.branch value _ =>
               value
           | _ =>
               PsKernelExprPairSetIndex.empty;
-        let right :=
+        let right : PsKernelExprPairSetIndex :=
           match index with
           | PsKernelExprPairSetIndex.branch _ value =>
               value

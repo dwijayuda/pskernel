@@ -8,6 +8,7 @@ export function semanticBoundaryViolations(relativePath, source) {
   const isCompiler = file.startsWith("packages/compiler/src/");
   const isErasure = file.startsWith("packages/erasure/src/");
   const isBackend = /^packages\/backend-[^/]+\/src\//u.test(file);
+  const isDriver = /^packages\/driver-[^/]+\/src\//u.test(file);
   const isHost = file.startsWith("host/src/");
   const isProduction =
     /^packages\/[^/]+\/src\//u.test(file) ||
@@ -32,7 +33,7 @@ export function semanticBoundaryViolations(relativePath, source) {
     violations.push("PSC2_SEMANTIC_BOUNDARY_DIRECT_CORE_ERASURE");
   }
 
-  if ((isBackend || isHost) && /\bpsErase(?:CoreModule|Definition|Expr|Inductive|Structure)\b/u.test(source)) {
+  if ((isBackend || isDriver || isHost) && /\bpsErase(?:CoreModule|Definition|Expr|Inductive|Structure)\b/u.test(source)) {
     violations.push("PSC2_SEMANTIC_BOUNDARY_BACKEND_HOST_LOW_LEVEL_ERASURE");
   }
 
@@ -51,7 +52,7 @@ export function semanticBoundaryViolations(relativePath, source) {
     }
   }
 
-  if (isBackend && /\bpsCompilerVerifiedIrFromPrepared\b/u.test(source)) {
+  if ((isBackend || isDriver) && /\bpsCompilerVerifiedIrFromPrepared\b/u.test(source)) {
     if (!/\bps(?:Ts|Rust|Wasm|Js)EmitValidatedModule\b/u.test(source)) {
       violations.push("PSC2_SEMANTIC_BOUNDARY_BACKEND_BYPASSES_VALIDATED_IR");
     }

@@ -207,6 +207,7 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Declaration,
     `Ps.KernelSelfHost.LocalContext,
     `Ps.KernelSelfHost.Environment,
+    `Ps.KernelSelfHost.Runtime.Cache,
     `Ps.KernelSelfHost.CheckerState,
     `Ps.KernelSelfHost.TypeCheckerBase,
     `Ps.KernelSelfHost.TypeCheckerPrimitives,

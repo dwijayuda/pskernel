@@ -108,7 +108,12 @@ def psKernelReduceInductiveRecWith
                         let reducedResult :
                             Except String
                               (Prod PsKernelExpr PsKernelCheckerState) :=
-                          if cheapRec then
+                          if
+                              psKernelIsConstructorApp
+                                context.environment
+                                (Prod.fst majorK) then
+                            Except.ok majorK
+                          else if cheapRec then
                             coreWhnf
                               context
                               (Prod.snd majorK)

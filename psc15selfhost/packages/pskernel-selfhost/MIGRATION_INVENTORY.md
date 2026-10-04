@@ -1,5 +1,7 @@
 # PSC1Kernel portable migration inventory
 
+> **Historical document.** This file records the original migration baseline and completed migration strategy. The active architecture and roadmap are `PSKERNEL_SELFHOST_ARCHITECTURE.md` and `DEVELOPMENT_PLAN.md`. Do not use the migration order below to override the current phase plan.
+
 Reference baseline: `packages/pskernel/PSC1Kernel` on
 `psc2/psc1kernel-selfhost-portable`, derived from the compiler-only self-host
 fixed-point branch at `d4298a712d1e2ea6505185d311e9af10a698b2ca`.

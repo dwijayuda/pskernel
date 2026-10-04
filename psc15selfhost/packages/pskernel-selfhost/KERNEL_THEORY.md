@@ -90,24 +90,29 @@ These modules define the data manipulated by the checker.
 16. `TypeCheckerDefEqSupport.lean` (compatibility umbrella)
 17. `Theory/DefEq/LazyDelta.lean`
 18. `Theory/DefEq/FinalRules.lean`
-19. `TypeCheckerDefEq.lean`
+19. `Theory/DefEq/Shortcuts.lean`
+20. `Theory/DefEq/FullShape.lean`
+21. `TypeCheckerDefEq.lean`
 
 `Theory/DefEq/BinderSpines.lean` isolates binder/application congruence.
 `Theory/DefEq/Quick.lean` isolates the cheap pre-reduction decisions and pair-cache semantics.
 `Theory/DefEq/LazyDelta.lean` isolates Lean's observable lazy-unfolding order.
-The final-rules module isolates proof/proposition handling, structure eta,
-string literal expansion, and unit-like structures. Keeping these rules
-separate makes the algorithm easier to study without changing its ordering.
+`Theory/DefEq/FinalRules.lean` isolates proof/proposition handling, structure eta,
+string literal expansion, and unit-like structures.
+`Theory/DefEq/Shortcuts.lean` contains reflection, projection, and function-eta shortcuts.
+`Theory/DefEq/FullShape.lean` contains the last same-shape and terminal fallback rules.
+`TypeCheckerDefEq.lean` is intentionally kept small so it reads as the observable
+Lean 4.34 algorithmic-equality order rather than a bag of helper implementations.
 
 ### Declaration admission
 
-20. `CheckerSession.lean`
-21. `Kernel.lean`
-22. `Quot.lean`
-23. `Inductive.lean`
-24. `InductiveAdmission.lean`
-25. `MutualInductive.lean`
-26. `NestedInductive.lean`
+22. `CheckerSession.lean`
+23. `Kernel.lean`
+24. `Quot.lean`
+25. `Inductive.lean`
+26. `InductiveAdmission.lean`
+27. `MutualInductive.lean`
+28. `NestedInductive.lean`
 
 ### Backend/runtime mechanisms
 

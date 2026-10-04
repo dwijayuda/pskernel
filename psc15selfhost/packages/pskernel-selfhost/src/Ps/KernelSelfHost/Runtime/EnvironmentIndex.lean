@@ -2,6 +2,7 @@ import Ps.KernelSelfHost.Declaration
 
 inductive PsKernelEnvironmentIndex where
   | empty
+  | small (constants : List PsKernelConstantInfo)
   | bucket (constants : List PsKernelConstantInfo)
   | branch
       (left : PsKernelEnvironmentIndex)
@@ -78,6 +79,19 @@ def psKernelEnvironmentNameHash
             2)
           value)
         65521
+
+def psKernelEnvironmentIndexSmallLimit : Nat :=
+  8
+
+def psKernelEnvironmentIndexListLength
+    (constants : List PsKernelConstantInfo) :
+    Nat :=
+  match constants with
+  | List.nil =>
+      0
+  | List.cons _ rest =>
+      Nat.succ
+        (psKernelEnvironmentIndexListLength rest)
 
 def psKernelEnvironmentIndexFindWorker
     (fuel : Nat) :
@@ -199,25 +213,89 @@ def psKernelEnvironmentIndexRemoveName
     constants
     name
 
+def psKernelEnvironmentIndexBuild
+    (constants : List PsKernelConstantInfo) :
+    PsKernelEnvironmentIndex :=
+  match constants with
+  | List.nil =>
+      PsKernelEnvironmentIndex.empty
+  | List.cons info rest =>
+      let index :=
+        psKernelEnvironmentIndexBuild rest;
+      let name :=
+        psKernelConstantInfoName info;
+      let hash :=
+        psKernelEnvironmentNameHash name;
+      let bucket :=
+        psKernelEnvironmentIndexFindWorker
+          16
+          index
+          hash;
+      psKernelEnvironmentIndexSetWorker
+        16
+        index
+        hash
+        (List.cons
+          info
+          (psKernelEnvironmentIndexRemoveName
+            name
+            bucket))
+
+def psKernelEnvironmentIndexFind
+    (index : PsKernelEnvironmentIndex)
+    (name : PsKernelName) :
+    List PsKernelConstantInfo :=
+  match index with
+  | PsKernelEnvironmentIndex.empty =>
+      List.nil
+  | PsKernelEnvironmentIndex.small constants =>
+      constants
+  | PsKernelEnvironmentIndex.bucket constants =>
+      constants
+  | PsKernelEnvironmentIndex.branch _ _ =>
+      psKernelEnvironmentIndexFindWorker
+        16
+        index
+        (psKernelEnvironmentNameHash name)
+
 def psKernelEnvironmentIndexInsert
     (index : PsKernelEnvironmentIndex)
     (info : PsKernelConstantInfo) :
     PsKernelEnvironmentIndex :=
   let name :=
     psKernelConstantInfoName info;
-  let hash :=
-    psKernelEnvironmentNameHash name;
-  let bucket :=
-    psKernelEnvironmentIndexFindWorker
-      16
-      index
-      hash;
-  psKernelEnvironmentIndexSetWorker
-    16
-    index
-    hash
-    (List.cons
-      info
-      (psKernelEnvironmentIndexRemoveName
-        name
-        bucket))
+  match index with
+  | PsKernelEnvironmentIndex.empty =>
+      PsKernelEnvironmentIndex.small
+        (List.cons info List.nil)
+  | PsKernelEnvironmentIndex.small constants =>
+      let next :=
+        List.cons
+          info
+          (psKernelEnvironmentIndexRemoveName
+            name
+            constants);
+      if
+          Nat.ble
+            (psKernelEnvironmentIndexListLength next)
+            psKernelEnvironmentIndexSmallLimit then
+        PsKernelEnvironmentIndex.small next
+      else
+        psKernelEnvironmentIndexBuild next
+  | _ =>
+      let hash :=
+        psKernelEnvironmentNameHash name;
+      let bucket :=
+        psKernelEnvironmentIndexFindWorker
+          16
+          index
+          hash;
+      psKernelEnvironmentIndexSetWorker
+        16
+        index
+        hash
+        (List.cons
+          info
+          (psKernelEnvironmentIndexRemoveName
+            name
+            bucket))

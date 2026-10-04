@@ -992,7 +992,7 @@ def psKernelMakeSimpleMutualRecursiveCallsWorker
                     (List.cons
                       applied
                       List.nil)));
-            let call :=
+            let call : PsKernelExpr :=
               match recursive.args with
               | List.nil =>
                   call0

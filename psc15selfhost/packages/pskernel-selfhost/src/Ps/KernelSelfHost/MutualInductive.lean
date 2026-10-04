@@ -417,32 +417,50 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
         (revArgs : List PsKernelOpenBinder)
         (applied : PsKernelExpr) =>
         match
-            psKernelSessionWhnf
-              remaining
-              session
+            psKernelSimpleMutualAppInfo
+              targets
+              shapes
+              levels
+              params
               domain with
-        | Except.error error =>
-            Except.error error
-        | Except.ok reduced =>
+        | Option.some directInfo =>
+            Except.ok
+              (PsKernelMutualRecursiveArgumentResult.mk
+                session
+                (Option.some
+                  (PsKernelSimpleMutualRecursiveField.mk
+                    field
+                    (psKernelReverseOpenBinders revArgs)
+                    directInfo.target
+                    directInfo.indices)))
+        | Option.none =>
             match
-                psKernelSimpleMutualAppInfo
-                  targets
-                  shapes
-                  levels
-                  params
-                  (Prod.fst reduced) with
-            | Option.some info =>
-                Except.ok
-                  (PsKernelMutualRecursiveArgumentResult.mk
-                    (Prod.snd reduced)
-                    (Option.some
-                      (PsKernelSimpleMutualRecursiveField.mk
-                        field
-                        (psKernelReverseOpenBinders revArgs)
-                        info.target
-                        info.indices)))
-            | Option.none =>
-                match Prod.fst reduced with
+                psKernelSessionWhnf
+                  remaining
+                  session
+                  domain with
+            | Except.error error =>
+                Except.error error
+            | Except.ok reduced =>
+                match
+                    psKernelSimpleMutualAppInfo
+                      targets
+                      shapes
+                      levels
+                      params
+                      (Prod.fst reduced) with
+                | Option.some info =>
+                    Except.ok
+                      (PsKernelMutualRecursiveArgumentResult.mk
+                        (Prod.snd reduced)
+                        (Option.some
+                          (PsKernelSimpleMutualRecursiveField.mk
+                            field
+                            (psKernelReverseOpenBinders revArgs)
+                            info.target
+                            info.indices)))
+                | Option.none =>
+                    match Prod.fst reduced with
                 | PsKernelExpr.forallE
                     userName
                     argDomain

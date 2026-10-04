@@ -201,7 +201,10 @@ const unitMotive = kernel.PsKernelExpr.lam(
   kernel.PsKernelBinderInfo.default,
 );
 const unitRecursorApp = kernel.psKernelApplyArgs(
-  kernel.PsKernelExpr.const(unitRecName, kernel.List.nil()),
+  kernel.PsKernelExpr.const(
+    unitRecName,
+    kernel.List.cons(zero, kernel.List.nil()),
+  ),
   kernel.List.cons(
     unitMotive,
     kernel.List.cons(

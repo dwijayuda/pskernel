@@ -481,24 +481,62 @@ The mutual admission path is layered as:
 
 ## 13. Nested inductives
 
-Nested inductives are split by the transformation stages:
+Nested inductives are split by theory concept rather than kept in one
+transformation file. Read the implementation in this order:
 
 ```text
+Theory/Nested/Types.lean
+      |
+      v
+Theory/Nested/ReservedNames.lean
+      |
+      v
+Theory/Nested/Rebase.lean
+      |
+      v
 Theory/Nested/Discover.lean
       |
-      | reserved-name checks, parameter rebasing, auxiliary-family planning
       v
 Theory/Nested/Flatten.lean
       |
-      | rewrite nested applications and close the transformed mutual bundle
+      | transformed declaration bundle
+      v
+Theory/Mutual/Admission.lean
+      |
+      | checked transformed environment
+      v
+Theory/Nested/RestoreExpr.lean
+      |
       v
 Theory/Nested/Restore.lean
       |
-      | restore user constructors/recursors and map auxiliary artifacts
       v
-Theory/Nested/Admission.lean
-         validate restored types/rules and install the final environment
+Theory/Nested/Validation.lean
+      |
+      v
+Theory/Nested/Commit.lean
+
+Theory/Nested/Admission.lean orchestrates the complete transaction.
 ```
+
+The module responsibilities are:
+
+- `Types.lean` — auxiliary-family, constructor-map and work-state data;
+- `ReservedNames.lean` — reject user collisions with the internal
+  `_nested` namespace;
+- `Rebase.lean` — open/rebase parameters and restoration binders;
+- `Discover.lean` — identify nested outer families and create collision-safe
+  auxiliary families;
+- `Flatten.lean` — rewrite nested occurrences and close the transformed mutual
+  bundle;
+- `RestoreExpr.lean` — map auxiliary family/constructor/recursor references
+  back into user-facing expressions;
+- `Restore.lean` — install restored constructors and recursors;
+- `Validation.lean` — re-check restored types/rules and source-to-restored
+  type preservation;
+- `Commit.lean` — build the user-visible recursor rename map and final
+  commit helpers;
+- `Admission.lean` — top-level fail-closed transaction boundary.
 
 `NestedInductive.lean` remains a stable umbrella import.
 

@@ -614,6 +614,92 @@ partial def psKernelBenchIsPropColdLoop
       | Except.error _ =>
           pure tail
 
+partial def psKernelBenchProofProbeColdLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment)
+    (expr : PsKernelExpr) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchProofProbeColdLoop
+          rest
+          environment
+          expr
+      let session :=
+        psKernelBenchFreshSession environment
+      match
+          psKernelSessionInfer
+            1024
+            session
+            expr with
+      | Except.error _ =>
+          pure tail
+      | Except.ok typeResult =>
+          match
+              psKernelSessionIsProp
+                1024
+                (Prod.snd typeResult)
+                (Prod.fst typeResult) with
+          | Except.ok propResult =>
+              if Prod.fst propResult then
+                pure tail
+              else
+                pure (Nat.succ tail)
+          | Except.error _ =>
+              pure tail
+
+partial def psKernelBenchLazyDeltaColdLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment)
+    (left right : PsKernelExpr) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchLazyDeltaColdLoop
+          rest
+          environment
+          left
+          right
+      let session :=
+        psKernelBenchFreshSession environment
+      let defeq :=
+        psKernelIsDefEqWithFuel 1024
+      let whnf :=
+        psKernelWhnfWithRecursorFuel
+          1024
+          defeq
+      let coreWhnf :=
+        psKernelWhnfCoreWithRecursorFuel
+          1024
+          defeq
+      match
+          psKernelDefEqLazyReductionWithFuel
+            1024
+            defeq
+            whnf
+            coreWhnf
+            session.context
+            session.state
+            left
+            right with
+      | Except.ok result =>
+          match Prod.fst result with
+          | PsKernelDeltaResult.decided value =>
+              if value then
+                pure (Nat.succ tail)
+              else
+                pure tail
+          | PsKernelDeltaResult.residual _ _ =>
+              pure tail
+      | Except.error _ =>
+          pure tail
+
 def main : IO Unit := do
   let size := 2048
   let iterations := 2000
@@ -796,6 +882,23 @@ def main : IO Unit := do
       checkerNatType
   let isPropColdStop ← IO.monoNanosNow
 
+  let proofProbeStart ← IO.monoNanosNow
+  let proofProbeHits ←
+    psKernelBenchProofProbeColdLoop
+      checkerIterations
+      checkerEnvironment
+      checkerExpr
+  let proofProbeStop ← IO.monoNanosNow
+
+  let lazyDeltaStart ← IO.monoNanosNow
+  let lazyDeltaHits ←
+    psKernelBenchLazyDeltaColdLoop
+      checkerIterations
+      checkerEnvironment
+      checkerExpr
+      checkerExpected
+  let lazyDeltaStop ← IO.monoNanosNow
+
   let whnfColdStart ← IO.monoNanosNow
   let whnfColdHits ←
     psKernelBenchWhnfColdLoop
@@ -872,6 +975,22 @@ def main : IO Unit := do
       toString inferColdHits ++
       "/" ++
       toString isPropColdHits)
+
+  IO.println
+    ("PSKERNEL_BENCH proof_probe_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          proofProbeStart
+          proofProbeStop) ++
+      " lazy_delta_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          lazyDeltaStart
+          lazyDeltaStop) ++
+      " hits=" ++
+      toString proofProbeHits ++
+      "/" ++
+      toString lazyDeltaHits)
 
   IO.println
     ("PSKERNEL_BENCH whnf_cold_ns=" ++

@@ -10,7 +10,7 @@ Use these files in this order when making development decisions:
 4. **`KERNEL_RULE_REFERENCE.md`** — generated rule → implementation → Lean locator → test table.
 5. **`LEAN_4_34_COMPATIBILITY.json`** — machine-readable feature-completeness matrix for Lean 4.34.0.
 6. **`LEAN_4_34_CONFORMANCE.json`** — machine-readable concrete test coverage for every compatibility rule.
-7. **`SELFHOST_EVIDENCE.json`** — fixed-point and generated-runtime evidence for a concrete closure.
+7. **`SELFHOST_EVIDENCE.json`** — optional historical/generated-bootstrap checkpoint evidence; not a normal development gate.
 8. **`MIGRATION_INVENTORY.md`** — historical migration baseline only; it is not the active roadmap.
 
 When documents disagree, the architecture guardrails and machine-enforced compatibility/self-host gates take precedence over historical planning text.
@@ -46,9 +46,12 @@ point.
 5. Quotients.
 6. Ordinary, mutual and nested inductive admission.
 7. Complete PSC1 check and canonical `.ps` generation.
-8. Generated TypeScript/JavaScript differential replay against the reference.
-9. Checked-provider integration.
-10. Joint compiler/kernel fixed point.
+8. Performance/readability hardening while preserving portable source checks.
+9. Generated TypeScript/JavaScript differential replay where useful.
+10. Checked-provider integration.
+
+The joint compiler/kernel fixed point is optional/manual and reserved for
+explicit bootstrap/release checkpoints.
 
 The source is intentionally flat and explicitly prefixed rather than relying on
 Lean namespace conveniences. Tests compare the portable implementation against

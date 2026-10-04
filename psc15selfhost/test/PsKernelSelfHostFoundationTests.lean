@@ -3122,13 +3122,17 @@ def psKernelRuntimeEnvironmentPromotionTests : Bool :=
           false))
 
 def psKernelRuntimeEnvironmentIndexInvariantTests : Bool :=
+  let collisionParent :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "collision"
   let firstName :=
     PsKernelName.num
-      PsKernelName.anonymous
+      collisionParent
       1
   let collisionName :=
     PsKernelName.num
-      PsKernelName.anonymous
+      collisionParent
       65522
   let firstType :=
     PsKernelExpr.sort PsKernelLevel.zero
@@ -3166,9 +3170,11 @@ def psKernelRuntimeEnvironmentIndexInvariantTests : Bool :=
       }
       isUnsafe := false
     }
+  let promotedBase :=
+    psKernelRuntimeBuildEnvironment 9
   let environment0 :=
     psKernelEnvironmentAddUnchecked
-      psKernelEnvironmentEmpty
+      promotedBase
       firstInfo
   let environment1 :=
     psKernelEnvironmentAddUnchecked

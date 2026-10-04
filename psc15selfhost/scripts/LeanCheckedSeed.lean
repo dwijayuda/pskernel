@@ -142,7 +142,7 @@ def psCheckedSeedDiagnoseAdmissions (sourcePath : String) : IO Unit := do
     | .ok next => environment := next
     | .error error =>
         IO.println s!"PSC2_CHECKED_DIAGNOSE_REJECTION: {index}"
-        throw (IO.userError (← (error.toMessageData {}).toString))
+        throw (IO.userError (PsKernelLean.kernelExceptionSummary error))
   IO.println "PSC2_CHECKED_DIAGNOSE_ACCEPTED"
 
 def main (args : List String) : IO Unit := do

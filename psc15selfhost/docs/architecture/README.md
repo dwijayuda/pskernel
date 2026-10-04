@@ -83,6 +83,7 @@ compiler service / LSP
 - [Implementation Roadmap](IMPLEMENTATION_ROADMAP.md) — staged migration from the current architecture to the production shape without destabilizing the proven fixed point.
 - [Design References](DESIGN_REFERENCES.md) — external compiler/build/security research and the specific ideas PSC should borrow.
 - [GitHub-first Cloud Workflow](GITHUB_CLOUD_WORKFLOW.md) — canonical repository/branch workflow, checkpoint policy, no-force synchronization rules, and noncanonical local-state policy.
+- [GitHub-first Migration Checkpoint](../continuity/GITHUB_FIRST_MIGRATION_2026-10-04.md) — audited local-state preservation record and archive-branch inventory for the workstation-to-cloud migration.
 - [KernelContract-v1](contracts/KERNEL_CONTRACT_V1.md) — frozen provider-neutral checked-session request/decision/capability contract.
 - [VerifiedIR validation v1](contracts/VERIFIED_IR_V1.md) — implemented ErasedIR → validated IR boundary and its current fail-closed runtime-type invariant.
 - [Architecture Decision Records](adr/README.md) — concise anti-drift decisions that future implementation work should preserve unless explicitly superseded.

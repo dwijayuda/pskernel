@@ -2062,8 +2062,12 @@ def psWasmLowerArrayPushWith
   match psWasmResolveArrayLowerInfo profile typeArguments with
   | Except.error error => Except.error error
   | Except.ok info =>
-      match arguments with
-      | [array, value] =>
+      match psWasmListPair? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some pair =>
+          let array := Prod.fst pair;
+          let value := Prod.snd pair;
           match lower (some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
@@ -2110,7 +2114,6 @@ def psWasmLowerArrayPushWith
                       ]
                     state := (Prod.snd allocatedOutput)
                   }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerArrayGetWith
     (profile : PsWasmTargetProfile)
@@ -2126,8 +2129,12 @@ def psWasmLowerArrayGetWith
   match psWasmResolveArrayLowerInfo profile typeArguments with
   | Except.error error => Except.error error
   | Except.ok info =>
-      match arguments with
-      | [array, index] =>
+      match psWasmListPair? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some pair =>
+          let array := Prod.fst pair;
+          let index := Prod.snd pair;
           match lower (some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
@@ -2161,7 +2168,6 @@ def psWasmLowerArrayGetWith
                       ]
                     state := (Prod.snd allocatedIndex)
                   }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerArrayGetDWith
     (profile : PsWasmTargetProfile)
@@ -2177,8 +2183,14 @@ def psWasmLowerArrayGetDWith
   match psWasmResolveArrayLowerInfo profile typeArguments with
   | Except.error error => Except.error error
   | Except.ok info =>
-      match arguments with
-      | [array, index, fallback] =>
+      match psWasmListTriple? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some triple =>
+          let array := Prod.fst triple;
+          let tail := Prod.snd triple;
+          let index := Prod.fst tail;
+          let fallback := Prod.snd tail;
           match lower (some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
@@ -2236,7 +2248,6 @@ def psWasmLowerArrayGetDWith
                           ]
                         state := (Prod.snd allocatedFallback)
                       }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerArraySetWith
     (profile : PsWasmTargetProfile)
@@ -2252,8 +2263,14 @@ def psWasmLowerArraySetWith
   match psWasmResolveArrayLowerInfo profile typeArguments with
   | Except.error error => Except.error error
   | Except.ok info =>
-      match arguments with
-      | [array, index, value] =>
+      match psWasmListTriple? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some triple =>
+          let array := Prod.fst triple;
+          let tail := Prod.snd triple;
+          let index := Prod.fst tail;
+          let value := Prod.snd tail;
           match lower (some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
@@ -2317,7 +2334,6 @@ def psWasmLowerArraySetWith
                           ]
                         state := (Prod.snd allocatedOutput)
                       }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerArraySetIfInBoundsWith
     (profile : PsWasmTargetProfile)
@@ -2333,8 +2349,14 @@ def psWasmLowerArraySetIfInBoundsWith
   match psWasmResolveArrayLowerInfo profile typeArguments with
   | Except.error error => Except.error error
   | Except.ok info =>
-      match arguments with
-      | [array, index, value] =>
+      match psWasmListTriple? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some triple =>
+          let array := Prod.fst triple;
+          let tail := Prod.snd triple;
+          let index := Prod.fst tail;
+          let value := Prod.snd tail;
           match lower (some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
@@ -2407,7 +2429,6 @@ def psWasmLowerArraySetIfInBoundsWith
                           ]
                         state := (Prod.snd allocatedOutput)
                       }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)

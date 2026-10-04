@@ -29,7 +29,7 @@ def psKernelCheckerContextEmpty
     levelParams := List.nil
     safety := PsKernelDefinitionSafety.safe
     eagerReduce := false
-    nativeEvaluator := Option.none
+    nativeEvaluator := environment.runtime.nativeEvaluator
     maxRecDepth := 0
     maxNatSize := psKernelLeanNatMaxSizeDefault
     recDepth := 0

@@ -567,6 +567,30 @@ def psKernelExprInferImplicitAll
       fun (_considerRange : Bool) =>
         expr
 
+def psKernelExprGetAppFnArgsWorker
+    (expr : PsKernelExpr) :
+    List PsKernelExpr ->
+    Prod PsKernelExpr (List PsKernelExpr) :=
+  match expr with
+  | PsKernelExpr.app fn arg =>
+      let smaller :
+          List PsKernelExpr ->
+          Prod PsKernelExpr (List PsKernelExpr) :=
+        psKernelExprGetAppFnArgsWorker fn;
+      fun (args : List PsKernelExpr) =>
+        smaller
+          (List.cons arg args)
+  | _ =>
+      fun (args : List PsKernelExpr) =>
+        Prod.mk expr args
+
+def psKernelExprGetAppFnArgs
+    (expr : PsKernelExpr) :
+    Prod PsKernelExpr (List PsKernelExpr) :=
+  psKernelExprGetAppFnArgsWorker
+    expr
+    List.nil
+
 def psKernelExprGetAppFn
     (expr : PsKernelExpr) : PsKernelExpr :=
   match expr with

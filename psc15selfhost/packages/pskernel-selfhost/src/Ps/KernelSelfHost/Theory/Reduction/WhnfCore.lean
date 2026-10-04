@@ -353,10 +353,12 @@ def psKernelWhnfCoreWithFuel
                                           (Prod.fst result)
                                           (Prod.snd result)
                     | PsKernelExpr.app _ _ =>
+                        let spine :=
+                          psKernelExprGetAppFnArgs expr;
                         let fn0 :=
-                          psKernelExprGetAppFn expr;
+                          Prod.fst spine;
                         let args :=
-                          psKernelExprGetAppArgs expr;
+                          Prod.snd spine;
                         match
                             smaller
                               publicWhnf

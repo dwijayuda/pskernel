@@ -12,7 +12,9 @@ visits each node once, while memoizing every growing application tree can force
 expensive structural hashing/promotion in the portable cache. Checked lambda
 nodes are likewise one-shot in generated recursor-rule validation, where
 memoizing each growing lambda subtree adds structural hashing without useful
-reuse. Infer-only application and lambda results remain memoized because those
+reuse. Checked forall nodes are treated the same way: declaration and generated
+binder-domain checking normally consumes them once in a single checker state.
+Infer-only application, lambda, and forall results remain memoized because
 whole-expression inference results are commonly reused.
 -/
 
@@ -33,6 +35,8 @@ def psKernelInferCacheEligible
   | PsKernelExpr.app _ _ =>
       inferOnly
   | PsKernelExpr.lam _ _ _ _ =>
+      inferOnly
+  | PsKernelExpr.forallE _ _ _ _ =>
       inferOnly
   | _ =>
       true

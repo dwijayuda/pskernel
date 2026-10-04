@@ -67,7 +67,7 @@ lines.push(
   "- **direct-invariant**: the named test checks a non-semantic runtime invariant directly; this is appropriate for cache/index representation rules.",
   "- A compatibility row being implemented is not enough for promotion; the conformance row must also remain non-pending.",
   "",
-  "The authoritative CI gates are:",
+  "The authoritative development CI gates are:",
   "",
   "```text",
   "psc1kernel-compatibility-audit.mjs --require-complete",
@@ -75,8 +75,9 @@ lines.push(
   "psc1 check",
   "canonical .ps recheck",
   "differential executable",
-  "generated fixed point",
   "```",
+  "",
+  "Generated fixed-point reproduction is a manual release/bootstrap checkpoint, not a normal development gate.",
   ""
 );
 

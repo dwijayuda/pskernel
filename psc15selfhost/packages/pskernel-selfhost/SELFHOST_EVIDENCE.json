@@ -33,5 +33,5 @@
     "Mutual and nested inductives are included in the 24-source SelfHost closure."
   ],
   "evidenceKind": "historical-checkpoint",
-  "updatePolicy": "Refresh hashes at promoted semantic/layout milestones; every development head is independently required to pass generated fixed-point CI."
+  "updatePolicy": "Refresh hashes at promoted semantic/layout milestones; normal development heads use the fast portable/PSC1/Lean/differential/canonical gates, while generated fixed-point reproduction is a manual release/bootstrap checkpoint."
 }

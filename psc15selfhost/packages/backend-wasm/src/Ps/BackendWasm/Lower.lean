@@ -2853,6 +2853,7 @@ def psWasmLowerMatchBindings
                     state := loweredRest.state
                   }
 
+
 def psWasmLowerMatchAlternativesWith
     (profile : PsWasmTargetProfile)
     (inductiveInfo : PsVerifiedIrInductive)
@@ -2864,61 +2865,23 @@ def psWasmLowerMatchAlternativesWith
       PsVerifiedIrExpr ->
         Except PsWasmLowerError PsWasmLoweredExpr)
     (baseBindings : List PsWasmBinding)
-    (expected : Option PsWasmValueType) :
-    PsWasmLowerState ->
-    List
-      (String ×
-        List PsVerifiedIrMatchBinding ×
-        PsVerifiedIrExpr) ->
-    Except PsWasmLowerError PsWasmLoweredExpr
-  | _, [] =>
+    (expected : Option PsWasmValueType)
+    (state : PsWasmLowerState)
+    (alternatives :
+      List
+        (String ×
+          List PsVerifiedIrMatchBinding ×
+          PsVerifiedIrExpr)) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match alternatives with
+  | List.nil =>
       Except.error PsWasmLowerError.unsupportedExpression
-  | state, [alternative] =>
-      let constructorName := (Prod.fst alternative)
-      let matchBindings := (Prod.fst (Prod.snd alternative))
-      let body := (Prod.snd (Prod.snd alternative))
-      match
-          psWasmFindConstructor
-            inductiveInfo.constructors
-            constructorName with
-      | none =>
-          Except.error
-            (PsWasmLowerError.unknownConstructor
-              inductiveInfo.name
-              constructorName)
-      | some constructorInfo =>
-          match
-              psWasmLowerMatchBindings
-                profile
-                inductiveInfo.name
-                constructorInfo
-                scrutineeLocal
-                baseBindings
-                state
-                matchBindings with
-          | Except.error error => Except.error error
-          | Except.ok loweredBindings =>
-              match
-                  lowerWithBindings
-                    loweredBindings.bindings
-                    expected
-                    loweredBindings.state
-                    body with
-              | Except.error error => Except.error error
-              | Except.ok loweredBody =>
-                  Except.ok {
-                    instructions :=
-                      loweredBindings.instructions ++
-                        loweredBody.instructions
-                    state := loweredBody.state
-                  }
-  | state, alternative :: rest =>
-      match expected with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some resultType =>
-          let constructorName := (Prod.fst alternative)
-          let matchBindings := (Prod.fst (Prod.snd alternative))
-          let body := (Prod.snd (Prod.snd alternative))
+  | List.cons alternative rest =>
+      let constructorName := Prod.fst alternative;
+      let matchBindings := Prod.fst (Prod.snd alternative);
+      let body := Prod.snd (Prod.snd alternative);
+      match rest with
+      | List.nil =>
           match
               psWasmFindConstructor
                 inductiveInfo.constructors
@@ -2929,10 +2892,6 @@ def psWasmLowerMatchAlternativesWith
                   inductiveInfo.name
                   constructorName)
           | some constructorInfo =>
-              let constructorType :=
-                psWasmConstructorTypeName
-                  inductiveInfo.name
-                  constructorName
               match
                   psWasmLowerMatchBindings
                     profile
@@ -2952,35 +2911,92 @@ def psWasmLowerMatchAlternativesWith
                         body with
                   | Except.error error => Except.error error
                   | Except.ok loweredBody =>
+                      Except.ok {
+                        instructions :=
+                          psListAppend
+                            loweredBindings.instructions
+                            loweredBody.instructions
+                        state := loweredBody.state
+                      }
+      | List.cons _ _ =>
+          match expected with
+          | none =>
+              Except.error PsWasmLowerError.unsupportedType
+          | some resultType =>
+              match
+                  psWasmFindConstructor
+                    inductiveInfo.constructors
+                    constructorName with
+              | none =>
+                  Except.error
+                    (PsWasmLowerError.unknownConstructor
+                      inductiveInfo.name
+                      constructorName)
+              | some constructorInfo =>
+                  let constructorType :=
+                    psWasmConstructorTypeName
+                      inductiveInfo.name
+                      constructorName;
+                  match
+                      psWasmLowerMatchBindings
+                        profile
+                        inductiveInfo.name
+                        constructorInfo
+                        scrutineeLocal
+                        baseBindings
+                        state
+                        matchBindings with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredBindings =>
                       match
-                          psWasmLowerMatchAlternativesWith
-                            profile
-                            inductiveInfo
-                            scrutineeLocal
-                            lowerWithBindings
-                            baseBindings
+                          lowerWithBindings
+                            loweredBindings.bindings
                             expected
-                            loweredBody.state
-                            rest with
-                      | Except.error error => Except.error error
-                      | Except.ok loweredRest =>
-                          Except.ok {
-                            instructions :=
-                              [
-                                PsWasmInstruction.localGet
-                                  scrutineeLocal,
-                                PsWasmInstruction.refTest
-                                  constructorType,
-                                PsWasmInstruction.ifStart
-                                  (some resultType)
-                              ]
-                                ++ loweredBindings.instructions
-                                ++ loweredBody.instructions
-                                ++ [PsWasmInstruction.else_]
-                                ++ loweredRest.instructions
-                                ++ [PsWasmInstruction.end_]
-                            state := loweredRest.state
-                          }
+                            loweredBindings.state
+                            body with
+                      | Except.error error =>
+                          Except.error error
+                      | Except.ok loweredBody =>
+                          match
+                              psWasmLowerMatchAlternativesWith
+                                profile
+                                inductiveInfo
+                                scrutineeLocal
+                                lowerWithBindings
+                                baseBindings
+                                expected
+                                loweredBody.state
+                                rest with
+                          | Except.error error =>
+                              Except.error error
+                          | Except.ok loweredRest =>
+                              Except.ok {
+                                instructions :=
+                                  psListAppend
+                                    (List.cons
+                                      (PsWasmInstruction.localGet
+                                        scrutineeLocal)
+                                      (List.cons
+                                        (PsWasmInstruction.refTest
+                                          constructorType)
+                                        (List.cons
+                                          (PsWasmInstruction.ifStart
+                                            (some resultType))
+                                          List.nil)))
+                                    (psListAppend
+                                      loweredBindings.instructions
+                                      (psListAppend
+                                        loweredBody.instructions
+                                        (List.cons
+                                          PsWasmInstruction.else_
+                                          (psListAppend
+                                            loweredRest.instructions
+                                            (List.cons
+                                              PsWasmInstruction.end_
+                                              List.nil)))))
+                                state := loweredRest.state
+                              }
+
 
 def psWasmLowerCaptureFields
     (profile : PsWasmTargetProfile) :

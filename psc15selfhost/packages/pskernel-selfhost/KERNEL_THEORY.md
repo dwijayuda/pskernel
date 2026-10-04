@@ -79,10 +79,12 @@ These modules define the data manipulated by the checker.
 ### Type checking and reduction
 
 8. `TypeCheckerBase.lean`
-9. `TypeCheckerPrimitives.lean`
-10. `Theory/Reduction/KernelReductions.lean`
-11. `Theory/Reduction/WhnfCore.lean`
-12. `TypeCheckerWhnf.lean`
+9. `Theory/Reduction/PrimitiveData.lean`
+10. `Theory/Reduction/PrimitiveNat.lean`
+11. `TypeCheckerPrimitives.lean` (compatibility umbrella)
+12. `Theory/Reduction/KernelReductions.lean`
+13. `Theory/Reduction/WhnfCore.lean`
+14. `TypeCheckerWhnf.lean`
 13. `TypeCheckerProjection.lean`
 14. `Theory/Inference/Helpers.lean`
 15. `Theory/Inference/Core.lean`
@@ -194,6 +196,24 @@ projection             : dependent field type
 
 When checking applications, inferred and expected argument types are compared
 using algorithmic definitional equality.
+
+## 5.1 Primitive literals and Nat reduction
+
+Primitive reduction is split into two theory-facing modules:
+
+```text
+Theory/Reduction/PrimitiveData.lean
+      |
+      | Nat size limits, Bool expressions, String literal constructor form
+      v
+Theory/Reduction/PrimitiveNat.lean
+         gcd / pow / bitwise / shifts / binary Nat kernel operations
+```
+
+`TypeCheckerPrimitives.lean` remains a stable compatibility umbrella.
+
+This split is explanatory only: public symbols and Lean 4.34 reduction behavior
+are unchanged.
 
 ## 6. Weak-head reduction
 

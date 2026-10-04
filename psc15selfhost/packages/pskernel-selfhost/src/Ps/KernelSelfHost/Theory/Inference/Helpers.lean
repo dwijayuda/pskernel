@@ -21,24 +21,28 @@ def psKernelCacheInferResult
     (expr : PsKernelExpr)
     (result : PsKernelExpr) :
     PsKernelCheckerState :=
-  if inferOnly then
-    let cache :=
-      psKernelExprMapInsert
-        state.inferOnly
-        expr
-        result;
-    psKernelCheckerStateWithInferOnly
+  match expr with
+  | PsKernelExpr.lit _ =>
       state
-      cache
-  else
-    let cache :=
-      psKernelExprMapInsert
-        state.checkedInfer
-        expr
-        result;
-    psKernelCheckerStateWithCheckedInfer
-      state
-      cache
+  | _ =>
+      if inferOnly then
+        let cache :=
+          psKernelExprMapInsert
+            state.inferOnly
+            expr
+            result;
+        psKernelCheckerStateWithInferOnly
+          state
+          cache
+      else
+        let cache :=
+          psKernelExprMapInsert
+            state.checkedInfer
+            expr
+            result;
+        psKernelCheckerStateWithCheckedInfer
+          state
+          cache
 
 def psKernelEnsureSortWith
     (whnf :

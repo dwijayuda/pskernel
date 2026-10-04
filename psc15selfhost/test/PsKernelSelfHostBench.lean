@@ -1192,6 +1192,33 @@ def psKernelBenchLeanRecExpr : Lean.Expr :=
     psKernelBenchLeanRecName
     []
 
+def psKernelBenchLeanRecDecl : Lean.Declaration :=
+  Lean.Declaration.inductDecl
+    []
+    0
+    [{
+      name := psKernelBenchLeanRecName
+      type :=
+        Lean.Expr.sort
+          (Lean.Level.succ Lean.Level.zero)
+      ctors := [
+        {
+          name := psKernelBenchLeanRecZeroName
+          type := psKernelBenchLeanRecExpr
+        },
+        {
+          name := psKernelBenchLeanRecSuccName
+          type :=
+            Lean.Expr.forallE
+              Lean.Name.anonymous
+              psKernelBenchLeanRecExpr
+              psKernelBenchLeanRecExpr
+              Lean.BinderInfo.default
+        }
+      ]
+    }]
+    false
+
 def psKernelBenchLeanRecEnvironment :
     IO Lean.Environment := do
   let base :=
@@ -1200,31 +1227,7 @@ def psKernelBenchLeanRecEnvironment :
       Lean.Kernel.Environment.addDecl
         base
         {}
-        (.inductDecl
-          []
-          0
-          [{
-            name := psKernelBenchLeanRecName
-            type :=
-              Lean.Expr.sort
-                (Lean.Level.succ Lean.Level.zero)
-            ctors := [
-              {
-                name := psKernelBenchLeanRecZeroName
-                type := psKernelBenchLeanRecExpr
-              },
-              {
-                name := psKernelBenchLeanRecSuccName
-                type :=
-                  Lean.Expr.forallE
-                    Lean.Name.anonymous
-                    psKernelBenchLeanRecExpr
-                    psKernelBenchLeanRecExpr
-                    Lean.BinderInfo.default
-              }
-            ]
-          }]
-          false) with
+        psKernelBenchLeanRecDecl with
   | .ok environment =>
       pure
         (Lean.Environment.ofKernelEnv environment)
@@ -1275,6 +1278,61 @@ def psKernelBenchLeanRecInput : Lean.Expr :=
       psKernelBenchLeanRecStep,
       psKernelBenchLeanRecMajor
     ]
+
+partial def psKernelBenchInductiveAdmissionLoop
+    (iterations : Nat) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchInductiveAdmissionLoop rest
+      match
+          psKernelAddSimpleInductive
+            65536
+            psKernelEnvironmentEmpty
+            psKernelBenchRecDecl
+            0
+            psKernelLeanNatMaxSizeDefault with
+      | Except.ok environment =>
+          if
+              psKernelEnvironmentContains
+                environment
+                psKernelBenchRecRecName then
+            pure (Nat.succ tail)
+          else
+            pure tail
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchLeanInductiveAdmissionLoop
+    (iterations : Nat)
+    (environment : Lean.Environment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchLeanInductiveAdmissionLoop
+          rest
+          environment
+      match
+          Lean.Kernel.Environment.addDecl
+            environment.toKernelEnv
+            {}
+            psKernelBenchLeanRecDecl with
+      | .ok next =>
+          match
+              next.find?
+                psKernelBenchLeanRecRecName with
+          | some (.recInfo _) =>
+              pure (Nat.succ tail)
+          | _ =>
+              pure tail
+      | .error _ =>
+          pure tail
 
 def main : IO Unit := do
   let size := 2048
@@ -1980,6 +2038,41 @@ def main : IO Unit := do
       toString recursorPsHits ++
       "/" ++
       toString recursorLeanHits)
+
+  let admissionIterations := 100
+  let leanAdmissionBase ←
+    Lean.mkEmptyEnvironment
+
+  let admissionPsStart ← IO.monoNanosNow
+  let admissionPsHits ←
+    psKernelBenchInductiveAdmissionLoop
+      admissionIterations
+  let admissionPsStop ← IO.monoNanosNow
+
+  let admissionLeanStart ← IO.monoNanosNow
+  let admissionLeanHits ←
+    psKernelBenchLeanInductiveAdmissionLoop
+      admissionIterations
+      leanAdmissionBase
+  let admissionLeanStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH inductive_admission_pskernel_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          admissionPsStart
+          admissionPsStop) ++
+      " inductive_admission_lean_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          admissionLeanStart
+          admissionLeanStop) ++
+      " iterations=" ++
+      toString admissionIterations ++
+      " hits=" ++
+      toString admissionPsHits ++
+      "/" ++
+      toString admissionLeanHits)
 
   IO.println
     ("PSKERNEL_BENCH structural_defeq_pskernel_ns=" ++

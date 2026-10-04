@@ -233,6 +233,9 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Theory.Inductive.Recursor,
     `Ps.KernelSelfHost.Theory.Inductive.Elimination,
     `Ps.KernelSelfHost.InductiveAdmission,
+    `Ps.KernelSelfHost.Theory.Mutual.Analysis,
+    `Ps.KernelSelfHost.Theory.Mutual.Recursor,
+    `Ps.KernelSelfHost.Theory.Mutual.Admission,
     `Ps.KernelSelfHost.MutualInductive,
     `Ps.KernelSelfHost.NestedInductive,
     `Ps.KernelSelfHost.SelfHost

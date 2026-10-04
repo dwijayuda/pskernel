@@ -23,21 +23,41 @@ def psTypeScriptOutputPaths
     psReplaceSuffix typeScriptPath ".ts" ".js.map"
   )
 
--- Resolve the installed JavaScript entry point. npm exec does not reliably use
--- a pinned tsc supplied on PATH, and Windows .cmd shims require a shell.
+-- Resolve the installed JavaScript entry point. PSC_TYPESCRIPT_CLI is the
+-- authoritative override shared with the Node-side self-host tooling. Falling
+-- back to local/PATH discovery is retained for interactive use, but every
+-- fixed-point workflow supplies the override explicitly.
 def psTypeScriptCli : IO String := do
-  let current ← IO.currentDir
-  let separator := if System.Platform.isWindows then ";" else ":"
-  let directories := current.toString :: ((← IO.getEnv "PATH").getD "").splitOn separator
-  for directory in directories do
-    let base := System.FilePath.mk directory
-    for candidate in [base / "node_modules/typescript/bin/tsc",
-        base / "../typescript/bin/tsc", base / "tsc"] do
-      if ← candidate.pathExists then
-        let resolved ← IO.FS.realPath candidate
-        if (resolved.toString.replace "\\" "/").endsWith "/typescript/bin/tsc" then
-          return resolved.toString
-  throw (IO.userError "PSC1_TYPESCRIPT_CLI_MISSING: install TypeScript 5.8.3 locally or on PATH")
+  match ← IO.getEnv "PSC_TYPESCRIPT_CLI" with
+  | some override =>
+      let candidate := System.FilePath.mk override
+      if !(← candidate.pathExists) then
+        throw
+          (IO.userError
+            ("PSC1_TYPESCRIPT_CLI_OVERRIDE_MISSING: " ++ override))
+      let resolved ← IO.FS.realPath candidate
+      let normalized := resolved.toString.replace "\\" "/"
+      if normalized.endsWith "/typescript/bin/tsc" then
+        return resolved.toString
+      throw
+        (IO.userError
+          ("PSC1_TYPESCRIPT_CLI_OVERRIDE_INVALID: " ++ resolved.toString))
+  | none =>
+      let current ← IO.currentDir
+      let separator := if System.Platform.isWindows then ";" else ":"
+      let directories :=
+        current.toString :: ((← IO.getEnv "PATH").getD "").splitOn separator
+      for directory in directories do
+        let base := System.FilePath.mk directory
+        for candidate in [base / "node_modules/typescript/bin/tsc",
+            base / "../typescript/bin/tsc", base / "tsc"] do
+          if ← candidate.pathExists then
+            let resolved ← IO.FS.realPath candidate
+            if (resolved.toString.replace "\\" "/").endsWith "/typescript/bin/tsc" then
+              return resolved.toString
+      throw
+        (IO.userError
+          "PSC1_TYPESCRIPT_CLI_MISSING: install TypeScript 5.8.3 locally or on PATH")
 
 def psTypeScriptVersion : IO String := do
   let output ← IO.Process.output {

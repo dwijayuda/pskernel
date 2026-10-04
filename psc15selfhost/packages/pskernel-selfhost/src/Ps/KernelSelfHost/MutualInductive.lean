@@ -638,7 +638,22 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                           | Except.error error =>
                               Except.error error
                           | Except.ok recursiveResult =>
-                              let nextRecursive :=
+                              let child0 :=
+                                child;
+                              let analysisLocal :=
+                                recursiveResult.session.context.localContext;
+                              let continuationLocal :=
+                                PsKernelLocalContext.mk
+                                  child0.context.localContext.decls
+                                  analysisLocal.nextIndex;
+                              let continuation :=
+                                PsKernelCheckerSession.mk
+                                  (psKernelCheckerContextWithLocalContext
+                                    child0.context
+                                    continuationLocal)
+                                  recursiveResult.session.state;
+                              let nextRecursive :
+                                  List PsKernelSimpleMutualRecursiveField :=
                                 match
                                     recursiveResult.recursiveInfo with
                                 | Option.none =>
@@ -648,7 +663,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                                       recursive
                                       revRecursive;
                               smaller
-                                recursiveResult.session
+                                continuation
                                 targets
                                 shapes
                                 levels

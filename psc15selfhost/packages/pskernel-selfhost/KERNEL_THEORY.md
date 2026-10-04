@@ -72,41 +72,60 @@ historical file creation order.
 1. `Name.lean`
 2. `Level.lean`
 3. `Expr.lean`
-4. `Instantiate.lean`
-5. `Declaration.lean`
-6. `LocalContext.lean`
-7. `Environment.lean`
+4. `Theory/Substitution/ListOps.lean`
+5. `Theory/Substitution/Lift.lean`
+6. `Theory/Substitution/Instantiate.lean`
+7. `Theory/Substitution/Beta.lean`
+8. `Theory/Substitution/Abstract.lean`
+9. `Instantiate.lean` (compatibility umbrella)
+10. `Declaration.lean`
+11. `LocalContext.lean`
+12. `Environment.lean`
 
-These modules define the data manipulated by the checker.
+These modules define the data manipulated by the checker. The substitution
+sequence is deliberately explicit:
+
+```text
+list/spine helpers
+    -> lift loose variables
+    -> instantiate de Bruijn variables
+    -> cheap beta/application helpers
+    -> abstract free variables
+```
+
+`Theory/Substitution/Instantiate.lean` contains the conservative
+non-dependent `instantiate1` fast path: when a codomain has no loose bound
+variable, substitution is the identity and the original expression is returned
+without a node-count/substitution traversal.
 
 ### 3.2 Type checking and reduction
 
-8. `TypeCheckerBase.lean`
-9. `Theory/Reduction/PrimitiveData.lean`
-10. `Theory/Reduction/PrimitiveNat.lean`
-11. `TypeCheckerPrimitives.lean` (compatibility umbrella)
-12. `Theory/Reduction/KernelReductions.lean`
-13. `Theory/Reduction/WhnfCore.lean`
-14. `TypeCheckerWhnf.lean`
-15. `TypeCheckerProjection.lean`
-16. `Theory/Inference/Helpers.lean`
-17. `Theory/Inference/Core.lean`
-18. `TypeCheckerInfer.lean`
-19. `Theory/Recursor/Analysis.lean`
-20. `Theory/Recursor/Reduction.lean`
-21. `TypeCheckerRecursor.lean`
+13. `TypeCheckerBase.lean`
+14. `Theory/Reduction/PrimitiveData.lean`
+15. `Theory/Reduction/PrimitiveNat.lean`
+16. `TypeCheckerPrimitives.lean` (compatibility umbrella)
+17. `Theory/Reduction/KernelReductions.lean`
+18. `Theory/Reduction/WhnfCore.lean`
+19. `TypeCheckerWhnf.lean`
+20. `TypeCheckerProjection.lean`
+21. `Theory/Inference/Helpers.lean`
+22. `Theory/Inference/Core.lean`
+23. `TypeCheckerInfer.lean`
+24. `Theory/Recursor/Analysis.lean`
+25. `Theory/Recursor/Reduction.lean`
+26. `TypeCheckerRecursor.lean`
 
 ### 3.3 Definitional equality
 
-22. `Theory/DefEq/BinderSpines.lean`
-23. `Theory/DefEq/Quick.lean`
-24. `TypeCheckerDefEqSupport.lean` (compatibility umbrella)
-25. `Theory/DefEq/DeltaStep.lean`
-26. `Theory/DefEq/LazyDelta.lean`
-27. `Theory/DefEq/FinalRules.lean`
-28. `Theory/DefEq/Shortcuts.lean`
-29. `Theory/DefEq/FullShape.lean`
-30. `TypeCheckerDefEq.lean`
+27. `Theory/DefEq/BinderSpines.lean`
+28. `Theory/DefEq/Quick.lean`
+29. `TypeCheckerDefEqSupport.lean` (compatibility umbrella)
+30. `Theory/DefEq/DeltaStep.lean`
+31. `Theory/DefEq/LazyDelta.lean`
+32. `Theory/DefEq/FinalRules.lean`
+33. `Theory/DefEq/Shortcuts.lean`
+34. `Theory/DefEq/FullShape.lean`
+35. `TypeCheckerDefEq.lean`
 
 `Theory/DefEq/BinderSpines.lean` isolates binder/application congruence.
 `Theory/DefEq/Quick.lean` isolates cheap pre-reduction decisions and pair-cache
@@ -122,36 +141,36 @@ observable algorithmic-equality order rather than a collection of helpers.
 
 ### 3.4 Declaration and inductive admission
 
-31. `CheckerSession.lean`
-32. `Theory/Admission/Validation.lean`
-33. `Theory/Admission/Declarations.lean`
-34. `Kernel.lean` (compatibility umbrella)
-35. `Theory/Quot/Bootstrap.lean`
-36. `Theory/Quot/Admission.lean`
-37. `Quot.lean` (compatibility umbrella)
-38. `Inductive.lean`
-39. `Theory/Inductive/Constructor.lean`
-40. `Theory/Inductive/ConstructorAdmission.lean`
-41. `Theory/Inductive/Recursor.lean`
-42. `Theory/Inductive/Elimination.lean`
-43. `InductiveAdmission.lean`
-44. `Theory/Mutual/Analysis.lean`
-45. `Theory/Mutual/Recursor.lean`
-46. `Theory/Mutual/Header.lean`
-47. `Theory/Mutual/AdmissionLoops.lean`
-48. `Theory/Mutual/Admission.lean`
-49. `MutualInductive.lean` (compatibility umbrella)
-50. `Theory/Nested/Types.lean`
-51. `Theory/Nested/ReservedNames.lean`
-52. `Theory/Nested/Rebase.lean`
-53. `Theory/Nested/Discover.lean`
-54. `Theory/Nested/Flatten.lean`
-55. `Theory/Nested/RestoreExpr.lean`
-56. `Theory/Nested/Restore.lean`
-57. `Theory/Nested/Validation.lean`
-58. `Theory/Nested/Commit.lean`
-59. `Theory/Nested/Admission.lean`
-60. `NestedInductive.lean` (compatibility umbrella)
+36. `CheckerSession.lean`
+37. `Theory/Admission/Validation.lean`
+38. `Theory/Admission/Declarations.lean`
+39. `Kernel.lean` (compatibility umbrella)
+40. `Theory/Quot/Bootstrap.lean`
+41. `Theory/Quot/Admission.lean`
+42. `Quot.lean` (compatibility umbrella)
+43. `Inductive.lean`
+44. `Theory/Inductive/Constructor.lean`
+45. `Theory/Inductive/ConstructorAdmission.lean`
+46. `Theory/Inductive/Recursor.lean`
+47. `Theory/Inductive/Elimination.lean`
+48. `InductiveAdmission.lean`
+49. `Theory/Mutual/Analysis.lean`
+50. `Theory/Mutual/Recursor.lean`
+51. `Theory/Mutual/Header.lean`
+52. `Theory/Mutual/AdmissionLoops.lean`
+53. `Theory/Mutual/Admission.lean`
+54. `MutualInductive.lean` (compatibility umbrella)
+55. `Theory/Nested/Types.lean`
+56. `Theory/Nested/ReservedNames.lean`
+57. `Theory/Nested/Rebase.lean`
+58. `Theory/Nested/Discover.lean`
+59. `Theory/Nested/Flatten.lean`
+60. `Theory/Nested/RestoreExpr.lean`
+61. `Theory/Nested/Restore.lean`
+62. `Theory/Nested/Validation.lean`
+63. `Theory/Nested/Commit.lean`
+64. `Theory/Nested/Admission.lean`
+65. `NestedInductive.lean` (compatibility umbrella)
 
 ### 3.5 Runtime mechanisms
 

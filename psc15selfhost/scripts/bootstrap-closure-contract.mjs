@@ -17,6 +17,7 @@ export const allowedBootstrapPackageNames = Object.freeze([
 export const forbiddenBootstrapPackageNames = Object.freeze([
   "stdlib",
   "project",
+  "backend-js",
   "backend-rust",
   "driver-rust",
   "backend-wasm",
@@ -68,6 +69,7 @@ export function assertBootstrapPolicyWellFormed() {
   for (const packageName of [
     "stdlib",
     "project",
+    "backend-js",
     "backend-rust",
     "driver-rust",
     "backend-wasm",

@@ -281,6 +281,59 @@ Interpretation:
 
 Next benchmark target: checked application-spine inference.
 
+## 2.5 Checked application-spine optimization
+
+The checked-application benchmark uses an arity-8 function with non-dependent
+`Nat` domains and eight `Nat` literal arguments. Lean 4.34 checks this path
+one application node at a time; PSKernel preserves that algorithm.
+
+Measured optimization progression on the authorized Windows development
+machine:
+
+```text
+representative pre-optimization checked spine : ~19.5 ms / 1000
+skip checked-app memo publication              :  ~8.7 ms / 1000
+structural domain-equality fast path            :  ~7.1 ms / 1000
+non-dependent instantiate1 fast path            :  ~5.5 ms / 1000
+
+same-run Lean 4.34 after instantiate1 fast path :  ~3.8 ms / 1000
+PSKernel / Lean ratio                           :  ~1.45x
+```
+
+The exact wall-clock values vary between runs, but the direction is stable.
+
+The accepted optimizations preserve Lean's checked-app rule:
+
+```text
+infer function
+-> expose Pi
+-> infer argument
+-> compare argument type with Pi domain
+-> instantiate codomain
+```
+
+They only remove portable-runtime overhead around the rule:
+
+- checked application nodes are not memoized when a cold spine visits them only
+  once and hashing the growing trees costs more than the reusable cache value;
+- literal inference is not memoized;
+- inference cache eligibility is centralized and ineligible nodes skip both
+  lookup and publication;
+- structurally identical argument/domain types bypass the full defeq
+  orchestration because structural equality is already the first successful
+  definitional-equality rule;
+- `instantiate1` returns a non-dependent codomain unchanged when it has no
+  loose bound variable, avoiding the node-count + substitution traversal.
+
+A warm-session application benchmark is retained alongside the cold benchmark.
+The no-checked-app-memo policy still leaves warm checking faster than cold
+checking through the remaining WHNF/inference/defeq caches, so the cold speedup
+does not eliminate useful session reuse.
+
+This workload is now inside the initial native target of approximately
+`<= 1.5-2x` Lean. The next application work should use dependent argument
+types before introducing any more special cases.
+
 ## 3. Interpretation
 
 The existing runtime-index work is justified.
@@ -307,7 +360,7 @@ WHNF and defeq warm/cold paths are now measured.
 Next measurement priority:
 
 1. official Lean 4.34 kernel vs PSKernel-native on matched WHNF/defeq cases;
-2. inference over application spines;
+2. dependent checked-application spines;
 3. recursor reduction;
 4. indexed/nested-inductive admission on representative declarations.
 

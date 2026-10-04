@@ -565,7 +565,10 @@ A feature-complete release requires:
 1. every required rule marked implemented;
 2. the compatibility audit passes with `--require-complete`;
 3. the focused conformance/differential suite is green;
-4. the self-host source and generated-artifact fixed points pass.
+4. portable-source profile, `psc1 check`, canonical `.ps` recheck and Lean-native tests are green.
+
+Generated compiler/kernel fixed-point reproduction is optional/manual and is
+reserved for explicit bootstrap/release checkpoints.
 
 This definition avoids treating project size or a successful demo as evidence
 of semantic completeness.

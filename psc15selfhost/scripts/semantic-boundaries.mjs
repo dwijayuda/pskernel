@@ -20,6 +20,10 @@ export function semanticBoundaryViolations(relativePath, source) {
     violations.push("PSC2_SEMANTIC_BOUNDARY_COMPILER_IMPORTS_BACKEND");
   }
 
+  if (isBackend && /^\s*import\s+Ps\.Compiler(?:\.|\s|$)/mu.test(source)) {
+    violations.push("PSC2_SEMANTIC_BOUNDARY_BACKEND_IMPORTS_COMPILER");
+  }
+
   if (!isCompiler && !isErasure && /^\s*import\s+Ps\.Erasure(?:\.|\s|$)/mu.test(source)) {
     violations.push("PSC2_SEMANTIC_BOUNDARY_ERASURE_IMPORT_OWNER");
   }

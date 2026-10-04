@@ -266,7 +266,24 @@ Lean.reduceBool / Lean.reduceNat marker
 
 The provider belongs in `Runtime/NativeReduction`, not in core type theory.
 
-## 11. Change review checklist
+## 11. Self-host evidence policy
+
+There are two distinct kinds of evidence:
+
+1. **Current-head proof** — CI must generate the current source closure, reach a
+   source/artifact fixed point, and pass generated runtime smoke.
+2. **Committed checkpoint** — `SELFHOST_EVIDENCE.json` records exact hashes for
+   a promoted commit/closure so that historical releases remain auditable.
+
+A layout-only refactor is expected to change source count and closure hashes.
+That must not disable or weaken the current-head fixed-point proof. Exact hash
+comparison is required when reproducing the checkpoint commit; later heads
+prove themselves with their own generated receipt/artifact uploaded by CI.
+
+Refresh `SELFHOST_EVIDENCE.json` at promoted semantic/layout milestones, not
+after every intermediate explanatory split.
+
+## 12. Change review checklist
 
 Before promoting any kernel change, ask:
 
@@ -283,7 +300,7 @@ Before promoting any kernel change, ask:
 
 If any answer is unknown, the change is not ready for promotion.
 
-## 12. Anti-drift rules
+## 13. Anti-drift rules
 
 Do not:
 

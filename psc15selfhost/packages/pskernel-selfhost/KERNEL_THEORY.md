@@ -107,22 +107,24 @@ Lean 4.34 algorithmic-equality order rather than a bag of helper implementations
 ### Declaration admission
 
 22. `CheckerSession.lean`
-23. `Kernel.lean`
-24. `Quot.lean`
-25. `Inductive.lean`
-26. `Theory/Inductive/Constructor.lean`
-27. `Theory/Inductive/Recursor.lean`
-28. `Theory/Inductive/Elimination.lean`
-29. `InductiveAdmission.lean`
-30. `Theory/Mutual/Analysis.lean`
-31. `Theory/Mutual/Recursor.lean`
-32. `Theory/Mutual/Admission.lean`
-33. `MutualInductive.lean` (compatibility umbrella)
-34. `Theory/Nested/Discover.lean`
-35. `Theory/Nested/Flatten.lean`
-36. `Theory/Nested/Restore.lean`
-37. `Theory/Nested/Admission.lean`
-38. `NestedInductive.lean` (compatibility umbrella)
+23. `Theory/Admission/Validation.lean`
+24. `Theory/Admission/Declarations.lean`
+25. `Kernel.lean` (compatibility umbrella)
+26. `Quot.lean`
+27. `Inductive.lean`
+28. `Theory/Inductive/Constructor.lean`
+29. `Theory/Inductive/Recursor.lean`
+30. `Theory/Inductive/Elimination.lean`
+31. `InductiveAdmission.lean`
+32. `Theory/Mutual/Analysis.lean`
+33. `Theory/Mutual/Recursor.lean`
+34. `Theory/Mutual/Admission.lean`
+35. `MutualInductive.lean` (compatibility umbrella)
+36. `Theory/Nested/Discover.lean`
+37. `Theory/Nested/Flatten.lean`
+38. `Theory/Nested/Restore.lean`
+39. `Theory/Nested/Admission.lean`
+40. `NestedInductive.lean` (compatibility umbrella)
 
 ### Backend/runtime mechanisms
 
@@ -347,7 +349,20 @@ environment.
 
 ## 14. Declaration admission
 
-`Kernel.lean` checks:
+Declaration admission is split into validation and environment extension:
+
+```text
+Theory/Admission/Validation.lean
+      |
+      | universe discipline, closedness, sort/header/body checking
+      v
+Theory/Admission/Declarations.lean
+         axiom / definition / theorem / opaque / mutual environment extension
+```
+
+`Kernel.lean` remains a stable umbrella import.
+
+The admission layer checks:
 
 - duplicate declaration names;
 - duplicate/undefined universe parameters;

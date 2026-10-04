@@ -2040,6 +2040,132 @@ def psKernelSelfHostNestedTests : Bool :=
   | _, _ =>
       false
 
+def psKernelSelfHostNestedRejectionTests : Bool :=
+  let type1 :=
+    PsKernelExpr.sort
+      (PsKernelLevel.succ
+        PsKernelLevel.zero)
+  let reservedTypeName :=
+    PsKernelName.str
+      psKernelSimpleNestedPrefix
+      "userType"
+  let portableReservedType :=
+    psKernelAddSimpleNestedInductive
+      1024
+      psKernelEnvironmentEmpty
+      (PsKernelSimpleMutualInductiveDecl.mk
+        List.nil
+        0
+        (List.cons
+          (PsKernelSimpleMutualTypeDecl.mk
+            reservedTypeName
+            type1
+            List.nil)
+          List.nil)
+        false)
+      0
+      psKernelLeanNatMaxSizeDefault
+  let referenceReservedType :=
+    PSC1Kernel.Kernel.addSimpleNestedInductive
+      PSC1Kernel.Environment.empty
+      {
+        levelParams := []
+        numParams := 0
+        types := [{
+          name :=
+            psKernelNameToReference
+              reservedTypeName
+          type :=
+            psKernelExprToReference
+              type1
+          ctors := []
+        }]
+        isUnsafe := false
+      }
+  let typeNameParity :=
+    match
+        portableReservedType,
+        referenceReservedType with
+    | Except.error portableError,
+      Except.error referenceError =>
+        Bool.and
+          (portableError == referenceError)
+          (portableError ==
+            "reserved prefix '_nested' occurs in nested inductive declaration")
+    | _, _ =>
+        false
+  let ownerName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "PortableNestedReservedOwner"
+  let ownerType :=
+    PsKernelExpr.const
+      ownerName
+      List.nil
+  let reservedCtorName :=
+    PsKernelName.str
+      psKernelSimpleNestedPrefix
+      "badCtor"
+  let portableReservedCtor :=
+    psKernelAddSimpleNestedInductive
+      1024
+      psKernelEnvironmentEmpty
+      (PsKernelSimpleMutualInductiveDecl.mk
+        List.nil
+        0
+        (List.cons
+          (PsKernelSimpleMutualTypeDecl.mk
+            ownerName
+            type1
+            (List.cons
+              (PsKernelSimpleConstructorDecl.mk
+                reservedCtorName
+                ownerType)
+              List.nil))
+          List.nil)
+        false)
+      0
+      psKernelLeanNatMaxSizeDefault
+  let referenceReservedCtor :=
+    PSC1Kernel.Kernel.addSimpleNestedInductive
+      PSC1Kernel.Environment.empty
+      {
+        levelParams := []
+        numParams := 0
+        types := [{
+          name :=
+            psKernelNameToReference
+              ownerName
+          type :=
+            psKernelExprToReference
+              type1
+          ctors := [{
+            name :=
+              psKernelNameToReference
+                reservedCtorName
+            type :=
+              psKernelExprToReference
+                ownerType
+          }]
+        }]
+        isUnsafe := false
+      }
+  let ctorNameParity :=
+    match
+        portableReservedCtor,
+        referenceReservedCtor with
+    | Except.error portableError,
+      Except.error referenceError =>
+        Bool.and
+          (portableError == referenceError)
+          (portableError ==
+            "reserved prefix '_nested' occurs in nested inductive constructor")
+    | _, _ =>
+        false
+  Bool.and
+    typeNameParity
+    ctorNameParity
+
 def psKernelDefEqSpecialRuleTests : Bool :=
   let type1 :=
     PsKernelExpr.sort
@@ -3337,6 +3463,10 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_NESTED_DIFFERENTIAL: FAIL")
+  else if !psKernelSelfHostNestedRejectionTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_NESTED_REJECTION_DIFFERENTIAL: FAIL")
   else
     IO.println
       "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"

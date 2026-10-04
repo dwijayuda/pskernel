@@ -154,6 +154,18 @@ export function findForbiddenForms(source, profile) {
 function assertProfileShape(profile) {
   if (profile.schemaVersion !== 1) throw new Error('PSC2_SELFHOST_PROFILE_SCHEMA');
   if (profile.profile !== 'PSC1-selfhost-stable/1') throw new Error('PSC2_SELFHOST_PROFILE_ID');
+  if (profile.proofScriptLanguageEdition !== 'ps-0.9-r3') {
+    throw new Error('PSC2_SELFHOST_PROFILE_LANGUAGE_EDITION');
+  }
+  if (profile.proofScriptSourceProfile !== 'ps-standard-0.9-r3') {
+    throw new Error('PSC2_SELFHOST_PROFILE_SOURCE_EDITION');
+  }
+  if (profile.requiredLanguageProfile !== 'psc2-language-v1') {
+    throw new Error('PSC2_SELFHOST_PROFILE_REQUIRED_LANGUAGE');
+  }
+  if (profile.standardLanguageProfile !== 'psc2-standard-language-v1') {
+    throw new Error('PSC2_SELFHOST_PROFILE_STANDARD_LANGUAGE');
+  }
   if (profile.entry !== 'packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean') {
     throw new Error('PSC2_SELFHOST_PROFILE_ENTRY');
   }
@@ -201,11 +213,15 @@ export async function checkSelfhostProfile() {
   assertProfileShape(profile);
   const psconfig = JSON.parse(await readFile(path.join(selfhostRoot, 'psconfig.json'), 'utf8'));
   if (psconfig.entry !== profile.entry) throw new Error('PSC2_SELFHOST_PROFILE_PSCONFIG_ENTRY_DRIFT');
+  if (psconfig.languageVersion !== '0.9-r3' ||
+      psconfig.languageEdition !== profile.proofScriptLanguageEdition ||
+      psconfig.sourceProfile !== profile.proofScriptSourceProfile ||
+      psconfig.requiredLanguageProfile !== profile.requiredLanguageProfile ||
+      psconfig.standardLanguageProfile !== profile.standardLanguageProfile) {
+    throw new Error('PSC2_SELFHOST_PROFILE_PSCONFIG_LANGUAGE_DRIFT');
+  }
   if (psconfig.implementationProfile !== profile.implementationProfile) {
     throw new Error('PSC2_SELFHOST_PROFILE_IMPLEMENTATION_DRIFT');
-  }
-  if (psconfig.acceptedLanguageProfile !== profile.acceptedLanguageProfile) {
-    throw new Error('PSC2_SELFHOST_PROFILE_ACCEPTED_LANGUAGE_DRIFT');
   }
 
   const closure = await collectSelfhostClosure(profile);

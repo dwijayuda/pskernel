@@ -3,8 +3,16 @@ import { readFile } from 'node:fs/promises';
 const cases = [
   ['scripts/compile-with-generated.mjs', [
     'sources: chunks,',
-    'compiler.List.cons(head, tail), compiler.List.nil()',
-    'compiler.psCompilerPrepareSources(project.sourceKind, sources)',
+    'let environment = compiler.psSelfHostProdPreludeEnvironment;',
+    'let declarationsRev = compiler.List.nil();',
+    'for (let index = 0; index < sourceChunks.length; index += 1)',
+    'compiler.psCompilerParseSource(sourceKindValue, source)',
+    'compiler.psElabModule(environment, parsed)',
+    'environment = elaborated.environment;',
+    'declarationsRev = compiler.psListAppend(',
+    'compiler.psListReverse(elaborated.declarations),',
+    'compiler.psCompilerElaborateSourcesWorker(',
+    'compiler.psCompilerPrepareElaborated(elaborated)',
     'compiler.psCompilerTypeScriptFromPrepared(prepared)',
   ]],
   ['packages/compiler/src/Ps/Compiler/Api.lean', [

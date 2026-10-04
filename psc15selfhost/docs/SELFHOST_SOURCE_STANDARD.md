@@ -2,6 +2,11 @@
 
 Profile: `PSC1-selfhost-stable/1`
 
+Canonical generated `.ps` syntax is `ps-0.9-r3` under the closed
+`ps-standard-0.9-r3` source profile. `PSC1-selfhost-stable/1` is a deliberately
+smaller coding discipline for the compiler implementation; it does not redefine or
+preserve the retired pre-r3 `.ps` grammar.
+
 This document is normative for code that is reachable from
 `packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean`.
 
@@ -181,25 +186,55 @@ The fixed point is the final self-hostability gate.
 
 ## Development commands
 
-Fast source-profile check:
+Fast edit-time grammar/profile check:
 
 ```text
-npm run check:selfhost-profile
+npm run check:fast
 ```
 
-Normal developer guard:
+This checks the frozen self-host source profile, the root r3 language-authority hash,
+and the focused r3 parser/printer/translation suite. It does not rebuild Lean or the
+whole compiler.
+
+Fast JS source-selfhost guard:
 
 ```text
 npm run selfhost:guard
 ```
 
-This builds the native `psc` if necessary and runs the complete executable source
-contract.
+This uses the existing generated JavaScript compiler to re-emit the complete canonical
+`.ps` closure and requires exact 55-module source parity. It is the normal pre-commit
+gate for compiler-source edits.
 
-Final compiler self-host gate:
+JS compiler fixed point without reseeding Lean:
+
+```text
+npm run fixed-point:js
+```
+
+This uses the existing bootstrap JavaScript compiler, regenerates the next compiler,
+and requires exact source and generated-TypeScript parity.
+
+Stronger native/reference source contract:
+
+```text
+npm run selfhost:guard:native
+```
+
+This builds native `psc` and runs the whole-closure Lean↔PSC admissions/TypeScript
+parity contract. Use it for release evidence, bootstrap-boundary changes, and changes
+to translation/elaboration semantics rather than on every edit.
+
+Full seed-to-selfhost compiler gate:
 
 ```text
 npm run fixed-point
+```
+
+Optional 55-module Lean replay is likewise separated from the normal fast selfhost path:
+
+```text
+npm run selfhost:lean-replay
 ```
 
 Checked-kernel fixed-point/release gates remain separate assurance layers.

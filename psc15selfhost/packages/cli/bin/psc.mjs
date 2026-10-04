@@ -36,7 +36,7 @@ function usage() {
     "  psc emit-lean <input.lean|input.ps> [--out <output.lean>] [--compiler <compiler.js>]",
     "  psc emit-ps <input.lean|input.ps> [--out <output.ps>] [--compiler <compiler.js>]",
     "  psc project emit <entry.lean|entry.ps> --to <lean|ps> --out <workspace> [--compiler <compiler.js>]",
-    "  psc selfhost [--compiler <compiler.js>] [--workspace <ps-workspace>] [--out <generation>]",
+    "  psc selfhost [--compiler <compiler.js>] [--workspace <ps-workspace>] [--out <generation>] [--emit-lean]",
     "  psc verify-selfhost",
     "  psc fixed-point",
     "",
@@ -58,12 +58,14 @@ if (!command || command === "--help" || command === "-h") {
   const compiler = option(args, "--compiler") ?? defaultCompiler;
   const workspace = option(args, "--workspace") ?? defaultWorkspace;
   const output = option(args, "--out") ?? defaultGeneration;
-  run(node, [
+  const selfhostArgs = [
     "scripts/selfhost-generation.mjs",
     compiler,
     workspace,
     output,
-  ]);
+  ];
+  if (args.includes("--emit-lean")) selfhostArgs.push("--emit-lean");
+  run(node, selfhostArgs);
 } else if (command === "verify-selfhost") {
   run(npm, ["run", "verify:selfhost"]);
 } else if (command === "fixed-point") {

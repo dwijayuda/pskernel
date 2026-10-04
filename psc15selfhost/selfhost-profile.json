@@ -1,9 +1,12 @@
 {
   "schemaVersion": 1,
   "profile": "PSC1-selfhost-stable/1",
+  "proofScriptLanguageEdition": "ps-0.9-r3",
+  "proofScriptSourceProfile": "ps-standard-0.9-r3",
+  "requiredLanguageProfile": "psc2-language-v1",
+  "standardLanguageProfile": "psc2-standard-language-v1",
   "entry": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
-  "implementationProfile": "PSC1",
-  "acceptedLanguageProfile": "PSC2-bootstrap",
+  "implementationProfile": "PSC1-selfhost-stable/1",
   "allowedPackages": [
     "bootstrap",
     "foundation",

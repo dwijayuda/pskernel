@@ -74,11 +74,19 @@ if (psconfig.entry !== requiredEntry) {
   );
 }
 
-if (psconfig.implementationProfile !== "PSC1") {
-  throw new Error("PSC2_BOOTSTRAP_IMPLEMENTATION_PROFILE: expected PSC1");
+if (
+  psconfig.languageVersion !== "0.9-r3" ||
+  psconfig.languageEdition !== "ps-0.9-r3" ||
+  psconfig.sourceProfile !== "ps-standard-0.9-r3" ||
+  psconfig.requiredLanguageProfile !== "psc2-language-v1" ||
+  psconfig.standardLanguageProfile !== "psc2-standard-language-v1"
+) {
+  throw new Error("PSC2_BOOTSTRAP_PROOFSCRIPT_R3_PROFILE");
 }
-if (psconfig.acceptedLanguageProfile !== "PSC2-bootstrap") {
-  throw new Error("PSC2_BOOTSTRAP_ACCEPTED_PROFILE: expected PSC2-bootstrap");
+if (psconfig.implementationProfile !== "PSC1-selfhost-stable/1") {
+  throw new Error(
+    "PSC2_BOOTSTRAP_IMPLEMENTATION_PROFILE: expected PSC1-selfhost-stable/1",
+  );
 }
 if (JSON.stringify(psconfig.sourceRoots ?? []) !== JSON.stringify(["packages"])) {
   throw new Error("PSC2_BOOTSTRAP_SOURCE_ROOTS: expected packages-only bootstrap roots");

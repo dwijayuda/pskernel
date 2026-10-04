@@ -81,18 +81,31 @@ function translatedRelativePath(sourcePath) {
 function translateFile(sourcePath, outputPath) {
   const relativeSource = path.relative(selfhostRoot, sourcePath);
   const relativeOutput = path.relative(selfhostRoot, outputPath);
+  const nativeSuffix = process.platform === "win32" ? ".exe" : "";
+  const directCompiler = path.join(
+    selfhostRoot,
+    ".lake",
+    "build",
+    "bin",
+    "psc1" + nativeSuffix,
+  );
+  const useDirect = existsSync(directCompiler);
+  const command = useDirect ? directCompiler : "lake";
+  const args = useDirect
+    ? ["translate", relativeSource, "--to", "ps", "--out", relativeOutput]
+    : [
+        "exe",
+        "psc1",
+        "translate",
+        relativeSource,
+        "--to",
+        "ps",
+        "--out",
+        relativeOutput,
+      ];
   const result = spawnSync(
-    "lake",
-    [
-      "exe",
-      "psc1",
-      "translate",
-      relativeSource,
-      "--to",
-      "ps",
-      "--out",
-      relativeOutput,
-    ],
+    command,
+    args,
     {
       cwd: selfhostRoot,
       encoding: "utf8",

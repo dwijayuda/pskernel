@@ -259,6 +259,7 @@ def psHostElabErrorText : PsElabError -> String
   | .typeMismatch => "typeMismatch"
   | .implicitApplicationUnsupported =>
       "implicitApplicationUnsupported"
+  | .emptyCallUnsupported => "emptyCallUnsupported"
   | .unsupportedTerm => "unsupportedTerm"
   | .matchExpectedType => "matchExpectedType"
   | .matchScrutineeUnsupported => "matchScrutineeUnsupported"

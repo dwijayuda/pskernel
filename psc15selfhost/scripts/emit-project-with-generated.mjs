@@ -275,9 +275,12 @@ function generatedLakefile(generatedFiles) {
 async function writeGeneratedProjectMetadata() {
   if (targetExtension === ".ps") {
     const generatedConfig = {
-      languageVersion: "0.7",
-      implementationProfile: "PSC1",
-      acceptedLanguageProfile: "PSC2-bootstrap",
+      languageVersion: "0.9-r3",
+      languageEdition: "ps-0.9-r3",
+      sourceProfile: "ps-standard-0.9-r3",
+      requiredLanguageProfile: "psc2-language-v1",
+      standardLanguageProfile: "psc2-standard-language-v1",
+      implementationProfile: "PSC1-selfhost-stable/1",
       entry: entryRelative,
       sourceRoots: ["packages", "stdlib"],
       runtimeDependencies: {},

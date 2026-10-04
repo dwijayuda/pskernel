@@ -88,7 +88,6 @@ function requireCompilerApi(compiler) {
   const required = [
     "PsCompilerSourceKind",
     "psCompilerTranslateSource",
-    "psCompilerPrepareSources",
     "psCompilerTypeScriptFromPrepared",
     "List",
   ];
@@ -97,6 +96,22 @@ function requireCompilerApi(compiler) {
       throw new Error(`PSC2_SELFHOST_COMPILER_EXPORT_MISSING: ${name}`);
     }
   }
+
+  const incremental = [
+    "psCompilerParseSource",
+    "psElabModule",
+    "psListReverse",
+    "psListAppend",
+    "psCompilerElaborateSourcesWorker",
+    "psCompilerPrepareElaborated",
+    "psSelfHostProdPreludeEnvironment",
+  ].every((name) => name in compiler);
+  if (!incremental && !("psCompilerPrepareSources" in compiler)) {
+    throw new Error(
+      "PSC2_SELFHOST_COMPILER_EXPORT_MISSING: incremental preparation API or psCompilerPrepareSources",
+    );
+  }
+  return incremental;
 }
 
 function sourceKind(compiler, sourcePath) {
@@ -161,6 +176,55 @@ async function flattenProject(compiler, entryPath) {
     sources: chunks,
     source: chunks.join("\n\n") + "\n",
   };
+}
+
+function prepareSourcesIncrementally(compiler, sourceKindValue, sourceChunks) {
+  let environment = compiler.psSelfHostProdPreludeEnvironment;
+  let declarationsRev = compiler.List.nil();
+  const progress = process.env.PSC_SELFHOST_PROGRESS === "1";
+  const allStarted = performance.now();
+
+  for (let index = 0; index < sourceChunks.length; index += 1) {
+    const source = sourceChunks[index];
+    const moduleStarted = performance.now();
+    const parsed = unwrapExcept(
+      compiler.psCompilerParseSource(sourceKindValue, source),
+      `parse-module-${index + 1}`,
+    );
+    const elaborated = unwrapExcept(
+      compiler.psElabModule(environment, parsed),
+      `elaborate-module-${index + 1}`,
+    );
+    environment = elaborated.environment;
+    declarationsRev = compiler.psListAppend(
+      compiler.psListReverse(elaborated.declarations),
+      declarationsRev,
+    );
+    if (progress) {
+      process.stdout.write(
+        `PSC2_SELFHOST_INCREMENTAL_MODULE: ${index + 1}/${sourceChunks.length} ms=${Math.round(performance.now() - moduleStarted)}\n`,
+      );
+    }
+  }
+
+  const prepareStarted = performance.now();
+  const elaborated = unwrapExcept(
+    compiler.psCompilerElaborateSourcesWorker(
+      sourceKindValue,
+      compiler.List.nil(),
+      environment,
+      declarationsRev,
+    ),
+    "finalize",
+  );
+  const prepared = unwrapExcept(
+    compiler.psCompilerPrepareElaborated(elaborated),
+    "prepare",
+  );
+  process.stdout.write(
+    `PSC2_SELFHOST_INCREMENTAL_PREPARE: PASS (${sourceChunks.length} modules; prepareMs=${Math.round(performance.now() - prepareStarted)}; totalMs=${Math.round(performance.now() - allStarted)})\n`,
+  );
+  return prepared;
 }
 
 function compileTypeScript(typeScriptPath) {
@@ -230,16 +294,40 @@ if (!outputTsPath.endsWith(".ts")) {
 }
 
 const compiler = await import(pathToFileURL(compilerPath).href);
-requireCompilerApi(compiler);
+const incrementalPreparation = requireCompilerApi(compiler);
 
 const project = await flattenProject(compiler, entryPath);
-const sources = project.sources.reduceRight((tail, head) => compiler.List.cons(head, tail), compiler.List.nil());
-const prepared = unwrapExcept(compiler.psCompilerPrepareSources(project.sourceKind, sources), "prepare");
-const typeScript = unwrapExcept(compiler.psCompilerTypeScriptFromPrepared(prepared), "compile");
+const prepared = incrementalPreparation
+  ? prepareSourcesIncrementally(
+      compiler,
+      project.sourceKind,
+      project.sources,
+    )
+  : unwrapExcept(
+      compiler.psCompilerPrepareSources(
+        project.sourceKind,
+        project.sources.reduceRight(
+          (tail, head) => compiler.List.cons(head, tail),
+          compiler.List.nil(),
+        ),
+      ),
+      "prepare",
+    );
+process.stdout.write(
+  `PSC2_SELFHOST_PREPARE_MODE: ${incrementalPreparation ? "incremental" : "aggregate"}\n`,
+);
+const backendStarted = performance.now();
+const typeScript = unwrapExcept(
+  compiler.psCompilerTypeScriptFromPrepared(prepared),
+  "compile",
+);
+const backendMs = Math.round(performance.now() - backendStarted);
 
 await mkdir(path.dirname(outputTsPath), { recursive: true });
 await writeFile(outputTsPath, typeScript, "utf8");
+const tscStarted = performance.now();
 compileTypeScript(outputTsPath);
+const tscMs = Math.round(performance.now() - tscStarted);
 
 process.stdout.write(
   [
@@ -249,5 +337,7 @@ process.stdout.write(
     ...(project.closureSha256 ? [`PSC2_SELFHOST_SOURCE_CLOSURE_SHA256: ${project.closureSha256}`] : []),
     `PSC2_SELFHOST_TS: ${path.relative(selfhostRoot, outputTsPath)}`,
     `PSC2_SELFHOST_JS: ${path.relative(selfhostRoot, outputTsPath.replace(/\.ts$/u, ".js"))}`,
+    `PSC2_SELFHOST_BACKEND_MS: ${backendMs}`,
+    `PSC2_SELFHOST_TSC_MS: ${tscMs}`,
   ].join("\n") + "\n",
 );

@@ -36,7 +36,7 @@ The package is intentionally isolated from the existing PSC1 bootstrap compiler 
 
 ## Language/reference policy
 
-For ProofScript language behavior, use the accepted v0.7 / v0.6.1 reference line unless a later repository decision explicitly supersedes it. Do not silently use abandoned v0.8 material as normative language design.
+This historical continuity note is superseded for ProofScript source-language behavior by the root `PSC2_COMPLETE_LANGUAGE_AND_JS_PLATFORM.md` authority and `language-authority.json`. Active `.ps` source uses `ps-0.9-r3` / `ps-standard-0.9-r3`; the older v0.7/v0.6.1 syntax line is retained only as historical context and must not be accepted as a compatibility grammar.
 
 Do not claim full Lean 4 semantic equivalence unless formally demonstrated by the relevant evidence. Differential parity against the mature PSC1Kernel/Lean behavior is evidence, not a blanket equivalence proof.
 

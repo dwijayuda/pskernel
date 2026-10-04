@@ -82,10 +82,12 @@ These modules define the data manipulated by the checker.
 11. `Theory/Reduction/WhnfCore.lean`
 12. `TypeCheckerWhnf.lean`
 13. `TypeCheckerProjection.lean`
-14. `TypeCheckerInfer.lean`
-15. `Theory/Recursor/Analysis.lean`
-16. `Theory/Recursor/Reduction.lean`
-17. `TypeCheckerRecursor.lean`
+14. `Theory/Inference/Helpers.lean`
+15. `Theory/Inference/Core.lean`
+16. `TypeCheckerInfer.lean`
+17. `Theory/Recursor/Analysis.lean`
+18. `Theory/Recursor/Reduction.lean`
+19. `TypeCheckerRecursor.lean`
 
 ### Definitional equality
 
@@ -157,8 +159,21 @@ meaning of level expressions for all assignments to universe parameters.
 
 ## 5. Inference
 
-`TypeCheckerInfer.lean` implements syntax-directed inference for core
-expressions.
+Inference is split into a small helper layer, the syntax-directed core, and
+public entry points:
+
+```text
+Theory/Inference/Helpers.lean
+      |
+      | Sort/Pi views, application-spine exposure, cache publication
+      v
+Theory/Inference/Core.lean
+      |
+      | syntax-directed typing cases
+      v
+TypeCheckerInfer.lean
+         public infer/check wrappers
+```
 
 Important cases include:
 

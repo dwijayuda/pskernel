@@ -2006,6 +2006,484 @@ def psKernelSelfHostNestedTests : Bool :=
   | _, _ =>
       false
 
+def psKernelDefEqSpecialRuleTests : Bool :=
+  let type1 :=
+    PsKernelExpr.sort
+      (PsKernelLevel.succ PsKernelLevel.zero)
+  let portableStringEnv :=
+    psKernelEnvironmentAddUnchecked
+      psKernelEnvironmentEmpty
+      (PsKernelConstantInfo.axiomInfo {
+        base := {
+          name := psKernelStringName
+          levelParams := List.nil
+          type := type1
+        }
+        isUnsafe := false
+      })
+  let referenceStringEnv :=
+    PSC1Kernel.Environment.empty.addUnchecked
+      (PSC1Kernel.ConstantInfo.axiomInfo {
+        base := {
+          name := PSC1Kernel.kernelStringName
+          levelParams := List.nil
+          type :=
+            PSC1Kernel.Expr.sort
+              (PSC1Kernel.Level.succ
+                PSC1Kernel.Level.zero)
+        }
+        isUnsafe := false
+      })
+  let literal :=
+    PsKernelExpr.lit
+      (PsKernelLiteral.str "Aλ")
+  let expanded :=
+    psKernelStringLitToConstructor "Aλ"
+  let stringParity :=
+    match
+        psKernelIsDefEq
+          4096
+          (psKernelCheckerContextEmpty
+            portableStringEnv)
+          psKernelCheckerStateEmpty
+          literal
+          expanded,
+        PSC1Kernel.isDefEq
+          (PSC1Kernel.CheckerContext.empty
+            referenceStringEnv)
+          (psKernelExprToReference literal)
+          (psKernelExprToReference expanded) with
+    | Except.ok portableResult, Except.ok referenceResult =>
+        Bool.and
+          (Prod.fst portableResult)
+          referenceResult
+    | _, _ =>
+        false
+  let unitName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "ConformanceUnit"
+  let unitCtorName :=
+    PsKernelName.str
+      unitName
+      "mk"
+  let unitType :=
+    PsKernelExpr.const
+      unitName
+      List.nil
+  let portableUnitEnv0 :=
+    psKernelEnvironmentAddUnchecked
+      psKernelEnvironmentEmpty
+      (PsKernelConstantInfo.inductInfo {
+        base := {
+          name := unitName
+          levelParams := List.nil
+          type := type1
+        }
+        numParams := 0
+        numIndices := 0
+        all := List.cons unitName List.nil
+        ctors := List.cons unitCtorName List.nil
+        numNested := 0
+        isRec := false
+        isReflexive := false
+        isUnsafe := false
+      })
+  let portableUnitEnv :=
+    psKernelEnvironmentAddUnchecked
+      portableUnitEnv0
+      (PsKernelConstantInfo.ctorInfo {
+        base := {
+          name := unitCtorName
+          levelParams := List.nil
+          type := unitType
+        }
+        induct := unitName
+        cidx := 0
+        numParams := 0
+        numFields := 0
+        isUnsafe := false
+      })
+  let referenceUnitName :=
+    psKernelNameToReference unitName
+  let referenceUnitCtorName :=
+    psKernelNameToReference unitCtorName
+  let referenceUnitType :=
+    PSC1Kernel.Expr.const
+      referenceUnitName
+      List.nil
+  let referenceUnitEnv0 :=
+    PSC1Kernel.Environment.empty.addUnchecked
+      (PSC1Kernel.ConstantInfo.inductInfo {
+        base := {
+          name := referenceUnitName
+          levelParams := List.nil
+          type :=
+            PSC1Kernel.Expr.sort
+              (PSC1Kernel.Level.succ
+                PSC1Kernel.Level.zero)
+        }
+        numParams := 0
+        numIndices := 0
+        all := List.cons referenceUnitName List.nil
+        ctors := List.cons referenceUnitCtorName List.nil
+        numNested := 0
+        isRec := false
+        isReflexive := false
+        isUnsafe := false
+      })
+  let referenceUnitEnv :=
+    referenceUnitEnv0.addUnchecked
+      (PSC1Kernel.ConstantInfo.ctorInfo {
+        base := {
+          name := referenceUnitCtorName
+          levelParams := List.nil
+          type := referenceUnitType
+        }
+        induct := referenceUnitName
+        cidx := 0
+        numParams := 0
+        numFields := 0
+        isUnsafe := false
+      })
+  let leftName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "unitLeft"
+  let rightName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "unitRight"
+  let portableLeft :=
+    psKernelCheckerContextWithLocal
+      (psKernelCheckerContextEmpty
+        portableUnitEnv)
+      leftName
+      unitType
+      PsKernelBinderInfo.default
+  let portableRight :=
+    psKernelCheckerContextWithLocal
+      (Prod.snd portableLeft)
+      rightName
+      unitType
+      PsKernelBinderInfo.default
+  let referenceLeft :=
+    (PSC1Kernel.CheckerContext.empty
+      referenceUnitEnv).withLocal
+      (psKernelNameToReference leftName)
+      (psKernelNameToReference leftName)
+      referenceUnitType
+      PSC1Kernel.BinderInfo.default
+  let referenceRight :=
+    (Prod.snd referenceLeft).withLocal
+      (psKernelNameToReference rightName)
+      (psKernelNameToReference rightName)
+      referenceUnitType
+      PSC1Kernel.BinderInfo.default
+  let unitParity :=
+    match
+        psKernelIsDefEq
+          4096
+          (Prod.snd portableRight)
+          psKernelCheckerStateEmpty
+          (PsKernelExpr.fvar
+            (Prod.fst portableLeft))
+          (PsKernelExpr.fvar
+            (Prod.fst portableRight)),
+        PSC1Kernel.isDefEq
+          (Prod.snd referenceRight)
+          (PSC1Kernel.Expr.fvar
+            (Prod.fst referenceLeft))
+          (PSC1Kernel.Expr.fvar
+            (Prod.fst referenceRight)) with
+    | Except.ok portableResult, Except.ok referenceResult =>
+        Bool.and
+          (Prod.fst portableResult)
+          referenceResult
+    | _, _ =>
+        false
+  Bool.and stringParity unitParity
+
+def psKernelPortableQuotBaseEnvironment :
+    PsKernelEnvironment :=
+  let universeName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "quotConformanceU"
+  let reflName :=
+    PsKernelName.str
+      psKernelEqName
+      "refl"
+  let env0 :=
+    psKernelEnvironmentAddUnchecked
+      psKernelEnvironmentEmpty
+      (PsKernelConstantInfo.inductInfo {
+        base := {
+          name := psKernelEqName
+          levelParams :=
+            List.cons universeName List.nil
+          type :=
+            psKernelExpectedEqType
+              universeName
+        }
+        numParams := 2
+        numIndices := 1
+        all :=
+          List.cons psKernelEqName List.nil
+        ctors :=
+          List.cons reflName List.nil
+        numNested := 0
+        isRec := false
+        isReflexive := true
+        isUnsafe := false
+      })
+  psKernelEnvironmentAddUnchecked
+    env0
+    (PsKernelConstantInfo.ctorInfo {
+      base := {
+        name := reflName
+        levelParams :=
+          List.cons universeName List.nil
+        type :=
+          psKernelExpectedEqReflType
+            universeName
+      }
+      induct := psKernelEqName
+      cidx := 0
+      numParams := 2
+      numFields := 0
+      isUnsafe := false
+    })
+
+def psKernelReferenceQuotBaseEnvironment :
+    PSC1Kernel.Environment :=
+  let universeName :=
+    PSC1Kernel.Name.str
+      PSC1Kernel.Name.anonymous
+      "quotConformanceU"
+  let reflName :=
+    PSC1Kernel.Name.str
+      PSC1Kernel.Kernel.kernelEqName
+      "refl"
+  let env0 :=
+    PSC1Kernel.Environment.empty.addUnchecked
+      (PSC1Kernel.ConstantInfo.inductInfo {
+        base := {
+          name := PSC1Kernel.Kernel.kernelEqName
+          levelParams :=
+            List.cons universeName List.nil
+          type :=
+            PSC1Kernel.Kernel.expectedEqType
+              universeName
+        }
+        numParams := 2
+        numIndices := 1
+        all :=
+          List.cons
+            PSC1Kernel.Kernel.kernelEqName
+            List.nil
+        ctors :=
+          List.cons reflName List.nil
+        numNested := 0
+        isRec := false
+        isReflexive := true
+        isUnsafe := false
+      })
+  env0.addUnchecked
+    (PSC1Kernel.ConstantInfo.ctorInfo {
+      base := {
+        name := reflName
+        levelParams :=
+          List.cons universeName List.nil
+        type :=
+          PSC1Kernel.Kernel.expectedEqReflType
+            universeName
+      }
+      induct := PSC1Kernel.Kernel.kernelEqName
+      cidx := 0
+      numParams := 2
+      numFields := 0
+      isUnsafe := false
+    })
+
+def psKernelQuotPrimitiveTypesMatch
+    (portable : PsKernelEnvironment)
+    (reference : PSC1Kernel.Environment)
+    (names : List PsKernelName) :
+    Bool :=
+  match names with
+  | List.nil =>
+      true
+  | List.cons name rest =>
+      match
+          psKernelEnvironmentFind
+            portable
+            name,
+          reference.find?
+            (psKernelNameToReference name) with
+      | Option.some portableInfo,
+        Option.some referenceInfo =>
+          if
+              psKernelExprReferenceEq
+                (psKernelConstantInfoType
+                  portableInfo)
+                referenceInfo.type then
+            psKernelQuotPrimitiveTypesMatch
+              portable
+              reference
+              rest
+          else
+            false
+      | _, _ =>
+          false
+
+def psKernelSelfHostQuotTests : Bool :=
+  match
+      psKernelAddQuot
+        psKernelPortableQuotBaseEnvironment,
+      PSC1Kernel.Kernel.addQuot
+        psKernelReferenceQuotBaseEnvironment with
+  | Except.ok portableEnv,
+    Except.ok referenceEnv =>
+      let names :=
+        List.cons
+          psKernelQuotName
+          (List.cons
+            psKernelQuotMkName
+            (List.cons
+              psKernelQuotLiftName
+              (List.cons
+                psKernelQuotIndName
+                List.nil)))
+      let admissionParity :=
+        Bool.and
+          portableEnv.quotInitialized
+          (Bool.and
+            referenceEnv.quotInitialized
+            (psKernelQuotPrimitiveTypesMatch
+              portableEnv
+              referenceEnv
+              names))
+      let x :=
+        PsKernelName.str
+          PsKernelName.anonymous
+          "quot_x"
+      let dummy :=
+        PsKernelExpr.sort
+          PsKernelLevel.zero
+      let representative :=
+        PsKernelExpr.lit
+          (PsKernelLiteral.nat 37)
+      let fn :=
+        PsKernelExpr.lam
+          x
+          dummy
+          (PsKernelExpr.bvar 0)
+          PsKernelBinderInfo.default
+      let quotMk :=
+        psKernelApplyArgs
+          (PsKernelExpr.const
+            psKernelQuotMkName
+            List.nil)
+          (List.cons
+            dummy
+            (List.cons
+              dummy
+              (List.cons
+                representative
+                List.nil)))
+      let liftExpr :=
+        psKernelApplyArgs
+          (PsKernelExpr.const
+            psKernelQuotLiftName
+            List.nil)
+          (List.cons
+            dummy
+            (List.cons
+              dummy
+              (List.cons
+                dummy
+                (List.cons
+                  fn
+                  (List.cons
+                    dummy
+                    (List.cons
+                      quotMk
+                      List.nil))))))
+      let indExpr :=
+        psKernelApplyArgs
+          (PsKernelExpr.const
+            psKernelQuotIndName
+            List.nil)
+          (List.cons
+            dummy
+            (List.cons
+              dummy
+              (List.cons
+                dummy
+                (List.cons
+                  fn
+                  (List.cons
+                    quotMk
+                    List.nil)))))
+      let portableSession :=
+        psKernelMkCheckerSession
+          portableEnv
+          List.nil
+          PsKernelDefinitionSafety.safe
+          0
+          psKernelLeanNatMaxSizeDefault
+      let referenceContext :=
+        PSC1Kernel.CheckerContext.empty
+          referenceEnv
+      let liftParity :=
+        match
+            psKernelSessionWhnf
+              4096
+              portableSession
+              liftExpr,
+            PSC1Kernel.whnf
+              referenceContext
+              (psKernelExprToReference
+                liftExpr) with
+        | Except.ok portableResult,
+          Except.ok referenceResult =>
+            Bool.and
+              (psKernelExprEq
+                (Prod.fst portableResult)
+                representative)
+              (psKernelExprReferenceEq
+                (Prod.fst portableResult)
+                referenceResult)
+        | _, _ =>
+            false
+      let indParity :=
+        match
+            psKernelSessionWhnf
+              4096
+              portableSession
+              indExpr,
+            PSC1Kernel.whnf
+              referenceContext
+              (psKernelExprToReference
+                indExpr) with
+        | Except.ok portableResult,
+          Except.ok referenceResult =>
+            Bool.and
+              (psKernelExprEq
+                (Prod.fst portableResult)
+                representative)
+              (psKernelExprReferenceEq
+                (Prod.fst portableResult)
+                referenceResult)
+        | _, _ =>
+            false
+      Bool.and
+        admissionParity
+        (Bool.and liftParity indParity)
+  | _, _ =>
+      false
+
 def psKernelAdmissionConformanceTests : Bool :=
   let fuel := 4096
   let maxNatSize := psKernelLeanNatMaxSizeDefault
@@ -2624,6 +3102,14 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_PRIMITIVE_DIFFERENTIAL: FAIL")
+  else if !psKernelDefEqSpecialRuleTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_DEFEQ_SPECIAL_CONFORMANCE: FAIL")
+  else if !psKernelSelfHostQuotTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_QUOT_CONFORMANCE: FAIL")
   else if !psKernelAdmissionConformanceTests then
     throw
       (IO.userError

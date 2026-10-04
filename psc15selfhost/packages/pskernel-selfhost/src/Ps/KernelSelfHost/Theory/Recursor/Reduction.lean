@@ -46,7 +46,9 @@ def psKernelReduceInductiveRecWith
       (Prod
         (Option PsKernelExpr)
         PsKernelCheckerState) :=
-  match psKernelExprGetAppFn expr with
+  let recSpine :=
+    psKernelExprGetAppFnArgs expr;
+  match Prod.fst recSpine with
   | PsKernelExpr.const recName recLevels =>
       match
           psKernelEnvironmentFind
@@ -56,7 +58,7 @@ def psKernelReduceInductiveRecWith
           match info with
           | PsKernelConstantInfo.recInfo recursor =>
               let recArgs :=
-                psKernelExprGetAppArgs expr;
+                Prod.snd recSpine;
               let majorIndex :=
                 Nat.add
                   recursor.numParams
@@ -169,7 +171,9 @@ def psKernelReduceInductiveRecWith
                             | Except.ok normalized =>
                                 let major :=
                                   Prod.fst normalized;
-                                match psKernelExprGetAppFn major with
+                                let majorSpine :=
+                                  psKernelExprGetAppFnArgs major;
+                                match Prod.fst majorSpine with
                                 | PsKernelExpr.const ctorName _ =>
                                     match
                                         psKernelFindRecursorRule
@@ -182,7 +186,7 @@ def psKernelReduceInductiveRecWith
                                             (Prod.snd normalized))
                                     | Option.some rule =>
                                         let majorArgs :=
-                                          psKernelExprGetAppArgs major;
+                                          Prod.snd majorSpine;
                                         if
                                             psKernelNatGt
                                               rule.nFields

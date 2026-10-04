@@ -4,8 +4,9 @@ This document records non-semantic performance measurements for
 `packages/pskernel-selfhost`.
 
 These numbers are **engineering baselines**, not semantic evidence and not
-release guarantees. Always preserve the Lean-4.34 conformance/fixed-point gates
-before promoting a performance change.
+release guarantees. Always preserve the Lean-4.34 conformance, PSC1 portable
+source, canonical `.ps`, and differential gates before promoting a
+performance change. Generated fixed-point proof is optional/manual.
 
 ## 1. Benchmark harness
 
@@ -141,8 +142,8 @@ The full portable gate passed for this representation:
 - frozen-reference differential;
 - canonical `.ps` recheck.
 
-The generated fixed-point gate must also remain green before the semantic
-closure is promoted as the new self-host checkpoint.
+The generated fixed-point workflow may be run manually for a bootstrap/release
+checkpoint; it is not a normal performance-promotion gate.
 
 ## 2.3 Hybrid small-environment baseline
 
@@ -224,8 +225,8 @@ The first intermediate environment-promotion commit did not yet route
 `Environment.find` through the small representation and failed the Linux
 special-defeq differential. That intermediate commit is **not** a valid
 checkpoint. The corrected semantic commit is `0b2641e48...`, which passes the
-full local frozen-reference differential; CI/fixed-point promotion remains
-required before recording it as the current self-host evidence checkpoint.
+full local frozen-reference differential. Portable CI promotion is required;
+generated fixed-point evidence is optional/manual.
 
 ## 2.4 Cold DefEq stage profile
 

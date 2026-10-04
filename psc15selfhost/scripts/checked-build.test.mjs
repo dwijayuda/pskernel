@@ -98,7 +98,7 @@ for (const kind of ['lean','ps']) test(`actual ${kind} natural literal passes ow
   try {
     await writeFile(path.join(dir,'package.json'),'{"type":"module"}');
     const entryPath=path.join(dir,'Main.'+kind),outputPath=path.join(dir,'out.js');
-    await writeFile(entryPath,kind==='lean'?'def answer : Nat := 42\n':'def answer: Nat := 42;\n');
+    await writeFile(entryPath,kind==='lean'?'def answer : Nat := 42\n':'const answer: Nat := { 42 }\n');
     const receipt=await buildChecked({entryPath,outputPath,seedPath:seed,kernel:'pskernel-core'});
     assert.equal((await import(pathToFileURL(outputPath).href)).answer,42n);
     assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-uniform-algebraic/11');
@@ -107,7 +107,7 @@ for (const kind of ['lean','ps']) test(`actual ${kind} natural literal passes ow
 
 for (const [kind, source] of [
   ['lean', 'def answer : Nat := 42\n'],
-  ['ps', 'def answer: Nat := 42;\n'],
+  ['ps', 'const answer: Nat := { 42 }\n'],
 ]) {
   test(`real ${kind} frontend -> WASM Lean kernel -> tsc -> executed JavaScript`, { skip: !native }, async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'psc2-checked-real-'));
@@ -175,7 +175,7 @@ for (const kind of ['lean','ps']) test(`actual ${kind} closed record passes owne
     const entryPath=path.join(dir,'Main.'+kind),outputPath=path.join(dir,'out.js');
     const source=kind==='lean'
       ? 'structure OwnedPair where\n  left : Nat\n  right : Nat\ndef pair : OwnedPair := OwnedPair.mk 7 11\n'
-      : 'structure OwnedPair where { left : Nat; right : Nat; };\ndef pair : OwnedPair := OwnedPair.mk(7, 11);\n';
+      : 'structure OwnedPair where {\n  left : Nat,\n  right : Nat\n}\nconst pair: OwnedPair := { OwnedPair.mk(7, 11) }\n';
     await writeFile(entryPath,source);
     const receipt=await buildChecked({entryPath,outputPath,seedPath:seed,kernel:'pskernel-core'});
     const result=(await import(pathToFileURL(outputPath).href)).pair;

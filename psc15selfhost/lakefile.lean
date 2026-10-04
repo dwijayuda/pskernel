@@ -226,6 +226,7 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Theory.DefEq.BinderSpines,
     `Ps.KernelSelfHost.Theory.DefEq.Quick,
     `Ps.KernelSelfHost.TypeCheckerDefEqSupport,
+    `Ps.KernelSelfHost.Theory.DefEq.DeltaStep,
     `Ps.KernelSelfHost.Theory.DefEq.LazyDelta,
     `Ps.KernelSelfHost.Theory.DefEq.FinalRules,
     `Ps.KernelSelfHost.Theory.DefEq.Shortcuts,

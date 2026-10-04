@@ -615,12 +615,12 @@ def psVerifiedIrValidateExprListWith
   fun (values : List PsVerifiedIrExpr) =>
     match values with
     | List.nil =>
-      Except.ok Unit.unit
-  | List.cons value rest =>
-      match validateExpr value with
-      | Except.error error => Except.error error
-      | Except.ok _ =>
-          psVerifiedIrValidateExprListWith validateExpr rest
+        Except.ok Unit.unit
+    | List.cons value rest =>
+        match validateExpr value with
+        | Except.error error => Except.error error
+        | Except.ok _ =>
+            psVerifiedIrValidateExprListWith validateExpr rest
 
 def psVerifiedIrValidateRecordFieldsWith
     (structureName : String)
@@ -633,27 +633,27 @@ def psVerifiedIrValidateRecordFieldsWith
   fun (fields : List (String × PsVerifiedIrExpr)) =>
     match fields with
     | List.nil =>
-      Except.ok Unit.unit
-  | List.cons field rest =>
-      match field with
-      | Prod.mk fieldName value =>
-          if
-              psVerifiedIrStructureHasField
-                structureFields
-                fieldName then
-            match validateExpr value with
-            | Except.error error => Except.error error
-            | Except.ok _ =>
-                psVerifiedIrValidateRecordFieldsWith
-                  structureName
+        Except.ok Unit.unit
+    | List.cons field rest =>
+        match field with
+        | Prod.mk fieldName value =>
+            if
+                psVerifiedIrStructureHasField
                   structureFields
-                  validateExpr
-                  rest
-          else
-            Except.error
-              (PsVerifiedIrValidationError.unknownStructureField
-                structureName
-                fieldName)
+                  fieldName then
+              match validateExpr value with
+              | Except.error error => Except.error error
+              | Except.ok _ =>
+                  psVerifiedIrValidateRecordFieldsWith
+                    structureName
+                    structureFields
+                    validateExpr
+                    rest
+            else
+              Except.error
+                (PsVerifiedIrValidationError.unknownStructureField
+                  structureName
+                  fieldName)
 
 def psVerifiedIrValidateConstructorFieldsWith
     (inductiveName constructorName : String)
@@ -666,29 +666,29 @@ def psVerifiedIrValidateConstructorFieldsWith
   fun (fields : List (String × PsVerifiedIrExpr)) =>
     match fields with
     | List.nil =>
-      Except.ok Unit.unit
-  | List.cons field rest =>
-      match field with
-      | Prod.mk fieldName value =>
-          if
-              psVerifiedIrConstructorHasField
-                constructorFields
-                fieldName then
-            match validateExpr value with
-            | Except.error error => Except.error error
-            | Except.ok _ =>
-                psVerifiedIrValidateConstructorFieldsWith
+        Except.ok Unit.unit
+    | List.cons field rest =>
+        match field with
+        | Prod.mk fieldName value =>
+            if
+                psVerifiedIrConstructorHasField
+                  constructorFields
+                  fieldName then
+              match validateExpr value with
+              | Except.error error => Except.error error
+              | Except.ok _ =>
+                  psVerifiedIrValidateConstructorFieldsWith
+                    inductiveName
+                    constructorName
+                    constructorFields
+                    validateExpr
+                    rest
+            else
+              Except.error
+                (PsVerifiedIrValidationError.unknownConstructorField
                   inductiveName
                   constructorName
-                  constructorFields
-                  validateExpr
-                  rest
-          else
-            Except.error
-              (PsVerifiedIrValidationError.unknownConstructorField
-                inductiveName
-                constructorName
-                fieldName)
+                  fieldName)
 
 def psVerifiedIrValidateBindings
     (inductiveName constructorName : String)
@@ -698,23 +698,23 @@ def psVerifiedIrValidateBindings
   fun (bindings : List PsVerifiedIrMatchBinding) =>
     match bindings with
     | List.nil =>
-      Except.ok Unit.unit
-  | List.cons binding rest =>
-      if
-          psVerifiedIrConstructorHasField
-            constructorFields
-            binding.field then
-        psVerifiedIrValidateBindings
-          inductiveName
-          constructorName
-          constructorFields
-          rest
-      else
-        Except.error
-          (PsVerifiedIrValidationError.unknownConstructorField
+        Except.ok Unit.unit
+    | List.cons binding rest =>
+        if
+            psVerifiedIrConstructorHasField
+              constructorFields
+              binding.field then
+          psVerifiedIrValidateBindings
             inductiveName
             constructorName
-            binding.field)
+            constructorFields
+            rest
+        else
+          Except.error
+            (PsVerifiedIrValidationError.unknownConstructorField
+              inductiveName
+              constructorName
+              binding.field)
 
 def psVerifiedIrValidateAlternativeWith
     (inductiveName : String)
@@ -769,21 +769,21 @@ def psVerifiedIrValidateAlternativesWith
             PsVerifiedIrExpr)) =>
     match alternatives with
     | List.nil =>
-      Except.ok Unit.unit
-  | List.cons alternative rest =>
-      match
-          psVerifiedIrValidateAlternativeWith
-            inductiveName
-            constructors
-            validateExpr
-            alternative with
-      | Except.error error => Except.error error
-      | Except.ok _ =>
-          psVerifiedIrValidateAlternativesWith
-            inductiveName
-            constructors
-            validateExpr
-            rest
+        Except.ok Unit.unit
+    | List.cons alternative rest =>
+        match
+            psVerifiedIrValidateAlternativeWith
+              inductiveName
+              constructors
+              validateExpr
+              alternative with
+        | Except.error error => Except.error error
+        | Except.ok _ =>
+            psVerifiedIrValidateAlternativesWith
+              inductiveName
+              constructors
+              validateExpr
+              rest
 
 def psVerifiedIrValidateExprReferencesWithFuel
     (module : PsVerifiedIrModule)
@@ -967,18 +967,18 @@ def psVerifiedIrValidateDeclarationsWith
   fun (declarations : List PsVerifiedIrDeclaration) =>
     match declarations with
     | List.nil =>
-      Except.ok Unit.unit
-  | List.cons declaration rest =>
-      match
-          psVerifiedIrValidateExprReferencesWithFuel
-            module
-            4096
-            declaration.body with
-      | Except.error error => Except.error error
-      | Except.ok _ =>
-          psVerifiedIrValidateDeclarationsWith
-            module
-            rest
+        Except.ok Unit.unit
+    | List.cons declaration rest =>
+        match
+            psVerifiedIrValidateExprReferencesWithFuel
+              module
+              4096
+              declaration.body with
+        | Except.error error => Except.error error
+        | Except.ok _ =>
+            psVerifiedIrValidateDeclarationsWith
+              module
+              rest
 
 def psVerifiedIrValidateReferences
     (module : PsVerifiedIrModule) :

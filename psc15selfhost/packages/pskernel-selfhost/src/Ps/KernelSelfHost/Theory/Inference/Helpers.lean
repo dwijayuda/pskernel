@@ -52,18 +52,23 @@ def psKernelEnsureSortWith
     (type : PsKernelExpr) :
     Except String
       (Prod PsKernelLevel PsKernelCheckerState) :=
-  match whnf context state type with
-  | Except.error error =>
-      Except.error error
-  | Except.ok result =>
-      match Prod.fst result with
-      | PsKernelExpr.sort level =>
-          Except.ok
-            (Prod.mk
-              level
-              (Prod.snd result))
-      | _ =>
-          Except.error "expected sort"
+  match type with
+  | PsKernelExpr.sort level =>
+      Except.ok
+        (Prod.mk level state)
+  | _ =>
+      match whnf context state type with
+      | Except.error error =>
+          Except.error error
+      | Except.ok result =>
+          match Prod.fst result with
+          | PsKernelExpr.sort level =>
+              Except.ok
+                (Prod.mk
+                  level
+                  (Prod.snd result))
+          | _ =>
+              Except.error "expected sort"
 
 def psKernelEnsureForallWith
     (whnf :
@@ -77,24 +82,35 @@ def psKernelEnsureForallWith
     (type : PsKernelExpr) :
     Except String
       (Prod PsKernelForallView PsKernelCheckerState) :=
-  match whnf context state type with
-  | Except.error error =>
-      Except.error error
-  | Except.ok result =>
-      match Prod.fst result with
-      | PsKernelExpr.forallE name domain body binderInfo =>
-          let view :=
-            PsKernelForallView.mk
-              name
-              domain
-              body
-              binderInfo;
-          Except.ok
-            (Prod.mk
-              view
-              (Prod.snd result))
-      | _ =>
-          Except.error "expected function type"
+  match type with
+  | PsKernelExpr.forallE name domain body binderInfo =>
+      Except.ok
+        (Prod.mk
+          (PsKernelForallView.mk
+            name
+            domain
+            body
+            binderInfo)
+          state)
+  | _ =>
+      match whnf context state type with
+      | Except.error error =>
+          Except.error error
+      | Except.ok result =>
+          match Prod.fst result with
+          | PsKernelExpr.forallE name domain body binderInfo =>
+              let view :=
+                PsKernelForallView.mk
+                  name
+                  domain
+                  body
+                  binderInfo;
+              Except.ok
+                (Prod.mk
+                  view
+                  (Prod.snd result))
+          | _ =>
+              Except.error "expected function type"
 
 def psKernelInferAppOnlyLoopWithFuel
     (fuel : Nat) :

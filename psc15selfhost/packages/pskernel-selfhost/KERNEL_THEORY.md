@@ -83,7 +83,9 @@ These modules define the data manipulated by the checker.
 12. `TypeCheckerWhnf.lean`
 13. `TypeCheckerProjection.lean`
 14. `TypeCheckerInfer.lean`
-15. `TypeCheckerRecursor.lean`
+15. `Theory/Recursor/Analysis.lean`
+16. `Theory/Recursor/Reduction.lean`
+17. `TypeCheckerRecursor.lean`
 
 ### Definitional equality
 
@@ -208,6 +210,26 @@ whnfCore
 
 This order follows Lean 4.34. The order is observable because algorithmic
 definitional equality is incomplete.
+
+## 6.1 Recursor reduction
+
+Recursor reduction is split into three layers:
+
+```text
+Theory/Recursor/Analysis.lean
+      |
+      | major-family discovery, K conversion, structure conversion
+      v
+Theory/Recursor/Reduction.lean
+      |
+      | Quot / inductive rule selection and computation
+      v
+TypeCheckerRecursor.lean
+         bounded integration with WHNF and inference
+```
+
+This keeps the semantic iota/K logic readable while the public integration
+layer makes recursion/resource behavior explicit and fail-closed.
 
 ## 7. Algorithmic definitional equality
 

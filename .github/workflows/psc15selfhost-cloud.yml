@@ -48,6 +48,14 @@ jobs:
         working-directory: psc15selfhost
         run: node check-psc1-source.mjs --all-portable
 
+      - name: Check workspace and bootstrap composition policy
+        working-directory: psc15selfhost
+        run: |
+          npm run check:workspace
+          npm run check:layout
+          npm run test:bootstrap-closure-contract
+          npm run test:bootstrap-root-minimality
+
       - name: Build semantic compiler layers
         working-directory: psc15selfhost
         run: |
@@ -56,10 +64,13 @@ jobs:
             PsErasure \
             PsCompiler \
             PsBackendTs \
+            PsDriverTs \
             PsBackendRust \
+            PsDriverRust \
             psc1_erasure_tests \
             psc2_minimal_selfhost_tests \
-            psc1_backend_ts_tests
+            psc1_backend_ts_tests \
+            psc1_backend_rust_source_tests
 
       - name: Run VerifiedIR and erasure corpus
         working-directory: psc15selfhost
@@ -72,6 +83,10 @@ jobs:
       - name: Run TypeScript backend corpus
         working-directory: psc15selfhost
         run: lake exe psc1_backend_ts_tests
+
+      - name: Run Rust source driver corpus
+        working-directory: psc15selfhost
+        run: lake exe psc1_backend_rust_source_tests
 
       - name: Enforce semantic boundaries
         working-directory: psc15selfhost

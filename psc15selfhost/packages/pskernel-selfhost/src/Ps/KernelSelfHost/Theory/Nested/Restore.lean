@@ -243,7 +243,8 @@ def psKernelSimpleNestedAddOriginals
     renames
 
 def psKernelSimpleNestedAddAuxRecursorsWorker
-    (families : List PsKernelSimpleNestedAuxFamily) :
+    (pending : List PsKernelSimpleNestedAuxFamily) :
+    List PsKernelSimpleNestedAuxFamily ->
     PsKernelEnvironment ->
     PsKernelEnvironment ->
     List PsKernelName ->
@@ -251,9 +252,10 @@ def psKernelSimpleNestedAddAuxRecursorsWorker
     Nat ->
     List (Prod PsKernelName PsKernelName) ->
     Except String PsKernelEnvironment :=
-  match families with
+  match pending with
   | List.nil =>
       fun
+        (_allFamilies : List PsKernelSimpleNestedAuxFamily)
         (_transformed : PsKernelEnvironment)
         (work : PsKernelEnvironment)
         (_originalNames : List PsKernelName)
@@ -266,6 +268,7 @@ def psKernelSimpleNestedAddAuxRecursorsWorker
         psKernelSimpleNestedAddAuxRecursorsWorker
           rest;
       fun
+        (allFamilies : List PsKernelSimpleNestedAuxFamily)
         (transformed : PsKernelEnvironment)
         (work : PsKernelEnvironment)
         (originalNames : List PsKernelName)
@@ -300,7 +303,7 @@ def psKernelSimpleNestedAddAuxRecursorsWorker
                       match
                           psKernelSimpleNestedRestoreRecursor
                             originalNames
-                            families
+                            allFamilies
                             renames
                             canonicalParams
                             numParams
@@ -311,6 +314,7 @@ def psKernelSimpleNestedAddAuxRecursorsWorker
                           Except.error error
                       | Except.ok restored =>
                           smaller
+                            allFamilies
                             transformed
                             (psKernelEnvironmentAddUnchecked
                               work
@@ -334,6 +338,7 @@ def psKernelSimpleNestedAddAuxRecursors
     (renames : List (Prod PsKernelName PsKernelName)) :
     Except String PsKernelEnvironment :=
   psKernelSimpleNestedAddAuxRecursorsWorker
+    families
     families
     transformed
     base

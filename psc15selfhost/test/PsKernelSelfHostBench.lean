@@ -2106,6 +2106,51 @@ def psKernelBenchNestedValidate
     0
     psKernelLeanNatMaxSizeDefault
 
+
+def psKernelBenchNestedValidateTemplates
+    (finalEnvironment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    Except String Unit :=
+  psKernelSimpleNestedValidateTemplates
+    65536
+    finalEnvironment
+    psKernelBenchNestedDecl.levelParams
+    PsKernelDefinitionSafety.safe
+    List.nil
+    0
+    psKernelLeanNatMaxSizeDefault
+    processed.state.aux
+
+def psKernelBenchNestedValidateOriginals
+    (finalEnvironment : PsKernelEnvironment) :
+    Except String Unit :=
+  psKernelSimpleNestedValidateOriginals
+    65536
+    finalEnvironment
+    psKernelBenchNestedDecl
+    PsKernelDefinitionSafety.safe
+    0
+    psKernelLeanNatMaxSizeDefault
+    psKernelBenchNestedDecl.types
+
+def psKernelBenchNestedValidateAux
+    (transformed : PsKernelEnvironment)
+    (finalEnvironment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    Except String Unit :=
+  psKernelSimpleNestedValidateAux
+    65536
+    transformed
+    finalEnvironment
+    psKernelBenchNestedDecl
+    PsKernelDefinitionSafety.safe
+    List.nil
+    0
+    psKernelLeanNatMaxSizeDefault
+    processed.state.aux
+    (psKernelBenchNestedRenames processed)
+    processed.state.aux
+
 partial def psKernelBenchNestedAdmissionLoop
     (iterations : Nat)
     (environment : PsKernelEnvironment) :
@@ -2264,6 +2309,76 @@ partial def psKernelBenchNestedValidateLoop
           processed
       match
           psKernelBenchNestedValidate
+            transformed
+            finalEnvironment
+            processed with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+
+partial def psKernelBenchNestedValidateTemplatesLoop
+    (iterations : Nat)
+    (finalEnvironment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedValidateTemplatesLoop
+          rest
+          finalEnvironment
+          processed
+      match
+          psKernelBenchNestedValidateTemplates
+            finalEnvironment
+            processed with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedValidateOriginalsLoop
+    (iterations : Nat)
+    (finalEnvironment : PsKernelEnvironment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedValidateOriginalsLoop
+          rest
+          finalEnvironment
+      match
+          psKernelBenchNestedValidateOriginals
+            finalEnvironment with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedValidateAuxLoop
+    (iterations : Nat)
+    (transformed : PsKernelEnvironment)
+    (finalEnvironment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedValidateAuxLoop
+          rest
+          transformed
+          finalEnvironment
+          processed
+      match
+          psKernelBenchNestedValidateAux
             transformed
             finalEnvironment
             processed with
@@ -3236,6 +3351,56 @@ def main : IO Unit := do
       toString nestedRestoreHits ++
       "/" ++
       toString nestedValidateHits)
+
+
+  let nestedValidateTemplatesStart ← IO.monoNanosNow
+  let nestedValidateTemplatesHits ←
+    psKernelBenchNestedValidateTemplatesLoop
+      nestedAdmissionIterations
+      nestedFinal
+      nestedProcessed
+  let nestedValidateTemplatesStop ← IO.monoNanosNow
+
+  let nestedValidateOriginalsStart ← IO.monoNanosNow
+  let nestedValidateOriginalsHits ←
+    psKernelBenchNestedValidateOriginalsLoop
+      nestedAdmissionIterations
+      nestedFinal
+  let nestedValidateOriginalsStop ← IO.monoNanosNow
+
+  let nestedValidateAuxStart ← IO.monoNanosNow
+  let nestedValidateAuxHits ←
+    psKernelBenchNestedValidateAuxLoop
+      nestedAdmissionIterations
+      nestedTransformed
+      nestedFinal
+      nestedProcessed
+  let nestedValidateAuxStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH nested_validate_templates_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedValidateTemplatesStart
+          nestedValidateTemplatesStop) ++
+      " nested_validate_originals_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedValidateOriginalsStart
+          nestedValidateOriginalsStop) ++
+      " nested_validate_aux_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedValidateAuxStart
+          nestedValidateAuxStop) ++
+      " iterations=" ++
+      toString nestedAdmissionIterations ++
+      " hits=" ++
+      toString nestedValidateTemplatesHits ++
+      "/" ++
+      toString nestedValidateOriginalsHits ++
+      "/" ++
+      toString nestedValidateAuxHits)
 
   IO.println
     ("PSKERNEL_BENCH structural_defeq_pskernel_ns=" ++

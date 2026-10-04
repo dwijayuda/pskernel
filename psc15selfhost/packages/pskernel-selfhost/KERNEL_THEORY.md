@@ -114,8 +114,11 @@ Lean 4.34 algorithmic-equality order rather than a bag of helper implementations
 27. `Theory/Inductive/Recursor.lean`
 28. `Theory/Inductive/Elimination.lean`
 29. `InductiveAdmission.lean`
-30. `MutualInductive.lean`
-31. `NestedInductive.lean`
+30. `Theory/Mutual/Analysis.lean`
+31. `Theory/Mutual/Recursor.lean`
+32. `Theory/Mutual/Admission.lean`
+33. `MutualInductive.lean` (compatibility umbrella)
+34. `NestedInductive.lean`
 
 ### Backend/runtime mechanisms
 
@@ -288,9 +291,26 @@ mutual bundle.
 
 ## 12. Mutual inductives
 
-`MutualInductive.lean` supports multiple simultaneously declared families,
-with a separate motive per family and recursive hypotheses for recursive
-arguments that may target any member of the bundle.
+Mutual inductives are split by theory responsibility:
+
+```text
+Theory/Mutual/Analysis.lean
+      |
+      | discover targets, constructor fields, recursive occurrences
+      v
+Theory/Mutual/Recursor.lean
+      |
+      | motives, minors, recursive calls, computation rules
+      v
+Theory/Mutual/Admission.lean
+         checked environment installation
+```
+
+`MutualInductive.lean` remains a stable umbrella import.
+
+The implementation supports multiple simultaneously declared families, with a
+separate motive per family and recursive hypotheses for recursive arguments
+that may target any member of the bundle.
 
 The families in one bundle must satisfy Lean's shared-universe constraints.
 

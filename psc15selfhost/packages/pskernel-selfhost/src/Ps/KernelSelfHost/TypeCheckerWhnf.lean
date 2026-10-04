@@ -825,6 +825,72 @@ def psKernelWhnfCoreWithFuel
                         Except.ok
                           (Prod.mk expr state)
 
+def psKernelWhnfAfterCore
+    (continueWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (original : PsKernelExpr)
+    (core : PsKernelExpr) :
+    Except String
+      (Prod PsKernelExpr PsKernelCheckerState) :=
+  match
+      psKernelReduceNative
+        context
+        core with
+  | Except.error error =>
+      Except.error error
+  | Except.ok nativeResult =>
+      match nativeResult with
+      | Option.some value =>
+          psKernelWhnfFinish
+            original
+            value
+            state
+      | Option.none =>
+          match
+              psKernelReduceNatWith
+                continueWhnf
+                context
+                state
+                core with
+          | Except.error error =>
+              Except.error error
+          | Except.ok natResult =>
+              match Prod.fst natResult with
+              | Option.some value =>
+                  psKernelWhnfFinish
+                    original
+                    value
+                    (Prod.snd natResult)
+              | Option.none =>
+                  match
+                      psKernelUnfoldDefinition
+                        context
+                        core with
+                  | Option.none =>
+                      psKernelWhnfFinish
+                        original
+                        core
+                        (Prod.snd natResult)
+                  | Option.some value =>
+                      match
+                          continueWhnf
+                            context
+                            (Prod.snd natResult)
+                            value with
+                      | Except.error error =>
+                          Except.error error
+                      | Except.ok result =>
+                          psKernelWhnfFinish
+                            original
+                            (Prod.fst result)
+                            (Prod.snd result)
+
 def psKernelWhnfWithFuel
     (fuel : Nat) :
     (PsKernelCheckerContext ->
@@ -942,46 +1008,12 @@ def psKernelWhnfWithFuel
                               Prod.fst coreResult;
                             let state1 :=
                               Prod.snd coreResult;
-                            match
-                                psKernelReduceNatWith
-                                  publicWhnf
-                                  context
-                                  state1
-                                  core with
-                            | Except.error error =>
-                                Except.error error
-                            | Except.ok natResult =>
-                                match
-                                    Prod.fst natResult with
-                                | Option.some value =>
-                                    psKernelWhnfFinish
-                                      expr
-                                      value
-                                      (Prod.snd natResult)
-                                | Option.none =>
-                                    match
-                                        psKernelUnfoldDefinition
-                                          context
-                                          core with
-                                    | Option.none =>
-                                        psKernelWhnfFinish
-                                          expr
-                                          core
-                                          (Prod.snd natResult)
-                                    | Option.some value =>
-                                        match
-                                            smaller
-                                              reduceRecursor
-                                              context
-                                              (Prod.snd natResult)
-                                              value with
-                                        | Except.error error =>
-                                            Except.error error
-                                        | Except.ok result =>
-                                            psKernelWhnfFinish
-                                              expr
-                                              (Prod.fst result)
-                                              (Prod.snd result)
+                            psKernelWhnfAfterCore
+                              publicWhnf
+                              context
+                              state1
+                              expr
+                              core
         | _ =>
             match
                 psKernelExprMapGet
@@ -1018,46 +1050,12 @@ def psKernelWhnfWithFuel
                       Prod.fst coreResult;
                     let state1 :=
                       Prod.snd coreResult;
-                    match
-                        psKernelReduceNatWith
-                          publicWhnf
-                          context
-                          state1
-                          core with
-                    | Except.error error =>
-                        Except.error error
-                    | Except.ok natResult =>
-                        match
-                            Prod.fst natResult with
-                        | Option.some value =>
-                            psKernelWhnfFinish
-                              expr
-                              value
-                              (Prod.snd natResult)
-                        | Option.none =>
-                            match
-                                psKernelUnfoldDefinition
-                                  context
-                                  core with
-                            | Option.none =>
-                                psKernelWhnfFinish
-                                  expr
-                                  core
-                                  (Prod.snd natResult)
-                            | Option.some value =>
-                                match
-                                    smaller
-                                      reduceRecursor
-                                      context
-                                      (Prod.snd natResult)
-                                      value with
-                                | Except.error error =>
-                                    Except.error error
-                                | Except.ok result =>
-                                    psKernelWhnfFinish
-                                      expr
-                                      (Prod.fst result)
-                                      (Prod.snd result)
+                    psKernelWhnfAfterCore
+                      publicWhnf
+                      context
+                      state1
+                      expr
+                      core
 
 def psKernelWhnfNoRecursor
     (fuel : Nat)

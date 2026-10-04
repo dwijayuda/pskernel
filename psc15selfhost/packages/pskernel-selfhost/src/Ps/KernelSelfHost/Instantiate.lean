@@ -466,9 +466,12 @@ def psKernelExprInstantiate
 def psKernelExprInstantiate1
     (expr : PsKernelExpr)
     (replacement : PsKernelExpr) : PsKernelExpr :=
-  psKernelExprInstantiate
+  if psKernelExprHasLooseBVar expr then
+    psKernelExprInstantiate
+      expr
+      (List.cons replacement List.nil)
+  else
     expr
-    (List.cons replacement List.nil)
 
 def psKernelExprInstantiateRev
     (expr : PsKernelExpr)

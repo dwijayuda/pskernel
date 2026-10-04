@@ -2021,6 +2021,91 @@ partial def psKernelBenchLeanMutualAdmissionLoop
           pure tail
 
 
+
+def psKernelBenchNestedProcess
+    (environment : PsKernelEnvironment) :
+    Except String PsKernelSimpleNestedProcessQueueResult :=
+  psKernelSimpleNestedProcessQueue
+    65536
+    environment
+    psKernelBenchNestedDecl.levelParams
+    (psKernelSimpleMutualNames
+      psKernelBenchNestedDecl.types)
+    List.nil
+    psKernelBenchNestedDecl.numParams
+    psKernelBenchNestedDecl.types
+    List.nil
+    (PsKernelSimpleNestedMapState.mk
+      List.nil
+      1
+      List.nil)
+
+def psKernelBenchNestedTransform
+    (environment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    Except String PsKernelEnvironment :=
+  psKernelAddSimpleMutualInductive
+    65536
+    environment
+    (PsKernelSimpleMutualInductiveDecl.mk
+      psKernelBenchNestedDecl.levelParams
+      psKernelBenchNestedDecl.numParams
+      processed.types
+      psKernelBenchNestedDecl.isUnsafe)
+    0
+    psKernelLeanNatMaxSizeDefault
+
+def psKernelBenchNestedRenames
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    List (Prod PsKernelName PsKernelName) :=
+  psKernelSimpleNestedMakeRenames
+    psKernelBenchNestedTreeRecName
+    processed.state.aux
+
+def psKernelBenchNestedRestore
+    (base : PsKernelEnvironment)
+    (transformed : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    Except String PsKernelEnvironment :=
+  let renames :=
+    psKernelBenchNestedRenames processed;
+  match
+      psKernelSimpleNestedAddOriginals
+        transformed
+        base
+        psKernelBenchNestedDecl
+        List.nil
+        processed.state.aux
+        renames with
+  | Except.error error =>
+      Except.error error
+  | Except.ok restoredOriginals =>
+      psKernelSimpleNestedAddAuxRecursors
+        transformed
+        restoredOriginals
+        (psKernelSimpleMutualNames
+          psKernelBenchNestedDecl.types)
+        List.nil
+        psKernelBenchNestedDecl.numParams
+        processed.state.aux
+        renames
+
+def psKernelBenchNestedValidate
+    (transformed : PsKernelEnvironment)
+    (finalEnvironment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    Except String Unit :=
+  psKernelSimpleNestedValidateRestored
+    65536
+    transformed
+    finalEnvironment
+    psKernelBenchNestedDecl
+    List.nil
+    processed.state.aux
+    (psKernelBenchNestedRenames processed)
+    0
+    psKernelLeanNatMaxSizeDefault
+
 partial def psKernelBenchNestedAdmissionLoop
     (iterations : Nat)
     (environment : PsKernelEnvironment) :
@@ -2087,6 +2172,104 @@ partial def psKernelBenchLeanNestedAdmissionLoop
           | _, _ =>
               pure tail
       | .error _ =>
+          pure tail
+
+
+partial def psKernelBenchNestedPreprocessLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedPreprocessLoop
+          rest
+          environment
+      match psKernelBenchNestedProcess environment with
+      | Except.ok processed =>
+          match processed.state.aux with
+          | List.cons _ _ =>
+              pure (Nat.succ tail)
+          | List.nil =>
+              pure tail
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedTransformLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedTransformLoop
+          rest
+          environment
+          processed
+      match
+          psKernelBenchNestedTransform
+            environment
+            processed with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedRestoreLoop
+    (iterations : Nat)
+    (base : PsKernelEnvironment)
+    (transformed : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedRestoreLoop
+          rest
+          base
+          transformed
+          processed
+      match
+          psKernelBenchNestedRestore
+            base
+            transformed
+            processed with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedValidateLoop
+    (iterations : Nat)
+    (transformed : PsKernelEnvironment)
+    (finalEnvironment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedValidateLoop
+          rest
+          transformed
+          finalEnvironment
+          processed
+      match
+          psKernelBenchNestedValidate
+            transformed
+            finalEnvironment
+            processed with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
           pure tail
 
 def main : IO Unit := do
@@ -2935,6 +3118,124 @@ def main : IO Unit := do
       toString nestedAdmissionPsHits ++
       "/" ++
       toString nestedAdmissionLeanHits)
+
+
+  let nestedProcessed ←
+    match
+        psKernelBenchNestedProcess
+          nestedAdmissionPsBase with
+    | Except.ok value =>
+        pure value
+    | Except.error error =>
+        throw
+          (IO.userError
+            ("PSKERNEL_BENCH nested preprocessing setup failed: " ++
+              error))
+
+  let nestedTransformed ←
+    match
+        psKernelBenchNestedTransform
+          nestedAdmissionPsBase
+          nestedProcessed with
+    | Except.ok value =>
+        pure value
+    | Except.error error =>
+        throw
+          (IO.userError
+            ("PSKERNEL_BENCH nested transformed setup failed: " ++
+              error))
+
+  let nestedFinal ←
+    match
+        psKernelBenchNestedRestore
+          nestedAdmissionPsBase
+          nestedTransformed
+          nestedProcessed with
+    | Except.ok value =>
+        pure value
+    | Except.error error =>
+        throw
+          (IO.userError
+            ("PSKERNEL_BENCH nested restore setup failed: " ++
+              error))
+
+  match
+      psKernelBenchNestedValidate
+        nestedTransformed
+        nestedFinal
+        nestedProcessed with
+  | Except.ok _ =>
+      pure ()
+  | Except.error error =>
+      throw
+        (IO.userError
+          ("PSKERNEL_BENCH nested validation setup failed: " ++
+            error))
+
+  let nestedPreprocessStart ← IO.monoNanosNow
+  let nestedPreprocessHits ←
+    psKernelBenchNestedPreprocessLoop
+      nestedAdmissionIterations
+      nestedAdmissionPsBase
+  let nestedPreprocessStop ← IO.monoNanosNow
+
+  let nestedTransformStart ← IO.monoNanosNow
+  let nestedTransformHits ←
+    psKernelBenchNestedTransformLoop
+      nestedAdmissionIterations
+      nestedAdmissionPsBase
+      nestedProcessed
+  let nestedTransformStop ← IO.monoNanosNow
+
+  let nestedRestoreStart ← IO.monoNanosNow
+  let nestedRestoreHits ←
+    psKernelBenchNestedRestoreLoop
+      nestedAdmissionIterations
+      nestedAdmissionPsBase
+      nestedTransformed
+      nestedProcessed
+  let nestedRestoreStop ← IO.monoNanosNow
+
+  let nestedValidateStart ← IO.monoNanosNow
+  let nestedValidateHits ←
+    psKernelBenchNestedValidateLoop
+      nestedAdmissionIterations
+      nestedTransformed
+      nestedFinal
+      nestedProcessed
+  let nestedValidateStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH nested_stage_preprocess_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedPreprocessStart
+          nestedPreprocessStop) ++
+      " nested_stage_transform_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedTransformStart
+          nestedTransformStop) ++
+      " nested_stage_restore_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedRestoreStart
+          nestedRestoreStop) ++
+      " nested_stage_validate_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedValidateStart
+          nestedValidateStop) ++
+      " iterations=" ++
+      toString nestedAdmissionIterations ++
+      " hits=" ++
+      toString nestedPreprocessHits ++
+      "/" ++
+      toString nestedTransformHits ++
+      "/" ++
+      toString nestedRestoreHits ++
+      "/" ++
+      toString nestedValidateHits)
 
   IO.println
     ("PSKERNEL_BENCH structural_defeq_pskernel_ns=" ++

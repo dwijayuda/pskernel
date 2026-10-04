@@ -1,5 +1,5 @@
 import Ps.CompilerIr.Specialize
-import Ps.BackendWasm.Binary
+import Ps.BackendWasm.Support
 import Ps.BackendWasm.LowerInt
 import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.RuntimeNat

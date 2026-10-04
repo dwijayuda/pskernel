@@ -408,6 +408,32 @@ def psKernelSelfHostInstantiateTests : Bool :=
       0
       (psKernelExprListToReference subst)
       0
+  let instantiate1DependentSource :=
+    PsKernelExpr.app
+      (PsKernelExpr.bvar 0)
+      (PsKernelExpr.lit
+        (PsKernelLiteral.nat 3))
+  let instantiate1Dependent :=
+    psKernelExprInstantiate1
+      instantiate1DependentSource
+      replacement
+  let referenceInstantiate1Dependent :=
+    PSC1Kernel.Expr.instantiateAt
+      (psKernelExprToReference
+        instantiate1DependentSource)
+      0
+      (List.cons
+        (psKernelExprToReference replacement)
+        List.nil)
+      0
+  let instantiate1NondependentSource :=
+    PsKernelExpr.const
+      psKernelNatName
+      List.nil
+  let instantiate1Nondependent :=
+    psKernelExprInstantiate1
+      instantiate1NondependentSource
+      replacement
   let betaSource :=
     PsKernelExpr.app
       (PsKernelExpr.lam
@@ -447,11 +473,19 @@ def psKernelSelfHostInstantiateTests : Bool :=
         referenceInstantiated)
       (Bool.and
         (psKernelExprReferenceEq
-          betaReduced
-          referenceBetaReduced)
-        (psKernelExprReferenceEq
-          abstracted
-          referenceAbstracted)))
+          instantiate1Dependent
+          referenceInstantiate1Dependent)
+        (Bool.and
+          (psKernelExprEq
+            instantiate1Nondependent
+            instantiate1NondependentSource)
+          (Bool.and
+            (psKernelExprReferenceEq
+              betaReduced
+              referenceBetaReduced)
+            (psKernelExprReferenceEq
+              abstracted
+              referenceAbstracted)))))
 
 def psKernelReferenceExprOptionEq
     (portable : Option PsKernelExpr)

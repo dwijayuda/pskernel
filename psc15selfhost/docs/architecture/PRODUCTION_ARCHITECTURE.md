@@ -122,9 +122,31 @@ If the runtime truly has a representation-irrelevant type, give it a precise sem
 
 ### 3.3 Backend dependencies must enforce authority
 
-Backend core packages should depend only on validated IR and target-neutral interface metadata.
+Backend core packages depend only on validated IR and target-neutral support metadata; they do not import the semantic compiler.
 
-Target:
+Current TypeScript/Rust split:
+
+```text
+compiler frontend
+      |
+      +--> driver-ts   --> backend-ts
+      |
+      +--> driver-rust --> backend-rust
+
+backend-ts   -X-> compiler
+backend-rust -X-> compiler
+```
+
+The concrete composition modules are:
+
+```text
+Ps.DriverTs.Compiler
+Ps.DriverRust.Compiler
+```
+
+They own source/prepared-module convenience APIs and may call the semantic compiler. Backend core modules own only target lowering/emission from validated IR.
+
+Long-term target remains:
 
 ```text
 backend-js   -> compiler-ir/verified
@@ -133,15 +155,7 @@ backend-rust -> compiler-ir/verified
 backend-wasm -> compiler-ir/verified
 ```
 
-Source-to-backend adapters belong in composition/driver packages:
-
-```text
-compiler-driver
-   -> compiler frontend
-   -> kernel provider
-   -> erasure + IR validator
-   -> selected backend
-```
+Bridge/formatting utility cleanup can proceed independently; the critical authority edge is that backend core cannot import `Ps.Compiler` or construct/erase semantic compiler state.
 
 This makes a kernel/erasure bypass unavailable by dependency construction rather than only prohibited by convention.
 

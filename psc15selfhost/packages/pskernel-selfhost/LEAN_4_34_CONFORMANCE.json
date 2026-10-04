@@ -129,28 +129,28 @@
     },
     {
       "id": "PSK-ADMIT-AXIOM",
-      "coverage": "pending",
-      "testSymbol": null
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelAdmissionConformanceTests"
     },
     {
       "id": "PSK-ADMIT-DEF",
-      "coverage": "pending",
-      "testSymbol": null
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelAdmissionConformanceTests"
     },
     {
       "id": "PSK-ADMIT-THM",
-      "coverage": "pending",
-      "testSymbol": null
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelAdmissionConformanceTests"
     },
     {
       "id": "PSK-ADMIT-OPAQUE",
-      "coverage": "pending",
-      "testSymbol": null
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelAdmissionConformanceTests"
     },
     {
       "id": "PSK-ADMIT-MUTDEF",
-      "coverage": "pending",
-      "testSymbol": null
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelAdmissionConformanceTests"
     },
     {
       "id": "PSK-ADMIT-QUOT",

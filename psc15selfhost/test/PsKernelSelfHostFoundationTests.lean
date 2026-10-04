@@ -708,11 +708,13 @@ def psKernelNativeReductionDifferential : Bool :=
       else
         Except.ok Option.none
   }
-  let portableContext :=
-    psKernelCheckerContextWithNativeEvaluator
-      (psKernelCheckerContextEmpty
-        psKernelEnvironmentEmpty)
+  let portableEnvironment :=
+    psKernelEnvironmentWithNativeEvaluator
+      psKernelEnvironmentEmpty
       (Option.some portableProvider)
+  let portableContext :=
+    psKernelCheckerContextEmpty
+      portableEnvironment
   let referenceBase :=
     PSC1Kernel.CheckerContext.empty
       PSC1Kernel.Environment.empty

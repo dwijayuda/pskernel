@@ -213,7 +213,9 @@ npm run fixed-point:js
 ```
 
 This uses the existing bootstrap JavaScript compiler, regenerates the next compiler,
-and requires exact source and generated-TypeScript parity.
+and requires exact source and generated-TypeScript parity. The generated-JS path requires
+the incremental preparation API; missing incremental exports reject instead of silently
+falling back to aggregate whole-closure preparation.
 
 Stronger native/reference source contract:
 

@@ -52,6 +52,18 @@ for (const [file, markers] of cases) {
   validate(source);
   for (const marker of markers) assert.throws(() => validate(source.replaceAll(marker, 'removed')));
 }
+const generatedSelfhost = await readFile(
+  new URL('../scripts/compile-with-generated.mjs', import.meta.url),
+  'utf8',
+);
+assert(
+  !generatedSelfhost.includes('psCompilerPrepareSources'),
+  'generated-JS selfhost must reject missing incremental APIs instead of falling back to aggregate preparation',
+);
+assert(
+  !generatedSelfhost.includes('aggregate'),
+  'generated-JS selfhost must not contain an implicit aggregate preparation mode',
+);
 const api = await readFile(new URL('../packages/compiler/src/Ps/Compiler/Api.lean', import.meta.url), 'utf8');
 const prepared = api.slice(api.indexOf('structure PsCompilerAdmissionReadyModule'), api.indexOf('def psCompilerTranslateSource'));
 assert.deepEqual([...prepared.matchAll(/^  (\w+) :/gm)].map(item => item[1]), ['declarations']);

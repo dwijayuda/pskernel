@@ -90,14 +90,6 @@ function requireCompilerApi(compiler) {
     "psCompilerTranslateSource",
     "psCompilerTypeScriptFromPrepared",
     "List",
-  ];
-  for (const name of required) {
-    if (!(name in compiler)) {
-      throw new Error(`PSC2_SELFHOST_COMPILER_EXPORT_MISSING: ${name}`);
-    }
-  }
-
-  const incremental = [
     "psCompilerParseSource",
     "psElabModule",
     "psListReverse",
@@ -105,13 +97,12 @@ function requireCompilerApi(compiler) {
     "psCompilerElaborateSourcesWorker",
     "psCompilerPrepareElaborated",
     "psSelfHostProdPreludeEnvironment",
-  ].every((name) => name in compiler);
-  if (!incremental && !("psCompilerPrepareSources" in compiler)) {
-    throw new Error(
-      "PSC2_SELFHOST_COMPILER_EXPORT_MISSING: incremental preparation API or psCompilerPrepareSources",
-    );
+  ];
+  for (const name of required) {
+    if (!(name in compiler)) {
+      throw new Error(`PSC2_SELFHOST_COMPILER_EXPORT_MISSING: ${name}`);
+    }
   }
-  return incremental;
 }
 
 function sourceKind(compiler, sourcePath) {
@@ -294,28 +285,15 @@ if (!outputTsPath.endsWith(".ts")) {
 }
 
 const compiler = await import(pathToFileURL(compilerPath).href);
-const incrementalPreparation = requireCompilerApi(compiler);
+requireCompilerApi(compiler);
 
 const project = await flattenProject(compiler, entryPath);
-const prepared = incrementalPreparation
-  ? prepareSourcesIncrementally(
-      compiler,
-      project.sourceKind,
-      project.sources,
-    )
-  : unwrapExcept(
-      compiler.psCompilerPrepareSources(
-        project.sourceKind,
-        project.sources.reduceRight(
-          (tail, head) => compiler.List.cons(head, tail),
-          compiler.List.nil(),
-        ),
-      ),
-      "prepare",
-    );
-process.stdout.write(
-  `PSC2_SELFHOST_PREPARE_MODE: ${incrementalPreparation ? "incremental" : "aggregate"}\n`,
+const prepared = prepareSourcesIncrementally(
+  compiler,
+  project.sourceKind,
+  project.sources,
 );
+process.stdout.write("PSC2_SELFHOST_PREPARE_MODE: incremental\n");
 const backendStarted = performance.now();
 const typeScript = unwrapExcept(
   compiler.psCompilerTypeScriptFromPrepared(prepared),

@@ -82,6 +82,7 @@ compiler service / LSP
 - [Platform and Extensibility Guide](PLATFORM_EXTENSIBILITY_GUIDE.md) — libraries-first growth, Meta/tactics, plugins, InterfaceIR/FFI, capabilities, async/resources, reflection, and solver boundaries.
 - [Implementation Roadmap](IMPLEMENTATION_ROADMAP.md) — staged migration from the current architecture to the production shape without destabilizing the proven fixed point.
 - [Design References](DESIGN_REFERENCES.md) — external compiler/build/security research and the specific ideas PSC should borrow.
+- [KernelContract-v1](contracts/KERNEL_CONTRACT_V1.md) — frozen provider-neutral checked-session request/decision/capability contract.
 - [Architecture Decision Records](adr/README.md) — concise anti-drift decisions that future implementation work should preserve unless explicitly superseded.
 
 ## What these documents deliberately do not do

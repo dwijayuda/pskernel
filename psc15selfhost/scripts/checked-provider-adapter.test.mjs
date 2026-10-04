@@ -4,7 +4,7 @@ import { mkdtemp, writeFile, chmod, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { checkCanonicalAdmissions } from '../packages/pskernel-lean/index.mjs';
-import { leanCheckedIdentity } from './checked-prepared-session.mjs';
+import { leanCheckedIdentity } from './kernel-checked-session.mjs';
 async function withStub(body, fn) {
   const dir = await mkdtemp(path.join(tmpdir(), 'psc2-provider-double-'));
   try {

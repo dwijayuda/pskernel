@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { checkAdmissionsWithKernel } from './checked-kernel-provider.mjs';
 import { checkOwnedAdmissions } from './checked-owned-kernel.mjs';
-import { createCheckedPreparedSession } from './checked-prepared-session.mjs';
+import { createKernelCheckedSession } from './kernel-checked-session.mjs';
 import { ownedCheckedIdentity, leanCheckedIdentity } from './checked-kernel-identity.mjs';
 
 const name = v => ({ k: 's', p: { k: 'a' }, v });
@@ -130,12 +130,12 @@ test('owned checked module emits the exact frozen preparation and rejects transf
       return ok('export const checked = true;');
     },
   };
-  const session = createCheckedPreparedSession(compiler, checkOwnedAdmissions, ownedCheckedIdentity);
+  const session = createKernelCheckedSession(compiler, checkOwnedAdmissions, ownedCheckedIdentity);
   const handle = await session.check('lean', 'source');
   assert.equal(session.emit(handle), 'export const checked = true;');
   assert.equal(emitted, 1);
   assert.throws(() => session.emit({ ...handle }), /UNCHECKED_MODULE/);
-  const wrong = createCheckedPreparedSession(compiler, () => ({ ...leanCheckedIdentity, accepted: true }), ownedCheckedIdentity);
+  const wrong = createKernelCheckedSession(compiler, () => ({ ...leanCheckedIdentity, accepted: true }), ownedCheckedIdentity);
   await assert.rejects(wrong.check('lean', 'source'), /PROVIDER_IDENTITY/);
   assert.equal(emitted, 1);
 });

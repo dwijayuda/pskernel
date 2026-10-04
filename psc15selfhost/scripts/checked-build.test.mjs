@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { buildChecked, defaultCheckedSeed } from './checked-build.mjs';
+import { kernelContractV1 } from './kernel-contract.mjs';
 
 const seed = process.env.PSC2_CHECKED_SEED_BIN ?? defaultCheckedSeed;
 const native = existsSync(seed);
@@ -21,7 +22,9 @@ test('explicit owned kernel checks dependent source before emission and executio
     assert.equal(module.identity(42n), 42n);
     assert.equal(receipt.kernel.selector, 'pskernel-core');
     assert.equal(receipt.provider.provider, 'psc-generated-owned');
-    assert.equal(receipt.schemaVersion, 3);
+    assert.equal(receipt.schemaVersion, 4);
+    assert.equal(receipt.kernelContract.id, kernelContractV1.id);
+    assert.equal(receipt.kernelContract.sha256, kernelContractV1.sha256);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 

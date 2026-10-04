@@ -17,7 +17,7 @@ The production system should eventually identify at least these contracts:
 | SourceLanguage | accepted source grammar/semantics | slow |
 | StandardProfile | closed standard surface | slow |
 | Core | kernel-facing semantic terms/declarations | very slow |
-| KernelContract | admission/checking rules/provider protocol | extremely slow |
+| KernelContract | admission/checking rules/provider protocol; current frozen identity `proofscript-kernel-contract/1` | extremely slow |
 | CheckedCore | checked artifact schema/capability | very slow |
 | ErasedIR | construction/runtime lowering IR | moderate |
 | VerifiedIR | validated target-neutral executable contract | slow |

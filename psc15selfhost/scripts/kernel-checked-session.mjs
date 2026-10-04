@@ -1,7 +1,13 @@
 import { createHash } from 'node:crypto';
 
 import { leanCheckedIdentity } from './checked-kernel-identity.mjs';
+import {
+  assertCanonicalAdmissionsEnvelope,
+  assertKernelContractDecision,
+  kernelContractV1,
+} from './kernel-contract.mjs';
 export { leanCheckedIdentity } from './checked-kernel-identity.mjs';
+export { kernelContractV1 } from './kernel-contract.mjs';
 const hash = text => createHash('sha256').update(text, 'utf8').digest('hex');
 
 export function unwrapCompilerResult(result, stage) {
@@ -39,6 +45,7 @@ function freezeGraph(root) {
 function admissionsFrom(compiler, prepared) {
   const source = unwrapCompilerResult(compiler.psCompilerAdmissionsFromPrepared(prepared), 'ADMISSIONS');
   if (typeof source !== 'string') throw new Error('PSC2_CHECKED_ADMISSIONS_RESULT_SHAPE');
+  assertCanonicalAdmissionsEnvelope(source);
   return source;
 }
 
@@ -49,9 +56,20 @@ function admissionsFrom(compiler, prepared) {
  * exercise orchestration only. This does not sandbox malicious compiler/host JS
  * and does not claim a portable, universally unforgeable CheckedCore type.
  */
-export function createCheckedPreparedSession(compiler, checkAdmissions, expectedIdentity = leanCheckedIdentity) {
+export function createKernelCheckedSession(
+  compiler,
+  checkAdmissions,
+  expectedIdentity = leanCheckedIdentity,
+  kernelContract = kernelContractV1,
+) {
   const identity = Object.freeze({ ...expectedIdentity });
-  if (!identity.protocol || !identity.provider || !identity.profile) throw new Error('PSC2_CHECKED_IDENTITY_REQUIRED');
+  if (!identity.protocol || !identity.provider || !identity.profile) {
+    throw new Error('PSC2_CHECKED_IDENTITY_REQUIRED');
+  }
+  if (kernelContract?.id !== kernelContractV1.id ||
+      kernelContract?.sha256 !== kernelContractV1.sha256) {
+    throw new Error('PSC2_KERNEL_CONTRACT_IDENTITY');
+  }
   for (const name of ['psCompilerPrepareSource', 'psCompilerAdmissionsFromPrepared',
     'psCompilerTypeScriptFromPrepared']) {
     if (typeof compiler?.[name] !== 'function') throw new Error(`PSC2_CHECKED_API_MISSING: ${name}`);
@@ -62,14 +80,17 @@ export function createCheckedPreparedSession(compiler, checkAdmissions, expected
       if (prepared === null || typeof prepared !== 'object') throw new Error('PSC2_CHECKED_PREPARE_RESULT_SHAPE');
       freezeGraph(prepared);
       const admissions = admissionsFrom(compiler, prepared);
-      const result = await checkAdmissions(admissions);
+      const result = assertKernelContractDecision(
+        await checkAdmissions(admissions),
+      );
       for (const [field, expected] of Object.entries(identity)) {
         if (result?.[field] !== expected) throw new Error(`PSC2_CHECKED_PROVIDER_IDENTITY: ${field}`);
       }
-      if (typeof result.accepted !== 'boolean') throw new Error('PSC2_CHECKED_PROVIDER_RESULT');
-      if (!result.accepted) throw new Error(`PSC2_KERNEL_REJECTED: ${result.errorKind ?? 'kernel-rejection'}`);
+      if (!result.accepted) throw new Error(`PSC2_KERNEL_REJECTED: ${result.errorKind}`);
       const handle = Object.freeze({
-        sourceSha256: hash(source), canonicalAdmissionsSha256: hash(admissions),
+        sourceSha256: hash(source),
+        canonicalAdmissionsSha256: hash(admissions),
+        kernelContract: kernelContractV1,
         provider: identity,
       });
       modules.set(handle, { prepared, admissions });

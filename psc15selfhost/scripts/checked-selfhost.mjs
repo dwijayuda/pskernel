@@ -6,6 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { buildChecked, defaultCheckedSeed } from './checked-build.mjs';
 import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
+import { kernelContractV1 } from './kernel-contract.mjs';
 import { checkedKernelDescriptor, defaultCheckedKernel } from './checked-kernel-provider.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -44,7 +45,9 @@ async function validateGeneration(generation, kernel) {
   if (Object.entries(expectedKernel).some(([key, value]) => receipt.kernel?.[key] !== value)) {
     throw new Error('PSC2_CHECKED_GENERATION_KERNEL');
   }
-  if (receipt.kind !== 'psc2-checked-build' || receipt.schemaVersion !== 3 ||
+  if (receipt.kind !== 'psc2-checked-build' || receipt.schemaVersion !== 4 ||
+      receipt.kernelContract?.id !== kernelContractV1.id ||
+      receipt.kernelContract?.sha256 !== kernelContractV1.sha256 ||
       hash(await readFile(compiler)) !== receipt.javaScriptSha256 ||
       hash(await readFile(compiler.replace(/\.js$/u, '.ts'))) !== receipt.typeScriptSha256 ||
       hash(await readFile(compiler.replace(/\.js$/u, '.admissions.json'))) !== receipt.canonicalAdmissionsSha256) {

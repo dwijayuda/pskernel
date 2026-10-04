@@ -5,6 +5,7 @@ import {
   checkedKernelDescriptor,
   defaultCheckedKernel,
 } from './checked-kernel-provider.mjs';
+import { kernelContractV1 } from './kernel-contract.mjs';
 
 const emptyAdmissions = JSON.stringify({
   admissions: [],
@@ -16,6 +17,11 @@ test('Lean WASM is the checked-profile default and remains host-side', () => {
   assert.equal(defaultCheckedKernel, 'lean434-wasm');
   assert.equal(checkedKernelDescriptor().package, '@proofscript/pskernel-lean-wasm');
   assert.equal(checkedKernelDescriptor().execution, 'wasm-node');
+  assert.equal(checkedKernelDescriptor().kernelContract, kernelContractV1.id);
+  assert.equal(
+    checkedKernelDescriptor().kernelContractSha256,
+    kernelContractV1.sha256,
+  );
 });
 
 test('real bundled default WASM provider accepts canonical empty module', async () => {

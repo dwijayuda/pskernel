@@ -2397,6 +2397,13 @@ def psKernelSelfHostNestedRejectionTests : Bool :=
     typeNameParity
     ctorNameParity
 
+def psKernelSelfHostNestedConformanceTests : Bool :=
+  Bool.and
+    psKernelSelfHostNestedTests
+    (Bool.and
+      psKernelSelfHostNestedMultiFamilyTests
+      psKernelSelfHostNestedRejectionTests)
+
 def psKernelDefEqSpecialRuleTests : Bool :=
   let type1 :=
     PsKernelExpr.sort

@@ -170,7 +170,7 @@
     {
       "id": "PSK-ADMIT-NESTED",
       "coverage": "direct-differential",
-      "testSymbol": "psKernelSelfHostNestedTests"
+      "testSymbol": "psKernelSelfHostNestedConformanceTests"
     },
     {
       "id": "PSK-NATIVE-BOOL",

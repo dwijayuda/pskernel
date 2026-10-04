@@ -49,7 +49,7 @@ For conceptual explanation and reading order, see `KERNEL_THEORY.md`.
 | `PSK-ADMIT-QUOT` | Quot initialization | `psKernelAddQuot` | `src/kernel/quot.cpp` | direct-differential | `psKernelSelfHostQuotTests` |
 | `PSK-ADMIT-IND` | ordinary/indexed inductives | `psKernelAddSimpleInductive` | `src/kernel/inductive.cpp` | direct-differential | `psKernelSelfHostNestedTests` |
 | `PSK-ADMIT-MUTIND` | mutual inductives | `psKernelAddSimpleMutualInductive` | `src/kernel/inductive.cpp` | direct-differential | `psKernelSelfHostNestedTests` |
-| `PSK-ADMIT-NESTED` | nested inductive flatten/restore | `psKernelAddSimpleNestedInductive` | `src/kernel/inductive.cpp` | direct-differential | `psKernelSelfHostNestedTests` |
+| `PSK-ADMIT-NESTED` | nested inductive flatten/restore | `psKernelAddSimpleNestedInductive` | `src/kernel/inductive.cpp` | direct-differential | `psKernelSelfHostNestedConformanceTests` |
 | `PSK-NATIVE-BOOL` | Lean.reduceBool native reduction | `psKernelReduceNative` | `src/kernel/type_checker.cpp::reduce_native` | direct-differential | `psKernelNativeReductionDifferential` |
 | `PSK-NATIVE-NAT` | Lean.reduceNat native reduction | `psKernelReduceNative` | `src/kernel/type_checker.cpp::reduce_native` | direct-differential | `psKernelNativeReductionDifferential` |
 

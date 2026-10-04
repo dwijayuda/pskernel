@@ -21,46 +21,48 @@ structure PsKernelForallView where
   body : PsKernelExpr
   binderInfo : PsKernelBinderInfo
 
+def psKernelInferCacheEligible
+    (inferOnly : Bool)
+    (expr : PsKernelExpr) :
+    Bool :=
+  match expr with
+  | PsKernelExpr.lit _ =>
+      false
+  | PsKernelExpr.app _ _ =>
+      inferOnly
+  | _ =>
+      true
+
 def psKernelCacheInferResult
     (state : PsKernelCheckerState)
     (inferOnly : Bool)
     (expr : PsKernelExpr)
     (result : PsKernelExpr) :
     PsKernelCheckerState :=
-  match expr with
-  | PsKernelExpr.lit _ =>
-      state
-  | PsKernelExpr.app _ _ =>
-      if inferOnly then
-        let cache :=
-          psKernelExprMapInsert
-            state.inferOnly
-            expr
-            result;
-        psKernelCheckerStateWithInferOnly
-          state
-          cache
-      else
+  if
+      psKernelInferCacheEligible
+        inferOnly
+        expr then
+    if inferOnly then
+      let cache :=
+        psKernelExprMapInsert
+          state.inferOnly
+          expr
+          result;
+      psKernelCheckerStateWithInferOnly
         state
-  | _ =>
-      if inferOnly then
-        let cache :=
-          psKernelExprMapInsert
-            state.inferOnly
-            expr
-            result;
-        psKernelCheckerStateWithInferOnly
-          state
-          cache
-      else
-        let cache :=
-          psKernelExprMapInsert
-            state.checkedInfer
-            expr
-            result;
-        psKernelCheckerStateWithCheckedInfer
-          state
-          cache
+        cache
+    else
+      let cache :=
+        psKernelExprMapInsert
+          state.checkedInfer
+          expr
+          result;
+      psKernelCheckerStateWithCheckedInfer
+        state
+        cache
+  else
+    state
 
 def psKernelEnsureSortWith
     (whnf :

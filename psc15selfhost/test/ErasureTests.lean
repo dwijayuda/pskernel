@@ -371,6 +371,297 @@ def psTestVerifiedIrValidationRejectsNestedUnknown : Bool :=
   | Except.error PsVerifiedIrValidationError.unresolvedRuntimeType => true
   | _ => false
 
+def psVerifiedIrValidationNatType : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+
+def psVerifiedIrValidationBox : PsVerifiedIrStructure :=
+  PsVerifiedIrStructure.mk
+    "Box"
+    (List.cons
+      (PsVerifiedIrTypeParameter.mk "T")
+      List.nil)
+    (List.cons
+      (PsVerifiedIrStructureField.mk
+        "value"
+        (PsVerifiedIrType.typeParameter "T"))
+      List.nil)
+
+def psVerifiedIrValidationMaybe : PsVerifiedIrInductive :=
+  PsVerifiedIrInductive.mk
+    "Maybe"
+    (List.cons
+      (PsVerifiedIrTypeParameter.mk "T")
+      List.nil)
+    (List.cons
+      (PsVerifiedIrConstructor.mk
+        "none"
+        List.nil)
+      (List.cons
+        (PsVerifiedIrConstructor.mk
+          "some"
+          (List.cons
+            (PsVerifiedIrConstructorField.mk
+              "value"
+              (PsVerifiedIrType.typeParameter "T"))
+            List.nil))
+        List.nil))
+
+def psVerifiedIrValidationModule
+    (body : PsVerifiedIrExpr) :
+    PsVerifiedIrModule :=
+  PsVerifiedIrModule.mk
+    List.nil
+    (List.cons psVerifiedIrValidationBox List.nil)
+    (List.cons psVerifiedIrValidationMaybe List.nil)
+    (List.cons
+      (PsVerifiedIrDeclaration.mk
+        "probe"
+        List.nil
+        List.nil
+        psVerifiedIrValidationNatType
+        body)
+      List.nil)
+
+def psTestVerifiedIrValidationAcceptsStructuralReferences : Bool :=
+  let body :=
+    PsVerifiedIrExpr.record
+      "Box"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      (List.cons
+        (Prod.mk
+          "value"
+          (PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.natural 42)))
+        List.nil)
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error _ => false
+  | Except.ok _ => true
+
+def psTestVerifiedIrValidationRejectsUnknownStructure : Bool :=
+  let body :=
+    PsVerifiedIrExpr.record
+      "Missing"
+      List.nil
+      List.nil
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownStructure name) =>
+      psStringEq name "Missing"
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsStructureArity : Bool :=
+  let body :=
+    PsVerifiedIrExpr.record
+      "Box"
+      List.nil
+      (List.cons
+        (Prod.mk
+          "value"
+          (PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.natural 42)))
+        List.nil)
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.typeArgumentArity name) =>
+      psStringEq name "Box"
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsStructureField : Bool :=
+  let body :=
+    PsVerifiedIrExpr.record
+      "Box"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      (List.cons
+        (Prod.mk
+          "missing"
+          (PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.natural 42)))
+        List.nil)
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownStructureField
+        structureName
+        fieldName) =>
+      if psStringEq structureName "Box" then
+        psStringEq fieldName "missing"
+      else
+        false
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsProjectionField : Bool :=
+  let target :=
+    PsVerifiedIrExpr.record
+      "Box"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      (List.cons
+        (Prod.mk
+          "value"
+          (PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.natural 42)))
+        List.nil)
+  let body :=
+    PsVerifiedIrExpr.projection
+      "Box"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      target
+      "missing"
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownStructureField
+        structureName
+        fieldName) =>
+      if psStringEq structureName "Box" then
+        psStringEq fieldName "missing"
+      else
+        false
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsUnknownInductive : Bool :=
+  let body :=
+    PsVerifiedIrExpr.constructor
+      "Missing"
+      "none"
+      List.nil
+      List.nil
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownInductive name) =>
+      psStringEq name "Missing"
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsUnknownConstructor : Bool :=
+  let body :=
+    PsVerifiedIrExpr.constructor
+      "Maybe"
+      "missing"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      List.nil
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownConstructor
+        inductiveName
+        constructorName) =>
+      if psStringEq inductiveName "Maybe" then
+        psStringEq constructorName "missing"
+      else
+        false
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsConstructorField : Bool :=
+  let body :=
+    PsVerifiedIrExpr.constructor
+      "Maybe"
+      "some"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      (List.cons
+        (Prod.mk
+          "missing"
+          (PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.natural 42)))
+        List.nil)
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownConstructorField
+        inductiveName
+        constructorName
+        fieldName) =>
+      if psStringEq inductiveName "Maybe" then
+        if psStringEq constructorName "some" then
+          psStringEq fieldName "missing"
+        else
+          false
+      else
+        false
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsMatchConstructor : Bool :=
+  let alternative :=
+    Prod.mk
+      "missing"
+      (Prod.mk
+        List.nil
+        (PsVerifiedIrExpr.literal
+          (PsVerifiedIrLiteral.natural 0)))
+  let body :=
+    PsVerifiedIrExpr.matchE
+      "Maybe"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      (PsVerifiedIrExpr.var "value")
+      (List.cons alternative List.nil)
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownConstructor
+        inductiveName
+        constructorName) =>
+      if psStringEq inductiveName "Maybe" then
+        psStringEq constructorName "missing"
+      else
+        false
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsMatchBindingField : Bool :=
+  let binding :=
+    PsVerifiedIrMatchBinding.mk
+      "missing"
+      "value"
+      psVerifiedIrValidationNatType
+  let alternative :=
+    Prod.mk
+      "some"
+      (Prod.mk
+        (List.cons binding List.nil)
+        (PsVerifiedIrExpr.var "value"))
+  let body :=
+    PsVerifiedIrExpr.matchE
+      "Maybe"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      (PsVerifiedIrExpr.var "input")
+      (List.cons alternative List.nil)
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownConstructorField
+        inductiveName
+        constructorName
+        fieldName) =>
+      if psStringEq inductiveName "Maybe" then
+        if psStringEq constructorName "some" then
+          psStringEq fieldName "missing"
+        else
+          false
+      else
+        false
+  | _ => false
+
 structure PsErasureNamedTest where
   name : String
   passed : Bool
@@ -394,7 +685,17 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native controlled partial def", passed := psTestDualSourceLeanNativePartialDefinition },
   { name := "VerifiedIR accepts resolved construction IR", passed := psTestVerifiedIrValidationAcceptsResolved },
   { name := "VerifiedIR rejects unknown result type", passed := psTestVerifiedIrValidationRejectsUnknownResult },
-  { name := "VerifiedIR rejects nested unknown runtime type", passed := psTestVerifiedIrValidationRejectsNestedUnknown }
+  { name := "VerifiedIR rejects nested unknown runtime type", passed := psTestVerifiedIrValidationRejectsNestedUnknown },
+  { name := "VerifiedIR accepts structural references", passed := psTestVerifiedIrValidationAcceptsStructuralReferences },
+  { name := "VerifiedIR rejects unknown structure", passed := psTestVerifiedIrValidationRejectsUnknownStructure },
+  { name := "VerifiedIR rejects structure type-argument arity", passed := psTestVerifiedIrValidationRejectsStructureArity },
+  { name := "VerifiedIR rejects unknown structure field", passed := psTestVerifiedIrValidationRejectsStructureField },
+  { name := "VerifiedIR rejects unknown projection field", passed := psTestVerifiedIrValidationRejectsProjectionField },
+  { name := "VerifiedIR rejects unknown inductive", passed := psTestVerifiedIrValidationRejectsUnknownInductive },
+  { name := "VerifiedIR rejects unknown constructor", passed := psTestVerifiedIrValidationRejectsUnknownConstructor },
+  { name := "VerifiedIR rejects unknown constructor field", passed := psTestVerifiedIrValidationRejectsConstructorField },
+  { name := "VerifiedIR rejects unknown match constructor", passed := psTestVerifiedIrValidationRejectsMatchConstructor },
+  { name := "VerifiedIR rejects unknown match binding field", passed := psTestVerifiedIrValidationRejectsMatchBindingField }
 ]
 
 def psRunErasureTests : List PsErasureNamedTest -> IO Bool

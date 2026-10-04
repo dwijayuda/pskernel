@@ -97,16 +97,16 @@ def psWasmMachineIntegerValueType
     (type : PsVerifiedIrMachineIntegerType) :
     PsWasmValueType :=
   if psWasmMachineIntegerIs64 profile type then
-    .i64
+    PsWasmValueType.i64
   else
-    .i32
+    PsWasmValueType.i32
 
 def psWasmFloatingValueType
     (type : PsVerifiedIrFloatingType) :
     PsWasmValueType :=
   match type with
-  | .float32 => .f32
-  | .float => .f64
+  | .float32 => PsWasmValueType.f32
+  | .float => PsWasmValueType.f64
 
 def psWasmFunctionTypeListContains
     (types : List PsVerifiedIrType)
@@ -700,14 +700,14 @@ def psWasmStructGetInstruction
     (type : PsVerifiedIrType) : PsWasmInstruction :=
   match type with
   | .primitive .uint8 =>
-      .structGetU structureName fieldIndex
+      PsWasmInstruction.structGetU structureName fieldIndex
   | .primitive .uint16 =>
-      .structGetU structureName fieldIndex
+      PsWasmInstruction.structGetU structureName fieldIndex
   | .primitive .int8 =>
-      .structGetS structureName fieldIndex
+      PsWasmInstruction.structGetS structureName fieldIndex
   | .primitive .int16 =>
-      .structGetS structureName fieldIndex
-  | _ => .structGet structureName fieldIndex
+      PsWasmInstruction.structGetS structureName fieldIndex
+  | _ => PsWasmInstruction.structGet structureName fieldIndex
 
 def psWasmLowerStructureField
     (profile : PsWasmTargetProfile)

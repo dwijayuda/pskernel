@@ -359,40 +359,59 @@ def psKernelInferCoreWithFuel
                               | Except.error error =>
                                   Except.error error
                               | Except.ok argResult =>
-                                  let eqContext :=
-                                    if
-                                        psKernelExprIsEagerReduce
-                                          arg then
-                                      psKernelCheckerContextWithEagerReduce
-                                        nextContext
-                                        true
-                                    else
-                                      nextContext;
-                                  match
-                                      defeq
-                                        eqContext
-                                        (Prod.snd argResult)
-                                        (Prod.fst argResult)
-                                        view.domain with
-                                  | Except.error error =>
-                                      Except.error error
-                                  | Except.ok eqResult =>
-                                      if Prod.fst eqResult then
-                                        let result :=
-                                          psKernelExprInstantiate1
-                                            view.body
-                                            arg;
-                                        Except.ok
-                                          (Prod.mk
-                                            result
-                                            (psKernelCacheInferResult
-                                              (Prod.snd eqResult)
-                                              false
-                                              expr
-                                              result))
+                                  let argType :=
+                                    Prod.fst argResult;
+                                  if
+                                      psKernelExprEq
+                                        argType
+                                        view.domain then
+                                    let result :=
+                                      psKernelExprInstantiate1
+                                        view.body
+                                        arg;
+                                    Except.ok
+                                      (Prod.mk
+                                        result
+                                        (psKernelCacheInferResult
+                                          (Prod.snd argResult)
+                                          false
+                                          expr
+                                          result))
+                                  else
+                                    let eqContext :=
+                                      if
+                                          psKernelExprIsEagerReduce
+                                            arg then
+                                        psKernelCheckerContextWithEagerReduce
+                                          nextContext
+                                          true
                                       else
-                                        Except.error
-                                          "application type mismatch"
+                                        nextContext;
+                                    match
+                                        defeq
+                                          eqContext
+                                          (Prod.snd argResult)
+                                          argType
+                                          view.domain with
+                                    | Except.error error =>
+                                        Except.error error
+                                    | Except.ok eqResult =>
+                                        if Prod.fst eqResult then
+                                          let result :=
+                                            psKernelExprInstantiate1
+                                              view.body
+                                              arg;
+                                          Except.ok
+                                            (Prod.mk
+                                              result
+                                              (psKernelCacheInferResult
+                                                (Prod.snd eqResult)
+                                                false
+                                                expr
+                                                result))
+                                        else
+                                          Except.error
+                                            "application type mismatch"
                 | PsKernelExpr.lam name domain body binderInfo =>
                     let checkedDomain :=
                       if inferOnly then

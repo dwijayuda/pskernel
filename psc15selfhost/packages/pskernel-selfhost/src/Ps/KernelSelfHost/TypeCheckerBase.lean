@@ -184,6 +184,18 @@ def psKernelEagerReduceName : PsKernelName :=
     PsKernelName.anonymous
     "eagerReduce"
 
+def psKernelReduceNative
+    (context : PsKernelCheckerContext)
+    (expr : PsKernelExpr) :
+    Except String (Option PsKernelExpr) :=
+  psKernelReduceNativeWith
+    context.nativeEvaluator
+    psKernelReduceBoolName
+    psKernelReduceNatName
+    psKernelBoolTrueName
+    psKernelBoolFalseName
+    expr
+
 def psKernelNatZeroName : PsKernelName :=
   PsKernelName.str
     psKernelNatName

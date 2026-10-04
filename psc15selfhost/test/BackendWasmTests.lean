@@ -1,4 +1,5 @@
 import Ps.BackendWasm.Lower
+import Ps.BackendWasm.Binary
 
 def psWasmProfile32 : PsWasmTargetProfile :=
   { wordSize := PsWasmWordSize.wasm32 }

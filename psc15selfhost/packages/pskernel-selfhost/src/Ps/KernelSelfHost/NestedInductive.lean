@@ -469,65 +469,81 @@ def psKernelSimpleNestedOpenRestorationParamsWithFuel
                 domain
                 body
                 binderInfo =>
-                match kind with
-                | Option.some
-                    PsKernelSimpleNestedBinderKind.lambdaK =>
-                    Except.error
-                      "restored nested binders mix forall and lambda"
-                | _ =>
-                    let internalName :=
-                      PsKernelName.num
-                        (psKernelSimpleInternalName
-                          "nestedRestoreParam")
-                        index;
-                    let binder :=
-                      PsKernelOpenBinder.mk
-                        internalName
-                        userName
-                        domain
-                        binderInfo;
-                    smaller
-                      (psKernelExprInstantiate1
-                        body
-                        (PsKernelExpr.fvar
-                          internalName))
-                      countRest
-                      (Option.some
-                        PsKernelSimpleNestedBinderKind.forallK)
-                      (Nat.succ index)
-                      (List.cons binder rev)
+                let conflict :=
+                  match kind with
+                  | Option.some value =>
+                      match value with
+                      | PsKernelSimpleNestedBinderKind.lambdaK =>
+                          true
+                      | PsKernelSimpleNestedBinderKind.forallK =>
+                          false
+                  | Option.none =>
+                      false;
+                if conflict then
+                  Except.error
+                    "restored nested binders mix forall and lambda"
+                else
+                  let internalName :=
+                    PsKernelName.num
+                      (psKernelSimpleInternalName
+                        "nestedRestoreParam")
+                      index;
+                  let binder :=
+                    PsKernelOpenBinder.mk
+                      internalName
+                      userName
+                      domain
+                      binderInfo;
+                  smaller
+                    (psKernelExprInstantiate1
+                      body
+                      (PsKernelExpr.fvar
+                        internalName))
+                    countRest
+                    (Option.some
+                      PsKernelSimpleNestedBinderKind.forallK)
+                    (Nat.succ index)
+                    (List.cons binder rev)
             | PsKernelExpr.lam
                 userName
                 domain
                 body
                 binderInfo =>
-                match kind with
-                | Option.some
-                    PsKernelSimpleNestedBinderKind.forallK =>
-                    Except.error
-                      "restored nested binders mix forall and lambda"
-                | _ =>
-                    let internalName :=
-                      PsKernelName.num
-                        (psKernelSimpleInternalName
-                          "nestedRestoreParam")
-                        index;
-                    let binder :=
-                      PsKernelOpenBinder.mk
-                        internalName
-                        userName
-                        domain
-                        binderInfo;
-                    smaller
-                      (psKernelExprInstantiate1
-                        body
-                        (PsKernelExpr.fvar
-                          internalName))
-                      countRest
-                      (Option.some
-                        PsKernelSimpleNestedBinderKind.lambdaK)
-                      (Nat.succ index)
-                      (List.cons binder rev)
+                let conflict :=
+                  match kind with
+                  | Option.some value =>
+                      match value with
+                      | PsKernelSimpleNestedBinderKind.forallK =>
+                          true
+                      | PsKernelSimpleNestedBinderKind.lambdaK =>
+                          false
+                  | Option.none =>
+                      false;
+                if conflict then
+                  Except.error
+                    "restored nested binders mix forall and lambda"
+                else
+                  let internalName :=
+                    PsKernelName.num
+                      (psKernelSimpleInternalName
+                        "nestedRestoreParam")
+                      index;
+                  let binder :=
+                    PsKernelOpenBinder.mk
+                      internalName
+                      userName
+                      domain
+                      binderInfo;
+                  smaller
+                    (psKernelExprInstantiate1
+                      body
+                      (PsKernelExpr.fvar
+                        internalName))
+                    countRest
+                    (Option.some
+                      PsKernelSimpleNestedBinderKind.lambdaK)
+                    (Nat.succ index)
+                    (List.cons binder rev)
             | _ =>
                 Except.error
                   "failed to restore nested inductive parameters"

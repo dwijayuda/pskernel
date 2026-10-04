@@ -193,8 +193,9 @@ npm run check:fast
 ```
 
 This checks the frozen self-host source profile, the root r3 language-authority hash,
-and the focused r3 parser/printer/translation suite. It does not rebuild Lean or the
-whole compiler.
+the focused r3 parser/printer/translation suite, content-cache corruption/bypass
+invariants, and a tiny resident-cache invalidation corpus. It does not rebuild Lean or
+the whole compiler.
 
 Fast JS source-selfhost guard:
 
@@ -206,16 +207,73 @@ This uses the existing generated JavaScript compiler to re-emit the complete can
 `.ps` closure and requires exact 55-module source parity. It is the normal pre-commit
 gate for compiler-source edits.
 
-JS compiler fixed point without reseeding Lean:
+Current-source JS compiler fixed point without reseeding Lean:
 
 ```text
 npm run fixed-point:js
 ```
 
-This uses the existing bootstrap JavaScript compiler, regenerates the next compiler,
-and requires exact source and generated-TypeScript parity. The generated-JS path requires
-the incremental preparation API; missing incremental exports reject instead of silently
-falling back to aggregate whole-closure preparation.
+This is the predictive development fixed point. It first uses the last-known-good
+bootstrap JavaScript compiler to translate the **current handwritten compiler source** into
+a canonical PSC workspace. If that workspace is byte-identical to the already-proven
+bootstrap workspace, it reuses the existing exact bootstrap/selfhost fixed-point evidence
+instead of recompiling an unchanged compiler. Otherwise it compiles the current workspace
+into a candidate compiler, then uses that candidate compiler on the same canonical current
+source to produce the next generation. The current and next canonical source workspaces
+must be byte-identical, and `index.ts`, `index.js`, `index.d.ts`, and `index.js.map`
+must all be byte-identical.
+
+For regression against the already-generated bootstrap workspace only:
+
+```text
+npm run fixed-point:bootstrap-js
+```
+
+Do not use `fixed-point:bootstrap-js` as evidence for ungenerated current-source edits.
+
+Both generated-JS paths require the incremental preparation API; missing incremental
+exports reject instead of silently falling back to aggregate whole-closure preparation.
+
+Resident hot development loop:
+
+```text
+npm run dev:selfhost
+```
+
+The resident process imports the exact parent compiler once and keeps four in-memory,
+compiler-hash-scoped caches: parsed modules, prefix environment/declaration snapshots,
+prepared modules, and backend TypeScript text. Content-addressed disk caches separately
+cover source translation/canonicalization and TypeScript artifacts. Cache keys use exact
+compiler/source bytes; the TypeScript artifact key also fingerprints the launcher,
+package metadata, platform-native compiler executable, Node/platform identity, and the
+pinned compiler flags.
+
+Interactive resident commands are:
+
+```text
+build       # current source -> candidate compiler using hot caches
+check       # candidate -> next generation, exact source/artifact fixed point
+oracle      # hot current build == fully cold current build
+cold-check  # full resident JS fixed point with all caches bypassed
+stats
+clear
+quit
+```
+
+One-shot equivalents are:
+
+```text
+npm run dev:selfhost:once
+npm run dev:selfhost:check
+npm run dev:selfhost:oracle
+npm run dev:selfhost:cold-check
+```
+
+`PSC_NO_CACHE=1` is the canonical cache bypass. A cache miss or corrupt cache entry
+recomputes from source; no semantic fallback is permitted. Resident snapshots are never
+serialized to disk because generated compiler objects contain runtime symbol tags. The
+cold path remains the oracle, and optimized results become trusted only by exact
+differential equality against cold execution and the normal fixed-point gates.
 
 Stronger native/reference source contract:
 

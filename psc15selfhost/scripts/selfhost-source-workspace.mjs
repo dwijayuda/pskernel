@@ -2,11 +2,19 @@ import { existsSync, lstatSync } from "node:fs";
 import { readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
-import { assertBootstrapManifestShape, computeBootstrapClosureSha256 } from "./bootstrap-manifest.mjs";
+import {
+  assertBootstrapManifestShape,
+  canonicalGeneratedPaths,
+  computeBootstrapClosureSha256,
+} from "./bootstrap-manifest.mjs";
 
 const generationManifests = [
   [".proofscript-bootstrap.json", "bootstrap"],
   [".proofscript-selfhost.json", "selfhost"],
+];
+const workspaceBoundaryManifests = [
+  ...generationManifests,
+  [".proofscript-project.json", "project"],
 ];
 const present = (file) => lstatSync(file, { throwIfNoEntry: false }) !== undefined;
 const slash = (file) => file.split(path.sep).join("/");
@@ -23,7 +31,7 @@ function assertInside(root, file) {
 export function findSourceWorkspaceRoot(entryPath) {
   let current = path.dirname(path.resolve(entryPath));
   for (let fuel = 0; fuel < 64; fuel += 1) {
-    if (generationManifests.some(([name]) => present(path.join(current, name)))) return current;
+    if (workspaceBoundaryManifests.some(([name]) => present(path.join(current, name)))) return current;
     if (existsSync(path.join(current, "packages")) &&
         (present(path.join(current, "package.json")) ||
          present(path.join(current, ".proofscript-project.json")) ||
@@ -51,10 +59,19 @@ function generatedModulePath(root, moduleName) {
 
 // Return a validated, immutable-in-memory snapshot of exactly the declared PS
 // closure, in dependency order. Hash the bytes actually consumed, not a second
-// filesystem read. Ordinary (non-generation) projects keep their existing policy.
-export async function readGeneratedSourceClosure(entryPath, workspaceRoot = findSourceWorkspaceRoot(entryPath)) {
+// filesystem read. Bootstrap/selfhost manifests carry a committed closure hash;
+// generated project manifests are validated and hashed from their declared files.
+export async function readGeneratedSourceClosure(
+  entryPath,
+  workspaceRoot = findSourceWorkspaceRoot(entryPath),
+  options = {},
+) {
   const root = path.resolve(workspaceRoot);
-  const candidates = generationManifests.filter(([name]) => present(path.join(root, name)));
+  const candidates = (
+    options.allowProjectManifest === true
+      ? workspaceBoundaryManifests
+      : generationManifests
+  ).filter(([name]) => present(path.join(root, name)));
   if (candidates.length === 0) return undefined;
   if (candidates.length !== 1) throw new Error("PSC2_SELFHOST_MANIFEST_AMBIGUITY");
   const [manifestName, generation] = candidates[0];
@@ -67,7 +84,25 @@ export async function readGeneratedSourceClosure(entryPath, workspaceRoot = find
   } catch (error) {
     throw new Error(`PSC2_SELFHOST_MANIFEST_INVALID: ${manifestName}: ${error.message}`, { cause: error });
   }
-  const generated = assertBootstrapManifestShape(manifest, generation);
+  const generated =
+    generation === "project"
+      ? (() => {
+          if (
+            manifest === null ||
+            typeof manifest !== "object" ||
+            manifest.schemaVersion !== 1 ||
+            manifest.targetKind !== "ps" ||
+            typeof manifest.entry !== "string"
+          ) {
+            throw new Error("PSC2_SELFHOST_PROJECT_MANIFEST_SHAPE");
+          }
+          const files = canonicalGeneratedPaths(manifest.generated);
+          if (manifest.sourceCount !== files.length) {
+            throw new Error("PSC2_SELFHOST_PROJECT_SOURCE_COUNT");
+          }
+          return files;
+        })()
+      : assertBootstrapManifestShape(manifest, generation);
   const absoluteEntry = path.resolve(entryPath);
   assertInside(root, absoluteEntry);
   if (slash(path.relative(root, absoluteEntry)) !== manifest.entry) {
@@ -102,10 +137,22 @@ export async function readGeneratedSourceClosure(entryPath, workspaceRoot = find
   if (JSON.stringify([...consumed.keys()].sort()) !== JSON.stringify(generated)) {
     throw new Error("PSC2_SELFHOST_SOURCE_FILESET_MISMATCH");
   }
-  const closureSha256 = await computeBootstrapClosureSha256(manifest.entry, generated,
-    async (relative) => consumed.get(relative));
-  if (closureSha256 !== manifest.closureSha256) {
-    throw new Error(`PSC2_SELFHOST_SOURCE_CLOSURE_MISMATCH: expected ${manifest.closureSha256}, got ${closureSha256}`);
+  const closureSha256 = await computeBootstrapClosureSha256(
+    manifest.entry,
+    generated,
+    async (relative) => consumed.get(relative),
+  );
+  if (
+    generation !== "project" &&
+    closureSha256 !== manifest.closureSha256
+  ) {
+    throw new Error(
+      `PSC2_SELFHOST_SOURCE_CLOSURE_MISMATCH: expected ${manifest.closureSha256}, got ${closureSha256}`,
+    );
   }
-  return Object.freeze({ workspaceRoot: root, closureSha256, ordered: Object.freeze(ordered) });
+  return Object.freeze({
+    workspaceRoot: root,
+    closureSha256,
+    ordered: Object.freeze(ordered),
+  });
 }

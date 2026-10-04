@@ -2,10 +2,9 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { spawnSync } from "node:child_process";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
 import { findSourceWorkspaceRoot, readGeneratedSourceClosure } from "./selfhost-source-workspace.mjs";
-import { pinnedTypeScriptVersionText, resolveTypeScriptCli } from "./typescript-cli.mjs";
+import { compileTypeScriptCached } from "./compile-typescript-cached.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -218,48 +217,6 @@ function prepareSourcesIncrementally(compiler, sourceKindValue, sourceChunks) {
   return prepared;
 }
 
-function compileTypeScript(typeScriptPath) {
-  const tsc = resolveTypeScriptCli();
-  const version = spawnSync(process.execPath, [tsc, '--version'], { encoding: 'utf8', timeout: 10000 });
-  if (version.error || version.status !== 0 || version.stdout.trim() !== pinnedTypeScriptVersionText)
-    throw new Error('PSC2_SELFHOST_TYPESCRIPT_PIN: require TypeScript 7.0.2');
-  const result = spawnSync(
-    process.execPath,
-    [
-      tsc,
-      typeScriptPath,
-      "--ignoreConfig",
-      "--target",
-      "ES2022",
-      "--module",
-      "ES2022",
-      "--moduleResolution",
-      "bundler",
-      "--strict",
-      "--declaration",
-      "--sourceMap",
-      "--noEmitOnError",
-      "--skipLibCheck",
-      "--pretty",
-      "false",
-    ],
-    {
-      cwd: selfhostRoot,
-      encoding: "utf8",
-      stdio: "pipe",
-    },
-  );
-  if (result.status !== 0) {
-    throw new Error(
-      [
-        "PSC2_SELFHOST_TSC_FAILED",
-        result.stdout,
-        result.stderr,
-      ].filter(Boolean).join("\n"),
-    );
-  }
-}
-
 if (process.argv.length < 5) {
   throw new Error(usage());
 }
@@ -304,7 +261,7 @@ const backendMs = Math.round(performance.now() - backendStarted);
 await mkdir(path.dirname(outputTsPath), { recursive: true });
 await writeFile(outputTsPath, typeScript, "utf8");
 const tscStarted = performance.now();
-compileTypeScript(outputTsPath);
+const tscCache = await compileTypeScriptCached(selfhostRoot, outputTsPath);
 const tscMs = Math.round(performance.now() - tscStarted);
 
 process.stdout.write(
@@ -317,5 +274,6 @@ process.stdout.write(
     `PSC2_SELFHOST_JS: ${path.relative(selfhostRoot, outputTsPath.replace(/\.ts$/u, ".js"))}`,
     `PSC2_SELFHOST_BACKEND_MS: ${backendMs}`,
     `PSC2_SELFHOST_TSC_MS: ${tscMs}`,
+    `PSC2_SELFHOST_TSC_CACHE: ${tscCache.cache}`,
   ].join("\n") + "\n",
 );

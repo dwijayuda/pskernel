@@ -10,6 +10,7 @@ import {
   assertBootstrapManifestShape,
   assertBootstrapWorkspaceManifest,
 } from "./bootstrap-manifest.mjs";
+import { cachedTextTransform, sha256File } from "./cache-utils.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -73,6 +74,7 @@ if (
 ) {
   throw new Error("PSC1_SELFHOST_REEMIT_COMPILER_API_MISSING");
 }
+const compilerSha256 = await sha256File(compilerPath);
 
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 const expectedGeneration =
@@ -92,18 +94,36 @@ if (expectedGeneration !== undefined) {
 
 const generated = canonicalGeneratedPaths(manifest.generated);
 const psKind = compiler.PsCompilerSourceKind.proofScript;
+let cacheHits = 0;
+let cacheMisses = 0;
+let cacheDisabled = 0;
 
 for (const relativePath of generated) {
   const inputPath = path.join(inputWorkspace, relativePath);
   const outputPath = path.join(outputWorkspace, relativePath);
   const source = await readFile(inputPath, "utf8");
-  const canonical = unwrapExcept(
-    compiler.psCompilerTranslateSource(psKind, psKind, source),
-    relativePath,
-  );
+  const canonicalResult = await cachedTextTransform({
+    projectRoot: selfhostRoot,
+    namespace: "translate-source-v1",
+    contract: {
+      operation: "psCompilerTranslateSource",
+      compilerSha256,
+      sourceKind: ".ps",
+      targetKind: ".ps",
+    },
+    input: source,
+    compute: async () =>
+      unwrapExcept(
+        compiler.psCompilerTranslateSource(psKind, psKind, source),
+        relativePath,
+      ),
+  });
+  if (canonicalResult.cache === "hit") cacheHits += 1;
+  else if (canonicalResult.cache === "miss") cacheMisses += 1;
+  else cacheDisabled += 1;
 
   await mkdir(path.dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, canonical, "utf8");
+  await writeFile(outputPath, canonicalResult.value, "utf8");
 }
 
 const closureSha256 = await computeBootstrapWorkspaceClosureSha256(
@@ -138,5 +158,6 @@ process.stdout.write(
     `PSC1_SELFHOST_REEMIT_OUTPUT: ${path.relative(selfhostRoot, outputWorkspace)}`,
     `PSC1_SELFHOST_REEMIT_FILES: ${generated.length}`,
     `PSC1_SELFHOST_REEMIT_CLOSURE_SHA256: ${closureSha256}`,
+    `PSC2_SELFHOST_TRANSLATE_CACHE: hits=${cacheHits} misses=${cacheMisses} disabled=${cacheDisabled}`,
   ].join("\n") + "\n",
 );

@@ -87,8 +87,10 @@ def psWasmExpectedResultType :
     List PsWasmValueType ->
     Except PsWasmLowerError (Option PsWasmValueType)
   | [] => Except.ok none
-  | [result] => Except.ok (some result)
-  | _ => Except.error PsWasmLowerError.unsupportedType
+  | result :: rest =>
+      match rest with
+      | [] => Except.ok (some result)
+      | _ => Except.error PsWasmLowerError.unsupportedType
 
 def psWasmMachineIntegerValueType
     (profile : PsWasmTargetProfile)
@@ -1372,21 +1374,25 @@ def psWasmLowerIntUnaryCallWith
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match arguments with
-  | [value] =>
-      match
-          lower
-            (some psWasmIntRef)
-            state
-            value with
-      | Except.error error => Except.error error
-      | Except.ok lowered =>
-          Except.ok {
-            instructions :=
-              lowered.instructions ++
-                [PsWasmInstruction.call functionName]
-            state := lowered.state
-          }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | [] => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | value :: rest =>
+      match rest with
+      | _ :: _ =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | [] =>
+          match
+              lower
+                (some psWasmIntRef)
+                state
+                value with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok {
+                instructions :=
+                  lowered.instructions ++
+                    [PsWasmInstruction.call functionName]
+                state := lowered.state
+              }
 
 def psWasmLowerNatToIntUnaryCallWith
     (lower :
@@ -1399,21 +1405,25 @@ def psWasmLowerNatToIntUnaryCallWith
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match arguments with
-  | [value] =>
-      match
-          lower
-            (some psWasmNatRef)
-            state
-            value with
-      | Except.error error => Except.error error
-      | Except.ok lowered =>
-          Except.ok {
-            instructions :=
-              lowered.instructions ++
-                [PsWasmInstruction.call functionName]
-            state := lowered.state
-          }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | [] => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | value :: rest =>
+      match rest with
+      | _ :: _ =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | [] =>
+          match
+              lower
+                (some psWasmNatRef)
+                state
+                value with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok {
+                instructions :=
+                  lowered.instructions ++
+                    [PsWasmInstruction.call functionName]
+                state := lowered.state
+              }
 
 def psWasmLowerIntCompareWith
     (lower :
@@ -1453,20 +1463,24 @@ def psWasmResolveArrayLowerInfo
     (typeArguments : List PsVerifiedIrType) :
     Except PsWasmLowerError PsWasmArrayLowerInfo :=
   match typeArguments with
-  | [elementType] =>
-      match psWasmArrayTypeName elementType with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some typeName =>
-          match psWasmValueTypeOfIrType? profile elementType with
+  | [] => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | elementType :: rest =>
+      match rest with
+      | _ :: _ =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | [] =>
+          match psWasmArrayTypeName elementType with
           | none => Except.error PsWasmLowerError.unsupportedType
-          | some elementValueType =>
-              Except.ok {
-                elementType := elementType
-                elementValueType := elementValueType
-                typeName := typeName
-                refType := PsWasmValueType.refT typeName
-              }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+          | some typeName =>
+              match psWasmValueTypeOfIrType? profile elementType with
+              | none => Except.error PsWasmLowerError.unsupportedType
+              | some elementValueType =>
+                  Except.ok {
+                    elementType := elementType
+                    elementValueType := elementValueType
+                    typeName := typeName
+                    refType := PsWasmValueType.refT typeName
+                  }
 
 def psWasmArrayGetInstruction
     (typeName : String)
@@ -1493,19 +1507,23 @@ def psWasmLowerArrayEmptyWithCapacityWith
   | Except.error error => Except.error error
   | Except.ok info =>
       match arguments with
-      | [capacity] =>
-          match lower (some psWasmNatRef) state capacity with
-          | Except.error error => Except.error error
-          | Except.ok lowered =>
-              Except.ok {
-                instructions :=
-                  lowered.instructions ++ [
-                    PsWasmInstruction.drop,
-                    PsWasmInstruction.arrayNewFixed info.typeName 0
-                  ]
-                state := lowered.state
-              }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+      | [] => Except.error PsWasmLowerError.invalidIntrinsicArity
+      | capacity :: rest =>
+          match rest with
+          | _ :: _ =>
+              Except.error PsWasmLowerError.invalidIntrinsicArity
+          | [] =>
+              match lower (some psWasmNatRef) state capacity with
+              | Except.error error => Except.error error
+              | Except.ok lowered =>
+                  Except.ok {
+                    instructions :=
+                      lowered.instructions ++ [
+                        PsWasmInstruction.drop,
+                        PsWasmInstruction.arrayNewFixed info.typeName 0
+                      ]
+                    state := lowered.state
+                  }
 
 def psWasmLowerArraySizeWith
     (profile : PsWasmTargetProfile)
@@ -1522,19 +1540,23 @@ def psWasmLowerArraySizeWith
   | Except.error error => Except.error error
   | Except.ok info =>
       match arguments with
-      | [array] =>
-          match lower (some info.refType) state array with
-          | Except.error error => Except.error error
-          | Except.ok lowered =>
-              Except.ok {
-                instructions :=
-                  lowered.instructions ++ [
-                    PsWasmInstruction.arrayLen,
-                    PsWasmInstruction.call psWasmNatOfU32Fn
-                  ]
-                state := lowered.state
-              }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+      | [] => Except.error PsWasmLowerError.invalidIntrinsicArity
+      | array :: rest =>
+          match rest with
+          | _ :: _ =>
+              Except.error PsWasmLowerError.invalidIntrinsicArity
+          | [] =>
+              match lower (some info.refType) state array with
+              | Except.error error => Except.error error
+              | Except.ok lowered =>
+                  Except.ok {
+                    instructions :=
+                      lowered.instructions ++ [
+                        PsWasmInstruction.arrayLen,
+                        PsWasmInstruction.call psWasmNatOfU32Fn
+                      ]
+                    state := lowered.state
+                  }
 
 def psWasmLowerArrayPushWith
     (profile : PsWasmTargetProfile)

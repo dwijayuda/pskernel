@@ -28,7 +28,7 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-          npm install --prefix /tmp/psc2-lean-integration --no-audit --no-fund typescript@5.8.3
+          npm install --prefix /tmp/psc2-lean-integration --no-audit --no-fund typescript@7.0.2
           echo /tmp/psc2-lean-integration/node_modules/.bin >> "$GITHUB_PATH"
       - name: Verify imported Lean WASM provider and execute real admission
         run: |

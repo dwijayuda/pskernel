@@ -13,16 +13,18 @@ test('checked bootstrap runs the real PSC1 project preflight before the checked 
   )?.[0];
   assert.ok(bootstrap, 'bootstrap function missing');
 
-  const lean = bootstrap.indexOf("run(npm, ['run', 'bootstrap:lean']);");
-  const preflight = bootstrap.indexOf("run(npm, ['run', 'bootstrap:check']);");
+  const lean = bootstrap.indexOf("runNpm(['run', 'bootstrap:lean']);");
+  const preflight = bootstrap.indexOf("runNpm(['run', 'bootstrap:check']);");
+  const providerSelection = bootstrap.indexOf("const hostTargets = kernel === 'lean434'");
   const providerBuild = bootstrap.indexOf(
-    "run('lake', ['build', 'psc2_lean_checked_seed', 'psc2_lean_kernel_provider']",
+    "run('lake', hostTargets, path.join(root, 'lean-checked'));",
   );
   const checkedSeed = bootstrap.indexOf('await buildChecked({');
 
   assert.ok(preflight >= 0, 'bootstrap:check missing');
   assert.ok(lean > preflight, 'bootstrap:lean must follow parser preflight');
-  assert.ok(providerBuild > lean, 'provider/seed build must follow full bootstrap suite');
+  assert.ok(providerSelection > lean, 'provider target selection must follow full bootstrap suite');
+  assert.ok(providerBuild > providerSelection, 'provider/seed build must use selected checked targets');
   assert.ok(checkedSeed > providerBuild, 'checked seed session must follow parser preflight');
 });
 

@@ -2391,40 +2391,40 @@ def psKernelSelfHostQuotTests : Bool :=
               (List.cons
                 representative
                 List.nil)))
+      let liftArgs5 :=
+        List.cons quotMk List.nil
+      let liftArgs4 :=
+        List.cons dummy liftArgs5
+      let liftArgs3 :=
+        List.cons fn liftArgs4
+      let liftArgs2 :=
+        List.cons dummy liftArgs3
+      let liftArgs1 :=
+        List.cons dummy liftArgs2
+      let liftArgs :=
+        List.cons dummy liftArgs1
       let liftExpr :=
         psKernelApplyArgs
           (PsKernelExpr.const
             psKernelQuotLiftName
             List.nil)
-          (List.cons
-            dummy
-            (List.cons
-              dummy
-              (List.cons
-                dummy
-                (List.cons
-                  fn
-                  (List.cons
-                    dummy
-                    (List.cons
-                      quotMk
-                      List.nil))))))
+          liftArgs
+      let indArgs4 :=
+        List.cons quotMk List.nil
+      let indArgs3 :=
+        List.cons fn indArgs4
+      let indArgs2 :=
+        List.cons dummy indArgs3
+      let indArgs1 :=
+        List.cons dummy indArgs2
+      let indArgs :=
+        List.cons dummy indArgs1
       let indExpr :=
         psKernelApplyArgs
           (PsKernelExpr.const
             psKernelQuotIndName
             List.nil)
-          (List.cons
-            dummy
-            (List.cons
-              dummy
-              (List.cons
-                dummy
-                (List.cons
-                  fn
-                  (List.cons
-                    quotMk
-                    List.nil)))))
+          indArgs
       let portableSession :=
         psKernelMkCheckerSession
           portableEnv

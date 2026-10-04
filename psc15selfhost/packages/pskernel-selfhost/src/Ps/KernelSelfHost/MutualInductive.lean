@@ -1726,11 +1726,8 @@ def psKernelAddSimpleMutualConstructorsForTypeWorker
                                             params)
                                           (psKernelOpenBinderListLength
                                             fieldsResult.fields)
-                                          typeShape.decl.name
-                                          typeNames
-                                          (psKernelOpenBinderListLength
-                                            typeShape.indices)
-                                          false;
+                                          (psKernelDefinitionSafetyIsUnsafe
+                                            safety);
                                       let nextWork :=
                                         psKernelEnvironmentAddUnchecked
                                           work

@@ -1,6 +1,7 @@
 import Lean
 import Ps.KernelSelfHost.CheckerSession
 import Ps.KernelSelfHost.InductiveAdmission
+import Ps.KernelSelfHost.MutualInductive
 
 def psKernelBenchName
     (index : Nat) :
@@ -1219,6 +1220,196 @@ def psKernelBenchLeanRecDecl : Lean.Declaration :=
     }]
     false
 
+
+def psKernelBenchMutualEvenName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "BenchMutualEven"
+
+def psKernelBenchMutualOddName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "BenchMutualOdd"
+
+def psKernelBenchMutualEvenZeroName : PsKernelName :=
+  PsKernelName.str
+    psKernelBenchMutualEvenName
+    "zero"
+
+def psKernelBenchMutualEvenStepName : PsKernelName :=
+  PsKernelName.str
+    psKernelBenchMutualEvenName
+    "step"
+
+def psKernelBenchMutualOddStepName : PsKernelName :=
+  PsKernelName.str
+    psKernelBenchMutualOddName
+    "step"
+
+def psKernelBenchMutualEvenRecName : PsKernelName :=
+  psKernelSimpleRecName
+    psKernelBenchMutualEvenName
+
+def psKernelBenchMutualOddRecName : PsKernelName :=
+  psKernelSimpleRecName
+    psKernelBenchMutualOddName
+
+def psKernelBenchMutualEvenExpr : PsKernelExpr :=
+  PsKernelExpr.const
+    psKernelBenchMutualEvenName
+    List.nil
+
+def psKernelBenchMutualOddExpr : PsKernelExpr :=
+  PsKernelExpr.const
+    psKernelBenchMutualOddName
+    List.nil
+
+def psKernelBenchMutualDecl :
+    PsKernelSimpleMutualInductiveDecl :=
+  {
+    levelParams := List.nil
+    numParams := 0
+    types :=
+      List.cons
+        {
+          name := psKernelBenchMutualEvenName
+          type :=
+            PsKernelExpr.sort
+              (PsKernelLevel.succ
+                PsKernelLevel.zero)
+          ctors :=
+            List.cons
+              {
+                name := psKernelBenchMutualEvenZeroName
+                type := psKernelBenchMutualEvenExpr
+              }
+              (List.cons
+                {
+                  name := psKernelBenchMutualEvenStepName
+                  type :=
+                    PsKernelExpr.forallE
+                      PsKernelName.anonymous
+                      psKernelBenchMutualOddExpr
+                      psKernelBenchMutualEvenExpr
+                      PsKernelBinderInfo.default
+                }
+                List.nil)
+        }
+        (List.cons
+          {
+            name := psKernelBenchMutualOddName
+            type :=
+              PsKernelExpr.sort
+                (PsKernelLevel.succ
+                  PsKernelLevel.zero)
+            ctors :=
+              List.cons
+                {
+                  name := psKernelBenchMutualOddStepName
+                  type :=
+                    PsKernelExpr.forallE
+                      PsKernelName.anonymous
+                      psKernelBenchMutualEvenExpr
+                      psKernelBenchMutualOddExpr
+                      PsKernelBinderInfo.default
+                }
+                List.nil
+          }
+          List.nil)
+    isUnsafe := false
+  }
+
+def psKernelBenchLeanMutualEvenName : Lean.Name :=
+  Lean.Name.str
+    Lean.Name.anonymous
+    "BenchMutualEven"
+
+def psKernelBenchLeanMutualOddName : Lean.Name :=
+  Lean.Name.str
+    Lean.Name.anonymous
+    "BenchMutualOdd"
+
+def psKernelBenchLeanMutualEvenZeroName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanMutualEvenName
+    "zero"
+
+def psKernelBenchLeanMutualEvenStepName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanMutualEvenName
+    "step"
+
+def psKernelBenchLeanMutualOddStepName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanMutualOddName
+    "step"
+
+def psKernelBenchLeanMutualEvenRecName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanMutualEvenName
+    "rec"
+
+def psKernelBenchLeanMutualOddRecName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanMutualOddName
+    "rec"
+
+def psKernelBenchLeanMutualEvenExpr : Lean.Expr :=
+  Lean.Expr.const
+    psKernelBenchLeanMutualEvenName
+    []
+
+def psKernelBenchLeanMutualOddExpr : Lean.Expr :=
+  Lean.Expr.const
+    psKernelBenchLeanMutualOddName
+    []
+
+def psKernelBenchLeanMutualDecl : Lean.Declaration :=
+  Lean.Declaration.inductDecl
+    []
+    0
+    [
+      {
+        name := psKernelBenchLeanMutualEvenName
+        type :=
+          Lean.Expr.sort
+            (Lean.Level.succ Lean.Level.zero)
+        ctors := [
+          {
+            name := psKernelBenchLeanMutualEvenZeroName
+            type := psKernelBenchLeanMutualEvenExpr
+          },
+          {
+            name := psKernelBenchLeanMutualEvenStepName
+            type :=
+              Lean.Expr.forallE
+                Lean.Name.anonymous
+                psKernelBenchLeanMutualOddExpr
+                psKernelBenchLeanMutualEvenExpr
+                Lean.BinderInfo.default
+          }
+        ]
+      },
+      {
+        name := psKernelBenchLeanMutualOddName
+        type :=
+          Lean.Expr.sort
+            (Lean.Level.succ Lean.Level.zero)
+        ctors := [
+          {
+            name := psKernelBenchLeanMutualOddStepName
+            type :=
+              Lean.Expr.forallE
+                Lean.Name.anonymous
+                psKernelBenchLeanMutualEvenExpr
+                psKernelBenchLeanMutualOddExpr
+                Lean.BinderInfo.default
+          }
+        ]
+      }
+    ]
+    false
+
 def psKernelBenchLeanRecEnvironment :
     IO Lean.Environment := do
   let base :=
@@ -1330,6 +1521,70 @@ partial def psKernelBenchLeanInductiveAdmissionLoop
           | some (.recInfo _) =>
               pure (Nat.succ tail)
           | _ =>
+              pure tail
+      | .error _ =>
+          pure tail
+
+
+partial def psKernelBenchMutualAdmissionLoop
+    (iterations : Nat) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchMutualAdmissionLoop rest
+      match
+          psKernelAddSimpleMutualInductive
+            65536
+            psKernelEnvironmentEmpty
+            psKernelBenchMutualDecl
+            0
+            psKernelLeanNatMaxSizeDefault with
+      | Except.ok environment =>
+          if
+              psKernelEnvironmentContains
+                environment
+                psKernelBenchMutualEvenRecName then
+            if
+                psKernelEnvironmentContains
+                  environment
+                  psKernelBenchMutualOddRecName then
+              pure (Nat.succ tail)
+            else
+              pure tail
+          else
+            pure tail
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchLeanMutualAdmissionLoop
+    (iterations : Nat)
+    (environment : Lean.Environment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchLeanMutualAdmissionLoop
+          rest
+          environment
+      match
+          Lean.Kernel.Environment.addDecl
+            environment.toKernelEnv
+            {}
+            psKernelBenchLeanMutualDecl with
+      | .ok next =>
+          match
+              next.find?
+                psKernelBenchLeanMutualEvenRecName,
+              next.find?
+                psKernelBenchLeanMutualOddRecName with
+          | some (.recInfo _), some (.recInfo _) =>
+              pure (Nat.succ tail)
+          | _, _ =>
               pure tail
       | .error _ =>
           pure tail
@@ -2073,6 +2328,40 @@ def main : IO Unit := do
       toString admissionPsHits ++
       "/" ++
       toString admissionLeanHits)
+
+
+  let mutualAdmissionIterations := 100
+
+  let mutualAdmissionPsStart ← IO.monoNanosNow
+  let mutualAdmissionPsHits ←
+    psKernelBenchMutualAdmissionLoop
+      mutualAdmissionIterations
+  let mutualAdmissionPsStop ← IO.monoNanosNow
+
+  let mutualAdmissionLeanStart ← IO.monoNanosNow
+  let mutualAdmissionLeanHits ←
+    psKernelBenchLeanMutualAdmissionLoop
+      mutualAdmissionIterations
+      leanAdmissionBase
+  let mutualAdmissionLeanStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH mutual_inductive_admission_pskernel_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          mutualAdmissionPsStart
+          mutualAdmissionPsStop) ++
+      " mutual_inductive_admission_lean_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          mutualAdmissionLeanStart
+          mutualAdmissionLeanStop) ++
+      " iterations=" ++
+      toString mutualAdmissionIterations ++
+      " hits=" ++
+      toString mutualAdmissionPsHits ++
+      "/" ++
+      toString mutualAdmissionLeanHits)
 
   IO.println
     ("PSKERNEL_BENCH structural_defeq_pskernel_ns=" ++

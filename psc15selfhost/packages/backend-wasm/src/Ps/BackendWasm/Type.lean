@@ -92,41 +92,41 @@ def psWasmArrayTypeName
 
 def psWasmWordValueType (profile : PsWasmTargetProfile) : PsWasmValueType :=
   match profile.wordSize with
-  | .wasm32 => .i32
-  | .wasm64 => .i64
+  | .wasm32 => PsWasmValueType.i32
+  | .wasm64 => PsWasmValueType.i64
 
 def psWasmValueTypeOfPrimitive
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrPrimitiveType) : PsWasmValueType :=
   match type with
-  | .nat => .refT "ProofScript.Nat"
-  | .int => .refT "ProofScript.Int"
-  | .uint8 => .i32
-  | .uint16 => .i32
-  | .uint32 => .i32
-  | .uint64 => .i64
+  | .nat => PsWasmValueType.refT "ProofScript.Nat"
+  | .int => PsWasmValueType.refT "ProofScript.Int"
+  | .uint8 => PsWasmValueType.i32
+  | .uint16 => PsWasmValueType.i32
+  | .uint32 => PsWasmValueType.i32
+  | .uint64 => PsWasmValueType.i64
   | .usize => psWasmWordValueType profile
-  | .int8 => .i32
-  | .int16 => .i32
-  | .int32 => .i32
-  | .int64 => .i64
+  | .int8 => PsWasmValueType.i32
+  | .int16 => PsWasmValueType.i32
+  | .int32 => PsWasmValueType.i32
+  | .int64 => PsWasmValueType.i64
   | .isize => psWasmWordValueType profile
-  | .float => .f64
-  | .float32 => .f32
-  | .bool => .i32
-  | .char => .i32
-  | .string => .refT "ProofScript.String"
-  | .unit => .noValue
+  | .float => PsWasmValueType.f64
+  | .float32 => PsWasmValueType.f32
+  | .bool => PsWasmValueType.i32
+  | .char => PsWasmValueType.i32
+  | .string => PsWasmValueType.refT "ProofScript.String"
+  | .unit => PsWasmValueType.noValue
 
 def psWasmStorageTypeOfPrimitive
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrPrimitiveType) : PsWasmStorageType :=
   match type with
-  | .uint8 => .packedI8
-  | .int8 => .packedI8
-  | .uint16 => .packedI16
-  | .int16 => .packedI16
-  | other => .value (psWasmValueTypeOfPrimitive profile other)
+  | .uint8 => PsWasmStorageType.packedI8
+  | .int8 => PsWasmStorageType.packedI8
+  | .uint16 => PsWasmStorageType.packedI16
+  | .int16 => PsWasmStorageType.packedI16
+  | other => PsWasmStorageType.value (psWasmValueTypeOfPrimitive profile other)
 
 def psWasmLowerPrimitive
     (profile : PsWasmTargetProfile)

@@ -1785,6 +1785,309 @@ def psKernelBenchLeanNestedBaseEnvironment :
         (IO.userError
           "PSKERNEL_BENCH failed to create Lean nested-inductive base fixture")
 
+def psKernelBenchNestedWrapName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "BenchNestedWrap"
+
+def psKernelBenchNestedWrapMkName : PsKernelName :=
+  PsKernelName.str
+    psKernelBenchNestedWrapName
+    "mk"
+
+def psKernelBenchNestedWideTreeName : PsKernelName :=
+  PsKernelName.str
+    PsKernelName.anonymous
+    "BenchNestedWideTree"
+
+def psKernelBenchNestedWideLeafName : PsKernelName :=
+  PsKernelName.str
+    psKernelBenchNestedWideTreeName
+    "leaf"
+
+def psKernelBenchNestedWideBoxName : PsKernelName :=
+  PsKernelName.str
+    psKernelBenchNestedWideTreeName
+    "boxNode"
+
+def psKernelBenchNestedWideWrapName : PsKernelName :=
+  PsKernelName.str
+    psKernelBenchNestedWideTreeName
+    "wrapNode"
+
+def psKernelBenchNestedWideRecName : PsKernelName :=
+  psKernelSimpleRecName
+    psKernelBenchNestedWideTreeName
+
+def psKernelBenchNestedWrapExpr : PsKernelExpr :=
+  PsKernelExpr.const
+    psKernelBenchNestedWrapName
+    List.nil
+
+def psKernelBenchNestedWideTreeExpr : PsKernelExpr :=
+  PsKernelExpr.const
+    psKernelBenchNestedWideTreeName
+    List.nil
+
+def psKernelBenchNestedBoxWideTreeExpr : PsKernelExpr :=
+  PsKernelExpr.app
+    psKernelBenchNestedBoxExpr
+    psKernelBenchNestedWideTreeExpr
+
+def psKernelBenchNestedWrapWideTreeExpr : PsKernelExpr :=
+  PsKernelExpr.app
+    psKernelBenchNestedWrapExpr
+    psKernelBenchNestedWideTreeExpr
+
+def psKernelBenchNestedWrapDecl :
+    PsKernelSimpleInductiveDecl :=
+  {
+    levelParams := List.nil
+    name := psKernelBenchNestedWrapName
+    type :=
+      PsKernelExpr.forallE
+        PsKernelName.anonymous
+        psKernelBenchNestedType1
+        psKernelBenchNestedType1
+        PsKernelBinderInfo.default
+    ctors :=
+      List.cons
+        {
+          name := psKernelBenchNestedWrapMkName
+          type :=
+            PsKernelExpr.forallE
+              PsKernelName.anonymous
+              psKernelBenchNestedType1
+              (PsKernelExpr.forallE
+                PsKernelName.anonymous
+                (PsKernelExpr.bvar 0)
+                (PsKernelExpr.app
+                  psKernelBenchNestedWrapExpr
+                  (PsKernelExpr.bvar 1))
+                PsKernelBinderInfo.default)
+              PsKernelBinderInfo.default
+        }
+        List.nil
+    isUnsafe := false
+    numParams := 1
+  }
+
+def psKernelBenchNestedWideDecl :
+    PsKernelSimpleMutualInductiveDecl :=
+  {
+    levelParams := List.nil
+    numParams := 0
+    types :=
+      List.cons
+        {
+          name := psKernelBenchNestedWideTreeName
+          type := psKernelBenchNestedType1
+          ctors :=
+            List.cons
+              {
+                name := psKernelBenchNestedWideLeafName
+                type := psKernelBenchNestedWideTreeExpr
+              }
+              (List.cons
+                {
+                  name := psKernelBenchNestedWideBoxName
+                  type :=
+                    PsKernelExpr.forallE
+                      PsKernelName.anonymous
+                      psKernelBenchNestedBoxWideTreeExpr
+                      psKernelBenchNestedWideTreeExpr
+                      PsKernelBinderInfo.default
+                }
+                (List.cons
+                  {
+                    name := psKernelBenchNestedWideWrapName
+                    type :=
+                      PsKernelExpr.forallE
+                        PsKernelName.anonymous
+                        psKernelBenchNestedWrapWideTreeExpr
+                        psKernelBenchNestedWideTreeExpr
+                        PsKernelBinderInfo.default
+                  }
+                  List.nil))
+        }
+        List.nil
+    isUnsafe := false
+  }
+
+def psKernelBenchNestedWideBaseEnvironment :
+    IO PsKernelEnvironment := do
+  match
+      psKernelAddSimpleInductive
+        65536
+        psKernelEnvironmentEmpty
+        psKernelBenchNestedBoxDecl
+        0
+        psKernelLeanNatMaxSizeDefault with
+  | Except.error _ =>
+      throw
+        (IO.userError
+          "PSKERNEL_BENCH failed to create wide nested Box fixture")
+  | Except.ok boxEnvironment =>
+      match
+          psKernelAddSimpleInductive
+            65536
+            boxEnvironment
+            psKernelBenchNestedWrapDecl
+            0
+            psKernelLeanNatMaxSizeDefault with
+      | Except.ok environment =>
+          pure environment
+      | Except.error _ =>
+          throw
+            (IO.userError
+              "PSKERNEL_BENCH failed to create wide nested Wrap fixture")
+
+def psKernelBenchLeanNestedWrapName : Lean.Name :=
+  Lean.Name.str
+    Lean.Name.anonymous
+    "BenchNestedWrap"
+
+def psKernelBenchLeanNestedWrapMkName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanNestedWrapName
+    "mk"
+
+def psKernelBenchLeanNestedWideTreeName : Lean.Name :=
+  Lean.Name.str
+    Lean.Name.anonymous
+    "BenchNestedWideTree"
+
+def psKernelBenchLeanNestedWideLeafName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanNestedWideTreeName
+    "leaf"
+
+def psKernelBenchLeanNestedWideBoxName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanNestedWideTreeName
+    "boxNode"
+
+def psKernelBenchLeanNestedWideWrapName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanNestedWideTreeName
+    "wrapNode"
+
+def psKernelBenchLeanNestedWideRecName : Lean.Name :=
+  Lean.Name.str
+    psKernelBenchLeanNestedWideTreeName
+    "rec"
+
+def psKernelBenchLeanNestedWrapExpr : Lean.Expr :=
+  Lean.Expr.const
+    psKernelBenchLeanNestedWrapName
+    []
+
+def psKernelBenchLeanNestedWideTreeExpr : Lean.Expr :=
+  Lean.Expr.const
+    psKernelBenchLeanNestedWideTreeName
+    []
+
+def psKernelBenchLeanNestedBoxWideTreeExpr : Lean.Expr :=
+  Lean.Expr.app
+    psKernelBenchLeanNestedBoxExpr
+    psKernelBenchLeanNestedWideTreeExpr
+
+def psKernelBenchLeanNestedWrapWideTreeExpr : Lean.Expr :=
+  Lean.Expr.app
+    psKernelBenchLeanNestedWrapExpr
+    psKernelBenchLeanNestedWideTreeExpr
+
+def psKernelBenchLeanNestedWrapDecl : Lean.Declaration :=
+  Lean.Declaration.inductDecl
+    []
+    1
+    [{
+      name := psKernelBenchLeanNestedWrapName
+      type :=
+        Lean.Expr.forallE
+          Lean.Name.anonymous
+          psKernelBenchLeanNestedType1
+          psKernelBenchLeanNestedType1
+          Lean.BinderInfo.default
+      ctors := [{
+        name := psKernelBenchLeanNestedWrapMkName
+        type :=
+          Lean.Expr.forallE
+            Lean.Name.anonymous
+            psKernelBenchLeanNestedType1
+            (Lean.Expr.forallE
+              Lean.Name.anonymous
+              (Lean.Expr.bvar 0)
+              (Lean.Expr.app
+                psKernelBenchLeanNestedWrapExpr
+                (Lean.Expr.bvar 1))
+              Lean.BinderInfo.default)
+            Lean.BinderInfo.default
+      }]
+    }]
+    false
+
+def psKernelBenchLeanNestedWideDecl : Lean.Declaration :=
+  Lean.Declaration.inductDecl
+    []
+    0
+    [{
+      name := psKernelBenchLeanNestedWideTreeName
+      type := psKernelBenchLeanNestedType1
+      ctors := [
+        {
+          name := psKernelBenchLeanNestedWideLeafName
+          type := psKernelBenchLeanNestedWideTreeExpr
+        },
+        {
+          name := psKernelBenchLeanNestedWideBoxName
+          type :=
+            Lean.Expr.forallE
+              Lean.Name.anonymous
+              psKernelBenchLeanNestedBoxWideTreeExpr
+              psKernelBenchLeanNestedWideTreeExpr
+              Lean.BinderInfo.default
+        },
+        {
+          name := psKernelBenchLeanNestedWideWrapName
+          type :=
+            Lean.Expr.forallE
+              Lean.Name.anonymous
+              psKernelBenchLeanNestedWrapWideTreeExpr
+              psKernelBenchLeanNestedWideTreeExpr
+              Lean.BinderInfo.default
+        }
+      ]
+    }]
+    false
+
+def psKernelBenchLeanNestedWideBaseEnvironment :
+    IO Lean.Environment := do
+  let base :=
+    (← Lean.mkEmptyEnvironment).toKernelEnv
+  match
+      Lean.Kernel.Environment.addDecl
+        base
+        {}
+        psKernelBenchLeanNestedBoxDecl with
+  | .error _ =>
+      throw
+        (IO.userError
+          "PSKERNEL_BENCH failed to create Lean wide nested Box fixture")
+  | .ok boxEnvironment =>
+      match
+          Lean.Kernel.Environment.addDecl
+            boxEnvironment
+            {}
+            psKernelBenchLeanNestedWrapDecl with
+      | .ok environment =>
+          pure
+            (Lean.Environment.ofKernelEnv environment)
+      | .error _ =>
+          throw
+            (IO.userError
+              "PSKERNEL_BENCH failed to create Lean wide nested Wrap fixture")
+
 def psKernelBenchLeanRecEnvironment :
     IO Lean.Environment := do
   let base :=
@@ -2690,6 +2993,74 @@ partial def psKernelBenchLeanNestedAdmissionLoop
       | .error _ =>
           pure tail
 
+
+partial def psKernelBenchNestedWideAdmissionLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedWideAdmissionLoop
+          rest
+          environment
+      match
+          psKernelAddSimpleNestedInductive
+            65536
+            environment
+            psKernelBenchNestedWideDecl
+            0
+            psKernelLeanNatMaxSizeDefault with
+      | Except.ok next =>
+          match
+              psKernelEnvironmentFind
+                next
+                psKernelBenchNestedWideTreeName with
+          | Option.some
+              (PsKernelConstantInfo.inductInfo _) =>
+              if
+                  psKernelEnvironmentContains
+                    next
+                    psKernelBenchNestedWideRecName then
+                pure (Nat.succ tail)
+              else
+                pure tail
+          | _ =>
+              pure tail
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchLeanNestedWideAdmissionLoop
+    (iterations : Nat)
+    (environment : Lean.Environment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchLeanNestedWideAdmissionLoop
+          rest
+          environment
+      match
+          Lean.Kernel.Environment.addDecl
+            environment.toKernelEnv
+            {}
+            psKernelBenchLeanNestedWideDecl with
+      | .ok next =>
+          match
+              next.find?
+                psKernelBenchLeanNestedWideTreeName,
+              next.find?
+                psKernelBenchLeanNestedWideRecName with
+          | some (.inductInfo _), some (.recInfo _) =>
+              pure (Nat.succ tail)
+          | _, _ =>
+              pure tail
+      | .error _ =>
+          pure tail
 
 partial def psKernelBenchNestedPreprocessLoop
     (iterations : Nat)
@@ -3948,6 +4319,44 @@ def main : IO Unit := do
       "/" ++
       toString nestedAdmissionLeanHits)
 
+
+  let nestedWideIterations := 50
+  let nestedWidePsBase ←
+    psKernelBenchNestedWideBaseEnvironment
+  let nestedWideLeanBase ←
+    psKernelBenchLeanNestedWideBaseEnvironment
+
+  let nestedWidePsStart ← IO.monoNanosNow
+  let nestedWidePsHits ←
+    psKernelBenchNestedWideAdmissionLoop
+      nestedWideIterations
+      nestedWidePsBase
+  let nestedWidePsStop ← IO.monoNanosNow
+
+  let nestedWideLeanStart ← IO.monoNanosNow
+  let nestedWideLeanHits ←
+    psKernelBenchLeanNestedWideAdmissionLoop
+      nestedWideIterations
+      nestedWideLeanBase
+  let nestedWideLeanStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH nested_wide_admission_pskernel_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedWidePsStart
+          nestedWidePsStop) ++
+      " nested_wide_admission_lean_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedWideLeanStart
+          nestedWideLeanStop) ++
+      " iterations=" ++
+      toString nestedWideIterations ++
+      " hits=" ++
+      toString nestedWidePsHits ++
+      "/" ++
+      toString nestedWideLeanHits)
 
   let nestedProcessed ←
     match

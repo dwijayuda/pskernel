@@ -99,3 +99,7 @@ jobs:
       - name: Self-check changed compiler API source
         working-directory: psc15selfhost
         run: lake exe psc1 check packages/compiler/src/Ps/Compiler/Api.lean
+
+      - name: Self-check bootstrap composition root
+        working-directory: psc15selfhost
+        run: lake exe psc1 check packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean

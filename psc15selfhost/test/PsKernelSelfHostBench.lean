@@ -45,52 +45,52 @@ def psKernelBenchBuildEnvironment
     0
     psKernelEnvironmentEmpty
 
-def psKernelBenchEnvironmentIndexedLoop
+
+partial def psKernelBenchEnvironmentIndexedLoop
     (iterations : Nat)
     (environment : PsKernelEnvironment)
     (target : PsKernelName) :
-    Nat :=
-  let rec go
-      (remaining : Nat)
-      (hits : Nat) :
-      Nat :=
-    match remaining with
-    | Nat.zero =>
-        hits
-    | Nat.succ rest =>
-        match
-            psKernelEnvironmentFind
-              environment
-              target with
-        | Option.some _ =>
-            go rest (Nat.succ hits)
-        | Option.none =>
-            go rest hits
-  go iterations 0
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest =>
+      let tail ←
+        psKernelBenchEnvironmentIndexedLoop
+          rest
+          environment
+          target
+      match
+          psKernelEnvironmentFind
+            environment
+            target with
+      | Option.some _ =>
+          pure (Nat.succ tail)
+      | Option.none =>
+          pure tail
 
-def psKernelBenchEnvironmentLinearLoop
+partial def psKernelBenchEnvironmentLinearLoop
     (iterations : Nat)
     (environment : PsKernelEnvironment)
     (target : PsKernelName) :
-    Nat :=
-  let rec go
-      (remaining : Nat)
-      (hits : Nat) :
-      Nat :=
-    match remaining with
-    | Nat.zero =>
-        hits
-    | Nat.succ rest =>
-        match
-            psKernelFindConstantInList
-              target
-              environment.constants with
-        | Option.some _ =>
-            go rest (Nat.succ hits)
-        | Option.none =>
-            go rest hits
-  go iterations 0
-
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest =>
+      let tail ←
+        psKernelBenchEnvironmentLinearLoop
+          rest
+          environment
+          target
+      match
+          psKernelFindConstantInList
+            target
+            environment.constants with
+      | Option.some _ =>
+          pure (Nat.succ tail)
+      | Option.none =>
+          pure tail
 def psKernelBenchBuildCache
     (count : Nat) :
     Prod
@@ -128,49 +128,49 @@ def psKernelBenchBuildCache
     psKernelExprMapEmpty
     List.nil
 
-def psKernelBenchCacheIndexedLoop
+
+partial def psKernelBenchCacheIndexedLoop
     (iterations : Nat)
     (cache : PsKernelExprMap)
     (target : PsKernelExpr) :
-    Nat :=
-  let rec go
-      (remaining : Nat)
-      (hits : Nat) :
-      Nat :=
-    match remaining with
-    | Nat.zero =>
-        hits
-    | Nat.succ rest =>
-        match psKernelExprMapGet cache target with
-        | Option.some _ =>
-            go rest (Nat.succ hits)
-        | Option.none =>
-            go rest hits
-  go iterations 0
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest =>
+      let tail ←
+        psKernelBenchCacheIndexedLoop
+          rest
+          cache
+          target
+      match psKernelExprMapGet cache target with
+      | Option.some _ =>
+          pure (Nat.succ tail)
+      | Option.none =>
+          pure tail
 
-def psKernelBenchCacheLinearLoop
+partial def psKernelBenchCacheLinearLoop
     (iterations : Nat)
     (entries : List (Prod PsKernelExpr PsKernelExpr))
     (target : PsKernelExpr) :
-    Nat :=
-  let rec go
-      (remaining : Nat)
-      (hits : Nat) :
-      Nat :=
-    match remaining with
-    | Nat.zero =>
-        hits
-    | Nat.succ rest =>
-        match
-            psKernelExprMapGetIn
-              target
-              entries with
-        | Option.some _ =>
-            go rest (Nat.succ hits)
-        | Option.none =>
-            go rest hits
-  go iterations 0
-
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest =>
+      let tail ←
+        psKernelBenchCacheLinearLoop
+          rest
+          entries
+          target
+      match
+          psKernelExprMapGetIn
+            target
+            entries with
+      | Option.some _ =>
+          pure (Nat.succ tail)
+      | Option.none =>
+          pure tail
 def psKernelBenchElapsed
     (start stop : Nat) :
     Nat :=
@@ -185,7 +185,7 @@ def main : IO Unit := do
     psKernelBenchName 0
 
   let envIndexedStart ← IO.monoNanosNow
-  let envIndexedHits :=
+  let envIndexedHits ←
     psKernelBenchEnvironmentIndexedLoop
       iterations
       environment
@@ -193,7 +193,7 @@ def main : IO Unit := do
   let envIndexedStop ← IO.monoNanosNow
 
   let envLinearStart ← IO.monoNanosNow
-  let envLinearHits :=
+  let envLinearHits ←
     psKernelBenchEnvironmentLinearLoop
       iterations
       environment
@@ -212,7 +212,7 @@ def main : IO Unit := do
       List.nil
 
   let cacheIndexedStart ← IO.monoNanosNow
-  let cacheIndexedHits :=
+  let cacheIndexedHits ←
     psKernelBenchCacheIndexedLoop
       iterations
       cache
@@ -220,7 +220,7 @@ def main : IO Unit := do
   let cacheIndexedStop ← IO.monoNanosNow
 
   let cacheLinearStart ← IO.monoNanosNow
-  let cacheLinearHits :=
+  let cacheLinearHits ←
     psKernelBenchCacheLinearLoop
       iterations
       entries

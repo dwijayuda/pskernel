@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.Declaration
+import Ps.KernelSelfHost.Runtime.EnvironmentIndex
 
 def psKernelNameListContains
     (needle : PsKernelName)
@@ -76,11 +76,13 @@ def psKernelConstantListLength
 
 structure PsKernelEnvironment where
   constants : List PsKernelConstantInfo
+  index : PsKernelEnvironmentIndex
   quotInitialized : Bool
 
 def psKernelEnvironmentEmpty : PsKernelEnvironment :=
   {
     constants := List.nil
+    index := PsKernelEnvironmentIndex.empty
     quotInitialized := false
   }
 
@@ -90,7 +92,10 @@ def psKernelEnvironmentFind
     Option PsKernelConstantInfo :=
   psKernelFindConstantInList
     name
-    environment.constants
+    (psKernelEnvironmentIndexFindWorker
+      16
+      environment.index
+      (psKernelEnvironmentNameHash name))
 
 def psKernelEnvironmentContains
     (environment : PsKernelEnvironment)
@@ -141,6 +146,10 @@ def psKernelEnvironmentAddUnchecked
       List.cons
         info
         environment.constants
+    index :=
+      psKernelEnvironmentIndexInsert
+        environment.index
+        info
     quotInitialized := environment.quotInitialized
   }
 
@@ -154,6 +163,10 @@ def psKernelEnvironmentReplaceUnchecked
         (psKernelConstantInfoName info)
         info
         environment.constants
+    index :=
+      psKernelEnvironmentIndexInsert
+        environment.index
+        info
     quotInitialized := environment.quotInitialized
   }
 
@@ -184,5 +197,6 @@ def psKernelEnvironmentMarkQuotInitialized
   else
     {
       constants := environment.constants
+      index := environment.index
       quotInitialized := true
     }

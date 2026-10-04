@@ -1,0 +1,86 @@
+name: PSC15 self-host cloud CI
+
+on:
+  pull_request:
+    branches:
+      - psc2/selfhost-lean-kernel
+    paths:
+      - "psc15selfhost/**"
+      - ".github/workflows/psc15selfhost-cloud.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc15-selfhost-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  semantic-boundaries:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+          node --version
+
+      - name: Audit portable self-host source
+        working-directory: psc15selfhost
+        run: node check-psc1-source.mjs --all-portable
+
+      - name: Build semantic compiler layers
+        working-directory: psc15selfhost
+        run: |
+          lake build \
+            PsCompilerIr \
+            PsErasure \
+            PsCompiler \
+            PsBackendTs \
+            PsBackendRust \
+            psc1_erasure_tests \
+            psc2_minimal_selfhost_tests \
+            psc1_backend_ts_tests
+
+      - name: Run VerifiedIR and erasure corpus
+        working-directory: psc15selfhost
+        run: lake exe psc1_erasure_tests
+
+      - name: Run minimal self-host corpus
+        working-directory: psc15selfhost
+        run: lake exe psc2_minimal_selfhost_tests
+
+      - name: Run TypeScript backend corpus
+        working-directory: psc15selfhost
+        run: lake exe psc1_backend_ts_tests
+
+      - name: Enforce semantic boundaries
+        working-directory: psc15selfhost
+        run: npm run check:semantic-boundaries
+
+      - name: Self-check changed compiler IR source
+        working-directory: psc15selfhost
+        run: lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/Model.lean
+
+      - name: Self-check changed compiler API source
+        working-directory: psc15selfhost
+        run: lake exe psc1 check packages/compiler/src/Ps/Compiler/Api.lean

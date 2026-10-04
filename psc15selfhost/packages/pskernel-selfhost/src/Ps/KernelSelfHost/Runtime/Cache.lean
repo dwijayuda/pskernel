@@ -1,17 +1,343 @@
 import Ps.KernelSelfHost.Expr
 
+def psKernelCacheHashModulus : Nat :=
+  65521
+
+def psKernelCacheMix
+    (left : Nat)
+    (right : Nat) :
+    Nat :=
+  Nat.mod
+    (Nat.add
+      (Nat.mul left 31)
+      right)
+    psKernelCacheHashModulus
+
+def psKernelCacheStringHashWorker
+    (fuel : Nat) :
+    String -> Nat -> Nat -> Nat :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_value : String)
+        (_position : Nat)
+        (hash : Nat) =>
+        hash
+  | Nat.succ remaining =>
+      let smaller :
+          String -> Nat -> Nat -> Nat :=
+        psKernelCacheStringHashWorker remaining;
+      fun
+        (value : String)
+        (position : Nat)
+        (hash : Nat) =>
+        if
+            String.Internal.atEnd
+              value
+              (String.Pos.Raw.mk position) then
+          hash
+        else
+          let char :=
+            String.Internal.get
+              value
+              (String.Pos.Raw.mk position);
+          let next :=
+            String.Pos.Raw.byteIdx
+              (String.Internal.next
+                value
+                (String.Pos.Raw.mk position));
+          smaller
+            value
+            next
+            (psKernelCacheMix
+              hash
+              (Char.toNat char))
+
+def psKernelCacheStringHash
+    (value : String) :
+    Nat :=
+  psKernelCacheStringHashWorker
+    (Nat.succ
+      (String.utf8ByteSize value))
+    value
+    0
+    0
+
+def psKernelCacheNameHash
+    (name : PsKernelName) :
+    Nat :=
+  match name with
+  | PsKernelName.anonymous =>
+      1
+  | PsKernelName.str parent value =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          2
+          (psKernelCacheNameHash parent))
+        (psKernelCacheStringHash value)
+  | PsKernelName.num parent value =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          3
+          (psKernelCacheNameHash parent))
+        value
+
+def psKernelCacheLevelHash
+    (level : PsKernelLevel) :
+    Nat :=
+  match level with
+  | PsKernelLevel.zero =>
+      11
+  | PsKernelLevel.succ inner =>
+      psKernelCacheMix
+        12
+        (psKernelCacheLevelHash inner)
+  | PsKernelLevel.max left right =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          13
+          (psKernelCacheLevelHash left))
+        (psKernelCacheLevelHash right)
+  | PsKernelLevel.imax left right =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          14
+          (psKernelCacheLevelHash left))
+        (psKernelCacheLevelHash right)
+  | PsKernelLevel.param name =>
+      psKernelCacheMix
+        15
+        (psKernelCacheNameHash name)
+  | PsKernelLevel.mvar name =>
+      psKernelCacheMix
+        16
+        (psKernelCacheNameHash name)
+
+def psKernelCacheLevelListHashWorker
+    (values : List PsKernelLevel) :
+    Nat -> Nat :=
+  match values with
+  | List.nil =>
+      fun (hash : Nat) =>
+        psKernelCacheMix hash 17
+  | List.cons head tail =>
+      let smaller : Nat -> Nat :=
+        psKernelCacheLevelListHashWorker tail;
+      fun (hash : Nat) =>
+        smaller
+          (psKernelCacheMix
+            hash
+            (psKernelCacheLevelHash head))
+
+def psKernelCacheLevelListHash
+    (values : List PsKernelLevel) :
+    Nat :=
+  psKernelCacheLevelListHashWorker
+    values
+    18
+
+def psKernelCacheLiteralHash
+    (literal : PsKernelLiteral) :
+    Nat :=
+  match literal with
+  | PsKernelLiteral.nat value =>
+      psKernelCacheMix 19 value
+  | PsKernelLiteral.str value =>
+      psKernelCacheMix
+        20
+        (psKernelCacheStringHash value)
+
+def psKernelExprHash
+    (expr : PsKernelExpr) :
+    Nat :=
+  match expr with
+  | PsKernelExpr.bvar index =>
+      psKernelCacheMix 21 index
+  | PsKernelExpr.fvar name =>
+      psKernelCacheMix
+        22
+        (psKernelCacheNameHash name)
+  | PsKernelExpr.mvar name =>
+      psKernelCacheMix
+        23
+        (psKernelCacheNameHash name)
+  | PsKernelExpr.sort level =>
+      psKernelCacheMix
+        24
+        (psKernelCacheLevelHash level)
+  | PsKernelExpr.const name levels =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          25
+          (psKernelCacheNameHash name))
+        (psKernelCacheLevelListHash levels)
+  | PsKernelExpr.app fn arg =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          26
+          (psKernelExprHash fn))
+        (psKernelExprHash arg)
+  | PsKernelExpr.lam _ type body _ =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          27
+          (psKernelExprHash type))
+        (psKernelExprHash body)
+  | PsKernelExpr.forallE _ type body _ =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          28
+          (psKernelExprHash type))
+        (psKernelExprHash body)
+  | PsKernelExpr.letE _ type value body nondep =>
+      let typeHash :=
+        psKernelExprHash type;
+      let valueHash :=
+        psKernelExprHash value;
+      let bodyHash :=
+        psKernelExprHash body;
+      let flag :=
+        if nondep then 1 else 0;
+      psKernelCacheMix
+        (psKernelCacheMix
+          (psKernelCacheMix
+            (psKernelCacheMix
+              29
+              typeHash)
+            valueHash)
+          bodyHash)
+        flag
+  | PsKernelExpr.lit literal =>
+      psKernelCacheMix
+        30
+        (psKernelCacheLiteralHash literal)
+  | PsKernelExpr.mdata metadata body =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          31
+          metadata)
+        (psKernelExprHash body)
+  | PsKernelExpr.proj typeName index body =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          (psKernelCacheMix
+            32
+            (psKernelCacheNameHash typeName))
+          index)
+        (psKernelExprHash body)
+
+inductive PsKernelExprMapIndex where
+  | empty
+  | bucket
+      (entries :
+        List (Prod PsKernelExpr PsKernelExpr))
+  | branch
+      (left : PsKernelExprMapIndex)
+      (right : PsKernelExprMapIndex)
+
+def psKernelExprMapIndexBucket
+    (fuel : Nat) :
+    PsKernelExprMapIndex ->
+    Nat ->
+    List (Prod PsKernelExpr PsKernelExpr) :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (index : PsKernelExprMapIndex)
+        (_hash : Nat) =>
+        match index with
+        | PsKernelExprMapIndex.bucket entries =>
+            entries
+        | _ =>
+            List.nil
+  | Nat.succ remaining =>
+      let smaller :
+          PsKernelExprMapIndex ->
+          Nat ->
+          List (Prod PsKernelExpr PsKernelExpr) :=
+        psKernelExprMapIndexBucket remaining;
+      fun
+        (index : PsKernelExprMapIndex)
+        (hash : Nat) =>
+        match index with
+        | PsKernelExprMapIndex.branch left right =>
+            if Nat.beq (Nat.mod hash 2) 0 then
+              smaller
+                left
+                (Nat.div hash 2)
+            else
+              smaller
+                right
+                (Nat.div hash 2)
+        | _ =>
+            List.nil
+
+def psKernelExprMapIndexSet
+    (fuel : Nat) :
+    PsKernelExprMapIndex ->
+    Nat ->
+    List (Prod PsKernelExpr PsKernelExpr) ->
+    PsKernelExprMapIndex :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_index : PsKernelExprMapIndex)
+        (_hash : Nat)
+        (entries :
+          List (Prod PsKernelExpr PsKernelExpr)) =>
+        PsKernelExprMapIndex.bucket entries
+  | Nat.succ remaining =>
+      let smaller :
+          PsKernelExprMapIndex ->
+          Nat ->
+          List (Prod PsKernelExpr PsKernelExpr) ->
+          PsKernelExprMapIndex :=
+        psKernelExprMapIndexSet remaining;
+      fun
+        (index : PsKernelExprMapIndex)
+        (hash : Nat)
+        (entries :
+          List (Prod PsKernelExpr PsKernelExpr)) =>
+        let left :=
+          match index with
+          | PsKernelExprMapIndex.branch value _ =>
+              value
+          | _ =>
+              PsKernelExprMapIndex.empty;
+        let right :=
+          match index with
+          | PsKernelExprMapIndex.branch _ value =>
+              value
+          | _ =>
+              PsKernelExprMapIndex.empty;
+        if Nat.beq (Nat.mod hash 2) 0 then
+          PsKernelExprMapIndex.branch
+            (smaller
+              left
+              (Nat.div hash 2)
+              entries)
+            right
+        else
+          PsKernelExprMapIndex.branch
+            left
+            (smaller
+              right
+              (Nat.div hash 2)
+              entries)
+
 structure PsKernelExprMap where
-  entries : List (Prod PsKernelExpr PsKernelExpr)
+  index : PsKernelExprMapIndex
 
 def psKernelExprMapEmpty :
     PsKernelExprMap :=
   {
-    entries := List.nil
+    index := PsKernelExprMapIndex.empty
   }
 
 def psKernelExprMapGetIn
     (expr : PsKernelExpr)
-    (entries : List (Prod PsKernelExpr PsKernelExpr)) :
+    (entries :
+      List (Prod PsKernelExpr PsKernelExpr)) :
     Option PsKernelExpr :=
   match entries with
   | List.nil =>
@@ -33,12 +359,16 @@ def psKernelExprMapGet
     Option PsKernelExpr :=
   psKernelExprMapGetIn
     expr
-    cache.entries
+    (psKernelExprMapIndexBucket
+      16
+      cache.index
+      (psKernelExprHash expr))
 
 def psKernelExprMapInsertIn
     (expr : PsKernelExpr)
     (value : PsKernelExpr)
-    (entries : List (Prod PsKernelExpr PsKernelExpr)) :
+    (entries :
+      List (Prod PsKernelExpr PsKernelExpr)) :
     List (Prod PsKernelExpr PsKernelExpr) :=
   match entries with
   | List.nil =>
@@ -66,27 +396,30 @@ def psKernelExprMapInsert
     (expr : PsKernelExpr)
     (value : PsKernelExpr) :
     PsKernelExprMap :=
+  let hash :=
+    psKernelExprHash expr;
+  let bucket :=
+    psKernelExprMapIndexBucket
+      16
+      cache.index
+      hash;
   {
-    entries :=
-      psKernelExprMapInsertIn
-        expr
-        value
-        cache.entries
-  }
-
-structure PsKernelExprPairSet where
-  entries : List (Prod PsKernelExpr PsKernelExpr)
-
-def psKernelExprPairSetEmpty :
-    PsKernelExprPairSet :=
-  {
-    entries := List.nil
+    index :=
+      psKernelExprMapIndexSet
+        16
+        cache.index
+        hash
+        (psKernelExprMapInsertIn
+          expr
+          value
+          bucket)
   }
 
 def psKernelExprPairEq
     (left : PsKernelExpr)
     (right : PsKernelExpr)
-    (entry : Prod PsKernelExpr PsKernelExpr) :
+    (entry :
+      Prod PsKernelExpr PsKernelExpr) :
     Bool :=
   let first := Prod.fst entry;
   let second := Prod.snd entry;
@@ -97,10 +430,129 @@ def psKernelExprPairEq
   else
     false
 
+def psKernelExprPairHash
+    (left : PsKernelExpr)
+    (right : PsKernelExpr) :
+    Nat :=
+  Nat.mod
+    (Nat.add
+      (psKernelExprHash left)
+      (psKernelExprHash right))
+    psKernelCacheHashModulus
+
+inductive PsKernelExprPairSetIndex where
+  | empty
+  | bucket
+      (entries :
+        List (Prod PsKernelExpr PsKernelExpr))
+  | branch
+      (left : PsKernelExprPairSetIndex)
+      (right : PsKernelExprPairSetIndex)
+
+def psKernelExprPairSetIndexBucket
+    (fuel : Nat) :
+    PsKernelExprPairSetIndex ->
+    Nat ->
+    List (Prod PsKernelExpr PsKernelExpr) :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (index : PsKernelExprPairSetIndex)
+        (_hash : Nat) =>
+        match index with
+        | PsKernelExprPairSetIndex.bucket entries =>
+            entries
+        | _ =>
+            List.nil
+  | Nat.succ remaining =>
+      let smaller :
+          PsKernelExprPairSetIndex ->
+          Nat ->
+          List (Prod PsKernelExpr PsKernelExpr) :=
+        psKernelExprPairSetIndexBucket remaining;
+      fun
+        (index : PsKernelExprPairSetIndex)
+        (hash : Nat) =>
+        match index with
+        | PsKernelExprPairSetIndex.branch left right =>
+            if Nat.beq (Nat.mod hash 2) 0 then
+              smaller
+                left
+                (Nat.div hash 2)
+            else
+              smaller
+                right
+                (Nat.div hash 2)
+        | _ =>
+            List.nil
+
+def psKernelExprPairSetIndexSet
+    (fuel : Nat) :
+    PsKernelExprPairSetIndex ->
+    Nat ->
+    List (Prod PsKernelExpr PsKernelExpr) ->
+    PsKernelExprPairSetIndex :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_index : PsKernelExprPairSetIndex)
+        (_hash : Nat)
+        (entries :
+          List (Prod PsKernelExpr PsKernelExpr)) =>
+        PsKernelExprPairSetIndex.bucket entries
+  | Nat.succ remaining =>
+      let smaller :
+          PsKernelExprPairSetIndex ->
+          Nat ->
+          List (Prod PsKernelExpr PsKernelExpr) ->
+          PsKernelExprPairSetIndex :=
+        psKernelExprPairSetIndexSet remaining;
+      fun
+        (index : PsKernelExprPairSetIndex)
+        (hash : Nat)
+        (entries :
+          List (Prod PsKernelExpr PsKernelExpr)) =>
+        let left :=
+          match index with
+          | PsKernelExprPairSetIndex.branch value _ =>
+              value
+          | _ =>
+              PsKernelExprPairSetIndex.empty;
+        let right :=
+          match index with
+          | PsKernelExprPairSetIndex.branch _ value =>
+              value
+          | _ =>
+              PsKernelExprPairSetIndex.empty;
+        if Nat.beq (Nat.mod hash 2) 0 then
+          PsKernelExprPairSetIndex.branch
+            (smaller
+              left
+              (Nat.div hash 2)
+              entries)
+            right
+        else
+          PsKernelExprPairSetIndex.branch
+            left
+            (smaller
+              right
+              (Nat.div hash 2)
+              entries)
+
+structure PsKernelExprPairSet where
+  index : PsKernelExprPairSetIndex
+
+def psKernelExprPairSetEmpty :
+    PsKernelExprPairSet :=
+  {
+    index := PsKernelExprPairSetIndex.empty
+  }
+
 def psKernelExprPairSetContainsIn
     (left : PsKernelExpr)
     (right : PsKernelExpr)
-    (entries : List (Prod PsKernelExpr PsKernelExpr)) :
+    (entries :
+      List (Prod PsKernelExpr PsKernelExpr)) :
     Bool :=
   match entries with
   | List.nil =>
@@ -126,20 +578,37 @@ def psKernelExprPairSetContains
   psKernelExprPairSetContainsIn
     left
     right
-    set.entries
+    (psKernelExprPairSetIndexBucket
+      16
+      set.index
+      (psKernelExprPairHash left right))
 
 def psKernelExprPairSetInsert
     (set : PsKernelExprPairSet)
     (left : PsKernelExpr)
     (right : PsKernelExpr) :
     PsKernelExprPairSet :=
-  if psKernelExprPairSetContains set left right then
+  let hash :=
+    psKernelExprPairHash left right;
+  let bucket :=
+    psKernelExprPairSetIndexBucket
+      16
+      set.index
+      hash;
+  if
+      psKernelExprPairSetContainsIn
+        left
+        right
+        bucket then
     set
   else
     {
-      entries :=
-        List.cons
-          (Prod.mk left right)
-          set.entries
+      index :=
+        psKernelExprPairSetIndexSet
+          16
+          set.index
+          hash
+          (List.cons
+            (Prod.mk left right)
+            bucket)
     }
-

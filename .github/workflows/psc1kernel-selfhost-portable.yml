@@ -69,7 +69,7 @@ jobs:
       - name: Audit Lean 4.34 conformance coverage
         run: |
           set -euo pipefail
-          node scripts/psc1kernel-conformance-audit.mjs
+          node scripts/psc1kernel-conformance-audit.mjs --require-complete
 
       - name: Build proven PSC1 compiler
         run: |

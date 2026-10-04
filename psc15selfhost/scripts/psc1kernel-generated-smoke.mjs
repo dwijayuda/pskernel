@@ -35,7 +35,11 @@ const required = [
   "psKernelApplyArgs",
   "psKernelAddAxiom",
   "psKernelAddSimpleInductive",
+  "psKernelAddSimpleMutualInductive",
+  "psKernelAddSimpleNestedInductive",
   "psKernelSimpleRecName",
+  "psKernelNameAppendIndexAfter",
+  "psKernelNatName",
   "psKernelLeanNatMaxSizeDefault",
   "psKernelSelfHostSemanticRoot",
 ];
@@ -239,10 +243,290 @@ const duplicateInductive = kernel.psKernelAddSimpleInductive(
 );
 assert.equal(sumTag(duplicateInductive), "error");
 
+const type1 = kernel.PsKernelExpr.sort(
+  kernel.PsKernelLevel.succ(zero),
+);
+const natBase = {
+  name: kernel.psKernelNatName,
+  levelParams: kernel.List.nil(),
+  type: type1,
+};
+const natAxiom = {
+  base: natBase,
+  isUnsafe: false,
+};
+const environment3 = unwrapExcept(
+  kernel.psKernelAddAxiom(
+    4096n,
+    environment2,
+    natAxiom,
+    0n,
+    kernel.psKernelLeanNatMaxSizeDefault,
+  ),
+  "NAT_AXIOM",
+);
+
+const evenName = kernel.PsKernelName.str(anonymous, "SmokeEven");
+const evenZeroName = kernel.PsKernelName.str(evenName, "zero");
+const evenSuccName = kernel.PsKernelName.str(evenName, "succ");
+const evenRecName = kernel.psKernelSimpleRecName(evenName);
+const oddName = kernel.PsKernelName.str(anonymous, "SmokeOdd");
+const oddSuccName = kernel.PsKernelName.str(oddName, "succ");
+const oddRecName = kernel.psKernelSimpleRecName(oddName);
+const evenType = kernel.PsKernelExpr.const(evenName, kernel.List.nil());
+const oddType = kernel.PsKernelExpr.const(oddName, kernel.List.nil());
+const evenSuccType = kernel.PsKernelExpr.forallE(
+  kernel.PsKernelName.str(anonymous, "odd"),
+  oddType,
+  evenType,
+  kernel.PsKernelBinderInfo.default,
+);
+const oddSuccType = kernel.PsKernelExpr.forallE(
+  kernel.PsKernelName.str(anonymous, "even"),
+  evenType,
+  oddType,
+  kernel.PsKernelBinderInfo.default,
+);
+const mutualDecl = {
+  levelParams: kernel.List.nil(),
+  numParams: 0n,
+  types: kernel.List.cons(
+    {
+      name: evenName,
+      type: type1,
+      ctors: kernel.List.cons(
+        { name: evenZeroName, type: evenType },
+        kernel.List.cons(
+          { name: evenSuccName, type: evenSuccType },
+          kernel.List.nil(),
+        ),
+      ),
+    },
+    kernel.List.cons(
+      {
+        name: oddName,
+        type: type1,
+        ctors: kernel.List.cons(
+          { name: oddSuccName, type: oddSuccType },
+          kernel.List.nil(),
+        ),
+      },
+      kernel.List.nil(),
+    ),
+  ),
+  isUnsafe: false,
+};
+const environment4 = unwrapExcept(
+  kernel.psKernelAddSimpleMutualInductive(
+    32768n,
+    environment3,
+    mutualDecl,
+    0n,
+    kernel.psKernelLeanNatMaxSizeDefault,
+  ),
+  "MUTUAL",
+);
+for (const name of [
+  evenName,
+  evenZeroName,
+  evenSuccName,
+  evenRecName,
+  oddName,
+  oddSuccName,
+  oddRecName,
+]) {
+  assert.equal(kernel.psKernelEnvironmentContains(environment4, name), true);
+}
+
+const natType = kernel.PsKernelExpr.const(kernel.psKernelNatName, kernel.List.nil());
+const evenMotive = kernel.PsKernelExpr.lam(
+  kernel.PsKernelName.str(anonymous, "even"),
+  evenType,
+  natType,
+  kernel.PsKernelBinderInfo.default,
+);
+const oddMotive = kernel.PsKernelExpr.lam(
+  kernel.PsKernelName.str(anonymous, "odd"),
+  oddType,
+  natType,
+  kernel.PsKernelBinderInfo.default,
+);
+const evenZeroMinor = kernel.PsKernelExpr.lit(kernel.PsKernelLiteral.nat(61n));
+const evenSuccMinor = kernel.PsKernelExpr.lam(
+  kernel.PsKernelName.str(anonymous, "odd"),
+  oddType,
+  kernel.PsKernelExpr.lam(
+    kernel.PsKernelName.str(anonymous, "odd_ih"),
+    natType,
+    kernel.PsKernelExpr.bvar(0n),
+    kernel.PsKernelBinderInfo.default,
+  ),
+  kernel.PsKernelBinderInfo.default,
+);
+const oddSuccMinor = kernel.PsKernelExpr.lam(
+  kernel.PsKernelName.str(anonymous, "even"),
+  evenType,
+  kernel.PsKernelExpr.lam(
+    kernel.PsKernelName.str(anonymous, "even_ih"),
+    natType,
+    kernel.PsKernelExpr.bvar(0n),
+    kernel.PsKernelBinderInfo.default,
+  ),
+  kernel.PsKernelBinderInfo.default,
+);
+const mutualMajor = kernel.PsKernelExpr.app(
+  kernel.PsKernelExpr.const(evenSuccName, kernel.List.nil()),
+  kernel.PsKernelExpr.app(
+    kernel.PsKernelExpr.const(oddSuccName, kernel.List.nil()),
+    kernel.PsKernelExpr.const(evenZeroName, kernel.List.nil()),
+  ),
+);
+const mutualRecApp = kernel.psKernelApplyArgs(
+  kernel.PsKernelExpr.const(
+    evenRecName,
+    kernel.List.cons(kernel.PsKernelLevel.succ(zero), kernel.List.nil()),
+  ),
+  kernel.List.cons(
+    evenMotive,
+    kernel.List.cons(
+      oddMotive,
+      kernel.List.cons(
+        evenZeroMinor,
+        kernel.List.cons(
+          evenSuccMinor,
+          kernel.List.cons(
+            oddSuccMinor,
+            kernel.List.cons(mutualMajor, kernel.List.nil()),
+          ),
+        ),
+      ),
+    ),
+  ),
+);
+const mutualSession = kernel.psKernelMkCheckerSession(
+  environment4,
+  kernel.List.nil(),
+  kernel.PsKernelDefinitionSafety.safe,
+  0n,
+  kernel.psKernelLeanNatMaxSizeDefault,
+);
+const mutualReduced = unwrapExcept(
+  kernel.psKernelSessionWhnf(65536n, mutualSession, mutualRecApp),
+  "MUTUAL_RECURSOR",
+);
+assert.equal(
+  kernel.psKernelExprEq(
+    mutualReduced.fst,
+    kernel.PsKernelExpr.lit(kernel.PsKernelLiteral.nat(61n)),
+  ),
+  true,
+);
+
+const boxName = kernel.PsKernelName.str(anonymous, "SmokeNestedBox");
+const boxMkName = kernel.PsKernelName.str(boxName, "mk");
+const alphaName = kernel.PsKernelName.str(anonymous, "alpha");
+const valueName = kernel.PsKernelName.str(anonymous, "value");
+const boxType = kernel.PsKernelExpr.forallE(
+  alphaName,
+  type1,
+  type1,
+  kernel.PsKernelBinderInfo.default,
+);
+const boxCtorType = kernel.PsKernelExpr.forallE(
+  alphaName,
+  type1,
+  kernel.PsKernelExpr.forallE(
+    valueName,
+    kernel.PsKernelExpr.bvar(0n),
+    kernel.PsKernelExpr.app(
+      kernel.PsKernelExpr.const(boxName, kernel.List.nil()),
+      kernel.PsKernelExpr.bvar(1n),
+    ),
+    kernel.PsKernelBinderInfo.default,
+  ),
+  kernel.PsKernelBinderInfo.default,
+);
+const boxDecl = {
+  levelParams: kernel.List.nil(),
+  name: boxName,
+  type: boxType,
+  ctors: kernel.List.cons(
+    { name: boxMkName, type: boxCtorType },
+    kernel.List.nil(),
+  ),
+  isUnsafe: false,
+  numParams: 1n,
+};
+const environment5 = unwrapExcept(
+  kernel.psKernelAddSimpleInductive(
+    32768n,
+    environment4,
+    boxDecl,
+    0n,
+    kernel.psKernelLeanNatMaxSizeDefault,
+  ),
+  "NESTED_OUTER",
+);
+
+const treeName = kernel.PsKernelName.str(anonymous, "SmokeNestedTree");
+const leafName = kernel.PsKernelName.str(treeName, "leaf");
+const nodeName = kernel.PsKernelName.str(treeName, "node");
+const treeRecName = kernel.psKernelSimpleRecName(treeName);
+const treeRecAuxName = kernel.psKernelNameAppendIndexAfter(treeRecName, 1n);
+const treeType = kernel.PsKernelExpr.const(treeName, kernel.List.nil());
+const boxTreeType = kernel.PsKernelExpr.app(
+  kernel.PsKernelExpr.const(boxName, kernel.List.nil()),
+  treeType,
+);
+const nodeType = kernel.PsKernelExpr.forallE(
+  kernel.PsKernelName.str(anonymous, "children"),
+  boxTreeType,
+  treeType,
+  kernel.PsKernelBinderInfo.default,
+);
+const nestedDecl = {
+  levelParams: kernel.List.nil(),
+  numParams: 0n,
+  types: kernel.List.cons(
+    {
+      name: treeName,
+      type: type1,
+      ctors: kernel.List.cons(
+        { name: leafName, type: treeType },
+        kernel.List.cons(
+          { name: nodeName, type: nodeType },
+          kernel.List.nil(),
+        ),
+      ),
+    },
+    kernel.List.nil(),
+  ),
+  isUnsafe: false,
+};
+const environment6 = unwrapExcept(
+  kernel.psKernelAddSimpleNestedInductive(
+    65536n,
+    environment5,
+    nestedDecl,
+    0n,
+    kernel.psKernelLeanNatMaxSizeDefault,
+  ),
+  "NESTED",
+);
+for (const name of [
+  treeName,
+  leafName,
+  nodeName,
+  treeRecName,
+  treeRecAuxName,
+]) {
+  assert.equal(kernel.psKernelEnvironmentContains(environment6, name), true);
+}
+
 process.stdout.write(
   [
     "PSC1KERNEL_GENERATED_SMOKE: PASS",
     `kernel=${path.relative(root, kernelPath)}`,
-    "checks=name,level,expr,subst,nat,whnf,defeq,axiom,inductive,recursor,duplicate-rejection",
+    "checks=name,level,expr,subst,nat,whnf,defeq,axiom,inductive,recursor,mutual,nested,duplicate-rejection",
   ].join("\n") + "\n",
 );

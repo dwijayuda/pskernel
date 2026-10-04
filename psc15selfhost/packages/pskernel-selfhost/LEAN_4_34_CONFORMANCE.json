@@ -84,8 +84,8 @@
     },
     {
       "id": "PSK-RED-QUOT",
-      "coverage": "pending",
-      "testSymbol": null
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelSelfHostQuotTests"
     },
     {
       "id": "PSK-RED-REC",
@@ -119,13 +119,13 @@
     },
     {
       "id": "PSK-DEFEQ-STRING",
-      "coverage": "pending",
-      "testSymbol": null
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelDefEqSpecialRuleTests"
     },
     {
       "id": "PSK-DEFEQ-UNIT",
-      "coverage": "pending",
-      "testSymbol": null
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelDefEqSpecialRuleTests"
     },
     {
       "id": "PSK-ADMIT-AXIOM",
@@ -154,8 +154,8 @@
     },
     {
       "id": "PSK-ADMIT-QUOT",
-      "coverage": "pending",
-      "testSymbol": null
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelSelfHostQuotTests"
     },
     {
       "id": "PSK-ADMIT-IND",

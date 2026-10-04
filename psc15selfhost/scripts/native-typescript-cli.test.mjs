@@ -19,8 +19,12 @@ try {
   assert.match(await readFile(output, 'utf8'), /export const answer/);
   // No package installation or arbitrary tsc shim may replace the pinned CLI.
   await writeFile(path.join(directory, 'tsc'), 'must not execute this shim');
+  const { PSC_TYPESCRIPT_CLI: _pinnedTypeScriptCli, ...withoutPinnedTypeScriptCli } = process.env;
   const missing = spawnSync(compiler, ['build', source, '--out', path.join(directory, 'missing.js')], {
-    cwd: directory, env: { ...process.env, PATH: directory }, encoding: 'utf8', timeout: 30000,
+    cwd: directory,
+    env: { ...withoutPinnedTypeScriptCli, PATH: directory },
+    encoding: 'utf8',
+    timeout: 30000,
   });
   assert.notEqual(missing.status, 0);
   assert.match(missing.stderr, /PSC1_TYPESCRIPT_CLI_MISSING/);

@@ -76,10 +76,17 @@ def psKernelInferCoreWithFuel
             state.inferOnly
           else
             state.checkedInfer;
-        match
+        let cached :=
+          if
+              psKernelInferCacheEligible
+                inferOnly
+                expr then
             psKernelExprMapGet
               cache
-              expr with
+              expr
+          else
+            Option.none;
+        match cached with
         | Option.some cached =>
             match
                 psKernelCheckerContextEnterRecDepth

@@ -39,7 +39,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: psc1kernel-selfhost-fixed-point-${{ github.ref }}
+  group: psc1kernel-selfhost-fixed-point-v2-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

@@ -3062,6 +3062,23 @@ def psKernelBenchNestedWideRestore
         processed.state.aux
         renames
 
+
+def psKernelBenchNestedWideValidate
+    (transformed : PsKernelEnvironment)
+    (finalEnvironment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    Except String Unit :=
+  psKernelSimpleNestedValidateRestored
+    65536
+    transformed
+    finalEnvironment
+    psKernelBenchNestedWideDecl
+    List.nil
+    processed.state.aux
+    (psKernelBenchNestedWideRenames processed)
+    0
+    psKernelLeanNatMaxSizeDefault
+
 partial def psKernelBenchNameString
     (name : PsKernelName) :
     String :=
@@ -3287,6 +3304,103 @@ partial def psKernelBenchReportNestedAuxRecursors
         renames
         rest
         (Nat.succ index)
+
+partial def psKernelBenchNestedWidePreprocessLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedWidePreprocessLoop
+          rest
+          environment
+      match psKernelBenchNestedWideProcess environment with
+      | Except.ok processed =>
+          match processed.state.aux with
+          | List.cons _ _ =>
+              pure (Nat.succ tail)
+          | List.nil =>
+              pure tail
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedWideTransformLoop
+    (iterations : Nat)
+    (environment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedWideTransformLoop
+          rest
+          environment
+          processed
+      match
+          psKernelBenchNestedWideTransform
+            environment
+            processed with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedWideRestoreLoop
+    (iterations : Nat)
+    (base : PsKernelEnvironment)
+    (transformed : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedWideRestoreLoop
+          rest
+          base
+          transformed
+          processed
+      match
+          psKernelBenchNestedWideRestore
+            base
+            transformed
+            processed with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedWideValidateLoop
+    (iterations : Nat)
+    (transformed : PsKernelEnvironment)
+    (finalEnvironment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedWideValidateLoop
+          rest
+          transformed
+          finalEnvironment
+          processed
+      match
+          psKernelBenchNestedWideValidate
+            transformed
+            finalEnvironment
+            processed with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
 
 partial def psKernelBenchNestedWideAdmissionLoop
     (iterations : Nat)
@@ -4773,6 +4887,72 @@ def main : IO Unit := do
       toString nestedWidePsHits ++
       "/" ++
       toString nestedWideLeanHits)
+
+
+  let nestedWidePreprocessStart ← IO.monoNanosNow
+  let nestedWidePreprocessHits ←
+    psKernelBenchNestedWidePreprocessLoop
+      nestedWideIterations
+      nestedWidePsBase
+  let nestedWidePreprocessStop ← IO.monoNanosNow
+
+  let nestedWideTransformStart ← IO.monoNanosNow
+  let nestedWideTransformHits ←
+    psKernelBenchNestedWideTransformLoop
+      nestedWideIterations
+      nestedWidePsBase
+      nestedWideProcessed
+  let nestedWideTransformStop ← IO.monoNanosNow
+
+  let nestedWideRestoreStart ← IO.monoNanosNow
+  let nestedWideRestoreHits ←
+    psKernelBenchNestedWideRestoreLoop
+      nestedWideIterations
+      nestedWidePsBase
+      nestedWideTransformed
+      nestedWideProcessed
+  let nestedWideRestoreStop ← IO.monoNanosNow
+
+  let nestedWideValidateStart ← IO.monoNanosNow
+  let nestedWideValidateHits ←
+    psKernelBenchNestedWideValidateLoop
+      nestedWideIterations
+      nestedWideTransformed
+      nestedWideFinal
+      nestedWideProcessed
+  let nestedWideValidateStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH nested_wide_stage_preprocess_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedWidePreprocessStart
+          nestedWidePreprocessStop) ++
+      " nested_wide_stage_transform_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedWideTransformStart
+          nestedWideTransformStop) ++
+      " nested_wide_stage_restore_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedWideRestoreStart
+          nestedWideRestoreStop) ++
+      " nested_wide_stage_validate_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedWideValidateStart
+          nestedWideValidateStop) ++
+      " iterations=" ++
+      toString nestedWideIterations ++
+      " hits=" ++
+      toString nestedWidePreprocessHits ++
+      "/" ++
+      toString nestedWideTransformHits ++
+      "/" ++
+      toString nestedWideRestoreHits ++
+      "/" ++
+      toString nestedWideValidateHits)
 
   let nestedProcessed ←
     match

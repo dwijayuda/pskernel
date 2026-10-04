@@ -2899,6 +2899,96 @@ def psKernelAdmissionConformanceTests : Bool :=
   | _, _ =>
       false
 
+def psKernelRuntimeCacheKey
+    (index : Nat) :
+    PsKernelExpr :=
+  PsKernelExpr.const
+    (PsKernelName.num
+      (PsKernelName.str
+        PsKernelName.anonymous
+        "runtimeCache")
+      index)
+    List.nil
+
+def psKernelRuntimeCacheValue
+    (index : Nat) :
+    PsKernelExpr :=
+  PsKernelExpr.lit
+    (PsKernelLiteral.nat index)
+
+def psKernelRuntimeBuildExprMap
+    (count : Nat) :
+    PsKernelExprMap :=
+  match count with
+  | Nat.zero =>
+      psKernelExprMapEmpty
+  | Nat.succ rest =>
+      psKernelExprMapInsert
+        (psKernelRuntimeBuildExprMap rest)
+        (psKernelRuntimeCacheKey rest)
+        (psKernelRuntimeCacheValue rest)
+
+def psKernelRuntimeBuildPairSet
+    (count : Nat) :
+    PsKernelExprPairSet :=
+  match count with
+  | Nat.zero =>
+      psKernelExprPairSetEmpty
+  | Nat.succ rest =>
+      psKernelExprPairSetInsert
+        (psKernelRuntimeBuildPairSet rest)
+        (psKernelRuntimeCacheKey rest)
+        (psKernelRuntimeCacheValue rest)
+
+def psKernelRuntimeCachePromotionTests : Bool :=
+  let map8 :=
+    psKernelRuntimeBuildExprMap 8
+  let map9 :=
+    psKernelRuntimeBuildExprMap 9
+  let pair8 :=
+    psKernelRuntimeBuildPairSet 8
+  let pair9 :=
+    psKernelRuntimeBuildPairSet 9
+  let map8Small :=
+    match map8.index with
+    | Option.none => true
+    | Option.some _ => false
+  let map9Indexed :=
+    match map9.index with
+    | Option.none => false
+    | Option.some _ => true
+  let pair8Small :=
+    match pair8.index with
+    | Option.none => true
+    | Option.some _ => false
+  let pair9Indexed :=
+    match pair9.index with
+    | Option.none => false
+    | Option.some _ => true
+  Bool.and
+    map8Small
+    (Bool.and
+      map9Indexed
+      (Bool.and
+        pair8Small
+        (Bool.and
+          pair9Indexed
+          (Bool.and
+            (match
+                psKernelExprMapGet
+                  map9
+                  (psKernelRuntimeCacheKey 0) with
+            | Option.some value =>
+                psKernelExprEq
+                  value
+                  (psKernelRuntimeCacheValue 0)
+            | Option.none =>
+                false)
+            (psKernelExprPairSetContains
+              pair9
+              (psKernelRuntimeCacheValue 0)
+              (psKernelRuntimeCacheKey 0))))))
+
 def psKernelRuntimeCacheInvariantTests : Bool :=
   let nameA :=
     PsKernelName.str
@@ -3068,7 +3158,9 @@ def psKernelRuntimeEnvironmentIndexInvariantTests : Bool :=
 def psKernelRuntimeInvariantTests : Bool :=
   Bool.and
     psKernelRuntimeCacheInvariantTests
-    psKernelRuntimeEnvironmentIndexInvariantTests
+    (Bool.and
+      psKernelRuntimeCachePromotionTests
+      psKernelRuntimeEnvironmentIndexInvariantTests)
 
 def main : IO Unit :=
   if !psKernelSelfHostNameTests then

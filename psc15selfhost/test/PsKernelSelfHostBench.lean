@@ -1,3 +1,4 @@
+import Lean
 import Ps.KernelSelfHost.CheckerSession
 
 def psKernelBenchName
@@ -174,6 +175,120 @@ def psKernelBenchElapsed
     (start stop : Nat) :
     Nat :=
   Nat.sub stop start
+
+def psKernelBenchLeanNatName : Lean.Name :=
+  Lean.Name.str
+    Lean.Name.anonymous
+    "Nat"
+
+def psKernelBenchLeanDeltaName : Lean.Name :=
+  Lean.Name.str
+    Lean.Name.anonymous
+    "BenchDelta"
+
+def psKernelBenchLeanEnvironment :
+    IO Lean.Environment := do
+  let base :=
+    (← Lean.mkEmptyEnvironment).toKernelEnv
+  let withNat ←
+    match
+        Lean.Kernel.Environment.addDecl
+          base
+          {}
+          (.axiomDecl {
+            name := psKernelBenchLeanNatName
+            levelParams := []
+            type :=
+              Lean.Expr.sort
+                (Lean.Level.succ Lean.Level.zero)
+            isUnsafe := false
+          }) with
+    | .ok environment =>
+        pure environment
+    | .error _ =>
+        throw
+          (IO.userError
+            "PSKERNEL_BENCH failed to create Lean Nat fixture")
+  let withDef ←
+    match
+        Lean.Kernel.Environment.addDecl
+          withNat
+          {}
+          (.defnDecl {
+            name := psKernelBenchLeanDeltaName
+            levelParams := []
+            type :=
+              Lean.Expr.const
+                psKernelBenchLeanNatName
+                []
+            value :=
+              Lean.Expr.lit
+                (Lean.Literal.natVal 42)
+            hints := Lean.ReducibilityHints.regular 0
+            safety := Lean.DefinitionSafety.safe
+          }) with
+    | .ok environment =>
+        pure environment
+    | .error _ =>
+        throw
+          (IO.userError
+            "PSKERNEL_BENCH failed to create Lean delta fixture")
+  pure
+    (Lean.Environment.ofKernelEnv
+      withDef)
+
+partial def psKernelBenchLeanWhnfLoop
+    (iterations : Nat)
+    (environment : Lean.Environment)
+    (expr : Lean.Expr) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchLeanWhnfLoop
+          rest
+          environment
+          expr
+      match
+          Lean.Kernel.whnf
+            environment
+            ({} : Lean.LocalContext)
+            expr with
+      | .ok _ =>
+          pure (Nat.succ tail)
+      | .error _ =>
+          pure tail
+
+partial def psKernelBenchLeanDefEqLoop
+    (iterations : Nat)
+    (environment : Lean.Environment)
+    (left right : Lean.Expr) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchLeanDefEqLoop
+          rest
+          environment
+          left
+          right
+      match
+          Lean.Kernel.isDefEq
+            environment
+            ({} : Lean.LocalContext)
+            left
+            right with
+      | .ok value =>
+          if value then
+            pure (Nat.succ tail)
+          else
+            pure tail
+      | .error _ =>
+          pure tail
 
 def psKernelBenchDeltaName : PsKernelName :=
   PsKernelName.str
@@ -533,4 +648,62 @@ def main : IO Unit := do
       toString defeqColdHits ++
       "/" ++
       toString (Prod.fst defeqWarmResult))
+
+  let leanEnvironment ←
+    psKernelBenchLeanEnvironment
+  let leanExpr :=
+    Lean.Expr.const
+      psKernelBenchLeanDeltaName
+      []
+  let leanExpected :=
+    Lean.Expr.lit
+      (Lean.Literal.natVal 42)
+
+  let leanWhnfStart ← IO.monoNanosNow
+  let leanWhnfHits ←
+    psKernelBenchLeanWhnfLoop
+      checkerIterations
+      leanEnvironment
+      leanExpr
+  let leanWhnfStop ← IO.monoNanosNow
+
+  let leanDefEqStart ← IO.monoNanosNow
+  let leanDefEqHits ←
+    psKernelBenchLeanDefEqLoop
+      checkerIterations
+      leanEnvironment
+      leanExpr
+      leanExpected
+  let leanDefEqStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH official_lean_whnf_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          leanWhnfStart
+          leanWhnfStop) ++
+      " pskernel_cold_whnf_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          whnfColdStart
+          whnfColdStop) ++
+      " hits=" ++
+      toString leanWhnfHits ++
+      "/" ++
+      toString whnfColdHits)
+  IO.println
+    ("PSKERNEL_BENCH official_lean_defeq_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          leanDefEqStart
+          leanDefEqStop) ++
+      " pskernel_cold_defeq_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          defeqColdStart
+          defeqColdStop) ++
+      " hits=" ++
+      toString leanDefEqHits ++
+      "/" ++
+      toString defeqColdHits)
 

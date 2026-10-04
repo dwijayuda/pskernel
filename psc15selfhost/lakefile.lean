@@ -132,6 +132,7 @@ lean_lib PsBackendWasm where
   srcDir := "packages/backend-wasm/src"
   roots := #[
     `Ps.BackendWasm.Model,
+    `Ps.BackendWasm.Support,
     `Ps.BackendWasm.Type,
     `Ps.BackendWasm.LowerInt,
     `Ps.BackendWasm.LowerFloat,

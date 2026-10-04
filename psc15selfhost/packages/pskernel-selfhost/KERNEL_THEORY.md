@@ -118,7 +118,11 @@ Lean 4.34 algorithmic-equality order rather than a bag of helper implementations
 31. `Theory/Mutual/Recursor.lean`
 32. `Theory/Mutual/Admission.lean`
 33. `MutualInductive.lean` (compatibility umbrella)
-34. `NestedInductive.lean`
+34. `Theory/Nested/Discover.lean`
+35. `Theory/Nested/Flatten.lean`
+36. `Theory/Nested/Restore.lean`
+37. `Theory/Nested/Admission.lean`
+38. `NestedInductive.lean` (compatibility umbrella)
 
 ### Backend/runtime mechanisms
 
@@ -316,26 +320,30 @@ The families in one bundle must satisfy Lean's shared-universe constraints.
 
 ## 13. Nested inductives
 
-`NestedInductive.lean` performs the kernel-side flatten/restore process:
+Nested inductives are split by the transformation stages:
 
-```
-discover nested family
+```text
+Theory/Nested/Discover.lean
       |
-create auxiliary family
+      | reserved-name checks, parameter rebasing, auxiliary-family planning
+      v
+Theory/Nested/Flatten.lean
       |
-construct extended mutual bundle
+      | rewrite nested applications and close the transformed mutual bundle
+      v
+Theory/Nested/Restore.lean
       |
-validate mutual bundle
-      |
-restore user constructors
-      |
-restore recursors/rules
-      |
-hide temporary flattening declarations
+      | restore user constructors/recursors and map auxiliary artifacts
+      v
+Theory/Nested/Admission.lean
+         validate restored types/rules and install the final environment
 ```
 
-This is necessary to preserve Lean 4 computation behavior for nested
-inductives.
+`NestedInductive.lean` remains a stable umbrella import.
+
+The transformation is necessary to preserve Lean 4 computation behavior for
+nested inductives while keeping flattening details out of the user-visible
+environment.
 
 ## 14. Declaration admission
 

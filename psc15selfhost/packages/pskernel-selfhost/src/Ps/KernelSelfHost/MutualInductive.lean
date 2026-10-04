@@ -53,71 +53,91 @@ def psKernelSimpleMutualNames
         typeDecl.name
         (psKernelSimpleMutualNames rest)
 
-def psKernelSimpleMutualContainsConst
-    (targets : List PsKernelName) :
-    PsKernelExpr -> Bool :=
-  fun (expr : PsKernelExpr) =>
-    match expr with
-    | PsKernelExpr.const name _ =>
+def psKernelSimpleMutualContainsConstWorker
+    (expr : PsKernelExpr) :
+    List PsKernelName -> Bool :=
+  match expr with
+  | PsKernelExpr.const name _ =>
+      fun (targets : List PsKernelName) =>
         psKernelNameMember name targets
-    | PsKernelExpr.app fn arg =>
-        if
-            psKernelSimpleMutualContainsConst
-              targets
-              fn then
+  | PsKernelExpr.app fn arg =>
+      let left :
+          List PsKernelName -> Bool :=
+        psKernelSimpleMutualContainsConstWorker fn;
+      let right :
+          List PsKernelName -> Bool :=
+        psKernelSimpleMutualContainsConstWorker arg;
+      fun (targets : List PsKernelName) =>
+        if left targets then
           true
         else
-          psKernelSimpleMutualContainsConst
-            targets
-            arg
-    | PsKernelExpr.lam _ type body _ =>
-        if
-            psKernelSimpleMutualContainsConst
-              targets
-              type then
+          right targets
+  | PsKernelExpr.lam _ type body _ =>
+      let left :
+          List PsKernelName -> Bool :=
+        psKernelSimpleMutualContainsConstWorker type;
+      let right :
+          List PsKernelName -> Bool :=
+        psKernelSimpleMutualContainsConstWorker body;
+      fun (targets : List PsKernelName) =>
+        if left targets then
           true
         else
-          psKernelSimpleMutualContainsConst
-            targets
-            body
-    | PsKernelExpr.forallE _ type body _ =>
-        if
-            psKernelSimpleMutualContainsConst
-              targets
-              type then
+          right targets
+  | PsKernelExpr.forallE _ type body _ =>
+      let left :
+          List PsKernelName -> Bool :=
+        psKernelSimpleMutualContainsConstWorker type;
+      let right :
+          List PsKernelName -> Bool :=
+        psKernelSimpleMutualContainsConstWorker body;
+      fun (targets : List PsKernelName) =>
+        if left targets then
           true
         else
-          psKernelSimpleMutualContainsConst
-            targets
-            body
-    | PsKernelExpr.letE _ type value body _ =>
-        if
-            psKernelSimpleMutualContainsConst
-              targets
-              type then
+          right targets
+  | PsKernelExpr.letE _ type value body _ =>
+      let typeCheck :
+          List PsKernelName -> Bool :=
+        psKernelSimpleMutualContainsConstWorker type;
+      let valueCheck :
+          List PsKernelName -> Bool :=
+        psKernelSimpleMutualContainsConstWorker value;
+      let bodyCheck :
+          List PsKernelName -> Bool :=
+        psKernelSimpleMutualContainsConstWorker body;
+      fun (targets : List PsKernelName) =>
+        if typeCheck targets then
           true
-        else if
-            psKernelSimpleMutualContainsConst
-              targets
-              value then
+        else if valueCheck targets then
           true
         else
-          psKernelSimpleMutualContainsConst
-            targets
-            body
-    | PsKernelExpr.mdata _ body =>
-        psKernelSimpleMutualContainsConst
-          targets
-          body
-    | PsKernelExpr.proj typeName _ body =>
+          bodyCheck targets
+  | PsKernelExpr.mdata _ body =>
+      let smaller :
+          List PsKernelName -> Bool :=
+        psKernelSimpleMutualContainsConstWorker body;
+      fun (targets : List PsKernelName) =>
+        smaller targets
+  | PsKernelExpr.proj typeName _ body =>
+      let smaller :
+          List PsKernelName -> Bool :=
+        psKernelSimpleMutualContainsConstWorker body;
+      fun (targets : List PsKernelName) =>
         if psKernelNameMember typeName targets then
           true
         else
-          psKernelSimpleMutualContainsConst
-            targets
-            body
-    | _ =>
+          smaller targets
+  | _ =>
+      fun (_targets : List PsKernelName) =>
         false
+
+def psKernelSimpleMutualContainsConst
+    (targets : List PsKernelName)
+    (expr : PsKernelExpr) : Bool :=
+  psKernelSimpleMutualContainsConstWorker
+    expr
+    targets
 
 def psKernelSimpleMutualTargetIndexWorker
     (name : PsKernelName)

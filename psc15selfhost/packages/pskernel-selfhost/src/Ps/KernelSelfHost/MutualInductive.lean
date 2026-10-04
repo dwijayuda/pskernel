@@ -1283,3 +1283,573 @@ def psKernelValidateSimpleMutualRules
     ruleBinders
     owner
     rules
+
+
+structure PsKernelAddMutualConstructorsResult where
+  environment : PsKernelEnvironment
+  shapes : List PsKernelSimpleMutualConstructorShape
+
+def psKernelMutualNameListAppend
+    (left : List PsKernelName) :
+    List PsKernelName -> List PsKernelName :=
+  match left with
+  | List.nil =>
+      fun (right : List PsKernelName) =>
+        right
+  | List.cons head tail =>
+      let smaller :
+          List PsKernelName -> List PsKernelName :=
+        psKernelMutualNameListAppend tail;
+      fun (right : List PsKernelName) =>
+        List.cons
+          head
+          (smaller right)
+
+def psKernelMutualConstructorShapeListAppend
+    (left : List PsKernelSimpleMutualConstructorShape) :
+    List PsKernelSimpleMutualConstructorShape ->
+    List PsKernelSimpleMutualConstructorShape :=
+  match left with
+  | List.nil =>
+      fun
+        (right : List PsKernelSimpleMutualConstructorShape) =>
+        right
+  | List.cons head tail =>
+      let smaller :
+          List PsKernelSimpleMutualConstructorShape ->
+          List PsKernelSimpleMutualConstructorShape :=
+        psKernelMutualConstructorShapeListAppend tail;
+      fun
+        (right : List PsKernelSimpleMutualConstructorShape) =>
+        List.cons
+          head
+          (smaller right)
+
+def psKernelSimpleMutualTypeCount
+    (types : List PsKernelSimpleMutualTypeDecl) :
+    Nat :=
+  match types with
+  | List.nil =>
+      0
+  | List.cons _ rest =>
+      Nat.succ
+        (psKernelSimpleMutualTypeCount rest)
+
+def psKernelSimpleMutualRecNames
+    (types : List PsKernelSimpleMutualTypeDecl) :
+    List PsKernelName :=
+  match types with
+  | List.nil =>
+      List.nil
+  | List.cons typeDecl rest =>
+      List.cons
+        (psKernelSimpleRecName
+          typeDecl.name)
+        (psKernelSimpleMutualRecNames rest)
+
+def psKernelSimpleMutualCtorNames
+    (types : List PsKernelSimpleMutualTypeDecl) :
+    List PsKernelName :=
+  match types with
+  | List.nil =>
+      List.nil
+  | List.cons typeDecl rest =>
+      psKernelMutualNameListAppend
+        (psKernelSimpleCtorNames
+          typeDecl.ctors)
+        (psKernelSimpleMutualCtorNames
+          rest)
+
+def psKernelSimpleMutualCtorTypes
+    (types : List PsKernelSimpleMutualTypeDecl) :
+    List PsKernelExpr :=
+  match types with
+  | List.nil =>
+      List.nil
+  | List.cons typeDecl rest =>
+      psKernelExprListAppend
+        (psKernelSimpleCtorTypes
+          typeDecl.ctors)
+        (psKernelSimpleMutualCtorTypes
+          rest)
+
+def psKernelOpenSimpleMutualRemainingTypesWorker
+    (types : List PsKernelSimpleMutualTypeDecl) :
+    Nat ->
+    PsKernelEnvironment ->
+    List PsKernelName ->
+    PsKernelDefinitionSafety ->
+    Nat ->
+    Nat ->
+    PsKernelCheckerSession ->
+    List PsKernelOpenBinder ->
+    PsKernelLevel ->
+    Except String (List PsKernelSimpleMutualTypeShape) :=
+  match types with
+  | List.nil =>
+      fun
+        (_fuel : Nat)
+        (_environment : PsKernelEnvironment)
+        (_levelParams : List PsKernelName)
+        (_safety : PsKernelDefinitionSafety)
+        (_maxRecDepth : Nat)
+        (_maxNatSize : Nat)
+        (_headerSession : PsKernelCheckerSession)
+        (_params : List PsKernelOpenBinder)
+        (_resultLevel : PsKernelLevel) =>
+        Except.ok List.nil
+  | List.cons typeDecl rest =>
+      let smaller :=
+        psKernelOpenSimpleMutualRemainingTypesWorker
+          rest;
+      fun
+        (fuel : Nat)
+        (environment : PsKernelEnvironment)
+        (levelParams : List PsKernelName)
+        (safety : PsKernelDefinitionSafety)
+        (maxRecDepth : Nat)
+        (maxNatSize : Nat)
+        (headerSession : PsKernelCheckerSession)
+        (params : List PsKernelOpenBinder)
+        (resultLevel : PsKernelLevel) =>
+        match
+            psKernelCheckNoMVarNoFVar
+              typeDecl.type with
+        | Except.error error =>
+            Except.error error
+        | Except.ok _ =>
+            match
+                psKernelCheckLevelParams
+                  typeDecl.type
+                  levelParams with
+            | Except.error error =>
+                Except.error error
+            | Except.ok _ =>
+                let closedSession :=
+                  psKernelMkCheckerSession
+                    environment
+                    levelParams
+                    safety
+                    maxRecDepth
+                    maxNatSize;
+                match
+                    psKernelSessionCheck
+                      fuel
+                      closedSession
+                      typeDecl.type with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok typeType =>
+                    match
+                        psKernelSessionEnsureSort
+                          fuel
+                          (Prod.snd typeType)
+                          (Prod.fst typeType) with
+                    | Except.error error =>
+                        Except.error error
+                    | Except.ok _ =>
+                        match
+                            psKernelOpenSimpleConstructorParams
+                              fuel
+                              headerSession
+                              params
+                              typeDecl.type with
+                        | Except.error error =>
+                            Except.error error
+                        | Except.ok afterParams =>
+                            match
+                                psKernelOpenSimpleHeaderIndices
+                                  fuel
+                                  afterParams.session
+                                  afterParams.result with
+                            | Except.error error =>
+                                Except.error error
+                            | Except.ok indexResult =>
+                                match indexResult.result with
+                                | PsKernelExpr.sort level =>
+                                    if
+                                        psKernelLevelEquivalent
+                                          level
+                                          resultLevel then
+                                      match
+                                          smaller
+                                            fuel
+                                            environment
+                                            levelParams
+                                            safety
+                                            maxRecDepth
+                                            maxNatSize
+                                            headerSession
+                                            params
+                                            resultLevel with
+                                      | Except.error error =>
+                                          Except.error error
+                                      | Except.ok tail =>
+                                          Except.ok
+                                            (List.cons
+                                              (PsKernelSimpleMutualTypeShape.mk
+                                                typeDecl
+                                                indexResult.binders)
+                                              tail)
+                                    else
+                                      Except.error
+                                        "mutually inductive types must live in the same universe"
+                                | _ =>
+                                    Except.error
+                                      "mutual inductive result must be a sort"
+
+def psKernelMakeSimpleMutualBaseInfos
+    (typeNames : List PsKernelName)
+    (decl : PsKernelSimpleMutualInductiveDecl)
+    (shapes : List PsKernelSimpleMutualTypeShape) :
+    List PsKernelInductiveInfo :=
+  match shapes with
+  | List.nil =>
+      List.nil
+  | List.cons shape rest =>
+      List.cons
+        (PsKernelInductiveInfo.mk
+          (PsKernelConstantBase.mk
+            shape.decl.name
+            decl.levelParams
+            shape.decl.type)
+          decl.numParams
+          (psKernelOpenBinderListLength
+            shape.indices)
+          typeNames
+          (psKernelSimpleCtorNames
+            shape.decl.ctors)
+          0
+          false
+          false
+          decl.isUnsafe)
+        (psKernelMakeSimpleMutualBaseInfos
+          typeNames
+          decl
+          rest)
+
+def psKernelAddMutualInductiveInfos
+    (infos : List PsKernelInductiveInfo) :
+    PsKernelEnvironment -> PsKernelEnvironment :=
+  match infos with
+  | List.nil =>
+      fun
+        (environment : PsKernelEnvironment) =>
+        environment
+  | List.cons info rest =>
+      let smaller :
+          PsKernelEnvironment -> PsKernelEnvironment :=
+        psKernelAddMutualInductiveInfos rest;
+      fun
+        (environment : PsKernelEnvironment) =>
+        smaller
+          (psKernelEnvironmentAddUnchecked
+            environment
+            (PsKernelConstantInfo.inductInfo
+              info))
+
+def psKernelReplaceMutualInductiveInfos
+    (infos : List PsKernelInductiveInfo) :
+    Bool ->
+    Bool ->
+    PsKernelEnvironment ->
+    PsKernelEnvironment :=
+  match infos with
+  | List.nil =>
+      fun
+        (_isRecursive : Bool)
+        (_isReflexive : Bool)
+        (environment : PsKernelEnvironment) =>
+        environment
+  | List.cons info rest =>
+      let smaller :
+          Bool ->
+          Bool ->
+          PsKernelEnvironment ->
+          PsKernelEnvironment :=
+        psKernelReplaceMutualInductiveInfos rest;
+      fun
+        (isRecursive : Bool)
+        (isReflexive : Bool)
+        (environment : PsKernelEnvironment) =>
+        let finalInfo :=
+          PsKernelInductiveInfo.mk
+            info.base
+            info.numParams
+            info.numIndices
+            info.all
+            info.ctors
+            info.numNested
+            isRecursive
+            isReflexive
+            info.isUnsafe;
+        smaller
+          isRecursive
+          isReflexive
+          (psKernelEnvironmentReplaceUnchecked
+            environment
+            (PsKernelConstantInfo.inductInfo
+              finalInfo))
+
+def psKernelAddSimpleMutualConstructorsForTypeWorker
+    (ctors : List PsKernelSimpleConstructorDecl) :
+    Nat ->
+    PsKernelDefinitionSafety ->
+    PsKernelLevel ->
+    List PsKernelLevel ->
+    List PsKernelOpenBinder ->
+    List PsKernelName ->
+    List PsKernelSimpleMutualTypeShape ->
+    PsKernelSimpleMutualTypeShape ->
+    Nat ->
+    PsKernelCheckerSession ->
+    PsKernelEnvironment ->
+    Nat ->
+    Except String PsKernelAddMutualConstructorsResult :=
+  match ctors with
+  | List.nil =>
+      fun
+        (_fuel : Nat)
+        (_safety : PsKernelDefinitionSafety)
+        (_resultLevel : PsKernelLevel)
+        (_levels : List PsKernelLevel)
+        (_params : List PsKernelOpenBinder)
+        (_typeNames : List PsKernelName)
+        (_typeShapes : List PsKernelSimpleMutualTypeShape)
+        (_typeShape : PsKernelSimpleMutualTypeShape)
+        (_owner : Nat)
+        (_headerSession : PsKernelCheckerSession)
+        (work : PsKernelEnvironment)
+        (_ctorIndex : Nat) =>
+        Except.ok
+          (PsKernelAddMutualConstructorsResult.mk
+            work
+            List.nil)
+  | List.cons ctor rest =>
+      let smaller :=
+        psKernelAddSimpleMutualConstructorsForTypeWorker
+          rest;
+      fun
+        (fuel : Nat)
+        (safety : PsKernelDefinitionSafety)
+        (resultLevel : PsKernelLevel)
+        (levels : List PsKernelLevel)
+        (params : List PsKernelOpenBinder)
+        (typeNames : List PsKernelName)
+        (typeShapes : List PsKernelSimpleMutualTypeShape)
+        (typeShape : PsKernelSimpleMutualTypeShape)
+        (owner : Nat)
+        (headerSession : PsKernelCheckerSession)
+        (work : PsKernelEnvironment)
+        (ctorIndex : Nat) =>
+        match psKernelCheckNoMVarNoFVar ctor.type with
+        | Except.error error =>
+            Except.error error
+        | Except.ok _ =>
+            match
+                psKernelCheckLevelParams
+                  ctor.type
+                  headerSession.context.levelParams with
+            | Except.error error =>
+                Except.error error
+            | Except.ok _ =>
+                let closedSession :=
+                  psKernelMkCheckerSession
+                    work
+                    headerSession.context.levelParams
+                    safety
+                    headerSession.context.maxRecDepth
+                    headerSession.context.maxNatSize;
+                match
+                    psKernelSessionCheck
+                      fuel
+                      closedSession
+                      ctor.type with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok ctorType =>
+                    match
+                        psKernelSessionEnsureSort
+                          fuel
+                          (Prod.snd ctorType)
+                          (Prod.fst ctorType) with
+                    | Except.error error =>
+                        Except.error error
+                    | Except.ok _ =>
+                        let ctorSession :=
+                          psKernelSessionWithEnvironment
+                            headerSession
+                            work;
+                        match
+                            psKernelOpenSimpleConstructorParams
+                              fuel
+                              ctorSession
+                              params
+                              ctor.type with
+                        | Except.error error =>
+                            Except.error error
+                        | Except.ok afterParams =>
+                            match
+                                psKernelOpenSimpleMutualConstructorFields
+                                  fuel
+                                  afterParams.session
+                                  typeNames
+                                  typeShapes
+                                  levels
+                                  params
+                                  resultLevel
+                                  afterParams.result with
+                            | Except.error error =>
+                                Except.error error
+                            | Except.ok fieldsResult =>
+                                match
+                                    psKernelSimpleMutualAppInfo
+                                      typeNames
+                                      typeShapes
+                                      levels
+                                      params
+                                      fieldsResult.result with
+                                | Option.none =>
+                                    Except.error
+                                      "mutual constructor has invalid return type"
+                                | Option.some appInfo =>
+                                    if Nat.beq appInfo.target owner then
+                                      let ctorInfo :=
+                                        PsKernelConstructorInfo.mk
+                                          (PsKernelConstantBase.mk
+                                            ctor.name
+                                            headerSession.context.levelParams
+                                            ctor.type)
+                                          typeShape.decl.name
+                                          ctorIndex
+                                          (psKernelOpenBinderListLength
+                                            params)
+                                          (psKernelOpenBinderListLength
+                                            fieldsResult.fields)
+                                          typeShape.decl.name
+                                          typeNames
+                                          (psKernelOpenBinderListLength
+                                            typeShape.indices)
+                                          false;
+                                      let nextWork :=
+                                        psKernelEnvironmentAddUnchecked
+                                          work
+                                          (PsKernelConstantInfo.ctorInfo
+                                            ctorInfo);
+                                      match
+                                          smaller
+                                            fuel
+                                            safety
+                                            resultLevel
+                                            levels
+                                            params
+                                            typeNames
+                                            typeShapes
+                                            typeShape
+                                            owner
+                                            headerSession
+                                            nextWork
+                                            (Nat.succ ctorIndex) with
+                                      | Except.error error =>
+                                          Except.error error
+                                      | Except.ok tailResult =>
+                                          let shape :=
+                                            PsKernelSimpleMutualConstructorShape.mk
+                                              owner
+                                              ctor
+                                              fieldsResult.fields
+                                              fieldsResult.recursiveFields
+                                              appInfo.indices;
+                                          Except.ok
+                                            (PsKernelAddMutualConstructorsResult.mk
+                                              tailResult.environment
+                                              (List.cons
+                                                shape
+                                                tailResult.shapes))
+                                    else
+                                      Except.error
+                                        "mutual constructor returns the wrong datatype"
+
+def psKernelAddSimpleMutualTypesWorker
+    (types : List PsKernelSimpleMutualTypeShape) :
+    Nat ->
+    PsKernelDefinitionSafety ->
+    PsKernelLevel ->
+    List PsKernelLevel ->
+    List PsKernelOpenBinder ->
+    List PsKernelName ->
+    List PsKernelSimpleMutualTypeShape ->
+    PsKernelCheckerSession ->
+    PsKernelEnvironment ->
+    Nat ->
+    Except String PsKernelAddMutualConstructorsResult :=
+  match types with
+  | List.nil =>
+      fun
+        (_fuel : Nat)
+        (_safety : PsKernelDefinitionSafety)
+        (_resultLevel : PsKernelLevel)
+        (_levels : List PsKernelLevel)
+        (_params : List PsKernelOpenBinder)
+        (_typeNames : List PsKernelName)
+        (_allShapes : List PsKernelSimpleMutualTypeShape)
+        (_headerSession : PsKernelCheckerSession)
+        (work : PsKernelEnvironment)
+        (_owner : Nat) =>
+        Except.ok
+          (PsKernelAddMutualConstructorsResult.mk
+            work
+            List.nil)
+  | List.cons typeShape rest =>
+      let smaller :=
+        psKernelAddSimpleMutualTypesWorker rest;
+      fun
+        (fuel : Nat)
+        (safety : PsKernelDefinitionSafety)
+        (resultLevel : PsKernelLevel)
+        (levels : List PsKernelLevel)
+        (params : List PsKernelOpenBinder)
+        (typeNames : List PsKernelName)
+        (allShapes : List PsKernelSimpleMutualTypeShape)
+        (headerSession : PsKernelCheckerSession)
+        (work : PsKernelEnvironment)
+        (owner : Nat) =>
+        match
+            psKernelAddSimpleMutualConstructorsForTypeWorker
+              typeShape.decl.ctors
+              fuel
+              safety
+              resultLevel
+              levels
+              params
+              typeNames
+              allShapes
+              typeShape
+              owner
+              headerSession
+              work
+              0 with
+        | Except.error error =>
+            Except.error error
+        | Except.ok ownResult =>
+            match
+                smaller
+                  fuel
+                  safety
+                  resultLevel
+                  levels
+                  params
+                  typeNames
+                  allShapes
+                  headerSession
+                  ownResult.environment
+                  (Nat.succ owner) with
+            | Except.error error =>
+                Except.error error
+            | Except.ok later =>
+                Except.ok
+                  (PsKernelAddMutualConstructorsResult.mk
+                    later.environment
+                    (psKernelMutualConstructorShapeListAppend
+                      ownResult.shapes
+                      later.shapes))

@@ -119,7 +119,7 @@
       "area": "Quot lift/ind computation",
       "pskernelSymbol": "psKernelReduceQuotWith",
       "leanLocator": "src/kernel/type_checker.cpp::reduce_quot",
-      "status": "implemented-source"
+      "status": "implemented-differential"
     },
     {
       "id": "PSK-RED-REC",
@@ -168,56 +168,56 @@
       "area": "string literal expansion",
       "pskernelSymbol": "psKernelDefEqStringLitExpansionWith",
       "leanLocator": "src/kernel/type_checker.cpp::try_string_lit_expansion",
-      "status": "implemented-source"
+      "status": "implemented-differential"
     },
     {
       "id": "PSK-DEFEQ-UNIT",
       "area": "fieldless structure equality",
       "pskernelSymbol": "psKernelDefEqUnitLikeWith",
       "leanLocator": "src/kernel/type_checker.cpp::is_def_eq_unit_like",
-      "status": "implemented-source"
+      "status": "implemented-differential"
     },
     {
       "id": "PSK-ADMIT-AXIOM",
       "area": "axiom admission",
       "pskernelSymbol": "psKernelAddAxiom",
       "leanLocator": "src/kernel/environment.cpp::add_axiom",
-      "status": "implemented-source"
+      "status": "implemented-differential"
     },
     {
       "id": "PSK-ADMIT-DEF",
       "area": "definition admission",
       "pskernelSymbol": "psKernelAddDefinition",
       "leanLocator": "src/kernel/environment.cpp::add_definition",
-      "status": "implemented-source"
+      "status": "implemented-differential"
     },
     {
       "id": "PSK-ADMIT-THM",
       "area": "theorem admission",
       "pskernelSymbol": "psKernelAddTheorem",
       "leanLocator": "src/kernel/environment.cpp::add_theorem",
-      "status": "implemented-source"
+      "status": "implemented-differential"
     },
     {
       "id": "PSK-ADMIT-OPAQUE",
       "area": "opaque admission",
       "pskernelSymbol": "psKernelAddOpaque",
       "leanLocator": "src/kernel/environment.cpp::add_opaque",
-      "status": "implemented-source"
+      "status": "implemented-differential"
     },
     {
       "id": "PSK-ADMIT-MUTDEF",
       "area": "unsafe/partial mutual definitions",
       "pskernelSymbol": "psKernelAddMutualDefinitions",
       "leanLocator": "src/kernel/environment.cpp::add_mutual",
-      "status": "implemented-source"
+      "status": "implemented-differential"
     },
     {
       "id": "PSK-ADMIT-QUOT",
       "area": "Quot initialization",
       "pskernelSymbol": "psKernelAddQuot",
       "leanLocator": "src/kernel/quot.cpp",
-      "status": "implemented-source"
+      "status": "implemented-differential"
     },
     {
       "id": "PSK-ADMIT-IND",

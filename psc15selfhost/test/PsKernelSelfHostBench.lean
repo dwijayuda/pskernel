@@ -3402,6 +3402,96 @@ partial def psKernelBenchNestedWideValidateLoop
       | Except.error _ =>
           pure tail
 
+partial def psKernelBenchNestedWideValidateTemplatesLoop
+    (iterations : Nat)
+    (finalEnvironment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedWideValidateTemplatesLoop
+          rest
+          finalEnvironment
+          processed
+      match
+          psKernelSimpleNestedValidateTemplates
+            65536
+            finalEnvironment
+            psKernelBenchNestedWideDecl.levelParams
+            PsKernelDefinitionSafety.safe
+            List.nil
+            0
+            psKernelLeanNatMaxSizeDefault
+            processed.state.aux with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedWideValidateOriginalsLoop
+    (iterations : Nat)
+    (finalEnvironment : PsKernelEnvironment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedWideValidateOriginalsLoop
+          rest
+          finalEnvironment
+      match
+          psKernelSimpleNestedValidateOriginals
+            65536
+            finalEnvironment
+            psKernelBenchNestedWideDecl
+            PsKernelDefinitionSafety.safe
+            0
+            psKernelLeanNatMaxSizeDefault
+            psKernelBenchNestedWideDecl.types with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedWideValidateAuxLoop
+    (iterations : Nat)
+    (transformed : PsKernelEnvironment)
+    (finalEnvironment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedWideValidateAuxLoop
+          rest
+          transformed
+          finalEnvironment
+          processed
+      match
+          psKernelSimpleNestedValidateAux
+            65536
+            transformed
+            finalEnvironment
+            psKernelBenchNestedWideDecl
+            PsKernelDefinitionSafety.safe
+            List.nil
+            0
+            psKernelLeanNatMaxSizeDefault
+            processed.state.aux
+            (psKernelBenchNestedWideRenames
+              processed)
+            processed.state.aux with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
 partial def psKernelBenchNestedWideAdmissionLoop
     (iterations : Nat)
     (environment : PsKernelEnvironment) :
@@ -4953,6 +5043,55 @@ def main : IO Unit := do
       toString nestedWideRestoreHits ++
       "/" ++
       toString nestedWideValidateHits)
+
+  let nestedWideValidateTemplatesStart ← IO.monoNanosNow
+  let nestedWideValidateTemplatesHits ←
+    psKernelBenchNestedWideValidateTemplatesLoop
+      nestedWideIterations
+      nestedWideFinal
+      nestedWideProcessed
+  let nestedWideValidateTemplatesStop ← IO.monoNanosNow
+
+  let nestedWideValidateOriginalsStart ← IO.monoNanosNow
+  let nestedWideValidateOriginalsHits ←
+    psKernelBenchNestedWideValidateOriginalsLoop
+      nestedWideIterations
+      nestedWideFinal
+  let nestedWideValidateOriginalsStop ← IO.monoNanosNow
+
+  let nestedWideValidateAuxStart ← IO.monoNanosNow
+  let nestedWideValidateAuxHits ←
+    psKernelBenchNestedWideValidateAuxLoop
+      nestedWideIterations
+      nestedWideTransformed
+      nestedWideFinal
+      nestedWideProcessed
+  let nestedWideValidateAuxStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH nested_wide_validate_templates_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedWideValidateTemplatesStart
+          nestedWideValidateTemplatesStop) ++
+      " nested_wide_validate_originals_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedWideValidateOriginalsStart
+          nestedWideValidateOriginalsStop) ++
+      " nested_wide_validate_aux_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedWideValidateAuxStart
+          nestedWideValidateAuxStop) ++
+      " iterations=" ++
+      toString nestedWideIterations ++
+      " hits=" ++
+      toString nestedWideValidateTemplatesHits ++
+      "/" ++
+      toString nestedWideValidateOriginalsHits ++
+      "/" ++
+      toString nestedWideValidateAuxHits)
 
   let nestedProcessed ←
     match

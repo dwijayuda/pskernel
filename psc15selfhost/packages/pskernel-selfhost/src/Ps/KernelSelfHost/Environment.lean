@@ -1,4 +1,5 @@
 import Ps.KernelSelfHost.Runtime.EnvironmentIndex
+import Ps.KernelSelfHost.Runtime.NativeReduction
 
 def psKernelNameListContains
     (needle : PsKernelName)
@@ -74,16 +75,40 @@ def psKernelConstantListLength
       Nat.succ
         (psKernelConstantListLength rest)
 
+structure PsKernelEnvironmentRuntime where
+  nativeEvaluator : Option PsKernelNativeEvaluator
+
+def psKernelEnvironmentRuntimeEmpty :
+    PsKernelEnvironmentRuntime :=
+  {
+    nativeEvaluator := Option.none
+  }
+
 structure PsKernelEnvironment where
   constants : List PsKernelConstantInfo
   index : PsKernelEnvironmentIndex
   quotInitialized : Bool
+  runtime : PsKernelEnvironmentRuntime
 
 def psKernelEnvironmentEmpty : PsKernelEnvironment :=
   {
     constants := List.nil
     index := PsKernelEnvironmentIndex.empty
     quotInitialized := false
+    runtime := psKernelEnvironmentRuntimeEmpty
+  }
+
+def psKernelEnvironmentWithNativeEvaluator
+    (environment : PsKernelEnvironment)
+    (nativeEvaluator : Option PsKernelNativeEvaluator) :
+    PsKernelEnvironment :=
+  {
+    constants := environment.constants
+    index := environment.index
+    quotInitialized := environment.quotInitialized
+    runtime := {
+      nativeEvaluator := nativeEvaluator
+    }
   }
 
 def psKernelEnvironmentFind
@@ -151,6 +176,7 @@ def psKernelEnvironmentAddUnchecked
         environment.index
         info
     quotInitialized := environment.quotInitialized
+    runtime := environment.runtime
   }
 
 def psKernelEnvironmentReplaceUnchecked
@@ -168,6 +194,7 @@ def psKernelEnvironmentReplaceUnchecked
         environment.index
         info
     quotInitialized := environment.quotInitialized
+    runtime := environment.runtime
   }
 
 def psKernelEnvironmentAdd
@@ -199,4 +226,5 @@ def psKernelEnvironmentMarkQuotInitialized
       constants := environment.constants
       index := environment.index
       quotInitialized := true
+      runtime := environment.runtime
     }

@@ -8,6 +8,8 @@ Target:
 - Lean version: 4.34.0
 - Lean commit: `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`
 - compatibility matrix: `LEAN_4_34_COMPATIBILITY.json`
+- conformance matrix: `LEAN_4_34_CONFORMANCE.json`
+- generated rule reference: `KERNEL_RULE_REFERENCE.md`
 
 Project guidance:
 

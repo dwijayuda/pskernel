@@ -1,45 +1,13 @@
 name: PSC1Kernel generated fixed point
 
 on:
-  push:
-    branches:
-      - psc2/psc1kernel-selfhost-portable
-    paths:
-      - psc15selfhost/packages/pskernel-selfhost/src/**
-      - psc15selfhost/packages/pskernel-selfhost/SELFHOST_EVIDENCE.json
-      - psc15selfhost/packages/pskernel-selfhost/package.json
-      - psc15selfhost/packages/foundation/**
-      - psc15selfhost/packages/syntax/**
-      - psc15selfhost/packages/core/**
-      - psc15selfhost/packages/environment/**
-      - psc15selfhost/packages/meta/**
-      - psc15selfhost/packages/elab/**
-      - psc15selfhost/packages/bridge/**
-      - psc15selfhost/packages/compiler-ir/**
-      - psc15selfhost/packages/erasure/**
-      - psc15selfhost/packages/compiler/**
-      - psc15selfhost/packages/backend-ts/**
-      - psc15selfhost/packages/bootstrap/**
-      - psc15selfhost/host/**
-      - psc15selfhost/lakefile.lean
-      - psc15selfhost/scripts/psc1kernel-selfhost-generation.mjs
-      - psc15selfhost/scripts/psc1kernel-selfhost-resume.mjs
-      - psc15selfhost/scripts/psc1kernel-generated-smoke.mjs
-      - psc15selfhost/scripts/selfhost-replay-runtime.test.mjs
-      - psc15selfhost/scripts/typescript-cli.mjs
-      - psc15selfhost/scripts/bootstrap-project.mjs
-      - psc15selfhost/scripts/compile-with-generated.mjs
-      - psc15selfhost/scripts/reemit-project-with-generated.mjs
-      - psc15selfhost/scripts/compare-source-workspaces.mjs
-      - psc15selfhost/scripts/compare-selfhost.mjs
-      - .github/workflows/psc1kernel-selfhost-fixed-point.yml
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: psc1kernel-selfhost-fixed-point-v2-${{ github.ref }}
+  group: psc1kernel-selfhost-fixed-point-manual-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

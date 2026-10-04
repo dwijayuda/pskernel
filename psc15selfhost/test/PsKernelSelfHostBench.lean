@@ -3062,6 +3062,123 @@ def psKernelBenchNestedWideRestore
         processed.state.aux
         renames
 
+partial def psKernelBenchReportNestedRules
+    (label : String)
+    (session : PsKernelCheckerSession)
+    (rules : List PsKernelRecursorRule)
+    (index : Nat) :
+    IO Unit :=
+  match rules with
+  | List.nil =>
+      pure ()
+  | List.cons rule rest => do
+      match
+          psKernelSessionCheck
+            65536
+            session
+            rule.rhs with
+      | Except.ok _ =>
+          IO.println
+            ("PSKERNEL_BENCH " ++
+              label ++
+              "_rule_" ++
+              toString index ++
+              "=ok")
+      | Except.error error =>
+          IO.println
+            ("PSKERNEL_BENCH " ++
+              label ++
+              "_rule_" ++
+              toString index ++
+              "_error=" ++
+              error)
+      psKernelBenchReportNestedRules
+        label
+        session
+        rest
+        (Nat.succ index)
+
+def psKernelBenchReportNestedRecursor
+    (label : String)
+    (environment : PsKernelEnvironment)
+    (name : PsKernelName) :
+    IO Unit := do
+  match psKernelEnvironmentFind environment name with
+  | Option.none =>
+      IO.println
+        ("PSKERNEL_BENCH " ++
+          label ++
+          "_missing")
+  | Option.some value =>
+      match value with
+      | PsKernelConstantInfo.recInfo info =>
+          let session :=
+            psKernelMkCheckerSession
+              environment
+              info.base.levelParams
+              PsKernelDefinitionSafety.safe
+              0
+              psKernelLeanNatMaxSizeDefault
+          match
+              psKernelSessionCheck
+                65536
+                session
+                info.base.type with
+          | Except.ok _ =>
+              IO.println
+                ("PSKERNEL_BENCH " ++
+                  label ++
+                  "_type=ok")
+          | Except.error error =>
+              IO.println
+                ("PSKERNEL_BENCH " ++
+                  label ++
+                  "_type_error=" ++
+                  error)
+          psKernelBenchReportNestedRules
+            label
+            session
+            info.rules
+            0
+      | _ =>
+          IO.println
+            ("PSKERNEL_BENCH " ++
+              label ++
+              "_not_recursor")
+
+partial def psKernelBenchReportNestedAuxRecursors
+    (environment : PsKernelEnvironment)
+    (renames : List (Prod PsKernelName PsKernelName))
+    (families : List PsKernelSimpleNestedAuxFamily)
+    (index : Nat) :
+    IO Unit :=
+  match families with
+  | List.nil =>
+      pure ()
+  | List.cons family rest => do
+      let oldName :=
+        psKernelSimpleRecName
+          family.auxName
+      match
+          psKernelSimpleNestedFindRename
+            oldName
+            renames with
+      | Option.none =>
+          IO.println
+            ("PSKERNEL_BENCH wide_aux_" ++
+              toString index ++
+              "_rename_missing")
+      | Option.some newName =>
+          psKernelBenchReportNestedRecursor
+            ("wide_aux_" ++ toString index)
+            environment
+            newName
+      psKernelBenchReportNestedAuxRecursors
+        environment
+        renames
+        rest
+        (Nat.succ index)
+
 partial def psKernelBenchNestedWideAdmissionLoop
     (iterations : Nat)
     (environment : PsKernelEnvironment) :
@@ -4504,6 +4621,17 @@ def main : IO Unit := do
       IO.println
         ("PSKERNEL_BENCH nested_wide_validate_aux_error=" ++
           error)
+
+  psKernelBenchReportNestedRecursor
+    "wide_main"
+    nestedWideFinal
+    psKernelBenchNestedWideRecName
+  psKernelBenchReportNestedAuxRecursors
+    nestedWideFinal
+    (psKernelBenchNestedWideRenames
+      nestedWideProcessed)
+    nestedWideProcessed.state.aux
+    0
 
   let nestedWidePsStart ← IO.monoNanosNow
   let nestedWidePsHits ←

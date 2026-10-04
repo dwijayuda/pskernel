@@ -14,6 +14,7 @@ export const runtimeSemanticsV1 = Object.freeze({
 export const runtimeSemanticsV1PackageFolders = Object.freeze([
   "compiler-ir",
   "backend-ts",
+  "backend-js",
   "backend-rust",
   "backend-wasm",
 ]);

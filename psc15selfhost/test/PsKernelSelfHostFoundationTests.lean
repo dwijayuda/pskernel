@@ -1,5 +1,5 @@
-import Ps.KernelSelfHost.TypeCheckerDefEq
-import PSC1Kernel.TypeChecker
+import Ps.KernelSelfHost.NestedInductive
+import PSC1Kernel.NestedInductive
 
 def psKernelNameToReference
     (name : PsKernelName) : PSC1Kernel.Name :=
@@ -13,6 +13,21 @@ def psKernelNameToReference
   | PsKernelName.num parent value =>
       PSC1Kernel.Name.num
         (psKernelNameToReference parent)
+        value
+
+
+def psKernelNameFromReference
+    (name : PSC1Kernel.Name) : PsKernelName :=
+  match name with
+  | PSC1Kernel.Name.anonymous =>
+      PsKernelName.anonymous
+  | PSC1Kernel.Name.str parent value =>
+      PsKernelName.str
+        (psKernelNameFromReference parent)
+        value
+  | PSC1Kernel.Name.num parent value =>
+      PsKernelName.num
+        (psKernelNameFromReference parent)
         value
 
 def psKernelOrderingToReference
@@ -1602,6 +1617,275 @@ def psKernelSelfHostDefEqTests : Bool :=
           (PsKernelExpr.fvar proofRightName))
         etaDifferential))
 
+
+def psKernelConstantListUsesNestedPrefix
+    (values : List PsKernelConstantInfo) : Bool :=
+  match values with
+  | List.nil =>
+      false
+  | List.cons info rest =>
+      if
+          psKernelNameIsPrefixOf
+            psKernelSimpleNestedPrefix
+            (psKernelConstantInfoName info) then
+        true
+      else
+        psKernelConstantListUsesNestedPrefix rest
+
+def psKernelSelfHostNestedTests : Bool :=
+  let type1 :=
+    PsKernelExpr.sort
+      (PsKernelLevel.succ
+        PsKernelLevel.zero)
+  let boxName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "PortableNestedBox"
+  let boxMkName :=
+    PsKernelName.str
+      boxName
+      "mk"
+  let alphaName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "alpha"
+  let valueName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "value"
+  let boxType :=
+    PsKernelExpr.forallE
+      alphaName
+      type1
+      type1
+      PsKernelBinderInfo.default
+  let boxCtorType :=
+    PsKernelExpr.forallE
+      alphaName
+      type1
+      (PsKernelExpr.forallE
+        valueName
+        (PsKernelExpr.bvar 0)
+        (PsKernelExpr.app
+          (PsKernelExpr.const
+            boxName
+            List.nil)
+          (PsKernelExpr.bvar 1))
+        PsKernelBinderInfo.default)
+      PsKernelBinderInfo.default
+  let treeName :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "PortableNestedTree"
+  let leafName :=
+    PsKernelName.str
+      treeName
+      "leaf"
+  let nodeName :=
+    PsKernelName.str
+      treeName
+      "node"
+  let recName :=
+    psKernelSimpleRecName
+      treeName
+  let recAuxName :=
+    psKernelNameAppendIndexAfter
+      recName
+      1
+  let treeType :=
+    PsKernelExpr.const
+      treeName
+      List.nil
+  let boxTreeType :=
+    PsKernelExpr.app
+      (PsKernelExpr.const
+        boxName
+        List.nil)
+      treeType
+  let nodeType :=
+    PsKernelExpr.forallE
+      (PsKernelName.str
+        PsKernelName.anonymous
+        "children")
+      boxTreeType
+      treeType
+      PsKernelBinderInfo.default
+  let portableBox :=
+    psKernelAddSimpleInductive
+      4096
+      psKernelEnvironmentEmpty
+      (PsKernelSimpleInductiveDecl.mk
+        List.nil
+        boxName
+        boxType
+        (List.cons
+          (PsKernelSimpleConstructorDecl.mk
+            boxMkName
+            boxCtorType)
+          List.nil)
+        false
+        1)
+      0
+      psKernelLeanNatMaxSizeDefault
+  let portableNested :=
+    match portableBox with
+    | Except.error _ =>
+        Except.error "outer box admission failed"
+    | Except.ok environment =>
+        psKernelAddSimpleNestedInductive
+          4096
+          environment
+          (PsKernelSimpleMutualInductiveDecl.mk
+            List.nil
+            0
+            (List.cons
+              (PsKernelSimpleMutualTypeDecl.mk
+                treeName
+                type1
+                (List.cons
+                  (PsKernelSimpleConstructorDecl.mk
+                    leafName
+                    treeType)
+                  (List.cons
+                    (PsKernelSimpleConstructorDecl.mk
+                      nodeName
+                      nodeType)
+                    List.nil)))
+              List.nil)
+            false)
+          0
+          psKernelLeanNatMaxSizeDefault
+  let referenceBoxName :=
+    psKernelNameToReference boxName
+  let referenceBoxMkName :=
+    psKernelNameToReference boxMkName
+  let referenceTreeName :=
+    psKernelNameToReference treeName
+  let referenceLeafName :=
+    psKernelNameToReference leafName
+  let referenceNodeName :=
+    psKernelNameToReference nodeName
+  let referenceRecName :=
+    psKernelNameToReference recName
+  let referenceRecAuxName :=
+    psKernelNameToReference recAuxName
+  let referenceBox :=
+    PSC1Kernel.Kernel.addSimpleInductive
+      PSC1Kernel.Environment.empty
+      {
+        levelParams := []
+        name := referenceBoxName
+        type := psKernelExprToReference boxType
+        ctors := [{
+          name := referenceBoxMkName
+          type := psKernelExprToReference boxCtorType
+        }]
+        isUnsafe := false
+        numParams := 1
+      }
+  let referenceNested :=
+    match referenceBox with
+    | Except.error error =>
+        Except.error error
+    | Except.ok environment =>
+        PSC1Kernel.Kernel.addSimpleNestedInductive
+          environment
+          {
+            levelParams := []
+            numParams := 0
+            types := [{
+              name := referenceTreeName
+              type := psKernelExprToReference type1
+              ctors := [
+                {
+                  name := referenceLeafName
+                  type := psKernelExprToReference treeType
+                },
+                {
+                  name := referenceNodeName
+                  type := psKernelExprToReference nodeType
+                }
+              ]
+            }]
+            isUnsafe := false
+          }
+  match portableNested, referenceNested with
+  | Except.ok portable, Except.ok reference =>
+      match
+          psKernelEnvironmentFind
+            portable
+            treeName,
+          reference.find?
+            referenceTreeName with
+      | Option.some
+          (PsKernelConstantInfo.inductInfo portableTree),
+        Option.some
+          (PSC1Kernel.ConstantInfo.inductInfo referenceTree) =>
+          if
+              !(Nat.beq portableTree.numNested
+                referenceTree.numNested) then
+            false
+          else
+            match
+                psKernelEnvironmentFind
+                  portable
+                  recName,
+                reference.find?
+                  referenceRecName with
+            | Option.some
+                (PsKernelConstantInfo.recInfo portableRec),
+              Option.some
+                (PSC1Kernel.ConstantInfo.recInfo referenceRec) =>
+                if
+                    !(Nat.beq
+                      portableRec.numMotives
+                      referenceRec.numMotives) then
+                  false
+                else if
+                    !(Nat.beq
+                      portableRec.numMinors
+                      referenceRec.numMinors) then
+                  false
+                else
+                  match
+                      psKernelEnvironmentFind
+                        portable
+                        recAuxName,
+                      reference.find?
+                        referenceRecAuxName with
+                  | Option.some
+                      (PsKernelConstantInfo.recInfo portableAux),
+                    Option.some
+                      (PSC1Kernel.ConstantInfo.recInfo referenceAux) =>
+                      if
+                          !(Nat.beq
+                            portableAux.numMotives
+                            referenceAux.numMotives) then
+                        false
+                      else if
+                          psKernelConstantListUsesNestedPrefix
+                            portable.constants then
+                        false
+                      else
+                        match portableAux.rules,
+                            referenceAux.rules with
+                        | List.cons portableRule List.nil,
+                          List.cons referenceRule List.nil =>
+                            psKernelNameEq
+                              portableRule.ctor
+                              (psKernelNameFromReference
+                                referenceRule.ctor)
+                        | _, _ =>
+                            false
+                  | _, _ =>
+                      false
+            | _, _ =>
+                false
+      | _, _ =>
+          false
+  | _, _ =>
+      false
+
 def main : IO Unit :=
   if !psKernelSelfHostNameTests then
     throw
@@ -1643,6 +1927,10 @@ def main : IO Unit :=
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_DEFEQ_DIFFERENTIAL: FAIL")
+  else if !psKernelSelfHostNestedTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_NESTED_DIFFERENTIAL: FAIL")
   else
     IO.println
       "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"

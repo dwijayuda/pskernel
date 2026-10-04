@@ -55,6 +55,18 @@ for (const [section, packageName] of expected) {
   }
 }
 
+const hostProjectCompiler = await readFile(
+  path.join(root, "host", "src", "Ps", "Host", "ProjectCompiler.lean"),
+  "utf8",
+);
+for (const [section, packageName] of expected) {
+  const marker =
+    `| "Ps" :: "${section}" :: _ => some "${packageName}"`;
+  if (!hostProjectCompiler.includes(marker)) {
+    throw new Error(`PSC2_LAYOUT_HOST_SECTION_MISMATCH: ${section}`);
+  }
+}
+
 process.stdout.write(
   `PSC2_LAYOUT_DRIFT: PASS (${expected.size} module sections; ${consumers.length} consumers)\n`,
 );

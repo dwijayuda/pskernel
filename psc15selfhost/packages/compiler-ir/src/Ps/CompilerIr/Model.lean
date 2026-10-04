@@ -609,33 +609,31 @@ def psVerifiedIrTypeArgumentArityMatches
 def psVerifiedIrValidateExprListWith
     (validateExpr :
       PsVerifiedIrExpr ->
-        Except PsVerifiedIrValidationError Unit) :
-    List PsVerifiedIrExpr ->
-      Except PsVerifiedIrValidationError Unit :=
-  fun (values : List PsVerifiedIrExpr) =>
-    match values with
-    | List.nil =>
-        Except.ok Unit.unit
-    | List.cons value rest =>
-        match validateExpr value with
-        | Except.error error => Except.error error
-        | Except.ok _ =>
-            psVerifiedIrValidateExprListWith validateExpr rest
+        Except PsVerifiedIrValidationError Unit)
+    (values : List PsVerifiedIrExpr) :
+    Except PsVerifiedIrValidationError Unit :=
+  match values with
+  | List.nil =>
+      Except.ok Unit.unit
+  | List.cons value rest =>
+      match validateExpr value with
+      | Except.error error => Except.error error
+      | Except.ok _ =>
+          psVerifiedIrValidateExprListWith validateExpr rest
 
 def psVerifiedIrValidateRecordFieldsWith
     (structureName : String)
     (structureFields : List PsVerifiedIrStructureField)
     (validateExpr :
       PsVerifiedIrExpr ->
-        Except PsVerifiedIrValidationError Unit) :
-    List (String × PsVerifiedIrExpr) ->
-      Except PsVerifiedIrValidationError Unit :=
-  fun (fields : List (String × PsVerifiedIrExpr)) =>
-    match fields with
-    | List.nil =>
-        Except.ok Unit.unit
-    | List.cons field rest =>
-        match field with
+        Except PsVerifiedIrValidationError Unit)
+    (fields : List (String × PsVerifiedIrExpr)) :
+    Except PsVerifiedIrValidationError Unit :=
+  match fields with
+  | List.nil =>
+      Except.ok Unit.unit
+  | List.cons field rest =>
+      match field with
         | Prod.mk fieldName value =>
             if
                 psVerifiedIrStructureHasField
@@ -660,15 +658,14 @@ def psVerifiedIrValidateConstructorFieldsWith
     (constructorFields : List PsVerifiedIrConstructorField)
     (validateExpr :
       PsVerifiedIrExpr ->
-        Except PsVerifiedIrValidationError Unit) :
-    List (String × PsVerifiedIrExpr) ->
-      Except PsVerifiedIrValidationError Unit :=
-  fun (fields : List (String × PsVerifiedIrExpr)) =>
-    match fields with
-    | List.nil =>
-        Except.ok Unit.unit
-    | List.cons field rest =>
-        match field with
+        Except PsVerifiedIrValidationError Unit)
+    (fields : List (String × PsVerifiedIrExpr)) :
+    Except PsVerifiedIrValidationError Unit :=
+  match fields with
+  | List.nil =>
+      Except.ok Unit.unit
+  | List.cons field rest =>
+      match field with
         | Prod.mk fieldName value =>
             if
                 psVerifiedIrConstructorHasField
@@ -692,14 +689,13 @@ def psVerifiedIrValidateConstructorFieldsWith
 
 def psVerifiedIrValidateBindings
     (inductiveName constructorName : String)
-    (constructorFields : List PsVerifiedIrConstructorField) :
-    List PsVerifiedIrMatchBinding ->
-      Except PsVerifiedIrValidationError Unit :=
-  fun (bindings : List PsVerifiedIrMatchBinding) =>
-    match bindings with
-    | List.nil =>
-        Except.ok Unit.unit
-    | List.cons binding rest =>
+    (constructorFields : List PsVerifiedIrConstructorField)
+    (bindings : List PsVerifiedIrMatchBinding) :
+    Except PsVerifiedIrValidationError Unit :=
+  match bindings with
+  | List.nil =>
+      Except.ok Unit.unit
+  | List.cons binding rest =>
         if
             psVerifiedIrConstructorHasField
               constructorFields
@@ -755,22 +751,17 @@ def psVerifiedIrValidateAlternativesWith
     (constructors : List PsVerifiedIrConstructor)
     (validateExpr :
       PsVerifiedIrExpr ->
-        Except PsVerifiedIrValidationError Unit) :
-    List
-      (String ×
-        List PsVerifiedIrMatchBinding ×
-        PsVerifiedIrExpr) ->
-      Except PsVerifiedIrValidationError Unit :=
-  fun
-      (alternatives :
-        List
-          (String ×
-            List PsVerifiedIrMatchBinding ×
-            PsVerifiedIrExpr)) =>
-    match alternatives with
-    | List.nil =>
-        Except.ok Unit.unit
-    | List.cons alternative rest =>
+        Except PsVerifiedIrValidationError Unit)
+    (alternatives :
+      List
+        (String ×
+          List PsVerifiedIrMatchBinding ×
+          PsVerifiedIrExpr)) :
+    Except PsVerifiedIrValidationError Unit :=
+  match alternatives with
+  | List.nil =>
+      Except.ok Unit.unit
+  | List.cons alternative rest =>
         match
             psVerifiedIrValidateAlternativeWith
               inductiveName
@@ -961,14 +952,13 @@ def psVerifiedIrValidateExprReferencesWithFuel
                       inductiveName)
 
 def psVerifiedIrValidateDeclarationsWith
-    (module : PsVerifiedIrModule) :
-    List PsVerifiedIrDeclaration ->
-      Except PsVerifiedIrValidationError Unit :=
-  fun (declarations : List PsVerifiedIrDeclaration) =>
-    match declarations with
-    | List.nil =>
-        Except.ok Unit.unit
-    | List.cons declaration rest =>
+    (module : PsVerifiedIrModule)
+    (declarations : List PsVerifiedIrDeclaration) :
+    Except PsVerifiedIrValidationError Unit :=
+  match declarations with
+  | List.nil =>
+      Except.ok Unit.unit
+  | List.cons declaration rest =>
         match
             psVerifiedIrValidateExprReferencesWithFuel
               module

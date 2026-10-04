@@ -7,6 +7,7 @@ import Ps.Kernel.Expr
 import Ps.Kernel.Binding
 import Ps.Kernel.Environment
 import Ps.Kernel.AlgebraicReduction
+import Ps.Kernel.AlgebraicProjectionReduction
 
 /- First-order beta/zeta/delta and supported inductive recursor reduction.
 No primitive or quotient reduction is asserted. Type checking validates discarded terms.
@@ -30,6 +31,8 @@ def psKernelRecordNeutral (action : PsKernelRecordAction) (major : PsKernelExpr)
   | PsKernelRecordAction.eliminate fn unusedMinor => PsKernelExpr.app fn major
 
 inductive PsKernelReduceTask where
+  | algebraicProjection (state : PsKernelAlgProjectReduceState)
+  | algebraicProjectionMajor (continuation : PsKernelAlgProjectReduceContinuation)
   | algebraic (state : PsKernelAlgReduceState)
   | algebraicMajor (continuation : PsKernelAlgReduceContinuation)
   | sumMinors (original : PsKernelExpr) (rules : PsKernelList PsKernelSumRule)
@@ -177,6 +180,8 @@ def psKernelReduceValueTask
   | PsKernelList.nil => psKernelReduceReject PsKernelCheckError.invalidState
   | PsKernelList.cons top rest =>
       match task with
+      | PsKernelReduceTask.algebraicProjectionMajor continuation => psKernelReduceNext env
+          (PsKernelList.cons (PsKernelReduceTask.algebraicProjection (psKernelAlgProjectReduceResume continuation top)) tasks) rest
       | PsKernelReduceTask.algebraicMajor continuation => psKernelReduceNext env
           (PsKernelList.cons (PsKernelReduceTask.algebraic (psKernelAlgReduceResume continuation top)) tasks) rest
       | PsKernelReduceTask.sumMajor fn branches => psKernelReduceNext env
@@ -274,6 +279,17 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
           | _ => psKernelReduceReject PsKernelCheckError.invalidState
       | PsKernelList.cons task rest =>
           match task with
+          | PsKernelReduceTask.algebraicProjection current =>
+              match psKernelAlgProjectReduceStep current with
+              | PsKernelAlgProjectReduceStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.algebraicProjection next) rest) values
+              | PsKernelAlgProjectReduceStep.major major continuation => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.whnf major)
+                    (PsKernelList.cons (PsKernelReduceTask.algebraicProjectionMajor continuation) rest)) values
+              | PsKernelAlgProjectReduceStep.neutral value => psKernelReducePush env rest values value
+              | PsKernelAlgProjectReduceStep.reduced value => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.whnf value) rest) values
+              | PsKernelAlgProjectReduceStep.rejected error => psKernelReduceReject error
           | PsKernelReduceTask.algebraic current =>
               match psKernelAlgReduceStep current with
               | PsKernelAlgReduceStep.next next => psKernelReduceNext env
@@ -440,6 +456,8 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                   (PsKernelList.cons (PsKernelReduceTask.projectLookup family index major next) rest) values
               | PsKernelLookupStep.found entry =>
                   match entry with
+                  | PsKernelDefinition.algebraicFamily unusedName unusedType unusedParameters unusedConstructors => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.algebraicProjection (psKernelAlgProjectReduceStart env family index major)) rest) values
                   | PsKernelDefinition.recordFamily unusedName ctor fields => psKernelReduceNext env
                       (PsKernelList.cons (PsKernelReduceTask.projectBound family index major ctor fields fields index) rest) values
                   | _ => psKernelReduceReject PsKernelCheckError.unsupported

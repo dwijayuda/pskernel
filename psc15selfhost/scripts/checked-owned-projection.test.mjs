@@ -9,7 +9,7 @@ const projection=i=>({k:'proj',n:family.n,i,e:structuredClone(major)});
 const definition=v=>({kind:'constant',declaration:{k:'definition',n:N('Projected'),lp:[],t:C(N('Nat')),v,h:{k:'regular',h:'1'},s:'safe'}});
 const wire=admissions=>JSON.stringify({format:'proofscript-checked-admissions',version:2,admissions});
 for(const i of [0,1,2])test('exact preserved PsSourcePos metadata checks wire projection '+i,async()=>{
- const result=await checkOwnedAdmissions(wire([...prefix.slice(0,3),definition(projection(i))]));assert.equal(result.accepted,true,JSON.stringify(result));assert.equal(result.profile,'owned-uniform-algebraic/11');
+ const result=await checkOwnedAdmissions(wire([...prefix.slice(0,3),definition(projection(i))]));assert.equal(result.accepted,true,JSON.stringify(result));assert.equal(result.profile,'owned-algebraic-projections/12');
 });
 for(const [label,change]of [
  ['out-of-bounds',p=>{p.i=3;}],['huge-index',p=>{p.i='9007199254740993';}],['negative-index',p=>{p.i=-1;}],['noncanonical-index',p=>{p.i='01';}],

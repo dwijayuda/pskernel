@@ -7,7 +7,7 @@ assert.equal(createHash('sha256').update(preserved).digest('hex'),'20715347d21c3
 const original=JSON.parse(preserved),token=original.admissions[14],batch=admissions=>JSON.stringify({format:original.format,version:original.version,admissions});
 test('exact preserved PsTokenKind admits in isolation, not as a full-prefix claim',async()=>{
  assert.equal(token.declaration.ts[0].n.v,'PsTokenKind');assert.equal(token.declaration.ts[0].cs.length,6);const r=(await checkOwnedAdmissions(batch([token])));
- assert.equal(r.accepted,true,r.errorKind);assert.equal(r.admissionCount,1);assert.equal(r.profile,'owned-uniform-algebraic/11');
+ assert.equal(r.accepted,true,r.errorKind);assert.equal(r.admissionCount,1);assert.equal(r.profile,'owned-algebraic-projections/12');
 });
 test('owned enum checks dependent computed-result witnesses through the production boundary',async()=>{
  const e=enumeration('E',3);for(let i=0;i<3;i++){const w=resultWitness(eliminate(e,i),i+1);assert.equal((await check([e,definition('Good',[],w.type,w.value)])).accepted,true);const bad=resultWitness(eliminate(e,i),i+2);assert.equal((await check([e,definition('Bad',[],bad.type,bad.value)])).accepted,false);}

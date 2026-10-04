@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "scope": "Closed monomorphic Type-valued record fields, constructor applications and derived dependent eliminator typing; admission-only suite; projection and iota have separate evidence; not general inductive completeness",
-  "sourceManifestSha256": "fe74eb30a78c2ff6b7295862c4988139b717cf7e2fe4e5ece7d131a6a1314513",
+  "sourceManifestSha256": "5f005286af587170e490e97a0c7a1e39facb3e5af9f59737cefcd71bceacf548",
   "harnessSha256": "3cc745e76132fcf8dd702452c7ff3d45a52a1fd7b8cd6cc02fc4dc084fe480bf",
   "provider": {
     "protocol": "pskernel-lean/1",

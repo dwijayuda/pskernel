@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "package": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.14",
+  "version": "0.1.0-checker.15",
   "status": "experimental-term-checker",
   "canCheckProofs": false,
   "authoritative": false,
@@ -43,7 +43,9 @@
     "checked-string-literal-typing-and-byte-exact-conversion",
     "uniform-Type0-type-parameter-algebraic-admission",
     "checked-covariant-parameter-and-direct-recursion-profile",
-    "derived-dependent-algebraic-eliminators-and-charged-recursive-iota"
+    "derived-dependent-algebraic-eliminators-and-charged-recursive-iota",
+    "parameterized-single-constructor-projection-typing-with-capture-avoiding-parameter-substitution",
+    "parameterized-single-constructor-projection-reduction-with-checked-constructor-arity"
   ],
   "boundedEvidence": [
     "BUILD.json",
@@ -61,7 +63,8 @@
     "ENUM_DIFFERENTIAL.json",
     "SUM_DIFFERENTIAL.json",
     "TEXT_DIFFERENTIAL.json",
-    "ALGEBRAIC_DIFFERENTIAL.json"
+    "ALGEBRAIC_DIFFERENTIAL.json",
+    "ALGEBRAIC_PROJECTION_DIFFERENTIAL.json"
   ],
   "releaseGates": {
     "term-checking": {
@@ -131,6 +134,6 @@
     "axiom-and-opaque-declaration-admission",
     "hostile-input-decoder",
     "public-CheckedModule",
-    "dependent-indexed-and-general-recursive-record-fields-and-parameterized-projections"
+    "dependent-indexed-and-general-recursive-record-fields"
   ]
 }

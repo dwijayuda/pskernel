@@ -1946,6 +1946,496 @@ def psKernelAlgReduceResume (continuation : PsKernelAlgReduceContinuation) (majo
 
 
 
+/- A conservative occurrence scan. Free variables are relevant only when checking
+covariance in the already scope-checked constructor parameter context. -/
+inductive PsKernelOccurrenceTask where
+  | visit (value : PsKernelExpr)
+  | name (work : PsKernelList PsKernelOrderTask)
+
+inductive PsKernelOccurrenceState where
+  | state (family : PsKernelName) (parameters : PsKernelFlag)
+      (tasks : PsKernelList PsKernelOccurrenceTask)
+
+inductive PsKernelOccurrenceStep where
+  | next (state : PsKernelOccurrenceState)
+  | found
+  | absent
+  | invalidState
+
+def psKernelOccurrenceNext (family : PsKernelName) (parameters : PsKernelFlag)
+    (tasks : PsKernelList PsKernelOccurrenceTask) : PsKernelOccurrenceStep :=
+  PsKernelOccurrenceStep.next (PsKernelOccurrenceState.state family parameters tasks)
+
+def psKernelOccurrenceStep (state : PsKernelOccurrenceState) : PsKernelOccurrenceStep :=
+  match state with
+  | PsKernelOccurrenceState.state family parameters tasks =>
+      match tasks with
+      | PsKernelList.nil => PsKernelOccurrenceStep.absent
+      | PsKernelList.cons task rest =>
+          match task with
+          | PsKernelOccurrenceTask.name current =>
+              match psKernelOrderStep current with
+              | PsKernelOrderStep.next next => psKernelOccurrenceNext family parameters
+                  (PsKernelList.cons (PsKernelOccurrenceTask.name next) rest)
+              | PsKernelOrderStep.done order =>
+                  match order with
+                  | PsKernelOrder.same => PsKernelOccurrenceStep.found
+                  | _ => psKernelOccurrenceNext family parameters rest
+              | _ => PsKernelOccurrenceStep.invalidState
+          | PsKernelOccurrenceTask.visit value =>
+              match value with
+              | PsKernelExpr.fvar unused =>
+                  match parameters with
+                  | PsKernelFlag.yes => PsKernelOccurrenceStep.found
+                  | PsKernelFlag.no => psKernelOccurrenceNext family parameters rest
+              | PsKernelExpr.constE name unusedLevels => psKernelOccurrenceNext family parameters
+                  (PsKernelList.cons (PsKernelOccurrenceTask.name
+                    (PsKernelList.cons (PsKernelOrderTask.name name family) PsKernelList.nil)) rest)
+              | PsKernelExpr.app fn arg => psKernelOccurrenceNext family parameters
+                  (PsKernelList.cons (PsKernelOccurrenceTask.visit fn)
+                    (PsKernelList.cons (PsKernelOccurrenceTask.visit arg) rest))
+              | PsKernelExpr.lam unusedName type body unusedBinder => psKernelOccurrenceNext family parameters
+                  (PsKernelList.cons (PsKernelOccurrenceTask.visit type)
+                    (PsKernelList.cons (PsKernelOccurrenceTask.visit body) rest))
+              | PsKernelExpr.forallE unusedName type body unusedBinder => psKernelOccurrenceNext family parameters
+                  (PsKernelList.cons (PsKernelOccurrenceTask.visit type)
+                    (PsKernelList.cons (PsKernelOccurrenceTask.visit body) rest))
+              | PsKernelExpr.letE unusedName type val body => psKernelOccurrenceNext family parameters
+                  (PsKernelList.cons (PsKernelOccurrenceTask.visit type)
+                    (PsKernelList.cons (PsKernelOccurrenceTask.visit val)
+                      (PsKernelList.cons (PsKernelOccurrenceTask.visit body) rest)))
+              | PsKernelExpr.proj name unusedIndex major => psKernelOccurrenceNext family parameters
+                  (PsKernelList.cons (PsKernelOccurrenceTask.name
+                    (PsKernelList.cons (PsKernelOrderTask.name name family) PsKernelList.nil))
+                    (PsKernelList.cons (PsKernelOccurrenceTask.visit major) rest))
+              | _ => psKernelOccurrenceNext family parameters rest
+
+def psKernelOccurrenceStart (family : PsKernelName) (parameters : PsKernelFlag)
+    (value : PsKernelExpr) : PsKernelOccurrenceState :=
+  PsKernelOccurrenceState.state family parameters
+    (PsKernelList.cons (PsKernelOccurrenceTask.visit value) PsKernelList.nil)
+
+
+
+/- Simultaneous instantiation of a template whose only free bound variables are
+its declared type parameters. Replacements may themselves be open. Each lookup,
+reversal, lift and reconstruction shares the enclosing transition budget. -/
+
+inductive PsKernelParameterTask where
+  | reverse (pending reversed : PsKernelList PsKernelExpr) (value : PsKernelExpr)
+  | visit (depth : PsKernelNatural) (value : PsKernelExpr)
+  | bound (original index remainingDepth depth : PsKernelNatural)
+  | select (index depth : PsKernelNatural) (arguments : PsKernelList PsKernelExpr)
+  | lift (state : PsKernelBindingState)
+  | app
+  | lam (name : PsKernelName) (binder : PsKernelBinder)
+  | forallE (name : PsKernelName) (binder : PsKernelBinder)
+  | letE (name : PsKernelName)
+  | proj (family : PsKernelName) (index : PsKernelNatural)
+
+inductive PsKernelParameterState where
+  | state (arguments : PsKernelList PsKernelExpr) (tasks : PsKernelList PsKernelParameterTask) (values : PsKernelList PsKernelExpr)
+
+inductive PsKernelParameterResult where
+  | done (value : PsKernelExpr)
+  | invalidScope
+  | invalidState
+  | outOfFuel
+
+inductive PsKernelParameterStep where
+  | next (state : PsKernelParameterState)
+  | final (result : PsKernelParameterResult)
+
+def psKernelParameterNext (arguments : PsKernelList PsKernelExpr)
+    (tasks : PsKernelList PsKernelParameterTask) (values : PsKernelList PsKernelExpr) : PsKernelParameterStep :=
+  PsKernelParameterStep.next (PsKernelParameterState.state arguments tasks values)
+
+def psKernelParameterPush (arguments : PsKernelList PsKernelExpr)
+    (tasks : PsKernelList PsKernelParameterTask) (values : PsKernelList PsKernelExpr) (value : PsKernelExpr) : PsKernelParameterStep :=
+  psKernelParameterNext arguments tasks (PsKernelList.cons value values)
+
+def psKernelParameterVisit (arguments : PsKernelList PsKernelExpr) (depth : PsKernelNatural) (value : PsKernelExpr)
+    (tasks : PsKernelList PsKernelParameterTask) (values : PsKernelList PsKernelExpr) : PsKernelParameterStep :=
+  match value with
+  | PsKernelExpr.bvar index => psKernelParameterNext arguments
+      (PsKernelList.cons (PsKernelParameterTask.bound index index depth depth) tasks) values
+  | PsKernelExpr.fvar unused => PsKernelParameterStep.final PsKernelParameterResult.invalidScope
+  | PsKernelExpr.sortE unused => psKernelParameterPush arguments tasks values value
+  | PsKernelExpr.constE unusedName unusedLevels => psKernelParameterPush arguments tasks values value
+  | PsKernelExpr.lit unused => psKernelParameterPush arguments tasks values value
+  | PsKernelExpr.app fn arg => psKernelParameterNext arguments
+      (PsKernelList.cons (PsKernelParameterTask.visit depth fn)
+        (PsKernelList.cons (PsKernelParameterTask.visit depth arg)
+          (PsKernelList.cons PsKernelParameterTask.app tasks))) values
+  | PsKernelExpr.lam name type body binder => psKernelParameterNext arguments
+      (PsKernelList.cons (PsKernelParameterTask.visit depth type)
+        (PsKernelList.cons (PsKernelParameterTask.visit (psKernelNaturalSucc depth) body)
+          (PsKernelList.cons (PsKernelParameterTask.lam name binder) tasks))) values
+  | PsKernelExpr.forallE name type body binder => psKernelParameterNext arguments
+      (PsKernelList.cons (PsKernelParameterTask.visit depth type)
+        (PsKernelList.cons (PsKernelParameterTask.visit (psKernelNaturalSucc depth) body)
+          (PsKernelList.cons (PsKernelParameterTask.forallE name binder) tasks))) values
+  | PsKernelExpr.letE name type val body => psKernelParameterNext arguments
+      (PsKernelList.cons (PsKernelParameterTask.visit depth type)
+        (PsKernelList.cons (PsKernelParameterTask.visit depth val)
+          (PsKernelList.cons (PsKernelParameterTask.visit (psKernelNaturalSucc depth) body)
+            (PsKernelList.cons (PsKernelParameterTask.letE name) tasks)))) values
+  | PsKernelExpr.proj family index major => psKernelParameterNext arguments
+      (PsKernelList.cons (PsKernelParameterTask.visit depth major)
+        (PsKernelList.cons (PsKernelParameterTask.proj family index) tasks)) values
+
+def psKernelParameterRebuild (arguments : PsKernelList PsKernelExpr) (task : PsKernelParameterTask)
+    (tasks : PsKernelList PsKernelParameterTask) (values : PsKernelList PsKernelExpr) : PsKernelParameterStep :=
+  match values with
+  | PsKernelList.nil => PsKernelParameterStep.final PsKernelParameterResult.invalidState
+  | PsKernelList.cons top rest =>
+      match task with
+      | PsKernelParameterTask.proj family index => psKernelParameterPush arguments tasks rest (PsKernelExpr.proj family index top)
+      | PsKernelParameterTask.app =>
+          match rest with
+          | PsKernelList.cons fn tail => psKernelParameterPush arguments tasks tail (PsKernelExpr.app fn top)
+          | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
+      | PsKernelParameterTask.lam name binder =>
+          match rest with
+          | PsKernelList.cons type tail => psKernelParameterPush arguments tasks tail (PsKernelExpr.lam name type top binder)
+          | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
+      | PsKernelParameterTask.forallE name binder =>
+          match rest with
+          | PsKernelList.cons type tail => psKernelParameterPush arguments tasks tail (PsKernelExpr.forallE name type top binder)
+          | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
+      | PsKernelParameterTask.letE name =>
+          match rest with
+          | PsKernelList.cons val tail =>
+              match tail with
+              | PsKernelList.cons type remaining => psKernelParameterPush arguments tasks remaining (PsKernelExpr.letE name type val top)
+              | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
+          | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
+      | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
+
+def psKernelParameterStep (state : PsKernelParameterState) : PsKernelParameterStep :=
+  match state with
+  | PsKernelParameterState.state arguments tasks values =>
+      match tasks with
+      | PsKernelList.nil =>
+          match values with
+          | PsKernelList.cons value rest =>
+              match rest with
+              | PsKernelList.nil => PsKernelParameterStep.final (PsKernelParameterResult.done value)
+              | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
+          | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
+      | PsKernelList.cons task rest =>
+          match task with
+          | PsKernelParameterTask.reverse pending reversed value =>
+              match pending with
+              | PsKernelList.nil => psKernelParameterNext reversed
+                  (PsKernelList.cons (PsKernelParameterTask.visit PsKernelNatural.zero value) rest) values
+              | PsKernelList.cons arg tail => psKernelParameterNext arguments
+                  (PsKernelList.cons (PsKernelParameterTask.reverse tail (PsKernelList.cons arg reversed) value) rest) values
+          | PsKernelParameterTask.visit depth value => psKernelParameterVisit arguments depth value rest values
+          | PsKernelParameterTask.bound original index remainingDepth depth =>
+              match remainingDepth with
+              | PsKernelNatural.zero => psKernelParameterNext arguments
+                  (PsKernelList.cons (PsKernelParameterTask.select index depth arguments) rest) values
+              | _ =>
+                  match index with
+                  | PsKernelNatural.zero => psKernelParameterPush arguments rest values (PsKernelExpr.bvar original)
+                  | _ => psKernelParameterNext arguments
+                      (PsKernelList.cons (PsKernelParameterTask.bound original (psKernelNaturalPred index)
+                        (psKernelNaturalPred remainingDepth) depth) rest) values
+          | PsKernelParameterTask.select index depth pending =>
+              match pending with
+              | PsKernelList.nil => PsKernelParameterStep.final PsKernelParameterResult.invalidScope
+              | PsKernelList.cons arg tail =>
+                  match index with
+                  | PsKernelNatural.zero => psKernelParameterNext arguments
+                      (PsKernelList.cons (PsKernelParameterTask.lift
+                        (psKernelBindingStart (PsKernelBindingMode.lift depth) PsKernelNatural.zero arg)) rest) values
+                  | _ => psKernelParameterNext arguments
+                      (PsKernelList.cons (PsKernelParameterTask.select (psKernelNaturalPred index) depth tail) rest) values
+          | PsKernelParameterTask.lift current =>
+              match psKernelBindingStep current with
+              | PsKernelBindingStep.next next => psKernelParameterNext arguments
+                  (PsKernelList.cons (PsKernelParameterTask.lift next) rest) values
+              | PsKernelBindingStep.final result =>
+                  match result with
+                  | PsKernelBindingResult.done value => psKernelParameterPush arguments rest values value
+                  | PsKernelBindingResult.invalidScope => PsKernelParameterStep.final PsKernelParameterResult.invalidScope
+                  | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
+          | _ => psKernelParameterRebuild arguments task rest values
+
+def psKernelParameterStart (arguments : PsKernelList PsKernelExpr) (value : PsKernelExpr) : PsKernelParameterState :=
+  PsKernelParameterState.state PsKernelList.nil
+    (PsKernelList.cons (PsKernelParameterTask.reverse arguments PsKernelList.nil value) PsKernelList.nil) PsKernelList.nil
+
+def psKernelParameterRun (fuel : PsKernelFuel) : PsKernelParameterState -> PsKernelParameterResult :=
+  match fuel with
+  | PsKernelFuel.stop => fun (state : PsKernelParameterState) => PsKernelParameterResult.outOfFuel
+  | PsKernelFuel.more remaining =>
+      fun (state : PsKernelParameterState) =>
+        match psKernelParameterStep state with
+        | PsKernelParameterStep.final result => result
+        | PsKernelParameterStep.next next =>
+            let smaller : PsKernelParameterState -> PsKernelParameterResult := psKernelParameterRun remaining;
+            smaller next
+
+
+
+/- Projection metadata is obtained only from completed algebraic admission.
+This fragment allows one constructor with nonrecursive parameter-only fields;
+recursive and dependent fields never acquire projection authority. All lookups,
+field scans, parameter counts and substitutions share the outer budget. -/
+
+inductive PsKernelAlgProjectInfo where
+  | info (constructor : PsKernelName) (parameters : PsKernelNatural)
+      (fields : PsKernelList PsKernelExpr) (selected : PsKernelExpr)
+
+inductive PsKernelAlgProjectMetaTask where
+  | lookup (state : PsKernelLookupState)
+  | select (constructor : PsKernelName) (parameters : PsKernelNatural)
+      (fields pending : PsKernelList PsKernelExpr) (index : PsKernelNatural)
+  | scan (info : PsKernelAlgProjectInfo) (fields : PsKernelList PsKernelExpr)
+  | occurrence (info : PsKernelAlgProjectInfo) (fields : PsKernelList PsKernelExpr) (state : PsKernelOccurrenceState)
+
+inductive PsKernelAlgProjectMetaState where
+  | state (family : PsKernelName) (index : PsKernelNatural) (task : PsKernelAlgProjectMetaTask)
+
+inductive PsKernelAlgProjectMetaStep where
+  | next (state : PsKernelAlgProjectMetaState)
+  | ready (info : PsKernelAlgProjectInfo)
+  | rejected (error : PsKernelCheckError)
+
+def psKernelAlgProjectMetaNext (family : PsKernelName) (index : PsKernelNatural)
+    (task : PsKernelAlgProjectMetaTask) : PsKernelAlgProjectMetaStep :=
+  PsKernelAlgProjectMetaStep.next (PsKernelAlgProjectMetaState.state family index task)
+
+def psKernelAlgProjectMetaStep (state : PsKernelAlgProjectMetaState) : PsKernelAlgProjectMetaStep :=
+  match state with
+  | PsKernelAlgProjectMetaState.state family index task =>
+      match task with
+      | PsKernelAlgProjectMetaTask.lookup current =>
+          match psKernelLookupStep current with
+          | PsKernelLookupStep.next next => psKernelAlgProjectMetaNext family index (PsKernelAlgProjectMetaTask.lookup next)
+          | PsKernelLookupStep.missing => PsKernelAlgProjectMetaStep.rejected PsKernelCheckError.unknownConstant
+          | PsKernelLookupStep.invalidState => PsKernelAlgProjectMetaStep.rejected PsKernelCheckError.invalidState
+          | PsKernelLookupStep.found entry =>
+              match entry with
+              | PsKernelDefinition.algebraicFamily unusedName unusedType parameters constructors =>
+                  match constructors with
+                  | PsKernelList.cons constructor tail =>
+                      match tail with
+                      | PsKernelList.nil =>
+                          match constructor with
+                          | PsKernelAlgConstructor.constructor name unusedType fields => psKernelAlgProjectMetaNext family index
+                              (PsKernelAlgProjectMetaTask.select name parameters fields fields index)
+                      | _ => PsKernelAlgProjectMetaStep.rejected PsKernelCheckError.unsupported
+                  | _ => PsKernelAlgProjectMetaStep.rejected PsKernelCheckError.unsupported
+              | _ => PsKernelAlgProjectMetaStep.rejected PsKernelCheckError.unsupported
+      | PsKernelAlgProjectMetaTask.select constructor parameters fields pending cursor =>
+          match pending with
+          | PsKernelList.nil => PsKernelAlgProjectMetaStep.rejected PsKernelCheckError.typeMismatch
+          | PsKernelList.cons field rest =>
+              match cursor with
+              | PsKernelNatural.zero => psKernelAlgProjectMetaNext family index
+                  (PsKernelAlgProjectMetaTask.scan (PsKernelAlgProjectInfo.info constructor parameters fields field) fields)
+              | _ => psKernelAlgProjectMetaNext family index
+                  (PsKernelAlgProjectMetaTask.select constructor parameters fields rest (psKernelNaturalPred cursor))
+      | PsKernelAlgProjectMetaTask.scan info pending =>
+          match pending with
+          | PsKernelList.nil => PsKernelAlgProjectMetaStep.ready info
+          | PsKernelList.cons field rest => psKernelAlgProjectMetaNext family index
+              (PsKernelAlgProjectMetaTask.occurrence info rest (psKernelOccurrenceStart family PsKernelFlag.no field))
+      | PsKernelAlgProjectMetaTask.occurrence info fields current =>
+          match psKernelOccurrenceStep current with
+          | PsKernelOccurrenceStep.next next => psKernelAlgProjectMetaNext family index
+              (PsKernelAlgProjectMetaTask.occurrence info fields next)
+          | PsKernelOccurrenceStep.absent => psKernelAlgProjectMetaNext family index (PsKernelAlgProjectMetaTask.scan info fields)
+          | PsKernelOccurrenceStep.found => PsKernelAlgProjectMetaStep.rejected PsKernelCheckError.unsupported
+          | _ => PsKernelAlgProjectMetaStep.rejected PsKernelCheckError.invalidState
+
+def psKernelAlgProjectMetaStart (env : PsKernelList PsKernelDefinition) (family : PsKernelName)
+    (index : PsKernelNatural) : PsKernelAlgProjectMetaState :=
+  PsKernelAlgProjectMetaState.state family index (PsKernelAlgProjectMetaTask.lookup (PsKernelLookupState.search family env))
+
+inductive PsKernelAlgProjectInferTask where
+  | spine (type : PsKernelExpr) (arguments : PsKernelList PsKernelExpr)
+  | name (arguments : PsKernelList PsKernelExpr) (tasks : PsKernelList PsKernelOrderTask)
+  | metadata (arguments : PsKernelList PsKernelExpr) (state : PsKernelAlgProjectMetaState)
+  | arity (arguments pending : PsKernelList PsKernelExpr) (remaining : PsKernelNatural) (field : PsKernelExpr)
+  | instantiate (state : PsKernelParameterState)
+
+inductive PsKernelAlgProjectInferState where
+  | state (environment : PsKernelList PsKernelDefinition) (family : PsKernelName)
+      (index : PsKernelNatural) (task : PsKernelAlgProjectInferTask)
+
+inductive PsKernelAlgProjectInferStep where
+  | next (state : PsKernelAlgProjectInferState)
+  | done (type : PsKernelExpr)
+  | rejected (error : PsKernelCheckError)
+
+def psKernelAlgProjectInferNext (env : PsKernelList PsKernelDefinition) (family : PsKernelName)
+    (index : PsKernelNatural) (task : PsKernelAlgProjectInferTask) : PsKernelAlgProjectInferStep :=
+  PsKernelAlgProjectInferStep.next (PsKernelAlgProjectInferState.state env family index task)
+
+def psKernelAlgProjectInferStep (state : PsKernelAlgProjectInferState) : PsKernelAlgProjectInferStep :=
+  match state with
+  | PsKernelAlgProjectInferState.state env family index task =>
+      match task with
+      | PsKernelAlgProjectInferTask.spine type arguments =>
+          match type with
+          | PsKernelExpr.app fn arg => psKernelAlgProjectInferNext env family index
+              (PsKernelAlgProjectInferTask.spine fn (PsKernelList.cons arg arguments))
+          | PsKernelExpr.constE actual levels =>
+              match levels with
+              | PsKernelList.nil => psKernelAlgProjectInferNext env family index
+                  (PsKernelAlgProjectInferTask.name arguments (PsKernelList.cons (PsKernelOrderTask.name family actual) PsKernelList.nil))
+              | _ => PsKernelAlgProjectInferStep.rejected PsKernelCheckError.unsupported
+          | _ => PsKernelAlgProjectInferStep.rejected PsKernelCheckError.typeMismatch
+      | PsKernelAlgProjectInferTask.name arguments current =>
+          match psKernelOrderStep current with
+          | PsKernelOrderStep.next next => psKernelAlgProjectInferNext env family index (PsKernelAlgProjectInferTask.name arguments next)
+          | PsKernelOrderStep.done order =>
+              match order with
+              | PsKernelOrder.same => psKernelAlgProjectInferNext env family index
+                  (PsKernelAlgProjectInferTask.metadata arguments (psKernelAlgProjectMetaStart env family index))
+              | _ => PsKernelAlgProjectInferStep.rejected PsKernelCheckError.typeMismatch
+          | _ => PsKernelAlgProjectInferStep.rejected PsKernelCheckError.invalidState
+      | PsKernelAlgProjectInferTask.metadata arguments current =>
+          match psKernelAlgProjectMetaStep current with
+          | PsKernelAlgProjectMetaStep.next next => psKernelAlgProjectInferNext env family index
+              (PsKernelAlgProjectInferTask.metadata arguments next)
+          | PsKernelAlgProjectMetaStep.rejected error => PsKernelAlgProjectInferStep.rejected error
+          | PsKernelAlgProjectMetaStep.ready info =>
+              match info with
+              | PsKernelAlgProjectInfo.info unusedConstructor parameters unusedFields field => psKernelAlgProjectInferNext env family index
+                  (PsKernelAlgProjectInferTask.arity arguments arguments parameters field)
+      | PsKernelAlgProjectInferTask.arity arguments pending remaining field =>
+          match remaining with
+          | PsKernelNatural.zero =>
+              match pending with
+              | PsKernelList.nil => psKernelAlgProjectInferNext env family index
+                  (PsKernelAlgProjectInferTask.instantiate (psKernelParameterStart arguments field))
+              | _ => PsKernelAlgProjectInferStep.rejected PsKernelCheckError.typeMismatch
+          | _ =>
+              match pending with
+              | PsKernelList.cons unused rest => psKernelAlgProjectInferNext env family index
+                  (PsKernelAlgProjectInferTask.arity arguments rest (psKernelNaturalPred remaining) field)
+              | _ => PsKernelAlgProjectInferStep.rejected PsKernelCheckError.typeMismatch
+      | PsKernelAlgProjectInferTask.instantiate current =>
+          match psKernelParameterStep current with
+          | PsKernelParameterStep.next next => psKernelAlgProjectInferNext env family index (PsKernelAlgProjectInferTask.instantiate next)
+          | PsKernelParameterStep.final result =>
+              match result with
+              | PsKernelParameterResult.done type => PsKernelAlgProjectInferStep.done type
+              | PsKernelParameterResult.invalidScope => PsKernelAlgProjectInferStep.rejected PsKernelCheckError.invalidScope
+              | _ => PsKernelAlgProjectInferStep.rejected PsKernelCheckError.invalidState
+
+def psKernelAlgProjectInferStart (env : PsKernelList PsKernelDefinition) (family : PsKernelName)
+    (index : PsKernelNatural) (majorType : PsKernelExpr) : PsKernelAlgProjectInferState :=
+  PsKernelAlgProjectInferState.state env family index (PsKernelAlgProjectInferTask.spine majorType PsKernelList.nil)
+
+
+
+inductive PsKernelAlgProjectReduceContinuation where
+  | continuation (family : PsKernelName) (index : PsKernelNatural) (info : PsKernelAlgProjectInfo)
+
+inductive PsKernelAlgProjectReduceTask where
+  | metadata (state : PsKernelAlgProjectMetaState)
+  | spine (cursor : PsKernelExpr) (info : PsKernelAlgProjectInfo) (arguments : PsKernelList PsKernelExpr)
+  | name (info : PsKernelAlgProjectInfo) (arguments : PsKernelList PsKernelExpr) (work : PsKernelList PsKernelOrderTask)
+  | drop (remaining : PsKernelNatural) (fields arguments : PsKernelList PsKernelExpr)
+  | arity (fields arguments original : PsKernelList PsKernelExpr)
+  | select (index : PsKernelNatural) (arguments : PsKernelList PsKernelExpr)
+
+inductive PsKernelAlgProjectReduceState where
+  | state (family : PsKernelName) (index : PsKernelNatural) (major : PsKernelExpr) (task : PsKernelAlgProjectReduceTask)
+
+inductive PsKernelAlgProjectReduceStep where
+  | next (state : PsKernelAlgProjectReduceState)
+  | major (value : PsKernelExpr) (continuation : PsKernelAlgProjectReduceContinuation)
+  | neutral (value : PsKernelExpr)
+  | reduced (value : PsKernelExpr)
+  | rejected (error : PsKernelCheckError)
+
+def psKernelAlgProjectReduceNext (family : PsKernelName) (index : PsKernelNatural)
+    (major : PsKernelExpr) (task : PsKernelAlgProjectReduceTask) : PsKernelAlgProjectReduceStep :=
+  PsKernelAlgProjectReduceStep.next (PsKernelAlgProjectReduceState.state family index major task)
+
+def psKernelAlgProjectReduceStep (state : PsKernelAlgProjectReduceState) : PsKernelAlgProjectReduceStep :=
+  match state with
+  | PsKernelAlgProjectReduceState.state family index major task =>
+      match task with
+      | PsKernelAlgProjectReduceTask.metadata current =>
+          match psKernelAlgProjectMetaStep current with
+          | PsKernelAlgProjectMetaStep.next next => psKernelAlgProjectReduceNext family index major (PsKernelAlgProjectReduceTask.metadata next)
+          | PsKernelAlgProjectMetaStep.rejected error => PsKernelAlgProjectReduceStep.rejected error
+          | PsKernelAlgProjectMetaStep.ready info => PsKernelAlgProjectReduceStep.major major
+              (PsKernelAlgProjectReduceContinuation.continuation family index info)
+      | PsKernelAlgProjectReduceTask.spine cursor info arguments =>
+          match cursor with
+          | PsKernelExpr.app fn arg => psKernelAlgProjectReduceNext family index major
+              (PsKernelAlgProjectReduceTask.spine fn info (PsKernelList.cons arg arguments))
+          | PsKernelExpr.constE name levels =>
+              match levels with
+              | PsKernelList.nil =>
+                  match info with
+                  | PsKernelAlgProjectInfo.info constructor unusedParameters unusedFields unusedSelected => psKernelAlgProjectReduceNext family index major
+                      (PsKernelAlgProjectReduceTask.name info arguments
+                        (PsKernelList.cons (PsKernelOrderTask.name name constructor) PsKernelList.nil))
+              | _ => PsKernelAlgProjectReduceStep.neutral (PsKernelExpr.proj family index major)
+          | _ => PsKernelAlgProjectReduceStep.neutral (PsKernelExpr.proj family index major)
+      | PsKernelAlgProjectReduceTask.name info arguments current =>
+          match psKernelOrderStep current with
+          | PsKernelOrderStep.next next => psKernelAlgProjectReduceNext family index major
+              (PsKernelAlgProjectReduceTask.name info arguments next)
+          | PsKernelOrderStep.done order =>
+              match order with
+              | PsKernelOrder.same =>
+                  match info with
+                  | PsKernelAlgProjectInfo.info unusedConstructor parameters fields unusedSelected => psKernelAlgProjectReduceNext family index major
+                      (PsKernelAlgProjectReduceTask.drop parameters fields arguments)
+              | _ => PsKernelAlgProjectReduceStep.neutral (PsKernelExpr.proj family index major)
+          | _ => PsKernelAlgProjectReduceStep.rejected PsKernelCheckError.invalidState
+      | PsKernelAlgProjectReduceTask.drop remaining fields arguments =>
+          match remaining with
+          | PsKernelNatural.zero => psKernelAlgProjectReduceNext family index major
+              (PsKernelAlgProjectReduceTask.arity fields arguments arguments)
+          | _ =>
+              match arguments with
+              | PsKernelList.cons unused rest => psKernelAlgProjectReduceNext family index major
+                  (PsKernelAlgProjectReduceTask.drop (psKernelNaturalPred remaining) fields rest)
+              | _ => PsKernelAlgProjectReduceStep.rejected PsKernelCheckError.typeMismatch
+      | PsKernelAlgProjectReduceTask.arity fields arguments original =>
+          match fields with
+          | PsKernelList.nil =>
+              match arguments with
+              | PsKernelList.nil => psKernelAlgProjectReduceNext family index major (PsKernelAlgProjectReduceTask.select index original)
+              | _ => PsKernelAlgProjectReduceStep.rejected PsKernelCheckError.typeMismatch
+          | PsKernelList.cons unused rest =>
+              match arguments with
+              | PsKernelList.cons unusedArg tail => psKernelAlgProjectReduceNext family index major
+                  (PsKernelAlgProjectReduceTask.arity rest tail original)
+              | _ => PsKernelAlgProjectReduceStep.rejected PsKernelCheckError.typeMismatch
+      | PsKernelAlgProjectReduceTask.select cursor arguments =>
+          match arguments with
+          | PsKernelList.nil => PsKernelAlgProjectReduceStep.rejected PsKernelCheckError.typeMismatch
+          | PsKernelList.cons arg rest =>
+              match cursor with
+              | PsKernelNatural.zero => PsKernelAlgProjectReduceStep.reduced arg
+              | _ => psKernelAlgProjectReduceNext family index major (PsKernelAlgProjectReduceTask.select (psKernelNaturalPred cursor) rest)
+
+def psKernelAlgProjectReduceStart (env : PsKernelList PsKernelDefinition) (family : PsKernelName)
+    (index : PsKernelNatural) (major : PsKernelExpr) : PsKernelAlgProjectReduceState :=
+  PsKernelAlgProjectReduceState.state family index major
+    (PsKernelAlgProjectReduceTask.metadata (psKernelAlgProjectMetaStart env family index))
+
+def psKernelAlgProjectReduceResume (continuation : PsKernelAlgProjectReduceContinuation)
+    (major : PsKernelExpr) : PsKernelAlgProjectReduceState :=
+  match continuation with
+  | PsKernelAlgProjectReduceContinuation.continuation family index info =>
+      PsKernelAlgProjectReduceState.state family index major (PsKernelAlgProjectReduceTask.spine major info PsKernelList.nil)
+
+
+
 /- First-order beta/zeta/delta and supported inductive recursor reduction.
 No primitive or quotient reduction is asserted. Type checking validates discarded terms.
 All nested substitutions and lookups consume the caller's transition budget. -/
@@ -1968,6 +2458,8 @@ def psKernelRecordNeutral (action : PsKernelRecordAction) (major : PsKernelExpr)
   | PsKernelRecordAction.eliminate fn unusedMinor => PsKernelExpr.app fn major
 
 inductive PsKernelReduceTask where
+  | algebraicProjection (state : PsKernelAlgProjectReduceState)
+  | algebraicProjectionMajor (continuation : PsKernelAlgProjectReduceContinuation)
   | algebraic (state : PsKernelAlgReduceState)
   | algebraicMajor (continuation : PsKernelAlgReduceContinuation)
   | sumMinors (original : PsKernelExpr) (rules : PsKernelList PsKernelSumRule)
@@ -2115,6 +2607,8 @@ def psKernelReduceValueTask
   | PsKernelList.nil => psKernelReduceReject PsKernelCheckError.invalidState
   | PsKernelList.cons top rest =>
       match task with
+      | PsKernelReduceTask.algebraicProjectionMajor continuation => psKernelReduceNext env
+          (PsKernelList.cons (PsKernelReduceTask.algebraicProjection (psKernelAlgProjectReduceResume continuation top)) tasks) rest
       | PsKernelReduceTask.algebraicMajor continuation => psKernelReduceNext env
           (PsKernelList.cons (PsKernelReduceTask.algebraic (psKernelAlgReduceResume continuation top)) tasks) rest
       | PsKernelReduceTask.sumMajor fn branches => psKernelReduceNext env
@@ -2212,6 +2706,17 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
           | _ => psKernelReduceReject PsKernelCheckError.invalidState
       | PsKernelList.cons task rest =>
           match task with
+          | PsKernelReduceTask.algebraicProjection current =>
+              match psKernelAlgProjectReduceStep current with
+              | PsKernelAlgProjectReduceStep.next next => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.algebraicProjection next) rest) values
+              | PsKernelAlgProjectReduceStep.major major continuation => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.whnf major)
+                    (PsKernelList.cons (PsKernelReduceTask.algebraicProjectionMajor continuation) rest)) values
+              | PsKernelAlgProjectReduceStep.neutral value => psKernelReducePush env rest values value
+              | PsKernelAlgProjectReduceStep.reduced value => psKernelReduceNext env
+                  (PsKernelList.cons (PsKernelReduceTask.whnf value) rest) values
+              | PsKernelAlgProjectReduceStep.rejected error => psKernelReduceReject error
           | PsKernelReduceTask.algebraic current =>
               match psKernelAlgReduceStep current with
               | PsKernelAlgReduceStep.next next => psKernelReduceNext env
@@ -2378,6 +2883,8 @@ def psKernelReduceStep (state : PsKernelReduceState) : PsKernelReduceStep :=
                   (PsKernelList.cons (PsKernelReduceTask.projectLookup family index major next) rest) values
               | PsKernelLookupStep.found entry =>
                   match entry with
+                  | PsKernelDefinition.algebraicFamily unusedName unusedType unusedParameters unusedConstructors => psKernelReduceNext env
+                      (PsKernelList.cons (PsKernelReduceTask.algebraicProjection (psKernelAlgProjectReduceStart env family index major)) rest) values
                   | PsKernelDefinition.recordFamily unusedName ctor fields => psKernelReduceNext env
                       (PsKernelList.cons (PsKernelReduceTask.projectBound family index major ctor fields fields index) rest) values
                   | _ => psKernelReduceReject PsKernelCheckError.unsupported
@@ -2795,6 +3302,7 @@ that binder's OUTER context; lookup lifts by index+1 into the current context.
 No self-inference shortcut and no acceptance Boolean supplied by the caller.
 Raw machine states are implementation data, not a checked-module capability. -/
 inductive PsKernelTypeTask where
+  | algebraicProjection (state : PsKernelAlgProjectInferState)
   | text (state : PsKernelTextCheckState)
   | natural (state : PsKernelBuiltinNatState)
   | infer (context : PsKernelList PsKernelExpr) (value : PsKernelExpr)
@@ -2909,6 +3417,9 @@ def psKernelTypeValueTask
           psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.reduce (psKernelWhnfStart (psKernelTypingDeclarations env) top)) tasks) rest
       | PsKernelTypeTask.projectType family index =>
           match top with
+          | PsKernelExpr.app unusedFn unusedArg => psKernelTypeNext env
+              (PsKernelList.cons (PsKernelTypeTask.algebraicProjection
+                (psKernelAlgProjectInferStart (psKernelTypingDeclarations env) family index top)) tasks) rest
           | PsKernelExpr.constE majorFamily levels =>
               match levels with
               | PsKernelList.nil => psKernelTypeNext env
@@ -3000,6 +3511,12 @@ def psKernelTypeStep (state : PsKernelTypeState) : PsKernelTypeStep :=
           | _ => psKernelTypeReject PsKernelCheckError.invalidState
       | PsKernelList.cons task rest =>
           match task with
+          | PsKernelTypeTask.algebraicProjection current =>
+              match psKernelAlgProjectInferStep current with
+              | PsKernelAlgProjectInferStep.next next => psKernelTypeNext env
+                  (PsKernelList.cons (PsKernelTypeTask.algebraicProjection next) rest) values
+              | PsKernelAlgProjectInferStep.done type => psKernelTypePush env rest values type
+              | PsKernelAlgProjectInferStep.rejected error => psKernelTypeReject error
           | PsKernelTypeTask.projectName family index work =>
               match psKernelOrderStep work with
               | PsKernelOrderStep.next next => psKernelTypeNext env
@@ -3017,6 +3534,9 @@ def psKernelTypeStep (state : PsKernelTypeState) : PsKernelTypeStep :=
                   (PsKernelList.cons (PsKernelTypeTask.projectLookup index next) rest) values
               | PsKernelLookupStep.found entry =>
                   match entry with
+                  | PsKernelDefinition.algebraicFamily name unusedType unusedParameters unusedConstructors => psKernelTypeNext env
+                      (PsKernelList.cons (PsKernelTypeTask.algebraicProjection
+                        (psKernelAlgProjectInferStart (psKernelTypingDeclarations env) name index (PsKernelExpr.constE name PsKernelList.nil))) rest) values
                   | PsKernelDefinition.recordFamily unusedName unusedCtor fields => psKernelTypeNext env
                       (PsKernelList.cons (PsKernelTypeTask.projectField index fields) rest) values
                   | _ => psKernelTypeReject PsKernelCheckError.unsupported
@@ -4481,77 +5001,6 @@ def psKernelCloseRun (fuel : PsKernelFuel) : PsKernelCloseState -> PsKernelClose
 
 
 
-/- A conservative occurrence scan. Free variables are relevant only when checking
-covariance in the already scope-checked constructor parameter context. -/
-inductive PsKernelOccurrenceTask where
-  | visit (value : PsKernelExpr)
-  | name (work : PsKernelList PsKernelOrderTask)
-
-inductive PsKernelOccurrenceState where
-  | state (family : PsKernelName) (parameters : PsKernelFlag)
-      (tasks : PsKernelList PsKernelOccurrenceTask)
-
-inductive PsKernelOccurrenceStep where
-  | next (state : PsKernelOccurrenceState)
-  | found
-  | absent
-  | invalidState
-
-def psKernelOccurrenceNext (family : PsKernelName) (parameters : PsKernelFlag)
-    (tasks : PsKernelList PsKernelOccurrenceTask) : PsKernelOccurrenceStep :=
-  PsKernelOccurrenceStep.next (PsKernelOccurrenceState.state family parameters tasks)
-
-def psKernelOccurrenceStep (state : PsKernelOccurrenceState) : PsKernelOccurrenceStep :=
-  match state with
-  | PsKernelOccurrenceState.state family parameters tasks =>
-      match tasks with
-      | PsKernelList.nil => PsKernelOccurrenceStep.absent
-      | PsKernelList.cons task rest =>
-          match task with
-          | PsKernelOccurrenceTask.name current =>
-              match psKernelOrderStep current with
-              | PsKernelOrderStep.next next => psKernelOccurrenceNext family parameters
-                  (PsKernelList.cons (PsKernelOccurrenceTask.name next) rest)
-              | PsKernelOrderStep.done order =>
-                  match order with
-                  | PsKernelOrder.same => PsKernelOccurrenceStep.found
-                  | _ => psKernelOccurrenceNext family parameters rest
-              | _ => PsKernelOccurrenceStep.invalidState
-          | PsKernelOccurrenceTask.visit value =>
-              match value with
-              | PsKernelExpr.fvar unused =>
-                  match parameters with
-                  | PsKernelFlag.yes => PsKernelOccurrenceStep.found
-                  | PsKernelFlag.no => psKernelOccurrenceNext family parameters rest
-              | PsKernelExpr.constE name unusedLevels => psKernelOccurrenceNext family parameters
-                  (PsKernelList.cons (PsKernelOccurrenceTask.name
-                    (PsKernelList.cons (PsKernelOrderTask.name name family) PsKernelList.nil)) rest)
-              | PsKernelExpr.app fn arg => psKernelOccurrenceNext family parameters
-                  (PsKernelList.cons (PsKernelOccurrenceTask.visit fn)
-                    (PsKernelList.cons (PsKernelOccurrenceTask.visit arg) rest))
-              | PsKernelExpr.lam unusedName type body unusedBinder => psKernelOccurrenceNext family parameters
-                  (PsKernelList.cons (PsKernelOccurrenceTask.visit type)
-                    (PsKernelList.cons (PsKernelOccurrenceTask.visit body) rest))
-              | PsKernelExpr.forallE unusedName type body unusedBinder => psKernelOccurrenceNext family parameters
-                  (PsKernelList.cons (PsKernelOccurrenceTask.visit type)
-                    (PsKernelList.cons (PsKernelOccurrenceTask.visit body) rest))
-              | PsKernelExpr.letE unusedName type val body => psKernelOccurrenceNext family parameters
-                  (PsKernelList.cons (PsKernelOccurrenceTask.visit type)
-                    (PsKernelList.cons (PsKernelOccurrenceTask.visit val)
-                      (PsKernelList.cons (PsKernelOccurrenceTask.visit body) rest)))
-              | PsKernelExpr.proj name unusedIndex major => psKernelOccurrenceNext family parameters
-                  (PsKernelList.cons (PsKernelOccurrenceTask.name
-                    (PsKernelList.cons (PsKernelOrderTask.name name family) PsKernelList.nil))
-                    (PsKernelList.cons (PsKernelOccurrenceTask.visit major) rest))
-              | _ => psKernelOccurrenceNext family parameters rest
-
-def psKernelOccurrenceStart (family : PsKernelName) (parameters : PsKernelFlag)
-    (value : PsKernelExpr) : PsKernelOccurrenceState :=
-  PsKernelOccurrenceState.state family parameters
-    (PsKernelList.cons (PsKernelOccurrenceTask.visit value) PsKernelList.nil)
-
-
-
 /- Raw alpha equality for internal constructor templates, not definitional
 conversion or admission. This can compare private fvars without granting them
 scope or bypassing the ordinary checker's closed-input rejection. -/
@@ -4973,169 +5422,6 @@ def psKernelAlgConstructorRun (fuel : PsKernelFuel) : PsKernelAlgConstructorStat
         | PsKernelAlgConstructorStep.rejected error => PsKernelAlgConstructorResult.rejected error
         | PsKernelAlgConstructorStep.next next =>
             let smaller : PsKernelAlgConstructorState -> PsKernelAlgConstructorResult := psKernelAlgConstructorRun remaining;
-            smaller next
-
-
-
-/- Simultaneous instantiation of a template whose only free bound variables are
-its declared type parameters. Replacements may themselves be open. Each lookup,
-reversal, lift and reconstruction shares the enclosing transition budget. -/
-
-inductive PsKernelParameterTask where
-  | reverse (pending reversed : PsKernelList PsKernelExpr) (value : PsKernelExpr)
-  | visit (depth : PsKernelNatural) (value : PsKernelExpr)
-  | bound (original index remainingDepth depth : PsKernelNatural)
-  | select (index depth : PsKernelNatural) (arguments : PsKernelList PsKernelExpr)
-  | lift (state : PsKernelBindingState)
-  | app
-  | lam (name : PsKernelName) (binder : PsKernelBinder)
-  | forallE (name : PsKernelName) (binder : PsKernelBinder)
-  | letE (name : PsKernelName)
-  | proj (family : PsKernelName) (index : PsKernelNatural)
-
-inductive PsKernelParameterState where
-  | state (arguments : PsKernelList PsKernelExpr) (tasks : PsKernelList PsKernelParameterTask) (values : PsKernelList PsKernelExpr)
-
-inductive PsKernelParameterResult where
-  | done (value : PsKernelExpr)
-  | invalidScope
-  | invalidState
-  | outOfFuel
-
-inductive PsKernelParameterStep where
-  | next (state : PsKernelParameterState)
-  | final (result : PsKernelParameterResult)
-
-def psKernelParameterNext (arguments : PsKernelList PsKernelExpr)
-    (tasks : PsKernelList PsKernelParameterTask) (values : PsKernelList PsKernelExpr) : PsKernelParameterStep :=
-  PsKernelParameterStep.next (PsKernelParameterState.state arguments tasks values)
-
-def psKernelParameterPush (arguments : PsKernelList PsKernelExpr)
-    (tasks : PsKernelList PsKernelParameterTask) (values : PsKernelList PsKernelExpr) (value : PsKernelExpr) : PsKernelParameterStep :=
-  psKernelParameterNext arguments tasks (PsKernelList.cons value values)
-
-def psKernelParameterVisit (arguments : PsKernelList PsKernelExpr) (depth : PsKernelNatural) (value : PsKernelExpr)
-    (tasks : PsKernelList PsKernelParameterTask) (values : PsKernelList PsKernelExpr) : PsKernelParameterStep :=
-  match value with
-  | PsKernelExpr.bvar index => psKernelParameterNext arguments
-      (PsKernelList.cons (PsKernelParameterTask.bound index index depth depth) tasks) values
-  | PsKernelExpr.fvar unused => PsKernelParameterStep.final PsKernelParameterResult.invalidScope
-  | PsKernelExpr.sortE unused => psKernelParameterPush arguments tasks values value
-  | PsKernelExpr.constE unusedName unusedLevels => psKernelParameterPush arguments tasks values value
-  | PsKernelExpr.lit unused => psKernelParameterPush arguments tasks values value
-  | PsKernelExpr.app fn arg => psKernelParameterNext arguments
-      (PsKernelList.cons (PsKernelParameterTask.visit depth fn)
-        (PsKernelList.cons (PsKernelParameterTask.visit depth arg)
-          (PsKernelList.cons PsKernelParameterTask.app tasks))) values
-  | PsKernelExpr.lam name type body binder => psKernelParameterNext arguments
-      (PsKernelList.cons (PsKernelParameterTask.visit depth type)
-        (PsKernelList.cons (PsKernelParameterTask.visit (psKernelNaturalSucc depth) body)
-          (PsKernelList.cons (PsKernelParameterTask.lam name binder) tasks))) values
-  | PsKernelExpr.forallE name type body binder => psKernelParameterNext arguments
-      (PsKernelList.cons (PsKernelParameterTask.visit depth type)
-        (PsKernelList.cons (PsKernelParameterTask.visit (psKernelNaturalSucc depth) body)
-          (PsKernelList.cons (PsKernelParameterTask.forallE name binder) tasks))) values
-  | PsKernelExpr.letE name type val body => psKernelParameterNext arguments
-      (PsKernelList.cons (PsKernelParameterTask.visit depth type)
-        (PsKernelList.cons (PsKernelParameterTask.visit depth val)
-          (PsKernelList.cons (PsKernelParameterTask.visit (psKernelNaturalSucc depth) body)
-            (PsKernelList.cons (PsKernelParameterTask.letE name) tasks)))) values
-  | PsKernelExpr.proj family index major => psKernelParameterNext arguments
-      (PsKernelList.cons (PsKernelParameterTask.visit depth major)
-        (PsKernelList.cons (PsKernelParameterTask.proj family index) tasks)) values
-
-def psKernelParameterRebuild (arguments : PsKernelList PsKernelExpr) (task : PsKernelParameterTask)
-    (tasks : PsKernelList PsKernelParameterTask) (values : PsKernelList PsKernelExpr) : PsKernelParameterStep :=
-  match values with
-  | PsKernelList.nil => PsKernelParameterStep.final PsKernelParameterResult.invalidState
-  | PsKernelList.cons top rest =>
-      match task with
-      | PsKernelParameterTask.proj family index => psKernelParameterPush arguments tasks rest (PsKernelExpr.proj family index top)
-      | PsKernelParameterTask.app =>
-          match rest with
-          | PsKernelList.cons fn tail => psKernelParameterPush arguments tasks tail (PsKernelExpr.app fn top)
-          | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
-      | PsKernelParameterTask.lam name binder =>
-          match rest with
-          | PsKernelList.cons type tail => psKernelParameterPush arguments tasks tail (PsKernelExpr.lam name type top binder)
-          | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
-      | PsKernelParameterTask.forallE name binder =>
-          match rest with
-          | PsKernelList.cons type tail => psKernelParameterPush arguments tasks tail (PsKernelExpr.forallE name type top binder)
-          | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
-      | PsKernelParameterTask.letE name =>
-          match rest with
-          | PsKernelList.cons val tail =>
-              match tail with
-              | PsKernelList.cons type remaining => psKernelParameterPush arguments tasks remaining (PsKernelExpr.letE name type val top)
-              | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
-          | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
-      | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
-
-def psKernelParameterStep (state : PsKernelParameterState) : PsKernelParameterStep :=
-  match state with
-  | PsKernelParameterState.state arguments tasks values =>
-      match tasks with
-      | PsKernelList.nil =>
-          match values with
-          | PsKernelList.cons value rest =>
-              match rest with
-              | PsKernelList.nil => PsKernelParameterStep.final (PsKernelParameterResult.done value)
-              | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
-          | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
-      | PsKernelList.cons task rest =>
-          match task with
-          | PsKernelParameterTask.reverse pending reversed value =>
-              match pending with
-              | PsKernelList.nil => psKernelParameterNext reversed
-                  (PsKernelList.cons (PsKernelParameterTask.visit PsKernelNatural.zero value) rest) values
-              | PsKernelList.cons arg tail => psKernelParameterNext arguments
-                  (PsKernelList.cons (PsKernelParameterTask.reverse tail (PsKernelList.cons arg reversed) value) rest) values
-          | PsKernelParameterTask.visit depth value => psKernelParameterVisit arguments depth value rest values
-          | PsKernelParameterTask.bound original index remainingDepth depth =>
-              match remainingDepth with
-              | PsKernelNatural.zero => psKernelParameterNext arguments
-                  (PsKernelList.cons (PsKernelParameterTask.select index depth arguments) rest) values
-              | _ =>
-                  match index with
-                  | PsKernelNatural.zero => psKernelParameterPush arguments rest values (PsKernelExpr.bvar original)
-                  | _ => psKernelParameterNext arguments
-                      (PsKernelList.cons (PsKernelParameterTask.bound original (psKernelNaturalPred index)
-                        (psKernelNaturalPred remainingDepth) depth) rest) values
-          | PsKernelParameterTask.select index depth pending =>
-              match pending with
-              | PsKernelList.nil => PsKernelParameterStep.final PsKernelParameterResult.invalidScope
-              | PsKernelList.cons arg tail =>
-                  match index with
-                  | PsKernelNatural.zero => psKernelParameterNext arguments
-                      (PsKernelList.cons (PsKernelParameterTask.lift
-                        (psKernelBindingStart (PsKernelBindingMode.lift depth) PsKernelNatural.zero arg)) rest) values
-                  | _ => psKernelParameterNext arguments
-                      (PsKernelList.cons (PsKernelParameterTask.select (psKernelNaturalPred index) depth tail) rest) values
-          | PsKernelParameterTask.lift current =>
-              match psKernelBindingStep current with
-              | PsKernelBindingStep.next next => psKernelParameterNext arguments
-                  (PsKernelList.cons (PsKernelParameterTask.lift next) rest) values
-              | PsKernelBindingStep.final result =>
-                  match result with
-                  | PsKernelBindingResult.done value => psKernelParameterPush arguments rest values value
-                  | PsKernelBindingResult.invalidScope => PsKernelParameterStep.final PsKernelParameterResult.invalidScope
-                  | _ => PsKernelParameterStep.final PsKernelParameterResult.invalidState
-          | _ => psKernelParameterRebuild arguments task rest values
-
-def psKernelParameterStart (arguments : PsKernelList PsKernelExpr) (value : PsKernelExpr) : PsKernelParameterState :=
-  PsKernelParameterState.state PsKernelList.nil
-    (PsKernelList.cons (PsKernelParameterTask.reverse arguments PsKernelList.nil value) PsKernelList.nil) PsKernelList.nil
-
-def psKernelParameterRun (fuel : PsKernelFuel) : PsKernelParameterState -> PsKernelParameterResult :=
-  match fuel with
-  | PsKernelFuel.stop => fun (state : PsKernelParameterState) => PsKernelParameterResult.outOfFuel
-  | PsKernelFuel.more remaining =>
-      fun (state : PsKernelParameterState) =>
-        match psKernelParameterStep state with
-        | PsKernelParameterStep.final result => result
-        | PsKernelParameterStep.next next =>
-            let smaller : PsKernelParameterState -> PsKernelParameterResult := psKernelParameterRun remaining;
             smaller next
 
 

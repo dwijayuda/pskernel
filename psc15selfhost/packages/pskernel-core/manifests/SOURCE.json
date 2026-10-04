@@ -62,8 +62,24 @@
       "sha256": "89dc8873d341a5cd2ccff40ac9b306f26406f7cb42a597993220e9c9e97c4a6a"
     },
     {
+      "path": "src/Ps/Kernel/Occurrence.lean",
+      "sha256": "683e69690b0695e4241befc4ad8ea87ddd1144b0659cb247eb4dc7300db239cc"
+    },
+    {
+      "path": "src/Ps/Kernel/Parameters.lean",
+      "sha256": "a72ef711750694782f2e16e20762f4f337210f7f7ee33e196126fc0e043bc377"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicProjection.lean",
+      "sha256": "aa6fce3f008d9e731731ca1c602645339abed0ba914d4bf6dba83a2ee056e78b"
+    },
+    {
+      "path": "src/Ps/Kernel/AlgebraicProjectionReduction.lean",
+      "sha256": "ef5cb25a3ef29d0d1f8b544a82982cfc3949487d4e8d911a2b7a5de807310365"
+    },
+    {
       "path": "src/Ps/Kernel/Reduction.lean",
-      "sha256": "9dffb2f10a5e16e83d2c9e930fe61449cebab7b3b65fb937fad547ced841f6b6"
+      "sha256": "6a91fb811e61eeec22b15f93bf0535931fe29e105f12cfdf8d3e4939c0e2cbb2"
     },
     {
       "path": "src/Ps/Kernel/Conversion.lean",
@@ -71,7 +87,7 @@
     },
     {
       "path": "src/Ps/Kernel/TypeCheck.lean",
-      "sha256": "99341b9267878889df7bf34b7ed1434465718ed47a265255929a90c20a8e0a99"
+      "sha256": "5cdf6c1189ea736024736c8dabf58b5390107b0ae9f9f59b0286994bedb7ec82"
     },
     {
       "path": "src/Ps/Kernel/Admission.lean",
@@ -106,10 +122,6 @@
       "sha256": "be6cbc897202666f09e382ae2740c1c8ea15dd148d462f48389d8590ceafa207"
     },
     {
-      "path": "src/Ps/Kernel/Occurrence.lean",
-      "sha256": "683e69690b0695e4241befc4ad8ea87ddd1144b0659cb247eb4dc7300db239cc"
-    },
-    {
       "path": "src/Ps/Kernel/ExpressionEquality.lean",
       "sha256": "a11bd034c0df503d265cfad716e28941bc0254b47330414c226d16a19e703cf2"
     },
@@ -120,10 +132,6 @@
     {
       "path": "src/Ps/Kernel/AlgebraicConstructor.lean",
       "sha256": "0c1f098ad8fdabed0caaddecc6a3de1819818424a910123e58c9738df750eb2c"
-    },
-    {
-      "path": "src/Ps/Kernel/Parameters.lean",
-      "sha256": "a72ef711750694782f2e16e20762f4f337210f7f7ee33e196126fc0e043bc377"
     },
     {
       "path": "src/Ps/Kernel/AlgebraicMinor.lean",

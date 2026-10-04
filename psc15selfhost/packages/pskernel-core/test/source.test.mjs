@@ -1,10 +1,10 @@
-import test from 'node:test';
+﻿import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { root, maskNonCode, validateCode, readSources } from '../scripts/source.mjs';
-test('exact owned source closure validates',()=>assert.equal(readSources().manifest.files.length,36));
+test('exact owned source closure validates',()=>assert.equal(readSources().manifest.files.length,38));
 test('comments and strings are not executable forbidden words',()=> {
   validateCode('/- outer /- import Lean -/ unsafe -/\ndef text : String := "unsafe -- \\\" extern"\n',new Set());
 });

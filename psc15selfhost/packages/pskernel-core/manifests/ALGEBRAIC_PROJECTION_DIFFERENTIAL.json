@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "scope": "One-constructor parameterized Type0 projections; capture-avoiding field substitution, exact arity and dependent computed result witnesses; not recursive/dependent projections or general induction",
+  "sourceManifestSha256": "5f005286af587170e490e97a0c7a1e39facb3e5af9f59737cefcd71bceacf548",
+  "harnessSha256": "d0d722972524994e201137edafb63c72df8b05eea9e6b479ff514a98e89736a0",
+  "fixtureSha256": "d6bebfe24be05285d52bb594d502ce9b0657addf746cc58021660398e4e2d21e",
+  "provider": {
+    "protocol": "pskernel-lean/1",
+    "provider": "lean4-cpp",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "profile": "lean4.34-core",
+    "status": "version"
+  },
+  "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+  "cases": 73,
+  "matched": 73,
+  "accepted": 31,
+  "rejected": 42,
+  "recordsPath": "dist/evidence/algebraic-projection-differential-records.json",
+  "recordsSha256": "78bbfe04c9b929458729eb8c2a098f7a642afe19d69a30fa49e8251a5929233c"
+}

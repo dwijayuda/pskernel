@@ -6,7 +6,7 @@ const ps='inductive OwnedMode where {\n  | read;\n  | write;\n  | idle;\n};\ndef
 for(const kind of ['lean','ps'])test('real '+kind+' enumeration is owned-checked, emitted, and executed',{skip:!existsSync(seed)},async()=>{
  const dir=await mkdtemp(path.join(tmpdir(),'psc2-owned-enum-'));try{
   await writeFile(path.join(dir,'package.json'),'{"type":"module"}');const entryPath=path.join(dir,'Main.'+kind),outputPath=path.join(dir,'out.js');await writeFile(entryPath,kind==='lean'?lean:ps);
-  const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-uniform-algebraic/11');
+  const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-algebraic-projections/12');
   const out=await import(pathToFileURL(outputPath).href);assert.equal(out.answer,11n);
   const admissions=JSON.parse(await readFile(path.join(dir,'out.admissions.json'),'utf8'));assert(admissions.admissions.some(a=>a.kind==='inductive'&&a.declaration.ts[0].cs.length===3));
  }finally{await rm(dir,{recursive:true,force:true});}

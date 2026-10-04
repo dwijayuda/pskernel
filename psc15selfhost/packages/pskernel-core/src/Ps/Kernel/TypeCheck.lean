@@ -8,12 +8,14 @@ import Ps.Kernel.Binding
 import Ps.Kernel.Environment
 import Ps.Kernel.Reduction
 import Ps.Kernel.Conversion
+import Ps.Kernel.AlgebraicProjection
 
 /- Internal dependent-function fragment. Context entries store binder types in
 that binder's OUTER context; lookup lifts by index+1 into the current context.
 No self-inference shortcut and no acceptance Boolean supplied by the caller.
 Raw machine states are implementation data, not a checked-module capability. -/
 inductive PsKernelTypeTask where
+  | algebraicProjection (state : PsKernelAlgProjectInferState)
   | text (state : PsKernelTextCheckState)
   | natural (state : PsKernelBuiltinNatState)
   | infer (context : PsKernelList PsKernelExpr) (value : PsKernelExpr)
@@ -128,6 +130,9 @@ def psKernelTypeValueTask
           psKernelTypeNext env (PsKernelList.cons (PsKernelTypeTask.reduce (psKernelWhnfStart (psKernelTypingDeclarations env) top)) tasks) rest
       | PsKernelTypeTask.projectType family index =>
           match top with
+          | PsKernelExpr.app unusedFn unusedArg => psKernelTypeNext env
+              (PsKernelList.cons (PsKernelTypeTask.algebraicProjection
+                (psKernelAlgProjectInferStart (psKernelTypingDeclarations env) family index top)) tasks) rest
           | PsKernelExpr.constE majorFamily levels =>
               match levels with
               | PsKernelList.nil => psKernelTypeNext env
@@ -219,6 +224,12 @@ def psKernelTypeStep (state : PsKernelTypeState) : PsKernelTypeStep :=
           | _ => psKernelTypeReject PsKernelCheckError.invalidState
       | PsKernelList.cons task rest =>
           match task with
+          | PsKernelTypeTask.algebraicProjection current =>
+              match psKernelAlgProjectInferStep current with
+              | PsKernelAlgProjectInferStep.next next => psKernelTypeNext env
+                  (PsKernelList.cons (PsKernelTypeTask.algebraicProjection next) rest) values
+              | PsKernelAlgProjectInferStep.done type => psKernelTypePush env rest values type
+              | PsKernelAlgProjectInferStep.rejected error => psKernelTypeReject error
           | PsKernelTypeTask.projectName family index work =>
               match psKernelOrderStep work with
               | PsKernelOrderStep.next next => psKernelTypeNext env
@@ -236,6 +247,9 @@ def psKernelTypeStep (state : PsKernelTypeState) : PsKernelTypeStep :=
                   (PsKernelList.cons (PsKernelTypeTask.projectLookup index next) rest) values
               | PsKernelLookupStep.found entry =>
                   match entry with
+                  | PsKernelDefinition.algebraicFamily name unusedType unusedParameters unusedConstructors => psKernelTypeNext env
+                      (PsKernelList.cons (PsKernelTypeTask.algebraicProjection
+                        (psKernelAlgProjectInferStart (psKernelTypingDeclarations env) name index (PsKernelExpr.constE name PsKernelList.nil))) rest) values
                   | PsKernelDefinition.recordFamily unusedName unusedCtor fields => psKernelTypeNext env
                       (PsKernelList.cons (PsKernelTypeTask.projectField index fields) rest) values
                   | _ => psKernelTypeReject PsKernelCheckError.unsupported

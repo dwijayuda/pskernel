@@ -1,6 +1,6 @@
 {
   "name": "@proofscript/pskernel-core",
-  "version": "0.1.0-checker.14",
+  "version": "0.1.0-checker.15",
   "private": true,
   "description": "Owned PSC-compiled dependent term-checker fragment; private experimental checkpoint, not an authoritative kernel",
   "type": "module",
@@ -45,7 +45,8 @@
     "test:record-differential": "node scripts/record-differential.mjs",
     "test:enum-differential": "node scripts/enum-differential.mjs",
     "test:sum-differential": "node scripts/sum-differential.mjs",
-    "test:algebraic-differential": "node scripts/algebraic-differential.mjs"
+    "test:algebraic-differential": "node scripts/algebraic-differential.mjs",
+    "test:algebraic-projection-differential": "node scripts/algebraic-projection-differential.mjs"
   },
   "dependencies": {},
   "proofscript": {

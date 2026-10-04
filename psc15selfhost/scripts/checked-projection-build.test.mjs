@@ -11,7 +11,7 @@ for(const kind of ['lean','ps'])test('real '+kind+' record projections pass owne
   const source=kind==='lean'?'structure OwnedPair where\n  left : Nat\n  right : Nat\ndef pair : OwnedPair := OwnedPair.mk 7 11\ndef answer : Nat := pair.right\ndef select (p : OwnedPair) : Nat := p.left\n'
    :'structure OwnedPair where { left : Nat; right : Nat; };\ndef pair : OwnedPair := OwnedPair.mk(7, 11);\ndef answer : Nat := pair.right;\ndef select(p : OwnedPair) : Nat := p.left;\n';
   await writeFile(entryPath,source);const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});const out=await import(pathToFileURL(outputPath).href);
-  assert.equal(out.answer,11n);assert.equal(out.select(out.pair),7n);assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-uniform-algebraic/11');
+  assert.equal(out.answer,11n);assert.equal(out.select(out.pair),7n);assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-algebraic-projections/12');
   assert.match(await readFile(path.join(dir,'out.admissions.json'),'utf8'),/"k":"proj"/u);
  }finally{await rm(dir,{recursive:true,force:true});}
 });

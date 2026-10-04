@@ -1,6 +1,6 @@
 # @proofscript/pskernel-core
 
-**0.1.0-checker.14 — private experimental dependent term-checker checkpoint.**
+**0.1.0-checker.15 — private experimental dependent term-checker checkpoint.**
 
 Regenerated with the pinned PSC seed, with all 651 tests passing and fresh build
 and reference evidence. See `../../docs/continuity/OWNED_UNIFORM_ALGEBRAIC_2026-10-03.md`.

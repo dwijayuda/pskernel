@@ -118,6 +118,10 @@ jobs:
         working-directory: psc15selfhost
         run: npm run test:backend-wasm
 
+      - name: Self-check complete Wasm backend closure
+        working-directory: psc15selfhost
+        run: lake exe psc1 check test/BackendWasmSelfHostEntry.lean
+
       - name: Build checked Lean provider integration
         working-directory: psc15selfhost/lean-checked
         run: |

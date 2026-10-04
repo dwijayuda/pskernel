@@ -154,6 +154,7 @@ async function currentBuild({ cold = false } = {}) {
       `parse.misses=${result.stats.parseMisses}`,
       `snapshot.hits=${result.stats.snapshotHits}`,
       `snapshot.misses=${result.stats.snapshotMisses}`,
+      `semantic.green=${result.stats.semanticGreen}`,
       `prepared.hit=${result.stats.preparedHit}`,
       `backend.hit=${result.stats.backendHit}`,
       `tsc.cache=${emitted.tscCache}`,
@@ -230,6 +231,7 @@ async function fixedPoint({ cold = false } = {}) {
       `next.parse.misses=${next.stats.parseMisses}`,
       `next.snapshot.hits=${next.stats.snapshotHits}`,
       `next.snapshot.misses=${next.stats.snapshotMisses}`,
+      `next.semantic.green=${next.stats.semanticGreen}`,
       `next.tsc.cache=${emittedNext.tscCache}`,
     ].join("\n") + "\n",
   );

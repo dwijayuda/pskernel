@@ -240,13 +240,19 @@ Resident hot development loop:
 npm run dev:selfhost
 ```
 
-The resident process imports the exact parent compiler once and keeps four in-memory,
-compiler-hash-scoped caches: parsed modules, prefix environment/declaration snapshots,
-prepared modules, and backend TypeScript text. Content-addressed disk caches separately
-cover source translation/canonicalization and TypeScript artifacts. Cache keys use exact
-compiler/source bytes; the TypeScript artifact key also fingerprints the launcher,
-package metadata, platform-native compiler executable, Node/platform identity, and the
-pinned compiler flags.
+The resident process imports the exact parent compiler once and keeps compiler-hash-scoped
+caches for parsed modules, semantic transition/environment snapshots, prepared modules,
+and backend TypeScript text. A changed module is reparsed/re-elaborated once; its complete
+runtime declaration value (including every own field and generated constructor symbol tag)
+is structurally SHA-256 fingerprinted. If that semantic prefix matches a previously proven
+state, downstream unchanged transitions remain green and are reused instead of being
+invalidated merely because source bytes changed. The fingerprint is only a cache key, not
+an admission authority; cold/oracle and fixed-point equality remain decisive.
+
+Content-addressed disk caches separately cover source translation/canonicalization and
+TypeScript artifacts. Cache keys use exact compiler/source bytes; the TypeScript artifact
+key also fingerprints the launcher, package metadata, platform-native compiler executable,
+Node/platform identity, and the pinned compiler flags.
 
 Interactive resident commands are:
 

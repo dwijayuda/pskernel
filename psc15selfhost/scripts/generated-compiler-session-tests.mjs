@@ -27,9 +27,17 @@ const aPath = path.join(demo, "A.ps");
 const bPath = path.join(demo, "B.ps");
 const cPath = path.join(demo, "C.ps");
 
-async function writeProject({ aValue = "1", cValue = "b" } = {}) {
+async function writeProject({
+  aValue = "1",
+  cValue = "b",
+  aComment = "",
+} = {}) {
   await mkdir(demo, { recursive: true });
-  await writeFile(aPath, `const a: Nat := { ${aValue} }\n`, "utf8");
+  await writeFile(
+    aPath,
+    `${aComment}const a: Nat := { ${aValue} }\n`,
+    "utf8",
+  );
   await writeFile(
     bPath,
     "import Demo.A\nconst b: Nat := { a }\n",
@@ -105,6 +113,40 @@ try {
   assert(reverted.stats.preparedHit, "reverted known source must reuse prepared module");
   assert(reverted.stats.backendHit, "reverted known source must reuse backend output");
 
+  await writeProject({ aComment: "/* semantic no-op */\n" });
+  const greenPrefix = await session.compile(cPath);
+  assert(
+    greenPrefix.typeScript === first.typeScript,
+    "semantic no-op source change must preserve exact TypeScript",
+  );
+  assert(
+    greenPrefix.stats.snapshotHits === 2,
+    "semantic no-op first-module edit must reuse downstream semantic transitions",
+  );
+  assert(
+    greenPrefix.stats.snapshotMisses === 1,
+    "semantic no-op first-module edit must re-elaborate only the changed module",
+  );
+  assert(
+    greenPrefix.stats.parseMisses === 1,
+    "semantic no-op changed text must be parsed once",
+  );
+  assert(
+    greenPrefix.stats.semanticGreen === 1,
+    "semantic no-op must be recognized as a red/green semantic match",
+  );
+  assert(
+    greenPrefix.stats.preparedHit && greenPrefix.stats.backendHit,
+    "semantic no-op must reuse final prepared/backend results",
+  );
+
+  await writeProject();
+  const afterGreenRestore = await session.compile(cPath);
+  assert(
+    afterGreenRestore.stats.snapshotHits === 3,
+    "restoring after a semantic no-op must recover the original transitions",
+  );
+
   await writeProject({ aValue: "2" });
   const changedPrefix = await session.compile(cPath);
   assert(changedPrefix.stats.snapshotHits === 0, "changed first module must invalidate semantic prefix");
@@ -140,6 +182,8 @@ try {
       "PSC2_RESIDENT_CACHE: PASS",
       `unchanged.snapshotHits=${warm.stats.snapshotHits}`,
       `suffix.snapshotHits=${changedSuffix.stats.snapshotHits}`,
+      `green.semanticMatches=${greenPrefix.stats.semanticGreen}`,
+      `green.snapshotHits=${greenPrefix.stats.snapshotHits}`,
       `prefix.parseHits=${changedPrefix.stats.parseHits}`,
       `prefix.parseMisses=${changedPrefix.stats.parseMisses}`,
     ].join("\n") + "\n",

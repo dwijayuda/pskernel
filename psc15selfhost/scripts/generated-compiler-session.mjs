@@ -36,12 +36,107 @@ function stripImports(source) {
     .trim();
 }
 
-function prefixFingerprint(previous, sourceHash) {
+function hashAtom(hash, tag, value) {
+  const text = String(value);
+  hash.update(tag, "utf8");
+  hash.update(":", "utf8");
+  hash.update(String(Buffer.byteLength(text, "utf8")), "utf8");
+  hash.update(":", "utf8");
+  hash.update(text, "utf8");
+  hash.update(";", "utf8");
+}
+
+function hashRuntimeValue(hash, value, active) {
+  if (value === null) {
+    hashAtom(hash, "null", "");
+    return;
+  }
+
+  const type = typeof value;
+  if (type === "undefined") {
+    hashAtom(hash, "undefined", "");
+    return;
+  }
+  if (type === "string") {
+    hashAtom(hash, "string", value);
+    return;
+  }
+  if (type === "boolean") {
+    hashAtom(hash, "boolean", value ? "1" : "0");
+    return;
+  }
+  if (type === "bigint") {
+    hashAtom(hash, "bigint", value.toString(10));
+    return;
+  }
+  if (type === "number") {
+    const normalized =
+      Number.isNaN(value)
+        ? "NaN"
+        : value === Infinity
+          ? "Infinity"
+          : value === -Infinity
+            ? "-Infinity"
+            : Object.is(value, -0)
+              ? "-0"
+              : String(value);
+    hashAtom(hash, "number", normalized);
+    return;
+  }
+  if (type === "symbol") {
+    hashAtom(hash, "symbol-value", String(value));
+    return;
+  }
+  if (type !== "object") {
+    throw new Error(`PSC2_RESIDENT_SEMANTIC_FINGERPRINT_KIND: ${type}`);
+  }
+  if (active.has(value)) {
+    throw new Error("PSC2_RESIDENT_SEMANTIC_FINGERPRINT_CYCLE");
+  }
+
+  active.add(value);
+  hashAtom(hash, Array.isArray(value) ? "array-open" : "object-open", "");
+
+  const names = Object.getOwnPropertyNames(value).sort();
+  for (const name of names) {
+    hashAtom(hash, "property", name);
+    hashRuntimeValue(hash, value[name], active);
+  }
+
+  const symbols = Object.getOwnPropertySymbols(value)
+    .map((symbol) => ({ symbol, label: String(symbol) }))
+    .sort((left, right) => left.label.localeCompare(right.label));
+  for (const item of symbols) {
+    hashAtom(hash, "symbol-property", item.label);
+    hashRuntimeValue(hash, value[item.symbol], active);
+  }
+
+  hashAtom(hash, Array.isArray(value) ? "array-close" : "object-close", "");
+  active.delete(value);
+}
+
+function semanticValueFingerprint(value) {
   const hash = createHash("sha256");
-  hash.update("psc2-resident-prefix-v1\0", "utf8");
-  hash.update(previous, "utf8");
-  hash.update("\0", "utf8");
-  hash.update(sourceHash, "utf8");
+  hashAtom(hash, "contract", "psc2-resident-runtime-value-v1");
+  hashRuntimeValue(hash, value, new Set());
+  return hash.digest("hex");
+}
+
+function transitionFingerprint(previousSemantic, relativePath, sourceHash) {
+  const hash = createHash("sha256");
+  hashAtom(hash, "contract", "psc2-resident-transition-v2");
+  hashAtom(hash, "previous-semantic", previousSemantic);
+  hashAtom(hash, "module", relativePath);
+  hashAtom(hash, "source", sourceHash);
+  return hash.digest("hex");
+}
+
+function semanticPrefixFingerprint(previousSemantic, relativePath, declarationsHash) {
+  const hash = createHash("sha256");
+  hashAtom(hash, "contract", "psc2-resident-semantic-prefix-v2");
+  hashAtom(hash, "previous-semantic", previousSemantic);
+  hashAtom(hash, "module", relativePath);
+  hashAtom(hash, "declarations", declarationsHash);
   return hash.digest("hex");
 }
 
@@ -74,6 +169,7 @@ export async function createGeneratedCompilerSession(projectRoot, compilerPath) 
 
   const parseCache = new Map();
   const snapshotCache = new Map();
+  const semanticStateCache = new Map();
   const preparedCache = new Map();
   const backendCache = new Map();
 
@@ -100,6 +196,9 @@ export async function createGeneratedCompilerSession(projectRoot, compilerPath) 
       modules.push(
         Object.freeze({
           path: item.path,
+          relativePath: path
+            .relative(workspaceRoot, item.path)
+            .replaceAll(path.sep, "/"),
           source,
           sourceHash: sha256Bytes(Buffer.from(source, "utf8")),
         }),
@@ -124,33 +223,45 @@ export async function createGeneratedCompilerSession(projectRoot, compilerPath) 
       parseMisses: 0,
       snapshotHits: 0,
       snapshotMisses: 0,
+      semanticGreen: 0,
       preparedHit: false,
       backendHit: false,
     };
 
     let environment = compiler.psSelfHostProdPreludeEnvironment;
     let declarationsRev = compiler.List.nil();
-    let prefix = sha256Bytes(
+    let semanticPrefix = sha256Bytes(
       Buffer.from(
-        `psc2-resident-root-v1\0${compilerSha256}\0proofScript`,
+        `psc2-resident-semantic-root-v2\0${compilerSha256}\0proofScript`,
         "utf8",
       ),
     );
 
+    if (!cold && !semanticStateCache.has(semanticPrefix)) {
+      semanticStateCache.set(
+        semanticPrefix,
+        Object.freeze({ environment, declarationsRev }),
+      );
+    }
+
     for (let index = 0; index < project.modules.length; index += 1) {
       const module = project.modules[index];
-      const nextPrefix = prefixFingerprint(prefix, module.sourceHash);
+      const transition = transitionFingerprint(
+        semanticPrefix,
+        module.relativePath,
+        module.sourceHash,
+      );
       const started = performance.now();
 
-      if (!cold && snapshotCache.has(nextPrefix)) {
-        const snapshot = snapshotCache.get(nextPrefix);
+      if (!cold && snapshotCache.has(transition)) {
+        const snapshot = snapshotCache.get(transition);
         environment = snapshot.environment;
         declarationsRev = snapshot.declarationsRev;
+        semanticPrefix = snapshot.semanticPrefix;
         stats.snapshotHits += 1;
-        prefix = nextPrefix;
         if (progress) {
           process.stdout.write(
-            `PSC2_RESIDENT_MODULE: ${index + 1}/${project.modules.length} snapshot=hit parse=skip ms=${Math.round(performance.now() - started)}\n`,
+            `PSC2_RESIDENT_MODULE: ${index + 1}/${project.modules.length} snapshot=hit parse=skip green=skip ms=${Math.round(performance.now() - started)}\n`,
           );
         }
         continue;
@@ -177,29 +288,58 @@ export async function createGeneratedCompilerSession(projectRoot, compilerPath) 
         compiler.psElabModule(environment, parsed),
         `elaborate-module-${index + 1}`,
       );
+      const declarationsHash = semanticValueFingerprint(
+        elaborated.declarations,
+      );
+      const nextSemanticPrefix = semanticPrefixFingerprint(
+        semanticPrefix,
+        module.relativePath,
+        declarationsHash,
+      );
+
       environment = elaborated.environment;
       declarationsRev = compiler.psListAppend(
         compiler.psListReverse(elaborated.declarations),
         declarationsRev,
       );
-      if (!cold) {
-        snapshotCache.set(
-          nextPrefix,
+
+      let green = false;
+      if (!cold && semanticStateCache.has(nextSemanticPrefix)) {
+        const stableState = semanticStateCache.get(nextSemanticPrefix);
+        environment = stableState.environment;
+        declarationsRev = stableState.declarationsRev;
+        stats.semanticGreen += 1;
+        green = true;
+      } else if (!cold) {
+        semanticStateCache.set(
+          nextSemanticPrefix,
           Object.freeze({ environment, declarationsRev }),
         );
       }
-      prefix = nextPrefix;
+
+      if (!cold) {
+        snapshotCache.set(
+          transition,
+          Object.freeze({
+            environment,
+            declarationsRev,
+            semanticPrefix: nextSemanticPrefix,
+            declarationsHash,
+          }),
+        );
+      }
+      semanticPrefix = nextSemanticPrefix;
 
       if (progress) {
         process.stdout.write(
-          `PSC2_RESIDENT_MODULE: ${index + 1}/${project.modules.length} snapshot=miss parse=${parseMode} ms=${Math.round(performance.now() - started)}\n`,
+          `PSC2_RESIDENT_MODULE: ${index + 1}/${project.modules.length} snapshot=miss parse=${parseMode} green=${green ? "yes" : "no"} ms=${Math.round(performance.now() - started)}\n`,
         );
       }
     }
 
     let prepared;
-    if (!cold && preparedCache.has(prefix)) {
-      prepared = preparedCache.get(prefix);
+    if (!cold && preparedCache.has(semanticPrefix)) {
+      prepared = preparedCache.get(semanticPrefix);
       stats.preparedHit = true;
     } else {
       const elaborated = unwrapExcept(
@@ -215,24 +355,24 @@ export async function createGeneratedCompilerSession(projectRoot, compilerPath) 
         compiler.psCompilerPrepareElaborated(elaborated),
         "prepare",
       );
-      if (!cold) preparedCache.set(prefix, prepared);
+      if (!cold) preparedCache.set(semanticPrefix, prepared);
     }
 
     let typeScript;
-    if (!cold && backendCache.has(prefix)) {
-      typeScript = backendCache.get(prefix);
+    if (!cold && backendCache.has(semanticPrefix)) {
+      typeScript = backendCache.get(semanticPrefix);
       stats.backendHit = true;
     } else {
       typeScript = unwrapExcept(
         compiler.psCompilerTypeScriptFromPrepared(prepared),
         "backend",
       );
-      if (!cold) backendCache.set(prefix, typeScript);
+      if (!cold) backendCache.set(semanticPrefix, typeScript);
     }
 
     return {
       compilerSha256,
-      fingerprint: prefix,
+      fingerprint: semanticPrefix,
       project,
       prepared,
       typeScript,
@@ -243,6 +383,7 @@ export async function createGeneratedCompilerSession(projectRoot, compilerPath) 
   function clear() {
     parseCache.clear();
     snapshotCache.clear();
+    semanticStateCache.clear();
     preparedCache.clear();
     backendCache.clear();
   }
@@ -251,6 +392,7 @@ export async function createGeneratedCompilerSession(projectRoot, compilerPath) 
     return {
       parse: parseCache.size,
       snapshots: snapshotCache.size,
+      semanticStates: semanticStateCache.size,
       prepared: preparedCache.size,
       backend: backendCache.size,
     };

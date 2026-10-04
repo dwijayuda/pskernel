@@ -113,10 +113,12 @@ const residentSession = await readFile(
 for (const marker of [
   "parseCache",
   "snapshotCache",
+  "semanticStateCache",
   "preparedCache",
   "backendCache",
   "options.cold === true",
-  "psc2-resident-prefix-v1",
+  "semanticValueFingerprint",
+  "psc2-resident-semantic-prefix-v2",
 ]) {
   assert(
     residentSession.includes(marker),

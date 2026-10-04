@@ -452,6 +452,67 @@ Do not replace these checks with infer-only shortcuts. Further improvement
 should reduce checked-inference runtime overhead while preserving the same
 accept/reject judgments and algorithmic ordering.
 
+### 2.8 Multi-family nested regression and profile
+
+A wider nested fixture was added with two independent outer families and one
+user datatype containing recursive occurrences through both families. Official
+Lean 4.34 admitted the fixture, while the first PSKernel run rejected every
+iteration during restored validation.
+
+The defect was semantic, not a benchmark artifact. Auxiliary-recursors were
+restored by a structurally recursive worker whose `families` argument doubled
+as both the shrinking pending queue and the restoration lookup universe. By the
+time the second family was restored, the first family had been dropped from
+that lookup set, leaving a transformed constant such as
+`_nested.BenchNestedBox_1` inside the later restored recursor.
+
+The fix separates:
+
+```text
+pending families     = structurally decreasing work queue
+allFamilies          = invariant restoration lookup registry
+```
+
+After the fix, the same wide fixture changed from:
+
+```text
+PSKernel: 0 / 50 admissions
+Lean 4.34: 50 / 50 admissions
+```
+
+to:
+
+```text
+PSKernel: 50 / 50 admissions
+Lean 4.34: 50 / 50 admissions
+```
+
+and every restored main/auxiliary recursor type and rule checked successfully.
+A permanent multi-family regression now locks this behavior.
+
+Two post-fix same-run samples measured the complete wide admission at roughly
+`3.6x-3.8x` Lean. One representative stage split for 50 iterations was:
+
+```text
+preprocess :    489,893 ns
+transform  : 39,991,951 ns
+restore    :  2,844,111 ns
+validate   : 36,398,253 ns
+```
+
+The wide validation split was:
+
+```text
+templates :    139,821 ns
+originals : 13,629,274 ns
+auxiliary : 22,083,301 ns
+```
+
+Therefore discovery and restoration are not current performance priorities.
+Further native optimization should focus on the transformed mutual-admission
+path and the fully checked restored auxiliary-recursors, while preserving the
+full-family restoration invariant and the new multi-family conformance case.
+
 ## 3. Interpretation
 
 The existing runtime-index work is justified.

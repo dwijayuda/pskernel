@@ -506,6 +506,19 @@ The transformation is necessary to preserve Lean 4 computation behavior for
 nested inductives while keeping flattening details out of the user-visible
 environment.
 
+A critical restoration invariant is that the structurally decreasing work queue
+must be kept separate from the complete auxiliary-family registry. A worker may
+recurse over a shrinking list of pending families, but every expression,
+constructor and recursor restoration must still receive the full family set.
+Later restored auxiliary recursors can refer to earlier auxiliary families in
+the transformed mutual bundle; restoring against only the pending suffix can
+therefore leak an internal `_nested.*` constant into the final environment.
+
+The multi-family conformance case exercises this directly with two different
+outer nested families. It requires the final main recursor and both restored
+auxiliary recursors to type-check with no internal auxiliary declarations
+visible after commit.
+
 ## 14. Declaration admission
 
 Declaration admission is split into validation and environment extension:

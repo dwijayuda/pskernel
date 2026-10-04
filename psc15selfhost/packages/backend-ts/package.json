@@ -16,8 +16,8 @@
     "role": "typescript-bootstrap-backend"
   },
   "dependencies": {
-    "@proofscript/compiler-next": "0.0.0-dev",
     "@proofscript/compiler-ir-next": "0.0.0-dev",
-    "@proofscript/bridge-next": "0.0.0-dev"
+    "@proofscript/bridge-next": "0.0.0-dev",
+    "@proofscript/foundation-next": "0.0.0-dev"
   }
 }

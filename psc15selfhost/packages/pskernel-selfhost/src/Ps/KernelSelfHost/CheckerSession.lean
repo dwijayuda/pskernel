@@ -21,11 +21,35 @@ def psKernelMkCheckerSession
       levelParams := levelParams
       safety := safety
       eagerReduce := false
+      nativeEvaluator := base.nativeEvaluator
       maxRecDepth := maxRecDepth
       maxNatSize := maxNatSize
       recDepth := 0
     }
     state := psKernelCheckerStateEmpty
+  }
+
+def psKernelMkCheckerSessionWithNativeEvaluator
+    (environment : PsKernelEnvironment)
+    (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety)
+    (maxRecDepth : Nat)
+    (maxNatSize : Nat)
+    (nativeEvaluator : Option PsKernelNativeEvaluator) :
+    PsKernelCheckerSession :=
+  let base :=
+    psKernelMkCheckerSession
+      environment
+      levelParams
+      safety
+      maxRecDepth
+      maxNatSize;
+  {
+    context :=
+      psKernelCheckerContextWithNativeEvaluator
+        base.context
+        nativeEvaluator
+    state := base.state
   }
 
 def psKernelSessionWhnf

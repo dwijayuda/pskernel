@@ -133,10 +133,9 @@ Theory/DefEq/
     Projection.lean
 
 Theory/Inductive/
-    Header.lean
-    Positivity.lean
-    Elimination.lean
+    Constructor.lean
     Recursor.lean
+    Elimination.lean
 
 Theory/Nested/
     Discover.lean

@@ -1349,6 +1349,14 @@ def main : IO Unit := do
         psKernelBenchLeanAppName
         [])
 
+  let applicationInferStart ← IO.monoNanosNow
+  let applicationInferHits ←
+    psKernelBenchInferColdLoop
+      checkerIterations
+      applicationEnvironment
+      applicationExpr
+  let applicationInferStop ← IO.monoNanosNow
+
   let applicationPsStart ← IO.monoNanosNow
   let applicationPsHits ←
     psKernelBenchCheckColdLoop
@@ -1364,6 +1372,17 @@ def main : IO Unit := do
       leanApplicationEnvironment
       leanApplicationExpr
   let applicationLeanStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH application_infer_only_pskernel_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          applicationInferStart
+          applicationInferStop) ++
+      " arity=" ++
+      toString applicationArity ++
+      " hits=" ++
+      toString applicationInferHits)
 
   IO.println
     ("PSKERNEL_BENCH application_check_pskernel_ns=" ++

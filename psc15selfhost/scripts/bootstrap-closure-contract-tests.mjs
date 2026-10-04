@@ -36,11 +36,13 @@ const expectedAllowed = [
   "erasure",
   "compiler",
   "backend-ts",
+  "driver-ts",
 ];
 const expectedForbidden = [
   "stdlib",
   "project",
   "backend-rust",
+  "driver-rust",
   "backend-wasm",
   "pskernel",
   "pskernel-core",

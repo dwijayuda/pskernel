@@ -1327,6 +1327,113 @@ def psKernelDefEqLazyStep
             leftDef
             rightDef
 
+def psKernelDefEqNativeThenLazyStep
+    (resume :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelDeltaResult PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState))
+    (coreWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left : PsKernelExpr)
+    (right : PsKernelExpr) :
+    Except String
+      (Prod PsKernelDeltaResult PsKernelCheckerState) :=
+  match psKernelReduceNative context left with
+  | Except.error error =>
+      Except.error error
+  | Except.ok leftNative =>
+      match leftNative with
+      | Option.some value =>
+          match
+              defeq
+                context
+                state
+                value
+                right with
+          | Except.error error =>
+              Except.error error
+          | Except.ok result =>
+              Except.ok
+                (Prod.mk
+                  (PsKernelDeltaResult.decided
+                    (Prod.fst result))
+                  (Prod.snd result))
+      | Option.none =>
+          match psKernelReduceNative context right with
+          | Except.error error =>
+              Except.error error
+          | Except.ok rightNative =>
+              match rightNative with
+              | Option.some value =>
+                  match
+                      defeq
+                        context
+                        state
+                        left
+                        value with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok result =>
+                      Except.ok
+                        (Prod.mk
+                          (PsKernelDeltaResult.decided
+                            (Prod.fst result))
+                          (Prod.snd result))
+              | Option.none =>
+                  match
+                      psKernelDefEqLazyStep
+                        defeq
+                        coreWhnf
+                        context
+                        state
+                        left
+                        right with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok stepResult =>
+                      match Prod.fst stepResult with
+                      | PsKernelDeltaStepResult.continue nextLeft nextRight =>
+                          resume
+                            context
+                            (Prod.snd stepResult)
+                            nextLeft
+                            nextRight
+                      | PsKernelDeltaStepResult.unknown nextLeft nextRight =>
+                          Except.ok
+                            (Prod.mk
+                              (PsKernelDeltaResult.residual
+                                nextLeft
+                                nextRight)
+                              (Prod.snd stepResult))
+                      | PsKernelDeltaStepResult.equal =>
+                          Except.ok
+                            (Prod.mk
+                              (PsKernelDeltaResult.decided true)
+                              (Prod.snd stepResult))
+                      | PsKernelDeltaStepResult.different _ _ =>
+                          Except.ok
+                            (Prod.mk
+                              (PsKernelDeltaResult.decided false)
+                              (Prod.snd stepResult))
+
 def psKernelDefEqLazyReductionAfterPred
     (resume :
       PsKernelCheckerContext ->
@@ -1443,41 +1550,14 @@ def psKernelDefEqLazyReductionAfterPred
                             (Prod.fst result))
                           (Prod.snd result))
               | Option.none =>
-                  match
-                      psKernelDefEqLazyStep
-                        defeq
-                        coreWhnf
-                        context
-                        (Prod.snd rightNatResult)
-                        left
-                        right with
-                  | Except.error error =>
-                      Except.error error
-                  | Except.ok stepResult =>
-                      match Prod.fst stepResult with
-                      | PsKernelDeltaStepResult.continue nextLeft nextRight =>
-                          resume
-                            context
-                            (Prod.snd stepResult)
-                            nextLeft
-                            nextRight
-                      | PsKernelDeltaStepResult.unknown nextLeft nextRight =>
-                          Except.ok
-                            (Prod.mk
-                              (PsKernelDeltaResult.residual
-                                nextLeft
-                                nextRight)
-                              (Prod.snd stepResult))
-                      | PsKernelDeltaStepResult.equal =>
-                          Except.ok
-                            (Prod.mk
-                              (PsKernelDeltaResult.decided true)
-                              (Prod.snd stepResult))
-                      | PsKernelDeltaStepResult.different _ _ =>
-                          Except.ok
-                            (Prod.mk
-                              (PsKernelDeltaResult.decided false)
-                              (Prod.snd stepResult))
+                  psKernelDefEqNativeThenLazyStep
+                    resume
+                    defeq
+                    coreWhnf
+                    context
+                    (Prod.snd rightNatResult)
+                    left
+                    right
 
 def psKernelDefEqLazyReductionWithFuel
     (fuel : Nat) :

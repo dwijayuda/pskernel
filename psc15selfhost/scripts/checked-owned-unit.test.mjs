@@ -15,9 +15,9 @@ const unit=()=>({kind:'inductive',declaration:{lp:[N('u')],np:0,ts:[{n:N('Unit')
 const family=()=>C('Unit',[S(Z)]), ctor=()=>C(nested('Unit','unit'),[S(Z)]);
 const iota=()=>app(C(nested('Unit','rec'),[S(S(Z)),S(Z)]),binder('lam','major',family(),U(S(Z))),U(Z),ctor());
 
-test('default admits a polymorphic unit, constructor use and generated iota', async()=>{
+test('explicit owned kernel admits a polymorphic unit, constructor use and generated iota', async()=>{
   const entries=[unit(),def('Value',family(),ctor()),def('Reduce',U(S(Z)),iota())];
-  const {result,descriptor}=await checkAdmissionsWithKernel(wire(entries));
+  const {result,descriptor}=await checkAdmissionsWithKernel(wire(entries),'pskernel-core');
   assert.equal(descriptor.selector,'pskernel-core');
   assert.equal(result.profile,'owned-uniform-algebraic/11');
   assert.equal(result.accepted,true,JSON.stringify(result));
@@ -35,7 +35,7 @@ for(const [label,change] of [
   ['duplicate level parameters',d=>{d.lp.push(N('u'));}],
 ])test('unit production boundary rejects '+label,async()=>{
   const entry=unit();change(entry.declaration);
-  const {result,descriptor}=await checkAdmissionsWithKernel(wire([entry]));
+  const {result,descriptor}=await checkAdmissionsWithKernel(wire([entry]),'pskernel-core');
   assert.equal(descriptor.selector,'pskernel-core');assert.equal(result.accepted,false,JSON.stringify(result));
   assert.equal(result.admissionIndex,0);assert.equal(result.environment,undefined);
 });

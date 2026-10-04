@@ -6,8 +6,8 @@ import { checkedKernelIdentity, ownedCheckedIdentity } from './checked-kernel-id
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const nativeSuffix = process.platform === 'win32' ? '.exe' : '';
 
-export const defaultCheckedKernel = 'lean434';
-export const checkedKernelSelectors = Object.freeze(['lean434', 'lean434-wasm', 'pskernel-core']);
+export const defaultCheckedKernel = 'lean434-wasm';
+export const checkedKernelSelectors = Object.freeze(['lean434-wasm', 'lean434', 'pskernel-core']);
 
 const descriptors = Object.freeze({
   'pskernel-core': Object.freeze({

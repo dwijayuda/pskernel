@@ -131,8 +131,8 @@ Examples:
     bin/pskernel-lean${executableSuffix} --health
     typescript/lib/${tscName} --version
 
-The default checked profile in the source repository is \`lean434\` (native).
-WASM remains the explicit portable alternative \`lean434-wasm\`.
+The default checked profile in the source repository is \`lean434-wasm\`.
+The bundled native Lean provider remains an explicit reference alternative via \`lean434\`.
 
 The kernel remains outside the 55-module compiler bootstrap closure.
 `;

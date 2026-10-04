@@ -56,17 +56,23 @@ No code semantics change required.
 
 ### Goals
 
-Replace “codec-valid admission ready” as the executable staging boundary with genuine kernel admission.
+Replace “codec-valid admission ready” as the executable staging boundary with genuine kernel admission while keeping the provider replaceable.
+
+### Interim provider policy
+
+Use `lean434-wasm` / `@proofscript/pskernel-lean-wasm` as the default checked provider for this phase. Keep native Lean as an explicit reference route and `pskernel-core` as an explicit experimental route. Do not make either alternative a fallback.
 
 ### Work
 
 - freeze `KernelContract-v1`;
 - define `CandidateCore`;
-- define opaque/restricted `CheckedModule`;
-- adapt `pskernel-core` to the frozen bridge/provider contract;
-- make erasure production entry points require CheckedCore;
-- keep bootstrap compatibility path explicit until migration completes;
-- record checked-core hash/receipt.
+- define opaque/restricted `CheckedModule` / checked-session capability;
+- bind the current checked path to the pinned Lean 4.34 Wasm provider identity;
+- keep the provider contract independent of that concrete implementation;
+- make erasure production entry points require the checked capability;
+- preserve the exact prepared value across external checking;
+- record checked-core/admissions hash and provider receipt;
+- later adapt `pskernel-core` to the same contract and switch only after its readiness gates close.
 
 ### Gates
 

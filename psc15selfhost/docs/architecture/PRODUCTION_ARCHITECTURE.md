@@ -18,7 +18,15 @@ ProofScript should become production-grade without sacrificing the properties th
 
 The principal architectural task is therefore **enforcement**, not conceptual replacement.
 
-## 2. Target semantic pipeline
+## 2. Current provider versus target authority
+
+During the current hardening phase, use the pinned `@proofscript/pskernel-lean-wasm` provider (`lean434-wasm`) as the default checked provider. It is external to the compiler bootstrap closure and checks canonical admissions through the same provider-neutral host boundary used by other checkers.
+
+Long term, `pskernel-core` remains the intended owned authority once its declared readiness gates close. Native Lean remains an explicit reference/oracle route. No rejection, timeout, unsupported result, or provider failure may silently select a different kernel.
+
+The compiler architecture must therefore depend on a **kernel provider contract**, not on a concrete provider implementation.
+
+## 3. Target semantic pipeline
 
 ```text
 .ps / supported Lean subset

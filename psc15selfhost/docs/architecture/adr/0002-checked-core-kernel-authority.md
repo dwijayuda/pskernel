@@ -14,9 +14,11 @@ Renaming such a staging value to CheckedCore would blur the trusted boundary.
 
 > admitted by the designated kernel provider under a named kernel contract.
 
-Only the kernel provider may construct checked artifacts or checked handles.
+For the current hardening phase, the designated default provider is the pinned Lean 4.34 WebAssembly provider `@proofscript/pskernel-lean-wasm` (`lean434-wasm`). Native Lean is an explicit reference alternative. The owned `pskernel-core` remains the intended long-term authority but is not the default until its readiness gates close.
 
-Production erasure accepts CheckedCore, not arbitrary elaborated declarations or a frontend Boolean/flag.
+Only the selected kernel provider may create the checked-session capability for a prepared module.
+
+Production erasure accepts the checked capability, not arbitrary elaborated declarations or a frontend Boolean/flag. Provider failure/rejection never triggers another provider.
 
 ## Consequences
 

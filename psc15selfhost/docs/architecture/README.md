@@ -14,6 +14,12 @@ Keep these layers distinct:
 
 If a forward document conflicts with the current executable bootstrap contract, the current executable contract wins until an explicit reviewed migration changes it.
 
+## Current checked-provider policy
+
+For the present production-hardening phase, the default checked provider is `lean434-wasm` from `@proofscript/pskernel-lean-wasm`, pinned to Lean 4.34.0. Native `lean434` remains an explicit reference/oracle alternative and `pskernel-core` remains an explicit experimental alternative.
+
+The long-term architectural target is still an owned `pskernel-core` authority. The provider-neutral checked-session boundary must make that future switch a kernel-provider migration rather than a change to erasure/backend semantics.
+
 ## Core rule
 
 > Do not redesign the ProofScript semantic spine merely to gain production features. Harden the existing spine by making authority boundaries typed, versioned, capability-scoped, deterministic, and independently checkable.

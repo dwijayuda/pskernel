@@ -37,7 +37,7 @@ A bug here may cause rejection, diagnostics, wrong candidate output, or build fa
 Target trusted/formally justified set:
 
 - PSC Core rules/semantics;
-- designated `pskernel-core` admission checker;
+- designated kernel provider under the frozen kernel contract (currently the pinned `pskernel-lean-wasm`; long-term target `pskernel-core`);
 - CheckedCore construction boundary;
 - ErasedIR/VerifiedIR validator;
 - proved transformations or small translation validators;

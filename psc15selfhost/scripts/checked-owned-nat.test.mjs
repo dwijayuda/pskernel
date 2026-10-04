@@ -19,16 +19,16 @@ const nat=name=>({kind:'inductive',declaration:{lp:[],np:0,ts:[{n:N(name),t:U(S(
 const fold=(name,n)=>app(C(child(name,'rec'),[S(Z)]),lam('major',C(name),C(name)),numeral(name,0),
   lam('n',C(name),lam('ih',C(name),app(C(child(name,'succ')),B(0)))),numeral(name,n));
 
-test('default checks its Nat prelude and derived recursor before user declarations',async()=>{
+test('explicit owned kernel checks its Nat prelude and derived recursor before user declarations',async()=>{
   const {result,descriptor}=await checkAdmissionsWithKernel(wire([
     def('First',C('Nat'),numeral('Nat',1)),def('Fold',C('Nat'),fold('Nat',4)),
-  ]));
+  ]),'pskernel-core');
   assert.equal(descriptor.selector,'pskernel-core');
   assert.equal(result.profile,'owned-uniform-algebraic/11');
   assert.equal(result.accepted,true,JSON.stringify(result));
   assert.equal(result.admissionCount,2);
 });
-test('default derives a fresh Nat-like family and checks constructor iota',async()=>{
+test('explicit owned kernel derives a fresh Nat-like family and checks constructor iota',async()=>{
   const result=await checkOwnedAdmissions(wire([nat('Counter'),def('Fold',C('Counter'),fold('Counter',3))]));
   assert.equal(result.accepted,true,JSON.stringify(result));assert.equal(result.admissionCount,2);
 });
@@ -39,7 +39,7 @@ for(const [label,change] of [
   ['duplicate constructors',d=>{d.ts[0].cs[1].n=d.ts[0].cs[0].n;}],
 ])test('Nat boundary rejects '+label+' without reference fallback',async()=>{
   const entry=nat('Counter');change(entry.declaration);
-  const {result,descriptor}=await checkAdmissionsWithKernel(wire([entry]));
+  const {result,descriptor}=await checkAdmissionsWithKernel(wire([entry]),'pskernel-core');
   assert.equal(descriptor.selector,'pskernel-core');assert.equal(result.accepted,false);
   assert.equal(result.admissionIndex,0);assert.equal(result.environment,undefined);
 });
@@ -73,7 +73,7 @@ test('two nullary constructors named zero/succ form an enum without Nat authorit
   const accepted=await checkOwnedAdmissions(wire([entry]));
   assert.equal(accepted.accepted,true,JSON.stringify(accepted));
   for(const bad of [def('BadSuccessor',C('Counter'),numeral('Counter',1)),def('BadFold',C('Counter'),fold('Counter',1))]){
-    const {result,descriptor}=await checkAdmissionsWithKernel(wire([entry,bad]));
+    const {result,descriptor}=await checkAdmissionsWithKernel(wire([entry,bad]),'pskernel-core');
     assert.equal(descriptor.selector,'pskernel-core');assert.equal(result.accepted,false,JSON.stringify(result));
     assert.equal(result.admissionIndex,1);assert.equal(result.environment,undefined);
   }

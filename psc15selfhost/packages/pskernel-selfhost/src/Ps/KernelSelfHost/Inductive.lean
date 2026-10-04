@@ -203,7 +203,7 @@ def psKernelSimpleCheckUniformOccurrenceHead
     (numParams : Nat)
     (expr : PsKernelExpr)
     (offset : Nat) :
-    Except String Unit :=
+    Except String Bool :=
   match psKernelExprGetAppFn expr with
   | PsKernelExpr.const name levels =>
       let args :=
@@ -237,7 +237,7 @@ def psKernelSimpleCheckUniformOccurrenceHead
             if fullParams then
               if levelsOk then
                 if argsOk then
-                  Except.ok ()
+                  Except.ok true
                 else
                   Except.error
                     "invalid occurrence of datatype being declared: it must be applied to the parameters and universe levels of the mutual declaration"
@@ -251,11 +251,11 @@ def psKernelSimpleCheckUniformOccurrenceHead
             Except.error
               "invalid occurrence of datatype being declared: it must be applied to the parameters and universe levels of the mutual declaration"
         else
-          Except.ok ()
+          Except.ok false
       else
-        Except.ok ()
+        Except.ok false
   | _ =>
-      Except.ok ()
+      Except.ok false
 
 def psKernelSimpleCheckUniformOccurrenceWithFuel
     (fuel : Nat) :
@@ -285,7 +285,7 @@ def psKernelSimpleCheckUniformOccurrenceWithFuel
         (expr : PsKernelExpr)
         (offset : Nat) =>
         let checkHead :
-            Except String Unit :=
+            Except String Bool :=
           psKernelSimpleCheckUniformOccurrenceHead
             declaredNames
             expectedLevels
@@ -295,102 +295,105 @@ def psKernelSimpleCheckUniformOccurrenceWithFuel
         match checkHead with
         | Except.error error =>
             Except.error error
-        | Except.ok _ =>
-            match expr with
-            | PsKernelExpr.app fn arg =>
-                match
-                    smaller
-                      declaredNames
-                      expectedLevels
-                      numParams
-                      fn
-                      offset with
-                | Except.error error =>
-                    Except.error error
-                | Except.ok _ =>
-                    smaller
-                      declaredNames
-                      expectedLevels
-                      numParams
-                      arg
-                      offset
-            | PsKernelExpr.lam _ type body _ =>
-                match
-                    smaller
-                      declaredNames
-                      expectedLevels
-                      numParams
-                      type
-                      offset with
-                | Except.error error =>
-                    Except.error error
-                | Except.ok _ =>
-                    smaller
-                      declaredNames
-                      expectedLevels
-                      numParams
-                      body
-                      (Nat.succ offset)
-            | PsKernelExpr.forallE _ type body _ =>
-                match
-                    smaller
-                      declaredNames
-                      expectedLevels
-                      numParams
-                      type
-                      offset with
-                | Except.error error =>
-                    Except.error error
-                | Except.ok _ =>
-                    smaller
-                      declaredNames
-                      expectedLevels
-                      numParams
-                      body
-                      (Nat.succ offset)
-            | PsKernelExpr.letE _ type value body _ =>
-                match
-                    smaller
-                      declaredNames
-                      expectedLevels
-                      numParams
-                      type
-                      offset with
-                | Except.error error =>
-                    Except.error error
-                | Except.ok _ =>
-                    match
-                        smaller
-                          declaredNames
-                          expectedLevels
-                          numParams
-                          value
-                          offset with
-                    | Except.error error =>
-                        Except.error error
-                    | Except.ok _ =>
-                        smaller
-                          declaredNames
-                          expectedLevels
-                          numParams
-                          body
-                          (Nat.succ offset)
-            | PsKernelExpr.mdata _ body =>
-                smaller
-                  declaredNames
-                  expectedLevels
-                  numParams
-                  body
-                  offset
-            | PsKernelExpr.proj _ _ body =>
-                smaller
-                  declaredNames
-                  expectedLevels
-                  numParams
-                  body
-                  offset
-            | _ =>
-                Except.ok ()
+        | Except.ok stop =>
+            if stop then
+              Except.ok ()
+            else
+              match expr with
+              | PsKernelExpr.app fn arg =>
+                  match
+                      smaller
+                        declaredNames
+                        expectedLevels
+                        numParams
+                        fn
+                        offset with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok _ =>
+                      smaller
+                        declaredNames
+                        expectedLevels
+                        numParams
+                        arg
+                        offset
+              | PsKernelExpr.lam _ type body _ =>
+                  match
+                      smaller
+                        declaredNames
+                        expectedLevels
+                        numParams
+                        type
+                        offset with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok _ =>
+                      smaller
+                        declaredNames
+                        expectedLevels
+                        numParams
+                        body
+                        (Nat.succ offset)
+              | PsKernelExpr.forallE _ type body _ =>
+                  match
+                      smaller
+                        declaredNames
+                        expectedLevels
+                        numParams
+                        type
+                        offset with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok _ =>
+                      smaller
+                        declaredNames
+                        expectedLevels
+                        numParams
+                        body
+                        (Nat.succ offset)
+              | PsKernelExpr.letE _ type value body _ =>
+                  match
+                      smaller
+                        declaredNames
+                        expectedLevels
+                        numParams
+                        type
+                        offset with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok _ =>
+                      match
+                          smaller
+                            declaredNames
+                            expectedLevels
+                            numParams
+                            value
+                            offset with
+                      | Except.error error =>
+                          Except.error error
+                      | Except.ok _ =>
+                          smaller
+                            declaredNames
+                            expectedLevels
+                            numParams
+                            body
+                            (Nat.succ offset)
+              | PsKernelExpr.mdata _ body =>
+                  smaller
+                    declaredNames
+                    expectedLevels
+                    numParams
+                    body
+                    offset
+              | PsKernelExpr.proj _ _ body =>
+                  smaller
+                    declaredNames
+                    expectedLevels
+                    numParams
+                    body
+                    offset
+              | _ =>
+                  Except.ok ()
 
 def psKernelSimpleCheckUniformOccurrence
     (declaredNames : List PsKernelName)

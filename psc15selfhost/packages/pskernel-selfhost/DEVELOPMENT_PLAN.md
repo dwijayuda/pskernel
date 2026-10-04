@@ -27,6 +27,8 @@ clear theory/runtime modules while keeping every step self-hostable.
 
 ## Phase A — Semantic closure
 
+**Status: COMPLETE for the declared Lean-4.34 compatibility matrix.**
+
 Goal: exact declared Lean-4.34 kernel feature coverage.
 
 ### A1. Compatibility matrix
@@ -86,6 +88,8 @@ Do not use giant external replay as the primary completion criterion.
 - generated runtime smoke green.
 
 ## Phase B — Explainability and readability
+
+**Status: ACTIVE.**
 
 Goal: source code should teach the kernel theory.
 

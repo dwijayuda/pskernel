@@ -3549,21 +3549,24 @@ def psWasmLowerDeclarations
               }
 
 
+
 def psWasmTypeUsesNatWithFuel :
     Nat -> PsVerifiedIrType -> Bool
   | 0, _ => false
   | fuel + 1, type =>
+      let usesType :
+          PsVerifiedIrType -> Bool :=
+        fun (value : PsVerifiedIrType) =>
+          psWasmTypeUsesNatWithFuel fuel value;
       match type with
       | .primitive .nat => true
       | .function parameters result =>
-          parameters.any
-              (fun (parameter : PsVerifiedIrType) =>
-                psWasmTypeUsesNatWithFuel fuel parameter)
-            || psWasmTypeUsesNatWithFuel fuel result
+          if psListAny usesType parameters then
+            true
+          else
+            usesType result
       | .named _ arguments =>
-          arguments.any
-            (fun (argument : PsVerifiedIrType) =>
-              psWasmTypeUsesNatWithFuel fuel argument)
+          psListAny usesType arguments
       | _ => false
 
 def psWasmTypeUsesNat
@@ -3601,80 +3604,125 @@ def psWasmIntrinsicUsesNat
   | .arrayFoldl => true
   | _ => false
 
-
 def psWasmExprUsesNatWithFuel :
     Nat -> PsVerifiedIrExpr -> Bool
   | 0, _ => false
   | fuel + 1, expr =>
-      let uses :=
+      let uses :
+          PsVerifiedIrExpr -> Bool :=
         fun (nested : PsVerifiedIrExpr) =>
-          psWasmExprUsesNatWithFuel fuel nested
+          psWasmExprUsesNatWithFuel fuel nested;
+      let fieldUses :
+          (String × PsVerifiedIrExpr) -> Bool :=
+        fun (field : String × PsVerifiedIrExpr) =>
+          uses (Prod.snd field);
+      let parameterUses :
+          PsVerifiedIrParameter -> Bool :=
+        fun (parameter : PsVerifiedIrParameter) =>
+          psWasmTypeUsesNat parameter.type;
+      let bindingUses :
+          PsVerifiedIrMatchBinding -> Bool :=
+        fun (binding : PsVerifiedIrMatchBinding) =>
+          psWasmTypeUsesNat binding.type;
+      let alternativeUses :
+          (String ×
+            List PsVerifiedIrMatchBinding ×
+            PsVerifiedIrExpr) -> Bool :=
+        fun
+          (alternative :
+            String ×
+              List PsVerifiedIrMatchBinding ×
+              PsVerifiedIrExpr) =>
+          if
+              psListAny
+                bindingUses
+                (Prod.fst (Prod.snd alternative)) then
+            true
+          else
+            uses (Prod.snd (Prod.snd alternative));
       match expr with
       | .literal (.natural _) => true
       | .literal _ => false
       | .var _ => false
       | .intrinsic operation typeArguments arguments =>
-          psWasmIntrinsicUsesNat operation
-            || typeArguments.any psWasmTypeUsesNat
-            || arguments.any uses
+          if psWasmIntrinsicUsesNat operation then
+            true
+          else if psListAny psWasmTypeUsesNat typeArguments then
+            true
+          else
+            psListAny uses arguments
       | .lambda parameters resultType body =>
-          parameters.any
-              (fun (parameter : PsVerifiedIrParameter) =>
-                psWasmTypeUsesNat parameter.type)
-            || psWasmTypeUsesNat resultType
-            || uses body
+          if psListAny parameterUses parameters then
+            true
+          else if psWasmTypeUsesNat resultType then
+            true
+          else
+            uses body
       | .call fn typeArguments arguments =>
-          uses fn
-            || typeArguments.any psWasmTypeUsesNat
-            || arguments.any uses
+          if uses fn then
+            true
+          else if psListAny psWasmTypeUsesNat typeArguments then
+            true
+          else
+            psListAny uses arguments
       | .letE _ type value body =>
-          psWasmTypeUsesNat type || uses value || uses body
+          if psWasmTypeUsesNat type then
+            true
+          else if uses value then
+            true
+          else
+            uses body
       | .ifE condition thenBranch elseBranch =>
-          uses condition || uses thenBranch || uses elseBranch
+          if uses condition then
+            true
+          else if uses thenBranch then
+            true
+          else
+            uses elseBranch
       | .record _ typeArguments fields =>
-          typeArguments.any psWasmTypeUsesNat
-            || fields.any
-              (fun (field : String × PsVerifiedIrExpr) =>
-                uses (Prod.snd field))
+          if psListAny psWasmTypeUsesNat typeArguments then
+            true
+          else
+            psListAny fieldUses fields
       | .projection _ typeArguments target _ =>
-          typeArguments.any psWasmTypeUsesNat || uses target
+          if psListAny psWasmTypeUsesNat typeArguments then
+            true
+          else
+            uses target
       | .constructor _ _ typeArguments fields =>
-          typeArguments.any psWasmTypeUsesNat
-            || fields.any
-              (fun (field : String × PsVerifiedIrExpr) =>
-                uses (Prod.snd field))
+          if psListAny psWasmTypeUsesNat typeArguments then
+            true
+          else
+            psListAny fieldUses fields
       | .matchE _ typeArguments scrutinee alternatives =>
-          typeArguments.any psWasmTypeUsesNat
-            || uses scrutinee
-            || alternatives.any
-              (fun
-                (alternative :
-                  String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
-                (Prod.fst (Prod.snd alternative)).any
-                    (fun (binding : PsVerifiedIrMatchBinding) =>
-                      psWasmTypeUsesNat binding.type)
-                  || uses (Prod.snd (Prod.snd alternative)))
+          if psListAny psWasmTypeUsesNat typeArguments then
+            true
+          else if uses scrutinee then
+            true
+          else
+            psListAny alternativeUses alternatives
 
 def psWasmExprUsesNat
     (expr : PsVerifiedIrExpr) : Bool :=
   psWasmExprUsesNatWithFuel 4096 expr
 
-
 def psWasmTypeUsesIntWithFuel :
     Nat -> PsVerifiedIrType -> Bool
   | 0, _ => false
   | fuel + 1, type =>
+      let usesType :
+          PsVerifiedIrType -> Bool :=
+        fun (value : PsVerifiedIrType) =>
+          psWasmTypeUsesIntWithFuel fuel value;
       match type with
       | .primitive .int => true
       | .function parameters result =>
-          parameters.any
-              (fun (parameter : PsVerifiedIrType) =>
-                psWasmTypeUsesIntWithFuel fuel parameter)
-            || psWasmTypeUsesIntWithFuel fuel result
+          if psListAny usesType parameters then
+            true
+          else
+            usesType result
       | .named _ arguments =>
-          arguments.any
-            (fun (argument : PsVerifiedIrType) =>
-              psWasmTypeUsesIntWithFuel fuel argument)
+          psListAny usesType arguments
       | _ => false
 
 def psWasmTypeUsesInt
@@ -3695,115 +3743,208 @@ def psWasmIntrinsicUsesInt
   | .intLt => true
   | _ => false
 
-
 def psWasmExprUsesIntWithFuel :
     Nat -> PsVerifiedIrExpr -> Bool
   | 0, _ => false
   | fuel + 1, expr =>
-      let uses :=
+      let uses :
+          PsVerifiedIrExpr -> Bool :=
         fun (nested : PsVerifiedIrExpr) =>
-          psWasmExprUsesIntWithFuel fuel nested
+          psWasmExprUsesIntWithFuel fuel nested;
+      let fieldUses :
+          (String × PsVerifiedIrExpr) -> Bool :=
+        fun (field : String × PsVerifiedIrExpr) =>
+          uses (Prod.snd field);
+      let parameterUses :
+          PsVerifiedIrParameter -> Bool :=
+        fun (parameter : PsVerifiedIrParameter) =>
+          psWasmTypeUsesInt parameter.type;
+      let bindingUses :
+          PsVerifiedIrMatchBinding -> Bool :=
+        fun (binding : PsVerifiedIrMatchBinding) =>
+          psWasmTypeUsesInt binding.type;
+      let alternativeUses :
+          (String ×
+            List PsVerifiedIrMatchBinding ×
+            PsVerifiedIrExpr) -> Bool :=
+        fun
+          (alternative :
+            String ×
+              List PsVerifiedIrMatchBinding ×
+              PsVerifiedIrExpr) =>
+          if
+              psListAny
+                bindingUses
+                (Prod.fst (Prod.snd alternative)) then
+            true
+          else
+            uses (Prod.snd (Prod.snd alternative));
       match expr with
       | .literal (.integer _) => true
       | .literal _ => false
       | .var _ => false
       | .intrinsic operation typeArguments arguments =>
-          psWasmIntrinsicUsesInt operation
-            || typeArguments.any psWasmTypeUsesInt
-            || arguments.any uses
+          if psWasmIntrinsicUsesInt operation then
+            true
+          else if psListAny psWasmTypeUsesInt typeArguments then
+            true
+          else
+            psListAny uses arguments
       | .lambda parameters resultType body =>
-          parameters.any
-              (fun (parameter : PsVerifiedIrParameter) =>
-                psWasmTypeUsesInt parameter.type)
-            || psWasmTypeUsesInt resultType
-            || uses body
+          if psListAny parameterUses parameters then
+            true
+          else if psWasmTypeUsesInt resultType then
+            true
+          else
+            uses body
       | .call fn typeArguments arguments =>
-          uses fn
-            || typeArguments.any psWasmTypeUsesInt
-            || arguments.any uses
+          if uses fn then
+            true
+          else if psListAny psWasmTypeUsesInt typeArguments then
+            true
+          else
+            psListAny uses arguments
       | .letE _ type value body =>
-          psWasmTypeUsesInt type || uses value || uses body
+          if psWasmTypeUsesInt type then
+            true
+          else if uses value then
+            true
+          else
+            uses body
       | .ifE condition thenBranch elseBranch =>
-          uses condition || uses thenBranch || uses elseBranch
+          if uses condition then
+            true
+          else if uses thenBranch then
+            true
+          else
+            uses elseBranch
       | .record _ typeArguments fields =>
-          typeArguments.any psWasmTypeUsesInt
-            || fields.any
-              (fun (field : String × PsVerifiedIrExpr) =>
-                uses (Prod.snd field))
+          if psListAny psWasmTypeUsesInt typeArguments then
+            true
+          else
+            psListAny fieldUses fields
       | .projection _ typeArguments target _ =>
-          typeArguments.any psWasmTypeUsesInt || uses target
+          if psListAny psWasmTypeUsesInt typeArguments then
+            true
+          else
+            uses target
       | .constructor _ _ typeArguments fields =>
-          typeArguments.any psWasmTypeUsesInt
-            || fields.any
-              (fun (field : String × PsVerifiedIrExpr) =>
-                uses (Prod.snd field))
+          if psListAny psWasmTypeUsesInt typeArguments then
+            true
+          else
+            psListAny fieldUses fields
       | .matchE _ typeArguments scrutinee alternatives =>
-          typeArguments.any psWasmTypeUsesInt
-            || uses scrutinee
-            || alternatives.any
-              (fun
-                (alternative :
-                  String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
-                (Prod.fst (Prod.snd alternative)).any
-                    (fun (binding : PsVerifiedIrMatchBinding) =>
-                      psWasmTypeUsesInt binding.type)
-                  || uses (Prod.snd (Prod.snd alternative)))
+          if psListAny psWasmTypeUsesInt typeArguments then
+            true
+          else if uses scrutinee then
+            true
+          else
+            psListAny alternativeUses alternatives
 
 def psWasmExprUsesInt
     (expr : PsVerifiedIrExpr) : Bool :=
   psWasmExprUsesIntWithFuel 4096 expr
 
+def psWasmStructureUsesNat
+    (structureInfo : PsVerifiedIrStructure) : Bool :=
+  let fieldUses :
+      PsVerifiedIrStructureField -> Bool :=
+    fun (field : PsVerifiedIrStructureField) =>
+      psWasmTypeUsesNat field.type;
+  psListAny fieldUses structureInfo.fields
+
+def psWasmConstructorUsesNat
+    (constructorInfo : PsVerifiedIrConstructor) : Bool :=
+  let fieldUses :
+      PsVerifiedIrConstructorField -> Bool :=
+    fun (field : PsVerifiedIrConstructorField) =>
+      psWasmTypeUsesNat field.type;
+  psListAny fieldUses constructorInfo.fields
+
+def psWasmInductiveUsesNat
+    (inductiveInfo : PsVerifiedIrInductive) : Bool :=
+  psListAny
+    psWasmConstructorUsesNat
+    inductiveInfo.constructors
+
+def psWasmDeclarationUsesNat
+    (declaration : PsVerifiedIrDeclaration) : Bool :=
+  let parameterUses :
+      PsVerifiedIrParameter -> Bool :=
+    fun (parameter : PsVerifiedIrParameter) =>
+      psWasmTypeUsesNat parameter.type;
+  if psListAny parameterUses declaration.parameters then
+    true
+  else if psWasmTypeUsesNat declaration.resultType then
+    true
+  else
+    psWasmExprUsesNat declaration.body
 
 def psWasmModuleUsesNat
     (module : PsVerifiedIrModule) : Bool :=
-  module.imports.any
-      (fun (importInfo : PsVerifiedIrExternalImport) =>
-        psWasmTypeUsesNat importInfo.type)
-    || module.structures.any
-      (fun (structureInfo : PsVerifiedIrStructure) =>
-        structureInfo.fields.any
-          (fun (field : PsVerifiedIrStructureField) =>
-            psWasmTypeUsesNat field.type))
-    || module.inductives.any
-      (fun (inductiveInfo : PsVerifiedIrInductive) =>
-        inductiveInfo.constructors.any
-          (fun (constructorInfo : PsVerifiedIrConstructor) =>
-            constructorInfo.fields.any
-              (fun (field : PsVerifiedIrConstructorField) =>
-                psWasmTypeUsesNat field.type)))
-    || module.declarations.any
-      (fun (declaration : PsVerifiedIrDeclaration) =>
-        declaration.parameters.any
-            (fun (parameter : PsVerifiedIrParameter) =>
-              psWasmTypeUsesNat parameter.type)
-          || psWasmTypeUsesNat declaration.resultType
-          || psWasmExprUsesNat declaration.body)
+  let importUses :
+      PsVerifiedIrExternalImport -> Bool :=
+    fun (importInfo : PsVerifiedIrExternalImport) =>
+      psWasmTypeUsesNat importInfo.type;
+  if psListAny importUses module.imports then
+    true
+  else if psListAny psWasmStructureUsesNat module.structures then
+    true
+  else if psListAny psWasmInductiveUsesNat module.inductives then
+    true
+  else
+    psListAny psWasmDeclarationUsesNat module.declarations
 
+def psWasmStructureUsesInt
+    (structureInfo : PsVerifiedIrStructure) : Bool :=
+  let fieldUses :
+      PsVerifiedIrStructureField -> Bool :=
+    fun (field : PsVerifiedIrStructureField) =>
+      psWasmTypeUsesInt field.type;
+  psListAny fieldUses structureInfo.fields
+
+def psWasmConstructorUsesInt
+    (constructorInfo : PsVerifiedIrConstructor) : Bool :=
+  let fieldUses :
+      PsVerifiedIrConstructorField -> Bool :=
+    fun (field : PsVerifiedIrConstructorField) =>
+      psWasmTypeUsesInt field.type;
+  psListAny fieldUses constructorInfo.fields
+
+def psWasmInductiveUsesInt
+    (inductiveInfo : PsVerifiedIrInductive) : Bool :=
+  psListAny
+    psWasmConstructorUsesInt
+    inductiveInfo.constructors
+
+def psWasmDeclarationUsesInt
+    (declaration : PsVerifiedIrDeclaration) : Bool :=
+  let parameterUses :
+      PsVerifiedIrParameter -> Bool :=
+    fun (parameter : PsVerifiedIrParameter) =>
+      psWasmTypeUsesInt parameter.type;
+  if psListAny parameterUses declaration.parameters then
+    true
+  else if psWasmTypeUsesInt declaration.resultType then
+    true
+  else
+    psWasmExprUsesInt declaration.body
 
 def psWasmModuleUsesInt
     (module : PsVerifiedIrModule) : Bool :=
-  module.imports.any
-      (fun (importInfo : PsVerifiedIrExternalImport) =>
-        psWasmTypeUsesInt importInfo.type)
-    || module.structures.any
-      (fun (structureInfo : PsVerifiedIrStructure) =>
-        structureInfo.fields.any
-          (fun (field : PsVerifiedIrStructureField) =>
-            psWasmTypeUsesInt field.type))
-    || module.inductives.any
-      (fun (inductiveInfo : PsVerifiedIrInductive) =>
-        inductiveInfo.constructors.any
-          (fun (constructorInfo : PsVerifiedIrConstructor) =>
-            constructorInfo.fields.any
-              (fun (field : PsVerifiedIrConstructorField) =>
-                psWasmTypeUsesInt field.type)))
-    || module.declarations.any
-      (fun (declaration : PsVerifiedIrDeclaration) =>
-        declaration.parameters.any
-            (fun (parameter : PsVerifiedIrParameter) =>
-              psWasmTypeUsesInt parameter.type)
-          || psWasmTypeUsesInt declaration.resultType
-          || psWasmExprUsesInt declaration.body)
+  let importUses :
+      PsVerifiedIrExternalImport -> Bool :=
+    fun (importInfo : PsVerifiedIrExternalImport) =>
+      psWasmTypeUsesInt importInfo.type;
+  if psListAny importUses module.imports then
+    true
+  else if psListAny psWasmStructureUsesInt module.structures then
+    true
+  else if psListAny psWasmInductiveUsesInt module.inductives then
+    true
+  else
+    psListAny psWasmDeclarationUsesInt module.declarations
+
 
 def psWasmExportsOfDeclarations :
     List PsVerifiedIrDeclaration -> List (String × String)

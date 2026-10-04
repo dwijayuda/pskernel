@@ -63,7 +63,7 @@ jobs:
       - name: Audit Lean 4.34 compatibility matrix
         run: |
           set -euo pipefail
-          node scripts/psc1kernel-compatibility-audit.mjs
+          node scripts/psc1kernel-compatibility-audit.mjs --require-complete
 
       - name: Build proven PSC1 compiler
         run: |

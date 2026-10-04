@@ -53,6 +53,40 @@ expression cache:   36.7x
 
 Both paths returned exactly 2,000/2,000 hits.
 
+## 2.1 Checker-path baseline
+
+Measured at commit `5e5e4475a1f46cc0fc07657989500fb7bd8d6d9e`
+with 1,000 repeated checks of a delta-reducible Nat definition:
+
+```text
+WHNF cold session :  2,675,200 ns
+WHNF warm cache   :    826,700 ns
+
+DefEq cold session: 13,727,400 ns
+DefEq warm cache  :    519,200 ns
+```
+
+Approximate warm-state speedups:
+
+```text
+WHNF :  3.2x
+DefEq: 26.4x
+```
+
+The same run measured:
+
+```text
+environment indexed :  6,222,300 ns
+environment linear  : 79,917,200 ns
+
+cache indexed       :  4,534,900 ns
+cache linear        : 71,044,300 ns
+```
+
+These microbenchmarks are intentionally simple and should be interpreted as
+evidence that indexing/memoization is valuable, not as end-to-end production
+throughput.
+
 ## 3. Interpretation
 
 The existing runtime-index work is justified.
@@ -74,13 +108,14 @@ No algorithmic-defeq ordering changes are needed to get these gains.
 
 Do **not** add cached expression metadata or interning yet.
 
-Next benchmark actual checker operations:
+WHNF and defeq warm/cold paths are now measured.
 
-1. WHNF beta/zeta/delta cases;
-2. algorithmic defeq with successful/failed pair cache reuse;
-3. inference over application spines;
-4. recursor reduction;
-5. indexed/nested-inductive admission on representative declarations.
+Next measurement priority:
+
+1. official Lean 4.34 kernel vs PSKernel-native on matched WHNF/defeq cases;
+2. inference over application spines;
+3. recursor reduction;
+4. indexed/nested-inductive admission on representative declarations.
 
 Only optimize expression metadata/hash/sharing if those measurements show
 repeated tree traversal is a dominant cost.

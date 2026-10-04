@@ -671,6 +671,122 @@ def psKernelWhnfLocalLetDifferential : Bool :=
   | _, _ =>
       false
 
+def psKernelNativeReductionDifferential : Bool :=
+  let natTarget :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "NativeNat"
+  let boolTarget :=
+    PsKernelName.str
+      PsKernelName.anonymous
+      "NativeBool"
+  let referenceNatTarget :=
+    psKernelNameToReference natTarget
+  let referenceBoolTarget :=
+    psKernelNameToReference boolTarget
+  let portableProvider : PsKernelNativeEvaluator := {
+    evalBool := fun name =>
+      if psKernelNameEq name boolTarget then
+        Except.ok (Option.some true)
+      else
+        Except.ok Option.none
+    evalNat := fun name =>
+      if psKernelNameEq name natTarget then
+        Except.ok (Option.some 42)
+      else
+        Except.ok Option.none
+  }
+  let referenceProvider : PSC1Kernel.NativeEvaluator := {
+    evalBool := fun name =>
+      if PSC1Kernel.Name.eq name referenceBoolTarget then
+        Except.ok (Option.some true)
+      else
+        Except.ok Option.none
+    evalNat := fun name =>
+      if PSC1Kernel.Name.eq name referenceNatTarget then
+        Except.ok (Option.some 42)
+      else
+        Except.ok Option.none
+  }
+  let portableContext :=
+    psKernelCheckerContextWithNativeEvaluator
+      (psKernelCheckerContextEmpty
+        psKernelEnvironmentEmpty)
+      (Option.some portableProvider)
+  let referenceBase :=
+    PSC1Kernel.CheckerContext.empty
+      PSC1Kernel.Environment.empty
+  let referenceContext : PSC1Kernel.CheckerContext :=
+    {
+      referenceBase with
+      nativeEvaluator := Option.some referenceProvider
+    }
+  let portableNat :=
+    PsKernelExpr.app
+      (PsKernelExpr.const
+        psKernelReduceNatName
+        List.nil)
+      (PsKernelExpr.const
+        natTarget
+        List.nil)
+  let referenceNat :=
+    PSC1Kernel.Expr.app
+      (PSC1Kernel.Expr.const
+        PSC1Kernel.kernelReduceNatName
+        List.nil)
+      (PSC1Kernel.Expr.const
+        referenceNatTarget
+        List.nil)
+  let portableBool :=
+    PsKernelExpr.app
+      (PsKernelExpr.const
+        psKernelReduceBoolName
+        List.nil)
+      (PsKernelExpr.const
+        boolTarget
+        List.nil)
+  let referenceBool :=
+    PSC1Kernel.Expr.app
+      (PSC1Kernel.Expr.const
+        PSC1Kernel.kernelReduceBoolName
+        List.nil)
+      (PSC1Kernel.Expr.const
+        referenceBoolTarget
+        List.nil)
+  match
+      psKernelWhnfNoRecursor
+        256
+        portableContext
+        psKernelCheckerStateEmpty
+        portableNat,
+      PSC1Kernel.whnf
+        referenceContext
+        referenceNat with
+  | Except.ok portableNatResult, Except.ok referenceNatResult =>
+      if
+          psKernelExprReferenceEq
+            (Prod.fst portableNatResult)
+            referenceNatResult then
+        match
+            psKernelWhnfNoRecursor
+              256
+              portableContext
+              (Prod.snd portableNatResult)
+              portableBool,
+            PSC1Kernel.whnf
+              referenceContext
+              referenceBool with
+        | Except.ok portableBoolResult, Except.ok referenceBoolResult =>
+            psKernelExprReferenceEq
+              (Prod.fst portableBoolResult)
+              referenceBoolResult
+        | _, _ =>
+            false
+      else
+        false
+  | _, _ =>
+      false
+
 def psKernelWhnfCacheTest : Bool :=
   let expr :=
     PsKernelExpr.app
@@ -762,8 +878,10 @@ def psKernelSelfHostWhnfTests : Bool :=
           (Bool.and
             psKernelWhnfLocalLetDifferential
             (Bool.and
-              psKernelWhnfCacheTest
-              psKernelWhnfFuelExhaustionTest)))))
+              psKernelNativeReductionDifferential
+              (Bool.and
+                psKernelWhnfCacheTest
+                psKernelWhnfFuelExhaustionTest))))))
 
 def psKernelInferenceWhnf
     (context : PsKernelCheckerContext)

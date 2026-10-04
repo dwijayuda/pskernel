@@ -216,6 +216,21 @@ projection             : dependent field type
 When checking applications, inferred and expected argument types are compared
 using algorithmic definitional equality.
 
+Lean 4.34 has two deliberately different application paths:
+
+- **checked inference** follows the application tree one node at a time:
+  infer the function, expose a Pi type, infer the argument, compare the
+  argument type with the Pi domain, then instantiate the codomain;
+- **infer-only** mode exposes the whole application spine and avoids checking
+  each argument when only the resulting type is required.
+
+PSKernel preserves that semantic distinction. Performance work must not flatten
+the checked path merely to make a benchmark faster. Memoization policy is kept
+in `Theory/Inference/Helpers.lean` as a non-semantic runtime choice; currently
+trivial literals and fully checked application nodes are not published into the
+checked-inference cache when doing so only creates structural-hash/promotion
+overhead.
+
 ## 5.1 Primitive literals and Nat reduction
 
 Primitive reduction is split into two theory-facing modules:

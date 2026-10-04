@@ -10,7 +10,7 @@ def psBackendJsExpected : String :=
   "export function callPlusOne(x) { return plusOne(x); }\n" ++
   "export const greeting = \"hello\";\n" ++
   "export const truth = true;\n" ++
-  "export const unitValue = undefined;\n"
+  "export const unitValue = (void 0);\n"
 
 def psTestBackendJsFixtureEmission : Bool :=
   match psBackendJsFixtureValidated with

@@ -10,7 +10,10 @@ contract freezes the historical set of 75 one-off self-host repair guards: it ma
 shrink, but new repair-guard names are rejected. Future self-host failures must become
 profile/contract invariants rather than new per-file repair tests. See `docs/SELFHOST_SOURCE_STANDARD.md`.
 
-The active toolchain policy is now native-first:
+The compiler development policy is **self-hosted JS first**: after the one-time Lean
+bootstrap exists, normal `psc`/`build:auto`/self-host guards use the generated
+JavaScript compiler. Native Lean `psc` remains the seed/reference/recovery compiler.
+The checked-kernel policy remains native-first:
 
 - **default checked kernel:** `lean434` / `@proofscript/pskernel-lean`;
 - portable alternative: `lean434-wasm`;

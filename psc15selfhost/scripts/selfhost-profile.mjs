@@ -173,6 +173,12 @@ function assertProfileShape(profile) {
   if (profile.legacyRepairGuardMaxCount !== legacy.length) {
     throw new Error('PSC2_SELFHOST_PROFILE_LEGACY_GUARD_COUNT');
   }
+  if (profile.executableContract?.developmentEngine !== 'generated-js') {
+    throw new Error('PSC2_SELFHOST_PROFILE_DEVELOPMENT_ENGINE');
+  }
+  if (profile.executableContract?.seedRecoveryEngine !== 'native-lean') {
+    throw new Error('PSC2_SELFHOST_PROFILE_SEED_ENGINE');
+  }
 }
 
 export function legacyRepairGuardNames() {

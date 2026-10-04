@@ -159,8 +159,10 @@ For the entire compiler closure it performs:
 
 The contract prints stable admissions and TypeScript SHA-256 identities on success.
 
-This catches unsupported source patterns before the generated JavaScript compiler is
-involved.
+This stronger parity contract is executed by the native Lean compiler as an
+independent seed/reference implementation. Ordinary development still uses the
+last-known-good generated JavaScript compiler; the native contract is kept separate
+so the self-hosted implementation is checked against an independent seed.
 
 ## Generated compiler fixed point
 
@@ -187,19 +189,48 @@ Fast source-profile check:
 npm run check:selfhost-profile
 ```
 
-Normal developer guard:
+Compile the current compiler with the generated JS compiler:
 
 ```text
-npm run selfhost:guard
+npm run dev:compiler
 ```
 
-This builds the native `psc` if necessary and runs the complete executable source
-contract.
+This is an alias of `npm run build`. `build:auto` uses
+`dist/bootstrap/packages/compiler/index.js` when it exists and runs a one-time Lean
+bootstrap only when that generated compiler is missing.
+
+Normal self-host development guard:
+
+```text
+npm run dev:selfhost
+```
+
+This performs the fast profile check and then builds the current compiler with the
+last generated JS compiler. It is the normal inner-loop command.
+
+The stronger independent Lean/PSC whole-closure parity contract remains:
+
+```text
+npm run check:selfhost-contract
+```
+
+That contract intentionally uses native Lean `psc` as an independent seed/reference
+implementation. The fixed-point pipeline reaches it automatically, so developers do
+not need to rebuild native `psc` for every edit.
 
 Final compiler self-host gate:
 
 ```text
 npm run fixed-point
+```
+
+The intended development flow is therefore:
+
+```text
+edit compiler
+  -> check:selfhost-profile
+  -> dev:compiler / dev:selfhost        (generated JS compiler)
+  -> fixed-point                         (independent seed + self-host proof)
 ```
 
 Checked-kernel fixed-point/release gates remain separate assurance layers.

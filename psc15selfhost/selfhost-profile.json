@@ -86,6 +86,8 @@
     }
   ],
   "executableContract": {
+    "developmentEngine": "generated-js",
+    "seedRecoveryEngine": "native-lean",
     "leanClosureChecks": true,
     "canonicalLeanToProofScriptRoundTrip": true,
     "generatedProofScriptClosureChecks": true,

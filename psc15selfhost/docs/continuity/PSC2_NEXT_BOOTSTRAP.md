@@ -2,6 +2,8 @@
 
 Status: forward design / continuity document for the bootstrap generation **after** the current TypeScript-based PSC2 fixed point.
 
+Production hardening, trust/security, build/artifact, compatibility, extensibility, and staged implementation guidance is refined in `docs/architecture/README.md` and the documents it indexes. Those guides do not supersede this continuity document's compiler-verification direction.
+
 This document records the intended next bootstrap direction so future work does not drift back toward making TypeScript or any other host compiler part of the semantic trust story.
 
 It is deliberately **not** a claim that the work below is already implemented or formally proved.

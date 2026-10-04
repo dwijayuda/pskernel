@@ -232,3 +232,29 @@ Contracts/VC generation, `simp`/automation, deriving, async/Task/Resource, FFI,
 InterfaceIR, external plugin loading, Rust/Wasm bootstrap, LSP and large libraries are
 post-fixed-point platform work. They may be developed in parallel, but they do not
 block the smallest PSC2 self-host.
+
+
+## Production architecture guidance
+
+The current file remains the authority for the **implemented minimal self-host bootstrap**.
+Long-term production hardening is documented separately so forward design cannot be mistaken
+for a completed bootstrap guarantee.
+
+Start at:
+
+- `docs/architecture/README.md`
+- `docs/architecture/PRODUCTION_ARCHITECTURE.md`
+- `docs/architecture/TRUST_SECURITY_MODEL.md`
+- `docs/architecture/BUILD_ARTIFACT_MODEL.md`
+- `docs/architecture/COMPATIBILITY_CONTRACTS.md`
+- `docs/architecture/IMPLEMENTATION_ROADMAP.md`
+
+Those documents preserve the semantic spine in this file while planning the transition to
+a genuine kernel-owned `CheckedCore` boundary, construction-IR/VerifiedIR validation split,
+IR-only backend dependencies, direct JS/Wasm ownership, capability-scoped extensibility,
+incremental query/CAS builds, hermetic toolchains, separate compilation, semantic lockfiles,
+and reproducible signed releases.
+
+`docs/continuity/PSC2_NEXT_BOOTSTRAP.md` remains the forward bootstrap/compiler-verification
+continuity document. The production architecture documents refine it into smaller guides and
+ADRs; they do not silently supersede current executable gates.

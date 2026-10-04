@@ -2346,6 +2346,154 @@ def psKernelBenchNestedValidateAuxRecursor
                   Except.error
                     "PSKERNEL_BENCH restored auxiliary recursor malformed"
 
+
+def psKernelBenchNestedValidateOriginalRecursorType
+    (finalEnvironment : PsKernelEnvironment) :
+    Except String Unit :=
+  match
+      psKernelEnvironmentFind
+        finalEnvironment
+        psKernelBenchNestedTreeRecName with
+  | Option.none =>
+      Except.error
+        "PSKERNEL_BENCH restored nested recursor missing"
+  | Option.some value =>
+      match value with
+      | PsKernelConstantInfo.recInfo recInfo =>
+          let session :=
+            psKernelMkCheckerSession
+              finalEnvironment
+              recInfo.base.levelParams
+              PsKernelDefinitionSafety.safe
+              0
+              psKernelLeanNatMaxSizeDefault;
+          match
+              psKernelSessionCheck
+                65536
+                session
+                recInfo.base.type with
+          | Except.error error =>
+              Except.error error
+          | Except.ok typeType =>
+              match
+                  psKernelSessionEnsureSort
+                    65536
+                    (Prod.snd typeType)
+                    (Prod.fst typeType) with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok _ =>
+                  Except.ok ()
+      | _ =>
+          Except.error
+            "PSKERNEL_BENCH restored nested recursor malformed"
+
+def psKernelBenchNestedValidateOriginalRules
+    (finalEnvironment : PsKernelEnvironment) :
+    Except String Unit :=
+  match
+      psKernelEnvironmentFind
+        finalEnvironment
+        psKernelBenchNestedTreeRecName with
+  | Option.none =>
+      Except.error
+        "PSKERNEL_BENCH restored nested recursor missing"
+  | Option.some value =>
+      match value with
+      | PsKernelConstantInfo.recInfo recInfo =>
+          psKernelSimpleNestedValidateRules
+            65536
+            (psKernelMkCheckerSession
+              finalEnvironment
+              recInfo.base.levelParams
+              PsKernelDefinitionSafety.safe
+              0
+              psKernelLeanNatMaxSizeDefault)
+            recInfo.rules
+      | _ =>
+          Except.error
+            "PSKERNEL_BENCH restored nested recursor malformed"
+
+def psKernelBenchNestedValidateAuxOldRules
+    (transformed : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    Except String Unit :=
+  match processed.state.aux with
+  | List.nil =>
+      Except.error
+        "PSKERNEL_BENCH nested auxiliary family missing"
+  | List.cons family _ =>
+      let oldName :=
+        psKernelSimpleRecName
+          family.auxName;
+      match
+          psKernelEnvironmentFind
+            transformed
+            oldName with
+      | Option.none =>
+          Except.error
+            "PSKERNEL_BENCH transformed auxiliary recursor missing"
+      | Option.some value =>
+          match value with
+          | PsKernelConstantInfo.recInfo recInfo =>
+              psKernelSimpleNestedValidateRules
+                65536
+                (psKernelMkCheckerSession
+                  transformed
+                  recInfo.base.levelParams
+                  PsKernelDefinitionSafety.safe
+                  0
+                  psKernelLeanNatMaxSizeDefault)
+                recInfo.rules
+          | _ =>
+              Except.error
+                "PSKERNEL_BENCH transformed auxiliary recursor malformed"
+
+def psKernelBenchNestedValidateAuxNewRules
+    (finalEnvironment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    Except String Unit :=
+  let renames :=
+    psKernelBenchNestedRenames processed;
+  match processed.state.aux with
+  | List.nil =>
+      Except.error
+        "PSKERNEL_BENCH nested auxiliary family missing"
+  | List.cons family _ =>
+      let oldName :=
+        psKernelSimpleRecName
+          family.auxName;
+      match
+          psKernelSimpleNestedFindRename
+            oldName
+            renames with
+      | Option.none =>
+          Except.error
+            "PSKERNEL_BENCH nested auxiliary rename missing"
+      | Option.some newName =>
+          match
+              psKernelEnvironmentFind
+                finalEnvironment
+                newName with
+          | Option.none =>
+              Except.error
+                "PSKERNEL_BENCH restored auxiliary recursor missing"
+          | Option.some value =>
+              match value with
+              | PsKernelConstantInfo.recInfo recInfo =>
+                  psKernelSimpleNestedValidateRules
+                    65536
+                    (psKernelMkCheckerSession
+                      finalEnvironment
+                      recInfo.base.levelParams
+                      PsKernelDefinitionSafety.safe
+                      0
+                      psKernelLeanNatMaxSizeDefault)
+                    recInfo.rules
+              | _ =>
+                  Except.error
+                    "PSKERNEL_BENCH restored auxiliary recursor malformed"
+
 partial def psKernelBenchNestedAdmissionLoop
     (iterations : Nat)
     (environment : PsKernelEnvironment) :
@@ -2665,6 +2813,93 @@ partial def psKernelBenchNestedValidateAuxRecursorLoop
           processed
       match
           psKernelBenchNestedValidateAuxRecursor
+            finalEnvironment
+            processed with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+
+partial def psKernelBenchNestedValidateOriginalRecursorTypeLoop
+    (iterations : Nat)
+    (finalEnvironment : PsKernelEnvironment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedValidateOriginalRecursorTypeLoop
+          rest
+          finalEnvironment
+      match
+          psKernelBenchNestedValidateOriginalRecursorType
+            finalEnvironment with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedValidateOriginalRulesLoop
+    (iterations : Nat)
+    (finalEnvironment : PsKernelEnvironment) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedValidateOriginalRulesLoop
+          rest
+          finalEnvironment
+      match
+          psKernelBenchNestedValidateOriginalRules
+            finalEnvironment with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedValidateAuxOldRulesLoop
+    (iterations : Nat)
+    (transformed : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedValidateAuxOldRulesLoop
+          rest
+          transformed
+          processed
+      match
+          psKernelBenchNestedValidateAuxOldRules
+            transformed
+            processed with
+      | Except.ok _ =>
+          pure (Nat.succ tail)
+      | Except.error _ =>
+          pure tail
+
+partial def psKernelBenchNestedValidateAuxNewRulesLoop
+    (iterations : Nat)
+    (finalEnvironment : PsKernelEnvironment)
+    (processed : PsKernelSimpleNestedProcessQueueResult) :
+    IO Nat :=
+  match iterations with
+  | Nat.zero =>
+      pure 0
+  | Nat.succ rest => do
+      let tail ←
+        psKernelBenchNestedValidateAuxNewRulesLoop
+          rest
+          finalEnvironment
+          processed
+      match
+          psKernelBenchNestedValidateAuxNewRules
             finalEnvironment
             processed with
       | Except.ok _ =>
@@ -3750,6 +3985,69 @@ def main : IO Unit := do
       toString nestedValidateAuxRulesHits ++
       "/" ++
       toString nestedValidateAuxRecursorHits)
+
+
+  let nestedOriginalRecursorTypeStart ← IO.monoNanosNow
+  let nestedOriginalRecursorTypeHits ←
+    psKernelBenchNestedValidateOriginalRecursorTypeLoop
+      nestedAdmissionIterations
+      nestedFinal
+  let nestedOriginalRecursorTypeStop ← IO.monoNanosNow
+
+  let nestedOriginalRulesStart ← IO.monoNanosNow
+  let nestedOriginalRulesHits ←
+    psKernelBenchNestedValidateOriginalRulesLoop
+      nestedAdmissionIterations
+      nestedFinal
+  let nestedOriginalRulesStop ← IO.monoNanosNow
+
+  let nestedAuxOldRulesStart ← IO.monoNanosNow
+  let nestedAuxOldRulesHits ←
+    psKernelBenchNestedValidateAuxOldRulesLoop
+      nestedAdmissionIterations
+      nestedTransformed
+      nestedProcessed
+  let nestedAuxOldRulesStop ← IO.monoNanosNow
+
+  let nestedAuxNewRulesStart ← IO.monoNanosNow
+  let nestedAuxNewRulesHits ←
+    psKernelBenchNestedValidateAuxNewRulesLoop
+      nestedAdmissionIterations
+      nestedFinal
+      nestedProcessed
+  let nestedAuxNewRulesStop ← IO.monoNanosNow
+
+  IO.println
+    ("PSKERNEL_BENCH nested_original_rec_type_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedOriginalRecursorTypeStart
+          nestedOriginalRecursorTypeStop) ++
+      " nested_original_rules_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedOriginalRulesStart
+          nestedOriginalRulesStop) ++
+      " nested_aux_old_rules_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedAuxOldRulesStart
+          nestedAuxOldRulesStop) ++
+      " nested_aux_new_rules_ns=" ++
+      toString
+        (psKernelBenchElapsed
+          nestedAuxNewRulesStart
+          nestedAuxNewRulesStop) ++
+      " iterations=" ++
+      toString nestedAdmissionIterations ++
+      " hits=" ++
+      toString nestedOriginalRecursorTypeHits ++
+      "/" ++
+      toString nestedOriginalRulesHits ++
+      "/" ++
+      toString nestedAuxOldRulesHits ++
+      "/" ++
+      toString nestedAuxNewRulesHits)
 
   IO.println
     ("PSKERNEL_BENCH structural_defeq_pskernel_ns=" ++

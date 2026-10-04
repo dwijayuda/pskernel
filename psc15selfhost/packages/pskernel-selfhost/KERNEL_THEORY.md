@@ -118,8 +118,10 @@ Lean 4.34 algorithmic-equality order rather than a bag of helper implementations
 23. `Theory/Admission/Validation.lean`
 24. `Theory/Admission/Declarations.lean`
 25. `Kernel.lean` (compatibility umbrella)
-26. `Quot.lean`
-27. `Inductive.lean`
+26. `Theory/Quot/Bootstrap.lean`
+27. `Theory/Quot/Admission.lean`
+28. `Quot.lean` (compatibility umbrella)
+29. `Inductive.lean`
 28. `Theory/Inductive/Constructor.lean`
 29. `Theory/Inductive/Recursor.lean`
 30. `Theory/Inductive/Elimination.lean`
@@ -306,11 +308,23 @@ See `Theory/DefEq/FinalRules.lean`.
 
 ## 10. Quotients
 
-`Quot.lean` validates and installs the kernel-recognized quotient constants.
-Reduction recognizes `Quot.mk`, `Quot.lift`, and `Quot.ind` through the
-checker reduction layer.
+Quotient support is split into bootstrap shape construction and checked
+environment admission:
 
-Quotient initialization is explicit state in the environment.
+```text
+Theory/Quot/Bootstrap.lean
+      |
+      | validate Eq/Eq.refl and construct Quot primitive types
+      v
+Theory/Quot/Admission.lean
+         reserve/install Quot, Quot.mk, Quot.lift, Quot.ind
+```
+
+`Quot.lean` remains a stable umbrella import.
+
+Computation for `Quot.lift` and `Quot.ind` lives in
+`Theory/Reduction/KernelReductions.lean`. Quotient initialization is explicit
+state in the environment.
 
 ## 11. Inductive declarations
 

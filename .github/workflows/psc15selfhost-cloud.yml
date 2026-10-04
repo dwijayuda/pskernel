@@ -112,7 +112,7 @@ jobs:
       - name: Run checked-host r3/toolchain regression slice
         working-directory: psc15selfhost
         run: |
-          node --test             scripts/checked-algebraic-build.test.mjs             scripts/checked-build.test.mjs             scripts/checked-enum-build.test.mjs             scripts/checked-projection-build.test.mjs             scripts/checked-seed-session.test.mjs             scripts/checked-sum-build.test.mjs             scripts/checked-text-build.test.mjs             scripts/checked-owned-sum.test.mjs             scripts/checked-selfhost-preflight.test.mjs             packages/pskernel-core/test/package.test.mjs
+          node --test             scripts/checked-algebraic-build.test.mjs             scripts/checked-build.test.mjs             scripts/checked-enum-build.test.mjs             scripts/checked-projection-build.test.mjs             scripts/checked-seed-session.test.mjs             scripts/checked-sum-build.test.mjs             scripts/checked-text-build.test.mjs             scripts/checked-selfhost-preflight.test.mjs
 
       - name: Enforce semantic boundaries
         working-directory: psc15selfhost

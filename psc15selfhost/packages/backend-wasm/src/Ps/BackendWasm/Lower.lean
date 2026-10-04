@@ -122,6 +122,40 @@ def psWasmListFoldl {Value State : Type}
       fun (state : State) =>
         smaller (step state value)
 
+def psWasmListPair? {Value : Type}
+    (values : List Value) :
+    Option (Value × Value) :=
+  match values with
+  | List.nil => none
+  | List.cons first rest =>
+      match rest with
+      | List.nil => none
+      | List.cons second tail =>
+          match tail with
+          | List.nil =>
+              some (Prod.mk first second)
+          | List.cons _ _ => none
+
+def psWasmListTriple? {Value : Type}
+    (values : List Value) :
+    Option (Value × Value × Value) :=
+  match values with
+  | List.nil => none
+  | List.cons first rest =>
+      match rest with
+      | List.nil => none
+      | List.cons second tail =>
+          match tail with
+          | List.nil => none
+          | List.cons third final =>
+              match final with
+              | List.nil =>
+                  some
+                    (Prod.mk
+                      first
+                      (Prod.mk second third))
+              | List.cons _ _ => none
+
 def psWasmFunctionTypeListContains
     (types : List PsVerifiedIrType)
     (candidate : PsVerifiedIrType) : Bool :=
@@ -1742,8 +1776,8 @@ def psWasmLowerNatBinaryCallWith
     (functionName : String)
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
-  match arguments with
-  | [_, _] =>
+  match psWasmListPair? arguments with
+  | some _ =>
       match psWasmLowerNatArgumentsWith lower state arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1753,7 +1787,7 @@ def psWasmLowerNatBinaryCallWith
                 [PsWasmInstruction.call functionName]
             state := lowered.state
           }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | none => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerNatCompareWith
     (lower :
@@ -1765,8 +1799,8 @@ def psWasmLowerNatCompareWith
     (comparison : PsWasmInstruction)
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
-  match arguments with
-  | [_, _] =>
+  match psWasmListPair? arguments with
+  | some _ =>
       match psWasmLowerNatArgumentsWith lower state arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1779,7 +1813,7 @@ def psWasmLowerNatCompareWith
               ]
             state := lowered.state
           }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | none => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerIntArgumentsWith
     (lower :
@@ -1806,8 +1840,8 @@ def psWasmLowerIntBinaryCallWith
     (functionName : String)
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
-  match arguments with
-  | [_, _] =>
+  match psWasmListPair? arguments with
+  | some _ =>
       match psWasmLowerIntArgumentsWith lower state arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1817,7 +1851,7 @@ def psWasmLowerIntBinaryCallWith
                 [PsWasmInstruction.call functionName]
             state := lowered.state
           }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | none => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerIntUnaryCallWith
     (lower :
@@ -1891,8 +1925,8 @@ def psWasmLowerIntCompareWith
     (comparison : PsWasmInstruction)
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
-  match arguments with
-  | [_, _] =>
+  match psWasmListPair? arguments with
+  | some _ =>
       match psWasmLowerIntArgumentsWith lower state arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1905,7 +1939,7 @@ def psWasmLowerIntCompareWith
               ]
             state := lowered.state
           }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | none => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 
 structure PsWasmArrayLowerInfo where

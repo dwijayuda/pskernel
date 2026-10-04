@@ -5,29 +5,32 @@
 Use these files in this order when making development decisions:
 
 1. **`PSKERNEL_SELFHOST_ARCHITECTURE.md`** — normative architecture decisions and anti-drift guardrails.
-2. **`GITHUB_FIRST_WORKFLOW.md`** — canonical GitHub/cloud operating rules for this kernel topic branch.
-3. **`DEVELOPMENT_PLAN.md`** — active phases, milestones, task-selection rule, and exit gates.
-4. **`KERNEL_THEORY.md`** — theory-oriented explanation and recommended reading order.
-5. **`KERNEL_RULE_REFERENCE.md`** — generated rule → implementation → Lean locator → test table.
-6. **`LEAN_4_34_COMPATIBILITY.json`** — machine-readable feature-completeness matrix for Lean 4.34.0.
-7. **`LEAN_4_34_CONFORMANCE.json`** — machine-readable concrete test coverage for every compatibility rule.
-8. **`SELFHOST_EVIDENCE.json`** — optional historical/generated-bootstrap checkpoint evidence; not a normal development gate.
-9. **`MIGRATION_INVENTORY.md`** — historical migration baseline only; it is not the active roadmap.
+2. **`PSKERNEL_REFERENCE.md`** — canonical human architecture reference: Lean theory/source mapping, current audit, final target structure, trust classes, dependency law, scoring, and migration plan.
+3. **`GITHUB_FIRST_WORKFLOW.md`** — canonical GitHub/cloud operating rules for this kernel topic branch.
+4. **`DEVELOPMENT_PLAN.md`** — active phases, milestones, task-selection rule, and exit gates.
+5. **`KERNEL_THEORY.md`** — theory-oriented explanation and recommended reading order.
+6. **`KERNEL_RULE_REFERENCE.md`** — generated rule → implementation → Lean locator → test table.
+7. **`LEAN_4_34_COMPATIBILITY.json`** — machine-readable feature-completeness matrix for Lean 4.34.0.
+8. **`LEAN_4_34_CONFORMANCE.json`** — machine-readable concrete test coverage for every compatibility rule.
+9. **`SELFHOST_EVIDENCE.json`** — optional historical/generated-bootstrap checkpoint evidence; not a normal development gate.
+10. **`MIGRATION_INVENTORY.md`** — historical migration baseline only; it is not the active roadmap.
 
 When documents disagree, the architecture guardrails and machine-enforced compatibility/self-host gates take precedence over historical planning text.
 
 This package is the PSC1-profile implementation of the mature
 `packages/pskernel/PSC1Kernel` reference kernel.
 
-The reference package remains the Lean-4.34 semantic oracle and should not be
-reshaped merely to satisfy bootstrap syntax restrictions. This package instead
+Official pinned Lean 4.34 behavior and source remain the semantic compatibility
+authority. The frozen `packages/pskernel/PSC1Kernel` package remains a valuable
+regression/differential oracle and should not be reshaped merely to satisfy
+bootstrap syntax restrictions. This package instead
 uses the source patterns already exercised by the compiler-only self-host fixed
 point.
 
 ## Rules
 
 - Lean 4.34 behavior remains the semantic authority.
-- `packages/pskernel/PSC1Kernel` remains the implementation/differential oracle.
+- Official Lean 4.34 behavior/source is the semantic authority; `packages/pskernel/PSC1Kernel` remains a frozen regression/differential oracle.
 - This source tree must pass the same `check-psc1-source.mjs --all-portable`
   gate as other portable compiler packages.
 - No `Lean.*`, `Std.*`, `unsafe`, `extern`, `implemented_by`, custom

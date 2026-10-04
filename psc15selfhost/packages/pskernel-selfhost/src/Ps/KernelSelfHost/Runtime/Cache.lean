@@ -326,7 +326,7 @@ def psKernelExprMapIndexSet
               entries)
 
 def psKernelCacheSmallLimit : Nat :=
-  8
+  32
 
 def psKernelCacheEntryListLength
     (entries :

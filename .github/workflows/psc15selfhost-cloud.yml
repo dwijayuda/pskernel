@@ -76,6 +76,9 @@ jobs:
             PsDriverTs \
             PsBackendRust \
             PsDriverRust \
+            PsBackendWasm \
+            psc1_backend_wasm_tests \
+            psc1_backend_wasm_binary_smoke \
             psc1_erasure_tests \
             psc2_minimal_selfhost_tests \
             psc1_backend_ts_tests \
@@ -106,6 +109,18 @@ jobs:
       - name: Run Rust source driver corpus
         working-directory: psc15selfhost
         run: lake exe psc1_backend_rust_source_tests
+
+      - name: Check Wasm self-host normalization inventory
+        working-directory: psc15selfhost
+        run: npm run check:backend-wasm-selfhost-style
+
+      - name: Run Wasm backend corpus
+        working-directory: psc15selfhost
+        run: npm run test:backend-wasm
+
+      - name: Self-check complete Wasm backend closure
+        working-directory: psc15selfhost
+        run: lake exe psc1 check test/BackendWasmSelfHostEntry.lean
 
       - name: Build checked Lean provider integration
         working-directory: psc15selfhost/lean-checked

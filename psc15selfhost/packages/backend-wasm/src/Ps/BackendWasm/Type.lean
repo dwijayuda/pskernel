@@ -45,7 +45,7 @@ def psWasmIrTypeKeyWithFuel :
             | .unit => "Unit")
       | .named name arguments =>
           let argumentKeys :=
-            arguments.map (psWasmIrTypeKeyWithFuel fuel)
+            psWasmListMap (psWasmIrTypeKeyWithFuel fuel) arguments
           match psWasmJoinTypeKeys argumentKeys with
           | none => none
           | some "" => some ("N{" ++ name ++ "}")
@@ -53,7 +53,7 @@ def psWasmIrTypeKeyWithFuel :
               some ("N{" ++ name ++ "}<" ++ keys ++ ">")
       | .function parameters result =>
           let parameterKeys :=
-            parameters.map (psWasmIrTypeKeyWithFuel fuel)
+            psWasmListMap (psWasmIrTypeKeyWithFuel fuel) parameters
           match psWasmJoinTypeKeys parameterKeys with
           | none => none
           | some parameterKey =>

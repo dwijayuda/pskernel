@@ -12,6 +12,10 @@
       "test"
     ],
     "outDir": "dist",
-    "role": "verified-compiler-ir"
+    "role": "verified-compiler-ir",
+    "runtimeSemantics": {
+      "id": "psc-runtime-semantics/1",
+      "sha256": "d610e1a1936dd1b090a44a8293a68436bc9300ad5c82872e8faf4e1e6b97ae03"
+    }
   }
 }

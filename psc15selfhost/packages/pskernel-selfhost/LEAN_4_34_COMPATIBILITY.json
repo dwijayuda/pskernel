@@ -243,16 +243,16 @@
     {
       "id": "PSK-NATIVE-BOOL",
       "area": "Lean.reduceBool native reduction",
-      "pskernelSymbol": "psKernelReduceNativeBool",
+      "pskernelSymbol": "psKernelReduceNative",
       "leanLocator": "src/kernel/type_checker.cpp::reduce_native",
-      "status": "missing"
+      "status": "implemented-differential"
     },
     {
       "id": "PSK-NATIVE-NAT",
       "area": "Lean.reduceNat native reduction",
-      "pskernelSymbol": "psKernelReduceNativeNat",
+      "pskernelSymbol": "psKernelReduceNative",
       "leanLocator": "src/kernel/type_checker.cpp::reduce_native",
-      "status": "missing"
+      "status": "implemented-differential"
     }
   ]
 }

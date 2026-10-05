@@ -30,3 +30,39 @@ theorem psKernelExprInstantiate1_closed
     (h : psKernelExprHasLooseBVar expr = false) :
     psKernelExprInstantiate1 expr replacement = expr := by
   simp [psKernelExprInstantiate1, h]
+
+theorem psKernelExprInstantiate1_bvar_zero
+    (replacement : PsKernelExpr) :
+    psKernelExprInstantiate1
+        (PsKernelExpr.bvar 0)
+        replacement =
+      replacement := by
+  rfl
+
+theorem psKernelExprInstantiate1_bvar_succ
+    (index : Nat)
+    (replacement : PsKernelExpr) :
+    psKernelExprInstantiate1
+        (PsKernelExpr.bvar (Nat.succ index))
+        replacement =
+      PsKernelExpr.bvar index := by
+  rfl
+
+theorem psKernelExprInstantiate1_under_one_lambda
+    (name : PsKernelName)
+    (level : PsKernelLevel)
+    (binderInfo : PsKernelBinderInfo)
+    (replacement : PsKernelExpr) :
+    psKernelExprInstantiate1
+        (PsKernelExpr.lam
+          name
+          (PsKernelExpr.sort level)
+          (PsKernelExpr.bvar 1)
+          binderInfo)
+        replacement =
+      PsKernelExpr.lam
+        name
+        (PsKernelExpr.sort level)
+        (psKernelExprLift replacement 1)
+        binderInfo := by
+  rfl

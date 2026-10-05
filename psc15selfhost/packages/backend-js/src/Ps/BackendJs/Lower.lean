@@ -127,6 +127,16 @@ def psJsPrimitiveTypeSupported
   match type with
   | PsVerifiedIrPrimitiveType.nat => true
   | PsVerifiedIrPrimitiveType.int => true
+  | PsVerifiedIrPrimitiveType.uint8 => true
+  | PsVerifiedIrPrimitiveType.uint16 => true
+  | PsVerifiedIrPrimitiveType.uint32 => true
+  | PsVerifiedIrPrimitiveType.uint64 => true
+  | PsVerifiedIrPrimitiveType.int8 => true
+  | PsVerifiedIrPrimitiveType.int16 => true
+  | PsVerifiedIrPrimitiveType.int32 => true
+  | PsVerifiedIrPrimitiveType.int64 => true
+  | PsVerifiedIrPrimitiveType.float => true
+  | PsVerifiedIrPrimitiveType.float32 => true
   | PsVerifiedIrPrimitiveType.bool => true
   | PsVerifiedIrPrimitiveType.char => true
   | PsVerifiedIrPrimitiveType.string => true
@@ -157,6 +167,80 @@ def psJsTypeSupported
     (type : PsVerifiedIrType) : Bool :=
   psJsTypeSupportedWithFuel 64 type
 
+def psJsLowerMachineIntegerType
+    (type : PsVerifiedIrMachineIntegerType) :
+    Except PsJsLowerError PsJsIrMachineIntegerType :=
+  match type with
+  | PsVerifiedIrMachineIntegerType.uint8 =>
+      Except.ok PsJsIrMachineIntegerType.uint8
+  | PsVerifiedIrMachineIntegerType.uint16 =>
+      Except.ok PsJsIrMachineIntegerType.uint16
+  | PsVerifiedIrMachineIntegerType.uint32 =>
+      Except.ok PsJsIrMachineIntegerType.uint32
+  | PsVerifiedIrMachineIntegerType.uint64 =>
+      Except.ok PsJsIrMachineIntegerType.uint64
+  | PsVerifiedIrMachineIntegerType.int8 =>
+      Except.ok PsJsIrMachineIntegerType.int8
+  | PsVerifiedIrMachineIntegerType.int16 =>
+      Except.ok PsJsIrMachineIntegerType.int16
+  | PsVerifiedIrMachineIntegerType.int32 =>
+      Except.ok PsJsIrMachineIntegerType.int32
+  | PsVerifiedIrMachineIntegerType.int64 =>
+      Except.ok PsJsIrMachineIntegerType.int64
+  | PsVerifiedIrMachineIntegerType.usize =>
+      Except.error PsJsLowerError.unsupportedType
+  | PsVerifiedIrMachineIntegerType.isize =>
+      Except.error PsJsLowerError.unsupportedType
+
+def psJsLowerIntegerBinaryOp
+    (operation : PsVerifiedIrIntegerBinaryOp) :
+    PsJsIrIntegerBinaryOp :=
+  match operation with
+  | PsVerifiedIrIntegerBinaryOp.add => PsJsIrIntegerBinaryOp.add
+  | PsVerifiedIrIntegerBinaryOp.sub => PsJsIrIntegerBinaryOp.sub
+  | PsVerifiedIrIntegerBinaryOp.mul => PsJsIrIntegerBinaryOp.mul
+  | PsVerifiedIrIntegerBinaryOp.bitAnd => PsJsIrIntegerBinaryOp.bitAnd
+  | PsVerifiedIrIntegerBinaryOp.bitOr => PsJsIrIntegerBinaryOp.bitOr
+  | PsVerifiedIrIntegerBinaryOp.bitXor => PsJsIrIntegerBinaryOp.bitXor
+
+def psJsLowerIntegerCompareOp
+    (operation : PsVerifiedIrIntegerCompareOp) :
+    PsJsIrIntegerCompareOp :=
+  match operation with
+  | PsVerifiedIrIntegerCompareOp.eq => PsJsIrIntegerCompareOp.eq
+  | PsVerifiedIrIntegerCompareOp.ne => PsJsIrIntegerCompareOp.ne
+  | PsVerifiedIrIntegerCompareOp.lt => PsJsIrIntegerCompareOp.lt
+  | PsVerifiedIrIntegerCompareOp.le => PsJsIrIntegerCompareOp.le
+  | PsVerifiedIrIntegerCompareOp.gt => PsJsIrIntegerCompareOp.gt
+  | PsVerifiedIrIntegerCompareOp.ge => PsJsIrIntegerCompareOp.ge
+
+def psJsLowerFloatingType
+    (type : PsVerifiedIrFloatingType) :
+    PsJsIrFloatingType :=
+  match type with
+  | PsVerifiedIrFloatingType.float => PsJsIrFloatingType.float
+  | PsVerifiedIrFloatingType.float32 => PsJsIrFloatingType.float32
+
+def psJsLowerFloatBinaryOp
+    (operation : PsVerifiedIrFloatBinaryOp) :
+    PsJsIrFloatBinaryOp :=
+  match operation with
+  | PsVerifiedIrFloatBinaryOp.add => PsJsIrFloatBinaryOp.add
+  | PsVerifiedIrFloatBinaryOp.sub => PsJsIrFloatBinaryOp.sub
+  | PsVerifiedIrFloatBinaryOp.mul => PsJsIrFloatBinaryOp.mul
+  | PsVerifiedIrFloatBinaryOp.div => PsJsIrFloatBinaryOp.div
+
+def psJsLowerFloatCompareOp
+    (operation : PsVerifiedIrFloatCompareOp) :
+    PsJsIrFloatCompareOp :=
+  match operation with
+  | PsVerifiedIrFloatCompareOp.eq => PsJsIrFloatCompareOp.eq
+  | PsVerifiedIrFloatCompareOp.ne => PsJsIrFloatCompareOp.ne
+  | PsVerifiedIrFloatCompareOp.lt => PsJsIrFloatCompareOp.lt
+  | PsVerifiedIrFloatCompareOp.le => PsJsIrFloatCompareOp.le
+  | PsVerifiedIrFloatCompareOp.gt => PsJsIrFloatCompareOp.gt
+  | PsVerifiedIrFloatCompareOp.ge => PsJsIrFloatCompareOp.ge
+
 def psJsLowerLiteral
     (literal : PsVerifiedIrLiteral) :
     Except PsJsLowerError PsJsIrLiteral :=
@@ -171,8 +255,14 @@ def psJsLowerLiteral
       Except.ok (PsJsIrLiteral.bool value)
   | PsVerifiedIrLiteral.unit =>
       Except.ok PsJsIrLiteral.unit
-  | PsVerifiedIrLiteral.machineInteger _ _ =>
-      Except.error PsJsLowerError.unsupportedLiteral
+  | PsVerifiedIrLiteral.machineInteger type value =>
+      match psJsLowerMachineIntegerType type with
+      | Except.error error => Except.error error
+      | Except.ok loweredType =>
+          Except.ok
+            (PsJsIrLiteral.machineInteger
+              loweredType
+              value)
 
 def psJsLowerParameterNames
     (parameters : List PsVerifiedIrParameter) :
@@ -336,6 +426,41 @@ def psJsLowerExprWithFuel
             arguments =>
             if psListIsEmpty typeArguments then
               match operation with
+              | PsVerifiedIrIntrinsic.machineIntBinary type integerOperation =>
+                  match psJsLowerMachineIntegerType type with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredType =>
+                      psJsLowerBinaryWith
+                        smaller
+                        (PsJsIrBinaryOp.machineInt
+                          loweredType
+                          (psJsLowerIntegerBinaryOp integerOperation))
+                        arguments
+              | PsVerifiedIrIntrinsic.machineIntCompare type integerOperation =>
+                  match psJsLowerMachineIntegerType type with
+                  | Except.error error => Except.error error
+                  | Except.ok _ =>
+                      psJsLowerBinaryWith
+                        smaller
+                        (PsJsIrBinaryOp.machineIntCompare
+                          (psJsLowerIntegerCompareOp integerOperation))
+                        arguments
+              | PsVerifiedIrIntrinsic.uint8OfNat =>
+                  psJsLowerRuntimeUnaryWith
+                    smaller PsJsIrRuntimeOp.uint8OfNat arguments
+              | PsVerifiedIrIntrinsic.floatBinary type floatOperation =>
+                  psJsLowerBinaryWith
+                    smaller
+                    (PsJsIrBinaryOp.floatBinary
+                      (psJsLowerFloatingType type)
+                      (psJsLowerFloatBinaryOp floatOperation))
+                    arguments
+              | PsVerifiedIrIntrinsic.floatCompare _ floatOperation =>
+                  psJsLowerBinaryWith
+                    smaller
+                    (PsJsIrBinaryOp.floatCompare
+                      (psJsLowerFloatCompareOp floatOperation))
+                    arguments
               | PsVerifiedIrIntrinsic.natAdd =>
                   psJsLowerBinaryWith
                     smaller PsJsIrBinaryOp.bigintAdd arguments

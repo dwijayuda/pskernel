@@ -114,5 +114,6 @@ theorem psKernelAddQuot_success_postconditions
           simp [
             psKernelEnvironmentAddUnchecked,
             psKernelEnvironmentMarkQuotInitialized,
-            psKernelConstantListLength
+            psKernelConstantListLength,
+            hInit
           ]

@@ -47,6 +47,143 @@ def psJsConcat7
     (a b c d e f g : String) : String :=
   psJsConcat2 (psJsConcat6 a b c d e f) g
 
+def psJsPrintMachineIntegerLiteral
+    (type : PsJsIrMachineIntegerType)
+    (value : Int) : String :=
+  let printed :=
+    String.Internal.append (Int.repr value) "n";
+  match type with
+  | PsJsIrMachineIntegerType.uint8 =>
+      psJsJoin "" ["Number(BigInt.asUintN(8, ", printed, "))"]
+  | PsJsIrMachineIntegerType.uint16 =>
+      psJsJoin "" ["Number(BigInt.asUintN(16, ", printed, "))"]
+  | PsJsIrMachineIntegerType.uint32 =>
+      psJsJoin "" ["Number(BigInt.asUintN(32, ", printed, "))"]
+  | PsJsIrMachineIntegerType.uint64 =>
+      psJsJoin "" ["BigInt.asUintN(64, ", printed, ")"]
+  | PsJsIrMachineIntegerType.int8 =>
+      psJsJoin "" ["Number(BigInt.asIntN(8, ", printed, "))"]
+  | PsJsIrMachineIntegerType.int16 =>
+      psJsJoin "" ["Number(BigInt.asIntN(16, ", printed, "))"]
+  | PsJsIrMachineIntegerType.int32 =>
+      psJsJoin "" ["Number(BigInt.asIntN(32, ", printed, "))"]
+  | PsJsIrMachineIntegerType.int64 =>
+      psJsJoin "" ["BigInt.asIntN(64, ", printed, ")"]
+
+def psJsNormalizeMachineInteger
+    (type : PsJsIrMachineIntegerType)
+    (value : String) : String :=
+  match type with
+  | PsJsIrMachineIntegerType.uint8 =>
+      psJsJoin "" ["((", value, ") & 255)"]
+  | PsJsIrMachineIntegerType.uint16 =>
+      psJsJoin "" ["((", value, ") & 65535)"]
+  | PsJsIrMachineIntegerType.uint32 =>
+      psJsJoin "" ["((", value, ") >>> 0)"]
+  | PsJsIrMachineIntegerType.uint64 =>
+      psJsJoin "" ["BigInt.asUintN(64, (", value, "))"]
+  | PsJsIrMachineIntegerType.int8 =>
+      psJsJoin "" ["(((", value, ") << 24) >> 24)"]
+  | PsJsIrMachineIntegerType.int16 =>
+      psJsJoin "" ["(((", value, ") << 16) >> 16)"]
+  | PsJsIrMachineIntegerType.int32 =>
+      psJsJoin "" ["((", value, ") | 0)"]
+  | PsJsIrMachineIntegerType.int64 =>
+      psJsJoin "" ["BigInt.asIntN(64, (", value, "))"]
+
+def psJsMachineIntegerBinaryRaw
+    (type : PsJsIrMachineIntegerType)
+    (operation : PsJsIrIntegerBinaryOp)
+    (left right : String) : String :=
+  match operation with
+  | PsJsIrIntegerBinaryOp.add =>
+      psJsJoin "" ["(", left, " + ", right, ")"]
+  | PsJsIrIntegerBinaryOp.sub =>
+      psJsJoin "" ["(", left, " - ", right, ")"]
+  | PsJsIrIntegerBinaryOp.mul =>
+      match type with
+      | PsJsIrMachineIntegerType.uint8 =>
+          psJsJoin "" ["Math.imul(", left, ", ", right, ")"]
+      | PsJsIrMachineIntegerType.uint16 =>
+          psJsJoin "" ["Math.imul(", left, ", ", right, ")"]
+      | PsJsIrMachineIntegerType.uint32 =>
+          psJsJoin "" ["Math.imul(", left, ", ", right, ")"]
+      | PsJsIrMachineIntegerType.int8 =>
+          psJsJoin "" ["Math.imul(", left, ", ", right, ")"]
+      | PsJsIrMachineIntegerType.int16 =>
+          psJsJoin "" ["Math.imul(", left, ", ", right, ")"]
+      | PsJsIrMachineIntegerType.int32 =>
+          psJsJoin "" ["Math.imul(", left, ", ", right, ")"]
+      | _ =>
+          psJsJoin "" ["(", left, " * ", right, ")"]
+  | PsJsIrIntegerBinaryOp.bitAnd =>
+      psJsJoin "" ["(", left, " & ", right, ")"]
+  | PsJsIrIntegerBinaryOp.bitOr =>
+      psJsJoin "" ["(", left, " | ", right, ")"]
+  | PsJsIrIntegerBinaryOp.bitXor =>
+      psJsJoin "" ["(", left, " ^ ", right, ")"]
+
+def psJsPrintMachineIntegerBinary
+    (type : PsJsIrMachineIntegerType)
+    (operation : PsJsIrIntegerBinaryOp)
+    (left right : String) : String :=
+  psJsNormalizeMachineInteger
+    type
+    (psJsMachineIntegerBinaryRaw type operation left right)
+
+def psJsPrintIntegerCompare
+    (operation : PsJsIrIntegerCompareOp)
+    (left right : String) : String :=
+  match operation with
+  | PsJsIrIntegerCompareOp.eq =>
+      psJsJoin "" ["(", left, " === ", right, ")"]
+  | PsJsIrIntegerCompareOp.ne =>
+      psJsJoin "" ["(", left, " !== ", right, ")"]
+  | PsJsIrIntegerCompareOp.lt =>
+      psJsJoin "" ["(", left, " < ", right, ")"]
+  | PsJsIrIntegerCompareOp.le =>
+      psJsJoin "" ["(", left, " <= ", right, ")"]
+  | PsJsIrIntegerCompareOp.gt =>
+      psJsJoin "" ["(", left, " > ", right, ")"]
+  | PsJsIrIntegerCompareOp.ge =>
+      psJsJoin "" ["(", left, " >= ", right, ")"]
+
+def psJsPrintFloatBinary
+    (type : PsJsIrFloatingType)
+    (operation : PsJsIrFloatBinaryOp)
+    (left right : String) : String :=
+  let raw : String :=
+    match operation with
+    | PsJsIrFloatBinaryOp.add =>
+        psJsJoin "" ["(", left, " + ", right, ")"]
+    | PsJsIrFloatBinaryOp.sub =>
+        psJsJoin "" ["(", left, " - ", right, ")"]
+    | PsJsIrFloatBinaryOp.mul =>
+        psJsJoin "" ["(", left, " * ", right, ")"]
+    | PsJsIrFloatBinaryOp.div =>
+        psJsJoin "" ["(", left, " / ", right, ")"];
+  match type with
+  | PsJsIrFloatingType.float => raw
+  | PsJsIrFloatingType.float32 =>
+      psJsJoin "" ["Math.fround(", raw, ")"]
+
+def psJsPrintFloatCompare
+    (operation : PsJsIrFloatCompareOp)
+    (left right : String) : String :=
+  match operation with
+  | PsJsIrFloatCompareOp.eq =>
+      psJsJoin "" ["(", left, " === ", right, ")"]
+  | PsJsIrFloatCompareOp.ne =>
+      psJsJoin "" ["(", left, " !== ", right, ")"]
+  | PsJsIrFloatCompareOp.lt =>
+      psJsJoin "" ["(", left, " < ", right, ")"]
+  | PsJsIrFloatCompareOp.le =>
+      psJsJoin "" ["(", left, " <= ", right, ")"]
+  | PsJsIrFloatCompareOp.gt =>
+      psJsJoin "" ["(", left, " > ", right, ")"]
+  | PsJsIrFloatCompareOp.ge =>
+      psJsJoin "" ["(", left, " >= ", right, ")"]
+
 def psJsPrintLiteral
     (literal : PsJsIrLiteral) : String :=
   match literal with
@@ -58,6 +195,8 @@ def psJsPrintLiteral
       String.Internal.append
         (Int.repr value)
         "n"
+  | PsJsIrLiteral.machineInteger type value =>
+      psJsPrintMachineIntegerLiteral type value
   | PsJsIrLiteral.string value =>
       psJsonQuote value
   | PsJsIrLiteral.bool value =>
@@ -104,12 +243,26 @@ def psJsPrintBinary
       psJsJoin "" ["(", left, " + ", right, ")"]
   | PsJsIrBinaryOp.stringEq =>
       psJsJoin "" ["(", left, " === ", right, ")"]
+  | PsJsIrBinaryOp.machineInt type integerOperation =>
+      psJsPrintMachineIntegerBinary
+        type integerOperation left right
+  | PsJsIrBinaryOp.machineIntCompare integerOperation =>
+      psJsPrintIntegerCompare integerOperation left right
+  | PsJsIrBinaryOp.floatBinary type floatOperation =>
+      psJsPrintFloatBinary type floatOperation left right
+  | PsJsIrBinaryOp.floatCompare floatOperation =>
+      psJsPrintFloatCompare floatOperation left right
 
 def psJsRuntimeUnary
     (operation : PsJsIrRuntimeOp)
     (value : String) :
     Except PsJsEmitError String :=
   match operation with
+  | PsJsIrRuntimeOp.uint8OfNat =>
+      Except.ok
+        (psJsJoin
+          ""
+          ["Number(BigInt.asUintN(8, ", value, "))"])
   | PsJsIrRuntimeOp.intNegSucc =>
       Except.ok
         (psJsJoin "" ["(-(", value, " + 1n))"])

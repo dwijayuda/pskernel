@@ -1,8 +1,8 @@
 /** Package identity only. No public declaration-admission API is exposed. */
 export const kernelInfo = Object.freeze({
-  name: "@proofscript/pskernel-core",
+  name: "@proofscript/pskernel-core.old2",
   version: "0.1.0-checker.14",
-  implementation: "new-owned-psc-kernel",
+  implementation: "archived-owned-psc-kernel-old2",
   status: "experimental-term-checker",
   canCheckProofs: false,
   authoritative: false,

@@ -1,6 +1,6 @@
 import test from'node:test';import assert from'node:assert/strict';import fs from'node:fs';
 import{requiredReleaseGates,releaseBlockers}from'../scripts/release-check.mjs';
-import*as api from'@proofscript/pskernel-core';
+import*as api from'@proofscript/pskernel-core.old2';
 const read=f=>JSON.parse(fs.readFileSync(new URL('../'+f,import.meta.url),'utf8'));
 const manifest=read('package.json'),caps=read('manifests/CAPABILITIES.json');
 test('incomplete kernel cannot pass release gate',()=>{const errors=releaseBlockers(manifest,caps,Object.keys(api));assert.ok(errors.includes('NO_CHECKING_API'));assert.ok(errors.includes('PACKAGE_PRIVATE'));for(const gate of requiredReleaseGates)assert.ok(errors.includes('INCOMPLETE_GATE:'+gate));});

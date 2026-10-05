@@ -58,7 +58,7 @@ test('owned raw natural serialization preserves exact large values and rejects n
  assert.equal(definitions([]).k,'app');
 });
 test('no public entry point is added by the internal checker milestone',async()=>{
- const api=await import('@proofscript/pskernel-core');assert.deepEqual(Object.keys(api),['kernelInfo']);
+ const api=await import('@proofscript/pskernel-core.old2');assert.deepEqual(Object.keys(api),['kernelInfo']);
  const capabilities=JSON.parse(fs.readFileSync(path.join(root,'manifests/CAPABILITIES.json')));
  assert.equal(capabilities.authoritative,false);assert.equal(capabilities.selfHosted,false);
  assert.equal(capabilities.releaseGates['term-checking'].status,'partial');

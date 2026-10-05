@@ -1,4 +1,5 @@
 import Ps.BackendWasm.RuntimeNat
+import Ps.Foundation.List
 
 def psWasmIntName : String := "ProofScript.Int"
 
@@ -287,10 +288,14 @@ def psWasmIntLiteralInstructions
   | .ofNat magnitude =>
       let sign :=
         if Nat.beq magnitude 0 then 0 else 1;
-      [PsWasmInstruction.i32Const sign]
-        ++ psWasmNatLiteralInstructions magnitude
-        ++ [PsWasmInstruction.structNew psWasmIntName]
+      psListAppend
+        [PsWasmInstruction.i32Const sign]
+        (psListAppend
+          (psWasmNatLiteralInstructions magnitude)
+          [PsWasmInstruction.structNew psWasmIntName])
   | .negSucc magnitude =>
-      [PsWasmInstruction.i32Const (-1)]
-        ++ psWasmNatLiteralInstructions (magnitude + 1)
-        ++ [PsWasmInstruction.structNew psWasmIntName]
+      psListAppend
+        [PsWasmInstruction.i32Const (-1)]
+        (psListAppend
+          (psWasmNatLiteralInstructions (magnitude + 1))
+          [PsWasmInstruction.structNew psWasmIntName])

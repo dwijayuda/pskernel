@@ -1491,11 +1491,10 @@ def psIrSpecializeProcessStructure
                     Except.ok
                       (psIrSpecializeAddStructure
                         state
-                        {
-                          name := specializedName
-                          typeParameters := []
-                          fields := lowered.fields
-                        }
+                        (PsVerifiedIrStructure.mk
+                          specializedName
+                          List.nil
+                          lowered.fields)
                         lowered.requests)
 
 def psIrSpecializeProcessInductive
@@ -1544,11 +1543,10 @@ def psIrSpecializeProcessInductive
                     Except.ok
                       (psIrSpecializeAddInductive
                         state
-                        {
-                          name := specializedName
-                          typeParameters := []
-                          constructors := lowered.constructors
-                        }
+                        (PsVerifiedIrInductive.mk
+                          specializedName
+                          List.nil
+                          lowered.constructors)
                         lowered.requests)
 
 def psIrSpecializeProcessDeclaration
@@ -1611,14 +1609,12 @@ def psIrSpecializeProcessDeclaration
                             Except.ok
                               (psIrSpecializeAddDeclaration
                                 state
-                                {
-                                  name := specializedName
-                                  typeParameters := []
-                                  parameters :=
-                                    loweredParameters.parameters
-                                  resultType := loweredResult.type
-                                  body := loweredBody.expr
-                                }
+                                (PsVerifiedIrDeclaration.mk
+                                  specializedName
+                                  List.nil
+                                  loweredParameters.parameters
+                                  loweredResult.type
+                                  loweredBody.expr)
                                 (psListAppend
                                   loweredParameters.requests
                                   (psListAppend

@@ -10,9 +10,9 @@
   "semanticRootPath": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
   "semanticModulePrefix": "Ps.KernelSelfHost.",
   "migration": {
-    "phase": "B6-kernel-contract-v1",
+    "phase": "B-complete",
     "finalArchitectureAdopted": true,
-    "finalArchitectureImplemented": false,
+    "finalArchitectureImplemented": true,
     "compatibilityShimsAllowedDuringMigration": true,
     "compatibilityShimsAllowedInSemanticRoot": false,
     "migrationShims": [
@@ -87,7 +87,8 @@
       "Ps.KernelSelfHost.Theory.Substitution.Abstract",
       "Ps.KernelSelfHost.Instantiate",
       "Ps.KernelSelfHost.Environment"
-    ]
+    ],
+    "completionScope": "Phase B production architecture; long-term Assurance Plane and provider promotion remain separate"
   },
   "semanticRoles": [
     "logical-rule",
@@ -603,6 +604,10 @@
     {
       "area": "api-kernel",
       "module": "Ps.KernelSelfHost.API.Kernel"
+    },
+    {
+      "area": "selfhost",
+      "module": "Ps.KernelSelfHost.SelfHost"
     }
   ],
   "recursiveWiring": {
@@ -699,5 +704,7 @@
       ]
     }
   ],
-  "lakeLibrary": "PsKernelSelfHost"
+  "lakeLibrary": "PsKernelSelfHost",
+  "ruleInventory": "LEAN_4_34_KERNEL_RULES.json",
+  "diagnosticInventory": "KERNEL_DIAGNOSTICS.json"
 }

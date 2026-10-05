@@ -237,10 +237,115 @@ if (manifest.recursiveWiring) {
   }
 }
 
+const sourceFiles = [];
+function collectSources(directory) {
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory()) collectSources(file);
+    else if (entry.isFile() && entry.name.endsWith(".lean")) sourceFiles.push(file);
+  }
+}
+collectSources(sourceRoot);
+const symbolOwners = new Map();
+const literalErrors = new Set();
+for (const file of sourceFiles) {
+  const moduleName = prefix + path.relative(sourceRoot, file).replaceAll(path.sep, ".").slice(0, -5);
+  const raw = fs.readFileSync(file, "utf8");
+  const code = maskLeanNonCode(raw);
+  for (const match of code.matchAll(/^\s*(?:(?:private|protected|noncomputable|partial)\s+)*(?:def|structure|inductive)\s+(\w+)\b/gmu)) {
+    const owners = symbolOwners.get(match[1]) ?? [];
+    owners.push(moduleName);
+    symbolOwners.set(match[1], owners);
+  }
+  for (const match of raw.matchAll(/\bExcept\.error\s+("(?:[^"\\]|\\.)*")/gu)) {
+    if (code.slice(match.index, match.index + 12) === "Except.error") literalErrors.add(JSON.parse(match[1]));
+  }
+}
+
+if (manifest.ruleInventory) {
+  const inventory = JSON.parse(fs.readFileSync(path.join(packageRoot, manifest.ruleInventory), "utf8"));
+  assertTarget("rule inventory", inventory.target);
+  const parentIds = new Set(compatibility.rules.map((rule) => rule.id));
+  const ruleIds = new Set();
+  // Evidence must be both imported and reachable from the foundation main.
+  const testDefinitions = new Map();
+  const testModules = new Set();
+  function readTests(moduleName) {
+    if (testModules.has(moduleName)) return;
+    testModules.add(moduleName);
+    const testFile = path.join(root, "test", moduleName.replaceAll(".", path.sep) + ".lean");
+    if (!fs.existsSync(testFile)) return;
+    const code = maskLeanNonCode(fs.readFileSync(testFile, "utf8"));
+    for (const imported of importsOf(code)) readTests(imported);
+    const definitions = [...code.matchAll(/^\s*(?:private\s+)?def\s+(\w+)\b/gmu)];
+    for (let i = 0; i < definitions.length; i++) {
+      const name = definitions[i][1];
+      if (testDefinitions.has(name)) throw new Error("PSC1KERNEL_ARCH_DUPLICATE_TEST_SYMBOL: " + name);
+      testDefinitions.set(name, { file: testFile, body: code.slice(definitions[i].index, definitions[i + 1]?.index ?? code.length) });
+    }
+  }
+  readTests("PsKernelSelfHostFoundationTests");
+  const reachable = new Set();
+  const pending = ["main"];
+  while (pending.length) {
+    const name = pending.pop();
+    if (reachable.has(name) || !testDefinitions.has(name)) continue;
+    reachable.add(name);
+    for (const token of testDefinitions.get(name).body.matchAll(/\b[A-Za-z_][A-Za-z0-9_]*\b/gu)) {
+      if (testDefinitions.has(token[0])) pending.push(token[0]);
+    }
+  }
+  for (const rule of inventory.rules) {
+    if (ruleIds.has(rule.id)) throw new Error("PSC1KERNEL_ARCH_DUPLICATE_RULE: " + rule.id);
+    ruleIds.add(rule.id);
+    if (!parentIds.has(rule.parentId)) throw new Error("PSC1KERNEL_ARCH_RULE_PARENT: " + rule.id);
+    if (!seen.has(rule.ownerModule) || !ownerModules.has(rule.ownerModule)) throw new Error("PSC1KERNEL_ARCH_RULE_OWNER: " + rule.id);
+    if (!rule.implementationSymbols?.length || !rule.evidence?.length) throw new Error("PSC1KERNEL_ARCH_RULE_INCOMPLETE: " + rule.id);
+    for (const symbol of rule.implementationSymbols) {
+      const owners = symbolOwners.get(symbol) ?? [];
+      if (owners.length !== 1 || owners[0] !== rule.ownerModule) throw new Error("PSC1KERNEL_ARCH_RULE_SYMBOL_OWNER: " + rule.id + ": " + symbol);
+    }
+    for (const evidence of rule.evidence) {
+      const definition = testDefinitions.get(evidence.testSymbol);
+      if (!definition || definition.file !== path.join(root, evidence.testFile) || !reachable.has(evidence.testSymbol)) {
+        throw new Error("PSC1KERNEL_ARCH_RULE_EVIDENCE: " + rule.id + ": " + evidence.testSymbol);
+      }
+      if (!["direct-differential", "direct-invariant"].includes(evidence.coverage)) throw new Error("PSC1KERNEL_ARCH_RULE_COVERAGE: " + rule.id);
+    }
+  }
+  for (const rule of compatibility.rules) {
+    const mapped = inventory.rules.find((entry) => entry.id === rule.id);
+    if (!mapped || mapped.parentId !== rule.id || !mapped.implementationSymbols.includes(rule.pskernelSymbol)) {
+      throw new Error("PSC1KERNEL_ARCH_RULE_COMPATIBILITY: " + rule.id);
+    }
+  }
+}
+
+if (manifest.diagnosticInventory) {
+  const inventory = JSON.parse(fs.readFileSync(path.join(packageRoot, manifest.diagnosticInventory), "utf8"));
+  const messages = new Set();
+  for (const diagnostic of inventory.diagnostics) {
+    if (messages.has(diagnostic.message) || !literalErrors.has(diagnostic.message)) throw new Error("PSC1KERNEL_ARCH_DIAGNOSTIC_STALE: " + diagnostic.message);
+    messages.add(diagnostic.message);
+    if (!["rejectedInvalid", "declinedUnsupported", "resourceExhausted", "internalError"].includes(diagnostic.category)) throw new Error("PSC1KERNEL_ARCH_DIAGNOSTIC_CATEGORY");
+  }
+  if (inventory.unknownDiagnostic !== "internalError" || messages.size !== literalErrors.size) throw new Error("PSC1KERNEL_ARCH_DIAGNOSTIC_INCOMPLETE");
+}
+
 if (manifest.migration.finalArchitectureImplemented) {
-  throw new Error(
-    "PSC1KERNEL_ARCH_MIGRATION_STATUS: final architecture is not yet fully migrated"
-  );
+  if (!manifest.ruleInventory || !manifest.diagnosticInventory || !manifest.lakeLibrary) throw new Error("PSC1KERNEL_ARCH_COMPLETION_EVIDENCE_MISSING");
+  const required = ["Core.Name", "Core.Level", "Core.Expr", "Core.Declaration", "Core.Substitution.Abstract", "Environment.Semantic", "Environment.Environment", "Environment.Lookup", "Environment.Operations", "Checker.Ops", "Checker.Knot", "Checker.Session", "Checker.ResourcePolicy", "Runtime.Acceleration.Cache", "Runtime.Acceleration.EnvironmentIndex", "Runtime.Capability.Types", "Runtime.Capability.Lean434NativeReduction", "Admission.Declaration.Admission", "Admission.Quot.Admission", "Admission.Inductive.Ordinary.Admission", "Admission.Inductive.Mutual.Admission", "Admission.Inductive.Nested.Admission", "API.Outcome", "API.KernelContractV1", "API.Kernel", "API.Session", "API.Provider"];
+  for (const suffix of required) if (!seen.has(prefix + suffix)) throw new Error("PSC1KERNEL_ARCH_REQUIRED_OWNER: " + suffix);
+  for (const file of sourceFiles) {
+    const suffix = path.relative(sourceRoot, file).replaceAll(path.sep, ".").slice(0, -5);
+    const moduleName = prefix + suffix;
+    if (registeredShims.has(moduleName)) continue;
+    const sourcePath = suffix.replaceAll(".", "/");
+    const inTargetLayer = [...layerSet].some((layer) => sourcePath === layer || sourcePath.startsWith(layer + "/"));
+    if (!seen.has(moduleName) || !ownerModules.has(moduleName) || !inTargetLayer) {
+      throw new Error("PSC1KERNEL_ARCH_UNOWNED_SOURCE: " + moduleName);
+    }
+  }
 }
 
 return (

@@ -7,13 +7,16 @@
   - conformance registry: 34/34 rules mapped to direct differential/invariant tests.
   - `--require-complete` is enforced in CI for both compatibility and conformance audits.
   - green semantic baseline: `5d684efc33de559045bac74dfc0cb45fcc9a41ee`.
-- **Phase B — Canonical architecture migration: ACTIVE.**
+- **Phase B — Canonical architecture migration: COMPLETE.**
   - `PSKERNEL_REFERENCE.md` is now the canonical target architecture/migration guide.
   - preserve the Phase A semantic baseline while migrating source ownership, tests,
     dependency boundaries and public contracts.
-  - immediate sequence: split tests/benchmarks -> architecture manifest/import fence ->
-    Checker hierarchy/Knot -> unified Inductive hierarchy -> acceleration/capability split ->
-    KernelContract-v1/fine-grained rules.
+  - completed: split tests/benchmarks, import fences and Lake registration audit,
+    Core/Environment ownership, Checker/Ops/Knot, unified Admission hierarchy,
+    acceleration/capability separation, ResourcePolicy and KernelContract-v1.
+  - 61 rule ownership/evidence mappings preserve the 34-row compatibility matrix.
+  - completion concerns production architecture; Phase D and provider promotion
+    remain separately gated. See `ARCHITECTURE_MIGRATION_REPORT.md`.
 - **Phase C — Competitive performance: ACTIVE ONLY WHEN MEASURED.**
   - current indexing/cache and checker-path work may continue when profiling identifies a
     concrete hotspot and all Phase A/B gates remain green.
@@ -89,7 +92,7 @@ Complete and differentially test:
 
 Architecture:
 
-- current backend-neutral provider lives in `Runtime/NativeReduction.lean`;
+- current backend-neutral provider lives in `Runtime/Capability/Lean434NativeReduction.lean`;
 - final target ownership is `Runtime/Capability/Lean434NativeReduction.lean`;
 - optional provider lives in checker context/session;
 - no provider keeps ordinary semantic behavior;
@@ -123,7 +126,7 @@ Phase A blocker.
 
 ## Phase B — Canonical architecture migration
 
-**Status: ACTIVE.**
+**Status: COMPLETE (production architecture).**
 
 Goal: make the source tree, dependency graph, trust model, tests and public API
 tell the same story as the Lean-4.34 kernel theory while preserving one
@@ -158,7 +161,7 @@ Session delegation. Existing fuel workers and algorithm ordering are preserved;
 legacy imports forward to canonical owners outside the semantic root. Architecture
 CI enforces callback-leaf import fences and unique wiring ownership. Context retains context/binder and builtin helpers used by checker leaves; Core
 values/substitution and Environment history/wrapper/lookup/operations now have
-canonical owners. ResourcePolicy and the public contract are the next checkpoint.
+canonical owners. ResourcePolicy and the public contract now have explicit portable owners.
 
 Move existing checker components under one `Checker/` owner without changing
 algorithms:
@@ -211,15 +214,18 @@ acceptance.
 
 ### B6. Stable checked-session API
 
-Introduce `KernelContract-v1` after the internal ownership graph is stable.
+`KernelContract-v1` is implemented; its entry points and trust boundary are
+defined in `KERNEL_CONTRACT_V1.md`. It uses typed errors with the PSC1-supported
+`Except` representation, rechecks checked receipts, and preserves full checking.
 Public types must distinguish constructed/request state from checked/admitted
 state; provider adapters may translate but may not implement fallback semantics.
 
 ### B7. Fine-grained rule ownership
 
-Keep the existing 34-row compatibility matrix and add a finer rule inventory for
-high-risk algorithms. Every rule must map to one canonical implementation owner
-and focused conformance/hardening evidence.
+`LEAN_4_34_KERNEL_RULES.json` contains 61 mappings, including all 34 unchanged
+compatibility rows and 27 focused algorithm/resource/API rules. CI checks unique
+canonical symbol ownership and test evidence reachable from the foundation main.
+These are regression scenarios, not exhaustive branch coverage or formal proofs.
 
 ### Phase B exit gates
 
@@ -255,7 +261,7 @@ Collision handling must always use structural `PsKernelName` equality.
 
 ### C2. Checker caches
 
-Replace linear maps/sets behind `Runtime/Cache` with indexed structures.
+Replace linear maps/sets behind `Runtime/Acceleration/Cache` with indexed structures.
 
 Keep:
 

@@ -77,10 +77,10 @@ historical file creation order.
 6. `Core/Substitution/Instantiate.lean`
 7. `Core/Substitution/Beta.lean`
 8. `Core/Substitution/Abstract.lean`
-9. `Core/Substitution/Abstract.lean` (compatibility umbrella)
 10. `Core/Declaration.lean`
 11. `Core/LocalContext.lean`
-12. `Environment/Operations.lean`
+12. `Environment/Semantic.lean`, `Environment/Environment.lean`,
+    `Environment/Lookup.lean`, `Environment/Operations.lean`
 
 These modules define the data manipulated by the checker. The substitution
 sequence is deliberately explicit:
@@ -148,22 +148,21 @@ preserved.
 36. `Checker/Session.lean`
 37. `Admission/Declaration/Validation.lean`
 38. `Admission/Declaration/Admission.lean`
-39. `Admission/Declaration/Admission.lean` (compatibility umbrella)
 40. `Admission/Quot/Bootstrap.lean`
 41. `Admission/Quot/Admission.lean`
-42. `Admission/Quot/Admission.lean` (compatibility umbrella)
-43. `Admission/Inductive/Common/Parameters.lean`
+43. `Admission/Inductive/Types.lean`, `Admission/Inductive/Common/Occurrence.lean`,
+    `Admission/Inductive/Common/Parameters.lean`
 44. `Admission/Inductive/Ordinary/Constructor.lean`
 45. `Admission/Inductive/Ordinary/ConstructorAdmission.lean`
 46. `Admission/Inductive/Ordinary/Recursor.lean`
-47. `Admission/Inductive/Common/Elimination.lean`
+47. `Admission/Inductive/Common/RecursorValidation.lean`,
+    `Admission/Inductive/Common/Elimination.lean`
 48. `Admission/Inductive/Ordinary/Admission.lean`
 49. `Admission/Inductive/Mutual/Analysis.lean`
 50. `Admission/Inductive/Mutual/Recursor.lean`
 51. `Admission/Inductive/Mutual/Header.lean`
 52. `Admission/Inductive/Mutual/AdmissionLoops.lean`
 53. `Admission/Inductive/Mutual/Admission.lean`
-54. `Admission/Inductive/Mutual/Admission.lean` (compatibility umbrella)
 55. `Admission/Inductive/Nested/Types.lean`
 56. `Admission/Inductive/Nested/ReservedNames.lean`
 57. `Admission/Inductive/Nested/Rebase.lean`
@@ -174,19 +173,26 @@ preserved.
 62. `Admission/Inductive/Nested/Validation.lean`
 63. `Admission/Inductive/Nested/Commit.lean`
 64. `Admission/Inductive/Nested/Admission.lean`
-65. `Admission/Inductive/Nested/Admission.lean` (compatibility umbrella)
 
 ### 3.5 Runtime mechanisms
 
-Read these after the theory modules if the goal is to understand performance
-rather than semantics:
+Read the acceleration modules to understand representation policy, and the
+capability modules to understand explicit trusted external behavior:
 
-- `Runtime/Cache.lean`
-- `Runtime/EnvironmentIndex.lean`
-- `Runtime/NativeReduction.lean`
+- `Runtime/Acceleration/Cache.lean`
+- `Runtime/Acceleration/EnvironmentIndex.lean`
+- `Runtime/Capability/Lean434NativeReduction.lean`
 
-Runtime modules are deliberately separated from the theory-facing algorithm.
+Runtime mechanisms are separate owners. Acceleration must preserve semantic
+answers; an incorrect trusted native evaluator can affect acceptance.
 
+
+### 3.6 Checked public boundary
+
+Read `Checker/ResourcePolicy.lean`, `API/Outcome.lean`,
+`API/KernelContractV1.lean`, `API/Provider.lean`, `API/Session.lean` and
+`API/Kernel.lean`. `KERNEL_CONTRACT_V1.md` defines the stable entry points,
+resource semantics, typed outcomes, receipts and trusted construction boundary.
 
 ## 4. Universe levels
 
@@ -574,7 +580,7 @@ Admission/Declaration/Admission.lean
          axiom / definition / theorem / opaque / mutual environment extension
 ```
 
-`Admission/Declaration/Admission.lean` remains a stable umbrella import.
+`Kernel.lean` remains a compatibility import of the declaration admission owner.
 
 The admission layer checks:
 
@@ -588,11 +594,11 @@ The admission layer checks:
 - unsafe recursive definitions are checked in the recursive environment;
 - unsafe/partial mutual definitions are checked as one block.
 
-## 15. Runtime modules are non-semantic
+## 15. Runtime acceleration and trusted capabilities
 
 ### Environment index
 
-`Runtime/EnvironmentIndex.lean` is a persistent hash trie used only to narrow
+`Runtime/Acceleration/EnvironmentIndex.lean` is a persistent hash trie used only to narrow
 name lookup to a collision bucket.
 
 The authoritative ordered list of constants remains in `PsKernelEnvironment`.
@@ -600,13 +606,13 @@ Bucket collisions are resolved with full structural `PsKernelName` equality.
 
 ### Defeq/inference caches
 
-`Runtime/Cache.lean` owns memoization structures.
+`Runtime/Acceleration/Cache.lean` owns memoization structures.
 
 Changing cache representation must not change the result of a check.
 
 ### Native reduction
 
-`Runtime/NativeReduction.lean` exposes an optional provider:
+`Runtime/Capability/Lean434NativeReduction.lean` exposes an optional provider:
 
 ```
 Name -> Except String (Option Bool)
@@ -724,3 +730,13 @@ capability types live in `Runtime/Capability/Types`. The semantic view excludes
 the rebuildable index and native evaluator. Existing environment constructors
 and capability forwarding remain compatible; new public sessions configure the
 capability explicitly. No lookup or mutation algorithm changed.
+
+## Production architecture exit evidence
+
+`PSKERNEL_ARCHITECTURE.json` records all canonical owners and compatibility shims.
+The audit checks import fences, unique Knot wiring, Lake registration, completed
+layer ownership, all 61 rule mappings and all 136 legacy diagnostic mappings.
+Rule evidence must be imported and callable from the foundation main. The
+34-row Lean compatibility/conformance matrices remain the semantic gates.
+`ARCHITECTURE_MIGRATION_REPORT.md` records completion scope and intentional
+representation choices; formal proof coverage remains a separate assurance task.

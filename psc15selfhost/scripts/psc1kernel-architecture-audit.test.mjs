@@ -59,6 +59,79 @@ for (const missing of ["SelfHost", "Checker.State", "CheckerState"]) {
   });
 }
 
+function ruleFixture(t) {
+  const f = fixture(t);
+  f.manifest.ruleInventory = "RULES.json";
+  f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
+  f.json("LEAN_4_34_COMPATIBILITY.json", {
+    target: f.manifest.target, rules: [{ id: "RULE", pskernelSymbol: "testState" }],
+  });
+  const rule = {
+    id: "RULE", parentId: "RULE", ownerModule: "Ps.KernelSelfHost.Checker.State",
+    implementationSymbols: ["testState"],
+    evidence: [{ testFile: "test/PsKernelSelfHostFoundationTests.lean", testSymbol: "focused", coverage: "direct-invariant" }],
+  };
+  const inventory = { target: f.manifest.target, rules: [rule] };
+  f.json("RULES.json", inventory);
+  fs.mkdirSync(path.join(f.root, "test"));
+  const testFile = path.join(f.root, "test/PsKernelSelfHostFoundationTests.lean");
+  fs.writeFileSync(testFile, "def focused : Bool := true\ndef main : Bool := focused\n");
+  return { ...f, rule, inventory, testFile };
+}
+
+test("accept canonical rules with reachable executable evidence", (t) => {
+  assert.match(auditArchitecture(ruleFixture(t).root), /closureModules=2/);
+});
+
+test("reject evidence present in a file but not called by main", (t) => {
+  const f = ruleFixture(t);
+  fs.writeFileSync(f.testFile, "def focused : Bool := true\ndef main : Bool := true\n");
+  assert.throws(() => auditArchitecture(f.root), /ARCH_RULE_EVIDENCE/);
+});
+
+test("reject a rule symbol duplicated outside its canonical owner", (t) => {
+  const f = ruleFixture(t);
+  f.lean("Checker/Duplicate", "def testState : Bool := false\n");
+  assert.throws(() => auditArchitecture(f.root), /ARCH_RULE_SYMBOL_OWNER/);
+});
+
+test("reject a missing top-level compatibility mapping", (t) => {
+  const f = ruleFixture(t);
+  f.inventory.rules = [];
+  f.json("RULES.json", f.inventory);
+  assert.throws(() => auditArchitecture(f.root), /ARCH_RULE_COMPATIBILITY/);
+});
+
+test("reject a rule assigned to an unknown owner", (t) => {
+  const f = ruleFixture(t);
+  f.rule.ownerModule = "Ps.KernelSelfHost.Checker.Missing";
+  f.json("RULES.json", f.inventory);
+  assert.throws(() => auditArchitecture(f.root), /ARCH_RULE_OWNER/);
+});
+
+test("reject duplicate rule ids", (t) => {
+  const f = ruleFixture(t);
+  f.inventory.rules.push(f.rule);
+  f.json("RULES.json", f.inventory);
+  assert.throws(() => auditArchitecture(f.root), /ARCH_DUPLICATE_RULE/);
+});
+
+test("reject unclassified new checker diagnostics", (t) => {
+  const f = fixture(t);
+  f.manifest.diagnosticInventory = "DIAGNOSTICS.json";
+  f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
+  f.json("DIAGNOSTICS.json", { unknownDiagnostic: "internalError", diagnostics: [] });
+  f.lean("Checker/State", 'def testState : Except String Bool := Except.error "new failure"\n');
+  assert.throws(() => auditArchitecture(f.root), /ARCH_DIAGNOSTIC_INCOMPLETE/);
+});
+
+test("completion requires production evidence instead of a status flag alone", (t) => {
+  const f = fixture(t);
+  f.manifest.migration.finalArchitectureImplemented = true;
+  f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
+  assert.throws(() => auditArchitecture(f.root), /ARCH_COMPLETION_EVIDENCE_MISSING/);
+});
+
 test("comments and strings do not create imports; trailing comments preserve imports", (t) => {
   const f = fixture(t);
   f.lean("SelfHost", `/- Outer /- nested -/ comment

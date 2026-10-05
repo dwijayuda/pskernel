@@ -198,54 +198,55 @@ def psWasmInsertFunctionType
   | _ => types
 
 def psWasmCollectFunctionTypesFromTypeWithFuel
-    (remainingFuel : Nat)
-    (type : PsVerifiedIrType)
-    (types : List PsVerifiedIrType) :
+    (remainingFuel : Nat) :
+    PsVerifiedIrType ->
+    List PsVerifiedIrType ->
     List PsVerifiedIrType :=
   match remainingFuel with
-  | 0 => types
+  | 0 =>
+      fun (_type : PsVerifiedIrType) =>
+        fun (types : List PsVerifiedIrType) =>
+          types
   | fuel + 1 =>
-      match type with
-      | .function parameters result =>
-          let withSelf :=
-            psWasmInsertFunctionType types type;
-          let collectParameter :
-              List PsVerifiedIrType ->
-              PsVerifiedIrType ->
-              List PsVerifiedIrType :=
-            fun
-              (state : List PsVerifiedIrType)
-              (parameter : PsVerifiedIrType) =>
-              psWasmCollectFunctionTypesFromTypeWithFuel
-                fuel
-                parameter
-                state;
-          let withParameters :=
-            psWasmListFoldl
-              collectParameter
-              parameters
-              withSelf;
-          psWasmCollectFunctionTypesFromTypeWithFuel
-            fuel
-            result
-            withParameters
-      | .named _ arguments =>
-          let collectArgument :
-              List PsVerifiedIrType ->
-              PsVerifiedIrType ->
-              List PsVerifiedIrType :=
-            fun
-              (state : List PsVerifiedIrType)
-              (argument : PsVerifiedIrType) =>
-              psWasmCollectFunctionTypesFromTypeWithFuel
-                fuel
-                argument
-                state;
-          psWasmListFoldl
-            collectArgument
-            arguments
-            types
-      | _ => types
+      let smaller :
+          PsVerifiedIrType ->
+          List PsVerifiedIrType ->
+          List PsVerifiedIrType :=
+        psWasmCollectFunctionTypesFromTypeWithFuel fuel;
+      fun (type : PsVerifiedIrType) =>
+        fun (types : List PsVerifiedIrType) =>
+          match type with
+          | .function parameters result =>
+              let withSelf :=
+                psWasmInsertFunctionType types type;
+              let collectParameter :
+                  List PsVerifiedIrType ->
+                  PsVerifiedIrType ->
+                  List PsVerifiedIrType :=
+                fun
+                  (state : List PsVerifiedIrType)
+                  (parameter : PsVerifiedIrType) =>
+                  smaller parameter state;
+              let withParameters :=
+                psWasmListFoldl
+                  collectParameter
+                  parameters
+                  withSelf;
+              smaller result withParameters
+          | .named _ arguments =>
+              let collectArgument :
+                  List PsVerifiedIrType ->
+                  PsVerifiedIrType ->
+                  List PsVerifiedIrType :=
+                fun
+                  (state : List PsVerifiedIrType)
+                  (argument : PsVerifiedIrType) =>
+                  smaller argument state;
+              psWasmListFoldl
+                collectArgument
+                arguments
+                types
+          | _ => types
 
 def psWasmCollectFunctionTypesFromType
     (type : PsVerifiedIrType)
@@ -282,154 +283,163 @@ def psWasmParameterTypes
   psListMap parameterType parameters
 
 def psWasmCollectFunctionTypesFromExprWithFuel
-    (remainingFuel : Nat)
-    (expr : PsVerifiedIrExpr)
-    (types : List PsVerifiedIrType) :
+    (remainingFuel : Nat) :
+    PsVerifiedIrExpr ->
+    List PsVerifiedIrType ->
     List PsVerifiedIrType :=
   match remainingFuel with
-  | 0 => types
+  | 0 =>
+      fun (_expr : PsVerifiedIrExpr) =>
+        fun (types : List PsVerifiedIrType) =>
+          types
   | fuel + 1 =>
-      let collect :
+      let smaller :
           PsVerifiedIrExpr ->
           List PsVerifiedIrType ->
           List PsVerifiedIrType :=
-        fun
-          (expression : PsVerifiedIrExpr)
-          (state : List PsVerifiedIrType) =>
-          psWasmCollectFunctionTypesFromExprWithFuel
-            fuel
-            expression
-            state;
-      let collectType :
-          List PsVerifiedIrType ->
-          PsVerifiedIrType ->
-          List PsVerifiedIrType :=
-        fun
-          (state : List PsVerifiedIrType)
-          (type : PsVerifiedIrType) =>
-          psWasmCollectFunctionTypesFromType
-            type
-            state;
-      let collectArgument :
-          List PsVerifiedIrType ->
-          PsVerifiedIrExpr ->
-          List PsVerifiedIrType :=
-        fun
-          (state : List PsVerifiedIrType)
-          (argument : PsVerifiedIrExpr) =>
-          collect argument state;
-      let collectField :
-          List PsVerifiedIrType ->
-          (String × PsVerifiedIrExpr) ->
-          List PsVerifiedIrType :=
-        fun
-          (state : List PsVerifiedIrType)
-          (field : String × PsVerifiedIrExpr) =>
-          collect (Prod.snd field) state;
-      match expr with
-      | .literal _ => types
-      | .var _ => types
-      | .intrinsic _ typeArguments arguments =>
-          let withTypes :=
-            psWasmListFoldl
-              collectType
-              typeArguments
-              types;
-          psWasmListFoldl
-            collectArgument
-            arguments
-            withTypes
-      | .lambda parameters resultType body =>
-          let withParameters :=
-            psWasmCollectFunctionTypesFromParameters
-              parameters
-              types;
-          let functionType :=
-            PsVerifiedIrType.function
-              (psWasmParameterTypes parameters)
-              resultType;
-          let withFunction :=
-            psWasmInsertFunctionType
-              withParameters
-              functionType;
-          let withResult :=
-            psWasmCollectFunctionTypesFromType
-              resultType
-              withFunction;
-          collect body withResult
-      | .call fn typeArguments arguments =>
-          let withFn := collect fn types;
-          let withTypes :=
-            psWasmListFoldl
-              collectType
-              typeArguments
-              withFn;
-          psWasmListFoldl
-            collectArgument
-            arguments
-            withTypes
-      | .letE _ type value body =>
-          let withType :=
-            psWasmCollectFunctionTypesFromType type types;
-          let withValue := collect value withType;
-          collect body withValue
-      | .ifE condition thenBranch elseBranch =>
-          let withCondition := collect condition types;
-          let withThen := collect thenBranch withCondition;
-          collect elseBranch withThen
-      | .record _ _ fields =>
-          psWasmListFoldl
-            collectField
-            fields
-            types
-      | .projection _ _ target _ =>
-          collect target types
-      | .constructor _ _ typeArguments fields =>
-          let withTypes :=
-            psWasmListFoldl
-              collectType
-              typeArguments
-              types;
-          psWasmListFoldl
-            collectField
-            fields
-            withTypes
-      | .matchE _ _ scrutinee alternatives =>
-          let withScrutinee := collect scrutinee types;
-          let collectAlternative :
+        psWasmCollectFunctionTypesFromExprWithFuel fuel;
+      fun (expr : PsVerifiedIrExpr) =>
+        fun (types : List PsVerifiedIrType) =>
+          let collect :
+              PsVerifiedIrExpr ->
               List PsVerifiedIrType ->
-              (String ×
-                List PsVerifiedIrMatchBinding ×
-                PsVerifiedIrExpr) ->
+              List PsVerifiedIrType :=
+            fun
+              (expression : PsVerifiedIrExpr)
+              (state : List PsVerifiedIrType) =>
+              smaller expression state;
+          let collectType :
+              List PsVerifiedIrType ->
+              PsVerifiedIrType ->
               List PsVerifiedIrType :=
             fun
               (state : List PsVerifiedIrType)
-              (alternative :
-                String ×
-                  List PsVerifiedIrMatchBinding ×
-                  PsVerifiedIrExpr) =>
-              let bindings := Prod.fst (Prod.snd alternative);
-              let body := Prod.snd (Prod.snd alternative);
-              let collectBinding :
+              (type : PsVerifiedIrType) =>
+              psWasmCollectFunctionTypesFromType
+                type
+                state;
+          let collectArgument :
+              List PsVerifiedIrType ->
+              PsVerifiedIrExpr ->
+              List PsVerifiedIrType :=
+            fun
+              (state : List PsVerifiedIrType)
+              (argument : PsVerifiedIrExpr) =>
+              collect argument state;
+          let collectField :
+              List PsVerifiedIrType ->
+              (String × PsVerifiedIrExpr) ->
+              List PsVerifiedIrType :=
+            fun
+              (state : List PsVerifiedIrType)
+              (field : String × PsVerifiedIrExpr) =>
+              collect (Prod.snd field) state;
+          match expr with
+          | .literal _ => types
+          | .var _ => types
+          | .intrinsic _ typeArguments arguments =>
+              let withTypes :=
+                psWasmListFoldl
+                  collectType
+                  typeArguments
+                  types;
+              psWasmListFoldl
+                collectArgument
+                arguments
+                withTypes
+          | .lambda parameters resultType body =>
+              let withParameters :=
+                psWasmCollectFunctionTypesFromParameters
+                  parameters
+                  types;
+              let functionType :=
+                PsVerifiedIrType.function
+                  (psWasmParameterTypes parameters)
+                  resultType;
+              let withFunction :=
+                psWasmInsertFunctionType
+                  withParameters
+                  functionType;
+              let withResult :=
+                psWasmCollectFunctionTypesFromType
+                  resultType
+                  withFunction;
+              collect body withResult
+          | .call fn typeArguments arguments =>
+              let withFn := collect fn types;
+              let withTypes :=
+                psWasmListFoldl
+                  collectType
+                  typeArguments
+                  withFn;
+              psWasmListFoldl
+                collectArgument
+                arguments
+                withTypes
+          | .letE _ type value body =>
+              let withType :=
+                psWasmCollectFunctionTypesFromType type types;
+              let withValue := collect value withType;
+              collect body withValue
+          | .ifE condition thenBranch elseBranch =>
+              let withCondition := collect condition types;
+              let withThen := collect thenBranch withCondition;
+              collect elseBranch withThen
+          | .record _ _ fields =>
+              psWasmListFoldl
+                collectField
+                fields
+                types
+          | .projection _ _ target _ =>
+              collect target types
+          | .constructor _ _ typeArguments fields =>
+              let withTypes :=
+                psWasmListFoldl
+                  collectType
+                  typeArguments
+                  types;
+              psWasmListFoldl
+                collectField
+                fields
+                withTypes
+          | .matchE _ _ scrutinee alternatives =>
+              let withScrutinee := collect scrutinee types;
+              let collectAlternative :
                   List PsVerifiedIrType ->
-                  PsVerifiedIrMatchBinding ->
+                  (String ×
+                    List PsVerifiedIrMatchBinding ×
+                    PsVerifiedIrExpr) ->
                   List PsVerifiedIrType :=
                 fun
-                  (inner : List PsVerifiedIrType)
-                  (binding : PsVerifiedIrMatchBinding) =>
-                  psWasmCollectFunctionTypesFromType
-                    binding.type
-                    inner;
-              let withBindings :=
-                psWasmListFoldl
-                  collectBinding
-                  bindings
-                  state;
-              collect body withBindings;
-          psWasmListFoldl
-            collectAlternative
-            alternatives
-            withScrutinee
+                  (state : List PsVerifiedIrType)
+                  (alternative :
+                    String ×
+                      List PsVerifiedIrMatchBinding ×
+                      PsVerifiedIrExpr) =>
+                  let bindings :=
+                    Prod.fst (Prod.snd alternative);
+                  let body :=
+                    Prod.snd (Prod.snd alternative);
+                  let collectBinding :
+                      List PsVerifiedIrType ->
+                      PsVerifiedIrMatchBinding ->
+                      List PsVerifiedIrType :=
+                    fun
+                      (inner : List PsVerifiedIrType)
+                      (binding : PsVerifiedIrMatchBinding) =>
+                      psWasmCollectFunctionTypesFromType
+                        binding.type
+                        inner;
+                  let withBindings :=
+                    psWasmListFoldl
+                      collectBinding
+                      bindings
+                      state;
+                  collect body withBindings;
+              psWasmListFoldl
+                collectAlternative
+                alternatives
+                withScrutinee
 
 def psWasmCollectFunctionTypesFromExpr
     (expr : PsVerifiedIrExpr)
@@ -582,83 +592,78 @@ def psWasmInsertArrayType
   | _ => types
 
 def psWasmCollectArrayTypesFromTypeWithFuel
-    (remainingFuel : Nat)
-    (type : PsVerifiedIrType)
-    (types : List PsVerifiedIrType) :
+    (remainingFuel : Nat) :
+    PsVerifiedIrType ->
+    List PsVerifiedIrType ->
     List PsVerifiedIrType :=
   match remainingFuel with
-  | 0 => types
+  | 0 =>
+      fun (_type : PsVerifiedIrType) =>
+        fun (types : List PsVerifiedIrType) =>
+          types
   | fuel + 1 =>
-      match type with
-      | .function parameters result =>
-          let collectParameter :
-              List PsVerifiedIrType ->
-              PsVerifiedIrType ->
-              List PsVerifiedIrType :=
-            fun
-              (state : List PsVerifiedIrType)
-              (parameter : PsVerifiedIrType) =>
-              psWasmCollectArrayTypesFromTypeWithFuel
-                fuel
-                parameter
-                state;
-          let withParameters :=
-            psWasmListFoldl
-              collectParameter
-              parameters
-              types;
-          psWasmCollectArrayTypesFromTypeWithFuel
-            fuel
-            result
-            withParameters
-      | .named name arguments =>
-          if psStringEq name "Array" then
-            match arguments with
-            | List.nil => types
-            | List.cons elementType rest =>
-                match rest with
-                | List.nil =>
-                    let withSelf :=
-                      psWasmInsertArrayType
-                        types
-                        type;
-                    psWasmCollectArrayTypesFromTypeWithFuel
-                      fuel
-                      elementType
-                      withSelf
-                | List.cons _ _ =>
-                    let collectArgument :
-                        List PsVerifiedIrType ->
-                        PsVerifiedIrType ->
-                        List PsVerifiedIrType :=
-                      fun
-                        (state : List PsVerifiedIrType)
-                        (argument : PsVerifiedIrType) =>
-                        psWasmCollectArrayTypesFromTypeWithFuel
-                          fuel
-                          argument
-                          state;
-                    psWasmListFoldl
-                      collectArgument
-                      arguments
-                      types
-          else
-            let collectArgument :
-                List PsVerifiedIrType ->
-                PsVerifiedIrType ->
-                List PsVerifiedIrType :=
-              fun
-                (state : List PsVerifiedIrType)
-                (argument : PsVerifiedIrType) =>
-                psWasmCollectArrayTypesFromTypeWithFuel
-                  fuel
-                  argument
-                  state;
-            psWasmListFoldl
-              collectArgument
-              arguments
-              types
-      | _ => types
+      let smaller :
+          PsVerifiedIrType ->
+          List PsVerifiedIrType ->
+          List PsVerifiedIrType :=
+        psWasmCollectArrayTypesFromTypeWithFuel fuel;
+      fun (type : PsVerifiedIrType) =>
+        fun (types : List PsVerifiedIrType) =>
+          match type with
+          | .function parameters result =>
+              let collectParameter :
+                  List PsVerifiedIrType ->
+                  PsVerifiedIrType ->
+                  List PsVerifiedIrType :=
+                fun
+                  (state : List PsVerifiedIrType)
+                  (parameter : PsVerifiedIrType) =>
+                  smaller parameter state;
+              let withParameters :=
+                psWasmListFoldl
+                  collectParameter
+                  parameters
+                  types;
+              smaller result withParameters
+          | .named name arguments =>
+              if psStringEq name "Array" then
+                match arguments with
+                | List.nil => types
+                | List.cons elementType rest =>
+                    match rest with
+                    | List.nil =>
+                        let withSelf :=
+                          psWasmInsertArrayType
+                            types
+                            type;
+                        smaller elementType withSelf
+                    | List.cons _ _ =>
+                        let collectArgument :
+                            List PsVerifiedIrType ->
+                            PsVerifiedIrType ->
+                            List PsVerifiedIrType :=
+                          fun
+                            (state : List PsVerifiedIrType)
+                            (argument : PsVerifiedIrType) =>
+                            smaller argument state;
+                        psWasmListFoldl
+                          collectArgument
+                          arguments
+                          types
+              else
+                let collectArgument :
+                    List PsVerifiedIrType ->
+                    PsVerifiedIrType ->
+                    List PsVerifiedIrType :=
+                  fun
+                    (state : List PsVerifiedIrType)
+                    (argument : PsVerifiedIrType) =>
+                    smaller argument state;
+                psWasmListFoldl
+                  collectArgument
+                  arguments
+                  types
+          | _ => types
 
 def psWasmCollectArrayTypesFromType
     (type : PsVerifiedIrType)
@@ -758,169 +763,178 @@ def psWasmAddArrayTypesForIntrinsic
   | _ => types
 
 def psWasmCollectArrayTypesFromExprWithFuel
-    (remainingFuel : Nat)
-    (expr : PsVerifiedIrExpr)
-    (types : List PsVerifiedIrType) :
+    (remainingFuel : Nat) :
+    PsVerifiedIrExpr ->
+    List PsVerifiedIrType ->
     List PsVerifiedIrType :=
   match remainingFuel with
-  | 0 => types
+  | 0 =>
+      fun (_expr : PsVerifiedIrExpr) =>
+        fun (types : List PsVerifiedIrType) =>
+          types
   | fuel + 1 =>
-      let collect :
+      let smaller :
           PsVerifiedIrExpr ->
           List PsVerifiedIrType ->
           List PsVerifiedIrType :=
-        fun
-          (expression : PsVerifiedIrExpr)
-          (state : List PsVerifiedIrType) =>
-          psWasmCollectArrayTypesFromExprWithFuel
-            fuel
-            expression
-            state;
-      let collectType :
-          List PsVerifiedIrType ->
-          PsVerifiedIrType ->
-          List PsVerifiedIrType :=
-        fun
-          (state : List PsVerifiedIrType)
-          (type : PsVerifiedIrType) =>
-          psWasmCollectArrayTypesFromType
-            type
-            state;
-      let collectArgument :
-          List PsVerifiedIrType ->
-          PsVerifiedIrExpr ->
-          List PsVerifiedIrType :=
-        fun
-          (state : List PsVerifiedIrType)
-          (argument : PsVerifiedIrExpr) =>
-          collect argument state;
-      let collectField :
-          List PsVerifiedIrType ->
-          (String × PsVerifiedIrExpr) ->
-          List PsVerifiedIrType :=
-        fun
-          (state : List PsVerifiedIrType)
-          (field : String × PsVerifiedIrExpr) =>
-          collect (Prod.snd field) state;
-      match expr with
-      | .literal _ => types
-      | .var _ => types
-      | .intrinsic operation typeArguments arguments =>
-          let withTypes :=
-            psWasmListFoldl
-              collectType
-              typeArguments
-              types;
-          let withArrayTypes :=
-            psWasmAddArrayTypesForIntrinsic
-              operation
-              typeArguments
-              withTypes;
-          psWasmListFoldl
-            collectArgument
-            arguments
-            withArrayTypes
-      | .lambda parameters resultType body =>
-          let withParameters :=
-            psWasmCollectArrayTypesFromParameters
-              parameters
-              types;
-          let withResult :=
-            psWasmCollectArrayTypesFromType
-              resultType
-              withParameters;
-          collect body withResult
-      | .call fn typeArguments arguments =>
-          let withFn := collect fn types;
-          let withTypes :=
-            psWasmListFoldl
-              collectType
-              typeArguments
-              withFn;
-          psWasmListFoldl
-            collectArgument
-            arguments
-            withTypes
-      | .letE _ type value body =>
-          let withType :=
-            psWasmCollectArrayTypesFromType
-              type
-              types;
-          let withValue := collect value withType;
-          collect body withValue
-      | .ifE condition thenBranch elseBranch =>
-          let withCondition := collect condition types;
-          let withThen := collect thenBranch withCondition;
-          collect elseBranch withThen
-      | .record _ typeArguments fields =>
-          let withTypes :=
-            psWasmListFoldl
-              collectType
-              typeArguments
-              types;
-          psWasmListFoldl
-            collectField
-            fields
-            withTypes
-      | .projection _ typeArguments target _ =>
-          let withTypes :=
-            psWasmListFoldl
-              collectType
-              typeArguments
-              types;
-          collect target withTypes
-      | .constructor _ _ typeArguments fields =>
-          let withTypes :=
-            psWasmListFoldl
-              collectType
-              typeArguments
-              types;
-          psWasmListFoldl
-            collectField
-            fields
-            withTypes
-      | .matchE _ typeArguments scrutinee alternatives =>
-          let withTypes :=
-            psWasmListFoldl
-              collectType
-              typeArguments
-              types;
-          let withScrutinee :=
-            collect scrutinee withTypes;
-          let collectAlternative :
+        psWasmCollectArrayTypesFromExprWithFuel fuel;
+      fun (expr : PsVerifiedIrExpr) =>
+        fun (types : List PsVerifiedIrType) =>
+          let collect :
+              PsVerifiedIrExpr ->
               List PsVerifiedIrType ->
-              (String ×
-                List PsVerifiedIrMatchBinding ×
-                PsVerifiedIrExpr) ->
+              List PsVerifiedIrType :=
+            fun
+              (expression : PsVerifiedIrExpr)
+              (state : List PsVerifiedIrType) =>
+              smaller expression state;
+          let collectType :
+              List PsVerifiedIrType ->
+              PsVerifiedIrType ->
               List PsVerifiedIrType :=
             fun
               (state : List PsVerifiedIrType)
-              (alternative :
-                String ×
-                  List PsVerifiedIrMatchBinding ×
-                  PsVerifiedIrExpr) =>
-              let bindings := Prod.fst (Prod.snd alternative);
-              let body := Prod.snd (Prod.snd alternative);
-              let collectBinding :
+              (type : PsVerifiedIrType) =>
+              psWasmCollectArrayTypesFromType
+                type
+                state;
+          let collectArgument :
+              List PsVerifiedIrType ->
+              PsVerifiedIrExpr ->
+              List PsVerifiedIrType :=
+            fun
+              (state : List PsVerifiedIrType)
+              (argument : PsVerifiedIrExpr) =>
+              collect argument state;
+          let collectField :
+              List PsVerifiedIrType ->
+              (String × PsVerifiedIrExpr) ->
+              List PsVerifiedIrType :=
+            fun
+              (state : List PsVerifiedIrType)
+              (field : String × PsVerifiedIrExpr) =>
+              collect (Prod.snd field) state;
+          match expr with
+          | .literal _ => types
+          | .var _ => types
+          | .intrinsic operation typeArguments arguments =>
+              let withTypes :=
+                psWasmListFoldl
+                  collectType
+                  typeArguments
+                  types;
+              let withArrayTypes :=
+                psWasmAddArrayTypesForIntrinsic
+                  operation
+                  typeArguments
+                  withTypes;
+              psWasmListFoldl
+                collectArgument
+                arguments
+                withArrayTypes
+          | .lambda parameters resultType body =>
+              let withParameters :=
+                psWasmCollectArrayTypesFromParameters
+                  parameters
+                  types;
+              let withResult :=
+                psWasmCollectArrayTypesFromType
+                  resultType
+                  withParameters;
+              collect body withResult
+          | .call fn typeArguments arguments =>
+              let withFn := collect fn types;
+              let withTypes :=
+                psWasmListFoldl
+                  collectType
+                  typeArguments
+                  withFn;
+              psWasmListFoldl
+                collectArgument
+                arguments
+                withTypes
+          | .letE _ type value body =>
+              let withType :=
+                psWasmCollectArrayTypesFromType
+                  type
+                  types;
+              let withValue := collect value withType;
+              collect body withValue
+          | .ifE condition thenBranch elseBranch =>
+              let withCondition := collect condition types;
+              let withThen := collect thenBranch withCondition;
+              collect elseBranch withThen
+          | .record _ typeArguments fields =>
+              let withTypes :=
+                psWasmListFoldl
+                  collectType
+                  typeArguments
+                  types;
+              psWasmListFoldl
+                collectField
+                fields
+                withTypes
+          | .projection _ typeArguments target _ =>
+              let withTypes :=
+                psWasmListFoldl
+                  collectType
+                  typeArguments
+                  types;
+              collect target withTypes
+          | .constructor _ _ typeArguments fields =>
+              let withTypes :=
+                psWasmListFoldl
+                  collectType
+                  typeArguments
+                  types;
+              psWasmListFoldl
+                collectField
+                fields
+                withTypes
+          | .matchE _ typeArguments scrutinee alternatives =>
+              let withTypes :=
+                psWasmListFoldl
+                  collectType
+                  typeArguments
+                  types;
+              let withScrutinee :=
+                collect scrutinee withTypes;
+              let collectAlternative :
                   List PsVerifiedIrType ->
-                  PsVerifiedIrMatchBinding ->
+                  (String ×
+                    List PsVerifiedIrMatchBinding ×
+                    PsVerifiedIrExpr) ->
                   List PsVerifiedIrType :=
                 fun
-                  (inner : List PsVerifiedIrType)
-                  (binding : PsVerifiedIrMatchBinding) =>
-                  psWasmCollectArrayTypesFromType
-                    binding.type
-                    inner;
-              let withBindings :=
-                psWasmListFoldl
-                  collectBinding
-                  bindings
-                  state;
-              collect body withBindings;
-          psWasmListFoldl
-            collectAlternative
-            alternatives
-            withScrutinee
+                  (state : List PsVerifiedIrType)
+                  (alternative :
+                    String ×
+                      List PsVerifiedIrMatchBinding ×
+                      PsVerifiedIrExpr) =>
+                  let bindings :=
+                    Prod.fst (Prod.snd alternative);
+                  let body :=
+                    Prod.snd (Prod.snd alternative);
+                  let collectBinding :
+                      List PsVerifiedIrType ->
+                      PsVerifiedIrMatchBinding ->
+                      List PsVerifiedIrType :=
+                    fun
+                      (inner : List PsVerifiedIrType)
+                      (binding : PsVerifiedIrMatchBinding) =>
+                      psWasmCollectArrayTypesFromType
+                        binding.type
+                        inner;
+                  let withBindings :=
+                    psWasmListFoldl
+                      collectBinding
+                      bindings
+                      state;
+                  collect body withBindings;
+              psWasmListFoldl
+                collectAlternative
+                alternatives
+                withScrutinee
 
 def psWasmCollectArrayTypesFromExpr
     (expr : PsVerifiedIrExpr)
@@ -3967,28 +3981,32 @@ def psWasmLowerDeclarations
     profile structures inductives declarations state
 
 def psWasmTypeUsesNatWithFuel
-    (remainingFuel : Nat)
-    (type : PsVerifiedIrType) : Bool :=
+    (remainingFuel : Nat) :
+    PsVerifiedIrType -> Bool :=
   match remainingFuel with
-  | 0 => false
+  | 0 =>
+      fun (_type : PsVerifiedIrType) => false
   | fuel + 1 =>
-      let usesType :
-          PsVerifiedIrType -> Bool :=
-        fun (value : PsVerifiedIrType) =>
-          psWasmTypeUsesNatWithFuel fuel value;
-      match type with
-      | .primitive primitive =>
-          match primitive with
-          | .nat => true
-          | _ => false
-      | .function parameters result =>
-          if psListAny usesType parameters then
-            true
-          else
-            usesType result
-      | .named _ arguments =>
-          psListAny usesType arguments
-      | _ => false
+      let smaller : PsVerifiedIrType -> Bool :=
+        psWasmTypeUsesNatWithFuel fuel;
+      fun (type : PsVerifiedIrType) =>
+        let usesType :
+            PsVerifiedIrType -> Bool :=
+          fun (value : PsVerifiedIrType) =>
+            smaller value;
+        match type with
+        | .primitive primitive =>
+            match primitive with
+            | .nat => true
+            | _ => false
+        | .function parameters result =>
+            if psListAny usesType parameters then
+              true
+            else
+              usesType result
+        | .named _ arguments =>
+            psListAny usesType arguments
+        | _ => false
 
 def psWasmTypeUsesNat
     (type : PsVerifiedIrType) : Bool :=
@@ -4026,134 +4044,142 @@ def psWasmIntrinsicUsesNat
   | _ => false
 
 def psWasmExprUsesNatWithFuel
-    (remainingFuel : Nat)
-    (expr : PsVerifiedIrExpr) : Bool :=
+    (remainingFuel : Nat) :
+    PsVerifiedIrExpr -> Bool :=
   match remainingFuel with
-  | 0 => false
+  | 0 =>
+      fun (_expr : PsVerifiedIrExpr) => false
   | fuel + 1 =>
-      let uses :
-          PsVerifiedIrExpr -> Bool :=
-        fun (nested : PsVerifiedIrExpr) =>
-          psWasmExprUsesNatWithFuel fuel nested;
-      let fieldUses :
-          (String × PsVerifiedIrExpr) -> Bool :=
-        fun (field : String × PsVerifiedIrExpr) =>
-          uses (Prod.snd field);
-      let parameterUses :
-          PsVerifiedIrParameter -> Bool :=
-        fun (parameter : PsVerifiedIrParameter) =>
-          psWasmTypeUsesNat parameter.type;
-      let bindingUses :
-          PsVerifiedIrMatchBinding -> Bool :=
-        fun (binding : PsVerifiedIrMatchBinding) =>
-          psWasmTypeUsesNat binding.type;
-      let alternativeUses :
-          (String ×
-            List PsVerifiedIrMatchBinding ×
-            PsVerifiedIrExpr) -> Bool :=
-        fun
-          (alternative :
-            String ×
+      let smaller : PsVerifiedIrExpr -> Bool :=
+        psWasmExprUsesNatWithFuel fuel;
+      fun (expr : PsVerifiedIrExpr) =>
+        let uses :
+            PsVerifiedIrExpr -> Bool :=
+          fun (nested : PsVerifiedIrExpr) =>
+            smaller nested;
+        let fieldUses :
+            (String × PsVerifiedIrExpr) -> Bool :=
+          fun (field : String × PsVerifiedIrExpr) =>
+            uses (Prod.snd field);
+        let parameterUses :
+            PsVerifiedIrParameter -> Bool :=
+          fun (parameter : PsVerifiedIrParameter) =>
+            psWasmTypeUsesNat parameter.type;
+        let bindingUses :
+            PsVerifiedIrMatchBinding -> Bool :=
+          fun (binding : PsVerifiedIrMatchBinding) =>
+            psWasmTypeUsesNat binding.type;
+        let alternativeUses :
+            (String ×
               List PsVerifiedIrMatchBinding ×
-              PsVerifiedIrExpr) =>
-          if
-              psListAny
-                bindingUses
-                (Prod.fst (Prod.snd alternative)) then
-            true
-          else
-            uses (Prod.snd (Prod.snd alternative));
-      match expr with
-      | .literal literal =>
-          match literal with
-          | .natural _ => true
-          | _ => false
-      | .var _ => false
-      | .intrinsic operation typeArguments arguments =>
-          if psWasmIntrinsicUsesNat operation then
-            true
-          else if psListAny psWasmTypeUsesNat typeArguments then
-            true
-          else
-            psListAny uses arguments
-      | .lambda parameters resultType body =>
-          if psListAny parameterUses parameters then
-            true
-          else if psWasmTypeUsesNat resultType then
-            true
-          else
-            uses body
-      | .call fn typeArguments arguments =>
-          if uses fn then
-            true
-          else if psListAny psWasmTypeUsesNat typeArguments then
-            true
-          else
-            psListAny uses arguments
-      | .letE _ type value body =>
-          if psWasmTypeUsesNat type then
-            true
-          else if uses value then
-            true
-          else
-            uses body
-      | .ifE condition thenBranch elseBranch =>
-          if uses condition then
-            true
-          else if uses thenBranch then
-            true
-          else
-            uses elseBranch
-      | .record _ typeArguments fields =>
-          if psListAny psWasmTypeUsesNat typeArguments then
-            true
-          else
-            psListAny fieldUses fields
-      | .projection _ typeArguments target _ =>
-          if psListAny psWasmTypeUsesNat typeArguments then
-            true
-          else
-            uses target
-      | .constructor _ _ typeArguments fields =>
-          if psListAny psWasmTypeUsesNat typeArguments then
-            true
-          else
-            psListAny fieldUses fields
-      | .matchE _ typeArguments scrutinee alternatives =>
-          if psListAny psWasmTypeUsesNat typeArguments then
-            true
-          else if uses scrutinee then
-            true
-          else
-            psListAny alternativeUses alternatives
+              PsVerifiedIrExpr) -> Bool :=
+          fun
+            (alternative :
+              String ×
+                List PsVerifiedIrMatchBinding ×
+                PsVerifiedIrExpr) =>
+            if
+                psListAny
+                  bindingUses
+                  (Prod.fst (Prod.snd alternative)) then
+              true
+            else
+              uses (Prod.snd (Prod.snd alternative));
+        match expr with
+        | .literal literal =>
+            match literal with
+            | .natural _ => true
+            | _ => false
+        | .var _ => false
+        | .intrinsic operation typeArguments arguments =>
+            if psWasmIntrinsicUsesNat operation then
+              true
+            else if psListAny psWasmTypeUsesNat typeArguments then
+              true
+            else
+              psListAny uses arguments
+        | .lambda parameters resultType body =>
+            if psListAny parameterUses parameters then
+              true
+            else if psWasmTypeUsesNat resultType then
+              true
+            else
+              uses body
+        | .call fn typeArguments arguments =>
+            if uses fn then
+              true
+            else if psListAny psWasmTypeUsesNat typeArguments then
+              true
+            else
+              psListAny uses arguments
+        | .letE _ type value body =>
+            if psWasmTypeUsesNat type then
+              true
+            else if uses value then
+              true
+            else
+              uses body
+        | .ifE condition thenBranch elseBranch =>
+            if uses condition then
+              true
+            else if uses thenBranch then
+              true
+            else
+              uses elseBranch
+        | .record _ typeArguments fields =>
+            if psListAny psWasmTypeUsesNat typeArguments then
+              true
+            else
+              psListAny fieldUses fields
+        | .projection _ typeArguments target _ =>
+            if psListAny psWasmTypeUsesNat typeArguments then
+              true
+            else
+              uses target
+        | .constructor _ _ typeArguments fields =>
+            if psListAny psWasmTypeUsesNat typeArguments then
+              true
+            else
+              psListAny fieldUses fields
+        | .matchE _ typeArguments scrutinee alternatives =>
+            if psListAny psWasmTypeUsesNat typeArguments then
+              true
+            else if uses scrutinee then
+              true
+            else
+              psListAny alternativeUses alternatives
 
 def psWasmExprUsesNat
     (expr : PsVerifiedIrExpr) : Bool :=
   psWasmExprUsesNatWithFuel 4096 expr
 
 def psWasmTypeUsesIntWithFuel
-    (remainingFuel : Nat)
-    (type : PsVerifiedIrType) : Bool :=
+    (remainingFuel : Nat) :
+    PsVerifiedIrType -> Bool :=
   match remainingFuel with
-  | 0 => false
+  | 0 =>
+      fun (_type : PsVerifiedIrType) => false
   | fuel + 1 =>
-      let usesType :
-          PsVerifiedIrType -> Bool :=
-        fun (value : PsVerifiedIrType) =>
-          psWasmTypeUsesIntWithFuel fuel value;
-      match type with
-      | .primitive primitive =>
-          match primitive with
-          | .int => true
-          | _ => false
-      | .function parameters result =>
-          if psListAny usesType parameters then
-            true
-          else
-            usesType result
-      | .named _ arguments =>
-          psListAny usesType arguments
-      | _ => false
+      let smaller : PsVerifiedIrType -> Bool :=
+        psWasmTypeUsesIntWithFuel fuel;
+      fun (type : PsVerifiedIrType) =>
+        let usesType :
+            PsVerifiedIrType -> Bool :=
+          fun (value : PsVerifiedIrType) =>
+            smaller value;
+        match type with
+        | .primitive primitive =>
+            match primitive with
+            | .int => true
+            | _ => false
+        | .function parameters result =>
+            if psListAny usesType parameters then
+              true
+            else
+              usesType result
+        | .named _ arguments =>
+            psListAny usesType arguments
+        | _ => false
 
 def psWasmTypeUsesInt
     (type : PsVerifiedIrType) : Bool :=
@@ -4174,106 +4200,110 @@ def psWasmIntrinsicUsesInt
   | _ => false
 
 def psWasmExprUsesIntWithFuel
-    (remainingFuel : Nat)
-    (expr : PsVerifiedIrExpr) : Bool :=
+    (remainingFuel : Nat) :
+    PsVerifiedIrExpr -> Bool :=
   match remainingFuel with
-  | 0 => false
+  | 0 =>
+      fun (_expr : PsVerifiedIrExpr) => false
   | fuel + 1 =>
-      let uses :
-          PsVerifiedIrExpr -> Bool :=
-        fun (nested : PsVerifiedIrExpr) =>
-          psWasmExprUsesIntWithFuel fuel nested;
-      let fieldUses :
-          (String × PsVerifiedIrExpr) -> Bool :=
-        fun (field : String × PsVerifiedIrExpr) =>
-          uses (Prod.snd field);
-      let parameterUses :
-          PsVerifiedIrParameter -> Bool :=
-        fun (parameter : PsVerifiedIrParameter) =>
-          psWasmTypeUsesInt parameter.type;
-      let bindingUses :
-          PsVerifiedIrMatchBinding -> Bool :=
-        fun (binding : PsVerifiedIrMatchBinding) =>
-          psWasmTypeUsesInt binding.type;
-      let alternativeUses :
-          (String ×
-            List PsVerifiedIrMatchBinding ×
-            PsVerifiedIrExpr) -> Bool :=
-        fun
-          (alternative :
-            String ×
+      let smaller : PsVerifiedIrExpr -> Bool :=
+        psWasmExprUsesIntWithFuel fuel;
+      fun (expr : PsVerifiedIrExpr) =>
+        let uses :
+            PsVerifiedIrExpr -> Bool :=
+          fun (nested : PsVerifiedIrExpr) =>
+            smaller nested;
+        let fieldUses :
+            (String × PsVerifiedIrExpr) -> Bool :=
+          fun (field : String × PsVerifiedIrExpr) =>
+            uses (Prod.snd field);
+        let parameterUses :
+            PsVerifiedIrParameter -> Bool :=
+          fun (parameter : PsVerifiedIrParameter) =>
+            psWasmTypeUsesInt parameter.type;
+        let bindingUses :
+            PsVerifiedIrMatchBinding -> Bool :=
+          fun (binding : PsVerifiedIrMatchBinding) =>
+            psWasmTypeUsesInt binding.type;
+        let alternativeUses :
+            (String ×
               List PsVerifiedIrMatchBinding ×
-              PsVerifiedIrExpr) =>
-          if
-              psListAny
-                bindingUses
-                (Prod.fst (Prod.snd alternative)) then
-            true
-          else
-            uses (Prod.snd (Prod.snd alternative));
-      match expr with
-      | .literal literal =>
-          match literal with
-          | .integer _ => true
-          | _ => false
-      | .var _ => false
-      | .intrinsic operation typeArguments arguments =>
-          if psWasmIntrinsicUsesInt operation then
-            true
-          else if psListAny psWasmTypeUsesInt typeArguments then
-            true
-          else
-            psListAny uses arguments
-      | .lambda parameters resultType body =>
-          if psListAny parameterUses parameters then
-            true
-          else if psWasmTypeUsesInt resultType then
-            true
-          else
-            uses body
-      | .call fn typeArguments arguments =>
-          if uses fn then
-            true
-          else if psListAny psWasmTypeUsesInt typeArguments then
-            true
-          else
-            psListAny uses arguments
-      | .letE _ type value body =>
-          if psWasmTypeUsesInt type then
-            true
-          else if uses value then
-            true
-          else
-            uses body
-      | .ifE condition thenBranch elseBranch =>
-          if uses condition then
-            true
-          else if uses thenBranch then
-            true
-          else
-            uses elseBranch
-      | .record _ typeArguments fields =>
-          if psListAny psWasmTypeUsesInt typeArguments then
-            true
-          else
-            psListAny fieldUses fields
-      | .projection _ typeArguments target _ =>
-          if psListAny psWasmTypeUsesInt typeArguments then
-            true
-          else
-            uses target
-      | .constructor _ _ typeArguments fields =>
-          if psListAny psWasmTypeUsesInt typeArguments then
-            true
-          else
-            psListAny fieldUses fields
-      | .matchE _ typeArguments scrutinee alternatives =>
-          if psListAny psWasmTypeUsesInt typeArguments then
-            true
-          else if uses scrutinee then
-            true
-          else
-            psListAny alternativeUses alternatives
+              PsVerifiedIrExpr) -> Bool :=
+          fun
+            (alternative :
+              String ×
+                List PsVerifiedIrMatchBinding ×
+                PsVerifiedIrExpr) =>
+            if
+                psListAny
+                  bindingUses
+                  (Prod.fst (Prod.snd alternative)) then
+              true
+            else
+              uses (Prod.snd (Prod.snd alternative));
+        match expr with
+        | .literal literal =>
+            match literal with
+            | .integer _ => true
+            | _ => false
+        | .var _ => false
+        | .intrinsic operation typeArguments arguments =>
+            if psWasmIntrinsicUsesInt operation then
+              true
+            else if psListAny psWasmTypeUsesInt typeArguments then
+              true
+            else
+              psListAny uses arguments
+        | .lambda parameters resultType body =>
+            if psListAny parameterUses parameters then
+              true
+            else if psWasmTypeUsesInt resultType then
+              true
+            else
+              uses body
+        | .call fn typeArguments arguments =>
+            if uses fn then
+              true
+            else if psListAny psWasmTypeUsesInt typeArguments then
+              true
+            else
+              psListAny uses arguments
+        | .letE _ type value body =>
+            if psWasmTypeUsesInt type then
+              true
+            else if uses value then
+              true
+            else
+              uses body
+        | .ifE condition thenBranch elseBranch =>
+            if uses condition then
+              true
+            else if uses thenBranch then
+              true
+            else
+              uses elseBranch
+        | .record _ typeArguments fields =>
+            if psListAny psWasmTypeUsesInt typeArguments then
+              true
+            else
+              psListAny fieldUses fields
+        | .projection _ typeArguments target _ =>
+            if psListAny psWasmTypeUsesInt typeArguments then
+              true
+            else
+              uses target
+        | .constructor _ _ typeArguments fields =>
+            if psListAny psWasmTypeUsesInt typeArguments then
+              true
+            else
+              psListAny fieldUses fields
+        | .matchE _ typeArguments scrutinee alternatives =>
+            if psListAny psWasmTypeUsesInt typeArguments then
+              true
+            else if uses scrutinee then
+              true
+            else
+              psListAny alternativeUses alternatives
 
 def psWasmExprUsesInt
     (expr : PsVerifiedIrExpr) : Bool :=

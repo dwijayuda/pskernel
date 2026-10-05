@@ -5,7 +5,6 @@ import Ps.Bridge.CheckedAdmissions
 structure PsHostModuleArtifact where
   path : String
   declarations : List PsDeclaration
-  queryRecord : PsModuleQueryRecord
 
 structure PsHostProjectSnapshot where
   query : PsQuerySnapshot
@@ -181,7 +180,6 @@ def psHostIncrementalRebuild
             {
               path := path
               declarations := elaborated.declarations
-              queryRecord := record
             }
           pure
             (psHostIncrementalStateCommitArtifact
@@ -216,7 +214,6 @@ def psHostIncrementalReuse
         {
           path := path
           declarations := artifact.declarations
-          queryRecord := record
         }
       pure
         (psHostIncrementalStateCommitArtifact

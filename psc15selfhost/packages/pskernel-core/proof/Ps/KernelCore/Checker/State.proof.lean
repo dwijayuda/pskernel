@@ -126,3 +126,17 @@ theorem psKernelCheckerStateEmpty_semantic_caches_sound
         psKernelDefEqCacheSound_empty
           environment
           localContext
+
+
+theorem psKernelCheckerStateEmpty_semantic_sound
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) :
+    PsKernelCheckerStateSemanticSound
+      environment
+      localContext
+      psKernelCheckerStateEmpty := by
+  unfold PsKernelCheckerStateSemanticSound
+  exact
+    psKernelCheckerStateEmpty_semantic_caches_sound
+      environment
+      localContext

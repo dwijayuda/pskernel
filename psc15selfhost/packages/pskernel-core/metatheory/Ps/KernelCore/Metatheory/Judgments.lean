@@ -473,3 +473,67 @@ def PsKernelInferenceCacheSound
         localContext
         expr
         result
+
+
+def PsKernelCheckerStateSemanticSound
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (state : PsKernelCheckerState) : Prop :=
+  PsKernelInferenceCacheSound
+      environment
+      localContext
+      state.inferOnly ∧
+  PsKernelInferenceCacheSound
+      environment
+      localContext
+      state.checkedInfer ∧
+  PsKernelDefEqCacheSound
+      environment
+      localContext
+      state.success
+
+def PsKernelInferenceCacheInsertLaw : Prop :=
+  ∀
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (cache : PsKernelExprMap)
+    (expr result : PsKernelExpr),
+    PsKernelInferenceCacheSound
+        environment
+        localContext
+        cache ->
+    PsKernelTypingJudgment
+        environment
+        localContext
+        expr
+        result ->
+    PsKernelInferenceCacheSound
+      environment
+      localContext
+      (psKernelExprMapInsert
+        cache
+        expr
+        result)
+
+def PsKernelDefEqCacheInsertLaw : Prop :=
+  ∀
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (cache : PsKernelExprPairSet)
+    (left right : PsKernelExpr),
+    PsKernelDefEqCacheSound
+        environment
+        localContext
+        cache ->
+    PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right ->
+    PsKernelDefEqCacheSound
+      environment
+      localContext
+      (psKernelExprPairSetInsert
+        cache
+        left
+        right)

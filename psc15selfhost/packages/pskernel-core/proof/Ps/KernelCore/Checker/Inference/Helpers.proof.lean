@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Inference.Helpers
+import Ps.KernelCore.Metatheory.Judgments
 
 theorem psKernelCacheInferResult_ineligible
     (state : PsKernelCheckerState)
@@ -140,3 +141,103 @@ theorem psKernelCacheInferResult_preserves_defeq_caches
       psKernelCheckerStateWithInferOnly,
       psKernelCheckerStateWithCheckedInfer
     ]
+
+
+theorem psKernelCacheInferResult_preserves_semantic_sound
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (state : PsKernelCheckerState)
+    (inferOnly : Bool)
+    (expr result : PsKernelExpr)
+    (hInsert : PsKernelInferenceCacheInsertLaw)
+    (hState :
+      PsKernelCheckerStateSemanticSound
+        environment
+        localContext
+        state)
+    (hTyping :
+      PsKernelTypingJudgment
+        environment
+        localContext
+        expr
+        result) :
+    PsKernelCheckerStateSemanticSound
+      environment
+      localContext
+      (psKernelCacheInferResult
+        state
+        inferOnly
+        expr
+        result) := by
+  unfold PsKernelCheckerStateSemanticSound at hState ⊢
+  rcases hState with ⟨hInferOnly, hChecked, hSuccess⟩
+  cases hEligible :
+      psKernelInferCacheEligible inferOnly expr with
+  | false =>
+      simpa [psKernelCacheInferResult, hEligible] using
+        (show
+          PsKernelInferenceCacheSound
+              environment localContext state.inferOnly ∧
+            PsKernelInferenceCacheSound
+              environment localContext state.checkedInfer ∧
+            PsKernelDefEqCacheSound
+              environment localContext state.success
+          from ⟨hInferOnly, hChecked, hSuccess⟩)
+  | true =>
+      cases inferOnly with
+      | false =>
+          simpa [
+            psKernelCacheInferResult,
+            hEligible,
+            psKernelCheckerStateWithCheckedInfer
+          ] using
+            (show
+              PsKernelInferenceCacheSound
+                  environment localContext state.inferOnly ∧
+                PsKernelInferenceCacheSound
+                  environment localContext
+                  (psKernelExprMapInsert
+                    state.checkedInfer expr result) ∧
+                PsKernelDefEqCacheSound
+                  environment localContext state.success
+              from
+                ⟨
+                  hInferOnly,
+                  hInsert
+                    environment
+                    localContext
+                    state.checkedInfer
+                    expr
+                    result
+                    hChecked
+                    hTyping,
+                  hSuccess
+                ⟩)
+      | true =>
+          simpa [
+            psKernelCacheInferResult,
+            hEligible,
+            psKernelCheckerStateWithInferOnly
+          ] using
+            (show
+              PsKernelInferenceCacheSound
+                  environment localContext
+                  (psKernelExprMapInsert
+                    state.inferOnly expr result) ∧
+                PsKernelInferenceCacheSound
+                  environment localContext state.checkedInfer ∧
+                PsKernelDefEqCacheSound
+                  environment localContext state.success
+              from
+                ⟨
+                  hInsert
+                    environment
+                    localContext
+                    state.inferOnly
+                    expr
+                    result
+                    hInferOnly
+                    hTyping,
+                  hChecked,
+                  hSuccess
+                ⟩)

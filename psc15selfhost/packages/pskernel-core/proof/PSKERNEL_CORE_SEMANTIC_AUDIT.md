@@ -13,9 +13,9 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 7 |
-| B | 26 |
-| C | 38 |
+| A | 9 |
+| B | 25 |
+| C | 37 |
 | D | 8 |
 | **Total canonical source/proof pairs** | **79** |
 
@@ -59,7 +59,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Admission/Quot/Admission.lean` | **B** | Transaction propagation plus successful postconditions; independent Quot admission judgment pending. |
 | `Admission/Quot/Bootstrap.lean` | **C** | Reserved-name branch behavior and binder base case. |
 | `Checker/Context.lean` | **B** | Context construction/freshness/application helper invariants. |
-| `Checker/DefEq/BinderSpines.lean` | **C** | Finish/cache and fuel behavior; congruence relation incomplete. |
+| `Checker/DefEq/BinderSpines.lean` | **A** | `psKernelDefEqFinish` now preserves checker-state semantic soundness under the isolated successful-pair cache insertion law; binder-spine congruence itself still needs deeper semantic coverage. |
 | `Checker/DefEq/DeltaStep.lean` | **C** | Delta-step result/control cases. |
 | `Checker/DefEq/FinalRules.lean` | **C** | Fuel/control only for final rules. |
 | `Checker/DefEq/FullShape.lean` | **C** | Selected same-shape cases; formal defeq soundness pending. |
@@ -69,7 +69,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Checker/DefEq/Support.lean` | **D** | Single empty-list aggregation fact. |
 | `Checker/Inference.lean` | **C** | Wrapper/fuel facts. |
 | `Checker/Inference/Core.lean` | **A** | Rule-level implementation theorems plus independent Typing metatheory bridges for Sort/literals/fvar/const. |
-| `Checker/Inference/Helpers.lean` | **B** | Sort/Pi views plus cache noninterference invariants. |
+| `Checker/Inference/Helpers.lean` | **A** | Cache publication now preserves the named checker-state semantic soundness invariant under the isolated inference-cache insertion law; Sort/Pi views and noninterference laws remain. |
 | `Checker/Knot.lean` | **C** | Public wiring/fuel equations; end-to-end soundness pending. |
 | `Checker/Ops.lean` | **D** | Eta/wrapper fact only. |
 | `Checker/Projection.lean` | **C** | Fuel/error control facts; dependent projection typing relation pending. |

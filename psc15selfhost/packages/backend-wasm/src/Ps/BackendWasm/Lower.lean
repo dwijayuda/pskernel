@@ -2545,7 +2545,7 @@ def psWasmLowerIntrinsicWith
                 instructions :=
                   psListAppend
                     lowered.instructions
-                    (psWasmLowerFloatBinary type floatOperation
+                    (psWasmLowerFloatBinary type floatOperation)
                 state := lowered.state
               }
   | .floatCompare type floatOperation =>
@@ -2565,7 +2565,7 @@ def psWasmLowerIntrinsicWith
                 instructions :=
                   psListAppend
                     lowered.instructions
-                    (psWasmLowerFloatCompare type floatOperation
+                    (psWasmLowerFloatCompare type floatOperation)
                 state := lowered.state
               }
   | .natAdd =>

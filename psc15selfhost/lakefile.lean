@@ -139,6 +139,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.IntUtil,
     `Ps.BackendWasm.RuntimeInt,
     `Ps.BackendWasm.RuntimeString,
+    `Ps.BackendWasm.RuntimeIntRepr,
     `Ps.BackendWasm.Binary,
     `Ps.BackendWasm.Lower
   ]

@@ -7,6 +7,7 @@ export const portableSelfhostStructuralRuleIds = Object.freeze([
   'term-arithmetic-operator',
   'scalar-member-capability',
   'opaque-primitive-match',
+  'explicit-option-constructors',
   'term-list-append',
   'term-list-cons',
   'numeric-tuple-projection',
@@ -546,6 +547,10 @@ export function findSelfhostStructuralViolations(
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index];
     const trimmed = line.trim();
+
+    if (/(^|[^A-Za-z0-9_.])(?:none|some)(?=$|[^A-Za-z0-9_'])/u.test(line)) {
+      add('explicit-option-constructors', index + 1, line);
+    }
 
     if (
       /^\|\s*(Int|UInt8|UInt16|UInt32|UInt64|USize|Int8|Int16|Int32|Int64|ISize|Float|Float32|String|Char)\./u

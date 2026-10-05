@@ -23,7 +23,7 @@ theorem psKernelExprInstantiate_empty
 theorem psKernelExprInstantiateRev_empty
     (expr : PsKernelExpr) :
     psKernelExprInstantiateRev expr List.nil = expr := by
-  simp [psKernelExprInstantiateRev, psKernelExprListReverse, psKernelExprInstantiate_empty]
+  rfl
 
 theorem psKernelExprInstantiate1_closed
     (expr replacement : PsKernelExpr)

@@ -4,30 +4,38 @@ def psWasmLowerFloatBinary
     (type : PsVerifiedIrFloatingType)
     (operation : PsVerifiedIrFloatBinaryOp) :
     List PsWasmInstruction :=
-  match type, operation with
-  | .float32, .add => [.f32Add]
-  | .float32, .sub => [.f32Sub]
-  | .float32, .mul => [.f32Mul]
-  | .float32, .div => [.f32Div]
-  | .float, .add => [.f64Add]
-  | .float, .sub => [.f64Sub]
-  | .float, .mul => [.f64Mul]
-  | .float, .div => [.f64Div]
+  match type with
+  | .float32 =>
+      match operation with
+      | .add => [PsWasmInstruction.f32Add]
+      | .sub => [PsWasmInstruction.f32Sub]
+      | .mul => [PsWasmInstruction.f32Mul]
+      | .div => [PsWasmInstruction.f32Div]
+  | .float =>
+      match operation with
+      | .add => [PsWasmInstruction.f64Add]
+      | .sub => [PsWasmInstruction.f64Sub]
+      | .mul => [PsWasmInstruction.f64Mul]
+      | .div => [PsWasmInstruction.f64Div]
 
 def psWasmLowerFloatCompare
     (type : PsVerifiedIrFloatingType)
     (operation : PsVerifiedIrFloatCompareOp) :
     List PsWasmInstruction :=
-  match type, operation with
-  | .float32, .eq => [.f32Eq]
-  | .float32, .ne => [.f32Ne]
-  | .float32, .lt => [.f32Lt]
-  | .float32, .le => [.f32Le]
-  | .float32, .gt => [.f32Gt]
-  | .float32, .ge => [.f32Ge]
-  | .float, .eq => [.f64Eq]
-  | .float, .ne => [.f64Ne]
-  | .float, .lt => [.f64Lt]
-  | .float, .le => [.f64Le]
-  | .float, .gt => [.f64Gt]
-  | .float, .ge => [.f64Ge]
+  match type with
+  | .float32 =>
+      match operation with
+      | .eq => [PsWasmInstruction.f32Eq]
+      | .ne => [PsWasmInstruction.f32Ne]
+      | .lt => [PsWasmInstruction.f32Lt]
+      | .le => [PsWasmInstruction.f32Le]
+      | .gt => [PsWasmInstruction.f32Gt]
+      | .ge => [PsWasmInstruction.f32Ge]
+  | .float =>
+      match operation with
+      | .eq => [PsWasmInstruction.f64Eq]
+      | .ne => [PsWasmInstruction.f64Ne]
+      | .lt => [PsWasmInstruction.f64Lt]
+      | .le => [PsWasmInstruction.f64Le]
+      | .gt => [PsWasmInstruction.f64Gt]
+      | .ge => [PsWasmInstruction.f64Ge]

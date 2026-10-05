@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "scope": "Monomorphic Type-valued nullary enumerations, freshness, derived dependent recursor typing and computed iota witnesses; not general sum/recursive completeness",
+  "sourceManifestSha256": "fe74eb30a78c2ff6b7295862c4988139b717cf7e2fe4e5ece7d131a6a1314513",
+  "harnessSha256": "962ab12f3c812806287ce16efdf9baa6634a92b5f08e120e3180cc5f5c7274ba",
+  "fixtureSha256": "32f1c9a6bde52e1434ffa1179dc0aeb2c7ad756f53f8c4a54a85a26c989e2529",
+  "provider": {
+    "protocol": "pskernel-lean/1",
+    "provider": "lean4-cpp",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "profile": "lean4.34-core",
+    "status": "version"
+  },
+  "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+  "cases": 109,
+  "matched": 109,
+  "accepted": 48,
+  "rejected": 61,
+  "deliberatelyUnsupported": [
+    "constructor fields",
+    "term and universe parameters",
+    "indices",
+    "recursive families",
+    "Prop and higher-universe families",
+    "empty enumeration"
+  ],
+  "recordsPath": "dist/evidence/enum-differential-records.json",
+  "recordsSha256": "aea422adb79d9521132a6c62f35dce811aed5ca3954f8f1b0b29e10910a8df2e"
+}

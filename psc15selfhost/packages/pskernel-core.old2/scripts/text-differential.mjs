@@ -1,0 +1,23 @@
+// Bounded comparisons with the explicitly pinned independent native Lean provider.
+import fs from 'node:fs';import path from 'node:path';import {spawnSync} from 'node:child_process';import {fileURLToPath} from 'node:url';
+import {root,json,sha256,checkedTool} from './source.mjs';import './verify-build.mjs';
+import {Z,S,U,B,C,app,pi,lam,N,definition,literal,bootstrap,wire,equalityWitness} from '../test/text-values.mjs';
+const pin=json(path.join(root,'manifests/TOOLCHAIN.json')),provider=checkedTool(process.env.LEAN_PROVIDER,pin.leanProviderSha256,'LEAN_PROVIDER');
+function call(args,input){const p=spawnSync(provider,args,{input,encoding:'utf8',timeout:120000,maxBuffer:8*1024*1024});if(p.error||p.signal||p.status!==0)throw p.error||Error('REFERENCE_PROCESS_FAILED');const r=JSON.parse(p.stdout);if(r.protocol!=='pskernel-lean/1'||r.provider!=='lean4-cpp'||r.leanVersion!==pin.leanVersion||r.leanCommit!==pin.leanCommit||r.profile!=='lean4.34-core')throw Error('REFERENCE_IDENTITY');return r;}
+const identity=call(['--version']),cases=[],add=(label,entries,expected)=>cases.push({label,entries,expected});
+const texts=['','\0','hello','a\0b','\r\n\t','λ','😀','Indonesia 🇮🇩','é','e\u0301',...[0x7f,0x80,0x7ff,0x800,0xd7ff,0xe000,0xfffe,0xffff,0x10000,0x10ffff].map(c=>String.fromCodePoint(c))];
+for(const[i,s]of texts.entries()){const l=literal(s);add('literal-'+i,[definition('TextProbe',[],C('String'),l)],true);add('wrong-type-'+i,[definition('TextProbe',[],C('Nat'),l)],false);add('equal-index-'+i,[equalityWitness(l,l)],true);add('different-index-'+i,[equalityWitness(l,literal(s+'\0'))],false);add('beta-index-'+i,[equalityWitness(app(lam('s',C('String'),B(0)),l),l)],true);}
+for(const[a,b]of [['é','e\u0301'],['\0A','A'],['😀','😁'],['a','A']])add('distinct-'+cases.length,[equalityWitness(literal(a),literal(b))],false);
+add('zeta-index',[equalityWitness(['let',N('s'),C('String'),literal('λ😀'),B(0)],literal('λ😀'))],true);
+add('transparent-value-index',[definition('textValue',[],C('String'),literal('δ')),equalityWitness(C('textValue'),literal('δ'))],true);
+add('transparent-type-alias',[definition('Text',[],U(S(Z)),C('String')),definition('s',[],C('Text'),literal('alias'))],true);
+add('wrong-universe-arity',[definition('s',[],C('String',[Z]),literal('no'))],false);
+add('literal-not-function',[definition('s',[],C('String'),app(literal('a'),literal('b')))],false);
+add('literal-not-type',[definition('s',[],literal('a'),literal('a'))],false);
+add('no-forged-intrinsic-name',[definition('String',[],U(S(Z)),C('Nat'))],false);
+add('later-rejection-is-atomic',[definition('good',[],C('String'),literal('yes')),definition('bad',[],C('Nat'),literal('no'))],false);
+const records=[];
+for(const c of cases){const ours=bootstrap(c.entries,1000000);if(!['admitted','rejected'].includes(ours.status))throw Error('NONDECISIVE_OWNED_RESULT:'+c.label);const request=wire(c.entries),native=call(['--check'],request);if(native.accepted!==true&&(native.accepted!==false||native.errorKind!=='kernel-rejection'))throw Error('NONDECISIVE_REFERENCE_RESULT:'+c.label+':'+JSON.stringify(native));const r={...c,ours:ours.status,ourError:ours.error??null,steps:ours.steps,native,requestSha256:sha256(request)};if(native.accepted!==c.expected||(ours.status==='admitted')!==native.accepted)throw Error('TEXT_MISMATCH:'+JSON.stringify(r));records.push(r);if(records.length%20===0)console.log('TEXT_DIFFERENTIAL_PROGRESS '+records.length+'/'+cases.length);}
+const recordsPath='dist/evidence/text-differential-records.json',bytes=JSON.stringify(records,null,2)+'\n';fs.mkdirSync(path.join(root,'dist/evidence'),{recursive:true});fs.writeFileSync(path.join(root,recordsPath),bytes);
+const report={schemaVersion:1,scope:'Fixed intrinsic String Type; validated Unicode scalar literals, exact byte equality, beta/zeta/delta and dependent result-type witnesses; not String operations or full logical model',sourceManifestSha256:sha256(fs.readFileSync(path.join(root,'manifests/SOURCE.json'))),harnessSha256:sha256(fs.readFileSync(fileURLToPath(import.meta.url))),fixtureSha256:sha256(fs.readFileSync(path.join(root,'test/text-values.mjs'))),provider:identity,providerSha256:pin.leanProviderSha256,cases:records.length,matched:records.length,accepted:records.filter(x=>x.native.accepted).length,rejected:records.filter(x=>!x.native.accepted).length,deliberatelyUnsupported:['String operations and constructor unfolding','String.ofByteArray and proof fields','general primitive and axiom admission','non-Unicode raw byte strings'],recordsPath,recordsSha256:sha256(bytes)};
+fs.writeFileSync(path.join(root,'manifests/TEXT_DIFFERENTIAL.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));

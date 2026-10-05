@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import { assertBootstrapWorkspaceManifest } from "./bootstrap-manifest.mjs";
-import { resolveTypeScriptCli } from "./typescript-cli.mjs";
+import { resolveTypeScriptCli, pinnedTypeScriptVersion, pinnedTypeScriptVersionText } from "./typescript-cli.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
@@ -62,9 +62,9 @@ const tscVersion = spawnSync(process.execPath, [tsc, "--version"], {
 if (
   tscVersion.error ||
   tscVersion.status !== 0 ||
-  tscVersion.stdout.trim() !== "Version 5.8.3"
+  tscVersion.stdout.trim() !== pinnedTypeScriptVersionText
 ) {
-  throw new Error("PSC1KERNEL_SELFHOST_TYPESCRIPT_PIN: require TypeScript 5.8.3");
+  throw new Error("PSC1KERNEL_SELFHOST_TYPESCRIPT_PIN: require TypeScript " + pinnedTypeScriptVersion);
 }
 
 const bootstrapWorkspace = path.join(outRoot, "bootstrap", "workspace");

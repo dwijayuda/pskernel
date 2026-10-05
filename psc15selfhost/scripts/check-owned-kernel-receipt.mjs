@@ -16,7 +16,7 @@ assert(!existsSync(new URL('../packages/pskernel-core.old', import.meta.url)));
 assert.equal(packageBySection.get('KernelCore'), 'pskernel-core');
 assert.equal(packageBySection.get('Kernel'), 'pskernel-core.old3');
 assert(bootstrapPackageViolation('pskernel-core.old3'));
-for (const name of ['pskernel-core.old', 'pskernel-core.old3', 'pskernel-lean', 'pskernel-lean-wasm']) assert(bootstrapPackageViolation(name));
+for (const name of ['pskernel-core.old', 'pskernel-core', 'pskernel-core.old2', 'pskernel-core.old3', 'pskernel-lean', 'pskernel-lean-wasm']) assert(bootstrapPackageViolation(name));
 assert.equal(defaultCheckedKernel, 'lean434-wasm');
 const entry = await readFile(new URL('../packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean', import.meta.url), 'utf8');
 assert(!/^import Ps\.Kernel\./mu.test(entry), 'compiler bootstrap must not import a kernel');

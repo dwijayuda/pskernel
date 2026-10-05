@@ -1,66 +1,110 @@
 import Ps.BackendWasm.Model
+import Ps.Foundation.Name
 
-def psWasmJoinTypeKeys :
-    List (Option String) -> Option String
-  | [] => some ""
-  | key :: rest =>
+def psWasmJoinTypeKeys
+    (keys : List (Option String)) : Option String :=
+  match keys with
+  | List.nil => Option.some ""
+  | List.cons key rest =>
       match key with
-      | none => none
-      | some head =>
+      | Option.none => Option.none
+      | Option.some head =>
           match psWasmJoinTypeKeys rest with
-          | none => none
-          | some tail =>
-              if tail == "" then
-                some head
+          | Option.none => Option.none
+          | Option.some tail =>
+              if psStringEq tail "" then
+                Option.some head
               else
-                some (head ++ "," ++ tail)
+                Option.some
+                  (String.Internal.append
+                    head
+                    (String.Internal.append "," tail))
 
-def psWasmIrTypeKeyWithFuel :
-    Nat -> PsVerifiedIrType -> Option String
-  | 0, _ => none
-  | fuel + 1, type =>
-      match type with
-      | .unknown => none
-      | .typeParameter _ => none
-      | .primitive primitive =>
-          some
-            (match primitive with
-            | .nat => "Nat"
-            | .int => "Int"
-            | .uint8 => "U8"
-            | .uint16 => "U16"
-            | .uint32 => "U32"
-            | .uint64 => "U64"
-            | .usize => "USize"
-            | .int8 => "I8"
-            | .int16 => "I16"
-            | .int32 => "I32"
-            | .int64 => "I64"
-            | .isize => "ISize"
-            | .float => "F64"
-            | .float32 => "F32"
-            | .bool => "Bool"
-            | .char => "Char"
-            | .string => "String"
-            | .unit => "Unit")
-      | .named name arguments =>
-          let argumentKeys :=
-            arguments.map (psWasmIrTypeKeyWithFuel fuel)
-          match psWasmJoinTypeKeys argumentKeys with
-          | none => none
-          | some "" => some ("N{" ++ name ++ "}")
-          | some keys =>
-              some ("N{" ++ name ++ "}<" ++ keys ++ ">")
-      | .function parameters result =>
-          let parameterKeys :=
-            parameters.map (psWasmIrTypeKeyWithFuel fuel)
-          match psWasmJoinTypeKeys parameterKeys with
-          | none => none
-          | some parameterKey =>
-              match psWasmIrTypeKeyWithFuel fuel result with
-              | none => none
-              | some resultKey =>
-                  some ("Fn{" ++ parameterKey ++ "}->{" ++ resultKey ++ "}")
+def psWasmMapTypeKeysWith
+    (convert : PsVerifiedIrType -> Option String)
+    (values : List PsVerifiedIrType) :
+    List (Option String) :=
+  match values with
+  | List.nil => List.nil
+  | List.cons value rest =>
+      List.cons
+        (convert value)
+        (psWasmMapTypeKeysWith convert rest)
+
+def psWasmIrTypeKeyWithFuel
+    (remainingFuel : Nat) :
+    PsVerifiedIrType -> Option String :=
+  match remainingFuel with
+  | 0 =>
+      fun (_type : PsVerifiedIrType) => Option.none
+  | fuel + 1 =>
+      let smaller : PsVerifiedIrType -> Option String :=
+        psWasmIrTypeKeyWithFuel fuel;
+      fun (type : PsVerifiedIrType) =>
+        match type with
+        | .unknown => Option.none
+        | .typeParameter _ => Option.none
+        | .primitive primitive =>
+            match primitive with
+            | .nat => Option.some "Nat"
+            | .int => Option.some "Int"
+            | .uint8 => Option.some "U8"
+            | .uint16 => Option.some "U16"
+            | .uint32 => Option.some "U32"
+            | .uint64 => Option.some "U64"
+            | .usize => Option.some "USize"
+            | .int8 => Option.some "I8"
+            | .int16 => Option.some "I16"
+            | .int32 => Option.some "I32"
+            | .int64 => Option.some "I64"
+            | .isize => Option.some "ISize"
+            | .float => Option.some "F64"
+            | .float32 => Option.some "F32"
+            | .bool => Option.some "Bool"
+            | .char => Option.some "Char"
+            | .string => Option.some "String"
+            | .unit => Option.some "Unit"
+        | .named name arguments =>
+            let argumentKeys :=
+              psWasmMapTypeKeysWith
+                smaller
+                arguments;
+            match psWasmJoinTypeKeys argumentKeys with
+            | Option.none => Option.none
+            | Option.some keys =>
+                if psStringEq keys "" then
+                  Option.some
+                    (String.Internal.append
+                      "N{"
+                      (String.Internal.append name "}"))
+                else
+                  Option.some
+                    (String.Internal.append
+                      "N{"
+                      (String.Internal.append
+                        name
+                        (String.Internal.append
+                          "}<"
+                          (String.Internal.append keys ">"))))
+        | .function parameters result =>
+            let parameterKeys :=
+              psWasmMapTypeKeysWith
+                smaller
+                parameters;
+            match psWasmJoinTypeKeys parameterKeys with
+            | Option.none => Option.none
+            | Option.some parameterKey =>
+                match smaller result with
+                | Option.none => Option.none
+                | Option.some resultKey =>
+                    Option.some
+                      (String.Internal.append
+                        "Fn{"
+                        (String.Internal.append
+                          parameterKey
+                          (String.Internal.append
+                            "}->{"
+                            (String.Internal.append resultKey "}"))))
 
 def psWasmIrTypeKey
     (type : PsVerifiedIrType) : Option String :=
@@ -71,62 +115,62 @@ def psWasmClosureBaseName
   match type with
   | .function _ _ =>
       match psWasmIrTypeKey type with
-      | none => none
-      | some key => some ("ProofScript.Closure$" ++ key)
-  | _ => none
+      | Option.none => Option.none
+      | Option.some key => Option.some (String.Internal.append "ProofScript.Closure$" key)
+  | _ => Option.none
 
 def psWasmClosureCodeTypeName
     (type : PsVerifiedIrType) : Option String :=
   match type with
   | .function _ _ =>
       match psWasmIrTypeKey type with
-      | none => none
-      | some key => some ("ProofScript.ClosureCode$" ++ key)
-  | _ => none
+      | Option.none => Option.none
+      | Option.some key => Option.some (String.Internal.append "ProofScript.ClosureCode$" key)
+  | _ => Option.none
 
 def psWasmArrayTypeName
     (elementType : PsVerifiedIrType) : Option String :=
   match psWasmIrTypeKey elementType with
-  | none => none
-  | some key => some ("ProofScript.Array$" ++ key)
+  | Option.none => Option.none
+  | Option.some key => Option.some (String.Internal.append "ProofScript.Array$" key)
 
 def psWasmWordValueType (profile : PsWasmTargetProfile) : PsWasmValueType :=
   match profile.wordSize with
-  | .wasm32 => .i32
-  | .wasm64 => .i64
+  | .wasm32 => PsWasmValueType.i32
+  | .wasm64 => PsWasmValueType.i64
 
 def psWasmValueTypeOfPrimitive
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrPrimitiveType) : PsWasmValueType :=
   match type with
-  | .nat => .refT "ProofScript.Nat"
-  | .int => .refT "ProofScript.Int"
-  | .uint8 => .i32
-  | .uint16 => .i32
-  | .uint32 => .i32
-  | .uint64 => .i64
+  | .nat => PsWasmValueType.refT "ProofScript.Nat"
+  | .int => PsWasmValueType.refT "ProofScript.Int"
+  | .uint8 => PsWasmValueType.i32
+  | .uint16 => PsWasmValueType.i32
+  | .uint32 => PsWasmValueType.i32
+  | .uint64 => PsWasmValueType.i64
   | .usize => psWasmWordValueType profile
-  | .int8 => .i32
-  | .int16 => .i32
-  | .int32 => .i32
-  | .int64 => .i64
+  | .int8 => PsWasmValueType.i32
+  | .int16 => PsWasmValueType.i32
+  | .int32 => PsWasmValueType.i32
+  | .int64 => PsWasmValueType.i64
   | .isize => psWasmWordValueType profile
-  | .float => .f64
-  | .float32 => .f32
-  | .bool => .i32
-  | .char => .i32
-  | .string => .refT "ProofScript.String"
-  | .unit => .noValue
+  | .float => PsWasmValueType.f64
+  | .float32 => PsWasmValueType.f32
+  | .bool => PsWasmValueType.i32
+  | .char => PsWasmValueType.i32
+  | .string => PsWasmValueType.refT "ProofScript.String"
+  | .unit => PsWasmValueType.noValue
 
 def psWasmStorageTypeOfPrimitive
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrPrimitiveType) : PsWasmStorageType :=
   match type with
-  | .uint8 => .packedI8
-  | .int8 => .packedI8
-  | .uint16 => .packedI16
-  | .int16 => .packedI16
-  | other => .value (psWasmValueTypeOfPrimitive profile other)
+  | .uint8 => PsWasmStorageType.packedI8
+  | .int8 => PsWasmStorageType.packedI8
+  | .uint16 => PsWasmStorageType.packedI16
+  | .int16 => PsWasmStorageType.packedI16
+  | _ => PsWasmStorageType.value (psWasmValueTypeOfPrimitive profile type)
 
 def psWasmLowerPrimitive
     (profile : PsWasmTargetProfile)
@@ -141,38 +185,71 @@ def psWasmValueTypeOfIrType?
     (profile : PsWasmTargetProfile) :
     PsVerifiedIrType -> Option PsWasmValueType
   | .primitive primitive =>
-      match psWasmValueTypeOfPrimitive profile primitive with
-      | .noValue => none
-      | valueType => some valueType
-  | .named "Array" [elementType] =>
-      match psWasmArrayTypeName elementType with
-      | none => none
-      | some name => some (.refT name)
-  | .named name [] => some (.refT name)
+      let valueType :=
+        psWasmValueTypeOfPrimitive profile primitive;
+      match valueType with
+      | .noValue => Option.none
+      | _ => Option.some valueType
+  | .named name arguments =>
+      if psStringEq name "Array" then
+        match arguments with
+        | List.nil => Option.none
+        | List.cons elementType rest =>
+            match rest with
+            | List.nil =>
+                match psWasmArrayTypeName elementType with
+                | Option.none => Option.none
+                | Option.some arrayName =>
+                    Option.some (PsWasmValueType.refT arrayName)
+            | List.cons _ _ => Option.none
+      else
+        match arguments with
+        | List.nil =>
+            Option.some (PsWasmValueType.refT name)
+        | List.cons _ _ => Option.none
   | .function parameters result =>
       match
           psWasmClosureBaseName
             (PsVerifiedIrType.function parameters result) with
-      | none => none
-      | some name => some (.refT name)
-  | _ => none
+      | Option.none => Option.none
+      | Option.some name => Option.some (PsWasmValueType.refT name)
+  | _ => Option.none
 
 def psWasmStorageTypeOfIrType?
     (profile : PsWasmTargetProfile) :
     PsVerifiedIrType -> Option PsWasmStorageType
   | .primitive primitive =>
       match psWasmValueTypeOfPrimitive profile primitive with
-      | .noValue => none
-      | _ => some (psWasmStorageTypeOfPrimitive profile primitive)
-  | .named "Array" [elementType] =>
-      match psWasmArrayTypeName elementType with
-      | none => none
-      | some name => some (.value (.refT name))
-  | .named name [] => some (.value (.refT name))
+      | .noValue => Option.none
+      | _ => Option.some (psWasmStorageTypeOfPrimitive profile primitive)
+  | .named name arguments =>
+      if psStringEq name "Array" then
+        match arguments with
+        | List.nil => Option.none
+        | List.cons elementType rest =>
+            match rest with
+            | List.nil =>
+                match psWasmArrayTypeName elementType with
+                | Option.none => Option.none
+                | Option.some arrayName =>
+                    Option.some
+                      (PsWasmStorageType.value
+                        (PsWasmValueType.refT arrayName))
+            | List.cons _ _ => Option.none
+      else
+        match arguments with
+        | List.nil =>
+            Option.some
+              (PsWasmStorageType.value
+                (PsWasmValueType.refT name))
+        | List.cons _ _ => Option.none
   | .function parameters result =>
       match
           psWasmClosureBaseName
             (PsVerifiedIrType.function parameters result) with
-      | none => none
-      | some name => some (.value (.refT name))
-  | _ => none
+      | Option.none => Option.none
+      | Option.some name =>
+          Option.some
+            (PsWasmStorageType.value
+              (PsWasmValueType.refT name))
+  | _ => Option.none

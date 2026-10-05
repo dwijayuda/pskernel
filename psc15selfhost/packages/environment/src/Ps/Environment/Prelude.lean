@@ -64,6 +64,9 @@ def psPreludeNatType : PsExpr :=
 def psPreludeIntType : PsExpr :=
   PsExpr.constE psIntName []
 
+def psPreludeUInt8Type : PsExpr :=
+  PsExpr.constE psUInt8Name []
+
 def psPreludeStringType : PsExpr :=
   PsExpr.constE psStringName []
 
@@ -390,6 +393,13 @@ def psPreludeIntOfNatType : PsExpr :=
     psPreludeIntType
     PsBinderInfo.explicit
 
+def psPreludeUInt8OfNatType : PsExpr :=
+  PsExpr.forallE
+    psPreludeNName
+    psPreludeNatType
+    psPreludeUInt8Type
+    PsBinderInfo.explicit
+
 def psPreludeIntUnaryType : PsExpr :=
   PsExpr.forallE
     psPreludeAName
@@ -689,10 +699,15 @@ def psPreludeEnv8 : PsEnvironment :=
 
 def psPreludeEnvScalarUInt8 : PsEnvironment :=
   psPreludeAdd
-    (psPreludeAdd psPreludeEnv8
-      (PsDeclaration.axiomDecl psIntReprName []
-        (PsExpr.forallE psPreludeNName psPreludeIntType psPreludeStringType PsBinderInfo.explicit)))
-    (PsDeclaration.axiomDecl psUInt8Name [] psPreludeTypeType)
+    (psPreludeAdd
+      (psPreludeAdd psPreludeEnv8
+        (PsDeclaration.axiomDecl psIntReprName []
+          (PsExpr.forallE psPreludeNName psPreludeIntType psPreludeStringType PsBinderInfo.explicit)))
+      (PsDeclaration.axiomDecl psUInt8Name [] psPreludeTypeType))
+    (PsDeclaration.axiomDecl
+      psUInt8OfNatName
+      []
+      psPreludeUInt8OfNatType)
 
 def psPreludeEnvScalarUInt16 : PsEnvironment :=
   psPreludeAdd psPreludeEnvScalarUInt8

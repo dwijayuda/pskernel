@@ -1,4 +1,6 @@
 import Ps.BackendWasm.RuntimeNat
+import Ps.BackendWasm.IntUtil
+import Ps.Foundation.List
 
 def psWasmIntName : String := "ProofScript.Int"
 
@@ -17,7 +19,7 @@ def psWasmIntRuntimeStructures : List PsWasmStructType :=
   [
     {
       name := psWasmIntName
-      superType := none
+      superType := Option.none
       isFinal := true
       fields := [
         {
@@ -36,14 +38,14 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
   [
     {
       name := psWasmIntOfNatFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef]
       results := [psWasmIntRef]
       locals := []
       body := [
         PsWasmInstruction.localGet 0,
         PsWasmInstruction.refTest psWasmNatZeroName,
-        PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+        PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
           PsWasmInstruction.i32Const 0,
         PsWasmInstruction.else_,
           PsWasmInstruction.i32Const 1,
@@ -54,12 +56,12 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmIntNegSuccFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef]
       results := [psWasmIntRef]
       locals := []
       body := [
-        PsWasmInstruction.i32Const (-1),
+        PsWasmInstruction.i32Const (Int.negSucc 0),
         PsWasmInstruction.localGet 0,
         PsWasmInstruction.call psWasmNatSuccFn,
         PsWasmInstruction.structNew psWasmIntName
@@ -67,7 +69,7 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmIntNegFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmIntRef]
       results := [psWasmIntRef]
       locals := []
@@ -83,7 +85,7 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmIntCmpFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmIntRef, psWasmIntRef]
       results := [PsWasmValueType.i32]
       locals := [
@@ -103,19 +105,19 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
         PsWasmInstruction.localGet 2,
         PsWasmInstruction.localGet 3,
         PsWasmInstruction.i32LtS,
-        PsWasmInstruction.ifStart (some PsWasmValueType.i32),
-          PsWasmInstruction.i32Const (-1),
+        PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
+          PsWasmInstruction.i32Const (Int.negSucc 0),
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 2,
           PsWasmInstruction.localGet 3,
           PsWasmInstruction.i32GtS,
-          PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+          PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
             PsWasmInstruction.i32Const 1,
           PsWasmInstruction.else_,
             PsWasmInstruction.localGet 2,
             PsWasmInstruction.i32Const 0,
             PsWasmInstruction.i32Eq,
-            PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+            PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
               PsWasmInstruction.i32Const 0,
             PsWasmInstruction.else_,
               PsWasmInstruction.localGet 0,
@@ -131,7 +133,7 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
               PsWasmInstruction.localGet 2,
               PsWasmInstruction.i32Const 0,
               PsWasmInstruction.i32GtS,
-              PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+              PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
                 PsWasmInstruction.localGet 6,
               PsWasmInstruction.else_,
                 PsWasmInstruction.i32Const 0,
@@ -145,7 +147,7 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmIntAddFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmIntRef, psWasmIntRef]
       results := [psWasmIntRef]
       locals := [
@@ -171,19 +173,19 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
         PsWasmInstruction.localGet 2,
         PsWasmInstruction.i32Const 0,
         PsWasmInstruction.i32Eq,
-        PsWasmInstruction.ifStart (some psWasmIntRef),
+        PsWasmInstruction.ifStart (Option.some psWasmIntRef),
           PsWasmInstruction.localGet 1,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 3,
           PsWasmInstruction.i32Const 0,
           PsWasmInstruction.i32Eq,
-          PsWasmInstruction.ifStart (some psWasmIntRef),
+          PsWasmInstruction.ifStart (Option.some psWasmIntRef),
             PsWasmInstruction.localGet 0,
           PsWasmInstruction.else_,
             PsWasmInstruction.localGet 2,
             PsWasmInstruction.localGet 3,
             PsWasmInstruction.i32Eq,
-            PsWasmInstruction.ifStart (some psWasmIntRef),
+            PsWasmInstruction.ifStart (Option.some psWasmIntRef),
               PsWasmInstruction.localGet 2,
               PsWasmInstruction.localGet 4,
               PsWasmInstruction.localGet 5,
@@ -197,14 +199,14 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
               PsWasmInstruction.localGet 6,
               PsWasmInstruction.i32Const 0,
               PsWasmInstruction.i32Eq,
-              PsWasmInstruction.ifStart (some psWasmIntRef),
+              PsWasmInstruction.ifStart (Option.some psWasmIntRef),
                 PsWasmInstruction.call psWasmNatZeroFn,
                 PsWasmInstruction.call psWasmIntOfNatFn,
               PsWasmInstruction.else_,
                 PsWasmInstruction.localGet 6,
                 PsWasmInstruction.i32Const 0,
                 PsWasmInstruction.i32GtS,
-                PsWasmInstruction.ifStart (some psWasmIntRef),
+                PsWasmInstruction.ifStart (Option.some psWasmIntRef),
                   PsWasmInstruction.localGet 2,
                   PsWasmInstruction.localGet 4,
                   PsWasmInstruction.localGet 5,
@@ -225,7 +227,7 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmIntSubFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmIntRef, psWasmIntRef]
       results := [psWasmIntRef]
       locals := []
@@ -238,7 +240,7 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmIntMulFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmIntRef, psWasmIntRef]
       results := [psWasmIntRef]
       locals := [
@@ -255,14 +257,14 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
         PsWasmInstruction.localGet 2,
         PsWasmInstruction.i32Const 0,
         PsWasmInstruction.i32Eq,
-        PsWasmInstruction.ifStart (some psWasmIntRef),
+        PsWasmInstruction.ifStart (Option.some psWasmIntRef),
           PsWasmInstruction.call psWasmNatZeroFn,
           PsWasmInstruction.call psWasmIntOfNatFn,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 3,
           PsWasmInstruction.i32Const 0,
           PsWasmInstruction.i32Eq,
-          PsWasmInstruction.ifStart (some psWasmIntRef),
+          PsWasmInstruction.ifStart (Option.some psWasmIntRef),
             PsWasmInstruction.call psWasmNatZeroFn,
             PsWasmInstruction.call psWasmIntOfNatFn,
           PsWasmInstruction.else_,
@@ -283,13 +285,9 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
 
 def psWasmIntLiteralInstructions
     (value : Int) : List PsWasmInstruction :=
-  match value with
-  | .ofNat magnitude =>
-      [PsWasmInstruction.i32Const
-        (if magnitude == 0 then 0 else 1)]
-        ++ psWasmNatLiteralInstructions magnitude
-        ++ [PsWasmInstruction.structNew psWasmIntName]
-  | .negSucc magnitude =>
-      [PsWasmInstruction.i32Const (-1)]
-        ++ psWasmNatLiteralInstructions (magnitude + 1)
-        ++ [PsWasmInstruction.structNew psWasmIntName]
+  let signMagnitude := psWasmIntSignMagnitude value;
+  psListAppend
+    [PsWasmInstruction.i32Const (Prod.fst signMagnitude)]
+    (psListAppend
+      (psWasmNatLiteralInstructions (Prod.snd signMagnitude))
+      [PsWasmInstruction.structNew psWasmIntName])

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fixed intrinsic String Type; validated Unicode scalar literals, exact byte equality, beta/zeta/delta and dependent result-type witnesses; not String operations or full logical model",
+  "sourceManifestSha256": "fe74eb30a78c2ff6b7295862c4988139b717cf7e2fe4e5ece7d131a6a1314513",
+  "harnessSha256": "fe8e883554173012e1c7066e7056f2167b77eb0a2025e3115baa64349022d30b",
+  "fixtureSha256": "2ca3d40799d2eb40b4b158dfb249debfbf1f040d8e214f92669dfcfde32c6b5c",
+  "provider": {
+    "protocol": "pskernel-lean/1",
+    "provider": "lean4-cpp",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "profile": "lean4.34-core",
+    "status": "version"
+  },
+  "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+  "cases": 112,
+  "matched": 112,
+  "accepted": 63,
+  "rejected": 49,
+  "deliberatelyUnsupported": [
+    "String operations and constructor unfolding",
+    "String.ofByteArray and proof fields",
+    "general primitive and axiom admission",
+    "non-Unicode raw byte strings"
+  ],
+  "recordsPath": "dist/evidence/text-differential-records.json",
+  "recordsSha256": "480b0d7a881a0e97356e4fa258e2ae85f87584c35d938985c4b32dd38fc8e51a"
+}

@@ -45,6 +45,9 @@ def psIntName : PsName :=
 def psUInt8Name : PsName :=
   psRootName "UInt8"
 
+def psUInt8OfNatName : PsName :=
+  psNameAppendStr psUInt8Name "ofNat"
+
 def psUInt16Name : PsName :=
   psRootName "UInt16"
 

@@ -3,7 +3,7 @@ import { mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
-import { resolveTypeScriptCli } from "./typescript-cli.mjs";
+import { resolveTypeScriptCli, pinnedTypeScriptVersion, pinnedTypeScriptVersionText } from "./typescript-cli.mjs";
 import { assertBootstrapWorkspaceManifest } from "./bootstrap-manifest.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -89,9 +89,9 @@ const version = spawnSync(process.execPath, [tsc, "--version"], {
 if (
   version.error ||
   version.status !== 0 ||
-  version.stdout.trim() !== "Version 5.8.3"
+  version.stdout.trim() !== pinnedTypeScriptVersionText
 ) {
-  throw new Error("PSC1KERNEL_FAST_VERIFY_TYPESCRIPT_PIN: require TypeScript 5.8.3");
+  throw new Error("PSC1KERNEL_FAST_VERIFY_TYPESCRIPT_PIN: require TypeScript " + pinnedTypeScriptVersion);
 }
 
 const smokeDir = path.join(path.dirname(generatedTs), "smoke-js");
@@ -102,6 +102,7 @@ const emitted = spawnSync(
   process.execPath,
   [
     tsc,
+    "--ignoreConfig",
     generatedTs,
     "--target",
     "ES2022",

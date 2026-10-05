@@ -272,6 +272,19 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.SelfHost
   ]
 
+lean_lib PsKernelSelfHostTestSupport where
+  srcDir := "test"
+  roots := #[
+    `KernelSelfHost.Foundation.Core,
+    `KernelSelfHost.Foundation.Checking,
+    `KernelSelfHost.Foundation.DefEqNested,
+    `KernelSelfHost.Foundation.AdmissionRuntime,
+    `KernelSelfHost.Bench.Foundation,
+    `KernelSelfHost.Bench.Inference,
+    `KernelSelfHost.Bench.Inductive,
+    `KernelSelfHost.Bench.Nested
+  ]
+
 @[default_target]
 lean_exe psc1 where
   srcDir := "packages/cli/src"

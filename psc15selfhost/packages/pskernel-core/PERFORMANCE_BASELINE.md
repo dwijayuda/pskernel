@@ -3,6 +3,12 @@
 This document records non-semantic performance measurements for
 `packages/pskernel-core`.
 
+Current M3 acceptance uses the explicit latency and memory ceilings in
+`M3_ACCEPTANCE.md` and `M3_WORKLOAD_BUDGETS.json`. Relative speed against Lean
+remains diagnostic. Historical ordinary/indexed/mutual admission timings below
+used closed expressions that could be precomputed; they are superseded by the
+runtime-input corpus and must not be cited as admission throughput wins.
+
 These numbers are **engineering baselines**, not semantic evidence and not
 release guarantees. Always preserve the Lean-4.34 conformance, PSC1 portable
 source, canonical `.ps`, and differential gates before promoting a
@@ -22,8 +28,8 @@ For Phase C promotion, use the bounded reporter after building the executable:
 node scripts/psc1kernel-benchmark-report.mjs .lake/build/bin/psc1_kernel_core_bench 3 /tmp/pskernel-core-bench
 ```
 
-On Windows, append `.exe` to the executable path. The reporter takes 1–5
-samples (CI uses 3), caps each process at 30 seconds, and fails on missing
+The M3 reporter requires Linux x64 and Node 22, exactly three samples, and GNU
+time/timeout for peak RSS and a 30-second process cap. It fails on missing
 results or unsuccessful benchmark operations. It saves raw logs, JSON with
 median/range timings and matched PSKernel/Lean ratios, and a Markdown summary.
 No compiler/kernel fixed-point generation is invoked. The historical log fixture
@@ -31,8 +37,9 @@ used to test this reporter is from green commit `33b59ded58aa5ab745ab6b7f729cf48
 
 Untimed `PSKERNEL_PROFILE` rows inspect the fully checked nested recursor-rule
 cache after validation. They distinguish free-variable, sort and constant entries
-without instrumenting the semantic checker. Performance timings remain advisory;
-successful operation counts and existing conformance checks remain hard gates.
+without instrumenting the semantic checker. The explicit M3 workload ceilings,
+successful operation counts and existing conformance checks are hard gates;
+historical timing ratios remain advisory.
 
 Source:
 
@@ -47,8 +54,9 @@ Current benchmark shape:
 - 2,000 repeated worst-case lookups;
 - native Lean 4.34 compiled executable;
 - same semantic data used by indexed and direct-linear lookup paths;
-- timed loops are sequenced inside `IO` so optimizer code motion cannot move
-  the measured work outside the timing interval.
+- timed loops are sequenced inside `IO`; closed pure expressions can still be
+  precomputed, so the repaired admission loops select from sixteen runtime
+  inputs and require occupied-environment rejection guards.
 
 ## 2. Baseline — 2026-10-04
 
@@ -410,9 +418,9 @@ reduction measured approximately:
 PSKernel / Lean recursor reduction: ~2.08x-2.18x
 ```
 
-Ordinary, indexed and small mutual-inductive admission are not current
-bottlenecks in the benchmark fixture. Nested admission was substantially more
-expensive and was therefore split into:
+The historical ordinary/indexed/mutual measurements did not reliably measure
+repeated admission work; use the corrected runtime-input corpus for those rows.
+Nested admission was split into:
 
 ```text
 preprocess
@@ -575,7 +583,7 @@ The comparison used one extra native build capped at four minutes and three
 short samples per variant. Full generated compiler/kernel fixed-point generation
 and large proof-library replay were not run.
 
-M3 remains open. Further changes require representative gains; the next useful
+At that historical checkpoint M3 remained open. Further changes require representative gains; the next useful
 work is a bounded profile of fully checked recursor-rule inference and an
 affordable current-JavaScript benchmark, not speculative metadata or cache-policy
 changes justified only by microbenchmarks.
@@ -747,7 +755,8 @@ portable PSC1 gates and native benchmark all passed at this checkpoint.
 This is a local improvement, not closure of the runtime gap. In that run the
 three JS/native median ratios were still 584.49x, 387.74x and 344.03x respectively.
 Do not compare ratios from different runners to estimate the shortcut's benefit;
-use the paired current/original results above. M3 remains open.
+use the paired current/original results above. M3 remained open at that checkpoint;
+its subsequent budget-based acceptance is recorded in `M3_ACCEPTANCE.md`.
 
 The one-off comparison generator and optional reporter path are removed after
 this experiment. The ordinary bounded harness, correctness guards and profile

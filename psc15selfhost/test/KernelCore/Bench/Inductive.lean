@@ -1099,13 +1099,23 @@ def psKernelBenchAdmissionBases : IO (Array PsKernelEnvironment × Array Lean.En
   for index in [0:16] do
     let psName := PsKernelName.num (PsKernelName.str PsKernelName.anonymous "BenchAmbient") index
     let leanName := Lean.Name.num (Lean.Name.str Lean.Name.anonymous "BenchAmbient") index
-    let psBase := psKernelEnvironmentAddUnchecked psKernelEnvironmentEmpty
-      (.axiomInfo { base := { name := psName, levelParams := [],
-        type := .sort (.succ .zero) }, isUnsafe := false })
+    let psInfo : PsKernelAxiomInfo := {
+      base := {
+        name := psName
+        levelParams := []
+        type := .sort (.succ .zero)
+      }
+      isUnsafe := false
+    }
+    let psBase := psKernelEnvironmentAddUnchecked psKernelEnvironmentEmpty (.axiomInfo psInfo)
     let leanBase ← Lean.mkEmptyEnvironment
     let .ok leanNext := Lean.Kernel.Environment.addDecl leanBase.toKernelEnv {}
-      (.axiomDecl { name := leanName, levelParams := [],
-        type := .sort (.succ .zero), isUnsafe := false })
+      (.axiomDecl {
+        name := leanName
+        levelParams := []
+        type := .sort (.succ .zero)
+        isUnsafe := false
+      })
       | throw (IO.userError "admission ambient fixture failed")
     portable := portable.push psBase
     official := official.push (Lean.Environment.ofKernelEnv leanNext)
@@ -1329,4 +1339,3 @@ def psKernelBenchAdmissionInputGuards
     if psHits != 0 || leanHits != 0 then
       throw (IO.userError "admission benchmark ignored occupied input")
   IO.println "PSKERNEL_ADMISSION_INPUT_GUARDS: PASS variants=16"
-

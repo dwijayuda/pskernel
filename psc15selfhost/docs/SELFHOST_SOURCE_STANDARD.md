@@ -57,6 +57,23 @@ paper over semantic gaps.
 The goal is to keep self-hostability as a development invariant instead of rediscovering
 unsupported source patterns late in the bootstrap/fixed-point cycle.
 
+### Prelude extension parity
+
+The historical joint-inventory prelude remains the frozen core parity oracle. Intentional
+portable capabilities that extend that prelude must be declared separately in
+`prelude-extension-contract.json`.
+
+The parity gate therefore enforces two independent invariants:
+
+1. after removing only contract-declared extensions, the frozen core declarations must
+   remain exactly equal in type, metadata, body and order;
+2. every declared extension must itself match its exact serialized declaration and
+   pinned insertion point.
+
+Unknown extra declarations are never hidden by the extension contract. Missing,
+duplicated, moved or shape-changed extensions reject. Do not regenerate the frozen core
+inventory merely because a portable capability is intentionally added.
+
 ## Rule of authority
 
 A change is bootstrap-safe only when all three layers pass:

@@ -18,6 +18,12 @@ inductive PsIrSpecializeError where
   | unknownTarget (name : String)
   | unsupportedGenericCall
 
+def psIrSpecializeBoolNot (value : Bool) : Bool :=
+  if value then false else true
+
+def psIrSpecializeNatNe (left : Nat) (right : Nat) : Bool :=
+  if Nat.beq left right then false else true
+
 structure PsIrSpecializeTypeResult where
   type : PsVerifiedIrType
   requests : List PsIrSpecializeRequest
@@ -80,7 +86,7 @@ def psIrSpecializeLookupType :
     Option PsVerifiedIrType
   | [], _ => none
   | entry :: rest, name =>
-      if (Prod.fst entry) == name then
+      if psStringEq (Prod.fst entry) name then
         some (Prod.snd entry)
       else
         psIrSpecializeLookupType rest name
@@ -91,7 +97,7 @@ def psIrSpecializeFindStructure :
     Option PsVerifiedIrStructure
   | [], _ => none
   | entry :: rest, name =>
-      if entry.name == name then
+      if psStringEq entry.name name then
         some entry
       else
         psIrSpecializeFindStructure rest name
@@ -102,7 +108,7 @@ def psIrSpecializeFindInductive :
     Option PsVerifiedIrInductive
   | [], _ => none
   | entry :: rest, name =>
-      if entry.name == name then
+      if psStringEq entry.name name then
         some entry
       else
         psIrSpecializeFindInductive rest name
@@ -113,7 +119,7 @@ def psIrSpecializeFindDeclaration :
     Option PsVerifiedIrDeclaration
   | [], _ => none
   | entry :: rest, name =>
-      if entry.name == name then
+      if psStringEq entry.name name then
         some entry
       else
         psIrSpecializeFindDeclaration rest name
@@ -128,7 +134,7 @@ def psIrSpecializeJoinKeys :
           match psIrSpecializeJoinKeys rest with
           | none => none
           | some tail =>
-              if tail == "" then
+              if psStringEq tail "" then
                 some head
               else
                 some (head ++ "$" ++ tail)
@@ -220,7 +226,7 @@ def psIrSpecializeSeenContains :
     List String -> String -> Bool
   | [], _ => false
   | entry :: rest, key =>
-      if entry == key then
+      if psStringEq entry key then
         true
       else
         psIrSpecializeSeenContains rest key
@@ -235,8 +241,10 @@ def psIrSpecializeAllGround :
     List PsVerifiedIrType -> Bool
   | [] => true
   | type :: rest =>
-      psIrSpecializeIsGround type
-        && psIrSpecializeAllGround rest
+      if psIrSpecializeIsGround type then
+        psIrSpecializeAllGround rest
+      else
+        false
 
 def psIrSpecializeTypeParameterNames :
     List PsVerifiedIrTypeParameter -> List String
@@ -250,10 +258,10 @@ def psIrSpecializeMakeSubstitution
     (arguments : List PsVerifiedIrType) :
     Except PsIrSpecializeError
       (List (String × PsVerifiedIrType)) :=
-  if parameters.length != arguments.length then
+  if psIrSpecializeNatNe parameters.length arguments.length then
     Except.error
       (PsIrSpecializeError.typeArgumentArity "")
-  else if !psIrSpecializeAllGround arguments then
+  else if psIrSpecializeBoolNot (psIrSpecializeAllGround arguments) then
     Except.error
       (PsIrSpecializeError.nonGroundType "")
   else
@@ -389,8 +397,8 @@ def psIrSpecializeRewriteTypeWithFuel
                   }
               | some request =>
                   if
-                      !psIrSpecializeAllGround
-                        loweredArguments.types
+                      psIrSpecializeBoolNot
+                        (psIrSpecializeAllGround loweredArguments.types)
                   then
                     Except.error
                       (PsIrSpecializeError.nonGroundType name)
@@ -709,15 +717,15 @@ def psIrSpecializeRewriteExprWithFuel
                                   }
                               | _ =>
                                   if
-                                      declaration.typeParameters.length !=
+                                      psIrSpecializeNatNe declaration.typeParameters.length
                                         loweredTypes.types.length
                                   then
                                     Except.error
                                       (PsIrSpecializeError.typeArgumentArity
                                         name)
                                   else if
-                                      !psIrSpecializeAllGround
-                                        loweredTypes.types
+                                      psIrSpecializeBoolNot
+                                        (psIrSpecializeAllGround loweredTypes.types)
                                   then
                                     Except.error
                                       (PsIrSpecializeError.nonGroundType name)
@@ -763,7 +771,7 @@ def psIrSpecializeRewriteExprWithFuel
                                     ++ loweredArguments.requests
                               }
                       | _ =>
-                          if loweredTypes.types.length == 0 then
+                          if Nat.beq loweredTypes.types.length 0 then
                             Except.ok {
                               expr :=
                                 PsVerifiedIrExpr.call
@@ -853,7 +861,7 @@ def psIrSpecializeRewriteExprWithFuel
                           }
                       | _ =>
                           if
-                              structureInfo.typeParameters.length !=
+                              psIrSpecializeNatNe structureInfo.typeParameters.length
                                 loweredTypes.types.length
                           then
                             Except.error
@@ -918,7 +926,7 @@ def psIrSpecializeRewriteExprWithFuel
                           }
                       | _ =>
                           if
-                              structureInfo.typeParameters.length !=
+                              psIrSpecializeNatNe structureInfo.typeParameters.length
                                 loweredTypes.types.length
                           then
                             Except.error
@@ -987,7 +995,7 @@ def psIrSpecializeRewriteExprWithFuel
                           }
                       | _ =>
                           if
-                              inductiveInfo.typeParameters.length !=
+                              psIrSpecializeNatNe inductiveInfo.typeParameters.length
                                 loweredTypes.types.length
                           then
                             Except.error
@@ -1062,7 +1070,7 @@ def psIrSpecializeRewriteExprWithFuel
                               }
                           | _ =>
                               if
-                                  inductiveInfo.typeParameters.length !=
+                                  psIrSpecializeNatNe inductiveInfo.typeParameters.length
                                     loweredTypes.types.length
                               then
                                 Except.error
@@ -1444,7 +1452,7 @@ def psIrSpecializeProcessStructure
         (PsIrSpecializeError.unknownTarget request.name)
   | some structureInfo =>
       if
-          structureInfo.typeParameters.length !=
+          psIrSpecializeNatNe structureInfo.typeParameters.length
             request.arguments.length
       then
         Except.error
@@ -1497,7 +1505,7 @@ def psIrSpecializeProcessInductive
         (PsIrSpecializeError.unknownTarget request.name)
   | some inductiveInfo =>
       if
-          inductiveInfo.typeParameters.length !=
+          psIrSpecializeNatNe inductiveInfo.typeParameters.length
             request.arguments.length
       then
         Except.error
@@ -1550,7 +1558,7 @@ def psIrSpecializeProcessDeclaration
         (PsIrSpecializeError.unknownTarget request.name)
   | some declaration =>
       if
-          declaration.typeParameters.length !=
+          psIrSpecializeNatNe declaration.typeParameters.length
             request.arguments.length
       then
         Except.error

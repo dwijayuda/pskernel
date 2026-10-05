@@ -57,8 +57,8 @@ def psWasmLowerParameterType
     (type : PsVerifiedIrType) :
     Except PsWasmLowerError PsWasmValueType :=
   match psWasmValueTypeOfIrType? profile type with
-  | none => Except.error PsWasmLowerError.unsupportedType
-  | some valueType => Except.ok valueType
+  | Option.none => Except.error PsWasmLowerError.unsupportedType
+  | Option.some valueType => Except.ok valueType
 
 def psWasmLowerResultType
     (profile : PsWasmTargetProfile)
@@ -68,8 +68,8 @@ def psWasmLowerResultType
   | .primitive .unit => Except.ok []
   | _ =>
       match psWasmValueTypeOfIrType? profile type with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some valueType => Except.ok [valueType]
+      | Option.none => Except.error PsWasmLowerError.unsupportedType
+      | Option.some valueType => Except.ok [valueType]
 
 def psWasmLowerParameterTypes
     (profile : PsWasmTargetProfile) :
@@ -88,10 +88,10 @@ def psWasmLowerParameterTypes
 def psWasmExpectedResultType :
     List PsWasmValueType ->
     Except PsWasmLowerError (Option PsWasmValueType)
-  | [] => Except.ok none
+  | [] => Except.ok Option.none
   | result :: rest =>
       match rest with
-      | [] => Except.ok (some result)
+      | [] => Except.ok (Option.some result)
       | _ => Except.error PsWasmLowerError.unsupportedType
 
 def psWasmMachineIntegerValueType
@@ -128,48 +128,48 @@ def psWasmListPair? {Value : Type}
     (values : List Value) :
     Option (Value × Value) :=
   match values with
-  | List.nil => none
+  | List.nil => Option.none
   | List.cons first rest =>
       match rest with
-      | List.nil => none
+      | List.nil => Option.none
       | List.cons second tail =>
           match tail with
           | List.nil =>
-              some (Prod.mk first second)
-          | List.cons _ _ => none
+              Option.some (Prod.mk first second)
+          | List.cons _ _ => Option.none
 
 def psWasmListTriple? {Value : Type}
     (values : List Value) :
     Option (Value × Value × Value) :=
   match values with
-  | List.nil => none
+  | List.nil => Option.none
   | List.cons first rest =>
       match rest with
-      | List.nil => none
+      | List.nil => Option.none
       | List.cons second tail =>
           match tail with
-          | List.nil => none
+          | List.nil => Option.none
           | List.cons third final =>
               match final with
               | List.nil =>
-                  some
+                  Option.some
                     (Prod.mk
                       first
                       (Prod.mk second third))
-              | List.cons _ _ => none
+              | List.cons _ _ => Option.none
 
 def psWasmFunctionTypeListContains
     (types : List PsVerifiedIrType)
     (candidate : PsVerifiedIrType) : Bool :=
   match psWasmIrTypeKey candidate with
-  | none => false
-  | some candidateKey =>
+  | Option.none => false
+  | Option.some candidateKey =>
       let predicate :
           PsVerifiedIrType -> Bool :=
         fun (existing : PsVerifiedIrType) =>
           match psWasmIrTypeKey existing with
-          | none => false
-          | some existingKey => psStringEq existingKey candidateKey;
+          | Option.none => false
+          | Option.some existingKey => psStringEq existingKey candidateKey;
       psListAny predicate types
 
 def psWasmInsertFunctionType
@@ -535,14 +535,14 @@ def psWasmArrayTypeListContains
     (types : List PsVerifiedIrType)
     (candidate : PsVerifiedIrType) : Bool :=
   match psWasmIrTypeKey candidate with
-  | none => false
-  | some candidateKey =>
+  | Option.none => false
+  | Option.some candidateKey =>
       let predicate :
           PsVerifiedIrType -> Bool :=
         fun (existing : PsVerifiedIrType) =>
           match psWasmIrTypeKey existing with
-          | none => false
-          | some existingKey => psStringEq existingKey candidateKey;
+          | Option.none => false
+          | Option.some existingKey => psStringEq existingKey candidateKey;
       psListAny predicate types
 
 def psWasmInsertArrayType
@@ -1039,16 +1039,16 @@ def psWasmLowerArrayType
                 Except.error PsWasmLowerError.unsupportedType
             | List.nil =>
                 match psWasmArrayTypeName elementType with
-                | none =>
+                | Option.none =>
                     Except.error PsWasmLowerError.unsupportedType
-                | some arrayName =>
+                | Option.some arrayName =>
                     match
                         psWasmStorageTypeOfIrType?
                           profile
                           elementType with
-                    | none =>
+                    | Option.none =>
                         Except.error PsWasmLowerError.unsupportedType
-                    | some storageType =>
+                    | Option.some storageType =>
                         Except.ok {
                           name := arrayName
                           elementType := storageType
@@ -1084,8 +1084,8 @@ def psWasmLowerIrTypeList
   | [] => Except.ok []
   | type :: rest =>
       match psWasmValueTypeOfIrType? profile type with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some lowered =>
+      | Option.none => Except.error PsWasmLowerError.unsupportedType
+      | Option.some lowered =>
           match psWasmLowerIrTypeList profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
@@ -1098,11 +1098,11 @@ def psWasmLowerClosureSignature
   match type with
   | .function parameters result =>
       match psWasmClosureBaseName type with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some baseName =>
+      | Option.none => Except.error PsWasmLowerError.unsupportedType
+      | Option.some baseName =>
           match psWasmClosureCodeTypeName type with
-          | none => Except.error PsWasmLowerError.unsupportedType
-          | some codeTypeName =>
+          | Option.none => Except.error PsWasmLowerError.unsupportedType
+          | Option.some codeTypeName =>
               match psWasmLowerIrTypeList profile parameters with
               | Except.error error => Except.error error
               | Except.ok loweredParameters =>
@@ -1112,7 +1112,7 @@ def psWasmLowerClosureSignature
                       Except.ok {
                         baseStructure := {
                           name := baseName
-                          superType := none
+                          superType := Option.none
                           isFinal := false
                           fields := [
                             {
@@ -1220,8 +1220,8 @@ def psWasmLowerStructureField
     (field : PsVerifiedIrStructureField) :
     Except PsWasmLowerError PsWasmStructField :=
   match psWasmStorageTypeOfIrType? profile field.type with
-  | none => Except.error PsWasmLowerError.unsupportedType
-  | some storageType =>
+  | Option.none => Except.error PsWasmLowerError.unsupportedType
+  | Option.some storageType =>
       Except.ok {
         name := field.name
         storageType := storageType
@@ -1253,7 +1253,7 @@ def psWasmLowerStructure
       | Except.ok fields =>
           Except.ok {
             name := structInfo.name
-            superType := none
+            superType := Option.none
             isFinal := true
             fields := fields
           }
@@ -1328,8 +1328,8 @@ def psWasmLowerConstructorField
     (field : PsVerifiedIrConstructorField) :
     Except PsWasmLowerError PsWasmStructField :=
   match psWasmStorageTypeOfIrType? profile field.type with
-  | none => Except.error PsWasmLowerError.unsupportedType
-  | some storageType =>
+  | Option.none => Except.error PsWasmLowerError.unsupportedType
+  | Option.some storageType =>
       Except.ok {
         name := field.name
         storageType := storageType
@@ -1367,7 +1367,7 @@ def psWasmLowerInductiveConstructors
               psWasmConstructorTypeName
                 inductiveInfo.name
                 constructorInfo.name
-            superType := some inductiveInfo.name
+            superType := Option.some inductiveInfo.name
             isFinal := true
             fields := fields
           };
@@ -1389,7 +1389,7 @@ def psWasmLowerInductive
   | [] =>
       let base : PsWasmStructType := {
         name := inductiveInfo.name
-        superType := none
+        superType := Option.none
         isFinal := false
         fields := []
       };
@@ -1453,8 +1453,8 @@ def psWasmFindBindingIndex
     (bindings : List PsWasmBinding)
     (name : String) : Option Nat :=
   match psWasmFindBinding bindings name with
-  | none => none
-  | some binding => some binding.index
+  | Option.none => Option.none
+  | Option.some binding => Option.some binding.index
 
 def psWasmStringListContains
     (items : List String)
@@ -1489,8 +1489,8 @@ def psWasmAppendCaptureForName
     captures
   else
     match psWasmFindBinding outerBindings name with
-    | none => captures
-    | some binding => psListAppend captures (List.cons binding List.nil)
+    | Option.none => captures
+    | Option.some binding => psListAppend captures (List.cons binding List.nil)
 
 def psWasmParameterNames :
     List PsVerifiedIrParameter -> List String
@@ -1751,15 +1751,15 @@ def psWasmLowerRecordFieldsWith
       }
   | List.cons field rest =>
       match psWasmFindRecordField fields field.name with
-      | none =>
+      | Option.none =>
           Except.error
             (PsWasmLowerError.missingRecordField
               structInfo.name field.name)
-      | some value =>
+      | Option.some value =>
           match psWasmValueTypeOfIrType? profile field.type with
-          | none => Except.error PsWasmLowerError.unsupportedType
-          | some valueType =>
-              match lower (some valueType) state value with
+          | Option.none => Except.error PsWasmLowerError.unsupportedType
+          | Option.some valueType =>
+              match lower (Option.some valueType) state value with
               | Except.error error => Except.error error
               | Except.ok lowered =>
                   match
@@ -1801,17 +1801,17 @@ def psWasmLowerConstructorValuesWith
       }
   | List.cons field rest =>
       match psWasmFindRecordField fields field.name with
-      | none =>
+      | Option.none =>
           Except.error
             (PsWasmLowerError.missingConstructorField
               inductiveName
               constructorInfo.name
               field.name)
-      | some value =>
+      | Option.some value =>
           match psWasmValueTypeOfIrType? profile field.type with
-          | none => Except.error PsWasmLowerError.unsupportedType
-          | some valueType =>
-              match lower (some valueType) state value with
+          | Option.none => Except.error PsWasmLowerError.unsupportedType
+          | Option.some valueType =>
+              match lower (Option.some valueType) state value with
               | Except.error error => Except.error error
               | Except.ok lowered =>
                   match
@@ -1844,7 +1844,7 @@ def psWasmLowerNatArgumentsWith
     Except PsWasmLowerError PsWasmLoweredExpr :=
   psWasmLowerExprListWith
     lower
-    (some psWasmNatRef)
+    (Option.some psWasmNatRef)
     state
     arguments
 
@@ -1859,7 +1859,7 @@ def psWasmLowerNatBinaryCallWith
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match psWasmListPair? arguments with
-  | some _ =>
+  | Option.some _ =>
       match psWasmLowerNatArgumentsWith lower state arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1870,7 +1870,7 @@ def psWasmLowerNatBinaryCallWith
                 [PsWasmInstruction.call functionName]
             state := lowered.state
           }
-  | none => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | Option.none => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerNatCompareWith
     (lower :
@@ -1883,7 +1883,7 @@ def psWasmLowerNatCompareWith
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match psWasmListPair? arguments with
-  | some _ =>
+  | Option.some _ =>
       match psWasmLowerNatArgumentsWith lower state arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1896,7 +1896,7 @@ def psWasmLowerNatCompareWith
               ]
             state := lowered.state
           }
-  | none => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | Option.none => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerIntArgumentsWith
     (lower :
@@ -1909,7 +1909,7 @@ def psWasmLowerIntArgumentsWith
     Except PsWasmLowerError PsWasmLoweredExpr :=
   psWasmLowerExprListWith
     lower
-    (some psWasmIntRef)
+    (Option.some psWasmIntRef)
     state
     arguments
 
@@ -1924,7 +1924,7 @@ def psWasmLowerIntBinaryCallWith
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match psWasmListPair? arguments with
-  | some _ =>
+  | Option.some _ =>
       match psWasmLowerIntArgumentsWith lower state arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1935,7 +1935,7 @@ def psWasmLowerIntBinaryCallWith
                 [PsWasmInstruction.call functionName]
             state := lowered.state
           }
-  | none => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | Option.none => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerIntUnaryCallWith
     (lower :
@@ -1956,7 +1956,7 @@ def psWasmLowerIntUnaryCallWith
       | [] =>
           match
               lower
-                (some psWasmIntRef)
+                (Option.some psWasmIntRef)
                 state
                 value with
           | Except.error error => Except.error error
@@ -1988,7 +1988,7 @@ def psWasmLowerNatToIntUnaryCallWith
       | [] =>
           match
               lower
-                (some psWasmNatRef)
+                (Option.some psWasmNatRef)
                 state
                 value with
           | Except.error error => Except.error error
@@ -2012,7 +2012,7 @@ def psWasmLowerIntCompareWith
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match psWasmListPair? arguments with
-  | some _ =>
+  | Option.some _ =>
       match psWasmLowerIntArgumentsWith lower state arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -2025,7 +2025,7 @@ def psWasmLowerIntCompareWith
               ]
             state := lowered.state
           }
-  | none => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | Option.none => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 
 structure PsWasmArrayLowerInfo where
@@ -2046,11 +2046,11 @@ def psWasmResolveArrayLowerInfo
           Except.error PsWasmLowerError.invalidIntrinsicArity
       | [] =>
           match psWasmArrayTypeName elementType with
-          | none => Except.error PsWasmLowerError.unsupportedType
-          | some typeName =>
+          | Option.none => Except.error PsWasmLowerError.unsupportedType
+          | Option.some typeName =>
               match psWasmValueTypeOfIrType? profile elementType with
-              | none => Except.error PsWasmLowerError.unsupportedType
-              | some elementValueType =>
+              | Option.none => Except.error PsWasmLowerError.unsupportedType
+              | Option.some elementValueType =>
                   Except.ok {
                     elementType := elementType
                     elementValueType := elementValueType
@@ -2089,7 +2089,7 @@ def psWasmLowerArrayEmptyWithCapacityWith
           | _ :: _ =>
               Except.error PsWasmLowerError.invalidIntrinsicArity
           | [] =>
-              match lower (some psWasmNatRef) state capacity with
+              match lower (Option.some psWasmNatRef) state capacity with
               | Except.error error => Except.error error
               | Except.ok lowered =>
                   Except.ok {
@@ -2122,7 +2122,7 @@ def psWasmLowerArraySizeWith
           | _ :: _ =>
               Except.error PsWasmLowerError.invalidIntrinsicArity
           | [] =>
-              match lower (some info.refType) state array with
+              match lower (Option.some info.refType) state array with
               | Except.error error => Except.error error
               | Except.ok lowered =>
                   Except.ok {
@@ -2149,12 +2149,12 @@ def psWasmLowerArrayPushWith
   | Except.error error => Except.error error
   | Except.ok info =>
       match psWasmListPair? arguments with
-      | none =>
+      | Option.none =>
           Except.error PsWasmLowerError.invalidIntrinsicArity
-      | some pair =>
+      | Option.some pair =>
           let array := Prod.fst pair;
           let value := Prod.snd pair;
-          match lower (some info.refType) state array with
+          match lower (Option.some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
               let allocatedArray :=
@@ -2162,7 +2162,7 @@ def psWasmLowerArrayPushWith
               let arrayLocal := (Prod.fst allocatedArray);
               match
                   lower
-                    (some info.elementValueType)
+                    (Option.some info.elementValueType)
                     (Prod.snd allocatedArray)
                     value with
               | Except.error error => Except.error error
@@ -2222,18 +2222,18 @@ def psWasmLowerArrayGetWith
   | Except.error error => Except.error error
   | Except.ok info =>
       match psWasmListPair? arguments with
-      | none =>
+      | Option.none =>
           Except.error PsWasmLowerError.invalidIntrinsicArity
-      | some pair =>
+      | Option.some pair =>
           let array := Prod.fst pair;
           let index := Prod.snd pair;
-          match lower (some info.refType) state array with
+          match lower (Option.some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
               let allocatedArray :=
                 psWasmAddLocal loweredArray.state info.refType;
               let arrayLocal := (Prod.fst allocatedArray);
-              match lower (some psWasmNatRef) (Prod.snd allocatedArray) index with
+              match lower (Option.some psWasmNatRef) (Prod.snd allocatedArray) index with
               | Except.error error => Except.error error
               | Except.ok loweredIndex =>
                   let allocatedIndex :=
@@ -2254,7 +2254,7 @@ def psWasmLowerArrayGetWith
                                                     PsWasmInstruction.localGet indexLocal,
                                                     PsWasmInstruction.call psWasmNatFitsU32Fn,
                                                     PsWasmInstruction.ifStart
-                                                      (some info.elementValueType),
+                                                      (Option.some info.elementValueType),
                                                       PsWasmInstruction.localGet arrayLocal,
                                                       PsWasmInstruction.localGet indexLocal,
                                                       PsWasmInstruction.call psWasmNatToU32Fn,
@@ -2282,20 +2282,20 @@ def psWasmLowerArrayGetDWith
   | Except.error error => Except.error error
   | Except.ok info =>
       match psWasmListTriple? arguments with
-      | none =>
+      | Option.none =>
           Except.error PsWasmLowerError.invalidIntrinsicArity
-      | some triple =>
+      | Option.some triple =>
           let array := Prod.fst triple;
           let tail := Prod.snd triple;
           let index := Prod.fst tail;
           let fallback := Prod.snd tail;
-          match lower (some info.refType) state array with
+          match lower (Option.some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
               let allocatedArray :=
                 psWasmAddLocal loweredArray.state info.refType;
               let arrayLocal := (Prod.fst allocatedArray);
-              match lower (some psWasmNatRef) (Prod.snd allocatedArray) index with
+              match lower (Option.some psWasmNatRef) (Prod.snd allocatedArray) index with
               | Except.error error => Except.error error
               | Except.ok loweredIndex =>
                   let allocatedIndex :=
@@ -2303,7 +2303,7 @@ def psWasmLowerArrayGetDWith
                   let indexLocal := (Prod.fst allocatedIndex);
                   match
                       lower
-                        (some info.elementValueType)
+                        (Option.some info.elementValueType)
                         (Prod.snd allocatedIndex)
                         fallback with
                   | Except.error error => Except.error error
@@ -2334,14 +2334,14 @@ def psWasmLowerArrayGetDWith
                                                                 PsWasmInstruction.localGet indexLocal,
                                                                 PsWasmInstruction.call psWasmNatFitsU32Fn,
                                                                 PsWasmInstruction.ifStart
-                                                                  (some info.elementValueType),
+                                                                  (Option.some info.elementValueType),
                                                                   PsWasmInstruction.localGet indexLocal,
                                                                   PsWasmInstruction.call psWasmNatToU32Fn,
                                                                   PsWasmInstruction.localGet arrayLocal,
                                                                   PsWasmInstruction.arrayLen,
                                                                   PsWasmInstruction.i32LtU,
                                                                   PsWasmInstruction.ifStart
-                                                                    (some info.elementValueType),
+                                                                    (Option.some info.elementValueType),
                                                                     PsWasmInstruction.localGet arrayLocal,
                                                                     PsWasmInstruction.localGet indexLocal,
                                                                     PsWasmInstruction.call psWasmNatToU32Fn,
@@ -2372,20 +2372,20 @@ def psWasmLowerArraySetWith
   | Except.error error => Except.error error
   | Except.ok info =>
       match psWasmListTriple? arguments with
-      | none =>
+      | Option.none =>
           Except.error PsWasmLowerError.invalidIntrinsicArity
-      | some triple =>
+      | Option.some triple =>
           let array := Prod.fst triple;
           let tail := Prod.snd triple;
           let index := Prod.fst tail;
           let value := Prod.snd tail;
-          match lower (some info.refType) state array with
+          match lower (Option.some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
               let allocatedArray :=
                 psWasmAddLocal loweredArray.state info.refType;
               let arrayLocal := (Prod.fst allocatedArray);
-              match lower (some psWasmNatRef) (Prod.snd allocatedArray) index with
+              match lower (Option.some psWasmNatRef) (Prod.snd allocatedArray) index with
               | Except.error error => Except.error error
               | Except.ok loweredIndex =>
                   let allocatedIndex :=
@@ -2393,7 +2393,7 @@ def psWasmLowerArraySetWith
                   let indexLocal := (Prod.fst allocatedIndex);
                   match
                       lower
-                        (some info.elementValueType)
+                        (Option.some info.elementValueType)
                         (Prod.snd allocatedIndex)
                         value with
                   | Except.error error => Except.error error
@@ -2426,7 +2426,7 @@ def psWasmLowerArraySetWith
                                                                 PsWasmInstruction.localSet valueLocal,
                                                                 PsWasmInstruction.localGet indexLocal,
                                                                 PsWasmInstruction.call psWasmNatFitsU32Fn,
-                                                                PsWasmInstruction.ifStart (some info.refType),
+                                                                PsWasmInstruction.ifStart (Option.some info.refType),
                                                                   PsWasmInstruction.localGet valueLocal,
                                                                   PsWasmInstruction.localGet arrayLocal,
                                                                   PsWasmInstruction.arrayLen,
@@ -2468,20 +2468,20 @@ def psWasmLowerArraySetIfInBoundsWith
   | Except.error error => Except.error error
   | Except.ok info =>
       match psWasmListTriple? arguments with
-      | none =>
+      | Option.none =>
           Except.error PsWasmLowerError.invalidIntrinsicArity
-      | some triple =>
+      | Option.some triple =>
           let array := Prod.fst triple;
           let tail := Prod.snd triple;
           let index := Prod.fst tail;
           let value := Prod.snd tail;
-          match lower (some info.refType) state array with
+          match lower (Option.some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
               let allocatedArray :=
                 psWasmAddLocal loweredArray.state info.refType;
               let arrayLocal := (Prod.fst allocatedArray);
-              match lower (some psWasmNatRef) (Prod.snd allocatedArray) index with
+              match lower (Option.some psWasmNatRef) (Prod.snd allocatedArray) index with
               | Except.error error => Except.error error
               | Except.ok loweredIndex =>
                   let allocatedIndex :=
@@ -2489,7 +2489,7 @@ def psWasmLowerArraySetIfInBoundsWith
                   let indexLocal := (Prod.fst allocatedIndex);
                   match
                       lower
-                        (some info.elementValueType)
+                        (Option.some info.elementValueType)
                         (Prod.snd allocatedIndex)
                         value with
                   | Except.error error => Except.error error
@@ -2522,13 +2522,13 @@ def psWasmLowerArraySetIfInBoundsWith
                                                                 PsWasmInstruction.localSet valueLocal,
                                                                 PsWasmInstruction.localGet indexLocal,
                                                                 PsWasmInstruction.call psWasmNatFitsU32Fn,
-                                                                PsWasmInstruction.ifStart (some info.refType),
+                                                                PsWasmInstruction.ifStart (Option.some info.refType),
                                                                   PsWasmInstruction.localGet indexLocal,
                                                                   PsWasmInstruction.call psWasmNatToU32Fn,
                                                                   PsWasmInstruction.localGet arrayLocal,
                                                                   PsWasmInstruction.arrayLen,
                                                                   PsWasmInstruction.i32LtU,
-                                                                  PsWasmInstruction.ifStart (some info.refType),
+                                                                  PsWasmInstruction.ifStart (Option.some info.refType),
                                                                     PsWasmInstruction.localGet valueLocal,
                                                                     PsWasmInstruction.localGet arrayLocal,
                                                                     PsWasmInstruction.arrayLen,
@@ -2573,13 +2573,13 @@ def psWasmLowerIntrinsicWith
   match operation with
   | .machineIntBinary type integerOperation =>
       match psWasmListPair? arguments with
-      | none =>
+      | Option.none =>
           Except.error PsWasmLowerError.invalidIntrinsicArity
-      | some pair =>
+      | Option.some pair =>
           let left := Prod.fst pair;
           let right := Prod.snd pair;
           let expected :=
-            some (psWasmMachineIntegerValueType profile type);
+            Option.some (psWasmMachineIntegerValueType profile type);
           match
               psWasmLowerExprListWith
                 lower expected state [left, right] with
@@ -2595,13 +2595,13 @@ def psWasmLowerIntrinsicWith
               }
   | .machineIntCompare type integerOperation =>
       match psWasmListPair? arguments with
-      | none =>
+      | Option.none =>
           Except.error PsWasmLowerError.invalidIntrinsicArity
-      | some pair =>
+      | Option.some pair =>
           let left := Prod.fst pair;
           let right := Prod.snd pair;
           let expected :=
-            some (psWasmMachineIntegerValueType profile type);
+            Option.some (psWasmMachineIntegerValueType profile type);
           match
               psWasmLowerExprListWith
                 lower expected state [left, right] with
@@ -2617,12 +2617,12 @@ def psWasmLowerIntrinsicWith
               }
   | .floatBinary type floatOperation =>
       match psWasmListPair? arguments with
-      | none =>
+      | Option.none =>
           Except.error PsWasmLowerError.invalidIntrinsicArity
-      | some pair =>
+      | Option.some pair =>
           let left := Prod.fst pair;
           let right := Prod.snd pair;
-          let expected := some (psWasmFloatingValueType type);
+          let expected := Option.some (psWasmFloatingValueType type);
           match
               psWasmLowerExprListWith
                 lower expected state [left, right] with
@@ -2637,12 +2637,12 @@ def psWasmLowerIntrinsicWith
               }
   | .floatCompare type floatOperation =>
       match psWasmListPair? arguments with
-      | none =>
+      | Option.none =>
           Except.error PsWasmLowerError.invalidIntrinsicArity
-      | some pair =>
+      | Option.some pair =>
           let left := Prod.fst pair;
           let right := Prod.snd pair;
-          let expected := some (psWasmFloatingValueType type);
+          let expected := Option.some (psWasmFloatingValueType type);
           match
               psWasmLowerExprListWith
                 lower expected state [left, right] with
@@ -2750,9 +2750,9 @@ def psWasmLowerTypedArgumentsWith
       }
   | state, type :: restTypes, argument :: restArguments =>
       match psWasmValueTypeOfIrType? profile type with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some expected =>
-          match lower (some expected) state argument with
+      | Option.none => Except.error PsWasmLowerError.unsupportedType
+      | Option.some expected =>
+          match lower (Option.some expected) state argument with
           | Except.error error => Except.error error
           | Except.ok lowered =>
               match
@@ -2790,11 +2790,11 @@ def psWasmLowerFunctionValueCall
   let functionType :=
     PsVerifiedIrType.function parameterTypes resultType;
   match psWasmClosureBaseName functionType with
-  | none => Except.error PsWasmLowerError.unsupportedType
-  | some baseName =>
+  | Option.none => Except.error PsWasmLowerError.unsupportedType
+  | Option.some baseName =>
       match psWasmClosureCodeTypeName functionType with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some codeTypeName =>
+      | Option.none => Except.error PsWasmLowerError.unsupportedType
+      | Option.some codeTypeName =>
           let allocated :=
             psWasmAddLocal
               state
@@ -2844,7 +2844,7 @@ def psWasmLowerCallWith
   match fn with
   | .var name =>
       match psWasmFindBinding bindings name with
-      | some binding =>
+      | Option.some binding =>
           match binding.type with
           | .function parameterTypes resultType =>
               psWasmLowerFunctionValueCall
@@ -2857,10 +2857,10 @@ def psWasmLowerCallWith
                 arguments
           | _ =>
               Except.error PsWasmLowerError.unsupportedExpression
-      | none =>
+      | Option.none =>
           match
               psWasmLowerExprListWith
-                lower none state arguments with
+                lower Option.none state arguments with
           | Except.error error => Except.error error
           | Except.ok lowered =>
               Except.ok {
@@ -2883,11 +2883,11 @@ def psWasmLowerIfWith
     (condition thenBranch elseBranch : PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match expected with
-  | none => Except.error PsWasmLowerError.unsupportedType
-  | some resultType =>
+  | Option.none => Except.error PsWasmLowerError.unsupportedType
+  | Option.some resultType =>
       match
           lower
-            (some PsWasmValueType.i32)
+            (Option.some PsWasmValueType.i32)
             state
             condition with
       | Except.error error => Except.error error
@@ -2911,7 +2911,7 @@ def psWasmLowerIfWith
                       psListAppend
                         conditionCode.instructions
                         (psListAppend
-                          [PsWasmInstruction.ifStart (some resultType)]
+                          [PsWasmInstruction.ifStart (Option.some resultType)]
                           (psListAppend
                             thenCode.instructions
                             (psListAppend
@@ -2943,18 +2943,18 @@ def psWasmLowerMatchBindings
           psWasmFindConstructorField
             constructorInfo
             binding.field with
-      | none =>
+      | Option.none =>
           Except.error
             (PsWasmLowerError.unknownConstructorField
               inductiveName
               constructorInfo.name
               binding.field)
-      | some indexedField =>
+      | Option.some indexedField =>
           let fieldIndex := (Prod.fst indexedField);
           let field := (Prod.snd indexedField);
           match psWasmValueTypeOfIrType? profile field.type with
-          | none => Except.error PsWasmLowerError.unsupportedType
-          | some valueType =>
+          | Option.none => Except.error PsWasmLowerError.unsupportedType
+          | Option.some valueType =>
               let allocated := psWasmAddLocal state valueType;
               let localIndex := (Prod.fst allocated);
               let nextState := (Prod.snd allocated);
@@ -3027,12 +3027,12 @@ def psWasmLowerMatchAlternativesWith
               psWasmFindConstructor
                 inductiveInfo.constructors
                 constructorName with
-          | none =>
+          | Option.none =>
               Except.error
                 (PsWasmLowerError.unknownConstructor
                   inductiveInfo.name
                   constructorName)
-          | some constructorInfo =>
+          | Option.some constructorInfo =>
               match
                   psWasmLowerMatchBindings
                     profile
@@ -3061,19 +3061,19 @@ def psWasmLowerMatchAlternativesWith
                       }
       | List.cons _ _ =>
           match expected with
-          | none =>
+          | Option.none =>
               Except.error PsWasmLowerError.unsupportedType
-          | some resultType =>
+          | Option.some resultType =>
               match
                   psWasmFindConstructor
                     inductiveInfo.constructors
                     constructorName with
-              | none =>
+              | Option.none =>
                   Except.error
                     (PsWasmLowerError.unknownConstructor
                       inductiveInfo.name
                       constructorName)
-              | some constructorInfo =>
+              | Option.some constructorInfo =>
                   let constructorType :=
                     psWasmConstructorTypeName
                       inductiveInfo.name
@@ -3122,7 +3122,7 @@ def psWasmLowerMatchAlternativesWith
                                           constructorType)
                                         (List.cons
                                           (PsWasmInstruction.ifStart
-                                            (some resultType))
+                                            (Option.some resultType))
                                           List.nil)))
                                     (psListAppend
                                       loweredBindings.instructions
@@ -3146,8 +3146,8 @@ def psWasmLowerCaptureFields
   | [] => Except.ok []
   | capture :: rest =>
       match psWasmStorageTypeOfIrType? profile capture.type with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some storageType =>
+      | Option.none => Except.error PsWasmLowerError.unsupportedType
+      | Option.some storageType =>
           match psWasmLowerCaptureFields profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
@@ -3174,8 +3174,8 @@ def psWasmPrepareCaptureBindings
       }
   | List.cons capture rest =>
       match psWasmValueTypeOfIrType? profile capture.type with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some valueType =>
+      | Option.none => Except.error PsWasmLowerError.unsupportedType
+      | Option.some valueType =>
           let allocated := psWasmAddLocal state valueType;
           let localIndex := (Prod.fst allocated);
           let nextState := (Prod.snd allocated);
@@ -3280,11 +3280,11 @@ def psWasmLowerLambdaWith
   let functionType :=
     PsVerifiedIrType.function parameterTypes resultType;
   match psWasmClosureBaseName functionType with
-  | none => Except.error PsWasmLowerError.unsupportedType
-  | some baseName =>
+  | Option.none => Except.error PsWasmLowerError.unsupportedType
+  | Option.some baseName =>
       match psWasmClosureCodeTypeName functionType with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some codeTypeName =>
+      | Option.none => Except.error PsWasmLowerError.unsupportedType
+      | Option.some codeTypeName =>
           match psWasmLowerIrTypeList profile parameterTypes with
           | Except.error error => Except.error error
           | Except.ok loweredParameters =>
@@ -3317,7 +3317,7 @@ def psWasmLowerLambdaWith
                       | Except.ok captureFields =>
                           let subtype : PsWasmStructType := {
                             name := subtypeName
-                            superType := some baseName
+                            superType := Option.some baseName
                             isFinal := true
                             fields :=
                               List.cons
@@ -3360,7 +3360,7 @@ def psWasmLowerLambdaWith
                               | Except.ok loweredBody =>
                                   let generatedFunction : PsWasmFunction := {
                                     name := lambdaName
-                                    typeName := some codeTypeName
+                                    typeName := Option.some codeTypeName
                                     parameters :=
                                       List.cons
                                         (PsWasmValueType.refT baseName)
@@ -3458,9 +3458,9 @@ def psWasmLowerExprWithFuel
               Except.error PsWasmLowerError.unsupportedExpression
       | .var name =>
           match psWasmFindBindingIndex bindings name with
-          | none =>
+          | Option.none =>
               Except.error (PsWasmLowerError.unknownVariable name)
-          | some index =>
+          | Option.some index =>
               Except.ok {
                 instructions := [PsWasmInstruction.localGet index]
                 state := state
@@ -3486,7 +3486,7 @@ def psWasmLowerExprWithFuel
           | Except.ok localType =>
               match
                   lower
-                    (some localType)
+                    (Option.some localType)
                     state
                     value with
               | Except.error error => Except.error error
@@ -3525,10 +3525,10 @@ def psWasmLowerExprWithFuel
                       }
       | .record structureName _ fields =>
           match psWasmFindStructure structures structureName with
-          | none =>
+          | Option.none =>
               Except.error
                 (PsWasmLowerError.unknownStructure structureName)
-          | some structInfo =>
+          | Option.some structInfo =>
               match structInfo.typeParameters with
               | _ :: _ =>
                   Except.error PsWasmLowerError.unsupportedType
@@ -3552,21 +3552,21 @@ def psWasmLowerExprWithFuel
                       }
       | .projection structureName _ target fieldName =>
           match psWasmFindStructure structures structureName with
-          | none =>
+          | Option.none =>
               Except.error
                 (PsWasmLowerError.unknownStructure structureName)
-          | some structInfo =>
+          | Option.some structInfo =>
               match psWasmFindStructureField structInfo fieldName with
-              | none =>
+              | Option.none =>
                   Except.error
                     (PsWasmLowerError.unknownStructureField
                       structureName fieldName)
-              | some indexedField =>
+              | Option.some indexedField =>
                   let fieldIndex := (Prod.fst indexedField);
                   let field := (Prod.snd indexedField);
                   match
                       lower
-                        (some (PsWasmValueType.refT structureName))
+                        (Option.some (PsWasmValueType.refT structureName))
                         state
                         target with
                   | Except.error error => Except.error error
@@ -3591,10 +3591,10 @@ def psWasmLowerExprWithFuel
               Except.error PsWasmLowerError.unsupportedType
           | [] =>
               match psWasmFindInductive inductives inductiveName with
-              | none =>
+              | Option.none =>
                   Except.error
                     (PsWasmLowerError.unknownInductive inductiveName)
-              | some inductiveInfo =>
+              | Option.some inductiveInfo =>
                   match inductiveInfo.typeParameters with
                   | _ :: _ =>
                       Except.error PsWasmLowerError.unsupportedType
@@ -3603,12 +3603,12 @@ def psWasmLowerExprWithFuel
                           psWasmFindConstructor
                             inductiveInfo.constructors
                             constructorName with
-                      | none =>
+                      | Option.none =>
                           Except.error
                             (PsWasmLowerError.unknownConstructor
                               inductiveName
                               constructorName)
-                      | some constructorInfo =>
+                      | Option.some constructorInfo =>
                           match
                               psWasmLowerConstructorValuesWith
                                 profile
@@ -3633,17 +3633,17 @@ def psWasmLowerExprWithFuel
                               }
       | .matchE inductiveName _ scrutinee alternatives =>
           match psWasmFindInductive inductives inductiveName with
-          | none =>
+          | Option.none =>
               Except.error
                 (PsWasmLowerError.unknownInductive inductiveName)
-          | some inductiveInfo =>
+          | Option.some inductiveInfo =>
               match inductiveInfo.typeParameters with
               | _ :: _ =>
                   Except.error PsWasmLowerError.unsupportedType
               | [] =>
                   match
                       lower
-                        (some (PsWasmValueType.refT inductiveName))
+                        (Option.some (PsWasmValueType.refT inductiveName))
                         state
                         scrutinee with
                   | Except.error error => Except.error error
@@ -3746,7 +3746,7 @@ def psWasmLowerDeclaration
                   Except.ok {
                     function := {
                       name := declaration.name
-                      typeName := none
+                      typeName := Option.none
                       parameters := parameters
                       results := results
                       locals := lowered.state.localTypes

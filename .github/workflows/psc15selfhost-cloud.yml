@@ -55,6 +55,10 @@ jobs:
         working-directory: psc15selfhost
         run: node check-psc1-source.mjs --all-portable
 
+      - name: Enforce portable self-host implementation profiles
+        working-directory: psc15selfhost
+        run: npm run check:portable-selfhost-profile
+
       - name: Check workspace and bootstrap composition policy
         working-directory: psc15selfhost
         run: |

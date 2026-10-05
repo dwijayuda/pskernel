@@ -359,7 +359,7 @@ def psBackendJsFixtureModule : PsVerifiedIrModule :=
             [PsVerifiedIrExpr.var "value"]
       },
       {
-        name := "u8Literal300"
+        name := "u8Literal44"
         typeParameters := []
         parameters := []
         resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8
@@ -367,7 +367,7 @@ def psBackendJsFixtureModule : PsVerifiedIrModule :=
           PsVerifiedIrExpr.literal
             (PsVerifiedIrLiteral.machineInteger
               PsVerifiedIrMachineIntegerType.uint8
-              300)
+              44)
       },
       {
         name := "float32Mul"

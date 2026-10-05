@@ -86,6 +86,12 @@ test('known fragile term shorthand is rejected structurally', () => {
     ids('def text := toString value').includes('to-string-convenience'),
   );
   assert(
+    ids('def count := values.length').includes('value-length-dot-notation'),
+  );
+  assert(
+    !ids('def count := String.Internal.length text').includes('value-length-dot-notation'),
+  );
+  assert(
     ids('def value := .some x').includes('leading-dot-term-constructor'),
   );
   assert(ids('def mapper := fun x => x').includes('untyped-lambda-binder'));

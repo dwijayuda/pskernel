@@ -3409,10 +3409,11 @@ def psWasmLowerExprWithFuel
                 state := state
               }
           | .bool value =>
+              let encodedValue :=
+                if value then 1 else 0;
               Except.ok {
                 instructions :=
-                  [PsWasmInstruction.i32Const
-                    (if value then 1 else 0)]
+                  [PsWasmInstruction.i32Const encodedValue]
                 state := state
               }
           | .unit =>

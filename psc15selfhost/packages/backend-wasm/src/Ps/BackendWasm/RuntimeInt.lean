@@ -285,8 +285,9 @@ def psWasmIntLiteralInstructions
     (value : Int) : List PsWasmInstruction :=
   match value with
   | .ofNat magnitude =>
-      [PsWasmInstruction.i32Const
-        (if Nat.beq magnitude 0 then 0 else 1)]
+      let sign :=
+        if Nat.beq magnitude 0 then 0 else 1;
+      [PsWasmInstruction.i32Const sign]
         ++ psWasmNatLiteralInstructions magnitude
         ++ [PsWasmInstruction.structNew psWasmIntName]
   | .negSucc magnitude =>

@@ -626,11 +626,12 @@ def psWasmNatLiteralInstructionsWithFuel :
   | fuel + 1, value =>
       let half := value / 2;
       let low := value % 2;
-      psWasmNatLiteralInstructionsWithFuel fuel half ++
-      (if Nat.beq low 0 then
-        [PsWasmInstruction.structNew psWasmNatBit0Name]
-      else
-        [PsWasmInstruction.call psWasmNatBit1Fn])
+      let suffix :=
+        if Nat.beq low 0 then
+          [PsWasmInstruction.structNew psWasmNatBit0Name]
+        else
+          [PsWasmInstruction.call psWasmNatBit1Fn];
+      psWasmNatLiteralInstructionsWithFuel fuel half ++ suffix
 
 def psWasmNatLiteralInstructions
     (value : Nat) : List PsWasmInstruction :=

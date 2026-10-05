@@ -170,7 +170,7 @@ def psWasmStorageTypeOfPrimitive
   | .int8 => PsWasmStorageType.packedI8
   | .uint16 => PsWasmStorageType.packedI16
   | .int16 => PsWasmStorageType.packedI16
-  | other => PsWasmStorageType.value (psWasmValueTypeOfPrimitive profile other)
+  | _ => PsWasmStorageType.value (psWasmValueTypeOfPrimitive profile type)
 
 def psWasmLowerPrimitive
     (profile : PsWasmTargetProfile)
@@ -185,9 +185,11 @@ def psWasmValueTypeOfIrType?
     (profile : PsWasmTargetProfile) :
     PsVerifiedIrType -> Option PsWasmValueType
   | .primitive primitive =>
-      match psWasmValueTypeOfPrimitive profile primitive with
+      let valueType :=
+        psWasmValueTypeOfPrimitive profile primitive;
+      match valueType with
       | .noValue => Option.none
-      | valueType => Option.some valueType
+      | _ => Option.some valueType
   | .named name arguments =>
       if psStringEq name "Array" then
         match arguments with

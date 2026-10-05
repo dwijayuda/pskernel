@@ -1830,6 +1830,162 @@ def psWasmStateRestoreOuterLocals
     generatedFunctionRefs := generatedState.generatedFunctionRefs
   }
 
+def psWasmLocalGetsForTypesWorker
+    (types : List PsWasmValueType) :
+    Nat -> List PsWasmInstruction :=
+  match types with
+  | List.nil =>
+      fun (_index : Nat) => List.nil
+  | List.cons _ rest =>
+      let smaller : Nat -> List PsWasmInstruction :=
+        psWasmLocalGetsForTypesWorker rest;
+      fun (index : Nat) =>
+        List.cons
+          (PsWasmInstruction.localGet index)
+          (smaller (Nat.add index 1))
+
+def psWasmAppendGeneratedFunction
+    (state : PsWasmLowerState)
+    (function : PsWasmFunction)
+    (referenced : Bool) : PsWasmLowerState :=
+  {
+    nextLocalIndex := state.nextLocalIndex
+    localTypes := state.localTypes
+    currentDefinition := state.currentDefinition
+    nextLambdaId := state.nextLambdaId
+    generatedStructures := state.generatedStructures
+    generatedFunctionTypes := state.generatedFunctionTypes
+    generatedFunctions :=
+      psListAppend
+        state.generatedFunctions
+        (List.cons function List.nil)
+    generatedFunctionRefs :=
+      if referenced then
+        psListAppend
+          state.generatedFunctionRefs
+          (List.cons function.name List.nil)
+      else
+        state.generatedFunctionRefs
+  }
+
+def psWasmAdvanceGeneratedId
+    (state : PsWasmLowerState) : PsWasmLowerState :=
+  {
+    nextLocalIndex := state.nextLocalIndex
+    localTypes := state.localTypes
+    currentDefinition := state.currentDefinition
+    nextLambdaId := Nat.add state.nextLambdaId 1
+    generatedStructures := state.generatedStructures
+    generatedFunctionTypes := state.generatedFunctionTypes
+    generatedFunctions := state.generatedFunctions
+    generatedFunctionRefs := state.generatedFunctionRefs
+  }
+
+def psWasmLowerTopLevelFunctionValue
+    (profile : PsWasmTargetProfile)
+    (state : PsWasmLowerState)
+    (functionName : String)
+    (parameterTypes : List PsVerifiedIrType)
+    (resultType : PsVerifiedIrType) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  let functionType : PsVerifiedIrType :=
+    PsVerifiedIrType.function parameterTypes resultType;
+  match psWasmClosureBaseName functionType with
+  | Option.none =>
+      Except.error PsWasmLowerError.unsupportedType
+  | Option.some baseName =>
+      match psWasmClosureCodeTypeName functionType with
+      | Option.none =>
+          Except.error PsWasmLowerError.unsupportedType
+      | Option.some codeTypeName =>
+          match psWasmLowerIrTypeList profile parameterTypes with
+          | Except.error error => Except.error error
+          | Except.ok loweredParameters =>
+              match psWasmLowerResultType profile resultType with
+              | Except.error error => Except.error error
+              | Except.ok results =>
+                  let adapterId : Nat := state.nextLambdaId;
+                  let adapterName : String :=
+                    String.Internal.append
+                      state.currentDefinition
+                      (String.Internal.append
+                        "$functionAdapter$"
+                        (psNatToString adapterId));
+                  let advancedState : PsWasmLowerState :=
+                    psWasmAdvanceGeneratedId state;
+                  let generatedFunction : PsWasmFunction := {
+                    name := adapterName
+                    typeName := Option.some codeTypeName
+                    parameters :=
+                      List.cons
+                        (PsWasmValueType.refT baseName)
+                        loweredParameters
+                    results := results
+                    locals := List.nil
+                    body :=
+                      psListAppend
+                        (psWasmLocalGetsForTypesWorker
+                          loweredParameters
+                          1)
+                        (List.cons
+                          (PsWasmInstruction.call functionName)
+                          List.nil)
+                  };
+                  let finalState : PsWasmLowerState :=
+                    psWasmAppendGeneratedFunction
+                      advancedState
+                      generatedFunction
+                      true;
+                  Except.ok {
+                    instructions := [
+                      PsWasmInstruction.refFunc adapterName,
+                      PsWasmInstruction.structNew baseName
+                    ]
+                    state := finalState
+                  }
+
+def psWasmLowerHigherOrderFunctionValueWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (fn : PsVerifiedIrExpr)
+    (parameterTypes : List PsVerifiedIrType)
+    (resultType : PsVerifiedIrType) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  let functionType : PsVerifiedIrType :=
+    PsVerifiedIrType.function parameterTypes resultType;
+  match psWasmClosureBaseName functionType with
+  | Option.none =>
+      Except.error PsWasmLowerError.unsupportedType
+  | Option.some baseName =>
+      match
+          lower
+            (Option.some (PsWasmValueType.refT baseName))
+            state
+            fn with
+      | Except.ok lowered => Except.ok lowered
+      | Except.error (PsWasmLowerError.unknownVariable name) =>
+          match fn with
+          | PsVerifiedIrExpr.var functionName =>
+              if psStringEq name functionName then
+                psWasmLowerTopLevelFunctionValue
+                  profile
+                  state
+                  functionName
+                  parameterTypes
+                  resultType
+              else
+                Except.error
+                  (PsWasmLowerError.unknownVariable name)
+          | _ =>
+              Except.error
+                (PsWasmLowerError.unknownVariable name)
+      | Except.error error => Except.error error
+
 def psWasmLowerExprListWorker
     (lower :
       Option PsWasmValueType ->

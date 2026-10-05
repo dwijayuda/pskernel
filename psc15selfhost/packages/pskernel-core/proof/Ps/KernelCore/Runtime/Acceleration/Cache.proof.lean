@@ -223,50 +223,65 @@ theorem psKernelExprMapGet_build_cons_self
         }
         expr =
       Option.some value := by
+  unfold psKernelExprMapGet
+  rw [psKernelExprMapIndexBucket_build_cons]
+  exact
+    psKernelExprMapGetIn_insertIn_self
+      expr
+      value
+      (psKernelExprMapIndexBucket
+        16
+        (psKernelExprMapBuildIndex rest)
+        (psKernelExprHash expr))
+      hRefl
+
+theorem psKernelExprMapGet_insert_small_self
+    (small : List (Prod PsKernelExpr PsKernelExpr))
+    (expr value : PsKernelExpr)
+    (hRefl : psKernelExprEq expr expr = true)
+    (hFits :
+      Nat.ble
+          (psKernelCacheEntryListLength
+            (psKernelExprMapInsertIn expr value small))
+          psKernelCacheSmallLimit =
+        true) :
+    psKernelExprMapGet
+        (psKernelExprMapInsert
+          {
+            small := small
+            index := Option.none
+          }
+          expr
+          value)
+        expr =
+      Option.some value := by
   simp [
+    psKernelExprMapInsert,
+    hFits,
     psKernelExprMapGet,
-    psKernelExprMapIndexBucket_build_cons,
     psKernelExprMapGetIn_insertIn_self,
     hRefl
   ]
 
-theorem psKernelExprMapGet_insert_self
-    (cache : PsKernelExprMap)
+theorem psKernelExprMapGet_insert_indexed_self
+    (small : List (Prod PsKernelExpr PsKernelExpr))
+    (index : PsKernelExprMapIndex)
     (expr value : PsKernelExpr)
     (hRefl : psKernelExprEq expr expr = true) :
     psKernelExprMapGet
-        (psKernelExprMapInsert cache expr value)
+        (psKernelExprMapInsert
+          {
+            small := small
+            index := Option.some index
+          }
+          expr
+          value)
         expr =
       Option.some value := by
-  cases cache with
-  | mk small index =>
-      cases index with
-      | none =>
-          cases hSmall :
-              Nat.ble
-                (psKernelCacheEntryListLength
-                  (psKernelExprMapInsertIn expr value small))
-                psKernelCacheSmallLimit with
-          | false =>
-              simp [
-                psKernelExprMapInsert,
-                hSmall,
-                psKernelExprMapGet_build_cons_self,
-                hRefl
-              ]
-          | true =>
-              simp [
-                psKernelExprMapInsert,
-                hSmall,
-                psKernelExprMapGet,
-                psKernelExprMapGetIn_insertIn_self,
-                hRefl
-              ]
-      | some index =>
-          simp [
-            psKernelExprMapInsert,
-            psKernelExprMapGet,
-            psKernelExprMapIndexBucket_set_same,
-            psKernelExprMapGetIn_insertIn_self,
-            hRefl
-          ]
+  simp [
+    psKernelExprMapInsert,
+    psKernelExprMapGet,
+    psKernelExprMapIndexBucket_set_same,
+    psKernelExprMapGetIn_insertIn_self,
+    hRefl
+  ]

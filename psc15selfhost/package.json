@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "psc": "node packages/cli/bin/psc.mjs",
+    "test:pscv-compiler-proofs": "lake build PsCompiler && lake env lean packages/compiler/proof/Api.frontend.proof.lean && lake env lean packages/compiler/proof/Api.admission.proof.lean && lake env lean packages/compiler/proof/Api.lowering.proof.lean",
     "clean": "node scripts/clean.mjs",
     "check:workspace": "node scripts/bootstrap-closure-contract-tests.mjs && node scripts/check-workspace.mjs",
     "check:source:bootstrap": "node check-psc1-source.mjs",

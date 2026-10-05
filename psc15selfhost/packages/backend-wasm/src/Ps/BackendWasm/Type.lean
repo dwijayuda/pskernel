@@ -64,19 +64,21 @@ def psWasmIrTypeKeyWithFuel :
               arguments;
           match psWasmJoinTypeKeys argumentKeys with
           | none => none
-          | some "" => some
-                (String.Internal.append
-                  "N{"
-                  (String.Internal.append name "}"))
           | some keys =>
-              some
-                (String.Internal.append
-                  "N{"
+              if psStringEq keys "" then
+                some
                   (String.Internal.append
-                    name
+                    "N{"
+                    (String.Internal.append name "}"))
+              else
+                some
+                  (String.Internal.append
+                    "N{"
                     (String.Internal.append
-                      "}<"
-                      (String.Internal.append keys ">"))))
+                      name
+                      (String.Internal.append
+                        "}<"
+                        (String.Internal.append keys ">"))))
       | .function parameters result =>
           let parameterKeys :=
             psWasmMapTypeKeysWith
@@ -179,22 +181,23 @@ def psWasmValueTypeOfIrType?
       match psWasmValueTypeOfPrimitive profile primitive with
       | .noValue => none
       | valueType => some valueType
-  | .named "Array" arguments =>
-      match arguments with
-      | List.nil => none
-      | List.cons elementType rest =>
-          match rest with
-          | List.nil =>
-              match psWasmArrayTypeName elementType with
-              | none => none
-              | some name =>
-                  some (PsWasmValueType.refT name)
-          | List.cons _ _ => none
   | .named name arguments =>
-      match arguments with
-      | List.nil =>
-          some (PsWasmValueType.refT name)
-      | List.cons _ _ => none
+      if psStringEq name "Array" then
+        match arguments with
+        | List.nil => none
+        | List.cons elementType rest =>
+            match rest with
+            | List.nil =>
+                match psWasmArrayTypeName elementType with
+                | none => none
+                | some arrayName =>
+                    some (PsWasmValueType.refT arrayName)
+            | List.cons _ _ => none
+      else
+        match arguments with
+        | List.nil =>
+            some (PsWasmValueType.refT name)
+        | List.cons _ _ => none
   | .function parameters result =>
       match
           psWasmClosureBaseName
@@ -210,26 +213,27 @@ def psWasmStorageTypeOfIrType?
       match psWasmValueTypeOfPrimitive profile primitive with
       | .noValue => none
       | _ => some (psWasmStorageTypeOfPrimitive profile primitive)
-  | .named "Array" arguments =>
-      match arguments with
-      | List.nil => none
-      | List.cons elementType rest =>
-          match rest with
-          | List.nil =>
-              match psWasmArrayTypeName elementType with
-              | none => none
-              | some name =>
-                  some
-                    (PsWasmStorageType.value
-                      (PsWasmValueType.refT name))
-          | List.cons _ _ => none
   | .named name arguments =>
-      match arguments with
-      | List.nil =>
-          some
-            (PsWasmStorageType.value
-              (PsWasmValueType.refT name))
-      | List.cons _ _ => none
+      if psStringEq name "Array" then
+        match arguments with
+        | List.nil => none
+        | List.cons elementType rest =>
+            match rest with
+            | List.nil =>
+                match psWasmArrayTypeName elementType with
+                | none => none
+                | some arrayName =>
+                    some
+                      (PsWasmStorageType.value
+                        (PsWasmValueType.refT arrayName))
+            | List.cons _ _ => none
+      else
+        match arguments with
+        | List.nil =>
+            some
+              (PsWasmStorageType.value
+                (PsWasmValueType.refT name))
+        | List.cons _ _ => none
   | .function parameters result =>
       match
           psWasmClosureBaseName

@@ -23,10 +23,12 @@ def psWasmIntIsNegativeOne (value : Int) : Bool :=
   | Int.ofNat _ => false
   | Int.negSucc magnitude => Nat.beq magnitude 0
 
-def psWasmEncodeUlebWithFuel :
-    Nat -> Nat -> List UInt8
-  | 0, _ => []
-  | fuel + 1, value =>
+def psWasmEncodeUlebWithFuel
+    (remainingFuel : Nat)
+    (value : Nat) : List UInt8 :=
+  match remainingFuel with
+  | 0 => List.nil
+  | fuel + 1 =>
       let low := value % 128;
       let rest := value / 128;
       if Nat.beq rest 0 then
@@ -39,10 +41,12 @@ def psWasmEncodeUlebWithFuel :
 def psWasmEncodeUleb (value : Nat) : List UInt8 :=
   psWasmEncodeUlebWithFuel 16 value
 
-def psWasmEncodeSlebWithFuel :
-    Nat -> Int -> List UInt8
-  | 0, _ => []
-  | fuel + 1, value =>
+def psWasmEncodeSlebWithFuel
+    (remainingFuel : Nat)
+    (value : Int) : List UInt8 :=
+  match remainingFuel with
+  | 0 => List.nil
+  | fuel + 1 =>
       let lowInt := value % 128;
       let low := lowInt.toNat;
       let rest := value / 128;
@@ -109,9 +113,12 @@ def psWasmEncodeUtf8Char (char : Char) : List UInt8 :=
       psWasmByte (128 + value % 64)
     ]
 
-def psWasmEncodeUtf8Chars : List Char -> List UInt8
-  | [] => []
-  | char :: rest =>
+def psWasmEncodeUtf8Chars
+    (chars : List Char) :
+    List UInt8 :=
+  match chars with
+  | List.nil => []
+  | List.cons char rest =>
       psListAppend
         (psWasmEncodeUtf8Char char)
         (psWasmEncodeUtf8Chars rest)
@@ -123,10 +130,12 @@ def psWasmEncodeName (name : String) : List UInt8 :=
     bytes
 
 def psWasmFindStructureIndexLoop
-    (name : String) :
-    Nat -> List PsWasmStructType -> Option Nat
-  | _, [] => none
-  | index, structType :: rest =>
+    (name : String)
+    (index : Nat)
+    (structures : List PsWasmStructType) : Option Nat :=
+  match structures with
+  | List.nil => none
+  | List.cons structType rest =>
       if psStringEq structType.name name then
         some index
       else
@@ -138,10 +147,12 @@ def psWasmFindStructureIndex
   psWasmFindStructureIndexLoop name 0 structures
 
 def psWasmFindArrayIndexLoop
-    (name : String) :
-    Nat -> List PsWasmArrayType -> Option Nat
-  | _, [] => none
-  | index, arrayType :: rest =>
+    (name : String)
+    (index : Nat)
+    (arrays : List PsWasmArrayType) : Option Nat :=
+  match arrays with
+  | List.nil => none
+  | List.cons arrayType rest =>
       if psStringEq arrayType.name name then
         some index
       else
@@ -186,11 +197,12 @@ def psWasmEncodeValueType
 
 def psWasmEncodeValueTypes
     (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType) :
-    List PsWasmValueType ->
-    Except PsWasmEncodeError (List UInt8)
-  | [] => Except.ok []
-  | type :: rest =>
+    (arrays : List PsWasmArrayType)
+    (types : List PsWasmValueType) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match types with
+  | List.nil => Except.ok []
+  | List.cons type rest =>
       match psWasmEncodeValueType structures arrays type with
       | Except.error error => Except.error error
       | Except.ok encoded =>
@@ -207,10 +219,12 @@ def psWasmEncodeVector
     bytes
 
 def psWasmFindFunctionTypeIndexLoop
-    (name : String) :
-    Nat -> List PsWasmFunctionType -> Option Nat
-  | _, [] => none
-  | index, functionType :: rest =>
+    (name : String)
+    (index : Nat)
+    (functionTypes : List PsWasmFunctionType) : Option Nat :=
+  match functionTypes with
+  | List.nil => none
+  | List.cons functionType rest =>
       if psStringEq functionType.name name then
         some index
       else
@@ -249,11 +263,12 @@ def psWasmEncodeNamedFunctionType
 
 def psWasmEncodeNamedFunctionTypes
     (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType) :
-    List PsWasmFunctionType ->
-    Except PsWasmEncodeError (List UInt8)
-  | [] => Except.ok []
-  | functionType :: rest =>
+    (arrays : List PsWasmArrayType)
+    (functionTypesToEncode : List PsWasmFunctionType) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match functionTypesToEncode with
+  | List.nil => Except.ok []
+  | List.cons functionType rest =>
       match psWasmEncodeNamedFunctionType structures arrays functionType with
       | Except.error error => Except.error error
       | Except.ok encoded =>
@@ -278,11 +293,12 @@ def psWasmEncodeFunctionType
 
 def psWasmEncodeFunctionTypes
     (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType) :
-    List PsWasmFunction ->
-    Except PsWasmEncodeError (List UInt8)
-  | [] => Except.ok []
-  | function :: rest =>
+    (arrays : List PsWasmArrayType)
+    (functionsToEncode : List PsWasmFunction) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match functionsToEncode with
+  | List.nil => Except.ok []
+  | List.cons function rest =>
       match psWasmEncodeFunctionType structures arrays function with
       | Except.error error => Except.error error
       | Except.ok encoded =>
@@ -292,10 +308,12 @@ def psWasmEncodeFunctionTypes
               Except.ok (psListAppend encoded encodedRest)
 
 def psWasmFindFunctionIndexLoop
-    (name : String) :
-    Nat -> List PsWasmFunction -> Option Nat
-  | _, [] => none
-  | index, function :: rest =>
+    (name : String)
+    (index : Nat)
+    (functions : List PsWasmFunction) : Option Nat :=
+  match functions with
+  | List.nil => none
+  | List.cons function rest =>
       if psStringEq function.name name then
         some index
       else
@@ -566,11 +584,12 @@ def psWasmEncodeInstructions
     (structures : List PsWasmStructType)
     (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType)
-    (functions : List PsWasmFunction) :
-    List PsWasmInstruction ->
-    Except PsWasmEncodeError (List UInt8)
-  | [] => Except.ok []
-  | instruction :: rest =>
+    (functions : List PsWasmFunction)
+    (instructions : List PsWasmInstruction) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match instructions with
+  | List.nil => Except.ok []
+  | List.cons instruction rest =>
       match psWasmEncodeInstruction
           structures
           arrays
@@ -591,11 +610,12 @@ def psWasmEncodeInstructions
 
 def psWasmEncodeLocalDeclarations
     (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType) :
-    List PsWasmValueType ->
-    Except PsWasmEncodeError (List UInt8)
-  | [] => Except.ok []
-  | type :: rest =>
+    (arrays : List PsWasmArrayType)
+    (types : List PsWasmValueType) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match types with
+  | List.nil => Except.ok []
+  | List.cons type rest =>
       match psWasmEncodeValueType structures arrays type with
       | Except.error error => Except.error error
       | Except.ok encodedType =>
@@ -641,11 +661,12 @@ def psWasmEncodeFunctionBodies
     (structures : List PsWasmStructType)
     (arrays : List PsWasmArrayType)
     (functionTypes : List PsWasmFunctionType)
-    (functions : List PsWasmFunction) :
-    List PsWasmFunction ->
-    Except PsWasmEncodeError (List UInt8)
-  | [] => Except.ok []
-  | function :: rest =>
+    (functions : List PsWasmFunction)
+    (functionsToEncode : List PsWasmFunction) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match functionsToEncode with
+  | List.nil => Except.ok []
+  | List.cons function rest =>
       match psWasmEncodeFunctionBody
           structures
           arrays
@@ -687,11 +708,12 @@ def psWasmEncodeStructField
 
 def psWasmEncodeStructFields
     (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType) :
-    List PsWasmStructField ->
-    Except PsWasmEncodeError (List UInt8)
-  | [] => Except.ok []
-  | field :: rest =>
+    (arrays : List PsWasmArrayType)
+    (fields : List PsWasmStructField) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match fields with
+  | List.nil => Except.ok []
+  | List.cons field rest =>
       match psWasmEncodeStructField structures arrays field with
       | Except.error error => Except.error error
       | Except.ok encoded =>
@@ -741,11 +763,12 @@ def psWasmEncodeStructType
 
 def psWasmEncodeStructTypes
     (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType) :
-    List PsWasmStructType ->
-    Except PsWasmEncodeError (List UInt8)
-  | [] => Except.ok []
-  | structType :: rest =>
+    (arrays : List PsWasmArrayType)
+    (structTypes : List PsWasmStructType) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match structTypes with
+  | List.nil => Except.ok []
+  | List.cons structType rest =>
       match psWasmEncodeStructType structures arrays structType with
       | Except.error error => Except.error error
       | Except.ok encoded =>
@@ -774,11 +797,12 @@ def psWasmEncodeArrayType
 
 def psWasmEncodeArrayTypes
     (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType) :
-    List PsWasmArrayType ->
-    Except PsWasmEncodeError (List UInt8)
-  | [] => Except.ok []
-  | arrayType :: rest =>
+    (arrays : List PsWasmArrayType)
+    (arrayTypes : List PsWasmArrayType) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match arrayTypes with
+  | List.nil => Except.ok []
+  | List.cons arrayType rest =>
       match
           psWasmEncodeArrayType
             structures
@@ -824,12 +848,13 @@ def psWasmFunctionTypeIndex
 def psWasmEncodeFunctionTypeIndicesLoop
     (structures : List PsWasmStructType)
     (arrays : List PsWasmArrayType)
-    (functionTypes : List PsWasmFunctionType) :
-    Nat ->
-    List PsWasmFunction ->
-    Except PsWasmEncodeError (List UInt8)
-  | _, [] => Except.ok []
-  | functionIndex, function :: rest =>
+    (functionTypes : List PsWasmFunctionType)
+    (functionIndex : Nat)
+    (functions : List PsWasmFunction) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match functions with
+  | List.nil => Except.ok List.nil
+  | List.cons function rest =>
       match
           psWasmFunctionTypeIndex
             structures
@@ -861,11 +886,12 @@ def psWasmEncodeFunctionTypeIndices
     structures arrays functionTypes 0 functions
 
 def psWasmEncodeFunctionRefIndices
-    (functions : List PsWasmFunction) :
-    List String ->
-    Except PsWasmEncodeError (List UInt8)
-  | [] => Except.ok []
-  | name :: rest =>
+    (functions : List PsWasmFunction)
+    (names : List String) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match names with
+  | List.nil => Except.ok []
+  | List.cons name rest =>
       match psWasmFindFunctionIndex functions name with
       | none =>
           Except.error (PsWasmEncodeError.unknownFunction name)
@@ -901,11 +927,12 @@ def psWasmEncodeDeclarativeFunctionRefs
             (psWasmEncodeVector segment 1)
 
 def psWasmEncodeExports
-    (functions : List PsWasmFunction) :
-    List (String × String) ->
-    Except PsWasmEncodeError (List UInt8)
-  | [] => Except.ok []
-  | exportItem :: rest =>
+    (functions : List PsWasmFunction)
+    (exports : List (String × String)) :
+    Except PsWasmEncodeError (List UInt8) :=
+  match exports with
+  | List.nil => Except.ok []
+  | List.cons exportItem rest =>
       match psWasmFindFunctionIndex functions (Prod.snd exportItem) with
       | none =>
           Except.error (PsWasmEncodeError.unknownFunction (Prod.snd exportItem))

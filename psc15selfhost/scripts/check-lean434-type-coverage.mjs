@@ -9,6 +9,9 @@ const manifestPath=path.join(auditRoot,'lean434-type-surfaces.json');
 const policyPath=path.join(root,'LEAN434_TYPE_COVERAGE_POLICY.json');
 const preludePath=path.join(auditRoot,'proofscript-prelude.json');
 const stdlibRoot=path.join(root,'stdlib');
+const quotientBootstrap=path.join(
+  root,'packages','pskernel-core','src','Ps','KernelCore','Admission','Quot','Bootstrap.lean',
+);
 
 const manifest=JSON.parse(fs.readFileSync(manifestPath,'utf8'));
 const policy=JSON.parse(fs.readFileSync(policyPath,'utf8'));
@@ -71,7 +74,8 @@ for(const entry of policy.handbookSurface){
   if(entry.owner==='kernel-sort'){
     implementation='kernel-sort';
   }else if(entry.owner==='kernel-logical-foundation'){
-    implementation=entry.status==='special'?'kernel-special':'missing';
+    assert.equal(entry.name,'Quot','unknown logical-foundation special type');
+    implementation=fs.existsSync(quotientBootstrap)?'kernel-special':'missing';
   }else if(actualCore){
     implementation='core-prelude';
   }else if(actualStdlib){
@@ -83,6 +87,9 @@ for(const entry of policy.handbookSurface){
     if(entry.owner==='core-prelude') assert.equal(implementation,'core-prelude',`handbook type missing from core: ${entry.name}`);
     if(entry.owner==='stdlib') assert.equal(implementation,'stdlib',`handbook type missing from stdlib: ${entry.name}`);
     if(entry.owner==='kernel-sort') assert.equal(implementation,'kernel-sort');
+  }
+  if(entry.status==='special'){
+    assert.equal(implementation,'kernel-special',`logical-foundation support missing: ${entry.name}`);
   }
   if(entry.status==='gap'){
     assert.equal(implementation,'missing',`documented gap changed; update policy: ${entry.name}`);

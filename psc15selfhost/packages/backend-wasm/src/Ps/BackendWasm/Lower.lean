@@ -1,5 +1,6 @@
 import Ps.CompilerIr.Specialize
 import Ps.Foundation.List
+import Ps.Foundation.Name
 import Ps.BackendWasm.LowerInt
 import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.RuntimeNat
@@ -168,7 +169,7 @@ def psWasmFunctionTypeListContains
         fun (existing : PsVerifiedIrType) =>
           match psWasmIrTypeKey existing with
           | none => false
-          | some existingKey => existingKey == candidateKey;
+          | some existingKey => psStringEq existingKey candidateKey;
       psListAny predicate types
 
 def psWasmInsertFunctionType
@@ -539,7 +540,7 @@ def psWasmArrayTypeListContains
         fun (existing : PsVerifiedIrType) =>
           match psWasmIrTypeKey existing with
           | none => false
-          | some existingKey => existingKey == candidateKey;
+          | some existingKey => psStringEq existingKey candidateKey;
       psListAny predicate types
 
 def psWasmInsertArrayType
@@ -1137,7 +1138,7 @@ def psWasmFindStructure :
     List PsVerifiedIrStructure -> String -> Option PsVerifiedIrStructure
   | [], _ => none
   | structInfo :: rest, name =>
-      if structInfo.name == name then
+      if psStringEq structInfo.name name then
         some structInfo
       else
         psWasmFindStructure rest name
@@ -1149,7 +1150,7 @@ def psWasmFindStructureFieldLoop
     Option (Nat × PsVerifiedIrStructureField)
   | _, [] => none
   | index, field :: rest =>
-      if field.name == fieldName then
+      if psStringEq field.name fieldName then
         some (index, field)
       else
         psWasmFindStructureFieldLoop
@@ -1167,7 +1168,7 @@ def psWasmFindRecordField :
     Option PsVerifiedIrExpr
   | [], _ => none
   | field :: rest, name =>
-      if (Prod.fst field) == name then
+      if psStringEq (Prod.fst field) name then
         some (Prod.snd field)
       else
         psWasmFindRecordField rest name
@@ -1252,7 +1253,7 @@ def psWasmFindInductive :
     List PsVerifiedIrInductive -> String -> Option PsVerifiedIrInductive
   | [], _ => none
   | inductiveInfo :: rest, name =>
-      if inductiveInfo.name == name then
+      if psStringEq inductiveInfo.name name then
         some inductiveInfo
       else
         psWasmFindInductive rest name
@@ -1261,7 +1262,7 @@ def psWasmFindConstructor :
     List PsVerifiedIrConstructor -> String -> Option PsVerifiedIrConstructor
   | [], _ => none
   | constructorInfo :: rest, name =>
-      if constructorInfo.name == name then
+      if psStringEq constructorInfo.name name then
         some constructorInfo
       else
         psWasmFindConstructor rest name
@@ -1273,7 +1274,7 @@ def psWasmFindConstructorFieldLoop
     Option (Nat × PsVerifiedIrConstructorField)
   | _, [] => none
   | index, field :: rest =>
-      if field.name == fieldName then
+      if psStringEq field.name fieldName then
         some (index, field)
       else
         psWasmFindConstructorFieldLoop
@@ -1404,7 +1405,7 @@ def psWasmFindBinding :
     List PsWasmBinding -> String -> Option PsWasmBinding
   | [], _ => none
   | binding :: rest, name =>
-      if binding.name == name then
+      if psStringEq binding.name name then
         some binding
       else
         psWasmFindBinding rest name
@@ -1420,7 +1421,7 @@ def psWasmStringListContains :
     List String -> String -> Bool
   | [], _ => false
   | item :: rest, name =>
-      if item == name then
+      if psStringEq item name then
         true
       else
         psWasmStringListContains rest name
@@ -1429,7 +1430,7 @@ def psWasmBindingListContains :
     List PsWasmBinding -> String -> Bool
   | [], _ => false
   | binding :: rest, name =>
-      if binding.name == name then
+      if psStringEq binding.name name then
         true
       else
         psWasmBindingListContains rest name
@@ -4125,7 +4126,7 @@ def psWasmLowerSpecializedModule
                     let needsInt :=
                       psWasmModuleUsesInt module
                     let needsNat :=
-                      psWasmModuleUsesNat module || needsInt
+                      if psWasmModuleUsesNat module then true else needsInt
                     let runtimeStructures :=
                       (if needsNat then psWasmNatRuntimeStructures else [])
                         ++ (if needsInt then psWasmIntRuntimeStructures else [])

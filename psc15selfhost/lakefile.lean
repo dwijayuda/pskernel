@@ -88,12 +88,6 @@ lean_lib PsCompiler where
     `Ps.Compiler.Api
   ]
 
--- Proof-only PSCV experiment. This target is intentionally outside the
--- executable bootstrap import closure.
-lean_lib PsCompilerProofs where
-  srcDir := "packages/compiler/proofs"
-  roots := #[`Ps.Compiler.PscvPoc]
-
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"
   roots := #[

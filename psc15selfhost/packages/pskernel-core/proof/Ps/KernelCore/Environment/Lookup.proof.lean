@@ -1,4 +1,5 @@
 import Ps.KernelCore.Environment.Lookup
+import Ps.KernelCore.Metatheory.Judgments
 
 theorem psKernelEnvironmentGet_is_find
     (environment : PsKernelEnvironment)
@@ -25,3 +26,16 @@ theorem psKernelEnvironmentContains_of_find_some
     (h : psKernelEnvironmentFind environment name = Option.some info) :
     psKernelEnvironmentContains environment name = true := by
   simp [psKernelEnvironmentContains, h]
+
+
+theorem psKernelEnvironmentFind_refines_authoritative
+    (environment : PsKernelEnvironment)
+    (name : PsKernelName)
+    (hIndex :
+      PsKernelEnvironmentIndexRefines environment) :
+    psKernelEnvironmentFind environment name =
+      psKernelFindConstantInList
+        name
+        environment.constants := by
+  unfold psKernelEnvironmentFind
+  exact hIndex name

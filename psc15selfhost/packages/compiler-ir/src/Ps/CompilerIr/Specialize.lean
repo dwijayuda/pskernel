@@ -86,10 +86,10 @@ def psIrSpecializeLookupType
     (name : String) :
     Option PsVerifiedIrType :=
   match entries with
-  | List.nil => none
+  | List.nil => Option.none
   | List.cons entry rest =>
       if psStringEq (Prod.fst entry) name then
-        some (Prod.snd entry)
+        Option.some (Prod.snd entry)
       else
         psIrSpecializeLookupType rest name
 
@@ -98,10 +98,10 @@ def psIrSpecializeFindStructure
     (name : String) :
     Option PsVerifiedIrStructure :=
   match entries with
-  | List.nil => none
+  | List.nil => Option.none
   | List.cons entry rest =>
       if psStringEq entry.name name then
-        some entry
+        Option.some entry
       else
         psIrSpecializeFindStructure rest name
 
@@ -110,10 +110,10 @@ def psIrSpecializeFindInductive
     (name : String) :
     Option PsVerifiedIrInductive :=
   match entries with
-  | List.nil => none
+  | List.nil => Option.none
   | List.cons entry rest =>
       if psStringEq entry.name name then
-        some entry
+        Option.some entry
       else
         psIrSpecializeFindInductive rest name
 
@@ -122,69 +122,69 @@ def psIrSpecializeFindDeclaration
     (name : String) :
     Option PsVerifiedIrDeclaration :=
   match entries with
-  | List.nil => none
+  | List.nil => Option.none
   | List.cons entry rest =>
       if psStringEq entry.name name then
-        some entry
+        Option.some entry
       else
         psIrSpecializeFindDeclaration rest name
 
 def psIrSpecializeJoinKeys :
     List (Option String) -> Option String
-  | [] => some ""
+  | [] => Option.some ""
   | key :: rest =>
       match key with
-      | none => none
-      | some head =>
+      | Option.none => Option.none
+      | Option.some head =>
           match psIrSpecializeJoinKeys rest with
-          | none => none
-          | some tail =>
+          | Option.none => Option.none
+          | Option.some tail =>
               if psStringEq tail "" then
-                some head
+                Option.some head
               else
-                some (String.Internal.append head (String.Internal.append "$" tail))
+                Option.some (String.Internal.append head (String.Internal.append "$" tail))
 
 def psIrSpecializeTypeKeyWithFuel
     (remainingFuel : Nat)
     (type : PsVerifiedIrType) :
     Option String :=
   match remainingFuel with
-  | 0 => none
+  | 0 => Option.none
   | fuel + 1 =>
       match type with
-      | .unknown => none
-      | .typeParameter _ => none
+      | .unknown => Option.none
+      | .typeParameter _ => Option.none
       | .primitive primitive =>
           match primitive with
-          | .nat => some "Nat"
-          | .int => some "Int"
-          | .uint8 => some "U8"
-          | .uint16 => some "U16"
-          | .uint32 => some "U32"
-          | .uint64 => some "U64"
-          | .usize => some "USize"
-          | .int8 => some "I8"
-          | .int16 => some "I16"
-          | .int32 => some "I32"
-          | .int64 => some "I64"
-          | .isize => some "ISize"
-          | .float => some "F64"
-          | .float32 => some "F32"
-          | .bool => some "Bool"
-          | .char => some "Char"
-          | .string => some "String"
-          | .unit => some "Unit"
+          | .nat => Option.some "Nat"
+          | .int => Option.some "Int"
+          | .uint8 => Option.some "U8"
+          | .uint16 => Option.some "U16"
+          | .uint32 => Option.some "U32"
+          | .uint64 => Option.some "U64"
+          | .usize => Option.some "USize"
+          | .int8 => Option.some "I8"
+          | .int16 => Option.some "I16"
+          | .int32 => Option.some "I32"
+          | .int64 => Option.some "I64"
+          | .isize => Option.some "ISize"
+          | .float => Option.some "F64"
+          | .float32 => Option.some "F32"
+          | .bool => Option.some "Bool"
+          | .char => Option.some "Char"
+          | .string => Option.some "String"
+          | .unit => Option.some "Unit"
       | .function parameters result =>
           let parameterKeys :=
             parameters.map
               (psIrSpecializeTypeKeyWithFuel fuel);
           match psIrSpecializeJoinKeys parameterKeys with
-          | none => none
-          | some parameterKey =>
+          | Option.none => Option.none
+          | Option.some parameterKey =>
               match psIrSpecializeTypeKeyWithFuel fuel result with
-              | none => none
-              | some resultKey =>
-                  some
+              | Option.none => Option.none
+              | Option.some resultKey =>
+                  Option.some
                     (String.Internal.append
         "Fn$"
         (String.Internal.append
@@ -195,12 +195,12 @@ def psIrSpecializeTypeKeyWithFuel
             arguments.map
               (psIrSpecializeTypeKeyWithFuel fuel);
           match psIrSpecializeJoinKeys argumentKeys with
-          | none => none
-          | some keys =>
+          | Option.none => Option.none
+          | Option.some keys =>
               if psStringEq keys "" then
-                some (String.Internal.append "N$" name)
+                Option.some (String.Internal.append "N$" name)
               else
-                some
+                Option.some
                   (String.Internal.append
                     "N$"
                     (String.Internal.append
@@ -220,12 +220,12 @@ def psIrSpecializedName
     (name : String)
     (arguments : List PsVerifiedIrType) : Option String :=
   match psIrSpecializeArgumentsKey arguments with
-  | none => none
-  | some key =>
+  | Option.none => Option.none
+  | Option.some key =>
       if psStringEq key "" then
-        some name
+        Option.some name
       else
-        some
+        Option.some
           (String.Internal.append
             name
             (String.Internal.append "$spec$" key))
@@ -242,9 +242,9 @@ def psIrSpecializeRequestKey
       psIrSpecializedName
         request.name
         request.arguments with
-  | none => none
-  | some name =>
-      some
+  | Option.none => Option.none
+  | Option.some name =>
+      Option.some
         (String.Internal.append
           (psIrSpecializeKindPrefix request.kind)
           name)
@@ -263,8 +263,8 @@ def psIrSpecializeSeenContains
 def psIrSpecializeIsGround
     (type : PsVerifiedIrType) : Bool :=
   match psIrSpecializeTypeKey type with
-  | none => false
-  | some _ => true
+  | Option.none => false
+  | Option.some _ => true
 
 def psIrSpecializeAllGround :
     List PsVerifiedIrType -> Bool
@@ -306,27 +306,27 @@ def psIrSpecializeGenericTypeRequest
     (arguments : List PsVerifiedIrType) :
     Option PsIrSpecializeRequest :=
   match psIrSpecializeFindStructure module.structures name with
-  | some structureInfo =>
+  | Option.some structureInfo =>
       match structureInfo.typeParameters with
-      | [] => none
+      | [] => Option.none
       | _ =>
-          some {
+          Option.some {
             kind := PsIrSpecializeKind.structure
             name := name
             arguments := arguments
           }
-  | none =>
+  | Option.none =>
       match psIrSpecializeFindInductive module.inductives name with
-      | some inductiveInfo =>
+      | Option.some inductiveInfo =>
           match inductiveInfo.typeParameters with
-          | [] => none
+          | [] => Option.none
           | _ =>
-              some {
+              Option.some {
                 kind := PsIrSpecializeKind.inductive
                 name := name
                 arguments := arguments
               }
-      | none => none
+      | Option.none => Option.none
 
 def psIrSpecializeRewriteTypeListWith
     (rewrite :
@@ -377,10 +377,10 @@ def psIrSpecializeRewriteTypeWithFuel
               psIrSpecializeLookupType
                 substitution
                 name with
-          | none =>
+          | Option.none =>
               Except.error
                 (PsIrSpecializeError.unresolvedTypeParameter name)
-          | some value =>
+          | Option.some value =>
               Except.ok {
                 type := value
                 requests := []
@@ -420,7 +420,7 @@ def psIrSpecializeRewriteTypeWithFuel
                     module
                     name
                     loweredArguments.types with
-              | none =>
+              | Option.none =>
                   Except.ok {
                     type :=
                       PsVerifiedIrType.named
@@ -428,7 +428,7 @@ def psIrSpecializeRewriteTypeWithFuel
                         loweredArguments.types
                     requests := loweredArguments.requests
                   }
-              | some request =>
+              | Option.some request =>
                   if
                       psIrSpecializeBoolNot
                         (psIrSpecializeAllGround loweredArguments.types)
@@ -440,10 +440,10 @@ def psIrSpecializeRewriteTypeWithFuel
                         psIrSpecializedName
                           name
                           loweredArguments.types with
-                    | none =>
+                    | Option.none =>
                         Except.error
                           (PsIrSpecializeError.nonGroundType name)
-                    | some specializedName =>
+                    | Option.some specializedName =>
                         Except.ok {
                           type :=
                             PsVerifiedIrType.named
@@ -736,7 +736,7 @@ def psIrSpecializeRewriteExprWithFuel
                               psIrSpecializeFindDeclaration
                                 module.declarations
                                 name with
-                          | some declaration =>
+                          | Option.some declaration =>
                               match declaration.typeParameters with
                               | [] =>
                                   Except.ok {
@@ -767,11 +767,11 @@ def psIrSpecializeRewriteExprWithFuel
                                         psIrSpecializedName
                                           name
                                           loweredTypes.types with
-                                    | none =>
+                                    | Option.none =>
                                         Except.error
                                           (PsIrSpecializeError.nonGroundType
                                             name)
-                                    | some specializedName =>
+                                    | Option.some specializedName =>
                                         let request : PsIrSpecializeRequest := {
                                           kind :=
                                             PsIrSpecializeKind.declaration
@@ -788,7 +788,7 @@ def psIrSpecializeRewriteExprWithFuel
                                           requests :=
                                             psListAppend loweredFn.requests (psListAppend loweredTypes.requests (psListAppend loweredArguments.requests [request]))
                                         }
-                          | none =>
+                          | Option.none =>
                               Except.ok {
                                 expr :=
                                   PsVerifiedIrExpr.call
@@ -868,7 +868,7 @@ def psIrSpecializeRewriteExprWithFuel
                       psIrSpecializeFindStructure
                         module.structures
                         structureName with
-                  | some structureInfo =>
+                  | Option.some structureInfo =>
                       match structureInfo.typeParameters with
                       | [] =>
                           Except.ok {
@@ -893,11 +893,11 @@ def psIrSpecializeRewriteExprWithFuel
                                 psIrSpecializedName
                                   structureName
                                   loweredTypes.types with
-                            | none =>
+                            | Option.none =>
                                 Except.error
                                   (PsIrSpecializeError.nonGroundType
                                     structureName)
-                            | some specializedName =>
+                            | Option.some specializedName =>
                                 let request : PsIrSpecializeRequest := {
                                   kind := PsIrSpecializeKind.structure
                                   name := structureName
@@ -912,7 +912,7 @@ def psIrSpecializeRewriteExprWithFuel
                                   requests :=
                                     psListAppend loweredTypes.requests (psListAppend loweredFields.requests [request])
                                 }
-                  | none =>
+                  | Option.none =>
                       Except.error
                         (PsIrSpecializeError.unknownTarget structureName)
       | .projection structureName typeArguments target field =>
@@ -929,7 +929,7 @@ def psIrSpecializeRewriteExprWithFuel
                       psIrSpecializeFindStructure
                         module.structures
                         structureName with
-                  | some structureInfo =>
+                  | Option.some structureInfo =>
                       match structureInfo.typeParameters with
                       | [] =>
                           Except.ok {
@@ -955,11 +955,11 @@ def psIrSpecializeRewriteExprWithFuel
                                 psIrSpecializedName
                                   structureName
                                   loweredTypes.types with
-                            | none =>
+                            | Option.none =>
                                 Except.error
                                   (PsIrSpecializeError.nonGroundType
                                     structureName)
-                            | some specializedName =>
+                            | Option.some specializedName =>
                                 let request : PsIrSpecializeRequest := {
                                   kind := PsIrSpecializeKind.structure
                                   name := structureName
@@ -975,7 +975,7 @@ def psIrSpecializeRewriteExprWithFuel
                                   requests :=
                                     psListAppend loweredTypes.requests (psListAppend loweredTarget.requests [request])
                                 }
-                  | none =>
+                  | Option.none =>
                       Except.error
                         (PsIrSpecializeError.unknownTarget structureName)
       | .constructor inductiveName constructorName typeArguments fields =>
@@ -995,7 +995,7 @@ def psIrSpecializeRewriteExprWithFuel
                       psIrSpecializeFindInductive
                         module.inductives
                         inductiveName with
-                  | some inductiveInfo =>
+                  | Option.some inductiveInfo =>
                       match inductiveInfo.typeParameters with
                       | [] =>
                           Except.ok {
@@ -1021,11 +1021,11 @@ def psIrSpecializeRewriteExprWithFuel
                                 psIrSpecializedName
                                   inductiveName
                                   loweredTypes.types with
-                            | none =>
+                            | Option.none =>
                                 Except.error
                                   (PsIrSpecializeError.nonGroundType
                                     inductiveName)
-                            | some specializedName =>
+                            | Option.some specializedName =>
                                 let request : PsIrSpecializeRequest := {
                                   kind := PsIrSpecializeKind.inductive
                                   name := inductiveName
@@ -1041,7 +1041,7 @@ def psIrSpecializeRewriteExprWithFuel
                                   requests :=
                                     psListAppend loweredTypes.requests (psListAppend loweredFields.requests [request])
                                 }
-                  | none =>
+                  | Option.none =>
                       Except.error
                         (PsIrSpecializeError.unknownTarget inductiveName)
       | .matchE inductiveName typeArguments scrutinee alternatives =>
@@ -1066,7 +1066,7 @@ def psIrSpecializeRewriteExprWithFuel
                           psIrSpecializeFindInductive
                             module.inductives
                             inductiveName with
-                      | some inductiveInfo =>
+                      | Option.some inductiveInfo =>
                           match inductiveInfo.typeParameters with
                           | [] =>
                               Except.ok {
@@ -1092,11 +1092,11 @@ def psIrSpecializeRewriteExprWithFuel
                                     psIrSpecializedName
                                       inductiveName
                                       loweredTypes.types with
-                                | none =>
+                                | Option.none =>
                                     Except.error
                                       (PsIrSpecializeError.nonGroundType
                                         inductiveName)
-                                | some specializedName =>
+                                | Option.some specializedName =>
                                     let request : PsIrSpecializeRequest := {
                                       kind := PsIrSpecializeKind.inductive
                                       name := inductiveName
@@ -1112,7 +1112,7 @@ def psIrSpecializeRewriteExprWithFuel
                                       requests :=
                                         psListAppend loweredTypes.requests (psListAppend loweredScrutinee.requests (psListAppend loweredAlternatives.requests [request]))
                                     }
-                      | none =>
+                      | Option.none =>
                           Except.error
                             (PsIrSpecializeError.unknownTarget
                               inductiveName)
@@ -1465,10 +1465,10 @@ def psIrSpecializeProcessStructure
       psIrSpecializeFindStructure
         module.structures
         request.name with
-  | none =>
+  | Option.none =>
       Except.error
         (PsIrSpecializeError.unknownTarget request.name)
-  | some structureInfo =>
+  | Option.some structureInfo =>
       if
           psIrSpecializeNatNe structureInfo.typeParameters.length
             request.arguments.length
@@ -1488,10 +1488,10 @@ def psIrSpecializeProcessStructure
                 psIrSpecializedName
                   request.name
                   request.arguments with
-            | none =>
+            | Option.none =>
                 Except.error
                   (PsIrSpecializeError.nonGroundType request.name)
-            | some specializedName =>
+            | Option.some specializedName =>
                 match
                     psIrSpecializeRewriteStructureFields
                       module
@@ -1517,10 +1517,10 @@ def psIrSpecializeProcessInductive
       psIrSpecializeFindInductive
         module.inductives
         request.name with
-  | none =>
+  | Option.none =>
       Except.error
         (PsIrSpecializeError.unknownTarget request.name)
-  | some inductiveInfo =>
+  | Option.some inductiveInfo =>
       if
           psIrSpecializeNatNe inductiveInfo.typeParameters.length
             request.arguments.length
@@ -1540,10 +1540,10 @@ def psIrSpecializeProcessInductive
                 psIrSpecializedName
                   request.name
                   request.arguments with
-            | none =>
+            | Option.none =>
                 Except.error
                   (PsIrSpecializeError.nonGroundType request.name)
-            | some specializedName =>
+            | Option.some specializedName =>
                 match
                     psIrSpecializeRewriteConstructors
                       module
@@ -1569,10 +1569,10 @@ def psIrSpecializeProcessDeclaration
       psIrSpecializeFindDeclaration
         module.declarations
         request.name with
-  | none =>
+  | Option.none =>
       Except.error
         (PsIrSpecializeError.unknownTarget request.name)
-  | some declaration =>
+  | Option.some declaration =>
       if
           psIrSpecializeNatNe declaration.typeParameters.length
             request.arguments.length
@@ -1592,10 +1592,10 @@ def psIrSpecializeProcessDeclaration
                 psIrSpecializedName
                   request.name
                   request.arguments with
-            | none =>
+            | Option.none =>
                 Except.error
                   (PsIrSpecializeError.nonGroundType request.name)
-            | some specializedName =>
+            | Option.some specializedName =>
                 match
                     psIrSpecializeRewriteParameters
                       module
@@ -1658,10 +1658,10 @@ def psIrSpecializeLoop
       | [] => Except.ok state
       | request :: rest =>
           match psIrSpecializeRequestKey request with
-          | none =>
+          | Option.none =>
               Except.error
                 (PsIrSpecializeError.nonGroundType request.name)
-          | some key =>
+          | Option.some key =>
               let withoutHead : PsIrSpecializeState := {
                 imports := state.imports
                 structures := state.structures

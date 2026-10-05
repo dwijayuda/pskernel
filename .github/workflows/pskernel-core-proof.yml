@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: pskernel-core-proof-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   kernel-proofs:

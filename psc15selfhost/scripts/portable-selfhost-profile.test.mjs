@@ -147,6 +147,36 @@ test('known fragile term shorthand is rejected structurally', () => {
   assert(!ids(multilinePattern).includes('leading-dot-term-constructor'));
 });
 
+test('general infix arithmetic is rejected but structural successor patterns remain allowed', () => {
+  for (const source of [
+    'def a (x : Nat) := x % 128',
+    'def a (x : Nat) := x / 128',
+    'def a (x : Nat) := x + 1',
+    'def a (x : Nat) := x - 1',
+    'def a (x : Nat) := x * 2',
+    'def a (x : Nat) := x <= 2',
+    'def a (x : Nat) := x >= 2',
+    'def a (x : Nat) := x < 2',
+    'def a (x : Nat) := x > 2',
+  ]) {
+    assert(ids(source).includes('term-arithmetic-operator'), source);
+  }
+
+  const structuralPattern = [
+    'def f (fuel : Nat) : Nat :=',
+    '  match fuel with',
+    '  | 0 => 0',
+    '  | remaining + 1 => Nat.succ remaining',
+  ].join('\n');
+  assert(!ids(structuralPattern).includes('term-arithmetic-operator'));
+
+  const explicit = [
+    'def f (x y : Nat) : Nat :=',
+    '  Nat.add (Nat.mod x 128) (Nat.div y 64)',
+  ].join('\n');
+  assert(!ids(explicit).includes('term-arithmetic-operator'));
+});
+
 test('layout-only lets are rejected while explicit sequencing remains valid', () => {
   const bad = [
     'def f : Nat :=',

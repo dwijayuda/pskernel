@@ -203,11 +203,168 @@ def psTestBackendJsRejectsWordSizedWithoutProfile : Bool :=
           true
       | _ => false
 
+def psTestBackendJsMachineIntegerPrinters : Bool :=
+  psStringEq
+      (psJsPrintMachineIntegerLiteral
+        PsJsIrMachineIntegerType.uint8
+        300)
+      "Number(BigInt.asUintN(8, 300n))"
+    && psStringEq
+      (psJsPrintMachineIntegerLiteral
+        PsJsIrMachineIntegerType.int8
+        200)
+      "Number(BigInt.asIntN(8, 200n))"
+    && psStringEq
+      (psJsPrintMachineIntegerLiteral
+        PsJsIrMachineIntegerType.uint64
+        5)
+      "BigInt.asUintN(64, 5n)"
+    && psStringEq
+      (psJsPrintMachineIntegerLiteral
+        PsJsIrMachineIntegerType.int64
+        (-5))
+      "BigInt.asIntN(64, -5n)"
+    && psStringEq
+      (psJsPrintMachineIntegerBinary
+        PsJsIrMachineIntegerType.uint8
+        PsJsIrIntegerBinaryOp.add
+        "left"
+        "right")
+      "(((left + right)) & 255)"
+    && psStringEq
+      (psJsPrintMachineIntegerBinary
+        PsJsIrMachineIntegerType.uint16
+        PsJsIrIntegerBinaryOp.sub
+        "left"
+        "right")
+      "(((left - right)) & 65535)"
+    && psStringEq
+      (psJsPrintMachineIntegerBinary
+        PsJsIrMachineIntegerType.int32
+        PsJsIrIntegerBinaryOp.mul
+        "left"
+        "right")
+      "((Math.imul(left, right)) | 0)"
+    && psStringEq
+      (psJsPrintMachineIntegerBinary
+        PsJsIrMachineIntegerType.uint32
+        PsJsIrIntegerBinaryOp.bitAnd
+        "left"
+        "right")
+      "(((left & right)) >>> 0)"
+    && psStringEq
+      (psJsPrintMachineIntegerBinary
+        PsJsIrMachineIntegerType.uint32
+        PsJsIrIntegerBinaryOp.bitOr
+        "left"
+        "right")
+      "(((left | right)) >>> 0)"
+    && psStringEq
+      (psJsPrintMachineIntegerBinary
+        PsJsIrMachineIntegerType.uint64
+        PsJsIrIntegerBinaryOp.bitXor
+        "left"
+        "right")
+      "BigInt.asUintN(64, ((left ^ right)))"
+    && psStringEq
+      (psJsPrintIntegerCompare
+        PsJsIrIntegerCompareOp.eq "left" "right")
+      "(left === right)"
+    && psStringEq
+      (psJsPrintIntegerCompare
+        PsJsIrIntegerCompareOp.ne "left" "right")
+      "(left !== right)"
+    && psStringEq
+      (psJsPrintIntegerCompare
+        PsJsIrIntegerCompareOp.lt "left" "right")
+      "(left < right)"
+    && psStringEq
+      (psJsPrintIntegerCompare
+        PsJsIrIntegerCompareOp.le "left" "right")
+      "(left <= right)"
+    && psStringEq
+      (psJsPrintIntegerCompare
+        PsJsIrIntegerCompareOp.gt "left" "right")
+      "(left > right)"
+    && psStringEq
+      (psJsPrintIntegerCompare
+        PsJsIrIntegerCompareOp.ge "left" "right")
+      "(left >= right)"
+
+def psTestBackendJsFloatPrinters : Bool :=
+  psStringEq
+      (psJsPrintFloatBinary
+        PsJsIrFloatingType.float
+        PsJsIrFloatBinaryOp.add
+        "left"
+        "right")
+      "(left + right)"
+    && psStringEq
+      (psJsPrintFloatBinary
+        PsJsIrFloatingType.float
+        PsJsIrFloatBinaryOp.sub
+        "left"
+        "right")
+      "(left - right)"
+    && psStringEq
+      (psJsPrintFloatBinary
+        PsJsIrFloatingType.float32
+        PsJsIrFloatBinaryOp.mul
+        "left"
+        "right")
+      "Math.fround((left * right))"
+    && psStringEq
+      (psJsPrintFloatBinary
+        PsJsIrFloatingType.float
+        PsJsIrFloatBinaryOp.div
+        "left"
+        "right")
+      "(left / right)"
+    && psStringEq
+      (psJsPrintFloatCompare
+        PsJsIrFloatCompareOp.eq "left" "right")
+      "(left === right)"
+    && psStringEq
+      (psJsPrintFloatCompare
+        PsJsIrFloatCompareOp.ne "left" "right")
+      "(left !== right)"
+    && psStringEq
+      (psJsPrintFloatCompare
+        PsJsIrFloatCompareOp.lt "left" "right")
+      "(left < right)"
+    && psStringEq
+      (psJsPrintFloatCompare
+        PsJsIrFloatCompareOp.le "left" "right")
+      "(left <= right)"
+    && psStringEq
+      (psJsPrintFloatCompare
+        PsJsIrFloatCompareOp.gt "left" "right")
+      "(left > right)"
+    && psStringEq
+      (psJsPrintFloatCompare
+        PsJsIrFloatCompareOp.ge "left" "right")
+      "(left >= right)"
+
+def psTestBackendJsUInt8OfNatPrinter : Bool :=
+  match
+      psJsRuntimeUnary
+        PsJsIrRuntimeOp.uint8OfNat
+        "value" with
+  | Except.ok printed =>
+      psStringEq
+        printed
+        "Number(BigInt.asUintN(8, value))"
+  | Except.error _ => false
+
 def main : IO Unit := do
   if psTestBackendJsFixtureEmission
       && psTestBackendJsRejectsKeywordName
       && psTestBackendJsRejectsUnsupportedStructure
-      && psTestBackendJsRejectsUnsupportedIntrinsic      && psTestBackendJsRejectsWordSizedWithoutProfile then
+      && psTestBackendJsRejectsUnsupportedIntrinsic
+      && psTestBackendJsRejectsWordSizedWithoutProfile
+      && psTestBackendJsMachineIntegerPrinters
+      && psTestBackendJsFloatPrinters
+      && psTestBackendJsUInt8OfNatPrinter then
     IO.println "PSC2_BACKEND_JS_TESTS: PASS"
   else
     throw

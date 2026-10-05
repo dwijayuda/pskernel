@@ -65,3 +65,37 @@ theorem psKernelExprCheapBetaReduce_closed_const_body
           arg) =
       PsKernelExpr.const constName levels := by
   rfl
+
+
+theorem psKernelExprConsumeLambdaSpine_single
+    (name : PsKernelName)
+    (type body arg : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo) :
+    psKernelExprConsumeLambdaSpine
+        (PsKernelExpr.lam name type body binderInfo)
+        (List.cons arg List.nil)
+        0 =
+      Prod.mk body 1 := by
+  cases body <;> rfl
+
+theorem psKernelExprCheapBetaReduce_closed_body
+    (name : PsKernelName)
+    (type body arg : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo)
+    (h : psKernelExprHasLooseBVar body = false) :
+    psKernelExprCheapBetaReduce
+        (PsKernelExpr.app
+          (PsKernelExpr.lam name type body binderInfo)
+          arg) =
+      body := by
+  simp [
+    psKernelExprCheapBetaReduce,
+    psKernelExprGetAppFn,
+    psKernelExprGetAppArgs,
+    psKernelExprGetAppArgsWorker,
+    psKernelExprConsumeLambdaSpine_single,
+    psKernelExprListDrop,
+    psKernelExprApplyArgsCheap,
+    psKernelExprApplyArgsCheapWorker,
+    h
+  ]

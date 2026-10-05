@@ -63,3 +63,128 @@ theorem psKernelCheckLevelParams_accepts_defined
     psKernelCheckLevelParams expr allowed =
       Except.ok Unit.unit := by
   simp [psKernelCheckLevelParams, h]
+
+
+theorem psKernelCheckDefinitionBody_rejects_shape_error
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (value : PsKernelDefinitionInfo)
+    (error : String)
+    (h :
+      psKernelCheckNoMVarNoFVar value.value =
+        Except.error error) :
+    psKernelCheckDefinitionBodyWithSession fuel session value =
+      Except.error error := by
+  simp [psKernelCheckDefinitionBodyWithSession, h]
+
+theorem psKernelCheckDefinitionBody_rejects_level_error
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (value : PsKernelDefinitionInfo)
+    (error : String)
+    (hClosed :
+      psKernelCheckNoMVarNoFVar value.value =
+        Except.ok Unit.unit)
+    (hLevels :
+      psKernelCheckLevelParams
+          value.value
+          value.base.levelParams =
+        Except.error error) :
+    psKernelCheckDefinitionBodyWithSession fuel session value =
+      Except.error error := by
+  simp [
+    psKernelCheckDefinitionBodyWithSession,
+    hClosed,
+    hLevels
+  ]
+
+theorem psKernelCheckDefinitionBody_propagates_check_error
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (value : PsKernelDefinitionInfo)
+    (error : String)
+    (hClosed :
+      psKernelCheckNoMVarNoFVar value.value =
+        Except.ok Unit.unit)
+    (hLevels :
+      psKernelCheckLevelParams
+          value.value
+          value.base.levelParams =
+        Except.ok Unit.unit)
+    (hCheck :
+      psKernelSessionCheck fuel session value.value =
+        Except.error error) :
+    psKernelCheckDefinitionBodyWithSession fuel session value =
+      Except.error error := by
+  simp [
+    psKernelCheckDefinitionBodyWithSession,
+    hClosed,
+    hLevels,
+    hCheck
+  ]
+
+theorem psKernelCheckDefinitionBody_rejects_type_mismatch
+    (fuel : Nat)
+    (session checkedSession nextSession : PsKernelCheckerSession)
+    (value : PsKernelDefinitionInfo)
+    (inferredType : PsKernelExpr)
+    (hClosed :
+      psKernelCheckNoMVarNoFVar value.value =
+        Except.ok Unit.unit)
+    (hLevels :
+      psKernelCheckLevelParams
+          value.value
+          value.base.levelParams =
+        Except.ok Unit.unit)
+    (hCheck :
+      psKernelSessionCheck fuel session value.value =
+        Except.ok (Prod.mk inferredType checkedSession))
+    (hDefEq :
+      psKernelSessionIsDefEq
+          fuel
+          checkedSession
+          inferredType
+          value.base.type =
+        Except.ok (Prod.mk false nextSession)) :
+    psKernelCheckDefinitionBodyWithSession fuel session value =
+      Except.error "definition type mismatch" := by
+  simp [
+    psKernelCheckDefinitionBodyWithSession,
+    hClosed,
+    hLevels,
+    hCheck,
+    hDefEq
+  ]
+
+theorem psKernelCheckDefinitionBody_accepts_defeq
+    (fuel : Nat)
+    (session checkedSession nextSession : PsKernelCheckerSession)
+    (value : PsKernelDefinitionInfo)
+    (inferredType : PsKernelExpr)
+    (hClosed :
+      psKernelCheckNoMVarNoFVar value.value =
+        Except.ok Unit.unit)
+    (hLevels :
+      psKernelCheckLevelParams
+          value.value
+          value.base.levelParams =
+        Except.ok Unit.unit)
+    (hCheck :
+      psKernelSessionCheck fuel session value.value =
+        Except.ok (Prod.mk inferredType checkedSession))
+    (hDefEq :
+      psKernelSessionIsDefEq
+          fuel
+          checkedSession
+          inferredType
+          value.base.type =
+        Except.ok (Prod.mk true nextSession)) :
+    psKernelCheckDefinitionBodyWithSession fuel session value =
+      Except.ok nextSession := by
+  simp [
+    psKernelCheckDefinitionBodyWithSession,
+    hClosed,
+    hLevels,
+    hCheck,
+    hDefEq
+  ]

@@ -30,14 +30,29 @@ A package opts in with:
 
 The portable profile reuses the stable profile's forbidden Lean machinery and adds
 generic structural rules for source shapes that the proven self-host corpus has shown
-to be fragile: recursive equation declarations, term list append/cons shorthand,
-numeric tuple projection, tuple construction, grouped-dot application, string-literal
-patterns, Boolean convenience operators, leading-dot term constructors, untyped lambda
-binders, and layout-only `let` sequencing.
+to be fragile. These include structural-recursion declaration/call shape, general
+infix arithmetic outside supported structural patterns, scalar-member capability
+allowlisting, opaque primitive matching, explicit `Option` constructors, term list
+append/cons shorthand, numeric tuple projection, tuple construction, grouped-dot
+application, string-literal patterns, Boolean/conversion conveniences, leading-dot
+term constructors, typed local lambda/match/numeric bindings, and explicit `let`
+sequencing.
 
-The checker scans every opted-in package source root and its workspace import closure.
+The static checker scans every opted-in package source root and its workspace import
+closure. The executable contract then performs two distinct gates:
+
+1. every package source root must pass `psc1 check`, proving that the root plus its
+   imports are parseable, elaboratable, and admission-ready;
+2. the contract derives the package's top-level entry roots from the import graph,
+   proves that those entry closures cover every package source file, and runs
+   `psc1 typescript` on only those entries. This exercises erasure, VerifiedIR
+   validation, and TypeScript emission without redundantly emitting every source root.
+
 New failures must extend a general rule only when they identify a genuinely new
-source-profile invariant; do not add backend/file-specific repair guards.
+source-profile invariant; do not add backend/file-specific repair guards. A capability
+missing from the portable semantic environment must be added coherently through the
+prelude/IR/erasure/backend path or rejected explicitly; source-profile checks must not
+paper over semantic gaps.
 
 The goal is to keep self-hostability as a development invariant instead of rediscovering
 unsupported source patterns late in the bootstrap/fixed-point cycle.

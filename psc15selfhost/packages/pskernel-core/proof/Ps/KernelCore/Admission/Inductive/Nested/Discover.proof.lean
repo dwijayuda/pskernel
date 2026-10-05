@@ -1,8 +1,8 @@
 import Ps.KernelCore.Admission.Inductive.Nested.Discover
 
 theorem psKernelSimpleNestedFindFamily_nil
-    (name : PsKernelName) :
-    psKernelSimpleNestedFindFamily name List.nil =
+    (template : PsKernelExpr) :
+    psKernelSimpleNestedFindFamily template List.nil =
       Option.none := by
   rfl
 

@@ -149,10 +149,20 @@ theorem psKernelInferCoreWithFuel_sort_cache_miss
             inferOnly
             (PsKernelExpr.sort level)
             (PsKernelExpr.sort (PsKernelLevel.succ level)))) := by
-  cases inferOnly <;>
-    simp [
-      psKernelInferCoreWithFuel,
-      psKernelInferCacheEligible,
-      hCache,
-      hDepth
-    ]
+  cases inferOnly with
+  | false =>
+      simp at hCache
+      simp [
+        psKernelInferCoreWithFuel,
+        psKernelInferCacheEligible,
+        hCache,
+        hDepth
+      ]
+  | true =>
+      simp at hCache
+      simp [
+        psKernelInferCoreWithFuel,
+        psKernelInferCacheEligible,
+        hCache,
+        hDepth
+      ]

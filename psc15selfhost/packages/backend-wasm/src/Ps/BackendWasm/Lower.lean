@@ -1405,11 +1405,11 @@ def psWasmParameterBindingsLoop :
   | _, [] => []
   | index, parameter :: rest =>
       List.cons
-        {
+        ({
           name := parameter.name
           index := index
           type := parameter.type
-        }
+        })
         (psWasmParameterBindingsLoop
           (Nat.add index 1)
           rest)
@@ -1620,11 +1620,11 @@ def psWasmParameterBindingsFrom
   | [] => []
   | parameter :: rest =>
       List.cons
-        {
+        ({
           name := parameter.name
           index := firstIndex
           type := parameter.type
-        }
+        })
         (psWasmParameterBindingsFrom
           (Nat.add firstIndex 1)
           rest)
@@ -2900,11 +2900,11 @@ def psWasmLowerMatchBindings
                     constructorInfo
                     scrutineeLocal
                     (List.cons
-                      {
+                      ({
                         name := binding.name
                         index := localIndex
                         type := field.type
-                      }
+                      })
                       baseBindings)
                     nextState
                     rest with
@@ -3076,10 +3076,10 @@ def psWasmLowerCaptureFields
           | Except.ok loweredRest =>
               Except.ok
                 (List.cons
-                  {
+                  ({
                     name := capture.name
                     storageType := storageType
-                  }
+                  })
                   loweredRest)
 
 def psWasmPrepareCaptureBindings
@@ -3125,11 +3125,11 @@ def psWasmPrepareCaptureBindings
                     ++ loweredRest.instructions
                 bindings :=
                   List.cons
-                    {
+                    ({
                       name := capture.name
                       index := localIndex
                       type := capture.type
-                    }
+                    })
                     loweredRest.bindings
                 state := loweredRest.state
               }
@@ -3238,12 +3238,12 @@ def psWasmLowerLambdaWith
                             isFinal := true
                             fields :=
                               List.cons
-                                {
+                                ({
                                   name := "code"
                                   storageType :=
                                     PsWasmStorageType.value
                                       PsWasmValueType.funcRef
-                                }
+                                })
                                 captureFields
                           };
                           let advancedState :=
@@ -3410,11 +3410,11 @@ def psWasmLowerExprWithFuel
                   let localState := (Prod.snd allocated);
                   let bodyBindings :=
                     List.cons
-                      {
+                      ({
                         name := name
                         index := localIndex
                         type := type
-                      }
+                      })
                       bindings;
                   match
                       psWasmLowerExprWithFuel

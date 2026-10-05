@@ -2155,7 +2155,7 @@ def psWasmLowerArrayPushWith
                                                 ]
                           (psListAppend
                             loweredValue.instructions
-                            ([
+                            [
                                                     PsWasmInstruction.localSet valueLocal,
                                                     PsWasmInstruction.localGet valueLocal,
                                                     PsWasmInstruction.localGet arrayLocal,
@@ -2173,7 +2173,7 @@ def psWasmLowerArrayPushWith
                                                     PsWasmInstruction.arrayCopy
                                                       info.typeName info.typeName,
                                                     PsWasmInstruction.localGet outputLocal
-                                                  ])))
+                                                  ]))
                     state := (Prod.snd allocatedOutput)
                   }
 
@@ -2219,7 +2219,7 @@ def psWasmLowerArrayGetWith
                                                 ]
                           (psListAppend
                             loweredIndex.instructions
-                            ([
+                            [
                                                     PsWasmInstruction.localSet indexLocal,
                                                     PsWasmInstruction.localGet indexLocal,
                                                     PsWasmInstruction.call psWasmNatFitsU32Fn,
@@ -2233,7 +2233,7 @@ def psWasmLowerArrayGetWith
                                                     PsWasmInstruction.else_,
                                                       PsWasmInstruction.unreachable,
                                                     PsWasmInstruction.end_
-                                                  ])))
+                                                  ]))
                     state := (Prod.snd allocatedIndex)
                   }
 
@@ -2299,7 +2299,7 @@ def psWasmLowerArrayGetDWith
                                                             ]
                                   (psListAppend
                                     loweredFallback.instructions
-                                    ([
+                                    [
                                                                 PsWasmInstruction.localSet fallbackLocal,
                                                                 PsWasmInstruction.localGet indexLocal,
                                                                 PsWasmInstruction.call psWasmNatFitsU32Fn,
@@ -2323,7 +2323,7 @@ def psWasmLowerArrayGetDWith
                                                                 PsWasmInstruction.else_,
                                                                   PsWasmInstruction.localGet fallbackLocal,
                                                                 PsWasmInstruction.end_
-                                                              ])))))
+                                                              ]))))
                         state := (Prod.snd allocatedFallback)
                       }
 
@@ -2392,7 +2392,7 @@ def psWasmLowerArraySetWith
                                                             ]
                                   (psListAppend
                                     loweredValue.instructions
-                                    ([
+                                    [
                                                                 PsWasmInstruction.localSet valueLocal,
                                                                 PsWasmInstruction.localGet indexLocal,
                                                                 PsWasmInstruction.call psWasmNatFitsU32Fn,
@@ -2419,7 +2419,7 @@ def psWasmLowerArraySetWith
                                                                 PsWasmInstruction.else_,
                                                                   PsWasmInstruction.unreachable,
                                                                 PsWasmInstruction.end_
-                                                              ])))))
+                                                              ]))))
                         state := (Prod.snd allocatedOutput)
                       }
 
@@ -2488,7 +2488,7 @@ def psWasmLowerArraySetIfInBoundsWith
                                                             ]
                                   (psListAppend
                                     loweredValue.instructions
-                                    ([
+                                    [
                                                                 PsWasmInstruction.localSet valueLocal,
                                                                 PsWasmInstruction.localGet indexLocal,
                                                                 PsWasmInstruction.call psWasmNatFitsU32Fn,
@@ -2524,7 +2524,7 @@ def psWasmLowerArraySetIfInBoundsWith
                                                                 PsWasmInstruction.else_,
                                                                   PsWasmInstruction.localGet arrayLocal,
                                                                 PsWasmInstruction.end_
-                                                              ])))))
+                                                              ]))))
                         state := (Prod.snd allocatedOutput)
                       }
 
@@ -2790,12 +2790,12 @@ def psWasmLowerFunctionValueCall
                                       ]
                     (psListAppend
                       loweredArguments.instructions
-                      ([
+                      [
                                             PsWasmInstruction.localGet closureLocal,
                                             PsWasmInstruction.structGet baseName 0,
                                             PsWasmInstruction.refCastFunction codeTypeName,
                                             PsWasmInstruction.callRef codeTypeName
-                                          ]))
+                                          ])
                 state := loweredArguments.state
               }
 
@@ -2888,7 +2888,7 @@ def psWasmLowerIfWith
                               [PsWasmInstruction.else_]
                               (psListAppend
                                 elseCode.instructions
-                                ([PsWasmInstruction.end_])))))
+                                [PsWasmInstruction.end_]))))
                     state := elseCode.state
                   }
 
@@ -3354,8 +3354,8 @@ def psWasmLowerLambdaWith
                                         (psListAppend
                                           psWasmCaptureConstructionInstructions
                                                                                     captures
-                                          ([PsWasmInstruction.structNew
-                                                                                    subtypeName]))
+                                          [PsWasmInstruction.structNew
+                                                                                    subtypeName])
                                     state := finalState
                                   }
 
@@ -3513,7 +3513,7 @@ def psWasmLowerExprWithFuel
                         instructions :=
                           psListAppend
                             lowered.instructions
-                            ([PsWasmInstruction.structNew structureName])
+                            [PsWasmInstruction.structNew structureName]
                         state := lowered.state
                       }
       | .projection structureName _ target fieldName =>
@@ -3541,10 +3541,10 @@ def psWasmLowerExprWithFuel
                         instructions :=
                           psListAppend
                             lowered.instructions
-                            ([psWasmStructGetInstruction
+                            [psWasmStructGetInstruction
                                                           structureName
                                                           fieldIndex
-                                                          field.type])
+                                                          field.type]
                         state := lowered.state
                       }
       | .constructor
@@ -3591,10 +3591,10 @@ def psWasmLowerExprWithFuel
                                 instructions :=
                                   psListAppend
                                     lowered.instructions
-                                    ([PsWasmInstruction.structNew
+                                    [PsWasmInstruction.structNew
                                                                           (psWasmConstructorTypeName
                                                                             inductiveName
-                                                                            constructorName)])
+                                                                            constructorName)]
                                 state := lowered.state
                               }
       | .matchE inductiveName _ scrutinee alternatives =>

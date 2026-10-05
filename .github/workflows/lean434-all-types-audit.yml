@@ -8,25 +8,32 @@ on:
       - .github/workflows/lean434-all-types-audit.yml
       - psc15selfhost/scripts/lean434-type-inventory.lean
       - psc15selfhost/packages/**/src/**
+      - psc15selfhost/stdlib/**
       - psc15selfhost/prelude-extension-contract.json
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: lean434-all-types-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   inventory:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: psc15selfhost
         shell: bash
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+
       - name: Install exact Lean 4.34
         run: |
           set -euo pipefail
@@ -36,14 +43,13 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           test "$(lean --githash)" = 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
 
-      - name: Enumerate every Init type constructor from the pinned environment
+      - name: Enumerate every Init Std and Lean type constructor
         run: |
           set -euo pipefail
           mkdir -p .lake/lean434-type-audit
           lake env lean --run scripts/lean434-type-inventory.lean \
-            > .lake/lean434-type-audit/lean-init-types.tsv
-          head -n 1 .lake/lean434-type-audit/lean-init-types.tsv
-          grep -c '^TYPE' .lake/lean434-type-audit/lean-init-types.tsv
+            > .lake/lean434-type-audit/lean-type-surfaces.tsv
+          grep '^SURFACE' .lake/lean434-type-audit/lean-type-surfaces.tsv
 
       - name: Build exact current ProofScript prelude inventory
         run: |
@@ -58,49 +64,107 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const root='.lake/lean434-type-audit';
-          const lines=fs.readFileSync(root+'/lean-init-types.tsv','utf8').trim().split(/\r?\n/u);
-          const header=lines.shift();
-          const headerMatch=/^LEAN434_INIT_TYPE_COUNT\t(\d+)$/u.exec(header);
-          if(!headerMatch) throw new Error('unexpected Lean type inventory header: '+header);
-          const records=lines.map(line=>{
-            const [tag,name,kind,internal,module]=line.split('\t');
-            if(tag!=='TYPE'||!name||!kind||!internal||!module) {
-              throw new Error('malformed type inventory row: '+line);
+          const lines=fs.readFileSync(root+'/lean-type-surfaces.tsv','utf8').trim().split(/\r?\n/u);
+          const expectedCounts=new Map();
+          const records=[];
+          for(const line of lines){
+            const cols=line.split('\t');
+            if(cols[0]==='SURFACE'){
+              if(cols.length!==3||!['Init','Std','Lean'].includes(cols[1])||!/^[0-9]+$/u.test(cols[2])){
+                throw new Error('malformed surface row: '+line);
+              }
+              expectedCounts.set(cols[1],Number(cols[2]));
+              continue;
             }
-            if(internal!=='true'&&internal!=='false') {
+            if(cols[0]!=='TYPE'||cols.length!==6){
+              throw new Error('malformed type row: '+line);
+            }
+            const [,surface,name,kind,internal,module]=cols;
+            if(!['Init','Std','Lean'].includes(surface)||!name||!kind||!module){
+              throw new Error('invalid type row: '+line);
+            }
+            if(internal!=='true'&&internal!=='false'){
               throw new Error('invalid internal flag: '+line);
             }
-            return {name,kind,internal:internal==='true',module};
-          }).sort((a,b)=>a.name.localeCompare(b.name,'en'));
-          if(records.length!==Number(headerMatch[1])) throw new Error('Lean type count mismatch');
-          if(new Set(records.map(r=>r.name)).size!==records.length) throw new Error('duplicate Lean type name');
+            records.push({surface,name,kind,internal:internal==='true',module});
+          }
+          for(const surface of ['Init','Std','Lean']){
+            const actual=records.filter(r=>r.surface===surface).length;
+            if(expectedCounts.get(surface)!==actual){
+              throw new Error(`${surface} type count mismatch: ${expectedCounts.get(surface)} != ${actual}`);
+            }
+          }
+
           const prelude=JSON.parse(fs.readFileSync(root+'/proofscript-prelude.json','utf8'));
           if(!Array.isArray(prelude)) throw new Error('ProofScript prelude inventory must be an array');
           const psNames=new Set(prelude.map(d=>d?.name).filter(n=>typeof n==='string'));
-          const compared=records.map(r=>({...r,proofscriptPrelude:psNames.has(r.name)}));
+
+          const union=new Map();
+          for(const record of records){
+            const prior=union.get(record.name);
+            if(prior){
+              if(prior.kind!==record.kind||prior.internal!==record.internal||prior.module!==record.module){
+                throw new Error('surface identity drift for '+record.name);
+              }
+              prior.surfaces.push(record.surface);
+            }else{
+              union.set(record.name,{
+                name:record.name,
+                kind:record.kind,
+                internal:record.internal,
+                module:record.module,
+                surfaces:[record.surface],
+                proofscriptPrelude:psNames.has(record.name),
+              });
+            }
+          }
+          const unionRecords=[...union.values()].sort((a,b)=>a.name.localeCompare(b.name,'en'));
+          for(const record of unionRecords){
+            record.surfaces.sort((a,b)=>['Init','Std','Lean'].indexOf(a)-['Init','Std','Lean'].indexOf(b));
+          }
+          const perSurface={};
+          for(const surface of ['Init','Std','Lean']){
+            const surfaceNames=new Set(records.filter(r=>r.surface===surface).map(r=>r.name));
+            const surfaceRecords=unionRecords.filter(r=>surfaceNames.has(r.name));
+            perSurface[surface]={
+              typeCount:surfaceRecords.length,
+              publicTypeCount:surfaceRecords.filter(r=>!r.internal&&!r.name.startsWith('_private.')).length,
+              internalOrPrivateTypeCount:surfaceRecords.filter(r=>r.internal||r.name.startsWith('_private.')).length,
+              proofscriptPreludeCoveredCount:surfaceRecords.filter(r=>r.proofscriptPrelude).length,
+            };
+          }
           const manifest={
-            schemaVersion:1,
+            schemaVersion:2,
             leanVersion:'4.34.0',
             leanCommit:'293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
             sourceCommit:process.env.GITHUB_SHA,
-            leanInitTypeCount:compared.length,
             proofscriptPreludeDeclarationCount:prelude.length,
-            publicLeanInitTypeCount:compared.filter(r=>!r.internal&&!r.name.startsWith('_private.')).length,
-            internalOrPrivateLeanInitTypeCount:compared.filter(r=>r.internal||r.name.startsWith('_private.')).length,
-            proofscriptCoveredLeanTypeCount:compared.filter(r=>r.proofscriptPrelude).length,
-            records:compared,
+            perSurface,
+            unionTypeCount:unionRecords.length,
+            unionPublicTypeCount:unionRecords.filter(r=>!r.internal&&!r.name.startsWith('_private.')).length,
+            proofscriptPreludeCoveredUnionCount:unionRecords.filter(r=>r.proofscriptPrelude).length,
+            records:unionRecords,
           };
-          fs.writeFileSync(root+'/lean434-init-type-surface.json',JSON.stringify(manifest,null,2)+'\n');
-          const missing=compared.filter(r=>!r.proofscriptPrelude);
-          fs.writeFileSync(root+'/missing-from-proofscript-prelude.txt',
-            missing.map(r=>r.name+'\t'+r.kind).join('\n')+'\n');
+          fs.writeFileSync(root+'/lean434-type-surfaces.json',JSON.stringify(manifest,null,2)+'\n');
+
+          const initMissing=unionRecords.filter(r=>r.surfaces.includes('Init')&&!r.proofscriptPrelude);
+          fs.writeFileSync(root+'/init-missing-from-proofscript-prelude.txt',
+            initMissing.map(r=>[r.name,r.kind,r.internal,r.module].join('\t')).join('\n')+'\n');
+          const stdOnly=unionRecords.filter(r=>r.surfaces.includes('Std')&&!r.surfaces.includes('Init'));
+          fs.writeFileSync(root+'/std-beyond-init.txt',
+            stdOnly.map(r=>[r.name,r.kind,r.internal,r.module].join('\t')).join('\n')+'\n');
+          const leanOnly=unionRecords.filter(r=>r.surfaces.includes('Lean')&&!r.surfaces.includes('Init')&&!r.surfaces.includes('Std'));
+          fs.writeFileSync(root+'/lean-meta-beyond-init-std.txt',
+            leanOnly.map(r=>[r.name,r.kind,r.internal,r.module].join('\t')).join('\n')+'\n');
+
           console.log(JSON.stringify({
-            leanInitTypeCount:manifest.leanInitTypeCount,
-            publicLeanInitTypeCount:manifest.publicLeanInitTypeCount,
-            internalOrPrivateLeanInitTypeCount:manifest.internalOrPrivateLeanInitTypeCount,
-            proofscriptPreludeDeclarationCount:manifest.proofscriptPreludeDeclarationCount,
-            proofscriptCoveredLeanTypeCount:manifest.proofscriptCoveredLeanTypeCount,
-            missingCount:missing.length,
+            perSurface:manifest.perSurface,
+            unionTypeCount:manifest.unionTypeCount,
+            unionPublicTypeCount:manifest.unionPublicTypeCount,
+            proofscriptPreludeCoveredUnionCount:manifest.proofscriptPreludeCoveredUnionCount,
+            initMissingCount:initMissing.length,
+            stdBeyondInitCount:stdOnly.length,
+            leanBeyondInitStdCount:leanOnly.length,
           },null,2));
           NODE
 

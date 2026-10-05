@@ -38,6 +38,14 @@
       "trustStatus": "trusted",
       "canAffectAcceptanceIfBuggy": true,
       "refinementStatus": "invariant-tested-not-formally-proved"
+    },
+    {
+      "component": "Inference cache eligibility policy",
+      "path": "src/Ps/KernelSelfHost/Runtime/Acceleration/CachePolicy.lean",
+      "semanticRole": "semantic-preserving-acceleration",
+      "trustStatus": "trusted",
+      "canAffectAcceptanceIfBuggy": false,
+      "refinementStatus": "policy-only-no-state-mutation"
     }
   ],
   "capabilityTCB": [

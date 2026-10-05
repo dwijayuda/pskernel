@@ -215,6 +215,7 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Runtime.EnvironmentIndex,
     `Ps.KernelSelfHost.Environment,
     `Ps.KernelSelfHost.Runtime.Acceleration.Cache,
+    `Ps.KernelSelfHost.Runtime.Acceleration.CachePolicy,
     `Ps.KernelSelfHost.Runtime.Cache,
     `Ps.KernelSelfHost.Runtime.Capability.Lean434NativeReduction,
     `Ps.KernelSelfHost.Runtime.NativeReduction,

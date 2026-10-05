@@ -10,7 +10,7 @@
   "semanticRootPath": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
   "semanticModulePrefix": "Ps.KernelSelfHost.",
   "migration": {
-    "phase": "B5-acceleration-owners",
+    "phase": "B5-cache-policy-owner",
     "finalArchitectureAdopted": true,
     "finalArchitectureImplemented": false,
     "compatibilityShimsAllowedDuringMigration": true,
@@ -49,6 +49,10 @@
     {
       "path": "Runtime/Capability/Lean434NativeReduction.lean",
       "role": "trusted-capability"
+    },
+    {
+      "path": "Runtime/Acceleration/CachePolicy.lean",
+      "role": "semantic-preserving-acceleration"
     }
   ],
   "targetLayers": [
@@ -101,6 +105,10 @@
       "area": "environment-index",
       "module": "Ps.KernelSelfHost.Runtime.Acceleration.EnvironmentIndex",
       "legacyShim": "Ps.KernelSelfHost.Runtime.EnvironmentIndex"
+    },
+    {
+      "area": "cache-policy",
+      "module": "Ps.KernelSelfHost.Runtime.Acceleration.CachePolicy"
     }
   ]
 }

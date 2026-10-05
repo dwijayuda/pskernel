@@ -1,21 +1,18 @@
 import Ps.KernelSelfHost.TypeCheckerProjection
+import Ps.KernelSelfHost.Runtime.Acceleration.CachePolicy
 
 /-
 Inference helper layer.
 
-This module owns cache publication, WHNF views for Sort/Pi expectations, and the
-application-spine exposure worker used by syntax-directed inference. These
-helpers do not choose the typing rule for an expression.
+This module owns checker-state publication of inference results, WHNF views for
+Sort/Pi expectations, and the application-spine exposure worker used by
+syntax-directed inference. These helpers do not choose the typing rule for an
+expression.
 
-Checked application nodes are intentionally not memoized. A cold checked spine
-visits each node once, while memoizing every growing application tree can force
-expensive structural hashing/promotion in the portable cache. Checked lambda
-nodes are likewise one-shot in generated recursor-rule validation, where
-memoizing each growing lambda subtree adds structural hashing without useful
-reuse. Checked forall nodes are treated the same way: declaration and generated
-binder-domain checking normally consumes them once in a single checker state.
-Infer-only application, lambda, and forall results remain memoized because
-whole-expression inference results are commonly reused.
+The pure decision of which inference results are worth memoizing is a
+non-semantic acceleration policy owned by
+`Runtime/Acceleration/CachePolicy.lean`. This module only applies that policy
+to the checker state.
 -/
 
 
@@ -24,22 +21,6 @@ structure PsKernelForallView where
   domain : PsKernelExpr
   body : PsKernelExpr
   binderInfo : PsKernelBinderInfo
-
-def psKernelInferCacheEligible
-    (inferOnly : Bool)
-    (expr : PsKernelExpr) :
-    Bool :=
-  match expr with
-  | PsKernelExpr.lit _ =>
-      false
-  | PsKernelExpr.app _ _ =>
-      inferOnly
-  | PsKernelExpr.lam _ _ _ _ =>
-      inferOnly
-  | PsKernelExpr.forallE _ _ _ _ =>
-      inferOnly
-  | _ =>
-      true
 
 def psKernelCacheInferResult
     (state : PsKernelCheckerState)

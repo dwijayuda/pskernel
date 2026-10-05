@@ -9,7 +9,7 @@ same checkpoint. M4 provider promotion remains separate and open.
 ## Scope and decision
 
 `M3_WORKLOAD_BUDGETS.json` is the executable acceptance contract. The profile is
-Linux x64, Ubuntu 24.04 CI, pinned Lean 4.34.0 and TypeScript 5.8.3, Node 22.
+Original acceptance evidence: Linux x64, Ubuntu 24.04 CI, pinned Lean 4.34.0 and TypeScript 5.8.3, Node 22.
 Reports record the exact commit, runtime identity, budget SHA-256, and (for JS)
 generated artifact SHA-256. Runner CPU/image details remain observations rather
 than a promise about user hardware.
@@ -150,3 +150,12 @@ changed.
 After M3, prioritize the canonical adapter, dual checking and parity required by
 M4. Until M4 is explicitly accepted, `lean434-wasm` remains the trusted default.
 Continue all semantic, architecture, PSC1 and canonical ProofScript gates.
+
+## Integration validation
+
+PR #72 reconciles the current integration compiler and package layout. The integration
+workflows use the existing TypeScript 7.0.2 compiler pin and rerun the unchanged M3
+workload budgets. The original measurements above remain historical evidence for
+their recorded commits; current integration results are attached to
+[PR #72](https://github.com/dwijayuda/pskernel/pull/72). M4 remains open, and
+`lean434-wasm` remains the trusted default.

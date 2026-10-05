@@ -1,5 +1,6 @@
 import Ps.Host.LeanChecked
 import Lean.Data.Json
+import Lean.Message
 
 -- Transport encoding belongs to the native host. Canonical admission bytes stay
 -- unchanged; avoid recursively concatenating a multi-megabyte quoted payload.

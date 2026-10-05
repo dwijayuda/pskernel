@@ -6,22 +6,25 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { buildChecked, defaultCheckedSeed } from './checked-build.mjs';
+import { kernelContractV1 } from './kernel-contract.mjs';
 
 const seed = process.env.PSC2_CHECKED_SEED_BIN ?? defaultCheckedSeed;
 const native = existsSync(seed);
 
-test('default owned kernel checks dependent source before emission and execution', { skip: !native }, async () => {
+test('explicit owned kernel checks dependent source before emission and execution', { skip: !native }, async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'psc2-owned-checked-real-'));
   try {
     await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
     const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'out.js');
     await writeFile(entryPath, 'def identity (A : Type) (a : A) : A := a\n');
-    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed });
+    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'pskernel-core.old3' });
     const module = await import(pathToFileURL(outputPath).href);
     assert.equal(module.identity(42n), 42n);
     assert.equal(receipt.kernel.selector, 'pskernel-core.old3');
     assert.equal(receipt.provider.provider, 'psc-generated-owned');
-    assert.equal(receipt.schemaVersion, 3);
+    assert.equal(receipt.schemaVersion, 4);
+    assert.equal(receipt.kernelContract.id, kernelContractV1.id);
+    assert.equal(receipt.kernelContract.sha256, kernelContractV1.sha256);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
@@ -31,7 +34,7 @@ test('previously unsupported Flag enum is now owned-checked and emitted', { skip
     await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
     const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'out.js');
     await writeFile(entryPath, 'inductive Flag where\n  | off\n  | on\n');
-    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed });
+    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'pskernel-core.old3' });
     assert.equal(receipt.kernel.selector, 'pskernel-core.old3');
     const module = await import(pathToFileURL(outputPath).href);
     assert.notDeepEqual(module.Flag.off, module.Flag.on);
@@ -44,18 +47,18 @@ test('previously unsupported PayloadFlag source now passes owned sum admission',
     await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
     const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'out.js');
     await writeFile(entryPath, 'inductive PayloadFlag where\n  | off\n  | on (value : Nat)\n');
-    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed });
+    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'pskernel-core.old3' });
     assert.equal(receipt.kernel.selector, 'pskernel-core.old3');assert.equal(receipt.provider.profile, 'owned-uniform-algebraic/11');
     const module = await import(pathToFileURL(outputPath).href);assert.notEqual(module.PayloadFlag.on(7n), undefined);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 
-test('default owned kernel blocks unsupported recursive payload sums before writing output', { skip: !native }, async () => {
+test('explicit owned kernel blocks unsupported recursive payload sums before writing output', { skip: !native }, async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'psc2-owned-rejected-real-'));
   try {
     const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'never/out.js');
     await writeFile(entryPath, 'inductive RecursiveFlag where\n  | off\n  | on (tail : RecursiveFlag) (value : Nat)\n');
-    await assert.rejects(buildChecked({ entryPath, outputPath, seedPath: seed }), /KERNEL_REJECTED:/);
+    await assert.rejects(buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'pskernel-core.old3' }), /KERNEL_REJECTED:/);
     assert.equal(existsSync(path.dirname(outputPath)), false);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
@@ -66,7 +69,7 @@ test('actual unit source passes owned admission, exact-module emission and execu
     await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
     const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'out.js');
     await writeFile(entryPath, 'inductive SampleUnit where\n  | make\ndef sample : SampleUnit := SampleUnit.make\n');
-    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed });
+    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'pskernel-core.old3' });
     const module = await import(pathToFileURL(outputPath).href);
     assert.notEqual(module.sample, undefined);
     assert.deepEqual(module.sample, module.SampleUnit.make);
@@ -82,7 +85,7 @@ test('actual Nat constructor source passes the owned bootstrap and executed outp
     await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
     const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'out.js');
     await writeFile(entryPath, 'def first : Nat := Nat.succ Nat.zero\n');
-    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed });
+    const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'pskernel-core.old3' });
     const module = await import(pathToFileURL(outputPath).href);
     assert.equal(module.first, 1n);
     assert.equal(receipt.kernel.selector, 'pskernel-core.old3');
@@ -95,8 +98,8 @@ for (const kind of ['lean','ps']) test(`actual ${kind} natural literal passes ow
   try {
     await writeFile(path.join(dir,'package.json'),'{"type":"module"}');
     const entryPath=path.join(dir,'Main.'+kind),outputPath=path.join(dir,'out.js');
-    await writeFile(entryPath,kind==='lean'?'def answer : Nat := 42\n':'def answer: Nat := 42;\n');
-    const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});
+    await writeFile(entryPath,kind==='lean'?'def answer : Nat := 42\n':'const answer: Nat := { 42 }\n');
+    const receipt=await buildChecked({entryPath,outputPath,seedPath:seed,kernel:'pskernel-core.old3'});
     assert.equal((await import(pathToFileURL(outputPath).href)).answer,42n);
     assert.equal(receipt.kernel.selector,'pskernel-core.old3');assert.equal(receipt.provider.profile,'owned-uniform-algebraic/11');
   } finally {await rm(dir,{recursive:true,force:true});}
@@ -104,7 +107,7 @@ for (const kind of ['lean','ps']) test(`actual ${kind} natural literal passes ow
 
 for (const [kind, source] of [
   ['lean', 'def answer : Nat := 42\n'],
-  ['ps', 'def answer: Nat := 42;\n'],
+  ['ps', 'const answer: Nat := { 42 }\n'],
 ]) {
   test(`real ${kind} frontend -> WASM Lean kernel -> tsc -> executed JavaScript`, { skip: !native }, async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'psc2-checked-real-'));
@@ -113,7 +116,7 @@ for (const [kind, source] of [
       const entryPath = path.join(dir, 'Main.' + kind);
       await writeFile(entryPath, source);
       const outputPath = path.join(dir, 'out.js');
-      const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed, kernel: 'lean434-wasm' });
+      const receipt = await buildChecked({ entryPath, outputPath, seedPath: seed });
       const module = await import(pathToFileURL(outputPath).href);
       assert.equal(module.answer, 42n);
       assert.equal(receipt.provider.profile, 'lean4.34-core');
@@ -172,9 +175,9 @@ for (const kind of ['lean','ps']) test(`actual ${kind} closed record passes owne
     const entryPath=path.join(dir,'Main.'+kind),outputPath=path.join(dir,'out.js');
     const source=kind==='lean'
       ? 'structure OwnedPair where\n  left : Nat\n  right : Nat\ndef pair : OwnedPair := OwnedPair.mk 7 11\n'
-      : 'structure OwnedPair where { left : Nat; right : Nat; };\ndef pair : OwnedPair := OwnedPair.mk(7, 11);\n';
+      : 'structure OwnedPair where {\n  left : Nat,\n  right : Nat\n}\nconst pair: OwnedPair := { OwnedPair.mk(7, 11) }\n';
     await writeFile(entryPath,source);
-    const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});
+    const receipt=await buildChecked({entryPath,outputPath,seedPath:seed,kernel:'pskernel-core.old3'});
     const result=(await import(pathToFileURL(outputPath).href)).pair;
     assert.equal(result.left,7n);assert.equal(result.right,11n);
     assert.equal(receipt.kernel.selector,'pskernel-core.old3');assert.equal(receipt.provider.profile,'owned-uniform-algebraic/11');

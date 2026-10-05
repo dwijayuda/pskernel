@@ -11,15 +11,6 @@ def psProofScriptTermStop
   let span := psSyntaxTermSpan term;
   span.stop
 
-def psParseOptionalSemicolon
-    (cursor : PsTokenCursor) : PsTokenCursor :=
-  if psTokenCursorAtText cursor ";" then
-    match psTokenCursorAdvance cursor with
-    | Option.none => cursor
-    | Option.some read => read.cursor
-  else
-    cursor
-
 def psProofScriptBoolNot (value : Bool) : Bool :=
   if value then false else true
 
@@ -50,7 +41,7 @@ def psParseProofScriptImport
                 stop := name.value.span.stop
               }
             }
-            cursor := psParseOptionalSemicolon name.cursor
+            cursor := name.cursor
           }
 
 structure PsProofScriptCallArgs where
@@ -119,14 +110,14 @@ def psParseProofScriptCallArgsWithFuel
                       cursor := close.cursor
                     }
 
-def psProofScriptCallAdjacent
+def psProofScriptCallGapAllowed
     (term : PsSyntaxTerm)
     (cursor : PsTokenCursor) : Bool :=
   match psTokenCursorPeek cursor with
   | Option.none => false
   | Option.some token =>
       let stop := psProofScriptTermStop term;
-      Nat.beq token.span.start.byteOffset stop.byteOffset
+      Nat.beq token.span.start.line stop.line
 
 def psParseProofScriptApplicationWithFuel
     (parseArgument :
@@ -144,7 +135,7 @@ def psParseProofScriptApplicationWithFuel
           if
               psProofScriptBoolAnd
                 (psTokenCursorAtText first.cursor "(")
-                (psProofScriptCallAdjacent first.value first.cursor) then
+                (psProofScriptCallGapAllowed first.value first.cursor) then
             match psTokenCursorAdvance first.cursor with
             | Option.none => Except.error (PsParseError.unexpectedEnd "(")
             | Option.some opening =>
@@ -159,16 +150,8 @@ def psParseProofScriptApplicationWithFuel
                       start := psProofScriptTermStart first.value
                       stop := call.closeSpan.stop
                     };
-                    let args : List PsSyntaxTerm :=
-                      match call.args with
-                      | [] =>
-                          [PsSyntaxTerm.unit {
-                            start := opening.token.span.start
-                            stop := call.closeSpan.stop
-                          }]
-                      | _ => call.args;
                     Except.ok {
-                      value := PsSyntaxTerm.app first.value args span
+                      value := PsSyntaxTerm.app first.value call.args span
                       cursor := call.cursor
                     }
           else
@@ -367,6 +350,187 @@ def psParseProofScriptBinder
                       }
 
 
+def psParseProofScriptExplicitGroupWithFuel
+    (fuel : Nat) :
+    PsTokenCursor ->
+    List (PsSyntaxBinderHead × PsSyntaxTerm) ->
+    Except PsParseError
+      (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
+  match fuel with
+  | 0 =>
+      fun
+        (_cursor : PsTokenCursor)
+        (_bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>
+        Except.error PsParseError.fuelExhausted
+  | remaining + 1 =>
+      let smaller :
+          PsTokenCursor ->
+          List (PsSyntaxBinderHead × PsSyntaxTerm) ->
+          Except PsParseError
+            (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
+        psParseProofScriptExplicitGroupWithFuel remaining;
+      fun
+        (cursor : PsTokenCursor)
+        (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>
+        if psTokenCursorAtText cursor ")" then
+          match psTokenCursorAdvance cursor with
+          | Option.none => Except.error (PsParseError.unexpectedEnd ")")
+          | Option.some close =>
+              Except.ok {
+                value := psParseListReverse bindersRev
+                cursor := close.cursor
+              }
+        else
+          match psTokenCursorExpectKind cursor PsTokenKind.identifier with
+          | Except.error error => Except.error error
+          | Except.ok name =>
+              match psTokenCursorExpectText name.cursor ":" with
+              | Except.error error => Except.error error
+              | Except.ok afterColon =>
+                  match psParseProofScriptBinderType afterColon.cursor with
+                  | Except.error error => Except.error error
+                  | Except.ok type =>
+                      let binderName : PsSyntaxName := {
+                        segments := [name.token.text]
+                        span := name.token.span
+                      };
+                      let binder : PsSyntaxBinderHead := {
+                        name := binderName
+                        kind := PsSyntaxBinderKind.explicit
+                        span := {
+                          start := name.token.span.start
+                          stop := psProofScriptTermStop type.value
+                        }
+                      };
+                      let entry := Prod.mk binder type.value;
+                      if psTokenCursorAtText type.cursor "," then
+                        match psTokenCursorAdvance type.cursor with
+                        | Option.none =>
+                            Except.error (PsParseError.unexpectedEnd ")")
+                        | Option.some comma =>
+                            if psTokenCursorAtText comma.cursor ")" then
+                              match psTokenCursorAdvance comma.cursor with
+                              | Option.none =>
+                                  Except.error (PsParseError.unexpectedEnd ")")
+                              | Option.some close =>
+                                  Except.ok {
+                                    value :=
+                                      psParseListReverse
+                                        (List.cons entry bindersRev)
+                                    cursor := close.cursor
+                                  }
+                            else
+                              smaller
+                                comma.cursor
+                                (List.cons entry bindersRev)
+                      else
+                        match psTokenCursorExpectText type.cursor ")" with
+                        | Except.error error => Except.error error
+                        | Except.ok close =>
+                            Except.ok {
+                              value :=
+                                psParseListReverse
+                                  (List.cons entry bindersRev)
+                              cursor := close.cursor
+                            }
+
+def psParseProofScriptHeaderBindersWithFuel
+    (fuel : Nat) :
+    PsTokenCursor ->
+    List (PsSyntaxBinderHead × PsSyntaxTerm) ->
+    Except PsParseError
+      (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
+  match fuel with
+  | 0 =>
+      fun
+        (cursor : PsTokenCursor)
+        (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>
+        Except.ok {
+          value := psParseListReverse bindersRev
+          cursor := cursor
+        }
+  | remaining + 1 =>
+      let smaller :
+          PsTokenCursor ->
+          List (PsSyntaxBinderHead × PsSyntaxTerm) ->
+          Except PsParseError
+            (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
+        psParseProofScriptHeaderBindersWithFuel remaining;
+      fun
+        (cursor : PsTokenCursor)
+        (bindersRev : List (PsSyntaxBinderHead × PsSyntaxTerm)) =>
+        if
+            psProofScriptBoolOr
+              (psTokenCursorAtText cursor "{")
+              (psTokenCursorAtText cursor "[") then
+          match psParseProofScriptBinder cursor with
+          | Except.error error => Except.error error
+          | Except.ok binder =>
+              smaller
+                binder.cursor
+                (List.cons binder.value bindersRev)
+        else if psTokenCursorAtText cursor "(" then
+          match psTokenCursorAdvance cursor with
+          | Option.none => Except.error (PsParseError.unexpectedEnd "(")
+          | Option.some opening =>
+              match
+                  psParseProofScriptExplicitGroupWithFuel
+                    remaining
+                    opening.cursor
+                    [] with
+              | Except.error error => Except.error error
+              | Except.ok explicitGroup =>
+                  Except.ok {
+                    value :=
+                      psParseListAppend
+                        (psParseListReverse bindersRev)
+                        explicitGroup.value
+                    cursor := explicitGroup.cursor
+                  }
+        else
+          Except.ok {
+            value := psParseListReverse bindersRev
+            cursor := cursor
+          }
+
+def psParseProofScriptHeaderBinders
+    (cursor : PsTokenCursor) :
+    Except PsParseError
+      (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
+  psParseProofScriptHeaderBindersWithFuel
+    (Nat.add (psParseListLength cursor.remaining) 1)
+    cursor
+    []
+
+def psProofScriptFunctionHasExplicitGroupWithFuel
+    (fuel : Nat) :
+    PsTokenCursor -> Bool :=
+  match fuel with
+  | 0 =>
+      fun (_cursor : PsTokenCursor) => false
+  | remaining + 1 =>
+      let smaller : PsTokenCursor -> Bool :=
+        psProofScriptFunctionHasExplicitGroupWithFuel remaining;
+      fun (cursor : PsTokenCursor) =>
+        if psTokenCursorAtText cursor "(" then
+          true
+        else if
+            psProofScriptBoolOr
+              (psTokenCursorAtText cursor "{")
+              (psTokenCursorAtText cursor "[") then
+          match psParseProofScriptBinder cursor with
+          | Except.error _ => false
+          | Except.ok binder =>
+              smaller binder.cursor
+        else
+          false
+
+def psProofScriptFunctionHasExplicitGroup
+    (cursor : PsTokenCursor) : Bool :=
+  psProofScriptFunctionHasExplicitGroupWithFuel
+    (Nat.add (psParseListLength cursor.remaining) 1)
+    cursor
+
 def psParseProofScriptBindersWithFuel
     (fuel : Nat) :
     PsTokenCursor ->
@@ -462,16 +626,10 @@ def psParseProofScriptMatchAlternativesWithFuel
                             Prod.mk
                               pattern.value
                               (Prod.mk body.value span);
-                          if psTokenCursorAtText body.cursor ";" then
-                            match psTokenCursorAdvance body.cursor with
-                            | Option.none =>
-                                Except.error
-                                  (PsParseError.unexpectedEnd "match alternative")
-                            | Option.some afterSemi =>
-                                smaller
-                                  afterSemi.cursor
-                                  (List.cons alternative alternativesRev)
-                          else if psTokenCursorAtText body.cursor "}" then
+                          if
+                              psProofScriptBoolOr
+                                (psTokenCursorAtText body.cursor "|")
+                                (psTokenCursorAtText body.cursor "}") then
                             smaller
                               body.cursor
                               (List.cons alternative alternativesRev)
@@ -479,11 +637,11 @@ def psParseProofScriptMatchAlternativesWithFuel
                             match psTokenCursorPeek body.cursor with
                             | Option.none =>
                                 Except.error
-                                  (PsParseError.unexpectedEnd "; or }")
+                                  (PsParseError.unexpectedEnd "| or }")
                             | Option.some token =>
                                 Except.error
                                   (PsParseError.expectedText
-                                    "; or }"
+                                    "| or }"
                                     token.text
                                     token.span)
 
@@ -776,28 +934,23 @@ def psParseProofScriptTermWithFuel
                               match smaller afterAssign.cursor with
                               | Except.error error => Except.error error
                               | Except.ok value =>
-                                  match psTokenCursorExpectText
-                                      value.cursor
-                                      ";" with
+                                  match smaller value.cursor with
                                   | Except.error error => Except.error error
-                                  | Except.ok afterSemi =>
-                                      match smaller afterSemi.cursor with
-                                      | Except.error error => Except.error error
-                                      | Except.ok body =>
-                                          Except.ok {
-                                            value :=
-                                              PsSyntaxTerm.letE
-                                                sourceName
-                                                (Option.some declaredType.value)
-                                                value.value
-                                                body.value
-                                                {
-                                                  start := keyword.token.span.start
-                                                  stop :=
-                                                    psProofScriptTermStop body.value
-                                                }
-                                            cursor := body.cursor
-                                          }
+                                  | Except.ok body =>
+                                      Except.ok {
+                                        value :=
+                                          PsSyntaxTerm.letE
+                                            sourceName
+                                            (Option.some declaredType.value)
+                                            value.value
+                                            body.value
+                                            {
+                                              start := keyword.token.span.start
+                                              stop :=
+                                                psProofScriptTermStop body.value
+                                            }
+                                        cursor := body.cursor
+                                      }
                 else
                   match psTokenCursorExpectText name.cursor ":=" with
                   | Except.error error => Except.error error
@@ -805,26 +958,23 @@ def psParseProofScriptTermWithFuel
                       match smaller afterAssign.cursor with
                       | Except.error error => Except.error error
                       | Except.ok value =>
-                          match psTokenCursorExpectText value.cursor ";" with
+                          match smaller value.cursor with
                           | Except.error error => Except.error error
-                          | Except.ok afterSemi =>
-                              match smaller afterSemi.cursor with
-                              | Except.error error => Except.error error
-                              | Except.ok body =>
-                                  Except.ok {
-                                    value :=
-                                      PsSyntaxTerm.letE
-                                        sourceName
-                                        Option.none
-                                        value.value
-                                        body.value
-                                        {
-                                          start := keyword.token.span.start
-                                          stop :=
-                                            psProofScriptTermStop body.value
-                                        }
-                                    cursor := body.cursor
-                                  }
+                          | Except.ok body =>
+                              Except.ok {
+                                value :=
+                                  PsSyntaxTerm.letE
+                                    sourceName
+                                    Option.none
+                                    value.value
+                                    body.value
+                                    {
+                                      start := keyword.token.span.start
+                                      stop :=
+                                        psProofScriptTermStop body.value
+                                    }
+                                cursor := body.cursor
+                              }
       else if psTokenCursorAtText cursor "fun" then
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "lambda binder")
@@ -972,46 +1122,40 @@ def psParseProofScriptInductiveConstructorsWithFuel
                   PsTokenKind.identifier with
               | Except.error error => Except.error error
               | Except.ok name =>
-                  match psParseProofScriptBindersWithFuel
-                      (psParseListLength name.cursor.remaining)
-                      name.cursor
-                      [] with
+                  match psParseProofScriptHeaderBinders name.cursor with
                   | Except.error error => Except.error error
                   | Except.ok fields =>
-                      match psTokenCursorExpectText fields.cursor ";" with
-                      | Except.error error => Except.error error
-                      | Except.ok semi =>
-                          let sourceName : PsSyntaxName := {
-                            segments := [name.token.text]
-                            span := name.token.span
-                          };
-                          let constructor : PsSyntaxInductiveConstructor := {
-                            name := sourceName
-                            fields := fields.value
-                            span := {
-                              start := bar.token.span.start
-                              stop := semi.token.span.stop
-                            }
-                          };
-                          smaller
-                            semi.cursor
-                            (List.cons constructor constructorsRev)
+                      let sourceName : PsSyntaxName := {
+                        segments := [name.token.text]
+                        span := name.token.span
+                      };
+                      let constructor : PsSyntaxInductiveConstructor := {
+                        name := sourceName
+                        fields := fields.value
+                        span := {
+                          start := bar.token.span.start
+                          stop := name.token.span.stop
+                        }
+                      };
+                      smaller
+                        fields.cursor
+                        (List.cons constructor constructorsRev)
 
 def psParseProofScriptStructureField
     (cursor : PsTokenCursor) :
     Except PsParseError
       (PsParseResult (PsSyntaxBinderHead × PsSyntaxTerm)) :=
-  if psTokenCursorAtBinderStart cursor then
+  if
+      psProofScriptBoolOr
+        (psTokenCursorAtText cursor "{")
+        (psTokenCursorAtText cursor "[") then
     match psParseProofScriptBinder cursor with
     | Except.error error => Except.error error
     | Except.ok field =>
-        match psTokenCursorExpectText field.cursor ";" with
-        | Except.error error => Except.error error
-        | Except.ok semi =>
-            Except.ok {
-              value := field.value
-              cursor := semi.cursor
-            }
+        Except.ok {
+          value := field.value
+          cursor := field.cursor
+        }
   else
     match psTokenCursorExpectKind cursor PsTokenKind.identifier with
     | Except.error error => Except.error error
@@ -1022,25 +1166,22 @@ def psParseProofScriptStructureField
             match psParseProofScriptTerm afterColon.cursor with
             | Except.error error => Except.error error
             | Except.ok type =>
-                match psTokenCursorExpectText type.cursor ";" with
-                | Except.error error => Except.error error
-                | Except.ok semi =>
-                    let fieldName : PsSyntaxName := {
-                      segments := [name.token.text]
-                      span := name.token.span
-                    };
-                    let head : PsSyntaxBinderHead := {
-                      name := fieldName
-                      kind := PsSyntaxBinderKind.explicit
-                      span := {
-                        start := name.token.span.start
-                        stop := psProofScriptTermStop type.value
-                      }
-                    };
-                    Except.ok {
-                      value := Prod.mk head type.value
-                      cursor := semi.cursor
-                    }
+                let fieldName : PsSyntaxName := {
+                  segments := [name.token.text]
+                  span := name.token.span
+                };
+                let head : PsSyntaxBinderHead := {
+                  name := fieldName
+                  kind := PsSyntaxBinderKind.explicit
+                  span := {
+                    start := name.token.span.start
+                    stop := psProofScriptTermStop type.value
+                  }
+                };
+                Except.ok {
+                  value := Prod.mk head type.value
+                  cursor := type.cursor
+                }
 
 
 def psParseProofScriptStructureFieldsWithFuel
@@ -1076,9 +1217,36 @@ def psParseProofScriptStructureFieldsWithFuel
           match psParseProofScriptStructureField cursor with
           | Except.error error => Except.error error
           | Except.ok field =>
-              smaller
-                field.cursor
-                (List.cons field.value fieldsRev)
+              let nextFields :=
+                List.cons field.value fieldsRev;
+              if psTokenCursorAtText field.cursor "," then
+                match psTokenCursorAdvance field.cursor with
+                | Option.none =>
+                    Except.error (PsParseError.unexpectedEnd "structure field")
+                | Option.some comma =>
+                    if psTokenCursorAtText comma.cursor "}" then
+                      Except.error
+                        (PsParseError.expectedText
+                          "structure field"
+                          "}"
+                          comma.token.span)
+                    else
+                      smaller comma.cursor nextFields
+              else if psTokenCursorAtText field.cursor "}" then
+                Except.ok {
+                  value := psParseListReverse nextFields
+                  cursor := field.cursor
+                }
+              else
+                match psTokenCursorPeek field.cursor with
+                | Option.none =>
+                    Except.error (PsParseError.unexpectedEnd ", or }")
+                | Option.some token =>
+                    Except.error
+                      (PsParseError.expectedText
+                        ", or }"
+                        token.text
+                        token.span)
 
 def psParseProofScriptStructureDeclaration
     (cursor : PsTokenCursor) :
@@ -1089,10 +1257,7 @@ def psParseProofScriptStructureDeclaration
       match psParseSyntaxName keyword.cursor with
       | Except.error error => Except.error error
       | Except.ok name =>
-          match psParseProofScriptBindersWithFuel
-              (psParseListLength name.cursor.remaining)
-              name.cursor
-              [] with
+          match psParseProofScriptHeaderBinders name.cursor with
           | Except.error error => Except.error error
           | Except.ok params =>
               match psTokenCursorExpectText params.cursor "where" with
@@ -1127,8 +1292,6 @@ def psParseProofScriptStructureDeclaration
                                   "}" with
                               | Except.error error => Except.error error
                               | Except.ok close =>
-                                  let finalCursor :=
-                                    psParseOptionalSemicolon close.cursor;
                                   Except.ok {
                                     value :=
                                       PsSyntaxDeclaration.structureDecl
@@ -1139,7 +1302,7 @@ def psParseProofScriptStructureDeclaration
                                           start := keyword.token.span.start
                                           stop := close.token.span.stop
                                         }
-                                    cursor := finalCursor
+                                    cursor := close.cursor
                                   }
 
 def psParseProofScriptInductiveDeclaration
@@ -1151,10 +1314,7 @@ def psParseProofScriptInductiveDeclaration
       match psParseSyntaxName keyword.cursor with
       | Except.error error => Except.error error
       | Except.ok name =>
-          match psParseProofScriptBindersWithFuel
-              (psParseListLength name.cursor.remaining)
-              name.cursor
-              [] with
+          match psParseProofScriptHeaderBinders name.cursor with
           | Except.error error => Except.error error
           | Except.ok params =>
               let parseAfterResult :
@@ -1196,8 +1356,6 @@ def psParseProofScriptInductiveDeclaration
                                     "}" with
                                 | Except.error error => Except.error error
                                 | Except.ok close =>
-                                    let finalCursor : PsTokenCursor :=
-                                      psParseOptionalSemicolon close.cursor;
                                     Except.ok {
                                       value :=
                                         PsSyntaxDeclaration.inductiveDecl
@@ -1209,7 +1367,7 @@ def psParseProofScriptInductiveDeclaration
                                             start := keyword.token.span.start
                                             stop := close.token.span.stop
                                           }
-                                      cursor := finalCursor
+                                      cursor := close.cursor
                                     };
               if psTokenCursorAtText params.cursor ":" then
                 match psTokenCursorAdvance params.cursor with
@@ -1226,6 +1384,29 @@ def psParseProofScriptInductiveDeclaration
               else
                 parseAfterResult Option.none params.cursor
 
+def psParseProofScriptDefinitionBody
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  if psTokenCursorAtText cursor "{" then
+    match psParseRecordLiteral psParseProofScriptTerm cursor with
+    | Except.ok record => Except.ok record
+    | Except.error _ =>
+        match psTokenCursorAdvance cursor with
+        | Option.none => Except.error (PsParseError.unexpectedEnd "{")
+        | Option.some opening =>
+            match psParseProofScriptTerm opening.cursor with
+            | Except.error error => Except.error error
+            | Except.ok body =>
+                match psTokenCursorExpectText body.cursor "}" with
+                | Except.error error => Except.error error
+                | Except.ok close =>
+                    Except.ok {
+                      value := body.value
+                      cursor := close.cursor
+                    }
+  else
+    psParseProofScriptTerm cursor
+
 def psParseProofScriptDeclaration
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
@@ -1239,14 +1420,21 @@ def psParseProofScriptDeclaration
       else
         let isPartial := psStringEq keyword.text "partial";
         let isDefinition := psStringEq keyword.text "def";
+        let isFunction := psStringEq keyword.text "function";
+        let isConst := psStringEq keyword.text "const";
         let isTheorem := psStringEq keyword.text "theorem";
-        if psProofScriptBoolNot
-          (psProofScriptBoolOr
-            isPartial
-            (psProofScriptBoolOr isDefinition isTheorem)) then
+        let isOrdinaryDefinition :=
+          psProofScriptBoolOr
+            isDefinition
+            (psProofScriptBoolOr isFunction isConst);
+        if
+            psProofScriptBoolNot
+              (psProofScriptBoolOr
+                isPartial
+                (psProofScriptBoolOr isOrdinaryDefinition isTheorem)) then
           Except.error
             (PsParseError.expectedText
-              "partial def, def, theorem, inductive, or structure"
+              "partial def, def, const, function, theorem, inductive, or structure"
               keyword.text
               keyword.span)
         else
@@ -1273,10 +1461,36 @@ def psParseProofScriptDeclaration
               match psParseSyntaxName afterKeyword with
               | Except.error error => Except.error error
               | Except.ok name =>
-                  match psParseProofScriptBindersWithFuel
-                      (psParseListLength name.cursor.remaining)
-                      name.cursor
-                      [] with
+                  let functionHeaderOk : Bool :=
+                    if isFunction then
+                      psProofScriptFunctionHasExplicitGroup name.cursor
+                    else
+                      true;
+                  if psProofScriptBoolNot functionHeaderOk then
+                    match psTokenCursorPeek name.cursor with
+                    | Option.none =>
+                        Except.error
+                          (PsParseError.unexpectedEnd
+                            "function explicit parameter group")
+                    | Option.some token =>
+                        Except.error
+                          (PsParseError.expectedText
+                            "("
+                            token.text
+                            token.span)
+                  else
+                    let bindersResult :
+                        Except PsParseError
+                          (PsParseResult
+                            (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
+                      if isConst then
+                        Except.ok {
+                          value := []
+                          cursor := name.cursor
+                        }
+                      else
+                        psParseProofScriptHeaderBinders name.cursor;
+                    match bindersResult with
                   | Except.error error => Except.error error
                   | Except.ok binders =>
                       match psTokenCursorExpectText binders.cursor ":" with
@@ -1285,41 +1499,45 @@ def psParseProofScriptDeclaration
                           match psParseProofScriptTerm afterColon.cursor with
                           | Except.error error => Except.error error
                           | Except.ok type =>
-                              match psTokenCursorExpectText
-                                  type.cursor
-                                  ":=" with
+                              match psTokenCursorExpectText type.cursor ":=" with
                               | Except.error error => Except.error error
                               | Except.ok afterAssign =>
-                                  match psParseProofScriptTerm
-                                      afterAssign.cursor with
+                                  match
+                                      psParseProofScriptDefinitionBody
+                                        afterAssign.cursor with
                                   | Except.error error =>
                                       Except.error error
                                   | Except.ok value =>
-                                      match psTokenCursorExpectText
-                                          value.cursor
-                                          ";" with
-                                      | Except.error error =>
-                                          Except.error error
-                                      | Except.ok afterSemi =>
-                                          let span : PsSourceSpan := {
-                                            start := keyword.span.start
-                                            stop := afterSemi.token.span.stop
-                                          };
-                                          let declaration : PsSyntaxDeclaration :=
-                                            if isPartial then
-                                              PsSyntaxDeclaration.partialDefinition
-                                                name.value binders.value type.value value.value span
-                                            else if isDefinition then
-                                              PsSyntaxDeclaration.definition
-                                                name.value binders.value type.value value.value span
-                                            else
-                                              PsSyntaxDeclaration.theoremDecl
-                                                name.value binders.value type.value value.value span;
-                                          Except.ok {
-                                            value := declaration
-                                            cursor := afterSemi.cursor
-                                          }
-
+                                      let span : PsSourceSpan := {
+                                        start := keyword.span.start
+                                        stop := psProofScriptTermStop value.value
+                                      };
+                                      let declaration : PsSyntaxDeclaration :=
+                                        if isPartial then
+                                          PsSyntaxDeclaration.partialDefinition
+                                            name.value
+                                            binders.value
+                                            type.value
+                                            value.value
+                                            span
+                                        else if isTheorem then
+                                          PsSyntaxDeclaration.theoremDecl
+                                            name.value
+                                            binders.value
+                                            type.value
+                                            value.value
+                                            span
+                                        else
+                                          PsSyntaxDeclaration.definition
+                                            name.value
+                                            binders.value
+                                            type.value
+                                            value.value
+                                            span;
+                                      Except.ok {
+                                        value := declaration
+                                        cursor := value.cursor
+                                      }
 
 
 def psParseProofScriptImportsWithFuel

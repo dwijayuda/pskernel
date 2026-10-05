@@ -1,9 +1,18 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createCheckedPreparedSession, leanCheckedIdentity } from './checked-prepared-session.mjs';
+import {
+  createKernelCheckedSession,
+  kernelContractV1,
+  leanCheckedIdentity,
+} from './kernel-checked-session.mjs';
 
 const tag = Symbol('Except');
 const ok = value => ({ [tag]: 'ok', value });
+const wire = admissions => JSON.stringify({
+  admissions,
+  format: 'proofscript-checked-admissions',
+  version: 2,
+});
 const identity = { protocol: 'pskernel-lean/1', provider: 'lean4-cpp',
   leanVersion: '4.34.0', leanCommit: '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
   profile: 'lean4.34-core', accepted: true };
@@ -23,13 +32,13 @@ function fixture(provider = () => identity) {
       return ok(prepared);
     },
     psCompilerAdmissionsFromPrepared(value) {
-      assert.equal(value, prepared); calls.push('encode'); return ok(JSON.stringify(value.declarations));
+      assert.equal(value, prepared); calls.push('encode'); return ok(wire(value.declarations));
     },
     psCompilerTypeScriptFromPrepared(value) {
       assert.equal(value, prepared); calls.push('emit'); return ok('export const answer = 42n;');
     },
   };
-  const session = createCheckedPreparedSession(compiler, admissions => {
+  const session = createKernelCheckedSession(compiler, admissions => {
     calls.push('kernel'); return provider(admissions, prepared);
   }, leanCheckedIdentity);
   return { session, calls, getPrepared: () => prepared };
@@ -48,7 +57,11 @@ test('module preparation preserves order and checks one combined immutable paylo
 });
 
 test('module preparation cannot bypass kernel rejection or use a fallback', async () => {
-  const { session, calls } = fixture(() => ({ ...identity, accepted: false }));
+  const { session, calls } = fixture(() => ({
+    ...identity,
+    accepted: false,
+    errorKind: 'kernel-rejection',
+  }));
   await assert.rejects(session.checkSources('lean', ['first', 'second']), /KERNEL_REJECTED/);
   assert.deepEqual(calls, ['prepare-modules', 'encode', 'kernel']);
 });
@@ -64,6 +77,8 @@ test('one preparation; exact checked object reaches emission', async () => {
   assert.equal(session.emit(checked), 'export const answer = 42n;');
   assert.deepEqual(calls, ['prepare', 'encode', 'kernel', 'encode', 'emit']);
   assert.match(checked.canonicalAdmissionsSha256, /^[0-9a-f]{64}$/);
+  assert.equal(checked.kernelContract.id, 'proofscript-kernel-contract/1');
+  assert.equal(checked.kernelContract.sha256, kernelContractV1.sha256);
   assert.equal(checked.provider.profile, 'lean4.34-core');
 });
 test('no emission after kernel rejection', async () => {
@@ -85,7 +100,47 @@ for (const field of ['protocol', 'provider', 'leanVersion', 'leanCommit', 'profi
 }
 test('nonboolean accepted is not acceptance', async () => {
   const { session } = fixture(() => ({ ...identity, accepted: 'true' }));
-  await assert.rejects(session.check('lean', '42'), /PROVIDER_RESULT/);
+  await assert.rejects(session.check('lean', '42'), /KERNEL_CONTRACT_RESULT_ACCEPTED/);
+});
+test('rejection without an error kind violates KernelContract-v1', async () => {
+  const { session } = fixture(() => ({ ...identity, accepted: false }));
+  await assert.rejects(session.check('lean', '42'), /KERNEL_CONTRACT_RESULT_REJECTION/);
+});
+test('mismatched kernel contract is rejected before preparation', () => {
+  const { session: baseline } = fixture();
+  assert.ok(baseline);
+  const compiler = {
+    psCompilerPrepareSource: () => ok({ declarations: [] }),
+    psCompilerAdmissionsFromPrepared: () => ok(wire([])),
+    psCompilerTypeScriptFromPrepared: () => ok(''),
+  };
+  assert.throws(
+    () => createKernelCheckedSession(
+      compiler,
+      () => identity,
+      leanCheckedIdentity,
+      { ...kernelContractV1, id: 'proofscript-kernel-contract/2' },
+    ),
+    /KERNEL_CONTRACT_IDENTITY/,
+  );
+});
+test('noncanonical admission envelope is rejected before provider invocation', async () => {
+  let called = false;
+  const compiler = {
+    psCompilerPrepareSource: () => ok({ declarations: [] }),
+    psCompilerAdmissionsFromPrepared: () => ok(JSON.stringify({
+      admissions: [],
+      format: 'wrong',
+      version: 2,
+    })),
+    psCompilerTypeScriptFromPrepared: () => ok(''),
+  };
+  const session = createKernelCheckedSession(
+    compiler,
+    () => { called = true; return identity; },
+  );
+  await assert.rejects(session.check('lean', ''), /KERNEL_CONTRACT_ADMISSIONS_FORMAT/);
+  assert.equal(called, false);
 });
 test('ordinary callers cannot forge or clone a checked handle', async () => {
   const { session } = fixture();
@@ -108,10 +163,10 @@ test('changed canonical output is rejected before emission', async () => {
   let count = 0; const calls = [];
   const compiler = {
     psCompilerPrepareSource: () => ok({ declarations: [] }),
-    psCompilerAdmissionsFromPrepared: () => ok(String(count++)),
+    psCompilerAdmissionsFromPrepared: () => ok(wire([{ generation: count++ }])),
     psCompilerTypeScriptFromPrepared: () => { calls.push('emit'); return ok('bad'); },
   };
-  const session = createCheckedPreparedSession(compiler, () => identity, leanCheckedIdentity);
+  const session = createKernelCheckedSession(compiler, () => identity, leanCheckedIdentity);
   const checked = await session.check('lean', '42');
   assert.throws(() => session.emit(checked), /CHECKED_PAYLOAD_CHANGED/);
   assert.deepEqual(calls, []);
@@ -123,7 +178,7 @@ test('malformed frontend result fails before checker', async () => {
     psCompilerAdmissionsFromPrepared: () => ok(''),
     psCompilerTypeScriptFromPrepared: () => ok(''),
   };
-  const session = createCheckedPreparedSession(compiler, () => { called = true; return identity; });
+  const session = createKernelCheckedSession(compiler, () => { called = true; return identity; });
   await assert.rejects(session.check('lean', ''), /RESULT_SHAPE/);
   assert.equal(called, false);
 });

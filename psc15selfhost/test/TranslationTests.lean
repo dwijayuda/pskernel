@@ -11,11 +11,15 @@ def psTranslationLeanFixture : String :=
 def psTranslationProofScriptFixture : String :=
   "import Demo.Core\n\n" ++
   "inductive Choice where {\n" ++
-  "  | left;\n" ++
-  "  | right;\n" ++
-  "};\n\n" ++
-  "def choose (x : Choice) : Nat := " ++
-  "match x with { | Choice.left => 1; | Choice.right => 2 };"
+  "  | left\n" ++
+  "  | right\n" ++
+  "}\n\n" ++
+  "function choose(x : Choice): Nat := {\n" ++
+  "  match x with {\n" ++
+  "    | Choice.left => 1\n" ++
+  "    | Choice.right => 2\n" ++
+  "  }\n" ++
+  "}"
 
 def psTestLeanProofScriptLeanRoundTrip : Bool :=
   match
@@ -54,9 +58,9 @@ def psTranslationStructureLeanFixture : String :=
 
 def psTranslationStructureProofScriptFixture : String :=
   "structure User where {\n" ++
-  "  age : Nat;\n" ++
-  "};\n\n" ++
-  "def ageOf (u : User) : Nat := u.age;"
+  "  age : Nat\n" ++
+  "}\n\n" ++
+  "function ageOf(u : User): Nat := { u.age }"
 
 def psTestStructureTranslationRoundTrip : Bool :=
   match
@@ -78,7 +82,7 @@ def psTestPartialDefinitionTranslationRoundTrip : Bool :=
   let leanSource :=
     "partial def loop (n : Nat) : Nat := loop n"
   let proofScriptSource :=
-    "partial def loop(n : Nat) : Nat := loop(n);"
+    "partial def loop(n : Nat): Nat := { loop(n) }"
   match
       psTranslateLeanToProofScript leanSource,
       psTranslateProofScriptToLean proofScriptSource with
@@ -127,11 +131,11 @@ def psTestHigherOrderBinderTranslation : Bool :=
 
 def psTestProofScriptNestedBinderTypes : Bool :=
   let sources := [
-    "def twice (f : ((_: Nat) -> Nat) -> Nat) : Nat := 0;",
-    "def named (f : (x : Nat) -> Nat) : Nat := 0;",
-    "def nested (f : List((_: Nat) -> Nat)) : Nat := 0;",
-    "def implicitType (f : {x : Nat} -> Nat) : Nat := 0;",
-    "def grouped (f : (Nat -> Nat)) : Nat := 0;"]
+    "function twice(f : ((_: Nat) -> Nat) -> Nat): Nat := { 0 }",
+    "function named(f : (x : Nat) -> Nat): Nat := { 0 }",
+    "function nested(f : List((_: Nat) -> Nat)): Nat := { 0 }",
+    "function implicitType(f : {x : Nat} -> Nat): Nat := { 0 }",
+    "function grouped(f : (Nat -> Nat)): Nat := { 0 }"]
   sources.all fun source =>
     match psCanonicalizeProofScriptSource source with
     | .error _ => false
@@ -140,7 +144,34 @@ def psTestProofScriptNestedBinderTypes : Bool :=
         | .error _ => false
         | .ok again => again == canonical
 
+def psTestR3CallGap : Bool :=
+  let source :=
+    "function id(x : Nat): Nat := { x }\n" ++
+    "const answer: Nat := { id /* horizontal gap */ (1) }"
+  match psCanonicalizeProofScriptSource source with
+  | .error _ => false
+  | .ok canonical =>
+      canonical.contains "id(1)"
+
+def psTestLegacyProofScriptRejected : Bool :=
+  let sources := [
+    "def old (x : Nat) : Nat := x;",
+    "structure Old where { x : Nat; }",
+    "inductive Old where { | one; }",
+    "function old(x : Nat)(y : Nat): Nat := { x }",
+    "function missing {α : Type}: Nat := { 0 }"]
+  sources.all fun source =>
+    match psCanonicalizeProofScriptSource source with
+    | .error _ => true
+    | .ok _ => false
+
 def main : IO Unit := do
+  if psTestLegacyProofScriptRejected then
+    IO.println "PSC2_R3_SYNTAX_PASS: legacy ProofScript spellings reject"
+  else throw (IO.userError "PSC2_R3_SYNTAX_FAIL: legacy ProofScript spelling accepted")
+  if psTestR3CallGap then
+    IO.println "PSC2_R3_SYNTAX_PASS: CallGap"
+  else throw (IO.userError "PSC2_R3_SYNTAX_FAIL: CallGap")
   if psTestProofScriptNestedBinderTypes then
     IO.println "PSC1_TRANSLATION_PASS: grouped and dependent ProofScript binder types"
   else throw (IO.userError "PSC1_TRANSLATION_FAIL: grouped and dependent ProofScript binder types")

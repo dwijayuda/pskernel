@@ -165,6 +165,74 @@ def psLexSkipBlockComment
     start
     position
 
+def psLexSkipCBlockCommentWithFuel
+    (fuel : Nat) :
+    List Char ->
+    PsSourcePos ->
+    PsSourcePos ->
+    Except PsLexError PsLexCursor :=
+  match fuel with
+  | 0 =>
+      fun
+        (_remaining : List Char)
+        (start : PsSourcePos)
+        (position : PsSourcePos) =>
+        Except.error
+          (PsLexError.unterminatedBlockComment
+            (psLexSpan start position))
+  | remainingFuel + 1 =>
+      let smaller :
+          List Char ->
+          PsSourcePos ->
+          PsSourcePos ->
+          Except PsLexError PsLexCursor :=
+        psLexSkipCBlockCommentWithFuel remainingFuel;
+      fun
+        (remaining : List Char)
+        (start : PsSourcePos)
+        (position : PsSourcePos) =>
+        match remaining with
+        | List.nil =>
+            Except.error
+              (PsLexError.unterminatedBlockComment
+                (psLexSpan start position))
+        | List.cons first rest =>
+            match rest with
+            | List.cons second tail =>
+                if psLexCharEq first '*' then
+                  if psLexCharEq second '/' then
+                    Except.ok {
+                      remaining := tail
+                      position :=
+                        psLexAdvanceTwo position first second
+                    }
+                  else
+                    smaller
+                      rest
+                      start
+                      (psLexAdvanceChar position first)
+                else
+                  smaller
+                    rest
+                    start
+                    (psLexAdvanceChar position first)
+            | List.nil =>
+                smaller
+                  List.nil
+                  start
+                  (psLexAdvanceChar position first)
+
+def psLexSkipCBlockComment
+    (remaining : List Char)
+    (start : PsSourcePos)
+    (position : PsSourcePos) :
+    Except PsLexError PsLexCursor :=
+  psLexSkipCBlockCommentWithFuel
+    (Nat.add (psLexListLength remaining) 1)
+    remaining
+    start
+    position
+
 def psLexSkipTriviaWithFuel
     (fuel : Nat) :
     List Char ->
@@ -218,6 +286,19 @@ def psLexSkipTriviaWithFuel
                     match
                         psLexSkipBlockComment
                           1
+                          tail
+                          position
+                          afterPrefix with
+                    | Except.error error => Except.error error
+                    | Except.ok cursor =>
+                        smaller
+                          cursor.remaining
+                          cursor.position
+                  else if psLexCharEq second '*' then
+                    let afterPrefix :=
+                      psLexAdvanceTwo position first second;
+                    match
+                        psLexSkipCBlockComment
                           tail
                           position
                           afterPrefix with

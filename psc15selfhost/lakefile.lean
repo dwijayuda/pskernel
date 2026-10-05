@@ -93,9 +93,20 @@ lean_lib PsBackendTs where
   roots := #[
     `Ps.BackendTs.Type,
     `Ps.BackendTs.Expr,
-    `Ps.BackendTs.Module,
-    `Ps.BackendTs.Compiler
+    `Ps.BackendTs.Module
   ]
+
+lean_lib PsBackendJs where
+  srcDir := "packages/backend-js/src"
+  roots := #[
+    `Ps.BackendJs.Model,
+    `Ps.BackendJs.Lower,
+    `Ps.BackendJs.Print
+  ]
+
+lean_lib PsDriverTs where
+  srcDir := "packages/driver-ts/src"
+  roots := #[`Ps.DriverTs.Compiler]
 
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"
@@ -110,9 +121,12 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.ValueRefs,
     `Ps.BackendRust.Runtime,
     `Ps.BackendRust.Module,
-    `Ps.BackendRust.Coverage,
-    `Ps.BackendRust.Compiler
+    `Ps.BackendRust.Coverage
   ]
+
+lean_lib PsDriverRust where
+  srcDir := "packages/driver-rust/src"
+  roots := #[`Ps.DriverRust.Compiler]
 
 lean_lib PsBackendWasm where
   srcDir := "packages/backend-wasm/src"
@@ -297,10 +311,20 @@ lean_lib PsKernelCoreTestSupport where
     `KernelCore.Bench.CrossRuntime
   ]
 
+lean_lib PsCli where
+  srcDir := "packages/cli/src"
+  roots := #[`PsCli]
+
 @[default_target]
 lean_exe psc1 where
   srcDir := "packages/cli/src"
   root := `Main
+
+-- Production-named native compiler. `psc1` remains as the bootstrap/compatibility
+-- executable while both targets are built from the same pinned Lean 4.34 sources.
+lean_exe psc where
+  srcDir := "packages/cli/src"
+  root := `PscMain
 
 lean_exe psc1_tests where
   srcDir := "test"
@@ -317,6 +341,18 @@ lean_exe psc1_bridge_tests where
 lean_exe psc1_backend_ts_tests where
   srcDir := "test"
   root := `BackendTsTests
+
+lean_lib PsBackendJsTestSupport where
+  srcDir := "test"
+  roots := #[`BackendJsFixture]
+
+lean_exe psc1_backend_js_tests where
+  srcDir := "test"
+  root := `BackendJsTests
+
+lean_exe psc1_backend_js_diff_fixture where
+  srcDir := "test"
+  root := `BackendJsDifferentialFixture
 
 lean_exe psc1_backend_wasm_tests where
   srcDir := "test"

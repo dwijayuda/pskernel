@@ -11,12 +11,15 @@ export const allowedBootstrapPackageNames = Object.freeze([
   "erasure",
   "compiler",
   "backend-ts",
+  "driver-ts",
 ]);
 
 export const forbiddenBootstrapPackageNames = Object.freeze([
   "stdlib",
   "project",
+  "backend-js",
   "backend-rust",
+  "driver-rust",
   "backend-wasm",
   "pskernel",
   "pskernel-core",
@@ -61,10 +64,15 @@ export function assertBootstrapPolicyWellFormed() {
   if (!allowedBootstrapPackages.has("backend-ts")) {
     throw new Error("PSC2_BOOTSTRAP_POLICY_MISSING_TYPESCRIPT_BACKEND");
   }
+  if (!allowedBootstrapPackages.has("driver-ts")) {
+    throw new Error("PSC2_BOOTSTRAP_POLICY_MISSING_TYPESCRIPT_DRIVER");
+  }
   for (const packageName of [
     "stdlib",
     "project",
+    "backend-js",
     "backend-rust",
+    "driver-rust",
     "backend-wasm",
     "pskernel",
     "pskernel-lean",

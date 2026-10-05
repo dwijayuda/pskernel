@@ -2,10 +2,9 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { spawnSync } from "node:child_process";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
 import { findSourceWorkspaceRoot, readGeneratedSourceClosure } from "./selfhost-source-workspace.mjs";
-import { resolveTypeScriptCli } from "./typescript-cli.mjs";
+import { compileTypeScriptCached } from "./compile-typescript-cached.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -88,9 +87,15 @@ function requireCompilerApi(compiler) {
   const required = [
     "PsCompilerSourceKind",
     "psCompilerTranslateSource",
-    "psCompilerPrepareSources",
     "psCompilerTypeScriptFromPrepared",
     "List",
+    "psCompilerParseSource",
+    "psElabModule",
+    "psListReverse",
+    "psListAppend",
+    "psCompilerElaborateSourcesWorker",
+    "psCompilerPrepareElaborated",
+    "psSelfHostProdPreludeEnvironment",
   ];
   for (const name of required) {
     if (!(name in compiler)) {
@@ -163,45 +168,53 @@ async function flattenProject(compiler, entryPath) {
   };
 }
 
-function compileTypeScript(typeScriptPath) {
-  const tsc = resolveTypeScriptCli();
-  const version = spawnSync(process.execPath, [tsc, '--version'], { encoding: 'utf8', timeout: 10000 });
-  if (version.error || version.status !== 0 || version.stdout.trim() !== 'Version 5.8.3')
-    throw new Error('PSC2_SELFHOST_TYPESCRIPT_PIN: require TypeScript 5.8.3');
-  const result = spawnSync(
-    process.execPath,
-    [
-      tsc,
-      typeScriptPath,
-      "--target",
-      "ES2022",
-      "--module",
-      "ES2022",
-      "--moduleResolution",
-      "bundler",
-      "--strict",
-      "--declaration",
-      "--sourceMap",
-      "--noEmitOnError",
-      "--skipLibCheck",
-      "--pretty",
-      "false",
-    ],
-    {
-      cwd: selfhostRoot,
-      encoding: "utf8",
-      stdio: "pipe",
-    },
-  );
-  if (result.status !== 0) {
-    throw new Error(
-      [
-        "PSC2_SELFHOST_TSC_FAILED",
-        result.stdout,
-        result.stderr,
-      ].filter(Boolean).join("\n"),
+function prepareSourcesIncrementally(compiler, sourceKindValue, sourceChunks) {
+  let environment = compiler.psSelfHostProdPreludeEnvironment;
+  let declarationsRev = compiler.List.nil();
+  const progress = process.env.PSC_SELFHOST_PROGRESS === "1";
+  const allStarted = performance.now();
+
+  for (let index = 0; index < sourceChunks.length; index += 1) {
+    const source = sourceChunks[index];
+    const moduleStarted = performance.now();
+    const parsed = unwrapExcept(
+      compiler.psCompilerParseSource(sourceKindValue, source),
+      `parse-module-${index + 1}`,
     );
+    const elaborated = unwrapExcept(
+      compiler.psElabModule(environment, parsed),
+      `elaborate-module-${index + 1}`,
+    );
+    environment = elaborated.environment;
+    declarationsRev = compiler.psListAppend(
+      compiler.psListReverse(elaborated.declarations),
+      declarationsRev,
+    );
+    if (progress) {
+      process.stdout.write(
+        `PSC2_SELFHOST_INCREMENTAL_MODULE: ${index + 1}/${sourceChunks.length} ms=${Math.round(performance.now() - moduleStarted)}\n`,
+      );
+    }
   }
+
+  const prepareStarted = performance.now();
+  const elaborated = unwrapExcept(
+    compiler.psCompilerElaborateSourcesWorker(
+      sourceKindValue,
+      compiler.List.nil(),
+      environment,
+      declarationsRev,
+    ),
+    "finalize",
+  );
+  const prepared = unwrapExcept(
+    compiler.psCompilerPrepareElaborated(elaborated),
+    "prepare",
+  );
+  process.stdout.write(
+    `PSC2_SELFHOST_INCREMENTAL_PREPARE: PASS (${sourceChunks.length} modules; prepareMs=${Math.round(performance.now() - prepareStarted)}; totalMs=${Math.round(performance.now() - allStarted)})\n`,
+  );
+  return prepared;
 }
 
 if (process.argv.length < 5) {
@@ -234,13 +247,24 @@ const compiler = await import(pathToFileURL(compilerPath).href);
 requireCompilerApi(compiler);
 
 const project = await flattenProject(compiler, entryPath);
-const sources = project.sources.reduceRight((tail, head) => compiler.List.cons(head, tail), compiler.List.nil());
-const prepared = unwrapExcept(compiler.psCompilerPrepareSources(project.sourceKind, sources), "prepare");
-const typeScript = unwrapExcept(compiler.psCompilerTypeScriptFromPrepared(prepared), "compile");
+const prepared = prepareSourcesIncrementally(
+  compiler,
+  project.sourceKind,
+  project.sources,
+);
+process.stdout.write("PSC2_SELFHOST_PREPARE_MODE: incremental\n");
+const backendStarted = performance.now();
+const typeScript = unwrapExcept(
+  compiler.psCompilerTypeScriptFromPrepared(prepared),
+  "compile",
+);
+const backendMs = Math.round(performance.now() - backendStarted);
 
 await mkdir(path.dirname(outputTsPath), { recursive: true });
 await writeFile(outputTsPath, typeScript, "utf8");
-if (!emitOnly) compileTypeScript(outputTsPath);
+const tscStarted = performance.now();
+const tscCache = emitOnly ? { cache: "skipped" } : await compileTypeScriptCached(selfhostRoot, outputTsPath);
+const tscMs = Math.round(performance.now() - tscStarted);
 
 process.stdout.write(
   [
@@ -252,5 +276,8 @@ process.stdout.write(
     ...(emitOnly
       ? ["PSC2_SELFHOST_TYPESCRIPT_CHECK: SKIPPED (emit-only)"]
       : [`PSC2_SELFHOST_JS: ${path.relative(selfhostRoot, outputTsPath.replace(/\.ts$/u, ".js"))}`]),
+    `PSC2_SELFHOST_BACKEND_MS: ${backendMs}`,
+    `PSC2_SELFHOST_TSC_MS: ${tscMs}`,
+    `PSC2_SELFHOST_TSC_CACHE: ${tscCache.cache}`,
   ].join("\n") + "\n",
 );

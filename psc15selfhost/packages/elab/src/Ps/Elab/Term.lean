@@ -18,6 +18,7 @@ inductive PsElabError where
   | infer (error : PsInferError)
   | typeMismatch
   | implicitApplicationUnsupported
+  | emptyCallUnsupported
   | unsupportedTerm
   | matchExpectedType
   | matchScrutineeUnsupported
@@ -2916,7 +2917,11 @@ def psElabTermWithFuel
                   alternatives
                   expected
             | .app fn args _ =>
-                match
+                match args with
+                | [] =>
+                    Except.error PsElabError.emptyCallUnsupported
+                | _ =>
+                  match
                     psTryElabStructuralSelfCall
                       context
                       fn

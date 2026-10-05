@@ -334,7 +334,7 @@ def psTestOpenDefinitionBinderErasure : Bool :=
   match psCompilerVerifiedIrSource PsCompilerSourceKind.lean source with
   | Except.error _ => false
   | Except.ok ir =>
-      ir.declarations.length == 1 && ir.declarations.any fun declaration =>
+      ir.raw.declarations.length == 1 && ir.raw.declarations.any fun declaration =>
         declaration.name == "keep"
           && declaration.typeParameters.map (fun parameter => parameter.name) == ["T0", "T1"]
           && declaration.parameters.map (fun parameter => parameter.name) == ["x", "y"]

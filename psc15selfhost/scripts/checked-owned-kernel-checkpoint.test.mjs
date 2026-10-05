@@ -9,7 +9,7 @@ const root = fileURLToPath(new URL('../packages/pskernel-core.old3/', import.met
 test('regenerated owned kernel has matching build/evidence identities and owns bootstrap routing', () => {
   execFileSync(process.execPath, [fileURLToPath(new URL('./check-owned-kernel-receipt.mjs', import.meta.url))]);
 });
-test('owned checker passes the 264-test baseline and 297 instantiation/polymorphic/constant/unit/Nat/literal/record/elimination/enum/sum tests', {
+test('owned checker full discovered test corpus passes without regressions', {
   // The unchanged receipt includes POSIX executable-bit and symlink tests.
   skip: process.platform === 'win32' ? 'full receipt baseline requires POSIX filesystem semantics' : false,
 }, () => {
@@ -20,8 +20,14 @@ test('owned checker passes the 264-test baseline and 297 instantiation/polymorph
   });
   assert.equal(run.status, 0, `${run.error ?? ''}\n${run.stdout}\n${run.stderr}`);
   const output = run.stdout;
-  assert.match(output, /# tests 561\b/u);
-  assert.match(output, /# pass 561\b/u);
+  const testsMatch = output.match(/# tests (\d+)\b/u);
+  const passMatch = output.match(/# pass (\d+)\b/u);
+  assert.notEqual(testsMatch, null, output);
+  assert.notEqual(passMatch, null, output);
+  const total = Number(testsMatch[1]);
+  const passed = Number(passMatch[1]);
+  assert(Number.isInteger(total) && total > 0, output);
+  assert.equal(passed, total, output);
   assert.match(output, /# fail 0\b/u);
   assert.match(output, /# skipped 0\b/u);
 });

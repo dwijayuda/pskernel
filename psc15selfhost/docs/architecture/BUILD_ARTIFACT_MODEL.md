@@ -1,0 +1,472 @@
+# ProofScript build and artifact model
+
+**Status:** forward build-system and artifact-identity design. It extends the current deterministic self-host/cache work without changing PSC semantics.
+
+## 1. Design principle
+
+Separate two layers:
+
+```text
+PURE / SEMANTIC
+--------------------------------
+parse
+resolve
+elaborate
+kernel admission
+erasure
+IR validation
+semantic lowering
+target lowering
+
+same explicit inputs -> same canonical outputs
+
+
+HOST / BUILD
+--------------------------------
+filesystem
+package resolution
+incremental query graph
+content-addressed store
+remote cache
+parallel scheduler
+toolchain processes
+network registry
+signing/publishing
+LSP worker
+```
+
+The host may become sophisticated and highly optimized without becoming semantic authority.
+
+## 2. Canonical artifact classes
+
+Production compilation should materialize explicit artifact classes.
+
+| Artifact | Purpose |
+| --- | --- |
+| SourceArtifact | canonical source/module identity |
+| CandidateCoreArtifact | elaborated kernel-facing semantics |
+| CheckedCoreArtifact | kernel-admitted semantic artifact |
+| ErasedIrArtifact | executable construction/runtime IR |
+| VerifiedIrArtifact | validated target-neutral executable IR |
+| ModuleInterfaceArtifact | exported semantic interface |
+| InterfaceIrArtifact | foreign/API interface contract |
+| JsIrArtifact | restricted JS target program |
+| WasmIrArtifact | Wasm target program |
+| ExecutableArtifact | emitted JS/Wasm/native-adapter output |
+| EvidenceManifest | provenance and assurance binding |
+
+Each class has an explicit schema/contract version.
+
+## 3. Domain-separated identities
+
+Do not use a naked digest as an untyped identity.
+
+Conceptually:
+
+```text
+ArtifactId =
+  SHA256(
+    "proofscript:" +
+    artifactKind + ":" +
+    schemaVersion + "\0" +
+    canonicalBytes
+  )
+```
+
+Examples:
+
+```text
+proofscript:checked-core:v1
+proofscript:verified-ir:v1
+proofscript:module-interface:v1
+proofscript:js-ir:v1
+proofscript:wasm-ir:v1
+proofscript:build-action:v1
+```
+
+Hash algorithms may evolve only through explicit artifact/profile versioning.
+
+## 4. Canonical serialization
+
+Persistent semantic identities require canonical bytes.
+
+Requirements:
+
+- exactly one canonical field/order representation;
+- schema version in the domain/encoding;
+- bounded decoder;
+- deterministic number/string encoding;
+- stable name/path normalization;
+- no host pointer/object identity;
+- no locale/timezone/current-directory dependence;
+- no map iteration-order dependence;
+- explicit rejection of duplicate or non-canonical encodings where relevant.
+
+JSON may remain a human/debug form. A compact canonical binary representation can be introduced later for performance.
+
+Resident generated-compiler objects remain in-memory only; do not persist runtime symbol-tag object graphs as semantic artifacts.
+
+## 5. Incremental query graph
+
+Generalize the current resident red/green self-host cache into a reusable build engine.
+
+Conceptual nodes:
+
+```text
+SourceBytes
+   |
+   v
+Parse
+   |
+   v
+Resolve
+   |
+   v
+Elaborate
+   |
+   v
+CandidateCore
+   |
+   v
+KernelCheck
+   |
+   v
+CheckedCore
+   |
+   v
+Erase
+   |
+   v
+ValidateRuntimeIr
+   |
+   v
+VerifiedIR
+   |
+   +--> Specialize --> JsIR --> JS
+   |
+   +--> Specialize --> WasmIR --> Wasm
+```
+
+Each query records:
+
+```text
+QueryKey
+input artifact IDs
+dependency query IDs
+semantic options/profile
+result artifact ID
+result semantic fingerprint
+timing/resource metrics
+```
+
+If a changed input recomputes to the same semantic artifact/fingerprint, downstream nodes stay green.
+
+## 6. Content-addressed store
+
+Use a local CAS first; remote cache later.
+
+Concept:
+
+```text
+CAS/
+  objects/<algorithm>/<digest>
+  metadata/<artifact-id>
+```
+
+Rules:
+
+- immutable objects;
+- verify content digest when reading untrusted storage;
+- atomic writes;
+- duplicate-safe;
+- corruption = cache miss/recompute, never semantic fallback;
+- garbage collection is separate from correctness.
+
+The action cache maps a deterministic action identity to output artifact IDs. The CAS stores bytes.
+
+## 7. Build actions
+
+A build action must include every input that can affect its output.
+
+Conceptual model:
+
+```text
+BuildAction {
+  actionKind
+  compilerIdentity
+  languageEdition
+  semanticContractVersions
+  inputArtifactIds
+  dependencyInterfaceIds
+  options
+  targetProfile
+  runtimeAbi
+  toolchainIdentity
+  capabilityWorld
+  declaredEnvironment
+}
+```
+
+```text
+ActionId = H(canonical BuildAction)
+```
+
+Ambient host state is not an implicit input in hermetic mode.
+
+## 8. Hermetic versus developer modes
+
+### Developer mode
+
+May discover convenient local tools:
+
+- PATH;
+- node_modules;
+- local editor/runtime configuration.
+
+It must report discovered identities and must not claim release reproducibility.
+
+### Hermetic mode
+
+```text
+psc build --locked --hermetic
+```
+
+Requirements:
+
+- pinned toolchain manifest;
+- locked dependencies;
+- declared environment only;
+- canonical locale/timezone where host tools need them;
+- stable paths or path remapping;
+- no undeclared network;
+- no undeclared process/tool;
+- deterministic input ordering.
+
+### Offline release verification
+
+```text
+psc build --locked --hermetic --offline
+```
+
+should be a supported release/verification workflow.
+
+## 9. Toolchain manifest
+
+External tools remain explicit inputs.
+
+Concept:
+
+```text
+ToolchainManifest {
+  lean: {
+    version/commit
+    artifactHash
+  }
+  node: {
+    version
+    artifactHash/platform
+  }
+  typescript?: {
+    version
+    launcherHash
+    compilerHash
+  }
+  rust?: {
+    version
+    target
+    rustcHash
+  }
+  wasmValidator?: {
+    version
+    artifactHash
+  }
+}
+```
+
+Current PATH/tool discovery is acceptable bootstrap/dev behavior, not the final release contract.
+
+## 10. Module interfaces and separate compilation
+
+Every checked module should eventually produce two identities:
+
+```text
+implementationHash
+interfaceHash
+```
+
+A `ModuleInterface` includes downstream-relevant semantics:
+
+- exported names and types;
+- public inductive/structure layout contract where observable;
+- instances that affect downstream synthesis;
+- relevant theorem/declaration identities;
+- required capabilities;
+- runtime ABI requirements;
+- imported interface identities.
+
+If implementation changes but interface identity stays stable, downstream elaboration need not invalidate.
+
+## 11. Project graph
+
+The current list-based portable graph is a good bootstrap implementation.
+
+Production build planning should add host-side indexes:
+
+```text
+moduleByName
+importsByModule
+reverseDependencies
+inDegree
+deterministicReadyQueue
+```
+
+The planner should be approximately `O(V + E)` and support parallel execution, while maintaining a canonical ready-order tie break so scheduling does not affect semantic/build identities.
+
+## 12. Semantic lockfile
+
+`psc.lock` should pin more than versions.
+
+Per dependency:
+
+```text
+packageId
+version
+source
+sourceHash
+semanticManifestHash
+moduleInterfaceHash
+language/profile requirements
+Core/kernel/IR contract requirements
+capability requirements
+toolchain requirement when relevant
+```
+
+Rules:
+
+- locked build never upgrades silently;
+- source digest mismatch rejects;
+- semantic-manifest mismatch rejects;
+- incompatible contract versions reject;
+- offline locked builds do not contact the registry.
+
+## 13. Semantic package manifest
+
+Package metadata should record:
+
+```text
+package ID/version
+language edition/profile
+Core contract
+kernel contract
+CheckedCore contract
+VerifiedIR contract
+InterfaceIR/plugin contracts if used
+supported targets
+required capabilities
+exported module interface identities
+runtime ABI requirements
+proof/evidence references
+```
+
+Use one authoritative schema. `package.json` may embed a `proofscript` reference, but semantic identity should not depend on arbitrary npm metadata ordering.
+
+## 14. Release evidence
+
+A release/build evidence manifest should bind the actual pipeline:
+
+```text
+sourceHash
+dependencyLockHash
+compilerSourceHash
+compilerExecutableHash
+candidateCoreHash
+checkedCoreHash
+verifiedIrHash
+backendIdentity
+targetIrHash
+outputHash
+kernelIdentity
+runtimeSemanticVersion
+toolchainManifestHash
+validator/proof identities
+external assumptions
+```
+
+This is not itself a semantic theorem. It binds actual artifacts to the theorem/validator identities and assumptions used.
+
+## 15. Provenance and signing
+
+Recommended outer wrappers:
+
+- in-toto/SLSA-style provenance for source/build statements;
+- SBOM for dependencies/toolchain components;
+- public signature/transparency system for releases;
+- role-separated registry/update metadata for compromise recovery.
+
+Keep PSC's semantic evidence manifest small and domain-specific; use standard supply-chain envelopes for the outer ecosystem.
+
+## 16. Remote cache security
+
+A remote cache is untrusted storage.
+
+For every hit:
+
+1. identify expected `ActionId`;
+2. receive output artifact IDs;
+3. fetch CAS objects;
+4. recompute content digest;
+5. reject mismatch;
+6. validate schema where applicable;
+7. use only verified bytes.
+
+Never treat “remote cache says this hash is X” as sufficient evidence.
+
+## 17. Build reproducibility classes
+
+Distinguish:
+
+### Semantic reproducibility
+
+Same explicit semantic input -> same canonical Core/IR/target IR.
+
+### Artifact reproducibility
+
+Same frozen host/toolchain inputs -> identical emitted artifact according to target policy.
+
+### Self-host fixed point
+
+Generation N and N+1 reproduce the canonical compiler artifact.
+
+### Diverse bootstrap evidence
+
+An independent trusted route provides provenance evidence against trusting-trust attacks.
+
+Do not collapse these into one “reproducible” Boolean.
+
+## 18. Performance metrics
+
+Track per-query/action:
+
+```text
+wall time
+CPU time where available
+peak memory
+input bytes
+output bytes
+cache state: cold/miss/hit/green
+dependency count
+artifact IDs
+```
+
+Performance regressions become observable without changing semantic code.
+
+## 19. Anti-drift rules
+
+1. Cache keys include all semantic/tool inputs.
+2. mtime is never semantic identity.
+3. corrupted caches recompute; they never fall back semantically.
+4. scheduling order cannot affect canonical outputs.
+5. production release builds have no ambient undeclared tool discovery.
+6. module interface identity, not implementation timestamp, drives downstream invalidation.
+7. persistent artifact formats are canonical and versioned.
+8. resident runtime-object caches are optimization only and remain disposable.

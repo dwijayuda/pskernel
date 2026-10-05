@@ -691,3 +691,8 @@ def psTsEmitModule
               let header : List String := ["// generated from pskernel-admitted ProofScript checked core", psTsRuntimeSupport];
               let lines := psTsFlattenLines [header, psListMap psTsEmitImport module.imports, psTsFlattenLines structures, psTsFlattenLines inductives, declarations];
               Except.ok (psTsJoin "" [psTsJoin "\n" lines, "\n"])
+
+def psTsEmitValidatedModule
+    (module : PsValidatedIrModule) :
+    Except PsTsEmitError String :=
+  psTsEmitModule module.raw

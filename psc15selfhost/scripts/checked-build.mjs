@@ -4,15 +4,16 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readCheckedSourceSnapshot } from './checked-source-snapshot.mjs';
-import { createCheckedPreparedSession } from './checked-prepared-session.mjs';
+import { createKernelCheckedSession } from './kernel-checked-session.mjs';
 import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
+import { kernelContractV1 } from './kernel-contract.mjs';
 import {
   checkAdmissionsWithKernel,
   checkedKernelDescriptor,
   defaultCheckedKernel,
 } from './checked-kernel-provider.mjs';
 import { runCheckedSeedSession } from './checked-seed-session.mjs';
-import { resolveTypeScriptCli } from './typescript-cli.mjs';
+import { pinnedTypeScriptVersionText, resolveTypeScriptCli } from './typescript-cli.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = data => createHash('sha256').update(data).digest('hex');
@@ -65,7 +66,7 @@ export async function buildChecked({
       ? compiler.PsCompilerSourceKind?.proofScript
       : compiler.PsCompilerSourceKind?.lean;
     if (kind === undefined) throw new Error('PSC2_CHECKED_SOURCE_KIND_API_MISSING');
-    const session = createCheckedPreparedSession(compiler, async text => {
+    const session = createKernelCheckedSession(compiler, async text => {
       admissions = text;
       return checkAdmissions(text);
     }, checkedKernelIdentity(kernel));
@@ -74,8 +75,9 @@ export async function buildChecked({
   }
 
   const receipt = {
-    schemaVersion: 3,
+    schemaVersion: 4,
     kind: 'psc2-checked-build',
+    kernelContract: kernelContractV1,
     provider: checkedKernelIdentity(kernel),
     kernel: kernelDescriptor,
     compiler: compilerIdentity,
@@ -94,15 +96,15 @@ export async function buildChecked({
   // a failed tsc cannot create a new final output or checked receipt.
   const tsc = resolveTypeScriptCli();
   const version = spawnSync(process.execPath, [tsc, '--version'], { encoding: 'utf8', timeout: 10000 });
-  if (version.error || version.status !== 0 || version.stdout.trim() !== 'Version 5.8.3') {
-    throw new Error('PSC2_CHECKED_TYPESCRIPT_PIN: require TypeScript 5.8.3');
+  if (version.error || version.status !== 0 || version.stdout.trim() !== pinnedTypeScriptVersionText) {
+    throw new Error('PSC2_CHECKED_TYPESCRIPT_PIN: require TypeScript 7.0.2');
   }
   await mkdir(path.dirname(output), { recursive: true });
   const staging = await mkdtemp(path.join(path.dirname(output), '.checked-stage-'));
   try {
     const tsFile = path.join(staging, stem + '.ts');
     await writeFile(tsFile, typeScript);
-    const run = spawnSync(process.execPath, [tsc, tsFile, '--target', 'ES2022', '--module', 'ES2022',
+    const run = spawnSync(process.execPath, [tsc, tsFile, '--ignoreConfig', '--target', 'ES2022', '--module', 'ES2022',
       '--moduleResolution', 'bundler', '--strict', '--declaration', '--sourceMap',
       '--noEmitOnError', '--skipLibCheck', '--pretty', 'false'], {
       encoding: 'utf8', timeout: 120000, maxBuffer: 16 * 1024 * 1024, windowsHide: true,
@@ -138,7 +140,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     } else throw new Error(`Unknown checked-build option: ${flag}`);
   }
   if (!entryPath) {
-    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434-wasm|pskernel-core.old3|lean434]');
+    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434|lean434-wasm|pskernel-core.old3]');
   }
   const receipt = await buildChecked(options);
   console.log('PSC2_CHECKED_BUILD: PASS ' + JSON.stringify(receipt));

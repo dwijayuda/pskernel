@@ -2,12 +2,17 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkedKernelIdentity, ownedCheckedIdentity } from './checked-kernel-identity.mjs';
+import {
+  assertCanonicalAdmissionsEnvelope,
+  assertKernelContractDecision,
+  kernelContractV1,
+} from './kernel-contract.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const nativeSuffix = process.platform === 'win32' ? '.exe' : '';
 
 export const defaultCheckedKernel = 'lean434-wasm';
-export const checkedKernelSelectors = Object.freeze(['lean434-wasm', 'pskernel-core.old3', 'lean434']);
+export const checkedKernelSelectors = Object.freeze(['lean434-wasm', 'lean434', 'pskernel-core.old3']);
 
 const descriptors = Object.freeze({
   'pskernel-core.old3': Object.freeze({
@@ -15,6 +20,8 @@ const descriptors = Object.freeze({
     execution: 'psc-generated-js', version: ownedCheckedIdentity.version,
     generatedKernelSha256: ownedCheckedIdentity.generatedKernelSha256,
     sourceManifestSha256: ownedCheckedIdentity.sourceManifestSha256,
+    kernelContract: kernelContractV1.id,
+    kernelContractSha256: kernelContractV1.sha256,
   }),
   'lean434-wasm': Object.freeze({
     selector: 'lean434-wasm',
@@ -22,13 +29,17 @@ const descriptors = Object.freeze({
     execution: 'wasm-node',
     sourceCommit: '1b21b2483df7e8de7542873c24eaff2501539b1b',
     verificationRun: 37014379617,
+    kernelContract: kernelContractV1.id,
+    kernelContractSha256: kernelContractV1.sha256,
   }),
   lean434: Object.freeze({
     selector: 'lean434',
     package: '@proofscript/pskernel-lean',
     execution: 'native',
-    sourceCommit: '88b18bbcec82bad02cb3db8ee5b5b96cae91ae86',
-    verificationRun: 36522373312,
+    sourceCommit: '1b21b2483df7e8de7542873c24eaff2501539b1b',
+    verificationCommit: '3c49f7d8a9812175e143c6db15cc3e0e496d23e2',
+    kernelContract: kernelContractV1.id,
+    kernelContractSha256: kernelContractV1.sha256,
   }),
 });
 
@@ -39,13 +50,11 @@ export function checkedKernelDescriptor(selector = defaultCheckedKernel) {
 }
 
 function assertSemanticIdentity(result, selector) {
+  assertKernelContractDecision(result);
   for (const [field, expected] of Object.entries(checkedKernelIdentity(selector))) {
     if (result?.[field] !== expected) {
       throw new Error(`PSC2_CHECKED_PROVIDER_IDENTITY: ${field}`);
     }
-  }
-  if (typeof result?.accepted !== 'boolean') {
-    throw new Error('PSC2_CHECKED_PROVIDER_RESULT');
   }
 }
 
@@ -55,6 +64,7 @@ export async function checkAdmissionsWithKernel(
   options = {},
 ) {
   if (typeof admissions !== 'string') throw new TypeError('Expected canonical admissions text');
+  assertCanonicalAdmissionsEnvelope(admissions);
   const descriptor = checkedKernelDescriptor(selector);
   const timeoutMs = options.timeoutMs ?? 60000;
   let result;
@@ -78,14 +88,22 @@ export async function checkAdmissionsWithKernel(
       root,
       'lean-checked/.lake/build/bin/psc2_lean_kernel_provider' + nativeSuffix,
     );
-    const binaryPath = options.nativeBinaryPath ?? (
-      !process.env.PSC_LEAN_KERNEL_PROVIDER_BIN && existsSync(developmentBinary)
-        ? developmentBinary
-        : undefined
+    const slimSourceBinary = path.join(
+      root,
+      'packages/pskernel-lean/.lake/build/bin/psc2_lean_kernel_provider' + nativeSuffix,
     );
+    const binaryPath = options.nativeBinaryPath ??
+      process.env.PSC_LEAN_KERNEL_PROVIDER_BIN ??
+      (existsSync(developmentBinary) ? developmentBinary : undefined) ??
+      (existsSync(slimSourceBinary) ? slimSourceBinary : undefined);
+    if (!binaryPath) {
+      throw new Error(
+        'PSC2_CHECKED_NATIVE_PROVIDER_MISSING: build the current native provider or set PSC_LEAN_KERNEL_PROVIDER_BIN; stale package prebuilts are not used by the default checked profile',
+      );
+    }
     result = provider.checkCanonicalAdmissions(admissions, {
       timeoutMs,
-      ...(binaryPath ? { binaryPath } : {}),
+      binaryPath,
     });
   }
 

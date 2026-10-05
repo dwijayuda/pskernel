@@ -4,6 +4,33 @@ on:
   push:
     branches:
       - psc2/psc1kernel-selfhost-portable
+      - psc2/selfhost-lean-kernel
+    paths:
+      - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/packages/pskernel-core.old3/package.json
+      - psc15selfhost/scripts/psc1kernel-package-layout.test.mjs
+      - psc15selfhost/scripts/workspace-layout.mjs
+      - psc15selfhost/scripts/checked-kernel-provider.mjs
+      - psc15selfhost/packages/pskernel/PSC1Kernel/**
+      - psc15selfhost/scripts/psc1-source-profile.mjs
+      - psc15selfhost/scripts/psc1kernel-reference-inventory.mjs
+      - psc15selfhost/scripts/psc1kernel-port-batch-check.mjs
+      - psc15selfhost/scripts/psc1kernel-port-translate-check.mjs
+      - psc15selfhost/scripts/psc1kernel-port-pattern-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-compatibility-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-conformance-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-architecture-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-architecture-audit.test.mjs
+      - psc15selfhost/scripts/psc1kernel-generate-rule-reference.mjs
+      - psc15selfhost/check-psc1-source.mjs
+      - psc15selfhost/lakefile.lean
+      - psc15selfhost/test/PsKernelCoreFoundationTests.lean
+      - psc15selfhost/test/KernelCore/**
+      - psc15selfhost/test/PsKernelCoreBench.lean
+      - .github/workflows/psc1kernel-core-portable.yml
+  pull_request:
+    branches:
+      - psc2/selfhost-lean-kernel
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/packages/pskernel-core.old3/package.json

@@ -59,6 +59,9 @@ if (!inputManifest.entry) {
 
 const outputWorkspace = path.join(outputGeneration, "workspace");
 const outputLean = path.join(outputGeneration, "lean");
+const emitLeanReplay =
+  process.argv.includes("--emit-lean") ||
+  process.env.PSC_SELFHOST_EMIT_LEAN === "1";
 const outputCompiler = path.join(
   outputGeneration,
   "packages",
@@ -74,15 +77,17 @@ run([
 ]);
 
 const outputEntry = path.join(outputWorkspace, inputManifest.entry);
-run([
-  "scripts/emit-project-with-generated.mjs",
-  compilerPath,
-  outputEntry,
-  "--to",
-  "lean",
-  "--out",
-  outputLean,
-]);
+if (emitLeanReplay) {
+  run([
+    "scripts/emit-project-with-generated.mjs",
+    compilerPath,
+    outputEntry,
+    "--to",
+    "lean",
+    "--out",
+    outputLean,
+  ]);
+}
 
 run([
   "scripts/compile-with-generated.mjs",
@@ -96,7 +101,9 @@ const generationManifest = {
   parentCompiler: path.relative(selfhostRoot, compilerPath).replaceAll(path.sep, "/"),
   parentWorkspace: path.relative(selfhostRoot, inputWorkspace).replaceAll(path.sep, "/"),
   workspace: path.relative(selfhostRoot, outputWorkspace).replaceAll(path.sep, "/"),
-  leanWorkspace: path.relative(selfhostRoot, outputLean).replaceAll(path.sep, "/"),
+  ...(emitLeanReplay
+    ? { leanWorkspace: path.relative(selfhostRoot, outputLean).replaceAll(path.sep, "/") }
+    : {}),
   compiler: path.relative(selfhostRoot, outputCompiler).replaceAll(path.sep, "/"),
   entry: inputManifest.entry,
 };
@@ -111,7 +118,9 @@ process.stdout.write(
   [
     `PSC1_SELFHOST_GENERATION: ${path.relative(selfhostRoot, outputGeneration)}`,
     `PSC1_SELFHOST_GENERATION_PS: ${generationManifest.workspace}`,
-    `PSC1_SELFHOST_GENERATION_LEAN: ${generationManifest.leanWorkspace}`,
+    ...(emitLeanReplay
+      ? [`PSC1_SELFHOST_GENERATION_LEAN: ${generationManifest.leanWorkspace}`]
+      : ["PSC1_SELFHOST_GENERATION_LEAN: SKIP (fast path)"]),
     `PSC1_SELFHOST_GENERATION_COMPILER: ${generationManifest.compiler}`,
   ].join("\n") + "\n",
 );

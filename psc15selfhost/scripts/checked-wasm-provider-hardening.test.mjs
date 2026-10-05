@@ -4,7 +4,7 @@ import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { checkCanonicalAdmissions } from '../packages/pskernel-lean-wasm/index.mjs';
-import { leanCheckedIdentity } from './checked-prepared-session.mjs';
+import { leanCheckedIdentity } from './kernel-checked-session.mjs';
 
 async function withLauncher(source, fn) {
   const dir = await mkdtemp(path.join(tmpdir(), 'psc2-wasm-provider-double-'));

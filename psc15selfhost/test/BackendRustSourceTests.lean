@@ -1,4 +1,4 @@
-import Ps.BackendRust.Compiler
+import Ps.DriverRust.Compiler
 
 def psBackendRustScalarLeanSource : String :=
   "def idUInt8 (x : UInt8) : UInt8 := x\n" ++
@@ -15,18 +15,18 @@ def psBackendRustScalarLeanSource : String :=
   "def idFloat32 (x : Float32) : Float32 := x"
 
 def psBackendRustScalarProofScriptSource : String :=
-  "def idUInt8(x : UInt8) : UInt8 := x; " ++
-  "def idUInt16(x : UInt16) : UInt16 := x; " ++
-  "def idUInt32(x : UInt32) : UInt32 := x; " ++
-  "def idUInt64(x : UInt64) : UInt64 := x; " ++
-  "def idUSize(x : USize) : USize := x; " ++
-  "def idInt8(x : Int8) : Int8 := x; " ++
-  "def idInt16(x : Int16) : Int16 := x; " ++
-  "def idInt32(x : Int32) : Int32 := x; " ++
-  "def idInt64(x : Int64) : Int64 := x; " ++
-  "def idISize(x : ISize) : ISize := x; " ++
-  "def idFloat(x : Float) : Float := x; " ++
-  "def idFloat32(x : Float32) : Float32 := x;"
+  "function idUInt8(x : UInt8): UInt8 := { x }\n" ++
+  "function idUInt16(x : UInt16): UInt16 := { x }\n" ++
+  "function idUInt32(x : UInt32): UInt32 := { x }\n" ++
+  "function idUInt64(x : UInt64): UInt64 := { x }\n" ++
+  "function idUSize(x : USize): USize := { x }\n" ++
+  "function idInt8(x : Int8): Int8 := { x }\n" ++
+  "function idInt16(x : Int16): Int16 := { x }\n" ++
+  "function idInt32(x : Int32): Int32 := { x }\n" ++
+  "function idInt64(x : Int64): Int64 := { x }\n" ++
+  "function idISize(x : ISize): ISize := { x }\n" ++
+  "function idFloat(x : Float): Float := { x }\n" ++
+  "function idFloat32(x : Float32): Float32 := { x }"
 
 def psBackendRustScalarOutputOk (output : String) : Bool :=
   output.contains "pub fn idUInt8(x: u8) -> u8 { x }"

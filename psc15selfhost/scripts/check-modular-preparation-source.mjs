@@ -3,8 +3,16 @@ import { readFile } from 'node:fs/promises';
 const cases = [
   ['scripts/compile-with-generated.mjs', [
     'sources: chunks,',
-    'compiler.List.cons(head, tail), compiler.List.nil()',
-    'compiler.psCompilerPrepareSources(project.sourceKind, sources)',
+    'let environment = compiler.psSelfHostProdPreludeEnvironment;',
+    'let declarationsRev = compiler.List.nil();',
+    'for (let index = 0; index < sourceChunks.length; index += 1)',
+    'compiler.psCompilerParseSource(sourceKindValue, source)',
+    'compiler.psElabModule(environment, parsed)',
+    'environment = elaborated.environment;',
+    'declarationsRev = compiler.psListAppend(',
+    'compiler.psListReverse(elaborated.declarations),',
+    'compiler.psCompilerElaborateSourcesWorker(',
+    'compiler.psCompilerPrepareElaborated(elaborated)',
     'compiler.psCompilerTypeScriptFromPrepared(prepared)',
   ]],
   ['packages/compiler/src/Ps/Compiler/Api.lean', [
@@ -44,11 +52,23 @@ for (const [file, markers] of cases) {
   validate(source);
   for (const marker of markers) assert.throws(() => validate(source.replaceAll(marker, 'removed')));
 }
+const generatedSelfhost = await readFile(
+  new URL('../scripts/compile-with-generated.mjs', import.meta.url),
+  'utf8',
+);
+assert(
+  !generatedSelfhost.includes('psCompilerPrepareSources'),
+  'generated-JS selfhost must reject missing incremental APIs instead of falling back to aggregate preparation',
+);
+assert(
+  !generatedSelfhost.includes('aggregate'),
+  'generated-JS selfhost must not contain an implicit aggregate preparation mode',
+);
 const api = await readFile(new URL('../packages/compiler/src/Ps/Compiler/Api.lean', import.meta.url), 'utf8');
 const prepared = api.slice(api.indexOf('structure PsCompilerAdmissionReadyModule'), api.indexOf('def psCompilerTranslateSource'));
 assert.deepEqual([...prepared.matchAll(/^  (\w+) :/gm)].map(item => item[1]), ['declarations']);
 assert(!api.includes('prepared.canonicalAdmissions'), 'admissions must come from the declarations, never a cached serialization');
-const session = await readFile(new URL('./checked-prepared-session.mjs', import.meta.url), 'utf8');
+const session = await readFile(new URL('./kernel-checked-session.mjs', import.meta.url), 'utf8');
 assert(session.indexOf('freezeGraph(prepared);') < session.indexOf('const admissions = admissionsFrom(compiler, prepared);'));
 assert(session.includes('admissionsFrom(compiler, item.prepared) !== item.admissions'));
 assert(session.includes('compiler.psCompilerTypeScriptFromPrepared(item.prepared)'));

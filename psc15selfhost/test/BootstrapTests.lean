@@ -584,7 +584,7 @@ def psTestDualSourceBinderApplicationParse : Bool :=
       psParseLeanSource
         "def id (x : Nat) : Nat := x\ndef one : Nat := id 1",
       psParseProofScriptSource
-        "def id(x : Nat) : Nat := x; def one : Nat := id(1);" with
+        "function id(x : Nat): Nat := { x }\nconst one: Nat := { id(1) }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       psTestParsedBinderApplicationShape leanModule
         && psTestParsedBinderApplicationShape proofScriptModule
@@ -616,16 +616,16 @@ def psTestParsedBinderKinds (module : PsSyntaxModule) : Bool :=
   | [
       PsSyntaxDeclaration.definition
         name
-        [explicitBinder, implicitBinder, strictBinder, instanceBinder]
+        [implicitBinder, strictBinder, instanceBinder, explicitBinder]
         (PsSyntaxTerm.reference resultType)
         (PsSyntaxTerm.reference valueName)
         _
     ] =>
       psTestSyntaxNameSingle name "binders"
-        && psTestBinderEntry explicitBinder "x" PsSyntaxBinderKind.explicit
         && psTestBinderEntry implicitBinder "y" PsSyntaxBinderKind.implicit
         && psTestBinderEntry strictBinder "z" PsSyntaxBinderKind.strictImplicit
         && psTestBinderEntry instanceBinder "w" PsSyntaxBinderKind.instanceImplicit
+        && psTestBinderEntry explicitBinder "x" PsSyntaxBinderKind.explicit
         && psTestSyntaxNameSingle resultType "Nat"
         && psTestSyntaxNameSingle valueName "x"
   | _ => false
@@ -633,9 +633,9 @@ def psTestParsedBinderKinds (module : PsSyntaxModule) : Bool :=
 def psTestDualSourceBinderKindsParse : Bool :=
   match
       psParseLeanSource
-        "def binders (x : Nat) {y : Nat} {{z : Nat}} [w : Nat] : Nat := x",
+        "def binders {y : Nat} {{z : Nat}} [w : Nat] (x : Nat) : Nat := x",
       psParseProofScriptSource
-        "def binders(x : Nat){y : Nat}{{z : Nat}}[w : Nat] : Nat := x;" with
+        "function binders{y : Nat}{{z : Nat}}[w : Nat](x : Nat): Nat := { x }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       psTestParsedBinderKinds leanModule
         && psTestParsedBinderKinds proofScriptModule
@@ -754,7 +754,7 @@ def psTestDualSourcePiLambdaDeclaration : Bool :=
       psParseLeanSource
         "def id : Nat -> Nat := fun (x : Nat) => x",
       psParseProofScriptSource
-        "def id : Nat -> Nat := fun (x : Nat) => x;" with
+        "const id: Nat -> Nat := { fun (x : Nat) => x }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -765,8 +765,8 @@ def psTestDualSourcePiLambdaDeclaration : Bool :=
       | _, _ => false
   | _, _ => false
 
-def psTestProofScriptEmptyCallUsesUnit : Bool :=
-  match psParseProofScriptSource "def u : Unit := f();" with
+def psTestProofScriptEmptyCallStaysEmpty : Bool :=
+  match psParseProofScriptSource "const u: Unit := { f() }" with
   | Except.error _ => false
   | Except.ok module =>
       match module.declarations with
@@ -777,17 +777,23 @@ def psTestProofScriptEmptyCallUsesUnit : Bool :=
             _
             (PsSyntaxTerm.app
               (PsSyntaxTerm.reference fnName)
-              [PsSyntaxTerm.unit _]
+              []
               _)
             _
         ] =>
           psTestSyntaxNameSingle fnName "f"
       | _ => false
 
-def psTestProofScriptRejectSpacedCall : Bool :=
-  match psParseProofScriptSource "def u : Nat := f (1);" with
-  | Except.error _ => true
-  | Except.ok _ => false
+def psTestProofScriptCallGap : Bool :=
+  let sameLine :=
+    match psParseProofScriptSource "const u: Nat := { f (1) }" with
+    | Except.error _ => false
+    | Except.ok _ => true
+  let newline :=
+    match psParseProofScriptSource "const u: Nat := { f\n(1) }" with
+    | Except.error _ => true
+    | Except.ok _ => false
+  sameLine && newline
 
 def psTestInductiveInfoEq
     (left : PsInductiveInfo)
@@ -912,7 +918,7 @@ def psTestDualSourceCoreElaboration : Bool :=
       psParseLeanSource
         "def id (x : Nat) : Nat := x\ndef one : Nat := id 1",
       psParseProofScriptSource
-        "def id(x : Nat) : Nat := x; def one : Nat := id(1);" with
+        "function id(x : Nat): Nat := { x }\nconst one: Nat := { id(1) }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -936,40 +942,40 @@ def psTestElaboratedBinderKindsShape
   let wName := psTestName "w"
   let expectedType :=
     PsExpr.forallE
-      xName
+      yName
       natType
       (PsExpr.forallE
-        yName
+        zName
         natType
         (PsExpr.forallE
-          zName
+          wName
           natType
           (PsExpr.forallE
-            wName
+            xName
             natType
             natType
-            PsBinderInfo.instanceImplicit)
-          PsBinderInfo.strictImplicit)
-        PsBinderInfo.implicit)
-      PsBinderInfo.explicit
+            PsBinderInfo.explicit)
+          PsBinderInfo.instanceImplicit)
+        PsBinderInfo.strictImplicit)
+      PsBinderInfo.implicit
   let expectedValue :=
     PsExpr.lam
-      xName
+      yName
       natType
       (PsExpr.lam
-        yName
+        zName
         natType
         (PsExpr.lam
-          zName
+          wName
           natType
           (PsExpr.lam
-            wName
+            xName
             natType
-            (PsExpr.bvar 3)
-            PsBinderInfo.instanceImplicit)
-          PsBinderInfo.strictImplicit)
-        PsBinderInfo.implicit)
-      PsBinderInfo.explicit
+            (PsExpr.bvar 0)
+            PsBinderInfo.explicit)
+          PsBinderInfo.instanceImplicit)
+        PsBinderInfo.strictImplicit)
+      PsBinderInfo.implicit
   match result.declarations with
   | [PsDeclaration.definitionDecl actualName [] actualType actualValue] =>
       psNameEq actualName name
@@ -980,9 +986,9 @@ def psTestElaboratedBinderKindsShape
 def psTestDualSourceBinderKindsElaboration : Bool :=
   match
       psParseLeanSource
-        "def binders (x : Nat) {y : Nat} {{z : Nat}} [w : Nat] : Nat := x",
+        "def binders {y : Nat} {{z : Nat}} [w : Nat] (x : Nat) : Nat := x",
       psParseProofScriptSource
-        "def binders(x : Nat){y : Nat}{{z : Nat}}[w : Nat] : Nat := x;" with
+        "function binders{y : Nat}{{z : Nat}}[w : Nat](x : Nat): Nat := { x }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -1063,7 +1069,7 @@ def psTestDualSourceAnnotatedLet : Bool :=
       psParseLeanSource
         "def one : Nat := let x : Nat := 1; x",
       psParseProofScriptSource
-        "def one : Nat := let x : Nat := 1; x;" with
+        "const one: Nat := { let x : Nat := 1; x }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -1082,7 +1088,7 @@ def psTestDualSourceInferredLet : Bool :=
       psParseLeanSource
         "def one : Nat := let x := 1; x",
       psParseProofScriptSource
-        "def one : Nat := let x := 1; x;" with
+        "const one: Nat := { let x := 1; x }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -1114,7 +1120,7 @@ def psTestDualSourceBoolLiteral : Bool :=
       psParseLeanSource
         "def yes : Bool := true",
       psParseProofScriptSource
-        "def yes : Bool := true;" with
+        "const yes: Bool := { true }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestConditionalEnvironment leanModule,
@@ -1167,7 +1173,7 @@ def psTestDualSourceIf : Bool :=
       psParseLeanSource
         "def pick : Nat := if true then 1 else 2",
       psParseProofScriptSource
-        "def pick : Nat := if (true) { 1 } else { 2 };" with
+        "const pick: Nat := { if (true) { 1 } else { 2 } }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestConditionalEnvironment leanModule,
@@ -1199,7 +1205,7 @@ def psTestDualSourceStringLiteral : Bool :=
       psParseLeanSource
         "def message : String := \"A\\nB\\x41\\u03bb\"",
       psParseProofScriptSource
-        "def message : String := \"A\\nB\\x41\\u03bb\";" with
+        "const message: String := { \"A\\nB\\x41\\u03bb\" }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestStringEnvironment leanModule,
@@ -1225,7 +1231,7 @@ def psTestDualSourceGrouping : Bool :=
       psParseLeanSource
         "def one : Nat := (((1)))",
       psParseProofScriptSource
-        "def one : Nat := (((1)));" with
+        "const one: Nat := { (((1))) }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -1253,7 +1259,7 @@ def psTestDualSourceUnit : Bool :=
       psParseLeanSource
         "def u : Unit := ()",
       psParseProofScriptSource
-        "def u : Unit := ();" with
+        "const u: Unit := { () }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestUnitEnvironment leanModule,
@@ -1321,7 +1327,7 @@ def psTestDualSourceCharLiteral : Bool :=
       psParseLeanSource
         "def letter : Char := '\\u03bb'",
       psParseProofScriptSource
-        "def letter : Char := '\\u03bb';" with
+        "const letter: Char := { '\\u03bb' }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestCharEnvironment leanModule,
@@ -1420,7 +1426,7 @@ def psTestBasicMatchShape
 def psTestDualSourceBasicMatchParse : Bool :=
   match
       psLex "match true with | true => 1 | false => 2",
-      psLex "match true with { | true => 1; | false => 2 }" with
+      psLex "match true with { | true => 1 | false => 2 }" with
   | Except.ok leanTokens, Except.ok proofScriptTokens =>
       match
           psParseLeanTerm (psTokenCursorFromTokens leanTokens),
@@ -1684,7 +1690,7 @@ def psTestDualSourceBasicMatchElaboration : Bool :=
       psParseLeanSource
         "def pick : Nat := match Choice.left with | Choice.left => 1 | Choice.right => 2",
       psParseProofScriptSource
-        "def pick : Nat := match Choice.left with { | Choice.left => 1; | Choice.right => 2 };" with
+        "const pick: Nat := { match Choice.left with { | Choice.left => 1 | Choice.right => 2 } }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestChoiceEnvironment leanModule,
@@ -1839,7 +1845,7 @@ def psTestDualSourceFieldMatchElaboration : Bool :=
       psParseLeanSource
         "def unwrap (v : BoxNat) : Nat := match v with | BoxNat.mk x => x",
       psParseProofScriptSource
-        "def unwrap(v : BoxNat) : Nat := match v with { | BoxNat.mk x => x };" with
+        "function unwrap(v : BoxNat): Nat := { match v with { | BoxNat.mk x => x } }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestBoxNatEnvironment leanModule,
@@ -1903,7 +1909,7 @@ def psTestDualSourceInductiveEnumParse : Bool :=
       psParseLeanSource
         "inductive Choice where | left | right",
       psParseProofScriptSource
-        "inductive Choice where { | left; | right; };" with
+        "inductive Choice where { | left | right }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       psTestInductiveEnumShape leanModule
         && psTestInductiveEnumShape proofScriptModule
@@ -1937,7 +1943,7 @@ def psTestDualSourceInductiveFieldParse : Bool :=
       psParseLeanSource
         "inductive BoxNat where | mk (x : Nat)",
       psParseProofScriptSource
-        "inductive BoxNat where { | mk(x : Nat); };" with
+        "inductive BoxNat where { | mk(x : Nat) }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       psTestInductiveFieldShape leanModule
         && psTestInductiveFieldShape proofScriptModule
@@ -1999,7 +2005,7 @@ def psTestDualSourceInductiveEnumElaboration : Bool :=
       psParseLeanSource
         "inductive Choice where | left | right\ndef pick (v : Choice) : Nat := match v with | Choice.left => 1 | Choice.right => 2",
       psParseProofScriptSource
-        "inductive Choice where { | left; | right; }; def pick(v : Choice) : Nat := match v with { | Choice.left => 1; | Choice.right => 2 };" with
+        "inductive Choice where { | left | right }\nfunction pick(v : Choice): Nat := { match v with { | Choice.left => 1 | Choice.right => 2 } }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -2067,7 +2073,7 @@ def psTestDualSourceInductiveFieldElaboration : Bool :=
       psParseLeanSource
         "inductive BoxNat where | mk (x : Nat)\ndef unwrap (v : BoxNat) : Nat := match v with | BoxNat.mk x => x",
       psParseProofScriptSource
-        "inductive BoxNat where { | mk(x : Nat); }; def unwrap(v : BoxNat) : Nat := match v with { | BoxNat.mk x => x };" with
+        "inductive BoxNat where { | mk(x : Nat) }\nfunction unwrap(v : BoxNat): Nat := { match v with { | BoxNat.mk x => x } }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -2123,7 +2129,7 @@ def psTestDualSourceTypePropElaboration : Bool :=
       psParseLeanSource
         "def idType (α : Type) : Type := α\ndef P : Type := Prop",
       psParseProofScriptSource
-        "def idType(α : Type) : Type := α; def P : Type := Prop;" with
+        "function idType(α : Type): Type := { α }\nconst P: Type := { Prop }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -2196,7 +2202,7 @@ def psTestDualSourceParametricInductive : Bool :=
       psParseLeanSource
         "inductive Maybe (α : Type) where | none | some (value : α)\ndef getOrZero (v : Maybe Nat) : Nat := match v with | Maybe.none => 0 | Maybe.some x => x",
       psParseProofScriptSource
-        "inductive Maybe(α : Type) where { | none; | some(value : α); }; def getOrZero(v : Maybe(Nat)) : Nat := match v with { | Maybe.none => 0; | Maybe.some x => x };" with
+        "inductive Maybe(α : Type) where { | none | some(value : α) }\nfunction getOrZero(v : Maybe(Nat)): Nat := { match v with { | Maybe.none => 0 | Maybe.some x => x } }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -2265,7 +2271,7 @@ def psTestLeanImplicitConstructorElaborates : Bool :=
 
 def psTestProofScriptImplicitConstructorElaborates : Bool :=
   match psParseProofScriptSource
-      "inductive Maybe(α : Type) where { | none; | some(value : α); }; def present : Maybe(Nat) := Maybe.some(1); def absent : Maybe(Nat) := Maybe.none;" with
+      "inductive Maybe(α : Type) where { | none | some(value : α) }\nconst present: Maybe(Nat) := { Maybe.some(1) }\nconst absent: Maybe(Nat) := { Maybe.none }" with
   | Except.error _ => false
   | Except.ok module =>
       match psElabModule psTestNatEnvironment module with
@@ -2284,7 +2290,7 @@ def psTestLeanImplicitConstructorApplication : Bool :=
 
 def psTestProofScriptImplicitConstructorApplication : Bool :=
   match psParseProofScriptSource
-      "inductive Maybe(α : Type) where { | none; | some(value : α); }; def present : Maybe(Nat) := Maybe.some(1); def absent : Maybe(Nat) := Maybe.none;" with
+      "inductive Maybe(α : Type) where { | none | some(value : α) }\nconst present: Maybe(Nat) := { Maybe.some(1) }\nconst absent: Maybe(Nat) := { Maybe.none }" with
   | Except.error _ => false
   | Except.ok module =>
       match psElabModule psTestNatEnvironment module with
@@ -2297,7 +2303,7 @@ def psTestDualSourceImplicitConstructorApplication : Bool :=
       psParseLeanSource
         "inductive Maybe (α : Type) where | none | some (value : α)\ndef present : Maybe Nat := Maybe.some 1\ndef absent : Maybe Nat := Maybe.none",
       psParseProofScriptSource
-        "inductive Maybe(α : Type) where { | none; | some(value : α); }; def present : Maybe(Nat) := Maybe.some(1); def absent : Maybe(Nat) := Maybe.none;" with
+        "inductive Maybe(α : Type) where { | none | some(value : α) }\nconst present: Maybe(Nat) := { Maybe.some(1) }\nconst absent: Maybe(Nat) := { Maybe.none }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -2317,9 +2323,9 @@ def psRecursiveListLeanSource : String :=
   "match xs with | List1.nil => 0 | List1.cons head tail => length1 tail"
 
 def psRecursiveListProofScriptSource : String :=
-  "inductive List1(α : Type) where { | nil; | cons(head : α)(tail : List1(α)); }; " ++
-  "def length1(xs : List1(Nat)) : Nat := " ++
-  "match xs with { | List1.nil => 0; | List1.cons head tail => length1(tail); };"
+  "inductive List1(α : Type) where { | nil | cons(head : α, tail : List1(α)) }\n" ++
+  "function length1(xs : List1(Nat)): Nat := { " ++
+  "match xs with { | List1.nil => 0 | List1.cons head tail => length1(tail) } }"
 
 def psTestDualSourceStructuralRecursion : Bool :=
   match
@@ -2369,7 +2375,7 @@ def psTestDualSourcePartialDefinition : Bool :=
       psParseLeanSource
         "partial def loop (n : Nat) : Nat := loop n",
       psParseProofScriptSource
-        "partial def loop(n : Nat) : Nat := loop(n);" with
+        "partial def loop(n : Nat): Nat := { loop(n) }" with
   | Except.ok leanModule, Except.ok proofScriptModule =>
       match
           psElabModule psTestNatEnvironment leanModule,
@@ -2578,8 +2584,8 @@ def psBootstrapTestCases : List PsNamedTest := [
   { name := "Lean parenthesized application", passed := psTestLeanParenthesizedApplication },
   { name := "dual-source Char literal", passed := psTestDualSourceCharLiteral },
   { name := "reject invalid Char escapes", passed := psTestRejectInvalidCharacterEscapes },
-  { name := "ProofScript empty call uses Unit", passed := psTestProofScriptEmptyCallUsesUnit },
-  { name := "ProofScript rejects spaced call", passed := psTestProofScriptRejectSpacedCall },
+  { name := "ProofScript empty call stays empty", passed := psTestProofScriptEmptyCallStaysEmpty },
+  { name := "ProofScript CallGap", passed := psTestProofScriptCallGap },
   { name := "lexer UTF-8 byte offsets", passed := psTestLexerUtf8Offset },
   { name := "lexer nested trivia", passed := psTestLexerNestedTrivia },
   { name := "module graph", passed := psTestModuleGraph },

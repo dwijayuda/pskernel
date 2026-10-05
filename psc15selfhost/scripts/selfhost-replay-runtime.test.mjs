@@ -4,7 +4,7 @@ import './native-typescript-cli.test.mjs';
 import { execFileSync } from 'node:child_process';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { createRequire } from 'node:module';
-import { resolveTypeScriptCli } from './typescript-cli.mjs';
+import { resolveTypeScriptCli, pinnedTypeScriptVersionText } from './typescript-cli.mjs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,7 +12,10 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(import.meta.url);
 const tsc = resolveTypeScriptCli();
-assert.equal(execFileSync(process.execPath, [tsc, '--version'], { encoding: 'utf8' }).trim(), 'Version 5.8.3');
+assert.equal(
+  execFileSync(process.execPath, [tsc, '--version'], { encoding: 'utf8' }).trim(),
+  pinnedTypeScriptVersionText,
+);
 const compiler = path.join(root, '.lake/build/bin', process.platform === 'win32' ? 'psc1.exe' : 'psc1');
 const staging = await mkdtemp(path.join(tmpdir(), 'psc2-replay-runtime-'));
 try {
@@ -22,7 +25,7 @@ try {
     });
     const input = path.join(staging, `${fixture}.ts`);
     await writeFile(input, source);
-    execFileSync(process.execPath, [tsc, input, '--strict', '--target', 'ES2022', '--module', 'commonjs'], {
+    execFileSync(process.execPath, [tsc, input, '--ignoreConfig', '--strict', '--target', 'ES2022', '--module', 'commonjs'], {
       encoding: 'utf8', timeout: 120000,
     });
     const compiled = require(path.join(staging, `${fixture}.js`));

@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "profile": "PSC1-selfhost-stable/1",
+  "proofScriptLanguageEdition": "ps-0.9-r3",
+  "proofScriptSourceProfile": "ps-standard-0.9-r3",
+  "requiredLanguageProfile": "psc2-language-v1",
+  "standardLanguageProfile": "psc2-standard-language-v1",
+  "entry": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+  "implementationProfile": "PSC1-selfhost-stable/1",
+  "allowedPackages": [
+    "bootstrap",
+    "foundation",
+    "syntax",
+    "core",
+    "environment",
+    "meta",
+    "elab",
+    "bridge",
+    "compiler-ir",
+    "erasure",
+    "compiler",
+    "backend-ts",
+    "driver-ts"
+  ],
+  "legacyRepairGuardMaxCount": 75,
+  "forbiddenLeanForms": [
+    {
+      "id": "unsafe-definition",
+      "pattern": "\\bunsafe\\s+(?:def|theorem)\\b"
+    },
+    {
+      "id": "noncomputable",
+      "pattern": "\\bnoncomputable\\b"
+    },
+    {
+      "id": "mutual",
+      "pattern": "\\bmutual\\b"
+    },
+    {
+      "id": "termination-by",
+      "pattern": "\\btermination_by\\b"
+    },
+    {
+      "id": "decreasing-by",
+      "pattern": "\\bdecreasing_by\\b"
+    },
+    {
+      "id": "opaque",
+      "pattern": "\\bopaque\\b"
+    },
+    {
+      "id": "abbrev",
+      "pattern": "\\babbrev\\b"
+    },
+    {
+      "id": "syntax-extension",
+      "pattern": "\\bsyntax\\b"
+    },
+    {
+      "id": "macro",
+      "pattern": "\\bmacro\\b"
+    },
+    {
+      "id": "elab-rules",
+      "pattern": "\\belab_rules\\b"
+    },
+    {
+      "id": "command-elab",
+      "pattern": "\\bcommand_elab\\b"
+    },
+    {
+      "id": "deriving",
+      "pattern": "\\bderiving\\b"
+    },
+    {
+      "id": "tactic-proof",
+      "pattern": "\\bby\\b"
+    },
+    {
+      "id": "mutable-local",
+      "pattern": "\\blet\\s+mut\\b"
+    },
+    {
+      "id": "for-loop",
+      "pattern": "\\bfor\\b"
+    },
+    {
+      "id": "while-loop",
+      "pattern": "\\bwhile\\b"
+    }
+  ],
+  "executableContract": {
+    "leanClosureChecks": true,
+    "canonicalLeanToProofScriptRoundTrip": true,
+    "generatedProofScriptClosureChecks": true,
+    "canonicalAdmissionsParity": true,
+    "typeScriptEmissionParity": true,
+    "generatedCompilerFixedPointRequired": true
+  },
+  "legacyRepairGuards": [
+    "check-elab-app-view-selfhost-source-syntax.mjs",
+    "check-elab-apply-args-next-pending-selfhost-source-syntax.mjs",
+    "check-elab-apply-args-option-selfhost-source-syntax.mjs",
+    "check-elab-apply-args-recursion-selfhost-source-syntax.mjs",
+    "check-elab-apply-many-selfhost-source-syntax.mjs",
+    "check-elab-binder-arguments-selfhost-source-syntax.mjs",
+    "check-elab-close-implicit-binders-selfhost-source-syntax.mjs",
+    "check-elab-close-match-fields-selfhost-source-syntax.mjs",
+    "check-elab-context-selfhost-source-syntax.mjs",
+    "check-elab-declaration-batch-selfhost-source-syntax.mjs",
+    "check-elab-declaration-structural-recursion-selfhost-source-syntax.mjs",
+    "check-elab-declarations-selfhost-source-syntax.mjs",
+    "check-elab-drop-forall-option-selfhost-source-syntax.mjs",
+    "check-elab-fill-wildcard-selfhost-source-syntax.mjs",
+    "check-elab-forall-selfhost-source-syntax.mjs",
+    "check-elab-has-const-selfhost-source-syntax.mjs",
+    "check-elab-if-selfhost-source-syntax.mjs",
+    "check-elab-inductive-constructor-names-selfhost-source-syntax.mjs",
+    "check-elab-inductive-constructors-selfhost-source-syntax.mjs",
+    "check-elab-inductive-declaration-selfhost-source-syntax.mjs",
+    "check-elab-lambda-expected-selfhost-source-syntax.mjs",
+    "check-elab-lambda-selfhost-source-syntax.mjs",
+    "check-elab-let-selfhost-source-syntax.mjs",
+    "check-elab-literal-selfhost-source-syntax.mjs",
+    "check-elab-match-alternative-find-selfhost-source-syntax.mjs",
+    "check-elab-match-apply-parameters-selfhost-source-syntax.mjs",
+    "check-elab-match-constructor-minor-selfhost-source-syntax.mjs",
+    "check-elab-match-fields-selfhost-source-syntax.mjs",
+    "check-elab-match-list-append-selfhost-source-syntax.mjs",
+    "check-elab-match-minor-selfhost-source-syntax.mjs",
+    "check-elab-match-minors-selfhost-source-syntax.mjs",
+    "check-elab-match-name-list-selfhost-source-syntax.mjs",
+    "check-elab-match-selfhost-source-syntax.mjs",
+    "check-elab-partial-declaration-selfhost-source-syntax.mjs",
+    "check-elab-prepare-match-selfhost-source-syntax.mjs",
+    "check-elab-prepend-batch-reverse-selfhost-source-syntax.mjs",
+    "check-elab-record-candidates-selfhost-source-syntax.mjs",
+    "check-elab-recursor-minor-binders-selfhost-source-syntax.mjs",
+    "check-elab-solve-pending-recursion-selfhost-source-syntax.mjs",
+    "check-elab-structural-recursion-source-selfhost-source-syntax.mjs",
+    "check-elab-structure-declaration-selfhost-source-syntax.mjs",
+    "check-elab-syntax-local-id-selfhost-source-syntax.mjs",
+    "check-elab-syntax-name-duplicates-selfhost-source-syntax.mjs",
+    "check-elab-take-forall-names-selfhost-source-syntax.mjs",
+    "check-elab-term-selfhost-source-syntax.mjs",
+    "check-elab-term-with-fuel-selfhost-source-syntax.mjs",
+    "check-elab-try-structural-self-call-selfhost-source-syntax.mjs",
+    "check-elab-validate-structural-call-selfhost-source-syntax.mjs",
+    "check-elab-wildcard-binder-names-selfhost-source-syntax.mjs",
+    "check-elab-wrap-recursive-hypotheses-selfhost-source-syntax.mjs",
+    "check-erasure-add-unique-string-selfhost-source-syntax.mjs",
+    "check-erasure-application-arguments-cons-selfhost-source-syntax.mjs",
+    "check-erasure-condition-sequencing-selfhost-source-syntax.mjs",
+    "check-erasure-core-module-sequencing-selfhost-source-syntax.mjs",
+    "check-erasure-declaration-names-selfhost-source-syntax.mjs",
+    "check-erasure-definition-selfhost-source-syntax.mjs",
+    "check-erasure-definitions-loop-selfhost-source-syntax.mjs",
+    "check-erasure-expr-operators-selfhost-source-syntax.mjs",
+    "check-erasure-finish-application-append-selfhost-source-syntax.mjs",
+    "check-erasure-finish-application-cons-selfhost-source-syntax.mjs",
+    "check-erasure-finish-application-sequencing-selfhost-source-syntax.mjs",
+    "check-erasure-inductive-parameters-selfhost-source-syntax.mjs",
+    "check-erasure-ite-argument-index-selfhost-source-syntax.mjs",
+    "check-erasure-ite-equality-selfhost-source-syntax.mjs",
+    "check-erasure-open-definition-selfhost-source-syntax.mjs",
+    "check-erasure-primitive-application-conjunction-selfhost-source-syntax.mjs",
+    "check-erasure-primitive-application-disjunction-selfhost-source-syntax.mjs",
+    "check-erasure-primitive-application-equality-selfhost-source-syntax.mjs",
+    "check-erasure-primitive-application-sequencing-selfhost-source-syntax.mjs",
+    "check-erasure-selected-arguments-cons-selfhost-source-syntax.mjs",
+    "check-erasure-selected-arguments-index-selfhost-source-syntax.mjs",
+    "check-infer-selfhost-source-syntax.mjs",
+    "check-instances-selfhost-source-syntax.mjs",
+    "check-synth-instance-selfhost-source-syntax.mjs",
+    "check-unify-selfhost-source-syntax.mjs"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "document": "PSC2_COMPLETE_LANGUAGE_AND_JS_PLATFORM.md",
+  "sha256": "43c583f7b87413b1f7ba2719b31a3706ebe15e4d87a4df2a48f4aaed05332752",
+  "languageEdition": "ps-0.9-r3",
+  "sourceProfile": "ps-standard-0.9-r3",
+  "requiredLanguageProfile": "psc2-language-v1",
+  "standardLanguageProfile": "psc2-standard-language-v1",
+  "javaScriptPlatformProfile": "psc-js-platform-v1",
+  "leanVersion": "4.34.0",
+  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "compilerConformance": "bootstrap-subset-until-psc2-language-v1-complete"
+}

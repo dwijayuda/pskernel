@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { packageBySection, parseImports } from "./workspace-layout.mjs";
+import { cachedTextTransform, sha256File } from "./cache-utils.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const selfhostRoot = path.resolve(scriptDir, "..");
@@ -22,12 +23,10 @@ function findWorkspaceRoot(entryPath) {
       ".proofscript-selfhost.json",
       ".proofscript-project.json",
     ].some((name) => existsSync(path.join(current, name)));
+    if (hasGeneratedManifest) return current;
     if (
       existsSync(path.join(current, "packages")) &&
-      (
-        existsSync(path.join(current, "package.json")) ||
-        hasGeneratedManifest
-      )
+      existsSync(path.join(current, "package.json"))
     ) {
       return current;
     }
@@ -159,6 +158,7 @@ if (
   throw new Error("PSC2_PROJECT_COMPILER_API_MISSING");
 }
 
+const compilerSha256 = await sha256File(compilerPath);
 const workspaceRoot = findWorkspaceRoot(entryPath);
 const sourceKind = compilerKind(compiler, sourceExtension);
 const targetKind = compilerKind(compiler, targetExtension);
@@ -186,14 +186,33 @@ async function visit(sourcePath) {
 await visit(entryPath);
 
 const generated = [];
+let cacheHits = 0;
+let cacheMisses = 0;
+let cacheDisabled = 0;
 for (const item of ordered) {
   const itemExtension = item.path.endsWith(".lean") ? ".lean" : ".ps";
   const itemKind = compilerKind(compiler, itemExtension);
-  const translated = unwrapExcept(
-    compiler.psCompilerTranslateSource(itemKind, targetKind, item.source),
-    "translate",
-    item.path,
-  );
+  const translatedResult = await cachedTextTransform({
+    projectRoot: selfhostRoot,
+    namespace: "translate-source-v1",
+    contract: {
+      operation: "psCompilerTranslateSource",
+      compilerSha256,
+      sourceKind: itemExtension,
+      targetKind: targetExtension,
+    },
+    input: item.source,
+    compute: async () =>
+      unwrapExcept(
+        compiler.psCompilerTranslateSource(itemKind, targetKind, item.source),
+        "translate",
+        item.path,
+      ),
+  });
+  if (translatedResult.cache === "hit") cacheHits += 1;
+  else if (translatedResult.cache === "miss") cacheMisses += 1;
+  else cacheDisabled += 1;
+  const translated = translatedResult.value;
 
   const relative = path.relative(workspaceRoot, item.path);
   if (relative.startsWith("..") || path.isAbsolute(relative)) {
@@ -275,9 +294,12 @@ function generatedLakefile(generatedFiles) {
 async function writeGeneratedProjectMetadata() {
   if (targetExtension === ".ps") {
     const generatedConfig = {
-      languageVersion: "0.7",
-      implementationProfile: "PSC1",
-      acceptedLanguageProfile: "PSC2-bootstrap",
+      languageVersion: "0.9-r3",
+      languageEdition: "ps-0.9-r3",
+      sourceProfile: "ps-standard-0.9-r3",
+      requiredLanguageProfile: "psc2-language-v1",
+      standardLanguageProfile: "psc2-standard-language-v1",
+      implementationProfile: "PSC1-selfhost-stable/1",
       entry: entryRelative,
       sourceRoots: ["packages", "stdlib"],
       runtimeDependencies: {},
@@ -331,5 +353,6 @@ process.stdout.write(
     `PSC2_PROJECT_EMIT_TARGET: ${targetExtension.slice(1)}`,
     `PSC2_PROJECT_EMIT_OUTPUT: ${path.relative(selfhostRoot, outputWorkspace)}`,
     `PSC2_PROJECT_EMIT_FILES: ${generated.length}`,
+    `PSC2_PROJECT_TRANSLATE_CACHE: hits=${cacheHits} misses=${cacheMisses} disabled=${cacheDisabled}`,
   ].join("\n") + "\n",
 );

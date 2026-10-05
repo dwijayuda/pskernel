@@ -43,13 +43,28 @@ const expected = new Map([
   ["Compiler", "compiler"],
   ["Erasure", "erasure"],
   ["BackendTs", "backend-ts"],
+  ["BackendJs", "backend-js"],
+  ["DriverTs", "driver-ts"],
   ["BackendRust", "backend-rust"],
+  ["DriverRust", "driver-rust"],
   ["BackendWasm", "backend-wasm"],
 ]);
 
 for (const [section, packageName] of expected) {
   if (layout.packageBySection?.get(section) !== packageName) {
     throw new Error(`PSC2_LAYOUT_SECTION_MISMATCH: ${section}`);
+  }
+}
+
+const hostProjectCompiler = await readFile(
+  path.join(root, "host", "src", "Ps", "Host", "ProjectCompiler.lean"),
+  "utf8",
+);
+for (const [section, packageName] of expected) {
+  const marker =
+    `| "Ps" :: "${section}" :: _ => some "${packageName}"`;
+  if (!hostProjectCompiler.includes(marker)) {
+    throw new Error(`PSC2_LAYOUT_HOST_SECTION_MISMATCH: ${section}`);
   }
 }
 

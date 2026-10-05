@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { checkAdmissionsWithKernel } from './checked-kernel-provider.mjs';
 import { checkOwnedAdmissions } from './checked-owned-kernel.mjs';
-import { createCheckedPreparedSession } from './checked-prepared-session.mjs';
+import { createKernelCheckedSession } from './kernel-checked-session.mjs';
 import { ownedCheckedIdentity, leanCheckedIdentity } from './checked-kernel-identity.mjs';
 
 const name = v => ({ k: 's', p: { k: 'a' }, v });
@@ -18,9 +18,9 @@ const alias = () => definition('Alias', U(1), U(0));
 const identityType = binder('forall', 'P', U(0), binder('forall', 'p', B(0), B(1)));
 const identity = binder('lam', 'P', U(0), binder('lam', 'p', B(0), B(0)));
 
-test('default runs generated owned semantics for empty, dependent and sequential modules', async () => {
+test('explicit owned kernel runs generated semantics for empty, dependent and sequential modules', async () => {
   for (const ds of [[], [alias()], [definition('Id', identityType, identity), definition('Use', identityType, C('Id'))]]) {
-    const { result, descriptor } = await checkAdmissionsWithKernel(wire(ds));
+    const { result, descriptor } = await checkAdmissionsWithKernel(wire(ds), 'pskernel-core.old3');
     assert.equal(descriptor.selector, 'pskernel-core.old3');
     assert.equal(result.provider, 'psc-generated-owned');
     assert.equal(result.accepted, true, JSON.stringify(result));
@@ -59,7 +59,7 @@ for (const [label, change] of [
   ['prototype binder', a => { a.declaration.v = { ...identity, bi: '__proto__' }; }],
 ]) test(`unsupported or malformed ${label} cannot be accepted or fall back`, async () => {
   const a = alias(); change(a);
-  const { result, descriptor } = await checkAdmissionsWithKernel(wire([a]));
+  const { result, descriptor } = await checkAdmissionsWithKernel(wire([a]), 'pskernel-core.old3');
   assert.equal(result.accepted, false, JSON.stringify(result));
   assert.equal(descriptor.selector, 'pskernel-core.old3');
   assert.equal(result.admissionIndex, 0);
@@ -79,10 +79,10 @@ const poly = () => {
   d.declaration.lp = [name('u')];
   return d;
 };
-test('default admits a polymorphic identity and checks distinct universe instantiations', async () => {
+test('explicit owned kernel admits a polymorphic identity and checks distinct universe instantiations', async () => {
   for (const l of [Z, { k: 's', o: Z }, { k: 'max', l: Z, r: { k: 's', o: Z } }]) {
     const use = definition('Use', polyType(l), { ...C('Poly'), ls: [l] });
-    const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]));
+    const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]), 'pskernel-core.old3');
     assert.equal(result.accepted, true, JSON.stringify(result));
     assert.equal(result.profile, 'owned-uniform-algebraic/11');
     assert.equal(descriptor.selector, 'pskernel-core.old3');
@@ -93,9 +93,9 @@ for (const [label, levels, typeLevel, errorKind] of [
   ['extra', [Z, Z], Z, 'invalidUniverse'],
   ['undeclared', [param('missing')], Z, 'invalidUniverse'],
   ['wrong type', [Z], { k: 's', o: Z }, 'typeMismatch'],
-]) test(`default rejects ${label} polymorphic instantiation without fallback`, async () => {
+]) test(`explicit owned kernel rejects ${label} polymorphic instantiation without fallback`, async () => {
   const use = definition('Use', polyType(typeLevel), { ...C('Poly'), ls: levels });
-  const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]));
+  const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]), 'pskernel-core.old3');
   assert.equal(descriptor.selector, 'pskernel-core.old3');
   assert.equal(result.accepted, false);
   assert.equal(result.errorKind, errorKind);
@@ -130,12 +130,12 @@ test('owned checked module emits the exact frozen preparation and rejects transf
       return ok('export const checked = true;');
     },
   };
-  const session = createCheckedPreparedSession(compiler, checkOwnedAdmissions);
+  const session = createKernelCheckedSession(compiler, checkOwnedAdmissions, ownedCheckedIdentity);
   const handle = await session.check('lean', 'source');
   assert.equal(session.emit(handle), 'export const checked = true;');
   assert.equal(emitted, 1);
   assert.throws(() => session.emit({ ...handle }), /UNCHECKED_MODULE/);
-  const wrong = createCheckedPreparedSession(compiler, () => ({ ...leanCheckedIdentity, accepted: true }));
+  const wrong = createKernelCheckedSession(compiler, () => ({ ...leanCheckedIdentity, accepted: true }), ownedCheckedIdentity);
   await assert.rejects(wrong.check('lean', 'source'), /PROVIDER_IDENTITY/);
   assert.equal(emitted, 1);
 });

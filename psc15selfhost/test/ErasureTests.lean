@@ -1,5 +1,6 @@
 import Ps.Syntax.ParseLean
 import Ps.Syntax.ParseProofScript
+import Ps.Syntax.Translate
 import Ps.Environment.Prelude
 import Ps.Elab.Declaration
 import Ps.Erasure.Definition
@@ -47,12 +48,19 @@ def psCompileProofScriptSourceToTypeScript
               | Except.error _ => Except.error "emit"
               | Except.ok output => Except.ok output
 
+def psCompileLeanSourceViaProofScriptToTypeScript
+    (source : String) : Except String String :=
+  match psTranslateLeanToProofScript source with
+  | Except.error _ => Except.error "translate"
+  | Except.ok proofScriptSource =>
+      psCompileProofScriptSourceToTypeScript proofScriptSource
+
 def psTestDualSourceLeanNativeIdentity : Bool :=
   match
       psCompileLeanSourceToTypeScript
         "def idNat (x : Nat) : Nat := x",
-      psCompileProofScriptSourceToTypeScript
-        "def idNat(x : Nat) : Nat := x;" with
+      psCompileLeanSourceViaProofScriptToTypeScript
+        "def idNat (x : Nat) : Nat := x" with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       let expected :=
         "// generated from pskernel-admitted ProofScript checked core\n" ++
@@ -66,8 +74,8 @@ def psTestDualSourceLeanNativeGenericIdentity : Bool :=
   match
       psCompileLeanSourceToTypeScript
         "def identity (α : Type) (x : α) : α := x",
-      psCompileProofScriptSourceToTypeScript
-        "def identity(α : Type)(x : α) : α := x;" with
+      psCompileLeanSourceViaProofScriptToTypeScript
+        "def identity (α : Type) (x : α) : α := x" with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       let expected :=
         "// generated from pskernel-admitted ProofScript checked core\n" ++
@@ -83,8 +91,8 @@ def psTestDualSourceLeanNativeLet : Bool :=
   match
       psCompileLeanSourceToTypeScript
         "def one : Nat := let x : Nat := 1; x",
-      psCompileProofScriptSourceToTypeScript
-        "def one : Nat := let x : Nat := 1; x;" with
+      psCompileLeanSourceViaProofScriptToTypeScript
+        "def one : Nat := let x : Nat := 1; x" with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains
@@ -95,8 +103,8 @@ def psTestDualSourceLeanNativeIf : Bool :=
   match
       psCompileLeanSourceToTypeScript
         "def choose (b : Bool) : Nat := if b then 1 else 2",
-      psCompileProofScriptSourceToTypeScript
-        "def choose(b : Bool) : Nat := if (b) { 1 } else { 2 };" with
+      psCompileLeanSourceViaProofScriptToTypeScript
+        "def choose (b : Bool) : Nat := if b then 1 else 2" with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains
@@ -109,14 +117,9 @@ def psTestDualSourceLeanNativeMaybeMatch : Bool :=
     "def present : Maybe Nat := Maybe.some 1\n" ++
     "def getOrZero (m : Maybe Nat) : Nat := " ++
     "match m with | Maybe.none => 0 | Maybe.some value => value"
-  let proofScriptSource :=
-    "inductive Maybe(α : Type) where { | none; | some(value : α); }; " ++
-    "def present : Maybe(Nat) := Maybe.some(1); " ++
-    "def getOrZero(m : Maybe(Nat)) : Nat := " ++
-    "match m with { | Maybe.none => 0; | Maybe.some value => value; };"
   match
       psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
+      psCompileLeanSourceViaProofScriptToTypeScript leanSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains "export type Maybe<T0>"
@@ -135,13 +138,9 @@ def psTestDualSourceLeanNativeStructureProjection : Bool :=
     "  age : Nat\n" ++
     "def user : User := User.mk 33\n" ++
     "def ageOf (u : User) : Nat := u.age"
-  let proofScriptSource :=
-    "structure User where { age : Nat; }; " ++
-    "def user : User := User.mk(33); " ++
-    "def ageOf(u : User) : Nat := u.age;"
   match
       psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
+      psCompileLeanSourceViaProofScriptToTypeScript leanSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains "export interface User"
@@ -157,13 +156,9 @@ def psTestDualSourceLeanNativeStructuralRecursion : Bool :=
     "inductive ListR (α : Type) where | nil | cons (head : α) (tail : ListR α)\n" ++
     "def lengthR (xs : ListR Nat) : Nat := " ++
     "match xs with | ListR.nil => 0 | ListR.cons head tail => lengthR tail"
-  let proofScriptSource :=
-    "inductive ListR(α : Type) where { | nil; | cons(head : α)(tail : ListR(α)); }; " ++
-    "def lengthR(xs : ListR(Nat)) : Nat := " ++
-    "match xs with { | ListR.nil => 0; | ListR.cons head tail => lengthR(tail); };"
   match
       psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
+      psCompileLeanSourceViaProofScriptToTypeScript leanSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains "export type ListR<T0>"
@@ -176,13 +171,9 @@ def psTestDualSourceLeanNativeInt : Bool :=
     "def intOne : Int := 1\n" ++
     "def intCalc (x : Int) : Int := " ++
     "Int.sub (Int.add x (Int.ofNat 2)) (Int.neg (Int.ofNat 3))"
-  let proofScriptSource :=
-    "def intOne : Int := 1; " ++
-    "def intCalc(x : Int) : Int := " ++
-    "Int.sub(Int.add(x, Int.ofNat(2)), Int.neg(Int.ofNat(3)));"
   match
       psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
+      psCompileLeanSourceViaProofScriptToTypeScript leanSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains "export const intOne: bigint = __ps$run((function*(): __ps$Computation<bigint> { return 1n; })());"
@@ -198,14 +189,9 @@ def psTestDualSourceLeanNativeArrayBasics : Bool :=
     "let xs : Array Nat := Array.push (Array.push (Array.emptyWithCapacity 2) a) b; " ++
     "let ys : Array Nat := Array.setIfInBounds xs 0 10; " ++
     "Array.getD ys 1 99"
-  let proofScriptSource :=
-    "def arrayDemo(a : Nat)(b : Nat) : Nat := " ++
-    "let xs : Array(Nat) := Array.push(Array.push(Array.emptyWithCapacity(2), a), b); " ++
-    "let ys : Array(Nat) := Array.setIfInBounds(xs, 0, 10); " ++
-    "Array.getD(ys, 1, 99);"
   match
       psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
+      psCompileLeanSourceViaProofScriptToTypeScript leanSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains
@@ -218,12 +204,9 @@ def psTestDualSourceLeanNativeArrayMap : Bool :=
   let leanSource :=
     "def arrayIdOnly (x : Nat) : Nat := x\n" ++
     "def arrayMapDemo (xs : Array Nat) : Array Nat := Array.map arrayIdOnly xs"
-  let proofScriptSource :=
-    "def arrayIdOnly(x : Nat) : Nat := x; " ++
-    "def arrayMapDemo(xs : Array(Nat)) : Array(Nat) := Array.map(arrayIdOnly, xs);"
   match
       psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
+      psCompileLeanSourceViaProofScriptToTypeScript leanSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains "__ps_a.map"
@@ -234,13 +217,9 @@ def psTestDualSourceLeanNativeArrayFoldl : Bool :=
     "def arrayKeepLeftOnly (acc : Nat) (x : Nat) : Nat := acc\n" ++
     "def arrayFoldOnly (xs : Array Nat) : Nat := " ++
     "Array.foldl arrayKeepLeftOnly 0 xs 0 (Array.size xs)"
-  let proofScriptSource :=
-    "def arrayKeepLeftOnly(acc : Nat)(x : Nat) : Nat := acc; " ++
-    "def arrayFoldOnly(xs : Array(Nat)) : Nat := " ++
-    "Array.foldl(arrayKeepLeftOnly, 0, xs, 0, Array.size(xs));"
   match
       psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
+      psCompileLeanSourceViaProofScriptToTypeScript leanSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains "for (let __ps_i"
@@ -254,16 +233,9 @@ def psTestDualSourceLeanNativeArrayHigherOrder : Bool :=
     "let xs : Array Nat := Array.push (Array.push (Array.emptyWithCapacity 2) a) b; " ++
     "let ys : Array Nat := Array.map arrayId xs; " ++
     "Array.foldl arrayKeepLeft 0 ys 0 (Array.size ys)"
-  let proofScriptSource :=
-    "def arrayId(x : Nat) : Nat := x; " ++
-    "def arrayKeepLeft(acc : Nat)(x : Nat) : Nat := acc; " ++
-    "def arrayFoldDemo(a : Nat)(b : Nat) : Nat := " ++
-    "let xs : Array(Nat) := Array.push(Array.push(Array.emptyWithCapacity(2), a), b); " ++
-    "let ys : Array(Nat) := Array.map(arrayId, xs); " ++
-    "Array.foldl(arrayKeepLeft, 0, ys, 0, Array.size(ys));"
   match
       psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
+      psCompileLeanSourceViaProofScriptToTypeScript leanSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains ".map("
@@ -274,12 +246,9 @@ def psTestDualSourceLeanNativePartialApplication : Bool :=
   let leanSource :=
     "def addPair (a : Nat) (b : Nat) : Nat := Nat.add a b\n" ++
     "def addOne : Nat -> Nat := addPair 1"
-  let proofScriptSource :=
-    "def addPair(a : Nat)(b : Nat) : Nat := Nat.add(a, b); " ++
-    "def addOne : Nat -> Nat := addPair(1);"
   match
       psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
+      psCompileLeanSourceViaProofScriptToTypeScript leanSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains "export const addOne:"
@@ -292,14 +261,9 @@ def psTestDualSourceLeanNativeTextPrimitives : Bool :=
     "def firstChar (s : String) : Char := String.Internal.get s 0\n" ++
     "def nextPos (s : String) (p : Nat) : Nat := String.Internal.next s p\n" ++
     "def textBytes (s : String) : Nat := String.utf8ByteSize s"
-  let proofScriptSource :=
-    "def pushBang(s : String) : String := String.push(s, '!'); " ++
-    "def firstChar(s : String) : Char := String.Internal.get(s, 0); " ++
-    "def nextPos(s : String)(p : Nat) : Nat := String.Internal.next(s, p); " ++
-    "def textBytes(s : String) : Nat := String.utf8ByteSize(s);"
   match
       psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
+      psCompileLeanSourceViaProofScriptToTypeScript leanSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains "export function pushBang(s: string): string"
@@ -321,17 +285,9 @@ def psTestDualSourceLeanNativeStringRawPositionBridge : Bool :=
     "def rawNext (s : String) (p : Nat) : Nat := " ++
     "String.Pos.Raw.byteIdx " ++
     "(String.Internal.next s (String.Pos.Raw.mk p))"
-  let proofScriptSource :=
-    "def rawPositionRoundTrip(p : Nat) : Nat := " ++
-    "String.Pos.Raw.byteIdx(String.Pos.Raw.mk(p)); " ++
-    "def rawCharAt(s : String)(p : Nat) : Char := " ++
-    "String.Internal.get(s, String.Pos.Raw.mk(p)); " ++
-    "def rawNext(s : String)(p : Nat) : Nat := " ++
-    "String.Pos.Raw.byteIdx(" ++
-    "String.Internal.next(s, String.Pos.Raw.mk(p)));"
   match
       psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
+      psCompileLeanSourceViaProofScriptToTypeScript leanSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains
@@ -345,16 +301,366 @@ def psTestDualSourceLeanNativeStringRawPositionBridge : Bool :=
 def psTestDualSourceLeanNativePartialDefinition : Bool :=
   let leanSource :=
     "partial def loop (n : Nat) : Nat := loop n"
-  let proofScriptSource :=
-    "partial def loop(n : Nat) : Nat := loop(n);"
   match
       psCompileLeanSourceToTypeScript leanSource,
-      psCompileProofScriptSourceToTypeScript proofScriptSource with
+      psCompileLeanSourceViaProofScriptToTypeScript leanSource with
   | Except.ok leanOutput, Except.ok proofScriptOutput =>
       leanOutput == proofScriptOutput
         && leanOutput.contains
           "export function loop(n: bigint): bigint { while (true) { [n] = [n]; continue; } }"
   | _, _ => false
+
+
+
+def psTestVerifiedIrValidationAcceptsResolved : Bool :=
+  let raw :=
+    PsVerifiedIrModule.mk
+      []
+      []
+      []
+      [
+        PsVerifiedIrDeclaration.mk
+          "answer"
+          []
+          []
+          (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+          (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 42))
+      ]
+  match psValidateErasedIrModule (PsErasedIrModule.mk raw) with
+  | Except.error _ => false
+  | Except.ok validated =>
+      validated.raw.declarations.length == 1
+
+def psTestVerifiedIrValidationRejectsUnknownResult : Bool :=
+  let raw :=
+    PsVerifiedIrModule.mk
+      []
+      []
+      []
+      [
+        PsVerifiedIrDeclaration.mk
+          "bad"
+          []
+          []
+          PsVerifiedIrType.unknown
+          (PsVerifiedIrExpr.literal PsVerifiedIrLiteral.unit)
+      ]
+  match psValidateErasedIrModule (PsErasedIrModule.mk raw) with
+  | Except.error PsVerifiedIrValidationError.unresolvedRuntimeType => true
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsNestedUnknown : Bool :=
+  let raw :=
+    PsVerifiedIrModule.mk
+      []
+      [
+        PsVerifiedIrStructure.mk
+          "Box"
+          []
+          [
+            PsVerifiedIrStructureField.mk
+              "value"
+              (PsVerifiedIrType.function
+                [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                PsVerifiedIrType.unknown)
+          ]
+      ]
+      []
+      []
+  match psValidateErasedIrModule (PsErasedIrModule.mk raw) with
+  | Except.error PsVerifiedIrValidationError.unresolvedRuntimeType => true
+  | _ => false
+
+def psVerifiedIrValidationNatType : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+
+def psVerifiedIrValidationBox : PsVerifiedIrStructure :=
+  PsVerifiedIrStructure.mk
+    "Box"
+    (List.cons
+      (PsVerifiedIrTypeParameter.mk "T")
+      List.nil)
+    (List.cons
+      (PsVerifiedIrStructureField.mk
+        "value"
+        (PsVerifiedIrType.typeParameter "T"))
+      List.nil)
+
+def psVerifiedIrValidationMaybe : PsVerifiedIrInductive :=
+  PsVerifiedIrInductive.mk
+    "Maybe"
+    (List.cons
+      (PsVerifiedIrTypeParameter.mk "T")
+      List.nil)
+    (List.cons
+      (PsVerifiedIrConstructor.mk
+        "none"
+        List.nil)
+      (List.cons
+        (PsVerifiedIrConstructor.mk
+          "some"
+          (List.cons
+            (PsVerifiedIrConstructorField.mk
+              "value"
+              (PsVerifiedIrType.typeParameter "T"))
+            List.nil))
+        List.nil))
+
+def psVerifiedIrValidationModule
+    (body : PsVerifiedIrExpr) :
+    PsVerifiedIrModule :=
+  PsVerifiedIrModule.mk
+    List.nil
+    (List.cons psVerifiedIrValidationBox List.nil)
+    (List.cons psVerifiedIrValidationMaybe List.nil)
+    (List.cons
+      (PsVerifiedIrDeclaration.mk
+        "probe"
+        List.nil
+        List.nil
+        psVerifiedIrValidationNatType
+        body)
+      List.nil)
+
+def psTestVerifiedIrValidationAcceptsStructuralReferences : Bool :=
+  let body :=
+    PsVerifiedIrExpr.record
+      "Box"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      (List.cons
+        (Prod.mk
+          "value"
+          (PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.natural 42)))
+        List.nil)
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error _ => false
+  | Except.ok _ => true
+
+def psTestVerifiedIrValidationRejectsUnknownStructure : Bool :=
+  let body :=
+    PsVerifiedIrExpr.record
+      "Missing"
+      List.nil
+      List.nil
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownStructure name) =>
+      psStringEq name "Missing"
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsStructureArity : Bool :=
+  let body :=
+    PsVerifiedIrExpr.record
+      "Box"
+      List.nil
+      (List.cons
+        (Prod.mk
+          "value"
+          (PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.natural 42)))
+        List.nil)
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.typeArgumentArity name) =>
+      psStringEq name "Box"
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsStructureField : Bool :=
+  let body :=
+    PsVerifiedIrExpr.record
+      "Box"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      (List.cons
+        (Prod.mk
+          "missing"
+          (PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.natural 42)))
+        List.nil)
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownStructureField
+        structureName
+        fieldName) =>
+      if psStringEq structureName "Box" then
+        psStringEq fieldName "missing"
+      else
+        false
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsProjectionField : Bool :=
+  let target :=
+    PsVerifiedIrExpr.record
+      "Box"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      (List.cons
+        (Prod.mk
+          "value"
+          (PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.natural 42)))
+        List.nil)
+  let body :=
+    PsVerifiedIrExpr.projection
+      "Box"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      target
+      "missing"
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownStructureField
+        structureName
+        fieldName) =>
+      if psStringEq structureName "Box" then
+        psStringEq fieldName "missing"
+      else
+        false
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsUnknownInductive : Bool :=
+  let body :=
+    PsVerifiedIrExpr.constructor
+      "Missing"
+      "none"
+      List.nil
+      List.nil
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownInductive name) =>
+      psStringEq name "Missing"
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsUnknownConstructor : Bool :=
+  let body :=
+    PsVerifiedIrExpr.constructor
+      "Maybe"
+      "missing"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      List.nil
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownConstructor
+        inductiveName
+        constructorName) =>
+      if psStringEq inductiveName "Maybe" then
+        psStringEq constructorName "missing"
+      else
+        false
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsConstructorField : Bool :=
+  let body :=
+    PsVerifiedIrExpr.constructor
+      "Maybe"
+      "some"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      (List.cons
+        (Prod.mk
+          "missing"
+          (PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.natural 42)))
+        List.nil)
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownConstructorField
+        inductiveName
+        constructorName
+        fieldName) =>
+      if psStringEq inductiveName "Maybe" then
+        if psStringEq constructorName "some" then
+          psStringEq fieldName "missing"
+        else
+          false
+      else
+        false
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsMatchConstructor : Bool :=
+  let alternative :=
+    Prod.mk
+      "missing"
+      (Prod.mk
+        List.nil
+        (PsVerifiedIrExpr.literal
+          (PsVerifiedIrLiteral.natural 0)))
+  let body :=
+    PsVerifiedIrExpr.matchE
+      "Maybe"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      (PsVerifiedIrExpr.var "value")
+      (List.cons alternative List.nil)
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownConstructor
+        inductiveName
+        constructorName) =>
+      if psStringEq inductiveName "Maybe" then
+        psStringEq constructorName "missing"
+      else
+        false
+  | _ => false
+
+def psTestVerifiedIrValidationRejectsMatchBindingField : Bool :=
+  let binding :=
+    PsVerifiedIrMatchBinding.mk
+      "missing"
+      "value"
+      psVerifiedIrValidationNatType
+  let alternative :=
+    Prod.mk
+      "some"
+      (Prod.mk
+        (List.cons binding List.nil)
+        (PsVerifiedIrExpr.var "value"))
+  let body :=
+    PsVerifiedIrExpr.matchE
+      "Maybe"
+      (List.cons psVerifiedIrValidationNatType List.nil)
+      (PsVerifiedIrExpr.var "input")
+      (List.cons alternative List.nil)
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          (psVerifiedIrValidationModule body)) with
+  | Except.error
+      (PsVerifiedIrValidationError.unknownConstructorField
+        inductiveName
+        constructorName
+        fieldName) =>
+      if psStringEq inductiveName "Maybe" then
+        if psStringEq constructorName "some" then
+          psStringEq fieldName "missing"
+        else
+          false
+      else
+        false
+  | _ => false
 
 structure PsErasureNamedTest where
   name : String
@@ -376,7 +682,20 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "dual-source Lean-native partial application", passed := psTestDualSourceLeanNativePartialApplication },
   { name := "dual-source Lean-native text primitives", passed := psTestDualSourceLeanNativeTextPrimitives },
   { name := "dual-source Lean-native String raw-position bridge", passed := psTestDualSourceLeanNativeStringRawPositionBridge },
-  { name := "dual-source Lean-native controlled partial def", passed := psTestDualSourceLeanNativePartialDefinition }
+  { name := "dual-source Lean-native controlled partial def", passed := psTestDualSourceLeanNativePartialDefinition },
+  { name := "VerifiedIR accepts resolved construction IR", passed := psTestVerifiedIrValidationAcceptsResolved },
+  { name := "VerifiedIR rejects unknown result type", passed := psTestVerifiedIrValidationRejectsUnknownResult },
+  { name := "VerifiedIR rejects nested unknown runtime type", passed := psTestVerifiedIrValidationRejectsNestedUnknown },
+  { name := "VerifiedIR accepts structural references", passed := psTestVerifiedIrValidationAcceptsStructuralReferences },
+  { name := "VerifiedIR rejects unknown structure", passed := psTestVerifiedIrValidationRejectsUnknownStructure },
+  { name := "VerifiedIR rejects structure type-argument arity", passed := psTestVerifiedIrValidationRejectsStructureArity },
+  { name := "VerifiedIR rejects unknown structure field", passed := psTestVerifiedIrValidationRejectsStructureField },
+  { name := "VerifiedIR rejects unknown projection field", passed := psTestVerifiedIrValidationRejectsProjectionField },
+  { name := "VerifiedIR rejects unknown inductive", passed := psTestVerifiedIrValidationRejectsUnknownInductive },
+  { name := "VerifiedIR rejects unknown constructor", passed := psTestVerifiedIrValidationRejectsUnknownConstructor },
+  { name := "VerifiedIR rejects unknown constructor field", passed := psTestVerifiedIrValidationRejectsConstructorField },
+  { name := "VerifiedIR rejects unknown match constructor", passed := psTestVerifiedIrValidationRejectsMatchConstructor },
+  { name := "VerifiedIR rejects unknown match binding field", passed := psTestVerifiedIrValidationRejectsMatchBindingField }
 ]
 
 def psRunErasureTests : List PsErasureNamedTest -> IO Bool

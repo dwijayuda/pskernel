@@ -4,6 +4,20 @@ on:
   push:
     branches:
       - psc2/psc1kernel-selfhost-portable
+      - psc2/selfhost-lean-kernel
+    paths:
+      - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/test/PsKernelCoreBench.lean
+      - psc15selfhost/test/KernelCore/Bench/**
+      - psc15selfhost/scripts/psc1kernel-benchmark-report*
+      - psc15selfhost/scripts/psc1kernel-m3-*
+      - psc15selfhost/scripts/psc1kernel-measure.mjs
+      - psc15selfhost/scripts/fixtures/pskernel-native-benchmark.log
+      - psc15selfhost/lakefile.lean
+      - .github/workflows/psc1kernel-core-benchmark.yml
+  pull_request:
+    branches:
+      - psc2/selfhost-lean-kernel
     paths:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/PsKernelCoreBench.lean

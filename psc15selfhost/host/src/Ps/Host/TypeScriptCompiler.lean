@@ -8,6 +8,10 @@ structure PsTypeScriptCompileResult where
   diagnostics : String
   typescriptVersion : String
 
+structure PsTypeScriptCommand where
+  command : String
+  prefixArgs : Array String
+
 def psReplaceSuffix
     (value suffix replacement : String) : String :=
   if value.endsWith suffix then
@@ -57,12 +61,30 @@ def psTypeScriptCli : IO String := do
               return resolved.toString
       throw
         (IO.userError
-          "PSC1_TYPESCRIPT_CLI_MISSING: install TypeScript 5.8.3 locally or on PATH")
+          "PSC1_TYPESCRIPT_CLI_MISSING: install TypeScript 7.0.2 locally or on PATH")
+
+def psTypeScriptNativeExecutableName : String :=
+  if System.Platform.isWindows then "tsc.exe" else "tsc"
+
+def psTypeScriptCommand : IO PsTypeScriptCommand := do
+  if let some override ← IO.getEnv "PSC_TYPESCRIPT_NATIVE_TSC" then
+    let candidate := System.FilePath.mk override
+    if ← candidate.pathExists then
+      return { command := override, prefixArgs := #[] }
+    throw (IO.userError ("PSC1_TYPESCRIPT_NATIVE_TSC_MISSING: " ++ override))
+  let appPath ← IO.appPath
+  if let some binDir := appPath.parent then
+    if let some bundleRoot := binDir.parent then
+      let bundled := bundleRoot / "typescript" / "lib" / psTypeScriptNativeExecutableName
+      if ← bundled.pathExists then
+        return { command := bundled.toString, prefixArgs := #[] }
+  pure { command := "node", prefixArgs := #[← psTypeScriptCli] }
 
 def psTypeScriptVersion : IO String := do
+  let tool ← psTypeScriptCommand
   let output ← IO.Process.output {
-    cmd := "node"
-    args := #[← psTypeScriptCli, "--version"]
+    cmd := tool.command
+    args := tool.prefixArgs ++ #["--version"]
   }
   if output.exitCode != 0 then
     throw
@@ -77,11 +99,17 @@ def psTypeScriptVersion : IO String := do
 def psCompileTypeScriptFile
     (typeScriptPath : String) :
     IO PsTypeScriptCompileResult := do
+  let version ← psTypeScriptVersion
+  if version != "7.0.2" then
+    throw
+      (IO.userError
+        ("PSC1_TYPESCRIPT_PIN: require TypeScript 7.0.2, got " ++ version))
+  let tool ← psTypeScriptCommand
   let output ← IO.Process.output {
-    cmd := "node"
-    args := #[
-      ← psTypeScriptCli,
+    cmd := tool.command
+    args := tool.prefixArgs ++ #[
       typeScriptPath,
+      "--ignoreConfig",
       "--target", "ES2022",
       "--module", "ES2022",
       "--moduleResolution", "bundler",
@@ -114,7 +142,6 @@ def psCompileTypeScriptFile
     throw (IO.userError "PSC1_TS_COMPILE_MISSING_DECLARATION")
   if !(← System.FilePath.pathExists sourceMapPath) then
     throw (IO.userError "PSC1_TS_COMPILE_MISSING_SOURCE_MAP")
-  let version ← psTypeScriptVersion
   pure {
     typeScriptPath := typeScriptPath
     javascriptPath := javascriptPath

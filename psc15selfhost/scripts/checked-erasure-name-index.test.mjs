@@ -27,7 +27,7 @@ test('generated erasure indexes preserve collisions, structured names, precedenc
     const output=execFileSync(seed,['typescript',input],{encoding:'utf8',timeout:60000,maxBuffer:8*1024*1024});
     await writeFile(ts,output);
     const compiler=resolveTypeScriptCli();
-    execFileSync(process.execPath,[compiler,'--strict','--target','ES2022','--module','ES2022','--outDir',dir,ts],{encoding:'utf8',timeout:60000});
+    execFileSync(process.execPath,[compiler,'--ignoreConfig','--strict','--target','ES2022','--module','ES2022','--outDir',dir,ts],{encoding:'utf8',timeout:60000});
     const m=await import(pathToFileURL(path.join(dir,'index.js')).href);
     assert.equal(m.erasureScopeCollision(7n),16n, 'local output names must not capture a qualified declaration');
     const tag=x=>x?.[Object.getOwnPropertySymbols(x??{})[0]],N=s=>m.PsName.str(m.PsName.anonymous,s);

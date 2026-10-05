@@ -16,7 +16,6 @@
     "role": "psc2-selfhost-composition"
   },
   "dependencies": {
-    "@proofscript/compiler-next": "0.0.0-dev",
-    "@proofscript/backend-ts-next": "0.0.0-dev"
+    "@proofscript/driver-ts-next": "0.0.0-dev"
   }
 }

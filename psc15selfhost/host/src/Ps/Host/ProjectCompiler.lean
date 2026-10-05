@@ -88,6 +88,7 @@ def psHostFindWorkspaceRoot (root : String) : IO (Option String) :=
   psHostFindWorkspaceRootWithFuel 64 root
 
 def psHostPackageDirectory : List String -> Option String
+  | "Ps" :: "Bootstrap" :: _ => some "bootstrap"
   | "Ps" :: "Foundation" :: _ => some "foundation"
   | "Ps" :: "Syntax" :: _ => some "syntax"
   | "Ps" :: "Core" :: _ => some "core"
@@ -102,6 +103,11 @@ def psHostPackageDirectory : List String -> Option String
   | "Ps" :: "Compiler" :: _ => some "compiler"
   | "Ps" :: "Erasure" :: _ => some "erasure"
   | "Ps" :: "BackendTs" :: _ => some "backend-ts"
+  | "Ps" :: "BackendJs" :: _ => some "backend-js"
+  | "Ps" :: "DriverTs" :: _ => some "driver-ts"
+  | "Ps" :: "BackendRust" :: _ => some "backend-rust"
+  | "Ps" :: "DriverRust" :: _ => some "driver-rust"
+  | "Ps" :: "BackendWasm" :: _ => some "backend-wasm"
   | _ => none
 
 def psHostImportSearchBases
@@ -260,6 +266,7 @@ def psHostElabErrorText : PsElabError -> String
   | .typeMismatch => "typeMismatch"
   | .implicitApplicationUnsupported =>
       "implicitApplicationUnsupported"
+  | .emptyCallUnsupported => "emptyCallUnsupported"
   | .unsupportedTerm => "unsupportedTerm"
   | .matchExpectedType => "matchExpectedType"
   | .matchScrutineeUnsupported => "matchScrutineeUnsupported"

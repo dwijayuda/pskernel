@@ -15,6 +15,7 @@ inductive PsCompilerError where
   | elaboration (error : PsElabError)
   | admission (error : PsCheckedAdmissionCodecError)
   | erasure (error : PsErasureError)
+  | irValidation (error : PsVerifiedIrValidationError)
 
 structure PsCompilerAdmissionReadyModule where
   declarations : List PsDeclaration
@@ -194,9 +195,9 @@ def psCompilerEnvironmentFromPrepared
       | Except.ok environment =>
           Except.ok environment
 
-def psCompilerVerifiedIrFromPrepared
+def psCompilerErasedIrFromPrepared
     (prepared : PsCompilerAdmissionReadyModule) :
-    Except PsCompilerError PsVerifiedIrModule :=
+    Except PsCompilerError PsErasedIrModule :=
   match psCompilerEnvironmentFromPrepared prepared with
   | Except.error error =>
       Except.error error
@@ -209,11 +210,24 @@ def psCompilerVerifiedIrFromPrepared
       | Except.error error =>
           Except.error (PsCompilerError.erasure error)
       | Except.ok ir =>
-          Except.ok ir
+          Except.ok (PsErasedIrModule.mk ir)
+
+def psCompilerVerifiedIrFromPrepared
+    (prepared : PsCompilerAdmissionReadyModule) :
+    Except PsCompilerError PsValidatedIrModule :=
+  match psCompilerErasedIrFromPrepared prepared with
+  | Except.error error =>
+      Except.error error
+  | Except.ok erased =>
+      match psValidateErasedIrModule erased with
+      | Except.error error =>
+          Except.error (PsCompilerError.irValidation error)
+      | Except.ok validated =>
+          Except.ok validated
 
 def psCompilerVerifiedIrFromElaborated
     (elaborated : PsElabModuleResult) :
-    Except PsCompilerError PsVerifiedIrModule :=
+    Except PsCompilerError PsValidatedIrModule :=
   match psCompilerPrepareElaborated elaborated with
   | Except.error error =>
       Except.error error
@@ -223,7 +237,7 @@ def psCompilerVerifiedIrFromElaborated
 def psCompilerVerifiedIrSource
     (sourceKind : PsCompilerSourceKind)
     (source : String) :
-    Except PsCompilerError PsVerifiedIrModule :=
+    Except PsCompilerError PsValidatedIrModule :=
   match psCompilerPrepareSource sourceKind source with
   | Except.error error =>
       Except.error error

@@ -15,7 +15,7 @@ const entry = path.join(
   "Bootstrap",
   "SelfHost.lean",
 );
-const tsCompositionModule = "Ps.BackendTs.Compiler";
+const tsCompositionModule = "Ps.DriverTs.Compiler";
 
 function moduleSourcePath(moduleName) {
   const parts = moduleName.split(".");

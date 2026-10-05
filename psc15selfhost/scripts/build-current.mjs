@@ -36,6 +36,9 @@ if (!existsSync(path.join(root, compiler))) {
 const outRoot = process.env.PSC_OUT_DIR ?? path.join("dist", "current");
 const psWorkspace = path.join(outRoot, "ps");
 const leanWorkspace = path.join(outRoot, "lean");
+const emitLeanReplay =
+  process.argv.includes("--emit-lean") ||
+  process.env.PSC_BUILD_EMIT_LEAN === "1";
 const jsCompiler = path.join(outRoot, "packages", "compiler", "index.js");
 
 run([
@@ -50,15 +53,17 @@ run([
 
 const psEntry = config.entry.replace(/\.(lean|ps)$/u, ".ps");
 
-run([
-  "scripts/emit-project-with-generated.mjs",
-  compiler,
-  path.join(psWorkspace, psEntry),
-  "--to",
-  "lean",
-  "--out",
-  leanWorkspace,
-]);
+if (emitLeanReplay) {
+  run([
+    "scripts/emit-project-with-generated.mjs",
+    compiler,
+    path.join(psWorkspace, psEntry),
+    "--to",
+    "lean",
+    "--out",
+    leanWorkspace,
+  ]);
+}
 
 run([
   "scripts/compile-with-generated.mjs",
@@ -71,10 +76,14 @@ const manifest = {
   schemaVersion: 1,
   sourceEntry: config.entry,
   proofScriptEntry: path.join(psWorkspace, psEntry).replaceAll(path.sep, "/"),
-  leanEntry: path.join(
-    leanWorkspace,
-    config.entry.replace(/\.(lean|ps)$/u, ".lean"),
-  ).replaceAll(path.sep, "/"),
+  ...(emitLeanReplay
+    ? {
+        leanEntry: path.join(
+          leanWorkspace,
+          config.entry.replace(/\.(lean|ps)$/u, ".lean"),
+        ).replaceAll(path.sep, "/"),
+      }
+    : {}),
   compiler: jsCompiler.replaceAll(path.sep, "/"),
 };
 
@@ -87,7 +96,9 @@ await writeFile(
 process.stdout.write(
   [
     `PSC1_BUILD_CURRENT_PS: ${manifest.proofScriptEntry}`,
-    `PSC1_BUILD_CURRENT_LEAN: ${manifest.leanEntry}`,
+    ...(emitLeanReplay
+      ? [`PSC1_BUILD_CURRENT_LEAN: ${manifest.leanEntry}`]
+      : ["PSC1_BUILD_CURRENT_LEAN: SKIP (fast path)"]),
     `PSC1_BUILD_CURRENT_JS: ${manifest.compiler}`,
   ].join("\n") + "\n",
 );

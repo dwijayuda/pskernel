@@ -337,16 +337,53 @@ def psWasmCollectFunctionTypesFromExprWithFuel
           match expr with
           | .literal _ => types
           | .var _ => types
-          | .intrinsic _ typeArguments arguments =>
+          | .intrinsic operation typeArguments arguments =>
               let withTypes :=
                 psWasmListFoldl
                   collectType
                   typeArguments
                   types;
+              let withIntrinsicFunction : List PsVerifiedIrType :=
+                match operation with
+                | PsVerifiedIrIntrinsic.arrayMap =>
+                    match typeArguments with
+                    | List.cons inputType rest =>
+                        match rest with
+                        | List.cons outputType tail =>
+                            match tail with
+                            | List.nil =>
+                                psWasmInsertFunctionType
+                                  withTypes
+                                  (PsVerifiedIrType.function
+                                    (List.cons inputType List.nil)
+                                    outputType)
+                            | List.cons _ _ => withTypes
+                        | List.nil => withTypes
+                    | List.nil => withTypes
+                | PsVerifiedIrIntrinsic.arrayFoldl =>
+                    match typeArguments with
+                    | List.cons elementType rest =>
+                        match rest with
+                        | List.cons accumulatorType tail =>
+                            match tail with
+                            | List.nil =>
+                                psWasmInsertFunctionType
+                                  withTypes
+                                  (PsVerifiedIrType.function
+                                    (List.cons
+                                      accumulatorType
+                                      (List.cons
+                                        elementType
+                                        List.nil))
+                                    accumulatorType)
+                            | List.cons _ _ => withTypes
+                        | List.nil => withTypes
+                    | List.nil => withTypes
+                | _ => withTypes;
               psWasmListFoldl
                 collectArgument
                 arguments
-                withTypes
+                withIntrinsicFunction
           | .lambda parameters resultType body =>
               let withParameters :=
                 psWasmCollectFunctionTypesFromParameters

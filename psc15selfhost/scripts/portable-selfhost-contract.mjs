@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process';
+import { unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -26,6 +27,9 @@ export async function checkPortableSelfhostContract(packageFilter) {
 
   if (profile.executableContract?.pscTypeScriptEntryRoots !== true) {
     throw new Error('PSC1_PORTABLE_SELFHOST_EMISSION_CONTRACT_DISABLED');
+  }
+  if (profile.executableContract?.pscProofScriptEntryRoots !== true) {
+    throw new Error('PSC1_PORTABLE_SELFHOST_PS_EMISSION_CONTRACT_DISABLED');
   }
 
   const targetMap = new Map();
@@ -93,7 +97,7 @@ export async function checkPortableSelfhostContract(packageFilter) {
     throw new Error('PSC1_PORTABLE_SELFHOST_EMISSION_NO_TARGETS');
   }
 
-  for (const [displayPath] of emissionTargets) {
+  for (const [displayPath, sourcePath] of emissionTargets) {
     process.stdout.write(
       'PSC1_PORTABLE_SELFHOST_EMIT: ' + displayPath + '\n',
     );
@@ -130,6 +134,121 @@ export async function checkPortableSelfhostContract(packageFilter) {
         'PSC1_PORTABLE_SELFHOST_EMIT_EMPTY: ' + displayPath,
       );
     }
+
+    process.stdout.write(
+      'PSC1_PORTABLE_SELFHOST_EMIT_PS: ' + displayPath + '\n',
+    );
+    const psEmission = spawnSync(
+      'lake',
+      ['exe', 'psc1', 'emit-ps', displayPath],
+      {
+        cwd: workspaceRoot,
+        env: process.env,
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024 * 1024,
+      },
+    );
+    if (psEmission.error) {
+      throw new Error(
+        'PSC1_PORTABLE_SELFHOST_EMIT_PS_EXEC_FAILED: ' +
+          displayPath +
+          ': ' +
+          psEmission.error.message,
+      );
+    }
+    if (psEmission.status !== 0) {
+      if (psEmission.stdout) process.stderr.write(psEmission.stdout);
+      if (psEmission.stderr) process.stderr.write(psEmission.stderr);
+      throw new Error(
+        'PSC1_PORTABLE_SELFHOST_EMIT_PS_FAILED: ' +
+          displayPath +
+          ': exit=' +
+          String(psEmission.status),
+      );
+    }
+    if (
+      typeof psEmission.stdout !== 'string' ||
+      psEmission.stdout.length === 0
+    ) {
+      throw new Error(
+        'PSC1_PORTABLE_SELFHOST_EMIT_PS_EMPTY: ' + displayPath,
+      );
+    }
+
+    const generatedPath = sourcePath + '.portable-selfhost.generated.ps';
+    const generatedDisplay = sourcePathForDisplay(generatedPath);
+    writeFileSync(generatedPath, psEmission.stdout, 'utf8');
+    try {
+      const psCheck = spawnSync(
+        'lake',
+        ['exe', 'psc1', 'check', generatedDisplay],
+        {
+          cwd: workspaceRoot,
+          env: process.env,
+          stdio: 'inherit',
+        },
+      );
+      if (psCheck.error) {
+        throw new Error(
+          'PSC1_PORTABLE_SELFHOST_PS_CHECK_EXEC_FAILED: ' +
+            displayPath +
+            ': ' +
+            psCheck.error.message,
+        );
+      }
+      if (psCheck.status !== 0) {
+        throw new Error(
+          'PSC1_PORTABLE_SELFHOST_PS_CHECK_FAILED: ' +
+            displayPath +
+            ': exit=' +
+            String(psCheck.status),
+        );
+      }
+
+      const psCanonical = spawnSync(
+        'lake',
+        ['exe', 'psc1', 'emit-ps', generatedDisplay],
+        {
+          cwd: workspaceRoot,
+          env: process.env,
+          encoding: 'utf8',
+          maxBuffer: 64 * 1024 * 1024,
+        },
+      );
+      if (psCanonical.error || psCanonical.status !== 0) {
+        throw new Error(
+          'PSC1_PORTABLE_SELFHOST_PS_CANONICAL_FAILED: ' + displayPath,
+        );
+      }
+      if (psCanonical.stdout !== psEmission.stdout) {
+        throw new Error(
+          'PSC1_PORTABLE_SELFHOST_PS_FIXED_POINT_MISMATCH: ' + displayPath,
+        );
+      }
+
+      const psTypeScript = spawnSync(
+        'lake',
+        ['exe', 'psc1', 'typescript', generatedDisplay],
+        {
+          cwd: workspaceRoot,
+          env: process.env,
+          encoding: 'utf8',
+          maxBuffer: 64 * 1024 * 1024,
+        },
+      );
+      if (psTypeScript.error || psTypeScript.status !== 0) {
+        throw new Error(
+          'PSC1_PORTABLE_SELFHOST_PS_TYPESCRIPT_FAILED: ' + displayPath,
+        );
+      }
+      if (psTypeScript.stdout !== result.stdout) {
+        throw new Error(
+          'PSC1_PORTABLE_SELFHOST_PS_TYPESCRIPT_PARITY: ' + displayPath,
+        );
+      }
+    } finally {
+      unlinkSync(generatedPath);
+    }
   }
 
   return {
@@ -138,6 +257,7 @@ export async function checkPortableSelfhostContract(packageFilter) {
     moduleCount: profileResult.moduleCount,
     targetCount: targets.length,
     emissionTargetCount: emissionTargets.length,
+    proofScriptEmissionTargetCount: emissionTargets.length,
   };
 }
 

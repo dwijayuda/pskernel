@@ -6,8 +6,6 @@ theorem psKernelAddQuot_idempotent_when_initialized
     psKernelAddQuot environment = Except.ok environment := by
   simp [psKernelAddQuot, h]
 
-
-
 def psKernelQuotReservedNamesForProof : List PsKernelName :=
   List.cons
     psKernelQuotName
@@ -18,7 +16,6 @@ def psKernelQuotReservedNamesForProof : List PsKernelName :=
         (List.cons
           psKernelQuotIndName
           List.nil)))
-
 
 theorem psKernelAddQuot_propagates_eq_failure
     (environment : PsKernelEnvironment)
@@ -45,12 +42,25 @@ theorem psKernelAddQuot_propagates_reserved_failure
         Except.error error) :
     psKernelAddQuot environment =
       Except.error error := by
+  have hReservedConcrete :
+      psKernelCheckQuotReservedNames
+          environment
+          (List.cons
+            psKernelQuotName
+            (List.cons
+              psKernelQuotMkName
+              (List.cons
+                psKernelQuotLiftName
+                (List.cons
+                  psKernelQuotIndName
+                  List.nil)))) =
+        Except.error error := by
+    simpa [psKernelQuotReservedNamesForProof] using hReserved
   simp [
     psKernelAddQuot,
     hInit,
     hEq,
-    psKernelQuotReservedNamesForProof,
-    hReserved
+    hReservedConcrete
   ]
 
 theorem psKernelAddQuot_success_postconditions
@@ -72,24 +82,32 @@ theorem psKernelAddQuot_success_postconditions
   | error error =>
       simp [psKernelAddQuot, hInit, hEq] at hSuccess
   | ok eqResult =>
+      cases eqResult
       cases hReserved :
           psKernelCheckQuotReservedNames
             environment
-            psKernelQuotReservedNamesForProof with
+            (List.cons
+              psKernelQuotName
+              (List.cons
+                psKernelQuotMkName
+                (List.cons
+                  psKernelQuotLiftName
+                  (List.cons
+                    psKernelQuotIndName
+                    List.nil)))) with
       | error error =>
           simp [
             psKernelAddQuot,
             hInit,
             hEq,
-            psKernelQuotReservedNamesForProof,
             hReserved
           ] at hSuccess
       | ok reservedResult =>
+          cases reservedResult
           simp [
             psKernelAddQuot,
             hInit,
             hEq,
-            psKernelQuotReservedNamesForProof,
             hReserved
           ] at hSuccess
           subst result

@@ -13,8 +13,8 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 2 |
-| B | 31 |
+| A | 4 |
+| B | 29 |
 | C | 38 |
 | D | 8 |
 | **Total canonical source/proof pairs** | **79** |
@@ -79,8 +79,8 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Checker/Reduction/PrimitiveData.lean` | **C** | Primitive base/control facts. |
 | `Checker/Reduction/PrimitiveNat.lean` | **C** | Primitive fuel/base facts. |
 | `Checker/Reduction/Primitives.lean` | **D** | Single aggregation/fuel fact. |
-| `Checker/Reduction/Whnf.lean` | **B** | Several observable WHNF rules; independent reduction relation added separately. |
-| `Checker/Reduction/WhnfCore.lean` | **B** | Zeta/fvar-let implementation rules; independent reduction relation added separately. |
+| `Checker/Reduction/Whnf.lean` | **A** | Observable WHNF rules now bridge to the independent `PsKernelReductionClosure` relation for reflexive/metadata cases. |
+| `Checker/Reduction/WhnfCore.lean` | **A** | Zeta implementation now bridges to the independent `PsKernelReductionClosure`; additional beta/delta/projection coverage remains. |
 | `Checker/ResourcePolicy.lean` | **C** | Fail-closed/resource policy cases. |
 | `Checker/Session.lean` | **C** | Session forwarding/error propagation. |
 | `Checker/State.lean` | **B** | State/cache isolation and freshness invariants. |

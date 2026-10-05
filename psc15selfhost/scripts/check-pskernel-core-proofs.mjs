@@ -18,10 +18,58 @@ function collect(dir) {
   return out;
 }
 
-const files = collect(proofRoot).sort();
+const allFiles = collect(proofRoot).sort();
 
-if (files.length === 0) {
+if (allFiles.length === 0) {
   throw new Error("PSKERNEL_CORE_PROOFS_EMPTY");
+}
+
+function changedProofs() {
+  const result = spawnSync(
+    "git",
+    [
+      "diff",
+      "--name-only",
+      "--relative",
+      "HEAD^",
+      "HEAD",
+      "--",
+      "packages/pskernel-core/proof",
+    ],
+    {
+      cwd: root,
+      encoding: "utf8",
+      shell: process.platform === "win32",
+    },
+  );
+
+  if (result.status !== 0 || result.error) {
+    return [];
+  }
+
+  const changed = new Set(
+    result.stdout
+      .split(/\r?\n/)
+      .map((value) => value.trim().replaceAll("\\", "/"))
+      .filter((value) => value.endsWith(".proof.lean")),
+  );
+
+  return allFiles.filter((file) =>
+    changed.has(relative(root, file).replaceAll("\\", "/")),
+  );
+}
+
+const changed = changedProofs();
+const changedSet = new Set(changed);
+const files = [
+  ...changed,
+  ...allFiles.filter((file) => !changedSet.has(file)),
+];
+
+if (changed.length > 0) {
+  process.stdout.write(
+    `PSKERNEL_CORE_PROOFS_CHANGED_FIRST: files=${changed.length}\n`,
+  );
 }
 
 for (const file of files) {

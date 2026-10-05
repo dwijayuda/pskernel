@@ -328,3 +328,124 @@ theorem psKernelInferCore_const_inferOnly_refines_typing
         info
         (hLookupSound name info hFind)
         hLevels
+
+
+theorem psKernelInferCore_app_checked_refines_typing
+    (remaining : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state fnState forallState argState : PsKernelCheckerState)
+    (fn arg fnType argType : PsKernelExpr)
+    (view : PsKernelForallView)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hFn :
+      psKernelInferCoreWithFuel
+          remaining
+          whnf
+          defeq
+          nextContext
+          state
+          fn
+          false =
+        Except.ok (Prod.mk fnType fnState))
+    (hForall :
+      psKernelEnsureForallWith
+          whnf
+          nextContext
+          fnState
+          fnType =
+        Except.ok (Prod.mk view forallState))
+    (hArg :
+      psKernelInferCoreWithFuel
+          remaining
+          whnf
+          defeq
+          nextContext
+          forallState
+          arg
+          false =
+        Except.ok (Prod.mk argType argState))
+    (hEq :
+      psKernelExprEq argType view.domain = true)
+    (hFnTyping :
+      PsKernelTypingJudgment
+        nextContext.environment
+        nextContext.localContext
+        fn
+        fnType)
+    (hFnType :
+      PsKernelDefEqJudgment
+        nextContext.environment
+        nextContext.localContext
+        fnType
+        (PsKernelExpr.forallE
+          view.name
+          view.domain
+          view.body
+          view.binderInfo))
+    (hArgTyping :
+      PsKernelTypingJudgment
+        nextContext.environment
+        nextContext.localContext
+        arg
+        argType)
+    (hArgType :
+      PsKernelDefEqJudgment
+        nextContext.environment
+        nextContext.localContext
+        argType
+        view.domain) :
+    psKernelInferCoreWithFuel
+        (Nat.succ remaining)
+        whnf
+        defeq
+        context
+        state
+        (PsKernelExpr.app fn arg)
+        false =
+      Except.ok
+        (Prod.mk
+          (psKernelExprInstantiate1 view.body arg)
+          argState) ∧
+    PsKernelTypingJudgment
+      nextContext.environment
+      nextContext.localContext
+      (PsKernelExpr.app fn arg)
+      (psKernelExprInstantiate1 view.body arg) := by
+  constructor
+  · simp [
+      psKernelInferCoreWithFuel,
+      psKernelInferCacheEligible,
+      psKernelCacheInferResult,
+      hDepth,
+      hFn,
+      hForall,
+      hArg,
+      hEq
+    ]
+  · exact
+      PsKernelTypingJudgment.app
+        fn
+        arg
+        fnType
+        argType
+        view.domain
+        view.body
+        view.name
+        view.binderInfo
+        hFnTyping
+        hFnType
+        hArgTyping
+        hArgType

@@ -64,11 +64,14 @@ theorem psKernelEnvironmentIndexFindWorker_setWorker_same
   | zero =>
       rfl
   | succ remaining ih =>
-      simp [
-        psKernelEnvironmentIndexSetWorker,
-        psKernelEnvironmentIndexFindWorker,
-        ih
-      ]
+      cases hParity :
+          Nat.beq (Nat.mod hash 2) 0 <;>
+        simp [
+          psKernelEnvironmentIndexSetWorker,
+          psKernelEnvironmentIndexFindWorker,
+          hParity,
+          ih
+        ]
 
 theorem psKernelEnvironmentIndexRemoveNameWorker_find_none
     (constants : List PsKernelConstantInfo)
@@ -83,11 +86,16 @@ theorem psKernelEnvironmentIndexRemoveNameWorker_find_none
   | nil =>
       rfl
   | cons info rest ih =>
-      simp [
-        psKernelEnvironmentIndexRemoveNameWorker,
-        psKernelFindConstantInList,
-        ih
-      ]
+      cases hName :
+          psKernelNameEq
+            (psKernelConstantInfoName info)
+            name <;>
+        simp [
+          psKernelEnvironmentIndexRemoveNameWorker,
+          psKernelFindConstantInList,
+          hName,
+          ih
+        ]
 
 theorem psKernelEnvironmentIndexRemoveName_find_none
     (name : PsKernelName)
@@ -116,22 +124,19 @@ theorem psKernelEnvironmentIndexFind_setWorker_same_name
           constants)
         name =
       constants := by
-  change
-    psKernelEnvironmentIndexFindWorker
-        16
-        (psKernelEnvironmentIndexSetWorker
-          16
-          index
+  cases hParity :
+      Nat.beq
+        (Nat.mod
           (psKernelEnvironmentNameHash name)
-          constants)
-        (psKernelEnvironmentNameHash name) =
-      constants
-  exact
-    psKernelEnvironmentIndexFindWorker_setWorker_same
-      16
-      index
-      (psKernelEnvironmentNameHash name)
-      constants
+          2)
+        0 <;>
+    simp [
+      psKernelEnvironmentIndexFind,
+      psKernelEnvironmentIndexSetWorker,
+      psKernelEnvironmentIndexFindWorker,
+      hParity,
+      psKernelEnvironmentIndexFindWorker_setWorker_same
+    ]
 
 theorem psKernelEnvironmentIndexFind_build_cons
     (info : PsKernelConstantInfo)

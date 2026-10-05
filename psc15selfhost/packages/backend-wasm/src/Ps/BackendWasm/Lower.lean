@@ -3352,10 +3352,10 @@ def psWasmLowerLambdaWith
                                       psListAppend
                                         [PsWasmInstruction.refFunc lambdaName]
                                         (psListAppend
-                                          psWasmCaptureConstructionInstructions
-                                                                                    captures
+                                          (psWasmCaptureConstructionInstructions
+                                            captures)
                                           [PsWasmInstruction.structNew
-                                                                                    subtypeName])
+                                            subtypeName])
                                     state := finalState
                                   }
 

@@ -98,6 +98,10 @@ jobs:
         working-directory: psc15selfhost
         run: lake exe psc1_erasure_tests
 
+      - name: Check generalized erasure source equality guard
+        working-directory: psc15selfhost
+        run: node scripts/check-erasure-primitive-application-equality-selfhost-source-syntax.mjs
+
       - name: Run project query graph corpus
         working-directory: psc15selfhost
         run: lake exe psc1_project_query_graph_tests

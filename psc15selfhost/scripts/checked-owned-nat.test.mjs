@@ -23,7 +23,7 @@ test('default checks its Nat prelude and derived recursor before user declaratio
   const {result,descriptor}=await checkAdmissionsWithKernel(wire([
     def('First',C('Nat'),numeral('Nat',1)),def('Fold',C('Nat'),fold('Nat',4)),
   ]));
-  assert.equal(descriptor.selector,'pskernel-core');
+  assert.equal(descriptor.selector,'pskernel-core.old3');
   assert.equal(result.profile,'owned-uniform-algebraic/11');
   assert.equal(result.accepted,true,JSON.stringify(result));
   assert.equal(result.admissionCount,2);
@@ -40,7 +40,7 @@ for(const [label,change] of [
 ])test('Nat boundary rejects '+label+' without reference fallback',async()=>{
   const entry=nat('Counter');change(entry.declaration);
   const {result,descriptor}=await checkAdmissionsWithKernel(wire([entry]));
-  assert.equal(descriptor.selector,'pskernel-core');assert.equal(result.accepted,false);
+  assert.equal(descriptor.selector,'pskernel-core.old3');assert.equal(result.accepted,false);
   assert.equal(result.admissionIndex,0);assert.equal(result.environment,undefined);
 });
 test('Nat initialization shares the total transition budget even for an empty module',async()=>{
@@ -74,7 +74,7 @@ test('two nullary constructors named zero/succ form an enum without Nat authorit
   assert.equal(accepted.accepted,true,JSON.stringify(accepted));
   for(const bad of [def('BadSuccessor',C('Counter'),numeral('Counter',1)),def('BadFold',C('Counter'),fold('Counter',1))]){
     const {result,descriptor}=await checkAdmissionsWithKernel(wire([entry,bad]));
-    assert.equal(descriptor.selector,'pskernel-core');assert.equal(result.accepted,false,JSON.stringify(result));
+    assert.equal(descriptor.selector,'pskernel-core.old3');assert.equal(result.accepted,false,JSON.stringify(result));
     assert.equal(result.admissionIndex,1);assert.equal(result.environment,undefined);
   }
 });

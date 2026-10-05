@@ -1,86 +1,80 @@
-# @proofscript/pskernel-core
+# PSKernel Core
 
-**0.1.0-checker.14 — private experimental dependent term-checker checkpoint.**
+This is the canonical portable PSKernel implementation, formerly
+`packages/pskernel-selfhost`. Its package identity is `@proofscript/pskernel-core`
+and its Lean modules use `Ps.KernelCore`. The former experimental core is
+preserved in `../pskernel-core.old3`; see [PACKAGE_RENAME.md](PACKAGE_RENAME.md)
+for the migration map and the separate provider-promotion boundary.
 
-Regenerated with the pinned PSC seed, with all 651 tests passing and fresh build
-and reference evidence. See `../../docs/continuity/OWNED_UNIFORM_ALGEBRAIC_2026-10-03.md`.
+## Project documentation hierarchy
 
-This checker is preserved as an explicit private experimental alternative. It is no
-longer the default checker and is no longer part of the compiler bootstrap source
-closure. The host adapter runs the generated semantic machine and fails closed outside
-its supported fragment. Historical owned-prefix evidence admits the unit,
-`PsSourcePos` and `PsSourceSpan`, after checking the initial `Nat` prelude.
-The next entry, `PsLexCursor`, rejects an unknown dependency; the preserved complete
-batch decodes all 1,714 entries and rejects semantically at PsLexCursor (index 3).
-The former joint closure had 91 modules (55 compiler plus 36 owned kernel); the
-current compiler-only bootstrap deliberately excludes those 36 kernel modules.
+Use these files in this order when making development decisions:
 
-This package now executes an owned checking fragment, rather than data helpers
-alone. It is **not the authoritative PSC2 kernel**, a full Lean-compatible
-checker, a jointly self-hosted compiler/kernel, or a published npm release.
+1. **`PSKERNEL_CORE_ARCHITECTURE.md`** — normative architecture decisions and anti-drift guardrails.
+2. **`PSKERNEL_REFERENCE.md`** — canonical human architecture reference: Lean theory/source mapping, current audit, final target structure, trust classes, dependency law, scoring, and migration plan.
+3. **`GITHUB_FIRST_WORKFLOW.md`** — canonical GitHub/cloud operating rules for this kernel topic branch.
+4. **`DEVELOPMENT_PLAN.md`** — active phases, milestones, task-selection rule, and exit gates.
+5. **`KERNEL_THEORY.md`** — theory-oriented explanation and recommended reading order.
+6. **`KERNEL_RULE_REFERENCE.md`** — generated rule → implementation → Lean locator → test table.
+7. **`LEAN_4_34_COMPATIBILITY.json`** — machine-readable feature-completeness matrix for Lean 4.34.0.
+8. **`LEAN_4_34_CONFORMANCE.json`** — machine-readable concrete test coverage for every compatibility rule.
+9. **`SELFHOST_EVIDENCE.json`** — optional historical/generated-bootstrap checkpoint evidence; not a normal development gate.
+10. **`KERNEL_CONTRACT_V1.md`** — checked public entry points, resource outcomes and integration boundary.
+11. **`PSKERNEL_ARCHITECTURE.json`**, **`LEAN_4_34_KERNEL_RULES.json`** and **`PSKERNEL_TCB.json`** — enforced ownership, executable rule evidence and trust inventory.
+12. **`ARCHITECTURE_MIGRATION_REPORT.md`** — completed production migration and preservation evidence.
 
-The public package export is still only immutable `kernelInfo`. The internal
-machines check closed universe-polymorphic terms with dependent function types, typed
-lambdas, applications, lets and earlier admitted transparent definitions.
-Conversion implements beta, zeta, transparent delta and alpha comparison, with
-bounded universe normalization. The generated unit-inductive admission machine
-derives a recursor and implements its constructor iota rule. The fragment has
-one family, no term parameters or indices, and one constructor with no fields.
-The monomorphic zero/successor fragment also derives a dependent recursor and
-checks its recursive iota rules. Generated bootstrap starts empty and checks the
-fixed Nat declaration through that same admission machine before user declarations.
-Natural literals check only after owned Nat-family metadata is validated;
-conversion and recursor reduction share the bounded transition budget.
-The new record fragment admits one monomorphic Type-valued family with closed,
-nonrecursive Type-valued fields. It checks field and constructor types in bounded
-source machines and derives a checked dependent eliminator type and field metadata.
-Record iota and projection typing/reduction run against validated closed-record metadata.
-Parameterized projections, dependent/indexed fields and Prop/higher-universe record families
-remain outside this fragment. String literals are validated against a fixed intrinsic String type; String operations,
-arithmetic and other missing prelude constants remain unsupported. See PRIMITIVE_POLICY.md.
-Nullary enumerations derive checked dependent recursors and computed branch reduction.
-Closed nonrecursive payload sums are checked. The uniform algebraic route additionally checks
-Type0 type parameters and direct recursion, derives dependent eliminators and computes
-recursive hypotheses. Nested, indexed, mutual and universe-polymorphic families remain
-unsupported. See ALGEBRAIC.md for the production routing boundary and the separately
-recorded native reference scope discrepancy.
-Sequential internal admission starts from the checked prelude,
-rejects forward/self references and duplicates, and returns no environment on a
-failed batch. The generated implementation is not edited by hand.
+When documents disagree, the architecture guardrails and machine-enforced compatibility/self-host gates take precedence over historical planning text.
 
-See the current continuity checkpoint and CAPABILITIES.json for supported
-judgments and remaining release gates. **CHECKER.md** records the original
-checker.0 judgments, tests and repaired defects as historical receipt evidence.
-The target architecture remains in ARCHITECTURE.md. FOUNDATION.md and
-BINDING_UNIVERSES.md describe earlier checkpoints, not current release readiness.
+This package is the PSC1-profile implementation of the mature
+`packages/pskernel/PSC1Kernel` reference kernel.
 
-## Execute the installed development package
+Official pinned Lean 4.34 behavior and source remain the semantic compatibility
+authority. The frozen `packages/pskernel/PSC1Kernel` package remains a valuable
+regression/differential oracle and should not be reshaped merely to satisfy
+bootstrap syntax restrictions. This package instead
+uses the source patterns already exercised by the compiler-only self-host fixed
+point.
 
-The tarball contains the generated JavaScript, canonical PS, TypeScript, source,
-tests and pinned evidence. It has no runtime dependencies or installation hooks.
+## Rules
 
-```sh
-npm test
-npm run verify:build
-npm run verify:evidence
-npm run release:check  # Expected to FAIL: this is not a release candidate.
+- Lean 4.34 behavior remains the semantic authority.
+- Official Lean 4.34 behavior/source is the semantic authority; `packages/pskernel/PSC1Kernel` remains a frozen regression/differential oracle.
+- This source tree must pass the same `check-psc1-source.mjs --all-portable`
+  gate as other portable compiler packages.
+- No `Lean.*`, `Std.*`, `unsafe`, `extern`, `implemented_by`, custom
+  macros/elaboration, `namespace`, `abbrev`, or `mutual` conveniences.
+- Controlled executable `partial def` may exist during migration, but it is
+  tracked separately and cannot turn failure, exhaustion, or nontermination
+  into declaration acceptance.
+- Replay, JSON import, test adapters, and host policy remain outside the
+  semantic kernel package.
+
+## Source layout
+
+Production architecture migration is complete. The source tree contains only
+the 79 canonical modules used by `SelfHost.lean`:
+
+```text
+src/Ps/KernelCore/
+  Core/
+  Environment/
+  Runtime/Acceleration/
+  Runtime/Capability/
+  Checker/
+  Admission/
+  API/
+  SelfHost.lean
 ```
 
-Rebuilds and optional external reference tests require **explicitly supplied**
-executables matching manifests/TOOLCHAIN.json and TypeScript 5.8.3 on PATH:
+Import `Ps.KernelCore.API.Kernel` for the checked public contract, or the
+specific canonical owner for low-level integration. Temporary migration import
+paths (`TypeChecker*`, `Theory/*`, and the old flat modules) have been removed.
+All repository callers and Lake registrations use the canonical hierarchy.
+The superseded migration inventory remains available in Git history.
 
-```sh
-PSC1=/absolute/path/to/pinned/psc1 npm run build
-PSC1=/absolute/path/to/pinned/psc1 LEAN_PROVIDER=/absolute/path/to/pinned/provider npm run test:oracle
-PSC1=/absolute/path/to/pinned/psc1 LEAN_PROVIDER=/absolute/path/to/pinned/provider npm run test:semantic-oracle
-PSC1=/absolute/path/to/pinned/psc1 LEAN_PROVIDER=/absolute/path/to/pinned/provider npm run test:checker-oracle
-LEAN_PROVIDER=/absolute/path/to/pinned/provider npm run test:level-differential
-LEAN_PROVIDER=/absolute/path/to/pinned/provider npm run test:checker-differential
-```
+The joint compiler/kernel fixed point is optional/manual and reserved for
+explicit bootstrap/release checkpoints.
 
-The reference provider is test-only. It never supplies the new implementation's
-runtime answers. No seed, toolchain or fallback checker is downloaded by these
-commands, installation or verification.
-
-Publication, full compatibility and joint self-hosting gates remain closed.
-Do not use this checkpoint as a trusted proof-certification boundary.
+Declarations remain explicitly prefixed rather than relying on Lean namespace
+conveniences. Tests compare the portable implementation against
+the frozen reference implementation before each semantic slice is promoted.

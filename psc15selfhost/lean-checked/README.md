@@ -7,7 +7,7 @@ closure. The default host-side checker is `lean434-wasm`, provided by
 | Selector | Implementation | Role |
 | --- | --- | --- |
 | lean434-wasm | Lean 4.34.0 kernel in WebAssembly | Default host-side checker |
-| pskernel-core | PSC-generated owned JavaScript | Explicit experimental alternative; off-bootstrap |
+| pskernel-core.old3 | PSC-generated owned JavaScript | Explicit experimental alternative; off-bootstrap |
 | lean434 | Native Lean 4.34.0 kernel | Explicit native alternative |
 
 No rejection, timeout, exhaustion or provider error selects another checker. The

@@ -21,7 +21,7 @@ const identity = binder('lam', 'P', U(0), binder('lam', 'p', B(0), B(0)));
 test('default runs generated owned semantics for empty, dependent and sequential modules', async () => {
   for (const ds of [[], [alias()], [definition('Id', identityType, identity), definition('Use', identityType, C('Id'))]]) {
     const { result, descriptor } = await checkAdmissionsWithKernel(wire(ds));
-    assert.equal(descriptor.selector, 'pskernel-core');
+    assert.equal(descriptor.selector, 'pskernel-core.old3');
     assert.equal(result.provider, 'psc-generated-owned');
     assert.equal(result.accepted, true, JSON.stringify(result));
     assert.equal(result.admissionCount, ds.length);
@@ -61,7 +61,7 @@ for (const [label, change] of [
   const a = alias(); change(a);
   const { result, descriptor } = await checkAdmissionsWithKernel(wire([a]));
   assert.equal(result.accepted, false, JSON.stringify(result));
-  assert.equal(descriptor.selector, 'pskernel-core');
+  assert.equal(descriptor.selector, 'pskernel-core.old3');
   assert.equal(result.admissionIndex, 0);
 });
 test('structured names do not collide with dotted root names', async () => {
@@ -85,7 +85,7 @@ test('default admits a polymorphic identity and checks distinct universe instant
     const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]));
     assert.equal(result.accepted, true, JSON.stringify(result));
     assert.equal(result.profile, 'owned-uniform-algebraic/11');
-    assert.equal(descriptor.selector, 'pskernel-core');
+    assert.equal(descriptor.selector, 'pskernel-core.old3');
   }
 });
 for (const [label, levels, typeLevel, errorKind] of [
@@ -96,7 +96,7 @@ for (const [label, levels, typeLevel, errorKind] of [
 ]) test(`default rejects ${label} polymorphic instantiation without fallback`, async () => {
   const use = definition('Use', polyType(typeLevel), { ...C('Poly'), ls: levels });
   const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]));
-  assert.equal(descriptor.selector, 'pskernel-core');
+  assert.equal(descriptor.selector, 'pskernel-core.old3');
   assert.equal(result.accepted, false);
   assert.equal(result.errorKind, errorKind);
   assert.equal(result.admissionIndex, 1);

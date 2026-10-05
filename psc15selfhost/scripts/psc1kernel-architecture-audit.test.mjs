@@ -8,22 +8,22 @@ import { auditArchitecture } from "./psc1kernel-architecture-audit.mjs";
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "pskernel-architecture-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  const packageRoot = path.join(root, "packages/pskernel-selfhost");
-  const sourceRoot = path.join(packageRoot, "src/Ps/KernelSelfHost");
+  const packageRoot = path.join(root, "packages/pskernel-core");
+  const sourceRoot = path.join(packageRoot, "src/Ps/KernelCore");
   fs.mkdirSync(sourceRoot, { recursive: true });
-  const prefix = "Ps.KernelSelfHost.";
+  const prefix = "Ps.KernelCore.";
   const target = { version: "4.34.0", gitCommit: "pinned-test-target" };
   const manifest = {
     target,
     semanticRootModule: prefix + "SelfHost",
-    semanticRootPath: "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
+    semanticRootPath: "packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
     semanticModulePrefix: prefix,
     migration: {
       finalArchitectureAdopted: true,
       finalArchitectureImplemented: false,
       migrationShims: [prefix + "CheckerState"],
     },
-    forbiddenSemanticImportPrefixes: ["PSC1Kernel.", prefix + "Compat.", "KernelSelfHost."],
+    forbiddenSemanticImportPrefixes: ["PSC1Kernel.", prefix + "Compat.", "KernelCore."],
     currentRoleFiles: [],
     semanticRoles: [],
     trustStatuses: [],
@@ -40,21 +40,21 @@ function fixture(t) {
   json("LEAN_4_34_COMPATIBILITY.json", { target });
   json("LEAN_4_34_CONFORMANCE.json", { target });
   json("PSKERNEL_TCB.json", { target, productionSemanticRoot: prefix + "SelfHost" });
-  lean("SelfHost", "import Ps.KernelSelfHost.Checker.State\n");
+  lean("SelfHost", "import Ps.KernelCore.Checker.State\n");
   lean("Checker/State", "def testState : Bool := true\n");
-  lean("CheckerState", "import Ps.KernelSelfHost.Checker.State\n/- Forwarding only. -/\n");
+  lean("CheckerState", "import Ps.KernelCore.Checker.State\n/- Forwarding only. -/\n");
   return { root, lean, json, manifest };
 }
 
 for (const missing of ["SelfHost", "Checker.State", "CheckerState"]) {
   test("reject missing Lake registration: " + missing, (t) => {
     const f = fixture(t);
-    f.manifest.lakeLibrary = "PsKernelSelfHost";
+    f.manifest.lakeLibrary = "PsKernelCore";
     f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
     const roots = ["SelfHost", "Checker.State", "CheckerState"].filter((name) => name !== missing);
     fs.writeFileSync(path.join(f.root, "lakefile.lean"),
-      "lean_lib PsKernelSelfHost where\n  roots := #[" + roots.map((name) => "`Ps.KernelSelfHost." + name).join(", ") + "]\n" +
-      "lean_lib Other where\n  roots := #[`Ps.KernelSelfHost." + missing + "]\n");
+      "lean_lib PsKernelCore where\n  roots := #[" + roots.map((name) => "`Ps.KernelCore." + name).join(", ") + "]\n" +
+      "lean_lib Other where\n  roots := #[`Ps.KernelCore." + missing + "]\n");
     assert.throws(() => auditArchitecture(f.root), /ARCH_LAKE_MODULE_MISSING/);
   });
 }
@@ -67,24 +67,24 @@ function ruleFixture(t) {
     target: f.manifest.target, rules: [{ id: "RULE", pskernelSymbol: "testState" }],
   });
   const rule = {
-    id: "RULE", parentId: "RULE", ownerModule: "Ps.KernelSelfHost.Checker.State",
+    id: "RULE", parentId: "RULE", ownerModule: "Ps.KernelCore.Checker.State",
     implementationSymbols: ["testState"],
-    evidence: [{ testFile: "test/PsKernelSelfHostFoundationTests.lean", testSymbol: "focused", coverage: "direct-invariant" }],
+    evidence: [{ testFile: "test/PsKernelCoreFoundationTests.lean", testSymbol: "focused", coverage: "direct-invariant" }],
   };
   const inventory = { target: f.manifest.target, rules: [rule] };
   f.json("RULES.json", inventory);
   fs.mkdirSync(path.join(f.root, "test"));
-  const testFile = path.join(f.root, "test/PsKernelSelfHostFoundationTests.lean");
+  const testFile = path.join(f.root, "test/PsKernelCoreFoundationTests.lean");
   fs.writeFileSync(testFile, "def focused : Bool := true\ndef main : Bool := focused\n");
   return { ...f, rule, inventory, testFile };
 }
 
 test("reject a deleted module still registered with Lake", (t) => {
   const f = fixture(t);
-  f.manifest.lakeLibrary = "PsKernelSelfHost";
+  f.manifest.lakeLibrary = "PsKernelCore";
   f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
   fs.writeFileSync(path.join(f.root, "lakefile.lean"),
-    "lean_lib PsKernelSelfHost where\n  roots := #[`Ps.KernelSelfHost.SelfHost, `Ps.KernelSelfHost.Checker.State, `Ps.KernelSelfHost.CheckerState, `Ps.KernelSelfHost.Deleted]\n");
+    "lean_lib PsKernelCore where\n  roots := #[`Ps.KernelCore.SelfHost, `Ps.KernelCore.Checker.State, `Ps.KernelCore.CheckerState, `Ps.KernelCore.Deleted]\n");
   assert.throws(() => auditArchitecture(f.root), /ARCH_LAKE_STALE_MODULE/);
 });
 
@@ -120,7 +120,7 @@ test("reject a missing top-level compatibility mapping", (t) => {
 
 test("reject a rule assigned to an unknown owner", (t) => {
   const f = ruleFixture(t);
-  f.rule.ownerModule = "Ps.KernelSelfHost.Checker.Missing";
+  f.rule.ownerModule = "Ps.KernelCore.Checker.Missing";
   f.json("RULES.json", f.inventory);
   assert.throws(() => auditArchitecture(f.root), /ARCH_RULE_OWNER/);
 });
@@ -153,7 +153,7 @@ test("comments and strings do not create imports; trailing comments preserve imp
   f.lean("SelfHost", `/- Outer /- nested -/ comment
 import PSC1Kernel.Fake
 -/
-import Ps.KernelSelfHost.Checker.State -- owner
+import Ps.KernelCore.Checker.State -- owner
 def note : String := "import PSC1Kernel.Fake"
 `);
   assert.match(auditArchitecture(f.root), /closureModules=2/);
@@ -161,7 +161,7 @@ def note : String := "import PSC1Kernel.Fake"
 
 for (const source of [
   "import PSC1Kernel.Hidden -- trailing comment\n",
-  "import Ps.KernelSelfHost.Checker.State PSC1Kernel.Hidden\n",
+  "import Ps.KernelCore.Checker.State PSC1Kernel.Hidden\n",
   "  public import PSC1Kernel.Hidden /- block comment -/\n",
 ]) {
   test("reject hidden reference import: " + source.trim(), (t) => {
@@ -179,25 +179,25 @@ test("reject host imports outside the semantic package", (t) => {
 
 test("reject an import whose syntax cannot be audited", (t) => {
   const f = fixture(t);
-  f.lean("SelfHost", "import\nPs.KernelSelfHost.Checker.State\n");
+  f.lean("SelfHost", "import\nPs.KernelCore.Checker.State\n");
   assert.throws(() => auditArchitecture(f.root), /ARCH_IMPORT_SYNTAX/);
 });
 
 test("reject a transitive migration shim in the semantic closure", (t) => {
   const f = fixture(t);
-  f.lean("Checker/State", "import Ps.KernelSelfHost.CheckerState\n");
+  f.lean("Checker/State", "import Ps.KernelCore.CheckerState\n");
   assert.throws(() => auditArchitecture(f.root), /ARCH_SHIM_IN_SEMANTIC_ROOT/);
 });
 
 test("reject declarations added to a forwarding shim", (t) => {
   const f = fixture(t);
-  f.lean("CheckerState", "import Ps.KernelSelfHost.Checker.State\ndef secondState : Bool := false\n");
+  f.lean("CheckerState", "import Ps.KernelCore.Checker.State\ndef secondState : Bool := false\n");
   assert.throws(() => auditArchitecture(f.root), /ARCH_NON_FORWARDING_SHIM/);
 });
 
 test("reject a shim forwarding to a different owner", (t) => {
   const f = fixture(t);
-  f.lean("CheckerState", "import Ps.KernelSelfHost.SelfHost\n");
+  f.lean("CheckerState", "import Ps.KernelCore.SelfHost\n");
   assert.throws(() => auditArchitecture(f.root), /ARCH_NON_FORWARDING_SHIM/);
 });
 
@@ -216,20 +216,20 @@ test("reject target drift", (t) => {
 
 test("reject a checker import across a configured layer fence", (t) => {
   const f = fixture(t);
-  f.manifest.importFences = [{ from: ["Ps.KernelSelfHost.Checker."], forbidden: ["Ps.KernelSelfHost.SelfHost"] }];
+  f.manifest.importFences = [{ from: ["Ps.KernelCore.Checker."], forbidden: ["Ps.KernelCore.SelfHost"] }];
   f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
-  f.lean("Checker/State", "import Ps.KernelSelfHost.SelfHost\n");
+  f.lean("Checker/State", "import Ps.KernelCore.SelfHost\n");
   assert.throws(() => auditArchitecture(f.root), /ARCH_IMPORT_FENCE/);
 });
 
 test("validate every forwarding shim for an owner with multiple legacy paths", (t) => {
   const f = fixture(t);
-  f.manifest.canonicalOwners[0].legacyShims = ["Ps.KernelSelfHost.OldState"];
-  f.manifest.migration.migrationShims.push("Ps.KernelSelfHost.OldState");
+  f.manifest.canonicalOwners[0].legacyShims = ["Ps.KernelCore.OldState"];
+  f.manifest.migration.migrationShims.push("Ps.KernelCore.OldState");
   f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
-  f.lean("OldState", "import Ps.KernelSelfHost.Checker.State\n");
+  f.lean("OldState", "import Ps.KernelCore.Checker.State\n");
   assert.match(auditArchitecture(f.root), /closureModules=2/);
-  f.lean("OldState", "import Ps.KernelSelfHost.SelfHost\n");
+  f.lean("OldState", "import Ps.KernelCore.SelfHost\n");
   assert.throws(() => auditArchitecture(f.root), /ARCH_NON_FORWARDING_SHIM/);
 });
 
@@ -242,7 +242,7 @@ test("reject a registered shim without a declared owner", (t) => {
 
 test("reject duplicate recursion owners even outside the semantic closure", (t) => {
   const f = fixture(t);
-  f.manifest.recursiveWiring = { module: "Ps.KernelSelfHost.Checker.State", symbols: ["testState"] };
+  f.manifest.recursiveWiring = { module: "Ps.KernelCore.Checker.State", symbols: ["testState"] };
   f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
   assert.match(auditArchitecture(f.root), /closureModules=2/);
   f.lean("Hidden", "def testState : Bool := false\n");
@@ -251,7 +251,7 @@ test("reject duplicate recursion owners even outside the semantic closure", (t) 
 
 test("reject a recursion symbol moved away from its declared owner", (t) => {
   const f = fixture(t);
-  f.manifest.recursiveWiring = { module: "Ps.KernelSelfHost.Checker.State", symbols: ["testState"] };
+  f.manifest.recursiveWiring = { module: "Ps.KernelCore.Checker.State", symbols: ["testState"] };
   f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
   f.lean("Checker/State", "");
   f.lean("Hidden", "def testState : Bool := false\n");

@@ -139,6 +139,7 @@ export function runBenchmark(binary, count, output) {
     ...Object.entries(report.pskernelOverLean).map(([name, value]) =>
       `| ${name} | ${value.median.toFixed(2)}x | ${value.min.toFixed(2)}–${value.max.toFixed(2)}x |`), '',
     'All benchmark success counts validated. Full compiler/kernel fixed-point generation was not run.', '',
+    'Untimed cache diagnostics (first sample):', '', '```text', ...samples[0].profiles, '```', '',
   ].join('\n');
   writeFileSync(`${output}.md`, markdown);
   process.stdout.write(markdown);

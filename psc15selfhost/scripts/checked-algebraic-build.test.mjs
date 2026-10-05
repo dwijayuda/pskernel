@@ -6,7 +6,7 @@ const listLean='inductive OwnedList (a : Type) where\n  | nil\n  | cons (head : 
 const listPs='inductive OwnedList (a : Type) where {\n  | nil;\n  | cons (head : a) (tail : OwnedList(a));\n};\ndef count (xs : OwnedList(Nat)) : Nat := match xs with {\n  | OwnedList.nil => 0;\n  | OwnedList.cons head tail => Nat.succ(count(tail));\n};\ndef answer : Nat := count(OwnedList.cons(7, OwnedList.cons(11, OwnedList.nil)));\n';
 for(const [label,lean,ps,answer]of [['option',optionLean,optionPs,11n],['recursive-list',listLean,listPs,2n]])for(const kind of ['lean','ps'])test('real '+kind+' '+label+' is owned-checked, emitted and executed',{skip:!existsSync(seed)},async()=>{
  const dir=await mkdtemp(path.join(tmpdir(),'psc2-owned-algebraic-'));try{await writeFile(path.join(dir,'package.json'),'{"type":"module"}');const entryPath=path.join(dir,'Main.'+kind),outputPath=path.join(dir,'out.js');await writeFile(entryPath,kind==='lean'?lean:ps);
- const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});assert.equal(receipt.kernel.selector,'pskernel-core');assert.equal(receipt.provider.profile,'owned-uniform-algebraic/11');assert.equal((await import(pathToFileURL(outputPath).href)).answer,answer);
+ const receipt=await buildChecked({entryPath,outputPath,seedPath:seed});assert.equal(receipt.kernel.selector,'pskernel-core.old3');assert.equal(receipt.provider.profile,'owned-uniform-algebraic/11');assert.equal((await import(pathToFileURL(outputPath).href)).answer,answer);
  const input=JSON.parse(await readFile(path.join(dir,'out.admissions.json'),'utf8'));assert(input.admissions.some(x=>x.kind==='inductive'&&x.declaration.np===1));
  }finally{await rm(dir,{recursive:true,force:true});}
 });

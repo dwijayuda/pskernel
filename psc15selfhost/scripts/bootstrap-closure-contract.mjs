@@ -20,6 +20,7 @@ export const forbiddenBootstrapPackageNames = Object.freeze([
   "backend-wasm",
   "pskernel",
   "pskernel-core",
+  "pskernel-core.old3",
   "pskernel-lean",
   "pskernel-lean-wasm",
 ]);

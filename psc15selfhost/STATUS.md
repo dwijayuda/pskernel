@@ -13,6 +13,6 @@ The canonical compiler fixed point now passes:
 - generated JavaScript SHA-256: `74dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76`
 - TypeScript compiler pin: **5.8.3**
 
-The generated owned `@proofscript/pskernel-core` checker.14 work is preserved as a private experimental alternative, with historical evidence intact, but it is not a bootstrap dependency and is not the default checker. No fallback is performed between checker implementations.
+The generated owned `@proofscript/pskernel-core.old3` checker.14 work is preserved as a private experimental alternative, with historical evidence intact, but it is not a bootstrap dependency and is not the default checker. No fallback is performed between checker implementations.
 
 The remaining completion gate for this workstream is the **default Lean-WASM checked fixed point**: bootstrap, selfhost and repeat generations must all be accepted by the default `lean434-wasm` provider and retain source/compiler parity. This target is compiler self-hosting only; it does not claim owned-kernel or joint compiler/kernel self-hosting.

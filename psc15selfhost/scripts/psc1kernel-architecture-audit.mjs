@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 import { maskLeanNonCode } from "./psc1-source-profile.mjs";
 
 export function auditArchitecture(root) {
-const packageRoot = path.join(root, "packages", "pskernel-selfhost");
-const sourceRoot = path.join(packageRoot, "src", "Ps", "KernelSelfHost");
+const packageRoot = path.join(root, "packages", "pskernel-core");
+const sourceRoot = path.join(packageRoot, "src", "Ps", "KernelCore");
 const manifestPath = path.join(packageRoot, "PSKERNEL_ARCHITECTURE.json");
 const compatibilityPath = path.join(packageRoot, "LEAN_4_34_COMPATIBILITY.json");
 const conformancePath = path.join(packageRoot, "LEAN_4_34_CONFORMANCE.json");
@@ -134,7 +134,7 @@ for (const group of ["logicalTCB", "accelerationTCB", "capabilityTCB"]) {
       );
     }
     if (entry.path) {
-      const target = path.join(sourceRoot, entry.path.replace(/^src\/Ps\/KernelSelfHost\//, ""));
+      const target = path.join(sourceRoot, entry.path.replace(/^src\/Ps\/KernelCore\//, ""));
       if (!fs.existsSync(target)) {
         throw new Error(
           "PSC1KERNEL_ARCH_TCB_FILE_MISSING: " + group + ": " + entry.path
@@ -292,7 +292,7 @@ if (manifest.ruleInventory) {
       testDefinitions.set(name, { file: testFile, body: code.slice(definitions[i].index, definitions[i + 1]?.index ?? code.length) });
     }
   }
-  readTests("PsKernelSelfHostFoundationTests");
+  readTests("PsKernelCoreFoundationTests");
   const reachable = new Set();
   const pending = ["main"];
   while (pending.length) {

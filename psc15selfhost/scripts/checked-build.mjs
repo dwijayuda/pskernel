@@ -138,7 +138,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     } else throw new Error(`Unknown checked-build option: ${flag}`);
   }
   if (!entryPath) {
-    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434-wasm|pskernel-core|lean434]');
+    throw new Error('usage: checked-build.mjs <entry> [--check | --out file.js] [--compiler file.js | --seed binary] [--kernel lean434-wasm|pskernel-core.old3|lean434]');
   }
   const receipt = await buildChecked(options);
   console.log('PSC2_CHECKED_BUILD: PASS ' + JSON.stringify(receipt));

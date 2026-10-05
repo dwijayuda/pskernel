@@ -18,7 +18,7 @@ const iota=()=>app(C(nested('Unit','rec'),[S(S(Z)),S(Z)]),binder('lam','major',f
 test('default admits a polymorphic unit, constructor use and generated iota', async()=>{
   const entries=[unit(),def('Value',family(),ctor()),def('Reduce',U(S(Z)),iota())];
   const {result,descriptor}=await checkAdmissionsWithKernel(wire(entries));
-  assert.equal(descriptor.selector,'pskernel-core');
+  assert.equal(descriptor.selector,'pskernel-core.old3');
   assert.equal(result.profile,'owned-uniform-algebraic/11');
   assert.equal(result.accepted,true,JSON.stringify(result));
   assert.equal(result.admissionCount,3);
@@ -36,7 +36,7 @@ for(const [label,change] of [
 ])test('unit production boundary rejects '+label,async()=>{
   const entry=unit();change(entry.declaration);
   const {result,descriptor}=await checkAdmissionsWithKernel(wire([entry]));
-  assert.equal(descriptor.selector,'pskernel-core');assert.equal(result.accepted,false,JSON.stringify(result));
+  assert.equal(descriptor.selector,'pskernel-core.old3');assert.equal(result.accepted,false,JSON.stringify(result));
   assert.equal(result.admissionIndex,0);assert.equal(result.environment,undefined);
 });
 test('unit exhaustion and later rejection expose no partial environment',async()=>{

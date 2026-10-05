@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { maskLeanNonCode } from "./psc1-source-profile.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const sourceRoot = path.join(root, "packages", "pskernel-selfhost", "src");
+const sourceRoot = path.join(root, "packages", "pskernel-core", "src");
 const files = [];
 
 function walk(directory) {

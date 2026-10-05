@@ -41,7 +41,7 @@ const required = [
   "psKernelNameAppendIndexAfter",
   "psKernelNatName",
   "psKernelLeanNatMaxSizeDefault",
-  "psKernelSelfHostSemanticRoot",
+  "psKernelCoreSemanticRoot",
 ];
 
 for (const name of required) {
@@ -70,7 +70,7 @@ function unwrapExcept(value, label) {
   throw new Error(`PSC1KERNEL_GENERATED_${label}_RESULT_SHAPE`);
 }
 
-assert.equal(kernel.psKernelSelfHostSemanticRoot, true);
+assert.equal(kernel.psKernelCoreSemanticRoot, true);
 
 const anonymous = kernel.PsKernelName.anonymous;
 const alpha = kernel.PsKernelName.str(anonymous, "Alpha");

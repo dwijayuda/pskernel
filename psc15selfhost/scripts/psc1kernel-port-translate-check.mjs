@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const sourceRoot = path.join(root, "packages", "pskernel-selfhost", "src");
+const sourceRoot = path.join(root, "packages", "pskernel-core", "src");
 const outRoot = fs.mkdtempSync(path.join(os.tmpdir(), "psc1kernel-port-ps-"));
 const files = [];
 

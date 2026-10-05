@@ -21,7 +21,7 @@
     "check:source": "npm run check:source:bootstrap",
     "check:kernel-core-source": "node scripts/check-kernel-core-source.mjs",
     "check:kernel-owned": "node scripts/check-owned-kernel-receipt.mjs",
-    "test:kernel-owned": "node --test packages/pskernel-core/test/*.test.mjs",
+    "test:kernel-owned": "node --test packages/pskernel-core.old3/test/*.test.mjs",
     "check:layout": "node scripts/check-layout-drift.mjs",
     "check:selfhost-project-prelude": "node scripts/check-selfhost-project-prelude.mjs",
     "check:selfhost-foundation": "node scripts/check-selfhost-foundation.mjs",

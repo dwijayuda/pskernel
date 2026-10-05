@@ -3,8 +3,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const packageRoot = path.join(root, "packages", "pskernel-selfhost");
-const sourceRoot = path.join(packageRoot, "src", "Ps", "KernelSelfHost");
+const packageRoot = path.join(root, "packages", "pskernel-core");
+const sourceRoot = path.join(packageRoot, "src", "Ps", "KernelCore");
 const manifestPath = path.join(packageRoot, "LEAN_4_34_COMPATIBILITY.json");
 const requireComplete = process.argv.includes("--require-complete");
 

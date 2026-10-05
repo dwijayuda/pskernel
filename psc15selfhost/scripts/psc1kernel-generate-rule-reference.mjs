@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const packageRoot = path.join(root, "packages", "pskernel-selfhost");
+const packageRoot = path.join(root, "packages", "pskernel-core");
 const compatibilityPath = path.join(packageRoot, "LEAN_4_34_COMPATIBILITY.json");
 const conformancePath = path.join(packageRoot, "LEAN_4_34_CONFORMANCE.json");
 const outputPath = path.join(packageRoot, "KERNEL_RULE_REFERENCE.md");

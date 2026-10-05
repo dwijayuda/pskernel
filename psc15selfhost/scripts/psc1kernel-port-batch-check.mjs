@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const sourceRoot = path.join(root, "packages", "pskernel-selfhost", "src");
+const sourceRoot = path.join(root, "packages", "pskernel-core", "src");
 const files = [];
 
 function walk(directory) {

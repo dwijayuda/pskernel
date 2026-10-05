@@ -160,7 +160,7 @@ lean_lib PsElab where
   ]
 
 lean_lib PsKernelOwned where
-  srcDir := "packages/pskernel-core/src"
+  srcDir := "packages/pskernel-core.old3/src"
   roots := #[
     `Ps.Kernel.Data, `Ps.Kernel.Structural, `Ps.Kernel.Natural,
     `Ps.Kernel.Expr, `Ps.Kernel.Binding, `Ps.Kernel.Order,
@@ -197,103 +197,103 @@ lean_lib PSC1KernelReferenceFoundations where
     `PSC1Kernel.NestedInductive
   ]
 
-lean_lib PsKernelSelfHost where
-  srcDir := "packages/pskernel-selfhost/src"
+lean_lib PsKernelCore where
+  srcDir := "packages/pskernel-core/src"
   roots := #[
-    `Ps.KernelSelfHost.Core.Name,
-    `Ps.KernelSelfHost.Core.Level,
-    `Ps.KernelSelfHost.Core.Expr,
-    `Ps.KernelSelfHost.Core.Substitution.ListOps,
-    `Ps.KernelSelfHost.Core.Substitution.Lift,
-    `Ps.KernelSelfHost.Core.Substitution.Instantiate,
-    `Ps.KernelSelfHost.Core.Substitution.Beta,
-    `Ps.KernelSelfHost.Core.Substitution.Abstract,
-    `Ps.KernelSelfHost.Core.Declaration,
-    `Ps.KernelSelfHost.Core.LocalContext,
-    `Ps.KernelSelfHost.Runtime.Acceleration.EnvironmentIndex,
-    `Ps.KernelSelfHost.Environment.Operations,
-    `Ps.KernelSelfHost.Runtime.Acceleration.Cache,
-    `Ps.KernelSelfHost.Runtime.Acceleration.CachePolicy,
-    `Ps.KernelSelfHost.Runtime.Capability.Lean434NativeReduction,
-    `Ps.KernelSelfHost.Checker.State,
-    `Ps.KernelSelfHost.Checker.Context,
-    `Ps.KernelSelfHost.Checker.Ops,
-    `Ps.KernelSelfHost.Checker.Knot,
-    `Ps.KernelSelfHost.Checker.Reduction.PrimitiveData,
-    `Ps.KernelSelfHost.Checker.Reduction.PrimitiveNat,
-    `Ps.KernelSelfHost.Checker.Reduction.Primitives,
-    `Ps.KernelSelfHost.Checker.Reduction.KernelReductions,
-    `Ps.KernelSelfHost.Checker.Reduction.WhnfCore,
-    `Ps.KernelSelfHost.Checker.Reduction.Whnf,
-    `Ps.KernelSelfHost.Checker.Projection,
-    `Ps.KernelSelfHost.Checker.Inference.Helpers,
-    `Ps.KernelSelfHost.Checker.Inference.Core,
-    `Ps.KernelSelfHost.Checker.Inference,
-    `Ps.KernelSelfHost.Checker.Recursor.Analysis,
-    `Ps.KernelSelfHost.Checker.Recursor.Reduction,
-    `Ps.KernelSelfHost.Checker.DefEq.BinderSpines,
-    `Ps.KernelSelfHost.Checker.DefEq.Quick,
-    `Ps.KernelSelfHost.Checker.DefEq.Support,
-    `Ps.KernelSelfHost.Checker.DefEq.DeltaStep,
-    `Ps.KernelSelfHost.Checker.DefEq.LazyDelta,
-    `Ps.KernelSelfHost.Checker.DefEq.FinalRules,
-    `Ps.KernelSelfHost.Checker.DefEq.Shortcuts,
-    `Ps.KernelSelfHost.Checker.DefEq.FullShape,
-    `Ps.KernelSelfHost.Checker.Session,
-    `Ps.KernelSelfHost.Admission.Declaration.Validation,
-    `Ps.KernelSelfHost.Admission.Declaration.Admission,
-    `Ps.KernelSelfHost.Admission.Quot.Bootstrap,
-    `Ps.KernelSelfHost.Admission.Quot.Admission,
-    `Ps.KernelSelfHost.Admission.Inductive.Common.Parameters,
-    `Ps.KernelSelfHost.Admission.Inductive.Ordinary.Constructor,
-    `Ps.KernelSelfHost.Admission.Inductive.Ordinary.ConstructorAdmission,
-    `Ps.KernelSelfHost.Admission.Inductive.Ordinary.Recursor,
-    `Ps.KernelSelfHost.Admission.Inductive.Common.Elimination,
-    `Ps.KernelSelfHost.Admission.Inductive.Ordinary.Admission,
-    `Ps.KernelSelfHost.Admission.Inductive.Mutual.Analysis,
-    `Ps.KernelSelfHost.Admission.Inductive.Mutual.Recursor,
-    `Ps.KernelSelfHost.Admission.Inductive.Mutual.Header,
-    `Ps.KernelSelfHost.Admission.Inductive.Mutual.AdmissionLoops,
-    `Ps.KernelSelfHost.Admission.Inductive.Mutual.Admission,
-    `Ps.KernelSelfHost.Admission.Inductive.Nested.Types,
-    `Ps.KernelSelfHost.Admission.Inductive.Nested.ReservedNames,
-    `Ps.KernelSelfHost.Admission.Inductive.Nested.Rebase,
-    `Ps.KernelSelfHost.Admission.Inductive.Nested.Discover,
-    `Ps.KernelSelfHost.Admission.Inductive.Nested.Flatten,
-    `Ps.KernelSelfHost.Admission.Inductive.Nested.RestoreExpr,
-    `Ps.KernelSelfHost.Admission.Inductive.Nested.Restore,
-    `Ps.KernelSelfHost.Admission.Inductive.Nested.Validation,
-    `Ps.KernelSelfHost.Admission.Inductive.Nested.Commit,
-    `Ps.KernelSelfHost.Admission.Inductive.Nested.Admission,
-    `Ps.KernelSelfHost.Admission.Inductive.Types,
-    `Ps.KernelSelfHost.Admission.Inductive.Common.Occurrence,
-    `Ps.KernelSelfHost.Admission.Inductive.Common.RecursorValidation,
-    `Ps.KernelSelfHost.Environment.Semantic,
-    `Ps.KernelSelfHost.Environment.Environment,
-    `Ps.KernelSelfHost.Environment.Lookup,
-    `Ps.KernelSelfHost.Runtime.Capability.Types,
-    `Ps.KernelSelfHost.Checker.ResourcePolicy,
-    `Ps.KernelSelfHost.API.Outcome,
-    `Ps.KernelSelfHost.API.KernelContractV1,
-    `Ps.KernelSelfHost.API.Provider,
-    `Ps.KernelSelfHost.API.Session,
-    `Ps.KernelSelfHost.API.Kernel,
-    `Ps.KernelSelfHost.SelfHost
+    `Ps.KernelCore.Core.Name,
+    `Ps.KernelCore.Core.Level,
+    `Ps.KernelCore.Core.Expr,
+    `Ps.KernelCore.Core.Substitution.ListOps,
+    `Ps.KernelCore.Core.Substitution.Lift,
+    `Ps.KernelCore.Core.Substitution.Instantiate,
+    `Ps.KernelCore.Core.Substitution.Beta,
+    `Ps.KernelCore.Core.Substitution.Abstract,
+    `Ps.KernelCore.Core.Declaration,
+    `Ps.KernelCore.Core.LocalContext,
+    `Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex,
+    `Ps.KernelCore.Environment.Operations,
+    `Ps.KernelCore.Runtime.Acceleration.Cache,
+    `Ps.KernelCore.Runtime.Acceleration.CachePolicy,
+    `Ps.KernelCore.Runtime.Capability.Lean434NativeReduction,
+    `Ps.KernelCore.Checker.State,
+    `Ps.KernelCore.Checker.Context,
+    `Ps.KernelCore.Checker.Ops,
+    `Ps.KernelCore.Checker.Knot,
+    `Ps.KernelCore.Checker.Reduction.PrimitiveData,
+    `Ps.KernelCore.Checker.Reduction.PrimitiveNat,
+    `Ps.KernelCore.Checker.Reduction.Primitives,
+    `Ps.KernelCore.Checker.Reduction.KernelReductions,
+    `Ps.KernelCore.Checker.Reduction.WhnfCore,
+    `Ps.KernelCore.Checker.Reduction.Whnf,
+    `Ps.KernelCore.Checker.Projection,
+    `Ps.KernelCore.Checker.Inference.Helpers,
+    `Ps.KernelCore.Checker.Inference.Core,
+    `Ps.KernelCore.Checker.Inference,
+    `Ps.KernelCore.Checker.Recursor.Analysis,
+    `Ps.KernelCore.Checker.Recursor.Reduction,
+    `Ps.KernelCore.Checker.DefEq.BinderSpines,
+    `Ps.KernelCore.Checker.DefEq.Quick,
+    `Ps.KernelCore.Checker.DefEq.Support,
+    `Ps.KernelCore.Checker.DefEq.DeltaStep,
+    `Ps.KernelCore.Checker.DefEq.LazyDelta,
+    `Ps.KernelCore.Checker.DefEq.FinalRules,
+    `Ps.KernelCore.Checker.DefEq.Shortcuts,
+    `Ps.KernelCore.Checker.DefEq.FullShape,
+    `Ps.KernelCore.Checker.Session,
+    `Ps.KernelCore.Admission.Declaration.Validation,
+    `Ps.KernelCore.Admission.Declaration.Admission,
+    `Ps.KernelCore.Admission.Quot.Bootstrap,
+    `Ps.KernelCore.Admission.Quot.Admission,
+    `Ps.KernelCore.Admission.Inductive.Common.Parameters,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Constructor,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.ConstructorAdmission,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Recursor,
+    `Ps.KernelCore.Admission.Inductive.Common.Elimination,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Admission,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Analysis,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Recursor,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Header,
+    `Ps.KernelCore.Admission.Inductive.Mutual.AdmissionLoops,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Admission,
+    `Ps.KernelCore.Admission.Inductive.Nested.Types,
+    `Ps.KernelCore.Admission.Inductive.Nested.ReservedNames,
+    `Ps.KernelCore.Admission.Inductive.Nested.Rebase,
+    `Ps.KernelCore.Admission.Inductive.Nested.Discover,
+    `Ps.KernelCore.Admission.Inductive.Nested.Flatten,
+    `Ps.KernelCore.Admission.Inductive.Nested.RestoreExpr,
+    `Ps.KernelCore.Admission.Inductive.Nested.Restore,
+    `Ps.KernelCore.Admission.Inductive.Nested.Validation,
+    `Ps.KernelCore.Admission.Inductive.Nested.Commit,
+    `Ps.KernelCore.Admission.Inductive.Nested.Admission,
+    `Ps.KernelCore.Admission.Inductive.Types,
+    `Ps.KernelCore.Admission.Inductive.Common.Occurrence,
+    `Ps.KernelCore.Admission.Inductive.Common.RecursorValidation,
+    `Ps.KernelCore.Environment.Semantic,
+    `Ps.KernelCore.Environment.Environment,
+    `Ps.KernelCore.Environment.Lookup,
+    `Ps.KernelCore.Runtime.Capability.Types,
+    `Ps.KernelCore.Checker.ResourcePolicy,
+    `Ps.KernelCore.API.Outcome,
+    `Ps.KernelCore.API.KernelContractV1,
+    `Ps.KernelCore.API.Provider,
+    `Ps.KernelCore.API.Session,
+    `Ps.KernelCore.API.Kernel,
+    `Ps.KernelCore.SelfHost
   ]
 
-lean_lib PsKernelSelfHostTestSupport where
+lean_lib PsKernelCoreTestSupport where
   srcDir := "test"
   roots := #[
-    `KernelSelfHost.Foundation.KernelContract,
-    `KernelSelfHost.Foundation.CheckerOps,
-    `KernelSelfHost.Foundation.Core,
-    `KernelSelfHost.Foundation.Checking,
-    `KernelSelfHost.Foundation.DefEqNested,
-    `KernelSelfHost.Foundation.AdmissionRuntime,
-    `KernelSelfHost.Bench.Foundation,
-    `KernelSelfHost.Bench.Inference,
-    `KernelSelfHost.Bench.Inductive,
-    `KernelSelfHost.Bench.Nested
+    `KernelCore.Foundation.KernelContract,
+    `KernelCore.Foundation.CheckerOps,
+    `KernelCore.Foundation.Core,
+    `KernelCore.Foundation.Checking,
+    `KernelCore.Foundation.DefEqNested,
+    `KernelCore.Foundation.AdmissionRuntime,
+    `KernelCore.Bench.Foundation,
+    `KernelCore.Bench.Inference,
+    `KernelCore.Bench.Inductive,
+    `KernelCore.Bench.Nested
   ]
 
 @[default_target]
@@ -365,13 +365,13 @@ lean_exe psc2_prod_match_selfhost_tests where
   srcDir := "test"
   root := `ProdMatchSelfHostTests
 
-lean_exe psc1_kernel_selfhost_foundation_tests where
+lean_exe psc1_kernel_core_foundation_tests where
   srcDir := "test"
-  root := `PsKernelSelfHostFoundationTests
+  root := `PsKernelCoreFoundationTests
 
-lean_exe psc1_kernel_selfhost_bench where
+lean_exe psc1_kernel_core_bench where
   srcDir := "test"
-  root := `PsKernelSelfHostBench
+  root := `PsKernelCoreBench
 
 -- Host-only diagnostics; this executable is not a portable bootstrap module.
 lean_exe psc2_joint_closure_inventory where

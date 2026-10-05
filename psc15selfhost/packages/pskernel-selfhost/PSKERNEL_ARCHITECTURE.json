@@ -68,5 +68,6 @@
     "Ps.KernelSelfHost.Compat.",
     "KernelSelfHost.Foundation.",
     "KernelSelfHost.Bench."
-  ]
+  ],
+  "tcbManifest": "PSKERNEL_TCB.json"
 }

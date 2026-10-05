@@ -8,10 +8,12 @@ const sourceRoot = path.join(packageRoot, "src", "Ps", "KernelSelfHost");
 const manifestPath = path.join(packageRoot, "PSKERNEL_ARCHITECTURE.json");
 const compatibilityPath = path.join(packageRoot, "LEAN_4_34_COMPATIBILITY.json");
 const conformancePath = path.join(packageRoot, "LEAN_4_34_CONFORMANCE.json");
+const tcbPath = path.join(packageRoot, manifestPath.endsWith("PSKERNEL_ARCHITECTURE.json") ? "PSKERNEL_TCB.json" : "PSKERNEL_TCB.json");
 
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 const compatibility = JSON.parse(fs.readFileSync(compatibilityPath, "utf8"));
 const conformance = JSON.parse(fs.readFileSync(conformancePath, "utf8"));
+const tcb = JSON.parse(fs.readFileSync(tcbPath, "utf8"));
 
 function assertTarget(label, target) {
   if (
@@ -24,6 +26,11 @@ function assertTarget(label, target) {
 
 assertTarget("compatibility", compatibility.target);
 assertTarget("conformance", conformance.target);
+assertTarget("tcb", tcb.target);
+
+if (tcb.productionSemanticRoot !== manifest.semanticRootModule) {
+  throw new Error("PSC1KERNEL_ARCH_TCB_ROOT_MISMATCH");
+}
 
 const prefix = manifest.semanticModulePrefix;
 
@@ -85,6 +92,39 @@ for (const entry of manifest.currentRoleFiles) {
   }
 }
 
+for (const group of ["logicalTCB", "accelerationTCB", "capabilityTCB"]) {
+  for (const entry of tcb[group] ?? []) {
+    if (!manifest.semanticRoles.includes(entry.semanticRole)) {
+      throw new Error(
+        "PSC1KERNEL_ARCH_TCB_ROLE_UNKNOWN: " +
+          group +
+          ": " +
+          entry.component +
+          ": " +
+          entry.semanticRole
+      );
+    }
+    if (!manifest.trustStatuses.includes(entry.trustStatus)) {
+      throw new Error(
+        "PSC1KERNEL_ARCH_TCB_STATUS_UNKNOWN: " +
+          group +
+          ": " +
+          entry.component +
+          ": " +
+          entry.trustStatus
+      );
+    }
+    if (entry.path) {
+      const target = path.join(sourceRoot, entry.path.replace(/^src\/Ps\/KernelSelfHost\//, ""));
+      if (!fs.existsSync(target)) {
+        throw new Error(
+          "PSC1KERNEL_ARCH_TCB_FILE_MISSING: " + group + ": " + entry.path
+        );
+      }
+    }
+  }
+}
+
 const layerSet = new Set(manifest.targetLayers);
 if (layerSet.size !== manifest.targetLayers.length) {
   throw new Error("PSC1KERNEL_ARCH_DUPLICATE_TARGET_LAYER");
@@ -109,5 +149,11 @@ console.log(
     " closureModules=" +
     seen.size +
     " migration=" +
-    manifest.migration.phase
+    manifest.migration.phase +
+    " tcbLogical=" +
+    (tcb.logicalTCB?.length ?? 0) +
+    " tcbAcceleration=" +
+    (tcb.accelerationTCB?.length ?? 0) +
+    " tcbCapability=" +
+    (tcb.capabilityTCB?.length ?? 0)
 );

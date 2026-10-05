@@ -48,3 +48,125 @@ theorem psKernelWhnfCoreWithFuel_zero
         context state expr cheapRec cheapProj =
       Except.error "kernel reduction budget exhausted" := by
   rfl
+
+
+theorem psKernelWhnfCoreWithFuel_let_zeta
+    (remaining : Nat)
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (reduceRecursor :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (name : PsKernelName)
+    (type value body result : PsKernelExpr)
+    (nondep cheapRec cheapProj : Bool)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hCache :
+      psKernelExprMapGet
+          state.whnfCore
+          (PsKernelExpr.letE name type value body nondep) =
+        Option.none)
+    (hReduce :
+      psKernelWhnfCoreWithFuel
+          remaining
+          publicWhnf
+          reduceRecursor
+          nextContext
+          state
+          (psKernelExprInstantiate1 body value)
+          cheapRec
+          cheapProj =
+        Except.ok (Prod.mk result nextState)) :
+    psKernelWhnfCoreWithFuel
+        (Nat.succ remaining)
+        publicWhnf
+        reduceRecursor
+        context
+        state
+        (PsKernelExpr.letE name type value body nondep)
+        cheapRec
+        cheapProj =
+      psKernelWhnfCoreFinish
+        (PsKernelExpr.letE name type value body nondep)
+        cheapProj
+        result
+        nextState := by
+  simp [
+    psKernelWhnfCoreWithFuel,
+    hDepth,
+    hCache,
+    hReduce
+  ]
+
+theorem psKernelWhnfCoreWithFuel_fvar_let
+    (remaining : Nat)
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (reduceRecursor :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (name : PsKernelName)
+    (declaration : PsKernelLocalDecl)
+    (value result : PsKernelExpr)
+    (cheapRec cheapProj : Bool)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hFind :
+      psKernelLocalContextFind
+          nextContext.localContext
+          name =
+        Option.some declaration)
+    (hValue :
+      psKernelLocalDeclValue declaration =
+        Option.some value)
+    (hReduce :
+      psKernelWhnfCoreWithFuel
+          remaining
+          publicWhnf
+          reduceRecursor
+          nextContext
+          state
+          value
+          cheapRec
+          cheapProj =
+        Except.ok (Prod.mk result nextState)) :
+    psKernelWhnfCoreWithFuel
+        (Nat.succ remaining)
+        publicWhnf
+        reduceRecursor
+        context
+        state
+        (PsKernelExpr.fvar name)
+        cheapRec
+        cheapProj =
+      Except.ok (Prod.mk result nextState) := by
+  simp [
+    psKernelWhnfCoreWithFuel,
+    hDepth,
+    hFind,
+    hValue,
+    hReduce
+  ]

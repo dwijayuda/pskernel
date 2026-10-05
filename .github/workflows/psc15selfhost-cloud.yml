@@ -121,9 +121,9 @@ jobs:
           lake exe psc1_backend_wasm_tests
           lake exe psc1_backend_wasm_binary_smoke
 
-      - name: Self-check WebAssembly lowering source
+      - name: Self-check portable implementation profiles
         working-directory: psc15selfhost
-        run: lake exe psc1 check packages/backend-wasm/src/Ps/BackendWasm/Lower.lean
+        run: npm run check:portable-selfhost-contract
 
       - name: Build checked Lean provider integration
         working-directory: psc15selfhost/lean-checked

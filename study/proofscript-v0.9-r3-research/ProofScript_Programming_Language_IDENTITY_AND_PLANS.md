@@ -3007,3 +3007,825 @@ If evidence says yes, expand deliberately.
 If evidence says no, narrow or pivot.
 
 That discipline is part of the ProofScript identity.
+
+
+---
+
+# Part XV — Verified Software Factory Feasibility Audit
+
+## 69. Feasibility verdict
+
+The **Verified Software Factory** idea is technically plausible, but only if the project separates several guarantees that are easy to conflate.
+
+> **A scoped Verified Package Factory is achievable with current formal-methods technology and current-generation AI as an untrusted synthesis assistant. A general autonomous factory that generates, verifies, deploys, and maintains arbitrary real-world applications end-to-end is not yet demonstrated and should not be treated as an implementation commitment.**
+
+Important pieces already exist independently:
+
+- Lean demonstrates a small independently checkable logical kernel beneath rich elaboration and automation.
+- Dafny demonstrates a verification-aware language with integrated specifications, automated verification, IDE tooling, and mainstream compilation targets.
+- F*/Project Everest demonstrates verified libraries and generated parsers deployed in production systems.
+- CompCert and CakeML demonstrate semantic-preserving and verified/self-hosted compilation.
+- seL4 demonstrates production-scale functional correctness and, on selected targets, binary correctness.
+- recent AI theorem-proving and verified-code-generation research demonstrates useful formal proof/code generation while still requiring machine checking and careful specification control.
+
+The central uncertainty is therefore not whether the ingredients can exist. It is whether ProofScript can integrate them into a product whose **human trust cost per useful capability** is lower than incumbent workflows.
+
+### 69.1 Feasibility by scope
+
+| Scope | Feasibility now | Research judgment |
+|---|---:|---|
+| Verified pure/mostly-pure library package factory | **8.5/10** | strong first target |
+| Verified parser/codec/protocol generator | **9.0/10** | strongest first vertical |
+| AI-assisted program + proof generation for bounded modules | **7.0/10** | feasible with checker-in-the-loop |
+| Schema/OpenAPI/WIT → typed package + tests + contracts | **8.0/10** | practical |
+| Arbitrary npm/TypeScript package migration with meaningful assurance | **6.0/10** | feasible only with explicit foreign assumptions |
+| Cross-platform application framework with gradual verification | **6.0/10** | plausible, large scope |
+| Source-level proof carried soundly to deployed JS/native artifacts | **4.5/10 now; 8/10 long-term** | requires verified compilation or translation validation |
+| End-to-end high-assurance Wasm package path | **6.5/10 now; 8.5/10 potential** | promising tighter execution target |
+| Fully autonomous ecosystem generation | **4.5/10** | interesting hypothesis, weak evidence |
+| General verified arbitrary-application factory | **4.0/10** | long-term research only |
+
+### 69.2 Research decision
+
+**Continue. Do not canonize the full factory.**
+
+Recommended near-term interpretation:
+
+> **ProofScript Forge is a candidate orchestration/product layer around PSC + Lean/PSKernel + checked artifacts + tests + provenance. Its first goal should be verified packages, not whole applications.**
+
+---
+
+## 70. Fit with the existing ProofScript architecture
+
+The repository already describes:
+
+~~~text
+source
+  -> elaboration
+  -> pskernel
+  -> CheckedCore
+  -> erasure
+  -> VerifiedIR
+  -> target lowering
+~~~
+
+and a target-neutral VerifiedIR shared by TypeScript/JavaScript, Rust, and WebAssembly backends.
+
+That is unusually compatible with the Factory idea because the Factory does **not** need to enter the semantic compiler or TCB.
+
+Recommended architecture:
+
+~~~text
+                     UNTRUSTED PRODUCT LAYER
+
+specifications / packages / schemas / docs / tests
+                         |
+                         v
+                  Forge orchestration
+                 /       |        \
+             AI plan   AI code   AI proof
+                 \       |        /
+                         v
+                    candidate .ps
+                         |
+────────────────── semantic boundary ──────────────────
+                         |
+                        PSC
+               parse / resolve / elaborate
+                         |
+                         v
+                 Lean-compatible core
+                         |
+              +----------+----------+
+              |                     |
+              v                     v
+       Lean reference check      PSKernel
+              |                     |
+              +----------+----------+
+                         |
+                         v
+                    CheckedCore
+                         |
+                       erasure
+                         |
+                         v
+                    VerifiedIR
+                         |
+──────────────── executable boundary ──────────────────
+              /          |           \
+             v           v            v
+            JS          Wasm         native
+              \          |            /
+               +--- validation/tests-+
+                         |
+                         v
+              deployable package/artifact
+                         |
+                         v
+               assurance/provenance manifest
+~~~
+
+Core rule:
+
+> **Forge is not proof authority. PSC is not automatically proof authority. Backend emission is not automatically proof authority. Each assurance claim must identify the checker and assumptions that justify it.**
+
+---
+
+## 71. Assurance must be multidimensional
+
+A single label such as “verified package” is too coarse.
+
+### 71.1 Logical assurance
+
+Question:
+
+> Does a checked term prove the claimed proposition relative to explicit definitions and axioms?
+
+Candidate mechanisms:
+
+- Lean reference/kernel checking;
+- PSKernel;
+- independently replayed/exported proof artifacts;
+- axiom/assumption inventory.
+
+For important AI-generated proofs, separate the trusted theorem/specification from the untrusted solution and replay evidence independently.
+
+### 71.2 Compilation assurance
+
+Question:
+
+> Does the deployed executable preserve the semantics of the checked program?
+
+Kernel acceptance of source-level proof does **not** answer this.
+
+Possible progression:
+
+~~~text
+ordinary backend + tests
+→ translation validation
+→ proved selected compiler passes
+→ verified backend
+~~~
+
+CompCert and CakeML demonstrate that strong semantic-preservation guarantees are achievable, but they also show that this is a major engineering/research effort.
+
+### 71.3 Boundary/environment assurance
+
+Question:
+
+> Do foreign libraries, OS APIs, databases, services, JavaScript objects, hardware, and other external systems actually satisfy the model used by the proof?
+
+A `.d.ts` file, OpenAPI file, C header, or AI-generated model is not proof of runtime behavior.
+
+Boundary evidence may include:
+
+- explicit assumptions;
+- runtime validators;
+- conformance tests;
+- differential tests;
+- fuzz/property tests;
+- protocol/schema validation;
+- audited adapters;
+- verified implementations where available.
+
+### 71.4 Prefer an assurance vector over one ladder
+
+The earlier `PS-A0` … `PS-A6` concept risks implying one-dimensional confidence.
+
+A better research model is:
+
+~~~text
+logic:        unchecked | typed | specified | proved | independently-rechecked
+compilation:  unvalidated | tested | translation-validated | proved
+boundary:     opaque | assumed | tested | model-validated | verified
+provenance:   unknown | recorded | reproducible | independently-replayed
+~~~
+
+Example:
+
+~~~text
+logic        = proved
+compilation  = translation-validated
+boundary     = tested
+provenance   = reproducible
+~~~
+
+The exact vocabulary remains research work.
+
+---
+
+## 72. Roles of Lean 4, PSC, and PSKernel
+
+### 72.1 Lean 4
+
+Initial roles:
+
+1. semantic reference for the pinned type theory;
+2. bootstrap/reference implementation;
+3. proof automation ecosystem;
+4. cross-checker for ProofScript/PSKernel acceptance;
+5. export/replay path for high-assurance proof validation.
+
+Lean does not need to remain the normal user-facing ProofScript compiler forever.
+
+### 72.2 PSC
+
+PSC should remain the language/product compiler:
+
+- parse/resolve/elaborate;
+- generate proof obligations;
+- call proof services;
+- construct kernel-checkable declarations;
+- produce CheckedCore;
+- erase proof-only content;
+- produce VerifiedIR;
+- invoke backends/validators;
+- produce audit/provenance metadata.
+
+For proof soundness, PSC should be treated as an **untrusted producer of candidate core terms** whenever practical.
+
+However, a buggy elaborator may still misinterpret the *statement* the user intended. High-assurance workflows therefore need a protected specification surface.
+
+### 72.3 PSKernel
+
+PSKernel should be the ProofScript-owned independent checking boundary.
+
+During maturation, prefer dual checking:
+
+~~~text
+candidate core
+   |       \
+   |        +-> Lean/reference checker
+   |
+   +----------> PSKernel
+~~~
+
+Disagreement is failure.
+
+Longer term, a small portable PSKernel can support package verification, CI, registries, browsers, and independent replay.
+
+### 72.4 Trusted specification capsule
+
+For high-assurance generated components, separate the specification from generated implementation/proof:
+
+~~~text
+SpecCapsule
+  canonical contracts/propositions
+  permitted axioms/assumptions
+  expected public API
+  environment/profile identity
+  hashes of trusted models
+
+Solution
+  generated implementation
+  generated proof
+  generated tests
+~~~
+
+The generated solution cannot modify the trusted capsule.
+
+---
+
+## 73. AI should plan program and proof together
+
+A naïve sequence:
+
+~~~text
+generate program
+→ attempt proof
+→ patch program
+→ patch proof
+→ repeat
+~~~
+
+can create implementations that are unnecessarily hard to verify.
+
+Recent work on joint program-and-proof planning reports higher verified-code solve rates and lower cost/time than implementation-first planning on multiple benchmarks.
+
+Forge should therefore research:
+
+~~~text
+specification
+     ↓
+joint program + proof plan
+     ↓
+implementation scaffold + proof scaffold
+     ↓
+checker feedback
+     ↓
+repair
+~~~
+
+Candidate AI jobs:
+
+- model/API proposal;
+- implementation;
+- invariant/contract proposal;
+- proof planning;
+- proof/tactic generation;
+- counterexample/checker-driven repair;
+- property/test generation;
+- migration/adaptation;
+- provenance summaries.
+
+AI outputs remain untrusted.
+
+### 73.1 Specification generation is likely the central bottleneck
+
+The Factory must not equate “AI-generated contract” with “correct intent.”
+
+Recommended defenses:
+
+- human review of high-level intent;
+- trusted spec capsule;
+- mutation-based specification-strength checks;
+- property/fuzz tests;
+- independent examples/oracles;
+- trace/protocol conformance;
+- explicit `AI-proposed, not human-approved` status.
+
+The intended human role shifts toward reviewing **meaning**, not generated implementation lines.
+
+---
+
+## 74. Recommended first product: Verified Package Factory
+
+The first release should deliberately exclude whole-application autonomy.
+
+Target:
+
+> **Given a bounded API/specification, generate or migrate one package, generate meaningful correctness obligations, discharge as many as possible, independently check accepted evidence, produce ordinary runtime artifacts, and emit a complete assurance manifest.**
+
+### 74.1 Strongest first vertical: parsers/codecs/protocol data
+
+Why:
+
+- concrete reusable properties;
+- round-trip and rejection laws are understandable;
+- bounded state space relative to arbitrary applications;
+- generated code can be benchmarked;
+- F*/EverParse provides production precedent;
+- resulting packages are useful to non-ProofScript users.
+
+Candidate inputs:
+
+- declarative schemas;
+- JSON Schema;
+- Protocol Buffers subset;
+- CBOR/MessagePack-like format descriptions;
+- protocol message grammars.
+
+Candidate guarantees:
+
+- `decode(encode(x)) = x` for admitted values;
+- successful decode satisfies schema;
+- malformed input cannot forge a valid value;
+- length/bounds invariants;
+- deterministic encoding;
+- admitted model has no uncaught parser failure.
+
+### 74.2 Second vertical: OpenAPI/SDK generation
+
+~~~text
+OpenAPI/schema
+→ InterfaceIR
+→ ProofScript models
+→ validated codecs
+→ client/server wrappers
+→ contracts/tests
+→ JS/npm package
+~~~
+
+The remote service remains a boundary assumption unless separately validated.
+
+### 74.3 Later verticals
+
+- authorization/state machines;
+- deterministic financial logic;
+- package/security logic;
+- verified-primitive wrappers;
+- compiler/serialization infrastructure.
+
+---
+
+## 75. Bridge strategy: schema-first before arbitrary TypeScript
+
+Arbitrary `.d.ts` includes structural typing, overloads, dynamic objects, callbacks, optional/missing/undefined distinctions, declaration merging, and behaviors the declaration file cannot prove.
+
+Recommended sequence:
+
+~~~text
+1. native ProofScript packages
+2. explicit schemas (JSON Schema / OpenAPI)
+3. WIT / protocol-oriented interfaces
+4. bounded TypeScript declarations
+5. broader npm shapes
+~~~
+
+`InterfaceIR` should preserve uncertainty rather than erase it.
+
+Classify each foreign surface:
+
+~~~text
+native-representable
+adapter-required
+runtime-validated
+opaque-handle
+assumed
+unsupported
+~~~
+
+No untracked `any` fallback.
+
+---
+
+## 76. The compilation last mile
+
+This is the biggest gap between “source proof checked” and “software verified.”
+
+### 76.1 Honest early claims
+
+Early packages may claim:
+
+~~~text
+source property: machine-checked
+compiler/backend: conformance-tested
+foreign boundary: explicit/tested assumptions
+~~~
+
+They must not claim deployed artifact equivalence without evidence.
+
+### 76.2 Translation validation is the recommended intermediate strategy
+
+Instead of proving the whole compiler immediately:
+
+1. keep CheckedCore → VerifiedIR small/deterministic;
+2. define explicit VerifiedIR semantics;
+3. validate transformations;
+4. validate backend output where practical;
+5. reject on validation failure.
+
+### 76.3 Wasm may be the stronger assurance target while npm remains distribution
+
+Strategic split:
+
+- **JS/npm:** adoption/distribution ecosystem.
+- **Wasm:** candidate tighter high-assurance execution target.
+
+Possible package:
+
+~~~text
+ProofScript
+   ↓
+checked semantics
+   ↓
+validated/proved VerifiedIR → Wasm
+   ↓
+thin JS/npm wrapper
+~~~
+
+Compare this experimentally with direct JS emission.
+
+### 76.4 Long-term verified backend
+
+Only after product value is proven should ProofScript attempt CompCert/CakeML-class semantic-preservation proofs for a substantial backend.
+
+---
+
+## 77. Candidate Factory package artifact
+
+Provisional package:
+
+~~~text
+package/
+  src/
+  dist/
+  proof/
+  tests/
+  proofscript-assurance.json
+~~~
+
+Candidate manifest fields:
+
+~~~text
+language/profile identity
+Standard environment digest
+source hashes
+specification capsule hash
+CheckedCore hash
+VerifiedIR hash
+proof identities/hashes
+checker identities/versions
+axioms and explicit assumptions
+foreign models and confidence class
+compilation-assurance class
+boundary-assurance class
+test/fuzz/differential evidence
+backend/toolchain identities
+reproducibility metadata
+AI/provider provenance where policy permits
+unresolved obligations
+known unsupported claims
+~~~
+
+Every claim should classify evidence as:
+
+~~~text
+proved
+tested
+assumed
+unknown
+unsupported
+~~~
+
+---
+
+## 78. Implementation plan
+
+### F0 — checker and artifact foundation
+
+Before “AI Factory” branding:
+
+- canonical proof/claim serialization;
+- stable CheckedCore identity;
+- stable VerifiedIR identity;
+- PSKernel checked-session API;
+- Lean ↔ PSKernel differential corpus;
+- independent replay CLI;
+- axiom/assumption reporting;
+- package assurance manifest prototype.
+
+**Exit:** a human-written package can produce independently replayable evidence.
+
+### F1 — obligation service
+
+- contract → proposition generation;
+- obligation IDs;
+- proof status database/cache;
+- `specified` vs `verified` reporting;
+- replay independent of the AI process.
+
+**Exit:** contracts become durable obligations and checked receipts.
+
+### F2 — AI proof worker
+
+~~~text
+goal + context
+→ candidate proof/tactics
+→ PSC/Lean elaboration
+→ PSKernel/Lean check
+→ structured error
+→ retry
+~~~
+
+Start with human-written implementation and AI-generated proofs.
+
+### F3 — joint program-and-proof worker
+
+~~~text
+trusted spec
+→ joint plan
+→ implementation + proof scaffold
+→ checker feedback
+→ repair
+~~~
+
+Benchmark against program-first generation.
+
+### F4 — Verified Parser/Codec Factory
+
+Inputs:
+
+- bounded schema/format.
+
+Outputs:
+
+- ProofScript implementation;
+- obligations;
+- checked proofs;
+- negative/fuzz corpus;
+- JS and/or Wasm package;
+- assurance manifest.
+
+**Exit:** at least 10 non-toy generated/migrated packages with independently replayed guarantees.
+
+### F5 — schema/OpenAPI Bridge
+
+Add InterfaceIR import with explicit classification/assumptions.
+
+**Exit:** generated package is consumed naturally from JS/TS while evidence remains inspectable.
+
+### F6 — translation validation
+
+Prioritize:
+
+- CheckedCore → VerifiedIR erasure;
+- VerifiedIR optimizations;
+- Wasm lowering;
+- later JS/native validation.
+
+### F7 — ecosystem-compounding experiment
+
+Build package N using accumulated verified libraries/theorems.
+
+Measure:
+
+- human specification/review time;
+- discharge rate;
+- reuse rate;
+- maintenance/refactor cost;
+- marginal human effort vs earlier packages.
+
+### F8 — reconsider ProofScript App
+
+Only after the package/factory evidence exists should the project decide whether a cross-platform application framework is the next highest-value investment.
+
+---
+
+## 79. Out of scope for Factory v1
+
+Do not require:
+
+- arbitrary UI generation;
+- arbitrary distributed applications;
+- full npm semantic verification;
+- arbitrary foreign-code verification;
+- whole-compiler correctness across every backend;
+- verified OS/runtime;
+- autonomous specification acceptance;
+- automatic proof of every property;
+- zero-human-review ecosystem generation.
+
+---
+
+## 80. Feasibility and practicality scorecard
+
+These scores evaluate **current plan/evidence**, not a hypothetical finished system.
+
+Scale: 0–5.
+
+| Criterion | Weight | Current | Potential | Evidence confidence |
+|---|---:|---:|---:|---:|
+| Problem–solution fit | 13 | 4.2 | 4.6 | 3.0 |
+| Differentiated wedge / language necessity | 7 | 4.2 | 4.6 | 2.5 |
+| Semantic architecture | 10 | 4.4 | 4.8 | 3.0 |
+| Practical usefulness / ergonomics | 9 | 2.3 | 4.3 | 1.5 |
+| Performance / resource economics | 6 | 2.0 | 3.8 | 1.0 |
+| Safety / correctness / TCB | 7 | 3.5 | 4.8 | 3.0 |
+| Implementation feasibility | 6 | 3.2 | 4.1 | 2.5 |
+| Developer product / tooling | 9 | 1.8 | 4.5 | 1.5 |
+| Adoption / migration / interoperability | 12 | 2.0 | 4.4 | 1.5 |
+| Ecosystem / distribution | 7 | 1.3 | 4.2 | 1.0 |
+| Compatibility / evolution | 5 | 3.0 | 4.6 | 2.0 |
+| Governance / sustainability | 3 | 1.2 | 4.0 | 1.0 |
+| Future relevance | 4 | 4.5 | 4.8 | 3.5 |
+| Novelty / defensibility | 2 | 4.3 | 4.6 | 3.0 |
+
+Weighted result:
+
+~~~text
+Current evidence/readiness score: approximately 60 / 100
+Potential architecture score:     approximately 89 / 100
+Evidence confidence overall:       approximately 2.2 / 5
+~~~
+
+Interpretation: promising enough for serious engineering research; far from demonstrated product maturity.
+
+### 80.1 Product-hypothesis scores
+
+| Hypothesis | Score today | Recommendation |
+|---|---:|---|
+| Verified Package Factory | **8.2/10** | research/build now |
+| Parser/Codec Factory | **9.0/10** | strongest first experiment |
+| Forge + Bridge for schema/OpenAPI | **7.8/10** | next candidate |
+| General npm migration factory | **6.0/10** | later, bounded shapes first |
+| ProofScript App framework | **6.2/10** | defer until package evidence |
+| High-assurance Wasm artifact path | **6.8/10** | strategically important |
+| High-assurance direct JS artifact path | **5.0/10** | useful but harder last-mile story |
+| Autonomous ecosystem generation | **4.5/10** | measure; do not claim |
+| General arbitrary-app Verified Software Factory | **4.0/10** | long-term research only |
+
+---
+
+## 81. Biggest risks
+
+### Specification fidelity
+Proving the wrong specification remains the largest conceptual risk.
+
+### Compiler semantic preservation
+A buggy backend can invalidate source-level assurance.
+
+### Effectful/foreign software
+Real programs depend on systems outside the logic.
+
+### Proof automation economics
+Search may be expensive/brittle.
+
+### AI ecosystem maintenance
+Generating version 1 is easier than maintaining packages for years.
+
+### TCB confusion
+Users may assume “verified” covers more than it does.
+
+All six risks must remain visible in scoring and assurance artifacts.
+
+---
+
+## 82. Research hypotheses to test
+
+### H1 — Human trust cost decreases
+Measure `human minutes per trusted capability`.
+
+### H2 — Verified knowledge compounds
+Package N should become cheaper because it reuses checked components/theorems.
+
+### H3 — AI proof generation beats manual proof economics in target verticals
+Measure human correction/review, not token count alone.
+
+### H4 — Incremental migration is real
+One package/module should deliver value without a rewrite.
+
+### H5 — Assurance metadata is understandable
+Reviewers should correctly distinguish proved/tested/assumed/unknown.
+
+### H6 — Backend assurance can strengthen incrementally
+Tested → translation-validated → proved must not require language redesign.
+
+---
+
+## 83. Pivot / stop conditions
+
+Narrow or reject the Factory direction if repeated experiments show:
+
+1. specification review dominates cost and does not improve with reusable models;
+2. most useful proofs require expert intervention;
+3. AI-generated packages are expensive to maintain;
+4. foreign assumptions dominate useful applications;
+5. backend assurance cannot improve without replacing the architecture;
+6. interoperability destroys incremental-adoption economics;
+7. assurance metadata creates false confidence;
+8. Lean/Dafny/F*/Verus workflows achieve the same result much more cheaply;
+9. ecosystem reuse does not lower marginal human effort;
+10. PSKernel provides no meaningful independent/auditable advantage.
+
+---
+
+## 84. Feasibility conclusion
+
+The Verified Software Factory should be treated as **credible research with a realistic scoped product path**, not a settled promise.
+
+> **ProofScript should not try to make AI correct. It should make AI-generated software cheap to reject when unsupported, cheap to check when formally justified, and explicit about everything that remains assumed.**
+
+A successful first Factory only needs to demonstrate:
+
+~~~text
+trusted specification
+        ↓
+AI-assisted package construction
+        ↓
+machine-checked core properties
+        ↓
+explicit compilation/boundary assumptions
+        ↓
+ordinary deployable package
+        ↓
+independent audit/replay
+~~~
+
+If ProofScript can do this for parser/codec packages and one second real vertical while lowering human effort, the project gains strong evidence for expanding Forge and Bridge.
+
+---
+
+## 85. Feasibility research sources
+
+Key external precedent/evidence:
+
+- Lean 4 kernel architecture and proof validation:
+  - https://lean-lang.org/doc/reference/latest/Elaboration-and-Compilation/
+  - https://lean-lang.org/doc/reference/latest/ValidatingProofs/
+  - https://lean-lang.org/faq/
+- Dafny:
+  - https://dafny.org/dafny/
+- F* / Project Everest / HACL* / EverParse:
+  - https://fstar-lang.org/
+  - https://hacl-star.github.io/
+- CompCert:
+  - https://compcert.org/
+- CakeML:
+  - https://cakeml.org/
+- seL4:
+  - https://sel4.systems/Verification/proofs.html
+- Verus:
+  - https://verus-lang.github.io/verus/guide/
+- Goedel-Prover:
+  - https://arxiv.org/abs/2502.07640
+- DeepSeek-Prover-V2:
+  - https://arxiv.org/abs/2504.21801
+- P3 joint program-and-proof planning:
+  - https://arxiv.org/abs/2608.09277
+- SpecSyn specification synthesis:
+  - https://arxiv.org/abs/2604.21570
+- LLM-generated Dafny verification annotations:
+  - https://arxiv.org/abs/2601.12845
+
+These sources establish that major ingredients are individually feasible. They do **not** establish that ProofScript's integrated Factory or ecosystem-compounding hypothesis will succeed; that remains the central empirical question.

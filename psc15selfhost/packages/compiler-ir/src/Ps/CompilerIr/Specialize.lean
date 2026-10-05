@@ -1,4 +1,5 @@
 import Ps.CompilerIr.Model
+import Ps.Foundation.List
 
 inductive PsIrSpecializeKind where
   | structure
@@ -338,7 +339,7 @@ def psIrSpecializeRewriteTypeListWith
                 types :=
                   List.cons lowered.type loweredRest.types
                 requests :=
-                  lowered.requests ++ loweredRest.requests
+                  psListAppend lowered.requests loweredRest.requests
               }
 
 def psIrSpecializeRewriteTypeWithFuel
@@ -393,8 +394,7 @@ def psIrSpecializeRewriteTypeWithFuel
                         loweredParameters.types
                         loweredResult.type
                     requests :=
-                      loweredParameters.requests
-                        ++ loweredResult.requests
+                      psListAppend loweredParameters.requests loweredResult.requests
                   }
       | .named name arguments =>
           match
@@ -438,7 +438,7 @@ def psIrSpecializeRewriteTypeWithFuel
                               specializedName
                               []
                           requests :=
-                            loweredArguments.requests ++ [request]
+                            psListAppend loweredArguments.requests [request]
                         }
 
 def psIrSpecializeRewriteType
@@ -486,7 +486,7 @@ def psIrSpecializeRewriteParameters
                     }
                     loweredRest.parameters
                 requests :=
-                  lowered.requests ++ loweredRest.requests
+                  psListAppend lowered.requests loweredRest.requests
               }
 
 def psIrSpecializeRewriteExprListWith
@@ -511,7 +511,7 @@ def psIrSpecializeRewriteExprListWith
                 expressions :=
                   List.cons lowered.expr loweredRest.expressions
                 requests :=
-                  lowered.requests ++ loweredRest.requests
+                  psListAppend lowered.requests loweredRest.requests
               }
 
 def psIrSpecializeRewriteFieldsWith
@@ -538,7 +538,7 @@ def psIrSpecializeRewriteFieldsWith
                     (Prod.mk (Prod.fst field) lowered.expr)
                     loweredRest.fields
                 requests :=
-                  lowered.requests ++ loweredRest.requests
+                  psListAppend lowered.requests loweredRest.requests
               }
 
 def psIrSpecializeRewriteMatchBindings
@@ -577,7 +577,7 @@ def psIrSpecializeRewriteMatchBindings
                     }
                     loweredRest.bindings
                 requests :=
-                  lowered.requests ++ loweredRest.requests
+                  psListAppend lowered.requests loweredRest.requests
               }
 
 def psIrSpecializeRewriteAlternativesWith
@@ -626,9 +626,7 @@ def psIrSpecializeRewriteAlternativesWith
                             loweredBody.expr))
                         loweredRest.alternatives
                     requests :=
-                      loweredBindings.requests
-                        ++ loweredBody.requests
-                        ++ loweredRest.requests
+                      psListAppend loweredBindings.requests (psListAppend loweredBody.requests loweredRest.requests)
                   }
 
 def psIrSpecializeRewriteExprWithFuel
@@ -680,7 +678,7 @@ def psIrSpecializeRewriteExprWithFuel
                         loweredTypes.types
                         lowered.expressions
                     requests :=
-                      loweredTypes.requests ++ lowered.requests
+                      psListAppend loweredTypes.requests lowered.requests
                   }
       | .lambda parameters resultType body =>
           match
@@ -703,9 +701,7 @@ def psIrSpecializeRewriteExprWithFuel
                             loweredResult.type
                             loweredBody.expr
                         requests :=
-                          loweredParameters.requests
-                            ++ loweredResult.requests
-                            ++ loweredBody.requests
+                          psListAppend loweredParameters.requests (psListAppend loweredResult.requests loweredBody.requests)
                       }
       | .call fn typeArguments arguments =>
           match rewrite fn with
@@ -739,9 +735,7 @@ def psIrSpecializeRewriteExprWithFuel
                                         loweredTypes.types
                                         loweredArguments.expressions
                                     requests :=
-                                      loweredFn.requests
-                                        ++ loweredTypes.requests
-                                        ++ loweredArguments.requests
+                                      psListAppend loweredFn.requests (psListAppend loweredTypes.requests loweredArguments.requests)
                                   }
                               | _ =>
                                   if
@@ -781,10 +775,7 @@ def psIrSpecializeRewriteExprWithFuel
                                               []
                                               loweredArguments.expressions
                                           requests :=
-                                            loweredFn.requests
-                                              ++ loweredTypes.requests
-                                              ++ loweredArguments.requests
-                                              ++ [request]
+                                            psListAppend loweredFn.requests (psListAppend loweredTypes.requests (psListAppend loweredArguments.requests [request]))
                                         }
                           | none =>
                               Except.ok {
@@ -794,9 +785,7 @@ def psIrSpecializeRewriteExprWithFuel
                                     loweredTypes.types
                                     loweredArguments.expressions
                                 requests :=
-                                  loweredFn.requests
-                                    ++ loweredTypes.requests
-                                    ++ loweredArguments.requests
+                                  psListAppend loweredFn.requests (psListAppend loweredTypes.requests loweredArguments.requests)
                               }
                       | _ =>
                           if Nat.beq loweredTypes.types.length 0 then
@@ -807,9 +796,7 @@ def psIrSpecializeRewriteExprWithFuel
                                   []
                                   loweredArguments.expressions
                               requests :=
-                                loweredFn.requests
-                                  ++ loweredTypes.requests
-                                  ++ loweredArguments.requests
+                                psListAppend loweredFn.requests (psListAppend loweredTypes.requests loweredArguments.requests)
                             }
                           else
                             Except.error
@@ -832,9 +819,7 @@ def psIrSpecializeRewriteExprWithFuel
                             loweredValue.expr
                             loweredBody.expr
                         requests :=
-                          loweredType.requests
-                            ++ loweredValue.requests
-                            ++ loweredBody.requests
+                          psListAppend loweredType.requests (psListAppend loweredValue.requests loweredBody.requests)
                       }
       | .ifE condition thenBranch elseBranch =>
           match rewrite condition with
@@ -853,9 +838,7 @@ def psIrSpecializeRewriteExprWithFuel
                             loweredThen.expr
                             loweredElse.expr
                         requests :=
-                          loweredCondition.requests
-                            ++ loweredThen.requests
-                            ++ loweredElse.requests
+                          psListAppend loweredCondition.requests (psListAppend loweredThen.requests loweredElse.requests)
                       }
       | .record structureName typeArguments fields =>
           match
@@ -884,8 +867,7 @@ def psIrSpecializeRewriteExprWithFuel
                                 []
                                 loweredFields.fields
                             requests :=
-                              loweredTypes.requests
-                                ++ loweredFields.requests
+                              psListAppend loweredTypes.requests loweredFields.requests
                           }
                       | _ =>
                           if
@@ -917,9 +899,7 @@ def psIrSpecializeRewriteExprWithFuel
                                       []
                                       loweredFields.fields
                                   requests :=
-                                    loweredTypes.requests
-                                      ++ loweredFields.requests
-                                      ++ [request]
+                                    psListAppend loweredTypes.requests (psListAppend loweredFields.requests [request])
                                 }
                   | none =>
                       Except.error
@@ -949,8 +929,7 @@ def psIrSpecializeRewriteExprWithFuel
                                 loweredTarget.expr
                                 field
                             requests :=
-                              loweredTypes.requests
-                                ++ loweredTarget.requests
+                              psListAppend loweredTypes.requests loweredTarget.requests
                           }
                       | _ =>
                           if
@@ -983,9 +962,7 @@ def psIrSpecializeRewriteExprWithFuel
                                       loweredTarget.expr
                                       field
                                   requests :=
-                                    loweredTypes.requests
-                                      ++ loweredTarget.requests
-                                      ++ [request]
+                                    psListAppend loweredTypes.requests (psListAppend loweredTarget.requests [request])
                                 }
                   | none =>
                       Except.error
@@ -1018,8 +995,7 @@ def psIrSpecializeRewriteExprWithFuel
                                 []
                                 loweredFields.fields
                             requests :=
-                              loweredTypes.requests
-                                ++ loweredFields.requests
+                              psListAppend loweredTypes.requests loweredFields.requests
                           }
                       | _ =>
                           if
@@ -1052,9 +1028,7 @@ def psIrSpecializeRewriteExprWithFuel
                                       []
                                       loweredFields.fields
                                   requests :=
-                                    loweredTypes.requests
-                                      ++ loweredFields.requests
-                                      ++ [request]
+                                    psListAppend loweredTypes.requests (psListAppend loweredFields.requests [request])
                                 }
                   | none =>
                       Except.error
@@ -1092,9 +1066,7 @@ def psIrSpecializeRewriteExprWithFuel
                                     loweredScrutinee.expr
                                     loweredAlternatives.alternatives
                                 requests :=
-                                  loweredTypes.requests
-                                    ++ loweredScrutinee.requests
-                                    ++ loweredAlternatives.requests
+                                  psListAppend loweredTypes.requests (psListAppend loweredScrutinee.requests loweredAlternatives.requests)
                               }
                           | _ =>
                               if
@@ -1127,10 +1099,7 @@ def psIrSpecializeRewriteExprWithFuel
                                           loweredScrutinee.expr
                                           loweredAlternatives.alternatives
                                       requests :=
-                                        loweredTypes.requests
-                                          ++ loweredScrutinee.requests
-                                          ++ loweredAlternatives.requests
-                                          ++ [request]
+                                        psListAppend loweredTypes.requests (psListAppend loweredScrutinee.requests (psListAppend loweredAlternatives.requests [request]))
                                     }
                       | none =>
                           Except.error
@@ -1183,7 +1152,7 @@ def psIrSpecializeRewriteStructureFields
                     }
                     loweredRest.fields
                 requests :=
-                  lowered.requests ++ loweredRest.requests
+                  psListAppend lowered.requests loweredRest.requests
               }
 
 def psIrSpecializeRewriteConstructorFields
@@ -1221,7 +1190,7 @@ def psIrSpecializeRewriteConstructorFields
                     }
                     loweredRest.fields
                 requests :=
-                  lowered.requests ++ loweredRest.requests
+                  psListAppend lowered.requests loweredRest.requests
               }
 
 def psIrSpecializeRewriteConstructors
@@ -1259,7 +1228,7 @@ def psIrSpecializeRewriteConstructors
                     }
                     loweredRest.constructors
                 requests :=
-                  lowered.requests ++ loweredRest.requests
+                  psListAppend lowered.requests loweredRest.requests
               }
 
 def psIrSpecializeRewriteImports
@@ -1293,7 +1262,7 @@ def psIrSpecializeRewriteImports
                     }
                     loweredRest.imports
                 requests :=
-                  lowered.requests ++ loweredRest.requests
+                  psListAppend lowered.requests loweredRest.requests
               }
 
 def psIrSpecializeSeedStructures
@@ -1325,7 +1294,7 @@ def psIrSpecializeSeedStructures
                           fields := lowered.fields
                         }
                         (Prod.fst loweredRest),
-                      lowered.requests ++ (Prod.snd loweredRest)
+                      psListAppend lowered.requests (Prod.snd loweredRest)
                     )
 
 def psIrSpecializeSeedInductives
@@ -1357,7 +1326,7 @@ def psIrSpecializeSeedInductives
                           constructors := lowered.constructors
                         }
                         (Prod.fst loweredRest),
-                      lowered.requests ++ (Prod.snd loweredRest)
+                      psListAppend lowered.requests (Prod.snd loweredRest)
                     )
 
 def psIrSpecializeSeedDeclarations
@@ -1406,10 +1375,7 @@ def psIrSpecializeSeedDeclarations
                                   body := loweredBody.expr
                                 }
                                 (Prod.fst loweredRest),
-                              loweredParameters.requests
-                                ++ loweredResult.requests
-                                ++ loweredBody.requests
-                                ++ (Prod.snd loweredRest)
+                              psListAppend loweredParameters.requests (psListAppend loweredResult.requests (psListAppend loweredBody.requests (Prod.snd loweredRest)))
                             )
 
 def psIrSpecializeAppendRequest
@@ -1421,7 +1387,7 @@ def psIrSpecializeAppendRequest
     structures := state.structures
     inductives := state.inductives
     declarations := state.declarations
-    pending := state.pending ++ requests
+    pending := psListAppend state.pending requests
     seen := state.seen
   }
 
@@ -1445,10 +1411,10 @@ def psIrSpecializeAddStructure
     PsIrSpecializeState :=
   {
     imports := state.imports
-    structures := state.structures ++ [structureInfo]
+    structures := psListAppend state.structures [structureInfo]
     inductives := state.inductives
     declarations := state.declarations
-    pending := state.pending ++ requests
+    pending := psListAppend state.pending requests
     seen := state.seen
   }
 
@@ -1460,9 +1426,9 @@ def psIrSpecializeAddInductive
   {
     imports := state.imports
     structures := state.structures
-    inductives := state.inductives ++ [inductiveInfo]
+    inductives := psListAppend state.inductives [inductiveInfo]
     declarations := state.declarations
-    pending := state.pending ++ requests
+    pending := psListAppend state.pending requests
     seen := state.seen
   }
 
@@ -1475,8 +1441,8 @@ def psIrSpecializeAddDeclaration
     imports := state.imports
     structures := state.structures
     inductives := state.inductives
-    declarations := state.declarations ++ [declaration]
-    pending := state.pending ++ requests
+    declarations := psListAppend state.declarations [declaration]
+    pending := psListAppend state.pending requests
     seen := state.seen
   }
 
@@ -1654,9 +1620,11 @@ def psIrSpecializeProcessDeclaration
                                   resultType := loweredResult.type
                                   body := loweredBody.expr
                                 }
-                                (loweredParameters.requests
-                                  ++ loweredResult.requests
-                                  ++ loweredBody.requests))
+                                (psListAppend
+                                  loweredParameters.requests
+                                  (psListAppend
+                                    loweredResult.requests
+                                    loweredBody.requests)))
 
 def psIrSpecializeProcessRequest
     (module : PsVerifiedIrModule)
@@ -1739,10 +1707,7 @@ def psIrSpecializeModule
                     inductives := (Prod.fst inductives)
                     declarations := (Prod.fst declarations)
                     pending :=
-                      imports.requests
-                        ++ (Prod.snd structures)
-                        ++ (Prod.snd inductives)
-                        ++ (Prod.snd declarations)
+                      psListAppend imports.requests (psListAppend (Prod.snd structures) (psListAppend (Prod.snd inductives) (Prod.snd declarations)))
                     seen := []
                   };
                   match

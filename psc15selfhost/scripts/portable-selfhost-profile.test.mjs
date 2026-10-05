@@ -214,6 +214,24 @@ test('opaque primitive scalars cannot be pattern matched', () => {
   assert(!ids(good).includes('opaque-primitive-match'));
 });
 
+test('portable source uses explicit Option constructors', () => {
+  const bad = [
+    'def f (value : Option Nat) : Option Nat :=',
+    '  match value with',
+    '  | none => some 0',
+    '  | some current => some current',
+  ].join('\n');
+  assert(ids(bad).includes('explicit-option-constructors'));
+
+  const good = [
+    'def f (value : Option Nat) : Option Nat :=',
+    '  match value with',
+    '  | Option.none => Option.some 0',
+    '  | Option.some current => Option.some current',
+  ].join('\n');
+  assert(!ids(good).includes('explicit-option-constructors'));
+});
+
 test('layout-only lets are rejected while explicit sequencing remains valid', () => {
   const bad = [
     'def f : Nat :=',

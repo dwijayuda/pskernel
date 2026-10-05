@@ -125,6 +125,7 @@ await readFile(path.join(packageRoot,'source','proofscript','foundation','Ps','F
 await readFile(path.join(packageRoot,'source','proofscript','provider','PsKernelLean','Admission.lean'),'utf8');
 await readFile(path.join(packageRoot,'scripts','build-wasm.sh'),'utf8');
 await readFile(path.join(packageRoot,'scripts','write-prebuilt-manifest.mjs'),'utf8');
+await readFile(path.join(packageRoot,'scripts','resolve-provider-modules.mjs'),'utf8');
 await readFile(path.join(packageRoot,'host','prebuilt.mjs'),'utf8');
 await readFile(path.join(packageRoot,'host','verify-prebuilt.mjs'),'utf8');
 await readFile(path.join(packageRoot,'patches','lean4-4.34.0-emscripten-uv-stubs.patch'),'utf8');
@@ -149,6 +150,7 @@ for(const file of [
   'scripts/build-wasm.sh',
   'scripts/apply-wasm-abi.mjs',
   'scripts/write-prebuilt-manifest.mjs',
+  'scripts/resolve-provider-modules.mjs',
   'host/prebuilt.mjs',
   'host/verify-prebuilt.mjs',
   'patches/lean4-4.34.0-emscripten-uv-stubs.patch',

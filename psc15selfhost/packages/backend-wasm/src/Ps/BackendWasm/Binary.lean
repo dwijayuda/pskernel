@@ -132,7 +132,7 @@ def psWasmEncodeUtf8Chars
 def psWasmEncodeName (name : String) : List UInt8 :=
   let bytes := psWasmEncodeUtf8Chars name.toList;
   psListAppend
-    (psWasmEncodeUleb bytes.length)
+    (psWasmEncodeUleb (psListLength bytes))
     bytes
 
 def psWasmFindStructureIndexWorker
@@ -199,7 +199,7 @@ def psWasmFindHeapTypeIndex
       match psWasmFindArrayIndex arrays name with
       | none => none
       | some index =>
-          some (structures.length + index)
+          some ((psListLength structures) + index)
 
 def psWasmEncodeValueType
     (structures : List PsWasmStructType)
@@ -274,7 +274,7 @@ def psWasmFindFunctionTypeIndex
   match psWasmFindFunctionTypeIndexLoop name 0 functionTypes with
   | none => none
   | some index =>
-      some (structures.length + arrays.length + index)
+      some ((psListLength structures) + (psListLength arrays) + index)
 
 def psWasmEncodeNamedFunctionType
     (structures : List PsWasmStructType)
@@ -290,9 +290,9 @@ def psWasmEncodeNamedFunctionType
           Except.ok
             (psListAppend [psWasmByte 96] (psListAppend (psWasmEncodeVector
                 parameters
-                functionType.parameters.length) (psWasmEncodeVector
+                (psListLength functionType.parameters)) (psWasmEncodeVector
                 results
-                functionType.results.length)))
+                (psListLength functionType.results))))
 
 def psWasmEncodeNamedFunctionTypes
     (structures : List PsWasmStructType)
@@ -322,7 +322,7 @@ def psWasmEncodeFunctionType
       | Except.error error => Except.error error
       | Except.ok results =>
           Except.ok
-            (psListAppend [psWasmByte 96] (psListAppend (psWasmEncodeVector parameters function.parameters.length) (psWasmEncodeVector results function.results.length)))
+            (psListAppend [psWasmByte 96] (psListAppend (psWasmEncodeVector parameters (psListLength function.parameters)) (psWasmEncodeVector results (psListLength function.results))))
 
 def psWasmEncodeFunctionTypes
     (structures : List PsWasmStructType)
@@ -692,13 +692,13 @@ def psWasmEncodeFunctionBody
       | Except.ok instructions =>
           let body :=
             psListAppend
-              (psWasmEncodeUleb function.locals.length)
+              (psWasmEncodeUleb (psListLength function.locals))
               (psListAppend
                 encodedLocals
                 (psListAppend
                   instructions
                   [psWasmByte 11]));
-          Except.ok (psListAppend (psWasmEncodeUleb body.length) body)
+          Except.ok (psListAppend (psWasmEncodeUleb (psListLength body)) body)
 
 def psWasmEncodeFunctionBodies
     (structures : List PsWasmStructType)
@@ -774,7 +774,7 @@ def psWasmEncodeStructCompositeType
   | Except.error error => Except.error error
   | Except.ok fields =>
       Except.ok
-        (psListAppend [psWasmByte 95] (psListAppend (psWasmEncodeUleb structType.fields.length) fields))
+        (psListAppend [psWasmByte 95] (psListAppend (psWasmEncodeUleb (psListLength structType.fields)) fields))
 
 def psWasmEncodeStructType
     (structures : List PsWasmStructType)
@@ -872,9 +872,9 @@ def psWasmFunctionTypeIndex
   match function.typeName with
   | none =>
       Except.ok
-        (structures.length
-          + arrays.length
-          + functionTypes.length
+        ((psListLength structures)
+          + (psListLength arrays)
+          + (psListLength functionTypes)
           + functionIndex)
   | some typeName =>
       match
@@ -980,7 +980,7 @@ def psWasmEncodeDeclarativeFunctionRefs
                 [psWasmByte 0]
                 (psWasmEncodeVector
                   indices
-                  functionRefs.length));
+                  (psListLength functionRefs)));
           Except.ok
             (psWasmEncodeVector segment 1)
 
@@ -1007,7 +1007,7 @@ def psWasmEncodeSection
   psListAppend
     [psWasmByte sectionId]
     (psListAppend
-      (psWasmEncodeUleb payload.length)
+      (psWasmEncodeUleb (psListLength payload))
       payload)
 
 def psWasmEncodeModule
@@ -1071,10 +1071,10 @@ def psWasmEncodeModule
                               | Except.error error => Except.error error
                               | Except.ok encodedBodies =>
                                   let typeCount :=
-                                    module.structures.length
-                                      + module.arrays.length
-                                      + module.functionTypes.length
-                                      + module.functions.length;
+                                    (psListLength module.structures)
+                                      + (psListLength module.arrays)
+                                      + (psListLength module.functionTypes)
+                                      + (psListLength module.functions);
                                   let typePayload :=
                                     psWasmEncodeVector
                                       (psListAppend encodedStructTypes (psListAppend encodedArrayTypes (psListAppend encodedNamedFunctionTypes encodedFunctionTypes)))
@@ -1082,11 +1082,11 @@ def psWasmEncodeModule
                                   let functionPayload :=
                                     psWasmEncodeVector
                                       encodedFunctionTypeIndices
-                                      module.functions.length;
+                                      (psListLength module.functions);
                                   let exportPayload :=
                                     psWasmEncodeVector
                                       encodedExports
-                                      module.exports.length;
+                                      (psListLength module.exports);
                                   let elementSection :=
                                     match module.functionRefs with
                                     | [] => []
@@ -1097,7 +1097,7 @@ def psWasmEncodeModule
                                   let codePayload :=
                                     psWasmEncodeVector
                                       encodedBodies
-                                      module.functions.length;
+                                      (psListLength module.functions);
                                   Except.ok
                                     (psListAppend [
                                       psWasmByte 0,

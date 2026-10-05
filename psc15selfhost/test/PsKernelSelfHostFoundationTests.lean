@@ -1,8 +1,11 @@
+import KernelSelfHost.Foundation.KernelContract
 import KernelSelfHost.Foundation.AdmissionRuntime
 import KernelSelfHost.Foundation.CheckerOps
 
 def main : IO Unit :=
-  if !psKernelCheckerOpsTests then
+  if !psKernelContractTests then
+    throw (IO.userError "PSC1_KERNEL_CONTRACT_V1: FAIL")
+  else if !psKernelCheckerOpsTests then
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_CHECKER_OPS_CONFORMANCE: FAIL")

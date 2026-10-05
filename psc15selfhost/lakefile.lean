@@ -343,12 +343,19 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Environment.Environment,
     `Ps.KernelSelfHost.Environment.Lookup,
     `Ps.KernelSelfHost.Runtime.Capability.Types,
+    `Ps.KernelSelfHost.Checker.ResourcePolicy,
+    `Ps.KernelSelfHost.API.Outcome,
+    `Ps.KernelSelfHost.API.KernelContractV1,
+    `Ps.KernelSelfHost.API.Provider,
+    `Ps.KernelSelfHost.API.Session,
+    `Ps.KernelSelfHost.API.Kernel,
     `Ps.KernelSelfHost.SelfHost
   ]
 
 lean_lib PsKernelSelfHostTestSupport where
   srcDir := "test"
   roots := #[
+    `KernelSelfHost.Foundation.KernelContract,
     `KernelSelfHost.Foundation.CheckerOps,
     `KernelSelfHost.Foundation.Core,
     `KernelSelfHost.Foundation.Checking,

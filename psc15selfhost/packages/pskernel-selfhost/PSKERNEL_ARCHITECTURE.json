@@ -10,7 +10,7 @@
   "semanticRootPath": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
   "semanticModulePrefix": "Ps.KernelSelfHost.",
   "migration": {
-    "phase": "B5-core-environment",
+    "phase": "B6-kernel-contract-v1",
     "finalArchitectureAdopted": true,
     "finalArchitectureImplemented": false,
     "compatibilityShimsAllowedDuringMigration": true,
@@ -579,6 +579,30 @@
     {
       "area": "runtime-capability-types",
       "module": "Ps.KernelSelfHost.Runtime.Capability.Types"
+    },
+    {
+      "area": "checker-resourcepolicy",
+      "module": "Ps.KernelSelfHost.Checker.ResourcePolicy"
+    },
+    {
+      "area": "api-outcome",
+      "module": "Ps.KernelSelfHost.API.Outcome"
+    },
+    {
+      "area": "api-kernelcontractv1",
+      "module": "Ps.KernelSelfHost.API.KernelContractV1"
+    },
+    {
+      "area": "api-provider",
+      "module": "Ps.KernelSelfHost.API.Provider"
+    },
+    {
+      "area": "api-session",
+      "module": "Ps.KernelSelfHost.API.Session"
+    },
+    {
+      "area": "api-kernel",
+      "module": "Ps.KernelSelfHost.API.Kernel"
     }
   ],
   "recursiveWiring": {
@@ -614,7 +638,8 @@
         "Ps.KernelSelfHost.InductiveAdmission",
         "Ps.KernelSelfHost.MutualInductive",
         "Ps.KernelSelfHost.NestedInductive",
-        "Ps.KernelSelfHost.Quot"
+        "Ps.KernelSelfHost.Quot",
+        "Ps.KernelSelfHost.API."
       ]
     },
     {

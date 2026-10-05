@@ -32,8 +32,34 @@ if (JSON.stringify(compatibilityIds) !== JSON.stringify(conformanceIds)) {
 }
 
 const allowed = new Set(conformance.coverageValues);
-const testFile = path.join(root, conformance.testFile);
-const testSource = fs.readFileSync(testFile, "utf8");
+
+function readLeanSources(target) {
+  const stat = fs.statSync(target);
+  if (stat.isFile()) {
+    if (!target.endsWith(".lean")) return [];
+    return [fs.readFileSync(target, "utf8")];
+  }
+  if (!stat.isDirectory()) return [];
+  const sources = [];
+  for (const entry of fs.readdirSync(target, { withFileTypes: true })) {
+    const child = path.join(target, entry.name);
+    if (entry.isDirectory()) {
+      sources.push(...readLeanSources(child));
+    } else if (entry.isFile() && entry.name.endsWith(".lean")) {
+      sources.push(fs.readFileSync(child, "utf8"));
+    }
+  }
+  return sources;
+}
+
+const configuredTestRoots =
+  Array.isArray(conformance.testRoots) && conformance.testRoots.length > 0
+    ? conformance.testRoots
+    : [conformance.testFile];
+const testSource = configuredTestRoots
+  .flatMap((target) => readLeanSources(path.join(root, target)))
+  .join("\n");
+
 const pending = [];
 let directDifferential = 0;
 let directInvariant = 0;

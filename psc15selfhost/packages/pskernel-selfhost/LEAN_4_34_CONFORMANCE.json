@@ -6,6 +6,10 @@
     "gitCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
   },
   "testFile": "test/PsKernelSelfHostFoundationTests.lean",
+  "testRoots": [
+    "test/PsKernelSelfHostFoundationTests.lean",
+    "test/KernelSelfHost/Foundation"
+  ],
   "coverageValues": [
     "direct-differential",
     "direct-invariant",

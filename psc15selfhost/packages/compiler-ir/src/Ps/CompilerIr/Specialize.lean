@@ -177,8 +177,9 @@ def psIrSpecializeTypeKeyWithFuel
           | .unit => Option.some "Unit"
       | .function parameters result =>
           let parameterKeys :=
-            parameters.map
-              (psIrSpecializeTypeKeyWithFuel fuel);
+            psListMap
+              (psIrSpecializeTypeKeyWithFuel fuel)
+              parameters;
           match psIrSpecializeJoinKeys parameterKeys with
           | Option.none => Option.none
           | Option.some parameterKey =>
@@ -193,8 +194,9 @@ def psIrSpecializeTypeKeyWithFuel
           (String.Internal.append "$To$" resultKey)))
       | .named name arguments =>
           let argumentKeys :=
-            arguments.map
-              (psIrSpecializeTypeKeyWithFuel fuel);
+            psListMap
+              (psIrSpecializeTypeKeyWithFuel fuel)
+              arguments;
           match psIrSpecializeJoinKeys argumentKeys with
           | Option.none => Option.none
           | Option.some keys =>
@@ -215,7 +217,7 @@ def psIrSpecializeTypeKey
 def psIrSpecializeArgumentsKey
     (arguments : List PsVerifiedIrType) : Option String :=
   psIrSpecializeJoinKeys
-    (arguments.map psIrSpecializeTypeKey)
+    (psListMap psIrSpecializeTypeKey arguments)
 
 def psIrSpecializedName
     (name : String)
@@ -291,7 +293,7 @@ def psIrSpecializeMakeSubstitution
     (parameters : List PsVerifiedIrTypeParameter)
     (arguments : List PsVerifiedIrType) :
     Except PsIrSpecializeError (List (String × PsVerifiedIrType)) :=
-  if psIrSpecializeNatNe parameters.length arguments.length then
+  if psIrSpecializeNatNe (psListLength parameters) (psListLength arguments) then
     Except.error
       (PsIrSpecializeError.typeArgumentArity "")
   else if psIrSpecializeBoolNot (psIrSpecializeAllGround arguments) then
@@ -758,8 +760,8 @@ def psIrSpecializeRewriteExprWithFuel
                                   }
                               | _ =>
                                   if
-                                      psIrSpecializeNatNe declaration.typeParameters.length
-                                        loweredTypes.types.length
+                                      psIrSpecializeNatNe (psListLength declaration.typeParameters)
+                                        (psListLength loweredTypes.types)
                                   then
                                     Except.error
                                       (PsIrSpecializeError.typeArgumentArity
@@ -807,7 +809,7 @@ def psIrSpecializeRewriteExprWithFuel
                                   psListAppend loweredFn.requests (psListAppend loweredTypes.requests loweredArguments.requests)
                               }
                       | _ =>
-                          if Nat.beq loweredTypes.types.length 0 then
+                          if Nat.beq (psListLength loweredTypes.types) 0 then
                             Except.ok {
                               expr :=
                                 PsVerifiedIrExpr.call
@@ -890,8 +892,8 @@ def psIrSpecializeRewriteExprWithFuel
                           }
                       | _ =>
                           if
-                              psIrSpecializeNatNe structureInfo.typeParameters.length
-                                loweredTypes.types.length
+                              psIrSpecializeNatNe (psListLength structureInfo.typeParameters)
+                                (psListLength loweredTypes.types)
                           then
                             Except.error
                               (PsIrSpecializeError.typeArgumentArity
@@ -952,8 +954,8 @@ def psIrSpecializeRewriteExprWithFuel
                           }
                       | _ =>
                           if
-                              psIrSpecializeNatNe structureInfo.typeParameters.length
-                                loweredTypes.types.length
+                              psIrSpecializeNatNe (psListLength structureInfo.typeParameters)
+                                (psListLength loweredTypes.types)
                           then
                             Except.error
                               (PsIrSpecializeError.typeArgumentArity
@@ -1018,8 +1020,8 @@ def psIrSpecializeRewriteExprWithFuel
                           }
                       | _ =>
                           if
-                              psIrSpecializeNatNe inductiveInfo.typeParameters.length
-                                loweredTypes.types.length
+                              psIrSpecializeNatNe (psListLength inductiveInfo.typeParameters)
+                                (psListLength loweredTypes.types)
                           then
                             Except.error
                               (PsIrSpecializeError.typeArgumentArity
@@ -1089,8 +1091,8 @@ def psIrSpecializeRewriteExprWithFuel
                               }
                           | _ =>
                               if
-                                  psIrSpecializeNatNe inductiveInfo.typeParameters.length
-                                    loweredTypes.types.length
+                                  psIrSpecializeNatNe (psListLength inductiveInfo.typeParameters)
+                                    (psListLength loweredTypes.types)
                               then
                                 Except.error
                                   (PsIrSpecializeError.typeArgumentArity
@@ -1479,8 +1481,8 @@ def psIrSpecializeProcessStructure
         (PsIrSpecializeError.unknownTarget request.name)
   | Option.some structureInfo =>
       if
-          psIrSpecializeNatNe structureInfo.typeParameters.length
-            request.arguments.length
+          psIrSpecializeNatNe (psListLength structureInfo.typeParameters)
+            (psListLength request.arguments)
       then
         Except.error
           (PsIrSpecializeError.typeArgumentArity request.name)
@@ -1531,8 +1533,8 @@ def psIrSpecializeProcessInductive
         (PsIrSpecializeError.unknownTarget request.name)
   | Option.some inductiveInfo =>
       if
-          psIrSpecializeNatNe inductiveInfo.typeParameters.length
-            request.arguments.length
+          psIrSpecializeNatNe (psListLength inductiveInfo.typeParameters)
+            (psListLength request.arguments)
       then
         Except.error
           (PsIrSpecializeError.typeArgumentArity request.name)
@@ -1583,8 +1585,8 @@ def psIrSpecializeProcessDeclaration
         (PsIrSpecializeError.unknownTarget request.name)
   | Option.some declaration =>
       if
-          psIrSpecializeNatNe declaration.typeParameters.length
-            request.arguments.length
+          psIrSpecializeNatNe (psListLength declaration.typeParameters)
+            (psListLength request.arguments)
       then
         Except.error
           (PsIrSpecializeError.typeArgumentArity request.name)

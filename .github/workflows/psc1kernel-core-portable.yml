@@ -7,6 +7,7 @@ on:
       - psc2/selfhost-lean-kernel
     paths:
       - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/packages/pskernel-lean-wasm/**
       - psc15selfhost/packages/pskernel-core.old3/package.json
       - psc15selfhost/scripts/psc1kernel-package-layout.test.mjs
       - psc15selfhost/scripts/workspace-layout.mjs
@@ -33,6 +34,7 @@ on:
       - psc2/selfhost-lean-kernel
     paths:
       - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/packages/pskernel-lean-wasm/**
       - psc15selfhost/packages/pskernel-core.old3/package.json
       - psc15selfhost/scripts/psc1kernel-package-layout.test.mjs
       - psc15selfhost/scripts/workspace-layout.mjs

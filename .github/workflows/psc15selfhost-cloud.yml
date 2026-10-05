@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - psc2/selfhost-lean-kernel
+      - psc2/psc1kernel-selfhost-portable
     paths:
       - "psc15selfhost/**"
       - ".github/workflows/psc15selfhost-cloud.yml"

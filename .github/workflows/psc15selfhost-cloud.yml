@@ -86,6 +86,7 @@ jobs:
             psc1_erasure_tests \
             psc1_project_query_graph_tests \
             psc1_host_project_query_tests \
+            psc2_joint_closure_inventory \
             psc2_minimal_selfhost_tests \
             psc1_backend_ts_tests \
             psc1_backend_js_tests \
@@ -93,6 +94,10 @@ jobs:
             psc1_backend_rust_source_tests \
             psc1_backend_wasm_tests \
             psc1_backend_wasm_binary_smoke
+
+      - name: Check exact prelude extension parity
+        working-directory: psc15selfhost
+        run: npm run check:prelude-declaration-parity
 
       - name: Run VerifiedIR and erasure corpus
         working-directory: psc15selfhost

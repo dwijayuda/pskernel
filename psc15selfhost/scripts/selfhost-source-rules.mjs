@@ -15,6 +15,7 @@ export const portableSelfhostStructuralRuleIds = Object.freeze([
   'value-length-dot-notation',
   'leading-dot-term-constructor',
   'untyped-lambda-binder',
+  'untyped-lambda-let',
   'layout-let-sequencing',
 ]);
 
@@ -534,6 +535,18 @@ export function findSelfhostStructuralViolations(
     }
     if (/\bfun\s+[A-Za-z_][A-Za-z0-9_]*\s*=>/u.test(line)) {
       add('untyped-lambda-binder', index + 1, line);
+    }
+
+    if (/^\s*let\s+[A-Za-z_][A-Za-z0-9_']*\s*:=\s*$/u.test(line)) {
+      let cursor = index + 1;
+      while (cursor < lines.length && lines[cursor].trim() === '') cursor++;
+      if (
+        cursor < lines.length &&
+        (lines[cursor].trim() === 'fun' ||
+          /^fun\s*\(/u.test(lines[cursor].trim()))
+      ) {
+        add('untyped-lambda-let', index + 1, line);
+      }
     }
 
     const stringLine = stringLines[index] ?? '';

@@ -26,8 +26,8 @@ provider promotion, or a change to `pskernel-core`.
 ## Enforced exit gates
 
 `psc1kernel-architecture-audit.mjs` checks target identity, the 79-module semantic
-closure, canonical owner uniqueness, import fences, forwarding-only compatibility
-shims, the single Knot wiring owner, Lake registrations, rule symbol ownership,
+closure, canonical owner uniqueness, import fences, retired compatibility
+shims, the single Knot wiring owner, valid Lake registrations, rule symbol ownership,
 test evidence reachable from the foundation executable, and the inventory of 136
 legacy diagnostics. The completion flag additionally requires the production
 layers and rejects unowned or unreachable source implementations.
@@ -57,7 +57,10 @@ and outcomes without rewriting the existing admission or checking algorithms.
 
 ## Intentional representation choices
 
-Compatibility modules remain for callers and are outside the semantic closure.
+The 71 temporary compatibility modules were removed after all repository callers
+were changed to canonical imports. The source tree now matches the 79-module
+semantic closure. The optional fixed-point workflow checks canonical generated
+paths. The superseded migration inventory is retained in Git history.
 The legacy environment record still carries native configuration for existing
 callers; the new public Session configures capability explicitly and strips it
 from returned history. This preserves old constructor behavior while making the

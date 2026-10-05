@@ -94,8 +94,8 @@ jobs:
 
           for (const required of [
             'packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.ps',
-            'packages/pskernel-selfhost/src/Ps/KernelSelfHost/MutualInductive.ps',
-            'packages/pskernel-selfhost/src/Ps/KernelSelfHost/NestedInductive.ps',
+            'packages/pskernel-selfhost/src/Ps/KernelSelfHost/Admission/Inductive/Mutual/Admission.ps',
+            'packages/pskernel-selfhost/src/Ps/KernelSelfHost/Admission/Inductive/Nested/Admission.ps',
           ]) {
             if (!manifest.sources.includes(required)) {
               throw new Error(

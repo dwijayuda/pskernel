@@ -1,8 +1,8 @@
 import Lean
-import Ps.KernelSelfHost.CheckerSession
-import Ps.KernelSelfHost.InductiveAdmission
-import Ps.KernelSelfHost.MutualInductive
-import Ps.KernelSelfHost.NestedInductive
+import Ps.KernelSelfHost.Checker.Session
+import Ps.KernelSelfHost.Admission.Inductive.Ordinary.Admission
+import Ps.KernelSelfHost.Admission.Inductive.Mutual.Admission
+import Ps.KernelSelfHost.Admission.Inductive.Nested.Admission
 
 set_option maxRecDepth 100000
 

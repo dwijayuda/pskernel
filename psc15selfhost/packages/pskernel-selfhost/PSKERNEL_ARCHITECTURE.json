@@ -13,82 +13,11 @@
     "phase": "B-complete",
     "finalArchitectureAdopted": true,
     "finalArchitectureImplemented": true,
-    "compatibilityShimsAllowedDuringMigration": true,
+    "compatibilityShimsAllowedDuringMigration": false,
     "compatibilityShimsAllowedInSemanticRoot": false,
-    "migrationShims": [
-      "Ps.KernelSelfHost.CheckerState",
-      "Ps.KernelSelfHost.Runtime.NativeReduction",
-      "Ps.KernelSelfHost.CheckerSession",
-      "Ps.KernelSelfHost.Runtime.Cache",
-      "Ps.KernelSelfHost.Runtime.EnvironmentIndex",
-      "Ps.KernelSelfHost.TypeCheckerBase",
-      "Ps.KernelSelfHost.TypeCheckerPrimitives",
-      "Ps.KernelSelfHost.TypeCheckerWhnf",
-      "Ps.KernelSelfHost.TypeCheckerProjection",
-      "Ps.KernelSelfHost.TypeCheckerInfer",
-      "Ps.KernelSelfHost.TypeCheckerRecursor",
-      "Ps.KernelSelfHost.TypeCheckerDefEqSupport",
-      "Ps.KernelSelfHost.TypeCheckerDefEq",
-      "Ps.KernelSelfHost.Theory.Reduction.KernelReductions",
-      "Ps.KernelSelfHost.Theory.Reduction.PrimitiveData",
-      "Ps.KernelSelfHost.Theory.Reduction.PrimitiveNat",
-      "Ps.KernelSelfHost.Theory.Reduction.WhnfCore",
-      "Ps.KernelSelfHost.Theory.Inference.Core",
-      "Ps.KernelSelfHost.Theory.Inference.Helpers",
-      "Ps.KernelSelfHost.Theory.Recursor.Analysis",
-      "Ps.KernelSelfHost.Theory.Recursor.Reduction",
-      "Ps.KernelSelfHost.Theory.DefEq.BinderSpines",
-      "Ps.KernelSelfHost.Theory.DefEq.DeltaStep",
-      "Ps.KernelSelfHost.Theory.DefEq.FinalRules",
-      "Ps.KernelSelfHost.Theory.DefEq.FullShape",
-      "Ps.KernelSelfHost.Theory.DefEq.LazyDelta",
-      "Ps.KernelSelfHost.Theory.DefEq.Quick",
-      "Ps.KernelSelfHost.Theory.DefEq.Shortcuts",
-      "Ps.KernelSelfHost.Checker.Recursor",
-      "Ps.KernelSelfHost.Checker.DefEq",
-      "Ps.KernelSelfHost.Theory.Admission.Validation",
-      "Ps.KernelSelfHost.Theory.Admission.Declarations",
-      "Ps.KernelSelfHost.Kernel",
-      "Ps.KernelSelfHost.Theory.Quot.Bootstrap",
-      "Ps.KernelSelfHost.Theory.Quot.Admission",
-      "Ps.KernelSelfHost.Quot",
-      "Ps.KernelSelfHost.Inductive",
-      "Ps.KernelSelfHost.InductiveAdmission",
-      "Ps.KernelSelfHost.Theory.Inductive.Elimination",
-      "Ps.KernelSelfHost.Theory.Inductive.Constructor",
-      "Ps.KernelSelfHost.Theory.Inductive.ConstructorAdmission",
-      "Ps.KernelSelfHost.Theory.Inductive.Recursor",
-      "Ps.KernelSelfHost.Theory.Mutual.Admission",
-      "Ps.KernelSelfHost.MutualInductive",
-      "Ps.KernelSelfHost.Theory.Mutual.AdmissionLoops",
-      "Ps.KernelSelfHost.Theory.Mutual.Analysis",
-      "Ps.KernelSelfHost.Theory.Mutual.Header",
-      "Ps.KernelSelfHost.Theory.Mutual.Recursor",
-      "Ps.KernelSelfHost.Theory.Nested.Admission",
-      "Ps.KernelSelfHost.NestedInductive",
-      "Ps.KernelSelfHost.Theory.Nested.Commit",
-      "Ps.KernelSelfHost.Theory.Nested.Discover",
-      "Ps.KernelSelfHost.Theory.Nested.Flatten",
-      "Ps.KernelSelfHost.Theory.Nested.Rebase",
-      "Ps.KernelSelfHost.Theory.Nested.ReservedNames",
-      "Ps.KernelSelfHost.Theory.Nested.Restore",
-      "Ps.KernelSelfHost.Theory.Nested.RestoreExpr",
-      "Ps.KernelSelfHost.Theory.Nested.Types",
-      "Ps.KernelSelfHost.Theory.Nested.Validation",
-      "Ps.KernelSelfHost.Name",
-      "Ps.KernelSelfHost.Level",
-      "Ps.KernelSelfHost.Expr",
-      "Ps.KernelSelfHost.Declaration",
-      "Ps.KernelSelfHost.LocalContext",
-      "Ps.KernelSelfHost.Theory.Substitution.ListOps",
-      "Ps.KernelSelfHost.Theory.Substitution.Lift",
-      "Ps.KernelSelfHost.Theory.Substitution.Instantiate",
-      "Ps.KernelSelfHost.Theory.Substitution.Beta",
-      "Ps.KernelSelfHost.Theory.Substitution.Abstract",
-      "Ps.KernelSelfHost.Instantiate",
-      "Ps.KernelSelfHost.Environment"
-    ],
-    "completionScope": "Phase B production architecture; long-term Assurance Plane and provider promotion remain separate"
+    "migrationShims": [],
+    "completionScope": "Phase B production architecture; long-term Assurance Plane and provider promotion remain separate",
+    "compatibilityShimsRetired": true
   },
   "semanticRoles": [
     "logical-rule",
@@ -150,28 +79,23 @@
   "canonicalOwners": [
     {
       "area": "checker-state",
-      "module": "Ps.KernelSelfHost.Checker.State",
-      "legacyShim": "Ps.KernelSelfHost.CheckerState"
+      "module": "Ps.KernelSelfHost.Checker.State"
     },
     {
       "area": "lean434-native-reduction",
-      "module": "Ps.KernelSelfHost.Runtime.Capability.Lean434NativeReduction",
-      "legacyShim": "Ps.KernelSelfHost.Runtime.NativeReduction"
+      "module": "Ps.KernelSelfHost.Runtime.Capability.Lean434NativeReduction"
     },
     {
       "area": "checker-session",
-      "module": "Ps.KernelSelfHost.Checker.Session",
-      "legacyShim": "Ps.KernelSelfHost.CheckerSession"
+      "module": "Ps.KernelSelfHost.Checker.Session"
     },
     {
       "area": "cache",
-      "module": "Ps.KernelSelfHost.Runtime.Acceleration.Cache",
-      "legacyShim": "Ps.KernelSelfHost.Runtime.Cache"
+      "module": "Ps.KernelSelfHost.Runtime.Acceleration.Cache"
     },
     {
       "area": "environment-index",
-      "module": "Ps.KernelSelfHost.Runtime.Acceleration.EnvironmentIndex",
-      "legacyShim": "Ps.KernelSelfHost.Runtime.EnvironmentIndex"
+      "module": "Ps.KernelSelfHost.Runtime.Acceleration.EnvironmentIndex"
     },
     {
       "area": "cache-policy",
@@ -179,28 +103,23 @@
     },
     {
       "area": "checker-context",
-      "module": "Ps.KernelSelfHost.Checker.Context",
-      "legacyShim": "Ps.KernelSelfHost.TypeCheckerBase"
+      "module": "Ps.KernelSelfHost.Checker.Context"
     },
     {
       "area": "checker-reduction-primitives",
-      "module": "Ps.KernelSelfHost.Checker.Reduction.Primitives",
-      "legacyShim": "Ps.KernelSelfHost.TypeCheckerPrimitives"
+      "module": "Ps.KernelSelfHost.Checker.Reduction.Primitives"
     },
     {
       "area": "checker-reduction-whnf",
-      "module": "Ps.KernelSelfHost.Checker.Reduction.Whnf",
-      "legacyShim": "Ps.KernelSelfHost.TypeCheckerWhnf"
+      "module": "Ps.KernelSelfHost.Checker.Reduction.Whnf"
     },
     {
       "area": "checker-projection",
-      "module": "Ps.KernelSelfHost.Checker.Projection",
-      "legacyShim": "Ps.KernelSelfHost.TypeCheckerProjection"
+      "module": "Ps.KernelSelfHost.Checker.Projection"
     },
     {
       "area": "checker-inference",
-      "module": "Ps.KernelSelfHost.Checker.Inference",
-      "legacyShim": "Ps.KernelSelfHost.TypeCheckerInfer"
+      "module": "Ps.KernelSelfHost.Checker.Inference"
     },
     {
       "area": "checker-defeq-support",
@@ -208,43 +127,35 @@
     },
     {
       "area": "checker-reduction-kernelreductions",
-      "module": "Ps.KernelSelfHost.Checker.Reduction.KernelReductions",
-      "legacyShim": "Ps.KernelSelfHost.Theory.Reduction.KernelReductions"
+      "module": "Ps.KernelSelfHost.Checker.Reduction.KernelReductions"
     },
     {
       "area": "checker-reduction-primitivedata",
-      "module": "Ps.KernelSelfHost.Checker.Reduction.PrimitiveData",
-      "legacyShim": "Ps.KernelSelfHost.Theory.Reduction.PrimitiveData"
+      "module": "Ps.KernelSelfHost.Checker.Reduction.PrimitiveData"
     },
     {
       "area": "checker-reduction-primitivenat",
-      "module": "Ps.KernelSelfHost.Checker.Reduction.PrimitiveNat",
-      "legacyShim": "Ps.KernelSelfHost.Theory.Reduction.PrimitiveNat"
+      "module": "Ps.KernelSelfHost.Checker.Reduction.PrimitiveNat"
     },
     {
       "area": "checker-reduction-whnfcore",
-      "module": "Ps.KernelSelfHost.Checker.Reduction.WhnfCore",
-      "legacyShim": "Ps.KernelSelfHost.Theory.Reduction.WhnfCore"
+      "module": "Ps.KernelSelfHost.Checker.Reduction.WhnfCore"
     },
     {
       "area": "checker-inference-core",
-      "module": "Ps.KernelSelfHost.Checker.Inference.Core",
-      "legacyShim": "Ps.KernelSelfHost.Theory.Inference.Core"
+      "module": "Ps.KernelSelfHost.Checker.Inference.Core"
     },
     {
       "area": "checker-inference-helpers",
-      "module": "Ps.KernelSelfHost.Checker.Inference.Helpers",
-      "legacyShim": "Ps.KernelSelfHost.Theory.Inference.Helpers"
+      "module": "Ps.KernelSelfHost.Checker.Inference.Helpers"
     },
     {
       "area": "checker-recursor-analysis",
-      "module": "Ps.KernelSelfHost.Checker.Recursor.Analysis",
-      "legacyShim": "Ps.KernelSelfHost.Theory.Recursor.Analysis"
+      "module": "Ps.KernelSelfHost.Checker.Recursor.Analysis"
     },
     {
       "area": "checker-recursor-reduction",
-      "module": "Ps.KernelSelfHost.Checker.Recursor.Reduction",
-      "legacyShim": "Ps.KernelSelfHost.Theory.Recursor.Reduction"
+      "module": "Ps.KernelSelfHost.Checker.Recursor.Reduction"
     },
     {
       "area": "checker-defeq-binderspines",
@@ -280,200 +191,107 @@
     },
     {
       "area": "checker-knot",
-      "module": "Ps.KernelSelfHost.Checker.Knot",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Checker.Recursor",
-        "Ps.KernelSelfHost.Checker.DefEq",
-        "Ps.KernelSelfHost.TypeCheckerRecursor",
-        "Ps.KernelSelfHost.TypeCheckerDefEqSupport",
-        "Ps.KernelSelfHost.TypeCheckerDefEq",
-        "Ps.KernelSelfHost.Theory.DefEq.BinderSpines",
-        "Ps.KernelSelfHost.Theory.DefEq.DeltaStep",
-        "Ps.KernelSelfHost.Theory.DefEq.FinalRules",
-        "Ps.KernelSelfHost.Theory.DefEq.FullShape",
-        "Ps.KernelSelfHost.Theory.DefEq.LazyDelta",
-        "Ps.KernelSelfHost.Theory.DefEq.Quick",
-        "Ps.KernelSelfHost.Theory.DefEq.Shortcuts"
-      ]
+      "module": "Ps.KernelSelfHost.Checker.Knot"
     },
     {
       "area": "admission-declaration-validation",
-      "module": "Ps.KernelSelfHost.Admission.Declaration.Validation",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Admission.Validation"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Declaration.Validation"
     },
     {
       "area": "admission-declaration-admission",
-      "module": "Ps.KernelSelfHost.Admission.Declaration.Admission",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Admission.Declarations",
-        "Ps.KernelSelfHost.Kernel"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Declaration.Admission"
     },
     {
       "area": "admission-quot-bootstrap",
-      "module": "Ps.KernelSelfHost.Admission.Quot.Bootstrap",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Quot.Bootstrap"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Quot.Bootstrap"
     },
     {
       "area": "admission-quot-admission",
-      "module": "Ps.KernelSelfHost.Admission.Quot.Admission",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Quot.Admission",
-        "Ps.KernelSelfHost.Quot"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Quot.Admission"
     },
     {
       "area": "admission-inductive-common-parameters",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Common.Parameters",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Inductive"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Common.Parameters"
     },
     {
       "area": "admission-inductive-ordinary-admission",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Ordinary.Admission",
-      "legacyShims": [
-        "Ps.KernelSelfHost.InductiveAdmission"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Ordinary.Admission"
     },
     {
       "area": "admission-inductive-common-elimination",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Common.Elimination",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Inductive.Elimination"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Common.Elimination"
     },
     {
       "area": "admission-inductive-ordinary-constructor",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Ordinary.Constructor",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Inductive.Constructor"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Ordinary.Constructor"
     },
     {
       "area": "admission-inductive-ordinary-constructoradmission",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Ordinary.ConstructorAdmission",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Inductive.ConstructorAdmission"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Ordinary.ConstructorAdmission"
     },
     {
       "area": "admission-inductive-ordinary-recursor",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Ordinary.Recursor",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Inductive.Recursor"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Ordinary.Recursor"
     },
     {
       "area": "admission-inductive-mutual-admission",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.Admission",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Mutual.Admission",
-        "Ps.KernelSelfHost.MutualInductive"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.Admission"
     },
     {
       "area": "admission-inductive-mutual-admissionloops",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.AdmissionLoops",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Mutual.AdmissionLoops"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.AdmissionLoops"
     },
     {
       "area": "admission-inductive-mutual-analysis",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.Analysis",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Mutual.Analysis"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.Analysis"
     },
     {
       "area": "admission-inductive-mutual-header",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.Header",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Mutual.Header"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.Header"
     },
     {
       "area": "admission-inductive-mutual-recursor",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.Recursor",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Mutual.Recursor"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.Recursor"
     },
     {
       "area": "admission-inductive-nested-admission",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Admission",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Nested.Admission",
-        "Ps.KernelSelfHost.NestedInductive"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Admission"
     },
     {
       "area": "admission-inductive-nested-commit",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Commit",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Nested.Commit"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Commit"
     },
     {
       "area": "admission-inductive-nested-discover",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Discover",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Nested.Discover"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Discover"
     },
     {
       "area": "admission-inductive-nested-flatten",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Flatten",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Nested.Flatten"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Flatten"
     },
     {
       "area": "admission-inductive-nested-rebase",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Rebase",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Nested.Rebase"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Rebase"
     },
     {
       "area": "admission-inductive-nested-reservednames",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.ReservedNames",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Nested.ReservedNames"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.ReservedNames"
     },
     {
       "area": "admission-inductive-nested-restore",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Restore",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Nested.Restore"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Restore"
     },
     {
       "area": "admission-inductive-nested-restoreexpr",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.RestoreExpr",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Nested.RestoreExpr"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.RestoreExpr"
     },
     {
       "area": "admission-inductive-nested-types",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Types",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Nested.Types"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Types"
     },
     {
       "area": "admission-inductive-nested-validation",
-      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Validation",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Nested.Validation"
-      ]
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Validation"
     },
     {
       "area": "admission-inductive-types",
@@ -489,81 +307,47 @@
     },
     {
       "area": "core-name",
-      "module": "Ps.KernelSelfHost.Core.Name",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Name"
-      ]
+      "module": "Ps.KernelSelfHost.Core.Name"
     },
     {
       "area": "core-level",
-      "module": "Ps.KernelSelfHost.Core.Level",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Level"
-      ]
+      "module": "Ps.KernelSelfHost.Core.Level"
     },
     {
       "area": "core-expr",
-      "module": "Ps.KernelSelfHost.Core.Expr",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Expr"
-      ]
+      "module": "Ps.KernelSelfHost.Core.Expr"
     },
     {
       "area": "core-declaration",
-      "module": "Ps.KernelSelfHost.Core.Declaration",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Declaration"
-      ]
+      "module": "Ps.KernelSelfHost.Core.Declaration"
     },
     {
       "area": "core-localcontext",
-      "module": "Ps.KernelSelfHost.Core.LocalContext",
-      "legacyShims": [
-        "Ps.KernelSelfHost.LocalContext"
-      ]
+      "module": "Ps.KernelSelfHost.Core.LocalContext"
     },
     {
       "area": "core-substitution-listops",
-      "module": "Ps.KernelSelfHost.Core.Substitution.ListOps",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Substitution.ListOps"
-      ]
+      "module": "Ps.KernelSelfHost.Core.Substitution.ListOps"
     },
     {
       "area": "core-substitution-lift",
-      "module": "Ps.KernelSelfHost.Core.Substitution.Lift",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Substitution.Lift"
-      ]
+      "module": "Ps.KernelSelfHost.Core.Substitution.Lift"
     },
     {
       "area": "core-substitution-instantiate",
-      "module": "Ps.KernelSelfHost.Core.Substitution.Instantiate",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Substitution.Instantiate"
-      ]
+      "module": "Ps.KernelSelfHost.Core.Substitution.Instantiate"
     },
     {
       "area": "core-substitution-beta",
-      "module": "Ps.KernelSelfHost.Core.Substitution.Beta",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Substitution.Beta"
-      ]
+      "module": "Ps.KernelSelfHost.Core.Substitution.Beta"
     },
     {
       "area": "core-substitution-abstract",
-      "module": "Ps.KernelSelfHost.Core.Substitution.Abstract",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Theory.Substitution.Abstract",
-        "Ps.KernelSelfHost.Instantiate"
-      ]
+      "module": "Ps.KernelSelfHost.Core.Substitution.Abstract"
     },
     {
       "area": "environment-operations",
-      "module": "Ps.KernelSelfHost.Environment.Operations",
-      "legacyShims": [
-        "Ps.KernelSelfHost.Environment"
-      ]
+      "module": "Ps.KernelSelfHost.Environment.Operations"
     },
     {
       "area": "environment-semantic",
@@ -633,17 +417,6 @@
       ],
       "forbidden": [
         "Ps.KernelSelfHost.Admission.",
-        "Ps.KernelSelfHost.Theory.Admission.",
-        "Ps.KernelSelfHost.Theory.Inductive.",
-        "Ps.KernelSelfHost.Theory.Mutual.",
-        "Ps.KernelSelfHost.Theory.Nested.",
-        "Ps.KernelSelfHost.Theory.Quot.",
-        "Ps.KernelSelfHost.Kernel",
-        "Ps.KernelSelfHost.Inductive",
-        "Ps.KernelSelfHost.InductiveAdmission",
-        "Ps.KernelSelfHost.MutualInductive",
-        "Ps.KernelSelfHost.NestedInductive",
-        "Ps.KernelSelfHost.Quot",
         "Ps.KernelSelfHost.API."
       ]
     },

@@ -13,7 +13,9 @@ Use these files in this order when making development decisions:
 7. **`LEAN_4_34_COMPATIBILITY.json`** — machine-readable feature-completeness matrix for Lean 4.34.0.
 8. **`LEAN_4_34_CONFORMANCE.json`** — machine-readable concrete test coverage for every compatibility rule.
 9. **`SELFHOST_EVIDENCE.json`** — optional historical/generated-bootstrap checkpoint evidence; not a normal development gate.
-10. **`MIGRATION_INVENTORY.md`** — historical migration baseline only; it is not the active roadmap.
+10. **`KERNEL_CONTRACT_V1.md`** — checked public entry points, resource outcomes and integration boundary.
+11. **`PSKERNEL_ARCHITECTURE.json`**, **`LEAN_4_34_KERNEL_RULES.json`** and **`PSKERNEL_TCB.json`** — enforced ownership, executable rule evidence and trust inventory.
+12. **`ARCHITECTURE_MIGRATION_REPORT.md`** — completed production migration and preservation evidence.
 
 When documents disagree, the architecture guardrails and machine-enforced compatibility/self-host gates take precedence over historical planning text.
 
@@ -41,22 +43,32 @@ point.
 - Replay, JSON import, test adapters, and host policy remain outside the
   semantic kernel package.
 
-## Migration order
+## Source layout
 
-1. Name/Level/Expr/substitution.
-2. Declarations, local/global environment and checker state.
-3. WHNF and inference.
-4. Algorithmic definitional equality preserving Lean ordering.
-5. Quotients.
-6. Ordinary, mutual and nested inductive admission.
-7. Complete PSC1 check and canonical `.ps` generation.
-8. Performance/readability hardening while preserving portable source checks.
-9. Generated TypeScript/JavaScript differential replay where useful.
-10. Checked-provider integration.
+Production architecture migration is complete. The source tree contains only
+the 79 canonical modules used by `SelfHost.lean`:
+
+```text
+src/Ps/KernelSelfHost/
+  Core/
+  Environment/
+  Runtime/Acceleration/
+  Runtime/Capability/
+  Checker/
+  Admission/
+  API/
+  SelfHost.lean
+```
+
+Import `Ps.KernelSelfHost.API.Kernel` for the checked public contract, or the
+specific canonical owner for low-level integration. Temporary migration import
+paths (`TypeChecker*`, `Theory/*`, and the old flat modules) have been removed.
+All repository callers and Lake registrations use the canonical hierarchy.
+The superseded migration inventory remains available in Git history.
 
 The joint compiler/kernel fixed point is optional/manual and reserved for
 explicit bootstrap/release checkpoints.
 
-The source is intentionally flat and explicitly prefixed rather than relying on
-Lean namespace conveniences. Tests compare the portable implementation against
+Declarations remain explicitly prefixed rather than relying on Lean namespace
+conveniences. Tests compare the portable implementation against
 the frozen reference implementation before each semantic slice is promoted.

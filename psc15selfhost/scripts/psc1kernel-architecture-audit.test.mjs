@@ -79,6 +79,22 @@ function ruleFixture(t) {
   return { ...f, rule, inventory, testFile };
 }
 
+test("reject a deleted module still registered with Lake", (t) => {
+  const f = fixture(t);
+  f.manifest.lakeLibrary = "PsKernelSelfHost";
+  f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
+  fs.writeFileSync(path.join(f.root, "lakefile.lean"),
+    "lean_lib PsKernelSelfHost where\n  roots := #[`Ps.KernelSelfHost.SelfHost, `Ps.KernelSelfHost.Checker.State, `Ps.KernelSelfHost.CheckerState, `Ps.KernelSelfHost.Deleted]\n");
+  assert.throws(() => auditArchitecture(f.root), /ARCH_LAKE_STALE_MODULE/);
+});
+
+test("retired compatibility shims cannot be registered again", (t) => {
+  const f = fixture(t);
+  f.manifest.migration.compatibilityShimsRetired = true;
+  f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
+  assert.throws(() => auditArchitecture(f.root), /ARCH_RETIRED_SHIM_REGISTERED/);
+});
+
 test("accept canonical rules with reachable executable evidence", (t) => {
   assert.match(auditArchitecture(ruleFixture(t).root), /closureModules=2/);
 });

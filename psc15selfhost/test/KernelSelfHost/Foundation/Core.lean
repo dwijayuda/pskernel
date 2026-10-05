@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.NestedInductive
+import Ps.KernelSelfHost.Admission.Inductive.Nested.Admission
 import PSC1Kernel.NestedInductive
 
 def psKernelNameToReference

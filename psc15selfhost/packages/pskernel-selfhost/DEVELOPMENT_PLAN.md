@@ -132,9 +132,8 @@ Goal: make the source tree, dependency graph, trust model, tests and public API
 tell the same story as the Lean-4.34 kernel theory while preserving one
 PSC1-self-hostable semantic implementation.
 
-The canonical target is `PSKERNEL_REFERENCE.md`. Migration is incremental:
-temporary old import paths may exist, but canonical implementation modules may
-not depend on compatibility shims.
+The canonical target is `PSKERNEL_REFERENCE.md`. The incremental migration is complete.
+Temporary import shims have been removed; callers use canonical module paths.
 
 ### B1. Split test and benchmark monoliths
 
@@ -158,7 +157,7 @@ tightens allowed imports as canonical modules move.
 
 **Ownership implemented:** Checker hierarchy, Ops contract, single Knot owner and
 Session delegation. Existing fuel workers and algorithm ordering are preserved;
-legacy imports forward to canonical owners outside the semantic root. Architecture
+legacy imports have been retired. Architecture
 CI enforces callback-leaf import fences and unique wiring ownership. Context retains context/binder and builtin helpers used by checker leaves; Core
 values/substitution and Environment history/wrapper/lookup/operations now have
 canonical owners. ResourcePolicy and the public contract now have explicit portable owners.
@@ -187,8 +186,8 @@ PSC1-proven curried callback patterns may remain internally.
 ### B4. Unified admission hierarchy
 
 **Ownership implemented.** Declaration, Quot and ordinary/mutual/nested admission
-now use canonical owners; shared phases are explicit and all legacy paths forward
-imports only. Algorithms and phase ordering are unchanged.
+now use canonical owners; shared phases are explicit and legacy import paths
+have been retired. Algorithms and phase ordering are unchanged.
 
 Move declaration, Quot and inductive admission under `Admission/`. Ordinary,
 mutual and nested inductives live under one `Admission/Inductive/` owner while

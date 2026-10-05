@@ -103,7 +103,7 @@ without a node-count/substitution traversal.
 13. `Checker/Context.lean`
 14. `Checker/Reduction/PrimitiveData.lean`
 15. `Checker/Reduction/PrimitiveNat.lean`
-16. `Checker/Reduction/Primitives.lean` (compatibility umbrella)
+16. `Checker/Reduction/Primitives.lean` (canonical aggregation module)
 17. `Checker/Reduction/KernelReductions.lean`
 18. `Checker/Reduction/WhnfCore.lean`
 19. `Checker/Reduction/Whnf.lean`
@@ -119,7 +119,7 @@ without a node-count/substitution traversal.
 
 27. `Checker/DefEq/BinderSpines.lean`
 28. `Checker/DefEq/Quick.lean`
-29. `Checker/DefEq/Support.lean` (compatibility umbrella)
+29. `Checker/DefEq/Support.lean` (canonical aggregation module)
 30. `Checker/DefEq/DeltaStep.lean`
 31. `Checker/DefEq/LazyDelta.lean`
 32. `Checker/DefEq/FinalRules.lean`
@@ -273,7 +273,7 @@ Checker/Reduction/PrimitiveNat.lean
          gcd / pow / bitwise / shifts / binary Nat kernel operations
 ```
 
-`Checker/Reduction/Primitives.lean` remains a stable compatibility umbrella.
+`Checker/Reduction/Primitives.lean` groups the canonical primitive modules.
 
 This split is explanatory only: public symbols and Lean 4.34 reduction behavior
 are unchanged.
@@ -403,7 +403,7 @@ Admission/Quot/Admission.lean
          reserve/install Quot, Quot.mk, Quot.lift, Quot.ind
 ```
 
-`Admission/Quot/Admission.lean` remains a stable umbrella import.
+`Admission/Quot/Admission.lean` owns the top-level admission transaction.
 
 Computation for `Quot.lift` and `Quot.ind` lives in
 `Checker/Reduction/KernelReductions.lean`. Quotient initialization is explicit
@@ -473,7 +473,7 @@ Admission/Inductive/Mutual/Admission.lean
          checked environment installation
 ```
 
-`Admission/Inductive/Mutual/Admission.lean` remains a stable umbrella import.
+`Admission/Inductive/Mutual/Admission.lean` owns the top-level admission transaction.
 
 The implementation supports multiple simultaneously declared families, with a
 separate motive per family and recursive hypotheses for recursive arguments
@@ -548,7 +548,7 @@ The module responsibilities are:
   commit helpers;
 - `Admission.lean` — top-level fail-closed transaction boundary.
 
-`Admission/Inductive/Nested/Admission.lean` remains a stable umbrella import.
+`Admission/Inductive/Nested/Admission.lean` owns the top-level admission transaction.
 
 The transformation is necessary to preserve Lean 4 computation behavior for
 nested inductives while keeping flattening details out of the user-visible
@@ -580,7 +580,7 @@ Admission/Declaration/Admission.lean
          axiom / definition / theorem / opaque / mutual environment extension
 ```
 
-`Kernel.lean` remains a compatibility import of the declaration admission owner.
+Use `Admission/Declaration/Admission.lean` directly for low-level declaration admission.
 
 The admission layer checks:
 
@@ -696,8 +696,8 @@ or native evaluation. It must not duplicate or redefine type-theory rules.
 
 ## Checker ownership migration
 
-Checker implementations now live under `Checker/`; former `TypeChecker*` and
-`Theory/{Reduction,Inference,Recursor,DefEq}` modules only forward imports.
+Checker implementations live under `Checker/`; former `TypeChecker*` and
+`Theory/{Reduction,Inference,Recursor,DefEq}` import shims have been removed.
 Definition bodies, fuel transitions and rule ordering are unchanged by this move.
 `Checker/Knot` now owns cross-component callback wiring, including the
 projection shortcut. `Checker/Ops` declares six operations: infer, check, whnfCore,
@@ -706,7 +706,7 @@ operations directly, avoiding allocation of a whole Ops record on each cache hit
 The Ops constructor uses the same concrete operations; check continues to select
 the fully checked path. Existing function bodies were
 moved verbatim. The architecture audit enforces the wiring symbol owner, import
-fences and forwarding-only legacy paths.
+fences and the retirement of legacy import paths.
 
 The focused CheckerOps conformance module checks success and zero-fuel rejection
 for all six operations. It also checks that full session checking rejects an
@@ -733,7 +733,7 @@ capability explicitly. No lookup or mutation algorithm changed.
 
 ## Production architecture exit evidence
 
-`PSKERNEL_ARCHITECTURE.json` records all canonical owners and compatibility shims.
+`PSKERNEL_ARCHITECTURE.json` records all canonical owners and confirms that no migration shims remain.
 The audit checks import fences, unique Knot wiring, Lake registration, completed
 layer ownership, all 61 rule mappings and all 136 legacy diagnostic mappings.
 Rule evidence must be imported and callable from the foundation main. The

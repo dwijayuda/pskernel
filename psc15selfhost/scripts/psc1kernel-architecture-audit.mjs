@@ -161,6 +161,9 @@ for (const shim of manifest.migration.migrationShims ?? []) {
 const ownerAreas = new Set();
 const ownerModules = new Set();
 const registeredShims = new Set(manifest.migration.migrationShims ?? []);
+if (manifest.migration.compatibilityShimsRetired && registeredShims.size > 0) {
+  throw new Error("PSC1KERNEL_ARCH_RETIRED_SHIM_REGISTERED");
+}
 if (manifest.lakeLibrary) {
   const lake = maskLeanNonCode(fs.readFileSync(path.join(root, "lakefile.lean"), "utf8"));
   const blocks = [...lake.matchAll(/^lean_lib\s+(\w+)\s+where\b([\s\S]*?)(?=^\S|(?![\s\S]))/gmu)];
@@ -169,6 +172,11 @@ if (manifest.lakeLibrary) {
   const modules = [...block[2].matchAll(/`([A-Za-z_][A-Za-z0-9_.]*)/gu)].map((match) => match[1]);
   const registered = new Set(modules);
   if (registered.size !== modules.length) throw new Error("PSC1KERNEL_ARCH_LAKE_DUPLICATE_MODULE");
+  for (const moduleName of registered) {
+    if (moduleName.startsWith(prefix) && !fs.existsSync(modulePath(moduleName))) {
+      throw new Error("PSC1KERNEL_ARCH_LAKE_STALE_MODULE: " + moduleName);
+    }
+  }
   for (const moduleName of [...seen, ...registeredShims]) {
     if (!registered.has(moduleName)) {
       throw new Error("PSC1KERNEL_ARCH_LAKE_MODULE_MISSING: " + moduleName);

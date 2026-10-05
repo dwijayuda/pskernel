@@ -118,16 +118,34 @@ def psJsPrimitiveTypeSupported
   | PsVerifiedIrPrimitiveType.nat => true
   | PsVerifiedIrPrimitiveType.int => true
   | PsVerifiedIrPrimitiveType.bool => true
+  | PsVerifiedIrPrimitiveType.char => true
   | PsVerifiedIrPrimitiveType.string => true
   | PsVerifiedIrPrimitiveType.unit => true
   | _ => false
 
+def psJsTypeSupportedWithFuel
+    (fuel : Nat) :
+    PsVerifiedIrType -> Bool :=
+  match fuel with
+  | Nat.zero =>
+      fun (_type : PsVerifiedIrType) => false
+  | Nat.succ remaining =>
+      let smaller : PsVerifiedIrType -> Bool :=
+        psJsTypeSupportedWithFuel remaining;
+      fun (type : PsVerifiedIrType) =>
+        match type with
+        | PsVerifiedIrType.primitive primitive =>
+            psJsPrimitiveTypeSupported primitive
+        | PsVerifiedIrType.function parameters result =>
+            if psVerifiedIrListAll smaller parameters then
+              smaller result
+            else
+              false
+        | _ => false
+
 def psJsTypeSupported
     (type : PsVerifiedIrType) : Bool :=
-  match type with
-  | PsVerifiedIrType.primitive primitive =>
-      psJsPrimitiveTypeSupported primitive
-  | _ => false
+  psJsTypeSupportedWithFuel 64 type
 
 def psJsLowerLiteral
     (literal : PsVerifiedIrLiteral) :
@@ -145,6 +163,137 @@ def psJsLowerLiteral
       Except.ok PsJsIrLiteral.unit
   | PsVerifiedIrLiteral.machineInteger _ _ =>
       Except.error PsJsLowerError.unsupportedLiteral
+
+def psJsLowerParameterNames
+    (parameters : List PsVerifiedIrParameter) :
+    Except PsJsLowerError (List String) :=
+  match parameters with
+  | List.nil =>
+      Except.ok List.nil
+  | List.cons parameter rest =>
+      if psJsIdentifierSupported parameter.name then
+        if psJsTypeSupported parameter.type then
+          match psJsLowerParameterNames rest with
+          | Except.error error => Except.error error
+          | Except.ok loweredRest =>
+              Except.ok (List.cons parameter.name loweredRest)
+        else
+          Except.error PsJsLowerError.unsupportedType
+      else
+        Except.error
+          (PsJsLowerError.unsupportedName parameter.name)
+
+def psJsLowerUnaryWith
+    (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
+    (operation : PsJsIrUnaryOp)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsJsLowerError PsJsIrExpr :=
+  match arguments with
+  | List.nil =>
+      Except.error PsJsLowerError.intrinsicArity
+  | List.cons value rest =>
+      match rest with
+      | List.nil =>
+          match lower value with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok (PsJsIrExpr.unary operation lowered)
+      | List.cons _ _ =>
+          Except.error PsJsLowerError.intrinsicArity
+
+def psJsLowerBinaryWith
+    (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
+    (operation : PsJsIrBinaryOp)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsJsLowerError PsJsIrExpr :=
+  match arguments with
+  | List.nil =>
+      Except.error PsJsLowerError.intrinsicArity
+  | List.cons left rest =>
+      match rest with
+      | List.nil =>
+          Except.error PsJsLowerError.intrinsicArity
+      | List.cons right tail =>
+          match tail with
+          | List.nil =>
+              match lower left with
+              | Except.error error => Except.error error
+              | Except.ok loweredLeft =>
+                  match lower right with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredRight =>
+                      Except.ok
+                        (PsJsIrExpr.binary
+                          operation
+                          loweredLeft
+                          loweredRight)
+          | List.cons _ _ =>
+              Except.error PsJsLowerError.intrinsicArity
+
+def psJsLowerRuntimeUnaryWith
+    (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
+    (operation : PsJsIrRuntimeOp)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsJsLowerError PsJsIrExpr :=
+  match arguments with
+  | List.nil =>
+      Except.error PsJsLowerError.intrinsicArity
+  | List.cons value rest =>
+      match rest with
+      | List.nil =>
+          match lower value with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok
+                (PsJsIrExpr.runtime
+                  operation
+                  (List.cons lowered List.nil))
+      | List.cons _ _ =>
+          Except.error PsJsLowerError.intrinsicArity
+
+def psJsLowerRuntimeBinaryWith
+    (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
+    (operation : PsJsIrRuntimeOp)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsJsLowerError PsJsIrExpr :=
+  match arguments with
+  | List.nil =>
+      Except.error PsJsLowerError.intrinsicArity
+  | List.cons left rest =>
+      match rest with
+      | List.nil =>
+          Except.error PsJsLowerError.intrinsicArity
+      | List.cons right tail =>
+          match tail with
+          | List.nil =>
+              match lower left with
+              | Except.error error => Except.error error
+              | Except.ok loweredLeft =>
+                  match lower right with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredRight =>
+                      Except.ok
+                        (PsJsIrExpr.runtime
+                          operation
+                          [
+                            loweredLeft,
+                            loweredRight
+                          ])
+          | List.cons _ _ =>
+              Except.error PsJsLowerError.intrinsicArity
+
+def psJsLowerIdentityWith
+    (lower : PsVerifiedIrExpr -> Except PsJsLowerError PsJsIrExpr)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsJsLowerError PsJsIrExpr :=
+  match arguments with
+  | List.cons value rest =>
+      match rest with
+      | List.nil => lower value
+      | List.cons _ _ =>
+          Except.error PsJsLowerError.intrinsicArity
+  | List.nil =>
+      Except.error PsJsLowerError.intrinsicArity
 
 def psJsLowerExprWithFuel
     (fuel : Nat) :
@@ -178,36 +327,117 @@ def psJsLowerExprWithFuel
             if psListIsEmpty typeArguments then
               match operation with
               | PsVerifiedIrIntrinsic.natAdd =>
-                  match arguments with
-                  | List.cons left rest =>
-                      match rest with
-                      | List.cons right tail =>
-                          match tail with
-                          | List.nil =>
-                              match smaller left with
-                              | Except.error error =>
-                                  Except.error error
-                              | Except.ok loweredLeft =>
-                                  match smaller right with
-                                  | Except.error error =>
-                                      Except.error error
-                                  | Except.ok loweredRight =>
-                                      Except.ok
-                                        (PsJsIrExpr.binary
-                                          PsJsIrBinaryOp.bigintAdd
-                                          loweredLeft
-                                          loweredRight)
-                          | List.cons _ _ =>
-                              Except.error
-                                PsJsLowerError.intrinsicArity
-                      | List.nil =>
-                          Except.error PsJsLowerError.intrinsicArity
-                  | List.nil =>
-                      Except.error PsJsLowerError.intrinsicArity
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.bigintAdd arguments
+              | PsVerifiedIrIntrinsic.natSub =>
+                  psJsLowerRuntimeBinaryWith
+                    smaller PsJsIrRuntimeOp.natSub arguments
+              | PsVerifiedIrIntrinsic.natMul =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.bigintMul arguments
+              | PsVerifiedIrIntrinsic.natDiv =>
+                  psJsLowerRuntimeBinaryWith
+                    smaller PsJsIrRuntimeOp.natDiv arguments
+              | PsVerifiedIrIntrinsic.natMod =>
+                  psJsLowerRuntimeBinaryWith
+                    smaller PsJsIrRuntimeOp.natMod arguments
+              | PsVerifiedIrIntrinsic.natEq =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.bigintEq arguments
+              | PsVerifiedIrIntrinsic.natNe =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.bigintNe arguments
+              | PsVerifiedIrIntrinsic.natLe =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.bigintLe arguments
+              | PsVerifiedIrIntrinsic.natLt =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.bigintLt arguments
+              | PsVerifiedIrIntrinsic.intOfNat =>
+                  psJsLowerIdentityWith smaller arguments
+              | PsVerifiedIrIntrinsic.intRepr =>
+                  psJsLowerRuntimeUnaryWith
+                    smaller PsJsIrRuntimeOp.intRepr arguments
+              | PsVerifiedIrIntrinsic.intNegSucc =>
+                  psJsLowerRuntimeUnaryWith
+                    smaller PsJsIrRuntimeOp.intNegSucc arguments
+              | PsVerifiedIrIntrinsic.intNeg =>
+                  psJsLowerUnaryWith
+                    smaller PsJsIrUnaryOp.bigintNeg arguments
+              | PsVerifiedIrIntrinsic.intAdd =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.bigintAdd arguments
+              | PsVerifiedIrIntrinsic.intSub =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.bigintSub arguments
+              | PsVerifiedIrIntrinsic.intMul =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.bigintMul arguments
+              | PsVerifiedIrIntrinsic.intEq =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.bigintEq arguments
+              | PsVerifiedIrIntrinsic.intLe =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.bigintLe arguments
+              | PsVerifiedIrIntrinsic.intLt =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.bigintLt arguments
+              | PsVerifiedIrIntrinsic.boolNot =>
+                  psJsLowerUnaryWith
+                    smaller PsJsIrUnaryOp.boolNot arguments
+              | PsVerifiedIrIntrinsic.boolAnd =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.boolAnd arguments
+              | PsVerifiedIrIntrinsic.boolOr =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.boolOr arguments
+              | PsVerifiedIrIntrinsic.boolEq =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.boolEq arguments
+              | PsVerifiedIrIntrinsic.boolNe =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.boolNe arguments
+              | PsVerifiedIrIntrinsic.charOfNat =>
+                  psJsLowerRuntimeUnaryWith
+                    smaller PsJsIrRuntimeOp.charOfNat arguments
+              | PsVerifiedIrIntrinsic.charToNat =>
+                  psJsLowerRuntimeUnaryWith
+                    smaller PsJsIrRuntimeOp.charToNat arguments
+              | PsVerifiedIrIntrinsic.stringPush =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.stringConcat arguments
+              | PsVerifiedIrIntrinsic.stringSingleton =>
+                  psJsLowerIdentityWith smaller arguments
+              | PsVerifiedIrIntrinsic.stringLength =>
+                  psJsLowerRuntimeUnaryWith
+                    smaller PsJsIrRuntimeOp.stringLength arguments
+              | PsVerifiedIrIntrinsic.stringAppend =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.stringConcat arguments
+              | PsVerifiedIrIntrinsic.stringEq =>
+                  psJsLowerBinaryWith
+                    smaller PsJsIrBinaryOp.stringEq arguments
               | _ =>
                   Except.error PsJsLowerError.unsupportedIntrinsic
             else
               Except.error PsJsLowerError.typeArgumentsUnsupported
+        | PsVerifiedIrExpr.lambda
+            parameters
+            resultType
+            body =>
+            if psJsTypeSupported resultType then
+              match psJsLowerParameterNames parameters with
+              | Except.error error => Except.error error
+              | Except.ok names =>
+                  match smaller body with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredBody =>
+                      Except.ok
+                        (PsJsIrExpr.lambda
+                          names
+                          loweredBody)
+            else
+              Except.error PsJsLowerError.unsupportedType
         | PsVerifiedIrExpr.call fn typeArguments arguments =>
             if psListIsEmpty typeArguments then
               match smaller fn with
@@ -222,6 +452,29 @@ def psJsLowerExprWithFuel
                           loweredArguments)
             else
               Except.error PsJsLowerError.typeArgumentsUnsupported
+        | PsVerifiedIrExpr.letE
+            name
+            type
+            value
+            body =>
+            if psJsIdentifierSupported name then
+              if psJsTypeSupported type then
+                match smaller value with
+                | Except.error error => Except.error error
+                | Except.ok loweredValue =>
+                    match smaller body with
+                    | Except.error error => Except.error error
+                    | Except.ok loweredBody =>
+                        Except.ok
+                          (PsJsIrExpr.letE
+                            name
+                            loweredValue
+                            loweredBody)
+              else
+                Except.error PsJsLowerError.unsupportedType
+            else
+              Except.error
+                (PsJsLowerError.unsupportedName name)
         | PsVerifiedIrExpr.ifE
             condition
             thenBranch

@@ -452,3 +452,165 @@ theorem psKernelInferCoreWithFuel_app_checked_direct
     hArg,
     hEq
   ]
+
+
+theorem psKernelInferCoreWithFuel_app_checked_defeq
+    (remaining : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state fnState forallState argState eqState : PsKernelCheckerState)
+    (fn arg fnType argType : PsKernelExpr)
+    (view : PsKernelForallView)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hFn :
+      psKernelInferCoreWithFuel
+          remaining whnf defeq nextContext state fn false =
+        Except.ok (Prod.mk fnType fnState))
+    (hForall :
+      psKernelEnsureForallWith
+          whnf nextContext fnState fnType =
+        Except.ok (Prod.mk view forallState))
+    (hArg :
+      psKernelInferCoreWithFuel
+          remaining whnf defeq nextContext forallState arg false =
+        Except.ok (Prod.mk argType argState))
+    (hEq :
+      psKernelExprEq argType view.domain = false)
+    (hDefEq :
+      defeq
+          (if psKernelExprIsEagerReduce arg then
+            psKernelCheckerContextWithEagerReduce nextContext true
+          else
+            nextContext)
+          argState
+          argType
+          view.domain =
+        Except.ok (Prod.mk true eqState)) :
+    psKernelInferCoreWithFuel
+        (Nat.succ remaining)
+        whnf defeq context state
+        (PsKernelExpr.app fn arg)
+        false =
+      Except.ok
+        (Prod.mk
+          (psKernelExprInstantiate1 view.body arg)
+          eqState) := by
+  cases hEager : psKernelExprIsEagerReduce arg with
+  | false =>
+      simp [hEager] at hDefEq
+      simp [
+        psKernelInferCoreWithFuel,
+        psKernelInferCacheEligible,
+        psKernelCacheInferResult,
+        hDepth,
+        hFn,
+        hForall,
+        hArg,
+        hEq,
+        hEager,
+        hDefEq
+      ]
+  | true =>
+      simp [hEager] at hDefEq
+      simp [
+        psKernelInferCoreWithFuel,
+        psKernelInferCacheEligible,
+        psKernelCacheInferResult,
+        hDepth,
+        hFn,
+        hForall,
+        hArg,
+        hEq,
+        hEager,
+        hDefEq
+      ]
+
+theorem psKernelInferCoreWithFuel_app_checked_defeq_rejects
+    (remaining : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state fnState forallState argState eqState : PsKernelCheckerState)
+    (fn arg fnType argType : PsKernelExpr)
+    (view : PsKernelForallView)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hFn :
+      psKernelInferCoreWithFuel
+          remaining whnf defeq nextContext state fn false =
+        Except.ok (Prod.mk fnType fnState))
+    (hForall :
+      psKernelEnsureForallWith
+          whnf nextContext fnState fnType =
+        Except.ok (Prod.mk view forallState))
+    (hArg :
+      psKernelInferCoreWithFuel
+          remaining whnf defeq nextContext forallState arg false =
+        Except.ok (Prod.mk argType argState))
+    (hEq :
+      psKernelExprEq argType view.domain = false)
+    (hDefEq :
+      defeq
+          (if psKernelExprIsEagerReduce arg then
+            psKernelCheckerContextWithEagerReduce nextContext true
+          else
+            nextContext)
+          argState
+          argType
+          view.domain =
+        Except.ok (Prod.mk false eqState)) :
+    psKernelInferCoreWithFuel
+        (Nat.succ remaining)
+        whnf defeq context state
+        (PsKernelExpr.app fn arg)
+        false =
+      Except.error "application type mismatch" := by
+  cases hEager : psKernelExprIsEagerReduce arg with
+  | false =>
+      simp [hEager] at hDefEq
+      simp [
+        psKernelInferCoreWithFuel,
+        psKernelInferCacheEligible,
+        hDepth,
+        hFn,
+        hForall,
+        hArg,
+        hEq,
+        hEager,
+        hDefEq
+      ]
+  | true =>
+      simp [hEager] at hDefEq
+      simp [
+        psKernelInferCoreWithFuel,
+        psKernelInferCacheEligible,
+        hDepth,
+        hFn,
+        hForall,
+        hArg,
+        hEq,
+        hEager,
+        hDefEq
+      ]

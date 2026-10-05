@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.Declaration
+import Ps.KernelSelfHost.Core.Declaration
 
 inductive PsKernelEnvironmentIndex where
   | empty

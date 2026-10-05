@@ -1,7 +1,7 @@
-import Ps.KernelSelfHost.Environment
+import Ps.KernelSelfHost.Environment.Operations
 import Ps.KernelSelfHost.Runtime.Capability.Lean434NativeReduction
-import Ps.KernelSelfHost.LocalContext
-import Ps.KernelSelfHost.Instantiate
+import Ps.KernelSelfHost.Core.LocalContext
+import Ps.KernelSelfHost.Core.Substitution.Abstract
 import Ps.KernelSelfHost.Checker.State
 
 def psKernelLeanNatMaxSizeDefault : Nat :=

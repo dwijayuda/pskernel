@@ -10,7 +10,7 @@
   "semanticRootPath": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
   "semanticModulePrefix": "Ps.KernelSelfHost.",
   "migration": {
-    "phase": "B4-admission-hierarchy",
+    "phase": "B5-core-environment",
     "finalArchitectureAdopted": true,
     "finalArchitectureImplemented": false,
     "compatibilityShimsAllowedDuringMigration": true,
@@ -74,7 +74,19 @@
       "Ps.KernelSelfHost.Theory.Nested.Restore",
       "Ps.KernelSelfHost.Theory.Nested.RestoreExpr",
       "Ps.KernelSelfHost.Theory.Nested.Types",
-      "Ps.KernelSelfHost.Theory.Nested.Validation"
+      "Ps.KernelSelfHost.Theory.Nested.Validation",
+      "Ps.KernelSelfHost.Name",
+      "Ps.KernelSelfHost.Level",
+      "Ps.KernelSelfHost.Expr",
+      "Ps.KernelSelfHost.Declaration",
+      "Ps.KernelSelfHost.LocalContext",
+      "Ps.KernelSelfHost.Theory.Substitution.ListOps",
+      "Ps.KernelSelfHost.Theory.Substitution.Lift",
+      "Ps.KernelSelfHost.Theory.Substitution.Instantiate",
+      "Ps.KernelSelfHost.Theory.Substitution.Beta",
+      "Ps.KernelSelfHost.Theory.Substitution.Abstract",
+      "Ps.KernelSelfHost.Instantiate",
+      "Ps.KernelSelfHost.Environment"
     ]
   },
   "semanticRoles": [
@@ -473,6 +485,100 @@
     {
       "area": "admission-inductive-common-recursorvalidation",
       "module": "Ps.KernelSelfHost.Admission.Inductive.Common.RecursorValidation"
+    },
+    {
+      "area": "core-name",
+      "module": "Ps.KernelSelfHost.Core.Name",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Name"
+      ]
+    },
+    {
+      "area": "core-level",
+      "module": "Ps.KernelSelfHost.Core.Level",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Level"
+      ]
+    },
+    {
+      "area": "core-expr",
+      "module": "Ps.KernelSelfHost.Core.Expr",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Expr"
+      ]
+    },
+    {
+      "area": "core-declaration",
+      "module": "Ps.KernelSelfHost.Core.Declaration",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Declaration"
+      ]
+    },
+    {
+      "area": "core-localcontext",
+      "module": "Ps.KernelSelfHost.Core.LocalContext",
+      "legacyShims": [
+        "Ps.KernelSelfHost.LocalContext"
+      ]
+    },
+    {
+      "area": "core-substitution-listops",
+      "module": "Ps.KernelSelfHost.Core.Substitution.ListOps",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Substitution.ListOps"
+      ]
+    },
+    {
+      "area": "core-substitution-lift",
+      "module": "Ps.KernelSelfHost.Core.Substitution.Lift",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Substitution.Lift"
+      ]
+    },
+    {
+      "area": "core-substitution-instantiate",
+      "module": "Ps.KernelSelfHost.Core.Substitution.Instantiate",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Substitution.Instantiate"
+      ]
+    },
+    {
+      "area": "core-substitution-beta",
+      "module": "Ps.KernelSelfHost.Core.Substitution.Beta",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Substitution.Beta"
+      ]
+    },
+    {
+      "area": "core-substitution-abstract",
+      "module": "Ps.KernelSelfHost.Core.Substitution.Abstract",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Substitution.Abstract",
+        "Ps.KernelSelfHost.Instantiate"
+      ]
+    },
+    {
+      "area": "environment-operations",
+      "module": "Ps.KernelSelfHost.Environment.Operations",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Environment"
+      ]
+    },
+    {
+      "area": "environment-semantic",
+      "module": "Ps.KernelSelfHost.Environment.Semantic"
+    },
+    {
+      "area": "environment-environment",
+      "module": "Ps.KernelSelfHost.Environment.Environment"
+    },
+    {
+      "area": "environment-lookup",
+      "module": "Ps.KernelSelfHost.Environment.Lookup"
+    },
+    {
+      "area": "runtime-capability-types",
+      "module": "Ps.KernelSelfHost.Runtime.Capability.Types"
     }
   ],
   "recursiveWiring": {
@@ -533,6 +639,40 @@
       "forbidden": [
         "Ps.KernelSelfHost.API."
       ]
+    },
+    {
+      "from": [
+        "Ps.KernelSelfHost.Core."
+      ],
+      "forbidden": [
+        "Ps.KernelSelfHost.Runtime.",
+        "Ps.KernelSelfHost.Environment.",
+        "Ps.KernelSelfHost.Checker.",
+        "Ps.KernelSelfHost.Admission.",
+        "Ps.KernelSelfHost.API."
+      ]
+    },
+    {
+      "from": [
+        "Ps.KernelSelfHost.Runtime."
+      ],
+      "forbidden": [
+        "Ps.KernelSelfHost.Environment.",
+        "Ps.KernelSelfHost.Checker.",
+        "Ps.KernelSelfHost.Admission.",
+        "Ps.KernelSelfHost.API."
+      ]
+    },
+    {
+      "from": [
+        "Ps.KernelSelfHost.Environment."
+      ],
+      "forbidden": [
+        "Ps.KernelSelfHost.Checker.",
+        "Ps.KernelSelfHost.Admission.",
+        "Ps.KernelSelfHost.API."
+      ]
     }
-  ]
+  ],
+  "lakeLibrary": "PsKernelSelfHost"
 }

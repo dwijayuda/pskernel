@@ -46,6 +46,19 @@ function fixture(t) {
   return { root, lean, json, manifest };
 }
 
+for (const missing of ["SelfHost", "Checker.State", "CheckerState"]) {
+  test("reject missing Lake registration: " + missing, (t) => {
+    const f = fixture(t);
+    f.manifest.lakeLibrary = "PsKernelSelfHost";
+    f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
+    const roots = ["SelfHost", "Checker.State", "CheckerState"].filter((name) => name !== missing);
+    fs.writeFileSync(path.join(f.root, "lakefile.lean"),
+      "lean_lib PsKernelSelfHost where\n  roots := #[" + roots.map((name) => "`Ps.KernelSelfHost." + name).join(", ") + "]\n" +
+      "lean_lib Other where\n  roots := #[`Ps.KernelSelfHost." + missing + "]\n");
+    assert.throws(() => auditArchitecture(f.root), /ARCH_LAKE_MODULE_MISSING/);
+  });
+}
+
 test("comments and strings do not create imports; trailing comments preserve imports", (t) => {
   const f = fixture(t);
   f.lean("SelfHost", `/- Outer /- nested -/ comment

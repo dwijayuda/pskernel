@@ -69,18 +69,18 @@ historical file creation order.
 
 ### 3.1 Core syntax and substitution
 
-1. `Name.lean`
-2. `Level.lean`
-3. `Expr.lean`
-4. `Theory/Substitution/ListOps.lean`
-5. `Theory/Substitution/Lift.lean`
-6. `Theory/Substitution/Instantiate.lean`
-7. `Theory/Substitution/Beta.lean`
-8. `Theory/Substitution/Abstract.lean`
-9. `Instantiate.lean` (compatibility umbrella)
-10. `Declaration.lean`
-11. `LocalContext.lean`
-12. `Environment.lean`
+1. `Core/Name.lean`
+2. `Core/Level.lean`
+3. `Core/Expr.lean`
+4. `Core/Substitution/ListOps.lean`
+5. `Core/Substitution/Lift.lean`
+6. `Core/Substitution/Instantiate.lean`
+7. `Core/Substitution/Beta.lean`
+8. `Core/Substitution/Abstract.lean`
+9. `Core/Substitution/Abstract.lean` (compatibility umbrella)
+10. `Core/Declaration.lean`
+11. `Core/LocalContext.lean`
+12. `Environment/Operations.lean`
 
 These modules define the data manipulated by the checker. The substitution
 sequence is deliberately explicit:
@@ -93,7 +93,7 @@ list/spine helpers
     -> abstract free variables
 ```
 
-`Theory/Substitution/Instantiate.lean` contains the conservative
+`Core/Substitution/Instantiate.lean` contains the conservative
 non-dependent `instantiate1` fast path: when a codomain has no loose bound
 variable, substitution is the identity and the original expression is returned
 without a node-count/substitution traversal.
@@ -200,7 +200,7 @@ imax u v
 parameter
 ```
 
-`Level.lean` implements normalization and semantic comparison.
+`Core/Level.lean` implements normalization and semantic comparison.
 
 A level comparison is not string/syntax equality. The checker compares the
 meaning of level expressions for all assignments to universe parameters.
@@ -714,3 +714,13 @@ elimination and recursor-validation phases have explicit owners in `Common/`.
 Constructor-specific positivity remains with each ordinary/mutual analysis owner,
 because those routines use distinct shapes and are not one interchangeable rule.
 The move preserves all existing declaration bodies and admission order.
+
+## Core and environment ownership
+
+Core values and substitution now live under `Core/`. `Environment/Semantic`
+owns ordered declaration history; `Environment/Environment` retains the existing
+wrapper representation; lookup and mutation have separate owners. Runtime
+capability types live in `Runtime/Capability/Types`. The semantic view excludes
+the rebuildable index and native evaluator. Existing environment constructors
+and capability forwarding remain compatible; new public sessions configure the
+capability explicitly. No lookup or mutation algorithm changed.

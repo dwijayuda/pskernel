@@ -156,9 +156,9 @@ tightens allowed imports as canonical modules move.
 **Ownership implemented:** Checker hierarchy, Ops contract, single Knot owner and
 Session delegation. Existing fuel workers and algorithm ordering are preserved;
 legacy imports forward to canonical owners outside the semantic root. Architecture
-CI enforces callback-leaf import fences and unique wiring ownership. Context still
-contains existing builtin helpers; Core/Environment decomposition remains later
-structural work.
+CI enforces callback-leaf import fences and unique wiring ownership. Context retains context/binder and builtin helpers used by checker leaves; Core
+values/substitution and Environment history/wrapper/lookup/operations now have
+canonical owners. ResourcePolicy and the public contract are the next checkpoint.
 
 Move existing checker components under one `Checker/` owner without changing
 algorithms:

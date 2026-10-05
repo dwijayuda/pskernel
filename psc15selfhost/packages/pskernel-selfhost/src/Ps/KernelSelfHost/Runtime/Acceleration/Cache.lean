@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.Expr
+import Ps.KernelSelfHost.Core.Expr
 
 def psKernelCacheHashModulus : Nat :=
   65521

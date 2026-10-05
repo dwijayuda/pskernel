@@ -200,19 +200,30 @@ lean_lib PSC1KernelReferenceFoundations where
 lean_lib PsKernelSelfHost where
   srcDir := "packages/pskernel-selfhost/src"
   roots := #[
+    `Ps.KernelSelfHost.Core.Name,
     `Ps.KernelSelfHost.Name,
+    `Ps.KernelSelfHost.Core.Level,
     `Ps.KernelSelfHost.Level,
+    `Ps.KernelSelfHost.Core.Expr,
     `Ps.KernelSelfHost.Expr,
+    `Ps.KernelSelfHost.Core.Substitution.ListOps,
     `Ps.KernelSelfHost.Theory.Substitution.ListOps,
+    `Ps.KernelSelfHost.Core.Substitution.Lift,
     `Ps.KernelSelfHost.Theory.Substitution.Lift,
+    `Ps.KernelSelfHost.Core.Substitution.Instantiate,
     `Ps.KernelSelfHost.Theory.Substitution.Instantiate,
+    `Ps.KernelSelfHost.Core.Substitution.Beta,
     `Ps.KernelSelfHost.Theory.Substitution.Beta,
+    `Ps.KernelSelfHost.Core.Substitution.Abstract,
     `Ps.KernelSelfHost.Theory.Substitution.Abstract,
     `Ps.KernelSelfHost.Instantiate,
+    `Ps.KernelSelfHost.Core.Declaration,
     `Ps.KernelSelfHost.Declaration,
+    `Ps.KernelSelfHost.Core.LocalContext,
     `Ps.KernelSelfHost.LocalContext,
     `Ps.KernelSelfHost.Runtime.Acceleration.EnvironmentIndex,
     `Ps.KernelSelfHost.Runtime.EnvironmentIndex,
+    `Ps.KernelSelfHost.Environment.Operations,
     `Ps.KernelSelfHost.Environment,
     `Ps.KernelSelfHost.Runtime.Acceleration.Cache,
     `Ps.KernelSelfHost.Runtime.Acceleration.CachePolicy,
@@ -328,6 +339,10 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Admission.Inductive.Types,
     `Ps.KernelSelfHost.Admission.Inductive.Common.Occurrence,
     `Ps.KernelSelfHost.Admission.Inductive.Common.RecursorValidation,
+    `Ps.KernelSelfHost.Environment.Semantic,
+    `Ps.KernelSelfHost.Environment.Environment,
+    `Ps.KernelSelfHost.Environment.Lookup,
+    `Ps.KernelSelfHost.Runtime.Capability.Types,
     `Ps.KernelSelfHost.SelfHost
   ]
 

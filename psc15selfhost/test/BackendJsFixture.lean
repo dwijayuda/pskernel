@@ -255,6 +255,165 @@ def psBackendJsFixtureModule : PsVerifiedIrModule :=
             [PsVerifiedIrExpr.var "value"]
       },
       {
+        name := "u8AddWrap"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8
+          },
+          {
+            name := "right"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntBinary
+              PsVerifiedIrMachineIntegerType.uint8
+              PsVerifiedIrIntegerBinaryOp.add)
+            []
+            [PsVerifiedIrExpr.var "left", PsVerifiedIrExpr.var "right"]
+      },
+      {
+        name := "i8MulWrap"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int8
+          },
+          {
+            name := "right"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int8
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int8
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntBinary
+              PsVerifiedIrMachineIntegerType.int8
+              PsVerifiedIrIntegerBinaryOp.mul)
+            []
+            [PsVerifiedIrExpr.var "left", PsVerifiedIrExpr.var "right"]
+      },
+      {
+        name := "u64Xor"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint64
+          },
+          {
+            name := "right"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint64
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint64
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntBinary
+              PsVerifiedIrMachineIntegerType.uint64
+              PsVerifiedIrIntegerBinaryOp.bitXor)
+            []
+            [PsVerifiedIrExpr.var "left", PsVerifiedIrExpr.var "right"]
+      },
+      {
+        name := "u16Lt"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint16
+          },
+          {
+            name := "right"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint16
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntCompare
+              PsVerifiedIrMachineIntegerType.uint16
+              PsVerifiedIrIntegerCompareOp.lt)
+            []
+            [PsVerifiedIrExpr.var "left", PsVerifiedIrExpr.var "right"]
+      },
+      {
+        name := "u8FromNat"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.uint8OfNat
+            []
+            [PsVerifiedIrExpr.var "value"]
+      },
+      {
+        name := "u8Literal300"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8
+        body :=
+          PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.machineInteger
+              PsVerifiedIrMachineIntegerType.uint8
+              300)
+      },
+      {
+        name := "float32Mul"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float32
+          },
+          {
+            name := "right"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float32
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float32
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.floatBinary
+              PsVerifiedIrFloatingType.float32
+              PsVerifiedIrFloatBinaryOp.mul)
+            []
+            [PsVerifiedIrExpr.var "left", PsVerifiedIrExpr.var "right"]
+      },
+      {
+        name := "floatDiv"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float
+          },
+          {
+            name := "right"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.floatBinary
+              PsVerifiedIrFloatingType.float
+              PsVerifiedIrFloatBinaryOp.div)
+            []
+            [PsVerifiedIrExpr.var "left", PsVerifiedIrExpr.var "right"]
+      },
+      {
         name := "letNatDemo"
         typeParameters := []
         parameters := [

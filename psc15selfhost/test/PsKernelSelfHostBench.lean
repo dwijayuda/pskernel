@@ -1,5 +1,7 @@
 import KernelSelfHost.Bench.Nested
 
+set_option maxRecDepth 100000
+
 def main : IO Unit := do
   let size := 2048
   let iterations := 2000

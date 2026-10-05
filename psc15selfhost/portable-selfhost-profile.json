@@ -11,6 +11,7 @@
     "term-arithmetic-operator",
     "scalar-member-capability",
     "opaque-primitive-match",
+    "explicit-option-constructors",
     "term-list-append",
     "term-list-cons",
     "numeric-tuple-projection",

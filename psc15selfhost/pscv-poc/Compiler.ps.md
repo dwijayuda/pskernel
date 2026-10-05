@@ -16,20 +16,29 @@ This is **not** a claim that preparation is kernel checking. The opposite is the
 architectural lesson of the proof: the current API still needs a future
 `AdmissionReady -> Checked -> VerifiedExecutable` transition for PSCV.
 
-Formal claim:
+Formal PoC claim:
 
 ```proofscript spec
 forall elaborated : PsElabModuleResult,
+  psCompilerPrepareElaborated(elaborated)
+    =
+  psCompilerPrepareElaborated(elaborated)
+  ->
   psCompilerCheckElaborated(elaborated)
     =
   psCompilerPrepareElaborated(elaborated)
 ```
 
+The premise is intentionally explicit because the current bootstrap proof surface
+does not yet expose a ProofScript `Eq.refl` constructor. The proof is still useful:
+the premise's proof term can inhabit the conclusion only because the current
+`psCompilerCheckElaborated` definition unfolds to preparation.
+
 Evidence declaration:
 
 - proof module: `packages/compiler/proofs/Ps/Compiler/PscvPoc.lean`
 - theorem: `pscvPocCheckElaboratedIsPrepare`
-- proof style: direct equality proof term (`Eq.refl`)
+- proof style: direct hypothesis proof term; no tactics and no new runtime/prelude semantics
 - runtime dependency: **none**; the proof module is outside the bootstrap runtime root
 - intended checked path: canonical Lean -> ProofScript translation, then
   `KernelContract-v1` checked admission of the generated homogeneous `.ps` workspace

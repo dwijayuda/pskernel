@@ -6,6 +6,7 @@ import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.RuntimeNat
 import Ps.BackendWasm.RuntimeInt
 import Ps.BackendWasm.RuntimeString
+import Ps.BackendWasm.RuntimeIntRepr
 
 inductive PsWasmLowerError where
   | unsupportedType
@@ -4105,6 +4106,9 @@ def psWasmLowerIntrinsicWith
   | .intOfNat =>
       psWasmLowerNatToIntUnaryCallWith
         lower state psWasmIntOfNatFn arguments
+  | .intRepr =>
+      psWasmLowerIntUnaryCallWith
+        lower state psWasmIntReprFn arguments
   | .intNegSucc =>
       psWasmLowerNatToIntUnaryCallWith
         lower state psWasmIntNegSuccFn arguments
@@ -5492,6 +5496,7 @@ def psWasmIntrinsicUsesNat
   | .natLt => true
   | .uint8OfNat => true
   | .intOfNat => true
+  | .intRepr => true
   | .intNegSucc => true
   | .charOfNat => true
   | .charToNat => true
@@ -6180,12 +6185,22 @@ def psWasmLowerSpecializedModule
                       if needsInt then psWasmIntRuntimeFunctions else [];
                     let stringRuntimeFunctions :=
                       if needsString then psWasmStringRuntimeFunctions else [];
+                    let intReprRuntimeFunctions : List PsWasmFunction :=
+                      if needsInt then
+                        if needsString then
+                          psWasmIntReprRuntimeFunctions
+                        else
+                          []
+                      else
+                        [];
                     let runtimeFunctions :=
                       psListAppend
                         natRuntimeFunctions
                         (psListAppend
                           intRuntimeFunctions
-                          stringRuntimeFunctions);
+                          (psListAppend
+                            stringRuntimeFunctions
+                            intReprRuntimeFunctions));
                     Except.ok {
                       structures :=
                         psListAppend

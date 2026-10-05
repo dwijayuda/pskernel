@@ -97,3 +97,69 @@ theorem psKernelEnvironmentAddUnchecked_semantic
         (List.cons info environment.constants)
         environment.quotInitialized := by
   rfl
+
+
+theorem psKernelEnvironmentReplaceUnchecked_constants
+    (environment : PsKernelEnvironment)
+    (info : PsKernelConstantInfo) :
+    (psKernelEnvironmentReplaceUnchecked environment info).constants =
+      psKernelReplaceEnvironmentConstant
+        (psKernelConstantInfoName info)
+        info
+        environment.constants := by
+  rfl
+
+theorem psKernelEnvironmentReplaceUnchecked_quot
+    (environment : PsKernelEnvironment)
+    (info : PsKernelConstantInfo) :
+    (psKernelEnvironmentReplaceUnchecked environment info).quotInitialized =
+      environment.quotInitialized := by
+  rfl
+
+theorem psKernelEnvironmentReplaceUnchecked_runtime
+    (environment : PsKernelEnvironment)
+    (info : PsKernelConstantInfo) :
+    (psKernelEnvironmentReplaceUnchecked environment info).runtime =
+      environment.runtime := by
+  rfl
+
+theorem psKernelEnvironmentReplaceUnchecked_semantic
+    (environment : PsKernelEnvironment)
+    (info : PsKernelConstantInfo) :
+    psKernelEnvironmentSemantic
+        (psKernelEnvironmentReplaceUnchecked environment info) =
+      PsKernelEnvironmentSemantic.mk
+        (psKernelReplaceEnvironmentConstant
+          (psKernelConstantInfoName info)
+          info
+          environment.constants)
+        environment.quotInitialized := by
+  rfl
+
+theorem psKernelEnvironmentMarkQuotInitialized_constants
+    (environment : PsKernelEnvironment) :
+    (psKernelEnvironmentMarkQuotInitialized environment).constants =
+      environment.constants := by
+  cases h : environment.quotInitialized <;>
+    simp [psKernelEnvironmentMarkQuotInitialized, h]
+
+theorem psKernelEnvironmentMarkQuotInitialized_runtime
+    (environment : PsKernelEnvironment) :
+    (psKernelEnvironmentMarkQuotInitialized environment).runtime =
+      environment.runtime := by
+  cases h : environment.quotInitialized <;>
+    simp [psKernelEnvironmentMarkQuotInitialized, h]
+
+theorem psKernelEnvironmentMarkQuotInitialized_semantic
+    (environment : PsKernelEnvironment) :
+    psKernelEnvironmentSemantic
+        (psKernelEnvironmentMarkQuotInitialized environment) =
+      PsKernelEnvironmentSemantic.mk
+        environment.constants
+        true := by
+  cases h : environment.quotInitialized <;>
+    simp [
+      psKernelEnvironmentMarkQuotInitialized,
+      psKernelEnvironmentSemantic,
+      h
+    ]

@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "psc": "node packages/cli/bin/psc.mjs",
+    "poc:pscv-selfhost": "node scripts/run-pscv-selfhost-poc.mjs",
     "clean": "node scripts/clean.mjs",
     "check:workspace": "node scripts/bootstrap-closure-contract-tests.mjs && node scripts/check-workspace.mjs",
     "check:source:bootstrap": "node check-psc1-source.mjs",

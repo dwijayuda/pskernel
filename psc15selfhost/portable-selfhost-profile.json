@@ -17,6 +17,7 @@
     "boolean-convenience",
     "to-string-convenience",
     "value-length-dot-notation",
+    "value-conversion-dot-notation",
     "leading-dot-term-constructor",
     "untyped-lambda-binder",
     "untyped-lambda-let",

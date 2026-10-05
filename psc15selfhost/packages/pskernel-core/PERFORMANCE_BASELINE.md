@@ -618,15 +618,15 @@ Next measurement priority:
 Only optimize expression metadata/hash/sharing if those measurements show
 repeated tree traversal/hash computation is a dominant cost.
 
-## 5. Future cross-runtime benchmark
+## 5. Cross-runtime scope and acceptance
 
-The current cost-bounded Phase C pass uses the native corpus and normal portable
-source/canonical `.ps` checks. Full generated compiler/kernel reproduction and
-large proof-library replay are excluded. Fresh generated-JavaScript throughput
-and M3/provider readiness are not established by native results alone.
+The cost-bounded Phase C pass uses the native corpus, the small Node corpus
+below, and normal portable source/canonical `.ps` checks. Full generated
+compiler/kernel reproduction and large proof-library replay are excluded.
+Native results alone do not establish JavaScript throughput; the initial Node
+measurements do not establish M3/provider readiness.
 
-After native checker microbenchmarks are stable, run the same semantic corpus
-through:
+Continue broadening matched workload coverage across:
 
 ```text
 official Lean 4.34 kernel
@@ -663,8 +663,8 @@ The reporter runs at most three fresh-process samples, caps each child at 30
 seconds, fails on missing/failed operations, and stores medians, ranges, raw
 logs, Node identity and the generated artifact SHA-256. Module import and first
 workload calls are reported separately; the latter occur after guard checks
-and must not be called pristine JIT startup. One optional-to-interpret bounded
-CPU profile includes the entire worker, including setup and guards.
+and must not be called pristine JIT startup. One bounded CPU profile includes
+the entire worker, including setup and guards.
 
 The existing integrity-checked Lean WASM provider is measured separately on
 matching batches of one and 128 definitions and a four-definition rejection.
@@ -678,3 +678,78 @@ check times as if it were an exact startup decomposition.
 This is initial Node evidence. It does not establish browser performance,
 general JS provider parity, or performance of nested admission. Keep M3 and
 M4 acceptance separate from this bounded measurement checkpoint.
+
+### 6.1 First measured Node baseline
+
+The first complete checkpoint is `d379472dcd515fceabd2e444a22245f75db4a9e8`:
+[three-sample run 37296102555](https://github.com/dwijayuda/pskernel/actions/runs/37296102555).
+Node 22.23.3 ran the generated JS; pinned Lean 4.34 compiled the same fixture
+functions natively. These ratios compare PSKernel JS with **PSKernel native**,
+not with official Lean native or Lean WASM.
+
+| Workload, 1,000 operations | JS median ms | Native median ms | Median paired JS/native |
+| --- | ---: | ---: | ---: |
+| 16-step beta WHNF | 12,324.900 | 22.577 | 544.26x |
+| Beta definitional equality | 1,839.516 | 4.328 | 421.59x |
+| Checked eight-argument application | 862.152 | 2.548 | 329.39x |
+
+The large gap is real on these synthetic fixtures; do not infer competitive JS
+throughput from the earlier native measurements. The whole-worker profile
+attributed 12.24% of samples to garbage collection, 9.89% to runtime dispatch,
+and substantial additional samples to expression counting, hashing, equality
+and callback construction. These are sampled attributions, not independent
+wall-clock stage timings or a proof of a particular optimization's benefit.
+
+The 128-definition JS fixture took 58.121 ms, while the complete Lean WASM
+request took 169.116 ms. The boundaries differ as described above; this does
+not establish that the JavaScript kernel is faster than the WASM kernel.
+
+### 6.2 Rejected equality scheduling experiment
+
+[Run 37298205029](https://github.com/dwijayuda/pskernel/actions/runs/37298205029)
+compared an attempt to delay child-comparator construction with the original
+implementation on one runner, alternating fresh-process order over three pairs.
+Current/original median ratios were 1.059 for beta WHNF, 0.988 for beta defeq,
+and 1.010 for checked application. There was no useful overall improvement, so
+the production equality change was reverted. The original and candidate
+generated artifact hashes were distinct and are retained in the run artifact.
+
+The new 729-pair equality matrix remains useful: it covers every expression
+constructor, ignored binder names/annotations, and significant metadata,
+projection and let fields. It runs in generated JS and native code; the native
+runner also compares all pairs with the frozen reference implementation.
+
+### 6.3 Accepted zero-lifting shortcut
+
+Checkpoint `11a1e8828b24edace52536444f4f4c848c1a1602` moves the existing
+zero-amount return ahead of expression counting in
+`psKernelExprLiftLooseBVarsChanged`. The wrapper previously counted the tree,
+then passed positive fuel to a worker that already returns `(expr, false)` for
+zero. The shortcut returns that same pair; nonzero lifting is unchanged.
+
+[Run 37299796818](https://github.com/dwijayuda/pskernel/actions/runs/37299796818)
+compiled both versions on the same runner, changing only the lifting module
+back to its pre-optimization source for the baseline. Three paired samples
+alternated fresh-process order:
+
+| Generated JS workload | Current/original median | Paired ratio range | Interpretation |
+| --- | ---: | ---: | --- |
+| 16-step beta WHNF | 0.933x | 0.868-0.958x | About 7% less time |
+| Beta definitional equality | 0.620x | 0.585-0.692x | About 38% less time |
+| Checked eight-argument application | 0.999x | 0.904-1.011x | Essentially unchanged |
+
+The shortcut is retained. The shared guards additionally check 54 zero lifts:
+27 expression forms at two starting indices, requiring the exact expression
+under binder-sensitive equality and an unchanged flag. The 729 equality pairs,
+rejection/exhaustion/large-natural guards, generated smoke, native conformance,
+portable PSC1 gates and native benchmark all passed at this checkpoint.
+
+This is a local improvement, not closure of the runtime gap. In that run the
+three JS/native median ratios were still 584.49x, 387.74x and 344.03x respectively.
+Do not compare ratios from different runners to estimate the shortcut's benefit;
+use the paired current/original results above. M3 remains open.
+
+The one-off comparison generator and optional reporter path are removed after
+this experiment. The ordinary bounded harness, correctness guards and profile
+remain in CI. The comparison implementation and raw evidence remain available
+at the checkpoint and linked workflow artifact.

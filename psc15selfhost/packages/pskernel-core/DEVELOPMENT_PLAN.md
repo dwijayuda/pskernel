@@ -18,16 +18,24 @@
   - completion concerns production architecture; Phase D and provider promotion
     remain separately gated. See `ARCHITECTURE_MIGRATION_REPORT.md`.
 - **Phase C — Competitive performance: ACTIVE ONLY WHEN MEASURED.**
-  - current pass is cost-bounded: three short native benchmark samples, ordinary
-    conformance/portable gates, and measured cache-pressure diagnostics; no full
-    compiler/kernel fixed-point generation or large proof-library replay.
+  - current pass is cost-bounded: three native and Node benchmark samples,
+    ordinary conformance/portable gates, and measured cache-pressure diagnostics;
+    no full compiler/kernel fixed-point generation or large proof-library replay.
   - current indexing/cache and checker-path work may continue when profiling identifies a
     concrete hotspot and all Phase A/B gates remain green.
   - performance work must not be mixed into structural move commits.
   - the first bounded pass established three-sample reports and nested cache
     diagnostics. A single-descent insertion experiment was rejected after a
     same-runner comparison showed no representative gain; production cache
-    behavior is retained. M3 and current-JavaScript throughput remain open.
+    behavior is retained.
+  - fresh generated-JavaScript measurements now exist for a small shared Node/native
+    corpus. They expose a large runtime gap; broader JS throughput and M3 remain
+    open. Lean WASM full-request timings are reported separately because its
+    subprocess/prelude/JSON boundary differs from direct JS fixture calls.
+  - a measured zero-lifting shortcut is retained: paired Node samples reduced
+    beta-defeq time by about 38% and beta-WHNF time by about 7%, with checked
+    application essentially unchanged. Equality scheduling was rejected and
+    reverted. See `PERFORMANCE_BASELINE.md` for evidence and limits.
 - **Phase D — Assurance Plane: LONG-TERM / NON-BLOCKING.**
   - formal specification/refinement, independent-checker consensus, fuzzing, receipts and
     broader interoperability strengthen the production kernel after the architecture boundary

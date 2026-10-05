@@ -59,23 +59,17 @@ function run(executable, args, log) {
   if (result.error || result.status !== 0) throw Error(`Bounded worker failed: ${result.error ?? result.status}; ${log}`);
   return { stdout: result.stdout, processNs };
 }
-export function runCrossRuntime(generated, native, count, output, baseline) {
+export function runCrossRuntime(generated, native, count, output) {
   assert.ok(Number.isInteger(count) && count >= 1 && count <= 3, 'Require 1 to 3 samples');
   mkdirSync(path.dirname(output), { recursive: true });
   const samples = [];
   for (let i = 0; i < count; i++) {
-    const runJsBaseline = () => validateWorker(JSON.parse(run(process.execPath,
-      [path.join(here, 'psc1kernel-cross-runtime-worker.mjs'), 'js', baseline, String(i)],
-      `${output}.${i}.js-baseline.log`).stdout), 'js');
-    // Alternate fresh-process ordering; compare identical fixtures on one runner.
-    let jsBaseline = baseline && i % 2 === 0 ? runJsBaseline() : undefined;
     const jsRun = run(process.execPath, [path.join(here, 'psc1kernel-cross-runtime-worker.mjs'), 'js', generated, String(i)], `${output}.${i}.js.log`);
     const js = validateWorker(JSON.parse(jsRun.stdout), 'js');
-    if (baseline && i % 2 !== 0) jsBaseline = runJsBaseline();
     const nativeNs = workloads.map((_, kind) => parseNative(run(native, [String(kind)], `${output}.${i}.native-${kind}.log`).stdout, kind));
     const wasmRun = run(process.execPath, [path.join(here, 'psc1kernel-cross-runtime-worker.mjs'), 'wasm'], `${output}.${i}.wasm.log`);
     const wasm = validateWorker(JSON.parse(wasmRun.stdout), 'wasm');
-    samples.push({ js, nativeNs, wasm, jsBaseline, jsProcessNs: jsRun.processNs, wasmProcessNs: wasmRun.processNs });
+    samples.push({ js, nativeNs, wasm, jsProcessNs: jsRun.processNs, wasmProcessNs: wasmRun.processNs });
   }
   const report = {
     schemaVersion: 1, commit: process.env.GITHUB_SHA ?? null, samples,
@@ -95,13 +89,6 @@ export function runCrossRuntime(generated, native, count, output, baseline) {
     })),
     wasmHealthRequestNs: stats(samples.map(x => x.wasm.healthRequestNs)),
   };
-  if (baseline) {
-    report.baselineGeneratedSha256 = createHash('sha256').update(readFileSync(baseline)).digest('hex');
-    report.currentOverBaseline = workloads.map((name, kind) => ({ name,
-      ratio: stats(samples.map(s => s.js.rows.find(r => r.kind === kind).ns /
-        s.jsBaseline.rows.find(r => r.kind === kind).ns)),
-    }));
-  }
   writeFileSync(`${output}.json`, JSON.stringify(report, null, 2) + '\n');
   const ms = ns => (ns / 1e6).toFixed(3);
   const markdown = [
@@ -118,17 +105,13 @@ export function runCrossRuntime(generated, native, count, output, baseline) {
     'Admission columns are different boundaries, not a kernel speed ratio: WASM includes artifact verification, subprocess startup, parsing, provider prelude and checking. JS calls the fixture directly with its smaller test environment.',
     'The health request is a separate observation, not a startup value subtracted from checks. Both execute matching declaration bodies, including exact >2^53 naturals and an ill-typed rejection.',
     'No WASM rebuild, full compiler/kernel fixed point, or large proof-library replay. This is bounded Node evidence, not browser/provider readiness.', '',
-    ...(report.currentOverBaseline ? [
-      'Same-runner JS experiment (current / pre-change, lower is better):', '',
-      ...report.currentOverBaseline.map(r => `${r.name}: ${r.ratio.median.toFixed(3)}x (${r.ratio.min.toFixed(3)}–${r.ratio.max.toFixed(3)}x)`), '',
-    ] : []),
   ].join('\n');
   writeFileSync(`${output}.md`, markdown);
   process.stdout.write(markdown);
   return report;
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const [generated, native, count, output, baseline] = process.argv.slice(2);
+  const [generated, native, count, output] = process.argv.slice(2);
   if (!output) throw Error('Usage: <generated.js> <native-binary> <samples:1..3> <output-prefix>');
-  runCrossRuntime(path.resolve(generated), path.resolve(native), Number(count), path.resolve(output), baseline && path.resolve(baseline));
+  runCrossRuntime(path.resolve(generated), path.resolve(native), Number(count), path.resolve(output));
 }

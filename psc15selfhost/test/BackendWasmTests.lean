@@ -1089,6 +1089,74 @@ def psTestWasmBoolIntrinsics : Bool :=
     && psTestWasmBoolBinaryIntrinsic
       PsVerifiedIrIntrinsic.boolNe
 
+def psTestWasmCharOfNatIntrinsic : Bool :=
+  match
+      psWasmLowerIntrinsicWith
+        psWasmProfile32
+        psWasmUInt8OfNatTestLower
+        psWasmUInt8OfNatTestState
+        PsVerifiedIrIntrinsic.charOfNat
+        []
+        [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 65)] with
+  | Except.ok {
+      instructions := [
+        PsWasmInstruction.localGet 0,
+        PsWasmInstruction.localSet 0,
+        PsWasmInstruction.localGet 0,
+        PsWasmInstruction.call fitsName,
+        PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
+        PsWasmInstruction.localGet 0,
+        PsWasmInstruction.call toU32Name,
+        PsWasmInstruction.localSet 1,
+        PsWasmInstruction.localGet 1,
+        PsWasmInstruction.i32Const 55296,
+        PsWasmInstruction.i32LtU,
+        PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
+        PsWasmInstruction.localGet 1,
+        PsWasmInstruction.else_,
+        PsWasmInstruction.localGet 1,
+        PsWasmInstruction.i32Const 57343,
+        PsWasmInstruction.i32GtU,
+        PsWasmInstruction.localGet 1,
+        PsWasmInstruction.i32Const 1114112,
+        PsWasmInstruction.i32LtU,
+        PsWasmInstruction.i32And,
+        PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
+        PsWasmInstruction.localGet 1,
+        PsWasmInstruction.else_,
+        PsWasmInstruction.i32Const 0,
+        PsWasmInstruction.end_,
+        PsWasmInstruction.end_,
+        PsWasmInstruction.else_,
+        PsWasmInstruction.i32Const 0,
+        PsWasmInstruction.end_
+      ],
+      state := finalState
+    } =>
+      psStringEq fitsName psWasmNatFitsU32Fn
+        && psStringEq toU32Name psWasmNatToU32Fn
+        && Nat.beq finalState.nextLocalIndex 2
+  | _ => false
+
+def psTestWasmCharToNatIntrinsic : Bool :=
+  match
+      psWasmLowerIntrinsicWith
+        psWasmProfile32
+        psWasmUInt8OfNatTestLower
+        psWasmUInt8OfNatTestState
+        PsVerifiedIrIntrinsic.charToNat
+        []
+        [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 65)] with
+  | Except.ok {
+      instructions := [
+        PsWasmInstruction.localGet 0,
+        PsWasmInstruction.call functionName
+      ],
+      state := _
+    } =>
+      psStringEq functionName psWasmNatOfU32Fn
+  | _ => false
+
 def psWasmAnswerModule : PsWasmModule :=
   {
     structures := []
@@ -1183,6 +1251,8 @@ def psTestWasmNatConstructorIdentityInvariant : Bool :=
       && psTestWasmMachineIntegerLiterals
       && psTestWasmUInt8OfNatIntrinsic
       && psTestWasmBoolIntrinsics
+      && psTestWasmCharOfNatIntrinsic
+      && psTestWasmCharToNatIntrinsic
       && psTestWasmFloatOps
       && psTestWasmVerifiedIrLowering
       && psTestWasmLetLowering

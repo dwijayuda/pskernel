@@ -10,14 +10,15 @@
   "semanticRootPath": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
   "semanticModulePrefix": "Ps.KernelSelfHost.",
   "migration": {
-    "phase": "B5-native-capability-owner",
+    "phase": "B3-checker-session-owner",
     "finalArchitectureAdopted": true,
     "finalArchitectureImplemented": false,
     "compatibilityShimsAllowedDuringMigration": true,
     "compatibilityShimsAllowedInSemanticRoot": false,
     "migrationShims": [
       "Ps.KernelSelfHost.CheckerState",
-      "Ps.KernelSelfHost.Runtime.NativeReduction"
+      "Ps.KernelSelfHost.Runtime.NativeReduction",
+      "Ps.KernelSelfHost.CheckerSession"
     ]
   },
   "semanticRoles": [
@@ -83,6 +84,11 @@
       "area": "lean434-native-reduction",
       "module": "Ps.KernelSelfHost.Runtime.Capability.Lean434NativeReduction",
       "legacyShim": "Ps.KernelSelfHost.Runtime.NativeReduction"
+    },
+    {
+      "area": "checker-session",
+      "module": "Ps.KernelSelfHost.Checker.Session",
+      "legacyShim": "Ps.KernelSelfHost.CheckerSession"
     }
   ]
 }

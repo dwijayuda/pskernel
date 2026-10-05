@@ -241,6 +241,7 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Theory.DefEq.Shortcuts,
     `Ps.KernelSelfHost.Theory.DefEq.FullShape,
     `Ps.KernelSelfHost.TypeCheckerDefEq,
+    `Ps.KernelSelfHost.Checker.Session,
     `Ps.KernelSelfHost.CheckerSession,
     `Ps.KernelSelfHost.Theory.Admission.Validation,
     `Ps.KernelSelfHost.Theory.Admission.Declarations,

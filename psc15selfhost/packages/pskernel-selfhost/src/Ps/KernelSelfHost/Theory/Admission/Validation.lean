@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.CheckerSession
+import Ps.KernelSelfHost.Checker.Session
 
 /-
 Core declaration validation shared by all admission operations.

@@ -1,6 +1,6 @@
 # ProofScript Programming Language — Identity and Plans
 
-**Status:** strategic identity and planning document — research revision v3; not a language specification and not implementation-conformance evidence.
+**Status:** strategic identity and planning document — research revision v4; not a language specification and not implementation-conformance evidence.
 
 **Repository role:** this document explains what ProofScript is trying to become, why it may deserve to exist, what product/adoption hypotheses are being explored, what must remain invariant, what remains undecided, and how the project should be evaluated.
 
@@ -111,6 +111,32 @@ Scope:                           library/package ecosystem,
 ~~~
 
 The >9 score applies only to this constrained product architecture. It does **not** raise the score of the unrestricted autonomous factory vision.
+
+
+### Mainstream JS/TS adoption iteration
+
+A further architecture loop optimized for **ordinary JS/TS/web developers**, including users who do not want AI or formal proof as their primary workflow.
+
+The highest-scoring current vision is:
+
+> **Keep JavaScript/TypeScript for the application stack you already have; use ProofScript for the modules and packages you want to trust more.**
+
+VEF-Core remains the ecosystem accelerator underneath this experience.
+
+The optional AI layer becomes model-agnostic and local-first: ProofScript exposes deterministic compiler/checker/spec/audit tools to existing open-source coding agents rather than requiring a proprietary or cloud model.
+
+For this exact target:
+
+~~~text
+Product-vision score:           9.35 / 10
+Architecture feasibility:       9.18 / 10
+Combined vision/feasibility:    9.27 / 10
+Architecture evidence:          ~7.8 / 10
+Current ProofScript product evidence:
+                                 ~4.2 / 10
+~~~
+
+The score applies primarily to the JS/TS/web ecosystem adoption strategy, not yet to “most programmers in every ecosystem”.
 
 
 For a **fully autonomous, general-purpose factory that generates and verifies arbitrary application ecosystems**:
@@ -3694,6 +3720,978 @@ generate by construction
 Then expand only when package families prove the next layer worthwhile.
 
 This retains the ambitious long-term vision while producing a first product whose feasibility exceeds 9/10 using techniques available today.
+
+
+
+# Part XVII — Mainstream adoption vision: ProofScript as the JS/TS Trust Layer
+
+**Status:** highest-scoring current mainstream-product hypothesis after another architecture-search loop.  
+**Scope:** JS/TS/npm/Node/Web developers first; broader ecosystems remain later expansion.  
+**Vision score:** **9.35 / 10**.  
+**Architecture feasibility:** **9.18 / 10**.  
+**Combined vision/feasibility:** **9.27 / 10**.  
+**Current ProofScript-specific product evidence:** still materially lower than the architecture score.
+
+## 109. Why VEF-Core alone was not enough
+
+VEF-Core scores highly as a way to manufacture trustworthy package ecosystems, but by itself it is primarily a package-author/platform story.
+
+Most web developers need a simpler answer:
+
+> Why would I use ProofScript in my React, Next, Vite, Node, Express, Fastify, or ordinary TypeScript project tomorrow?
+
+A full ProofScript application framework would answer that question only by asking the developer to switch too much infrastructure.
+
+A full TypeScript replacement would create the same adoption problem from another direction.
+
+The better answer is incremental:
+
+> **Keep your framework. Keep npm. Keep TypeScript where it works. Add ProofScript exactly where stronger trust is valuable.**
+
+---
+
+## 110. Iteration history
+
+| Iteration | Vision | Vision quality | Feasibility | Why it did/did not win |
+|---|---|---:|---:|---|
+| A | autonomous general verified factory | 8.5 | ~5.0 | too much depends on unsolved specification/autonomy problems |
+| B | VEF-Core package factory | 9.0 | 9.23 | excellent ecosystem engine; less direct daily value for ordinary web developers |
+| C | ProofScript-owned full web/app framework | 9.0 | ~8.0 | too much framework/runtime/UI scope and incumbent competition |
+| D | ProofScript as TypeScript replacement | 8.8 | ~7.5 | migration/ecosystem cost too high |
+| E | verified modules inside existing JS/TS apps | 9.25 | 9.12 | strong incremental wedge |
+| F | **JS/TS Trust Layer + VEF-Core + optional local agent interface** | **9.35** | **9.18** | best balance of usefulness, switching cost, ecosystem leverage, assurance, and buildability |
+
+The winning design changes the adoption question from:
+
+~~~text
+Should I rewrite my application in ProofScript?
+~~~
+
+to:
+
+~~~text
+Which parts of this application are valuable enough
+to make more trustworthy?
+~~~
+
+---
+
+## 111. Product sentence
+
+> **ProofScript is the trust layer for JavaScript/TypeScript software: keep the web stack you already use, move selected domain logic into ProofScript when stronger guarantees are valuable, and consume the result as ordinary JS/TS packages.**
+
+Long term, ProofScript may be used for entire applications.
+
+It should not require that outcome to be useful.
+
+---
+
+## 112. The mainstream developer value ladder
+
+A JS/TS developer should be able to receive increasing ProofScript value without making one giant commitment.
+
+### Level 0 — consume a ProofScript package
+
+The developer does not learn ProofScript.
+
+~~~typescript
+import { verifyToken } from "@proofscript-auth/token";
+~~~
+
+They receive ordinary:
+
+- JavaScript/ESM;
+- `.d.ts` declarations;
+- source maps;
+- package metadata;
+- optional audit/evidence URL/artifact.
+
+This is the lowest-friction adoption point.
+
+### Level 1 — one local ProofScript package
+
+Keep the application in JavaScript/TypeScript.
+
+Example workspace:
+
+~~~text
+web-app/
+  app/ or src/                 # React / Next / Vite / Node / TS
+  packages/
+    trusted-domain/
+      src/
+        pricing.ps
+        policy.ps
+      package.json
+~~~
+
+`psc watch` builds the package to ordinary JS + declarations.
+
+The surrounding app imports it normally.
+
+### Level 2 — specified module
+
+Add contracts to selected functions.
+
+~~~text
+typed
+→ specified
+~~~
+
+No theorem-proving expertise is required merely to state intent.
+
+### Level 3 — verified properties
+
+Prove only the properties whose value exceeds their proof cost.
+
+~~~text
+specified
+→ selected checked properties
+~~~
+
+### Level 4 — ProofScript-heavy application
+
+Only if the project receives enough value should more modules migrate.
+
+This gives ProofScript a Kotlin-like incremental adoption path rather than a rewrite mandate.
+
+---
+
+## 113. Best first web-developer use cases
+
+ProofScript should target logic where:
+
+- bugs have business/security consequences;
+- behavior is deterministic enough to specify;
+- boundaries with UI/framework code are narrow.
+
+High-value candidates:
+
+- pricing, money, discounts, billing rules;
+- authorization and permission policies;
+- authentication/session state;
+- form/schema validation;
+- reducers and application state machines;
+- parsers/serializers;
+- data transformations;
+- URL/protocol logic;
+- feature eligibility/routing policy;
+- API request/response codecs;
+- SDK core logic;
+- cryptographic/protocol wrapper logic;
+- package/security policy.
+
+Lower first priority:
+
+- DOM manipulation;
+- animation;
+- framework-specific rendering;
+- arbitrary browser plugin behavior;
+- highly dynamic UI glue.
+
+The first web story is therefore **verified domain logic**, not “ProofScript replaces React”.
+
+---
+
+## 114. Ordinary npm artifact contract
+
+The primary adoption artifact should be a normal package.
+
+Candidate build output:
+
+~~~text
+dist/
+  index.js
+  index.d.ts
+  index.js.map
+  proofscript.evidence.json
+  proofscript.manifest.json
+package.json
+~~~
+
+The package should use ordinary JS module/package conventions.
+
+TypeScript already supports npm packages that bundle their generated declaration files. Node and modern bundlers consume standard ECMAScript modules.
+
+This makes ProofScript output framework-independent.
+
+### Consequence
+
+ProofScript should not require a Vite/Next-specific compiler plugin for basic interoperability.
+
+A plugin may later improve:
+
+- direct `.ps` imports;
+- hot reload;
+- diagnostics overlay;
+- IDE integration.
+
+But the foundational integration route is:
+
+> **compile to an ordinary package first.**
+
+That is more portable and lowers product risk.
+
+---
+
+## 115. No-AI mode is mandatory
+
+ProofScript must remain a good programming language when AI is completely disabled.
+
+Core workflow:
+
+~~~text
+psc check
+psc build
+psc test
+psc verify
+psc audit
+psc package
+~~~
+
+A developer can:
+
+- write `.ps` manually;
+- write contracts manually;
+- write proofs manually or use deterministic tactics;
+- create foreign bindings through deterministic InterfaceIR tooling;
+- consume/publish packages;
+- inspect evidence.
+
+This is a hard product principle:
+
+> **AI is an accelerator, never a usability prerequisite.**
+
+If ProofScript is unpleasant without AI, the language/product is too complicated.
+
+---
+
+## 116. Optional local/open-source AI mode
+
+The AI integration should not start by building another coding agent.
+
+Existing open-source coding agents already provide:
+
+- repository editing;
+- terminal/tool invocation;
+- Git workflows;
+- IDE integration;
+- local-model support.
+
+Current examples include:
+
+- Qwen Code;
+- Continue;
+- Aider;
+- OpenHands;
+- other OpenAI-compatible local-agent frontends.
+
+Qwen Code can connect to local OpenAI-compatible endpoints such as Ollama, vLLM, and LM Studio. Continue documents a fully offline configuration with local models. Aider supports local models through Ollama and LM Studio. OpenHands supports local LLM servers, although its documentation warns that capable local agentic models generally require substantial hardware.
+
+Therefore ProofScript should provide the **deterministic agent tools**, not own the model/runtime.
+
+---
+
+## 117. ProofScript Agent Interface
+
+**Provisional name:** ProofScript Agent Interface / Agent Kit.
+
+Candidate architecture:
+
+~~~text
+Qwen Code / Continue / Aider / OpenHands / other
+                  │
+          local or remote model
+                  │
+          agent tool protocol
+                  │
+       ┌──────────┼──────────┐
+       ▼          ▼          ▼
+   psc check   psc goal   psc audit
+       │          │          │
+       └──────────┼──────────┘
+                  ▼
+        deterministic PSC tools
+                  │
+             PSKernel
+~~~
+
+The agent adapter may be:
+
+- MCP;
+- stdio JSON RPC;
+- CLI JSON;
+- generated agent skill/rule files.
+
+The protocol should remain model/provider neutral.
+
+### Candidate tools
+
+~~~text
+proofscript.check
+proofscript.build
+proofscript.test
+proofscript.goal
+proofscript.typeOf
+proofscript.explainDiagnostic
+proofscript.spec.createDraft
+proofscript.spec.diff
+proofscript.spec.lockStatus
+proofscript.assumptionDelta
+proofscript.bridge.inspect
+proofscript.bridge.generate
+proofscript.verify
+proofscript.audit
+proofscript.replayEvidence
+proofscript.package
+~~~
+
+These tools narrow agent tasks and provide structured feedback, reducing how much semantic reasoning must live inside the model.
+
+---
+
+## 118. Local AI usability tiers
+
+Offline AI should be a **supported mode**, not an unrealistic promise that every laptop can run a frontier coding model.
+
+### Tier A — AI off
+
+Hardware:
+
+- ordinary developer machine.
+
+Capability:
+
+- full deterministic ProofScript workflow.
+
+Feasibility:
+
+- very high.
+
+### Tier B — lightweight local assist
+
+Use a smaller local model for:
+
+- explanation;
+- boilerplate;
+- one-file translation;
+- test generation;
+- simple proof repair;
+- documentation.
+
+Deterministic tools catch invalid output.
+
+Capability depends strongly on model quality.
+
+### Tier C — capable local coding agent
+
+Use an open-weight coding model through Ollama/LM Studio/vLLM.
+
+Current agent documentation commonly recommends substantial memory for strong local software-engineering agents. OpenHands currently recommends a model class requiring roughly 24 GB GPU memory for a strong local setup; Mistral's offline-agent guidance similarly recommends a 24 GB GPU for useful quantized long-context local models.
+
+This is feasible for workstations, not every commodity laptop.
+
+### Tier D — optional remote model
+
+Users may choose a strong hosted model.
+
+The trust architecture remains identical:
+
+~~~text
+model quality changes productivity
+but
+model provider never changes proof authority
+~~~
+
+This prevents the ProofScript product from being tied to one AI vendor.
+
+---
+
+## 119. Local-first privacy use case
+
+ProofScript can have a particularly strong local/offline story for:
+
+- security-sensitive code;
+- proprietary business logic;
+- regulated environments;
+- air-gapped build networks;
+- education/research without recurring API cost.
+
+Candidate setup:
+
+~~~text
+local git repository
+      +
+local psc / PSKernel
+      +
+local package/cache mirror
+      +
+open-source agent
+      +
+local OpenAI-compatible model server
+      ↓
+no source-code prompts leave the machine
+~~~
+
+Build/proof replay should already support locked/offline inputs as part of the broader reproducibility architecture.
+
+This is a useful feature, not the only supported AI architecture.
+
+---
+
+## 120. AI migration workflow for a TypeScript module
+
+A candidate supervised workflow:
+
+~~~text
+existing src/domain/pricing.ts
+          ↓
+Interface Agent extracts public API
+          ↓
+tests/examples become characterization evidence
+          ↓
+Spec Agent drafts SpecCapsule
+          ↓
+human/adversary review
+          ↓
+LOCK SpecCapsule
+          ↓
+Implementation Agent writes pricing.ps
+          ↓
+differential tests vs existing TS
+          ↓
+Proof Agent discharges selected obligations
+          ↓
+PSKernel check
+          ↓
+psc package
+          ↓
+ordinary JS + .d.ts + evidence
+          ↓
+replace TS import
+~~~
+
+The old implementation may remain as a differential oracle until confidence is sufficient.
+
+This is much more achievable than “AI rewrites my whole web app”.
+
+---
+
+## 121. Human-first migration workflow
+
+The same migration must work without AI.
+
+~~~text
+1. identify one TS module
+2. record public interface + expected behavior
+3. write equivalent .ps module
+4. use existing tests as black-box regression
+5. add contracts if useful
+6. prove selected properties
+7. compile package
+8. switch import
+~~~
+
+AI merely accelerates steps.
+
+This makes the product resilient to model quality, cost, availability, policy, and hardware.
+
+---
+
+## 122. VEF-Core underneath mainstream adoption
+
+The user-facing Trust Layer and VEF-Core reinforce one another.
+
+~~~text
+                 JS/TS application
+                       │
+              ProofScript module
+                       │
+                 package imports
+                       │
+               ProofScript ecosystem
+                       ▲
+                       │
+                    VEF-Core
+          ┌────────────┼────────────┐
+          │            │            │
+       foreign       native      generated
+       bindings      ports       families
+~~~
+
+Ordinary users benefit from VEF-Core even when they never run Forge themselves.
+
+This resembles TypeScript's strongest ecosystem strategy:
+
+> consume the ecosystem immediately rather than requiring it to be recreated first.
+
+---
+
+## 123. Why not build ProofScript's own web framework first?
+
+A new framework creates simultaneous competition against:
+
+- React;
+- Next;
+- Vue;
+- Svelte;
+- Angular;
+- Vite/build infrastructure;
+- mature component ecosystems.
+
+That does not exploit ProofScript's strongest differentiation.
+
+The Trust Layer instead makes those frameworks **distribution channels** for ProofScript packages.
+
+A ProofScript-native application framework remains a later possibility after:
+
+- Task/Stream/Resource semantics stabilize;
+- platform libraries mature;
+- native package reuse is strong;
+- users demonstrate demand.
+
+---
+
+## 124. Why this is more useful than a pure verification language
+
+The product gives several user types value:
+
+### User 1 — ordinary JS developer
+
+Consumes a ProofScript-produced package from npm.
+
+No proof knowledge required.
+
+### User 2 — TypeScript application developer
+
+Moves one error-prone business/domain module to ProofScript.
+
+### User 3 — package author
+
+Publishes JS + `.d.ts` + optional evidence.
+
+### User 4 — security/fintech developer
+
+Uses contracts/proofs aggressively.
+
+### User 5 — AI-heavy developer
+
+Uses a cloud/local coding agent with ProofScript checker feedback.
+
+### User 6 — privacy-sensitive developer
+
+Runs a local open-source agent and model entirely offline.
+
+### User 7 — formal methods expert
+
+Builds theorem libraries, tactics, generators, and high-assurance packages.
+
+One architecture serves these users at different assurance depths.
+
+---
+
+## 125. Product commands
+
+A coherent eventual surface might be:
+
+~~~text
+psc init
+psc check
+psc build
+psc watch
+psc test
+
+psc spec
+psc verify
+psc audit
+
+psc bridge
+psc package
+psc publish
+
+psc agent serve
+psc agent init
+~~~
+
+Do not make every command mandatory.
+
+The ordinary web developer may use only:
+
+~~~text
+psc watch
+psc test
+~~~
+
+while a verification-heavy package may use the whole stack.
+
+---
+
+## 126. Web developer reference application
+
+A reference application should use an incumbent framework.
+
+Recommended:
+
+~~~text
+React/Vite or Next frontend
++
+Node API/server
++
+ordinary npm dependencies
++
+one ProofScript domain package
+~~~
+
+ProofScript package owns something meaningful such as:
+
+- cart/pricing rules;
+- permissions;
+- validation/state transitions.
+
+Demonstrate:
+
+1. application runs with ordinary JS tooling;
+2. ProofScript package exports accurate `.d.ts`;
+3. source maps/debugging work;
+4. ordinary TS tests call the package;
+5. selected properties have checked proofs;
+6. local agent can modify the module while checker/tests remain authoritative;
+7. app works equally with AI disabled.
+
+This is a much stronger adoption demo than a standalone ProofScript toy app.
+
+---
+
+## 127. Ecosystem bridge order for web use
+
+Recommended order:
+
+### B0 — native package output
+
+ProofScript → standard ESM + `.d.ts`.
+
+### B1 — manually declared foreign bindings
+
+Enough for first experiments.
+
+### B2 — deterministic WIT/OpenAPI/JSON Schema adapters
+
+More structured than arbitrary TS.
+
+### B3 — bounded `.d.ts` importer
+
+Support common:
+
+- functions;
+- primitives;
+- records;
+- arrays;
+- option-like shapes;
+- callbacks;
+- Promise adapters;
+- enums/unions where modeled safely.
+
+Reject unsupported dynamic patterns.
+
+### B4 — package characterization tools
+
+Generate tests/differential harnesses for foreign packages.
+
+### B5 — deeper npm coverage
+
+Add advanced forms only from real package demand.
+
+Do not make arbitrary TypeScript type-system parity a prerequisite.
+
+---
+
+## 128. Performance policy for web adoption
+
+For most domain/business logic, the first requirement is:
+
+> generated code must be fast enough not to create a visible regression.
+
+Do not require C/Rust performance.
+
+Track:
+
+- bundle size;
+- startup cost;
+- hot-path runtime;
+- allocation behavior;
+- bridge overhead;
+- compile/watch latency.
+
+ProofScript verification should not require a heavyweight runtime in the deployed JS package merely to preserve proof artifacts.
+
+Proof-only information should erase where semantically valid.
+
+---
+
+## 129. Mainstream-product feasibility score
+
+Target: JS/TS/web developers using existing frameworks.
+
+| Dimension | Weight | Score /10 |
+|---|---:|---:|
+| target-user value | 12 | 9.4 |
+| problem/solution fit | 10 | 9.3 |
+| incremental adoption / switching cost | 12 | 9.7 |
+| npm/JS ecosystem leverage | 10 | 9.7 |
+| usefulness without AI | 8 | 9.2 |
+| optional local/open AI practicality | 7 | 8.8 |
+| assurance differentiation | 10 | 9.5 |
+| architecture fit with pskernel/VEF-Core | 10 | 9.5 |
+| implementation-scope feasibility | 8 | 8.9 |
+| web developer UX potential | 5 | 9.0 |
+| performance practicality | 4 | 9.0 |
+| long-term durability | 4 | 9.2 |
+| **Weighted combined score** | **100** | **9.27 / 10** |
+
+### Separate headline scores
+
+~~~text
+Vision / desirability:          9.35 / 10
+Architecture feasibility:       9.18 / 10
+Combined:                       9.27 / 10
+Architecture evidence:          ~7.8 / 10
+Current ProofScript-specific
+product evidence:               ~4.2 / 10
+~~~
+
+The last number matters.
+
+The product is still to be built.
+
+---
+
+## 130. Why >9 is defensible for this vision
+
+The vision deliberately reuses mature infrastructure:
+
+- npm/package distribution;
+- standard ESM;
+- TypeScript declaration files;
+- incumbent web frameworks;
+- existing JS runtimes;
+- existing open-source AI agents;
+- local model servers using OpenAI-compatible APIs;
+- Lean proof infrastructure;
+- PSC/PSKernel/CheckedCore/VerifiedIR;
+- VEF-Core package-generation architecture.
+
+The first product does **not** require:
+
+- a new UI framework;
+- a new browser runtime;
+- a new package registry;
+- a frontier proprietary model;
+- general autonomous software synthesis;
+- complete npm formal verification;
+- a fully formally verified backend.
+
+This drastically lowers risk.
+
+---
+
+## 131. Research evidence for local/open agent integration
+
+Current agent ecosystems already demonstrate the integration style ProofScript needs:
+
+### Qwen Code
+
+- open-source coding agent;
+- terminal workflow;
+- custom OpenAI-compatible providers;
+- supports local servers including Ollama, vLLM, and LM Studio;
+- project-level instruction files and agent configuration.
+
+Reference:
+
+- https://qwenlm.github.io/qwen-code-docs/en/users/configuration/model-providers/
+
+### Continue
+
+- open-source IDE/CLI coding-agent tooling;
+- documents offline use with local models;
+- model/rule/tool configuration is externalized.
+
+References:
+
+- https://docs.continue.dev/
+- https://docs.continue.dev/guides/running-continue-without-internet
+
+### Aider
+
+- git-oriented open-source coding workflow;
+- supports local models through Ollama and LM Studio;
+- emphasizes repository maps, diffs, tests, and commits.
+
+References:
+
+- https://aider.chat/docs/
+- https://aider.chat/docs/llms/ollama.html
+
+### OpenHands
+
+- open-source agent platform;
+- supports locally hosted models;
+- its documentation demonstrates that capable local agentic coding currently benefits from high-memory hardware.
+
+Reference:
+
+- https://github.com/OpenHands/docs/blob/main/openhands/usage/llms/local-llms.mdx
+
+### Mistral local coding models
+
+Mistral documents offline coding-agent use with locally served open models and OpenAI-compatible endpoints, while also showing the current hardware tradeoff.
+
+Reference:
+
+- https://docs.mistral.ai/vibe/code/cli/offline-models
+
+### Design consequence
+
+ProofScript should integrate through standardized deterministic tools and local APIs rather than lock the product to one of these agents.
+
+---
+
+## 132. Research evidence for JS/TS adoption mechanics
+
+TypeScript explicitly prioritizes preserving JavaScript runtime behavior, recognizable JS output, cross-platform use, and ecosystem compatibility rather than replacing the runtime ecosystem.
+
+TypeScript declaration files are designed to ship alongside ordinary npm packages.
+
+Kotlin demonstrates the value of module-by-module migration while retaining Java/JVM infrastructure.
+
+Flutter demonstrates the opposite adoption pattern: a language can gain pull from a compelling framework, but ProofScript currently gains more leverage by using existing web frameworks as distribution.
+
+References:
+
+- https://github.com/Microsoft/TypeScript/wiki/TypeScript-Design-Goals
+- https://www.typescriptlang.org/docs/handbook/declaration-files/publishing.html
+- https://kotlinlang.org/docs/mixing-java-kotlin-intellij.html
+- https://kotlinlang.org/docs/java-interop.html
+- https://dart.dev/multiplatform-apps
+- https://vite.dev/guide/api-plugin.html
+
+---
+
+## 133. New recommended product sequence
+
+### W0 — ordinary package contract
+
+Prove PSC can reliably emit a consumable JS package with accurate declarations/source maps.
+
+### W1 — local workspace adoption
+
+Add one ProofScript package to an existing TypeScript web project.
+
+No AI.
+
+### W2 — verification UX
+
+Make contracts, proof status, assumptions, and audit output understandable to ordinary developers.
+
+### W3 — Bridge subset
+
+Import enough npm/TS APIs for the reference project.
+
+### W4 — agent interface
+
+Expose deterministic compiler/spec/proof/audit tools through CLI JSON/MCP/stdio.
+
+Integrate at least two existing open-source agents.
+
+### W5 — fully local workflow
+
+Demonstrate one agent with a local model server and no source/prompt network egress.
+
+### W6 — VEF-Core packages
+
+Consume/generated verified packages in the same reference web app.
+
+### W7 — migration experiment
+
+Move an existing TS domain module manually and with AI; compare effort and maintainability.
+
+### W8 — broader web ecosystem
+
+Only after evidence, deepen bundler/framework integrations.
+
+---
+
+## 134. Falsification gates
+
+This vision should be downgraded if:
+
+### T1 — package friction
+
+Consuming a ProofScript module from TS is materially harder than an ordinary workspace/npm package.
+
+### T2 — source-map/debugging failure
+
+Developers cannot debug generated JS back to meaningful ProofScript source.
+
+### T3 — bridge burden
+
+Common npm dependencies require excessive handwritten binding work.
+
+### T4 — verification burden
+
+Meaningful contracts/proofs cost more than the target audience will tolerate.
+
+### T5 — no-AI usability failure
+
+Manual ProofScript development is unpleasant enough that AI becomes mandatory.
+
+### T6 — local-agent mismatch
+
+Offline agents are too weak for useful bounded tasks even with strong checker feedback.
+
+This would not invalidate ProofScript; it would remove the local-agent product claim.
+
+### T7 — performance/bundle regression
+
+ProofScript modules cause unacceptable runtime/bundle costs for typical domain logic.
+
+### T8 — evidence irrelevance
+
+Developers do not understand or value the assurance information enough to affect adoption.
+
+---
+
+## 135. Revised mainstream vision
+
+The strongest current adoption strategy is:
+
+~~~text
+              existing JS/TS ecosystem
+                       │
+                       │ keep
+                       ▼
+          React / Next / Vite / Node / npm
+                       │
+                ordinary imports
+                       │
+                       ▼
+              ProofScript packages
+                       │
+            typed → specified → verified
+                       │
+           PSKernel / evidence graph
+                       │
+          ┌────────────┴────────────┐
+          ▼                         ▼
+      VEF-Core                  Agent Interface
+ ecosystem acceleration     optional local/cloud AI
+~~~
+
+The immediate product does not ask developers to abandon JavaScript.
+
+It gives them a new place to put the code where stronger guarantees matter.
+
+This is currently the best >9/10 vision/feasibility combination found for making ProofScript useful to mainstream web developers with technology available today.
 
 
 # Final identity

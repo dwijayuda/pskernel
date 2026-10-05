@@ -25,6 +25,7 @@
     "leading-dot-term-constructor",
     "untyped-lambda-binder",
     "untyped-lambda-let",
+    "untyped-match-let",
     "untyped-numeric-choice-let",
     "layout-let-sequencing"
   ],

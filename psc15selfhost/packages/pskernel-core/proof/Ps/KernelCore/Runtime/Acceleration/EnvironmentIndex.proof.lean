@@ -187,3 +187,102 @@ theorem psKernelEnvironmentIndexFind_build_cons
             (psKernelEnvironmentIndexBuild rest)
             (psKernelEnvironmentNameHash
               (psKernelConstantInfoName info)))))
+
+
+theorem psKernelEnvironmentIndexFind_insert_has_head
+    (index : PsKernelEnvironmentIndex)
+    (info : PsKernelConstantInfo) :
+    ∃ rest : List PsKernelConstantInfo,
+      psKernelEnvironmentIndexFind
+          (psKernelEnvironmentIndexInsert index info)
+          (psKernelConstantInfoName info) =
+        List.cons info rest := by
+  cases index with
+  | empty =>
+      exact ⟨List.nil, rfl⟩
+  | small constants =>
+      cases h :
+          Nat.ble
+            (psKernelEnvironmentIndexListLength
+              (List.cons
+                info
+                (psKernelEnvironmentIndexRemoveName
+                  (psKernelConstantInfoName info)
+                  constants)))
+            psKernelEnvironmentIndexSmallLimit with
+      | false =>
+          refine ⟨
+            psKernelEnvironmentIndexRemoveName
+              (psKernelConstantInfoName info)
+              (psKernelEnvironmentIndexFindWorker
+                16
+                (psKernelEnvironmentIndexBuild
+                  (psKernelEnvironmentIndexRemoveName
+                    (psKernelConstantInfoName info)
+                    constants))
+                (psKernelEnvironmentNameHash
+                  (psKernelConstantInfoName info))),
+            ?_⟩
+          simpa [psKernelEnvironmentIndexInsert, h] using
+            psKernelEnvironmentIndexFind_build_cons
+              info
+              (psKernelEnvironmentIndexRemoveName
+                (psKernelConstantInfoName info)
+                constants)
+      | true =>
+          refine ⟨
+            psKernelEnvironmentIndexRemoveName
+              (psKernelConstantInfoName info)
+              constants,
+            ?_⟩
+          simp [
+            psKernelEnvironmentIndexInsert,
+            h,
+            psKernelEnvironmentIndexFind
+          ]
+  | bucket constants =>
+      refine ⟨
+        psKernelEnvironmentIndexRemoveName
+          (psKernelConstantInfoName info)
+          (psKernelEnvironmentIndexFindWorker
+            16
+            (PsKernelEnvironmentIndex.bucket constants)
+            (psKernelEnvironmentNameHash
+              (psKernelConstantInfoName info))),
+        ?_⟩
+      simpa [psKernelEnvironmentIndexInsert] using
+        psKernelEnvironmentIndexFind_setWorker_same_name
+          (PsKernelEnvironmentIndex.bucket constants)
+          (psKernelConstantInfoName info)
+          (List.cons
+            info
+            (psKernelEnvironmentIndexRemoveName
+              (psKernelConstantInfoName info)
+              (psKernelEnvironmentIndexFindWorker
+                16
+                (PsKernelEnvironmentIndex.bucket constants)
+                (psKernelEnvironmentNameHash
+                  (psKernelConstantInfoName info)))))
+  | branch left right =>
+      refine ⟨
+        psKernelEnvironmentIndexRemoveName
+          (psKernelConstantInfoName info)
+          (psKernelEnvironmentIndexFindWorker
+            16
+            (PsKernelEnvironmentIndex.branch left right)
+            (psKernelEnvironmentNameHash
+              (psKernelConstantInfoName info))),
+        ?_⟩
+      simpa [psKernelEnvironmentIndexInsert] using
+        psKernelEnvironmentIndexFind_setWorker_same_name
+          (PsKernelEnvironmentIndex.branch left right)
+          (psKernelConstantInfoName info)
+          (List.cons
+            info
+            (psKernelEnvironmentIndexRemoveName
+              (psKernelConstantInfoName info)
+              (psKernelEnvironmentIndexFindWorker
+                16
+                (PsKernelEnvironmentIndex.branch left right)
+                (psKernelEnvironmentNameHash
+                  (psKernelConstantInfoName info)))))

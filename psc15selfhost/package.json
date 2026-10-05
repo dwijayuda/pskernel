@@ -151,6 +151,8 @@
     "verify:compiler": "node scripts/compare-selfhost.mjs dist/bootstrap/packages/compiler/index.ts dist/selfhost/packages/compiler/index.ts",
     "build:lake": "lake build",
     "build:native-psc": "lake build psc",
+    "build:kernel-core-provider": "lake build psc_kernel_core_provider psc_kernel_core_provider_tests",
+    "test:kernel-core-provider-parity": "node scripts/pskernel-core-provider-parity.mjs --output .lake/m4-provider-parity.json",
     "build:native-kernel": "node packages/pskernel-lean/scripts/build-native-slim.mjs",
     "build:native-toolchain": "npm run build:native-psc && npm run build:native-kernel && node scripts/build-native-toolchain-bundle.mjs",
     "psc:native": "lake exe psc --",

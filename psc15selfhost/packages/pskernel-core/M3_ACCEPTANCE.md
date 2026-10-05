@@ -65,6 +65,18 @@ The shared loops use sixteen prebuilt inputs, 100 warmup calls and a fresh kerne
 session per measured call. Naturals above 2^53 remain exact. Guards cover invalid
 terms/declarations, exhaustion, 729 expression-equality pairs and 54 zero lifts.
 
+The corrected schema-3 harness runs each JS admission case in a separate fresh
+process after module import and the same semantic guards. The original mixed
+worker ran tiny admissions after allocation-heavy checking loops and after the
+128-declaration batch; a GC-overlap diagnostic reproduced cleanup from earlier
+work inside a later request's timing. See `M4_TIMING_DIAGNOSIS.md`.
+No elapsed time is subtracted, no GC is forced or disabled, and no sample is
+discarded. Natural GC during the isolated request remains inside its timing.
+Import and peak-RSS gates take the maximum across the workload worker and all
+three admission workers per sample. The numerical ceilings and three-sample
+maximum rule are unchanged. This measures isolated requests after guards;
+legacy mixed-workload tail timings are not directly comparable.
+
 This accepts JS for the named small Node fixtures and preserves the PSC/backend-ts
 path. It does not claim browser responsiveness, bulk checking competitiveness,
 native-speed JS, a complete JS provider adapter, or npm/browser release readiness.

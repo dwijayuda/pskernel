@@ -117,6 +117,13 @@ def psWasmSmokeStringEq
     []
     [left, right]
 
+def psWasmSmokeIntRepr
+    (value : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.intRepr
+    []
+    [value]
+
 def psWasmSmokeU32Literal (value : Int) : PsVerifiedIrExpr :=
   PsVerifiedIrExpr.literal
     (PsVerifiedIrLiteral.machineInteger
@@ -1589,6 +1596,61 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
                 PsVerifiedIrExpr.literal
                 (PsVerifiedIrLiteral.integer (42))
               ]
+      },
+
+      {
+        name := "intReprZeroExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          psWasmSmokeStringEq
+            (psWasmSmokeIntRepr
+              (PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer 0)))
+            (psWasmSmokeStringLiteral "0")
+      },
+      {
+        name := "intReprPositiveExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          psWasmSmokeStringEq
+            (psWasmSmokeIntRepr
+              (PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer 42)))
+            (psWasmSmokeStringLiteral "42")
+      },
+      {
+        name := "intReprNegativeExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          psWasmSmokeStringEq
+            (psWasmSmokeIntRepr
+              (PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer (-42))))
+            (psWasmSmokeStringLiteral "-42")
+      },
+      {
+        name := "intReprLargeExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          psWasmSmokeStringEq
+            (psWasmSmokeIntRepr
+              (PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.integer
+                  (-1208925819614629174706176))))
+            (psWasmSmokeStringLiteral
+              "-1208925819614629174706176")
       },
 
       {

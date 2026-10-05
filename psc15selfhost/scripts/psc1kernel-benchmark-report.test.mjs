@@ -46,8 +46,20 @@ test('rejects corpus drift between samples', () => {
 });
 
 test('caps sample count before launching a process', () => {
-  for (const count of [0, 6, NaN, 1.5]) {
-    assert.throws(() => runBenchmark('must-not-run', count, 'must-not-write'), /1 to 5/);
+  for (const count of [0, 1, 2, 4, 6, NaN, 1.5]) {
+    assert.throws(() => runBenchmark('must-not-run', count, 'must-not-write'), /exactly 3/);
   }
   assert.throws(() => summarizeSamples([]), /1 to 5/);
+});
+
+test('requires the declared admission work count even when hit counts look successful', () => {
+  assert.throws(() => validateSample(fixture.replace('iterations=100', 'iterations=10')), /Wrong workload size/);
+});
+
+test('records input-dependence guards only for a unique complete success marker', () => {
+  const marker = 'PSKERNEL_ADMISSION_INPUT_GUARDS: PASS variants=16\n';
+  assert.equal(validateSample(fixture).admissionInputGuards, false);
+  assert.equal(validateSample(fixture + marker).admissionInputGuards, true);
+  assert.equal(validateSample(fixture + marker + marker).admissionInputGuards, false);
+  assert.equal(validateSample(fixture + marker.replace('16', '1')).admissionInputGuards, false);
 });

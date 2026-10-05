@@ -8,6 +8,8 @@ on:
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/packages/backend-ts/**
       - psc15selfhost/scripts/psc1kernel-cross-runtime*
+      - psc15selfhost/scripts/psc1kernel-m3-*
+      - psc15selfhost/scripts/psc1kernel-measure.mjs
       - psc15selfhost/test/KernelCore/Bench/CrossRuntime.lean
       - psc15selfhost/test/PsKernelCrossRuntimeBench.lean
       - psc15selfhost/lakefile.lean
@@ -23,7 +25,7 @@ concurrency:
 
 jobs:
   bounded-cross-runtime:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:
       run:
@@ -38,7 +40,7 @@ jobs:
           node-version: 22
       - name: Test evidence validation and verify existing WASM bytes
         run: |
-          node --test scripts/psc1kernel-cross-runtime-report.test.mjs
+          node --test scripts/psc1kernel-cross-runtime-report.test.mjs scripts/psc1kernel-m3-budgets.test.mjs
           node packages/pskernel-lean-wasm/host/verify-prebuilt.mjs
       - name: Install pinned compilers
         run: |

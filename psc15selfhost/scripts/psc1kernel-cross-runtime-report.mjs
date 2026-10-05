@@ -5,6 +5,8 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { iterations, requestCases, workloads } from './psc1kernel-cross-runtime-corpus.mjs';
+import { assessBudgets, budgetMarkdown, requireBudgetPass } from './psc1kernel-m3-budgets.mjs';
+import { runMeasuredNative } from './psc1kernel-measure.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const positive = value => Number.isSafeInteger(value) && value > 0;
@@ -13,6 +15,7 @@ export function validateWorker(sample, runtime) {
   if (runtime === 'js') {
     assert.equal(sample.guards, true);
     assert.ok(positive(sample.importNs));
+    assert.ok(positive(sample.peakRssKiB));
     assert.equal(sample.rows.length, workloads.length);
     assert.deepEqual([...sample.rows.map(x => x.name)].sort(), [...workloads].sort());
     for (const row of sample.rows) {
@@ -60,19 +63,34 @@ function run(executable, args, log) {
   return { stdout: result.stdout, processNs };
 }
 export function runCrossRuntime(generated, native, count, output) {
-  assert.ok(Number.isInteger(count) && count >= 1 && count <= 3, 'Require 1 to 3 samples');
+  assert.equal(count, 3, 'Require exactly 3 M3 samples');
   mkdirSync(path.dirname(output), { recursive: true });
   const samples = [];
   for (let i = 0; i < count; i++) {
     const jsRun = run(process.execPath, [path.join(here, 'psc1kernel-cross-runtime-worker.mjs'), 'js', generated, String(i)], `${output}.${i}.js.log`);
     const js = validateWorker(JSON.parse(jsRun.stdout), 'js');
-    const nativeNs = workloads.map((_, kind) => parseNative(run(native, [String(kind)], `${output}.${i}.native-${kind}.log`).stdout, kind));
+    const nativeRuns = workloads.map((_, kind) => runMeasuredNative(native, [String(kind)], `${output}.${i}.native-${kind}.log`));
+    const nativeNs = nativeRuns.map((r, kind) => parseNative(r.stdout, kind));
     const wasmRun = run(process.execPath, [path.join(here, 'psc1kernel-cross-runtime-worker.mjs'), 'wasm'], `${output}.${i}.wasm.log`);
     const wasm = validateWorker(JSON.parse(wasmRun.stdout), 'wasm');
-    samples.push({ js, nativeNs, wasm, jsProcessNs: jsRun.processNs, wasmProcessNs: wasmRun.processNs });
+    samples.push({ js, nativeNs, nativePeakRssKiB: Math.max(...nativeRuns.map(x => x.peakRssKiB)),
+      wasm, jsProcessNs: jsRun.processNs, wasmProcessNs: wasmRun.processNs });
   }
+  const observations = {};
+  for (const [kind, name] of workloads.entries()) {
+    observations[`native.${name}`] = samples.map(s => s.nativeNs[kind] / 1e6);
+    observations[`js.${name}`] = samples.map(s => s.js.rows.find(r => r.kind === kind).ns / 1e6);
+    observations[`js.firstCall.${name}`] = samples.map(s => s.js.rows.find(r => r.kind === kind).firstCallNs / 1e6);
+  }
+  observations['native.peakRss'] = samples.map(s => s.nativePeakRssKiB / 1024);
+  observations['js.peakRss'] = samples.map(s => s.js.peakRssKiB / 1024);
+  observations['js.import'] = samples.map(s => s.js.importNs / 1e6);
+  for (const [index, name] of ['admit1', 'admit128', 'reject4'].entries()) {
+    observations[`js.${name}`] = samples.map(s => s.js.admissions[index].ns / 1e6);
+  }
+  const budgetResult = assessBudgets('cross', observations);
   const report = {
-    schemaVersion: 1, commit: process.env.GITHUB_SHA ?? null, samples,
+    schemaVersion: 2, budgets: budgetResult, commit: process.env.GITHUB_SHA ?? null, samples,
     node: process.version, arch: process.arch, platform: process.platform,
     generatedSha256: createHash('sha256').update(readFileSync(generated)).digest('hex'),
     iterations, kernelCache: 'cold per operation', engineWarmup: 100,
@@ -105,13 +123,15 @@ export function runCrossRuntime(generated, native, count, output) {
     'Admission columns are different boundaries, not a kernel speed ratio: WASM includes artifact verification, subprocess startup, parsing, provider prelude and checking. JS calls the fixture directly with its smaller test environment.',
     'The health request is a separate observation, not a startup value subtracted from checks. Both execute matching declaration bodies, including exact >2^53 naturals and an ill-typed rejection.',
     'No WASM rebuild, full compiler/kernel fixed point, or large proof-library replay. This is bounded Node evidence, not browser/provider readiness.', '',
+    budgetMarkdown(budgetResult),
   ].join('\n');
   writeFileSync(`${output}.md`, markdown);
   process.stdout.write(markdown);
+  requireBudgetPass(budgetResult);
   return report;
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const [generated, native, count, output] = process.argv.slice(2);
-  if (!output) throw Error('Usage: <generated.js> <native-binary> <samples:1..3> <output-prefix>');
+  if (!output) throw Error('Usage: <generated.js> <native-binary> <samples:3> <output-prefix>');
   runCrossRuntime(path.resolve(generated), path.resolve(native), Number(count), path.resolve(output));
 }

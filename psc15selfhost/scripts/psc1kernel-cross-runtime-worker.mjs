@@ -38,6 +38,8 @@ if (mode === 'js') {
     assert.equal(accepted, !bad);
     return { count, bad, accepted, ns };
   });
+  // Node reports maximum resident set size in KiB, including import/guards.
+  report.peakRssKiB = process.resourceUsage().maxRSS;
 } else if (mode === 'wasm') {
   const { createKernel } = await import('../packages/pskernel-lean-wasm/index.mjs');
   const healthStart = process.hrtime.bigint();

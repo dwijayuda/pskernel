@@ -1,7 +1,8 @@
-import { spawnSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assessBudgets, budgets, budgetMarkdown, requireBudgetPass } from './psc1kernel-m3-budgets.mjs';
+import { runMeasuredNative } from './psc1kernel-measure.mjs';
 
 // Expected successful operations in the fixed, deliberately small native corpus.
 // A fast failure is never a performance improvement.
@@ -82,6 +83,11 @@ export function validateSample(log) {
   for (const [name, field, expected] of cases) {
     if (rows.get(name)?.[field] !== expected) throw new Error(`Incomplete/failed benchmark: ${name}, expected ${field}=${expected}`);
   }
+  for (const name of ['inductive_admission_pskernel_ns', 'indexed_inductive_admission_pskernel_ns',
+    'mutual_inductive_admission_pskernel_ns', 'nested_inductive_admission_pskernel_ns', 'nested_wide_admission_pskernel_ns']) {
+    const expected = name === 'nested_wide_admission_pskernel_ns' ? '50' : '100';
+    if (rows.get(name)?.iterations !== expected) throw Error(`Wrong workload size: ${name}`);
+  }
   const ratios = {};
   for (const [name, [numerator, denominator]] of Object.entries(comparisons)) {
     if (!(timings[numerator] > 0 && timings[denominator] > 0)) throw new Error(`Missing comparison timings: ${name}`);
@@ -89,7 +95,9 @@ export function validateSample(log) {
   }
   const fingerprint = [...rows].map(([name, fields]) => [name,
     Object.fromEntries(Object.entries(fields).filter(([key]) => !key.endsWith('_ns')))]);
-  return { timings, ratios, fingerprint, profiles };
+  const guardLines = log.split(/\r?\n/).filter(x => x.startsWith('PSKERNEL_ADMISSION_INPUT_GUARDS:'));
+  const admissionInputGuards = guardLines.length === 1 && guardLines[0] === 'PSKERNEL_ADMISSION_INPUT_GUARDS: PASS variants=16';
+  return { timings, ratios, fingerprint, profiles, admissionInputGuards };
 }
 
 function statistics(values) {
@@ -121,33 +129,39 @@ export function summarizeSamples(samples) {
 }
 
 export function runBenchmark(binary, count, output) {
-  if (!Number.isInteger(count) || count < 1 || count > 5) throw new Error('Require 1 to 5 bounded samples');
+  if (count !== 3) throw new Error('Require exactly 3 M3 samples');
   mkdirSync(path.dirname(output), { recursive: true });
   const samples = [];
   for (let index = 0; index < count; index++) {
-    const result = spawnSync(binary, [], { encoding: 'utf8', timeout: 30_000, maxBuffer: 2 * 1024 * 1024 });
-    writeFileSync(`${output}.sample-${index + 1}.log`, (result.stdout ?? '') + (result.stderr ?? ''));
-    if (result.error || result.status !== 0) throw new Error(`Benchmark sample failed: ${result.error ?? result.status}`);
-    samples.push(validateSample(result.stdout));
+    const result = runMeasuredNative(binary, [], `${output}.sample-${index + 1}.log`);
+    const sample = validateSample(result.stdout);
+    if (!sample.admissionInputGuards) throw Error('Missing runtime admission-input guards');
+    samples.push({ ...sample, peakRssKiB: result.peakRssKiB });
   }
-  const report = { ...summarizeSamples(samples), commit: process.env.GITHUB_SHA ?? null };
+  const observations = Object.fromEntries(Object.keys(budgets.native).map(name => [name,
+    samples.map(x => name === 'peakRss' ? x.peakRssKiB / 1024 : x.timings[name] / 1e6)]));
+  const budgetResult = assessBudgets('native', observations);
+  const report = { ...summarizeSamples(samples), schemaVersion: 2, corpusVersion: 'runtime-admission-inputs-v2',
+    budgets: budgetResult, commit: process.env.GITHUB_SHA ?? null };
   writeFileSync(`${output}.json`, JSON.stringify(report, null, 2) + '\n');
   const markdown = [
     '## PSKernel native benchmark', '',
-    `Samples: ${count}; each process limited to 30 seconds. Timings are observations, not release guarantees.`, '',
+    `Samples: ${count}; each process limited to 30 seconds. Fixed workload ceilings are checked below; Lean ratios are informational.`, '',
     '| Workload | Median PSKernel / Lean | Range |', '| --- | ---: | ---: |',
     ...Object.entries(report.pskernelOverLean).map(([name, value]) =>
       `| ${name} | ${value.median.toFixed(2)}x | ${value.min.toFixed(2)}–${value.max.toFixed(2)}x |`), '',
     'All benchmark success counts validated. Full compiler/kernel fixed-point generation was not run.', '',
     'Untimed cache diagnostics (first sample):', '', '```text', ...samples[0].profiles, '```', '',
+    budgetMarkdown(budgetResult),
   ].join('\n');
   writeFileSync(`${output}.md`, markdown);
   process.stdout.write(markdown);
+  requireBudgetPass(budgetResult);
   return report;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
-  if (args.length !== 3) throw new Error('Usage: node scripts/psc1kernel-benchmark-report.mjs <binary> <samples:1..5> <output-prefix>');
+  if (args.length !== 3) throw new Error('Usage: node scripts/psc1kernel-benchmark-report.mjs <binary> <samples:3> <output-prefix>');
   runBenchmark(path.resolve(args[0]), Number(args[1]), path.resolve(args[2]));
 }

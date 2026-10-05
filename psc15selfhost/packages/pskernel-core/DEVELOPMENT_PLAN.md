@@ -18,6 +18,10 @@
   - completion concerns production architecture; Phase D and provider promotion
     remain separately gated. See `ARCHITECTURE_MIGRATION_REPORT.md`.
 - **Phase C — Competitive performance: ACTIVE ONLY WHEN MEASURED.**
+  - M3 now uses the explicit small-workload latency/memory budgets in
+    `M3_ACCEPTANCE.md` and `M3_WORKLOAD_BUDGETS.json`; verification is pending.
+    Native is the preferred CLI/server deployment target; broad JS optimization
+    is deferred. Relative speed against Lean is informational, not an exit gate.
   - current pass is cost-bounded: three native and Node benchmark samples,
     ordinary conformance/portable gates, and measured cache-pressure diagnostics;
     no full compiler/kernel fixed-point generation or large proof-library replay.
@@ -29,8 +33,8 @@
     same-runner comparison showed no representative gain; production cache
     behavior is retained.
   - fresh generated-JavaScript measurements now exist for a small shared Node/native
-    corpus. They expose a large runtime gap; broader JS throughput and M3 remain
-    open. Lean WASM full-request timings are reported separately because its
+    corpus. They expose a large runtime gap; broader JS throughput remains outside
+    the bounded M3 scope. Lean WASM full-request timings are reported separately because its
     subprocess/prelude/JSON boundary differs from direct JS fixture calls.
   - a measured zero-lifting shortcut is retained: paired Node samples reduced
     beta-defeq time by about 38% and beta-WHNF time by about 7%, with checked
@@ -312,9 +316,9 @@ Compare:
 - PSKernel native;
 - PSKernel JS.
 
-Initial native target:
+Historical optimization guide (not an M3 release gate):
 
-- usable within roughly 1.5–2x Lean on representative workloads.
+- approximately 1.5–2x Lean where practical.
 
 Longer-term target:
 
@@ -322,14 +326,16 @@ Longer-term target:
 
 JS target:
 
-- portable and fast enough for npm/browser use; it need not beat native Lean.
+- preserve the portable artifact and meet the named small Node workload budgets;
+  browser and broader npm/provider readiness are separate deployment work.
 
 ### Phase C exit gates
 
 - semantic/conformance gates unchanged;
 - measured performance regression tests exist;
 - environment/cache improvements show real workload gains;
-- native performance is competitive enough for intended deployment;
+- all native and JS ceilings in `M3_WORKLOAD_BUDGETS.json` pass on the declared
+  profile; every one of three samples meets latency and peak-memory limits;
 - JS remains portable through the PSC/backend-ts path.
 
 ## Continuous portable-source self-host gate
@@ -380,9 +386,12 @@ readability/performance gate.
 
 ### M3 — Competitive kernel
 
+Bounded acceptance scope: `M3_ACCEPTANCE.md`. Status: verification pending.
+
 - indexed environment/cache structures;
-- measured native performance near intended target;
-- JS remains practical;
+- measured native performance meets the declared CLI/server workload budgets;
+- JS meets its declared small Node workload budgets and remains portable;
+- corrected runtime-selected admission inputs and complete timing/memory evidence;
 - no semantic regressions.
 
 ### M4 — Provider-ready

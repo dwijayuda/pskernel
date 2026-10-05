@@ -3,7 +3,7 @@ import test from 'node:test';
 import { admissionRequest, iterations, requestCases, workloads } from './psc1kernel-cross-runtime-corpus.mjs';
 import { parseNative, stats, validateWorker } from './psc1kernel-cross-runtime-report.mjs';
 
-const valid = () => ({ runtime: 'js', guards: true, importNs: 10,
+const valid = () => ({ runtime: 'js', guards: true, importNs: 10, peakRssKiB: 100,
   rows: workloads.map((name, kind) => ({ name, kind, hits: iterations, ns: 100, firstCallNs: 10 })),
   admissions: requestCases.map(x => ({ ...x, accepted: !x.bad, ns: 100 })),
 });
@@ -12,7 +12,8 @@ test('complete success evidence is required', () => {
   for (const mutate of [x => x.rows.pop(), x => x.rows.push(x.rows[0]),
     x => x.rows[1] = x.rows[0], x => x.rows[0].hits--, x => x.guards = false,
     x => x.admissions[2].accepted = true, x => x.admissions.pop(),
-    x => x.admissions[0].count++, x => x.runtime = 'native']) {
+    x => x.admissions[0].count++, x => x.runtime = 'native',
+    x => delete x.peakRssKiB, x => x.peakRssKiB = 0]) {
     const value = valid(); mutate(value); assert.throws(() => validateWorker(value, 'js'));
   }
 });

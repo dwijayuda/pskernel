@@ -708,20 +708,21 @@ def main : IO Unit := do
       toString recursorLeanHits)
 
   let admissionIterations := 100
-  let leanAdmissionBase ←
-    Lean.mkEmptyEnvironment
+  let (psAdmissionBases, leanAdmissionBases) ← psKernelBenchAdmissionBases
+  psKernelBenchAdmissionInputGuards psAdmissionBases leanAdmissionBases
 
   let admissionPsStart ← IO.monoNanosNow
   let admissionPsHits ←
     psKernelBenchInductiveAdmissionLoop
       admissionIterations
+      psAdmissionBases
   let admissionPsStop ← IO.monoNanosNow
 
   let admissionLeanStart ← IO.monoNanosNow
   let admissionLeanHits ←
     psKernelBenchLeanInductiveAdmissionLoop
       admissionIterations
-      leanAdmissionBase
+      leanAdmissionBases
   let admissionLeanStop ← IO.monoNanosNow
 
   IO.println
@@ -750,13 +751,14 @@ def main : IO Unit := do
   let indexedAdmissionPsHits ←
     psKernelBenchIndexedAdmissionLoop
       indexedAdmissionIterations
+      psAdmissionBases
   let indexedAdmissionPsStop ← IO.monoNanosNow
 
   let indexedAdmissionLeanStart ← IO.monoNanosNow
   let indexedAdmissionLeanHits ←
     psKernelBenchLeanIndexedAdmissionLoop
       indexedAdmissionIterations
-      leanAdmissionBase
+      leanAdmissionBases
   let indexedAdmissionLeanStop ← IO.monoNanosNow
 
   IO.println
@@ -783,13 +785,14 @@ def main : IO Unit := do
   let mutualAdmissionPsHits ←
     psKernelBenchMutualAdmissionLoop
       mutualAdmissionIterations
+      psAdmissionBases
   let mutualAdmissionPsStop ← IO.monoNanosNow
 
   let mutualAdmissionLeanStart ← IO.monoNanosNow
   let mutualAdmissionLeanHits ←
     psKernelBenchLeanMutualAdmissionLoop
       mutualAdmissionIterations
-      leanAdmissionBase
+      leanAdmissionBases
   let mutualAdmissionLeanStop ← IO.monoNanosNow
 
   IO.println

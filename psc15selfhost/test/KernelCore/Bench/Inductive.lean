@@ -1090,19 +1090,42 @@ def psKernelBenchLeanRecInput : Lean.Expr :=
       psKernelBenchLeanRecMajor
     ]
 
+-- Prepare matching, distinct ambient environments outside the timed loops.
+-- Admission must consume a runtime-selected input, not a closed expression
+-- which Lean can lift into a shared initializer.
+def psKernelBenchAdmissionBases : IO (Array PsKernelEnvironment × Array Lean.Environment) := do
+  let mut portable := #[]
+  let mut official := #[]
+  for index in [0:16] do
+    let psName := PsKernelName.num (PsKernelName.str PsKernelName.anonymous "BenchAmbient") index
+    let leanName := Lean.Name.num (Lean.Name.str Lean.Name.anonymous "BenchAmbient") index
+    let psBase := psKernelEnvironmentAddUnchecked psKernelEnvironmentEmpty
+      (.axiomInfo { base := { name := psName, levelParams := [],
+        type := .sort (.succ .zero) }, isUnsafe := false })
+    let leanBase ← Lean.mkEmptyEnvironment
+    let .ok leanNext := Lean.Kernel.Environment.addDecl leanBase.toKernelEnv {}
+      (.axiomDecl { name := leanName, levelParams := [],
+        type := .sort (.succ .zero), isUnsafe := false })
+      | throw (IO.userError "admission ambient fixture failed")
+    portable := portable.push psBase
+    official := official.push (Lean.Environment.ofKernelEnv leanNext)
+  return (portable, official)
+
 partial def psKernelBenchInductiveAdmissionLoop
-    (iterations : Nat) :
+    (iterations : Nat) (environments : Array PsKernelEnvironment) :
     IO Nat :=
   match iterations with
   | Nat.zero =>
       pure 0
   | Nat.succ rest => do
+      let some base := environments[rest % environments.size]?
+        | throw (IO.userError "empty admission fixtures")
       let tail ←
-        psKernelBenchInductiveAdmissionLoop rest
+        psKernelBenchInductiveAdmissionLoop rest environments
       match
           psKernelAddSimpleInductive
             65536
-            psKernelEnvironmentEmpty
+            base
             psKernelBenchRecDecl
             0
             psKernelLeanNatMaxSizeDefault with
@@ -1119,16 +1142,18 @@ partial def psKernelBenchInductiveAdmissionLoop
 
 partial def psKernelBenchLeanInductiveAdmissionLoop
     (iterations : Nat)
-    (environment : Lean.Environment) :
+    (environments : Array Lean.Environment) :
     IO Nat :=
   match iterations with
   | Nat.zero =>
       pure 0
   | Nat.succ rest => do
+      let some environment := environments[rest % environments.size]?
+        | throw (IO.userError "empty admission fixtures")
       let tail ←
         psKernelBenchLeanInductiveAdmissionLoop
           rest
-          environment
+          environments
       match
           Lean.Kernel.Environment.addDecl
             environment.toKernelEnv
@@ -1148,18 +1173,20 @@ partial def psKernelBenchLeanInductiveAdmissionLoop
 
 
 partial def psKernelBenchIndexedAdmissionLoop
-    (iterations : Nat) :
+    (iterations : Nat) (environments : Array PsKernelEnvironment) :
     IO Nat :=
   match iterations with
   | Nat.zero =>
       pure 0
   | Nat.succ rest => do
+      let some base := environments[rest % environments.size]?
+        | throw (IO.userError "empty admission fixtures")
       let tail ←
-        psKernelBenchIndexedAdmissionLoop rest
+        psKernelBenchIndexedAdmissionLoop rest environments
       match
           psKernelAddSimpleInductive
             65536
-            psKernelEnvironmentEmpty
+            base
             psKernelBenchIndexedDecl
             0
             psKernelLeanNatMaxSizeDefault with
@@ -1176,16 +1203,18 @@ partial def psKernelBenchIndexedAdmissionLoop
 
 partial def psKernelBenchLeanIndexedAdmissionLoop
     (iterations : Nat)
-    (environment : Lean.Environment) :
+    (environments : Array Lean.Environment) :
     IO Nat :=
   match iterations with
   | Nat.zero =>
       pure 0
   | Nat.succ rest => do
+      let some environment := environments[rest % environments.size]?
+        | throw (IO.userError "empty admission fixtures")
       let tail ←
         psKernelBenchLeanIndexedAdmissionLoop
           rest
-          environment
+          environments
       match
           Lean.Kernel.Environment.addDecl
             environment.toKernelEnv
@@ -1203,18 +1232,20 @@ partial def psKernelBenchLeanIndexedAdmissionLoop
           pure tail
 
 partial def psKernelBenchMutualAdmissionLoop
-    (iterations : Nat) :
+    (iterations : Nat) (environments : Array PsKernelEnvironment) :
     IO Nat :=
   match iterations with
   | Nat.zero =>
       pure 0
   | Nat.succ rest => do
+      let some base := environments[rest % environments.size]?
+        | throw (IO.userError "empty admission fixtures")
       let tail ←
-        psKernelBenchMutualAdmissionLoop rest
+        psKernelBenchMutualAdmissionLoop rest environments
       match
           psKernelAddSimpleMutualInductive
             65536
-            psKernelEnvironmentEmpty
+            base
             psKernelBenchMutualDecl
             0
             psKernelLeanNatMaxSizeDefault with
@@ -1237,16 +1268,18 @@ partial def psKernelBenchMutualAdmissionLoop
 
 partial def psKernelBenchLeanMutualAdmissionLoop
     (iterations : Nat)
-    (environment : Lean.Environment) :
+    (environments : Array Lean.Environment) :
     IO Nat :=
   match iterations with
   | Nat.zero =>
       pure 0
   | Nat.succ rest => do
+      let some environment := environments[rest % environments.size]?
+        | throw (IO.userError "empty admission fixtures")
       let tail ←
         psKernelBenchLeanMutualAdmissionLoop
           rest
-          environment
+          environments
       match
           Lean.Kernel.Environment.addDecl
             environment.toKernelEnv
@@ -1265,5 +1298,35 @@ partial def psKernelBenchLeanMutualAdmissionLoop
       | .error _ =>
           pure tail
 
-
+-- Each measured loop must actually consume its environment. Re-admitting
+-- an existing declaration must fail for both implementations, for all three
+-- repaired cases. These checks run outside the performance interval.
+def psKernelBenchAdmissionInputGuards
+    (portable : Array PsKernelEnvironment) (official : Array Lean.Environment) : IO Unit := do
+  if portable.size != 16 || official.size != 16 then
+    throw (IO.userError "expected sixteen admission environments")
+  let some psBase := portable[0]? | throw (IO.userError "missing portable fixture")
+  let some leanBase := official[0]? | throw (IO.userError "missing Lean fixture")
+  for kind in [0:3] do
+    let psResult := if kind == 0 then
+        psKernelAddSimpleInductive 65536 psBase psKernelBenchRecDecl 0 psKernelLeanNatMaxSizeDefault
+      else if kind == 1 then
+        psKernelAddSimpleInductive 65536 psBase psKernelBenchIndexedDecl 0 psKernelLeanNatMaxSizeDefault
+      else
+        psKernelAddSimpleMutualInductive 65536 psBase psKernelBenchMutualDecl 0 psKernelLeanNatMaxSizeDefault
+    let .ok psOccupied := psResult | throw (IO.userError "portable admission setup failed")
+    let leanDecl := if kind == 0 then psKernelBenchLeanRecDecl
+      else if kind == 1 then psKernelBenchLeanIndexedDecl else psKernelBenchLeanMutualDecl
+    let .ok leanOccupied := Lean.Kernel.Environment.addDecl leanBase.toKernelEnv {} leanDecl
+      | throw (IO.userError "Lean admission setup failed")
+    let psHits ← if kind == 0 then psKernelBenchInductiveAdmissionLoop 1 #[psOccupied]
+      else if kind == 1 then psKernelBenchIndexedAdmissionLoop 1 #[psOccupied]
+      else psKernelBenchMutualAdmissionLoop 1 #[psOccupied]
+    let leanInputs := #[Lean.Environment.ofKernelEnv leanOccupied]
+    let leanHits ← if kind == 0 then psKernelBenchLeanInductiveAdmissionLoop 1 leanInputs
+      else if kind == 1 then psKernelBenchLeanIndexedAdmissionLoop 1 leanInputs
+      else psKernelBenchLeanMutualAdmissionLoop 1 leanInputs
+    if psHits != 0 || leanHits != 0 then
+      throw (IO.userError "admission benchmark ignored occupied input")
+  IO.println "PSKERNEL_ADMISSION_INPUT_GUARDS: PASS variants=16"
 

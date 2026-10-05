@@ -1152,24 +1152,28 @@ def psWasmLowerClosureSignatures
                     signature.codeType
                     (Prod.snd loweredRest)))
 
-def psWasmFindStructure :
-    List PsVerifiedIrStructure -> String -> Option PsVerifiedIrStructure
-  | [], _ => none
-  | structInfo :: rest, name =>
+def psWasmFindStructure
+    (structures : List PsVerifiedIrStructure)
+    (name : String) :
+    Option PsVerifiedIrStructure :=
+  match structures with
+  | List.nil => Option.none
+  | List.cons structInfo rest =>
       if psStringEq structInfo.name name then
-        some structInfo
+        Option.some structInfo
       else
         psWasmFindStructure rest name
 
 def psWasmFindStructureFieldLoop
-    (fieldName : String) :
-    Nat ->
-    List PsVerifiedIrStructureField ->
-    Option (Nat × PsVerifiedIrStructureField)
-  | _, [] => none
-  | index, field :: rest =>
+    (fieldName : String)
+    (index : Nat)
+    (fields : List PsVerifiedIrStructureField) :
+    Option (Nat × PsVerifiedIrStructureField) :=
+  match fields with
+  | List.nil => Option.none
+  | List.cons field rest =>
       if psStringEq field.name fieldName then
-        some (Prod.mk index field)
+        Option.some (Prod.mk index field)
       else
         psWasmFindStructureFieldLoop
           fieldName (Nat.add index 1) rest
@@ -1180,14 +1184,15 @@ def psWasmFindStructureField
     Option (Nat × PsVerifiedIrStructureField) :=
   psWasmFindStructureFieldLoop fieldName 0 structInfo.fields
 
-def psWasmFindRecordField :
-    List (String × PsVerifiedIrExpr) ->
-    String ->
-    Option PsVerifiedIrExpr
-  | [], _ => none
-  | field :: rest, name =>
+def psWasmFindRecordField
+    (fields : List (String × PsVerifiedIrExpr))
+    (name : String) :
+    Option PsVerifiedIrExpr :=
+  match fields with
+  | List.nil => Option.none
+  | List.cons field rest =>
       if psStringEq (Prod.fst field) name then
-        some (Prod.snd field)
+        Option.some (Prod.snd field)
       else
         psWasmFindRecordField rest name
 
@@ -1267,33 +1272,40 @@ def psWasmConstructorTypeName
     (inductiveName constructorName : String) : String :=
   String.Internal.append inductiveName (String.Internal.append "$" constructorName)
 
-def psWasmFindInductive :
-    List PsVerifiedIrInductive -> String -> Option PsVerifiedIrInductive
-  | [], _ => none
-  | inductiveInfo :: rest, name =>
+def psWasmFindInductive
+    (inductives : List PsVerifiedIrInductive)
+    (name : String) :
+    Option PsVerifiedIrInductive :=
+  match inductives with
+  | List.nil => Option.none
+  | List.cons inductiveInfo rest =>
       if psStringEq inductiveInfo.name name then
-        some inductiveInfo
+        Option.some inductiveInfo
       else
         psWasmFindInductive rest name
 
-def psWasmFindConstructor :
-    List PsVerifiedIrConstructor -> String -> Option PsVerifiedIrConstructor
-  | [], _ => none
-  | constructorInfo :: rest, name =>
+def psWasmFindConstructor
+    (constructors : List PsVerifiedIrConstructor)
+    (name : String) :
+    Option PsVerifiedIrConstructor :=
+  match constructors with
+  | List.nil => Option.none
+  | List.cons constructorInfo rest =>
       if psStringEq constructorInfo.name name then
-        some constructorInfo
+        Option.some constructorInfo
       else
         psWasmFindConstructor rest name
 
 def psWasmFindConstructorFieldLoop
-    (fieldName : String) :
-    Nat ->
-    List PsVerifiedIrConstructorField ->
-    Option (Nat × PsVerifiedIrConstructorField)
-  | _, [] => none
-  | index, field :: rest =>
+    (fieldName : String)
+    (index : Nat)
+    (fields : List PsVerifiedIrConstructorField) :
+    Option (Nat × PsVerifiedIrConstructorField) :=
+  match fields with
+  | List.nil => Option.none
+  | List.cons field rest =>
       if psStringEq field.name fieldName then
-        some (Prod.mk index field)
+        Option.some (Prod.mk index field)
       else
         psWasmFindConstructorFieldLoop
           fieldName (Nat.add index 1) rest
@@ -1400,10 +1412,13 @@ def psWasmLowerInductives
           | Except.ok loweredRest =>
               Except.ok (psListAppend lowered loweredRest)
 
-def psWasmParameterBindingsLoop :
-    Nat -> List PsVerifiedIrParameter -> List PsWasmBinding
-  | _, [] => []
-  | index, parameter :: rest =>
+def psWasmParameterBindingsLoop
+    (index : Nat)
+    (parameters : List PsVerifiedIrParameter) :
+    List PsWasmBinding :=
+  match parameters with
+  | List.nil => List.nil
+  | List.cons parameter rest =>
       List.cons
         (PsWasmBinding.mk
           parameter.name
@@ -1418,12 +1433,15 @@ def psWasmParameterBindings
     List PsWasmBinding :=
   psWasmParameterBindingsLoop 0 parameters
 
-def psWasmFindBinding :
-    List PsWasmBinding -> String -> Option PsWasmBinding
-  | [], _ => none
-  | binding :: rest, name =>
+def psWasmFindBinding
+    (bindings : List PsWasmBinding)
+    (name : String) :
+    Option PsWasmBinding :=
+  match bindings with
+  | List.nil => Option.none
+  | List.cons binding rest =>
       if psStringEq binding.name name then
-        some binding
+        Option.some binding
       else
         psWasmFindBinding rest name
 
@@ -1434,19 +1452,23 @@ def psWasmFindBindingIndex
   | none => none
   | some binding => some binding.index
 
-def psWasmStringListContains :
-    List String -> String -> Bool
-  | [], _ => false
-  | item :: rest, name =>
+def psWasmStringListContains
+    (items : List String)
+    (name : String) : Bool :=
+  match items with
+  | List.nil => false
+  | List.cons item rest =>
       if psStringEq item name then
         true
       else
         psWasmStringListContains rest name
 
-def psWasmBindingListContains :
-    List PsWasmBinding -> String -> Bool
-  | [], _ => false
-  | binding :: rest, name =>
+def psWasmBindingListContains
+    (bindings : List PsWasmBinding)
+    (name : String) : Bool :=
+  match bindings with
+  | List.nil => false
+  | List.cons binding rest =>
       if psStringEq binding.name name then
         true
       else

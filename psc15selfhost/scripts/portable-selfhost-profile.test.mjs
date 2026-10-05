@@ -196,6 +196,24 @@ test('portable scalar member capabilities are allowlisted explicitly', () => {
   }
 });
 
+test('opaque primitive scalars cannot be pattern matched', () => {
+  const bad = [
+    'def f (value : Int) : Bool :=',
+    '  match value with',
+    '  | Int.ofNat _ => true',
+    '  | Int.negSucc _ => false',
+  ].join('\n');
+  assert(ids(bad).includes('opaque-primitive-match'));
+
+  const good = [
+    'def f (value : Nat) : Bool :=',
+    '  match value with',
+    '  | Nat.zero => true',
+    '  | Nat.succ _ => false',
+  ].join('\n');
+  assert(!ids(good).includes('opaque-primitive-match'));
+});
+
 test('layout-only lets are rejected while explicit sequencing remains valid', () => {
   const bad = [
     'def f : Nat :=',

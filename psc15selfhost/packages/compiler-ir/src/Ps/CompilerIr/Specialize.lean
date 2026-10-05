@@ -287,7 +287,9 @@ def psIrSpecializeMakeSubstitution
       (PsIrSpecializeError.nonGroundType "")
   else
     Except.ok
-      ((psIrSpecializeTypeParameterNames parameters).zip arguments)
+      (psListZip
+        (psIrSpecializeTypeParameterNames parameters)
+        arguments)
 
 def psIrSpecializeGenericTypeRequest
     (module : PsVerifiedIrModule)

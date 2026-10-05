@@ -7,6 +7,7 @@ on:
       - psc2/selfhost-lean-kernel
     paths:
       - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/packages/pskernel-lean-wasm/**
       - psc15selfhost/packages/backend-ts/**
       - psc15selfhost/scripts/psc1kernel-cross-runtime*
       - psc15selfhost/scripts/psc1kernel-m3-*
@@ -20,6 +21,7 @@ on:
       - psc2/selfhost-lean-kernel
     paths:
       - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/packages/pskernel-lean-wasm/**
       - psc15selfhost/packages/backend-ts/**
       - psc15selfhost/scripts/psc1kernel-cross-runtime*
       - psc15selfhost/scripts/psc1kernel-m3-*

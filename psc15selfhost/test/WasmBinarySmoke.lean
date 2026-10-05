@@ -91,6 +91,23 @@ def psWasmSmokeArraySetIfInBounds
     [elementType]
     [array, index, value]
 
+def psWasmSmokeArrayMap
+    (inputType outputType : PsVerifiedIrType)
+    (fn array : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.arrayMap
+    [inputType, outputType]
+    [fn, array]
+
+def psWasmSmokeArrayFoldl
+    (elementType accumulatorType : PsVerifiedIrType)
+    (fn init array start stop : PsVerifiedIrExpr) :
+    PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.arrayFoldl
+    [elementType, accumulatorType]
+    [fn, init, array, start, stop]
+
 def psWasmSmokeU32ArrayTwo : PsVerifiedIrExpr :=
   psWasmSmokeArrayPush
     psWasmSmokeU32Type
@@ -99,6 +116,12 @@ def psWasmSmokeU32ArrayTwo : PsVerifiedIrExpr :=
       (psWasmSmokeArrayEmpty psWasmSmokeU32Type 2)
       (psWasmSmokeU32Literal 20))
     (psWasmSmokeU32Literal 22)
+
+def psWasmSmokeU32ArrayThree : PsVerifiedIrExpr :=
+  psWasmSmokeArrayPush
+    psWasmSmokeU32Type
+    (psWasmSmokeU32ArrayTwo)
+    (psWasmSmokeU32Literal 30)
 
 def psWasmSmokeIrModule : PsVerifiedIrModule :=
   {

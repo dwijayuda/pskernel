@@ -626,6 +626,110 @@ def psTestVerifiedIrValidationRejectsMatchConstructor : Bool :=
         false
   | _ => false
 
+def psVerifiedIrInvalidUInt8LiteralModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "invalidByte"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive
+            PsVerifiedIrPrimitiveType.uint8
+        body :=
+          PsVerifiedIrExpr.literal
+            (PsVerifiedIrLiteral.machineInteger
+              PsVerifiedIrMachineIntegerType.uint8
+              300)
+      }
+    ]
+  }
+
+def psTestVerifiedIrValidationRejectsNoncanonicalMachineLiteral : Bool :=
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          psVerifiedIrInvalidUInt8LiteralModule) with
+  | Except.error
+      (PsVerifiedIrValidationError.invalidMachineIntegerLiteral
+        PsVerifiedIrMachineIntegerType.uint8) =>
+      true
+  | _ => false
+
+def psTestVerifiedIrMachineLiteralCanonicalBounds : Bool :=
+  psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.uint8
+      255
+    && !psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.uint8
+      256
+    && !psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.uint8
+      (-1)
+    && psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.uint16
+      65535
+    && !psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.uint16
+      65536
+    && psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.uint32
+      4294967295
+    && !psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.uint32
+      4294967296
+    && psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.uint64
+      18446744073709551615
+    && !psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.uint64
+      18446744073709551616
+    && psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.int8
+      (-128)
+    && psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.int8
+      127
+    && !psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.int8
+      (-129)
+    && !psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.int8
+      128
+    && psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.int16
+      (-32768)
+    && !psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.int16
+      32768
+    && psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.int32
+      (-2147483648)
+    && !psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.int32
+      2147483648
+    && psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.int64
+      (-9223372036854775808)
+    && !psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.int64
+      (-9223372036854775809)
+    && !psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.int64
+      9223372036854775808
+    && psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.usize
+      0
+    && !psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.usize
+      (-1)
+    && psVerifiedIrMachineIntegerLiteralCanonical
+      PsVerifiedIrMachineIntegerType.isize
+      0
+
 def psTestVerifiedIrValidationRejectsMatchBindingField : Bool :=
   let binding :=
     PsVerifiedIrMatchBinding.mk
@@ -686,6 +790,8 @@ def psErasureTests : List PsErasureNamedTest := [
   { name := "VerifiedIR accepts resolved construction IR", passed := psTestVerifiedIrValidationAcceptsResolved },
   { name := "VerifiedIR rejects unknown result type", passed := psTestVerifiedIrValidationRejectsUnknownResult },
   { name := "VerifiedIR rejects nested unknown runtime type", passed := psTestVerifiedIrValidationRejectsNestedUnknown },
+  { name := "VerifiedIR rejects noncanonical fixed-width machine literal", passed := psTestVerifiedIrValidationRejectsNoncanonicalMachineLiteral },
+  { name := "VerifiedIR checks fixed-width machine literal bounds", passed := psTestVerifiedIrMachineLiteralCanonicalBounds },
   { name := "VerifiedIR accepts structural references", passed := psTestVerifiedIrValidationAcceptsStructuralReferences },
   { name := "VerifiedIR rejects unknown structure", passed := psTestVerifiedIrValidationRejectsUnknownStructure },
   { name := "VerifiedIR rejects structure type-argument arity", passed := psTestVerifiedIrValidationRejectsStructureArity },

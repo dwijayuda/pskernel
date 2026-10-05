@@ -3,20 +3,23 @@ import Ps.Compiler.Api
 /-
 PSCV self-host proof-of-concept.
 
-This theorem records a real property of the current compiler API:
-`psCompilerCheckElaborated` is definitionally the same operation as
-`psCompilerPrepareElaborated`.
+This theorem records a real definitional relationship in the current compiler API
+without changing the runtime compiler or its bootstrap prelude.
 
-That fact is expected in the current PSC2 bootstrap architecture: preparation is
-AdmissionReady, not independent kernel checking. The theorem deliberately makes
-that boundary explicit so a later PSCV migration can replace this alias with a
-real Checked/Verified capability transition.
+The premise is a reflexive equality witness for the preparation result. The proof
+term is just that witness. It checks against the conclusion only because
+`psCompilerCheckElaborated elaborated` unfolds definitionally to
+`psCompilerPrepareElaborated elaborated`.
 
-The proof is a direct proof term rather than tactic syntax so it is suitable for
-translation into the current small ProofScript self-host surface.
+The PoC therefore demonstrates that a proof-only module can state and check a
+property of the existing compiler while staying outside the executable self-host
+closure. It does NOT claim that AdmissionReady is kernel-checked.
 -/
 theorem pscvPocCheckElaboratedIsPrepare
-    (elaborated : PsElabModuleResult) :
+    (elaborated : PsElabModuleResult)
+    (h :
+      psCompilerPrepareElaborated elaborated =
+        psCompilerPrepareElaborated elaborated) :
     psCompilerCheckElaborated elaborated =
       psCompilerPrepareElaborated elaborated :=
-  Eq.refl (psCompilerPrepareElaborated elaborated)
+  h

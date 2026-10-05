@@ -1,0 +1,83 @@
+name: PSKernel bounded JS and WASM baseline
+
+on:
+  push:
+    branches:
+      - psc2/psc1kernel-selfhost-portable
+    paths:
+      - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/packages/backend-ts/**
+      - psc15selfhost/scripts/psc1kernel-cross-runtime*
+      - psc15selfhost/test/KernelCore/Bench/CrossRuntime.lean
+      - psc15selfhost/test/PsKernelCrossRuntimeBench.lean
+      - psc15selfhost/lakefile.lean
+      - .github/workflows/psc1kernel-cross-runtime.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pskernel-cross-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bounded-cross-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: psc15selfhost
+        shell: bash
+    env:
+      PSC_TYPESCRIPT_CLI: /tmp/pskernel-cross-runtime/node_modules/typescript/bin/tsc
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test evidence validation and verify existing WASM bytes
+        run: |
+          node --test scripts/psc1kernel-cross-runtime-report.test.mjs
+          node packages/pskernel-lean-wasm/host/verify-prebuilt.mjs
+      - name: Install pinned compilers
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          test "$(lean --githash)" = 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+          npm install --prefix /tmp/pskernel-cross-runtime --no-audit --no-fund typescript@5.8.3
+          node "$PSC_TYPESCRIPT_CLI" --version | grep -Fx 'Version 5.8.3'
+      - name: Build native compiler and shared native fixtures
+        timeout-minutes: 8
+        run: lake build psc1 psc1_kernel_cross_runtime_bench
+      - name: Generate current kernel JS once with native PSC/backend-ts
+        timeout-minutes: 5
+        run: |
+          mkdir -p dist/cross-runtime
+          .lake/build/bin/psc1 build test/KernelCore/Bench/CrossRuntime.lean --out dist/cross-runtime/kernel.js
+          node scripts/psc1kernel-generated-smoke.mjs dist/cross-runtime/kernel.js
+      - name: Run three bounded cross-runtime samples
+        timeout-minutes: 4
+        run: |
+          node scripts/psc1kernel-cross-runtime-report.mjs \
+            dist/cross-runtime/kernel.js .lake/build/bin/psc1_kernel_cross_runtime_bench \
+            3 /tmp/pskernel-cross-runtime/baseline
+          cat /tmp/pskernel-cross-runtime/baseline.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Capture one bounded JS CPU profile
+        timeout-minutes: 1
+        run: |
+          timeout 30s node --cpu-prof --cpu-prof-dir=/tmp/pskernel-cross-runtime \
+            scripts/psc1kernel-cross-runtime-worker.mjs js dist/cross-runtime/kernel.js \
+            > /tmp/pskernel-cross-runtime/profile-worker.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-cross-runtime
+          path: |
+            /tmp/pskernel-cross-runtime/baseline.*
+            /tmp/pskernel-cross-runtime/*.cpuprofile
+            /tmp/pskernel-cross-runtime/profile-worker.json
+          if-no-files-found: warn

@@ -293,7 +293,8 @@ lean_lib PsKernelCoreTestSupport where
     `KernelCore.Bench.Foundation,
     `KernelCore.Bench.Inference,
     `KernelCore.Bench.Inductive,
-    `KernelCore.Bench.Nested
+    `KernelCore.Bench.Nested,
+    `KernelCore.Bench.CrossRuntime
   ]
 
 @[default_target]
@@ -372,6 +373,10 @@ lean_exe psc1_kernel_core_foundation_tests where
 lean_exe psc1_kernel_core_bench where
   srcDir := "test"
   root := `PsKernelCoreBench
+
+lean_exe psc1_kernel_cross_runtime_bench where
+  srcDir := "test"
+  root := `PsKernelCrossRuntimeBench
 
 -- Host-only diagnostics; this executable is not a portable bootstrap module.
 lean_exe psc2_joint_closure_inventory where

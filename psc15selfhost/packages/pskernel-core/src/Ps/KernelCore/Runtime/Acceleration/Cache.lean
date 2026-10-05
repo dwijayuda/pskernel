@@ -431,7 +431,8 @@ def psKernelExprMapIndexInsert
         (_hash : Nat)
         (expr : PsKernelExpr)
         (value : PsKernelExpr) =>
-        let entries :=
+        let entries :
+            List (Prod PsKernelExpr PsKernelExpr) :=
           match index with
           | PsKernelExprMapIndex.bucket values =>
               values
@@ -440,20 +441,25 @@ def psKernelExprMapIndexInsert
         PsKernelExprMapIndex.bucket
           (psKernelExprMapInsertIn expr value entries)
   | Nat.succ remaining =>
-      let smaller :=
+      let smaller :
+          PsKernelExprMapIndex ->
+          Nat ->
+          PsKernelExpr ->
+          PsKernelExpr ->
+          PsKernelExprMapIndex :=
         psKernelExprMapIndexInsert remaining;
       fun
         (index : PsKernelExprMapIndex)
         (hash : Nat)
         (expr : PsKernelExpr)
         (value : PsKernelExpr) =>
-        let left :=
+        let left : PsKernelExprMapIndex :=
           match index with
           | PsKernelExprMapIndex.branch child _ =>
               child
           | _ =>
               PsKernelExprMapIndex.empty;
-        let right :=
+        let right : PsKernelExprMapIndex :=
           match index with
           | PsKernelExprMapIndex.branch _ child =>
               child

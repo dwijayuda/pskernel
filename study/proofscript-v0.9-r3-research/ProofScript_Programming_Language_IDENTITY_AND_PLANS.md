@@ -1,6 +1,6 @@
 # ProofScript Programming Language — Identity and Plans
 
-**Status:** strategic identity and planning document — research revision v2; not a language specification and not implementation-conformance evidence.
+**Status:** strategic identity and planning document — research revision v3; not a language specification and not implementation-conformance evidence.
 
 **Repository role:** this document explains what ProofScript is trying to become, why it may deserve to exist, what product/adoption hypotheses are being explored, what must remain invariant, what remains undecided, and how the project should be evaluated.
 
@@ -90,6 +90,28 @@ Implementation-scope ease:    5.8 / 10
 Evidence maturity:            2.7 / 5
 Overall research verdict:     PROMISING / BUILD BOUNDED EXPERIMENTS
 ~~~
+
+### Iterative design result — VEF-Core
+
+A subsequent architecture search deliberately redesigned the factory rather than inflating the existing score.
+
+The strongest current scoped design is **Verified Ecosystem Factory Core (VEF-Core)**:
+
+> **A library/package factory that grows ecosystem coverage through multiple assurance lanes—bind, characterize, port, verified replacement, or verified-by-construction generation—while using locked specifications, role-separated AI workcells, kernel-checked evidence, and explicit provenance.**
+
+For this exact bounded scope:
+
+~~~text
+Current technical feasibility:  9.23 / 10
+Evidence confidence:            ~7.3 / 10
+Scope:                           library/package ecosystem,
+                                 deterministic or explicitly bounded effects,
+                                 first-class JS/npm + Wasm publication,
+                                 no claim of arbitrary autonomous app synthesis
+~~~
+
+The >9 score applies only to this constrained product architecture. It does **not** raise the score of the unrestricted autonomous factory vision.
+
 
 For a **fully autonomous, general-purpose factory that generates and verifies arbitrary application ecosystems**:
 
@@ -2977,6 +2999,702 @@ audit dashboard + SLSA/in-toto provenance
 If this works convincingly, advance to OpenAPI/SDK generation and state-machine packages.
 
 If it fails, improve specification/proof/product economics before attempting framework-scale ecosystem generation.
+
+
+# Part XVI — Iterated design result: Verified Ecosystem Factory Core
+
+**Status:** highest-feasibility research design found after iterative red-team redesign.  
+**Provisional name:** Verified Ecosystem Factory Core / `VEF-Core`.  
+**Feasibility score:** **9.23 / 10** for the exact bounded scope below.  
+**Evidence confidence:** approximately **7.3 / 10**.  
+**Important:** this score does not apply to arbitrary autonomous application generation.
+
+## 89. Architecture-search iterations
+
+The design was iterated instead of forcing a high score.
+
+| Iteration | Architecture | Feasibility | Main remaining problem |
+|---|---|---:|---|
+| 0 | General autonomous Verified Software Factory | ~5.0/10 | specification truth, repository-scale autonomy, foreign/runtime correctness |
+| 1 | Human-supervised bounded Forge | ~8.5/10 | still assumes too much native rewriting and manual specification work |
+| 2 | Evidence-centric domain factory | ~8.9/10 | excellent for one vertical but weak ecosystem-coverage strategy |
+| 3 | **Verified Ecosystem Factory Core** | **9.23/10** | bounded package scope; expanded application/platform vision remains later work |
+
+The score increased because the architecture changed:
+
+- ecosystem coverage no longer requires native reimplementation;
+- proof effort is allocated by ROI instead of applied uniformly;
+- declarative package families use verified generators instead of repeated ports;
+- approved specifications become immutable versioned inputs to implementation/proof agents;
+- assurance is represented as an evidence graph rather than one badge;
+- existing ecosystems remain usable from day one;
+- current Lean/PSC/PSKernel infrastructure is reused instead of replaced.
+
+## 90. Exact VEF-Core scope
+
+VEF-Core v1 targets:
+
+- reusable libraries/packages;
+- pure or mostly deterministic algorithms;
+- codecs/parsers/validators;
+- schema-generated models;
+- state machines;
+- SDK/API clients with explicit foreign boundaries;
+- portable data/collection/text libraries;
+- selected platform wrappers;
+- bounded native replacements for high-value dependencies.
+
+Initial publication targets:
+
+- JavaScript/npm;
+- WebAssembly;
+- ProofScript-native package artifacts.
+
+Not V1 goals:
+
+- arbitrary UI/application generation;
+- arbitrary dynamic JavaScript formal verification;
+- whole operating systems;
+- unrestricted FFI verification;
+- fully proved optimizing compiler stack;
+- autonomous correctness from natural-language intent.
+
+This bounded scope is what makes >9/10 feasibility credible.
+
+## 91. Five ecosystem lanes
+
+For every desired capability, VEF-Core chooses the cheapest assurance strategy that satisfies the product requirement.
+
+### Lane 0 — Bind
+
+Use an existing foreign implementation through InterfaceIR/FFI.
+
+~~~text
+foreign package
+   ↓
+machine-readable interface
+   ↓
+ProofScript binding
+   ↓
+explicit foreign assumption
+~~~
+
+This provides immediate ecosystem breadth.
+
+### Lane 1 — Characterize
+
+Keep the foreign implementation and add typed interfaces, behavioral models, property tests, fuzzing, differential tests, and EvidenceGraph claims.
+
+Use for platform APIs, drivers, runtime adapters, and packages where native replacement has low ROI.
+
+### Lane 2 — Port
+
+AI-assisted source port into ProofScript, preserving provenance and license obligations.
+
+~~~text
+suitably licensed OSS source
+       ↓
+AI port
+       ↓
+PSC implementation
+       ↓
+differential oracle against upstream
+       ↓
+contracts / selected proofs
+       ↓
+native ProofScript package
+~~~
+
+Engineering policy:
+
+> Translating/adapting open-source source code may remain a derivative work. AI rewriting does not automatically erase upstream license/copyright obligations.
+
+The package recipe records source repository/commit, license, notices, and generated-file provenance.
+
+### Lane 3 — Verified replacement
+
+Implement independently against an approved specification.
+
+~~~text
+approved SpecCapsule
+      ↓
+PSC implementation
+      ↓
+proof obligations
+      ↓
+checked proofs
+      ↓
+native verified package
+~~~
+
+Use when assurance value and long-term ownership justify the cost.
+
+### Lane 4 — Generate by construction
+
+The highest-leverage lane.
+
+~~~text
+declarative specification
+      ↓
+verified generator / verified combinators
+      ↓
+many implementations
+      ↓
+shared theorem schema
+~~~
+
+Candidate families:
+
+- codecs from schemas;
+- SDKs from OpenAPI;
+- WIT adapters;
+- validators from data models;
+- state machines from transition descriptions;
+- CLI parsers from command schemas;
+- serialization/deriving from reflected types.
+
+## 92. Portfolio algorithm
+
+The Factory should not decide “rewrite everything”.
+
+~~~text
+for each required capability:
+    if a mature foreign package is adequate:
+        bind it
+    if confidence is insufficient:
+        characterize it
+    if portability/native semantics justify ownership:
+        port it
+    if high assurance has strong ROI:
+        build a verified replacement
+    if many packages share one declarative structure:
+        create one verified generator instead
+~~~
+
+Candidate priority:
+
+~~~text
+Priority
+≈
+downstream reuse
+× ecosystem importance
+× semantic tractability
+× assurance value
+× upstream stability
+× license suitability
+────────────────────────────────────────
+implementation cost
+× foreign complexity
+× maintenance risk
+~~~
+
+## 93. PSpec / SpecCapsule
+
+The most important new subsystem is a versioned, approved specification artifact.
+
+Provisional structure:
+
+~~~text
+SpecCapsule {
+  identity
+  version
+
+  interface
+  semanticLaws
+  requires
+  ensures
+  invariants
+
+  effects
+  capabilities
+  errorModel
+  resourceModel
+  determinism
+
+  foreignAssumptions
+  environmentalAssumptions
+
+  examples
+  propertyOracles
+  interoperabilityVectors
+
+  securityProperties
+
+  compatibilityPolicy
+  deprecationPolicy
+
+  performanceBudgets
+
+  provenance
+  sourceReferences
+  licensePolicy
+
+  requiredEvidence
+  allowedTrust
+}
+~~~
+
+Spec lifecycle:
+
+~~~text
+Draft
+  ↓
+AI critique / counterexamples / test-oracle analysis
+  ↓
+human or authorized-policy approval
+  ↓
+LOCKED SpecCapsule identity
+  ↓
+implementation/proof work
+~~~
+
+Any semantic change creates a new identity.
+
+Automatic weakening detection flags:
+
+- removed postconditions;
+- stronger preconditions;
+- removed invariants;
+- broader exceptions;
+- new unchecked foreign calls;
+- new axioms;
+- reduced target coverage;
+- weakened resource/error guarantees.
+
+## 94. Role-separated AI Workcell
+
+Do not use one omnipotent agent.
+
+Candidate roles:
+
+1. Research/Source Agent;
+2. Interface Agent;
+3. Specification Agent;
+4. Specification Adversary;
+5. Implementation/Port Agent;
+6. Proof Agent;
+7. Test/Fuzz/Differential Agent;
+8. Performance Agent;
+9. Security/Trust Agent;
+10. License/Provenance Agent;
+11. Upstream Sync Agent;
+12. Release/Audit Agent;
+13. Orchestrator.
+
+Default authority rules:
+
+| Role | implementation | locked spec | new assumptions | proof acceptance |
+|---|---:|---:|---:|---:|
+| Spec Agent | no | proposal only | proposal only | no |
+| Implementation Agent | yes | **no** | no | no |
+| Proof Agent | proof/evidence only | **no** | **no** | no |
+| Test Agent | tests | no | no | no |
+| Orchestrator | delegated patches | no silent change | no silent change | no |
+| PSKernel/checker | no | no | no | **check/accept only** |
+| Human/policy approver | authorized | new revision | explicit approval | release decision |
+
+The Proof Agent should follow the successful verifier-in-the-loop pattern now documented by Verus: give the agent the verifier and libraries, prohibit spec/executable weakening during proof work, prohibit assume/admit, and run a cheat/assumption gate.
+
+## 95. EvidenceGraph-v1
+
+EvidenceGraph is the common assurance language.
+
+Candidate claim types:
+
+~~~text
+TypeClaim
+SpecificationClaim
+ProofClaim
+BoundaryClaim
+TranslationClaim
+TestClaim
+FuzzClaim
+DifferentialClaim
+PerformanceClaim
+ProvenanceClaim
+LicenseClaim
+ReproducibilityClaim
+CompatibilityClaim
+~~~
+
+Each claim records:
+
+~~~text
+claimId
+subjectArtifact
+property
+evidenceArtifact
+checkerOrOracle
+assumptions
+dependencyClaims
+environmentIdentity
+status
+creationPolicy
+~~~
+
+No transitive overclaiming is allowed.
+
+Example:
+
+~~~text
+ProofClaim:
+  CheckedCore satisfies theorem T
+
+TranslationClaim:
+  JS artifact is differential-tested against VerifiedIR
+
+BoundaryClaim:
+  Node crypto API is assumed to satisfy model M
+~~~
+
+The UI cannot summarize this as “JS artifact formally verified” unless the evidence graph really supports that claim.
+
+## 96. PackageRecipe-v1
+
+Every factory package has a machine-readable recipe.
+
+~~~text
+PackageRecipe {
+  packageId
+  capability
+
+  acquisitionMode:
+    bind | characterize | port | replace | generate
+
+  origin
+  upstreamVersion
+  upstreamCommit
+
+  licensePolicy
+  provenance
+
+  specCapsule
+
+  targetAssurance
+  targets
+
+  testPlan
+  proofPlan
+  performancePlan
+
+  upstreamSyncPolicy
+}
+~~~
+
+This makes initial generation maintainable over time.
+
+## 97. Ecosystem bootstrap strategy
+
+Grow bottom-up by reuse leverage.
+
+### E0 — semantic foundation
+
+Lean-compatible semantics, PSC compiler, kernel/provider, CheckedCore/VerifiedIR.
+
+### E1 — portable foundation/stdlib
+
+Prioritize data structures, strings/bytes, numeric helpers, comparisons, folds/iterators, parser combinators, codecs, testing/property libraries.
+
+### E2 — generated data ecosystem
+
+Build generators for JSON/schema codecs, validators, WIT, OpenAPI, command schemas, state systems.
+
+This is the primary compounding layer.
+
+### E3 — protocol/API ecosystem
+
+HTTP models, URI/URL, headers, MIME, auth formats, generated SDKs.
+
+### E4 — effects/platform libraries
+
+Only after effect contracts stabilize: filesystem, networking, Task, Stream, Resource, clock/random, database interfaces.
+
+### E5 — frameworks
+
+Frameworks should emerge after the reusable library graph proves the application model.
+
+### E6 — applications
+
+Applications then consume the accumulated ecosystem.
+
+## 98. Open-source migration policy
+
+### Do not rewrite the world
+
+Preferred progression:
+
+~~~text
+foreign coverage first
+→ characterization
+→ selective native ownership
+→ selective verification
+→ generator-driven replacement where high leverage
+~~~
+
+### Source-derived ports
+
+When AI consumes source code for translation/porting:
+
+- treat the result as source-derived;
+- preserve applicable license/notices;
+- record exact upstream commit;
+- retain provenance;
+- never call it “clean-room” merely because an LLM changed syntax.
+
+The U.S. Copyright Office describes translations/adaptations as derivative-work examples while distinguishing copyrightable program expression from ideas/processes/logic. This document gives engineering policy, not legal advice.
+
+### Independent/spec-driven replacement
+
+Where strategically useful:
+
+- use standards/public APIs/specifications as authoritative input;
+- separate source-derived implementation material where policy requires;
+- use behavioral test vectors/oracles only as permitted;
+- document the process;
+- obtain legal review for significant compatibility work.
+
+Early research should favor clearly permissive licenses and simple provenance.
+
+## 99. Generator-first ecosystem multiplication
+
+The highest leverage is not “AI ports N libraries”.
+
+It is:
+
+> **Build one generator when one declarative model can produce N packages.**
+
+Examples:
+
+~~~text
+OpenAPI generator → many SDKs
+schema/codec generator → many serializers/validators
+WIT generator → many component bindings
+state-machine generator → many workflows
+reflection deriving → many Eq/Ord/JSON/etc. implementations
+~~~
+
+This is the most credible mechanism for superlinear ecosystem growth.
+
+Use the word **compounding**, not “exponential”, until measurements justify stronger claims.
+
+## 100. ProofScript Verified Knowledge Base
+
+Factory output should feed a provenance-tagged knowledge layer containing:
+
+- checked theorem identities;
+- locked SpecCapsules;
+- verified combinators;
+- package interfaces;
+- EvidenceGraph claims;
+- counterexamples;
+- proof patterns;
+- migration recipes;
+- benchmark results.
+
+AI retrieval should prefer checked/provenance-known knowledge over free-form generated historical text.
+
+## 101. VEF-Core release workflow
+
+~~~text
+1. choose capability / PackageRecipe
+2. acquire authoritative inputs
+3. build InterfaceIR if foreign
+4. draft SpecCapsule
+5. adversarial spec review
+6. approve/lock SpecCapsule
+7. implementation/port/generator step
+8. compile/typecheck
+9. construct proof obligations
+10. proof-agent loop
+11. kernel replay/check
+12. property/fuzz/differential tests
+13. performance checks
+14. assumption/trust delta
+15. backend build
+16. translation/conformance checks
+17. EvidenceGraph assembly
+18. SLSA/in-toto provenance
+19. human/policy release gate
+20. publish normal package + assurance bundle
+~~~
+
+Unresolved obligations remain visible; they do not silently disappear.
+
+## 102. Feasibility scoring
+
+The exact bounded VEF-Core design scores:
+
+| Dimension | Weight | Score /10 |
+|---|---:|---:|
+| technical feasibility | 12 | 9.4 |
+| formal soundness / TCB design | 10 | 9.6 |
+| fit with current pskernel architecture | 8 | 9.5 |
+| implementation-scope practicality | 8 | 8.8 |
+| specification integrity architecture | 8 | 9.2 |
+| AI automation practicality | 7 | 9.0 |
+| ecosystem acceleration | 10 | 9.2 |
+| interoperability / migration | 9 | 9.3 |
+| auditability | 8 | 9.7 |
+| backend correctness strategy | 5 | 8.8 |
+| performance practicality | 4 | 8.7 |
+| developer-product UX | 5 | 9.0 |
+| maintainability / upstream sync | 4 | 9.1 |
+| license/provenance manageability | 2 | 9.0 |
+| **Weighted feasibility** | **100** | **9.23 / 10** |
+
+Why >9 is defensible:
+
+- no speculative breakthrough is required for the scoped product;
+- kernel checking is mature;
+- verifier-driven AI proof repair is demonstrated;
+- verified generators have strong prior art;
+- interface/package generators are routine engineering;
+- property/fuzz/differential testing is mature;
+- WIT/OpenAPI/schema normalizations have established patterns;
+- EvidenceGraph/artifact hashing are deterministic data engineering;
+- SLSA/in-toto already supply provenance standards;
+- PSC already has or plans CheckedCore/VerifiedIR/InterfaceIR seams;
+- the package scope avoids arbitrary UI/event-loop/dynamic-language semantics.
+
+What remains below 9:
+
+~~~text
+general application framework                      ~6–8/10
+arbitrary npm formal verification                  ~3/10
+fully verified general backend chain               ~5–8/10
+autonomous repository-scale general synthesis       ~5/10
+automatic correctness of AI-generated specs         ~5/10
+rewrite-all-software vision                         ~5–7/10
+~~~
+
+## 103. Evidence confidence
+
+Architecture-class evidence confidence is approximately:
+
+~~~text
+7.3 / 10
+~~~
+
+because the difficult techniques already exist independently.
+
+ProofScript-specific product evidence is much lower.
+
+The next objective is to turn architecture confidence into repository-specific evidence.
+
+## 104. Experiment 1 — Verified Codec Factory v0
+
+~~~text
+small declarative schema
+→ SpecCapsule
+→ generated PSC types
+→ encode/decode
+→ round-trip theorem
+→ boundary/property tests
+→ PSKernel check
+→ VerifiedIR
+→ JS + Wasm
+→ npm package
+→ EvidenceGraph
+→ provenance
+~~~
+
+Success goals:
+
+- after schema approval, low human review time for a small generated package;
+- every proof obligation checked or explicitly unresolved;
+- no hidden assumption increase;
+- ordinary npm consumption;
+- deterministic evidence replay;
+- JS/Wasm agreement on reference corpus;
+- schema changes invalidate only dependent evidence/artifacts;
+- repeated schemas require materially less human work due to generator reuse.
+
+## 105. Experiment 2 — OSS Port Workcell
+
+Choose one small permissively licensed pure library.
+
+Compare:
+
+### Source-assisted port
+
+~~~text
+upstream source
+→ AI PSC port
+→ license/provenance carry-forward
+→ differential tests
+→ contracts/proofs
+~~~
+
+### Spec-driven replacement
+
+~~~text
+public API/spec
+→ locked SpecCapsule
+→ independent PSC implementation
+→ public test vectors
+→ selected proofs
+~~~
+
+Compare engineering time, proof effort, performance, maintenance, legal/provenance complexity, semantic fidelity, and upstream-update cost.
+
+This experiment determines whether OSS rewriting is broadly scalable or only selectively valuable.
+
+## 106. Experiment 3 — OpenAPI package multiplication
+
+Build one generator and generate multiple SDK packages.
+
+Measure:
+
+~~~text
+human effort SDK #1
+human effort SDK #5
+human effort SDK #20
+~~~
+
+along with spec review, assurance coverage, generated-code acceptance, package quality, and upstream spec-update cost.
+
+This is the first real test of ecosystem compounding.
+
+## 107. Research references added by this iteration
+
+- Microsoft SymCrypt / Rust / Aeneas / Lean / AI: https://www.microsoft.com/en-us/research/blog/verifying-rust-cryptography-in-symcrypt-from-standards-to-code/
+- Technical report: https://arxiv.org/abs/2609.15648
+- Verus LLM proof workflow: https://verus-lang.github.io/verus/guide/llmforverusproof.html
+- LeanDojo: https://leandojo.org/leandojo.html
+- BRIDGE: https://leandojo.org/bridge.html
+- P³: https://arxiv.org/abs/2608.09277
+- Vero: https://arxiv.org/abs/2608.13522
+- AI formal-spec generation: https://arxiv.org/abs/2601.12845
+- EverParse: https://project-everest.github.io/everparse/
+- Project Everest/HACL*: https://project-everest.github.io/
+- Aeneas: https://github.com/AeneasVerif/aeneas
+- Dafny: https://dafny.org/latest/
+- CompCert: https://compcert.org/
+- CakeML: https://cakeml.org/
+- WIT: https://component-model.bytecodealliance.org/design/wit.html
+- SLSA v1.2: https://slsa.dev/spec/v1.2/
+- in-toto: https://in-toto.io/
+- U.S. Copyright Office computer-program guidance: https://www.copyright.gov/register/tx-programs.html
+- U.S. Copyright Office derivative-work guidance: https://www.copyright.gov/eco/help-limitation.html
+
+## 108. Revised recommendation
+
+Do **not** build a monolithic autonomous Verified Software Factory.
+
+Build **VEF-Core as an evidence-centric ecosystem accelerator** whose first job is to make trustworthy packages cheap to:
+
+~~~text
+bind
+characterize
+port
+replace/verify
+generate by construction
+~~~
+
+Then expand only when package families prove the next layer worthwhile.
+
+This retains the ambitious long-term vision while producing a first product whose feasibility exceeds 9/10 using techniques available today.
+
 
 # Final identity
 

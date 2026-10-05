@@ -66,11 +66,15 @@ theorem psKernelCacheInferResult_preserves_nextFresh
     (psKernelCacheInferResult
       state inferOnly expr result).nextFresh =
       state.nextFresh := by
-  simp [
-    psKernelCacheInferResult,
-    psKernelCheckerStateWithInferOnly,
-    psKernelCheckerStateWithCheckedInfer
-  ]
+  cases inferOnly <;>
+    cases hEligible :
+        psKernelInferCacheEligible inferOnly expr <;>
+    simp [
+      psKernelCacheInferResult,
+      hEligible,
+      psKernelCheckerStateWithInferOnly,
+      psKernelCheckerStateWithCheckedInfer
+    ]
 
 theorem psKernelCacheInferResult_inferOnly_preserves_checked
     (state : PsKernelCheckerState)
@@ -78,10 +82,13 @@ theorem psKernelCacheInferResult_inferOnly_preserves_checked
     (psKernelCacheInferResult
       state true expr result).checkedInfer =
       state.checkedInfer := by
-  simp [
-    psKernelCacheInferResult,
-    psKernelCheckerStateWithInferOnly
-  ]
+  cases hEligible :
+      psKernelInferCacheEligible true expr <;>
+    simp [
+      psKernelCacheInferResult,
+      hEligible,
+      psKernelCheckerStateWithInferOnly
+    ]
 
 theorem psKernelCacheInferResult_checked_preserves_inferOnly
     (state : PsKernelCheckerState)
@@ -89,10 +96,13 @@ theorem psKernelCacheInferResult_checked_preserves_inferOnly
     (psKernelCacheInferResult
       state false expr result).inferOnly =
       state.inferOnly := by
-  simp [
-    psKernelCacheInferResult,
-    psKernelCheckerStateWithCheckedInfer
-  ]
+  cases hEligible :
+      psKernelInferCacheEligible false expr <;>
+    simp [
+      psKernelCacheInferResult,
+      hEligible,
+      psKernelCheckerStateWithCheckedInfer
+    ]
 
 theorem psKernelCacheInferResult_preserves_whnf
     (state : PsKernelCheckerState)
@@ -101,11 +111,15 @@ theorem psKernelCacheInferResult_preserves_whnf
     (psKernelCacheInferResult
       state inferOnly expr result).whnf =
       state.whnf := by
-  simp [
-    psKernelCacheInferResult,
-    psKernelCheckerStateWithInferOnly,
-    psKernelCheckerStateWithCheckedInfer
-  ]
+  cases inferOnly <;>
+    cases hEligible :
+        psKernelInferCacheEligible inferOnly expr <;>
+    simp [
+      psKernelCacheInferResult,
+      hEligible,
+      psKernelCheckerStateWithInferOnly,
+      psKernelCheckerStateWithCheckedInfer
+    ]
 
 theorem psKernelCacheInferResult_preserves_defeq_caches
     (state : PsKernelCheckerState)
@@ -117,8 +131,12 @@ theorem psKernelCacheInferResult_preserves_defeq_caches
     (psKernelCacheInferResult
       state inferOnly expr result).failure =
         state.failure := by
-  simp [
-    psKernelCacheInferResult,
-    psKernelCheckerStateWithInferOnly,
-    psKernelCheckerStateWithCheckedInfer
-  ]
+  cases inferOnly <;>
+    cases hEligible :
+        psKernelInferCacheEligible inferOnly expr <;>
+    simp [
+      psKernelCacheInferResult,
+      hEligible,
+      psKernelCheckerStateWithInferOnly,
+      psKernelCheckerStateWithCheckedInfer
+    ]

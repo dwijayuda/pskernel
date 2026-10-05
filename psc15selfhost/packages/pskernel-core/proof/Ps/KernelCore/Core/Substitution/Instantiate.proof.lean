@@ -81,14 +81,15 @@ theorem psKernelExprInstantiateAt_bvar_before
         (List.cons replacement List.nil)
         offset =
       PsKernelExpr.bvar index := by
-  simp [
+  simp only [
     psKernelExprInstantiateAt,
     psKernelExprListIsEmpty,
     psKernelExprInstantiateAtChanged,
     psKernelExprInstantiateAtChangedWithFuel,
-    psKernelExprNodeCount,
-    h
+    psKernelExprNodeCount
   ]
+  rw [h]
+  rfl
 
 theorem psKernelExprInstantiateAt_bvar_hit
     (start offset : Nat)

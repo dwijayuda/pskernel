@@ -63,7 +63,8 @@ the admissions SHA-256. Receipts are audit records, not transferable proofs.
 The `PSKernel Core M4 provider parity` workflow builds current native providers
 and reuses the verified bundled Lean WASM artifact. It does not rebuild WASM.
 
-- 21 canonical request cases × 2 official reference runtimes = 42 comparisons.
+- 21 common canonical request cases × 2 official reference runtimes = 42 comparisons,
+  plus the current declared prelude extension against native Lean (43 total).
 - Coverage includes large naturals, universes, binders, beta/let reduction,
   theorems, projection, ordinary/indexed/mutual/nested inductives, duplicates,
   unknown constants, bad types, loose variables, and late rejection.
@@ -84,6 +85,17 @@ The workflow uploads `m4-provider-parity` with commit, case names, decisions,
 identities, admissions hashes, and elapsed times. It runs alongside the existing
 portable, native workload-budget, cross-runtime, and compiler integration gates.
 M4 acceptance requires these checks to pass for the reviewed revision.
+
+### Known bundled-WASM scope difference
+
+The current compiler's declared `UInt8.ofNat` extension is accepted by both
+native Core and current native Lean. The bundled WASM snapshot predates this
+extension and rejects the name as unknown. The gate records this limitation
+separately and requires dual mode to block emission on that disagreement; it
+does not count the differing outcomes as parity. Full current-prelude parity
+with WASM therefore remains open. Refreshing the bundled WASM is deferred to
+an explicit release/rebuild task. This is another reason default promotion
+is outside this bounded M4 checkpoint.
 
 ## Release reproduction and promotion
 

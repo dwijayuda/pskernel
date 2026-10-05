@@ -22,6 +22,7 @@ test('timeouts, exhaustion, unsupported forms and host failures never establish 
       'other:unknown failure', 'kernel inference budget exhausted'].map(message => ({ ...no, message })),
     { ...no, declarationIndex: undefined }, { ...no, declarationIndex: -1 },
     { ...no, declarationIndex: 1 }, { ...no, message: undefined }, {},
+    { accepted: true, errorKind: 'resource-exhausted' },
   ];
   for (const failure of failures) {
     assert.throws(() => assertProviderParity(failure, failure, 1), /INCONCLUSIVE/);

@@ -58,9 +58,9 @@ def psKernelSessionWhnf
     (expr : PsKernelExpr) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerSession) :=
-  let ops := psKernelCheckerOpsWithFuel fuel;
   match
-      ops.whnf
+      psKernelCheckerWhnf
+        fuel
         session.context
         session.state
         expr with
@@ -82,9 +82,9 @@ def psKernelSessionInfer
     (expr : PsKernelExpr) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerSession) :=
-  let ops := psKernelCheckerOpsWithFuel fuel;
   match
-      ops.infer
+      psKernelCheckerInfer
+        fuel
         session.context
         session.state
         expr with
@@ -106,9 +106,9 @@ def psKernelSessionCheck
     (expr : PsKernelExpr) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerSession) :=
-  let ops := psKernelCheckerOpsWithFuel fuel;
   match
-      ops.check
+      psKernelCheckerCheck
+        fuel
         session.context
         session.state
         expr with
@@ -174,9 +174,9 @@ def psKernelSessionIsDefEq
     (right : PsKernelExpr) :
     Except String
       (Prod Bool PsKernelCheckerSession) :=
-  let ops := psKernelCheckerOpsWithFuel fuel;
   match
-      ops.defeq
+      psKernelIsDefEq
+        fuel
         session.context
         session.state
         left

@@ -695,8 +695,10 @@ Checker implementations now live under `Checker/`; former `TypeChecker*` and
 Definition bodies, fuel transitions and rule ordering are unchanged by this move.
 `Checker/Knot` now owns cross-component callback wiring, including the
 projection shortcut. `Checker/Ops` declares six operations: infer, check, whnfCore,
-whnf, defeq and reduceRecursor. `Checker/Session` delegates through those operations;
-check continues to select the fully checked path. Existing function bodies were
+whnf, defeq and reduceRecursor. `Checker/Session` calls the concrete Knot
+operations directly, avoiding allocation of a whole Ops record on each cache hit.
+The Ops constructor uses the same concrete operations; check continues to select
+the fully checked path. Existing function bodies were
 moved verbatim. The architecture audit enforces the wiring symbol owner, import
 fences and forwarding-only legacy paths.
 

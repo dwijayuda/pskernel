@@ -636,15 +636,44 @@ def psKernelIsDefEq
     right
 
 
+/- Concrete operations let Session avoid allocating an entire callback record
+on each cache hit. They share the same fuel wiring as the Ops constructor. -/
+def psKernelCheckerWhnf
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr) :
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  let defeq := psKernelIsDefEqWithFuel fuel;
+  psKernelWhnfWithRecursorFuel fuel defeq context state expr
+
+def psKernelCheckerInfer
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr) :
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  let defeq := psKernelIsDefEqWithFuel fuel;
+  psKernelInferWithRecursorFuel fuel defeq context state expr
+
+def psKernelCheckerCheck
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr) :
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  let defeq := psKernelIsDefEqWithFuel fuel;
+  let whnf := psKernelWhnfWithRecursorFuel fuel defeq;
+  psKernelCheckWithFuel fuel whnf defeq context state expr
+
 def psKernelCheckerOpsWithFuel
     (fuel : Nat) : PsKernelCheckerOps :=
   let defeq := psKernelIsDefEqWithFuel fuel;
-  let whnf := psKernelWhnfWithRecursorFuel fuel defeq;
   {
-    infer := psKernelInferWithRecursorFuel fuel defeq
-    check := psKernelCheckWithFuel fuel whnf defeq
+    infer := psKernelCheckerInfer fuel
+    check := psKernelCheckerCheck fuel
     whnfCore := psKernelWhnfCoreWithRecursorFuel fuel defeq
-    whnf := whnf
+    whnf := psKernelCheckerWhnf fuel
     defeq := defeq
     reduceRecursor := psKernelReduceRecursorBoundedWithFuel fuel defeq
   }

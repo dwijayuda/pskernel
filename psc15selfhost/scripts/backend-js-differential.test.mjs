@@ -147,6 +147,53 @@ try {
   assert.equal(direct.stringLengthDemo("a😀"), reference.stringLengthDemo("a😀"));
   assert.equal(direct.stringLengthDemo("a😀"), 2n);
 
+  assert.equal(
+    direct.u8AddWrap(250, 10),
+    reference.u8AddWrap(250, 10),
+  );
+  assert.equal(direct.u8AddWrap(250, 10), 4);
+
+  assert.equal(
+    direct.i8MulWrap(100, 2),
+    reference.i8MulWrap(100, 2),
+  );
+  assert.equal(direct.i8MulWrap(100, 2), -56);
+
+  assert.equal(
+    direct.u64Xor(5n, 3n),
+    reference.u64Xor(5n, 3n),
+  );
+  assert.equal(direct.u64Xor(5n, 3n), 6n);
+
+  assert.equal(
+    direct.u16Lt(10, 20),
+    reference.u16Lt(10, 20),
+  );
+  assert.equal(direct.u16Lt(10, 20), true);
+
+  assert.equal(
+    direct.u8FromNat(300n),
+    reference.u8FromNat(300n),
+  );
+  assert.equal(direct.u8FromNat(300n), 44);
+  assert.equal(direct.u8Literal300, reference.u8Literal300);
+  assert.equal(direct.u8Literal300, 44);
+
+  assert.equal(
+    direct.float32Mul(0.1, 0.2),
+    reference.float32Mul(0.1, 0.2),
+  );
+  assert.equal(
+    direct.float32Mul(0.1, 0.2),
+    Math.fround(0.1 * 0.2),
+  );
+
+  assert.equal(
+    direct.floatDiv(7.5, 2.5),
+    reference.floatDiv(7.5, 2.5),
+  );
+  assert.equal(direct.floatDiv(7.5, 2.5), 3);
+
   assert.equal(direct.letNatDemo(4n), reference.letNatDemo(4n));
   assert.equal(direct.letNatDemo(4n), 10n);
 

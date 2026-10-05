@@ -89,7 +89,16 @@ export function validateSample(log) {
   }
   const fingerprint = [...rows].map(([name, fields]) => [name,
     Object.fromEntries(Object.entries(fields).filter(([key]) => !key.endsWith('_ns')))]);
-  return { timings, ratios, fingerprint, profiles };
+  const insertions = profiles.filter(line => line.startsWith('PSKERNEL_PROFILE cache_insert '));
+  let cacheInsertSingleOverDouble = null;
+  if (insertions.length) {
+    const match = /^PSKERNEL_PROFILE cache_insert double_walk_ns=(\d+) single_walk_ns=(\d+) hits=2000\/2000$/.exec(insertions[0]);
+    if (insertions.length !== 1 || !match || ![match[1], match[2]].every(value => Number.isSafeInteger(Number(value)) && Number(value) > 0)) {
+      throw new Error('Invalid cache insertion profile');
+    }
+    cacheInsertSingleOverDouble = Number(match[2]) / Number(match[1]);
+  }
+  return { timings, ratios, fingerprint, profiles, cacheInsertSingleOverDouble };
 }
 
 function statistics(values) {
@@ -103,7 +112,8 @@ export function summarizeSamples(samples) {
   if (samples.length < 1 || samples.length > 5) throw new Error('Require 1 to 5 bounded samples');
   for (const sample of samples) {
     if (JSON.stringify(sample.fingerprint) !== JSON.stringify(samples[0].fingerprint) ||
-        JSON.stringify(Object.keys(sample.timings)) !== JSON.stringify(Object.keys(samples[0].timings))) {
+        JSON.stringify(Object.keys(sample.timings)) !== JSON.stringify(Object.keys(samples[0].timings)) ||
+        (sample.cacheInsertSingleOverDouble === null) !== (samples[0].cacheInsertSingleOverDouble === null)) {
       throw new Error('Benchmark corpus changed between samples');
     }
   }
@@ -116,6 +126,8 @@ export function summarizeSamples(samples) {
     timingsNs: summarize('timings'),
     // Median of within-sample ratios: never divide unrelated runner medians.
     pskernelOverLean: summarize('ratios'),
+    cacheInsertSingleOverDouble: samples[0].cacheInsertSingleOverDouble === null ? null :
+      statistics(samples.map(sample => sample.cacheInsertSingleOverDouble)),
     samples,
   };
 }
@@ -138,6 +150,10 @@ export function runBenchmark(binary, count, output) {
     '| Workload | Median PSKernel / Lean | Range |', '| --- | ---: | ---: |',
     ...Object.entries(report.pskernelOverLean).map(([name, value]) =>
       `| ${name} | ${value.median.toFixed(2)}x | ${value.min.toFixed(2)}–${value.max.toFixed(2)}x |`), '',
+    ...(report.cacheInsertSingleOverDouble ? [
+      `Cache insertion single/double walk: median ${report.cacheInsertSingleOverDouble.median.toFixed(3)}x ` +
+        `(range ${report.cacheInsertSingleOverDouble.min.toFixed(3)}–${report.cacheInsertSingleOverDouble.max.toFixed(3)}x; lower is faster).`, '',
+    ] : []),
     'All benchmark success counts validated. Full compiler/kernel fixed-point generation was not run.', '',
     'Untimed cache diagnostics (first sample):', '', '```text', ...samples[0].profiles, '```', '',
   ].join('\n');

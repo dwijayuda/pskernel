@@ -51,3 +51,11 @@ test('caps sample count before launching a process', () => {
   }
   assert.throws(() => summarizeSamples([]), /1 to 5/);
 });
+
+test('cache insertion profile validates results and aggregates matched ratios', () => {
+  const samples = [60, 80, 70].map(time => validateSample(fixture +
+    `PSKERNEL_PROFILE cache_insert double_walk_ns=100 single_walk_ns=${time} hits=2000/2000\n`));
+  assert.deepEqual(summarizeSamples(samples).cacheInsertSingleOverDouble, {median: 0.7, min: 0.6, max: 0.8});
+  assert.throws(() => validateSample(fixture + 'PSKERNEL_PROFILE cache_insert double_walk_ns=100 single_walk_ns=80 hits=1999/2000\n'), /Invalid cache/);
+  assert.throws(() => summarizeSamples([samples[0], validateSample(fixture)]), /corpus changed/);
+});

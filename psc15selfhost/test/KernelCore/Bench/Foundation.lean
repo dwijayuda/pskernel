@@ -6,6 +6,24 @@ import Ps.KernelCore.Admission.Inductive.Nested.Admission
 
 set_option maxRecDepth 100000
 
+-- Same index/key/value workload for the previous two-walk operation and the
+-- production single-walk operation. Both results are consumed and validated.
+partial def psKernelBenchMapInsertLoop
+    (iterations : Nat) (index : PsKernelExprMapIndex) (singleWalk : Bool) : IO Nat :=
+  match iterations with
+  | 0 => pure 0
+  | remaining + 1 => do
+      let tail ← psKernelBenchMapInsertLoop remaining index singleWalk
+      let key := PsKernelExpr.bvar (remaining % 8)
+      let value := PsKernelExpr.lit (.nat remaining)
+      let hash := psKernelExprHash key
+      let next := if singleWalk then psKernelExprMapIndexInsert 16 index hash key value
+        else psKernelExprMapIndexSet 16 index hash
+          (psKernelExprMapInsertIn key value (psKernelExprMapIndexBucket 16 index hash))
+      match psKernelExprMapGetIn key (psKernelExprMapIndexBucket 16 next hash) with
+      | .some actual => pure (tail + if psKernelExprEq actual value then 1 else 0)
+      | .none => pure tail
+
 def psKernelBenchName
     (index : Nat) :
     PsKernelName :=
@@ -704,4 +722,3 @@ partial def psKernelBenchLazyDeltaColdLoop
               pure tail
       | Except.error _ =>
           pure tail
-

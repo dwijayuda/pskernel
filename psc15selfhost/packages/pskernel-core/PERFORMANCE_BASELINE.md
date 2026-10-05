@@ -538,11 +538,41 @@ change was reverted. Keep checked constant caching enabled globally; any future
 nested-specific optimization must avoid trading away general checker
 performance.
 
+## 2.9 Bounded Phase C cache-insertion work
+
+The three-sample baseline at package-rename checkpoint
+`071a584ec4bbefdd09cb2de3b063ce0db4641469` measured median PSKernel/Lean ratios
+of 3.20x for nested admission and 3.74x for the wider fixture. Untimed checked
+rule-cache profiles contained 20 entries (13 free variables) and 45 entries
+(34 free variables), respectively. These counts identify cache publication as
+a useful measurement target; they do not by themselves prove a bottleneck.
+
+Expression-map insertion now descends the persistent index once to update its
+bucket. Previously it first descended to read the bucket, then descended the
+same path to replace it. Hashing, 16-bit path selection, structural collision
+equality, bucket ordering, the 8-entry promotion threshold and inference cache
+eligibility are unchanged. Pair-set and environment-index algorithms are unchanged.
+
+The foundation suite compares complete index structures for 132 updates against
+the previous read-then-set operation, covering collisions, replacement, multiple
+depths and initially empty/noncanonical shapes. Existing promotion and checker
+conformance tests remain required.
+
+The native benchmark adds 2,000 matched updates per implementation to the same
+frozen index and validates every returned value. The bounded report records the
+median/range of single-walk divided by double-walk time across three samples,
+alongside the full checker/admission corpus. Consult the checkpoint's CI report
+for measured results; an insertion microbenchmark is not an end-to-end speed claim.
+
+No expression metadata, interning, cache-eligibility changes, semantic shortcuts,
+generated compiler/kernel fixed-point run, or large proof-library replay is part
+of this change. Generated-JavaScript performance and M3 remain open.
+
 ## 3. Interpretation
 
 The existing runtime-index work is justified.
 
-`Runtime/EnvironmentIndex.lean` and `Runtime/Cache.lean` materially reduce
+`Runtime/Acceleration/EnvironmentIndex.lean` and `Runtime/Acceleration/Cache.lean` materially reduce
 lookup cost while preserving the semantic structures:
 
 ```text

@@ -5,6 +5,7 @@ import Ps.BackendWasm.LowerInt
 import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.RuntimeNat
 import Ps.BackendWasm.RuntimeInt
+import Ps.BackendWasm.RuntimeString
 
 inductive PsWasmLowerError where
   | unsupportedType
@@ -3729,6 +3730,227 @@ def psWasmLowerCharToNatWith
                 state := lowered.state
               }
 
+def psWasmLowerStringUnaryCallWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (functionName : String)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match arguments with
+  | List.nil =>
+      Except.error PsWasmLowerError.invalidIntrinsicArity
+  | List.cons value rest =>
+      match rest with
+      | List.cons _ _ =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | List.nil =>
+          match
+              lower
+                (Option.some psWasmStringRef)
+                state
+                value with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok {
+                instructions :=
+                  psListAppend
+                    lowered.instructions
+                    [PsWasmInstruction.call functionName]
+                state := lowered.state
+              }
+
+def psWasmLowerCharToStringUnaryCallWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (functionName : String)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match arguments with
+  | List.nil =>
+      Except.error PsWasmLowerError.invalidIntrinsicArity
+  | List.cons value rest =>
+      match rest with
+      | List.cons _ _ =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | List.nil =>
+          match
+              lower
+                (Option.some PsWasmValueType.i32)
+                state
+                value with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok {
+                instructions :=
+                  psListAppend
+                    lowered.instructions
+                    [PsWasmInstruction.call functionName]
+                state := lowered.state
+              }
+
+def psWasmLowerStringBinaryCallWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (functionName : String)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmListPair? arguments with
+  | Option.none =>
+      Except.error PsWasmLowerError.invalidIntrinsicArity
+  | Option.some pair =>
+      match
+          psWasmLowerExprListWith
+            lower
+            (Option.some psWasmStringRef)
+            state
+            [Prod.fst pair, Prod.snd pair] with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            instructions :=
+              psListAppend
+                lowered.instructions
+                [PsWasmInstruction.call functionName]
+            state := lowered.state
+          }
+
+def psWasmLowerStringCharBinaryCallWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (functionName : String)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmListPair? arguments with
+  | Option.none =>
+      Except.error PsWasmLowerError.invalidIntrinsicArity
+  | Option.some pair =>
+      match
+          lower
+            (Option.some psWasmStringRef)
+            state
+            (Prod.fst pair) with
+      | Except.error error => Except.error error
+      | Except.ok loweredString =>
+          match
+              lower
+                (Option.some PsWasmValueType.i32)
+                loweredString.state
+                (Prod.snd pair) with
+          | Except.error error => Except.error error
+          | Except.ok loweredChar =>
+              Except.ok {
+                instructions :=
+                  psListAppend
+                    loweredString.instructions
+                    (psListAppend
+                      loweredChar.instructions
+                      [PsWasmInstruction.call functionName])
+                state := loweredChar.state
+              }
+
+def psWasmLowerStringNatBinaryCallWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (functionName : String)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmListPair? arguments with
+  | Option.none =>
+      Except.error PsWasmLowerError.invalidIntrinsicArity
+  | Option.some pair =>
+      match
+          lower
+            (Option.some psWasmStringRef)
+            state
+            (Prod.fst pair) with
+      | Except.error error => Except.error error
+      | Except.ok loweredString =>
+          match
+              lower
+                (Option.some psWasmNatRef)
+                loweredString.state
+                (Prod.snd pair) with
+          | Except.error error => Except.error error
+          | Except.ok loweredNat =>
+              Except.ok {
+                instructions :=
+                  psListAppend
+                    loweredString.instructions
+                    (psListAppend
+                      loweredNat.instructions
+                      [PsWasmInstruction.call functionName])
+                state := loweredNat.state
+              }
+
+def psWasmLowerStringNatNatCallWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (functionName : String)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmListTriple? arguments with
+  | Option.none =>
+      Except.error PsWasmLowerError.invalidIntrinsicArity
+  | Option.some triple =>
+      let value := Prod.fst triple;
+      let positions := Prod.snd triple;
+      match
+          lower
+            (Option.some psWasmStringRef)
+            state
+            value with
+      | Except.error error => Except.error error
+      | Except.ok loweredString =>
+          match
+              lower
+                (Option.some psWasmNatRef)
+                loweredString.state
+                (Prod.fst positions) with
+          | Except.error error => Except.error error
+          | Except.ok loweredBegin =>
+              match
+                  lower
+                    (Option.some psWasmNatRef)
+                    loweredBegin.state
+                    (Prod.snd positions) with
+              | Except.error error => Except.error error
+              | Except.ok loweredEnd =>
+                  Except.ok {
+                    instructions :=
+                      psListAppend
+                        loweredString.instructions
+                        (psListAppend
+                          loweredBegin.instructions
+                          (psListAppend
+                            loweredEnd.instructions
+                            [PsWasmInstruction.call functionName]))
+                    state := loweredEnd.state
+                  }
+
 def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)
     (lower :
@@ -3928,6 +4150,36 @@ def psWasmLowerIntrinsicWith
   | .charToNat =>
       psWasmLowerCharToNatWith
         lower state arguments
+  | .stringPush =>
+      psWasmLowerStringCharBinaryCallWith
+        lower state psWasmStringPushFn arguments
+  | .stringSingleton =>
+      psWasmLowerCharToStringUnaryCallWith
+        lower state psWasmStringSingletonFn arguments
+  | .stringLength =>
+      psWasmLowerStringUnaryCallWith
+        lower state psWasmStringLengthFn arguments
+  | .stringAppend =>
+      psWasmLowerStringBinaryCallWith
+        lower state psWasmStringAppendFn arguments
+  | .stringUtf8ByteSize =>
+      psWasmLowerStringUnaryCallWith
+        lower state psWasmStringUtf8ByteSizeFn arguments
+  | .stringNext =>
+      psWasmLowerStringNatBinaryCallWith
+        lower state psWasmStringNextFn arguments
+  | .stringGet =>
+      psWasmLowerStringNatBinaryCallWith
+        lower state psWasmStringGetFn arguments
+  | .stringAtEnd =>
+      psWasmLowerStringNatBinaryCallWith
+        lower state psWasmStringAtEndFn arguments
+  | .stringExtract =>
+      psWasmLowerStringNatNatCallWith
+        lower state psWasmStringExtractFn arguments
+  | .stringEq =>
+      psWasmLowerStringBinaryCallWith
+        lower state psWasmStringEqFn arguments
   | .arrayEmptyWithCapacity =>
       psWasmLowerArrayEmptyWithCapacityWith
         profile lower state typeArguments arguments
@@ -4803,6 +5055,12 @@ def psWasmLowerExprWorker
                       Except.ok {
                         instructions :=
                           psWasmLowerMachineIntegerLiteral profile type value
+                        state := state
+                      }
+                  | .string value =>
+                      Except.ok {
+                        instructions :=
+                          psWasmStringLiteralInstructions value
                         state := state
                       }
                   | .bool value =>

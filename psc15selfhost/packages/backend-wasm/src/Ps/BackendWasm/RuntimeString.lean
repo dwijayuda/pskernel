@@ -65,14 +65,17 @@ def psWasmStringNatOneInstructions : List PsWasmInstruction :=
     PsWasmInstruction.call psWasmNatBit1Fn
   ]
 
-def psWasmStringLiteralChars :
-    List Char -> List PsWasmInstruction
+def psWasmStringLiteralChars
+    (chars : List Char) : List PsWasmInstruction :=
+  match chars with
   | List.nil => List.nil
   | List.cons char rest =>
+      let encodedRest : List PsWasmInstruction :=
+        psWasmStringLiteralChars rest;
       List.cons
         (PsWasmInstruction.i32Const
           (Int.ofNat (Char.toNat char)))
-        (psWasmStringLiteralChars rest)
+        encodedRest
 
 def psWasmStringLiteralInstructions
     (value : String) : List PsWasmInstruction :=

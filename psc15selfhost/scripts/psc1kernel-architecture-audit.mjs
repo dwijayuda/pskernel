@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { maskLeanNonCode } from "./psc1-source-profile.mjs";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+export function auditArchitecture(root) {
 const packageRoot = path.join(root, "packages", "pskernel-selfhost");
 const sourceRoot = path.join(packageRoot, "src", "Ps", "KernelSelfHost");
 const manifestPath = path.join(packageRoot, "PSKERNEL_ARCHITECTURE.json");
@@ -44,8 +45,15 @@ function modulePath(moduleName) {
 
 function importsOf(source) {
   const imports = [];
-  const pattern = /^import\s+([^\s]+)\s*$/gmu;
-  for (const match of source.matchAll(pattern)) imports.push(match[1]);
+  const pattern = /^[ \t]*(?:(?:public|private)[ \t]+)?import\b([^\n]*)/gmu;
+  for (const match of maskLeanNonCode(source).matchAll(pattern)) {
+    for (const moduleName of match[1].trim().split(/\s+/u)) {
+      if (!/^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*$/u.test(moduleName)) {
+        throw new Error("PSC1KERNEL_ARCH_IMPORT_SYNTAX: " + moduleName);
+      }
+      imports.push(moduleName);
+    }
+  }
   return imports;
 }
 
@@ -71,7 +79,10 @@ while (queue.length > 0) {
         );
       }
     }
-    if (imported.startsWith(prefix)) queue.push(imported);
+    if (!imported.startsWith(prefix)) {
+      throw new Error("PSC1KERNEL_ARCH_EXTERNAL_IMPORT: " + moduleName + ": " + imported);
+    }
+    queue.push(imported);
   }
 }
 
@@ -139,7 +150,24 @@ for (const shim of manifest.migration.migrationShims ?? []) {
   }
 }
 
+const ownerAreas = new Set();
+const ownerModules = new Set();
+const registeredShims = new Set(manifest.migration.migrationShims ?? []);
 for (const owner of manifest.canonicalOwners ?? []) {
+  if (ownerAreas.has(owner.area) || ownerModules.has(owner.module)) {
+    throw new Error("PSC1KERNEL_ARCH_DUPLICATE_OWNER: " + owner.area);
+  }
+  ownerAreas.add(owner.area);
+  ownerModules.add(owner.module);
+  if (owner.legacyShim) {
+    if (!registeredShims.has(owner.legacyShim)) {
+      throw new Error("PSC1KERNEL_ARCH_UNREGISTERED_SHIM: " + owner.legacyShim);
+    }
+    const shimSource = maskLeanNonCode(fs.readFileSync(modulePath(owner.legacyShim), "utf8")).trim();
+    if (shimSource !== "import " + owner.module) {
+      throw new Error("PSC1KERNEL_ARCH_NON_FORWARDING_SHIM: " + owner.legacyShim);
+    }
+  }
   if (!seen.has(owner.module)) {
     throw new Error(
       "PSC1KERNEL_ARCH_CANONICAL_OWNER_NOT_IN_CLOSURE: " +
@@ -156,7 +184,7 @@ if (manifest.migration.finalArchitectureImplemented) {
   );
 }
 
-console.log(
+return (
   "PSC1KERNEL_ARCHITECTURE: target=" +
     manifest.target.version +
     "@" +
@@ -174,3 +202,10 @@ console.log(
     " tcbCapability=" +
     (tcb.capabilityTCB?.length ?? 0)
 );
+
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+  console.log(auditArchitecture(root));
+}

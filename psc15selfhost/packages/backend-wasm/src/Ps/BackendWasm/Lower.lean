@@ -1507,13 +1507,14 @@ def psWasmMatchBindingNames :
 
 def psWasmCollectCapturesWithFuel
     (outerBindings : List PsWasmBinding)
-    (boundNames : List String) :
-    Nat ->
-    PsVerifiedIrExpr ->
-    List PsWasmBinding ->
-    List PsWasmBinding
-  | 0, _, captures => captures
-  | fuel + 1, expr, captures =>
+    (boundNames : List String)
+    (remainingFuel : Nat)
+    (expr : PsVerifiedIrExpr)
+    (captures : List PsWasmBinding) :
+    List PsWasmBinding :=
+  match remainingFuel with
+  | 0 => captures
+  | fuel + 1 =>
       let collect :
           PsVerifiedIrExpr ->
           List PsWasmBinding ->
@@ -3390,14 +3391,15 @@ def psWasmLowerExprWithFuel
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive)
     (bindings : List PsWasmBinding)
-    (expected : Option PsWasmValueType) :
-    Nat ->
-    PsWasmLowerState ->
-    PsVerifiedIrExpr ->
-    Except PsWasmLowerError PsWasmLoweredExpr
-  | 0, _, _ =>
+    (expected : Option PsWasmValueType)
+    (remainingFuel : Nat)
+    (state : PsWasmLowerState)
+    (expr : PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match remainingFuel with
+  | 0 =>
       Except.error PsWasmLowerError.unsupportedExpression
-  | fuel + 1, state, expr =>
+  | fuel + 1 =>
       let lowerWithBindings :=
         fun
         (nextBindings : List PsWasmBinding)

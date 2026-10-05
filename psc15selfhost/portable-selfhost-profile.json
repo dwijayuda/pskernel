@@ -31,6 +31,7 @@
   ],
   "executableContract": {
     "pscCheckSourceRoots": true,
-    "pscTypeScriptEntryRoots": true
+    "pscTypeScriptEntryRoots": true,
+    "pscProofScriptEntryRoots": true
   }
 }

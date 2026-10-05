@@ -80,8 +80,8 @@ def psIrSpecializeLookupType :
     Option PsVerifiedIrType
   | [], _ => none
   | entry :: rest, name =>
-      if Prod.fst entry == name then
-        some Prod.snd entry
+      if (Prod.fst entry) == name then
+        some (Prod.snd entry)
       else
         psIrSpecializeLookupType rest name
 
@@ -495,7 +495,7 @@ def psIrSpecializeRewriteFieldsWith
         requests := []
       }
   | field :: rest =>
-      match rewrite Prod.snd field with
+      match rewrite (Prod.snd field) with
       | Except.error error => Except.error error
       | Except.ok lowered =>
           match psIrSpecializeRewriteFieldsWith rewrite rest with
@@ -503,7 +503,7 @@ def psIrSpecializeRewriteFieldsWith
           | Except.ok loweredRest =>
               Except.ok {
                 fields :=
-                  (Prod.fst field, lowered.expr) ::
+                  ((Prod.fst field), lowered.expr) ::
                     loweredRest.fields
                 requests :=
                   lowered.requests ++ loweredRest.requests
@@ -568,10 +568,10 @@ def psIrSpecializeRewriteAlternativesWith
           psIrSpecializeRewriteMatchBindings
             module
             substitution
-            Prod.fst (Prod.snd alternative) with
+            (Prod.fst (Prod.snd alternative)) with
       | Except.error error => Except.error error
       | Except.ok loweredBindings =>
-          match rewrite Prod.snd (Prod.snd alternative) with
+          match rewrite (Prod.snd (Prod.snd alternative)) with
           | Except.error error => Except.error error
           | Except.ok loweredBody =>
               match
@@ -585,7 +585,7 @@ def psIrSpecializeRewriteAlternativesWith
                   Except.ok {
                     alternatives :=
                       (
-                        Prod.fst alternative,
+                        (Prod.fst alternative),
                         loweredBindings.bindings,
                         loweredBody.expr
                       ) :: loweredRest.alternatives
@@ -1278,8 +1278,8 @@ def psIrSpecializeSeedStructures
                         name := structureInfo.name
                         typeParameters := []
                         fields := lowered.fields
-                      } :: Prod.fst loweredRest,
-                      lowered.requests ++ Prod.snd loweredRest
+                      } :: (Prod.fst loweredRest),
+                      lowered.requests ++ (Prod.snd loweredRest)
                     )
 
 def psIrSpecializeSeedInductives
@@ -1308,8 +1308,8 @@ def psIrSpecializeSeedInductives
                         name := inductiveInfo.name
                         typeParameters := []
                         constructors := lowered.constructors
-                      } :: Prod.fst loweredRest,
-                      lowered.requests ++ Prod.snd loweredRest
+                      } :: (Prod.fst loweredRest),
+                      lowered.requests ++ (Prod.snd loweredRest)
                     )
 
 def psIrSpecializeSeedDeclarations
@@ -1355,11 +1355,11 @@ def psIrSpecializeSeedDeclarations
                                   loweredParameters.parameters
                                 resultType := loweredResult.type
                                 body := loweredBody.expr
-                              } :: Prod.fst loweredRest,
+                              } :: (Prod.fst loweredRest),
                               loweredParameters.requests
                                 ++ loweredResult.requests
                                 ++ loweredBody.requests
-                                ++ Prod.snd loweredRest
+                                ++ (Prod.snd loweredRest)
                             )
 
 def psIrSpecializeAppendRequest
@@ -1685,14 +1685,14 @@ def psIrSpecializeModule
               | Except.ok declarations =>
                   let initial : PsIrSpecializeState := {
                     imports := imports.imports
-                    structures := Prod.fst structures
-                    inductives := Prod.fst inductives
-                    declarations := Prod.fst declarations
+                    structures := (Prod.fst structures)
+                    inductives := (Prod.fst inductives)
+                    declarations := (Prod.fst declarations)
                     pending :=
                       imports.requests
-                        ++ Prod.snd structures
-                        ++ Prod.snd inductives
-                        ++ Prod.snd declarations
+                        ++ (Prod.snd structures)
+                        ++ (Prod.snd inductives)
+                        ++ (Prod.snd declarations)
                     seen := []
                   }
                   match

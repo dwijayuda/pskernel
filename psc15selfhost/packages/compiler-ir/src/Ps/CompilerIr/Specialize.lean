@@ -269,8 +269,9 @@ def psIrSpecializeTypeParameterNames :
     List PsVerifiedIrTypeParameter -> List String
   | [] => []
   | parameter :: rest =>
-      parameter.name ::
-        psIrSpecializeTypeParameterNames rest
+      List.cons
+        parameter.name
+        (psIrSpecializeTypeParameterNames rest)
 
 def psIrSpecializeMakeSubstitution
     (parameters : List PsVerifiedIrTypeParameter)
@@ -334,7 +335,8 @@ def psIrSpecializeRewriteTypeListWith
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok {
-                types := lowered.type :: loweredRest.types
+                types :=
+                  List.cons lowered.type loweredRest.types
                 requests :=
                   lowered.requests ++ loweredRest.requests
               }
@@ -477,10 +479,12 @@ def psIrSpecializeRewriteParameters
           | Except.ok loweredRest =>
               Except.ok {
                 parameters :=
-                  {
-                    name := parameter.name
-                    type := lowered.type
-                  } :: loweredRest.parameters
+                  List.cons
+                    {
+                      name := parameter.name
+                      type := lowered.type
+                    }
+                    loweredRest.parameters
                 requests :=
                   lowered.requests ++ loweredRest.requests
               }
@@ -505,7 +509,7 @@ def psIrSpecializeRewriteExprListWith
           | Except.ok loweredRest =>
               Except.ok {
                 expressions :=
-                  lowered.expr :: loweredRest.expressions
+                  List.cons lowered.expr loweredRest.expressions
                 requests :=
                   lowered.requests ++ loweredRest.requests
               }
@@ -530,7 +534,8 @@ def psIrSpecializeRewriteFieldsWith
           | Except.ok loweredRest =>
               Except.ok {
                 fields :=
-                  ((Prod.fst field), lowered.expr) ::
+                  List.cons
+                    (Prod.mk (Prod.fst field) lowered.expr)
                     loweredRest.fields
                 requests :=
                   lowered.requests ++ loweredRest.requests
@@ -564,11 +569,13 @@ def psIrSpecializeRewriteMatchBindings
           | Except.ok loweredRest =>
               Except.ok {
                 bindings :=
-                  {
-                    field := binding.field
-                    name := binding.name
-                    type := lowered.type
-                  } :: loweredRest.bindings
+                  List.cons
+                    {
+                      field := binding.field
+                      name := binding.name
+                      type := lowered.type
+                    }
+                    loweredRest.bindings
                 requests :=
                   lowered.requests ++ loweredRest.requests
               }
@@ -611,11 +618,13 @@ def psIrSpecializeRewriteAlternativesWith
               | Except.ok loweredRest =>
                   Except.ok {
                     alternatives :=
-                      (
-                        (Prod.fst alternative),
-                        loweredBindings.bindings,
-                        loweredBody.expr
-                      ) :: loweredRest.alternatives
+                      List.cons
+                        (Prod.mk
+                          (Prod.fst alternative)
+                          (Prod.mk
+                            loweredBindings.bindings
+                            loweredBody.expr))
+                        loweredRest.alternatives
                     requests :=
                       loweredBindings.requests
                         ++ loweredBody.requests
@@ -1167,10 +1176,12 @@ def psIrSpecializeRewriteStructureFields
           | Except.ok loweredRest =>
               Except.ok {
                 fields :=
-                  {
-                    name := field.name
-                    type := lowered.type
-                  } :: loweredRest.fields
+                  List.cons
+                    {
+                      name := field.name
+                      type := lowered.type
+                    }
+                    loweredRest.fields
                 requests :=
                   lowered.requests ++ loweredRest.requests
               }
@@ -1203,10 +1214,12 @@ def psIrSpecializeRewriteConstructorFields
           | Except.ok loweredRest =>
               Except.ok {
                 fields :=
-                  {
-                    name := field.name
-                    type := lowered.type
-                  } :: loweredRest.fields
+                  List.cons
+                    {
+                      name := field.name
+                      type := lowered.type
+                    }
+                    loweredRest.fields
                 requests :=
                   lowered.requests ++ loweredRest.requests
               }
@@ -1239,10 +1252,12 @@ def psIrSpecializeRewriteConstructors
           | Except.ok loweredRest =>
               Except.ok {
                 constructors :=
-                  {
-                    name := constructorInfo.name
-                    fields := lowered.fields
-                  } :: loweredRest.constructors
+                  List.cons
+                    {
+                      name := constructorInfo.name
+                      fields := lowered.fields
+                    }
+                    loweredRest.constructors
                 requests :=
                   lowered.requests ++ loweredRest.requests
               }
@@ -1269,12 +1284,14 @@ def psIrSpecializeRewriteImports
           | Except.ok loweredRest =>
               Except.ok {
                 imports :=
-                  {
-                    localName := importInfo.localName
-                    source := importInfo.source
-                    importedName := importInfo.importedName
-                    type := lowered.type
-                  } :: loweredRest.imports
+                  List.cons
+                    {
+                      localName := importInfo.localName
+                      source := importInfo.source
+                      importedName := importInfo.importedName
+                      type := lowered.type
+                    }
+                    loweredRest.imports
                 requests :=
                   lowered.requests ++ loweredRest.requests
               }
@@ -1301,11 +1318,13 @@ def psIrSpecializeSeedStructures
               | Except.ok lowered =>
                   Except.ok
                     (
-                      {
-                        name := structureInfo.name
-                        typeParameters := []
-                        fields := lowered.fields
-                      } :: (Prod.fst loweredRest),
+                      List.cons
+                        {
+                          name := structureInfo.name
+                          typeParameters := []
+                          fields := lowered.fields
+                        }
+                        (Prod.fst loweredRest),
                       lowered.requests ++ (Prod.snd loweredRest)
                     )
 
@@ -1331,11 +1350,13 @@ def psIrSpecializeSeedInductives
               | Except.ok lowered =>
                   Except.ok
                     (
-                      {
-                        name := inductiveInfo.name
-                        typeParameters := []
-                        constructors := lowered.constructors
-                      } :: (Prod.fst loweredRest),
+                      List.cons
+                        {
+                          name := inductiveInfo.name
+                          typeParameters := []
+                          constructors := lowered.constructors
+                        }
+                        (Prod.fst loweredRest),
                       lowered.requests ++ (Prod.snd loweredRest)
                     )
 
@@ -1375,14 +1396,16 @@ def psIrSpecializeSeedDeclarations
                       | Except.ok loweredBody =>
                           Except.ok
                             (
-                              {
-                                name := declaration.name
-                                typeParameters := []
-                                parameters :=
-                                  loweredParameters.parameters
-                                resultType := loweredResult.type
-                                body := loweredBody.expr
-                              } :: (Prod.fst loweredRest),
+                              List.cons
+                                {
+                                  name := declaration.name
+                                  typeParameters := []
+                                  parameters :=
+                                    loweredParameters.parameters
+                                  resultType := loweredResult.type
+                                  body := loweredBody.expr
+                                }
+                                (Prod.fst loweredRest),
                               loweredParameters.requests
                                 ++ loweredResult.requests
                                 ++ loweredBody.requests
@@ -1412,7 +1435,7 @@ def psIrSpecializeMarkSeen
     inductives := state.inductives
     declarations := state.declarations
     pending := state.pending
-    seen := key :: state.seen
+    seen := List.cons key state.seen
   }
 
 def psIrSpecializeAddStructure

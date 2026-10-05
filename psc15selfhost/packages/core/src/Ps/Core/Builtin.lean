@@ -165,6 +165,9 @@ def psBoolFalseName : PsName :=
 def psEqName : PsName :=
   psRootName "Eq"
 
+def psEqReflName : PsName :=
+  psNameAppendStr psEqName "refl"
+
 def psDecidableName : PsName :=
   psRootName "Decidable"
 

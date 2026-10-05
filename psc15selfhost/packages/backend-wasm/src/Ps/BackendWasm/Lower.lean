@@ -5076,8 +5076,6 @@ def psWasmLowerExprWorker
                         instructions := []
                         state := state
                       }
-                  | _ =>
-                      Except.error PsWasmLowerError.unsupportedExpression
               | .var name =>
                   match psWasmFindBindingIndex bindings name with
                   | Option.none =>

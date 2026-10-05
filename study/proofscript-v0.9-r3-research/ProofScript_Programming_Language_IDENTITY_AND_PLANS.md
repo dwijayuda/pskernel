@@ -94,7 +94,7 @@ Overall research verdict:     PROMISING / BUILD BOUNDED EXPERIMENTS
 For a **fully autonomous, general-purpose factory that generates and verifies arbitrary application ecosystems**:
 
 ~~~text
-Current feasibility:          4.8 / 10
+Current feasibility:          ≈5.0 / 10
 Potential long-term:          8.0 / 10
 Current evidence maturity:    2.0 / 5
 Verdict:                      RESEARCH VISION, NOT PRODUCT CLAIM
@@ -1757,7 +1757,7 @@ Summary:
 
 ~~~text
 Bounded Factory MVP feasibility:           8.5 / 10
-Full general Factory current feasibility:  5.2 / 10
+Full general Factory current feasibility:  ≈5.0 / 10
 Architecture fit with existing repo:       9.0 / 10
 Practical product readiness today:         5.5 / 10
 Long-term potential:                       8.8 / 10

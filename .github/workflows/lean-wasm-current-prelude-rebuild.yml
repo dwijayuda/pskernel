@@ -183,6 +183,11 @@ jobs:
             echo "expected rebuilt bundle changes but index is clean" >&2
             exit 1
           fi
+          remote_head="$(git ls-remote origin "refs/heads/$GITHUB_REF_NAME" | cut -f1)"
+          if [[ "$remote_head" != "$GITHUB_SHA" ]]; then
+            echo "topic branch advanced during rebuild: expected $GITHUB_SHA, got $remote_head" >&2
+            exit 1
+          fi
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git commit -m "build(wasm): rebuild provider with current compiler prelude"
@@ -205,5 +210,6 @@ jobs:
             psc15selfhost/.lake/lean-wasm-refresh/
             psc15selfhost/packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json
             psc15selfhost/packages/pskernel-lean-wasm/PROOFSCRIPT_SOURCE_MANIFEST.json
+            psc15selfhost/packages/pskernel-lean-wasm/wasm/
           retention-days: 14
           if-no-files-found: warn

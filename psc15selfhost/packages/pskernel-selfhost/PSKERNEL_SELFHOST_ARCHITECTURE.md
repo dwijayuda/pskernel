@@ -3,6 +3,12 @@
 This document is normative project guidance for `packages/pskernel-selfhost`.
 It exists to prevent development drift after the portable self-host milestone.
 
+`PSKERNEL_REFERENCE.md` is adopted as the canonical **target architecture and
+migration reference**. This document retains the non-negotiable product and
+semantic guardrails. If a target-architecture idea conflicts with these
+guardrails, Lean-4.34 compatibility, PSC1 portability, or fail-closed checking,
+the guardrail wins until an explicit architecture review changes it.
+
 ## Development authority
 
 GitHub is the canonical development state. Follow
@@ -37,8 +43,12 @@ Unless a new architecture review explicitly replaces this document:
    - no duplicated `spec/reference/fast` semantic implementations.
 
 2. **No formal-verification project is required for the production milestone.**
-   Assurance comes from exact theory mapping, source review, Lean-4.34
-   conformance, differential tests, and portable-source self-host checks.
+   Production promotion continues to rely on exact theory mapping, source
+   review, Lean-4.34 conformance, differential tests, portable-source self-host
+   checks, and provider-parity gates. The Assurance Plane described in
+   `PSKERNEL_REFERENCE.md` is a long-term strengthening track; it must not
+   block current architecture/readability/performance work unless a specific
+   assurance milestone is explicitly promoted to a release gate.
 
 3. **Compatibility is defined by rules, not by project size.**
    The normative feature-completeness source is
@@ -68,36 +78,58 @@ Unless a new architecture review explicitly replaces this document:
 
 ## 3. Source architecture
 
-The direction is one semantic implementation with theory/runtime separation.
+The canonical target is the Execution Plane in `PSKERNEL_REFERENCE.md`.
+The current source may retain migration-era paths while it moves there
+incrementally, but there remains exactly one production semantic implementation.
 
 ```text
 Ps.KernelSelfHost
 |
-+-- core data
-|   Name / Level / Expr / Instantiate / Declaration
++-- Core
+|   Name / Level / Expr / Declaration / substitution
 |
-+-- theory-facing algorithms
-|   inference / reduction / definitional equality
-|   Quot / ordinary inductives / mutual / nested
++-- Environment
+|   semantic declarations + derived lookup structures
 |
-+-- admission
-|   declarations / theorem / opaque / mutual definitions / inductives
++-- Checker
+|   context / state / inference / reduction / recursor / defeq
+|   one explicit recursive wiring owner (Checker/Knot)
 |
-+-- runtime-only acceleration
-    Runtime/EnvironmentIndex
-    Runtime/Cache
-    Runtime/NativeReduction
++-- Admission
+|   declarations / Quot / ordinary + mutual + nested inductives
+|
++-- Runtime/Acceleration
+|   caches / indexes / derived metadata
+|
++-- Runtime/Capability
+|   explicit target-specific trusted capabilities
+|
++-- API
+|   KernelContract-v1 / checked sessions / provider-neutral boundary
+|
+'-- SelfHost
+    canonical portable semantic root
 ```
 
-The distinction is:
+The distinctions are:
 
 ```text
-Theory-facing modules:
-    answer "what does Lean mean?"
+Semantic rules:
+    answer "what does Lean 4.34 mean?"
 
-Runtime modules:
-    answer "how do we make that same result fast?"
+Acceleration:
+    makes the same judgment faster and must preserve answers
+
+Trusted capability:
+    can affect acceptance and therefore extends the TCB
+
+Assurance tooling:
+    validates the production implementation but is outside its semantic closure
 ```
+
+The long-term Assurance Plane (formal specification/refinement, external
+oracles, adversarial corpora, fuzzing and receipts) lives outside the production
+semantic root and never becomes a fallback semantic implementation.
 
 ## 4. Self-host coding discipline
 
@@ -132,18 +164,25 @@ Every major rule should eventually provide:
 
 Large files should be split by theory concept, not by arbitrary line count.
 
-Preferred examples:
+Preferred final ownership examples:
 
 ```text
-Theory/DefEq/
+Checker/DefEq/
     LazyDelta.lean
     FinalRules.lean
 
-Runtime/
+Runtime/Acceleration/
     Cache.lean
+    CachePolicy.lean
     EnvironmentIndex.lean
-    NativeReduction.lean
+
+Runtime/Capability/
+    Lean434NativeReduction.lean
 ```
+
+During migration, existing `Theory/*` and top-level compatibility paths may
+remain as temporary forwarding/import layers, but canonical source must not
+depend on those shims.
 
 Target: a reader familiar with dependent type theory should be able to learn
 Lean kernel behavior by following `KERNEL_THEORY.md` and the source modules.
@@ -274,7 +313,10 @@ Lean.reduceBool / Lean.reduceNat marker
 -> kernel receives Bool/Nat result
 ```
 
-The provider belongs in `Runtime/NativeReduction`, not in core type theory.
+The provider is a target-specific trusted capability. The final target path is
+`Runtime/Capability/Lean434NativeReduction.lean` (the current
+`Runtime/NativeReduction.lean` path may remain during migration). It is not
+ordinary cache/index acceleration and it is not core type theory.
 
 ## 11. Optional generated-bootstrap evidence
 
@@ -293,8 +335,11 @@ Before promoting any kernel change, ask:
 
 1. Does it preserve Lean 4.34 semantics?
 2. Does it remain PSC1 portable?
-3. Is it theory or runtime?
-4. If runtime, can it change acceptance? If yes, redesign it.
+3. What is its semantic role: rule, acceleration, trusted capability, adapter,
+   or assurance-only?
+4. If it is acceleration, can changing/removing it change a semantic answer?
+   If yes, the refinement invariant is broken and the change must not be
+   promoted as an acceleration-only change.
 5. Does it preserve fail-closed behavior on error/exhaustion?
 6. Does the compatibility matrix need updating?
 7. Does `KERNEL_THEORY.md` need updating?

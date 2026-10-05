@@ -61,7 +61,7 @@ def psWasmIrTypeKeyWithFuel :
           let argumentKeys :=
             psWasmMapTypeKeysWith
               (psWasmIrTypeKeyWithFuel fuel)
-              arguments
+              arguments;
           match psWasmJoinTypeKeys argumentKeys with
           | none => none
           | some "" => some
@@ -81,7 +81,7 @@ def psWasmIrTypeKeyWithFuel :
           let parameterKeys :=
             psWasmMapTypeKeysWith
               (psWasmIrTypeKeyWithFuel fuel)
-              parameters
+              parameters;
           match psWasmJoinTypeKeys parameterKeys with
           | none => none
           | some parameterKey =>

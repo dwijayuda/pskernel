@@ -51,7 +51,7 @@ def psWasmLowerMachineIntegerLiteral
     if psWasmMachineIntegerIs64 profile type then
       PsWasmInstruction.i64Const value
     else
-      PsWasmInstruction.i32Const value
+      PsWasmInstruction.i32Const value;
   List.cons
     constant
     (psWasmNormalizeMachineInteger type)
@@ -95,7 +95,7 @@ def psWasmMachineIntegerCompareInstruction
     (type : PsVerifiedIrMachineIntegerType)
     (operation : PsVerifiedIrIntegerCompareOp) :
     PsWasmInstruction :=
-  let signed := psWasmMachineIntegerIsSigned type
+  let signed := psWasmMachineIntegerIsSigned type;
   if psWasmMachineIntegerIs64 profile type then
     match operation with
     | .eq => PsWasmInstruction.i64Eq

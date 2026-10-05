@@ -26,8 +26,8 @@ def psWasmEncodeUlebWithFuel :
     Nat -> Nat -> List UInt8
   | 0, _ => []
   | fuel + 1, value =>
-      let low := value % 128
-      let rest := value / 128
+      let low := value % 128;
+      let rest := value / 128;
       if Nat.beq rest 0 then
         [psWasmByte low]
       else
@@ -42,17 +42,17 @@ def psWasmEncodeSlebWithFuel :
     Nat -> Int -> List UInt8
   | 0, _ => []
   | fuel + 1, value =>
-      let lowInt := value % 128
-      let low := lowInt.toNat
-      let rest := value / 128
-      let signSet := 64 <= low
+      let lowInt := value % 128;
+      let low := lowInt.toNat;
+      let rest := value / 128;
+      let signSet := 64 <= low;
       let donePositive :=
         if psWasmIntIsZero rest then
           if signSet then false else true
         else
-          false
+          false;
       let doneNegative :=
-        if psWasmIntIsNegativeOne rest then signSet else false
+        if psWasmIntIsNegativeOne rest then signSet else false;
       if donePositive then
         [psWasmByte low]
       else if doneNegative then
@@ -66,14 +66,14 @@ def psWasmEncodeSleb (value : Int) : List UInt8 :=
   psWasmEncodeSlebWithFuel 16 value
 
 def psWasmNormalizeI32Immediate (value : Int) : Int :=
-  let reduced := value % 4294967296
+  let reduced := value % 4294967296;
   if reduced >= 2147483648 then
     reduced - 4294967296
   else
     reduced
 
 def psWasmNormalizeI64Immediate (value : Int) : Int :=
-  let reduced := value % 18446744073709551616
+  let reduced := value % 18446744073709551616;
   if reduced >= 9223372036854775808 then
     reduced - 18446744073709551616
   else
@@ -86,7 +86,7 @@ def psWasmEncodeI64Constant (value : Int) : List UInt8 :=
   psWasmEncodeSleb (psWasmNormalizeI64Immediate value)
 
 def psWasmEncodeUtf8Char (char : Char) : List UInt8 :=
-  let value := char.toNat
+  let value := char.toNat;
   if value <= 127 then
     [psWasmByte value]
   else if value <= 2047 then
@@ -114,7 +114,7 @@ def psWasmEncodeUtf8Chars : List Char -> List UInt8
       psWasmEncodeUtf8Char char ++ psWasmEncodeUtf8Chars rest
 
 def psWasmEncodeName (name : String) : List UInt8 :=
-  let bytes := psWasmEncodeUtf8Chars name.toList
+  let bytes := psWasmEncodeUtf8Chars name.toList;
   psWasmEncodeUleb bytes.length ++ bytes
 
 def psWasmFindStructureIndexLoop
@@ -668,7 +668,7 @@ def psWasmEncodeFunctionBody
             psWasmEncodeUleb function.locals.length
               ++ encodedLocals
               ++ instructions
-              ++ [psWasmByte 11]
+              ++ [psWasmByte 11];
           Except.ok (psWasmEncodeUleb body.length ++ body)
 
 def psWasmEncodeFunctionBodies
@@ -773,7 +773,7 @@ def psWasmEncodeStructType
                 if structType.isFinal then
                   psWasmByte 79
                 else
-                  psWasmByte 80
+                  psWasmByte 80;
               Except.ok
                 ([subtypeTag]
                   ++ psWasmEncodeUleb 1
@@ -809,7 +809,7 @@ def psWasmEncodeArrayType
   | Except.ok elementType =>
       let mutability :=
         if arrayType.mutable then psWasmByte 1
-        else psWasmByte 0
+        else psWasmByte 0;
       Except.ok
         ([psWasmByte 94]
           ++ elementType
@@ -937,7 +937,7 @@ def psWasmEncodeDeclarativeFunctionRefs
               ++ [psWasmByte 0]
               ++ psWasmEncodeVector
                 indices
-                functionRefs.length
+                functionRefs.length;
           Except.ok
             (psWasmEncodeVector segment 1)
 
@@ -1031,33 +1031,33 @@ def psWasmEncodeModule
                                     module.structures.length
                                       + module.arrays.length
                                       + module.functionTypes.length
-                                      + module.functions.length
+                                      + module.functions.length;
                                   let typePayload :=
                                     psWasmEncodeVector
                                       (encodedStructTypes
                                         ++ encodedArrayTypes
                                         ++ encodedNamedFunctionTypes
                                         ++ encodedFunctionTypes)
-                                      typeCount
+                                      typeCount;
                                   let functionPayload :=
                                     psWasmEncodeVector
                                       encodedFunctionTypeIndices
-                                      module.functions.length
+                                      module.functions.length;
                                   let exportPayload :=
                                     psWasmEncodeVector
                                       encodedExports
-                                      module.exports.length
+                                      module.exports.length;
                                   let elementSection :=
                                     match module.functionRefs with
                                     | [] => []
                                     | _ =>
                                         psWasmEncodeSection
                                           9
-                                          encodedFunctionRefs
+                                          encodedFunctionRefs;
                                   let codePayload :=
                                     psWasmEncodeVector
                                       encodedBodies
-                                      module.functions.length
+                                      module.functions.length;
                                   Except.ok
                                     ([
                                       psWasmByte 0,

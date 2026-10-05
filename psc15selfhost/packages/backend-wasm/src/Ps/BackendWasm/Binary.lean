@@ -1132,7 +1132,7 @@ def psWasmEncodeModule
                                     psWasmEncodeVector
                                       encodedExports
                                       (psListLength module.exports);
-                                  let elementSection :=
+                                  let elementSection : List UInt8 :=
                                     match module.functionRefs with
                                     | [] => []
                                     | _ =>

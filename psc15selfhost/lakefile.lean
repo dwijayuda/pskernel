@@ -300,6 +300,12 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.SelfHost
   ]
 
+lean_lib PsKernelCoreMetatheory where
+  srcDir := "packages/pskernel-core/metatheory"
+  roots := #[
+    `Ps.KernelCore.Metatheory.Judgments
+  ]
+
 lean_lib PsKernelCoreTestSupport where
   srcDir := "test"
   roots := #[

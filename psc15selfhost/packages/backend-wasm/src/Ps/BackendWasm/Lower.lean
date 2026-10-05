@@ -118,18 +118,24 @@ def psWasmFloatingValueType
   | .float => PsWasmValueType.f64
 
 
+def psWasmListFoldlWorker {Value State : Type}
+    (step : State -> Value -> State)
+    (values : List Value) :
+    State -> State :=
+  match values with
+  | List.nil =>
+      fun (state : State) => state
+  | List.cons value rest =>
+      let smaller : State -> State :=
+        psWasmListFoldlWorker step rest;
+      fun (state : State) =>
+        smaller (step state value)
+
 def psWasmListFoldl {Value State : Type}
     (step : State -> Value -> State)
     (values : List Value)
     (state : State) : State :=
-  match values with
-  | List.nil =>
-      state
-  | List.cons value rest =>
-      psWasmListFoldl
-        step
-        rest
-        (step state value)
+  psWasmListFoldlWorker step values state
 
 def psWasmListPair? {Value : Type}
     (values : List Value) :
@@ -1177,19 +1183,29 @@ def psWasmFindStructure
       else
         psWasmFindStructure rest name
 
+def psWasmFindStructureFieldWorker
+    (fieldName : String)
+    (fields : List PsVerifiedIrStructureField) :
+    Nat -> Option (Nat × PsVerifiedIrStructureField) :=
+  match fields with
+  | List.nil =>
+      fun (_index : Nat) => Option.none
+  | List.cons field rest =>
+      let smaller :
+          Nat -> Option (Nat × PsVerifiedIrStructureField) :=
+        psWasmFindStructureFieldWorker fieldName rest;
+      fun (index : Nat) =>
+        if psStringEq field.name fieldName then
+          Option.some (Prod.mk index field)
+        else
+          smaller (Nat.add index 1)
+
 def psWasmFindStructureFieldLoop
     (fieldName : String)
     (index : Nat)
     (fields : List PsVerifiedIrStructureField) :
     Option (Nat × PsVerifiedIrStructureField) :=
-  match fields with
-  | List.nil => Option.none
-  | List.cons field rest =>
-      if psStringEq field.name fieldName then
-        Option.some (Prod.mk index field)
-      else
-        psWasmFindStructureFieldLoop
-          fieldName (Nat.add index 1) rest
+  psWasmFindStructureFieldWorker fieldName fields index
 
 def psWasmFindStructureField
     (structInfo : PsVerifiedIrStructure)
@@ -1314,19 +1330,29 @@ def psWasmFindConstructor
       else
         psWasmFindConstructor rest name
 
+def psWasmFindConstructorFieldWorker
+    (fieldName : String)
+    (fields : List PsVerifiedIrConstructorField) :
+    Nat -> Option (Nat × PsVerifiedIrConstructorField) :=
+  match fields with
+  | List.nil =>
+      fun (_index : Nat) => Option.none
+  | List.cons field rest =>
+      let smaller :
+          Nat -> Option (Nat × PsVerifiedIrConstructorField) :=
+        psWasmFindConstructorFieldWorker fieldName rest;
+      fun (index : Nat) =>
+        if psStringEq field.name fieldName then
+          Option.some (Prod.mk index field)
+        else
+          smaller (Nat.add index 1)
+
 def psWasmFindConstructorFieldLoop
     (fieldName : String)
     (index : Nat)
     (fields : List PsVerifiedIrConstructorField) :
     Option (Nat × PsVerifiedIrConstructorField) :=
-  match fields with
-  | List.nil => Option.none
-  | List.cons field rest =>
-      if psStringEq field.name fieldName then
-        Option.some (Prod.mk index field)
-      else
-        psWasmFindConstructorFieldLoop
-          fieldName (Nat.add index 1) rest
+  psWasmFindConstructorFieldWorker fieldName fields index
 
 def psWasmFindConstructorField
     (constructorInfo : PsVerifiedIrConstructor)
@@ -1433,21 +1459,28 @@ def psWasmLowerInductives
           | Except.ok loweredRest =>
               Except.ok (psListAppend lowered loweredRest)
 
+def psWasmParameterBindingsWorker
+    (parameters : List PsVerifiedIrParameter) :
+    Nat -> List PsWasmBinding :=
+  match parameters with
+  | List.nil =>
+      fun (_index : Nat) => List.nil
+  | List.cons parameter rest =>
+      let smaller : Nat -> List PsWasmBinding :=
+        psWasmParameterBindingsWorker rest;
+      fun (index : Nat) =>
+        List.cons
+          (PsWasmBinding.mk
+            parameter.name
+            index
+            parameter.type)
+          (smaller (Nat.add index 1))
+
 def psWasmParameterBindingsLoop
     (index : Nat)
     (parameters : List PsVerifiedIrParameter) :
     List PsWasmBinding :=
-  match parameters with
-  | List.nil => List.nil
-  | List.cons parameter rest =>
-      List.cons
-        (PsWasmBinding.mk
-          parameter.name
-          index
-          parameter.type)
-        (psWasmParameterBindingsLoop
-          (Nat.add index 1)
-          rest)
+  psWasmParameterBindingsWorker parameters index
 
 def psWasmParameterBindings
     (parameters : List PsVerifiedIrParameter) :
@@ -1660,21 +1693,28 @@ def psWasmCollectCaptures
     body
     []
 
+def psWasmParameterBindingsFromWorker
+    (parameters : List PsVerifiedIrParameter) :
+    Nat -> List PsWasmBinding :=
+  match parameters with
+  | List.nil =>
+      fun (_firstIndex : Nat) => List.nil
+  | List.cons parameter rest =>
+      let smaller : Nat -> List PsWasmBinding :=
+        psWasmParameterBindingsFromWorker rest;
+      fun (firstIndex : Nat) =>
+        List.cons
+          (PsWasmBinding.mk
+            parameter.name
+            firstIndex
+            parameter.type)
+          (smaller (Nat.add firstIndex 1))
+
 def psWasmParameterBindingsFrom
     (firstIndex : Nat)
     (parameters : List PsVerifiedIrParameter) :
     List PsWasmBinding :=
-  match parameters with
-  | List.nil => []
-  | List.cons parameter rest =>
-      List.cons
-        (PsWasmBinding.mk
-          parameter.name
-          firstIndex
-          parameter.type)
-        (psWasmParameterBindingsFrom
-          (Nat.add firstIndex 1)
-          rest)
+  psWasmParameterBindingsFromWorker parameters firstIndex
 
 def psWasmAddLocal
     (state : PsWasmLowerState)
@@ -1722,6 +1762,43 @@ def psWasmStateRestoreOuterLocals
     generatedFunctionRefs := generatedState.generatedFunctionRefs
   }
 
+def psWasmLowerExprListWorker
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (expected : Option PsWasmValueType)
+    (expressions : List PsVerifiedIrExpr) :
+    PsWasmLowerState ->
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match expressions with
+  | List.nil =>
+      fun (state : PsWasmLowerState) =>
+        Except.ok {
+          instructions := []
+          state := state
+        }
+  | List.cons expr rest =>
+      let smaller :
+          PsWasmLowerState ->
+          Except PsWasmLowerError PsWasmLoweredExpr :=
+        psWasmLowerExprListWorker lower expected rest;
+      fun (state : PsWasmLowerState) =>
+        match lower expected state expr with
+        | Except.error error => Except.error error
+        | Except.ok lowered =>
+            match smaller lowered.state with
+            | Except.error error => Except.error error
+            | Except.ok loweredRest =>
+                Except.ok {
+                  instructions :=
+                    psListAppend
+                      lowered.instructions
+                      loweredRest.instructions
+                  state := loweredRest.state
+                }
+
 def psWasmLowerExprListWith
     (lower :
       Option PsWasmValueType ->
@@ -1732,26 +1809,61 @@ def psWasmLowerExprListWith
     (state : PsWasmLowerState)
     (expressions : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
-  match expressions with
+  psWasmLowerExprListWorker lower expected expressions state
+
+def psWasmLowerRecordFieldsWorker
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (structInfo : PsVerifiedIrStructure)
+    (fields : List (String × PsVerifiedIrExpr))
+    (structureFields : List PsVerifiedIrStructureField) :
+    PsWasmLowerState ->
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match structureFields with
   | List.nil =>
-      Except.ok {
-        instructions := []
-        state := state
-      }
-  | List.cons expr rest =>
-      match lower expected state expr with
-      | Except.error error => Except.error error
-      | Except.ok lowered =>
-          match
-              psWasmLowerExprListWith
-                lower expected lowered.state rest with
-          | Except.error error => Except.error error
-          | Except.ok loweredRest =>
-              Except.ok {
-                instructions :=
-                  psListAppend lowered.instructions loweredRest.instructions
-                state := loweredRest.state
-              }
+      fun (state : PsWasmLowerState) =>
+        Except.ok {
+          instructions := []
+          state := state
+        }
+  | List.cons field rest =>
+      let smaller :
+          PsWasmLowerState ->
+          Except PsWasmLowerError PsWasmLoweredExpr :=
+        psWasmLowerRecordFieldsWorker
+          profile
+          lower
+          structInfo
+          fields
+          rest;
+      fun (state : PsWasmLowerState) =>
+        match psWasmFindRecordField fields field.name with
+        | Option.none =>
+            Except.error
+              (PsWasmLowerError.missingRecordField
+                structInfo.name field.name)
+        | Option.some value =>
+            match psWasmValueTypeOfIrType? profile field.type with
+            | Option.none =>
+                Except.error PsWasmLowerError.unsupportedType
+            | Option.some valueType =>
+                match lower (Option.some valueType) state value with
+                | Except.error error => Except.error error
+                | Except.ok lowered =>
+                    match smaller lowered.state with
+                    | Except.error error => Except.error error
+                    | Except.ok loweredRest =>
+                        Except.ok {
+                          instructions :=
+                            psListAppend
+                              lowered.instructions
+                              loweredRest.instructions
+                          state := loweredRest.state
+                        }
 
 def psWasmLowerRecordFieldsWith
     (profile : PsWasmTargetProfile)
@@ -1765,42 +1877,66 @@ def psWasmLowerRecordFieldsWith
     (state : PsWasmLowerState)
     (structureFields : List PsVerifiedIrStructureField) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
-  match structureFields with
+  psWasmLowerRecordFieldsWorker
+    profile lower structInfo fields structureFields state
+
+def psWasmLowerConstructorValuesWorker
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (inductiveName : String)
+    (constructorInfo : PsVerifiedIrConstructor)
+    (fields : List (String × PsVerifiedIrExpr))
+    (constructorFields : List PsVerifiedIrConstructorField) :
+    PsWasmLowerState ->
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match constructorFields with
   | List.nil =>
-      Except.ok {
-        instructions := []
-        state := state
-      }
+      fun (state : PsWasmLowerState) =>
+        Except.ok {
+          instructions := []
+          state := state
+        }
   | List.cons field rest =>
-      match psWasmFindRecordField fields field.name with
-      | Option.none =>
-          Except.error
-            (PsWasmLowerError.missingRecordField
-              structInfo.name field.name)
-      | Option.some value =>
-          match psWasmValueTypeOfIrType? profile field.type with
-          | Option.none => Except.error PsWasmLowerError.unsupportedType
-          | Option.some valueType =>
-              match lower (Option.some valueType) state value with
-              | Except.error error => Except.error error
-              | Except.ok lowered =>
-                  match
-                      psWasmLowerRecordFieldsWith
-                        profile
-                        lower
-                        structInfo
-                        fields
-                        lowered.state
-                        rest with
-                  | Except.error error => Except.error error
-                  | Except.ok loweredRest =>
-                      Except.ok {
-                        instructions :=
-                          psListAppend
-                            lowered.instructions
-                            loweredRest.instructions
-                        state := loweredRest.state
-                      }
+      let smaller :
+          PsWasmLowerState ->
+          Except PsWasmLowerError PsWasmLoweredExpr :=
+        psWasmLowerConstructorValuesWorker
+          profile
+          lower
+          inductiveName
+          constructorInfo
+          fields
+          rest;
+      fun (state : PsWasmLowerState) =>
+        match psWasmFindRecordField fields field.name with
+        | Option.none =>
+            Except.error
+              (PsWasmLowerError.missingConstructorField
+                inductiveName
+                constructorInfo.name
+                field.name)
+        | Option.some value =>
+            match psWasmValueTypeOfIrType? profile field.type with
+            | Option.none =>
+                Except.error PsWasmLowerError.unsupportedType
+            | Option.some valueType =>
+                match lower (Option.some valueType) state value with
+                | Except.error error => Except.error error
+                | Except.ok lowered =>
+                    match smaller lowered.state with
+                    | Except.error error => Except.error error
+                    | Except.ok loweredRest =>
+                        Except.ok {
+                          instructions :=
+                            psListAppend
+                              lowered.instructions
+                              loweredRest.instructions
+                          state := loweredRest.state
+                        }
 
 def psWasmLowerConstructorValuesWith
     (profile : PsWasmTargetProfile)
@@ -1815,45 +1951,14 @@ def psWasmLowerConstructorValuesWith
     (state : PsWasmLowerState)
     (constructorFields : List PsVerifiedIrConstructorField) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
-  match constructorFields with
-  | List.nil =>
-      Except.ok {
-        instructions := []
-        state := state
-      }
-  | List.cons field rest =>
-      match psWasmFindRecordField fields field.name with
-      | Option.none =>
-          Except.error
-            (PsWasmLowerError.missingConstructorField
-              inductiveName
-              constructorInfo.name
-              field.name)
-      | Option.some value =>
-          match psWasmValueTypeOfIrType? profile field.type with
-          | Option.none => Except.error PsWasmLowerError.unsupportedType
-          | Option.some valueType =>
-              match lower (Option.some valueType) state value with
-              | Except.error error => Except.error error
-              | Except.ok lowered =>
-                  match
-                      psWasmLowerConstructorValuesWith
-                        profile
-                        lower
-                        inductiveName
-                        constructorInfo
-                        fields
-                        lowered.state
-                        rest with
-                  | Except.error error => Except.error error
-                  | Except.ok loweredRest =>
-                      Except.ok {
-                        instructions :=
-                          psListAppend
-                            lowered.instructions
-                            loweredRest.instructions
-                        state := loweredRest.state
-                      }
+  psWasmLowerConstructorValuesWorker
+    profile
+    lower
+    inductiveName
+    constructorInfo
+    fields
+    constructorFields
+    state
 
 def psWasmLowerNatArgumentsWith
     (lower :
@@ -3191,6 +3296,66 @@ def psWasmLowerCaptureFields
                     storageType)
                   loweredRest)
 
+def psWasmPrepareCaptureBindingsWorker
+    (profile : PsWasmTargetProfile)
+    (subtypeName : String)
+    (captures : List PsWasmBinding) :
+    Nat ->
+    PsWasmLowerState ->
+    Except PsWasmLowerError PsWasmLoweredBindings :=
+  match captures with
+  | List.nil =>
+      fun (_fieldIndex : Nat) =>
+        fun (state : PsWasmLowerState) =>
+          Except.ok {
+            instructions := []
+            bindings := []
+            state := state
+          }
+  | List.cons capture rest =>
+      let smaller :
+          Nat ->
+          PsWasmLowerState ->
+          Except PsWasmLowerError PsWasmLoweredBindings :=
+        psWasmPrepareCaptureBindingsWorker
+          profile
+          subtypeName
+          rest;
+      fun (fieldIndex : Nat) =>
+        fun (state : PsWasmLowerState) =>
+          match psWasmValueTypeOfIrType? profile capture.type with
+          | Option.none =>
+              Except.error PsWasmLowerError.unsupportedType
+          | Option.some valueType =>
+              let allocated := psWasmAddLocal state valueType;
+              let localIndex := Prod.fst allocated;
+              let nextState := Prod.snd allocated;
+              match smaller (Nat.add fieldIndex 1) nextState with
+              | Except.error error => Except.error error
+              | Except.ok loweredRest =>
+                  Except.ok {
+                    instructions :=
+                      psListAppend
+                        [
+                          PsWasmInstruction.localGet 0,
+                          PsWasmInstruction.refCast subtypeName,
+                          psWasmStructGetInstruction
+                            subtypeName
+                            fieldIndex
+                            capture.type,
+                          PsWasmInstruction.localSet localIndex
+                        ]
+                        loweredRest.instructions
+                    bindings :=
+                      List.cons
+                        (PsWasmBinding.mk
+                          capture.name
+                          localIndex
+                          capture.type)
+                        loweredRest.bindings
+                    state := loweredRest.state
+                  }
+
 def psWasmPrepareCaptureBindings
     (profile : PsWasmTargetProfile)
     (subtypeName : String)
@@ -3198,51 +3363,8 @@ def psWasmPrepareCaptureBindings
     (state : PsWasmLowerState)
     (captures : List PsWasmBinding) :
     Except PsWasmLowerError PsWasmLoweredBindings :=
-  match captures with
-  | List.nil =>
-      Except.ok {
-        instructions := []
-        bindings := []
-        state := state
-      }
-  | List.cons capture rest =>
-      match psWasmValueTypeOfIrType? profile capture.type with
-      | Option.none => Except.error PsWasmLowerError.unsupportedType
-      | Option.some valueType =>
-          let allocated := psWasmAddLocal state valueType;
-          let localIndex := (Prod.fst allocated);
-          let nextState := (Prod.snd allocated);
-          match
-              psWasmPrepareCaptureBindings
-                profile
-                subtypeName
-                (Nat.add fieldIndex 1)
-                nextState
-                rest with
-          | Except.error error => Except.error error
-          | Except.ok loweredRest =>
-              Except.ok {
-                instructions :=
-                  psListAppend
-                    [
-                                        PsWasmInstruction.localGet 0,
-                                        PsWasmInstruction.refCast subtypeName,
-                                        psWasmStructGetInstruction
-                                          subtypeName
-                                          fieldIndex
-                                          capture.type,
-                                        PsWasmInstruction.localSet localIndex
-                                      ]
-                    (loweredRest.instructions)
-                bindings :=
-                  List.cons
-                    (PsWasmBinding.mk
-                      capture.name
-                      localIndex
-                      capture.type)
-                    loweredRest.bindings
-                state := loweredRest.state
-              }
+  psWasmPrepareCaptureBindingsWorker
+    profile subtypeName captures fieldIndex state
 
 def psWasmCaptureConstructionInstructions
     (captures : List PsWasmBinding) :
@@ -3790,6 +3912,50 @@ def psWasmLowerDeclaration
                     state := lowered.state
                   }
 
+def psWasmLowerDeclarationsWorker
+    (profile : PsWasmTargetProfile)
+    (structures : List PsVerifiedIrStructure)
+    (inductives : List PsVerifiedIrInductive)
+    (declarations : List PsVerifiedIrDeclaration) :
+    PsWasmLowerState ->
+    Except PsWasmLowerError PsWasmLoweredFunctions :=
+  match declarations with
+  | List.nil =>
+      fun (state : PsWasmLowerState) =>
+        Except.ok {
+          functions := []
+          state := state
+        }
+  | List.cons declaration rest =>
+      let smaller :
+          PsWasmLowerState ->
+          Except PsWasmLowerError PsWasmLoweredFunctions :=
+        psWasmLowerDeclarationsWorker
+          profile
+          structures
+          inductives
+          rest;
+      fun (state : PsWasmLowerState) =>
+        match
+            psWasmLowerDeclaration
+              profile
+              structures
+              inductives
+              state
+              declaration with
+        | Except.error error => Except.error error
+        | Except.ok lowered =>
+            match smaller lowered.state with
+            | Except.error error => Except.error error
+            | Except.ok loweredRest =>
+                Except.ok {
+                  functions :=
+                    List.cons
+                      lowered.function
+                      loweredRest.functions
+                  state := loweredRest.state
+                }
+
 def psWasmLowerDeclarations
     (profile : PsWasmTargetProfile)
     (structures : List PsVerifiedIrStructure)
@@ -3797,40 +3963,8 @@ def psWasmLowerDeclarations
     (state : PsWasmLowerState)
     (declarations : List PsVerifiedIrDeclaration) :
     Except PsWasmLowerError PsWasmLoweredFunctions :=
-  match declarations with
-  | List.nil =>
-      Except.ok {
-        functions := []
-        state := state
-      }
-  | List.cons declaration rest =>
-      match
-          psWasmLowerDeclaration
-            profile
-            structures
-            inductives
-            state
-            declaration with
-      | Except.error error => Except.error error
-      | Except.ok lowered =>
-          match
-              psWasmLowerDeclarations
-                profile
-                structures
-                inductives
-                lowered.state
-                rest with
-          | Except.error error => Except.error error
-          | Except.ok loweredRest =>
-              Except.ok {
-                functions :=
-                  List.cons
-                    lowered.function
-                    loweredRest.functions
-                state := loweredRest.state
-              }
-
-
+  psWasmLowerDeclarationsWorker
+    profile structures inductives declarations state
 
 def psWasmTypeUsesNatWithFuel
     (remainingFuel : Nat)

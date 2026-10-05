@@ -1,4 +1,5 @@
 import Ps.CompilerIr.Specialize
+import Ps.Foundation.List
 import Ps.BackendWasm.LowerInt
 import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.RuntimeNat

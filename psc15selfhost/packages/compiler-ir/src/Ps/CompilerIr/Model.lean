@@ -280,6 +280,110 @@ inductive PsVerifiedIrValidationError where
   | unknownConstructorField
       (inductiveName constructorName field : String)
   | typeArgumentArity (name : String)
+  | invalidMachineIntegerLiteral
+      (type : PsVerifiedIrMachineIntegerType)
+
+def psVerifiedIrIntDecimalMagnitudeWithFuel
+    (remainingFuel : Nat) :
+    String -> Nat -> Nat -> Nat :=
+  match remainingFuel with
+  | 0 =>
+      fun (_text : String) (_position : Nat) (acc : Nat) =>
+        acc
+  | fuel + 1 =>
+      let smaller : String -> Nat -> Nat -> Nat :=
+        psVerifiedIrIntDecimalMagnitudeWithFuel fuel;
+      fun (text : String) (position : Nat) (acc : Nat) =>
+        if String.Internal.atEnd text (String.Pos.Raw.mk position) then
+          acc
+        else
+          let char : Char :=
+            String.Internal.get text (String.Pos.Raw.mk position);
+          let digit : Nat :=
+            Nat.sub (Char.toNat char) 48;
+          let nextPosition : Nat :=
+            String.Pos.Raw.byteIdx
+              (String.Internal.next
+                text
+                (String.Pos.Raw.mk position));
+          smaller
+            text
+            nextPosition
+            (Nat.add (Nat.mul acc 10) digit)
+
+def psVerifiedIrIntNegativeMagnitude
+    (value : Int) : Bool × Nat :=
+  let text : String := Int.repr value;
+  let fuel : Nat := Nat.succ (String.utf8ByteSize text);
+  if String.Internal.atEnd text (String.Pos.Raw.mk 0) then
+    Prod.mk false 0
+  else
+    let first : Char :=
+      String.Internal.get text (String.Pos.Raw.mk 0);
+    if Nat.beq (Char.toNat first) 45 then
+      let start : Nat :=
+        String.Pos.Raw.byteIdx
+          (String.Internal.next text (String.Pos.Raw.mk 0));
+      Prod.mk
+        true
+        (psVerifiedIrIntDecimalMagnitudeWithFuel
+          fuel text start 0)
+    else
+      Prod.mk
+        false
+        (psVerifiedIrIntDecimalMagnitudeWithFuel
+          fuel text 0 0)
+
+def psVerifiedIrMachineIntegerLiteralCanonical
+    (type : PsVerifiedIrMachineIntegerType)
+    (value : Int) : Bool :=
+  let parts : Bool × Nat :=
+    psVerifiedIrIntNegativeMagnitude value;
+  let negative : Bool := Prod.fst parts;
+  let magnitude : Nat := Prod.snd parts;
+  match type with
+  | PsVerifiedIrMachineIntegerType.uint8 =>
+      if negative then false else Nat.ble magnitude 255
+  | PsVerifiedIrMachineIntegerType.uint16 =>
+      if negative then false else Nat.ble magnitude 65535
+  | PsVerifiedIrMachineIntegerType.uint32 =>
+      if negative then false else Nat.ble magnitude 4294967295
+  | PsVerifiedIrMachineIntegerType.uint64 =>
+      if negative then false
+      else Nat.ble magnitude 18446744073709551615
+  | PsVerifiedIrMachineIntegerType.usize =>
+      if negative then false else true
+  | PsVerifiedIrMachineIntegerType.int8 =>
+      if negative then Nat.ble magnitude 128
+      else Nat.ble magnitude 127
+  | PsVerifiedIrMachineIntegerType.int16 =>
+      if negative then Nat.ble magnitude 32768
+      else Nat.ble magnitude 32767
+  | PsVerifiedIrMachineIntegerType.int32 =>
+      if negative then Nat.ble magnitude 2147483648
+      else Nat.ble magnitude 2147483647
+  | PsVerifiedIrMachineIntegerType.int64 =>
+      if negative then Nat.ble magnitude 9223372036854775808
+      else Nat.ble magnitude 9223372036854775807
+  | PsVerifiedIrMachineIntegerType.isize =>
+      true
+
+def psVerifiedIrValidateLiteral
+    (literal : PsVerifiedIrLiteral) :
+    Except PsVerifiedIrValidationError Unit :=
+  match literal with
+  | PsVerifiedIrLiteral.machineInteger type value =>
+      if
+          psVerifiedIrMachineIntegerLiteralCanonical
+            type
+            value then
+        Except.ok Unit.unit
+      else
+        Except.error
+          (PsVerifiedIrValidationError.invalidMachineIntegerLiteral
+            type)
+  | _ =>
+      Except.ok Unit.unit
 
 def psVerifiedIrListAll {Value : Type}
     (check : Value -> Bool)
@@ -796,8 +900,8 @@ def psVerifiedIrValidateExprReferencesWithFuel
           remaining;
       fun (expr : PsVerifiedIrExpr) =>
         match expr with
-        | PsVerifiedIrExpr.literal _ =>
-            Except.ok Unit.unit
+        | PsVerifiedIrExpr.literal literal =>
+            psVerifiedIrValidateLiteral literal
         | PsVerifiedIrExpr.var _ =>
             Except.ok Unit.unit
         | PsVerifiedIrExpr.intrinsic _ _ arguments =>

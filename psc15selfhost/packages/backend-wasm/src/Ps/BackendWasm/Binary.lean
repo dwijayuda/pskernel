@@ -1,4 +1,5 @@
 import Ps.BackendWasm.Model
+import Ps.Foundation.Name
 
 inductive PsWasmEncodeError where
   | unsupportedValueType
@@ -11,13 +12,23 @@ inductive PsWasmEncodeError where
 def psWasmByte (value : Nat) : UInt8 :=
   UInt8.ofNat value
 
+def psWasmIntIsZero (value : Int) : Bool :=
+  match value with
+  | Int.ofNat magnitude => Nat.beq magnitude 0
+  | Int.negSucc _ => false
+
+def psWasmIntIsNegativeOne (value : Int) : Bool :=
+  match value with
+  | Int.ofNat _ => false
+  | Int.negSucc magnitude => Nat.beq magnitude 0
+
 def psWasmEncodeUlebWithFuel :
     Nat -> Nat -> List UInt8
   | 0, _ => []
   | fuel + 1, value =>
       let low := value % 128
       let rest := value / 128
-      if rest == 0 then
+      if Nat.beq rest 0 then
         [psWasmByte low]
       else
         List.cons
@@ -35,9 +46,18 @@ def psWasmEncodeSlebWithFuel :
       let low := lowInt.toNat
       let rest := value / 128
       let signSet := 64 <= low
-      let donePositive := rest == 0 && !signSet
-      let doneNegative := rest == -1 && signSet
-      if donePositive || doneNegative then
+      let donePositive :=
+        if psWasmIntIsZero rest then
+          match signSet with
+          | true => false
+          | false => true
+        else
+          false
+      let doneNegative :=
+        if psWasmIntIsNegativeOne rest then signSet else false
+      if donePositive then
+        [psWasmByte low]
+      else if doneNegative then
         [psWasmByte low]
       else
         List.cons
@@ -104,7 +124,7 @@ def psWasmFindStructureIndexLoop
     Nat -> List PsWasmStructType -> Option Nat
   | _, [] => none
   | index, structType :: rest =>
-      if structType.name == name then
+      if psStringEq structType.name name then
         some index
       else
         psWasmFindStructureIndexLoop name (index + 1) rest
@@ -119,7 +139,7 @@ def psWasmFindArrayIndexLoop
     Nat -> List PsWasmArrayType -> Option Nat
   | _, [] => none
   | index, arrayType :: rest =>
-      if arrayType.name == name then
+      if psStringEq arrayType.name name then
         some index
       else
         psWasmFindArrayIndexLoop name (index + 1) rest
@@ -187,7 +207,7 @@ def psWasmFindFunctionTypeIndexLoop
     Nat -> List PsWasmFunctionType -> Option Nat
   | _, [] => none
   | index, functionType :: rest =>
-      if functionType.name == name then
+      if psStringEq functionType.name name then
         some index
       else
         psWasmFindFunctionTypeIndexLoop
@@ -276,7 +296,7 @@ def psWasmFindFunctionIndexLoop
     Nat -> List PsWasmFunction -> Option Nat
   | _, [] => none
   | index, function :: rest =>
-      if function.name == name then
+      if psStringEq function.name name then
         some index
       else
         psWasmFindFunctionIndexLoop name (index + 1) rest

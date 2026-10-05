@@ -169,7 +169,7 @@ def psIrSpecializeTypeKeyWithFuel :
       | .function parameters result =>
           let parameterKeys :=
             parameters.map
-              (psIrSpecializeTypeKeyWithFuel fuel)
+              (psIrSpecializeTypeKeyWithFuel fuel);
           match psIrSpecializeJoinKeys parameterKeys with
           | none => none
           | some parameterKey =>
@@ -185,7 +185,7 @@ def psIrSpecializeTypeKeyWithFuel :
       | .named name arguments =>
           let argumentKeys :=
             arguments.map
-              (psIrSpecializeTypeKeyWithFuel fuel)
+              (psIrSpecializeTypeKeyWithFuel fuel);
           match psIrSpecializeJoinKeys argumentKeys with
           | none => none
           | some "" => some (String.Internal.append "N$" name)
@@ -346,7 +346,7 @@ def psIrSpecializeRewriteTypeWithFuel
         psIrSpecializeRewriteTypeWithFuel
           module
           substitution
-          fuel
+          fuel;
       match type with
       | .unknown =>
           Except.error
@@ -629,11 +629,11 @@ def psIrSpecializeRewriteExprWithFuel
         psIrSpecializeRewriteExprWithFuel
           module
           substitution
-          fuel
+          fuel;
       let rewriteType :=
         psIrSpecializeRewriteType
           module
-          substitution
+          substitution;
       match expression with
       | .literal literal =>
           Except.ok {
@@ -757,7 +757,7 @@ def psIrSpecializeRewriteExprWithFuel
                                             PsIrSpecializeKind.declaration
                                           name := name
                                           arguments := loweredTypes.types
-                                        }
+                                        };
                                         Except.ok {
                                           expr :=
                                             PsVerifiedIrExpr.call
@@ -894,7 +894,7 @@ def psIrSpecializeRewriteExprWithFuel
                                   kind := PsIrSpecializeKind.structure
                                   name := structureName
                                   arguments := loweredTypes.types
-                                }
+                                };
                                 Except.ok {
                                   expr :=
                                     PsVerifiedIrExpr.record
@@ -959,7 +959,7 @@ def psIrSpecializeRewriteExprWithFuel
                                   kind := PsIrSpecializeKind.structure
                                   name := structureName
                                   arguments := loweredTypes.types
-                                }
+                                };
                                 Except.ok {
                                   expr :=
                                     PsVerifiedIrExpr.projection
@@ -1028,7 +1028,7 @@ def psIrSpecializeRewriteExprWithFuel
                                   kind := PsIrSpecializeKind.inductive
                                   name := inductiveName
                                   arguments := loweredTypes.types
-                                }
+                                };
                                 Except.ok {
                                   expr :=
                                     PsVerifiedIrExpr.constructor
@@ -1103,7 +1103,7 @@ def psIrSpecializeRewriteExprWithFuel
                                       kind := PsIrSpecializeKind.inductive
                                       name := inductiveName
                                       arguments := loweredTypes.types
-                                    }
+                                    };
                                     Except.ok {
                                       expr :=
                                         PsVerifiedIrExpr.matchE
@@ -1665,12 +1665,12 @@ def psIrSpecializeLoop
                 declarations := state.declarations
                 pending := rest
                 seen := state.seen
-              }
+              };
               if psIrSpecializeSeenContains state.seen key then
                 psIrSpecializeLoop module fuel withoutHead
               else
                 let marked :=
-                  psIrSpecializeMarkSeen withoutHead key
+                  psIrSpecializeMarkSeen withoutHead key;
                 match
                     psIrSpecializeProcessRequest
                       module
@@ -1715,7 +1715,7 @@ def psIrSpecializeModule
                         ++ (Prod.snd inductives)
                         ++ (Prod.snd declarations)
                     seen := []
-                  }
+                  };
                   match
                       psIrSpecializeLoop
                         module

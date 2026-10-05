@@ -20,6 +20,7 @@
     "leading-dot-term-constructor",
     "untyped-lambda-binder",
     "untyped-lambda-let",
+    "untyped-numeric-choice-let",
     "layout-let-sequencing"
   ]
 }

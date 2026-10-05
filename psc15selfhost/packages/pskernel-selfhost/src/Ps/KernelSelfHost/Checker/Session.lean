@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.TypeCheckerDefEq
+import Ps.KernelSelfHost.Checker.DefEq
 
 structure PsKernelCheckerSession where
   context : PsKernelCheckerContext

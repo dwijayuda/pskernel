@@ -10,7 +10,7 @@
   "semanticRootPath": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
   "semanticModulePrefix": "Ps.KernelSelfHost.",
   "migration": {
-    "phase": "B5-cache-policy-owner",
+    "phase": "B3-checker-hierarchy",
     "finalArchitectureAdopted": true,
     "finalArchitectureImplemented": false,
     "compatibilityShimsAllowedDuringMigration": true,
@@ -20,7 +20,30 @@
       "Ps.KernelSelfHost.Runtime.NativeReduction",
       "Ps.KernelSelfHost.CheckerSession",
       "Ps.KernelSelfHost.Runtime.Cache",
-      "Ps.KernelSelfHost.Runtime.EnvironmentIndex"
+      "Ps.KernelSelfHost.Runtime.EnvironmentIndex",
+      "Ps.KernelSelfHost.TypeCheckerBase",
+      "Ps.KernelSelfHost.TypeCheckerPrimitives",
+      "Ps.KernelSelfHost.TypeCheckerWhnf",
+      "Ps.KernelSelfHost.TypeCheckerProjection",
+      "Ps.KernelSelfHost.TypeCheckerInfer",
+      "Ps.KernelSelfHost.TypeCheckerRecursor",
+      "Ps.KernelSelfHost.TypeCheckerDefEqSupport",
+      "Ps.KernelSelfHost.TypeCheckerDefEq",
+      "Ps.KernelSelfHost.Theory.Reduction.KernelReductions",
+      "Ps.KernelSelfHost.Theory.Reduction.PrimitiveData",
+      "Ps.KernelSelfHost.Theory.Reduction.PrimitiveNat",
+      "Ps.KernelSelfHost.Theory.Reduction.WhnfCore",
+      "Ps.KernelSelfHost.Theory.Inference.Core",
+      "Ps.KernelSelfHost.Theory.Inference.Helpers",
+      "Ps.KernelSelfHost.Theory.Recursor.Analysis",
+      "Ps.KernelSelfHost.Theory.Recursor.Reduction",
+      "Ps.KernelSelfHost.Theory.DefEq.BinderSpines",
+      "Ps.KernelSelfHost.Theory.DefEq.DeltaStep",
+      "Ps.KernelSelfHost.Theory.DefEq.FinalRules",
+      "Ps.KernelSelfHost.Theory.DefEq.FullShape",
+      "Ps.KernelSelfHost.Theory.DefEq.LazyDelta",
+      "Ps.KernelSelfHost.Theory.DefEq.Quick",
+      "Ps.KernelSelfHost.Theory.DefEq.Shortcuts"
     ]
   },
   "semanticRoles": [
@@ -109,6 +132,121 @@
     {
       "area": "cache-policy",
       "module": "Ps.KernelSelfHost.Runtime.Acceleration.CachePolicy"
+    },
+    {
+      "area": "checker-context",
+      "module": "Ps.KernelSelfHost.Checker.Context",
+      "legacyShim": "Ps.KernelSelfHost.TypeCheckerBase"
+    },
+    {
+      "area": "checker-reduction-primitives",
+      "module": "Ps.KernelSelfHost.Checker.Reduction.Primitives",
+      "legacyShim": "Ps.KernelSelfHost.TypeCheckerPrimitives"
+    },
+    {
+      "area": "checker-reduction-whnf",
+      "module": "Ps.KernelSelfHost.Checker.Reduction.Whnf",
+      "legacyShim": "Ps.KernelSelfHost.TypeCheckerWhnf"
+    },
+    {
+      "area": "checker-projection",
+      "module": "Ps.KernelSelfHost.Checker.Projection",
+      "legacyShim": "Ps.KernelSelfHost.TypeCheckerProjection"
+    },
+    {
+      "area": "checker-inference",
+      "module": "Ps.KernelSelfHost.Checker.Inference",
+      "legacyShim": "Ps.KernelSelfHost.TypeCheckerInfer"
+    },
+    {
+      "area": "checker-recursor",
+      "module": "Ps.KernelSelfHost.Checker.Recursor",
+      "legacyShim": "Ps.KernelSelfHost.TypeCheckerRecursor"
+    },
+    {
+      "area": "checker-defeq-support",
+      "module": "Ps.KernelSelfHost.Checker.DefEq.Support",
+      "legacyShim": "Ps.KernelSelfHost.TypeCheckerDefEqSupport"
+    },
+    {
+      "area": "checker-defeq",
+      "module": "Ps.KernelSelfHost.Checker.DefEq",
+      "legacyShim": "Ps.KernelSelfHost.TypeCheckerDefEq"
+    },
+    {
+      "area": "checker-reduction-kernelreductions",
+      "module": "Ps.KernelSelfHost.Checker.Reduction.KernelReductions",
+      "legacyShim": "Ps.KernelSelfHost.Theory.Reduction.KernelReductions"
+    },
+    {
+      "area": "checker-reduction-primitivedata",
+      "module": "Ps.KernelSelfHost.Checker.Reduction.PrimitiveData",
+      "legacyShim": "Ps.KernelSelfHost.Theory.Reduction.PrimitiveData"
+    },
+    {
+      "area": "checker-reduction-primitivenat",
+      "module": "Ps.KernelSelfHost.Checker.Reduction.PrimitiveNat",
+      "legacyShim": "Ps.KernelSelfHost.Theory.Reduction.PrimitiveNat"
+    },
+    {
+      "area": "checker-reduction-whnfcore",
+      "module": "Ps.KernelSelfHost.Checker.Reduction.WhnfCore",
+      "legacyShim": "Ps.KernelSelfHost.Theory.Reduction.WhnfCore"
+    },
+    {
+      "area": "checker-inference-core",
+      "module": "Ps.KernelSelfHost.Checker.Inference.Core",
+      "legacyShim": "Ps.KernelSelfHost.Theory.Inference.Core"
+    },
+    {
+      "area": "checker-inference-helpers",
+      "module": "Ps.KernelSelfHost.Checker.Inference.Helpers",
+      "legacyShim": "Ps.KernelSelfHost.Theory.Inference.Helpers"
+    },
+    {
+      "area": "checker-recursor-analysis",
+      "module": "Ps.KernelSelfHost.Checker.Recursor.Analysis",
+      "legacyShim": "Ps.KernelSelfHost.Theory.Recursor.Analysis"
+    },
+    {
+      "area": "checker-recursor-reduction",
+      "module": "Ps.KernelSelfHost.Checker.Recursor.Reduction",
+      "legacyShim": "Ps.KernelSelfHost.Theory.Recursor.Reduction"
+    },
+    {
+      "area": "checker-defeq-binderspines",
+      "module": "Ps.KernelSelfHost.Checker.DefEq.BinderSpines",
+      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.BinderSpines"
+    },
+    {
+      "area": "checker-defeq-deltastep",
+      "module": "Ps.KernelSelfHost.Checker.DefEq.DeltaStep",
+      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.DeltaStep"
+    },
+    {
+      "area": "checker-defeq-finalrules",
+      "module": "Ps.KernelSelfHost.Checker.DefEq.FinalRules",
+      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.FinalRules"
+    },
+    {
+      "area": "checker-defeq-fullshape",
+      "module": "Ps.KernelSelfHost.Checker.DefEq.FullShape",
+      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.FullShape"
+    },
+    {
+      "area": "checker-defeq-lazydelta",
+      "module": "Ps.KernelSelfHost.Checker.DefEq.LazyDelta",
+      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.LazyDelta"
+    },
+    {
+      "area": "checker-defeq-quick",
+      "module": "Ps.KernelSelfHost.Checker.DefEq.Quick",
+      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.Quick"
+    },
+    {
+      "area": "checker-defeq-shortcuts",
+      "module": "Ps.KernelSelfHost.Checker.DefEq.Shortcuts",
+      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.Shortcuts"
     }
   ]
 }

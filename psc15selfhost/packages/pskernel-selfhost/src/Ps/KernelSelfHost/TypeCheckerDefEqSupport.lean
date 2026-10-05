@@ -1,1 +1,3 @@
-import Ps.KernelSelfHost.Theory.DefEq.Quick
+import Ps.KernelSelfHost.Checker.DefEq.Support
+
+/- Migration compatibility shim; canonical source imports the owner directly. -/

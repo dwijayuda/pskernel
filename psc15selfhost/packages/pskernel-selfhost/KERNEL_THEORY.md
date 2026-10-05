@@ -100,43 +100,43 @@ without a node-count/substitution traversal.
 
 ### 3.2 Type checking and reduction
 
-13. `TypeCheckerBase.lean`
-14. `Theory/Reduction/PrimitiveData.lean`
-15. `Theory/Reduction/PrimitiveNat.lean`
-16. `TypeCheckerPrimitives.lean` (compatibility umbrella)
-17. `Theory/Reduction/KernelReductions.lean`
-18. `Theory/Reduction/WhnfCore.lean`
-19. `TypeCheckerWhnf.lean`
-20. `TypeCheckerProjection.lean`
-21. `Theory/Inference/Helpers.lean`
-22. `Theory/Inference/Core.lean`
-23. `TypeCheckerInfer.lean`
-24. `Theory/Recursor/Analysis.lean`
-25. `Theory/Recursor/Reduction.lean`
-26. `TypeCheckerRecursor.lean`
+13. `Checker/Context.lean`
+14. `Checker/Reduction/PrimitiveData.lean`
+15. `Checker/Reduction/PrimitiveNat.lean`
+16. `Checker/Reduction/Primitives.lean` (compatibility umbrella)
+17. `Checker/Reduction/KernelReductions.lean`
+18. `Checker/Reduction/WhnfCore.lean`
+19. `Checker/Reduction/Whnf.lean`
+20. `Checker/Projection.lean`
+21. `Checker/Inference/Helpers.lean`
+22. `Checker/Inference/Core.lean`
+23. `Checker/Inference.lean`
+24. `Checker/Recursor/Analysis.lean`
+25. `Checker/Recursor/Reduction.lean`
+26. `Checker/Recursor.lean`
 
 ### 3.3 Definitional equality
 
-27. `Theory/DefEq/BinderSpines.lean`
-28. `Theory/DefEq/Quick.lean`
-29. `TypeCheckerDefEqSupport.lean` (compatibility umbrella)
-30. `Theory/DefEq/DeltaStep.lean`
-31. `Theory/DefEq/LazyDelta.lean`
-32. `Theory/DefEq/FinalRules.lean`
-33. `Theory/DefEq/Shortcuts.lean`
-34. `Theory/DefEq/FullShape.lean`
-35. `TypeCheckerDefEq.lean`
+27. `Checker/DefEq/BinderSpines.lean`
+28. `Checker/DefEq/Quick.lean`
+29. `Checker/DefEq/Support.lean` (compatibility umbrella)
+30. `Checker/DefEq/DeltaStep.lean`
+31. `Checker/DefEq/LazyDelta.lean`
+32. `Checker/DefEq/FinalRules.lean`
+33. `Checker/DefEq/Shortcuts.lean`
+34. `Checker/DefEq/FullShape.lean`
+35. `Checker/DefEq.lean`
 
-`Theory/DefEq/BinderSpines.lean` isolates binder/application congruence.
-`Theory/DefEq/Quick.lean` isolates cheap pre-reduction decisions and pair-cache
-semantics. `Theory/DefEq/DeltaStep.lean` isolates one-step definition
+`Checker/DefEq/BinderSpines.lean` isolates binder/application congruence.
+`Checker/DefEq/Quick.lean` isolates cheap pre-reduction decisions and pair-cache
+semantics. `Checker/DefEq/DeltaStep.lean` isolates one-step definition
 selection/unfolding, while `LazyDelta.lean` preserves the observable iterative
 Lean 4.34 unfolding order. `FinalRules.lean` isolates proof/proposition
 handling, structure eta, string literal expansion and unit-like structures.
 `Shortcuts.lean` contains reflection, projection and function-eta shortcuts.
 `FullShape.lean` contains final same-shape/fallback rules.
 
-`TypeCheckerDefEq.lean` stays intentionally small so it reads as the
+`Checker/DefEq.lean` stays intentionally small so it reads as the
 observable algorithmic-equality order rather than a collection of helpers.
 
 ### 3.4 Declaration and inductive admission
@@ -207,15 +207,15 @@ Inference is split into a small helper layer, the syntax-directed core, and
 public entry points:
 
 ```text
-Theory/Inference/Helpers.lean
+Checker/Inference/Helpers.lean
       |
       | Sort/Pi views, application-spine exposure, cache publication
       v
-Theory/Inference/Core.lean
+Checker/Inference/Core.lean
       |
       | syntax-directed typing cases
       v
-TypeCheckerInfer.lean
+Checker/Inference.lean
          public infer/check wrappers
 ```
 
@@ -245,7 +245,7 @@ Lean 4.34 has two deliberately different application paths:
 
 PSKernel preserves that semantic distinction. Performance work must not flatten
 the checked path merely to make a benchmark faster. Memoization policy is kept
-in `Theory/Inference/Helpers.lean` as a non-semantic runtime choice; currently
+in `Checker/Inference/Helpers.lean` as a non-semantic runtime choice; currently
 trivial literals and fully checked application nodes are not published into the
 checked-inference cache when doing so only creates structural-hash/promotion
 overhead.
@@ -255,15 +255,15 @@ overhead.
 Primitive reduction is split into two theory-facing modules:
 
 ```text
-Theory/Reduction/PrimitiveData.lean
+Checker/Reduction/PrimitiveData.lean
       |
       | Nat size limits, Bool expressions, String literal constructor form
       v
-Theory/Reduction/PrimitiveNat.lean
+Checker/Reduction/PrimitiveNat.lean
          gcd / pow / bitwise / shifts / binary Nat kernel operations
 ```
 
-`TypeCheckerPrimitives.lean` remains a stable compatibility umbrella.
+`Checker/Reduction/Primitives.lean` remains a stable compatibility umbrella.
 
 This split is explanatory only: public symbols and Lean 4.34 reduction behavior
 are unchanged.
@@ -273,15 +273,15 @@ are unchanged.
 Weak-head reduction is split into three layers:
 
 ```text
-Theory/Reduction/KernelReductions.lean
+Checker/Reduction/KernelReductions.lean
       |
       | Quot + optimized Nat reductions
       v
-Theory/Reduction/WhnfCore.lean
+Checker/Reduction/WhnfCore.lean
       |
       | beta / zeta / projection / structural core WHNF
       v
-TypeCheckerWhnf.lean
+Checker/Reduction/Whnf.lean
          public cached post-core pipeline
 ```
 
@@ -308,15 +308,15 @@ definitional equality is incomplete.
 Recursor reduction is split into three layers:
 
 ```text
-Theory/Recursor/Analysis.lean
+Checker/Recursor/Analysis.lean
       |
       | major-family discovery, K conversion, structure conversion
       v
-Theory/Recursor/Reduction.lean
+Checker/Recursor/Reduction.lean
       |
       | Quot / inductive rule selection and computation
       v
-TypeCheckerRecursor.lean
+Checker/Recursor.lean
          bounded integration with WHNF and inference
 ```
 
@@ -377,7 +377,7 @@ Structure eta is restricted to non-recursive structures. A constructor applied
 to values definitionally equal to all projections of a structure value is
 definitionally equal to that structure value.
 
-See `Theory/DefEq/FinalRules.lean`.
+See `Checker/DefEq/FinalRules.lean`.
 
 ## 10. Quotients
 
@@ -396,7 +396,7 @@ Theory/Quot/Admission.lean
 `Quot.lean` remains a stable umbrella import.
 
 Computation for `Quot.lift` and `Quot.ind` lives in
-`Theory/Reduction/KernelReductions.lean`. Quotient initialization is explicit
+`Checker/Reduction/KernelReductions.lean`. Quotient initialization is explicit
 state in the environment.
 
 ## 11. Inductive declarations
@@ -683,3 +683,10 @@ Lean compiler   -> native
 
 Backend-specific code may implement runtime capabilities, indexes, allocation,
 or native evaluation. It must not duplicate or redefine type-theory rules.
+
+## Checker ownership migration
+
+Checker implementations now live under `Checker/`; former `TypeChecker*` and
+`Theory/{Reduction,Inference,Recursor,DefEq}` modules only forward imports.
+Definition bodies, fuel transitions and rule ordering are unchanged by this move.
+The next checkpoint centralizes cross-component callback wiring in `Checker/Knot`.

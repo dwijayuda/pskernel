@@ -1,11 +1,15 @@
 # ProofScript Self-Host Source Standard
 
-Profile: `PSC1-selfhost-stable/1`
+Profile: `PSC1-selfhost-stable/1` (implementation discipline)
 
-Canonical generated `.ps` syntax is `ps-0.9-r3` under the closed
-`ps-standard-0.9-r3` source profile. `PSC1-selfhost-stable/1` is a deliberately
-smaller coding discipline for the compiler implementation; it does not redefine or
-preserve the retired pre-r3 `.ps` grammar.
+The current self-host compiler still identifies its proven generated `.ps` closure as
+`ps-0.9-r3` / `ps-standard-0.9-r3`. Those names describe the implementation profile
+needed to bootstrap the current compiler; they are **not** a forward language-compatibility
+promise. The PSCV language reference is the design authority for new language work, and
+obsolete r3 syntax/grammar does not need to be preserved merely for backward compatibility.
+
+`PSC1-selfhost-stable/1` remains a deliberately smaller coding discipline for compiler
+implementation source so that the compiler can continue compiling and regenerating itself.
 
 This document is normative for code that is reachable from
 `packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean`.
@@ -39,14 +43,21 @@ term constructors, typed local lambda/match/numeric bindings, and explicit `let`
 sequencing.
 
 The static checker scans every opted-in package source root and its workspace import
-closure. The executable contract then performs two distinct gates:
+closure. The executable contract then performs four linked gates:
 
 1. every package source root must pass `psc1 check`, proving that the root plus its
    imports are parseable, elaboratable, and admission-ready;
-2. the contract derives the package's top-level entry roots from the import graph,
-   proves that those entry closures cover every package source file, and runs
-   `psc1 typescript` on only those entries. This exercises erasure, VerifiedIR
-   validation, and TypeScript emission without redundantly emitting every source root.
+2. the contract derives the package's top-level entry roots from the import graph and
+   proves that those entry closures cover every package source file;
+3. every entry root must pass `psc1 typescript`, exercising erasure, VerifiedIR
+   validation, and bootstrap TypeScript emission;
+4. every entry root must also emit canonical `.ps`; that emitted `.ps` is checked
+   again, re-emitted to prove byte-idempotent `.ps` fixed-point form, and compiled to
+   TypeScript with output exactly equal to the authoritative Lean-source emission.
+
+This makes portable Direct JS/Direct Wasm implementation code demonstrably consumable as
+ProofScript source rather than merely Lean source that happens to satisfy a static style
+checker.
 
 New failures must extend a general rule only when they identify a genuinely new
 source-profile invariant; do not add backend/file-specific repair guards. A capability

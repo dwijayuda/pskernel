@@ -155,3 +155,118 @@ theorem psKernelExprPairSetIndexBucket_set_same
           hParity,
           ih
         ]
+
+
+theorem psKernelExprMapIndexBucket_build_cons
+    (entry : Prod PsKernelExpr PsKernelExpr)
+    (rest : List (Prod PsKernelExpr PsKernelExpr)) :
+    psKernelExprMapIndexBucket
+        16
+        (psKernelExprMapBuildIndex
+          (List.cons entry rest))
+        (psKernelExprHash (Prod.fst entry)) =
+      psKernelExprMapInsertIn
+        (Prod.fst entry)
+        (Prod.snd entry)
+        (psKernelExprMapIndexBucket
+          16
+          (psKernelExprMapBuildIndex rest)
+          (psKernelExprHash (Prod.fst entry))) := by
+  change
+    psKernelExprMapIndexBucket
+        16
+        (psKernelExprMapIndexSet
+          16
+          (psKernelExprMapBuildIndex rest)
+          (psKernelExprHash (Prod.fst entry))
+          (psKernelExprMapInsertIn
+            (Prod.fst entry)
+            (Prod.snd entry)
+            (psKernelExprMapIndexBucket
+              16
+              (psKernelExprMapBuildIndex rest)
+              (psKernelExprHash (Prod.fst entry)))))
+        (psKernelExprHash (Prod.fst entry)) =
+      psKernelExprMapInsertIn
+        (Prod.fst entry)
+        (Prod.snd entry)
+        (psKernelExprMapIndexBucket
+          16
+          (psKernelExprMapBuildIndex rest)
+          (psKernelExprHash (Prod.fst entry)))
+  exact
+    psKernelExprMapIndexBucket_set_same
+      16
+      (psKernelExprMapBuildIndex rest)
+      (psKernelExprHash (Prod.fst entry))
+      (psKernelExprMapInsertIn
+        (Prod.fst entry)
+        (Prod.snd entry)
+        (psKernelExprMapIndexBucket
+          16
+          (psKernelExprMapBuildIndex rest)
+          (psKernelExprHash (Prod.fst entry))))
+
+theorem psKernelExprMapGet_build_cons_self
+    (expr value : PsKernelExpr)
+    (rest : List (Prod PsKernelExpr PsKernelExpr))
+    (hRefl : psKernelExprEq expr expr = true) :
+    psKernelExprMapGet
+        {
+          small := List.nil
+          index :=
+            Option.some
+              (psKernelExprMapBuildIndex
+                (List.cons
+                  (Prod.mk expr value)
+                  rest))
+        }
+        expr =
+      Option.some value := by
+  simp [
+    psKernelExprMapGet,
+    psKernelExprMapIndexBucket_build_cons,
+    psKernelExprMapGetIn_insertIn_self,
+    hRefl
+  ]
+
+theorem psKernelExprMapGet_insert_self
+    (cache : PsKernelExprMap)
+    (expr value : PsKernelExpr)
+    (hRefl : psKernelExprEq expr expr = true) :
+    psKernelExprMapGet
+        (psKernelExprMapInsert cache expr value)
+        expr =
+      Option.some value := by
+  cases cache with
+  | mk small index =>
+      cases index with
+      | none =>
+          cases hSmall :
+              Nat.ble
+                (psKernelCacheEntryListLength
+                  (psKernelExprMapInsertIn expr value small))
+                psKernelCacheSmallLimit with
+          | false =>
+              simp [
+                psKernelExprMapInsert,
+                hSmall,
+                psKernelExprMapGet_build_cons_self,
+                hRefl
+              ]
+          | true =>
+              simp [
+                psKernelExprMapInsert,
+                hSmall,
+                psKernelExprMapGet,
+                psKernelExprMapGetIn_insertIn_self,
+                hRefl
+              ]
+      | some index =>
+          simp [
+            psKernelExprMapInsert,
+            psKernelExprMapGet,
+            psKernelExprMapIndexBucket_set_same,
+            psKernelExprMapGetIn_insertIn_self,
+            hRefl
+          ]

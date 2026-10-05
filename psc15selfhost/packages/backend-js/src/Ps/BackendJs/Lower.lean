@@ -106,7 +106,10 @@ def psJsIdentifierSupported
   | List.cons first rest =>
       if psJsIdentifierFirstCharAllowed first then
         if psJsIdentifierRestSupported rest then
-          !psJsIdentifierKeyword value
+          if psJsIdentifierKeyword value then
+            false
+          else
+            true
         else
           false
       else

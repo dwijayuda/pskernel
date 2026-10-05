@@ -5,6 +5,7 @@ export const portableSelfhostStructuralRuleIds = Object.freeze([
   'recursive-equation-definition',
   'structural-recursion-call-shape',
   'term-arithmetic-operator',
+  'scalar-member-capability',
   'term-list-append',
   'term-list-cons',
   'numeric-tuple-projection',
@@ -468,6 +469,51 @@ function layoutLetViolations(source) {
   return hits;
 }
 
+const portableScalarMemberCapabilities = new Set([
+  'Nat.zero',
+  'Nat.succ',
+  'Nat.add',
+  'Nat.sub',
+  'Nat.mul',
+  'Nat.div',
+  'Nat.mod',
+  'Nat.beq',
+  'Nat.ble',
+  'Nat.blt',
+  'Int.ofNat',
+  'Int.negSucc',
+  'Int.neg',
+  'Int.add',
+  'Int.sub',
+  'Int.mul',
+  'Int.repr',
+  'Char.ofNat',
+  'Char.toNat',
+  'UInt8.ofNat',
+]);
+
+function scalarMemberViolations(lines) {
+  const hits = [];
+  const scalarMember =
+    /\b(Nat|Int|Char|UInt8|UInt16|UInt32|UInt64|USize|Int8|Int16|Int32|Int64|ISize|Float|Float32)\.([A-Za-z_][A-Za-z0-9_']*)\b/gu;
+
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index];
+    for (const match of line.matchAll(scalarMember)) {
+      const capability = match[1] + '.' + match[2];
+      if (!portableScalarMemberCapabilities.has(capability)) {
+        hits.push({
+          id: 'scalar-member-capability',
+          line: index + 1,
+          text: capability,
+        });
+      }
+    }
+  }
+
+  return hits;
+}
+
 export function findSelfhostStructuralViolations(
   source,
   enabledRuleIds = portableSelfhostStructuralRuleIds,
@@ -490,6 +536,10 @@ export function findSelfhostStructuralViolations(
   }
   if (enabled.has('structural-recursion-call-shape')) {
     hits.push(...structuralRecursionCallViolations(code));
+  }
+
+  if (enabled.has('scalar-member-capability')) {
+    hits.push(...scalarMemberViolations(lines));
   }
 
   for (let index = 0; index < lines.length; index++) {

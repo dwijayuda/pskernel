@@ -1504,6 +1504,145 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
       },
 
       {
+        name := "incrementU32"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := psWasmSmokeU32Type
+          }
+        ]
+        resultType := psWasmSmokeU32Type
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntBinary
+              PsVerifiedIrMachineIntegerType.uint32
+              PsVerifiedIrIntegerBinaryOp.add)
+            []
+            [
+              PsVerifiedIrExpr.var "value",
+              psWasmSmokeU32Literal 1
+            ]
+      },
+      {
+        name := "arrayMapTopLevelGet"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          psWasmSmokeArrayGet
+            psWasmSmokeU32Type
+            (psWasmSmokeArrayMap
+              psWasmSmokeU32Type
+              psWasmSmokeU32Type
+              (PsVerifiedIrExpr.var "incrementU32")
+              psWasmSmokeU32ArrayTwo)
+            (psWasmSmokeNatLiteral 1)
+      },
+      {
+        name := "arrayMapLambdaGet"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          psWasmSmokeArrayGet
+            psWasmSmokeU32Type
+            (psWasmSmokeArrayMap
+              psWasmSmokeU32Type
+              psWasmSmokeU32Type
+              (PsVerifiedIrExpr.lambda
+                [
+                  {
+                    name := "value"
+                    type := psWasmSmokeU32Type
+                  }
+                ]
+                psWasmSmokeU32Type
+                (PsVerifiedIrExpr.intrinsic
+                  (PsVerifiedIrIntrinsic.machineIntBinary
+                    PsVerifiedIrMachineIntegerType.uint32
+                    PsVerifiedIrIntegerBinaryOp.add)
+                  []
+                  [
+                    PsVerifiedIrExpr.var "value",
+                    psWasmSmokeU32Literal 2
+                  ]))
+              psWasmSmokeU32ArrayTwo)
+            (psWasmSmokeNatLiteral 0)
+      },
+      {
+        name := "arrayMapEmptySizeExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive
+            PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              psWasmSmokeArraySize
+                psWasmSmokeU32Type
+                (psWasmSmokeArrayMap
+                  psWasmSmokeU32Type
+                  psWasmSmokeU32Type
+                  (PsVerifiedIrExpr.var "incrementU32")
+                  (psWasmSmokeArrayEmpty
+                    psWasmSmokeU32Type
+                    4)),
+              psWasmSmokeNatLiteral 0
+            ]
+      },
+      {
+        name := "arrayFoldRange"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          psWasmSmokeArrayFoldl
+            psWasmSmokeU32Type
+            psWasmSmokeU32Type
+            (PsVerifiedIrExpr.var "addU32")
+            (psWasmSmokeU32Literal 1)
+            psWasmSmokeU32ArrayThree
+            (psWasmSmokeNatLiteral 1)
+            (psWasmSmokeNatLiteral 3)
+      },
+      {
+        name := "arrayFoldStopBeyond"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          psWasmSmokeArrayFoldl
+            psWasmSmokeU32Type
+            psWasmSmokeU32Type
+            (PsVerifiedIrExpr.var "addU32")
+            (psWasmSmokeU32Literal 0)
+            psWasmSmokeU32ArrayTwo
+            (psWasmSmokeNatLiteral 0)
+            (psWasmSmokeNatLiteral
+              1208925819614629174706176)
+      },
+      {
+        name := "arrayFoldStartBeyond"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeU32Type
+        body :=
+          psWasmSmokeArrayFoldl
+            psWasmSmokeU32Type
+            psWasmSmokeU32Type
+            (PsVerifiedIrExpr.var "addU32")
+            (psWasmSmokeU32Literal 7)
+            psWasmSmokeU32ArrayTwo
+            (psWasmSmokeNatLiteral
+              1208925819614629174706176)
+            (psWasmSmokeNatLiteral
+              1208925819614629174706177)
+      },
+      {
         name := "arrayEmptySizeExact"
         typeParameters := []
         parameters := []

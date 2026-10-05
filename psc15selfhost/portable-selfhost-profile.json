@@ -15,6 +15,7 @@
     "grouped-dot-application",
     "string-literal-pattern",
     "boolean-convenience",
+    "to-string-convenience",
     "leading-dot-term-constructor",
     "untyped-lambda-binder",
     "layout-let-sequencing"

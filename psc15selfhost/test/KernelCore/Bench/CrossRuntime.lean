@@ -116,8 +116,9 @@ def psKernelCrossAdmitLoop (remaining : Nat) :
       let smaller : Nat -> Bool -> PsKernelEnvironment -> Except String PsKernelEnvironment :=
         psKernelCrossAdmitLoop rest;
       fun (index : Nat) (bad : Bool) (environment : PsKernelEnvironment) =>
+        let rejectLast : Bool := if bad then Nat.beq rest 0 else false;
         match psKernelAddDefinition 2048 environment
-            (psKernelCrossAdmission index (Bool.and bad (Nat.beq rest 0)))
+            (psKernelCrossAdmission index rejectLast)
             0 psKernelLeanNatMaxSizeDefault with
         | Except.error error => Except.error error
         | Except.ok next => smaller (Nat.succ index) bad next
@@ -138,11 +139,16 @@ def psKernelCrossGuards : Bool :=
     | Except.error _ => true
     | Except.ok _ => false;
   let exhausted : Bool :=
-    match psKernelSessionCheck 0 session illTyped with
-    | Except.error _ => true
+    match psKernelSessionCheck 0 session (PsKernelExpr.lit (PsKernelLiteral.nat 7)) with
+    | Except.error error => psKernelStringEq error "kernel inference budget exhausted"
     | Except.ok _ => false;
   let large : PsKernelExpr := PsKernelExpr.lit (PsKernelLiteral.nat 9007199254740993);
   let adjacent : PsKernelExpr := PsKernelExpr.lit (PsKernelLiteral.nat 9007199254740992);
-  Bool.and rejects (Bool.and exhausted
-    (Bool.and (Bool.not (psKernelExprEq large adjacent))
-      (Bool.and (psKernelCrossAdmit 4 false) (Bool.not (psKernelCrossAdmit 4 true)))))
+  if rejects then
+    if exhausted then
+      if psKernelExprEq large adjacent then false
+      else if psKernelCrossAdmit 4 false then
+        if psKernelCrossAdmit 4 true then false else true
+      else false
+    else false
+  else false

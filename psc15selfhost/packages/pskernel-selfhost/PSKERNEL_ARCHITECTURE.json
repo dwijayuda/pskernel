@@ -10,7 +10,7 @@
   "semanticRootPath": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
   "semanticModulePrefix": "Ps.KernelSelfHost.",
   "migration": {
-    "phase": "B3-checker-knot",
+    "phase": "B4-admission-hierarchy",
     "finalArchitectureAdopted": true,
     "finalArchitectureImplemented": false,
     "compatibilityShimsAllowedDuringMigration": true,
@@ -45,7 +45,36 @@
       "Ps.KernelSelfHost.Theory.DefEq.Quick",
       "Ps.KernelSelfHost.Theory.DefEq.Shortcuts",
       "Ps.KernelSelfHost.Checker.Recursor",
-      "Ps.KernelSelfHost.Checker.DefEq"
+      "Ps.KernelSelfHost.Checker.DefEq",
+      "Ps.KernelSelfHost.Theory.Admission.Validation",
+      "Ps.KernelSelfHost.Theory.Admission.Declarations",
+      "Ps.KernelSelfHost.Kernel",
+      "Ps.KernelSelfHost.Theory.Quot.Bootstrap",
+      "Ps.KernelSelfHost.Theory.Quot.Admission",
+      "Ps.KernelSelfHost.Quot",
+      "Ps.KernelSelfHost.Inductive",
+      "Ps.KernelSelfHost.InductiveAdmission",
+      "Ps.KernelSelfHost.Theory.Inductive.Elimination",
+      "Ps.KernelSelfHost.Theory.Inductive.Constructor",
+      "Ps.KernelSelfHost.Theory.Inductive.ConstructorAdmission",
+      "Ps.KernelSelfHost.Theory.Inductive.Recursor",
+      "Ps.KernelSelfHost.Theory.Mutual.Admission",
+      "Ps.KernelSelfHost.MutualInductive",
+      "Ps.KernelSelfHost.Theory.Mutual.AdmissionLoops",
+      "Ps.KernelSelfHost.Theory.Mutual.Analysis",
+      "Ps.KernelSelfHost.Theory.Mutual.Header",
+      "Ps.KernelSelfHost.Theory.Mutual.Recursor",
+      "Ps.KernelSelfHost.Theory.Nested.Admission",
+      "Ps.KernelSelfHost.NestedInductive",
+      "Ps.KernelSelfHost.Theory.Nested.Commit",
+      "Ps.KernelSelfHost.Theory.Nested.Discover",
+      "Ps.KernelSelfHost.Theory.Nested.Flatten",
+      "Ps.KernelSelfHost.Theory.Nested.Rebase",
+      "Ps.KernelSelfHost.Theory.Nested.ReservedNames",
+      "Ps.KernelSelfHost.Theory.Nested.Restore",
+      "Ps.KernelSelfHost.Theory.Nested.RestoreExpr",
+      "Ps.KernelSelfHost.Theory.Nested.Types",
+      "Ps.KernelSelfHost.Theory.Nested.Validation"
     ]
   },
   "semanticRoles": [
@@ -253,6 +282,197 @@
         "Ps.KernelSelfHost.Theory.DefEq.Quick",
         "Ps.KernelSelfHost.Theory.DefEq.Shortcuts"
       ]
+    },
+    {
+      "area": "admission-declaration-validation",
+      "module": "Ps.KernelSelfHost.Admission.Declaration.Validation",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Admission.Validation"
+      ]
+    },
+    {
+      "area": "admission-declaration-admission",
+      "module": "Ps.KernelSelfHost.Admission.Declaration.Admission",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Admission.Declarations",
+        "Ps.KernelSelfHost.Kernel"
+      ]
+    },
+    {
+      "area": "admission-quot-bootstrap",
+      "module": "Ps.KernelSelfHost.Admission.Quot.Bootstrap",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Quot.Bootstrap"
+      ]
+    },
+    {
+      "area": "admission-quot-admission",
+      "module": "Ps.KernelSelfHost.Admission.Quot.Admission",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Quot.Admission",
+        "Ps.KernelSelfHost.Quot"
+      ]
+    },
+    {
+      "area": "admission-inductive-common-parameters",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Common.Parameters",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Inductive"
+      ]
+    },
+    {
+      "area": "admission-inductive-ordinary-admission",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Ordinary.Admission",
+      "legacyShims": [
+        "Ps.KernelSelfHost.InductiveAdmission"
+      ]
+    },
+    {
+      "area": "admission-inductive-common-elimination",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Common.Elimination",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Inductive.Elimination"
+      ]
+    },
+    {
+      "area": "admission-inductive-ordinary-constructor",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Ordinary.Constructor",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Inductive.Constructor"
+      ]
+    },
+    {
+      "area": "admission-inductive-ordinary-constructoradmission",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Ordinary.ConstructorAdmission",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Inductive.ConstructorAdmission"
+      ]
+    },
+    {
+      "area": "admission-inductive-ordinary-recursor",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Ordinary.Recursor",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Inductive.Recursor"
+      ]
+    },
+    {
+      "area": "admission-inductive-mutual-admission",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.Admission",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Mutual.Admission",
+        "Ps.KernelSelfHost.MutualInductive"
+      ]
+    },
+    {
+      "area": "admission-inductive-mutual-admissionloops",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.AdmissionLoops",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Mutual.AdmissionLoops"
+      ]
+    },
+    {
+      "area": "admission-inductive-mutual-analysis",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.Analysis",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Mutual.Analysis"
+      ]
+    },
+    {
+      "area": "admission-inductive-mutual-header",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.Header",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Mutual.Header"
+      ]
+    },
+    {
+      "area": "admission-inductive-mutual-recursor",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Mutual.Recursor",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Mutual.Recursor"
+      ]
+    },
+    {
+      "area": "admission-inductive-nested-admission",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Admission",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Nested.Admission",
+        "Ps.KernelSelfHost.NestedInductive"
+      ]
+    },
+    {
+      "area": "admission-inductive-nested-commit",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Commit",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Nested.Commit"
+      ]
+    },
+    {
+      "area": "admission-inductive-nested-discover",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Discover",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Nested.Discover"
+      ]
+    },
+    {
+      "area": "admission-inductive-nested-flatten",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Flatten",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Nested.Flatten"
+      ]
+    },
+    {
+      "area": "admission-inductive-nested-rebase",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Rebase",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Nested.Rebase"
+      ]
+    },
+    {
+      "area": "admission-inductive-nested-reservednames",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.ReservedNames",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Nested.ReservedNames"
+      ]
+    },
+    {
+      "area": "admission-inductive-nested-restore",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Restore",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Nested.Restore"
+      ]
+    },
+    {
+      "area": "admission-inductive-nested-restoreexpr",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.RestoreExpr",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Nested.RestoreExpr"
+      ]
+    },
+    {
+      "area": "admission-inductive-nested-types",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Types",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Nested.Types"
+      ]
+    },
+    {
+      "area": "admission-inductive-nested-validation",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Nested.Validation",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Theory.Nested.Validation"
+      ]
+    },
+    {
+      "area": "admission-inductive-types",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Types"
+    },
+    {
+      "area": "admission-inductive-common-occurrence",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Common.Occurrence"
+    },
+    {
+      "area": "admission-inductive-common-recursorvalidation",
+      "module": "Ps.KernelSelfHost.Admission.Inductive.Common.RecursorValidation"
     }
   ],
   "recursiveWiring": {
@@ -304,6 +524,14 @@
       "forbidden": [
         "Ps.KernelSelfHost.Checker.Knot",
         "Ps.KernelSelfHost.Checker.Session"
+      ]
+    },
+    {
+      "from": [
+        "Ps.KernelSelfHost.Admission."
+      ],
+      "forbidden": [
+        "Ps.KernelSelfHost.API."
       ]
     }
   ]

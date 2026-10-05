@@ -146,35 +146,35 @@ preserved.
 ### 3.4 Declaration and inductive admission
 
 36. `Checker/Session.lean`
-37. `Theory/Admission/Validation.lean`
-38. `Theory/Admission/Declarations.lean`
-39. `Kernel.lean` (compatibility umbrella)
-40. `Theory/Quot/Bootstrap.lean`
-41. `Theory/Quot/Admission.lean`
-42. `Quot.lean` (compatibility umbrella)
-43. `Inductive.lean`
-44. `Theory/Inductive/Constructor.lean`
-45. `Theory/Inductive/ConstructorAdmission.lean`
-46. `Theory/Inductive/Recursor.lean`
-47. `Theory/Inductive/Elimination.lean`
-48. `InductiveAdmission.lean`
-49. `Theory/Mutual/Analysis.lean`
-50. `Theory/Mutual/Recursor.lean`
-51. `Theory/Mutual/Header.lean`
-52. `Theory/Mutual/AdmissionLoops.lean`
-53. `Theory/Mutual/Admission.lean`
-54. `MutualInductive.lean` (compatibility umbrella)
-55. `Theory/Nested/Types.lean`
-56. `Theory/Nested/ReservedNames.lean`
-57. `Theory/Nested/Rebase.lean`
-58. `Theory/Nested/Discover.lean`
-59. `Theory/Nested/Flatten.lean`
-60. `Theory/Nested/RestoreExpr.lean`
-61. `Theory/Nested/Restore.lean`
-62. `Theory/Nested/Validation.lean`
-63. `Theory/Nested/Commit.lean`
-64. `Theory/Nested/Admission.lean`
-65. `NestedInductive.lean` (compatibility umbrella)
+37. `Admission/Declaration/Validation.lean`
+38. `Admission/Declaration/Admission.lean`
+39. `Admission/Declaration/Admission.lean` (compatibility umbrella)
+40. `Admission/Quot/Bootstrap.lean`
+41. `Admission/Quot/Admission.lean`
+42. `Admission/Quot/Admission.lean` (compatibility umbrella)
+43. `Admission/Inductive/Common/Parameters.lean`
+44. `Admission/Inductive/Ordinary/Constructor.lean`
+45. `Admission/Inductive/Ordinary/ConstructorAdmission.lean`
+46. `Admission/Inductive/Ordinary/Recursor.lean`
+47. `Admission/Inductive/Common/Elimination.lean`
+48. `Admission/Inductive/Ordinary/Admission.lean`
+49. `Admission/Inductive/Mutual/Analysis.lean`
+50. `Admission/Inductive/Mutual/Recursor.lean`
+51. `Admission/Inductive/Mutual/Header.lean`
+52. `Admission/Inductive/Mutual/AdmissionLoops.lean`
+53. `Admission/Inductive/Mutual/Admission.lean`
+54. `Admission/Inductive/Mutual/Admission.lean` (compatibility umbrella)
+55. `Admission/Inductive/Nested/Types.lean`
+56. `Admission/Inductive/Nested/ReservedNames.lean`
+57. `Admission/Inductive/Nested/Rebase.lean`
+58. `Admission/Inductive/Nested/Discover.lean`
+59. `Admission/Inductive/Nested/Flatten.lean`
+60. `Admission/Inductive/Nested/RestoreExpr.lean`
+61. `Admission/Inductive/Nested/Restore.lean`
+62. `Admission/Inductive/Nested/Validation.lean`
+63. `Admission/Inductive/Nested/Commit.lean`
+64. `Admission/Inductive/Nested/Admission.lean`
+65. `Admission/Inductive/Nested/Admission.lean` (compatibility umbrella)
 
 ### 3.5 Runtime mechanisms
 
@@ -389,15 +389,15 @@ Quotient support is split into bootstrap shape construction and checked
 environment admission:
 
 ```text
-Theory/Quot/Bootstrap.lean
+Admission/Quot/Bootstrap.lean
       |
       | validate Eq/Eq.refl and construct Quot primitive types
       v
-Theory/Quot/Admission.lean
+Admission/Quot/Admission.lean
          reserve/install Quot, Quot.mk, Quot.lift, Quot.ind
 ```
 
-`Quot.lean` remains a stable umbrella import.
+`Admission/Quot/Admission.lean` remains a stable umbrella import.
 
 Computation for `Quot.lift` and `Quot.ind` lives in
 `Checker/Reduction/KernelReductions.lean`. Quotient initialization is explicit
@@ -408,18 +408,18 @@ state in the environment.
 ### Ordinary-inductive source layout
 
 ```text
-Inductive.lean
+Admission/Inductive/Common/Parameters.lean
       |
-Theory/Inductive/Constructor.lean
+Admission/Inductive/Ordinary/Constructor.lean
       |  parameters, fields, positivity, constructor result
       v
-Theory/Inductive/Recursor.lean
+Admission/Inductive/Ordinary/Recursor.lean
       |  motives, minors, recursive calls, rules
       v
-Theory/Inductive/Elimination.lean
+Admission/Inductive/Common/Elimination.lean
       |  large-elimination and K/reflexivity policy
       v
-InductiveAdmission.lean
+Admission/Inductive/Ordinary/Admission.lean
          top-level checked environment extension
 ```
 
@@ -444,30 +444,30 @@ mutual bundle.
 
 The ordinary path is split by responsibility:
 
-- `Theory/Inductive/Constructor.lean` — constructor opening, positivity and result analysis;
-- `Theory/Inductive/ConstructorAdmission.lean` — checked constructor loop and working-environment installation;
-- `Theory/Inductive/Recursor.lean` — recursor metadata and rule construction;
-- `Theory/Inductive/Elimination.lean` — elimination restrictions;
-- `InductiveAdmission.lean` — top-level bundle transaction and final commit.
+- `Admission/Inductive/Ordinary/Constructor.lean` — constructor opening, positivity and result analysis;
+- `Admission/Inductive/Ordinary/ConstructorAdmission.lean` — checked constructor loop and working-environment installation;
+- `Admission/Inductive/Ordinary/Recursor.lean` — recursor metadata and rule construction;
+- `Admission/Inductive/Common/Elimination.lean` — elimination restrictions;
+- `Admission/Inductive/Ordinary/Admission.lean` — top-level bundle transaction and final commit.
 
 ## 12. Mutual inductives
 
 Mutual inductives are split by theory responsibility:
 
 ```text
-Theory/Mutual/Analysis.lean
+Admission/Inductive/Mutual/Analysis.lean
       |
       | discover targets, constructor fields, recursive occurrences
       v
-Theory/Mutual/Recursor.lean
+Admission/Inductive/Mutual/Recursor.lean
       |
       | motives, minors, recursive calls, computation rules
       v
-Theory/Mutual/Admission.lean
+Admission/Inductive/Mutual/Admission.lean
          checked environment installation
 ```
 
-`MutualInductive.lean` remains a stable umbrella import.
+`Admission/Inductive/Mutual/Admission.lean` remains a stable umbrella import.
 
 The implementation supports multiple simultaneously declared families, with a
 separate motive per family and recursive hypotheses for recursive arguments
@@ -477,11 +477,11 @@ The families in one bundle must satisfy Lean's shared-universe constraints.
 
 The mutual admission path is layered as:
 
-- `Theory/Mutual/Analysis.lean` — mutual occurrence and family analysis;
-- `Theory/Mutual/Recursor.lean` — motive/minor/recursive-hypothesis construction;
-- `Theory/Mutual/Header.lean` — shared header/name/type setup;
-- `Theory/Mutual/AdmissionLoops.lean` — checked constructor and recursor loops;
-- `Theory/Mutual/Admission.lean` — top-level bundle transaction.
+- `Admission/Inductive/Mutual/Analysis.lean` — mutual occurrence and family analysis;
+- `Admission/Inductive/Mutual/Recursor.lean` — motive/minor/recursive-hypothesis construction;
+- `Admission/Inductive/Mutual/Header.lean` — shared header/name/type setup;
+- `Admission/Inductive/Mutual/AdmissionLoops.lean` — checked constructor and recursor loops;
+- `Admission/Inductive/Mutual/Admission.lean` — top-level bundle transaction.
 
 ## 13. Nested inductives
 
@@ -489,38 +489,38 @@ Nested inductives are split by theory concept rather than kept in one
 transformation file. Read the implementation in this order:
 
 ```text
-Theory/Nested/Types.lean
+Admission/Inductive/Nested/Types.lean
       |
       v
-Theory/Nested/ReservedNames.lean
+Admission/Inductive/Nested/ReservedNames.lean
       |
       v
-Theory/Nested/Rebase.lean
+Admission/Inductive/Nested/Rebase.lean
       |
       v
-Theory/Nested/Discover.lean
+Admission/Inductive/Nested/Discover.lean
       |
       v
-Theory/Nested/Flatten.lean
+Admission/Inductive/Nested/Flatten.lean
       |
       | transformed declaration bundle
       v
-Theory/Mutual/Admission.lean
+Admission/Inductive/Mutual/Admission.lean
       |
       | checked transformed environment
       v
-Theory/Nested/RestoreExpr.lean
+Admission/Inductive/Nested/RestoreExpr.lean
       |
       v
-Theory/Nested/Restore.lean
+Admission/Inductive/Nested/Restore.lean
       |
       v
-Theory/Nested/Validation.lean
+Admission/Inductive/Nested/Validation.lean
       |
       v
-Theory/Nested/Commit.lean
+Admission/Inductive/Nested/Commit.lean
 
-Theory/Nested/Admission.lean orchestrates the complete transaction.
+Admission/Inductive/Nested/Admission.lean orchestrates the complete transaction.
 ```
 
 The module responsibilities are:
@@ -542,7 +542,7 @@ The module responsibilities are:
   commit helpers;
 - `Admission.lean` — top-level fail-closed transaction boundary.
 
-`NestedInductive.lean` remains a stable umbrella import.
+`Admission/Inductive/Nested/Admission.lean` remains a stable umbrella import.
 
 The transformation is necessary to preserve Lean 4 computation behavior for
 nested inductives while keeping flattening details out of the user-visible
@@ -566,15 +566,15 @@ visible after commit.
 Declaration admission is split into validation and environment extension:
 
 ```text
-Theory/Admission/Validation.lean
+Admission/Declaration/Validation.lean
       |
       | universe discipline, closedness, sort/header/body checking
       v
-Theory/Admission/Declarations.lean
+Admission/Declaration/Admission.lean
          axiom / definition / theorem / opaque / mutual environment extension
 ```
 
-`Kernel.lean` remains a stable umbrella import.
+`Admission/Declaration/Admission.lean` remains a stable umbrella import.
 
 The admission layer checks:
 
@@ -705,3 +705,12 @@ fences and forwarding-only legacy paths.
 The focused CheckerOps conformance module checks success and zero-fuel rejection
 for all six operations. It also checks that full session checking rejects an
 ill-typed application after infer-only checking has populated its cache.
+
+## Unified admission ownership
+
+Declaration and Quot admission now live under `Admission/`. Ordinary, mutual and
+nested inductive phases share `Admission/Inductive/`; shared occurrence, parameter,
+elimination and recursor-validation phases have explicit owners in `Common/`.
+Constructor-specific positivity remains with each ordinary/mutual analysis owner,
+because those routines use distinct shapes and are not one interchangeable rule.
+The move preserves all existing declaration bodies and admission order.

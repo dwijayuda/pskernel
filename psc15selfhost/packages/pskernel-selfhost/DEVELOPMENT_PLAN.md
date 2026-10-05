@@ -183,8 +183,9 @@ PSC1-proven curried callback patterns may remain internally.
 
 ### B4. Unified admission hierarchy
 
-**Next structural checkpoint.** Preserve the existing ordinary/mutual/nested
-algorithms and phase decomposition while moving their ownership.
+**Ownership implemented.** Declaration, Quot and ordinary/mutual/nested admission
+now use canonical owners; shared phases are explicit and all legacy paths forward
+imports only. Algorithms and phase ordering are unchanged.
 
 Move declaration, Quot and inductive admission under `Admission/`. Ordinary,
 mutual and nested inductives live under one `Admission/Inductive/` owner while

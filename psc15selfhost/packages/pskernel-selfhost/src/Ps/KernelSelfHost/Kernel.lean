@@ -1,1 +1,3 @@
-import Ps.KernelSelfHost.Theory.Admission.Declarations
+import Ps.KernelSelfHost.Admission.Declaration.Admission
+
+/- Compatibility import; implementation belongs to Admission. -/

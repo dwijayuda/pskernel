@@ -10,6 +10,7 @@
     "structural-recursion-call-shape",
     "term-arithmetic-operator",
     "scalar-member-capability",
+    "opaque-primitive-match",
     "term-list-append",
     "term-list-cons",
     "numeric-tuple-projection",

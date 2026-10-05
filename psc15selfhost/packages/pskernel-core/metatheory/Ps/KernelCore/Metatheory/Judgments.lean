@@ -592,6 +592,23 @@ inductive PsKernelTypingJudgment
          else
            reducedBodyType)
 
+
+  | mdata
+      {localContext : PsKernelLocalContext}
+      (metadata : Nat)
+      (body bodyType : PsKernelExpr)
+      (hBody :
+        PsKernelTypingJudgment
+          environment
+          localContext
+          body
+          bodyType) :
+      PsKernelTypingJudgment
+        environment
+        localContext
+        (PsKernelExpr.mdata metadata body)
+        bodyType
+
 def PsKernelInferenceCacheSound
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext)

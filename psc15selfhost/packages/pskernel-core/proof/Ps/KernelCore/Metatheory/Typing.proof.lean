@@ -1028,3 +1028,95 @@ theorem psKernelInferCore_let_checked_refines_typing
         name fresh type value body valueType bodyType
         nondep typeLevel
         hFresh hTypeTyping hValueTyping hValueType hBodyTyping
+
+
+theorem psKernelInferCore_mdata_refines_typing
+    (remaining : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state bodyState : PsKernelCheckerState)
+    (metadata : Nat)
+    (body bodyType : PsKernelExpr)
+    (inferOnly : Bool)
+    (hCache :
+      psKernelExprMapGet
+          (if inferOnly then state.inferOnly else state.checkedInfer)
+          (PsKernelExpr.mdata metadata body) =
+        Option.none)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hBody :
+      psKernelInferCoreWithFuel
+          remaining
+          whnf
+          defeq
+          nextContext
+          state
+          body
+          inferOnly =
+        Except.ok (Prod.mk bodyType bodyState))
+    (hBodyTyping :
+      PsKernelTypingJudgment
+        nextContext.environment
+        nextContext.localContext
+        body
+        bodyType) :
+    ∃ nextState : PsKernelCheckerState,
+      psKernelInferCoreWithFuel
+          (Nat.succ remaining)
+          whnf
+          defeq
+          context
+          state
+          (PsKernelExpr.mdata metadata body)
+          inferOnly =
+        Except.ok
+          (Prod.mk bodyType nextState) ∧
+      PsKernelTypingJudgment
+        nextContext.environment
+        nextContext.localContext
+        (PsKernelExpr.mdata metadata body)
+        bodyType := by
+  refine ⟨
+    psKernelCacheInferResult
+      bodyState
+      inferOnly
+      (PsKernelExpr.mdata metadata body)
+      bodyType,
+    ?_,
+    PsKernelTypingJudgment.mdata
+      metadata
+      body
+      bodyType
+      hBodyTyping
+  ⟩
+  cases inferOnly with
+  | false =>
+      simp at hCache
+      simp [
+        psKernelInferCoreWithFuel,
+        psKernelInferCacheEligible,
+        hCache,
+        hDepth,
+        hBody
+      ]
+  | true =>
+      simp at hCache
+      simp [
+        psKernelInferCoreWithFuel,
+        psKernelInferCacheEligible,
+        hCache,
+        hDepth,
+        hBody
+      ]

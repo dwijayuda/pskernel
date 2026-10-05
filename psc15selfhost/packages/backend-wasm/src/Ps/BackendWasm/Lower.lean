@@ -1918,7 +1918,8 @@ def psWasmLowerIntUnaryCallWith
           | Except.ok lowered =>
               Except.ok {
                 instructions :=
-                  lowered.instructions ++
+                  psListAppend
+                    lowered.instructions
                     [PsWasmInstruction.call functionName]
                 state := lowered.state
               }
@@ -1949,7 +1950,8 @@ def psWasmLowerNatToIntUnaryCallWith
           | Except.ok lowered =>
               Except.ok {
                 instructions :=
-                  lowered.instructions ++
+                  psListAppend
+                    lowered.instructions
                     [PsWasmInstruction.call functionName]
                 state := lowered.state
               }
@@ -2498,9 +2500,10 @@ def psWasmLowerIntrinsicWith
           | Except.ok lowered =>
               Except.ok {
                 instructions :=
-                  lowered.instructions ++
-                    psWasmLowerMachineIntegerBinary
-                      profile type integerOperation
+                  psListAppend
+                    lowered.instructions
+                    (psWasmLowerMachineIntegerBinary
+                      profile type integerOperation)
                 state := lowered.state
               }
   | .machineIntCompare type integerOperation =>
@@ -2519,9 +2522,10 @@ def psWasmLowerIntrinsicWith
           | Except.ok lowered =>
               Except.ok {
                 instructions :=
-                  lowered.instructions ++
-                    psWasmLowerMachineIntegerCompare
-                      profile type integerOperation
+                  psListAppend
+                    lowered.instructions
+                    (psWasmLowerMachineIntegerCompare
+                      profile type integerOperation)
                 state := lowered.state
               }
   | .floatBinary type floatOperation =>
@@ -2539,8 +2543,9 @@ def psWasmLowerIntrinsicWith
           | Except.ok lowered =>
               Except.ok {
                 instructions :=
-                  lowered.instructions ++
-                    psWasmLowerFloatBinary type floatOperation
+                  psListAppend
+                    lowered.instructions
+                    (psWasmLowerFloatBinary type floatOperation
                 state := lowered.state
               }
   | .floatCompare type floatOperation =>
@@ -2558,8 +2563,9 @@ def psWasmLowerIntrinsicWith
           | Except.ok lowered =>
               Except.ok {
                 instructions :=
-                  lowered.instructions ++
-                    psWasmLowerFloatCompare type floatOperation
+                  psListAppend
+                    lowered.instructions
+                    (psWasmLowerFloatCompare type floatOperation
                 state := lowered.state
               }
   | .natAdd =>
@@ -2673,8 +2679,9 @@ def psWasmLowerTypedArgumentsWith
               | Except.ok loweredRest =>
                   Except.ok {
                     instructions :=
-                      lowered.instructions
-                        ++ loweredRest.instructions
+                      psListAppend
+                        lowered.instructions
+                        loweredRest.instructions
                     state := loweredRest.state
                   }
   | _, _, _ =>
@@ -2769,7 +2776,8 @@ def psWasmLowerCallWith
           | Except.ok lowered =>
               Except.ok {
                 instructions :=
-                  lowered.instructions ++
+                  psListAppend
+                    lowered.instructions
                     [PsWasmInstruction.call name]
                 state := lowered.state
               }
@@ -2887,7 +2895,7 @@ def psWasmLowerMatchBindings
               | Except.ok loweredRest =>
                   Except.ok {
                     instructions :=
-                      fieldCode ++ loweredRest.instructions
+                      psListAppend fieldCode loweredRest.instructions
                     bindings := loweredRest.bindings
                     state := loweredRest.state
                   }
@@ -3144,13 +3152,19 @@ def psWasmAddGeneratedLambda
       currentDefinition := generatedState.currentDefinition
       nextLambdaId := generatedState.nextLambdaId
       generatedStructures :=
-        generatedState.generatedStructures ++ [subtype]
+        psListAppend
+          generatedState.generatedStructures
+          (List.cons subtype List.nil)
       generatedFunctionTypes :=
         generatedState.generatedFunctionTypes
       generatedFunctions :=
-        generatedState.generatedFunctions ++ [function]
+        psListAppend
+          generatedState.generatedFunctions
+          (List.cons function List.nil)
       generatedFunctionRefs :=
-        generatedState.generatedFunctionRefs ++ [function.name]
+        psListAppend
+          generatedState.generatedFunctionRefs
+          (List.cons function.name List.nil)
     }
 
 def psWasmLowerLambdaWith

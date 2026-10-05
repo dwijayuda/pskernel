@@ -113,16 +113,16 @@ def psWasmFloatingValueType
 
 def psWasmListFoldl {Value State : Type}
     (step : State -> Value -> State)
-    (values : List Value) :
-    State -> State :=
+    (values : List Value)
+    (state : State) : State :=
   match values with
   | List.nil =>
-      fun (state : State) => state
+      state
   | List.cons value rest =>
-      let smaller : State -> State :=
-        psWasmListFoldl step rest;
-      fun (state : State) =>
-        smaller (step state value)
+      psWasmListFoldl
+        step
+        rest
+        (step state value)
 
 def psWasmListPair? {Value : Type}
     (values : List Value) :

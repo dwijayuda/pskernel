@@ -1706,16 +1706,17 @@ def psWasmLowerExprListWith
       PsWasmLowerState ->
       PsVerifiedIrExpr ->
         Except PsWasmLowerError PsWasmLoweredExpr)
-    (expected : Option PsWasmValueType) :
-    PsWasmLowerState ->
-    List PsVerifiedIrExpr ->
-    Except PsWasmLowerError PsWasmLoweredExpr
-  | state, [] =>
+    (expected : Option PsWasmValueType)
+    (state : PsWasmLowerState)
+    (expressions : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match expressions with
+  | List.nil =>
       Except.ok {
         instructions := []
         state := state
       }
-  | state, expr :: rest =>
+  | List.cons expr rest =>
       match lower expected state expr with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1738,16 +1739,17 @@ def psWasmLowerRecordFieldsWith
       PsVerifiedIrExpr ->
         Except PsWasmLowerError PsWasmLoweredExpr)
     (structInfo : PsVerifiedIrStructure)
-    (fields : List (String × PsVerifiedIrExpr)) :
-    PsWasmLowerState ->
-    List PsVerifiedIrStructureField ->
-    Except PsWasmLowerError PsWasmLoweredExpr
-  | state, [] =>
+    (fields : List (String × PsVerifiedIrExpr))
+    (state : PsWasmLowerState)
+    (structureFields : List PsVerifiedIrStructureField) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match structureFields with
+  | List.nil =>
       Except.ok {
         instructions := []
         state := state
       }
-  | state, field :: rest =>
+  | List.cons field rest =>
       match psWasmFindRecordField fields field.name with
       | none =>
           Except.error
@@ -1787,16 +1789,17 @@ def psWasmLowerConstructorValuesWith
         Except PsWasmLowerError PsWasmLoweredExpr)
     (inductiveName : String)
     (constructorInfo : PsVerifiedIrConstructor)
-    (fields : List (String × PsVerifiedIrExpr)) :
-    PsWasmLowerState ->
-    List PsVerifiedIrConstructorField ->
-    Except PsWasmLowerError PsWasmLoweredExpr
-  | state, [] =>
+    (fields : List (String × PsVerifiedIrExpr))
+    (state : PsWasmLowerState)
+    (constructorFields : List PsVerifiedIrConstructorField) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match constructorFields with
+  | List.nil =>
       Except.ok {
         instructions := []
         state := state
       }
-  | state, field :: rest =>
+  | List.cons field rest =>
       match psWasmFindRecordField fields field.name with
       | none =>
           Except.error
@@ -2924,17 +2927,18 @@ def psWasmLowerMatchBindings
     (inductiveName : String)
     (constructorInfo : PsVerifiedIrConstructor)
     (scrutineeLocal : Nat)
-    (baseBindings : List PsWasmBinding) :
-    PsWasmLowerState ->
-    List PsVerifiedIrMatchBinding ->
-    Except PsWasmLowerError PsWasmLoweredBindings
-  | state, [] =>
+    (baseBindings : List PsWasmBinding)
+    (state : PsWasmLowerState)
+    (matchBindings : List PsVerifiedIrMatchBinding) :
+    Except PsWasmLowerError PsWasmLoweredBindings :=
+  match matchBindings with
+  | List.nil =>
       Except.ok {
         instructions := []
         bindings := baseBindings
         state := state
       }
-  | state, binding :: rest =>
+  | List.cons binding rest =>
       match
           psWasmFindConstructorField
             constructorInfo
@@ -3156,18 +3160,19 @@ def psWasmLowerCaptureFields
 
 def psWasmPrepareCaptureBindings
     (profile : PsWasmTargetProfile)
-    (subtypeName : String) :
-    Nat ->
-    PsWasmLowerState ->
-    List PsWasmBinding ->
-    Except PsWasmLowerError PsWasmLoweredBindings
-  | _, state, [] =>
+    (subtypeName : String)
+    (fieldIndex : Nat)
+    (state : PsWasmLowerState)
+    (captures : List PsWasmBinding) :
+    Except PsWasmLowerError PsWasmLoweredBindings :=
+  match captures with
+  | List.nil =>
       Except.ok {
         instructions := []
         bindings := []
         state := state
       }
-  | fieldIndex, state, capture :: rest =>
+  | List.cons capture rest =>
       match psWasmValueTypeOfIrType? profile capture.type with
       | none => Except.error PsWasmLowerError.unsupportedType
       | some valueType =>
@@ -3753,16 +3758,17 @@ def psWasmLowerDeclaration
 def psWasmLowerDeclarations
     (profile : PsWasmTargetProfile)
     (structures : List PsVerifiedIrStructure)
-    (inductives : List PsVerifiedIrInductive) :
-    PsWasmLowerState ->
-    List PsVerifiedIrDeclaration ->
-    Except PsWasmLowerError PsWasmLoweredFunctions
-  | state, [] =>
+    (inductives : List PsVerifiedIrInductive)
+    (state : PsWasmLowerState)
+    (declarations : List PsVerifiedIrDeclaration) :
+    Except PsWasmLowerError PsWasmLoweredFunctions :=
+  match declarations with
+  | List.nil =>
       Except.ok {
         functions := []
         state := state
       }
-  | state, declaration :: rest =>
+  | List.cons declaration rest =>
       match
           psWasmLowerDeclaration
             profile

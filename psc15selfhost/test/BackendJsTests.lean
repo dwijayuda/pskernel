@@ -17,6 +17,14 @@ def psBackendJsExpected : String :=
   "export function intNegDemo(value) { return (-(value)); }\n" ++
   "export function boolAndDemo(left, right) { return (left && right); }\n" ++
   "export function stringLengthDemo(value) { return ((__ps_s) => BigInt(Array.from(__ps_s).length))(value); }\n" ++
+  "export function u8AddWrap(left, right) { return (((left + right)) & 255); }\n" ++
+  "export function i8MulWrap(left, right) { return (((Math.imul(left, right)) << 24) >> 24); }\n" ++
+  "export function u64Xor(left, right) { return BigInt.asUintN(64, ((left ^ right))); }\n" ++
+  "export function u16Lt(left, right) { return (left < right); }\n" ++
+  "export function u8FromNat(value) { return Number(BigInt.asUintN(8, value)); }\n" ++
+  "export const u8Literal300 = Number(BigInt.asUintN(8, 300n));\n" ++
+  "export function float32Mul(left, right) { return Math.fround((left * right)); }\n" ++
+  "export function floatDiv(left, right) { return (left / right); }\n" ++
   "export function letNatDemo(x) { return (() => { const y = (x + 1n); return (y * 2n); })(); }\n" ++
   "export function applyLambda(x) { return ((y) => (y + 2n))(x); }\n"
 
@@ -141,11 +149,65 @@ def psTestBackendJsRejectsUnsupportedIntrinsic : Bool :=
           true
       | _ => false
 
+def psBackendJsWordSizedModule : PsVerifiedIrModule :=
+  {
+    imports := []
+    structures := []
+    inductives := []
+    declarations := [
+      {
+        name := "wordAdd"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.usize
+          },
+          {
+            name := "right"
+            type :=
+              PsVerifiedIrType.primitive
+                PsVerifiedIrPrimitiveType.usize
+          }
+        ]
+        resultType :=
+          PsVerifiedIrType.primitive
+            PsVerifiedIrPrimitiveType.usize
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntBinary
+              PsVerifiedIrMachineIntegerType.usize
+              PsVerifiedIrIntegerBinaryOp.add)
+            []
+            [
+              PsVerifiedIrExpr.var "left",
+              PsVerifiedIrExpr.var "right"
+            ]
+      }
+    ]
+  }
+
+def psTestBackendJsRejectsWordSizedWithoutProfile : Bool :=
+  match
+      psValidateErasedIrModule
+        (PsErasedIrModule.mk
+          psBackendJsWordSizedModule) with
+  | Except.error _ => false
+  | Except.ok validated =>
+      match psJsEmitValidatedModule validated with
+      | Except.error
+          (PsJsEmitError.lower
+            PsJsLowerError.unsupportedType) =>
+          true
+      | _ => false
+
 def main : IO Unit := do
   if psTestBackendJsFixtureEmission
       && psTestBackendJsRejectsKeywordName
       && psTestBackendJsRejectsUnsupportedStructure
-      && psTestBackendJsRejectsUnsupportedIntrinsic then
+      && psTestBackendJsRejectsUnsupportedIntrinsic      && psTestBackendJsRejectsWordSizedWithoutProfile then
     IO.println "PSC2_BACKEND_JS_TESTS: PASS"
   else
     throw

@@ -1,5 +1,4 @@
 import Ps.CompilerIr.Specialize
-import Ps.BackendWasm.Binary
 import Ps.BackendWasm.LowerInt
 import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.RuntimeNat
@@ -82,30 +81,80 @@ def psWasmLowerParameterTypes
           match psWasmLowerParameterTypes profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 def psWasmExpectedResultType :
     List PsWasmValueType ->
     Except PsWasmLowerError (Option PsWasmValueType)
   | [] => Except.ok none
-  | [result] => Except.ok (some result)
-  | _ => Except.error PsWasmLowerError.unsupportedType
+  | result :: rest =>
+      match rest with
+      | [] => Except.ok (some result)
+      | _ => Except.error PsWasmLowerError.unsupportedType
 
 def psWasmMachineIntegerValueType
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrMachineIntegerType) :
     PsWasmValueType :=
   if psWasmMachineIntegerIs64 profile type then
-    .i64
+    PsWasmValueType.i64
   else
-    .i32
+    PsWasmValueType.i32
 
 def psWasmFloatingValueType
     (type : PsVerifiedIrFloatingType) :
     PsWasmValueType :=
   match type with
-  | .float32 => .f32
-  | .float => .f64
+  | .float32 => PsWasmValueType.f32
+  | .float => PsWasmValueType.f64
+
+
+def psWasmListFoldl {Value State : Type}
+    (step : State -> Value -> State)
+    (values : List Value) :
+    State -> State :=
+  match values with
+  | List.nil =>
+      fun (state : State) => state
+  | List.cons value rest =>
+      let smaller : State -> State :=
+        psWasmListFoldl step rest;
+      fun (state : State) =>
+        smaller (step state value)
+
+def psWasmListPair? {Value : Type}
+    (values : List Value) :
+    Option (Value × Value) :=
+  match values with
+  | List.nil => none
+  | List.cons first rest =>
+      match rest with
+      | List.nil => none
+      | List.cons second tail =>
+          match tail with
+          | List.nil =>
+              some (Prod.mk first second)
+          | List.cons _ _ => none
+
+def psWasmListTriple? {Value : Type}
+    (values : List Value) :
+    Option (Value × Value × Value) :=
+  match values with
+  | List.nil => none
+  | List.cons first rest =>
+      match rest with
+      | List.nil => none
+      | List.cons second tail =>
+          match tail with
+          | List.nil => none
+          | List.cons third final =>
+              match final with
+              | List.nil =>
+                  some
+                    (Prod.mk
+                      first
+                      (Prod.mk second third))
+              | List.cons _ _ => none
 
 def psWasmFunctionTypeListContains
     (types : List PsVerifiedIrType)
@@ -113,11 +162,13 @@ def psWasmFunctionTypeListContains
   match psWasmIrTypeKey candidate with
   | none => false
   | some candidateKey =>
-      types.any
-        (fun existing =>
+      let matches :
+          PsVerifiedIrType -> Bool :=
+        fun (existing : PsVerifiedIrType) =>
           match psWasmIrTypeKey existing with
           | none => false
-          | some existingKey => existingKey == candidateKey)
+          | some existingKey => existingKey == candidateKey;
+      psListAny matches types
 
 def psWasmInsertFunctionType
     (types : List PsVerifiedIrType)
@@ -128,7 +179,7 @@ def psWasmInsertFunctionType
       if psWasmFunctionTypeListContains types candidate then
         types
       else
-        types ++ [candidate]
+        psListAppend types (List.cons candidate List.nil)
   | _ => types
 
 def psWasmCollectFunctionTypesFromTypeWithFuel :
@@ -141,20 +192,42 @@ def psWasmCollectFunctionTypesFromTypeWithFuel :
       match type with
       | .function parameters result =>
           let withSelf :=
-            psWasmInsertFunctionType types type
-          let withParameters :=
-            parameters.foldl
-              (fun state parameter =>
-                psWasmCollectFunctionTypesFromTypeWithFuel
-                  fuel parameter state)
-              withSelf
-          psWasmCollectFunctionTypesFromTypeWithFuel
-            fuel result withParameters
-      | .named _ arguments =>
-          arguments.foldl
-            (fun state argument =>
+            psWasmInsertFunctionType types type;
+          let collectParameter :
+              List PsVerifiedIrType ->
+              PsVerifiedIrType ->
+              List PsVerifiedIrType :=
+            fun
+              (state : List PsVerifiedIrType)
+              (parameter : PsVerifiedIrType) =>
               psWasmCollectFunctionTypesFromTypeWithFuel
-                fuel argument state)
+                fuel
+                parameter
+                state;
+          let withParameters :=
+            psWasmListFoldl
+              collectParameter
+              parameters
+              withSelf;
+          psWasmCollectFunctionTypesFromTypeWithFuel
+            fuel
+            result
+            withParameters
+      | .named _ arguments =>
+          let collectArgument :
+              List PsVerifiedIrType ->
+              PsVerifiedIrType ->
+              List PsVerifiedIrType :=
+            fun
+              (state : List PsVerifiedIrType)
+              (argument : PsVerifiedIrType) =>
+              psWasmCollectFunctionTypesFromTypeWithFuel
+                fuel
+                argument
+                state;
+          psWasmListFoldl
+            collectArgument
+            arguments
             types
       | _ => types
 
@@ -168,12 +241,29 @@ def psWasmCollectFunctionTypesFromParameters
     (parameters : List PsVerifiedIrParameter)
     (types : List PsVerifiedIrType) :
     List PsVerifiedIrType :=
-  parameters.foldl
-    (fun state parameter =>
+  let collectParameter :
+      List PsVerifiedIrType ->
+      PsVerifiedIrParameter ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (parameter : PsVerifiedIrParameter) =>
       psWasmCollectFunctionTypesFromType
         parameter.type
-        state)
+        state;
+  psWasmListFoldl
+    collectParameter
+    parameters
     types
+
+def psWasmParameterTypes
+    (parameters : List PsVerifiedIrParameter) :
+    List PsVerifiedIrType :=
+  let parameterType :
+      PsVerifiedIrParameter -> PsVerifiedIrType :=
+    fun (parameter : PsVerifiedIrParameter) =>
+      parameter.type;
+  psListMap parameterType parameters
 
 def psWasmCollectFunctionTypesFromExprWithFuel :
     Nat ->
@@ -182,87 +272,146 @@ def psWasmCollectFunctionTypesFromExprWithFuel :
     List PsVerifiedIrType
   | 0, _, types => types
   | fuel + 1, expr, types =>
-      let collect :=
-        fun expression state =>
+      let collect :
+          PsVerifiedIrExpr ->
+          List PsVerifiedIrType ->
+          List PsVerifiedIrType :=
+        fun
+          (expression : PsVerifiedIrExpr)
+          (state : List PsVerifiedIrType) =>
           psWasmCollectFunctionTypesFromExprWithFuel
-            fuel expression state
+            fuel
+            expression
+            state;
+      let collectType :
+          List PsVerifiedIrType ->
+          PsVerifiedIrType ->
+          List PsVerifiedIrType :=
+        fun
+          (state : List PsVerifiedIrType)
+          (type : PsVerifiedIrType) =>
+          psWasmCollectFunctionTypesFromType
+            type
+            state;
+      let collectArgument :
+          List PsVerifiedIrType ->
+          PsVerifiedIrExpr ->
+          List PsVerifiedIrType :=
+        fun
+          (state : List PsVerifiedIrType)
+          (argument : PsVerifiedIrExpr) =>
+          collect argument state;
+      let collectField :
+          List PsVerifiedIrType ->
+          (String × PsVerifiedIrExpr) ->
+          List PsVerifiedIrType :=
+        fun
+          (state : List PsVerifiedIrType)
+          (field : String × PsVerifiedIrExpr) =>
+          collect (Prod.snd field) state;
       match expr with
       | .literal _ => types
       | .var _ => types
       | .intrinsic _ typeArguments arguments =>
           let withTypes :=
-            typeArguments.foldl
-              (fun state type =>
-                psWasmCollectFunctionTypesFromType type state)
-              types
-          arguments.foldl
-            (fun state argument => collect argument state)
+            psWasmListFoldl
+              collectType
+              typeArguments
+              types;
+          psWasmListFoldl
+            collectArgument
+            arguments
             withTypes
       | .lambda parameters resultType body =>
           let withParameters :=
             psWasmCollectFunctionTypesFromParameters
-              parameters types
+              parameters
+              types;
           let functionType :=
             PsVerifiedIrType.function
-              (parameters.map (fun parameter => parameter.type))
-              resultType
+              (psWasmParameterTypes parameters)
+              resultType;
           let withFunction :=
             psWasmInsertFunctionType
               withParameters
-              functionType
+              functionType;
           let withResult :=
             psWasmCollectFunctionTypesFromType
               resultType
-              withFunction
+              withFunction;
           collect body withResult
       | .call fn typeArguments arguments =>
-          let withFn := collect fn types
+          let withFn := collect fn types;
           let withTypes :=
-            typeArguments.foldl
-              (fun state type =>
-                psWasmCollectFunctionTypesFromType type state)
-              withFn
-          arguments.foldl
-            (fun state argument => collect argument state)
+            psWasmListFoldl
+              collectType
+              typeArguments
+              withFn;
+          psWasmListFoldl
+            collectArgument
+            arguments
             withTypes
       | .letE _ type value body =>
           let withType :=
-            psWasmCollectFunctionTypesFromType type types
-          let withValue := collect value withType
+            psWasmCollectFunctionTypesFromType type types;
+          let withValue := collect value withType;
           collect body withValue
       | .ifE condition thenBranch elseBranch =>
-          let withCondition := collect condition types
-          let withThen := collect thenBranch withCondition
+          let withCondition := collect condition types;
+          let withThen := collect thenBranch withCondition;
           collect elseBranch withThen
       | .record _ _ fields =>
-          fields.foldl
-            (fun state field => collect field.2 state)
+          psWasmListFoldl
+            collectField
+            fields
             types
       | .projection _ _ target _ =>
           collect target types
       | .constructor _ _ typeArguments fields =>
           let withTypes :=
-            typeArguments.foldl
-              (fun state type =>
-                psWasmCollectFunctionTypesFromType type state)
-              types
-          fields.foldl
-            (fun state field => collect field.2 state)
+            psWasmListFoldl
+              collectType
+              typeArguments
+              types;
+          psWasmListFoldl
+            collectField
+            fields
             withTypes
       | .matchE _ _ scrutinee alternatives =>
-          let withScrutinee := collect scrutinee types
-          alternatives.foldl
-            (fun state alternative =>
-              let bindings := alternative.2.1
-              let body := alternative.2.2
+          let withScrutinee := collect scrutinee types;
+          let collectAlternative :
+              List PsVerifiedIrType ->
+              (String ×
+                List PsVerifiedIrMatchBinding ×
+                PsVerifiedIrExpr) ->
+              List PsVerifiedIrType :=
+            fun
+              (state : List PsVerifiedIrType)
+              (alternative :
+                String ×
+                  List PsVerifiedIrMatchBinding ×
+                  PsVerifiedIrExpr) =>
+              let bindings := Prod.fst (Prod.snd alternative);
+              let body := Prod.snd (Prod.snd alternative);
+              let collectBinding :
+                  List PsVerifiedIrType ->
+                  PsVerifiedIrMatchBinding ->
+                  List PsVerifiedIrType :=
+                fun
+                  (inner : List PsVerifiedIrType)
+                  (binding : PsVerifiedIrMatchBinding) =>
+                  psWasmCollectFunctionTypesFromType
+                    binding.type
+                    inner;
               let withBindings :=
-                bindings.foldl
-                  (fun inner binding =>
-                    psWasmCollectFunctionTypesFromType
-                      binding.type
-                      inner)
-                  state
-              collect body withBindings)
+                psWasmListFoldl
+                  collectBinding
+                  bindings
+                  state;
+              collect body withBindings;
+          psWasmListFoldl
+            collectAlternative
+            alternatives
             withScrutinee
 
 def psWasmCollectFunctionTypesFromExpr
@@ -271,43 +420,111 @@ def psWasmCollectFunctionTypesFromExpr
     List PsVerifiedIrType :=
   psWasmCollectFunctionTypesFromExprWithFuel 4096 expr types
 
+def psWasmCollectFunctionTypesFromStructureFields
+    (fields : List PsVerifiedIrStructureField)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  let collectField :
+      List PsVerifiedIrType ->
+      PsVerifiedIrStructureField ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (field : PsVerifiedIrStructureField) =>
+      psWasmCollectFunctionTypesFromType
+        field.type
+        state;
+  psWasmListFoldl collectField fields types
+
+def psWasmCollectFunctionTypesFromConstructorFields
+    (fields : List PsVerifiedIrConstructorField)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  let collectField :
+      List PsVerifiedIrType ->
+      PsVerifiedIrConstructorField ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (field : PsVerifiedIrConstructorField) =>
+      psWasmCollectFunctionTypesFromType
+        field.type
+        state;
+  psWasmListFoldl collectField fields types
+
+def psWasmCollectFunctionTypesFromConstructors
+    (constructors : List PsVerifiedIrConstructor)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  let collectConstructor :
+      List PsVerifiedIrType ->
+      PsVerifiedIrConstructor ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (constructorInfo : PsVerifiedIrConstructor) =>
+      psWasmCollectFunctionTypesFromConstructorFields
+        constructorInfo.fields
+        state;
+  psWasmListFoldl
+    collectConstructor
+    constructors
+    types
+
 def psWasmCollectModuleFunctionTypes
     (module : PsVerifiedIrModule) :
     List PsVerifiedIrType :=
+  let collectStructure :
+      List PsVerifiedIrType ->
+      PsVerifiedIrStructure ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (structureInfo : PsVerifiedIrStructure) =>
+      psWasmCollectFunctionTypesFromStructureFields
+        structureInfo.fields
+        state;
   let fromStructures :=
-    module.structures.foldl
-      (fun state structureInfo =>
-        structureInfo.fields.foldl
-          (fun inner field =>
-            psWasmCollectFunctionTypesFromType field.type inner)
-          state)
-      []
+    psWasmListFoldl
+      collectStructure
+      module.structures
+      List.nil;
+  let collectInductive :
+      List PsVerifiedIrType ->
+      PsVerifiedIrInductive ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (inductiveInfo : PsVerifiedIrInductive) =>
+      psWasmCollectFunctionTypesFromConstructors
+        inductiveInfo.constructors
+        state;
   let fromInductives :=
-    module.inductives.foldl
-      (fun state inductiveInfo =>
-        inductiveInfo.constructors.foldl
-          (fun inner constructorInfo =>
-            constructorInfo.fields.foldl
-              (fun fieldsState field =>
-                psWasmCollectFunctionTypesFromType
-                  field.type
-                  fieldsState)
-              inner)
-          state)
-      fromStructures
-  module.declarations.foldl
-    (fun state declaration =>
+    psWasmListFoldl
+      collectInductive
+      module.inductives
+      fromStructures;
+  let collectDeclaration :
+      List PsVerifiedIrType ->
+      PsVerifiedIrDeclaration ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (declaration : PsVerifiedIrDeclaration) =>
       let withParameters :=
         psWasmCollectFunctionTypesFromParameters
           declaration.parameters
-          state
+          state;
       let withResult :=
         psWasmCollectFunctionTypesFromType
           declaration.resultType
-          withParameters
+          withParameters;
       psWasmCollectFunctionTypesFromExpr
         declaration.body
-        withResult)
+        withResult;
+  psWasmListFoldl
+    collectDeclaration
+    module.declarations
     fromInductives
 
 def psWasmArrayTypeListContains
@@ -316,22 +533,32 @@ def psWasmArrayTypeListContains
   match psWasmIrTypeKey candidate with
   | none => false
   | some candidateKey =>
-      types.any
-        (fun existing =>
+      let matches :
+          PsVerifiedIrType -> Bool :=
+        fun (existing : PsVerifiedIrType) =>
           match psWasmIrTypeKey existing with
           | none => false
-          | some existingKey => existingKey == candidateKey)
+          | some existingKey => existingKey == candidateKey;
+      psListAny matches types
 
 def psWasmInsertArrayType
     (types : List PsVerifiedIrType)
     (candidate : PsVerifiedIrType) :
     List PsVerifiedIrType :=
   match candidate with
-  | .named "Array" [_] =>
-      if psWasmArrayTypeListContains types candidate then
-        types
-      else
-        types ++ [candidate]
+  | .named "Array" arguments =>
+      match arguments with
+      | List.nil => types
+      | List.cons _ rest =>
+          match rest with
+          | List.nil =>
+              if psWasmArrayTypeListContains types candidate then
+                types
+              else
+                psListAppend
+                  types
+                  (List.cons candidate List.nil)
+          | List.cons _ _ => types
   | _ => types
 
 def psWasmCollectArrayTypesFromTypeWithFuel :
@@ -343,23 +570,71 @@ def psWasmCollectArrayTypesFromTypeWithFuel :
   | fuel + 1, type, types =>
       match type with
       | .function parameters result =>
-          let withParameters :=
-            parameters.foldl
-              (fun state parameter =>
-                psWasmCollectArrayTypesFromTypeWithFuel
-                  fuel parameter state)
-              types
-          psWasmCollectArrayTypesFromTypeWithFuel
-            fuel result withParameters
-      | .named "Array" [elementType] =>
-          let withSelf := psWasmInsertArrayType types type
-          psWasmCollectArrayTypesFromTypeWithFuel
-            fuel elementType withSelf
-      | .named _ arguments =>
-          arguments.foldl
-            (fun state argument =>
+          let collectParameter :
+              List PsVerifiedIrType ->
+              PsVerifiedIrType ->
+              List PsVerifiedIrType :=
+            fun
+              (state : List PsVerifiedIrType)
+              (parameter : PsVerifiedIrType) =>
               psWasmCollectArrayTypesFromTypeWithFuel
-                fuel argument state)
+                fuel
+                parameter
+                state;
+          let withParameters :=
+            psWasmListFoldl
+              collectParameter
+              parameters
+              types;
+          psWasmCollectArrayTypesFromTypeWithFuel
+            fuel
+            result
+            withParameters
+      | .named "Array" arguments =>
+          match arguments with
+          | List.nil => types
+          | List.cons elementType rest =>
+              match rest with
+              | List.nil =>
+                  let withSelf :=
+                    psWasmInsertArrayType
+                      types
+                      type;
+                  psWasmCollectArrayTypesFromTypeWithFuel
+                    fuel
+                    elementType
+                    withSelf
+              | List.cons _ _ =>
+                  let collectArgument :
+                      List PsVerifiedIrType ->
+                      PsVerifiedIrType ->
+                      List PsVerifiedIrType :=
+                    fun
+                      (state : List PsVerifiedIrType)
+                      (argument : PsVerifiedIrType) =>
+                      psWasmCollectArrayTypesFromTypeWithFuel
+                        fuel
+                        argument
+                        state;
+                  psWasmListFoldl
+                    collectArgument
+                    arguments
+                    types
+      | .named _ arguments =>
+          let collectArgument :
+              List PsVerifiedIrType ->
+              PsVerifiedIrType ->
+              List PsVerifiedIrType :=
+            fun
+              (state : List PsVerifiedIrType)
+              (argument : PsVerifiedIrType) =>
+              psWasmCollectArrayTypesFromTypeWithFuel
+                fuel
+                argument
+                state;
+          psWasmListFoldl
+            collectArgument
+            arguments
             types
       | _ => types
 
@@ -373,10 +648,80 @@ def psWasmCollectArrayTypesFromParameters
     (parameters : List PsVerifiedIrParameter)
     (types : List PsVerifiedIrType) :
     List PsVerifiedIrType :=
-  parameters.foldl
-    (fun state parameter =>
-      psWasmCollectArrayTypesFromType parameter.type state)
+  let collectParameter :
+      List PsVerifiedIrType ->
+      PsVerifiedIrParameter ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (parameter : PsVerifiedIrParameter) =>
+      psWasmCollectArrayTypesFromType
+        parameter.type
+        state;
+  psWasmListFoldl
+    collectParameter
+    parameters
     types
+
+def psWasmAddArrayTypesForIntrinsic
+    (operation : PsVerifiedIrIntrinsic)
+    (typeArguments : List PsVerifiedIrType)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  match operation with
+  | .arrayMap =>
+      match typeArguments with
+      | List.cons inputType rest =>
+          match rest with
+          | List.cons outputType tail =>
+              match tail with
+              | List.nil =>
+                  psWasmInsertArrayType
+                    (psWasmInsertArrayType
+                      types
+                      (PsVerifiedIrType.named
+                        "Array"
+                        (List.cons inputType List.nil)))
+                    (PsVerifiedIrType.named
+                      "Array"
+                      (List.cons outputType List.nil))
+              | List.cons _ _ => types
+          | List.nil => types
+      | List.nil => types
+  | .arrayFoldl =>
+      match typeArguments with
+      | List.cons elementType rest =>
+          match rest with
+          | List.cons _ tail =>
+              match tail with
+              | List.nil =>
+                  psWasmInsertArrayType
+                    types
+                    (PsVerifiedIrType.named
+                      "Array"
+                      (List.cons elementType List.nil))
+              | List.cons _ _ => types
+          | List.nil => types
+      | List.nil => types
+  | .arrayEmptyWithCapacity
+  | .arraySize
+  | .arrayPush
+  | .arrayGet
+  | .arrayGetD
+  | .arraySet
+  | .arraySetIfInBounds =>
+      match typeArguments with
+      | List.cons elementType rest =>
+          match rest with
+          | List.nil =>
+              psWasmInsertArrayType
+                types
+                (PsVerifiedIrType.named
+                  "Array"
+                  (List.cons elementType List.nil))
+          | List.cons _ _ => types
+      | List.nil => types
+  | _ => types
 
 def psWasmCollectArrayTypesFromExprWithFuel :
     Nat ->
@@ -385,115 +730,161 @@ def psWasmCollectArrayTypesFromExprWithFuel :
     List PsVerifiedIrType
   | 0, _, types => types
   | fuel + 1, expr, types =>
-      let collect :=
-        fun expression state =>
+      let collect :
+          PsVerifiedIrExpr ->
+          List PsVerifiedIrType ->
+          List PsVerifiedIrType :=
+        fun
+          (expression : PsVerifiedIrExpr)
+          (state : List PsVerifiedIrType) =>
           psWasmCollectArrayTypesFromExprWithFuel
-            fuel expression state
+            fuel
+            expression
+            state;
+      let collectType :
+          List PsVerifiedIrType ->
+          PsVerifiedIrType ->
+          List PsVerifiedIrType :=
+        fun
+          (state : List PsVerifiedIrType)
+          (type : PsVerifiedIrType) =>
+          psWasmCollectArrayTypesFromType
+            type
+            state;
+      let collectArgument :
+          List PsVerifiedIrType ->
+          PsVerifiedIrExpr ->
+          List PsVerifiedIrType :=
+        fun
+          (state : List PsVerifiedIrType)
+          (argument : PsVerifiedIrExpr) =>
+          collect argument state;
+      let collectField :
+          List PsVerifiedIrType ->
+          (String × PsVerifiedIrExpr) ->
+          List PsVerifiedIrType :=
+        fun
+          (state : List PsVerifiedIrType)
+          (field : String × PsVerifiedIrExpr) =>
+          collect (Prod.snd field) state;
       match expr with
       | .literal _ => types
       | .var _ => types
       | .intrinsic operation typeArguments arguments =>
           let withTypes :=
-            typeArguments.foldl
-              (fun state type =>
-                psWasmCollectArrayTypesFromType type state)
-              types
+            psWasmListFoldl
+              collectType
+              typeArguments
+              types;
           let withArrayTypes :=
-            match operation, typeArguments with
-            | .arrayMap, [inputType, outputType] =>
-                psWasmInsertArrayType
-                  (psWasmInsertArrayType
-                    withTypes
-                    (PsVerifiedIrType.named "Array" [inputType]))
-                  (PsVerifiedIrType.named "Array" [outputType])
-            | .arrayFoldl, [elementType, _] =>
-                psWasmInsertArrayType
-                  withTypes
-                  (PsVerifiedIrType.named "Array" [elementType])
-            | .arrayEmptyWithCapacity, [elementType]
-            | .arraySize, [elementType]
-            | .arrayPush, [elementType]
-            | .arrayGet, [elementType]
-            | .arrayGetD, [elementType]
-            | .arraySet, [elementType]
-            | .arraySetIfInBounds, [elementType] =>
-                psWasmInsertArrayType
-                  withTypes
-                  (PsVerifiedIrType.named "Array" [elementType])
-            | _, _ => withTypes
-          arguments.foldl
-            (fun state argument => collect argument state)
+            psWasmAddArrayTypesForIntrinsic
+              operation
+              typeArguments
+              withTypes;
+          psWasmListFoldl
+            collectArgument
+            arguments
             withArrayTypes
       | .lambda parameters resultType body =>
           let withParameters :=
             psWasmCollectArrayTypesFromParameters
-              parameters types
+              parameters
+              types;
           let withResult :=
             psWasmCollectArrayTypesFromType
-              resultType withParameters
+              resultType
+              withParameters;
           collect body withResult
       | .call fn typeArguments arguments =>
-          let withFn := collect fn types
+          let withFn := collect fn types;
           let withTypes :=
-            typeArguments.foldl
-              (fun state type =>
-                psWasmCollectArrayTypesFromType type state)
-              withFn
-          arguments.foldl
-            (fun state argument => collect argument state)
+            psWasmListFoldl
+              collectType
+              typeArguments
+              withFn;
+          psWasmListFoldl
+            collectArgument
+            arguments
             withTypes
       | .letE _ type value body =>
           let withType :=
-            psWasmCollectArrayTypesFromType type types
-          let withValue := collect value withType
+            psWasmCollectArrayTypesFromType
+              type
+              types;
+          let withValue := collect value withType;
           collect body withValue
       | .ifE condition thenBranch elseBranch =>
-          let withCondition := collect condition types
-          let withThen := collect thenBranch withCondition
+          let withCondition := collect condition types;
+          let withThen := collect thenBranch withCondition;
           collect elseBranch withThen
       | .record _ typeArguments fields =>
           let withTypes :=
-            typeArguments.foldl
-              (fun state type =>
-                psWasmCollectArrayTypesFromType type state)
-              types
-          fields.foldl
-            (fun state field => collect field.2 state)
+            psWasmListFoldl
+              collectType
+              typeArguments
+              types;
+          psWasmListFoldl
+            collectField
+            fields
             withTypes
       | .projection _ typeArguments target _ =>
           let withTypes :=
-            typeArguments.foldl
-              (fun state type =>
-                psWasmCollectArrayTypesFromType type state)
-              types
+            psWasmListFoldl
+              collectType
+              typeArguments
+              types;
           collect target withTypes
       | .constructor _ _ typeArguments fields =>
           let withTypes :=
-            typeArguments.foldl
-              (fun state type =>
-                psWasmCollectArrayTypesFromType type state)
-              types
-          fields.foldl
-            (fun state field => collect field.2 state)
+            psWasmListFoldl
+              collectType
+              typeArguments
+              types;
+          psWasmListFoldl
+            collectField
+            fields
             withTypes
       | .matchE _ typeArguments scrutinee alternatives =>
           let withTypes :=
-            typeArguments.foldl
-              (fun state type =>
-                psWasmCollectArrayTypesFromType type state)
-              types
-          let withScrutinee := collect scrutinee withTypes
-          alternatives.foldl
-            (fun state alternative =>
-              let bindings := alternative.2.1
-              let body := alternative.2.2
+            psWasmListFoldl
+              collectType
+              typeArguments
+              types;
+          let withScrutinee :=
+            collect scrutinee withTypes;
+          let collectAlternative :
+              List PsVerifiedIrType ->
+              (String ×
+                List PsVerifiedIrMatchBinding ×
+                PsVerifiedIrExpr) ->
+              List PsVerifiedIrType :=
+            fun
+              (state : List PsVerifiedIrType)
+              (alternative :
+                String ×
+                  List PsVerifiedIrMatchBinding ×
+                  PsVerifiedIrExpr) =>
+              let bindings := Prod.fst (Prod.snd alternative);
+              let body := Prod.snd (Prod.snd alternative);
+              let collectBinding :
+                  List PsVerifiedIrType ->
+                  PsVerifiedIrMatchBinding ->
+                  List PsVerifiedIrType :=
+                fun
+                  (inner : List PsVerifiedIrType)
+                  (binding : PsVerifiedIrMatchBinding) =>
+                  psWasmCollectArrayTypesFromType
+                    binding.type
+                    inner;
               let withBindings :=
-                bindings.foldl
-                  (fun inner binding =>
-                    psWasmCollectArrayTypesFromType
-                      binding.type inner)
-                  state
-              collect body withBindings)
+                psWasmListFoldl
+                  collectBinding
+                  bindings
+                  state;
+              collect body withBindings;
+          psWasmListFoldl
+            collectAlternative
+            alternatives
             withScrutinee
 
 def psWasmCollectArrayTypesFromExpr
@@ -502,59 +893,113 @@ def psWasmCollectArrayTypesFromExpr
     List PsVerifiedIrType :=
   psWasmCollectArrayTypesFromExprWithFuel 4096 expr types
 
+def psWasmCollectArrayTypesFromStructureFields
+    (fields : List PsVerifiedIrStructureField)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  let collectField :
+      List PsVerifiedIrType ->
+      PsVerifiedIrStructureField ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (field : PsVerifiedIrStructureField) =>
+      psWasmCollectArrayTypesFromType
+        field.type
+        state;
+  psWasmListFoldl collectField fields types
+
+def psWasmCollectArrayTypesFromConstructorFields
+    (fields : List PsVerifiedIrConstructorField)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  let collectField :
+      List PsVerifiedIrType ->
+      PsVerifiedIrConstructorField ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (field : PsVerifiedIrConstructorField) =>
+      psWasmCollectArrayTypesFromType
+        field.type
+        state;
+  psWasmListFoldl collectField fields types
+
+def psWasmCollectArrayTypesFromConstructors
+    (constructors : List PsVerifiedIrConstructor)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  let collectConstructor :
+      List PsVerifiedIrType ->
+      PsVerifiedIrConstructor ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (constructorInfo : PsVerifiedIrConstructor) =>
+      psWasmCollectArrayTypesFromConstructorFields
+        constructorInfo.fields
+        state;
+  psWasmListFoldl
+    collectConstructor
+    constructors
+    types
+
 def psWasmCollectModuleArrayTypes
     (module : PsVerifiedIrModule) :
     List PsVerifiedIrType :=
+  let collectStructure :
+      List PsVerifiedIrType ->
+      PsVerifiedIrStructure ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (structureInfo : PsVerifiedIrStructure) =>
+      psWasmCollectArrayTypesFromStructureFields
+        structureInfo.fields
+        state;
   let fromStructures :=
-    module.structures.foldl
-      (fun state structureInfo =>
-        structureInfo.fields.foldl
-          (fun inner field =>
-            psWasmCollectArrayTypesFromType field.type inner)
-          state)
-      []
+    psWasmListFoldl
+      collectStructure
+      module.structures
+      List.nil;
+  let collectInductive :
+      List PsVerifiedIrType ->
+      PsVerifiedIrInductive ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (inductiveInfo : PsVerifiedIrInductive) =>
+      psWasmCollectArrayTypesFromConstructors
+        inductiveInfo.constructors
+        state;
   let fromInductives :=
-    module.inductives.foldl
-      (fun state inductiveInfo =>
-        inductiveInfo.constructors.foldl
-          (fun inner constructorInfo =>
-            constructorInfo.fields.foldl
-              (fun fieldsState field =>
-                psWasmCollectArrayTypesFromType
-                  field.type fieldsState)
-              inner)
-          state)
-      fromStructures
-  module.declarations.foldl
-    (fun state declaration =>
+    psWasmListFoldl
+      collectInductive
+      module.inductives
+      fromStructures;
+  let collectDeclaration :
+      List PsVerifiedIrType ->
+      PsVerifiedIrDeclaration ->
+      List PsVerifiedIrType :=
+    fun
+      (state : List PsVerifiedIrType)
+      (declaration : PsVerifiedIrDeclaration) =>
       let withParameters :=
         psWasmCollectArrayTypesFromParameters
-          declaration.parameters state
+          declaration.parameters
+          state;
       let withResult :=
         psWasmCollectArrayTypesFromType
-          declaration.resultType withParameters
+          declaration.resultType
+          withParameters;
       psWasmCollectArrayTypesFromExpr
-        declaration.body withResult)
+        declaration.body
+        withResult;
+  psWasmListFoldl
+    collectDeclaration
+    module.declarations
     fromInductives
 
-def psWasmLowerArrayType
-    (profile : PsWasmTargetProfile)
-    (type : PsVerifiedIrType) :
-    Except PsWasmLowerError PsWasmArrayType :=
-  match type with
-  | .named "Array" [elementType] =>
-      match psWasmArrayTypeName elementType with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some name =>
-          match psWasmStorageTypeOfIrType? profile elementType with
-          | none => Except.error PsWasmLowerError.unsupportedType
-          | some storageType =>
-              Except.ok {
-                name := name
-                elementType := storageType
-                mutable := true
-              }
-  | _ => Except.error PsWasmLowerError.unsupportedType
 
 def psWasmLowerArrayTypes
     (profile : PsWasmTargetProfile) :
@@ -568,7 +1013,7 @@ def psWasmLowerArrayTypes
           match psWasmLowerArrayTypes profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 structure PsWasmClosureSignature where
   baseStructure : PsWasmStructType
@@ -586,7 +1031,7 @@ def psWasmLowerIrTypeList
           match psWasmLowerIrTypeList profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 def psWasmLowerClosureSignature
     (profile : PsWasmTargetProfile)
@@ -623,7 +1068,8 @@ def psWasmLowerClosureSignature
                         codeType := {
                           name := codeTypeName
                           parameters :=
-                            PsWasmValueType.refT baseName ::
+                            List.cons
+                              (PsWasmValueType.refT baseName)
                               loweredParameters
                           results := loweredResults
                         }
@@ -645,8 +1091,12 @@ def psWasmLowerClosureSignatures
           | Except.ok loweredRest =>
               Except.ok
                 (
-                  signature.baseStructure :: loweredRest.1,
-                  signature.codeType :: loweredRest.2
+                  List.cons
+                    signature.baseStructure
+                    (Prod.fst loweredRest),
+                  List.cons
+                    signature.codeType
+                    (Prod.snd loweredRest)
                 )
 
 def psWasmFindStructure :
@@ -683,8 +1133,8 @@ def psWasmFindRecordField :
     Option PsVerifiedIrExpr
   | [], _ => none
   | field :: rest, name =>
-      if field.1 == name then
-        some field.2
+      if (Prod.fst field) == name then
+        some (Prod.snd field)
       else
         psWasmFindRecordField rest name
 
@@ -694,14 +1144,14 @@ def psWasmStructGetInstruction
     (type : PsVerifiedIrType) : PsWasmInstruction :=
   match type with
   | .primitive .uint8 =>
-      .structGetU structureName fieldIndex
+      PsWasmInstruction.structGetU structureName fieldIndex
   | .primitive .uint16 =>
-      .structGetU structureName fieldIndex
+      PsWasmInstruction.structGetU structureName fieldIndex
   | .primitive .int8 =>
-      .structGetS structureName fieldIndex
+      PsWasmInstruction.structGetS structureName fieldIndex
   | .primitive .int16 =>
-      .structGetS structureName fieldIndex
-  | _ => .structGet structureName fieldIndex
+      PsWasmInstruction.structGetS structureName fieldIndex
+  | _ => PsWasmInstruction.structGet structureName fieldIndex
 
 def psWasmLowerStructureField
     (profile : PsWasmTargetProfile)
@@ -727,7 +1177,7 @@ def psWasmLowerStructureFields
           match psWasmLowerStructureFields profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 def psWasmLowerStructure
     (profile : PsWasmTargetProfile)
@@ -758,7 +1208,7 @@ def psWasmLowerStructures
           match psWasmLowerStructures profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 def psWasmConstructorTypeName
     (inductiveName constructorName : String) : String :=
@@ -828,7 +1278,7 @@ def psWasmLowerConstructorFields
           match psWasmLowerConstructorFields profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 def psWasmLowerInductiveConstructors
     (profile : PsWasmTargetProfile)
@@ -859,7 +1309,7 @@ def psWasmLowerInductiveConstructors
                 rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered :: loweredRest)
+              Except.ok (List.cons lowered loweredRest)
 
 def psWasmLowerInductive
     (profile : PsWasmTargetProfile)
@@ -881,7 +1331,7 @@ def psWasmLowerInductive
             inductiveInfo.constructors with
       | Except.error error => Except.error error
       | Except.ok constructors =>
-          Except.ok (base :: constructors)
+          Except.ok (List.cons base constructors)
 
 def psWasmLowerInductives
     (profile : PsWasmTargetProfile) :
@@ -901,12 +1351,15 @@ def psWasmParameterBindingsLoop :
     Nat -> List PsVerifiedIrParameter -> List PsWasmBinding
   | _, [] => []
   | index, parameter :: rest =>
-      {
-        name := parameter.name
-        index := index
-        type := parameter.type
-      } ::
-        psWasmParameterBindingsLoop (index + 1) rest
+      List.cons
+        {
+          name := parameter.name
+          index := index
+          type := parameter.type
+        }
+        (psWasmParameterBindingsLoop
+          (index + 1)
+          rest)
 
 def psWasmParameterBindings
     (parameters : List PsVerifiedIrParameter) :
@@ -965,13 +1418,14 @@ def psWasmParameterNames :
     List PsVerifiedIrParameter -> List String
   | [] => []
   | parameter :: rest =>
-      parameter.name :: psWasmParameterNames rest
+      List.cons parameter.name (psWasmParameterNames rest)
 
 def psWasmMatchBindingNames :
     List PsVerifiedIrMatchBinding -> List String
   | [] => []
   | binding :: rest =>
-      binding.name :: psWasmMatchBindingNames rest
+      List.cons binding.name (psWasmMatchBindingNames rest)
+
 
 def psWasmCollectCapturesWithFuel
     (outerBindings : List PsWasmBinding)
@@ -982,14 +1436,35 @@ def psWasmCollectCapturesWithFuel
     List PsWasmBinding
   | 0, _, captures => captures
   | fuel + 1, expr, captures =>
-      let collect :=
-        fun nested state =>
+      let collect :
+          PsVerifiedIrExpr ->
+          List PsWasmBinding ->
+          List PsWasmBinding :=
+        fun
+          (nested : PsVerifiedIrExpr)
+          (state : List PsWasmBinding) =>
           psWasmCollectCapturesWithFuel
             outerBindings
             boundNames
             fuel
             nested
-            state
+            state;
+      let collectArgument :
+          List PsWasmBinding ->
+          PsVerifiedIrExpr ->
+          List PsWasmBinding :=
+        fun
+          (state : List PsWasmBinding)
+          (argument : PsVerifiedIrExpr) =>
+          collect argument state;
+      let collectField :
+          List PsWasmBinding ->
+          (String × PsVerifiedIrExpr) ->
+          List PsWasmBinding :=
+        fun
+          (state : List PsWasmBinding)
+          (field : String × PsVerifiedIrExpr) =>
+          collect (Prod.snd field) state;
       match expr with
       | .literal _ => captures
       | .var name =>
@@ -998,57 +1473,81 @@ def psWasmCollectCapturesWithFuel
             boundNames
             captures
             name
-      | .intrinsic _ typeArguments arguments =>
-          arguments.foldl
-            (fun state argument => collect argument state)
+      | .intrinsic _ _ arguments =>
+          psWasmListFoldl
+            collectArgument
+            arguments
             captures
       | .lambda parameters _ body =>
           psWasmCollectCapturesWithFuel
             outerBindings
-            (psWasmParameterNames parameters ++ boundNames)
+            (psListAppend
+              (psWasmParameterNames parameters)
+              boundNames)
             fuel
             body
             captures
       | .call fn _ arguments =>
-          let withFn := collect fn captures
-          arguments.foldl
-            (fun state argument => collect argument state)
+          let withFn := collect fn captures;
+          psWasmListFoldl
+            collectArgument
+            arguments
             withFn
       | .letE name _ value body =>
-          let withValue := collect value captures
+          let withValue := collect value captures;
           psWasmCollectCapturesWithFuel
             outerBindings
-            (name :: boundNames)
+            (List.cons name boundNames)
             fuel
             body
             withValue
       | .ifE condition thenBranch elseBranch =>
-          let withCondition := collect condition captures
-          let withThen := collect thenBranch withCondition
+          let withCondition := collect condition captures;
+          let withThen := collect thenBranch withCondition;
           collect elseBranch withThen
       | .record _ _ fields =>
-          fields.foldl
-            (fun state field => collect field.2 state)
+          psWasmListFoldl
+            collectField
+            fields
             captures
       | .projection _ _ target _ =>
           collect target captures
       | .constructor _ _ _ fields =>
-          fields.foldl
-            (fun state field => collect field.2 state)
+          psWasmListFoldl
+            collectField
+            fields
             captures
       | .matchE _ _ scrutinee alternatives =>
-          let withScrutinee := collect scrutinee captures
-          alternatives.foldl
-            (fun state alternative =>
-              let matchBindings := alternative.2.1
-              let body := alternative.2.2
+          let withScrutinee := collect scrutinee captures;
+          let collectAlternative :
+              List PsWasmBinding ->
+              (String ×
+                List PsVerifiedIrMatchBinding ×
+                PsVerifiedIrExpr) ->
+              List PsWasmBinding :=
+            fun
+              (state : List PsWasmBinding)
+              (alternative :
+                String ×
+                  List PsVerifiedIrMatchBinding ×
+                  PsVerifiedIrExpr) =>
+              let matchBindings :=
+                Prod.fst (Prod.snd alternative);
+              let body :=
+                Prod.snd (Prod.snd alternative);
               psWasmCollectCapturesWithFuel
                 outerBindings
-                (psWasmMatchBindingNames matchBindings ++ boundNames)
+                (psListAppend
+                  (psWasmMatchBindingNames matchBindings)
+                  boundNames)
                 fuel
                 body
-                state)
+                state;
+          psWasmListFoldl
+            collectAlternative
+            alternatives
             withScrutinee
+
 
 def psWasmCollectCaptures
     (outerBindings : List PsWasmBinding)
@@ -1067,14 +1566,15 @@ def psWasmParameterBindingsFrom
     List PsVerifiedIrParameter -> List PsWasmBinding
   | [] => []
   | parameter :: rest =>
-      {
-        name := parameter.name
-        index := firstIndex
-        type := parameter.type
-      } ::
-        psWasmParameterBindingsFrom
+      List.cons
+        {
+          name := parameter.name
+          index := firstIndex
+          type := parameter.type
+        }
+        (psWasmParameterBindingsFrom
           (firstIndex + 1)
-          rest
+          rest)
 
 def psWasmAddLocal
     (state : PsWasmLowerState)
@@ -1276,8 +1776,8 @@ def psWasmLowerNatBinaryCallWith
     (functionName : String)
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
-  match arguments with
-  | [_, _] =>
+  match psWasmListPair? arguments with
+  | some _ =>
       match psWasmLowerNatArgumentsWith lower state arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1287,7 +1787,7 @@ def psWasmLowerNatBinaryCallWith
                 [PsWasmInstruction.call functionName]
             state := lowered.state
           }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | none => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerNatCompareWith
     (lower :
@@ -1299,8 +1799,8 @@ def psWasmLowerNatCompareWith
     (comparison : PsWasmInstruction)
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
-  match arguments with
-  | [_, _] =>
+  match psWasmListPair? arguments with
+  | some _ =>
       match psWasmLowerNatArgumentsWith lower state arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1313,7 +1813,7 @@ def psWasmLowerNatCompareWith
               ]
             state := lowered.state
           }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | none => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerIntArgumentsWith
     (lower :
@@ -1340,8 +1840,8 @@ def psWasmLowerIntBinaryCallWith
     (functionName : String)
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
-  match arguments with
-  | [_, _] =>
+  match psWasmListPair? arguments with
+  | some _ =>
       match psWasmLowerIntArgumentsWith lower state arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1351,7 +1851,7 @@ def psWasmLowerIntBinaryCallWith
                 [PsWasmInstruction.call functionName]
             state := lowered.state
           }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | none => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerIntUnaryCallWith
     (lower :
@@ -1364,21 +1864,25 @@ def psWasmLowerIntUnaryCallWith
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match arguments with
-  | [value] =>
-      match
-          lower
-            (some psWasmIntRef)
-            state
-            value with
-      | Except.error error => Except.error error
-      | Except.ok lowered =>
-          Except.ok {
-            instructions :=
-              lowered.instructions ++
-                [PsWasmInstruction.call functionName]
-            state := lowered.state
-          }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | [] => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | value :: rest =>
+      match rest with
+      | _ :: _ =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | [] =>
+          match
+              lower
+                (some psWasmIntRef)
+                state
+                value with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok {
+                instructions :=
+                  lowered.instructions ++
+                    [PsWasmInstruction.call functionName]
+                state := lowered.state
+              }
 
 def psWasmLowerNatToIntUnaryCallWith
     (lower :
@@ -1391,21 +1895,25 @@ def psWasmLowerNatToIntUnaryCallWith
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match arguments with
-  | [value] =>
-      match
-          lower
-            (some psWasmNatRef)
-            state
-            value with
-      | Except.error error => Except.error error
-      | Except.ok lowered =>
-          Except.ok {
-            instructions :=
-              lowered.instructions ++
-                [PsWasmInstruction.call functionName]
-            state := lowered.state
-          }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | [] => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | value :: rest =>
+      match rest with
+      | _ :: _ =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | [] =>
+          match
+              lower
+                (some psWasmNatRef)
+                state
+                value with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok {
+                instructions :=
+                  lowered.instructions ++
+                    [PsWasmInstruction.call functionName]
+                state := lowered.state
+              }
 
 def psWasmLowerIntCompareWith
     (lower :
@@ -1417,8 +1925,8 @@ def psWasmLowerIntCompareWith
     (comparison : PsWasmInstruction)
     (arguments : List PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
-  match arguments with
-  | [_, _] =>
+  match psWasmListPair? arguments with
+  | some _ =>
       match psWasmLowerIntArgumentsWith lower state arguments with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1431,7 +1939,7 @@ def psWasmLowerIntCompareWith
               ]
             state := lowered.state
           }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | none => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 
 structure PsWasmArrayLowerInfo where
@@ -1445,20 +1953,24 @@ def psWasmResolveArrayLowerInfo
     (typeArguments : List PsVerifiedIrType) :
     Except PsWasmLowerError PsWasmArrayLowerInfo :=
   match typeArguments with
-  | [elementType] =>
-      match psWasmArrayTypeName elementType with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some typeName =>
-          match psWasmValueTypeOfIrType? profile elementType with
+  | [] => Except.error PsWasmLowerError.invalidIntrinsicArity
+  | elementType :: rest =>
+      match rest with
+      | _ :: _ =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | [] =>
+          match psWasmArrayTypeName elementType with
           | none => Except.error PsWasmLowerError.unsupportedType
-          | some elementValueType =>
-              Except.ok {
-                elementType := elementType
-                elementValueType := elementValueType
-                typeName := typeName
-                refType := PsWasmValueType.refT typeName
-              }
-  | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+          | some typeName =>
+              match psWasmValueTypeOfIrType? profile elementType with
+              | none => Except.error PsWasmLowerError.unsupportedType
+              | some elementValueType =>
+                  Except.ok {
+                    elementType := elementType
+                    elementValueType := elementValueType
+                    typeName := typeName
+                    refType := PsWasmValueType.refT typeName
+                  }
 
 def psWasmArrayGetInstruction
     (typeName : String)
@@ -1485,19 +1997,23 @@ def psWasmLowerArrayEmptyWithCapacityWith
   | Except.error error => Except.error error
   | Except.ok info =>
       match arguments with
-      | [capacity] =>
-          match lower (some psWasmNatRef) state capacity with
-          | Except.error error => Except.error error
-          | Except.ok lowered =>
-              Except.ok {
-                instructions :=
-                  lowered.instructions ++ [
-                    PsWasmInstruction.drop,
-                    PsWasmInstruction.arrayNewFixed info.typeName 0
-                  ]
-                state := lowered.state
-              }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+      | [] => Except.error PsWasmLowerError.invalidIntrinsicArity
+      | capacity :: rest =>
+          match rest with
+          | _ :: _ =>
+              Except.error PsWasmLowerError.invalidIntrinsicArity
+          | [] =>
+              match lower (some psWasmNatRef) state capacity with
+              | Except.error error => Except.error error
+              | Except.ok lowered =>
+                  Except.ok {
+                    instructions :=
+                      lowered.instructions ++ [
+                        PsWasmInstruction.drop,
+                        PsWasmInstruction.arrayNewFixed info.typeName 0
+                      ]
+                    state := lowered.state
+                  }
 
 def psWasmLowerArraySizeWith
     (profile : PsWasmTargetProfile)
@@ -1514,19 +2030,23 @@ def psWasmLowerArraySizeWith
   | Except.error error => Except.error error
   | Except.ok info =>
       match arguments with
-      | [array] =>
-          match lower (some info.refType) state array with
-          | Except.error error => Except.error error
-          | Except.ok lowered =>
-              Except.ok {
-                instructions :=
-                  lowered.instructions ++ [
-                    PsWasmInstruction.arrayLen,
-                    PsWasmInstruction.call psWasmNatOfU32Fn
-                  ]
-                state := lowered.state
-              }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
+      | [] => Except.error PsWasmLowerError.invalidIntrinsicArity
+      | array :: rest =>
+          match rest with
+          | _ :: _ =>
+              Except.error PsWasmLowerError.invalidIntrinsicArity
+          | [] =>
+              match lower (some info.refType) state array with
+              | Except.error error => Except.error error
+              | Except.ok lowered =>
+                  Except.ok {
+                    instructions :=
+                      lowered.instructions ++ [
+                        PsWasmInstruction.arrayLen,
+                        PsWasmInstruction.call psWasmNatOfU32Fn
+                      ]
+                    state := lowered.state
+                  }
 
 def psWasmLowerArrayPushWith
     (profile : PsWasmTargetProfile)
@@ -1542,18 +2062,22 @@ def psWasmLowerArrayPushWith
   match psWasmResolveArrayLowerInfo profile typeArguments with
   | Except.error error => Except.error error
   | Except.ok info =>
-      match arguments with
-      | [array, value] =>
+      match psWasmListPair? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some pair =>
+          let array := Prod.fst pair;
+          let value := Prod.snd pair;
           match lower (some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
               let allocatedArray :=
                 psWasmAddLocal loweredArray.state info.refType
-              let arrayLocal := allocatedArray.1
+              let arrayLocal := (Prod.fst allocatedArray)
               match
                   lower
                     (some info.elementValueType)
-                    allocatedArray.2
+                    (Prod.snd allocatedArray)
                     value with
               | Except.error error => Except.error error
               | Except.ok loweredValue =>
@@ -1561,10 +2085,10 @@ def psWasmLowerArrayPushWith
                     psWasmAddLocal
                       loweredValue.state
                       info.elementValueType
-                  let valueLocal := allocatedValue.1
+                  let valueLocal := (Prod.fst allocatedValue)
                   let allocatedOutput :=
-                    psWasmAddLocal allocatedValue.2 info.refType
-                  let outputLocal := allocatedOutput.1
+                    psWasmAddLocal (Prod.snd allocatedValue) info.refType
+                  let outputLocal := (Prod.fst allocatedOutput)
                   Except.ok {
                     instructions :=
                       loweredArray.instructions ++ [
@@ -1588,9 +2112,8 @@ def psWasmLowerArrayPushWith
                           info.typeName info.typeName,
                         PsWasmInstruction.localGet outputLocal
                       ]
-                    state := allocatedOutput.2
+                    state := (Prod.snd allocatedOutput)
                   }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerArrayGetWith
     (profile : PsWasmTargetProfile)
@@ -1606,20 +2129,24 @@ def psWasmLowerArrayGetWith
   match psWasmResolveArrayLowerInfo profile typeArguments with
   | Except.error error => Except.error error
   | Except.ok info =>
-      match arguments with
-      | [array, index] =>
+      match psWasmListPair? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some pair =>
+          let array := Prod.fst pair;
+          let index := Prod.snd pair;
           match lower (some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
               let allocatedArray :=
                 psWasmAddLocal loweredArray.state info.refType
-              let arrayLocal := allocatedArray.1
-              match lower (some psWasmNatRef) allocatedArray.2 index with
+              let arrayLocal := (Prod.fst allocatedArray)
+              match lower (some psWasmNatRef) (Prod.snd allocatedArray) index with
               | Except.error error => Except.error error
               | Except.ok loweredIndex =>
                   let allocatedIndex :=
                     psWasmAddLocal loweredIndex.state psWasmNatRef
-                  let indexLocal := allocatedIndex.1
+                  let indexLocal := (Prod.fst allocatedIndex)
                   Except.ok {
                     instructions :=
                       loweredArray.instructions ++ [
@@ -1639,9 +2166,8 @@ def psWasmLowerArrayGetWith
                           PsWasmInstruction.unreachable,
                         PsWasmInstruction.end_
                       ]
-                    state := allocatedIndex.2
+                    state := (Prod.snd allocatedIndex)
                   }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerArrayGetDWith
     (profile : PsWasmTargetProfile)
@@ -1657,24 +2183,30 @@ def psWasmLowerArrayGetDWith
   match psWasmResolveArrayLowerInfo profile typeArguments with
   | Except.error error => Except.error error
   | Except.ok info =>
-      match arguments with
-      | [array, index, fallback] =>
+      match psWasmListTriple? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some triple =>
+          let array := Prod.fst triple;
+          let tail := Prod.snd triple;
+          let index := Prod.fst tail;
+          let fallback := Prod.snd tail;
           match lower (some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
               let allocatedArray :=
                 psWasmAddLocal loweredArray.state info.refType
-              let arrayLocal := allocatedArray.1
-              match lower (some psWasmNatRef) allocatedArray.2 index with
+              let arrayLocal := (Prod.fst allocatedArray)
+              match lower (some psWasmNatRef) (Prod.snd allocatedArray) index with
               | Except.error error => Except.error error
               | Except.ok loweredIndex =>
                   let allocatedIndex :=
                     psWasmAddLocal loweredIndex.state psWasmNatRef
-                  let indexLocal := allocatedIndex.1
+                  let indexLocal := (Prod.fst allocatedIndex)
                   match
                       lower
                         (some info.elementValueType)
-                        allocatedIndex.2
+                        (Prod.snd allocatedIndex)
                         fallback with
                   | Except.error error => Except.error error
                   | Except.ok loweredFallback =>
@@ -1682,7 +2214,7 @@ def psWasmLowerArrayGetDWith
                         psWasmAddLocal
                           loweredFallback.state
                           info.elementValueType
-                      let fallbackLocal := allocatedFallback.1
+                      let fallbackLocal := (Prod.fst allocatedFallback)
                       Except.ok {
                         instructions :=
                           loweredArray.instructions ++ [
@@ -1714,9 +2246,8 @@ def psWasmLowerArrayGetDWith
                               PsWasmInstruction.localGet fallbackLocal,
                             PsWasmInstruction.end_
                           ]
-                        state := allocatedFallback.2
+                        state := (Prod.snd allocatedFallback)
                       }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerArraySetWith
     (profile : PsWasmTargetProfile)
@@ -1732,24 +2263,30 @@ def psWasmLowerArraySetWith
   match psWasmResolveArrayLowerInfo profile typeArguments with
   | Except.error error => Except.error error
   | Except.ok info =>
-      match arguments with
-      | [array, index, value] =>
+      match psWasmListTriple? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some triple =>
+          let array := Prod.fst triple;
+          let tail := Prod.snd triple;
+          let index := Prod.fst tail;
+          let value := Prod.snd tail;
           match lower (some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
               let allocatedArray :=
                 psWasmAddLocal loweredArray.state info.refType
-              let arrayLocal := allocatedArray.1
-              match lower (some psWasmNatRef) allocatedArray.2 index with
+              let arrayLocal := (Prod.fst allocatedArray)
+              match lower (some psWasmNatRef) (Prod.snd allocatedArray) index with
               | Except.error error => Except.error error
               | Except.ok loweredIndex =>
                   let allocatedIndex :=
                     psWasmAddLocal loweredIndex.state psWasmNatRef
-                  let indexLocal := allocatedIndex.1
+                  let indexLocal := (Prod.fst allocatedIndex)
                   match
                       lower
                         (some info.elementValueType)
-                        allocatedIndex.2
+                        (Prod.snd allocatedIndex)
                         value with
                   | Except.error error => Except.error error
                   | Except.ok loweredValue =>
@@ -1757,10 +2294,10 @@ def psWasmLowerArraySetWith
                         psWasmAddLocal
                           loweredValue.state
                           info.elementValueType
-                      let valueLocal := allocatedValue.1
+                      let valueLocal := (Prod.fst allocatedValue)
                       let allocatedOutput :=
-                        psWasmAddLocal allocatedValue.2 info.refType
-                      let outputLocal := allocatedOutput.1
+                        psWasmAddLocal (Prod.snd allocatedValue) info.refType
+                      let outputLocal := (Prod.fst allocatedOutput)
                       Except.ok {
                         instructions :=
                           loweredArray.instructions ++ [
@@ -1795,9 +2332,8 @@ def psWasmLowerArraySetWith
                               PsWasmInstruction.unreachable,
                             PsWasmInstruction.end_
                           ]
-                        state := allocatedOutput.2
+                        state := (Prod.snd allocatedOutput)
                       }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerArraySetIfInBoundsWith
     (profile : PsWasmTargetProfile)
@@ -1813,24 +2349,30 @@ def psWasmLowerArraySetIfInBoundsWith
   match psWasmResolveArrayLowerInfo profile typeArguments with
   | Except.error error => Except.error error
   | Except.ok info =>
-      match arguments with
-      | [array, index, value] =>
+      match psWasmListTriple? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some triple =>
+          let array := Prod.fst triple;
+          let tail := Prod.snd triple;
+          let index := Prod.fst tail;
+          let value := Prod.snd tail;
           match lower (some info.refType) state array with
           | Except.error error => Except.error error
           | Except.ok loweredArray =>
               let allocatedArray :=
                 psWasmAddLocal loweredArray.state info.refType
-              let arrayLocal := allocatedArray.1
-              match lower (some psWasmNatRef) allocatedArray.2 index with
+              let arrayLocal := (Prod.fst allocatedArray)
+              match lower (some psWasmNatRef) (Prod.snd allocatedArray) index with
               | Except.error error => Except.error error
               | Except.ok loweredIndex =>
                   let allocatedIndex :=
                     psWasmAddLocal loweredIndex.state psWasmNatRef
-                  let indexLocal := allocatedIndex.1
+                  let indexLocal := (Prod.fst allocatedIndex)
                   match
                       lower
                         (some info.elementValueType)
-                        allocatedIndex.2
+                        (Prod.snd allocatedIndex)
                         value with
                   | Except.error error => Except.error error
                   | Except.ok loweredValue =>
@@ -1838,10 +2380,10 @@ def psWasmLowerArraySetIfInBoundsWith
                         psWasmAddLocal
                           loweredValue.state
                           info.elementValueType
-                      let valueLocal := allocatedValue.1
+                      let valueLocal := (Prod.fst allocatedValue)
                       let allocatedOutput :=
-                        psWasmAddLocal allocatedValue.2 info.refType
-                      let outputLocal := allocatedOutput.1
+                        psWasmAddLocal (Prod.snd allocatedValue) info.refType
+                      let outputLocal := (Prod.fst allocatedOutput)
                       Except.ok {
                         instructions :=
                           loweredArray.instructions ++ [
@@ -1885,9 +2427,8 @@ def psWasmLowerArraySetIfInBoundsWith
                               PsWasmInstruction.localGet arrayLocal,
                             PsWasmInstruction.end_
                           ]
-                        state := allocatedOutput.2
+                        state := (Prod.snd allocatedOutput)
                       }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
 
 def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)
@@ -1903,8 +2444,12 @@ def psWasmLowerIntrinsicWith
     Except PsWasmLowerError PsWasmLoweredExpr :=
   match operation with
   | .machineIntBinary type integerOperation =>
-      match arguments with
-      | [left, right] =>
+      match psWasmListPair? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some pair =>
+          let left := Prod.fst pair;
+          let right := Prod.snd pair;
           let expected :=
             some (psWasmMachineIntegerValueType profile type)
           match
@@ -1919,10 +2464,13 @@ def psWasmLowerIntrinsicWith
                       profile type integerOperation
                 state := lowered.state
               }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | .machineIntCompare type integerOperation =>
-      match arguments with
-      | [left, right] =>
+      match psWasmListPair? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some pair =>
+          let left := Prod.fst pair;
+          let right := Prod.snd pair;
           let expected :=
             some (psWasmMachineIntegerValueType profile type)
           match
@@ -1937,10 +2485,13 @@ def psWasmLowerIntrinsicWith
                       profile type integerOperation
                 state := lowered.state
               }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | .floatBinary type floatOperation =>
-      match arguments with
-      | [left, right] =>
+      match psWasmListPair? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some pair =>
+          let left := Prod.fst pair;
+          let right := Prod.snd pair;
           let expected := some (psWasmFloatingValueType type)
           match
               psWasmLowerExprListWith
@@ -1953,10 +2504,13 @@ def psWasmLowerIntrinsicWith
                     psWasmLowerFloatBinary type floatOperation
                 state := lowered.state
               }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | .floatCompare type floatOperation =>
-      match arguments with
-      | [left, right] =>
+      match psWasmListPair? arguments with
+      | none =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | some pair =>
+          let left := Prod.fst pair;
+          let right := Prod.snd pair;
           let expected := some (psWasmFloatingValueType type)
           match
               psWasmLowerExprListWith
@@ -1969,7 +2523,6 @@ def psWasmLowerIntrinsicWith
                     psWasmLowerFloatCompare type floatOperation
                 state := lowered.state
               }
-      | _ => Except.error PsWasmLowerError.invalidIntrinsicArity
   | .natAdd =>
       psWasmLowerNatBinaryCallWith
         lower state psWasmNatAddFn arguments
@@ -2113,8 +2666,8 @@ def psWasmLowerFunctionValueCall
             psWasmAddLocal
               state
               (PsWasmValueType.refT baseName)
-          let closureLocal := allocated.1
-          let nextState := allocated.2
+          let closureLocal := (Prod.fst allocated)
+          let nextState := (Prod.snd allocated)
           match
               psWasmLowerTypedArgumentsWith
                 profile
@@ -2255,14 +2808,14 @@ def psWasmLowerMatchBindings
               constructorInfo.name
               binding.field)
       | some indexedField =>
-          let fieldIndex := indexedField.1
-          let field := indexedField.2
+          let fieldIndex := (Prod.fst indexedField)
+          let field := (Prod.snd indexedField)
           match psWasmValueTypeOfIrType? profile field.type with
           | none => Except.error PsWasmLowerError.unsupportedType
           | some valueType =>
               let allocated := psWasmAddLocal state valueType
-              let localIndex := allocated.1
-              let nextState := allocated.2
+              let localIndex := (Prod.fst allocated)
+              let nextState := (Prod.snd allocated)
               let constructorType :=
                 psWasmConstructorTypeName
                   inductiveName
@@ -2282,11 +2835,13 @@ def psWasmLowerMatchBindings
                     inductiveName
                     constructorInfo
                     scrutineeLocal
-                    ({
-                      name := binding.name
-                      index := localIndex
-                      type := field.type
-                    } :: baseBindings)
+                    (List.cons
+                      {
+                        name := binding.name
+                        index := localIndex
+                        type := field.type
+                      }
+                      baseBindings)
                     nextState
                     rest with
               | Except.error error => Except.error error
@@ -2297,6 +2852,7 @@ def psWasmLowerMatchBindings
                     bindings := loweredRest.bindings
                     state := loweredRest.state
                   }
+
 
 def psWasmLowerMatchAlternativesWith
     (profile : PsWasmTargetProfile)
@@ -2309,61 +2865,23 @@ def psWasmLowerMatchAlternativesWith
       PsVerifiedIrExpr ->
         Except PsWasmLowerError PsWasmLoweredExpr)
     (baseBindings : List PsWasmBinding)
-    (expected : Option PsWasmValueType) :
-    PsWasmLowerState ->
-    List
-      (String ×
-        List PsVerifiedIrMatchBinding ×
-        PsVerifiedIrExpr) ->
-    Except PsWasmLowerError PsWasmLoweredExpr
-  | _, [] =>
+    (expected : Option PsWasmValueType)
+    (state : PsWasmLowerState)
+    (alternatives :
+      List
+        (String ×
+          List PsVerifiedIrMatchBinding ×
+          PsVerifiedIrExpr)) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match alternatives with
+  | List.nil =>
       Except.error PsWasmLowerError.unsupportedExpression
-  | state, [alternative] =>
-      let constructorName := alternative.1
-      let matchBindings := alternative.2.1
-      let body := alternative.2.2
-      match
-          psWasmFindConstructor
-            inductiveInfo.constructors
-            constructorName with
-      | none =>
-          Except.error
-            (PsWasmLowerError.unknownConstructor
-              inductiveInfo.name
-              constructorName)
-      | some constructorInfo =>
-          match
-              psWasmLowerMatchBindings
-                profile
-                inductiveInfo.name
-                constructorInfo
-                scrutineeLocal
-                baseBindings
-                state
-                matchBindings with
-          | Except.error error => Except.error error
-          | Except.ok loweredBindings =>
-              match
-                  lowerWithBindings
-                    loweredBindings.bindings
-                    expected
-                    loweredBindings.state
-                    body with
-              | Except.error error => Except.error error
-              | Except.ok loweredBody =>
-                  Except.ok {
-                    instructions :=
-                      loweredBindings.instructions ++
-                        loweredBody.instructions
-                    state := loweredBody.state
-                  }
-  | state, alternative :: rest =>
-      match expected with
-      | none => Except.error PsWasmLowerError.unsupportedType
-      | some resultType =>
-          let constructorName := alternative.1
-          let matchBindings := alternative.2.1
-          let body := alternative.2.2
+  | List.cons alternative rest =>
+      let constructorName := Prod.fst alternative;
+      let matchBindings := Prod.fst (Prod.snd alternative);
+      let body := Prod.snd (Prod.snd alternative);
+      match rest with
+      | List.nil =>
           match
               psWasmFindConstructor
                 inductiveInfo.constructors
@@ -2374,10 +2892,6 @@ def psWasmLowerMatchAlternativesWith
                   inductiveInfo.name
                   constructorName)
           | some constructorInfo =>
-              let constructorType :=
-                psWasmConstructorTypeName
-                  inductiveInfo.name
-                  constructorName
               match
                   psWasmLowerMatchBindings
                     profile
@@ -2397,35 +2911,92 @@ def psWasmLowerMatchAlternativesWith
                         body with
                   | Except.error error => Except.error error
                   | Except.ok loweredBody =>
+                      Except.ok {
+                        instructions :=
+                          psListAppend
+                            loweredBindings.instructions
+                            loweredBody.instructions
+                        state := loweredBody.state
+                      }
+      | List.cons _ _ =>
+          match expected with
+          | none =>
+              Except.error PsWasmLowerError.unsupportedType
+          | some resultType =>
+              match
+                  psWasmFindConstructor
+                    inductiveInfo.constructors
+                    constructorName with
+              | none =>
+                  Except.error
+                    (PsWasmLowerError.unknownConstructor
+                      inductiveInfo.name
+                      constructorName)
+              | some constructorInfo =>
+                  let constructorType :=
+                    psWasmConstructorTypeName
+                      inductiveInfo.name
+                      constructorName;
+                  match
+                      psWasmLowerMatchBindings
+                        profile
+                        inductiveInfo.name
+                        constructorInfo
+                        scrutineeLocal
+                        baseBindings
+                        state
+                        matchBindings with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredBindings =>
                       match
-                          psWasmLowerMatchAlternativesWith
-                            profile
-                            inductiveInfo
-                            scrutineeLocal
-                            lowerWithBindings
-                            baseBindings
+                          lowerWithBindings
+                            loweredBindings.bindings
                             expected
-                            loweredBody.state
-                            rest with
-                      | Except.error error => Except.error error
-                      | Except.ok loweredRest =>
-                          Except.ok {
-                            instructions :=
-                              [
-                                PsWasmInstruction.localGet
-                                  scrutineeLocal,
-                                PsWasmInstruction.refTest
-                                  constructorType,
-                                PsWasmInstruction.ifStart
-                                  (some resultType)
-                              ]
-                                ++ loweredBindings.instructions
-                                ++ loweredBody.instructions
-                                ++ [PsWasmInstruction.else_]
-                                ++ loweredRest.instructions
-                                ++ [PsWasmInstruction.end_]
-                            state := loweredRest.state
-                          }
+                            loweredBindings.state
+                            body with
+                      | Except.error error =>
+                          Except.error error
+                      | Except.ok loweredBody =>
+                          match
+                              psWasmLowerMatchAlternativesWith
+                                profile
+                                inductiveInfo
+                                scrutineeLocal
+                                lowerWithBindings
+                                baseBindings
+                                expected
+                                loweredBody.state
+                                rest with
+                          | Except.error error =>
+                              Except.error error
+                          | Except.ok loweredRest =>
+                              Except.ok {
+                                instructions :=
+                                  psListAppend
+                                    (List.cons
+                                      (PsWasmInstruction.localGet
+                                        scrutineeLocal)
+                                      (List.cons
+                                        (PsWasmInstruction.refTest
+                                          constructorType)
+                                        (List.cons
+                                          (PsWasmInstruction.ifStart
+                                            (some resultType))
+                                          List.nil)))
+                                    (psListAppend
+                                      loweredBindings.instructions
+                                      (psListAppend
+                                        loweredBody.instructions
+                                        (List.cons
+                                          PsWasmInstruction.else_
+                                          (psListAppend
+                                            loweredRest.instructions
+                                            (List.cons
+                                              PsWasmInstruction.end_
+                                              List.nil)))))
+                                state := loweredRest.state
+                              }
+
 
 def psWasmLowerCaptureFields
     (profile : PsWasmTargetProfile) :
@@ -2440,10 +3011,12 @@ def psWasmLowerCaptureFields
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok
-                ({
-                  name := capture.name
-                  storageType := storageType
-                } :: loweredRest)
+                (List.cons
+                  {
+                    name := capture.name
+                    storageType := storageType
+                  }
+                  loweredRest)
 
 def psWasmPrepareCaptureBindings
     (profile : PsWasmTargetProfile)
@@ -2463,8 +3036,8 @@ def psWasmPrepareCaptureBindings
       | none => Except.error PsWasmLowerError.unsupportedType
       | some valueType =>
           let allocated := psWasmAddLocal state valueType
-          let localIndex := allocated.1
-          let nextState := allocated.2
+          let localIndex := (Prod.fst allocated)
+          let nextState := (Prod.snd allocated)
           match
               psWasmPrepareCaptureBindings
                 profile
@@ -2487,11 +3060,13 @@ def psWasmPrepareCaptureBindings
                   ]
                     ++ loweredRest.instructions
                 bindings :=
-                  {
-                    name := capture.name
-                    index := localIndex
-                    type := capture.type
-                  } :: loweredRest.bindings
+                  List.cons
+                    {
+                      name := capture.name
+                      index := localIndex
+                      type := capture.type
+                    }
+                    loweredRest.bindings
                 state := loweredRest.state
               }
 
@@ -2499,8 +3074,9 @@ def psWasmCaptureConstructionInstructions :
     List PsWasmBinding -> List PsWasmInstruction
   | [] => []
   | capture :: rest =>
-      PsWasmInstruction.localGet capture.index ::
-        psWasmCaptureConstructionInstructions rest
+      List.cons
+        (PsWasmInstruction.localGet capture.index)
+        (psWasmCaptureConstructionInstructions rest)
 
 def psWasmAdvanceLambdaId
     (state : PsWasmLowerState) : PsWasmLowerState :=
@@ -2553,7 +3129,7 @@ def psWasmLowerLambdaWith
     (body : PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   let parameterTypes :=
-    parameters.map (fun parameter => parameter.type)
+    psWasmParameterTypes parameters
   let functionType :=
     PsVerifiedIrType.function parameterTypes resultType
   match psWasmClosureBaseName functionType with
@@ -2591,12 +3167,14 @@ def psWasmLowerLambdaWith
                             superType := some baseName
                             isFinal := true
                             fields :=
-                              {
-                                name := "code"
-                                storageType :=
-                                  PsWasmStorageType.value
-                                    PsWasmValueType.funcRef
-                              } :: captureFields
+                              List.cons
+                                {
+                                  name := "code"
+                                  storageType :=
+                                    PsWasmStorageType.value
+                                      PsWasmValueType.funcRef
+                                }
+                                captureFields
                           }
                           let advancedState :=
                             psWasmAdvanceLambdaId state
@@ -2632,7 +3210,8 @@ def psWasmLowerLambdaWith
                                     name := lambdaName
                                     typeName := some codeTypeName
                                     parameters :=
-                                      PsWasmValueType.refT baseName ::
+                                      List.cons
+                                        (PsWasmValueType.refT baseName)
                                         loweredParameters
                                     results := results
                                     locals :=
@@ -2671,7 +3250,11 @@ def psWasmLowerExprWithFuel
       Except.error PsWasmLowerError.unsupportedExpression
   | fuel + 1, state, expr =>
       let lowerWithBindings :=
-        fun nextBindings expectedType nestedState nestedExpr =>
+        fun
+        (nextBindings : List PsWasmBinding)
+        (expectedType : Option PsWasmValueType)
+        (nestedState : PsWasmLowerState)
+        (nestedExpr : PsVerifiedIrExpr) =>
           psWasmLowerExprWithFuel
             profile
             structures
@@ -2753,14 +3336,16 @@ def psWasmLowerExprWithFuel
               | Except.ok loweredValue =>
                   let allocated :=
                     psWasmAddLocal loweredValue.state localType
-                  let localIndex := allocated.1
-                  let localState := allocated.2
+                  let localIndex := (Prod.fst allocated)
+                  let localState := (Prod.snd allocated)
                   let bodyBindings :=
-                    {
-                      name := name
-                      index := localIndex
-                      type := type
-                    } :: bindings
+                    List.cons
+                      {
+                        name := name
+                        index := localIndex
+                        type := type
+                      }
+                      bindings
                   match
                       psWasmLowerExprWithFuel
                         profile
@@ -2818,8 +3403,8 @@ def psWasmLowerExprWithFuel
                     (PsWasmLowerError.unknownStructureField
                       structureName fieldName)
               | some indexedField =>
-                  let fieldIndex := indexedField.1
-                  let field := indexedField.2
+                  let fieldIndex := (Prod.fst indexedField)
+                  let field := (Prod.snd indexedField)
                   match
                       lower
                         (some (PsWasmValueType.refT structureName))
@@ -2906,8 +3491,8 @@ def psWasmLowerExprWithFuel
                         psWasmAddLocal
                           loweredScrutinee.state
                           (PsWasmValueType.refT inductiveName)
-                      let scrutineeLocal := allocated.1
-                      let nextState := allocated.2
+                      let scrutineeLocal := (Prod.fst allocated)
+                      let nextState := (Prod.snd allocated)
                       match
                           psWasmLowerMatchAlternativesWith
                             profile
@@ -3040,25 +3625,31 @@ def psWasmLowerDeclarations
           | Except.ok loweredRest =>
               Except.ok {
                 functions :=
-                  lowered.function :: loweredRest.functions
+                  List.cons
+                    lowered.function
+                    loweredRest.functions
                 state := loweredRest.state
               }
+
+
 
 def psWasmTypeUsesNatWithFuel :
     Nat -> PsVerifiedIrType -> Bool
   | 0, _ => false
   | fuel + 1, type =>
+      let usesType :
+          PsVerifiedIrType -> Bool :=
+        fun (value : PsVerifiedIrType) =>
+          psWasmTypeUsesNatWithFuel fuel value;
       match type with
       | .primitive .nat => true
       | .function parameters result =>
-          parameters.any
-              (fun parameter =>
-                psWasmTypeUsesNatWithFuel fuel parameter)
-            || psWasmTypeUsesNatWithFuel fuel result
+          if psListAny usesType parameters then
+            true
+          else
+            usesType result
       | .named _ arguments =>
-          arguments.any
-            (fun argument =>
-              psWasmTypeUsesNatWithFuel fuel argument)
+          psListAny usesType arguments
       | _ => false
 
 def psWasmTypeUsesNat
@@ -3100,46 +3691,99 @@ def psWasmExprUsesNatWithFuel :
     Nat -> PsVerifiedIrExpr -> Bool
   | 0, _ => false
   | fuel + 1, expr =>
-      let uses :=
-        fun nested => psWasmExprUsesNatWithFuel fuel nested
+      let uses :
+          PsVerifiedIrExpr -> Bool :=
+        fun (nested : PsVerifiedIrExpr) =>
+          psWasmExprUsesNatWithFuel fuel nested;
+      let fieldUses :
+          (String × PsVerifiedIrExpr) -> Bool :=
+        fun (field : String × PsVerifiedIrExpr) =>
+          uses (Prod.snd field);
+      let parameterUses :
+          PsVerifiedIrParameter -> Bool :=
+        fun (parameter : PsVerifiedIrParameter) =>
+          psWasmTypeUsesNat parameter.type;
+      let bindingUses :
+          PsVerifiedIrMatchBinding -> Bool :=
+        fun (binding : PsVerifiedIrMatchBinding) =>
+          psWasmTypeUsesNat binding.type;
+      let alternativeUses :
+          (String ×
+            List PsVerifiedIrMatchBinding ×
+            PsVerifiedIrExpr) -> Bool :=
+        fun
+          (alternative :
+            String ×
+              List PsVerifiedIrMatchBinding ×
+              PsVerifiedIrExpr) =>
+          if
+              psListAny
+                bindingUses
+                (Prod.fst (Prod.snd alternative)) then
+            true
+          else
+            uses (Prod.snd (Prod.snd alternative));
       match expr with
       | .literal (.natural _) => true
       | .literal _ => false
       | .var _ => false
       | .intrinsic operation typeArguments arguments =>
-          psWasmIntrinsicUsesNat operation
-            || typeArguments.any psWasmTypeUsesNat
-            || arguments.any uses
+          if psWasmIntrinsicUsesNat operation then
+            true
+          else if psListAny psWasmTypeUsesNat typeArguments then
+            true
+          else
+            psListAny uses arguments
       | .lambda parameters resultType body =>
-          parameters.any
-              (fun parameter => psWasmTypeUsesNat parameter.type)
-            || psWasmTypeUsesNat resultType
-            || uses body
+          if psListAny parameterUses parameters then
+            true
+          else if psWasmTypeUsesNat resultType then
+            true
+          else
+            uses body
       | .call fn typeArguments arguments =>
-          uses fn
-            || typeArguments.any psWasmTypeUsesNat
-            || arguments.any uses
+          if uses fn then
+            true
+          else if psListAny psWasmTypeUsesNat typeArguments then
+            true
+          else
+            psListAny uses arguments
       | .letE _ type value body =>
-          psWasmTypeUsesNat type || uses value || uses body
+          if psWasmTypeUsesNat type then
+            true
+          else if uses value then
+            true
+          else
+            uses body
       | .ifE condition thenBranch elseBranch =>
-          uses condition || uses thenBranch || uses elseBranch
+          if uses condition then
+            true
+          else if uses thenBranch then
+            true
+          else
+            uses elseBranch
       | .record _ typeArguments fields =>
-          typeArguments.any psWasmTypeUsesNat
-            || fields.any (fun field => uses field.2)
+          if psListAny psWasmTypeUsesNat typeArguments then
+            true
+          else
+            psListAny fieldUses fields
       | .projection _ typeArguments target _ =>
-          typeArguments.any psWasmTypeUsesNat || uses target
+          if psListAny psWasmTypeUsesNat typeArguments then
+            true
+          else
+            uses target
       | .constructor _ _ typeArguments fields =>
-          typeArguments.any psWasmTypeUsesNat
-            || fields.any (fun field => uses field.2)
+          if psListAny psWasmTypeUsesNat typeArguments then
+            true
+          else
+            psListAny fieldUses fields
       | .matchE _ typeArguments scrutinee alternatives =>
-          typeArguments.any psWasmTypeUsesNat
-            || uses scrutinee
-            || alternatives.any
-              (fun alternative =>
-                alternative.2.1.any
-                    (fun binding =>
-                      psWasmTypeUsesNat binding.type)
-                  || uses alternative.2.2)
+          if psListAny psWasmTypeUsesNat typeArguments then
+            true
+          else if uses scrutinee then
+            true
+          else
+            psListAny alternativeUses alternatives
 
 def psWasmExprUsesNat
     (expr : PsVerifiedIrExpr) : Bool :=
@@ -3149,17 +3793,19 @@ def psWasmTypeUsesIntWithFuel :
     Nat -> PsVerifiedIrType -> Bool
   | 0, _ => false
   | fuel + 1, type =>
+      let usesType :
+          PsVerifiedIrType -> Bool :=
+        fun (value : PsVerifiedIrType) =>
+          psWasmTypeUsesIntWithFuel fuel value;
       match type with
       | .primitive .int => true
       | .function parameters result =>
-          parameters.any
-              (fun parameter =>
-                psWasmTypeUsesIntWithFuel fuel parameter)
-            || psWasmTypeUsesIntWithFuel fuel result
+          if psListAny usesType parameters then
+            true
+          else
+            usesType result
       | .named _ arguments =>
-          arguments.any
-            (fun argument =>
-              psWasmTypeUsesIntWithFuel fuel argument)
+          psListAny usesType arguments
       | _ => false
 
 def psWasmTypeUsesInt
@@ -3184,101 +3830,212 @@ def psWasmExprUsesIntWithFuel :
     Nat -> PsVerifiedIrExpr -> Bool
   | 0, _ => false
   | fuel + 1, expr =>
-      let uses :=
-        fun nested => psWasmExprUsesIntWithFuel fuel nested
+      let uses :
+          PsVerifiedIrExpr -> Bool :=
+        fun (nested : PsVerifiedIrExpr) =>
+          psWasmExprUsesIntWithFuel fuel nested;
+      let fieldUses :
+          (String × PsVerifiedIrExpr) -> Bool :=
+        fun (field : String × PsVerifiedIrExpr) =>
+          uses (Prod.snd field);
+      let parameterUses :
+          PsVerifiedIrParameter -> Bool :=
+        fun (parameter : PsVerifiedIrParameter) =>
+          psWasmTypeUsesInt parameter.type;
+      let bindingUses :
+          PsVerifiedIrMatchBinding -> Bool :=
+        fun (binding : PsVerifiedIrMatchBinding) =>
+          psWasmTypeUsesInt binding.type;
+      let alternativeUses :
+          (String ×
+            List PsVerifiedIrMatchBinding ×
+            PsVerifiedIrExpr) -> Bool :=
+        fun
+          (alternative :
+            String ×
+              List PsVerifiedIrMatchBinding ×
+              PsVerifiedIrExpr) =>
+          if
+              psListAny
+                bindingUses
+                (Prod.fst (Prod.snd alternative)) then
+            true
+          else
+            uses (Prod.snd (Prod.snd alternative));
       match expr with
       | .literal (.integer _) => true
       | .literal _ => false
       | .var _ => false
       | .intrinsic operation typeArguments arguments =>
-          psWasmIntrinsicUsesInt operation
-            || typeArguments.any psWasmTypeUsesInt
-            || arguments.any uses
+          if psWasmIntrinsicUsesInt operation then
+            true
+          else if psListAny psWasmTypeUsesInt typeArguments then
+            true
+          else
+            psListAny uses arguments
       | .lambda parameters resultType body =>
-          parameters.any
-              (fun parameter => psWasmTypeUsesInt parameter.type)
-            || psWasmTypeUsesInt resultType
-            || uses body
+          if psListAny parameterUses parameters then
+            true
+          else if psWasmTypeUsesInt resultType then
+            true
+          else
+            uses body
       | .call fn typeArguments arguments =>
-          uses fn
-            || typeArguments.any psWasmTypeUsesInt
-            || arguments.any uses
+          if uses fn then
+            true
+          else if psListAny psWasmTypeUsesInt typeArguments then
+            true
+          else
+            psListAny uses arguments
       | .letE _ type value body =>
-          psWasmTypeUsesInt type || uses value || uses body
+          if psWasmTypeUsesInt type then
+            true
+          else if uses value then
+            true
+          else
+            uses body
       | .ifE condition thenBranch elseBranch =>
-          uses condition || uses thenBranch || uses elseBranch
+          if uses condition then
+            true
+          else if uses thenBranch then
+            true
+          else
+            uses elseBranch
       | .record _ typeArguments fields =>
-          typeArguments.any psWasmTypeUsesInt
-            || fields.any (fun field => uses field.2)
+          if psListAny psWasmTypeUsesInt typeArguments then
+            true
+          else
+            psListAny fieldUses fields
       | .projection _ typeArguments target _ =>
-          typeArguments.any psWasmTypeUsesInt || uses target
+          if psListAny psWasmTypeUsesInt typeArguments then
+            true
+          else
+            uses target
       | .constructor _ _ typeArguments fields =>
-          typeArguments.any psWasmTypeUsesInt
-            || fields.any (fun field => uses field.2)
+          if psListAny psWasmTypeUsesInt typeArguments then
+            true
+          else
+            psListAny fieldUses fields
       | .matchE _ typeArguments scrutinee alternatives =>
-          typeArguments.any psWasmTypeUsesInt
-            || uses scrutinee
-            || alternatives.any
-              (fun alternative =>
-                alternative.2.1.any
-                    (fun binding =>
-                      psWasmTypeUsesInt binding.type)
-                  || uses alternative.2.2)
+          if psListAny psWasmTypeUsesInt typeArguments then
+            true
+          else if uses scrutinee then
+            true
+          else
+            psListAny alternativeUses alternatives
 
 def psWasmExprUsesInt
     (expr : PsVerifiedIrExpr) : Bool :=
   psWasmExprUsesIntWithFuel 4096 expr
 
+def psWasmStructureUsesNat
+    (structureInfo : PsVerifiedIrStructure) : Bool :=
+  let fieldUses :
+      PsVerifiedIrStructureField -> Bool :=
+    fun (field : PsVerifiedIrStructureField) =>
+      psWasmTypeUsesNat field.type;
+  psListAny fieldUses structureInfo.fields
+
+def psWasmConstructorUsesNat
+    (constructorInfo : PsVerifiedIrConstructor) : Bool :=
+  let fieldUses :
+      PsVerifiedIrConstructorField -> Bool :=
+    fun (field : PsVerifiedIrConstructorField) =>
+      psWasmTypeUsesNat field.type;
+  psListAny fieldUses constructorInfo.fields
+
+def psWasmInductiveUsesNat
+    (inductiveInfo : PsVerifiedIrInductive) : Bool :=
+  psListAny
+    psWasmConstructorUsesNat
+    inductiveInfo.constructors
+
+def psWasmDeclarationUsesNat
+    (declaration : PsVerifiedIrDeclaration) : Bool :=
+  let parameterUses :
+      PsVerifiedIrParameter -> Bool :=
+    fun (parameter : PsVerifiedIrParameter) =>
+      psWasmTypeUsesNat parameter.type;
+  if psListAny parameterUses declaration.parameters then
+    true
+  else if psWasmTypeUsesNat declaration.resultType then
+    true
+  else
+    psWasmExprUsesNat declaration.body
+
 def psWasmModuleUsesNat
     (module : PsVerifiedIrModule) : Bool :=
-  module.imports.any
-      (fun importInfo => psWasmTypeUsesNat importInfo.type)
-    || module.structures.any
-      (fun structureInfo =>
-        structureInfo.fields.any
-          (fun field => psWasmTypeUsesNat field.type))
-    || module.inductives.any
-      (fun inductiveInfo =>
-        inductiveInfo.constructors.any
-          (fun constructorInfo =>
-            constructorInfo.fields.any
-              (fun field => psWasmTypeUsesNat field.type)))
-    || module.declarations.any
-      (fun declaration =>
-        declaration.parameters.any
-            (fun parameter =>
-              psWasmTypeUsesNat parameter.type)
-          || psWasmTypeUsesNat declaration.resultType
-          || psWasmExprUsesNat declaration.body)
+  let importUses :
+      PsVerifiedIrExternalImport -> Bool :=
+    fun (importInfo : PsVerifiedIrExternalImport) =>
+      psWasmTypeUsesNat importInfo.type;
+  if psListAny importUses module.imports then
+    true
+  else if psListAny psWasmStructureUsesNat module.structures then
+    true
+  else if psListAny psWasmInductiveUsesNat module.inductives then
+    true
+  else
+    psListAny psWasmDeclarationUsesNat module.declarations
+
+def psWasmStructureUsesInt
+    (structureInfo : PsVerifiedIrStructure) : Bool :=
+  let fieldUses :
+      PsVerifiedIrStructureField -> Bool :=
+    fun (field : PsVerifiedIrStructureField) =>
+      psWasmTypeUsesInt field.type;
+  psListAny fieldUses structureInfo.fields
+
+def psWasmConstructorUsesInt
+    (constructorInfo : PsVerifiedIrConstructor) : Bool :=
+  let fieldUses :
+      PsVerifiedIrConstructorField -> Bool :=
+    fun (field : PsVerifiedIrConstructorField) =>
+      psWasmTypeUsesInt field.type;
+  psListAny fieldUses constructorInfo.fields
+
+def psWasmInductiveUsesInt
+    (inductiveInfo : PsVerifiedIrInductive) : Bool :=
+  psListAny
+    psWasmConstructorUsesInt
+    inductiveInfo.constructors
+
+def psWasmDeclarationUsesInt
+    (declaration : PsVerifiedIrDeclaration) : Bool :=
+  let parameterUses :
+      PsVerifiedIrParameter -> Bool :=
+    fun (parameter : PsVerifiedIrParameter) =>
+      psWasmTypeUsesInt parameter.type;
+  if psListAny parameterUses declaration.parameters then
+    true
+  else if psWasmTypeUsesInt declaration.resultType then
+    true
+  else
+    psWasmExprUsesInt declaration.body
 
 def psWasmModuleUsesInt
     (module : PsVerifiedIrModule) : Bool :=
-  module.imports.any
-      (fun importInfo => psWasmTypeUsesInt importInfo.type)
-    || module.structures.any
-      (fun structureInfo =>
-        structureInfo.fields.any
-          (fun field => psWasmTypeUsesInt field.type))
-    || module.inductives.any
-      (fun inductiveInfo =>
-        inductiveInfo.constructors.any
-          (fun constructorInfo =>
-            constructorInfo.fields.any
-              (fun field => psWasmTypeUsesInt field.type)))
-    || module.declarations.any
-      (fun declaration =>
-        declaration.parameters.any
-            (fun parameter =>
-              psWasmTypeUsesInt parameter.type)
-          || psWasmTypeUsesInt declaration.resultType
-          || psWasmExprUsesInt declaration.body)
+  let importUses :
+      PsVerifiedIrExternalImport -> Bool :=
+    fun (importInfo : PsVerifiedIrExternalImport) =>
+      psWasmTypeUsesInt importInfo.type;
+  if psListAny importUses module.imports then
+    true
+  else if psListAny psWasmStructureUsesInt module.structures then
+    true
+  else if psListAny psWasmInductiveUsesInt module.inductives then
+    true
+  else
+    psListAny psWasmDeclarationUsesInt module.declarations
+
 
 def psWasmExportsOfDeclarations :
     List PsVerifiedIrDeclaration -> List (String × String)
   | [] => []
   | declaration :: rest =>
-      (declaration.name, declaration.name) ::
-        psWasmExportsOfDeclarations rest
+      List.cons
+        (declaration.name, declaration.name)
+        (psWasmExportsOfDeclarations rest)
 
 def psWasmModuleHasUnsupportedData
     (module : PsVerifiedIrModule) : Bool :=
@@ -3346,11 +4103,11 @@ def psWasmLowerSpecializedModule
                         runtimeStructures
                           ++ structures
                           ++ inductiveTypes
-                          ++ closureSignatures.1
+                          ++ (Prod.fst closureSignatures)
                           ++ lowered.state.generatedStructures
                       arrays := arrays
                       functionTypes :=
-                        closureSignatures.2
+                        (Prod.snd closureSignatures)
                           ++ lowered.state.generatedFunctionTypes
                       functions :=
                         runtimeFunctions

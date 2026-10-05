@@ -1,4 +1,5 @@
 import Ps.BackendWasm.Model
+import Ps.BackendWasm.IntUtil
 import Ps.Foundation.Name
 import Ps.Foundation.List
 
@@ -12,48 +13,6 @@ inductive PsWasmEncodeError where
 
 def psWasmByte (value : Nat) : UInt8 :=
   UInt8.ofNat value
-
-def psWasmIntIsZero (value : Int) : Bool :=
-  match value with
-  | Int.ofNat magnitude => Nat.beq magnitude 0
-  | Int.negSucc _ => false
-
-def psWasmIntIsNegativeOne (value : Int) : Bool :=
-  match value with
-  | Int.ofNat _ => false
-  | Int.negSucc magnitude => Nat.beq magnitude 0
-
-def psWasmIntToNat (value : Int) : Nat :=
-  match value with
-  | Int.ofNat magnitude => magnitude
-  | Int.negSucc _ => 0
-
-def psWasmIntEDivNat
-    (value : Int)
-    (divisor : Nat) : Int :=
-  if Nat.beq divisor 0 then
-    Int.ofNat 0
-  else
-    match value with
-    | Int.ofNat magnitude =>
-        Int.ofNat (Nat.div magnitude divisor)
-    | Int.negSucc magnitude =>
-        Int.negSucc (Nat.div magnitude divisor)
-
-def psWasmIntEModNat
-    (value : Int)
-    (divisor : Nat) : Int :=
-  if Nat.beq divisor 0 then
-    value
-  else
-    match value with
-    | Int.ofNat magnitude =>
-        Int.ofNat (Nat.mod magnitude divisor)
-    | Int.negSucc magnitude =>
-        Int.ofNat
-          (Nat.sub
-            (Nat.sub divisor 1)
-            (Nat.mod magnitude divisor))
 
 def psWasmEncodeUlebWithFuel
     (remainingFuel : Nat) : Nat -> List UInt8 :=

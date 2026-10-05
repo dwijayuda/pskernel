@@ -1,4 +1,5 @@
 import Ps.Project.QueryGraph
+import Ps.Foundation.Name
 
 def psQueryTestName
     (value : String) : PsName :=

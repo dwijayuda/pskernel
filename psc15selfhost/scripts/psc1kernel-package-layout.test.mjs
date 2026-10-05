@@ -29,7 +29,8 @@ test('package rename cannot silently promote or substitute a checking provider',
   assert.equal(defaultCheckedKernel, 'lean434-wasm');
   assert.equal(checkedKernelDescriptor().package, '@proofscript/pskernel-lean-wasm');
   assert.equal(checkedKernelDescriptor('pskernel-core.old3').package, '@proofscript/pskernel-core.old3');
-  assert.throws(() => checkedKernelDescriptor('pskernel-core'), /KERNEL_UNSUPPORTED/);
+  assert.equal(checkedKernelDescriptor('pskernel-core').authority, 'explicit-candidate');
+  assert.equal(checkedKernelDescriptor('pskernel-core').package, '@proofscript/pskernel-core');
   assert(bootstrapPackageViolation('pskernel-core'));
   assert(bootstrapPackageViolation('pskernel-core.old3'));
 });

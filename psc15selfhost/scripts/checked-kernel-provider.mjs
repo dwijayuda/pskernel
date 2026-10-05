@@ -12,9 +12,15 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const nativeSuffix = process.platform === 'win32' ? '.exe' : '';
 
 export const defaultCheckedKernel = 'lean434-wasm';
-export const checkedKernelSelectors = Object.freeze(['lean434-wasm', 'lean434', 'pskernel-core.old3']);
+export const checkedKernelSelectors = Object.freeze(['lean434-wasm', 'lean434', 'pskernel-core.old3', 'pskernel-core']);
 
 const descriptors = Object.freeze({
+  'pskernel-core': Object.freeze({
+    selector: 'pskernel-core', package: '@proofscript/pskernel-core',
+    execution: 'native', authority: 'explicit-candidate',
+    kernelContract: kernelContractV1.id,
+    kernelContractSha256: kernelContractV1.sha256,
+  }),
   'pskernel-core.old3': Object.freeze({
     selector: 'pskernel-core.old3', package: '@proofscript/pskernel-core.old3',
     execution: 'psc-generated-js', version: ownedCheckedIdentity.version,
@@ -69,7 +75,13 @@ export async function checkAdmissionsWithKernel(
   const timeoutMs = options.timeoutMs ?? 60000;
   let result;
 
-  if (selector === 'pskernel-core.old3') {
+  if (selector === 'pskernel-core') {
+    const provider = await import('./checked-kernel-core.mjs');
+    result = provider.checkCoreAdmissions(admissions, {
+      timeoutMs,
+      ...(options.coreBinaryPath ? { binaryPath: options.coreBinaryPath } : {}),
+    });
+  } else if (selector === 'pskernel-core.old3') {
     const provider = await import('./checked-owned-kernel.mjs');
     result = await provider.checkOwnedAdmissions(admissions, {
       timeoutMs,

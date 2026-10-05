@@ -435,3 +435,16 @@ lean_exe psc2_joint_closure_inventory where
 lean_exe psc2_selfhost_replay_audit where
   srcDir := "scripts"
   root := `SelfhostReplayAudit
+
+-- M4 host adapter; deliberately outside the portable semantic kernel closure.
+lean_lib PsKernelCoreProviderHost where
+  srcDir := "host/src"
+  roots := #[
+    `Ps.Host.KernelCoreProvider.Error, `Ps.Host.KernelCoreProvider.Convert,
+    `Ps.Host.KernelCoreProvider.Protocol, `Ps.Host.KernelCoreProvider.Prelude,
+    `Ps.Host.KernelCoreProvider.Admission, `Ps.Host.KernelCoreProvider.Response
+  ]
+
+lean_exe psc_kernel_core_provider where
+  srcDir := "host/src"
+  root := `Ps.Host.KernelCoreProvider.Main

@@ -419,7 +419,7 @@ def psJsonParseNumber
             else
               let body := psJsonStringOfChars (List.cons first more);
               let text :=
-                if negative then psJsonConcat2 "-" body else body;
+                if negative then psJsonConcat2 (psJsonStringOfChars (List.cons (Char.ofNat 45) List.nil)) body else body;
               Except.ok {
                 value := PsJsonValue.number text
                 rest := afterDigits
@@ -427,7 +427,7 @@ def psJsonParseNumber
           else
             let body := psJsonStringOfChars (List.cons first more);
             let text :=
-              if negative then psJsonConcat2 "-" body else body;
+              if negative then psJsonConcat2 (psJsonStringOfChars (List.cons (Char.ofNat 45) List.nil)) body else body;
             Except.ok {
               value := PsJsonValue.number text
               rest := afterDigits

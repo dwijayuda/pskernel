@@ -448,3 +448,7 @@ lean_lib PsKernelCoreProviderHost where
 lean_exe psc_kernel_core_provider where
   srcDir := "host/src"
   root := `Ps.Host.KernelCoreProvider.Main
+
+lean_exe psc_kernel_core_provider_tests where
+  srcDir := "test"
+  root := `KernelCoreProviderTests

@@ -9,6 +9,22 @@ export const defaultCoreProviderBinary = fileURLToPath(new URL(
   import.meta.url,
 ));
 
+export function assertCoreProviderResponse(result) {
+  assertKernelContractDecision(result);
+  for (const [field, expected] of Object.entries(coreCheckedIdentity)) {
+    if (result[field] !== expected) throw new Error(`PSC_KERNEL_CORE_IDENTITY: ${field}`);
+  }
+  if (result.accepted) {
+    if ('errorKind' in result || 'declarationIndex' in result) throw new Error('PSC_KERNEL_CORE_CONTRADICTORY_RESPONSE');
+  } else if (typeof result.message !== 'string' || ![
+    'protocol-version', 'malformed-request', 'unsupported-core-form', 'prelude-mismatch',
+    'provider-version-mismatch', 'kernel-rejection', 'resource-exhausted', 'provider-internal-error',
+  ].includes(result.errorKind)) {
+    throw new Error('PSC_KERNEL_CORE_INVALID_FAILURE');
+  }
+  return result;
+}
+
 export function checkCoreAdmissions(admissions, {
   binaryPath = process.env.PSC_KERNEL_CORE_PROVIDER_BIN ?? defaultCoreProviderBinary,
   timeoutMs = 60000,
@@ -29,9 +45,5 @@ export function checkCoreAdmissions(admissions, {
   let result;
   try { result = JSON.parse(run.stdout); }
   catch { throw new Error('PSC_KERNEL_CORE_RESPONSE_INVALID_JSON'); }
-  assertKernelContractDecision(result);
-  for (const [field, expected] of Object.entries(coreCheckedIdentity)) {
-    if (result[field] !== expected) throw new Error(`PSC_KERNEL_CORE_IDENTITY: ${field}`);
-  }
-  return result;
+  return assertCoreProviderResponse(result);
 }

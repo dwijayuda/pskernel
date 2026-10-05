@@ -29,10 +29,13 @@ def psWasmMapTypeKeysWith
         (convert value)
         (psWasmMapTypeKeysWith convert rest)
 
-def psWasmIrTypeKeyWithFuel :
-    Nat -> PsVerifiedIrType -> Option String
-  | 0, _ => none
-  | fuel + 1, type =>
+def psWasmIrTypeKeyWithFuel
+    (remainingFuel : Nat)
+    (type : PsVerifiedIrType) :
+    Option String :=
+  match remainingFuel with
+  | 0 => none
+  | fuel + 1 =>
       match type with
       | .unknown => none
       | .typeParameter _ => none

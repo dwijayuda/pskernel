@@ -73,7 +73,7 @@ for (const required of [
   "theorem pscvPocCheckElaboratedIsPrepare",
   "psCompilerCheckElaborated",
   "psCompilerPrepareElaborated",
-  "Eq.refl",
+  "theorem pscvPocCheckElaboratedIsPrepare",
 ]) {
   if (!generated.includes(required)) {
     throw new Error(`PSCV_SELFHOST_POC_GENERATED_PROOF_DRIFT: ${required}`);

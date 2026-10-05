@@ -176,8 +176,8 @@ try {
     reference.u8FromNat(300n),
   );
   assert.equal(direct.u8FromNat(300n), 44);
-  assert.equal(direct.u8Literal300, reference.u8Literal300);
-  assert.equal(direct.u8Literal300, 44);
+  assert.equal(direct.u8Literal44, reference.u8Literal44);
+  assert.equal(direct.u8Literal44, 44);
 
   assert.equal(
     direct.float32Mul(0.1, 0.2),

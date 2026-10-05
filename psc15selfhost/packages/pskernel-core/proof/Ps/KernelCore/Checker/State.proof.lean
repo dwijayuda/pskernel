@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.State
+import Ps.KernelCore.Metatheory.Judgments
 
 theorem psKernelCheckerStateEmpty_nextFresh :
     psKernelCheckerStateEmpty.nextFresh = 0 := by
@@ -66,3 +67,62 @@ theorem psKernelCheckerStateFreshName_preserves_failure
     (Prod.snd (psKernelCheckerStateFreshName state base)).failure =
       state.failure := by
   rfl
+
+
+theorem psKernelInferenceCacheSound_empty
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) :
+    PsKernelInferenceCacheSound
+      environment
+      localContext
+      psKernelExprMapEmpty := by
+  intro expr result h
+  simp [
+    psKernelExprMapEmpty,
+    psKernelExprMapGet,
+    psKernelExprMapGetIn
+  ] at h
+
+theorem psKernelDefEqCacheSound_empty
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) :
+    PsKernelDefEqCacheSound
+      environment
+      localContext
+      psKernelExprPairSetEmpty := by
+  intro left right h
+  simp [
+    psKernelExprPairSetEmpty,
+    psKernelExprPairSetContains,
+    psKernelExprPairSetContainsIn
+  ] at h
+
+theorem psKernelCheckerStateEmpty_semantic_caches_sound
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) :
+    PsKernelInferenceCacheSound
+        environment
+        localContext
+        psKernelCheckerStateEmpty.inferOnly ∧
+    PsKernelInferenceCacheSound
+        environment
+        localContext
+        psKernelCheckerStateEmpty.checkedInfer ∧
+    PsKernelDefEqCacheSound
+        environment
+        localContext
+        psKernelCheckerStateEmpty.success := by
+  constructor
+  · simpa [psKernelCheckerStateEmpty] using
+      psKernelInferenceCacheSound_empty
+        environment
+        localContext
+  · constructor
+    · simpa [psKernelCheckerStateEmpty] using
+        psKernelInferenceCacheSound_empty
+          environment
+          localContext
+    · simpa [psKernelCheckerStateEmpty] using
+        psKernelDefEqCacheSound_empty
+          environment
+          localContext

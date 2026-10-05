@@ -13,8 +13,8 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 5 |
-| B | 28 |
+| A | 6 |
+| B | 27 |
 | C | 38 |
 | D | 8 |
 | **Total canonical source/proof pairs** | **79** |
@@ -83,7 +83,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Checker/Reduction/WhnfCore.lean` | **A** | Zeta implementation now bridges to the independent `PsKernelReductionClosure`; additional beta/delta/projection coverage remains. |
 | `Checker/ResourcePolicy.lean` | **C** | Fail-closed/resource policy cases. |
 | `Checker/Session.lean` | **C** | Session forwarding/error propagation. |
-| `Checker/State.lean` | **B** | State/cache isolation and freshness invariants. |
+| `Checker/State.lean` | **A** | Empty checker state now establishes independent inference-cache and successful-defeq-cache soundness invariants; field-isolation/freshness laws support preservation proofs. |
 | `Core/Declaration.lean` | **B** | Declaration projection/safety/delta facts. |
 | `Core/Expr.lean` | **B** | Expression spine/fvar/list helper laws. |
 | `Core/Level.lean` | **B** | Offset/list normalization foundations; full universe semantic equivalence proof pending. |

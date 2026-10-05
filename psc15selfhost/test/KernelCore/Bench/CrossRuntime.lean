@@ -185,7 +185,21 @@ def psKernelCrossEqualityMatrix (remaining : Nat) : Bool :=
         psKernelCrossEqualityMatrix rest
       else false
 
-def psKernelCrossGuards : Bool :=
+def psKernelCrossZeroLiftMatrix (remaining : Nat) : Bool :=
+  match remaining with
+  | Nat.zero => true
+  | Nat.succ rest =>
+      let expr : PsKernelExpr := Prod.fst (psKernelCrossEqualityEntry rest);
+      let first : Prod PsKernelExpr Bool := psKernelExprLiftLooseBVarsChanged expr 0 0;
+      let second : Prod PsKernelExpr Bool := psKernelExprLiftLooseBVarsChanged expr 42 0;
+      if Prod.snd first then false
+      else if Prod.snd second then false
+      else if psKernelExprEqual expr (Prod.fst first) then
+        if psKernelExprEqual expr (Prod.fst second) then psKernelCrossZeroLiftMatrix rest
+        else false
+      else false
+
+def psKernelCrossGuardChecks : Bool :=
   let session : PsKernelCheckerSession := psKernelMkCheckerSession psKernelCrossEnvironment List.nil
     PsKernelDefinitionSafety.safe 0 psKernelLeanNatMaxSizeDefault;
   let illTyped : PsKernelExpr := PsKernelExpr.app
@@ -211,3 +225,6 @@ def psKernelCrossGuards : Bool :=
       else false
     else false
   else false
+
+def psKernelCrossGuards : Bool :=
+  if psKernelCrossZeroLiftMatrix 27 then psKernelCrossGuardChecks else false

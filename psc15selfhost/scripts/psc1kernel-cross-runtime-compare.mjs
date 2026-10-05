@@ -2,7 +2,7 @@
 // even if generation fails. No compiler fixed point or second native build.
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
-const source = 'packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean';
+const source = 'packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Lift.lean';
 const current = readFileSync(source);
 execFileSync('git', ['fetch', '--depth=1', 'origin', 'd379472dcd515fceabd2e444a22245f75db4a9e8'],
   { stdio: 'inherit', timeout: 30_000 });

@@ -158,11 +158,16 @@ def psKernelExprLiftLooseBVarsChanged
     (start : Nat)
     (amount : Nat) :
     Prod PsKernelExpr Bool :=
-  psKernelExprLiftLooseBVarsChangedWithFuel
-    (Nat.succ (psKernelExprNodeCount expr))
-    expr
-    start
-    amount
+  -- The worker already returns this result for zero. Avoid counting the tree
+  -- and constructing its fuel worker before reaching that same branch.
+  if Nat.beq amount 0 then
+    Prod.mk expr false
+  else
+    psKernelExprLiftLooseBVarsChangedWithFuel
+      (Nat.succ (psKernelExprNodeCount expr))
+      expr
+      start
+      amount
 
 def psKernelExprLiftLooseBVars
     (expr : PsKernelExpr)

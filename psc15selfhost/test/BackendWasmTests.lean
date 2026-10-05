@@ -1014,9 +1014,30 @@ def psTestWasmUInt8OfNatIntrinsic : Bool :=
       psStringEq functionName psWasmNatToU32Fn
   | _ => false
 
-def psTestWasmBoolBinaryIntrinsic
+def psWasmBoolInstructionMatches
     (operation : PsVerifiedIrIntrinsic)
     (instruction : PsWasmInstruction) : Bool :=
+  match operation with
+  | PsVerifiedIrIntrinsic.boolAnd =>
+      match instruction with
+      | PsWasmInstruction.i32And => true
+      | _ => false
+  | PsVerifiedIrIntrinsic.boolOr =>
+      match instruction with
+      | PsWasmInstruction.i32Or => true
+      | _ => false
+  | PsVerifiedIrIntrinsic.boolEq =>
+      match instruction with
+      | PsWasmInstruction.i32Eq => true
+      | _ => false
+  | PsVerifiedIrIntrinsic.boolNe =>
+      match instruction with
+      | PsWasmInstruction.i32Ne => true
+      | _ => false
+  | _ => false
+
+def psTestWasmBoolBinaryIntrinsic
+    (operation : PsVerifiedIrIntrinsic) : Bool :=
   match
       psWasmLowerIntrinsicWith
         psWasmProfile32
@@ -1036,7 +1057,7 @@ def psTestWasmBoolBinaryIntrinsic
       ],
       state := _
     } =>
-      actual == instruction
+      psWasmBoolInstructionMatches operation actual
   | _ => false
 
 def psTestWasmBoolIntrinsics : Bool :=
@@ -1061,16 +1082,12 @@ def psTestWasmBoolIntrinsics : Bool :=
   notOk
     && psTestWasmBoolBinaryIntrinsic
       PsVerifiedIrIntrinsic.boolAnd
-      PsWasmInstruction.i32And
     && psTestWasmBoolBinaryIntrinsic
       PsVerifiedIrIntrinsic.boolOr
-      PsWasmInstruction.i32Or
     && psTestWasmBoolBinaryIntrinsic
       PsVerifiedIrIntrinsic.boolEq
-      PsWasmInstruction.i32Eq
     && psTestWasmBoolBinaryIntrinsic
       PsVerifiedIrIntrinsic.boolNe
-      PsWasmInstruction.i32Ne
 
 def psWasmAnswerModule : PsWasmModule :=
   {

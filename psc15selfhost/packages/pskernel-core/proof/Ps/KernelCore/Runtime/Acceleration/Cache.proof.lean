@@ -93,3 +93,65 @@ theorem psKernelExprMapIndexBucket_set_same
           hParity,
           ih
         ]
+
+
+theorem psKernelExprPairEq_self
+    (left right : PsKernelExpr)
+    (hLeft : psKernelExprEq left left = true)
+    (hRight : psKernelExprEq right right = true) :
+    psKernelExprPairEq
+        left
+        right
+        (Prod.mk left right) =
+      true := by
+  simp [
+    psKernelExprPairEq,
+    hLeft,
+    hRight
+  ]
+
+theorem psKernelExprPairSetContainsIn_cons_self
+    (left right : PsKernelExpr)
+    (rest : List (Prod PsKernelExpr PsKernelExpr))
+    (hLeft : psKernelExprEq left left = true)
+    (hRight : psKernelExprEq right right = true) :
+    psKernelExprPairSetContainsIn
+        left
+        right
+        (List.cons
+          (Prod.mk left right)
+          rest) =
+      true := by
+  simp [
+    psKernelExprPairSetContainsIn,
+    psKernelExprPairEq_self,
+    hLeft,
+    hRight
+  ]
+
+theorem psKernelExprPairSetIndexBucket_set_same
+    (fuel : Nat)
+    (index : PsKernelExprPairSetIndex)
+    (hash : Nat)
+    (entries : List (Prod PsKernelExpr PsKernelExpr)) :
+    psKernelExprPairSetIndexBucket
+        fuel
+        (psKernelExprPairSetIndexSet
+          fuel
+          index
+          hash
+          entries)
+        hash =
+      entries := by
+  induction fuel generalizing index hash with
+  | zero =>
+      rfl
+  | succ remaining ih =>
+      cases index <;>
+        by_cases hParity : Nat.mod hash 2 = 0 <;>
+        simp [
+          psKernelExprPairSetIndexSet,
+          psKernelExprPairSetIndexBucket,
+          hParity,
+          ih
+        ]

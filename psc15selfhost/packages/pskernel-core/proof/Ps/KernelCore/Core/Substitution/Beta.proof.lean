@@ -32,3 +32,36 @@ theorem psKernelExprCheapBetaReduce_const
     psKernelExprCheapBetaReduce (PsKernelExpr.const name levels) =
       PsKernelExpr.const name levels := by
   rfl
+
+theorem psKernelExprCheapBetaReduce_identity_lambda
+    (name : PsKernelName)
+    (level : PsKernelLevel)
+    (binderInfo : PsKernelBinderInfo)
+    (arg : PsKernelExpr) :
+    psKernelExprCheapBetaReduce
+        (PsKernelExpr.app
+          (PsKernelExpr.lam
+            name
+            (PsKernelExpr.sort level)
+            (PsKernelExpr.bvar 0)
+            binderInfo)
+          arg) =
+      arg := by
+  rfl
+
+theorem psKernelExprCheapBetaReduce_closed_const_body
+    (name constName : PsKernelName)
+    (level : PsKernelLevel)
+    (levels : List PsKernelLevel)
+    (binderInfo : PsKernelBinderInfo)
+    (arg : PsKernelExpr) :
+    psKernelExprCheapBetaReduce
+        (PsKernelExpr.app
+          (PsKernelExpr.lam
+            name
+            (PsKernelExpr.sort level)
+            (PsKernelExpr.const constName levels)
+            binderInfo)
+          arg) =
+      PsKernelExpr.const constName levels := by
+  rfl

@@ -10,6 +10,7 @@ structure PsProjectSnapshotIdentity where
   kernelContract : String
   interfaceCodec : String
   sourceKeyCodec : String
+  artifactAuthority : String
   artifactCodec : String
 
 inductive PsProjectSnapshotIdentityField where
@@ -22,6 +23,7 @@ inductive PsProjectSnapshotIdentityField where
   | kernelContract
   | interfaceCodec
   | sourceKeyCodec
+  | artifactAuthority
   | artifactCodec
 
 inductive PsProjectSnapshotIdentityError where
@@ -55,6 +57,9 @@ def psProjectSnapshotInterfaceCodec : String :=
 def psProjectSnapshotSourceKeyCodec : String :=
   "utf8-source-text/1"
 
+def psProjectSnapshotArtifactAuthority : String :=
+  "elaborated-declarations-unchecked/1"
+
 def psProjectSnapshotArtifactCodec : String :=
   "elaborated-declarations/1"
 
@@ -72,6 +77,7 @@ def psProjectSnapshotIdentityV1
     kernelContract := psProjectSnapshotKernelContract
     interfaceCodec := psProjectSnapshotInterfaceCodec
     sourceKeyCodec := psProjectSnapshotSourceKeyCodec
+    artifactAuthority := psProjectSnapshotArtifactAuthority
     artifactCodec := psProjectSnapshotArtifactCodec
   }
 
@@ -117,13 +123,20 @@ def psProjectSnapshotIdentityMatch
                       expected.sourceKeyCodec
                       actual.sourceKeyCodec then
                     if psStringEq
-                        expected.artifactCodec
-                        actual.artifactCodec then
-                      Except.ok Unit.unit
+                        expected.artifactAuthority
+                        actual.artifactAuthority then
+                      if psStringEq
+                          expected.artifactCodec
+                          actual.artifactCodec then
+                        Except.ok Unit.unit
+                      else
+                        Except.error
+                          (PsProjectSnapshotIdentityError.mismatch
+                            PsProjectSnapshotIdentityField.artifactCodec)
                     else
                       Except.error
                         (PsProjectSnapshotIdentityError.mismatch
-                          PsProjectSnapshotIdentityField.artifactCodec)
+                          PsProjectSnapshotIdentityField.artifactAuthority)
                   else
                     Except.error
                       (PsProjectSnapshotIdentityError.mismatch

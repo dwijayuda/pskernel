@@ -44,3 +44,27 @@ theorem psKernelEnvironmentIndexListLength_eq_length
       rfl
   | cons head tail ih =>
       simp [psKernelEnvironmentIndexListLength, ih]
+
+theorem psKernelEnvironmentIndexFindWorker_setWorker_same
+    (fuel : Nat)
+    (index : PsKernelEnvironmentIndex)
+    (hash : Nat)
+    (constants : List PsKernelConstantInfo) :
+    psKernelEnvironmentIndexFindWorker
+        fuel
+        (psKernelEnvironmentIndexSetWorker
+          fuel
+          index
+          hash
+          constants)
+        hash =
+      constants := by
+  induction fuel generalizing index hash with
+  | zero =>
+      rfl
+  | succ remaining ih =>
+      simp [
+        psKernelEnvironmentIndexSetWorker,
+        psKernelEnvironmentIndexFindWorker,
+        ih
+      ]

@@ -146,7 +146,8 @@ jobs:
         working-directory: psc15selfhost
         run: |
           lake exe psc1_backend_wasm_tests
-          lake exe psc1_backend_wasm_binary_smoke
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc15-wasm-bytes.txt
+          node scripts/backend-wasm-runtime.test.mjs /tmp/psc15-wasm-bytes.txt
 
       - name: Self-check portable implementation profiles
         working-directory: psc15selfhost

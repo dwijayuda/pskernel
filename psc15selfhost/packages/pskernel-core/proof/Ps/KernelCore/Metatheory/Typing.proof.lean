@@ -891,6 +891,11 @@ theorem psKernelInferCore_let_checked_refines_typing
     (type value body typeType valueType bodyType : PsKernelExpr)
     (nondep : Bool)
     (typeLevel : PsKernelLevel)
+    (hCache :
+      psKernelExprMapGet
+          state.checkedInfer
+          (PsKernelExpr.letE name type value body nondep) =
+        Option.none)
     (hDepth :
       psKernelCheckerContextEnterRecDepth context =
         Except.ok nextContext)
@@ -1008,6 +1013,8 @@ theorem psKernelInferCore_let_checked_refines_typing
   constructor
   · simp [
       psKernelInferCoreWithFuel,
+      psKernelInferCacheEligible,
+      hCache,
       hDepth,
       hTypeRun,
       hTypeSort,

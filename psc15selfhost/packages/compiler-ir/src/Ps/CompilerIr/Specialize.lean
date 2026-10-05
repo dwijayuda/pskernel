@@ -43,11 +43,7 @@ structure PsIrSpecializeMatchBindingsResult where
   requests : List PsIrSpecializeRequest
 
 structure PsIrSpecializeAlternativesResult where
-  alternatives :
-    List
-      (String ×
-        List PsVerifiedIrMatchBinding ×
-        PsVerifiedIrExpr)
+  alternatives : List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr)
   requests : List PsIrSpecializeRequest
 
 structure PsIrSpecializeStructureFieldsResult where

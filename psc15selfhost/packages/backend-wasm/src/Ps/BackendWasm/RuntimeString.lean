@@ -65,29 +65,56 @@ def psWasmStringNatOneInstructions : List PsWasmInstruction :=
     PsWasmInstruction.call psWasmNatBit1Fn
   ]
 
+def psWasmStringLiteralCharsWithFuel
+    (fuel : Nat) :
+    String -> Nat -> List PsWasmInstruction :=
+  match fuel with
+  | Nat.zero =>
+      fun (_value : String) (_position : Nat) =>
+        List.nil
+  | Nat.succ remaining =>
+      let smaller :
+          String -> Nat -> List PsWasmInstruction :=
+        psWasmStringLiteralCharsWithFuel remaining;
+      fun (value : String) (position : Nat) =>
+        if
+            String.Internal.atEnd
+              value
+              (String.Pos.Raw.mk position) then
+          List.nil
+        else
+          let char : Char :=
+            String.Internal.get
+              value
+              (String.Pos.Raw.mk position);
+          let nextPosition : Nat :=
+            String.Pos.Raw.byteIdx
+              (String.Internal.next
+                value
+                (String.Pos.Raw.mk position));
+          List.cons
+            (PsWasmInstruction.i32Const
+              (Int.ofNat (Char.toNat char)))
+            (smaller value nextPosition)
+
 def psWasmStringLiteralChars
-    (chars : List Char) : List PsWasmInstruction :=
-  match chars with
-  | List.nil => List.nil
-  | List.cons char rest =>
-      let encodedRest : List PsWasmInstruction :=
-        psWasmStringLiteralChars rest;
-      List.cons
-        (PsWasmInstruction.i32Const
-          (Int.ofNat (Char.toNat char)))
-        encodedRest
+    (value : String) : List PsWasmInstruction :=
+  psWasmStringLiteralCharsWithFuel
+    (Nat.succ (String.utf8ByteSize value))
+    value
+    0
 
 def psWasmStringLiteralInstructions
     (value : String) : List PsWasmInstruction :=
-  let chars : List Char := String.toList value;
+  let charCount : Nat := String.Internal.length value;
   psListAppend
-    (psWasmStringLiteralChars chars)
+    (psWasmStringLiteralChars value)
     [
       PsWasmInstruction.arrayNewFixed
         psWasmStringCharsName
-        (psListLength chars),
+        charCount,
       PsWasmInstruction.i32Const
-        (Int.ofNat (psListLength chars)),
+        (Int.ofNat charCount),
       PsWasmInstruction.structNew psWasmStringName
     ]
 

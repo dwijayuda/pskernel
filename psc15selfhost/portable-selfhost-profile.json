@@ -23,5 +23,8 @@
     "untyped-lambda-let",
     "untyped-numeric-choice-let",
     "layout-let-sequencing"
-  ]
+  ],
+  "executableContract": {
+    "pscCheckSourceRoots": true
+  }
 }

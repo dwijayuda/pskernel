@@ -271,11 +271,9 @@ theorem psKernelInferCoreWithFuel_const_inferOnly_cache_miss
           name =
         Option.some info)
     (hLevels :
-      Nat.beq
-          (psKernelNameListLength
-            (psKernelConstantInfoLevelParams info))
-          (psKernelLevelListLength levels) =
-        true) :
+      psKernelNameListLength
+          (psKernelConstantInfoLevelParams info) =
+        psKernelLevelListLength levels) :
     psKernelInferCoreWithFuel
         (Nat.succ remaining)
         whnf
@@ -339,11 +337,9 @@ theorem psKernelInferCoreWithFuel_const_checked_safe
           name =
         Option.some info)
     (hLevels :
-      Nat.beq
-          (psKernelNameListLength
-            (psKernelConstantInfoLevelParams info))
-          (psKernelLevelListLength levels) =
-        true)
+      psKernelNameListLength
+          (psKernelConstantInfoLevelParams info) =
+        psKernelLevelListLength levels)
     (hUnsafe :
       psKernelConstantInfoIsUnsafe info = false)
     (hPartial :

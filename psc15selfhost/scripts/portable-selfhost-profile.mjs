@@ -181,6 +181,9 @@ function assertProfile(profile) {
   if (profile.executableContract?.pscTypeScriptEntryRoots !== true) {
     throw new Error('PSC1_PORTABLE_SELFHOST_EMISSION_CONTRACT');
   }
+  if (profile.executableContract?.pscProofScriptEntryRoots !== true) {
+    throw new Error('PSC1_PORTABLE_SELFHOST_PS_EMISSION_CONTRACT');
+  }
 }
 
 export async function checkPortableSelfhostProfile(packageFilter) {

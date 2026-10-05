@@ -101,3 +101,89 @@ theorem psKernelEnvironmentIndexRemoveName_find_none
     psKernelEnvironmentIndexRemoveNameWorker_find_none
       constants
       name
+
+
+theorem psKernelEnvironmentIndexFind_setWorker_same_name
+    (index : PsKernelEnvironmentIndex)
+    (name : PsKernelName)
+    (constants : List PsKernelConstantInfo) :
+    psKernelEnvironmentIndexFind
+        (psKernelEnvironmentIndexSetWorker
+          16
+          index
+          (psKernelEnvironmentNameHash name)
+          constants)
+        name =
+      constants := by
+  change
+    psKernelEnvironmentIndexFindWorker
+        16
+        (psKernelEnvironmentIndexSetWorker
+          16
+          index
+          (psKernelEnvironmentNameHash name)
+          constants)
+        (psKernelEnvironmentNameHash name) =
+      constants
+  exact
+    psKernelEnvironmentIndexFindWorker_setWorker_same
+      16
+      index
+      (psKernelEnvironmentNameHash name)
+      constants
+
+theorem psKernelEnvironmentIndexFind_build_cons
+    (info : PsKernelConstantInfo)
+    (rest : List PsKernelConstantInfo) :
+    psKernelEnvironmentIndexFind
+        (psKernelEnvironmentIndexBuild
+          (List.cons info rest))
+        (psKernelConstantInfoName info) =
+      List.cons
+        info
+        (psKernelEnvironmentIndexRemoveName
+          (psKernelConstantInfoName info)
+          (psKernelEnvironmentIndexFindWorker
+            16
+            (psKernelEnvironmentIndexBuild rest)
+            (psKernelEnvironmentNameHash
+              (psKernelConstantInfoName info)))) := by
+  change
+    psKernelEnvironmentIndexFind
+        (psKernelEnvironmentIndexSetWorker
+          16
+          (psKernelEnvironmentIndexBuild rest)
+          (psKernelEnvironmentNameHash
+            (psKernelConstantInfoName info))
+          (List.cons
+            info
+            (psKernelEnvironmentIndexRemoveName
+              (psKernelConstantInfoName info)
+              (psKernelEnvironmentIndexFindWorker
+                16
+                (psKernelEnvironmentIndexBuild rest)
+                (psKernelEnvironmentNameHash
+                  (psKernelConstantInfoName info))))))
+        (psKernelConstantInfoName info) =
+      List.cons
+        info
+        (psKernelEnvironmentIndexRemoveName
+          (psKernelConstantInfoName info)
+          (psKernelEnvironmentIndexFindWorker
+            16
+            (psKernelEnvironmentIndexBuild rest)
+            (psKernelEnvironmentNameHash
+              (psKernelConstantInfoName info))))
+  exact
+    psKernelEnvironmentIndexFind_setWorker_same_name
+      (psKernelEnvironmentIndexBuild rest)
+      (psKernelConstantInfoName info)
+      (List.cons
+        info
+        (psKernelEnvironmentIndexRemoveName
+          (psKernelConstantInfoName info)
+          (psKernelEnvironmentIndexFindWorker
+            16
+            (psKernelEnvironmentIndexBuild rest)
+            (psKernelEnvironmentNameHash
+              (psKernelConstantInfoName info)))))

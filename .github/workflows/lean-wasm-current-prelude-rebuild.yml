@@ -29,7 +29,7 @@ jobs:
   rebuild-and-verify:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 105
     defaults:
       run:
         working-directory: psc15selfhost
@@ -107,12 +107,12 @@ jobs:
           trap - EXIT
 
       - name: Rebuild pinned Lean 4.34 WASM provider
-        timeout-minutes: 72
+        timeout-minutes: 80
         run: |
           set -euo pipefail
           start="$(date +%s)"
           set +e
-          timeout --signal=TERM --kill-after=60s 70m \
+          timeout --signal=TERM --kill-after=60s 78m \
             env PSC_LEAN_WASM_SOURCE_COMMIT="$GITHUB_SHA" \
             npm --prefix packages/pskernel-lean-wasm run build:kernel
           status=$?

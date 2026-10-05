@@ -63,9 +63,14 @@ jobs:
           const headerMatch=/^LEAN434_INIT_TYPE_COUNT\t(\d+)$/u.exec(header);
           if(!headerMatch) throw new Error('unexpected Lean type inventory header: '+header);
           const records=lines.map(line=>{
-            const [tag,name,kind]=line.split('\t');
-            if(tag!=='TYPE'||!name||!kind) throw new Error('malformed type inventory row: '+line);
-            return {name,kind};
+            const [tag,name,kind,internal,module]=line.split('\t');
+            if(tag!=='TYPE'||!name||!kind||!internal||!module) {
+              throw new Error('malformed type inventory row: '+line);
+            }
+            if(internal!=='true'&&internal!=='false') {
+              throw new Error('invalid internal flag: '+line);
+            }
+            return {name,kind,internal:internal==='true',module};
           }).sort((a,b)=>a.name.localeCompare(b.name,'en'));
           if(records.length!==Number(headerMatch[1])) throw new Error('Lean type count mismatch');
           if(new Set(records.map(r=>r.name)).size!==records.length) throw new Error('duplicate Lean type name');
@@ -80,6 +85,8 @@ jobs:
             sourceCommit:process.env.GITHUB_SHA,
             leanInitTypeCount:compared.length,
             proofscriptPreludeDeclarationCount:prelude.length,
+            publicLeanInitTypeCount:compared.filter(r=>!r.internal&&!r.name.startsWith('_private.')).length,
+            internalOrPrivateLeanInitTypeCount:compared.filter(r=>r.internal||r.name.startsWith('_private.')).length,
             proofscriptCoveredLeanTypeCount:compared.filter(r=>r.proofscriptPrelude).length,
             records:compared,
           };
@@ -89,6 +96,8 @@ jobs:
             missing.map(r=>r.name+'\t'+r.kind).join('\n')+'\n');
           console.log(JSON.stringify({
             leanInitTypeCount:manifest.leanInitTypeCount,
+            publicLeanInitTypeCount:manifest.publicLeanInitTypeCount,
+            internalOrPrivateLeanInitTypeCount:manifest.internalOrPrivateLeanInitTypeCount,
             proofscriptPreludeDeclarationCount:manifest.proofscriptPreludeDeclarationCount,
             proofscriptCoveredLeanTypeCount:manifest.proofscriptCoveredLeanTypeCount,
             missingCount:missing.length,

@@ -78,11 +78,12 @@ def psWasmLowerResultType
       | Option.some valueType => Except.ok [valueType]
 
 def psWasmLowerParameterTypes
-    (profile : PsWasmTargetProfile) :
-    List PsVerifiedIrParameter ->
-    Except PsWasmLowerError (List PsWasmValueType)
-  | [] => Except.ok []
-  | parameter :: rest =>
+    (profile : PsWasmTargetProfile)
+    (parameters : List PsVerifiedIrParameter) :
+    Except PsWasmLowerError (List PsWasmValueType) :=
+  match parameters with
+  | List.nil => Except.ok []
+  | List.cons parameter rest =>
       match psWasmLowerParameterType profile parameter.type with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1066,11 +1067,12 @@ def psWasmLowerArrayType
       Except.error PsWasmLowerError.unsupportedType
 
 def psWasmLowerArrayTypes
-    (profile : PsWasmTargetProfile) :
-    List PsVerifiedIrType ->
-    Except PsWasmLowerError (List PsWasmArrayType)
-  | [] => Except.ok []
-  | type :: rest =>
+    (profile : PsWasmTargetProfile)
+    (types : List PsVerifiedIrType) :
+    Except PsWasmLowerError (List PsWasmArrayType) :=
+  match types with
+  | List.nil => Except.ok []
+  | List.cons type rest =>
       match psWasmLowerArrayType profile type with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1084,11 +1086,12 @@ structure PsWasmClosureSignature where
   codeType : PsWasmFunctionType
 
 def psWasmLowerIrTypeList
-    (profile : PsWasmTargetProfile) :
-    List PsVerifiedIrType ->
-    Except PsWasmLowerError (List PsWasmValueType)
-  | [] => Except.ok []
-  | type :: rest =>
+    (profile : PsWasmTargetProfile)
+    (types : List PsVerifiedIrType) :
+    Except PsWasmLowerError (List PsWasmValueType) :=
+  match types with
+  | List.nil => Except.ok []
+  | List.cons type rest =>
       match psWasmValueTypeOfIrType? profile type with
       | Option.none => Except.error PsWasmLowerError.unsupportedType
       | Option.some lowered =>
@@ -1141,12 +1144,12 @@ def psWasmLowerClosureSignature
   | _ => Except.error PsWasmLowerError.unsupportedType
 
 def psWasmLowerClosureSignatures
-    (profile : PsWasmTargetProfile) :
-    List PsVerifiedIrType ->
-    Except PsWasmLowerError
-      (List PsWasmStructType × List PsWasmFunctionType)
-  | [] => Except.ok (Prod.mk List.nil List.nil)
-  | type :: rest =>
+    (profile : PsWasmTargetProfile)
+    (types : List PsVerifiedIrType) :
+    Except PsWasmLowerError (List PsWasmStructType × List PsWasmFunctionType) :=
+  match types with
+  | List.nil => Except.ok (Prod.mk List.nil List.nil)
+  | List.cons type rest =>
       match psWasmLowerClosureSignature profile type with
       | Except.error error => Except.error error
       | Except.ok signature =>
@@ -1237,11 +1240,12 @@ def psWasmLowerStructureField
       }
 
 def psWasmLowerStructureFields
-    (profile : PsWasmTargetProfile) :
-    List PsVerifiedIrStructureField ->
-    Except PsWasmLowerError (List PsWasmStructField)
-  | [] => Except.ok []
-  | field :: rest =>
+    (profile : PsWasmTargetProfile)
+    (fields : List PsVerifiedIrStructureField) :
+    Except PsWasmLowerError (List PsWasmStructField) :=
+  match fields with
+  | List.nil => Except.ok []
+  | List.cons field rest =>
       match psWasmLowerStructureField profile field with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1268,11 +1272,12 @@ def psWasmLowerStructure
           }
 
 def psWasmLowerStructures
-    (profile : PsWasmTargetProfile) :
-    List PsVerifiedIrStructure ->
-    Except PsWasmLowerError (List PsWasmStructType)
-  | [] => Except.ok []
-  | structInfo :: rest =>
+    (profile : PsWasmTargetProfile)
+    (structures : List PsVerifiedIrStructure) :
+    Except PsWasmLowerError (List PsWasmStructType) :=
+  match structures with
+  | List.nil => Except.ok []
+  | List.cons structInfo rest =>
       match psWasmLowerStructure profile structInfo with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1345,11 +1350,12 @@ def psWasmLowerConstructorField
       }
 
 def psWasmLowerConstructorFields
-    (profile : PsWasmTargetProfile) :
-    List PsVerifiedIrConstructorField ->
-    Except PsWasmLowerError (List PsWasmStructField)
-  | [] => Except.ok []
-  | field :: rest =>
+    (profile : PsWasmTargetProfile)
+    (fields : List PsVerifiedIrConstructorField) :
+    Except PsWasmLowerError (List PsWasmStructField) :=
+  match fields with
+  | List.nil => Except.ok []
+  | List.cons field rest =>
       match psWasmLowerConstructorField profile field with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1360,11 +1366,12 @@ def psWasmLowerConstructorFields
 
 def psWasmLowerInductiveConstructors
     (profile : PsWasmTargetProfile)
-    (inductiveInfo : PsVerifiedIrInductive) :
-    List PsVerifiedIrConstructor ->
-    Except PsWasmLowerError (List PsWasmStructType)
-  | [] => Except.ok []
-  | constructorInfo :: rest =>
+    (inductiveInfo : PsVerifiedIrInductive)
+    (constructors : List PsVerifiedIrConstructor) :
+    Except PsWasmLowerError (List PsWasmStructType) :=
+  match constructors with
+  | List.nil => Except.ok []
+  | List.cons constructorInfo rest =>
       match
           psWasmLowerConstructorFields
             profile
@@ -1412,11 +1419,12 @@ def psWasmLowerInductive
           Except.ok (List.cons base constructors)
 
 def psWasmLowerInductives
-    (profile : PsWasmTargetProfile) :
-    List PsVerifiedIrInductive ->
-    Except PsWasmLowerError (List PsWasmStructType)
-  | [] => Except.ok []
-  | inductiveInfo :: rest =>
+    (profile : PsWasmTargetProfile)
+    (inductives : List PsVerifiedIrInductive) :
+    Except PsWasmLowerError (List PsWasmStructType) :=
+  match inductives with
+  | List.nil => Except.ok []
+  | List.cons inductiveInfo rest =>
       match psWasmLowerInductive profile inductiveInfo with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -1501,18 +1509,21 @@ def psWasmAppendCaptureForName
     | Option.none => captures
     | Option.some binding => psListAppend captures (List.cons binding List.nil)
 
-def psWasmParameterNames :
-    List PsVerifiedIrParameter -> List String
-  | [] => []
-  | parameter :: rest =>
+def psWasmParameterNames
+    (parameters : List PsVerifiedIrParameter) :
+    List String :=
+  match parameters with
+  | List.nil => []
+  | List.cons parameter rest =>
       List.cons parameter.name (psWasmParameterNames rest)
 
-def psWasmMatchBindingNames :
-    List PsVerifiedIrMatchBinding -> List String
-  | [] => []
-  | binding :: rest =>
+def psWasmMatchBindingNames
+    (bindings : List PsVerifiedIrMatchBinding) :
+    List String :=
+  match bindings with
+  | List.nil => []
+  | List.cons binding rest =>
       List.cons binding.name (psWasmMatchBindingNames rest)
-
 
 def psWasmCollectCapturesWithFuel
     (outerBindings : List PsWasmBinding)
@@ -1650,10 +1661,12 @@ def psWasmCollectCaptures
     []
 
 def psWasmParameterBindingsFrom
-    (firstIndex : Nat) :
-    List PsVerifiedIrParameter -> List PsWasmBinding
-  | [] => []
-  | parameter :: rest =>
+    (firstIndex : Nat)
+    (parameters : List PsVerifiedIrParameter) :
+    List PsWasmBinding :=
+  match parameters with
+  | List.nil => []
+  | List.cons parameter rest =>
       List.cons
         (PsWasmBinding.mk
           parameter.name
@@ -2750,41 +2763,48 @@ def psWasmLowerTypedArgumentsWith
       Option PsWasmValueType ->
       PsWasmLowerState ->
       PsVerifiedIrExpr ->
-        Except PsWasmLowerError PsWasmLoweredExpr) :
-    PsWasmLowerState ->
-    List PsVerifiedIrType ->
-    List PsVerifiedIrExpr ->
-    Except PsWasmLowerError PsWasmLoweredExpr
-  | state, [], [] =>
-      Except.ok {
-        instructions := []
-        state := state
-      }
-  | state, type :: restTypes, argument :: restArguments =>
-      match psWasmValueTypeOfIrType? profile type with
-      | Option.none => Except.error PsWasmLowerError.unsupportedType
-      | Option.some expected =>
-          match lower (Option.some expected) state argument with
-          | Except.error error => Except.error error
-          | Except.ok lowered =>
-              match
-                  psWasmLowerTypedArgumentsWith
-                    profile
-                    lower
-                    lowered.state
-                    restTypes
-                    restArguments with
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (types : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match types with
+  | List.nil =>
+      match arguments with
+      | List.nil =>
+          Except.ok {
+            instructions := []
+            state := state
+          }
+      | List.cons _ _ =>
+          Except.error PsWasmLowerError.invalidCallArity
+  | List.cons type restTypes =>
+      match arguments with
+      | List.nil =>
+          Except.error PsWasmLowerError.invalidCallArity
+      | List.cons argument restArguments =>
+          match psWasmValueTypeOfIrType? profile type with
+          | Option.none => Except.error PsWasmLowerError.unsupportedType
+          | Option.some expected =>
+              match lower (Option.some expected) state argument with
               | Except.error error => Except.error error
-              | Except.ok loweredRest =>
-                  Except.ok {
-                    instructions :=
-                      psListAppend
-                        lowered.instructions
-                        loweredRest.instructions
-                    state := loweredRest.state
-                  }
-  | _, _, _ =>
-      Except.error PsWasmLowerError.invalidCallArity
+              | Except.ok lowered =>
+                  match
+                      psWasmLowerTypedArgumentsWith
+                        profile
+                        lower
+                        lowered.state
+                        restTypes
+                        restArguments with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredRest =>
+                      Except.ok {
+                        instructions :=
+                          psListAppend
+                            lowered.instructions
+                            loweredRest.instructions
+                        state := loweredRest.state
+                      }
 
 def psWasmLowerFunctionValueCall
     (profile : PsWasmTargetProfile)
@@ -3152,11 +3172,12 @@ def psWasmLowerMatchAlternativesWith
 
 
 def psWasmLowerCaptureFields
-    (profile : PsWasmTargetProfile) :
-    List PsWasmBinding ->
-    Except PsWasmLowerError (List PsWasmStructField)
-  | [] => Except.ok []
-  | capture :: rest =>
+    (profile : PsWasmTargetProfile)
+    (captures : List PsWasmBinding) :
+    Except PsWasmLowerError (List PsWasmStructField) :=
+  match captures with
+  | List.nil => Except.ok []
+  | List.cons capture rest =>
       match psWasmStorageTypeOfIrType? profile capture.type with
       | Option.none => Except.error PsWasmLowerError.unsupportedType
       | Option.some storageType =>
@@ -3223,10 +3244,12 @@ def psWasmPrepareCaptureBindings
                 state := loweredRest.state
               }
 
-def psWasmCaptureConstructionInstructions :
-    List PsWasmBinding -> List PsWasmInstruction
-  | [] => []
-  | capture :: rest =>
+def psWasmCaptureConstructionInstructions
+    (captures : List PsWasmBinding) :
+    List PsWasmInstruction :=
+  match captures with
+  | List.nil => []
+  | List.cons capture rest =>
       List.cons
         (PsWasmInstruction.localGet capture.index)
         (psWasmCaptureConstructionInstructions rest)
@@ -4223,10 +4246,12 @@ def psWasmModuleUsesInt
     psListAny psWasmDeclarationUsesInt module.declarations
 
 
-def psWasmExportsOfDeclarations :
-    List PsVerifiedIrDeclaration -> List (String × String)
-  | [] => []
-  | declaration :: rest =>
+def psWasmExportsOfDeclarations
+    (declarations : List PsVerifiedIrDeclaration) :
+    List (String × String) :=
+  match declarations with
+  | List.nil => []
+  | List.cons declaration rest =>
       List.cons
         (Prod.mk declaration.name declaration.name)
         (psWasmExportsOfDeclarations rest)

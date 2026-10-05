@@ -642,3 +642,39 @@ The native performance target remains:
 
 JavaScript is optimized for portability and embedding; it is not required to
 beat native Lean.
+
+## 6. Bounded Node cross-runtime harness
+
+`.github/workflows/psc1kernel-cross-runtime.yml` builds the current portable
+kernel and a test-only fixture through the native PSC1 compiler's backend-ts,
+then pinned TypeScript 5.8.3. It does not regenerate the compiler, prove a
+generated fixed point, rebuild WASM, or replay a large proof library.
+
+`test/KernelCore/Bench/CrossRuntime.lean` is compiled unchanged by both Lean and
+PSC1. The initial corpus measures 16 beta reductions, definitional equality
+through that beta chain, and checked eight-argument application. Sixteen inputs
+are prepared outside timing, with exact naturals above 2^53. Each sample uses
+100 warmup calls and 1,000 measured calls; every call starts a cold kernel
+session. Success checks inspect the result rather than merely counting returns.
+Separate guards require rejection of ill-typed terms, fuel exhaustion, and a
+definition with an ill-typed body, and distinguish adjacent large naturals.
+
+The reporter runs at most three fresh-process samples, caps each child at 30
+seconds, fails on missing/failed operations, and stores medians, ranges, raw
+logs, Node identity and the generated artifact SHA-256. Module import and first
+workload calls are reported separately; the latter occur after guard checks
+and must not be called pristine JIT startup. One optional-to-interpret bounded
+CPU profile includes the entire worker, including setup and guards.
+
+The existing integrity-checked Lean WASM provider is measured separately on
+matching batches of one and 128 definitions and a four-definition rejection.
+Its full request includes integrity verification, process startup, JSON
+decoding, provider prelude setup and checking. The JS column calls shared test
+fixtures directly with a smaller environment. These are different integration
+boundaries, so the report deliberately provides **no JS/WASM kernel speed
+ratio**. A health request is measured separately and is not subtracted from
+check times as if it were an exact startup decomposition.
+
+This is initial Node evidence. It does not establish browser performance,
+general JS provider parity, or performance of nested admission. Keep M3 and
+M4 acceptance separate from this bounded measurement checkpoint.

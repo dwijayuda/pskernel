@@ -53,11 +53,13 @@ def psKernelCrossBeta (count : Nat) (value : PsKernelExpr) : PsKernelExpr :=
           (PsKernelExpr.bvar 0) PsKernelBinderInfo.default)
         (psKernelCrossBeta rest value)
 
-def psKernelCrossApply (count : Nat) (fn value : PsKernelExpr) : PsKernelExpr :=
+def psKernelCrossApply (count : Nat) : PsKernelExpr -> PsKernelExpr -> PsKernelExpr :=
   match count with
-  | Nat.zero => fn
+  | Nat.zero => fun (fn : PsKernelExpr) (_value : PsKernelExpr) => fn
   | Nat.succ rest =>
-      psKernelCrossApply rest (PsKernelExpr.app fn value) value
+      let smaller : PsKernelExpr -> PsKernelExpr -> PsKernelExpr := psKernelCrossApply rest;
+      fun (fn : PsKernelExpr) (value : PsKernelExpr) =>
+        smaller (PsKernelExpr.app fn value) value
 
 def psKernelCrossInput (kind seed : Nat) : PsKernelCrossInput :=
   let value : PsKernelExpr := PsKernelExpr.lit (PsKernelLiteral.nat (Nat.add seed 9007199254740993));
@@ -105,16 +107,20 @@ def psKernelCrossAdmission (index : Nat) (bad : Bool) : PsKernelDefinitionInfo :
     safety := PsKernelDefinitionSafety.safe
   }
 
-def psKernelCrossAdmitLoop (remaining index : Nat) (bad : Bool)
-    (environment : PsKernelEnvironment) : Except String PsKernelEnvironment :=
+def psKernelCrossAdmitLoop (remaining : Nat) :
+    Nat -> Bool -> PsKernelEnvironment -> Except String PsKernelEnvironment :=
   match remaining with
-  | Nat.zero => Except.ok environment
+  | Nat.zero => fun (_index : Nat) (_bad : Bool) (environment : PsKernelEnvironment) =>
+      Except.ok environment
   | Nat.succ rest =>
-      match psKernelAddDefinition 2048 environment
-          (psKernelCrossAdmission index (Bool.and bad (Nat.beq rest 0)))
-          0 psKernelLeanNatMaxSizeDefault with
-      | Except.error error => Except.error error
-      | Except.ok next => psKernelCrossAdmitLoop rest (Nat.succ index) bad next
+      let smaller : Nat -> Bool -> PsKernelEnvironment -> Except String PsKernelEnvironment :=
+        psKernelCrossAdmitLoop rest;
+      fun (index : Nat) (bad : Bool) (environment : PsKernelEnvironment) =>
+        match psKernelAddDefinition 2048 environment
+            (psKernelCrossAdmission index (Bool.and bad (Nat.beq rest 0)))
+            0 psKernelLeanNatMaxSizeDefault with
+        | Except.error error => Except.error error
+        | Except.ok next => smaller (Nat.succ index) bad next
 
 def psKernelCrossAdmit (count : Nat) (bad : Bool) : Bool :=
   match psKernelCrossAdmitLoop count 0 bad psKernelCrossEnvironment with

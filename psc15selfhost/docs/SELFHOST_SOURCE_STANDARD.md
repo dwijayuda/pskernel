@@ -10,6 +10,35 @@ preserve the retired pre-r3 `.ps` grammar.
 This document is normative for code that is reachable from
 `packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean`.
 
+## Portable extension profile
+
+Portable non-bootstrap implementations that must be consumed by PSC use the separate
+`PSC1-portable-selfhost/1` implementation profile. This does **not** add those
+packages to the compiler bootstrap closure and does not change the meaning of
+`PSC1-selfhost-stable/1`.
+
+A package opts in with:
+
+```json
+{
+  "proofscript": {
+    "portable": true,
+    "implementationProfile": "PSC1-portable-selfhost/1"
+  }
+}
+```
+
+The portable profile reuses the stable profile's forbidden Lean machinery and adds
+generic structural rules for source shapes that the proven self-host corpus has shown
+to be fragile: recursive equation declarations, term list append/cons shorthand,
+numeric tuple projection, tuple construction, grouped-dot application, string-literal
+patterns, Boolean convenience operators, leading-dot term constructors, untyped lambda
+binders, and layout-only `let` sequencing.
+
+The checker scans every opted-in package source root and its workspace import closure.
+New failures must extend a general rule only when they identify a genuinely new
+source-profile invariant; do not add backend/file-specific repair guards.
+
 The goal is to keep self-hostability as a development invariant instead of rediscovering
 unsupported source patterns late in the bootstrap/fixed-point cycle.
 

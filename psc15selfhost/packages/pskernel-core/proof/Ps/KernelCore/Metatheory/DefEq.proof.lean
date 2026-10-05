@@ -1,4 +1,4 @@
-import Ps.KernelCore.Metatheory.Judgments
+import Ps.KernelCore.Metatheory.ExprEq
 import Ps.KernelCore.Checker.DefEq.Quick
 
 theorem psKernelReductionStep_implies_defeq
@@ -173,3 +173,37 @@ theorem psKernelDefEqQuick_success_cache_refines
   constructor
   · simp [psKernelDefEqQuick, hEq, hCache]
   · exact hSound left right hCache
+
+
+theorem psKernelDefEqQuick_expr_equal_refines_unconditional
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (hEq : psKernelExprEq left right = true) :
+    psKernelDefEqQuick
+        defeq context state left right =
+      Except.ok
+        (Prod.mk (Option.some true) state) ∧
+    PsKernelDefEqJudgment
+      context.environment
+      context.localContext
+      left
+      right := by
+  exact
+    psKernelDefEqQuick_expr_equal_refines
+      defeq
+      context
+      state
+      left
+      right
+      (psKernelExprEqSound_all
+        context.environment
+        context.localContext)
+      hEq

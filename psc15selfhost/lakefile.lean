@@ -303,7 +303,8 @@ lean_lib PsKernelCore where
 lean_lib PsKernelCoreMetatheory where
   srcDir := "packages/pskernel-core/metatheory"
   roots := #[
-    `Ps.KernelCore.Metatheory.Judgments
+    `Ps.KernelCore.Metatheory.Judgments,
+    `Ps.KernelCore.Metatheory.ExprEq
   ]
 
 lean_lib PsKernelCoreTestSupport where

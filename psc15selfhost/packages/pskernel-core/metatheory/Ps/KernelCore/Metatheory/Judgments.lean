@@ -138,6 +138,104 @@ inductive PsKernelReductionClosure
         left
         right
 
+inductive PsKernelStructuralExprEq :
+    PsKernelExpr -> PsKernelExpr -> Prop
+  | bvar
+      (left right : Nat)
+      (h : Nat.beq left right = true) :
+      PsKernelStructuralExprEq
+        (PsKernelExpr.bvar left)
+        (PsKernelExpr.bvar right)
+  | fvar
+      (left right : PsKernelName)
+      (h : psKernelNameEq left right = true) :
+      PsKernelStructuralExprEq
+        (PsKernelExpr.fvar left)
+        (PsKernelExpr.fvar right)
+  | mvar
+      (left right : PsKernelName)
+      (h : psKernelNameEq left right = true) :
+      PsKernelStructuralExprEq
+        (PsKernelExpr.mvar left)
+        (PsKernelExpr.mvar right)
+  | sort
+      (left right : PsKernelLevel)
+      (h : psKernelLevelEq left right = true) :
+      PsKernelStructuralExprEq
+        (PsKernelExpr.sort left)
+        (PsKernelExpr.sort right)
+  | const
+      (leftName rightName : PsKernelName)
+      (leftLevels rightLevels : List PsKernelLevel)
+      (hName : psKernelNameEq leftName rightName = true)
+      (hLevels : psKernelLevelListEq leftLevels rightLevels = true) :
+      PsKernelStructuralExprEq
+        (PsKernelExpr.const leftName leftLevels)
+        (PsKernelExpr.const rightName rightLevels)
+  | app
+      (leftFn leftArg rightFn rightArg : PsKernelExpr)
+      (hFn : PsKernelStructuralExprEq leftFn rightFn)
+      (hArg : PsKernelStructuralExprEq leftArg rightArg) :
+      PsKernelStructuralExprEq
+        (PsKernelExpr.app leftFn leftArg)
+        (PsKernelExpr.app rightFn rightArg)
+  | lam
+      (leftName rightName : PsKernelName)
+      (leftType leftBody rightType rightBody : PsKernelExpr)
+      (leftInfo rightInfo : PsKernelBinderInfo)
+      (hType : PsKernelStructuralExprEq leftType rightType)
+      (hBody : PsKernelStructuralExprEq leftBody rightBody) :
+      PsKernelStructuralExprEq
+        (PsKernelExpr.lam leftName leftType leftBody leftInfo)
+        (PsKernelExpr.lam rightName rightType rightBody rightInfo)
+  | forallE
+      (leftName rightName : PsKernelName)
+      (leftType leftBody rightType rightBody : PsKernelExpr)
+      (leftInfo rightInfo : PsKernelBinderInfo)
+      (hType : PsKernelStructuralExprEq leftType rightType)
+      (hBody : PsKernelStructuralExprEq leftBody rightBody) :
+      PsKernelStructuralExprEq
+        (PsKernelExpr.forallE leftName leftType leftBody leftInfo)
+        (PsKernelExpr.forallE rightName rightType rightBody rightInfo)
+  | letE
+      (leftName rightName : PsKernelName)
+      (leftType leftValue leftBody : PsKernelExpr)
+      (rightType rightValue rightBody : PsKernelExpr)
+      (leftNondep rightNondep : Bool)
+      (hType : PsKernelStructuralExprEq leftType rightType)
+      (hValue : PsKernelStructuralExprEq leftValue rightValue)
+      (hBody : PsKernelStructuralExprEq leftBody rightBody)
+      (hNondep : psKernelBoolEq leftNondep rightNondep = true) :
+      PsKernelStructuralExprEq
+        (PsKernelExpr.letE
+          leftName leftType leftValue leftBody leftNondep)
+        (PsKernelExpr.letE
+          rightName rightType rightValue rightBody rightNondep)
+  | lit
+      (left right : PsKernelLiteral)
+      (h : psKernelLiteralEq left right = true) :
+      PsKernelStructuralExprEq
+        (PsKernelExpr.lit left)
+        (PsKernelExpr.lit right)
+  | mdata
+      (leftMetadata rightMetadata : Nat)
+      (left right : PsKernelExpr)
+      (hMetadata : Nat.beq leftMetadata rightMetadata = true)
+      (hBody : PsKernelStructuralExprEq left right) :
+      PsKernelStructuralExprEq
+        (PsKernelExpr.mdata leftMetadata left)
+        (PsKernelExpr.mdata rightMetadata right)
+  | proj
+      (leftName rightName : PsKernelName)
+      (leftIndex rightIndex : Nat)
+      (left right : PsKernelExpr)
+      (hName : psKernelNameEq leftName rightName = true)
+      (hIndex : Nat.beq leftIndex rightIndex = true)
+      (hBody : PsKernelStructuralExprEq left right) :
+      PsKernelStructuralExprEq
+        (PsKernelExpr.proj leftName leftIndex left)
+        (PsKernelExpr.proj rightName rightIndex right)
+
 inductive PsKernelDefEqJudgment
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext) :
@@ -162,6 +260,14 @@ inductive PsKernelDefEqJudgment
         localContext
         right
         left
+  | structural
+      (left right : PsKernelExpr)
+      (h : PsKernelStructuralExprEq left right) :
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
   | reduction
       (left right : PsKernelExpr)
       (h :

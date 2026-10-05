@@ -13,8 +13,8 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 6 |
-| B | 27 |
+| A | 7 |
+| B | 26 |
 | C | 38 |
 | D | 8 |
 | **Total canonical source/proof pairs** | **79** |
@@ -85,7 +85,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Checker/Session.lean` | **C** | Session forwarding/error propagation. |
 | `Checker/State.lean` | **A** | Empty checker state now establishes independent inference-cache and successful-defeq-cache soundness invariants; field-isolation/freshness laws support preservation proofs. |
 | `Core/Declaration.lean` | **B** | Declaration projection/safety/delta facts. |
-| `Core/Expr.lean` | **B** | Expression spine/fvar/list helper laws. |
+| `Core/Expr.lean` | **A** | `psKernelExprEq = true` now refines an independent structural-expression equality relation and therefore the formal non-transitive defeq judgment; spine/fvar/list helper laws remain available. |
 | `Core/Level.lean` | **B** | Offset/list normalization foundations; full universe semantic equivalence proof pending. |
 | `Core/LocalContext.lean` | **B** | Lookup/base/add/value structural laws. |
 | `Core/Name.lean` | **B** | Append/list algebra; equality correctness pending. |

@@ -564,6 +564,13 @@ median/range of single-walk divided by double-walk time across three samples,
 alongside the full checker/admission corpus. Consult the checkpoint's CI report
 for measured results; an insertion microbenchmark is not an end-to-end speed claim.
 
+For a bounded same-runner comparison, a benchmark-triggering commit may include
+`[cache-compare]`. That opt-in CI step restores the previous read-then-set
+publication path only in its temporary checkout, rebuilds the native benchmark
+(four-minute cap), and runs three short samples. It compares successful-operation
+fingerprints, records both source hashes and matched ratios, then restores the
+production source. Routine benchmark commits do not perform this extra build.
+
 No expression metadata, interning, cache-eligibility changes, semantic shortcuts,
 generated compiler/kernel fixed-point run, or large proof-library replay is part
 of this change. Generated-JavaScript performance and M3 remain open.

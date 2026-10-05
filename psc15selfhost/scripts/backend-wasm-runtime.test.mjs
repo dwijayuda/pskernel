@@ -25,6 +25,20 @@ function exportedFunction(name) {
   return value;
 }
 
+assert.equal(exportedFunction("stringLiteralLengthExact")(), 1);
+assert.equal(exportedFunction("stringUtf8ByteSizeExact")(), 1);
+assert.equal(exportedFunction("stringNextUnicodeExact")(), 1);
+assert.equal(exportedFunction("stringNextMisalignedExact")(), 1);
+assert.equal(exportedFunction("stringGetUnicode")(), 128512);
+assert.equal(exportedFunction("stringGetMisaligned")(), 65);
+assert.equal(exportedFunction("stringAtEndExact")(), 1);
+assert.equal(exportedFunction("stringAppendExact")(), 1);
+assert.equal(exportedFunction("stringPushExact")(), 1);
+assert.equal(exportedFunction("stringSingletonExact")(), 1);
+assert.equal(exportedFunction("stringExtractExact")(), 1);
+assert.equal(exportedFunction("stringExtractMisalignedEmpty")(), 1);
+assert.equal(exportedFunction("stringEqMismatch")(), 0);
+
 assert.equal(exportedFunction("arrayMapTopLevelGet")(), 23);
 assert.equal(exportedFunction("arrayMapLambdaGet")(), 22);
 assert.equal(exportedFunction("arrayMapEmptySizeExact")(), 1);

@@ -11,6 +11,7 @@ export const portableSelfhostStructuralRuleIds = Object.freeze([
   'grouped-dot-application',
   'string-literal-pattern',
   'boolean-convenience',
+  'to-string-convenience',
   'leading-dot-term-constructor',
   'untyped-lambda-binder',
   'layout-let-sequencing',
@@ -523,6 +524,9 @@ export function findSelfhostStructuralViolations(
     }
     if (/&&|\|\||(^|[\s(=,:])!\s*[A-Za-z_(]/u.test(termSegment)) {
       add('boolean-convenience', index + 1, line);
+    }
+    if (/\btoString\b/u.test(termSegment)) {
+      add('to-string-convenience', index + 1, line);
     }
     if (/\bfun\s+[A-Za-z_][A-Za-z0-9_]*\s*=>/u.test(line)) {
       add('untyped-lambda-binder', index + 1, line);

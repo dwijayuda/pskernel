@@ -188,13 +188,16 @@ def psIrSpecializeTypeKeyWithFuel :
               (psIrSpecializeTypeKeyWithFuel fuel);
           match psIrSpecializeJoinKeys argumentKeys with
           | none => none
-          | some "" => some (String.Internal.append "N$" name)
-          | some keys => some
-              (String.Internal.append
-                "N$"
-                (String.Internal.append
-                  name
-                  (String.Internal.append "$" keys)))
+          | some keys =>
+              if psStringEq keys "" then
+                some (String.Internal.append "N$" name)
+              else
+                some
+                  (String.Internal.append
+                    "N$"
+                    (String.Internal.append
+                      name
+                      (String.Internal.append "$" keys)))
 
 def psIrSpecializeTypeKey
     (type : PsVerifiedIrType) : Option String :=
@@ -210,11 +213,14 @@ def psIrSpecializedName
     (arguments : List PsVerifiedIrType) : Option String :=
   match psIrSpecializeArgumentsKey arguments with
   | none => none
-  | some "" => some name
-  | some key => some
-        (String.Internal.append
-          name
-          (String.Internal.append "$spec$" key))
+  | some key =>
+      if psStringEq key "" then
+        some name
+      else
+        some
+          (String.Internal.append
+            name
+            (String.Internal.append "$spec$" key))
 
 def psIrSpecializeKindPrefix :
     PsIrSpecializeKind -> String

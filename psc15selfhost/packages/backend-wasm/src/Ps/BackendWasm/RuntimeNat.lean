@@ -619,26 +619,29 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
   ]
 
 def psWasmNatLiteralInstructionsWithFuel
-    (remainingFuel : Nat)
-    (value : Nat) :
-    List PsWasmInstruction :=
+    (remainingFuel : Nat) :
+    Nat -> List PsWasmInstruction :=
   match remainingFuel with
   | 0 =>
-      [PsWasmInstruction.structNew psWasmNatZeroName]
-  | fuel + 1 =>
-      if Nat.beq value 0 then
+      fun (_value : Nat) =>
         [PsWasmInstruction.structNew psWasmNatZeroName]
-      else
-        let half := Nat.div value 2;
-        let low := Nat.mod value 2;
-        let suffix :=
-          if Nat.beq low 0 then
-            [PsWasmInstruction.structNew psWasmNatBit0Name]
-          else
-            [PsWasmInstruction.call psWasmNatBit1Fn];
-        psListAppend
-          (psWasmNatLiteralInstructionsWithFuel fuel half)
-          suffix
+  | fuel + 1 =>
+      let smaller : Nat -> List PsWasmInstruction :=
+        psWasmNatLiteralInstructionsWithFuel fuel;
+      fun (value : Nat) =>
+        if Nat.beq value 0 then
+          [PsWasmInstruction.structNew psWasmNatZeroName]
+        else
+          let half := Nat.div value 2;
+          let low := Nat.mod value 2;
+          let suffix :=
+            if Nat.beq low 0 then
+              [PsWasmInstruction.structNew psWasmNatBit0Name]
+            else
+              [PsWasmInstruction.call psWasmNatBit1Fn];
+          psListAppend
+            (smaller half)
+            suffix
 
 def psWasmNatLiteralInstructions
     (value : Nat) : List PsWasmInstruction :=

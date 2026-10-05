@@ -103,3 +103,56 @@ theorem psKernelInferCoreWithFuel_nat_literal
     hDepth,
     hNat
   ]
+
+
+theorem psKernelInferCoreWithFuel_sort_cache_miss
+    (remaining : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (level : PsKernelLevel)
+    (inferOnly : Bool)
+    (hCache :
+      psKernelExprMapGet
+          (if inferOnly then
+            state.inferOnly
+          else
+            state.checkedInfer)
+          (PsKernelExpr.sort level) =
+        Option.none)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext) :
+    psKernelInferCoreWithFuel
+        (Nat.succ remaining)
+        whnf
+        defeq
+        context
+        state
+        (PsKernelExpr.sort level)
+        inferOnly =
+      Except.ok
+        (Prod.mk
+          (PsKernelExpr.sort (PsKernelLevel.succ level))
+          (psKernelCacheInferResult
+            state
+            inferOnly
+            (PsKernelExpr.sort level)
+            (PsKernelExpr.sort (PsKernelLevel.succ level)))) := by
+  cases inferOnly <;>
+    simp [
+      psKernelInferCoreWithFuel,
+      psKernelInferCacheEligible,
+      hCache,
+      hDepth
+    ]

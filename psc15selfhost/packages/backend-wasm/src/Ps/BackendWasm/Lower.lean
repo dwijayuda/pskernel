@@ -163,13 +163,13 @@ def psWasmFunctionTypeListContains
   match psWasmIrTypeKey candidate with
   | none => false
   | some candidateKey =>
-      let matches :
+      let predicate :
           PsVerifiedIrType -> Bool :=
         fun (existing : PsVerifiedIrType) =>
           match psWasmIrTypeKey existing with
           | none => false
           | some existingKey => existingKey == candidateKey;
-      psListAny matches types
+      psListAny predicate types
 
 def psWasmInsertFunctionType
     (types : List PsVerifiedIrType)
@@ -534,13 +534,13 @@ def psWasmArrayTypeListContains
   match psWasmIrTypeKey candidate with
   | none => false
   | some candidateKey =>
-      let matches :
+      let predicate :
           PsVerifiedIrType -> Bool :=
         fun (existing : PsVerifiedIrType) =>
           match psWasmIrTypeKey existing with
           | none => false
           | some existingKey => existingKey == candidateKey;
-      psListAny matches types
+      psListAny predicate types
 
 def psWasmInsertArrayType
     (types : List PsVerifiedIrType)
@@ -1001,6 +1001,39 @@ def psWasmCollectModuleArrayTypes
     module.declarations
     fromInductives
 
+
+def psWasmLowerArrayType
+    (profile : PsWasmTargetProfile)
+    (type : PsVerifiedIrType) :
+    Except PsWasmLowerError PsWasmArrayType :=
+  match type with
+  | .named "Array" arguments =>
+      match arguments with
+      | List.nil =>
+          Except.error PsWasmLowerError.unsupportedType
+      | List.cons elementType rest =>
+          match rest with
+          | List.cons _ _ =>
+              Except.error PsWasmLowerError.unsupportedType
+          | List.nil =>
+              match psWasmArrayTypeName elementType with
+              | none =>
+                  Except.error PsWasmLowerError.unsupportedType
+              | some name =>
+                  match
+                      psWasmStorageTypeOfIrType?
+                        profile
+                        elementType with
+                  | none =>
+                      Except.error PsWasmLowerError.unsupportedType
+                  | some storageType =>
+                      Except.ok {
+                        name := name
+                        elementType := storageType
+                        mutable := true
+                      }
+  | _ =>
+      Except.error PsWasmLowerError.unsupportedType
 
 def psWasmLowerArrayTypes
     (profile : PsWasmTargetProfile) :

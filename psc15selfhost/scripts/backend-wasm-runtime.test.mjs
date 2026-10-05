@@ -28,7 +28,7 @@ function exportedFunction(name) {
 assert.equal(exportedFunction("arrayMapTopLevelGet")(), 23);
 assert.equal(exportedFunction("arrayMapLambdaGet")(), 22);
 assert.equal(exportedFunction("arrayMapEmptySizeExact")(), 1);
-assert.equal(exportedFunction("arrayFoldRange")(), 51);
+assert.equal(exportedFunction("arrayFoldRange")(), 53);
 assert.equal(exportedFunction("arrayFoldStopBeyond")(), 42);
 assert.equal(exportedFunction("arrayFoldStartBeyond")(), 7);
 

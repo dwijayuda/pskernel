@@ -40,7 +40,7 @@ jobs:
           lean --version
           test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
 
-      - name: Check PSKernel Core proof slice
+      - name: Check PSKernel Core proof tree
         working-directory: psc15selfhost
         shell: bash
         run: |

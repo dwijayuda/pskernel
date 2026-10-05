@@ -25,6 +25,11 @@ function exportedFunction(name) {
   return value;
 }
 
+assert.equal(exportedFunction("intReprZeroExact")(), 1);
+assert.equal(exportedFunction("intReprPositiveExact")(), 1);
+assert.equal(exportedFunction("intReprNegativeExact")(), 1);
+assert.equal(exportedFunction("intReprLargeExact")(), 1);
+
 assert.equal(exportedFunction("stringLiteralLengthExact")(), 1);
 assert.equal(exportedFunction("stringUtf8ByteSizeExact")(), 1);
 assert.equal(exportedFunction("stringNextUnicodeExact")(), 1);

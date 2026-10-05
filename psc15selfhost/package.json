@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "psc": "node packages/cli/bin/psc.mjs",
+    "test:pskernel-core-proofs": "lake build PsKernelCore && lake env lean packages/pskernel-core/proof/Ps/KernelCore/API/Provider.proof.lean && lake env lean packages/pskernel-core/proof/Ps/KernelCore/API/Session.proof.lean && lake env lean packages/pskernel-core/proof/Ps/KernelCore/API/Kernel.proof.lean && lake env lean packages/pskernel-core/proof/Ps/KernelCore/Core/Substitution/ListOps.proof.lean",
     "clean": "node scripts/clean.mjs",
     "check:workspace": "node scripts/bootstrap-closure-contract-tests.mjs && node scripts/check-workspace.mjs",
     "check:source:bootstrap": "node check-psc1-source.mjs",

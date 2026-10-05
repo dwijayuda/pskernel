@@ -92,6 +92,15 @@ test('known fragile term shorthand is rejected structurally', () => {
     !ids('def count := String.Internal.length text').includes('value-length-dot-notation'),
   );
   assert(
+    ids('def code := char.toNat').includes('value-conversion-dot-notation'),
+  );
+  assert(
+    ids('def chars := text.toList').includes('value-conversion-dot-notation'),
+  );
+  assert(
+    !ids('def code := Char.toNat char').includes('value-conversion-dot-notation'),
+  );
+  assert(
     ids('def value := .some x').includes('leading-dot-term-constructor'),
   );
   assert(ids('def mapper := fun x => x').includes('untyped-lambda-binder'));

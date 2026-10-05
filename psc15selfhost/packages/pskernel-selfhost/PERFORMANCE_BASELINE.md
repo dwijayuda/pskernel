@@ -16,6 +16,24 @@ Executable:
 lake exe psc1_kernel_selfhost_bench
 ```
 
+For Phase C promotion, use the bounded reporter after building the executable:
+
+```text
+node scripts/psc1kernel-benchmark-report.mjs .lake/build/bin/psc1_kernel_selfhost_bench 3 /tmp/pskernel-selfhost-bench
+```
+
+On Windows, append `.exe` to the executable path. The reporter takes 1–5
+samples (CI uses 3), caps each process at 30 seconds, and fails on missing
+results or unsuccessful benchmark operations. It saves raw logs, JSON with
+median/range timings and matched PSKernel/Lean ratios, and a Markdown summary.
+No compiler/kernel fixed-point generation is invoked. The historical log fixture
+used to test this reporter is from green commit `33b59ded58aa5ab745ab6b7f729cf487dc608e20`.
+
+Untimed `PSKERNEL_PROFILE` rows inspect the fully checked nested recursor-rule
+cache after validation. They distinguish free-variable, sort and constant entries
+without instrumenting the semantic checker. Performance timings remain advisory;
+successful operation counts and existing conformance checks remain hard gates.
+
 Source:
 
 ```text
@@ -559,6 +577,11 @@ Only optimize expression metadata/hash/sharing if those measurements show
 repeated tree traversal/hash computation is a dominant cost.
 
 ## 5. Future cross-runtime benchmark
+
+The current cost-bounded Phase C pass uses the native corpus and normal portable
+source/canonical `.ps` checks. Full generated compiler/kernel reproduction and
+large proof-library replay are excluded. Fresh generated-JavaScript throughput
+and M3/provider readiness are not established by native results alone.
 
 After native checker microbenchmarks are stable, run the same semantic corpus
 through:

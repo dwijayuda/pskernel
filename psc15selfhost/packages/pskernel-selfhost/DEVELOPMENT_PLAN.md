@@ -18,6 +18,9 @@
   - completion concerns production architecture; Phase D and provider promotion
     remain separately gated. See `ARCHITECTURE_MIGRATION_REPORT.md`.
 - **Phase C — Competitive performance: ACTIVE ONLY WHEN MEASURED.**
+  - current pass is cost-bounded: three short native benchmark samples, ordinary
+    conformance/portable gates, and measured cache-pressure diagnostics; no full
+    compiler/kernel fixed-point generation or large proof-library replay.
   - current indexing/cache and checker-path work may continue when profiling identifies a
     concrete hotspot and all Phase A/B gates remain green.
   - performance work must not be mixed into structural move commits.

@@ -8,6 +8,8 @@ on:
       - psc15selfhost/packages/pskernel-selfhost/**
       - psc15selfhost/test/PsKernelSelfHostBench.lean
       - psc15selfhost/test/KernelSelfHost/Bench/**
+      - psc15selfhost/scripts/psc1kernel-benchmark-report*
+      - psc15selfhost/scripts/fixtures/pskernel-native-benchmark.log
       - psc15selfhost/lakefile.lean
       - .github/workflows/psc1kernel-selfhost-benchmark.yml
   workflow_dispatch:
@@ -27,6 +29,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Test bounded benchmark reporter
+        run: node --test scripts/psc1kernel-benchmark-report.test.mjs
+
       - name: Install pinned Lean
         run: |
           set -euo pipefail
@@ -42,23 +47,18 @@ jobs:
           set -euo pipefail
           lake build psc1_kernel_selfhost_bench
 
-      - name: Run benchmark
+      - name: Run three bounded benchmark samples
+        timeout-minutes: 2
         run: |
           set -euo pipefail
-          lake exe psc1_kernel_selfhost_bench | tee /tmp/pskernel-selfhost-bench.log
-          {
-            echo '## PSKernel native benchmark'
-            echo
-            echo 'Pinned Lean: 4.34.0 (293d5d0c0c3f3dded4688b3ccd6a33939ac5102b)'
-            echo
-            echo '~~~text'
-            cat /tmp/pskernel-selfhost-bench.log
-            echo '~~~'
-          } >> "$GITHUB_STEP_SUMMARY"
+          node scripts/psc1kernel-benchmark-report.mjs \
+            .lake/build/bin/psc1_kernel_selfhost_bench 3 /tmp/pskernel-selfhost-bench
+          cat /tmp/pskernel-selfhost-bench.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload benchmark log
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pskernel-selfhost-benchmark
-          path: /tmp/pskernel-selfhost-bench.log
-          if-no-files-found: error
+          path: /tmp/pskernel-selfhost-bench.*
+          if-no-files-found: warn

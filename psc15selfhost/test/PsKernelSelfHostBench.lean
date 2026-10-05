@@ -1504,3 +1504,5 @@ def main : IO Unit := do
       "/" ++
       toString structuralLeanHits)
 
+  psKernelBenchProfileRecursorCache "nested_main_rules" nestedFinal psKernelBenchNestedTreeRecName
+  psKernelBenchProfileRecursorCache "nested_wide_main_rules" nestedWideFinal psKernelBenchNestedWideRecName

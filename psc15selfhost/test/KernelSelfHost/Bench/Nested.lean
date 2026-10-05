@@ -1,5 +1,30 @@
 import KernelSelfHost.Bench.Inductive
 
+-- Untimed cache-pressure diagnostics for the fully checked generated rules.
+-- Observe the returned state without instrumenting or changing the checker.
+def psKernelBenchMapEntries (cache : PsKernelExprMap) : List (Prod PsKernelExpr PsKernelExpr) :=
+  let rec entries : PsKernelExprMapIndex → List (Prod PsKernelExpr PsKernelExpr)
+    | .empty => []
+    | .bucket values => values
+    | .branch left right => entries left ++ entries right
+  match cache.index with
+  | .none => cache.small
+  | .some index => entries index
+
+def psKernelBenchProfileRecursorCache
+    (label : String) (environment : PsKernelEnvironment) (name : PsKernelName) : IO Unit := do
+  let some (.recInfo info) := psKernelEnvironmentFind environment name
+    | throw (IO.userError ("profile recursor missing: " ++ label))
+  let session := psKernelMkCheckerSession environment info.base.levelParams
+    PsKernelDefinitionSafety.safe 0 psKernelLeanNatMaxSizeDefault
+  let .ok checked := psKernelSimpleNestedValidateRulesWorker info.rules 65536 session
+    | throw (IO.userError ("profile rule validation failed: " ++ label))
+  let entries := psKernelBenchMapEntries checked.state.checkedInfer
+  let fvars := entries.countP (fun entry => match entry.fst with | .fvar _ => true | _ => false)
+  let sorts := entries.countP (fun entry => match entry.fst with | .sort _ => true | _ => false)
+  let constants := entries.countP (fun entry => match entry.fst with | .const _ _ => true | _ => false)
+  IO.println s!"PSKERNEL_PROFILE {label} entries={entries.length} fvars={fvars} sorts={sorts} constants={constants}"
+
 def psKernelBenchNestedProcess
     (environment : PsKernelEnvironment) :
     Except String PsKernelSimpleNestedProcessQueueResult :=
@@ -1545,4 +1570,3 @@ partial def psKernelBenchNestedInferAuxNewRulesLoop
           pure (Nat.succ tail)
       | Except.error _ =>
           pure tail
-

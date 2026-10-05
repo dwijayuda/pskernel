@@ -8,6 +8,7 @@ on:
       - .github/workflows/lean434-all-types-audit.yml
       - psc15selfhost/scripts/lean434-type-inventory.lean
       - psc15selfhost/scripts/check-lean434-type-coverage.mjs
+      - psc15selfhost/scripts/check-compiler-builtin-prelude-closure.mjs
       - psc15selfhost/LEAN434_TYPE_COVERAGE_POLICY.json
       - psc15selfhost/docs/architecture/LEAN434_TYPE_SURFACE.md
       - psc15selfhost/packages/**/src/**
@@ -175,6 +176,7 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/check-lean434-type-coverage.mjs
+          node scripts/check-compiler-builtin-prelude-closure.mjs
           cat .lake/lean434-type-audit/lean434-type-coverage-summary.json
 
       - uses: actions/upload-artifact@v4

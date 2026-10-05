@@ -55,7 +55,8 @@ theorem psKernelExprListTake_append_drop
       | nil =>
           simp [psKernelExprListTake, psKernelExprListDrop]
       | cons head tail =>
-          simp [psKernelExprListTake, psKernelExprListDrop, ih]
+          simp [psKernelExprListTake, psKernelExprListDrop]
+          exact ih tail
 
 theorem psKernelExprListReverseWorker_append
     (values acc : List PsKernelExpr) :

@@ -31,3 +31,48 @@ theorem psKernelExprAbstractFVars_empty
     (expr : PsKernelExpr) :
     psKernelExprAbstractFVars expr List.nil = expr := by
   rfl
+
+theorem psKernelExprAbstractFVars_anonymous_singleton :
+    psKernelExprAbstractFVars
+        (PsKernelExpr.fvar PsKernelName.anonymous)
+        (List.cons PsKernelName.anonymous List.nil) =
+      PsKernelExpr.bvar 0 := by
+  rfl
+
+theorem psKernelExprAbstractFVars_under_one_lambda_anonymous
+    (name : PsKernelName)
+    (level : PsKernelLevel)
+    (binderInfo : PsKernelBinderInfo) :
+    psKernelExprAbstractFVars
+        (PsKernelExpr.lam
+          name
+          (PsKernelExpr.sort level)
+          (PsKernelExpr.fvar PsKernelName.anonymous)
+          binderInfo)
+        (List.cons PsKernelName.anonymous List.nil) =
+      PsKernelExpr.lam
+        name
+        (PsKernelExpr.sort level)
+        (PsKernelExpr.bvar 1)
+        binderInfo := by
+  rfl
+
+theorem psKernelExprAbstractInstantiate_roundtrip_under_one_lambda_anonymous
+    (name : PsKernelName)
+    (level : PsKernelLevel)
+    (binderInfo : PsKernelBinderInfo) :
+    psKernelExprInstantiate1
+        (psKernelExprAbstractFVars
+          (PsKernelExpr.lam
+            name
+            (PsKernelExpr.sort level)
+            (PsKernelExpr.fvar PsKernelName.anonymous)
+            binderInfo)
+          (List.cons PsKernelName.anonymous List.nil))
+        (PsKernelExpr.fvar PsKernelName.anonymous) =
+      PsKernelExpr.lam
+        name
+        (PsKernelExpr.sort level)
+        (PsKernelExpr.fvar PsKernelName.anonymous)
+        binderInfo := by
+  rfl

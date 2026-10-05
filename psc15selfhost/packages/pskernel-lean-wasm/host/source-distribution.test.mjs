@@ -104,20 +104,22 @@ const proofscriptManifest=JSON.parse(
 assert.equal(proofscriptManifest.schemaVersion,1);
 assert.equal(proofscriptManifest.packageName,'@proofscript/pskernel-lean-wasm');
 assert.equal(proofscriptManifest.snapshotRoot,'source/proofscript');
-assert.equal(proofscriptManifest.sourceTreeSha,'22f39d23220cc53b499640b5777e944a9aad5a97');
+assert.match(proofscriptManifest.sourceRevision,/^[0-9a-f]{40}$/u);
+assert.match(proofscriptManifest.sourceTreeSha,/^[0-9a-f]{40}$/u);
 assert.equal(
   await gitTreeSha(path.join(packageRoot,'source','proofscript')),
   proofscriptManifest.sourceTreeSha,
   'WASM ProofScript source snapshot must match its recorded Git tree',
 );
-assert.equal(
-  await gitTreeSha(path.join(packageRoot,'source','proofscript','provider')),
-  proofscriptManifest.components.provider,
-);
-assert.equal(
-  await gitTreeSha(path.join(packageRoot,'source','proofscript','wasm-provider')),
-  proofscriptManifest.components['wasm-provider'],
-);
+for(const component of [
+  'foundation','core','environment','bridge','provider','wasm-provider',
+]){
+  assert.equal(
+    await gitTreeSha(path.join(packageRoot,'source','proofscript',component)),
+    proofscriptManifest.components[component],
+    `ProofScript source component manifest drift: ${component}`,
+  );
+}
 await readFile(path.join(packageRoot,'provider','PsKernelLeanWasm','Api.lean'),'utf8');
 await readFile(path.join(packageRoot,'source','proofscript','foundation','Ps','Foundation','Name.lean'),'utf8');
 await readFile(path.join(packageRoot,'source','proofscript','provider','PsKernelLean','Admission.lean'),'utf8');

@@ -184,13 +184,14 @@ def psWasmInsertFunctionType
         psListAppend types (List.cons candidate List.nil)
   | _ => types
 
-def psWasmCollectFunctionTypesFromTypeWithFuel :
-    Nat ->
-    PsVerifiedIrType ->
-    List PsVerifiedIrType ->
-    List PsVerifiedIrType
-  | 0, _, types => types
-  | fuel + 1, type, types =>
+def psWasmCollectFunctionTypesFromTypeWithFuel
+    (remainingFuel : Nat)
+    (type : PsVerifiedIrType)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  match remainingFuel with
+  | 0 => types
+  | fuel + 1 =>
       match type with
       | .function parameters result =>
           let withSelf :=
@@ -267,13 +268,14 @@ def psWasmParameterTypes
       parameter.type;
   psListMap parameterType parameters
 
-def psWasmCollectFunctionTypesFromExprWithFuel :
-    Nat ->
-    PsVerifiedIrExpr ->
-    List PsVerifiedIrType ->
-    List PsVerifiedIrType
-  | 0, _, types => types
-  | fuel + 1, expr, types =>
+def psWasmCollectFunctionTypesFromExprWithFuel
+    (remainingFuel : Nat)
+    (expr : PsVerifiedIrExpr)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  match remainingFuel with
+  | 0 => types
+  | fuel + 1 =>
       let collect :
           PsVerifiedIrExpr ->
           List PsVerifiedIrType ->
@@ -566,13 +568,14 @@ def psWasmInsertArrayType
         types
   | _ => types
 
-def psWasmCollectArrayTypesFromTypeWithFuel :
-    Nat ->
-    PsVerifiedIrType ->
-    List PsVerifiedIrType ->
-    List PsVerifiedIrType
-  | 0, _, types => types
-  | fuel + 1, type, types =>
+def psWasmCollectArrayTypesFromTypeWithFuel
+    (remainingFuel : Nat)
+    (type : PsVerifiedIrType)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  match remainingFuel with
+  | 0 => types
+  | fuel + 1 =>
       match type with
       | .function parameters result =>
           let collectParameter :
@@ -741,13 +744,14 @@ def psWasmAddArrayTypesForIntrinsic
       psWasmAddSingleArrayTypeArgument typeArguments types
   | _ => types
 
-def psWasmCollectArrayTypesFromExprWithFuel :
-    Nat ->
-    PsVerifiedIrExpr ->
-    List PsVerifiedIrType ->
-    List PsVerifiedIrType
-  | 0, _, types => types
-  | fuel + 1, expr, types =>
+def psWasmCollectArrayTypesFromExprWithFuel
+    (remainingFuel : Nat)
+    (expr : PsVerifiedIrExpr)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  match remainingFuel with
+  | 0 => types
+  | fuel + 1 =>
       let collect :
           PsVerifiedIrExpr ->
           List PsVerifiedIrType ->

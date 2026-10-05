@@ -6,6 +6,7 @@ import Ps.Foundation.Name
 inductive PsJsEmitError where
   | lower (error : PsJsLowerError)
   | fuelExhausted
+  | malformedIr
 
 def psJsJoin
     (separator : String)
@@ -64,6 +65,139 @@ def psJsPrintLiteral
   | PsJsIrLiteral.unit =>
       "(void 0)"
 
+def psJsPrintUnary
+    (operation : PsJsIrUnaryOp)
+    (value : String) : String :=
+  match operation with
+  | PsJsIrUnaryOp.bigintNeg =>
+      psJsJoin "" ["(-(", value, "))"]
+  | PsJsIrUnaryOp.boolNot =>
+      psJsJoin "" ["(!", value, ")"]
+
+def psJsPrintBinary
+    (operation : PsJsIrBinaryOp)
+    (left right : String) : String :=
+  match operation with
+  | PsJsIrBinaryOp.bigintAdd =>
+      psJsJoin "" ["(", left, " + ", right, ")"]
+  | PsJsIrBinaryOp.bigintSub =>
+      psJsJoin "" ["(", left, " - ", right, ")"]
+  | PsJsIrBinaryOp.bigintMul =>
+      psJsJoin "" ["(", left, " * ", right, ")"]
+  | PsJsIrBinaryOp.bigintEq =>
+      psJsJoin "" ["(", left, " === ", right, ")"]
+  | PsJsIrBinaryOp.bigintNe =>
+      psJsJoin "" ["(", left, " !== ", right, ")"]
+  | PsJsIrBinaryOp.bigintLe =>
+      psJsJoin "" ["(", left, " <= ", right, ")"]
+  | PsJsIrBinaryOp.bigintLt =>
+      psJsJoin "" ["(", left, " < ", right, ")"]
+  | PsJsIrBinaryOp.boolAnd =>
+      psJsJoin "" ["(", left, " && ", right, ")"]
+  | PsJsIrBinaryOp.boolOr =>
+      psJsJoin "" ["(", left, " || ", right, ")"]
+  | PsJsIrBinaryOp.boolEq =>
+      psJsJoin "" ["(", left, " === ", right, ")"]
+  | PsJsIrBinaryOp.boolNe =>
+      psJsJoin "" ["(", left, " !== ", right, ")"]
+  | PsJsIrBinaryOp.stringConcat =>
+      psJsJoin "" ["(", left, " + ", right, ")"]
+  | PsJsIrBinaryOp.stringEq =>
+      psJsJoin "" ["(", left, " === ", right, ")"]
+
+def psJsRuntimeUnary
+    (operation : PsJsIrRuntimeOp)
+    (value : String) :
+    Except PsJsEmitError String :=
+  match operation with
+  | PsJsIrRuntimeOp.intNegSucc =>
+      Except.ok
+        (psJsJoin "" ["(-(", value, " + 1n))"])
+  | PsJsIrRuntimeOp.intRepr =>
+      Except.ok
+        (psJsJoin "" ["(", value, ").toString()"])
+  | PsJsIrRuntimeOp.charOfNat =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_n) => ((__ps_n < 0xd800n || (__ps_n > 0xdfffn && __ps_n < 0x110000n)) ",
+            "? String.fromCodePoint(Number(__ps_n)) : \"\\0\"))(",
+            value,
+            ")"
+          ])
+  | PsJsIrRuntimeOp.charToNat =>
+      Except.ok
+        (psJsJoin
+          ""
+          ["((__ps_c) => BigInt(__ps_c.codePointAt(0) ?? 0))(", value, ")"])
+  | PsJsIrRuntimeOp.stringLength =>
+      Except.ok
+        (psJsJoin
+          ""
+          ["((__ps_s) => BigInt(Array.from(__ps_s).length))(", value, ")"])
+  | _ =>
+      Except.error PsJsEmitError.malformedIr
+
+def psJsRuntimeBinary
+    (operation : PsJsIrRuntimeOp)
+    (left right : String) :
+    Except PsJsEmitError String :=
+  match operation with
+  | PsJsIrRuntimeOp.natSub =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(",
+            left,
+            ", ",
+            right,
+            ")"
+          ])
+  | PsJsIrRuntimeOp.natDiv =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_a, __ps_b) => (__ps_b === 0n ? 0n : __ps_a / __ps_b))(",
+            left,
+            ", ",
+            right,
+            ")"
+          ])
+  | PsJsIrRuntimeOp.natMod =>
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(",
+            left,
+            ", ",
+            right,
+            ")"
+          ])
+  | _ =>
+      Except.error PsJsEmitError.malformedIr
+
+def psJsPrintRuntime
+    (operation : PsJsIrRuntimeOp)
+    (arguments : List String) :
+    Except PsJsEmitError String :=
+  match arguments with
+  | List.nil =>
+      Except.error PsJsEmitError.malformedIr
+  | List.cons first rest =>
+      match rest with
+      | List.nil =>
+          psJsRuntimeUnary operation first
+      | List.cons second tail =>
+          match tail with
+          | List.nil =>
+              psJsRuntimeBinary operation first second
+          | List.cons _ _ =>
+              Except.error PsJsEmitError.malformedIr
+
 def psJsPrintExprWithFuel
     (fuel : Nat) :
     PsJsIrExpr -> Except PsJsEmitError String :=
@@ -81,10 +215,12 @@ def psJsPrintExprWithFuel
             Except.ok (psJsPrintLiteral literal)
         | PsJsIrExpr.var name =>
             Except.ok name
-        | PsJsIrExpr.binary
-            PsJsIrBinaryOp.bigintAdd
-            left
-            right =>
+        | PsJsIrExpr.unary operation value =>
+            match smaller value with
+            | Except.error error => Except.error error
+            | Except.ok printed =>
+                Except.ok (psJsPrintUnary operation printed)
+        | PsJsIrExpr.binary operation left right =>
             match smaller left with
             | Except.error error => Except.error error
             | Except.ok printedLeft =>
@@ -92,12 +228,29 @@ def psJsPrintExprWithFuel
                 | Except.error error => Except.error error
                 | Except.ok printedRight =>
                     Except.ok
-                      (psJsConcat5
-                        "("
+                      (psJsPrintBinary
+                        operation
                         printedLeft
-                        " + "
-                        printedRight
-                        ")")
+                        printedRight)
+        | PsJsIrExpr.runtime operation arguments =>
+            match psListMapExcept smaller arguments with
+            | Except.error error => Except.error error
+            | Except.ok printedArguments =>
+                psJsPrintRuntime operation printedArguments
+        | PsJsIrExpr.lambda parameters body =>
+            match smaller body with
+            | Except.error error => Except.error error
+            | Except.ok printedBody =>
+                Except.ok
+                  (psJsJoin
+                    ""
+                    [
+                      "((",
+                      psJsJoin ", " parameters,
+                      ") => ",
+                      printedBody,
+                      ")"
+                    ])
         | PsJsIrExpr.call fn arguments =>
             match smaller fn with
             | Except.error error => Except.error error
@@ -111,6 +264,25 @@ def psJsPrintExprWithFuel
                         "("
                         (psJsJoin ", " printedArguments)
                         ")")
+        | PsJsIrExpr.letE name value body =>
+            match smaller value with
+            | Except.error error => Except.error error
+            | Except.ok printedValue =>
+                match smaller body with
+                | Except.error error => Except.error error
+                | Except.ok printedBody =>
+                    Except.ok
+                      (psJsJoin
+                        ""
+                        [
+                          "(() => { const ",
+                          name,
+                          " = ",
+                          printedValue,
+                          "; return ",
+                          printedBody,
+                          "; })()"
+                        ])
         | PsJsIrExpr.ifE
             condition
             thenBranch

@@ -13,6 +13,7 @@ export const portableSelfhostStructuralRuleIds = Object.freeze([
   'boolean-convenience',
   'to-string-convenience',
   'value-length-dot-notation',
+  'value-conversion-dot-notation',
   'leading-dot-term-constructor',
   'untyped-lambda-binder',
   'untyped-lambda-let',
@@ -533,6 +534,9 @@ export function findSelfhostStructuralViolations(
     }
     if (/(?:\b[a-z_][A-Za-z0-9_]*|\))\.length\b/u.test(termSegment)) {
       add('value-length-dot-notation', index + 1, line);
+    }
+    if (/\b[a-z_][A-Za-z0-9_]*\.(?:toNat|toList)\b/u.test(termSegment)) {
+      add('value-conversion-dot-notation', index + 1, line);
     }
     if (/\bfun\s+[A-Za-z_][A-Za-z0-9_]*\s*=>/u.test(line)) {
       add('untyped-lambda-binder', index + 1, line);

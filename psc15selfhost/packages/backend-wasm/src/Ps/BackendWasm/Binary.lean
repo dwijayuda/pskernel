@@ -48,9 +48,7 @@ def psWasmEncodeSlebWithFuel :
       let signSet := 64 <= low
       let donePositive :=
         if psWasmIntIsZero rest then
-          match signSet with
-          | true => false
-          | false => true
+          if signSet then false else true
         else
           false
       let doneNegative :=

@@ -23,6 +23,11 @@ def psWasmIntIsNegativeOne (value : Int) : Bool :=
   | Int.ofNat _ => false
   | Int.negSucc magnitude => Nat.beq magnitude 0
 
+def psWasmIntToNat (value : Int) : Nat :=
+  match value with
+  | Int.ofNat magnitude => magnitude
+  | Int.negSucc _ => 0
+
 def psWasmEncodeUlebWithFuel
     (remainingFuel : Nat) : Nat -> List UInt8 :=
   match remainingFuel with
@@ -54,7 +59,7 @@ def psWasmEncodeSlebWithFuel
         psWasmEncodeSlebWithFuel fuel;
       fun (value : Int) =>
         let lowInt := value % 128;
-        let low := lowInt.toNat;
+        let low := psWasmIntToNat lowInt;
         let rest := value / 128;
         let signSet := 64 <= low;
         let donePositive :=
@@ -96,8 +101,48 @@ def psWasmEncodeI32Constant (value : Int) : List UInt8 :=
 def psWasmEncodeI64Constant (value : Int) : List UInt8 :=
   psWasmEncodeSleb (psWasmNormalizeI64Immediate value)
 
+def psWasmStringToListFromWithFuel
+    (remainingFuel : Nat) : String -> Nat -> List Char :=
+  match remainingFuel with
+  | Nat.zero =>
+      fun (_source : String) =>
+        fun (_position : Nat) =>
+          List.nil
+  | Nat.succ fuel =>
+      let smaller : String -> Nat -> List Char :=
+        psWasmStringToListFromWithFuel fuel;
+      fun (source : String) =>
+        fun (position : Nat) =>
+          if
+              String.Internal.atEnd
+                source
+                (String.Pos.Raw.mk position) then
+            List.nil
+          else
+            let char : Char :=
+              String.Internal.get
+                source
+                (String.Pos.Raw.mk position);
+            let nextPosition : Nat :=
+              String.Pos.Raw.byteIdx
+                (String.Internal.next
+                  source
+                  (String.Pos.Raw.mk position));
+            List.cons char (smaller source nextPosition)
+
+def psWasmStringToListFrom
+    (source : String)
+    (position : Nat) : List Char :=
+  psWasmStringToListFromWithFuel
+    (Nat.succ (String.utf8ByteSize source))
+    source
+    position
+
+def psWasmStringToList (source : String) : List Char :=
+  psWasmStringToListFrom source 0
+
 def psWasmEncodeUtf8Char (char : Char) : List UInt8 :=
-  let value := char.toNat;
+  let value := Char.toNat char;
   if value <= 127 then
     [psWasmByte value]
   else if value <= 2047 then
@@ -130,7 +175,7 @@ def psWasmEncodeUtf8Chars
         (psWasmEncodeUtf8Chars rest)
 
 def psWasmEncodeName (name : String) : List UInt8 :=
-  let bytes := psWasmEncodeUtf8Chars name.toList;
+  let bytes := psWasmEncodeUtf8Chars (psWasmStringToList name);
   psListAppend
     (psWasmEncodeUleb (psListLength bytes))
     bytes

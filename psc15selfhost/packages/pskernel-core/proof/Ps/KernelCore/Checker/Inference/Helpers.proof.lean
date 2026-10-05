@@ -66,9 +66,9 @@ theorem psKernelCacheInferResult_preserves_nextFresh
     (psKernelCacheInferResult
       state inferOnly expr result).nextFresh =
       state.nextFresh := by
-  cases inferOnly <;>
-    cases hEligible :
-        psKernelInferCacheEligible inferOnly expr <;>
+  cases hEligible :
+      psKernelInferCacheEligible inferOnly expr <;>
+    cases inferOnly <;>
     simp [
       psKernelCacheInferResult,
       hEligible,
@@ -111,9 +111,9 @@ theorem psKernelCacheInferResult_preserves_whnf
     (psKernelCacheInferResult
       state inferOnly expr result).whnf =
       state.whnf := by
-  cases inferOnly <;>
-    cases hEligible :
-        psKernelInferCacheEligible inferOnly expr <;>
+  cases hEligible :
+      psKernelInferCacheEligible inferOnly expr <;>
+    cases inferOnly <;>
     simp [
       psKernelCacheInferResult,
       hEligible,
@@ -131,9 +131,9 @@ theorem psKernelCacheInferResult_preserves_defeq_caches
     (psKernelCacheInferResult
       state inferOnly expr result).failure =
         state.failure := by
-  cases inferOnly <;>
-    cases hEligible :
-        psKernelInferCacheEligible inferOnly expr <;>
+  cases hEligible :
+      psKernelInferCacheEligible inferOnly expr <;>
+    cases inferOnly <;>
     simp [
       psKernelCacheInferResult,
       hEligible,

@@ -24,48 +24,54 @@ def psWasmIntIsNegativeOne (value : Int) : Bool :=
   | Int.negSucc magnitude => Nat.beq magnitude 0
 
 def psWasmEncodeUlebWithFuel
-    (remainingFuel : Nat)
-    (value : Nat) : List UInt8 :=
+    (remainingFuel : Nat) : Nat -> List UInt8 :=
   match remainingFuel with
-  | 0 => List.nil
+  | 0 =>
+      fun (_value : Nat) => List.nil
   | fuel + 1 =>
-      let low := value % 128;
-      let rest := value / 128;
-      if Nat.beq rest 0 then
-        [psWasmByte low]
-      else
-        List.cons
-          (psWasmByte (low + 128))
-          (psWasmEncodeUlebWithFuel fuel rest)
+      let smaller : Nat -> List UInt8 :=
+        psWasmEncodeUlebWithFuel fuel;
+      fun (value : Nat) =>
+        let low := value % 128;
+        let rest := value / 128;
+        if Nat.beq rest 0 then
+          [psWasmByte low]
+        else
+          List.cons
+            (psWasmByte (low + 128))
+            (smaller rest)
 
 def psWasmEncodeUleb (value : Nat) : List UInt8 :=
   psWasmEncodeUlebWithFuel 16 value
 
 def psWasmEncodeSlebWithFuel
-    (remainingFuel : Nat)
-    (value : Int) : List UInt8 :=
+    (remainingFuel : Nat) : Int -> List UInt8 :=
   match remainingFuel with
-  | 0 => List.nil
+  | 0 =>
+      fun (_value : Int) => List.nil
   | fuel + 1 =>
-      let lowInt := value % 128;
-      let low := lowInt.toNat;
-      let rest := value / 128;
-      let signSet := 64 <= low;
-      let donePositive :=
-        if psWasmIntIsZero rest then
-          if signSet then false else true
+      let smaller : Int -> List UInt8 :=
+        psWasmEncodeSlebWithFuel fuel;
+      fun (value : Int) =>
+        let lowInt := value % 128;
+        let low := lowInt.toNat;
+        let rest := value / 128;
+        let signSet := 64 <= low;
+        let donePositive :=
+          if psWasmIntIsZero rest then
+            if signSet then false else true
+          else
+            false;
+        let doneNegative :=
+          if psWasmIntIsNegativeOne rest then signSet else false;
+        if donePositive then
+          [psWasmByte low]
+        else if doneNegative then
+          [psWasmByte low]
         else
-          false;
-      let doneNegative :=
-        if psWasmIntIsNegativeOne rest then signSet else false;
-      if donePositive then
-        [psWasmByte low]
-      else if doneNegative then
-        [psWasmByte low]
-      else
-        List.cons
-          (psWasmByte (low + 128))
-          (psWasmEncodeSlebWithFuel fuel rest)
+          List.cons
+            (psWasmByte (low + 128))
+            (smaller rest)
 
 def psWasmEncodeSleb (value : Int) : List UInt8 :=
   psWasmEncodeSlebWithFuel 16 value
@@ -129,34 +135,54 @@ def psWasmEncodeName (name : String) : List UInt8 :=
     (psWasmEncodeUleb bytes.length)
     bytes
 
+def psWasmFindStructureIndexWorker
+    (name : String)
+    (structures : List PsWasmStructType) :
+    Nat -> Option Nat :=
+  match structures with
+  | List.nil =>
+      fun (_index : Nat) => Option.none
+  | List.cons structType rest =>
+      let smaller : Nat -> Option Nat :=
+        psWasmFindStructureIndexWorker name rest;
+      fun (index : Nat) =>
+        if psStringEq structType.name name then
+          Option.some index
+        else
+          smaller (index + 1)
+
 def psWasmFindStructureIndexLoop
     (name : String)
     (index : Nat)
     (structures : List PsWasmStructType) : Option Nat :=
-  match structures with
-  | List.nil => none
-  | List.cons structType rest =>
-      if psStringEq structType.name name then
-        some index
-      else
-        psWasmFindStructureIndexLoop name (index + 1) rest
+  psWasmFindStructureIndexWorker name structures index
 
 def psWasmFindStructureIndex
     (structures : List PsWasmStructType)
     (name : String) : Option Nat :=
   psWasmFindStructureIndexLoop name 0 structures
 
+def psWasmFindArrayIndexWorker
+    (name : String)
+    (arrays : List PsWasmArrayType) :
+    Nat -> Option Nat :=
+  match arrays with
+  | List.nil =>
+      fun (_index : Nat) => Option.none
+  | List.cons arrayType rest =>
+      let smaller : Nat -> Option Nat :=
+        psWasmFindArrayIndexWorker name rest;
+      fun (index : Nat) =>
+        if psStringEq arrayType.name name then
+          Option.some index
+        else
+          smaller (index + 1)
+
 def psWasmFindArrayIndexLoop
     (name : String)
     (index : Nat)
     (arrays : List PsWasmArrayType) : Option Nat :=
-  match arrays with
-  | List.nil => none
-  | List.cons arrayType rest =>
-      if psStringEq arrayType.name name then
-        some index
-      else
-        psWasmFindArrayIndexLoop name (index + 1) rest
+  psWasmFindArrayIndexWorker name arrays index
 
 def psWasmFindArrayIndex
     (arrays : List PsWasmArrayType)
@@ -218,20 +244,27 @@ def psWasmEncodeVector
     (psWasmEncodeUleb count)
     bytes
 
+def psWasmFindFunctionTypeIndexWorker
+    (name : String)
+    (functionTypes : List PsWasmFunctionType) :
+    Nat -> Option Nat :=
+  match functionTypes with
+  | List.nil =>
+      fun (_index : Nat) => Option.none
+  | List.cons functionType rest =>
+      let smaller : Nat -> Option Nat :=
+        psWasmFindFunctionTypeIndexWorker name rest;
+      fun (index : Nat) =>
+        if psStringEq functionType.name name then
+          Option.some index
+        else
+          smaller (index + 1)
+
 def psWasmFindFunctionTypeIndexLoop
     (name : String)
     (index : Nat)
     (functionTypes : List PsWasmFunctionType) : Option Nat :=
-  match functionTypes with
-  | List.nil => none
-  | List.cons functionType rest =>
-      if psStringEq functionType.name name then
-        some index
-      else
-        psWasmFindFunctionTypeIndexLoop
-          name
-          (index + 1)
-          rest
+  psWasmFindFunctionTypeIndexWorker name functionTypes index
 
 def psWasmFindFunctionTypeIndex
     (structures : List PsWasmStructType)
@@ -307,17 +340,27 @@ def psWasmEncodeFunctionTypes
           | Except.ok encodedRest =>
               Except.ok (psListAppend encoded encodedRest)
 
+def psWasmFindFunctionIndexWorker
+    (name : String)
+    (functions : List PsWasmFunction) :
+    Nat -> Option Nat :=
+  match functions with
+  | List.nil =>
+      fun (_index : Nat) => Option.none
+  | List.cons function rest =>
+      let smaller : Nat -> Option Nat :=
+        psWasmFindFunctionIndexWorker name rest;
+      fun (index : Nat) =>
+        if psStringEq function.name name then
+          Option.some index
+        else
+          smaller (index + 1)
+
 def psWasmFindFunctionIndexLoop
     (name : String)
     (index : Nat)
     (functions : List PsWasmFunction) : Option Nat :=
-  match functions with
-  | List.nil => none
-  | List.cons function rest =>
-      if psStringEq function.name name then
-        some index
-      else
-        psWasmFindFunctionIndexLoop name (index + 1) rest
+  psWasmFindFunctionIndexWorker name functions index
 
 def psWasmFindFunctionIndex
     (functions : List PsWasmFunction)
@@ -845,6 +888,38 @@ def psWasmFunctionTypeIndex
             (PsWasmEncodeError.unknownFunctionType typeName)
       | some typeIndex => Except.ok typeIndex
 
+def psWasmEncodeFunctionTypeIndicesWorker
+    (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType)
+    (functionTypes : List PsWasmFunctionType)
+    (functions : List PsWasmFunction) :
+    Nat -> Except PsWasmEncodeError (List UInt8) :=
+  match functions with
+  | List.nil =>
+      fun (_functionIndex : Nat) => Except.ok List.nil
+  | List.cons function rest =>
+      let smaller : Nat -> Except PsWasmEncodeError (List UInt8) :=
+        psWasmEncodeFunctionTypeIndicesWorker
+          structures
+          arrays
+          functionTypes
+          rest;
+      fun (functionIndex : Nat) =>
+        match
+            psWasmFunctionTypeIndex
+              structures
+              arrays
+              functionTypes
+              functionIndex
+              function with
+        | Except.error error => Except.error error
+        | Except.ok typeIndex =>
+            match smaller (functionIndex + 1) with
+            | Except.error error => Except.error error
+            | Except.ok encodedRest =>
+                Except.ok
+                  (psListAppend (psWasmEncodeUleb typeIndex) encodedRest)
+
 def psWasmEncodeFunctionTypeIndicesLoop
     (structures : List PsWasmStructType)
     (arrays : List PsWasmArrayType)
@@ -852,29 +927,12 @@ def psWasmEncodeFunctionTypeIndicesLoop
     (functionIndex : Nat)
     (functions : List PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
-  match functions with
-  | List.nil => Except.ok List.nil
-  | List.cons function rest =>
-      match
-          psWasmFunctionTypeIndex
-            structures
-            arrays
-            functionTypes
-            functionIndex
-            function with
-      | Except.error error => Except.error error
-      | Except.ok typeIndex =>
-          match
-              psWasmEncodeFunctionTypeIndicesLoop
-                structures
-                arrays
-                functionTypes
-                (functionIndex + 1)
-                rest with
-          | Except.error error => Except.error error
-          | Except.ok encodedRest =>
-              Except.ok
-                (psListAppend (psWasmEncodeUleb typeIndex) encodedRest)
+  psWasmEncodeFunctionTypeIndicesWorker
+    structures
+    arrays
+    functionTypes
+    functions
+    functionIndex
 
 def psWasmEncodeFunctionTypeIndices
     (structures : List PsWasmStructType)

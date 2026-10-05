@@ -4,7 +4,9 @@ Status: **research-driven post-PSC1 profile draft**
 
 Base profile: [`PSC1 Lang`](../PSC1%20Lang/README.md)
 
-Primary normative draft: [PSC2_LANGUAGE_REFERENCE.md](./PSC2_LANGUAGE_REFERENCE.md)
+Primary normative design basis: [PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md](./PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md)
+
+The former [PSC2_LANGUAGE_REFERENCE.md](./PSC2_LANGUAGE_REFERENCE.md) is retained as historical PSC2 planning material. It is no longer the language-design authority for new compiler/backend work. PSC2 remains the current compiler milestone and implementation closure; `pscv-v1` is the stricter future verified-programming profile, exactly as the PSCV reference states.
 
 PSC2 extends PSC1. It does **not** reopen or invalidate the PSC1 freeze.
 PSC1 remains the small bootstrap language and semantic foundation. PSC2 is the

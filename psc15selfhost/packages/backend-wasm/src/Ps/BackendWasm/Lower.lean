@@ -2776,6 +2776,33 @@ def psWasmLowerIntrinsicWith
                       profile type integerOperation)
                 state := lowered.state
               }
+  | .uint8OfNat =>
+      match arguments with
+      | List.nil =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | List.cons value rest =>
+          match rest with
+          | List.cons _ _ =>
+              Except.error PsWasmLowerError.invalidIntrinsicArity
+          | List.nil =>
+              match
+                  lower
+                    (Option.some psWasmNatRef)
+                    state
+                    value with
+              | Except.error error => Except.error error
+              | Except.ok lowered =>
+                  Except.ok {
+                    instructions :=
+                      psListAppend
+                        lowered.instructions
+                        [
+                          PsWasmInstruction.call psWasmNatToU32Fn,
+                          PsWasmInstruction.i32Const 255,
+                          PsWasmInstruction.i32And
+                        ]
+                    state := lowered.state
+                  }
   | .floatBinary type floatOperation =>
       match psWasmListPair? arguments with
       | Option.none =>
@@ -4170,6 +4197,7 @@ def psWasmIntrinsicUsesNat
   | .natNe => true
   | .natLe => true
   | .natLt => true
+  | .uint8OfNat => true
   | .intOfNat => true
   | .intNegSucc => true
   | .charOfNat => true

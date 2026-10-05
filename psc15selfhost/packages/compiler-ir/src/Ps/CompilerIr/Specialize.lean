@@ -129,10 +129,11 @@ def psIrSpecializeFindDeclaration
       else
         psIrSpecializeFindDeclaration rest name
 
-def psIrSpecializeJoinKeys :
-    List (Option String) -> Option String
-  | [] => Option.some ""
-  | key :: rest =>
+def psIrSpecializeJoinKeys
+    (keys : List (Option String)) : Option String :=
+  match keys with
+  | List.nil => Option.some ""
+  | List.cons key rest =>
       match key with
       | Option.none => Option.none
       | Option.some head =>
@@ -266,19 +267,22 @@ def psIrSpecializeIsGround
   | Option.none => false
   | Option.some _ => true
 
-def psIrSpecializeAllGround :
-    List PsVerifiedIrType -> Bool
-  | [] => true
-  | type :: rest =>
+def psIrSpecializeAllGround
+    (types : List PsVerifiedIrType) : Bool :=
+  match types with
+  | List.nil => true
+  | List.cons type rest =>
       if psIrSpecializeIsGround type then
         psIrSpecializeAllGround rest
       else
         false
 
-def psIrSpecializeTypeParameterNames :
-    List PsVerifiedIrTypeParameter -> List String
-  | [] => []
-  | parameter :: rest =>
+def psIrSpecializeTypeParameterNames
+    (parameters : List PsVerifiedIrTypeParameter) :
+    List String :=
+  match parameters with
+  | List.nil => []
+  | List.cons parameter rest =>
       List.cons
         parameter.name
         (psIrSpecializeTypeParameterNames rest)
@@ -331,15 +335,16 @@ def psIrSpecializeGenericTypeRequest
 def psIrSpecializeRewriteTypeListWith
     (rewrite :
       PsVerifiedIrType ->
-      Except PsIrSpecializeError PsIrSpecializeTypeResult) :
-    List PsVerifiedIrType ->
-    Except PsIrSpecializeError PsIrSpecializeTypeListResult
-  | [] =>
+      Except PsIrSpecializeError PsIrSpecializeTypeResult)
+    (types : List PsVerifiedIrType) :
+    Except PsIrSpecializeError PsIrSpecializeTypeListResult :=
+  match types with
+  | List.nil =>
       Except.ok {
         types := []
         requests := []
       }
-  | type :: rest =>
+  | List.cons type rest =>
       match rewrite type with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -466,15 +471,16 @@ def psIrSpecializeRewriteType
 
 def psIrSpecializeRewriteParameters
     (module : PsVerifiedIrModule)
-    (substitution : List (String × PsVerifiedIrType)) :
-    List PsVerifiedIrParameter ->
-    Except PsIrSpecializeError PsIrSpecializeParametersResult
-  | [] =>
+    (substitution : List (String × PsVerifiedIrType))
+    (parameters : List PsVerifiedIrParameter) :
+    Except PsIrSpecializeError PsIrSpecializeParametersResult :=
+  match parameters with
+  | List.nil =>
       Except.ok {
         parameters := []
         requests := []
       }
-  | parameter :: rest =>
+  | List.cons parameter rest =>
       match
           psIrSpecializeRewriteType
             module
@@ -503,15 +509,16 @@ def psIrSpecializeRewriteParameters
 def psIrSpecializeRewriteExprListWith
     (rewrite :
       PsVerifiedIrExpr ->
-      Except PsIrSpecializeError PsIrSpecializeExprResult) :
-    List PsVerifiedIrExpr ->
-    Except PsIrSpecializeError PsIrSpecializeExprListResult
-  | [] =>
+      Except PsIrSpecializeError PsIrSpecializeExprResult)
+    (expressions : List PsVerifiedIrExpr) :
+    Except PsIrSpecializeError PsIrSpecializeExprListResult :=
+  match expressions with
+  | List.nil =>
       Except.ok {
         expressions := []
         requests := []
       }
-  | expression :: rest =>
+  | List.cons expression rest =>
       match rewrite expression with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -528,15 +535,16 @@ def psIrSpecializeRewriteExprListWith
 def psIrSpecializeRewriteFieldsWith
     (rewrite :
       PsVerifiedIrExpr ->
-      Except PsIrSpecializeError PsIrSpecializeExprResult) :
-    List (String × PsVerifiedIrExpr) ->
-    Except PsIrSpecializeError PsIrSpecializeFieldsResult
-  | [] =>
+      Except PsIrSpecializeError PsIrSpecializeExprResult)
+    (fields : List (String × PsVerifiedIrExpr)) :
+    Except PsIrSpecializeError PsIrSpecializeFieldsResult :=
+  match fields with
+  | List.nil =>
       Except.ok {
         fields := []
         requests := []
       }
-  | field :: rest =>
+  | List.cons field rest =>
       match rewrite (Prod.snd field) with
       | Except.error error => Except.error error
       | Except.ok lowered =>
@@ -554,16 +562,17 @@ def psIrSpecializeRewriteFieldsWith
 
 def psIrSpecializeRewriteMatchBindings
     (module : PsVerifiedIrModule)
-    (substitution : List (String × PsVerifiedIrType)) :
-    List PsVerifiedIrMatchBinding ->
+    (substitution : List (String × PsVerifiedIrType))
+    (bindings : List PsVerifiedIrMatchBinding) :
     Except PsIrSpecializeError
-      PsIrSpecializeMatchBindingsResult
-  | [] =>
+      PsIrSpecializeMatchBindingsResult :=
+  match bindings with
+  | List.nil =>
       Except.ok {
         bindings := []
         requests := []
       }
-  | binding :: rest =>
+  | List.cons binding rest =>
       match
           psIrSpecializeRewriteType
             module
@@ -595,19 +604,21 @@ def psIrSpecializeRewriteAlternativesWith
       PsVerifiedIrExpr ->
       Except PsIrSpecializeError PsIrSpecializeExprResult)
     (module : PsVerifiedIrModule)
-    (substitution : List (String × PsVerifiedIrType)) :
-    List
-      (String ×
-        List PsVerifiedIrMatchBinding ×
-        PsVerifiedIrExpr) ->
+    (substitution : List (String × PsVerifiedIrType))
+    (alternatives :
+      List
+        (String ×
+          List PsVerifiedIrMatchBinding ×
+          PsVerifiedIrExpr)) :
     Except PsIrSpecializeError
-      PsIrSpecializeAlternativesResult
-  | [] =>
+      PsIrSpecializeAlternativesResult :=
+  match alternatives with
+  | List.nil =>
       Except.ok {
         alternatives := []
         requests := []
       }
-  | alternative :: rest =>
+  | List.cons alternative rest =>
       match
           psIrSpecializeRewriteMatchBindings
             module
@@ -1130,16 +1141,17 @@ def psIrSpecializeRewriteExpr
 
 def psIrSpecializeRewriteStructureFields
     (module : PsVerifiedIrModule)
-    (substitution : List (String × PsVerifiedIrType)) :
-    List PsVerifiedIrStructureField ->
+    (substitution : List (String × PsVerifiedIrType))
+    (fields : List PsVerifiedIrStructureField) :
     Except PsIrSpecializeError
-      PsIrSpecializeStructureFieldsResult
-  | [] =>
+      PsIrSpecializeStructureFieldsResult :=
+  match fields with
+  | List.nil =>
       Except.ok {
         fields := []
         requests := []
       }
-  | field :: rest =>
+  | List.cons field rest =>
       match
           psIrSpecializeRewriteType
             module
@@ -1167,16 +1179,17 @@ def psIrSpecializeRewriteStructureFields
 
 def psIrSpecializeRewriteConstructorFields
     (module : PsVerifiedIrModule)
-    (substitution : List (String × PsVerifiedIrType)) :
-    List PsVerifiedIrConstructorField ->
+    (substitution : List (String × PsVerifiedIrType))
+    (fields : List PsVerifiedIrConstructorField) :
     Except PsIrSpecializeError
-      PsIrSpecializeConstructorFieldsResult
-  | [] =>
+      PsIrSpecializeConstructorFieldsResult :=
+  match fields with
+  | List.nil =>
       Except.ok {
         fields := []
         requests := []
       }
-  | field :: rest =>
+  | List.cons field rest =>
       match
           psIrSpecializeRewriteType
             module
@@ -1204,16 +1217,17 @@ def psIrSpecializeRewriteConstructorFields
 
 def psIrSpecializeRewriteConstructors
     (module : PsVerifiedIrModule)
-    (substitution : List (String × PsVerifiedIrType)) :
-    List PsVerifiedIrConstructor ->
+    (substitution : List (String × PsVerifiedIrType))
+    (constructors : List PsVerifiedIrConstructor) :
     Except PsIrSpecializeError
-      PsIrSpecializeConstructorsResult
-  | [] =>
+      PsIrSpecializeConstructorsResult :=
+  match constructors with
+  | List.nil =>
       Except.ok {
         constructors := []
         requests := []
       }
-  | constructorInfo :: rest =>
+  | List.cons constructorInfo rest =>
       match
           psIrSpecializeRewriteConstructorFields
             module
@@ -1240,15 +1254,16 @@ def psIrSpecializeRewriteConstructors
               }
 
 def psIrSpecializeRewriteImports
-    (module : PsVerifiedIrModule) :
-    List PsVerifiedIrExternalImport ->
-    Except PsIrSpecializeError PsIrSpecializeImportsResult
-  | [] =>
+    (module : PsVerifiedIrModule)
+    (imports : List PsVerifiedIrExternalImport) :
+    Except PsIrSpecializeError PsIrSpecializeImportsResult :=
+  match imports with
+  | List.nil =>
       Except.ok {
         imports := []
         requests := []
       }
-  | importInfo :: rest =>
+  | List.cons importInfo rest =>
       match
           psIrSpecializeRewriteType
             module
@@ -1273,12 +1288,13 @@ def psIrSpecializeRewriteImports
               }
 
 def psIrSpecializeSeedStructures
-    (module : PsVerifiedIrModule) :
-    List PsVerifiedIrStructure ->
+    (module : PsVerifiedIrModule)
+    (structures : List PsVerifiedIrStructure) :
     Except PsIrSpecializeError
-      (List PsVerifiedIrStructure × List PsIrSpecializeRequest)
-  | [] => Except.ok (Prod.mk List.nil List.nil)
-  | structureInfo :: rest =>
+      (List PsVerifiedIrStructure × List PsIrSpecializeRequest) :=
+  match structures with
+  | List.nil => Except.ok (Prod.mk List.nil List.nil)
+  | List.cons structureInfo rest =>
       match psIrSpecializeSeedStructures module rest with
       | Except.error error => Except.error error
       | Except.ok loweredRest =>
@@ -1305,12 +1321,13 @@ def psIrSpecializeSeedStructures
                         (Prod.snd loweredRest)))
 
 def psIrSpecializeSeedInductives
-    (module : PsVerifiedIrModule) :
-    List PsVerifiedIrInductive ->
+    (module : PsVerifiedIrModule)
+    (inductives : List PsVerifiedIrInductive) :
     Except PsIrSpecializeError
-      (List PsVerifiedIrInductive × List PsIrSpecializeRequest)
-  | [] => Except.ok (Prod.mk List.nil List.nil)
-  | inductiveInfo :: rest =>
+      (List PsVerifiedIrInductive × List PsIrSpecializeRequest) :=
+  match inductives with
+  | List.nil => Except.ok (Prod.mk List.nil List.nil)
+  | List.cons inductiveInfo rest =>
       match psIrSpecializeSeedInductives module rest with
       | Except.error error => Except.error error
       | Except.ok loweredRest =>
@@ -1337,12 +1354,13 @@ def psIrSpecializeSeedInductives
                         (Prod.snd loweredRest)))
 
 def psIrSpecializeSeedDeclarations
-    (module : PsVerifiedIrModule) :
-    List PsVerifiedIrDeclaration ->
+    (module : PsVerifiedIrModule)
+    (declarations : List PsVerifiedIrDeclaration) :
     Except PsIrSpecializeError
-      (List PsVerifiedIrDeclaration × List PsIrSpecializeRequest)
-  | [] => Except.ok (Prod.mk List.nil List.nil)
-  | declaration :: rest =>
+      (List PsVerifiedIrDeclaration × List PsIrSpecializeRequest) :=
+  match declarations with
+  | List.nil => Except.ok (Prod.mk List.nil List.nil)
+  | List.cons declaration rest =>
       match psIrSpecializeSeedDeclarations module rest with
       | Except.error error => Except.error error
       | Except.ok loweredRest =>

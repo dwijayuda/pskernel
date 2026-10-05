@@ -147,6 +147,7 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.bvar left)
         (PsKernelExpr.bvar right)
   | fvar
+      {localContext : PsKernelLocalContext}
       (left right : PsKernelName)
       (h : psKernelNameEq left right = true) :
       PsKernelStructuralExprEq
@@ -165,6 +166,7 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.sort left)
         (PsKernelExpr.sort right)
   | const
+      {localContext : PsKernelLocalContext}
       (leftName rightName : PsKernelName)
       (leftLevels rightLevels : List PsKernelLevel)
       (hName : psKernelNameEq leftName rightName = true)
@@ -173,6 +175,7 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.const leftName leftLevels)
         (PsKernelExpr.const rightName rightLevels)
   | app
+      {localContext : PsKernelLocalContext}
       (leftFn leftArg rightFn rightArg : PsKernelExpr)
       (hFn : PsKernelStructuralExprEq leftFn rightFn)
       (hArg : PsKernelStructuralExprEq leftArg rightArg) :
@@ -180,6 +183,7 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.app leftFn leftArg)
         (PsKernelExpr.app rightFn rightArg)
   | lam
+      {localContext : PsKernelLocalContext}
       (leftName rightName : PsKernelName)
       (leftType leftBody rightType rightBody : PsKernelExpr)
       (leftInfo rightInfo : PsKernelBinderInfo)
@@ -189,6 +193,7 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.lam leftName leftType leftBody leftInfo)
         (PsKernelExpr.lam rightName rightType rightBody rightInfo)
   | forallE
+      {localContext : PsKernelLocalContext}
       (leftName rightName : PsKernelName)
       (leftType leftBody rightType rightBody : PsKernelExpr)
       (leftInfo rightInfo : PsKernelBinderInfo)
@@ -198,6 +203,7 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.forallE leftName leftType leftBody leftInfo)
         (PsKernelExpr.forallE rightName rightType rightBody rightInfo)
   | letE
+      {localContext : PsKernelLocalContext}
       (leftName rightName : PsKernelName)
       (leftType leftValue leftBody : PsKernelExpr)
       (rightType rightValue rightBody : PsKernelExpr)
@@ -371,10 +377,10 @@ def PsKernelDefEqCacheSound
         right
 
 inductive PsKernelTypingJudgment
-    (environment : PsKernelEnvironment)
-    (localContext : PsKernelLocalContext) :
-    PsKernelExpr -> PsKernelExpr -> Prop
+    (environment : PsKernelEnvironment) :
+    PsKernelLocalContext -> PsKernelExpr -> PsKernelExpr -> Prop
   | sort
+      {localContext : PsKernelLocalContext}
       (level : PsKernelLevel) :
       PsKernelTypingJudgment
         environment
@@ -382,6 +388,7 @@ inductive PsKernelTypingJudgment
         (PsKernelExpr.sort level)
         (PsKernelExpr.sort (PsKernelLevel.succ level))
   | natLiteral
+      {localContext : PsKernelLocalContext}
       (value : Nat) :
       PsKernelTypingJudgment
         environment
@@ -389,6 +396,7 @@ inductive PsKernelTypingJudgment
         (PsKernelExpr.lit (PsKernelLiteral.nat value))
         (PsKernelExpr.const psKernelNatName List.nil)
   | stringLiteral
+      {localContext : PsKernelLocalContext}
       (value : String) :
       PsKernelTypingJudgment
         environment

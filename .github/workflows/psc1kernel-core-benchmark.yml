@@ -9,7 +9,6 @@ on:
       - psc15selfhost/test/PsKernelCoreBench.lean
       - psc15selfhost/test/KernelCore/Bench/**
       - psc15selfhost/scripts/psc1kernel-benchmark-report*
-      - psc15selfhost/scripts/psc1kernel-cache-comparison.mjs
       - psc15selfhost/scripts/fixtures/pskernel-native-benchmark.log
       - psc15selfhost/lakefile.lean
       - .github/workflows/psc1kernel-core-benchmark.yml
@@ -56,19 +55,10 @@ jobs:
             .lake/build/bin/psc1_kernel_core_bench 3 /tmp/pskernel-core-bench
           cat /tmp/pskernel-core-bench.md >> "$GITHUB_STEP_SUMMARY"
 
-      # Explicit experiment marker keeps the extra build out of routine runs.
-      - name: Compare cache publication variants on this runner
-        if: contains(github.event.head_commit.message, '[cache-compare]')
-        timeout-minutes: 6
-        run: |
-          set -euo pipefail
-          node scripts/psc1kernel-cache-comparison.mjs /tmp/pskernel-core-bench
-          cat /tmp/pskernel-core-bench-comparison.md >> "$GITHUB_STEP_SUMMARY"
-
       - name: Upload benchmark log
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pskernel-core-benchmark
-          path: /tmp/pskernel-core-bench*
+          path: /tmp/pskernel-core-bench.*
           if-no-files-found: warn

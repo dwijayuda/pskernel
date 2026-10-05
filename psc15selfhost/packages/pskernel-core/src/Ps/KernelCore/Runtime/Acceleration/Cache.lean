@@ -414,66 +414,6 @@ def psKernelExprMapInsertIn
             value
             rest)
 
-/- Update a bucket during one bounded index descent. The previous publication
-path first read the bucket and then walked the same 16 edges again to replace it.
-Bucket equality, insertion order and persistent sibling sharing are unchanged. -/
-def psKernelExprMapIndexInsert
-    (fuel : Nat) :
-    PsKernelExprMapIndex ->
-    Nat ->
-    PsKernelExpr ->
-    PsKernelExpr ->
-    PsKernelExprMapIndex :=
-  match fuel with
-  | Nat.zero =>
-      fun
-        (index : PsKernelExprMapIndex)
-        (_hash : Nat)
-        (expr : PsKernelExpr)
-        (value : PsKernelExpr) =>
-        let entries :
-            List (Prod PsKernelExpr PsKernelExpr) :=
-          match index with
-          | PsKernelExprMapIndex.bucket values =>
-              values
-          | _ =>
-              List.nil;
-        PsKernelExprMapIndex.bucket
-          (psKernelExprMapInsertIn expr value entries)
-  | Nat.succ remaining =>
-      let smaller :
-          PsKernelExprMapIndex ->
-          Nat ->
-          PsKernelExpr ->
-          PsKernelExpr ->
-          PsKernelExprMapIndex :=
-        psKernelExprMapIndexInsert remaining;
-      fun
-        (index : PsKernelExprMapIndex)
-        (hash : Nat)
-        (expr : PsKernelExpr)
-        (value : PsKernelExpr) =>
-        let left : PsKernelExprMapIndex :=
-          match index with
-          | PsKernelExprMapIndex.branch child _ =>
-              child
-          | _ =>
-              PsKernelExprMapIndex.empty;
-        let right : PsKernelExprMapIndex :=
-          match index with
-          | PsKernelExprMapIndex.branch _ child =>
-              child
-          | _ =>
-              PsKernelExprMapIndex.empty;
-        if Nat.beq (Nat.mod hash 2) 0 then
-          PsKernelExprMapIndex.branch
-            (smaller left (Nat.div hash 2) expr value)
-            right
-        else
-          PsKernelExprMapIndex.branch
-            left
-            (smaller right (Nat.div hash 2) expr value)
-
 def psKernelExprMapBuildIndex
     (entries :
       List (Prod PsKernelExpr PsKernelExpr)) :
@@ -488,12 +428,19 @@ def psKernelExprMapBuildIndex
         Prod.fst entry;
       let hash :=
         psKernelExprHash key;
-      psKernelExprMapIndexInsert
+      let bucket :=
+        psKernelExprMapIndexBucket
+          16
+          index
+          hash;
+      psKernelExprMapIndexSet
         16
         index
         hash
-        key
-        (Prod.snd entry)
+        (psKernelExprMapInsertIn
+          key
+          (Prod.snd entry)
+          bucket)
 
 def psKernelExprMapInsert
     (cache : PsKernelExprMap)
@@ -525,16 +472,23 @@ def psKernelExprMapInsert
   | Option.some index =>
       let hash :=
         psKernelExprHash expr;
+      let bucket :=
+        psKernelExprMapIndexBucket
+          16
+          index
+          hash;
       {
         small := List.nil
         index :=
           Option.some
-            (psKernelExprMapIndexInsert
+            (psKernelExprMapIndexSet
               16
               index
               hash
-              expr
-              value)
+              (psKernelExprMapInsertIn
+                expr
+                value
+                bucket))
       }
 
 def psKernelExprPairEq

@@ -1030,34 +1030,7 @@ def psKernelRuntimeEnvironmentIndexInvariantTests : Bool :=
         | Option.none =>
             false)))
 
-def psKernelRuntimeMapIndexEq : PsKernelExprMapIndex → PsKernelExprMapIndex → Bool
-  | .empty, .empty => true
-  | .bucket left, .bucket right =>
-      left.length == right.length && (left.zip right).all (fun (a, b) =>
-        psKernelExprEq a.fst b.fst && psKernelExprEq a.snd b.snd)
-  | .branch left right, .branch otherLeft otherRight =>
-      psKernelRuntimeMapIndexEq left otherLeft && psKernelRuntimeMapIndexEq right otherRight
-  | _, _ => false
-
--- Compare the complete persistent structure with the previous bucket-read/set
--- operation, including collisions, overwrite, and shallow/malformed indices.
-def psKernelRuntimeMapInsertEquivalenceTests : Bool :=
-  let keys := [0, 1, 65521, 65522, 7, 8, 9, 31, 32, 65521, 0]
-  let initial := PsKernelExprMapIndex.bucket [(PsKernelExpr.bvar 0, PsKernelExpr.bvar 99)]
-  [0, 1, 8, 16].all (fun depth =>
-    [PsKernelExprMapIndex.empty, initial, .branch initial .empty].all (fun start =>
-      let result := keys.foldl (fun (state : PsKernelExprMapIndex × Bool × Nat) key =>
-        let expr := PsKernelExpr.bvar key
-        let value := PsKernelExpr.lit (.nat state.snd.snd)
-        let hash := psKernelExprHash expr
-        let old := psKernelExprMapIndexSet depth state.fst hash
-          (psKernelExprMapInsertIn expr value (psKernelExprMapIndexBucket depth state.fst hash))
-        let next := psKernelExprMapIndexInsert depth state.fst hash expr value
-        (next, state.snd.fst && psKernelRuntimeMapIndexEq old next, state.snd.snd + 1)) (start, true, 0)
-      result.snd.fst))
-
 def psKernelRuntimeInvariantTests : Bool :=
-  psKernelRuntimeMapInsertEquivalenceTests &&
   Bool.and
     psKernelRuntimeCacheInvariantTests
     (Bool.and
@@ -1065,3 +1038,4 @@ def psKernelRuntimeInvariantTests : Bool :=
       (Bool.and
         psKernelRuntimeEnvironmentPromotionTests
         psKernelRuntimeEnvironmentIndexInvariantTests))
+

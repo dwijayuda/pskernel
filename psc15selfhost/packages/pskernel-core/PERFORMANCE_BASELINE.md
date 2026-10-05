@@ -538,42 +538,47 @@ change was reverted. Keep checked constant caching enabled globally; any future
 nested-specific optimization must avoid trading away general checker
 performance.
 
-## 2.9 Bounded Phase C cache-insertion work
+## 2.9 Bounded Phase C experiment — not adopted
 
 The three-sample baseline at package-rename checkpoint
 `071a584ec4bbefdd09cb2de3b063ce0db4641469` measured median PSKernel/Lean ratios
 of 3.20x for nested admission and 3.74x for the wider fixture. Untimed checked
 rule-cache profiles contained 20 entries (13 free variables) and 45 entries
-(34 free variables), respectively. These counts identify cache publication as
-a useful measurement target; they do not by themselves prove a bottleneck.
+(34 free variables), respectively. Entry counts identify a profiling target;
+they do not establish how much execution time it consumes.
 
-Expression-map insertion now descends the persistent index once to update its
-bucket. Previously it first descended to read the bucket, then descended the
-same path to replace it. Hashing, 16-bit path selection, structural collision
-equality, bucket ordering, the 8-entry promotion threshold and inference cache
-eligibility are unchanged. Pair-set and environment-index algorithms are unchanged.
+An experiment replaced separate bucket lookup and replacement with one index
+descent. A 132-update comparison preserved the complete persistent structure,
+including collisions and replacement. Its matched insertion microbenchmark
+improved by about 13%, but a same-runner comparison did not improve the intended
+checker workloads:
 
-The foundation suite compares complete index structures for 132 updates against
-the previous read-then-set operation, covering collisions, replacement, multiple
-depths and initially empty/noncanonical shapes. Existing promotion and checker
-conformance tests remain required.
+| Workload | Single-descent / previous-path ratio |
+| --- | ---: |
+| Checked application | 1.054 |
+| Dependent application | 1.062 |
+| Recursor reduction | 0.990 |
+| Nested admission | 1.015 |
+| Wide nested admission | 1.001 |
 
-The native benchmark adds 2,000 matched updates per implementation to the same
-frozen index and validates every returned value. The bounded report records the
-median/range of single-walk divided by double-walk time across three samples,
-alongside the full checker/admission corpus. Consult the checkpoint's CI report
-for measured results; an insertion microbenchmark is not an end-to-end speed claim.
+Lower is faster. These are three-sample medians normalized to the matched Lean
+baseline on one runner; sequential runs still contain measurement noise.
+The experiment is **not adopted**: the production source is restored to the
+green rename checkpoint, and the experimental worker and comparison-only code
+are removed. The ordinary bounded reporter and cache diagnostics remain.
 
-For a bounded same-runner comparison, a benchmark-triggering commit may include
-`[cache-compare]`. That opt-in CI step restores the previous read-then-set
-publication path only in its temporary checkout, rebuilds the native benchmark
-(four-minute cap), and runs three short samples. It compares successful-operation
-fingerprints, records both source hashes and matched ratios, then restores the
-production source. Routine benchmark commits do not perform this extra build.
+Evidence: [same-runner comparison, run 37288339756](https://github.com/dwijayuda/pskernel/actions/runs/37288339756)
+at `27129b244b8648885f6aa81cfdf24b0482d6647c`. That experimental revision failed
+the PSC1 gate on a missing local type annotation; it is not a promoted semantic
+checkpoint. Adding the annotation was subsequently superseded by the rollback.
+The comparison used one extra native build capped at four minutes and three
+short samples per variant. Full generated compiler/kernel fixed-point generation
+and large proof-library replay were not run.
 
-No expression metadata, interning, cache-eligibility changes, semantic shortcuts,
-generated compiler/kernel fixed-point run, or large proof-library replay is part
-of this change. Generated-JavaScript performance and M3 remain open.
+M3 remains open. Further changes require representative gains; the next useful
+work is a bounded profile of fully checked recursor-rule inference and an
+affordable current-JavaScript benchmark, not speculative metadata or cache-policy
+changes justified only by microbenchmarks.
 
 ## 3. Interpretation
 

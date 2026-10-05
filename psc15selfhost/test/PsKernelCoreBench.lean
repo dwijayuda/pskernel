@@ -1506,15 +1506,3 @@ def main : IO Unit := do
 
   psKernelBenchProfileRecursorCache "nested_main_rules" nestedFinal psKernelBenchNestedTreeRecName
   psKernelBenchProfileRecursorCache "nested_wide_main_rules" nestedWideFinal psKernelBenchNestedWideRecName
-
-  let some insertionIndex := cache.index
-    | throw (IO.userError "cache insertion benchmark requires indexed fixture")
-  let doubleStart ← IO.monoNanosNow
-  let doubleHits ← psKernelBenchMapInsertLoop 2000 insertionIndex false
-  let doubleStop ← IO.monoNanosNow
-  let singleStart ← IO.monoNanosNow
-  let singleHits ← psKernelBenchMapInsertLoop 2000 insertionIndex true
-  let singleStop ← IO.monoNanosNow
-  if doubleHits != 2000 || singleHits != 2000 then
-    throw (IO.userError "cache insertion benchmark lost or changed an entry")
-  IO.println s!"PSKERNEL_PROFILE cache_insert double_walk_ns={doubleStop - doubleStart} single_walk_ns={singleStop - singleStart} hits={doubleHits}/{singleHits}"

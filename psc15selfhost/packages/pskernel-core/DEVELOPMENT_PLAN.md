@@ -24,6 +24,10 @@
   - current indexing/cache and checker-path work may continue when profiling identifies a
     concrete hotspot and all Phase A/B gates remain green.
   - performance work must not be mixed into structural move commits.
+  - the first bounded pass established three-sample reports and nested cache
+    diagnostics. A single-descent insertion experiment was rejected after a
+    same-runner comparison showed no representative gain; production cache
+    behavior is retained. M3 and current-JavaScript throughput remain open.
 - **Phase D — Assurance Plane: LONG-TERM / NON-BLOCKING.**
   - formal specification/refinement, independent-checker consensus, fuzzing, receipts and
     broader interoperability strengthen the production kernel after the architecture boundary

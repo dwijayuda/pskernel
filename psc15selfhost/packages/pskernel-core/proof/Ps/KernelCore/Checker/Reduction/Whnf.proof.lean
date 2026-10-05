@@ -72,3 +72,32 @@ theorem psKernelWhnfNoRecursor_def
       psKernelWhnfWithFuel
         fuel psKernelNoRecursorReduction context state expr := by
   rfl
+
+
+theorem psKernelWhnfWithFuel_mdata
+    (remaining : Nat)
+    (reduceRecursor :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (metadata : Nat)
+    (body : PsKernelExpr) :
+    psKernelWhnfWithFuel
+        (Nat.succ remaining)
+        reduceRecursor
+        context
+        state
+        (PsKernelExpr.mdata metadata body) =
+      psKernelWhnfWithFuel
+        remaining
+        reduceRecursor
+        context
+        state
+        body := by
+  rfl

@@ -627,7 +627,7 @@ def psWasmNatLiteralInstructionsWithFuel :
       let half := value / 2
       let low := value % 2
       psWasmNatLiteralInstructionsWithFuel fuel half ++
-      (if low == 0 then
+      (if Nat.beq low 0 then
         [PsWasmInstruction.structNew psWasmNatBit0Name]
       else
         [PsWasmInstruction.call psWasmNatBit1Fn])

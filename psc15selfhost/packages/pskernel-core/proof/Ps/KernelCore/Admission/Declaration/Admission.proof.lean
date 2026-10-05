@@ -131,3 +131,156 @@ theorem psKernelAddDefinition_safe_adds_only_after_checks
     hHeader,
     hBody
   ]
+
+
+theorem psKernelAddTheorem_rejects_non_prop
+    (fuel : Nat)
+    (environment : PsKernelEnvironment)
+    (value : PsKernelTheoremInfo)
+    (maxRecDepth maxNatSize : Nat)
+    (afterHeader propSession : PsKernelCheckerSession)
+    (hHeader :
+      psKernelCheckConstantBaseWithSession
+          fuel
+          (psKernelMkCheckerSession
+            environment
+            value.base.levelParams
+            PsKernelDefinitionSafety.safe
+            maxRecDepth
+            maxNatSize)
+          value.base =
+        Except.ok afterHeader)
+    (hProp :
+      psKernelSessionIsProp
+          fuel
+          afterHeader
+          value.base.type =
+        Except.ok (Prod.mk false propSession)) :
+    psKernelAddTheorem
+        fuel environment value maxRecDepth maxNatSize =
+      Except.error "theorem type is not a proposition" := by
+  simp [
+    psKernelAddTheorem,
+    hHeader,
+    hProp
+  ]
+
+theorem psKernelAddTheorem_rejects_proof_type_mismatch
+    (fuel : Nat)
+    (environment : PsKernelEnvironment)
+    (value : PsKernelTheoremInfo)
+    (maxRecDepth maxNatSize : Nat)
+    (afterHeader propSession checkedSession finalSession :
+      PsKernelCheckerSession)
+    (inferredType : PsKernelExpr)
+    (hHeader :
+      psKernelCheckConstantBaseWithSession
+          fuel
+          (psKernelMkCheckerSession
+            environment
+            value.base.levelParams
+            PsKernelDefinitionSafety.safe
+            maxRecDepth
+            maxNatSize)
+          value.base =
+        Except.ok afterHeader)
+    (hProp :
+      psKernelSessionIsProp
+          fuel
+          afterHeader
+          value.base.type =
+        Except.ok (Prod.mk true propSession))
+    (hClosed :
+      psKernelCheckNoMVarNoFVar value.value =
+        Except.ok Unit.unit)
+    (hLevels :
+      psKernelCheckLevelParams
+          value.value
+          value.base.levelParams =
+        Except.ok Unit.unit)
+    (hCheck :
+      psKernelSessionCheck
+          fuel
+          propSession
+          value.value =
+        Except.ok (Prod.mk inferredType checkedSession))
+    (hDefEq :
+      psKernelSessionIsDefEq
+          fuel
+          checkedSession
+          inferredType
+          value.base.type =
+        Except.ok (Prod.mk false finalSession)) :
+    psKernelAddTheorem
+        fuel environment value maxRecDepth maxNatSize =
+      Except.error "theorem proof type mismatch" := by
+  simp [
+    psKernelAddTheorem,
+    hHeader,
+    hProp,
+    hClosed,
+    hLevels,
+    hCheck,
+    hDefEq
+  ]
+
+theorem psKernelAddTheorem_adds_only_after_proof_checks
+    (fuel : Nat)
+    (environment : PsKernelEnvironment)
+    (value : PsKernelTheoremInfo)
+    (maxRecDepth maxNatSize : Nat)
+    (afterHeader propSession checkedSession finalSession :
+      PsKernelCheckerSession)
+    (inferredType : PsKernelExpr)
+    (hHeader :
+      psKernelCheckConstantBaseWithSession
+          fuel
+          (psKernelMkCheckerSession
+            environment
+            value.base.levelParams
+            PsKernelDefinitionSafety.safe
+            maxRecDepth
+            maxNatSize)
+          value.base =
+        Except.ok afterHeader)
+    (hProp :
+      psKernelSessionIsProp
+          fuel
+          afterHeader
+          value.base.type =
+        Except.ok (Prod.mk true propSession))
+    (hClosed :
+      psKernelCheckNoMVarNoFVar value.value =
+        Except.ok Unit.unit)
+    (hLevels :
+      psKernelCheckLevelParams
+          value.value
+          value.base.levelParams =
+        Except.ok Unit.unit)
+    (hCheck :
+      psKernelSessionCheck
+          fuel
+          propSession
+          value.value =
+        Except.ok (Prod.mk inferredType checkedSession))
+    (hDefEq :
+      psKernelSessionIsDefEq
+          fuel
+          checkedSession
+          inferredType
+          value.base.type =
+        Except.ok (Prod.mk true finalSession)) :
+    psKernelAddTheorem
+        fuel environment value maxRecDepth maxNatSize =
+      psKernelEnvironmentAdd
+        environment
+        (PsKernelConstantInfo.thmInfo value) := by
+  simp [
+    psKernelAddTheorem,
+    hHeader,
+    hProp,
+    hClosed,
+    hLevels,
+    hCheck,
+    hDefEq
+  ]

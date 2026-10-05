@@ -81,45 +81,49 @@ structure PsIrSpecializeState where
   pending : List PsIrSpecializeRequest
   seen : List String
 
-def psIrSpecializeLookupType :
-    List (String × PsVerifiedIrType) ->
-    String ->
-    Option PsVerifiedIrType
-  | [], _ => none
-  | entry :: rest, name =>
+def psIrSpecializeLookupType
+    (entries : List (String × PsVerifiedIrType))
+    (name : String) :
+    Option PsVerifiedIrType :=
+  match entries with
+  | List.nil => none
+  | List.cons entry rest =>
       if psStringEq (Prod.fst entry) name then
         some (Prod.snd entry)
       else
         psIrSpecializeLookupType rest name
 
-def psIrSpecializeFindStructure :
-    List PsVerifiedIrStructure ->
-    String ->
-    Option PsVerifiedIrStructure
-  | [], _ => none
-  | entry :: rest, name =>
+def psIrSpecializeFindStructure
+    (entries : List PsVerifiedIrStructure)
+    (name : String) :
+    Option PsVerifiedIrStructure :=
+  match entries with
+  | List.nil => none
+  | List.cons entry rest =>
       if psStringEq entry.name name then
         some entry
       else
         psIrSpecializeFindStructure rest name
 
-def psIrSpecializeFindInductive :
-    List PsVerifiedIrInductive ->
-    String ->
-    Option PsVerifiedIrInductive
-  | [], _ => none
-  | entry :: rest, name =>
+def psIrSpecializeFindInductive
+    (entries : List PsVerifiedIrInductive)
+    (name : String) :
+    Option PsVerifiedIrInductive :=
+  match entries with
+  | List.nil => none
+  | List.cons entry rest =>
       if psStringEq entry.name name then
         some entry
       else
         psIrSpecializeFindInductive rest name
 
-def psIrSpecializeFindDeclaration :
-    List PsVerifiedIrDeclaration ->
-    String ->
-    Option PsVerifiedIrDeclaration
-  | [], _ => none
-  | entry :: rest, name =>
+def psIrSpecializeFindDeclaration
+    (entries : List PsVerifiedIrDeclaration)
+    (name : String) :
+    Option PsVerifiedIrDeclaration :=
+  match entries with
+  | List.nil => none
+  | List.cons entry rest =>
       if psStringEq entry.name name then
         some entry
       else
@@ -140,10 +144,13 @@ def psIrSpecializeJoinKeys :
               else
                 some (String.Internal.append head (String.Internal.append "$" tail))
 
-def psIrSpecializeTypeKeyWithFuel :
-    Nat -> PsVerifiedIrType -> Option String
-  | 0, _ => none
-  | fuel + 1, type =>
+def psIrSpecializeTypeKeyWithFuel
+    (remainingFuel : Nat)
+    (type : PsVerifiedIrType) :
+    Option String :=
+  match remainingFuel with
+  | 0 => none
+  | fuel + 1 =>
       match type with
       | .unknown => none
       | .typeParameter _ => none
@@ -242,10 +249,12 @@ def psIrSpecializeRequestKey
           (psIrSpecializeKindPrefix request.kind)
           name)
 
-def psIrSpecializeSeenContains :
-    List String -> String -> Bool
-  | [], _ => false
-  | entry :: rest, key =>
+def psIrSpecializeSeenContains
+    (entries : List String)
+    (key : String) : Bool :=
+  match entries with
+  | List.nil => false
+  | List.cons entry rest =>
       if psStringEq entry key then
         true
       else
@@ -346,13 +355,14 @@ def psIrSpecializeRewriteTypeListWith
 
 def psIrSpecializeRewriteTypeWithFuel
     (module : PsVerifiedIrModule)
-    (substitution : List (String × PsVerifiedIrType)) :
-    Nat ->
-    PsVerifiedIrType ->
-    Except PsIrSpecializeError PsIrSpecializeTypeResult
-  | 0, _ =>
+    (substitution : List (String × PsVerifiedIrType))
+    (remainingFuel : Nat)
+    (type : PsVerifiedIrType) :
+    Except PsIrSpecializeError PsIrSpecializeTypeResult :=
+  match remainingFuel with
+  | 0 =>
       Except.error PsIrSpecializeError.fuelExhausted
-  | fuel + 1, type =>
+  | fuel + 1 =>
       let rewrite :=
         psIrSpecializeRewriteTypeWithFuel
           module
@@ -631,13 +641,14 @@ def psIrSpecializeRewriteAlternativesWith
 
 def psIrSpecializeRewriteExprWithFuel
     (module : PsVerifiedIrModule)
-    (substitution : List (String × PsVerifiedIrType)) :
-    Nat ->
-    PsVerifiedIrExpr ->
-    Except PsIrSpecializeError PsIrSpecializeExprResult
-  | 0, _ =>
+    (substitution : List (String × PsVerifiedIrType))
+    (remainingFuel : Nat)
+    (expression : PsVerifiedIrExpr) :
+    Except PsIrSpecializeError PsIrSpecializeExprResult :=
+  match remainingFuel with
+  | 0 =>
       Except.error PsIrSpecializeError.fuelExhausted
-  | fuel + 1, expression =>
+  | fuel + 1 =>
       let rewrite :=
         psIrSpecializeRewriteExprWithFuel
           module
@@ -1635,13 +1646,14 @@ def psIrSpecializeProcessRequest
       psIrSpecializeProcessDeclaration module state request
 
 def psIrSpecializeLoop
-    (module : PsVerifiedIrModule) :
-    Nat ->
-    PsIrSpecializeState ->
-    Except PsIrSpecializeError PsIrSpecializeState
-  | 0, _ =>
+    (module : PsVerifiedIrModule)
+    (remainingFuel : Nat)
+    (state : PsIrSpecializeState) :
+    Except PsIrSpecializeError PsIrSpecializeState :=
+  match remainingFuel with
+  | 0 =>
       Except.error PsIrSpecializeError.fuelExhausted
-  | fuel + 1, state =>
+  | fuel + 1 =>
       match state.pending with
       | [] => Except.ok state
       | request :: rest =>

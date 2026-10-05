@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.Checker.Recursor
+import Ps.KernelSelfHost.Checker.Recursor.Reduction
 
 /-
 Lean 4.34 binder/application comparison support.

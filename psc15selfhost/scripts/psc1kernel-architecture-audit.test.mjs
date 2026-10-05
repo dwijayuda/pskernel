@@ -111,3 +111,47 @@ test("reject target drift", (t) => {
   f.json("LEAN_4_34_CONFORMANCE.json", { target: { version: "4.35.0" } });
   assert.throws(() => auditArchitecture(f.root), /ARCH_TARGET_MISMATCH/);
 });
+
+test("reject a checker import across a configured layer fence", (t) => {
+  const f = fixture(t);
+  f.manifest.importFences = [{ from: ["Ps.KernelSelfHost.Checker."], forbidden: ["Ps.KernelSelfHost.SelfHost"] }];
+  f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
+  f.lean("Checker/State", "import Ps.KernelSelfHost.SelfHost\n");
+  assert.throws(() => auditArchitecture(f.root), /ARCH_IMPORT_FENCE/);
+});
+
+test("validate every forwarding shim for an owner with multiple legacy paths", (t) => {
+  const f = fixture(t);
+  f.manifest.canonicalOwners[0].legacyShims = ["Ps.KernelSelfHost.OldState"];
+  f.manifest.migration.migrationShims.push("Ps.KernelSelfHost.OldState");
+  f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
+  f.lean("OldState", "import Ps.KernelSelfHost.Checker.State\n");
+  assert.match(auditArchitecture(f.root), /closureModules=2/);
+  f.lean("OldState", "import Ps.KernelSelfHost.SelfHost\n");
+  assert.throws(() => auditArchitecture(f.root), /ARCH_NON_FORWARDING_SHIM/);
+});
+
+test("reject a registered shim without a declared owner", (t) => {
+  const f = fixture(t);
+  delete f.manifest.canonicalOwners[0].legacyShim;
+  f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
+  assert.throws(() => auditArchitecture(f.root), /ARCH_SHIM_OWNER_MISSING/);
+});
+
+test("reject duplicate recursion owners even outside the semantic closure", (t) => {
+  const f = fixture(t);
+  f.manifest.recursiveWiring = { module: "Ps.KernelSelfHost.Checker.State", symbols: ["testState"] };
+  f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
+  assert.match(auditArchitecture(f.root), /closureModules=2/);
+  f.lean("Hidden", "def testState : Bool := false\n");
+  assert.throws(() => auditArchitecture(f.root), /ARCH_WIRING_SYMBOL_OWNER/);
+});
+
+test("reject a recursion symbol moved away from its declared owner", (t) => {
+  const f = fixture(t);
+  f.manifest.recursiveWiring = { module: "Ps.KernelSelfHost.Checker.State", symbols: ["testState"] };
+  f.json("PSKERNEL_ARCHITECTURE.json", f.manifest);
+  f.lean("Checker/State", "");
+  f.lean("Hidden", "def testState : Bool := false\n");
+  assert.throws(() => auditArchitecture(f.root), /ARCH_WIRING_SYMBOL_OWNER/);
+});

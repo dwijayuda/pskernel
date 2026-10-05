@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.Checker.DefEq
+import Ps.KernelSelfHost.Checker.Knot
 
 structure PsKernelCheckerSession where
   context : PsKernelCheckerContext
@@ -58,12 +58,9 @@ def psKernelSessionWhnf
     (expr : PsKernelExpr) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerSession) :=
-  let defeq :=
-    psKernelIsDefEqWithFuel fuel;
+  let ops := psKernelCheckerOpsWithFuel fuel;
   match
-      psKernelWhnfWithRecursorFuel
-        fuel
-        defeq
+      ops.whnf
         session.context
         session.state
         expr with
@@ -85,12 +82,9 @@ def psKernelSessionInfer
     (expr : PsKernelExpr) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerSession) :=
-  let defeq :=
-    psKernelIsDefEqWithFuel fuel;
+  let ops := psKernelCheckerOpsWithFuel fuel;
   match
-      psKernelInferWithRecursorFuel
-        fuel
-        defeq
+      ops.infer
         session.context
         session.state
         expr with
@@ -112,17 +106,9 @@ def psKernelSessionCheck
     (expr : PsKernelExpr) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerSession) :=
-  let defeq :=
-    psKernelIsDefEqWithFuel fuel;
-  let whnf :=
-    psKernelWhnfWithRecursorFuel
-      fuel
-      defeq;
+  let ops := psKernelCheckerOpsWithFuel fuel;
   match
-      psKernelCheckWithFuel
-        fuel
-        whnf
-        defeq
+      ops.check
         session.context
         session.state
         expr with
@@ -188,9 +174,9 @@ def psKernelSessionIsDefEq
     (right : PsKernelExpr) :
     Except String
       (Prod Bool PsKernelCheckerSession) :=
+  let ops := psKernelCheckerOpsWithFuel fuel;
   match
-      psKernelIsDefEq
-        fuel
+      ops.defeq
         session.context
         session.state
         left

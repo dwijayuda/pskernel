@@ -222,6 +222,8 @@ lean_lib PsKernelSelfHost where
     `Ps.KernelSelfHost.Checker.State,
     `Ps.KernelSelfHost.CheckerState,
     `Ps.KernelSelfHost.Checker.Context,
+    `Ps.KernelSelfHost.Checker.Ops,
+    `Ps.KernelSelfHost.Checker.Knot,
     `Ps.KernelSelfHost.TypeCheckerBase,
     `Ps.KernelSelfHost.Checker.Reduction.PrimitiveData,
     `Ps.KernelSelfHost.Theory.Reduction.PrimitiveData,
@@ -304,6 +306,7 @@ lean_lib PsKernelSelfHost where
 lean_lib PsKernelSelfHostTestSupport where
   srcDir := "test"
   roots := #[
+    `KernelSelfHost.Foundation.CheckerOps,
     `KernelSelfHost.Foundation.Core,
     `KernelSelfHost.Foundation.Checking,
     `KernelSelfHost.Foundation.DefEqNested,

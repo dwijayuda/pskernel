@@ -1,7 +1,12 @@
 import KernelSelfHost.Foundation.AdmissionRuntime
+import KernelSelfHost.Foundation.CheckerOps
 
 def main : IO Unit :=
-  if !psKernelSelfHostNameTests then
+  if !psKernelCheckerOpsTests then
+    throw
+      (IO.userError
+        "PSC1_KERNEL_SELFHOST_CHECKER_OPS_CONFORMANCE: FAIL")
+  else if !psKernelSelfHostNameTests then
     throw
       (IO.userError
         "PSC1_KERNEL_SELFHOST_NAME_DIFFERENTIAL: FAIL")
@@ -72,4 +77,3 @@ def main : IO Unit :=
   else
     IO.println
       "PSC1_KERNEL_SELFHOST_FOUNDATION_DIFFERENTIAL: PASS"
-

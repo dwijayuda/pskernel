@@ -113,7 +113,7 @@ without a node-count/substitution traversal.
 23. `Checker/Inference.lean`
 24. `Checker/Recursor/Analysis.lean`
 25. `Checker/Recursor/Reduction.lean`
-26. `Checker/Recursor.lean`
+26. `Checker/Ops.lean` (internal callback contract)
 
 ### 3.3 Definitional equality
 
@@ -125,7 +125,7 @@ without a node-count/substitution traversal.
 32. `Checker/DefEq/FinalRules.lean`
 33. `Checker/DefEq/Shortcuts.lean`
 34. `Checker/DefEq/FullShape.lean`
-35. `Checker/DefEq.lean`
+35. `Checker/Knot.lean` (recursor/defeq wiring and public operations)
 
 `Checker/DefEq/BinderSpines.lean` isolates binder/application congruence.
 `Checker/DefEq/Quick.lean` isolates cheap pre-reduction decisions and pair-cache
@@ -133,15 +133,19 @@ semantics. `Checker/DefEq/DeltaStep.lean` isolates one-step definition
 selection/unfolding, while `LazyDelta.lean` preserves the observable iterative
 Lean 4.34 unfolding order. `FinalRules.lean` isolates proof/proposition
 handling, structure eta, string literal expansion and unit-like structures.
-`Shortcuts.lean` contains reflection, projection and function-eta shortcuts.
+`Shortcuts.lean` contains reflection and function-eta shortcuts. The projection
+shortcut lives in `Checker/Knot.lean` because it constructs a recursor-aware
+core-WHNF callback with an expression-derived budget.
 `FullShape.lean` contains final same-shape/fallback rules.
 
-`Checker/DefEq.lean` stays intentionally small so it reads as the
-observable algorithmic-equality order rather than a collection of helpers.
+`Checker/Knot.lean` owns the existing bounded recursor workers and top-level
+defeq orchestration. Leaf rule modules receive callbacks and never import Knot
+or Session. The observable algorithmic-equality order and fuel transitions are
+preserved.
 
 ### 3.4 Declaration and inductive admission
 
-36. `CheckerSession.lean`
+36. `Checker/Session.lean`
 37. `Theory/Admission/Validation.lean`
 38. `Theory/Admission/Declarations.lean`
 39. `Kernel.lean` (compatibility umbrella)
@@ -316,7 +320,7 @@ Checker/Recursor/Reduction.lean
       |
       | Quot / inductive rule selection and computation
       v
-Checker/Recursor.lean
+Checker/Knot.lean
          bounded integration with WHNF and inference
 ```
 
@@ -689,4 +693,13 @@ or native evaluation. It must not duplicate or redefine type-theory rules.
 Checker implementations now live under `Checker/`; former `TypeChecker*` and
 `Theory/{Reduction,Inference,Recursor,DefEq}` modules only forward imports.
 Definition bodies, fuel transitions and rule ordering are unchanged by this move.
-The next checkpoint centralizes cross-component callback wiring in `Checker/Knot`.
+`Checker/Knot` now owns cross-component callback wiring, including the
+projection shortcut. `Checker/Ops` declares six operations: infer, check, whnfCore,
+whnf, defeq and reduceRecursor. `Checker/Session` delegates through those operations;
+check continues to select the fully checked path. Existing function bodies were
+moved verbatim. The architecture audit enforces the wiring symbol owner, import
+fences and forwarding-only legacy paths.
+
+The focused CheckerOps conformance module checks success and zero-fuel rejection
+for all six operations. It also checks that full session checking rejects an
+ill-typed application after infer-only checking has populated its cache.

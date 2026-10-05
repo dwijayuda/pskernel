@@ -10,7 +10,7 @@
   "semanticRootPath": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
   "semanticModulePrefix": "Ps.KernelSelfHost.",
   "migration": {
-    "phase": "B3-checker-hierarchy",
+    "phase": "B3-checker-knot",
     "finalArchitectureAdopted": true,
     "finalArchitectureImplemented": false,
     "compatibilityShimsAllowedDuringMigration": true,
@@ -43,7 +43,9 @@
       "Ps.KernelSelfHost.Theory.DefEq.FullShape",
       "Ps.KernelSelfHost.Theory.DefEq.LazyDelta",
       "Ps.KernelSelfHost.Theory.DefEq.Quick",
-      "Ps.KernelSelfHost.Theory.DefEq.Shortcuts"
+      "Ps.KernelSelfHost.Theory.DefEq.Shortcuts",
+      "Ps.KernelSelfHost.Checker.Recursor",
+      "Ps.KernelSelfHost.Checker.DefEq"
     ]
   },
   "semanticRoles": [
@@ -159,19 +161,8 @@
       "legacyShim": "Ps.KernelSelfHost.TypeCheckerInfer"
     },
     {
-      "area": "checker-recursor",
-      "module": "Ps.KernelSelfHost.Checker.Recursor",
-      "legacyShim": "Ps.KernelSelfHost.TypeCheckerRecursor"
-    },
-    {
       "area": "checker-defeq-support",
-      "module": "Ps.KernelSelfHost.Checker.DefEq.Support",
-      "legacyShim": "Ps.KernelSelfHost.TypeCheckerDefEqSupport"
-    },
-    {
-      "area": "checker-defeq",
-      "module": "Ps.KernelSelfHost.Checker.DefEq",
-      "legacyShim": "Ps.KernelSelfHost.TypeCheckerDefEq"
+      "module": "Ps.KernelSelfHost.Checker.DefEq.Support"
     },
     {
       "area": "checker-reduction-kernelreductions",
@@ -215,38 +206,102 @@
     },
     {
       "area": "checker-defeq-binderspines",
-      "module": "Ps.KernelSelfHost.Checker.DefEq.BinderSpines",
-      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.BinderSpines"
+      "module": "Ps.KernelSelfHost.Checker.DefEq.BinderSpines"
     },
     {
       "area": "checker-defeq-deltastep",
-      "module": "Ps.KernelSelfHost.Checker.DefEq.DeltaStep",
-      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.DeltaStep"
+      "module": "Ps.KernelSelfHost.Checker.DefEq.DeltaStep"
     },
     {
       "area": "checker-defeq-finalrules",
-      "module": "Ps.KernelSelfHost.Checker.DefEq.FinalRules",
-      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.FinalRules"
+      "module": "Ps.KernelSelfHost.Checker.DefEq.FinalRules"
     },
     {
       "area": "checker-defeq-fullshape",
-      "module": "Ps.KernelSelfHost.Checker.DefEq.FullShape",
-      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.FullShape"
+      "module": "Ps.KernelSelfHost.Checker.DefEq.FullShape"
     },
     {
       "area": "checker-defeq-lazydelta",
-      "module": "Ps.KernelSelfHost.Checker.DefEq.LazyDelta",
-      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.LazyDelta"
+      "module": "Ps.KernelSelfHost.Checker.DefEq.LazyDelta"
     },
     {
       "area": "checker-defeq-quick",
-      "module": "Ps.KernelSelfHost.Checker.DefEq.Quick",
-      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.Quick"
+      "module": "Ps.KernelSelfHost.Checker.DefEq.Quick"
     },
     {
       "area": "checker-defeq-shortcuts",
-      "module": "Ps.KernelSelfHost.Checker.DefEq.Shortcuts",
-      "legacyShim": "Ps.KernelSelfHost.Theory.DefEq.Shortcuts"
+      "module": "Ps.KernelSelfHost.Checker.DefEq.Shortcuts"
+    },
+    {
+      "area": "checker-ops",
+      "module": "Ps.KernelSelfHost.Checker.Ops"
+    },
+    {
+      "area": "checker-knot",
+      "module": "Ps.KernelSelfHost.Checker.Knot",
+      "legacyShims": [
+        "Ps.KernelSelfHost.Checker.Recursor",
+        "Ps.KernelSelfHost.Checker.DefEq",
+        "Ps.KernelSelfHost.TypeCheckerRecursor",
+        "Ps.KernelSelfHost.TypeCheckerDefEqSupport",
+        "Ps.KernelSelfHost.TypeCheckerDefEq",
+        "Ps.KernelSelfHost.Theory.DefEq.BinderSpines",
+        "Ps.KernelSelfHost.Theory.DefEq.DeltaStep",
+        "Ps.KernelSelfHost.Theory.DefEq.FinalRules",
+        "Ps.KernelSelfHost.Theory.DefEq.FullShape",
+        "Ps.KernelSelfHost.Theory.DefEq.LazyDelta",
+        "Ps.KernelSelfHost.Theory.DefEq.Quick",
+        "Ps.KernelSelfHost.Theory.DefEq.Shortcuts"
+      ]
+    }
+  ],
+  "recursiveWiring": {
+    "module": "Ps.KernelSelfHost.Checker.Knot",
+    "symbols": [
+      "psKernelReduceRecursorBoundedWithFuel",
+      "psKernelWhnfWithRecursorFuel",
+      "psKernelWhnfCoreWithRecursorFuel",
+      "psKernelInferWithRecursorFuel",
+      "psKernelDefEqProjectionShortcut",
+      "psKernelIsDefEqWithFuel",
+      "psKernelIsDefEq",
+      "psKernelCheckerOpsWithFuel"
+    ]
+  },
+  "importFences": [
+    {
+      "from": [
+        "Ps.KernelSelfHost.Checker."
+      ],
+      "forbidden": [
+        "Ps.KernelSelfHost.Admission.",
+        "Ps.KernelSelfHost.Theory.Admission.",
+        "Ps.KernelSelfHost.Theory.Inductive.",
+        "Ps.KernelSelfHost.Theory.Mutual.",
+        "Ps.KernelSelfHost.Theory.Nested.",
+        "Ps.KernelSelfHost.Theory.Quot.",
+        "Ps.KernelSelfHost.Kernel",
+        "Ps.KernelSelfHost.Inductive",
+        "Ps.KernelSelfHost.InductiveAdmission",
+        "Ps.KernelSelfHost.MutualInductive",
+        "Ps.KernelSelfHost.NestedInductive",
+        "Ps.KernelSelfHost.Quot"
+      ]
+    },
+    {
+      "from": [
+        "Ps.KernelSelfHost.Checker.Reduction.",
+        "Ps.KernelSelfHost.Checker.Inference",
+        "Ps.KernelSelfHost.Checker.Inference.",
+        "Ps.KernelSelfHost.Checker.Recursor.",
+        "Ps.KernelSelfHost.Checker.DefEq.",
+        "Ps.KernelSelfHost.Checker.Projection",
+        "Ps.KernelSelfHost.Checker.Ops"
+      ],
+      "forbidden": [
+        "Ps.KernelSelfHost.Checker.Knot",
+        "Ps.KernelSelfHost.Checker.Session"
+      ]
     }
   ]
 }

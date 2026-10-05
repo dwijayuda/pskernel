@@ -59,6 +59,8 @@ function importsOf(source) {
 
 const queue = [manifest.semanticRootModule];
 const seen = new Set();
+const matchesModule = (moduleName, selector) =>
+  selector.endsWith(".") ? moduleName.startsWith(selector) : moduleName === selector;
 
 while (queue.length > 0) {
   const moduleName = queue.shift();
@@ -72,6 +74,12 @@ while (queue.length > 0) {
 
   const source = fs.readFileSync(file, "utf8");
   for (const imported of importsOf(source)) {
+    for (const fence of manifest.importFences ?? []) {
+      if (fence.from.some((selector) => matchesModule(moduleName, selector)) &&
+          fence.forbidden.some((selector) => matchesModule(imported, selector))) {
+        throw new Error("PSC1KERNEL_ARCH_IMPORT_FENCE: " + moduleName + ": " + imported);
+      }
+    }
     for (const forbidden of manifest.forbiddenSemanticImportPrefixes) {
       if (imported.startsWith(forbidden)) {
         throw new Error(
@@ -153,19 +161,24 @@ for (const shim of manifest.migration.migrationShims ?? []) {
 const ownerAreas = new Set();
 const ownerModules = new Set();
 const registeredShims = new Set(manifest.migration.migrationShims ?? []);
+const ownedShims = new Set();
 for (const owner of manifest.canonicalOwners ?? []) {
   if (ownerAreas.has(owner.area) || ownerModules.has(owner.module)) {
     throw new Error("PSC1KERNEL_ARCH_DUPLICATE_OWNER: " + owner.area);
   }
   ownerAreas.add(owner.area);
   ownerModules.add(owner.module);
-  if (owner.legacyShim) {
-    if (!registeredShims.has(owner.legacyShim)) {
-      throw new Error("PSC1KERNEL_ARCH_UNREGISTERED_SHIM: " + owner.legacyShim);
+  for (const shim of [...(owner.legacyShim ? [owner.legacyShim] : []), ...(owner.legacyShims ?? [])]) {
+    if (!registeredShims.has(shim)) {
+      throw new Error("PSC1KERNEL_ARCH_UNREGISTERED_SHIM: " + shim);
     }
-    const shimSource = maskLeanNonCode(fs.readFileSync(modulePath(owner.legacyShim), "utf8")).trim();
+    if (ownedShims.has(shim)) {
+      throw new Error("PSC1KERNEL_ARCH_DUPLICATE_SHIM_OWNER: " + shim);
+    }
+    ownedShims.add(shim);
+    const shimSource = maskLeanNonCode(fs.readFileSync(modulePath(shim), "utf8")).trim();
     if (shimSource !== "import " + owner.module) {
-      throw new Error("PSC1KERNEL_ARCH_NON_FORWARDING_SHIM: " + owner.legacyShim);
+      throw new Error("PSC1KERNEL_ARCH_NON_FORWARDING_SHIM: " + shim);
     }
   }
   if (!seen.has(owner.module)) {
@@ -175,6 +188,38 @@ for (const owner of manifest.canonicalOwners ?? []) {
         ": " +
         owner.module
     );
+  }
+}
+
+for (const shim of registeredShims) {
+  if (!ownedShims.has(shim)) {
+    throw new Error("PSC1KERNEL_ARCH_SHIM_OWNER_MISSING: " + shim);
+  }
+}
+
+if (manifest.recursiveWiring) {
+  const wiring = manifest.recursiveWiring;
+  if (!ownerModules.has(wiring.module)) {
+    throw new Error("PSC1KERNEL_ARCH_WIRING_OWNER_MISSING: " + wiring.module);
+  }
+  const definitions = new Map(wiring.symbols.map((symbol) => [symbol, []]));
+  function inspectDefinitions(directory) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const file = path.join(directory, entry.name);
+      if (entry.isDirectory()) inspectDefinitions(file);
+      else if (entry.isFile() && entry.name.endsWith(".lean")) {
+        const source = maskLeanNonCode(fs.readFileSync(file, "utf8"));
+        for (const match of source.matchAll(/^\s*(?:(?:private|protected|noncomputable|partial)\s+)*def\s+(\w+)\b/gmu)) {
+          definitions.get(match[1])?.push(file);
+        }
+      }
+    }
+  }
+  inspectDefinitions(sourceRoot);
+  for (const [symbol, files] of definitions) {
+    if (files.length !== 1 || files[0] !== modulePath(wiring.module)) {
+      throw new Error("PSC1KERNEL_ARCH_WIRING_SYMBOL_OWNER: " + symbol);
+    }
   }
 }
 

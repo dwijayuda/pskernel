@@ -153,6 +153,13 @@ tightens allowed imports as canonical modules move.
 
 ### B3. Canonical Checker hierarchy
 
+**Ownership implemented:** Checker hierarchy, Ops contract, single Knot owner and
+Session delegation. Existing fuel workers and algorithm ordering are preserved;
+legacy imports forward to canonical owners outside the semantic root. Architecture
+CI enforces callback-leaf import fences and unique wiring ownership. Context still
+contains existing builtin helpers; Core/Environment decomposition remains later
+structural work.
+
 Move existing checker components under one `Checker/` owner without changing
 algorithms:
 
@@ -175,6 +182,9 @@ Checker/
 PSC1-proven curried callback patterns may remain internally.
 
 ### B4. Unified admission hierarchy
+
+**Next structural checkpoint.** Preserve the existing ordinary/mutual/nested
+algorithms and phase decomposition while moving their ownership.
 
 Move declaration, Quot and inductive admission under `Admission/`. Ordinary,
 mutual and nested inductives live under one `Admission/Inductive/` owner while

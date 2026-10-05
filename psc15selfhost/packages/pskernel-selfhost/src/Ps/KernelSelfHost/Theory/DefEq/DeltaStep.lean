@@ -1,3 +1,3 @@
-import Ps.KernelSelfHost.Checker.DefEq.DeltaStep
+import Ps.KernelSelfHost.Checker.Knot
 
-/- Migration compatibility shim; canonical source imports the owner directly. -/
+/- Migration compatibility shim; recursive wiring is owned by Checker/Knot. -/

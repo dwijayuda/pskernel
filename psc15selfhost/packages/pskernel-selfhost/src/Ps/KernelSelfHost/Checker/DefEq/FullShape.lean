@@ -9,7 +9,7 @@ After lazy delta and full projection WHNF stop making progress, this module:
 - then applies structure eta, string-literal expansion, and unit-like
   structure equality.
 
-This module does not choose when to run these rules; TypeCheckerDefEq.lean
+This module does not choose when to run these rules; Checker/Knot.lean
 remains the readable top-level orchestration.
 -/
 

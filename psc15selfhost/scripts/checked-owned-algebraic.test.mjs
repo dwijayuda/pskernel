@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {createHash} from 'node:crypto';
 import {checkOwnedAdmissions} from './checked-owned-kernel.mjs';
-import {family,value,eliminate,resultWitness,wireBatch,N,Z,S,U,B,C,app,pi,lam,member,literal,d,T} from '../packages/pskernel-core/test/algebraic-values.mjs';
+import {family,value,eliminate,resultWitness,wireBatch,N,Z,S,U,B,C,app,pi,lam,member,literal,d,T} from '../packages/pskernel-core.old2/test/algebraic-values.mjs';
 const fixture=fs.readFileSync(new URL('./fixtures/owned-algebraic-list.json',import.meta.url),'utf8');
 test('exact preserved PsKernelList declaration is admitted through the owned production boundary',async()=>{
  assert.equal(createHash('sha256').update(fixture).digest('hex'),'1a1dc0ac346acaa79411efb6b91f029e6b1444aa8a39456ff6b993720c548d48');const r=await checkOwnedAdmissions(fixture);assert.equal(r.accepted,true);assert.equal(r.admissionCount,1);

@@ -10,6 +10,7 @@ def psRustRuntimePrelude : String :=
   "fn __ps_nat_mul(a: &PsNat, b: &PsNat) -> PsNat { a * b }\n" ++
   "fn __ps_nat_div(a: &PsNat, b: &PsNat) -> PsNat { if b.is_zero() { PsNat::zero() } else { a / b } }\n" ++
   "fn __ps_nat_mod(a: &PsNat, b: &PsNat) -> PsNat { if b.is_zero() { a.clone() } else { a % b } }\n" ++
+  "fn __ps_uint8_of_nat(value: &PsNat) -> u8 { (value % PsNat::from(256u16)).to_u8().expect(\"mod 256 fits u8\") }\n" ++
   "fn __ps_int_of_nat(value: &PsNat) -> PsInt { PsInt::from(value.clone()) }\n" ++
   "fn __ps_int_neg_succ(value: &PsNat) -> PsInt { -(PsInt::from(value.clone()) + PsInt::from(1u8)) }\n" ++
   "fn __ps_int_neg(value: &PsInt) -> PsInt { -value }\n" ++

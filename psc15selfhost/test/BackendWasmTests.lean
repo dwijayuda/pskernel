@@ -1,4 +1,5 @@
 import Ps.BackendWasm.Lower
+import Ps.BackendWasm.Binary
 
 def psWasmProfile32 : PsWasmTargetProfile :=
   { wordSize := PsWasmWordSize.wasm32 }
@@ -970,6 +971,49 @@ def psTestWasmClosureLowering : Bool :=
               [psWasmClosureTestLambdaName]
       | _, _, _ => false
 
+def psWasmUInt8OfNatTestState : PsWasmLowerState :=
+  {
+    nextLocalIndex := 0
+    localTypes := []
+    currentDefinition := "test"
+    nextLambdaId := 0
+    generatedStructures := []
+    generatedFunctionTypes := []
+    generatedFunctions := []
+    generatedFunctionRefs := []
+  }
+
+def psWasmUInt8OfNatTestLower
+    (_expected : Option PsWasmValueType)
+    (state : PsWasmLowerState)
+    (_expr : PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  Except.ok {
+    instructions := [PsWasmInstruction.localGet 0]
+    state := state
+  }
+
+def psTestWasmUInt8OfNatIntrinsic : Bool :=
+  match
+      psWasmLowerIntrinsicWith
+        psWasmProfile32
+        psWasmUInt8OfNatTestLower
+        psWasmUInt8OfNatTestState
+        PsVerifiedIrIntrinsic.uint8OfNat
+        []
+        [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 300)] with
+  | Except.ok {
+      instructions := [
+        PsWasmInstruction.localGet 0,
+        PsWasmInstruction.call functionName,
+        PsWasmInstruction.i32Const 255,
+        PsWasmInstruction.i32And
+      ],
+      state := _
+    } =>
+      psStringEq functionName psWasmNatToU32Fn
+  | _ => false
+
 def psWasmAnswerModule : PsWasmModule :=
   {
     structures := []
@@ -1062,6 +1106,7 @@ def psTestWasmNatConstructorIdentityInvariant : Bool :=
       && psTestWasmWordProfiles
       && psTestWasmMachineIntegerOps
       && psTestWasmMachineIntegerLiterals
+      && psTestWasmUInt8OfNatIntrinsic
       && psTestWasmFloatOps
       && psTestWasmVerifiedIrLowering
       && psTestWasmLetLowering

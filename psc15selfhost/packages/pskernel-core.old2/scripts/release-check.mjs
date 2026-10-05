@@ -25,7 +25,7 @@ if(process.argv[1]&&path.resolve(process.argv[1])===here){
  const root=path.resolve(path.dirname(here),'..');
  const manifest=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
  const capabilities=JSON.parse(fs.readFileSync(path.join(root,'manifests/CAPABILITIES.json'),'utf8'));
- const api=await import('@proofscript/pskernel-core');
+ const api=await import('@proofscript/pskernel-core.old2');
  const errors=releaseBlockers(manifest,capabilities,Object.keys(api));
  console.log(JSON.stringify({releaseReady:errors.length===0,blockers:errors},null,2));
  if(errors.length)process.exitCode=1;

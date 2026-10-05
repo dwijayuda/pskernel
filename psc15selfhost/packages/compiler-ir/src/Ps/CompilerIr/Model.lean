@@ -94,6 +94,7 @@ inductive PsVerifiedIrIntrinsic where
   | machineIntCompare
       (type : PsVerifiedIrMachineIntegerType)
       (operation : PsVerifiedIrIntegerCompareOp)
+  | uint8OfNat
   | floatBinary
       (type : PsVerifiedIrFloatingType)
       (operation : PsVerifiedIrFloatBinaryOp)

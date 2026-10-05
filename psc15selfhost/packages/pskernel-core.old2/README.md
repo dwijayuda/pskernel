@@ -1,6 +1,8 @@
-# @proofscript/pskernel-core
+# @proofscript/pskernel-core.old2
 
-**0.1.0-checker.14 — private experimental dependent term-checker checkpoint.**
+**0.1.0-checker.14 — archived legacy private experimental dependent term-checker checkpoint.**
+
+The `pskernel-core` name is intentionally free for the newer kernel implementation; this package is preserved only as `pskernel-core.old2`.
 
 Regenerated with the pinned PSC seed, with all 651 tests passing and fresh build
 and reference evidence. See `../../docs/continuity/OWNED_UNIFORM_ALGEBRAIC_2026-10-03.md`.

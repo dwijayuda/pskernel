@@ -102,6 +102,7 @@ def psRustCoverageIntrinsicName
   | PsVerifiedIrIntrinsic.natNe => "Nat.ne"
   | PsVerifiedIrIntrinsic.natLe => "Nat.le"
   | PsVerifiedIrIntrinsic.natLt => "Nat.lt"
+  | PsVerifiedIrIntrinsic.uint8OfNat => "UInt8.ofNat"
   | PsVerifiedIrIntrinsic.intOfNat => "Int.ofNat"
   | PsVerifiedIrIntrinsic.intRepr => "Int.repr"
   | PsVerifiedIrIntrinsic.intNegSucc => "Int.negSucc"
@@ -155,6 +156,7 @@ def psRustCoverageIntrinsicArity
   | PsVerifiedIrIntrinsic.natNe => 2
   | PsVerifiedIrIntrinsic.natLe => 2
   | PsVerifiedIrIntrinsic.natLt => 2
+  | PsVerifiedIrIntrinsic.uint8OfNat => 1
   | PsVerifiedIrIntrinsic.intOfNat => 1
   | PsVerifiedIrIntrinsic.intRepr => 1
   | PsVerifiedIrIntrinsic.intNegSucc => 1

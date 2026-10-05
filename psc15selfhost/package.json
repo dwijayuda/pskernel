@@ -23,7 +23,7 @@
     "test:kernel-contract": "node --test scripts/kernel-contract.test.mjs scripts/kernel-checked-session.test.mjs scripts/checked-kernel-provider.test.mjs",
     "check:checked-contract": "npm run test:kernel-contract && node scripts/check-owned-kernel-default-source.mjs",
     "check:kernel-owned": "node scripts/check-owned-kernel-receipt.mjs",
-    "test:kernel-owned": "node --test packages/pskernel-core/test/*.test.mjs",
+    "test:kernel-owned": "node --test packages/pskernel-core.old2/test/*.test.mjs",
     "check:layout": "node scripts/check-layout-drift.mjs",
     "check:selfhost-project-prelude": "node scripts/check-selfhost-project-prelude.mjs",
     "check:selfhost-foundation": "node scripts/check-selfhost-foundation.mjs",
@@ -137,7 +137,7 @@
     "fixed-point": "npm run bootstrap && npm run selfhost && npm run verify:selfhost",
     "build": "npm run build:auto",
     "test": "npm run test:all",
-    "check": "npm run check:workspace && npm run check:source:all && npm run check:kernel-core-source && npm run check:checked-contract && npm run check:layout && npm run check:selfhost-project-prelude && npm run check:selfhost-foundation && npm run check:selfhost-source-syntax && npm run check:structure-recursor-normalization && npm run check:bootstrap-closure && npm run check:ir-neutrality && npm run selfhost:guard && npm run test:all",
+    "check": "npm run check:workspace && npm run check:source:all && npm run check:portable-selfhost-profile && npm run check:kernel-core-source && npm run check:checked-contract && npm run check:layout && npm run check:selfhost-project-prelude && npm run check:selfhost-foundation && npm run check:selfhost-source-syntax && npm run check:structure-recursor-normalization && npm run check:bootstrap-closure && npm run check:ir-neutrality && npm run selfhost:guard && npm run test:all",
     "selfhost:emit-ps": "npm run bootstrap:emit",
     "selfhost:build-bootstrap-js": "npm run bootstrap:compiler",
     "selfhost:bootstrap": "npm run bootstrap",
@@ -163,7 +163,10 @@
     "check:runtime-semantics": "npm run test:runtime-semantics",
     "test:backend-js-unit": "lake exe psc1_backend_js_tests",
     "test:backend-js-differential": "node scripts/backend-js-differential.test.mjs",
-    "test:backend-js": "npm run test:backend-js-unit && npm run test:backend-js-differential"
+    "test:backend-js": "npm run test:backend-js-unit && npm run test:backend-js-differential",
+    "test:portable-selfhost-profile": "node --test scripts/portable-selfhost-profile.test.mjs",
+    "check:portable-selfhost-profile": "npm run test:portable-selfhost-profile && node scripts/portable-selfhost-profile.mjs",
+    "check:portable-selfhost-contract": "node scripts/portable-selfhost-contract.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

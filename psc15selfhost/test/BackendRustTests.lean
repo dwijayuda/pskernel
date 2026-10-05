@@ -62,6 +62,15 @@ def psTestBackendRustIntrinsic : Bool :=
   | Except.ok output =>
       output.contains "__ps_nat_add(&((x).clone()), &((__ps_nat_lit(\"1\")).clone()))"
 
+def psTestBackendRustUInt8OfNat : Bool :=
+  match
+      psRustEmitIntrinsicFromPrinted
+        PsVerifiedIrIntrinsic.uint8OfNat
+        ["value"] with
+  | Except.error _ => false
+  | Except.ok output =>
+      psStringEq output "__ps_uint8_of_nat(&(value))"
+
 def psBackendRustAdtModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -1276,6 +1285,7 @@ structure PsBackendRustNamedTest where
 def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "identity module", passed := psTestBackendRustIdentity },
   { name := "Nat intrinsic", passed := psTestBackendRustIntrinsic },
+  { name := "UInt8.ofNat intrinsic", passed := psTestBackendRustUInt8OfNat },
   { name := "structure and inductive", passed := psTestBackendRustAdt },
   { name := "Char and String intrinsics", passed := psTestBackendRustStringIntrinsics },
   { name := "Array intrinsics", passed := psTestBackendRustArrayIntrinsics },

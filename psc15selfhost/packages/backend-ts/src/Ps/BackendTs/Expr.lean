@@ -234,6 +234,14 @@ def psTsEmitIntrinsicFromPrinted
           Except.ok
             (psTsEmitMachineIntegerCompare integerOperation left right);
       psTsPrinted2 emit arguments
+  | .uint8OfNat =>
+      let emit : String -> Except PsTsEmitError String :=
+        fun (value : String) =>
+          Except.ok
+            (psTsJoin
+              ""
+              ["Number(BigInt.asUintN(8, ", value, "))"]);
+      psTsPrinted1 emit arguments
   | .floatBinary type floatOperation =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>

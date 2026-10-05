@@ -267,6 +267,17 @@ def psTestBackendTsSharedNumericIntrinsics : Bool :=
       output.contains "(((left + right)) >>> 0)"
         && output.contains "Math.fround((left + right))"
 
+def psTestBackendTsUInt8OfNat : Bool :=
+  match
+      psTsEmitIntrinsicFromPrinted
+        PsVerifiedIrIntrinsic.uint8OfNat
+        ["value"] with
+  | Except.error _ => false
+  | Except.ok output =>
+      psStringEq
+        output
+        "Number(BigInt.asUintN(8, value))"
+
 def psTestBackendTsEtaInlining : Bool :=
   let nat := PsVerifiedIrType.primitive .nat
   let fn := PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "local" nat] nat (.var "local")
@@ -314,7 +325,8 @@ def psBackendTsTests : List PsBackendTsNamedTest := [
   { name := "Nat intrinsic", passed := psTestBackendTsIntrinsic },
   { name := "machine integer literals", passed := psTestBackendTsMachineLiterals },
   { name := "target word literal fails closed", passed := psTestBackendTsTargetWordLiteralFailsClosed },
-  { name := "shared numeric intrinsics", passed := psTestBackendTsSharedNumericIntrinsics }
+  { name := "shared numeric intrinsics", passed := psTestBackendTsSharedNumericIntrinsics },
+  { name := "UInt8.ofNat intrinsic", passed := psTestBackendTsUInt8OfNat }
 ]
 
 def psRunBackendTsTests : List PsBackendTsNamedTest -> IO Bool

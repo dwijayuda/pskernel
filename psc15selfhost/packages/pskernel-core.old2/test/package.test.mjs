@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import * as api from '@proofscript/pskernel-core';
+import * as api from '@proofscript/pskernel-core.old2';
 const manifest=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));
 test('exports only immutable non-authoritative metadata',()=> {
   assert.deepEqual(Object.keys(api),['kernelInfo']);
@@ -31,5 +31,5 @@ test('Lean target is pinned, not a compatibility claim',()=> {
   assert.equal(api.kernelInfo.nativeEvaluation,'excluded-from-target-profile');
 });
 test('internal generated representation has no public package export',async()=> {
-  await assert.rejects(import('@proofscript/pskernel-core/dist/foundation.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});
+  await assert.rejects(import('@proofscript/pskernel-core.old2/dist/foundation.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});
 });

@@ -55,6 +55,10 @@ jobs:
         working-directory: psc15selfhost
         run: node check-psc1-source.mjs --all-portable
 
+      - name: Enforce portable self-host implementation profiles
+        working-directory: psc15selfhost
+        run: npm run check:portable-selfhost-profile
+
       - name: Check workspace and bootstrap composition policy
         working-directory: psc15selfhost
         run: |
@@ -76,13 +80,16 @@ jobs:
             PsDriverTs \
             PsBackendRust \
             PsDriverRust \
+            PsBackendWasm \
             psc1 \
             psc1_erasure_tests \
             psc2_minimal_selfhost_tests \
             psc1_backend_ts_tests \
             psc1_backend_js_tests \
             psc1_backend_js_diff_fixture \
-            psc1_backend_rust_source_tests
+            psc1_backend_rust_source_tests \
+            psc1_backend_wasm_tests \
+            psc1_backend_wasm_binary_smoke
 
       - name: Run VerifiedIR and erasure corpus
         working-directory: psc15selfhost
@@ -107,6 +114,16 @@ jobs:
       - name: Run Rust source driver corpus
         working-directory: psc15selfhost
         run: lake exe psc1_backend_rust_source_tests
+
+      - name: Run WebAssembly backend corpus
+        working-directory: psc15selfhost
+        run: |
+          lake exe psc1_backend_wasm_tests
+          lake exe psc1_backend_wasm_binary_smoke
+
+      - name: Self-check portable implementation profiles
+        working-directory: psc15selfhost
+        run: npm run check:portable-selfhost-contract
 
       - name: Build checked Lean provider integration
         working-directory: psc15selfhost/lean-checked

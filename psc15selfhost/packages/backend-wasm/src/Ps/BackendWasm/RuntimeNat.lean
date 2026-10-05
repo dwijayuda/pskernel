@@ -1,4 +1,5 @@
 import Ps.BackendWasm.Model
+import Ps.Foundation.List
 
 def psWasmNatName : String := "ProofScript.Nat"
 def psWasmNatZeroName : String := "ProofScript.Nat.Zero"
@@ -35,19 +36,19 @@ def psWasmNatRuntimeStructures : List PsWasmStructType :=
   [
     {
       name := psWasmNatName
-      superType := none
+      superType := Option.none
       isFinal := false
       fields := []
     },
     {
       name := psWasmNatZeroName
-      superType := some psWasmNatName
+      superType := Option.some psWasmNatName
       isFinal := true
       fields := []
     },
     {
       name := psWasmNatBit0Name
-      superType := some psWasmNatName
+      superType := Option.some psWasmNatName
       isFinal := true
       fields := [
         {
@@ -61,7 +62,7 @@ def psWasmNatRuntimeStructures : List PsWasmStructType :=
     -- preserve Nat constructor identity after canonicalization.
     {
       name := psWasmNatBit1Name
-      superType := some psWasmNatName
+      superType := Option.some psWasmNatName
       isFinal := true
       fields := [
         {
@@ -76,7 +77,7 @@ def psWasmNatRuntimeStructures : List PsWasmStructType :=
     },
         {
       name := psWasmNatDivModName
-      superType := none
+      superType := Option.none
       isFinal := true
       fields := [
         {
@@ -95,7 +96,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
   [
     {
       name := psWasmNatZeroFn
-      typeName := none
+      typeName := Option.none
       parameters := []
       results := [psWasmNatRef]
       locals := []
@@ -105,19 +106,19 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatHalfFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef]
       results := [psWasmNatRef]
       locals := []
       body := [
         PsWasmInstruction.localGet 0,
         PsWasmInstruction.refTest psWasmNatZeroName,
-        PsWasmInstruction.ifStart (some psWasmNatRef),
+        PsWasmInstruction.ifStart (Option.some psWasmNatRef),
           PsWasmInstruction.localGet 0,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 0,
           PsWasmInstruction.refTest psWasmNatBit0Name,
-          PsWasmInstruction.ifStart (some psWasmNatRef),
+          PsWasmInstruction.ifStart (Option.some psWasmNatRef),
             PsWasmInstruction.localGet 0,
             PsWasmInstruction.refCast psWasmNatBit0Name,
             PsWasmInstruction.structGet psWasmNatBit0Name 0,
@@ -131,7 +132,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatLowFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef]
       results := [PsWasmValueType.i32]
       locals := []
@@ -142,14 +143,14 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatMkBit0Fn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef]
       results := [psWasmNatRef]
       locals := []
       body := [
         PsWasmInstruction.localGet 0,
         PsWasmInstruction.refTest psWasmNatZeroName,
-        PsWasmInstruction.ifStart (some psWasmNatRef),
+        PsWasmInstruction.ifStart (Option.some psWasmNatRef),
           PsWasmInstruction.localGet 0,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 0,
@@ -159,7 +160,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatBit1Fn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef]
       results := [psWasmNatRef]
       locals := []
@@ -171,20 +172,20 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatSuccFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef]
       results := [psWasmNatRef]
       locals := []
       body := [
         PsWasmInstruction.localGet 0,
         PsWasmInstruction.refTest psWasmNatZeroName,
-        PsWasmInstruction.ifStart (some psWasmNatRef),
+        PsWasmInstruction.ifStart (Option.some psWasmNatRef),
           PsWasmInstruction.localGet 0,
           PsWasmInstruction.call psWasmNatBit1Fn,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 0,
           PsWasmInstruction.refTest psWasmNatBit0Name,
-          PsWasmInstruction.ifStart (some psWasmNatRef),
+          PsWasmInstruction.ifStart (Option.some psWasmNatRef),
             PsWasmInstruction.localGet 0,
             PsWasmInstruction.refCast psWasmNatBit0Name,
             PsWasmInstruction.structGet psWasmNatBit0Name 0,
@@ -201,25 +202,25 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatCmpFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef, psWasmNatRef]
       results := [PsWasmValueType.i32]
       locals := [psWasmNatRef, psWasmNatRef, PsWasmValueType.i32]
       body := [
         PsWasmInstruction.localGet 0,
         PsWasmInstruction.refTest psWasmNatZeroName,
-        PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+        PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
           PsWasmInstruction.localGet 1,
           PsWasmInstruction.refTest psWasmNatZeroName,
-          PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+          PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
             PsWasmInstruction.i32Const 0,
           PsWasmInstruction.else_,
-            PsWasmInstruction.i32Const (-1),
+            PsWasmInstruction.i32Const (Int.negSucc 0),
           PsWasmInstruction.end_,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 1,
           PsWasmInstruction.refTest psWasmNatZeroName,
-          PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+          PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
             PsWasmInstruction.i32Const 1,
           PsWasmInstruction.else_,
             PsWasmInstruction.localGet 0,
@@ -235,7 +236,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
             PsWasmInstruction.localGet 4,
             PsWasmInstruction.i32Const 0,
             PsWasmInstruction.i32Ne,
-            PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+            PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
               PsWasmInstruction.localGet 4,
             PsWasmInstruction.else_,
               PsWasmInstruction.localGet 0,
@@ -250,19 +251,19 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatAddFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef, psWasmNatRef]
       results := [psWasmNatRef]
       locals := [psWasmNatRef, PsWasmValueType.i32, PsWasmValueType.i32]
       body := [
         PsWasmInstruction.localGet 0,
         PsWasmInstruction.refTest psWasmNatZeroName,
-        PsWasmInstruction.ifStart (some psWasmNatRef),
+        PsWasmInstruction.ifStart (Option.some psWasmNatRef),
           PsWasmInstruction.localGet 1,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 1,
           PsWasmInstruction.refTest psWasmNatZeroName,
-          PsWasmInstruction.ifStart (some psWasmNatRef),
+          PsWasmInstruction.ifStart (Option.some psWasmNatRef),
             PsWasmInstruction.localGet 0,
           PsWasmInstruction.else_,
             PsWasmInstruction.localGet 0,
@@ -280,7 +281,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
             PsWasmInstruction.localGet 3,
             PsWasmInstruction.localGet 4,
             PsWasmInstruction.i32And,
-            PsWasmInstruction.ifStart (some psWasmNatRef),
+            PsWasmInstruction.ifStart (Option.some psWasmNatRef),
               PsWasmInstruction.localGet 2,
               PsWasmInstruction.call psWasmNatSuccFn,
               PsWasmInstruction.call psWasmNatMkBit0Fn,
@@ -288,7 +289,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
               PsWasmInstruction.localGet 3,
               PsWasmInstruction.localGet 4,
               PsWasmInstruction.i32Xor,
-              PsWasmInstruction.ifStart (some psWasmNatRef),
+              PsWasmInstruction.ifStart (Option.some psWasmNatRef),
                 PsWasmInstruction.localGet 2,
                 PsWasmInstruction.call psWasmNatBit1Fn,
               PsWasmInstruction.else_,
@@ -302,7 +303,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatSubGeFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef, psWasmNatRef]
       results := [psWasmNatRef]
       locals := [
@@ -315,12 +316,12 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
       body := [
         PsWasmInstruction.localGet 1,
         PsWasmInstruction.refTest psWasmNatZeroName,
-        PsWasmInstruction.ifStart (some psWasmNatRef),
+        PsWasmInstruction.ifStart (Option.some psWasmNatRef),
           PsWasmInstruction.localGet 0,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 0,
           PsWasmInstruction.refTest psWasmNatZeroName,
-          PsWasmInstruction.ifStart (some psWasmNatRef),
+          PsWasmInstruction.ifStart (Option.some psWasmNatRef),
             PsWasmInstruction.call psWasmNatZeroFn,
           PsWasmInstruction.else_,
             PsWasmInstruction.localGet 0,
@@ -338,7 +339,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
             PsWasmInstruction.localGet 4,
             PsWasmInstruction.localGet 5,
             PsWasmInstruction.i32LtU,
-            PsWasmInstruction.ifStart (some psWasmNatRef),
+            PsWasmInstruction.ifStart (Option.some psWasmNatRef),
               PsWasmInstruction.localGet 2,
               PsWasmInstruction.localGet 3,
               PsWasmInstruction.call psWasmNatSuccFn,
@@ -352,7 +353,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
               PsWasmInstruction.localGet 4,
               PsWasmInstruction.localGet 5,
               PsWasmInstruction.i32Ne,
-              PsWasmInstruction.ifStart (some psWasmNatRef),
+              PsWasmInstruction.ifStart (Option.some psWasmNatRef),
                 PsWasmInstruction.localGet 6,
                 PsWasmInstruction.call psWasmNatBit1Fn,
               PsWasmInstruction.else_,
@@ -366,7 +367,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatSubFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef, psWasmNatRef]
       results := [psWasmNatRef]
       locals := []
@@ -376,7 +377,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
         PsWasmInstruction.call psWasmNatCmpFn,
         PsWasmInstruction.i32Const 0,
         PsWasmInstruction.i32LtS,
-        PsWasmInstruction.ifStart (some psWasmNatRef),
+        PsWasmInstruction.ifStart (Option.some psWasmNatRef),
           PsWasmInstruction.call psWasmNatZeroFn,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 0,
@@ -387,19 +388,19 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatMulFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef, psWasmNatRef]
       results := [psWasmNatRef]
       locals := [psWasmNatRef]
       body := [
         PsWasmInstruction.localGet 0,
         PsWasmInstruction.refTest psWasmNatZeroName,
-        PsWasmInstruction.ifStart (some psWasmNatRef),
+        PsWasmInstruction.ifStart (Option.some psWasmNatRef),
           PsWasmInstruction.call psWasmNatZeroFn,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 1,
           PsWasmInstruction.refTest psWasmNatZeroName,
-          PsWasmInstruction.ifStart (some psWasmNatRef),
+          PsWasmInstruction.ifStart (Option.some psWasmNatRef),
             PsWasmInstruction.call psWasmNatZeroFn,
           PsWasmInstruction.else_,
             PsWasmInstruction.localGet 0,
@@ -409,7 +410,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
             PsWasmInstruction.localSet 2,
             PsWasmInstruction.localGet 0,
             PsWasmInstruction.call psWasmNatLowFn,
-            PsWasmInstruction.ifStart (some psWasmNatRef),
+            PsWasmInstruction.ifStart (Option.some psWasmNatRef),
               PsWasmInstruction.localGet 2,
               PsWasmInstruction.call psWasmNatMkBit0Fn,
               PsWasmInstruction.localGet 1,
@@ -424,7 +425,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatDivModFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef, psWasmNatRef]
       results := [psWasmNatDivModRef]
       locals := [
@@ -437,14 +438,14 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
       body := [
         PsWasmInstruction.localGet 1,
         PsWasmInstruction.refTest psWasmNatZeroName,
-        PsWasmInstruction.ifStart (some psWasmNatDivModRef),
+        PsWasmInstruction.ifStart (Option.some psWasmNatDivModRef),
           PsWasmInstruction.call psWasmNatZeroFn,
           PsWasmInstruction.localGet 0,
           PsWasmInstruction.structNew psWasmNatDivModName,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 0,
           PsWasmInstruction.refTest psWasmNatZeroName,
-          PsWasmInstruction.ifStart (some psWasmNatDivModRef),
+          PsWasmInstruction.ifStart (Option.some psWasmNatDivModRef),
             PsWasmInstruction.call psWasmNatZeroFn,
             PsWasmInstruction.call psWasmNatZeroFn,
             PsWasmInstruction.structNew psWasmNatDivModName,
@@ -464,7 +465,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
             PsWasmInstruction.localSet 5,
             PsWasmInstruction.localGet 0,
             PsWasmInstruction.call psWasmNatLowFn,
-            PsWasmInstruction.ifStart (some psWasmNatRef),
+            PsWasmInstruction.ifStart (Option.some psWasmNatRef),
               PsWasmInstruction.localGet 5,
               PsWasmInstruction.call psWasmNatBit1Fn,
             PsWasmInstruction.else_,
@@ -477,7 +478,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
             PsWasmInstruction.call psWasmNatCmpFn,
             PsWasmInstruction.i32Const 0,
             PsWasmInstruction.i32GeS,
-            PsWasmInstruction.ifStart (some psWasmNatDivModRef),
+            PsWasmInstruction.ifStart (Option.some psWasmNatDivModRef),
               PsWasmInstruction.localGet 4,
               PsWasmInstruction.call psWasmNatBit1Fn,
               PsWasmInstruction.localGet 6,
@@ -496,7 +497,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatDivFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef, psWasmNatRef]
       results := [psWasmNatRef]
       locals := []
@@ -509,7 +510,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatModFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef, psWasmNatRef]
       results := [psWasmNatRef]
       locals := []
@@ -523,20 +524,20 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
 ,
     {
       name := psWasmNatFitsBitsFn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef, PsWasmValueType.i32]
       results := [PsWasmValueType.i32]
       locals := []
       body := [
         PsWasmInstruction.localGet 0,
         PsWasmInstruction.refTest psWasmNatZeroName,
-        PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+        PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
           PsWasmInstruction.i32Const 1,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 1,
           PsWasmInstruction.i32Const 0,
           PsWasmInstruction.i32Eq,
-          PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+          PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
             PsWasmInstruction.i32Const 0,
           PsWasmInstruction.else_,
             PsWasmInstruction.localGet 0,
@@ -551,7 +552,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatFitsU32Fn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef]
       results := [PsWasmValueType.i32]
       locals := []
@@ -563,14 +564,14 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatToU32Fn
-      typeName := none
+      typeName := Option.none
       parameters := [psWasmNatRef]
       results := [PsWasmValueType.i32]
       locals := []
       body := [
         PsWasmInstruction.localGet 0,
         PsWasmInstruction.refTest psWasmNatZeroName,
-        PsWasmInstruction.ifStart (some PsWasmValueType.i32),
+        PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
           PsWasmInstruction.i32Const 0,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 0,
@@ -586,7 +587,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     },
     {
       name := psWasmNatOfU32Fn
-      typeName := none
+      typeName := Option.none
       parameters := [PsWasmValueType.i32]
       results := [psWasmNatRef]
       locals := [psWasmNatRef]
@@ -594,7 +595,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
         PsWasmInstruction.localGet 0,
         PsWasmInstruction.i32Const 0,
         PsWasmInstruction.i32Eq,
-        PsWasmInstruction.ifStart (some psWasmNatRef),
+        PsWasmInstruction.ifStart (Option.some psWasmNatRef),
           PsWasmInstruction.call psWasmNatZeroFn,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 0,
@@ -605,7 +606,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
           PsWasmInstruction.localGet 0,
           PsWasmInstruction.i32Const 1,
           PsWasmInstruction.i32And,
-          PsWasmInstruction.ifStart (some psWasmNatRef),
+          PsWasmInstruction.ifStart (Option.some psWasmNatRef),
             PsWasmInstruction.localGet 1,
             PsWasmInstruction.call psWasmNatBit1Fn,
           PsWasmInstruction.else_,
@@ -617,21 +618,31 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
     }
   ]
 
-def psWasmNatLiteralInstructionsWithFuel :
-    Nat -> Nat -> List PsWasmInstruction
-  | 0, _ =>
-      [PsWasmInstruction.structNew psWasmNatZeroName]
-  | _ + 1, 0 =>
-      [PsWasmInstruction.structNew psWasmNatZeroName]
-  | fuel + 1, value =>
-      let half := value / 2
-      let low := value % 2
-      psWasmNatLiteralInstructionsWithFuel fuel half ++
-      (if low == 0 then
-        [PsWasmInstruction.structNew psWasmNatBit0Name]
-      else
-        [PsWasmInstruction.call psWasmNatBit1Fn])
+def psWasmNatLiteralInstructionsWithFuel
+    (remainingFuel : Nat) :
+    Nat -> List PsWasmInstruction :=
+  match remainingFuel with
+  | 0 =>
+      fun (_value : Nat) =>
+        [PsWasmInstruction.structNew psWasmNatZeroName]
+  | fuel + 1 =>
+      let smaller : Nat -> List PsWasmInstruction :=
+        psWasmNatLiteralInstructionsWithFuel fuel;
+      fun (value : Nat) =>
+        if Nat.beq value 0 then
+          [PsWasmInstruction.structNew psWasmNatZeroName]
+        else
+          let half := Nat.div value 2;
+          let low := Nat.mod value 2;
+          let suffix :=
+            if Nat.beq low 0 then
+              [PsWasmInstruction.structNew psWasmNatBit0Name]
+            else
+              [PsWasmInstruction.call psWasmNatBit1Fn];
+          psListAppend
+            (smaller half)
+            suffix
 
 def psWasmNatLiteralInstructions
     (value : Nat) : List PsWasmInstruction :=
-  psWasmNatLiteralInstructionsWithFuel (value + 1) value
+  psWasmNatLiteralInstructionsWithFuel (Nat.add value 1) value

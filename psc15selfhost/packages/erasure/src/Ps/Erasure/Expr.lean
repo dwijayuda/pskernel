@@ -377,6 +377,17 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (Option.some result)
         else
           Except.error PsErasureError.unsupportedApplication
+      else if psStringEq text "UInt8.ofNat" then
+        if Nat.beq (psListLength view.args) 1 then
+          match
+              psEraseMappedIntrinsic
+                erase
+                PsVerifiedIrIntrinsic.uint8OfNat
+                view.args with
+          | Except.error error => Except.error error
+          | Except.ok result => Except.ok (Option.some result)
+        else
+          Except.error PsErasureError.unsupportedApplication
       else if psStringEq text "Int.repr" then
         if Nat.beq (psListLength view.args) 1 then
           match psEraseMappedIntrinsic erase PsVerifiedIrIntrinsic.intRepr view.args with

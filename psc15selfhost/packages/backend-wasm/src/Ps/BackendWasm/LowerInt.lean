@@ -51,8 +51,10 @@ def psWasmLowerMachineIntegerLiteral
     if psWasmMachineIntegerIs64 profile type then
       PsWasmInstruction.i64Const value
     else
-      PsWasmInstruction.i32Const value
-  constant :: psWasmNormalizeMachineInteger type
+      PsWasmInstruction.i32Const value;
+  List.cons
+    constant
+    (psWasmNormalizeMachineInteger type)
 
 def psWasmMachineIntegerBinaryInstruction
     (profile : PsWasmTargetProfile)
@@ -61,51 +63,55 @@ def psWasmMachineIntegerBinaryInstruction
     PsWasmInstruction :=
   if psWasmMachineIntegerIs64 profile type then
     match operation with
-    | .add => .i64Add
-    | .sub => .i64Sub
-    | .mul => .i64Mul
-    | .bitAnd => .i64And
-    | .bitOr => .i64Or
-    | .bitXor => .i64Xor
+    | .add => PsWasmInstruction.i64Add
+    | .sub => PsWasmInstruction.i64Sub
+    | .mul => PsWasmInstruction.i64Mul
+    | .bitAnd => PsWasmInstruction.i64And
+    | .bitOr => PsWasmInstruction.i64Or
+    | .bitXor => PsWasmInstruction.i64Xor
   else
     match operation with
-    | .add => .i32Add
-    | .sub => .i32Sub
-    | .mul => .i32Mul
-    | .bitAnd => .i32And
-    | .bitOr => .i32Or
-    | .bitXor => .i32Xor
+    | .add => PsWasmInstruction.i32Add
+    | .sub => PsWasmInstruction.i32Sub
+    | .mul => PsWasmInstruction.i32Mul
+    | .bitAnd => PsWasmInstruction.i32And
+    | .bitOr => PsWasmInstruction.i32Or
+    | .bitXor => PsWasmInstruction.i32Xor
 
 def psWasmLowerMachineIntegerBinary
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrMachineIntegerType)
     (operation : PsVerifiedIrIntegerBinaryOp) :
     List PsWasmInstruction :=
-  psWasmMachineIntegerBinaryInstruction profile type operation
-    :: psWasmNormalizeMachineInteger type
+  List.cons
+    (psWasmMachineIntegerBinaryInstruction
+      profile
+      type
+      operation)
+    (psWasmNormalizeMachineInteger type)
 
 def psWasmMachineIntegerCompareInstruction
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrMachineIntegerType)
     (operation : PsVerifiedIrIntegerCompareOp) :
     PsWasmInstruction :=
-  let signed := psWasmMachineIntegerIsSigned type
+  let signed := psWasmMachineIntegerIsSigned type;
   if psWasmMachineIntegerIs64 profile type then
     match operation with
-    | .eq => .i64Eq
-    | .ne => .i64Ne
-    | .lt => if signed then .i64LtS else .i64LtU
-    | .le => if signed then .i64LeS else .i64LeU
-    | .gt => if signed then .i64GtS else .i64GtU
-    | .ge => if signed then .i64GeS else .i64GeU
+    | .eq => PsWasmInstruction.i64Eq
+    | .ne => PsWasmInstruction.i64Ne
+    | .lt => if signed then PsWasmInstruction.i64LtS else PsWasmInstruction.i64LtU
+    | .le => if signed then PsWasmInstruction.i64LeS else PsWasmInstruction.i64LeU
+    | .gt => if signed then PsWasmInstruction.i64GtS else PsWasmInstruction.i64GtU
+    | .ge => if signed then PsWasmInstruction.i64GeS else PsWasmInstruction.i64GeU
   else
     match operation with
-    | .eq => .i32Eq
-    | .ne => .i32Ne
-    | .lt => if signed then .i32LtS else .i32LtU
-    | .le => if signed then .i32LeS else .i32LeU
-    | .gt => if signed then .i32GtS else .i32GtU
-    | .ge => if signed then .i32GeS else .i32GeU
+    | .eq => PsWasmInstruction.i32Eq
+    | .ne => PsWasmInstruction.i32Ne
+    | .lt => if signed then PsWasmInstruction.i32LtS else PsWasmInstruction.i32LtU
+    | .le => if signed then PsWasmInstruction.i32LeS else PsWasmInstruction.i32LeU
+    | .gt => if signed then PsWasmInstruction.i32GtS else PsWasmInstruction.i32GtU
+    | .ge => if signed then PsWasmInstruction.i32GeS else PsWasmInstruction.i32GeU
 
 def psWasmLowerMachineIntegerCompare
     (profile : PsWasmTargetProfile)

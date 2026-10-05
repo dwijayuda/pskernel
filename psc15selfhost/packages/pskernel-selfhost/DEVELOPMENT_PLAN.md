@@ -7,11 +7,23 @@
   - conformance registry: 34/34 rules mapped to direct differential/invariant tests.
   - `--require-complete` is enforced in CI for both compatibility and conformance audits.
   - green semantic baseline: `5d684efc33de559045bac74dfc0cb45fcc9a41ee`.
-- **Phase B — Explainability/readability: ACTIVE.**
-  - preserve the Phase A semantic baseline while reorganizing source by theory concept.
-- **Phase C — Competitive performance: STARTED ONLY FOR NON-SEMANTIC RUNTIME SEAMS.**
-  - environment index/cache separation may proceed when it does not disturb Phase B theory work.
-  - larger performance work waits for profiling and a stable explainable module layout.
+- **Phase B — Canonical architecture migration: ACTIVE.**
+  - `PSKERNEL_REFERENCE.md` is now the canonical target architecture/migration guide.
+  - preserve the Phase A semantic baseline while migrating source ownership, tests,
+    dependency boundaries and public contracts.
+  - immediate sequence: split tests/benchmarks -> architecture manifest/import fence ->
+    Checker hierarchy/Knot -> unified Inductive hierarchy -> acceleration/capability split ->
+    KernelContract-v1/fine-grained rules.
+- **Phase C — Competitive performance: ACTIVE ONLY WHEN MEASURED.**
+  - current indexing/cache and checker-path work may continue when profiling identifies a
+    concrete hotspot and all Phase A/B gates remain green.
+  - performance work must not be mixed into structural move commits.
+- **Phase D — Assurance Plane: LONG-TERM / NON-BLOCKING.**
+  - formal specification/refinement, independent-checker consensus, fuzzing, receipts and
+    broader interoperability strengthen the production kernel after the architecture boundary
+    is stable.
+  - Phase D is not required for the current production/provider milestone unless an explicit
+    release decision promotes one of its checks to a gate.
 
 If a new semantic mismatch with Lean 4.34 is discovered, temporarily return to Phase A only for that defect and add a conformance case before resuming Phase B.
 
@@ -38,8 +50,11 @@ The portable self-host implementation already contains:
 - ordinary, mutual and nested inductives;
 - generated source/artifact fixed-point tooling.
 
-The current architecture work is converting the mature flat implementation into
-clear theory/runtime modules while keeping every step self-hostable.
+The current architecture work is migrating the mature implementation toward the
+Execution Plane defined by `PSKERNEL_REFERENCE.md`: Core, Environment, Checker,
+Admission, Runtime/Acceleration, Runtime/Capability, API and a small SelfHost
+semantic root. Every step must remain PSC1-self-hostable and semantically
+equivalent to the pinned Lean-4.34 target.
 
 ## Phase A — Semantic closure
 
@@ -65,7 +80,7 @@ node scripts/psc1kernel-compatibility-audit.mjs --require-complete
 PASS
 ```
 
-### A2. Remaining native-reduction compatibility
+### A2. Native-reduction compatibility
 
 Complete and differentially test:
 
@@ -74,11 +89,13 @@ Complete and differentially test:
 
 Architecture:
 
-- backend-neutral provider in `Runtime/NativeReduction.lean`;
-- optional provider in checker context/session;
+- current backend-neutral provider lives in `Runtime/NativeReduction.lean`;
+- final target ownership is `Runtime/Capability/Lean434NativeReduction.lean`;
+- optional provider lives in checker context/session;
 - no provider keeps ordinary semantic behavior;
 - WHNF order matches Lean 4.34;
-- lazy defeq order matches Lean 4.34.
+- lazy defeq order matches Lean 4.34;
+- this is a target-specific trusted capability, not ordinary cache/index acceleration.
 
 ### A3. Rule-complete conformance suite
 
@@ -104,103 +121,107 @@ Do not use giant external replay as the primary completion criterion.
 Generated compiler/kernel fixed-point proof is optional/manual and is not a
 Phase A blocker.
 
-## Phase B — Explainability and readability
+## Phase B — Canonical architecture migration
 
 **Status: ACTIVE.**
 
-Goal: source code should teach the kernel theory.
+Goal: make the source tree, dependency graph, trust model, tests and public API
+tell the same story as the Lean-4.34 kernel theory while preserving one
+PSC1-self-hostable semantic implementation.
 
-This phase changes module boundaries/documentation, not semantics.
+The canonical target is `PSKERNEL_REFERENCE.md`. Migration is incremental:
+temporary old import paths may exist, but canonical implementation modules may
+not depend on compatibility shims.
 
-### B1. Separate theory from runtime
+### B1. Split test and benchmark monoliths
 
-Runtime-only modules:
+Create subsystem-owned fixtures/conformance/hardening/benchmark modules with
+thin aggregate executables. This is the first migration step because it improves
+auditability without changing semantic source.
 
-- `Runtime/Cache.lean`
-- `Runtime/EnvironmentIndex.lean`
-- `Runtime/NativeReduction.lean`
+### B2. Machine-readable architecture and import fence
 
-Theory-facing modules should never depend on runtime implementation details
-beyond narrow operations.
+Add:
 
-### B2. Split oversized theory modules
+- `PSKERNEL_ARCHITECTURE.json`;
+- an architecture audit script;
+- semantic-root closure checks;
+- target-pin consistency checks.
 
-Priority order:
+The initial manifest describes the current tree plus migration state; CI then
+tightens allowed imports as canonical modules move.
 
-1. definitional equality;
-2. inductive admission;
-3. mutual inductives;
-4. nested inductives;
-5. inference/reduction where useful.
+### B3. Canonical Checker hierarchy
 
-Already-started target:
-
-```text
-Theory/DefEq/
-    BinderSpines.lean
-    Quick.lean
-    LazyDelta.lean
-    FinalRules.lean
-    Shortcuts.lean
-    FullShape.lean
-```
-
-Future useful boundaries may include:
+Move existing checker components under one `Checker/` owner without changing
+algorithms:
 
 ```text
-Theory/DefEq/
-    Quick.lean
-    BinderSpines.lean
-    Projection.lean
-
-Theory/Inductive/
-    Constructor.lean
-    Recursor.lean
-    Elimination.lean
-
-Theory/Nested/
-    Discover.lean
-    Flatten.lean
-    Restore.lean
+Checker/
+  Context
+  State
+  ResourcePolicy
+  Projection
+  Reduction/
+  Inference/
+  Recursor/
+  DefEq/
+  Ops
+  Knot
+  Session
 ```
 
-Do not split merely to make files smaller; split when a theory concept becomes
-independently explainable.
+`Checker/Knot` is the one owner of recursive infer/WHNF/recursor/defeq wiring.
+PSC1-proven curried callback patterns may remain internally.
 
-### B3. Rule documentation
+### B4. Unified admission hierarchy
 
-For each compatibility rule add:
+Move declaration, Quot and inductive admission under `Admission/`. Ordinary,
+mutual and nested inductives live under one `Admission/Inductive/` owner while
+retaining their existing phase decomposition.
 
-- rule ID;
-- mathematical/semantic statement;
-- Lean 4.34 locator;
-- implementation symbol;
-- test locator.
+### B5. Separate acceleration from trusted capability
 
-Keep `KERNEL_THEORY.md` synchronized.
+Final ownership:
 
-### B4. Reading-order quality
+```text
+Runtime/Acceleration/
+  Cache
+  CachePolicy
+  EnvironmentIndex
 
-The intended reading order should remain:
+Runtime/Capability/
+  Lean434NativeReduction
+```
 
-1. Name/Level/Expr;
-2. substitution;
-3. environment;
-4. inference;
-5. WHNF/reduction;
-6. defeq;
-7. Quot;
-8. inductives;
-9. mutual;
-10. nested;
-11. declaration admission.
+Acceleration must preserve semantic answers. Lean-4.34 native reduction is an
+explicit trusted capability because an incorrect provider can affect
+acceptance.
+
+### B6. Stable checked-session API
+
+Introduce `KernelContract-v1` after the internal ownership graph is stable.
+Public types must distinguish constructed/request state from checked/admitted
+state; provider adapters may translate but may not implement fallback semantics.
+
+### B7. Fine-grained rule ownership
+
+Keep the existing 34-row compatibility matrix and add a finer rule inventory for
+high-risk algorithms. Every rule must map to one canonical implementation owner
+and focused conformance/hardening evidence.
 
 ### Phase B exit gates
 
-- no unexplained compatibility rule;
-- high-risk theory rules each have dedicated source/documentation;
-- runtime optimizations are visibly separated;
-- `KERNEL_THEORY.md` matches source layout;
+- canonical source tree follows the Reference ownership model;
+- architecture/import-fence CI is green;
+- SelfHost closure imports no compatibility shim, test, benchmark or frozen
+  reference-kernel module;
+- tests/benchmarks are split by subsystem;
+- Checker recursive wiring has one owner;
+- ordinary/mutual/nested admission share one canonical hierarchy;
+- acceleration and trusted capabilities are visibly separate;
+- KernelContract-v1 is stable;
+- `KERNEL_THEORY.md` matches the canonical source layout;
 - all Phase A gates remain green.
 
 ## Phase C — Competitive performance
@@ -315,10 +336,14 @@ readability/performance gate.
 - conformance suite green;
 - no known semantic gaps.
 
-### M2 — Explainable kernel
+### M2 — Canonical explainable kernel
 
-- theory/runtime architecture established;
-- large modules split by theory concept;
+- `PSKERNEL_REFERENCE.md` Execution Plane ownership established;
+- tests/benchmarks split by subsystem;
+- architecture manifest/import-fence CI established;
+- Checker recursive knot has one owner;
+- admission/inductive hierarchy is canonical;
+- acceleration/trusted-capability distinction is explicit;
 - rule documentation complete;
 - `KERNEL_THEORY.md` usable as a learning path.
 
@@ -348,9 +373,10 @@ When choosing the next task, prefer:
 ```text
 current phase exit blocker
 > compatibility defect
+> Reference migration step that improves trust/auditability without semantics
 > readability debt obscuring a high-risk rule
 > measured performance hotspot
-> optional feature
+> optional Assurance-Plane feature
 ```
 
 This prevents the project from drifting into unrelated language/backend work.

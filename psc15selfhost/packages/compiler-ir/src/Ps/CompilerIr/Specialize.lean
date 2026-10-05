@@ -147,26 +147,25 @@ def psIrSpecializeTypeKeyWithFuel :
       | .unknown => none
       | .typeParameter _ => none
       | .primitive primitive =>
-          some
-            (match primitive with
-            | .nat => "Nat"
-            | .int => "Int"
-            | .uint8 => "U8"
-            | .uint16 => "U16"
-            | .uint32 => "U32"
-            | .uint64 => "U64"
-            | .usize => "USize"
-            | .int8 => "I8"
-            | .int16 => "I16"
-            | .int32 => "I32"
-            | .int64 => "I64"
-            | .isize => "ISize"
-            | .float => "F64"
-            | .float32 => "F32"
-            | .bool => "Bool"
-            | .char => "Char"
-            | .string => "String"
-            | .unit => "Unit")
+          match primitive with
+          | .nat => some "Nat"
+          | .int => some "Int"
+          | .uint8 => some "U8"
+          | .uint16 => some "U16"
+          | .uint32 => some "U32"
+          | .uint64 => some "U64"
+          | .usize => some "USize"
+          | .int8 => some "I8"
+          | .int16 => some "I16"
+          | .int32 => some "I32"
+          | .int64 => some "I64"
+          | .isize => some "ISize"
+          | .float => some "F64"
+          | .float32 => some "F32"
+          | .bool => some "Bool"
+          | .char => some "Char"
+          | .string => some "String"
+          | .unit => some "Unit"
       | .function parameters result =>
           let parameterKeys :=
             parameters.map

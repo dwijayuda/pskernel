@@ -3700,7 +3700,12 @@ def psWasmLowerExprWorker
         fun (expected : Option PsWasmValueType) =>
           fun (state : PsWasmLowerState) =>
             fun (expr : PsVerifiedIrExpr) =>
-              let lowerWithBindings :=
+              let lowerWithBindings :
+                  List PsWasmBinding ->
+                  Option PsWasmValueType ->
+                  PsWasmLowerState ->
+                  PsVerifiedIrExpr ->
+                  Except PsWasmLowerError PsWasmLoweredExpr :=
                 fun
                 (nextBindings : List PsWasmBinding)
                 (expectedType : Option PsWasmValueType)
@@ -3711,7 +3716,11 @@ def psWasmLowerExprWorker
                     expectedType
                     nestedState
                     nestedExpr;
-              let lower :=
+              let lower :
+                  Option PsWasmValueType ->
+                  PsWasmLowerState ->
+                  PsVerifiedIrExpr ->
+                  Except PsWasmLowerError PsWasmLoweredExpr :=
                 lowerWithBindings bindings;
               match expr with
               | .literal literal =>

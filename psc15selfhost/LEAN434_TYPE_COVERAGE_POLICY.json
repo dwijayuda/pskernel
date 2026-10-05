@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "leanVersion": "4.34.0",
+  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "description": "Coverage policy for all type-producing declarations reachable from pinned Lean Init, Std, and Lean umbrella modules. This is an accounting/classification contract, not a promise to import all Lean types into the ProofScript trusted prelude.",
+  "classificationOrder": [
+    "lean-internal-private",
+    "proofscript-core-prelude",
+    "proofscript-stdlib",
+    "lean-init-library-only",
+    "lean-std-library-only",
+    "lean-compiler-meta-only"
+  ],
+  "requiredCorePrelude": [
+    "Array",
+    "Bool",
+    "Char",
+    "Decidable",
+    "Eq",
+    "Except",
+    "Float",
+    "Float32",
+    "Int",
+    "Int16",
+    "Int32",
+    "Int64",
+    "Int8",
+    "ISize",
+    "List",
+    "Nat",
+    "Option",
+    "Prod",
+    "String",
+    "UInt16",
+    "UInt32",
+    "UInt64",
+    "UInt8",
+    "Unit",
+    "USize"
+  ],
+  "handbookSurface": [
+    {
+      "name": "Nat",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Int",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "UInt8",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "UInt16",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "UInt32",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "UInt64",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "USize",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Int8",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Int16",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Int32",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Int64",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "ISize",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Float",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Float32",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Bool",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Char",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "String",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "ByteArray",
+      "owner": "stdlib",
+      "status": "gap"
+    },
+    {
+      "name": "Unit",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Prod",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Sum",
+      "owner": "stdlib",
+      "status": "gap"
+    },
+    {
+      "name": "Option",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Except",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "List",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Array",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Fin",
+      "owner": "stdlib-foundation",
+      "status": "gap"
+    },
+    {
+      "name": "Subtype",
+      "owner": "stdlib-foundation",
+      "status": "gap"
+    },
+    {
+      "name": "Prop",
+      "owner": "kernel-sort",
+      "status": "implemented"
+    },
+    {
+      "name": "Type",
+      "owner": "kernel-sort",
+      "status": "implemented"
+    },
+    {
+      "name": "Sort",
+      "owner": "kernel-sort",
+      "status": "implemented"
+    },
+    {
+      "name": "Eq",
+      "owner": "core-prelude",
+      "status": "implemented"
+    },
+    {
+      "name": "Quot",
+      "owner": "kernel-logical-foundation",
+      "status": "special"
+    }
+  ],
+  "referencedInterfaces": [
+    {
+      "name": "Ordering",
+      "owner": "stdlib",
+      "status": "implemented"
+    },
+    {
+      "name": "Ord",
+      "owner": "stdlib-typeclass",
+      "status": "gap"
+    },
+    {
+      "name": "Bind",
+      "owner": "stdlib-typeclass",
+      "status": "gap"
+    },
+    {
+      "name": "Pure",
+      "owner": "stdlib-typeclass",
+      "status": "gap"
+    }
+  ],
+  "notes": [
+    "A gap here is a ProofScript language/library surface gap, not automatically a kernel rule gap.",
+    "Types not explicitly promised by the ProofScript handbook are still exhaustively classified by their Lean umbrella surface.",
+    "Compiler/meta-only and internal/private Lean types are not candidates for automatic kernel-prelude inclusion."
+  ]
+}

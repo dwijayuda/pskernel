@@ -11,11 +11,39 @@ theorem psKernelMakeSimpleMutualMotivesWorker_nil
   rfl
 
 theorem psKernelMakeSimpleMutualRulesWorker_nil
-    (recNames : List PsKernelName)
-    (recLevels : List PsKernelLevel)
-    (params motives allMinors ruleBinders minors : List PsKernelOpenBinder) :
+    (recLevelParams : List PsKernelName)
+    (typeShapes : List PsKernelSimpleMutualTypeShape)
+    (params motives minors ruleBinders : List PsKernelOpenBinder)
+    (owner minorIndex : Nat) :
     psKernelMakeSimpleMutualRulesWorker
-        List.nil recNames recLevels params motives
-        allMinors ruleBinders minors =
+        List.nil
+        recLevelParams
+        typeShapes
+        params
+        motives
+        minors
+        ruleBinders
+        owner
+        minorIndex =
       Except.ok List.nil := by
+  rfl
+
+theorem psKernelValidateSimpleMutualRulesWorker_nil
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (levels : List PsKernelLevel)
+    (params motives minors ruleBinders : List PsKernelOpenBinder)
+    (owner : Nat) :
+    psKernelValidateSimpleMutualRulesWorker
+        List.nil
+        fuel
+        session
+        levels
+        params
+        motives
+        minors
+        ruleBinders
+        owner
+        List.nil =
+      Except.ok session := by
   rfl

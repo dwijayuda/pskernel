@@ -1,9 +1,16 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import path from 'node:path';
 import {
   findSelfhostStructuralViolations,
   portableSelfhostStructuralRuleIds,
 } from './selfhost-source-rules.mjs';
+
+import {
+  collectPortableSelfhostEntryRoots,
+  collectPortableSelfhostPackages,
+  readPortableSelfhostProfile,
+} from './portable-selfhost-profile.mjs';
 
 function ids(source) {
   return findSelfhostStructuralViolations(
@@ -252,6 +259,20 @@ test('local match bindings require explicit result types', () => {
     '  selected',
   ].join('\n');
   assert(!ids(good).includes('untyped-match-let'));
+});
+
+test('portable entry roots minimally cover the backend-wasm package graph', async () => {
+  const profile = await readPortableSelfhostProfile();
+  const packages = await collectPortableSelfhostPackages(profile, 'backend-wasm');
+  assert.equal(packages.length, 1);
+  const entries = await collectPortableSelfhostEntryRoots(
+    packages[0],
+    profile.includeImportClosure === true,
+  );
+  assert.deepEqual(
+    entries.map(sourcePath => path.basename(sourcePath)).sort(),
+    ['Binary.lean', 'Lower.lean'],
+  );
 });
 
 test('layout-only lets are rejected while explicit sequencing remains valid', () => {

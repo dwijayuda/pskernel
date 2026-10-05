@@ -282,20 +282,65 @@ def psWasmIntRuntimeFunctions : List PsWasmFunction :=
     }
   ]
 
+def psWasmIntDecimalMagnitudeWithFuel
+    (remainingFuel : Nat) :
+    String -> Nat -> Nat -> Nat :=
+  match remainingFuel with
+  | 0 =>
+      fun (_text : String) (_position : Nat) (acc : Nat) =>
+        acc
+  | fuel + 1 =>
+      let smaller : String -> Nat -> Nat -> Nat :=
+        psWasmIntDecimalMagnitudeWithFuel fuel;
+      fun (text : String) (position : Nat) (acc : Nat) =>
+        if String.Internal.atEnd text (String.Pos.Raw.mk position) then
+          acc
+        else
+          let char : Char :=
+            String.Internal.get text (String.Pos.Raw.mk position);
+          let digit : Nat :=
+            Nat.sub (Char.toNat char) 48;
+          let nextPosition : Nat :=
+            String.Pos.Raw.byteIdx
+              (String.Internal.next
+                text
+                (String.Pos.Raw.mk position));
+          smaller
+            text
+            nextPosition
+            (Nat.add (Nat.mul acc 10) digit)
+
+def psWasmIntSignMagnitude
+    (value : Int) : Int × Nat :=
+  let text : String := Int.repr value;
+  let fuel : Nat := Nat.succ (String.utf8ByteSize text);
+  if String.Internal.atEnd text (String.Pos.Raw.mk 0) then
+    Prod.mk (Int.ofNat 0) 0
+  else
+    let first : Char :=
+      String.Internal.get text (String.Pos.Raw.mk 0);
+    if Nat.beq (Char.toNat first) 45 then
+      let start : Nat :=
+        String.Pos.Raw.byteIdx
+          (String.Internal.next text (String.Pos.Raw.mk 0));
+      Prod.mk
+        (Int.negSucc 0)
+        (psWasmIntDecimalMagnitudeWithFuel fuel text start 0)
+    else
+      let magnitude : Nat :=
+        psWasmIntDecimalMagnitudeWithFuel fuel text 0 0;
+      let sign : Int :=
+        if Nat.beq magnitude 0 then
+          Int.ofNat 0
+        else
+          Int.ofNat 1;
+      Prod.mk sign magnitude
+
 def psWasmIntLiteralInstructions
     (value : Int) : List PsWasmInstruction :=
-  match value with
-  | .ofNat magnitude =>
-      let sign :=
-        if Nat.beq magnitude 0 then 0 else 1;
-      psListAppend
-        [PsWasmInstruction.i32Const sign]
-        (psListAppend
-          (psWasmNatLiteralInstructions magnitude)
-          [PsWasmInstruction.structNew psWasmIntName])
-  | .negSucc magnitude =>
-      psListAppend
-        [PsWasmInstruction.i32Const (Int.negSucc 0)]
-        (psListAppend
-          (psWasmNatLiteralInstructions (Nat.add magnitude 1))
-          [PsWasmInstruction.structNew psWasmIntName])
+  let signMagnitude := psWasmIntSignMagnitude value;
+  psListAppend
+    [PsWasmInstruction.i32Const (Prod.fst signMagnitude)]
+    (psListAppend
+      (psWasmNatLiteralInstructions (Prod.snd signMagnitude))
+      [PsWasmInstruction.structNew psWasmIntName])

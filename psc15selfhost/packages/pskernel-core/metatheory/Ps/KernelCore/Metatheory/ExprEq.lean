@@ -8,7 +8,7 @@ theorem psKernelExprEq_true_refines_structural
   | bvar leftIndex =>
       cases right <;> simp [psKernelExprEq] at h
       subst_vars
-      exact PsKernelStructuralExprEq.bvar leftIndex leftIndex (by simp)
+      exact PsKernelStructuralExprEq.bvar _ _ (by simp)
   | fvar leftName =>
       cases right <;> simp [psKernelExprEq] at h
       exact PsKernelStructuralExprEq.fvar _ _ h
@@ -118,42 +118,31 @@ theorem psKernelExprEq_true_refines_structural
   | mdata leftMetadata leftBody ihBody =>
       cases right <;> simp [psKernelExprEq] at h
       rename_i rightMetadata rightBody
-      cases hMetadata : Nat.beq leftMetadata rightMetadata with
-      | false =>
-          simp [psKernelExprEq, hMetadata] at h
-      | true =>
-          have hBody : psKernelExprEq leftBody rightBody = true := by
-            simpa [psKernelExprEq, hMetadata] using h
-          exact
-            PsKernelStructuralExprEq.mdata
-              leftMetadata rightMetadata
-              leftBody rightBody
-              hMetadata
-              (ihBody rightBody hBody)
+      rcases h with ⟨hMetadata, hBody⟩
+      subst rightMetadata
+      exact
+        PsKernelStructuralExprEq.mdata
+          leftMetadata leftMetadata
+          leftBody rightBody
+          (by simp)
+          (ihBody rightBody hBody)
   | proj leftName leftIndex leftBody ihBody =>
       cases right <;> simp [psKernelExprEq] at h
       rename_i rightName rightIndex rightBody
       cases hName : psKernelNameEq leftName rightName with
       | false =>
-          simp [psKernelExprEq, hName] at h
+          simp [hName] at h
       | true =>
-          cases hIndex : Nat.beq leftIndex rightIndex with
-          | false =>
-              simp [psKernelExprEq, hName, hIndex] at h
-          | true =>
-              have hBody : psKernelExprEq leftBody rightBody = true := by
-                simpa [
-                  psKernelExprEq,
-                  hName,
-                  hIndex
-                ] using h
-              exact
-                PsKernelStructuralExprEq.proj
-                  leftName rightName
-                  leftIndex rightIndex
-                  leftBody rightBody
-                  hName hIndex
-                  (ihBody rightBody hBody)
+          simp [hName] at h
+          rcases h with ⟨hIndex, hBody⟩
+          subst rightIndex
+          exact
+            PsKernelStructuralExprEq.proj
+              leftName rightName
+              leftIndex leftIndex
+              leftBody rightBody
+              hName (by simp)
+              (ihBody rightBody hBody)
 
 theorem psKernelExprEq_true_implies_defeq
     (environment : PsKernelEnvironment)

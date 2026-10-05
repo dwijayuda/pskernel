@@ -298,23 +298,6 @@ def psPreludeEqType : PsExpr :=
       PsBinderInfo.explicit)
     PsBinderInfo.implicit
 
-def psPreludeEqReflType : PsExpr :=
-  PsExpr.forallE
-    psPreludeAlphaName
-    (PsExpr.sortE (PsLevel.param psPreludeUName))
-    (PsExpr.forallE
-      psPreludeAName
-      (PsExpr.bvar 0)
-      (PsExpr.app
-        (PsExpr.app
-          (PsExpr.app
-            (PsExpr.constE psEqName [PsLevel.param psPreludeUName])
-            (PsExpr.bvar 1))
-          (PsExpr.bvar 0))
-        (PsExpr.bvar 0))
-      PsBinderInfo.explicit)
-    PsBinderInfo.implicit
-
 def psPreludeDecidableType : PsExpr :=
   PsExpr.forallE
     psPreludePName
@@ -897,13 +880,8 @@ def psPreludeEnv17 : PsEnvironment :=
   psPreludeAdd psPreludeEnvArray7
     (PsDeclaration.axiomDecl psEqName [psPreludeUName] psPreludeEqType)
 
-def psPreludeEnvEqRefl : PsEnvironment :=
-  psPreludeAdd psPreludeEnv17
-    (PsDeclaration.axiomDecl
-      psEqReflName [psPreludeUName] psPreludeEqReflType)
-
 def psPreludeEnv18 : PsEnvironment :=
-  psPreludeAdd psPreludeEnvEqRefl
+  psPreludeAdd psPreludeEnv17
     (PsDeclaration.axiomDecl psDecidableName [] psPreludeDecidableType)
 
 def psPreludeEnv19 : PsEnvironment :=

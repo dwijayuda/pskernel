@@ -1,8 +1,55 @@
 import Ps.CompilerIr.Model
 
+inductive PsJsIrMachineIntegerType where
+  | uint8
+  | uint16
+  | uint32
+  | uint64
+  | int8
+  | int16
+  | int32
+  | int64
+
+inductive PsJsIrIntegerBinaryOp where
+  | add
+  | sub
+  | mul
+  | bitAnd
+  | bitOr
+  | bitXor
+
+inductive PsJsIrIntegerCompareOp where
+  | eq
+  | ne
+  | lt
+  | le
+  | gt
+  | ge
+
+inductive PsJsIrFloatingType where
+  | float
+  | float32
+
+inductive PsJsIrFloatBinaryOp where
+  | add
+  | sub
+  | mul
+  | div
+
+inductive PsJsIrFloatCompareOp where
+  | eq
+  | ne
+  | lt
+  | le
+  | gt
+  | ge
+
 inductive PsJsIrLiteral where
   | natural (value : Nat)
   | integer (value : Int)
+  | machineInteger
+      (type : PsJsIrMachineIntegerType)
+      (value : Int)
   | string (value : String)
   | bool (value : Bool)
   | unit
@@ -25,8 +72,19 @@ inductive PsJsIrBinaryOp where
   | boolNe
   | stringConcat
   | stringEq
+  | machineInt
+      (type : PsJsIrMachineIntegerType)
+      (operation : PsJsIrIntegerBinaryOp)
+  | machineIntCompare
+      (operation : PsJsIrIntegerCompareOp)
+  | floatBinary
+      (type : PsJsIrFloatingType)
+      (operation : PsJsIrFloatBinaryOp)
+  | floatCompare
+      (operation : PsJsIrFloatCompareOp)
 
 inductive PsJsIrRuntimeOp where
+  | uint8OfNat
   | natSub
   | natDiv
   | natMod

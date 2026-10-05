@@ -1,4 +1,5 @@
 import Ps.BackendWasm.Model
+import Ps.Foundation.List
 
 def psWasmNatName : String := "ProofScript.Nat"
 def psWasmNatZeroName : String := "ProofScript.Nat.Zero"
@@ -631,7 +632,9 @@ def psWasmNatLiteralInstructionsWithFuel :
           [PsWasmInstruction.structNew psWasmNatBit0Name]
         else
           [PsWasmInstruction.call psWasmNatBit1Fn];
-      psWasmNatLiteralInstructionsWithFuel fuel half ++ suffix
+      psListAppend
+        (psWasmNatLiteralInstructionsWithFuel fuel half)
+        suffix
 
 def psWasmNatLiteralInstructions
     (value : Nat) : List PsWasmInstruction :=

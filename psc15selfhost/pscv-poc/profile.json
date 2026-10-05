@@ -17,8 +17,9 @@
   ],
   "proofSurface": {
     "directProofTerms": true,
-    "eqRefl": true,
-    "tacticsRequired": false
+    "eqRefl": false,
+    "tacticsRequired": false,
+    "hypothesisProof": true
   },
   "checkedPath": {
     "kernelContract": "proofscript-kernel-contract/1",

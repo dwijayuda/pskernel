@@ -59,12 +59,20 @@ jobs:
           mkdir -p dist/cross-runtime
           .lake/build/bin/psc1 build test/KernelCore/Bench/CrossRuntime.lean --out dist/cross-runtime/kernel.js
           node scripts/psc1kernel-generated-smoke.mjs dist/cross-runtime/kernel.js
+      - name: Generate pre-change equality for the opt-in same-runner comparison
+        if: contains(github.event.head_commit.message, '[js-compare]')
+        timeout-minutes: 3
+        run: node scripts/psc1kernel-cross-runtime-compare.mjs
       - name: Run three bounded cross-runtime samples
         timeout-minutes: 4
         run: |
+          compare_args=()
+          if test -f dist/cross-runtime/baseline.js; then
+            compare_args+=(dist/cross-runtime/baseline.js)
+          fi
           node scripts/psc1kernel-cross-runtime-report.mjs \
             dist/cross-runtime/kernel.js .lake/build/bin/psc1_kernel_cross_runtime_bench \
-            3 /tmp/pskernel-cross-runtime/baseline
+            3 /tmp/pskernel-cross-runtime/baseline "${compare_args[@]}"
           cat /tmp/pskernel-cross-runtime/baseline.md >> "$GITHUB_STEP_SUMMARY"
       - name: Capture one bounded JS CPU profile
         timeout-minutes: 1

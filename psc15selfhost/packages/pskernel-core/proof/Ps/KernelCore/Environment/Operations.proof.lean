@@ -65,3 +65,35 @@ theorem psKernelEnvironmentMarkQuotInitialized_sets_true
     (psKernelEnvironmentMarkQuotInitialized environment).quotInitialized =
       true := by
   simp [psKernelEnvironmentMarkQuotInitialized, h]
+
+
+theorem psKernelEnvironmentAddUnchecked_constants
+    (environment : PsKernelEnvironment)
+    (info : PsKernelConstantInfo) :
+    (psKernelEnvironmentAddUnchecked environment info).constants =
+      List.cons info environment.constants := by
+  rfl
+
+theorem psKernelEnvironmentAddUnchecked_quot
+    (environment : PsKernelEnvironment)
+    (info : PsKernelConstantInfo) :
+    (psKernelEnvironmentAddUnchecked environment info).quotInitialized =
+      environment.quotInitialized := by
+  rfl
+
+theorem psKernelEnvironmentAddUnchecked_runtime
+    (environment : PsKernelEnvironment)
+    (info : PsKernelConstantInfo) :
+    (psKernelEnvironmentAddUnchecked environment info).runtime =
+      environment.runtime := by
+  rfl
+
+theorem psKernelEnvironmentAddUnchecked_semantic
+    (environment : PsKernelEnvironment)
+    (info : PsKernelConstantInfo) :
+    psKernelEnvironmentSemantic
+        (psKernelEnvironmentAddUnchecked environment info) =
+      PsKernelEnvironmentSemantic.mk
+        (List.cons info environment.constants)
+        environment.quotInitialized := by
+  rfl

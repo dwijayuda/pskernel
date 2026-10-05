@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {gunzipSync} from 'node:zlib';import {createHash} from 'node:crypto';
-import {checkOwnedAdmissions} from './checked-owned-kernel.mjs';import {definition} from '../packages/pskernel-core/test/unit-values.mjs';
-import {enumeration,eliminate,resultWitness,wireBatch,wireEntry,N,Z,S,U,B,C,app,pi,lam,member,literal} from '../packages/pskernel-core/test/enum-values.mjs';
+import {checkOwnedAdmissions} from './checked-owned-kernel.mjs';import {definition} from '../packages/pskernel-core.old2/test/unit-values.mjs';
+import {enumeration,eliminate,resultWitness,wireBatch,wireEntry,N,Z,S,U,B,C,app,pi,lam,member,literal} from '../packages/pskernel-core.old2/test/enum-values.mjs';
 const check=async entries=>(await checkOwnedAdmissions(wireBatch(entries)));
 const preserved=gunzipSync(fs.readFileSync(new URL('../docs/continuity/owned-record-fields-2026-10-03/preserved75-admissions.json.gz',import.meta.url)));
 assert.equal(createHash('sha256').update(preserved).digest('hex'),'20715347d21c3151b02207cb0b17e4827fa098c1c97861c6438df79b2863a722');

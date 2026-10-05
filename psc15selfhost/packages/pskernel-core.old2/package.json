@@ -1,8 +1,8 @@
 {
-  "name": "@proofscript/pskernel-core",
+  "name": "@proofscript/pskernel-core.old2",
   "version": "0.1.0-checker.14",
   "private": true,
-  "description": "Owned PSC-compiled dependent term-checker fragment; private experimental checkpoint, not an authoritative kernel",
+  "description": "Archived legacy owned PSC-compiled dependent term-checker checkpoint; private, experimental, and non-authoritative",
   "type": "module",
   "exports": {
     ".": {
@@ -59,7 +59,7 @@
       "test"
     ],
     "outDir": "dist",
-    "role": "experimental-owned-kernel-off-bootstrap",
+    "role": "archived-owned-kernel-old2-off-bootstrap",
     "authoritative": false
   }
 }

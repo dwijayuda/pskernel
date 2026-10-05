@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "psc": "node packages/cli/bin/psc.mjs",
-    "test:pskernel-core-proofs": "lake build PsKernelCore && node scripts/check-pskernel-core-proofs.mjs",
+    "test:pskernel-core-proofs": "lake build PsKernelCore PsKernelCoreMetatheory && node scripts/check-pskernel-core-proofs.mjs",
     "clean": "node scripts/clean.mjs",
     "check:workspace": "node scripts/bootstrap-closure-contract-tests.mjs && node scripts/check-workspace.mjs",
     "check:source:bootstrap": "node check-psc1-source.mjs",

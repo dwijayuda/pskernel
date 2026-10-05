@@ -3432,101 +3432,130 @@ def psWasmLowerArrayFoldlWith
                                                                               advancedState
                                                                               helperFunction
                                                                               false;
+                                                                          let foldInstructions :
+                                                                              List PsWasmInstruction := [
+                                                                            PsWasmInstruction.localSet
+                                                                              stopLocal,
+                                                                            PsWasmInstruction.localGet
+                                                                              startLocal,
+                                                                            PsWasmInstruction.call
+                                                                              psWasmNatFitsU32Fn,
+                                                                            PsWasmInstruction.ifStart
+                                                                              (Option.some
+                                                                                accumulatorValueType),
+                                                                              PsWasmInstruction.localGet
+                                                                                stopLocal,
+                                                                              PsWasmInstruction.call
+                                                                                psWasmNatFitsU32Fn,
+                                                                              PsWasmInstruction.ifStart
+                                                                                (Option.some
+                                                                                  PsWasmValueType.i32),
+                                                                                PsWasmInstruction.localGet
+                                                                                  stopLocal,
+                                                                                PsWasmInstruction.call
+                                                                                  psWasmNatToU32Fn,
+                                                                                PsWasmInstruction.localGet
+                                                                                  arrayLocal,
+                                                                                PsWasmInstruction.arrayLen,
+                                                                                PsWasmInstruction.i32LeU,
+                                                                                PsWasmInstruction.ifStart
+                                                                                  (Option.some
+                                                                                    PsWasmValueType.i32),
+                                                                                  PsWasmInstruction.localGet
+                                                                                    stopLocal,
+                                                                                  PsWasmInstruction.call
+                                                                                    psWasmNatToU32Fn,
+                                                                                PsWasmInstruction.else_,
+                                                                                  PsWasmInstruction.localGet
+                                                                                    arrayLocal,
+                                                                                  PsWasmInstruction.arrayLen,
+                                                                                PsWasmInstruction.end_,
+                                                                              PsWasmInstruction.else_,
+                                                                                PsWasmInstruction.localGet
+                                                                                  arrayLocal,
+                                                                                PsWasmInstruction.arrayLen,
+                                                                              PsWasmInstruction.end_,
+                                                                              PsWasmInstruction.localSet
+                                                                                endLocal,
+                                                                              PsWasmInstruction.localGet
+                                                                                functionLocal,
+                                                                              PsWasmInstruction.localGet
+                                                                                arrayLocal,
+                                                                              PsWasmInstruction.localGet
+                                                                                startLocal,
+                                                                              PsWasmInstruction.call
+                                                                                psWasmNatToU32Fn,
+                                                                              PsWasmInstruction.localGet
+                                                                                endLocal,
+                                                                              PsWasmInstruction.localGet
+                                                                                initLocal,
+                                                                              PsWasmInstruction.call
+                                                                                helperName,
+                                                                            PsWasmInstruction.else_,
+                                                                              PsWasmInstruction.localGet
+                                                                                initLocal,
+                                                                            PsWasmInstruction.end_
+                                                                          ];
+                                                                          let withStopInstructions :
+                                                                              List PsWasmInstruction :=
+                                                                            psListAppend
+                                                                              loweredStop.instructions
+                                                                              foldInstructions;
+                                                                          let withStartStore :
+                                                                              List PsWasmInstruction :=
+                                                                            psListAppend
+                                                                              [
+                                                                                PsWasmInstruction.localSet
+                                                                                  startLocal
+                                                                              ]
+                                                                              withStopInstructions;
+                                                                          let withStartInstructions :
+                                                                              List PsWasmInstruction :=
+                                                                            psListAppend
+                                                                              loweredStart.instructions
+                                                                              withStartStore;
+                                                                          let withArrayStore :
+                                                                              List PsWasmInstruction :=
+                                                                            psListAppend
+                                                                              [
+                                                                                PsWasmInstruction.localSet
+                                                                                  arrayLocal
+                                                                              ]
+                                                                              withStartInstructions;
+                                                                          let withArrayInstructions :
+                                                                              List PsWasmInstruction :=
+                                                                            psListAppend
+                                                                              loweredArray.instructions
+                                                                              withArrayStore;
+                                                                          let withInitStore :
+                                                                              List PsWasmInstruction :=
+                                                                            psListAppend
+                                                                              [
+                                                                                PsWasmInstruction.localSet
+                                                                                  initLocal
+                                                                              ]
+                                                                              withArrayInstructions;
+                                                                          let withInitInstructions :
+                                                                              List PsWasmInstruction :=
+                                                                            psListAppend
+                                                                              loweredInit.instructions
+                                                                              withInitStore;
+                                                                          let withFunctionStore :
+                                                                              List PsWasmInstruction :=
+                                                                            psListAppend
+                                                                              [
+                                                                                PsWasmInstruction.localSet
+                                                                                  functionLocal
+                                                                              ]
+                                                                              withInitInstructions;
+                                                                          let allInstructions :
+                                                                              List PsWasmInstruction :=
+                                                                            psListAppend
+                                                                              loweredFunction.instructions
+                                                                              withFunctionStore;
                                                                           Except.ok {
                                                                             instructions :=
-                                                                              psListAppend
-                                                                                loweredFunction.instructions
-                                                                                (psListAppend
-                                                                                  [
-                                                                                    PsWasmInstruction.localSet
-                                                                                      functionLocal
-                                                                                  ]
-                                                                                  (psListAppend
-                                                                                    loweredInit.instructions
-                                                                                    (psListAppend
-                                                                                      [
-                                                                                        PsWasmInstruction.localSet
-                                                                                          initLocal
-                                                                                      ]
-                                                                                      (psListAppend
-                                                                                        loweredArray.instructions
-                                                                                        (psListAppend
-                                                                                          [
-                                                                                            PsWasmInstruction.localSet
-                                                                                              arrayLocal
-                                                                                          ]
-                                                                                          (psListAppend
-                                                                                            loweredStart.instructions
-                                                                                            (psListAppend
-                                                                                              [
-                                                                                                PsWasmInstruction.localSet
-                                                                                                  startLocal
-                                                                                              ]
-                                                                                              (psListAppend
-                                                                                                loweredStop.instructions
-                                                                                                [
-                                                                                                  PsWasmInstruction.localSet
-                                                                                                    stopLocal,
-                                                                                                  PsWasmInstruction.localGet
-                                                                                                    startLocal,
-                                                                                                  PsWasmInstruction.call
-                                                                                                    psWasmNatFitsU32Fn,
-                                                                                                  PsWasmInstruction.ifStart
-                                                                                                    (Option.some
-                                                                                                      accumulatorValueType),
-                                                                                                    PsWasmInstruction.localGet
-                                                                                                      stopLocal,
-                                                                                                    PsWasmInstruction.call
-                                                                                                      psWasmNatFitsU32Fn,
-                                                                                                    PsWasmInstruction.ifStart
-                                                                                                      (Option.some
-                                                                                                        PsWasmValueType.i32),
-                                                                                                      PsWasmInstruction.localGet
-                                                                                                        stopLocal,
-                                                                                                      PsWasmInstruction.call
-                                                                                                        psWasmNatToU32Fn,
-                                                                                                      PsWasmInstruction.localGet
-                                                                                                        arrayLocal,
-                                                                                                      PsWasmInstruction.arrayLen,
-                                                                                                      PsWasmInstruction.i32LeU,
-                                                                                                      PsWasmInstruction.ifStart
-                                                                                                        (Option.some
-                                                                                                          PsWasmValueType.i32),
-                                                                                                        PsWasmInstruction.localGet
-                                                                                                          stopLocal,
-                                                                                                        PsWasmInstruction.call
-                                                                                                          psWasmNatToU32Fn,
-                                                                                                      PsWasmInstruction.else_,
-                                                                                                        PsWasmInstruction.localGet
-                                                                                                          arrayLocal,
-                                                                                                        PsWasmInstruction.arrayLen,
-                                                                                                      PsWasmInstruction.end_,
-                                                                                                    PsWasmInstruction.else_,
-                                                                                                      PsWasmInstruction.localGet
-                                                                                                        arrayLocal,
-                                                                                                      PsWasmInstruction.arrayLen,
-                                                                                                    PsWasmInstruction.end_,
-                                                                                                    PsWasmInstruction.localSet
-                                                                                                      endLocal,
-                                                                                                    PsWasmInstruction.localGet
-                                                                                                      functionLocal,
-                                                                                                    PsWasmInstruction.localGet
-                                                                                                      arrayLocal,
-                                                                                                    PsWasmInstruction.localGet
-                                                                                                      startLocal,
-                                                                                                    PsWasmInstruction.call
-                                                                                                      psWasmNatToU32Fn,
-                                                                                                    PsWasmInstruction.localGet
-                                                                                                      endLocal,
-                                                                                                    PsWasmInstruction.localGet
-                                                                                                      initLocal,
-                                                                                                    PsWasmInstruction.call
-                                                                                                      helperName,
-                                                                                                  PsWasmInstruction.else_,
-                                                                                                    PsWasmInstruction.localGet
-                                                                                                      initLocal,
-                                                                                                  PsWasmInstruction.end_
-                                                                                                ])))))))
+                                                                              allInstructions
                                                                             state := finalState
                                                                           }
 

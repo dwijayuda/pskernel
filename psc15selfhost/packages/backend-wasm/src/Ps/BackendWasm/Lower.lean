@@ -3576,7 +3576,7 @@ def psWasmLowerLambdaWith
                           state.currentDefinition
                           (String.Internal.append
                             "$lambda$"
-                            (toString lambdaId));
+                            (psNatToString lambdaId));
                       let subtypeName :=
                         String.Internal.append
                           baseName

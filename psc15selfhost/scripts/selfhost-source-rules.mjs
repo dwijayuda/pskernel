@@ -550,11 +550,27 @@ export function findSelfhostStructuralViolations(
       }
     }
 
-    const numericChoice = line.match(
-      /^\s*let\s+[A-Za-z_][A-Za-z0-9_']*\s*:=\s*if\b[\s\S]*\bthen\s+\d+\s+else\s+\d+\s*;?\s*$/u,
+    const numericChoicePattern =
+      /^if\b[\s\S]*\bthen\s+\d+\s+else\s+\d+\s*;?\s*$/u;
+    const inlineNumericChoice = line.match(
+      /^\s*let\s+[A-Za-z_][A-Za-z0-9_']*\s*:=\s*(if[\s\S]*)$/u,
     );
-    if (numericChoice) {
+    if (
+      inlineNumericChoice &&
+      numericChoicePattern.test(inlineNumericChoice[1].trim())
+    ) {
       add('untyped-numeric-choice-let', index + 1, line);
+    } else if (
+      /^\s*let\s+[A-Za-z_][A-Za-z0-9_']*\s*:=\s*$/u.test(line)
+    ) {
+      let cursor = index + 1;
+      while (cursor < lines.length && lines[cursor].trim() === '') cursor++;
+      if (
+        cursor < lines.length &&
+        numericChoicePattern.test(lines[cursor].trim())
+      ) {
+        add('untyped-numeric-choice-let', index + 1, line);
+      }
     }
 
     const stringLine = stringLines[index] ?? '';

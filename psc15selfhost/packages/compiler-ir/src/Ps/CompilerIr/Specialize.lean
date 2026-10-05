@@ -1272,7 +1272,7 @@ def psIrSpecializeSeedStructures
     List PsVerifiedIrStructure ->
     Except PsIrSpecializeError
       (List PsVerifiedIrStructure × List PsIrSpecializeRequest)
-  | [] => Except.ok ([], [])
+  | [] => Except.ok (Prod.mk List.nil List.nil)
   | structureInfo :: rest =>
       match psIrSpecializeSeedStructures module rest with
       | Except.error error => Except.error error
@@ -1288,23 +1288,24 @@ def psIrSpecializeSeedStructures
               | Except.error error => Except.error error
               | Except.ok lowered =>
                   Except.ok
-                    (
-                      List.cons
+                    (Prod.mk
+                      (List.cons
                         {
                           name := structureInfo.name
                           typeParameters := []
                           fields := lowered.fields
                         }
-                        (Prod.fst loweredRest),
-                      psListAppend lowered.requests (Prod.snd loweredRest)
-                    )
+                        (Prod.fst loweredRest))
+                      (psListAppend
+                        lowered.requests
+                        (Prod.snd loweredRest)))
 
 def psIrSpecializeSeedInductives
     (module : PsVerifiedIrModule) :
     List PsVerifiedIrInductive ->
     Except PsIrSpecializeError
       (List PsVerifiedIrInductive × List PsIrSpecializeRequest)
-  | [] => Except.ok ([], [])
+  | [] => Except.ok (Prod.mk List.nil List.nil)
   | inductiveInfo :: rest =>
       match psIrSpecializeSeedInductives module rest with
       | Except.error error => Except.error error
@@ -1320,23 +1321,24 @@ def psIrSpecializeSeedInductives
               | Except.error error => Except.error error
               | Except.ok lowered =>
                   Except.ok
-                    (
-                      List.cons
+                    (Prod.mk
+                      (List.cons
                         {
                           name := inductiveInfo.name
                           typeParameters := []
                           constructors := lowered.constructors
                         }
-                        (Prod.fst loweredRest),
-                      psListAppend lowered.requests (Prod.snd loweredRest)
-                    )
+                        (Prod.fst loweredRest))
+                      (psListAppend
+                        lowered.requests
+                        (Prod.snd loweredRest)))
 
 def psIrSpecializeSeedDeclarations
     (module : PsVerifiedIrModule) :
     List PsVerifiedIrDeclaration ->
     Except PsIrSpecializeError
       (List PsVerifiedIrDeclaration × List PsIrSpecializeRequest)
-  | [] => Except.ok ([], [])
+  | [] => Except.ok (Prod.mk List.nil List.nil)
   | declaration :: rest =>
       match psIrSpecializeSeedDeclarations module rest with
       | Except.error error => Except.error error
@@ -1366,8 +1368,8 @@ def psIrSpecializeSeedDeclarations
                       | Except.error error => Except.error error
                       | Except.ok loweredBody =>
                           Except.ok
-                            (
-                              List.cons
+                            (Prod.mk
+                              (List.cons
                                 {
                                   name := declaration.name
                                   typeParameters := []
@@ -1376,9 +1378,14 @@ def psIrSpecializeSeedDeclarations
                                   resultType := loweredResult.type
                                   body := loweredBody.expr
                                 }
-                                (Prod.fst loweredRest),
-                              psListAppend loweredParameters.requests (psListAppend loweredResult.requests (psListAppend loweredBody.requests (Prod.snd loweredRest)))
-                            )
+                                (Prod.fst loweredRest))
+                              (psListAppend
+                                loweredParameters.requests
+                                (psListAppend
+                                  loweredResult.requests
+                                  (psListAppend
+                                    loweredBody.requests
+                                    (Prod.snd loweredRest)))))
 
 def psIrSpecializeAppendRequest
     (state : PsIrSpecializeState)

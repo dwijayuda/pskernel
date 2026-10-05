@@ -165,7 +165,8 @@
     "test:backend-js-differential": "node scripts/backend-js-differential.test.mjs",
     "test:backend-js": "npm run test:backend-js-unit && npm run test:backend-js-differential",
     "test:portable-selfhost-profile": "node --test scripts/portable-selfhost-profile.test.mjs",
-    "check:portable-selfhost-profile": "npm run test:portable-selfhost-profile && node scripts/portable-selfhost-profile.mjs"
+    "check:portable-selfhost-profile": "npm run test:portable-selfhost-profile && node scripts/portable-selfhost-profile.mjs",
+    "check:portable-selfhost-contract": "node scripts/portable-selfhost-contract.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

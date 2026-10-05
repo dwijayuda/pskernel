@@ -12,18 +12,38 @@ export function assertErasurePrimitiveApplicationEquality(source) {
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_EQUALITY_SELFHOST_SOURCE_SYNTAX_MISSING: declaration block",
     );
   }
-  const natChecks = block.match(/Nat\.beq \(psListLength view\.args\)/g) ?? [];
-  const stringChecks = block.match(/psStringEq text/g) ?? [];
-  if (natChecks.length !== 22 || stringChecks.length !== 43) {
+
+  const lengthUses =
+    block.match(/psListLength view\.args/g) ?? [];
+  const natChecks =
+    block.match(/Nat\.beq\s*\(psListLength view\.args\)/g) ?? [];
+  if (lengthUses.length === 0 || natChecks.length !== lengthUses.length) {
     throw new Error(
-      "PSC2_ERASURE_PRIMITIVE_APPLICATION_EQUALITY_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Nat/String equality checks",
+      "PSC2_ERASURE_PRIMITIVE_APPLICATION_EQUALITY_SELFHOST_SOURCE_SYNTAX_MISSING: explicit Nat.beq argument-length checks",
     );
   }
+
+  const withoutTextBinding = block.replace(
+    /let text := psNameToString name;/g,
+    "",
+  );
+  const withoutExplicitStringChecks =
+    withoutTextBinding.replace(/psStringEq text/g, "");
+  if (
+    !/psStringEq text/g.test(block) ||
+    /\btext\b/.test(withoutExplicitStringChecks)
+  ) {
+    throw new Error(
+      "PSC2_ERASURE_PRIMITIVE_APPLICATION_EQUALITY_SELFHOST_SOURCE_SYNTAX_MISSING: explicit psStringEq name checks",
+    );
+  }
+
   if (/==/.test(block)) {
     throw new Error(
       "PSC2_ERASURE_PRIMITIVE_APPLICATION_EQUALITY_SELFHOST_SOURCE_SYNTAX_FORBIDDEN: equality operator",
     );
   }
+
   return block;
 }
 
@@ -37,6 +57,7 @@ const block = assertErasurePrimitiveApplicationEquality(source);
 for (const [from, to] of [
   ["Nat.beq (psListLength view.args) 2", "(psListLength view.args) == 2"],
   ["psStringEq text \"Int.ofNat\"", "text == \"Int.ofNat\""],
+  ["psStringEq text \"UInt8.ofNat\"", "text == \"UInt8.ofNat\""],
 ]) {
   assert.ok(block.includes(from));
   const broken = block.replace(from, to);
@@ -47,5 +68,5 @@ for (const [from, to] of [
 }
 
 process.stdout.write(
-  "PSC2_ERASURE_PRIMITIVE_APPLICATION_EQUALITY_SELFHOST_SOURCE_SYNTAX: PASS (22 Nat.beq length checks, 43 psStringEq name checks; equality-operator mutations rejected)\n",
+  "PSC2_ERASURE_PRIMITIVE_APPLICATION_EQUALITY_SELFHOST_SOURCE_SYNTAX: PASS (all argument-length checks use Nat.beq; all primitive-name checks use psStringEq; equality-operator mutations rejected)\n",
 );

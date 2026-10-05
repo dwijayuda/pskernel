@@ -147,12 +147,16 @@ lean_lib PsHost where
   roots := #[
     `Ps.Host.TypeScriptCompiler,
     `Ps.Host.ProjectCompiler,
+    `Ps.Host.ProjectQuery,
     `Ps.Host.CompilerDriver
   ]
 
 lean_lib PsProject where
   srcDir := "packages/project/src"
-  roots := #[`Ps.Project.ModuleGraph]
+  roots := #[
+    `Ps.Project.ModuleGraph,
+    `Ps.Project.QueryGraph
+  ]
 
 lean_lib PsMeta where
   srcDir := "packages/meta/src"
@@ -215,6 +219,14 @@ lean_exe psc1_tests where
 lean_exe psc1_translation_tests where
   srcDir := "test"
   root := `TranslationTests
+
+lean_exe psc1_project_query_graph_tests where
+  srcDir := "test"
+  root := `ProjectQueryGraphTests
+
+lean_exe psc1_host_project_query_tests where
+  srcDir := "test"
+  root := `HostProjectQueryTests
 
 lean_exe psc1_bridge_tests where
   srcDir := "test"

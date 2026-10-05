@@ -21,6 +21,7 @@ export const portableSelfhostStructuralRuleIds = Object.freeze([
   'leading-dot-term-constructor',
   'untyped-lambda-binder',
   'untyped-lambda-let',
+  'untyped-match-let',
   'untyped-numeric-choice-let',
   'layout-let-sequencing',
 ]);
@@ -628,6 +629,21 @@ export function findSelfhostStructuralViolations(
           /^fun\s*\(/u.test(lines[cursor].trim()))
       ) {
         add('untyped-lambda-let', index + 1, line);
+      }
+    }
+
+    const inlineUntypedMatch =
+      /^\s*let\s+[A-Za-z_][A-Za-z0-9_']*\s*:=\s*match\b/u.test(line);
+    if (inlineUntypedMatch) {
+      add('untyped-match-let', index + 1, line);
+    } else if (/^\s*let\s+[A-Za-z_][A-Za-z0-9_']*\s*:=\s*$/u.test(line)) {
+      let cursor = index + 1;
+      while (cursor < lines.length && lines[cursor].trim() === '') cursor++;
+      if (
+        cursor < lines.length &&
+        /^match\b/u.test(lines[cursor].trim())
+      ) {
+        add('untyped-match-let', index + 1, line);
       }
     }
 

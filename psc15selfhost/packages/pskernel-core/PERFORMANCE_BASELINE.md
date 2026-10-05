@@ -8,6 +8,9 @@ Current M3 acceptance uses the explicit latency and memory ceilings in
 remains diagnostic. Historical ordinary/indexed/mutual admission timings below
 used closed expressions that could be precomputed; they are superseded by the
 runtime-input corpus and must not be cited as admission throughput wins.
+M3 is complete for the declared bounded profile at
+`c13558c6d573ef477fed6f0ffa31a9b7e39650ca`; see the permanent results in
+`M3_ACCEPTANCE.md`. This does not close M4 or promote a provider.
 
 These numbers are **engineering baselines**, not semantic evidence and not
 release guarantees. Always preserve the Lean-4.34 conformance, PSC1 portable

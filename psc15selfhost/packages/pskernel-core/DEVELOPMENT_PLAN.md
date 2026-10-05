@@ -17,9 +17,10 @@
   - 61 rule ownership/evidence mappings preserve the 34-row compatibility matrix.
   - completion concerns production architecture; Phase D and provider promotion
     remain separately gated. See `ARCHITECTURE_MIGRATION_REPORT.md`.
-- **Phase C — Competitive performance: ACTIVE ONLY WHEN MEASURED.**
+- **Phase C — Competitive performance: M3 COMPLETE FOR THE BOUNDED PROFILE.**
   - M3 now uses the explicit small-workload latency/memory budgets in
-    `M3_ACCEPTANCE.md` and `M3_WORKLOAD_BUDGETS.json`; verification is pending.
+    `M3_ACCEPTANCE.md` and `M3_WORKLOAD_BUDGETS.json`; all 28 budget checks and
+    semantic/portable gates passed at `c13558c6d573ef477fed6f0ffa31a9b7e39650ca`.
     Native is the preferred CLI/server deployment target; broad JS optimization
     is deferred. Relative speed against Lean is informational, not an exit gate.
   - current pass is cost-bounded: three native and Node benchmark samples,
@@ -386,7 +387,9 @@ readability/performance gate.
 
 ### M3 — Competitive kernel
 
-Bounded acceptance scope: `M3_ACCEPTANCE.md`. Status: verification pending.
+Bounded acceptance scope: `M3_ACCEPTANCE.md`. **Status: COMPLETE**, verified at
+`c13558c6d573ef477fed6f0ffa31a9b7e39650ca`. Continue enforcing these gates;
+new deployment profiles and larger workloads need their own explicit budgets.
 
 - indexed environment/cache structures;
 - measured native performance meets the declared CLI/server workload budgets;

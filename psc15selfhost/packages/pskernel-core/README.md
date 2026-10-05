@@ -6,6 +6,12 @@ and its Lean modules use `Ps.KernelCore`. The former experimental core is
 preserved in `../pskernel-core.old3`; see [PACKAGE_RENAME.md](PACKAGE_RENAME.md)
 for the migration map and the separate provider-promotion boundary.
 
+M3 is complete for the explicit small-workload Linux x64 profile. See
+[`M3_ACCEPTANCE.md`](M3_ACCEPTANCE.md) for latency/memory budgets, corrected
+benchmark evidence and scope. Native is the preferred CLI/server deployment
+target; the JS artifact retains its portable source and bounded Node checks.
+M4 remains open, and `lean434-wasm` remains the trusted default.
+
 ## Project documentation hierarchy
 
 Use these files in this order when making development decisions:

@@ -1,9 +1,10 @@
 # M3: explicit workload budgets
 
-Status: **verification pending**. The 2026-10-05 execution decision prioritizes
-native PSKernel for CLI/server deployment and bounds JavaScript work. M3 closes
-when the native budget job, cross-runtime budget job, and portable semantic gates
-pass for the same checkpoint. M4 provider promotion remains separate.
+Status: **M3 COMPLETE for the declared bounded profile**, verified 2026-10-05 at
+`c13558c6d573ef477fed6f0ffa31a9b7e39650ca`. The execution decision prioritizes
+native PSKernel for CLI/server deployment and bounds JavaScript work. The native
+budget job, cross-runtime budget job, and portable semantic gates passed for that
+same checkpoint. M4 provider promotion remains separate and open.
 
 ## Scope and decision
 
@@ -94,8 +95,57 @@ is part of M3.
 
 ## Completion evidence
 
-Pending the first run with these fixed budgets and corrected admission inputs.
-All three workflows must pass for one commit before recording completion.
+The budgets were declared at `76ad547e29c2812d9c1deeb2dc4a052cc4d9c7b0`, before
+measuring the corrected admission corpus. A fixture initializer syntax repair
+produced `c13558c6d573ef477fed6f0ffa31a9b7e39650ca`; no ceiling was raised.
+
+All three workflows passed at that commit:
+
+- [Native budgets](https://github.com/dwijayuda/pskernel/actions/runs/37305671515):
+  all 13 checks passed, including all occupied-input guards.
+- [Cross-runtime budgets](https://github.com/dwijayuda/pskernel/actions/runs/37305671495):
+  all 15 checks passed, including JS correctness guards and WASM verdicts.
+- [Portable semantic gates](https://github.com/dwijayuda/pskernel/actions/runs/37305671494):
+  architecture/compatibility/conformance audits, differential tests, PSC1 checking
+  and canonical translation passed.
+
+Maximum observations across the three samples (time rows are complete batches):
+
+| Workload | Maximum observed | Ceiling |
+| --- | ---: | ---: |
+| Native ordinary admission, 100 | 5.040 ms | 100 ms |
+| Native indexed admission, 100 | 4.299 ms | 100 ms |
+| Native mutual admission, 100 | 17.049 ms | 200 ms |
+| Native nested admission, 100 | 36.896 ms | 300 ms |
+| Native wider nested admission, 50 | 65.430 ms | 250 ms |
+| Native recursor reduction, 1,000 | 10.297 ms | 50 ms |
+| Native shared beta WHNF, 1,000 | 26.895 ms | 50 ms |
+| Native shared beta defeq, 1,000 | 4.627 ms | 20 ms |
+| Native shared checked application, 1,000 | 3.571 ms | 20 ms |
+| Native full benchmark peak RSS | 72.910 MiB | 256 MiB |
+| Native shared-fixture peak RSS | 10.094 MiB | 256 MiB |
+| JS shared beta WHNF, 1,000 | 15,476.217 ms | 20,000 ms |
+| JS shared beta defeq, 1,000 | 1,595.455 ms | 3,000 ms |
+| JS shared checked application, 1,000 | 1,192.520 ms | 2,000 ms |
+| JS module import | 92.318 ms | 500 ms |
+| JS slowest first call | 34.017 ms | 100 ms per workload |
+| JS accept one definition | 0.919 ms | 5 ms |
+| JS accept 128 definitions | 78.502 ms | 250 ms |
+| JS reject final definition of four | 2.940 ms | 10 ms |
+| JS peak RSS | 190.719 MiB | 512 MiB |
+
+The other six native checking ceilings also passed (maximum 2.819 ms per 1,000
+operations, against 20 ms for each). The reports retain every measurement,
+median/range, identity, and budget hash; no successful median hides a failed
+sample. Twenty local evidence-validation tests passed, including injected
+over-budget, incomplete, invalid-memory, wrong-profile and wrong-work-count cases.
+
+Corrected ordinary/indexed/mutual PSKernel/Lean median ratios were 2.11x, 1.46x,
+and 2.43x. These replace the misleading historical constant-input ratios. M3
+acceptance is the absolute-budget result, not a claim of native parity or broad
+JS competitiveness. Production kernel source and the archived core were unchanged
+through this M3 closure; only benchmarks, budget enforcement and documentation
+changed.
 
 After M3, prioritize the canonical adapter, dual checking and parity required by
 M4. Until M4 is explicitly accepted, `lean434-wasm` remains the trusted default.

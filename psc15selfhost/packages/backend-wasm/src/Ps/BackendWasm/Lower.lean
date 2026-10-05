@@ -3854,8 +3854,10 @@ def psWasmExprUsesNatWithFuel :
           else
             uses (Prod.snd (Prod.snd alternative));
       match expr with
-      | .literal (.natural _) => true
-      | .literal _ => false
+      | .literal literal =>
+          match literal with
+          | .natural _ => true
+          | _ => false
       | .var _ => false
       | .intrinsic operation typeArguments arguments =>
           if psWasmIntrinsicUsesNat operation then
@@ -3993,8 +3995,10 @@ def psWasmExprUsesIntWithFuel :
           else
             uses (Prod.snd (Prod.snd alternative));
       match expr with
-      | .literal (.integer _) => true
-      | .literal _ => false
+      | .literal literal =>
+          match literal with
+          | .integer _ => true
+          | _ => false
       | .var _ => false
       | .intrinsic operation typeArguments arguments =>
           if psWasmIntrinsicUsesInt operation then

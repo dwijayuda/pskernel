@@ -482,10 +482,9 @@ def psIrSpecializeRewriteParameters
               Except.ok {
                 parameters :=
                   List.cons
-                    {
-                      name := parameter.name
-                      type := lowered.type
-                    }
+                    (PsVerifiedIrParameter.mk
+                      parameter.name
+                      lowered.type)
                     loweredRest.parameters
                 requests :=
                   psListAppend lowered.requests loweredRest.requests
@@ -572,11 +571,10 @@ def psIrSpecializeRewriteMatchBindings
               Except.ok {
                 bindings :=
                   List.cons
-                    {
-                      field := binding.field
-                      name := binding.name
-                      type := lowered.type
-                    }
+                    (PsVerifiedIrMatchBinding.mk
+                      binding.field
+                      binding.name
+                      lowered.type)
                     loweredRest.bindings
                 requests :=
                   psListAppend lowered.requests loweredRest.requests
@@ -1148,10 +1146,9 @@ def psIrSpecializeRewriteStructureFields
               Except.ok {
                 fields :=
                   List.cons
-                    {
-                      name := field.name
-                      type := lowered.type
-                    }
+                    (PsVerifiedIrStructureField.mk
+                      field.name
+                      lowered.type)
                     loweredRest.fields
                 requests :=
                   psListAppend lowered.requests loweredRest.requests
@@ -1186,10 +1183,9 @@ def psIrSpecializeRewriteConstructorFields
               Except.ok {
                 fields :=
                   List.cons
-                    {
-                      name := field.name
-                      type := lowered.type
-                    }
+                    (PsVerifiedIrConstructorField.mk
+                      field.name
+                      lowered.type)
                     loweredRest.fields
                 requests :=
                   psListAppend lowered.requests loweredRest.requests
@@ -1224,10 +1220,9 @@ def psIrSpecializeRewriteConstructors
               Except.ok {
                 constructors :=
                   List.cons
-                    {
-                      name := constructorInfo.name
-                      fields := lowered.fields
-                    }
+                    (PsVerifiedIrConstructor.mk
+                      constructorInfo.name
+                      lowered.fields)
                     loweredRest.constructors
                 requests :=
                   psListAppend lowered.requests loweredRest.requests
@@ -1256,12 +1251,11 @@ def psIrSpecializeRewriteImports
               Except.ok {
                 imports :=
                   List.cons
-                    {
-                      localName := importInfo.localName
-                      source := importInfo.source
-                      importedName := importInfo.importedName
-                      type := lowered.type
-                    }
+                    (PsVerifiedIrExternalImport.mk
+                      importInfo.localName
+                      importInfo.source
+                      importInfo.importedName
+                      lowered.type)
                     loweredRest.imports
                 requests :=
                   psListAppend lowered.requests loweredRest.requests
@@ -1290,11 +1284,10 @@ def psIrSpecializeSeedStructures
                   Except.ok
                     (Prod.mk
                       (List.cons
-                        {
-                          name := structureInfo.name
-                          typeParameters := []
-                          fields := lowered.fields
-                        }
+                        (PsVerifiedIrStructure.mk
+                          structureInfo.name
+                          List.nil
+                          lowered.fields)
                         (Prod.fst loweredRest))
                       (psListAppend
                         lowered.requests
@@ -1323,11 +1316,10 @@ def psIrSpecializeSeedInductives
                   Except.ok
                     (Prod.mk
                       (List.cons
-                        {
-                          name := inductiveInfo.name
-                          typeParameters := []
-                          constructors := lowered.constructors
-                        }
+                        (PsVerifiedIrInductive.mk
+                          inductiveInfo.name
+                          List.nil
+                          lowered.constructors)
                         (Prod.fst loweredRest))
                       (psListAppend
                         lowered.requests
@@ -1370,14 +1362,12 @@ def psIrSpecializeSeedDeclarations
                           Except.ok
                             (Prod.mk
                               (List.cons
-                                {
-                                  name := declaration.name
-                                  typeParameters := []
-                                  parameters :=
-                                    loweredParameters.parameters
-                                  resultType := loweredResult.type
-                                  body := loweredBody.expr
-                                }
+                                (PsVerifiedIrDeclaration.mk
+                                  declaration.name
+                                  List.nil
+                                  loweredParameters.parameters
+                                  loweredResult.type
+                                  loweredBody.expr)
                                 (Prod.fst loweredRest))
                               (psListAppend
                                 loweredParameters.requests

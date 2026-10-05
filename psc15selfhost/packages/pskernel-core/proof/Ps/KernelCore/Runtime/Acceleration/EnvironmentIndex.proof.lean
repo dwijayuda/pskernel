@@ -1,4 +1,5 @@
 import Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex
+import Ps.KernelCore.Environment.Semantic
 
 theorem psKernelEnvironmentIndexFind_empty
     (name : PsKernelName) :

@@ -118,7 +118,7 @@
     "test:regression": "lake exe psc1_tests",
     "test:extensions": "lake exe psc1_backend_wasm_tests && lake exe psc1_backend_wasm_binary_smoke && lake exe psc1_backend_rust_tests && lake exe psc1_backend_rust_source_tests && lake exe psc1_backend_rust_let_function_result_tests",
     "test:lean": "npm run test:all",
-    "test:all": "npm run test:bootstrap && npm run test:regression && npm run test:project-query-graph && npm run test:host-project-query && npm run test:extensions",
+    "test:all": "npm run test:bootstrap && npm run test:regression && npm run test:project-query-graph && npm run test:project-snapshot && npm run test:host-project-query && npm run test:extensions",
     "bootstrap:lean": "npm run check:workspace && npm run check:source:bootstrap && npm run check:layout && npm run check:selfhost-project-prelude && npm run check:selfhost-foundation && npm run check:selfhost-source-syntax && npm run check:structure-recursor-normalization && npm run check:bootstrap-closure && npm run check:ir-neutrality && npm run build:lean && npm run check:selfhost-contract && npm run test:bootstrap",
     "bootstrap:check": "lake exe psc1 check packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
     "bootstrap:emit": "node scripts/bootstrap-project.mjs",
@@ -168,7 +168,8 @@
     "check:portable-selfhost-profile": "npm run test:portable-selfhost-profile && node scripts/portable-selfhost-profile.mjs",
     "check:portable-selfhost-contract": "node scripts/portable-selfhost-contract.mjs",
     "test:project-query-graph": "lake exe psc1_project_query_graph_tests",
-    "test:host-project-query": "lake exe psc1_host_project_query_tests"
+    "test:host-project-query": "lake exe psc1_host_project_query_tests",
+    "test:project-snapshot": "lake exe psc1_project_snapshot_tests"
   },
   "devDependencies": {
     "typescript": "7.0.2"

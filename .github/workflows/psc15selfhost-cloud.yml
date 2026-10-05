@@ -85,6 +85,7 @@ jobs:
             psc1 \
             psc1_erasure_tests \
             psc1_project_query_graph_tests \
+            psc1_project_snapshot_tests \
             psc1_host_project_query_tests \
             psc2_minimal_selfhost_tests \
             psc1_backend_ts_tests \
@@ -105,6 +106,10 @@ jobs:
       - name: Run project query graph corpus
         working-directory: psc15selfhost
         run: lake exe psc1_project_query_graph_tests
+
+      - name: Run project snapshot identity corpus
+        working-directory: psc15selfhost
+        run: lake exe psc1_project_snapshot_tests
 
       - name: Run host project query reuse corpus
         working-directory: psc15selfhost

@@ -155,7 +155,8 @@ lean_lib PsProject where
   srcDir := "packages/project/src"
   roots := #[
     `Ps.Project.ModuleGraph,
-    `Ps.Project.QueryGraph
+    `Ps.Project.QueryGraph,
+    `Ps.Project.Snapshot
   ]
 
 lean_lib PsMeta where
@@ -223,6 +224,10 @@ lean_exe psc1_translation_tests where
 lean_exe psc1_project_query_graph_tests where
   srcDir := "test"
   root := `ProjectQueryGraphTests
+
+lean_exe psc1_project_snapshot_tests where
+  srcDir := "test"
+  root := `ProjectSnapshotTests
 
 lean_exe psc1_host_project_query_tests where
   srcDir := "test"

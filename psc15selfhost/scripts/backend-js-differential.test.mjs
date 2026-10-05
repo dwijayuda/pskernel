@@ -126,6 +126,33 @@ try {
   assert.equal(direct.unitValue, reference.unitValue);
   assert.equal(direct.unitValue, undefined);
 
+  assert.equal(direct.natSubDemo(3n, 5n), reference.natSubDemo(3n, 5n));
+  assert.equal(direct.natSubDemo(3n, 5n), 0n);
+  assert.equal(direct.natSubDemo(9n, 4n), 5n);
+
+  assert.equal(direct.natDivDemo(9n, 0n), reference.natDivDemo(9n, 0n));
+  assert.equal(direct.natDivDemo(9n, 0n), 0n);
+  assert.equal(direct.natDivDemo(9n, 4n), 2n);
+
+  assert.equal(direct.natModDemo(9n, 0n), reference.natModDemo(9n, 0n));
+  assert.equal(direct.natModDemo(9n, 0n), 9n);
+  assert.equal(direct.natModDemo(9n, 4n), 1n);
+
+  assert.equal(direct.intNegDemo(7n), reference.intNegDemo(7n));
+  assert.equal(direct.intNegDemo(7n), -7n);
+
+  assert.equal(direct.boolAndDemo(true, false), reference.boolAndDemo(true, false));
+  assert.equal(direct.boolAndDemo(true, false), false);
+
+  assert.equal(direct.stringLengthDemo("a😀"), reference.stringLengthDemo("a😀"));
+  assert.equal(direct.stringLengthDemo("a😀"), 2n);
+
+  assert.equal(direct.letNatDemo(4n), reference.letNatDemo(4n));
+  assert.equal(direct.letNatDemo(4n), 10n);
+
+  assert.equal(direct.applyLambda(4n), reference.applyLambda(4n));
+  assert.equal(direct.applyLambda(4n), 6n);
+
   process.stdout.write(
     "PSC2_BACKEND_JS_DIFFERENTIAL: PASS\n",
   );

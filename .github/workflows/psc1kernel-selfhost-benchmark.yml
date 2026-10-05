@@ -7,6 +7,7 @@ on:
     paths:
       - psc15selfhost/packages/pskernel-selfhost/**
       - psc15selfhost/test/PsKernelSelfHostBench.lean
+      - psc15selfhost/test/KernelSelfHost/Bench/**
       - psc15selfhost/lakefile.lean
       - .github/workflows/psc1kernel-selfhost-benchmark.yml
   workflow_dispatch:

@@ -59,8 +59,8 @@ export const providerCorpus = [
   invalid('late-rejection', [def('M4Good', nat, lit(1)), def('M4Later', nat, sort(z))], 1),
 ];
 
-// Declared by prelude-extension-contract.json after the bundled WASM snapshot.
-// Keep this visible as a capability difference, never as a parity success.
+// Declared by prelude-extension-contract.json and required across all current
+// providers. A bundled provider that predates this declaration must fail parity.
 export const preludeExtensionFixture = valid('current-prelude-UInt8.ofNat', [
   def('M4Byte', c('UInt8'), app(c('UInt8.ofNat'), lit(42))),
 ]);

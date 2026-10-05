@@ -35,7 +35,9 @@
     "build:wasm": "bash scripts/build-wasm.sh && node scripts/write-prebuilt-manifest.mjs",
     "verify:source": "node host/source-distribution.test.mjs",
     "verify:prebuilt": "node host/verify-prebuilt.mjs",
-    "build:kernel": "npm run build:wasm"
+    "build:kernel": "npm run build:wasm",
+    "refresh:source": "node scripts/refresh-proofscript-source.mjs",
+    "check:source-current": "node scripts/refresh-proofscript-source.mjs --check"
   },
   "engines": {
     "node": ">=20"

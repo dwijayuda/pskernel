@@ -546,10 +546,10 @@ def psIrSpecializeRewriteFieldsWith
     Except PsIrSpecializeError PsIrSpecializeFieldsResult :=
   match fields with
   | List.nil =>
-      Except.ok {
-        fields := []
-        requests := []
-      }
+      Except.ok
+        (PsIrSpecializeFieldsResult.mk
+          List.nil
+          List.nil)
   | List.cons field rest =>
       match rewrite (Prod.snd field) with
       | Except.error error => Except.error error
@@ -557,14 +557,14 @@ def psIrSpecializeRewriteFieldsWith
           match psIrSpecializeRewriteFieldsWith rewrite rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok {
-                fields :=
-                  List.cons
+              Except.ok
+                (PsIrSpecializeFieldsResult.mk
+                  (List.cons
                     (Prod.mk (Prod.fst field) lowered.expr)
-                    loweredRest.fields
-                requests :=
-                  psListAppend lowered.requests loweredRest.requests
-              }
+                    loweredRest.fields)
+                  (psListAppend
+                    lowered.requests
+                    loweredRest.requests))
 
 def psIrSpecializeRewriteMatchBindings
     (module : PsVerifiedIrModule)
@@ -1152,10 +1152,10 @@ def psIrSpecializeRewriteStructureFields
     Except PsIrSpecializeError PsIrSpecializeStructureFieldsResult :=
   match fields with
   | List.nil =>
-      Except.ok {
-        fields := []
-        requests := []
-      }
+      Except.ok
+        (PsIrSpecializeStructureFieldsResult.mk
+          List.nil
+          List.nil)
   | List.cons field rest =>
       match
           psIrSpecializeRewriteType
@@ -1171,16 +1171,16 @@ def psIrSpecializeRewriteStructureFields
                 rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok {
-                fields :=
-                  List.cons
+              Except.ok
+                (PsIrSpecializeStructureFieldsResult.mk
+                  (List.cons
                     (PsVerifiedIrStructureField.mk
                       field.name
                       lowered.type)
-                    loweredRest.fields
-                requests :=
-                  psListAppend lowered.requests loweredRest.requests
-              }
+                    loweredRest.fields)
+                  (psListAppend
+                    lowered.requests
+                    loweredRest.requests))
 
 def psIrSpecializeRewriteConstructorFields
     (module : PsVerifiedIrModule)
@@ -1189,10 +1189,10 @@ def psIrSpecializeRewriteConstructorFields
     Except PsIrSpecializeError PsIrSpecializeConstructorFieldsResult :=
   match fields with
   | List.nil =>
-      Except.ok {
-        fields := []
-        requests := []
-      }
+      Except.ok
+        (PsIrSpecializeConstructorFieldsResult.mk
+          List.nil
+          List.nil)
   | List.cons field rest =>
       match
           psIrSpecializeRewriteType
@@ -1208,16 +1208,16 @@ def psIrSpecializeRewriteConstructorFields
                 rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok {
-                fields :=
-                  List.cons
+              Except.ok
+                (PsIrSpecializeConstructorFieldsResult.mk
+                  (List.cons
                     (PsVerifiedIrConstructorField.mk
                       field.name
                       lowered.type)
-                    loweredRest.fields
-                requests :=
-                  psListAppend lowered.requests loweredRest.requests
-              }
+                    loweredRest.fields)
+                  (psListAppend
+                    lowered.requests
+                    loweredRest.requests))
 
 def psIrSpecializeRewriteConstructors
     (module : PsVerifiedIrModule)

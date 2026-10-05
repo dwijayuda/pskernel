@@ -7,6 +7,7 @@
   "includeImportClosure": true,
   "structuralRules": [
     "recursive-equation-definition",
+    "structural-recursion-call-shape",
     "term-list-append",
     "term-list-cons",
     "numeric-tuple-projection",

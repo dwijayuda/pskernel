@@ -1,4 +1,5 @@
 import Ps.BackendWasm.Model
+import Ps.Foundation.Name
 
 def psWasmJoinTypeKeys :
     List (Option String) -> Option String
@@ -10,7 +11,7 @@ def psWasmJoinTypeKeys :
           match psWasmJoinTypeKeys rest with
           | none => none
           | some tail =>
-              if tail == "" then
+              if psStringEq tail "" then
                 some head
               else
                 some

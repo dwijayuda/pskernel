@@ -7,16 +7,16 @@ def psWasmLowerFloatBinary
   match type with
   | .float32 =>
       match operation with
-      | .add => [.f32Add]
-      | .sub => [.f32Sub]
-      | .mul => [.f32Mul]
-      | .div => [.f32Div]
+      | .add => [PsWasmInstruction.f32Add]
+      | .sub => [PsWasmInstruction.f32Sub]
+      | .mul => [PsWasmInstruction.f32Mul]
+      | .div => [PsWasmInstruction.f32Div]
   | .float =>
       match operation with
-      | .add => [.f64Add]
-      | .sub => [.f64Sub]
-      | .mul => [.f64Mul]
-      | .div => [.f64Div]
+      | .add => [PsWasmInstruction.f64Add]
+      | .sub => [PsWasmInstruction.f64Sub]
+      | .mul => [PsWasmInstruction.f64Mul]
+      | .div => [PsWasmInstruction.f64Div]
 
 def psWasmLowerFloatCompare
     (type : PsVerifiedIrFloatingType)
@@ -25,17 +25,17 @@ def psWasmLowerFloatCompare
   match type with
   | .float32 =>
       match operation with
-      | .eq => [.f32Eq]
-      | .ne => [.f32Ne]
-      | .lt => [.f32Lt]
-      | .le => [.f32Le]
-      | .gt => [.f32Gt]
-      | .ge => [.f32Ge]
+      | .eq => [PsWasmInstruction.f32Eq]
+      | .ne => [PsWasmInstruction.f32Ne]
+      | .lt => [PsWasmInstruction.f32Lt]
+      | .le => [PsWasmInstruction.f32Le]
+      | .gt => [PsWasmInstruction.f32Gt]
+      | .ge => [PsWasmInstruction.f32Ge]
   | .float =>
       match operation with
-      | .eq => [.f64Eq]
-      | .ne => [.f64Ne]
-      | .lt => [.f64Lt]
-      | .le => [.f64Le]
-      | .gt => [.f64Gt]
-      | .ge => [.f64Ge]
+      | .eq => [PsWasmInstruction.f64Eq]
+      | .ne => [PsWasmInstruction.f64Ne]
+      | .lt => [PsWasmInstruction.f64Lt]
+      | .le => [PsWasmInstruction.f64Le]
+      | .gt => [PsWasmInstruction.f64Gt]
+      | .ge => [PsWasmInstruction.f64Ge]

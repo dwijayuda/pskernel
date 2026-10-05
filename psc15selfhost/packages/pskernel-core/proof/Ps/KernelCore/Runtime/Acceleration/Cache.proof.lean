@@ -223,7 +223,17 @@ theorem psKernelExprMapGet_build_cons_self
         }
         expr =
       Option.some value := by
-  simp only [psKernelExprMapGet]
+  change
+    psKernelExprMapGetIn
+        expr
+        (psKernelExprMapIndexBucket
+          16
+          (psKernelExprMapBuildIndex
+            (List.cons
+              (Prod.mk expr value)
+              rest))
+          (psKernelExprHash expr)) =
+      Option.some value
   rw [psKernelExprMapIndexBucket_build_cons]
   exact
     psKernelExprMapGetIn_insertIn_self

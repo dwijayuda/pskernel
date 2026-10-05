@@ -282,27 +282,18 @@ cp -a "$environment_source/." "$provider_src/Ps/"
 cp -a "$bridge_source/." "$provider_src/Ps/"
 cp -a "$provider_source/." "$provider_src/PsKernelLean/"
 
-provider_modules=(
-  "Ps/Foundation/Name"
-  "PsKernelLean/Error"
-  "Ps/Core/Builtin"
-  "Ps/Core/Level"
-  "Ps/Bridge/Json"
-  "Ps/Core/Expr"
-  "Ps/Core/Declaration"
-  "Ps/Environment/Basic"
-  "Ps/Bridge/CheckedAdmissions"
-  "Ps/Environment/Prelude"
-  "PsKernelLean/Convert"
-  "Ps/Bridge/Codec"
-  "Ps/Environment/SelfHostPrelude"
-  "Ps/Environment/SelfHostProd"
-  "PsKernelLean/Protocol"
-  "PsKernelLean/Prelude"
-  "PsKernelLean/Admission"
-  "PsKernelLean/Response"
-  "PsKernelLean/Main"
+# Derive the complete package-local import closure from the provider entrypoint.
+# External Lean/Init/Std imports remain supplied by the pinned wasm32 stage1
+# sysroot. This prevents the checked-in build recipe from silently lagging a
+# live semantic-source import such as Ps.Core.Abstract.
+mapfile -t provider_modules < <(
+  node "$script_dir/resolve-provider-modules.mjs" "$provider_src" PsKernelLean.Main
 )
+if [[ ${#provider_modules[@]} -eq 0 ]]; then
+  echo 'provider local import closure is empty' >&2
+  exit 1
+fi
+printf 'PSC2_PROVIDER_LOCAL_CLOSURE: %s modules\n' "${#provider_modules[@]}"
 
 # Emit provider oleans/C with the runnable native 32-bit compiler, resolving
 # imports against the wasm32 stage1 olean sysroot. Using installed x86_64 Lean

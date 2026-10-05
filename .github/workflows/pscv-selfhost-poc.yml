@@ -51,6 +51,10 @@ jobs:
           test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
           node --version
 
+      - name: Check PSCV PoC proof module in Lean bootstrap
+        working-directory: psc15selfhost
+        run: lake build PsCompilerProofs
+
       - name: Bootstrap existing self-host compiler
         working-directory: psc15selfhost
         run: npm run bootstrap

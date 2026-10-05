@@ -28,6 +28,33 @@ def psWasmIntToNat (value : Int) : Nat :=
   | Int.ofNat magnitude => magnitude
   | Int.negSucc _ => 0
 
+def psWasmIntEDivNat
+    (value : Int)
+    (divisor : Nat) : Int :=
+  if Nat.beq divisor 0 then
+    Int.ofNat 0
+  else
+    match value with
+    | Int.ofNat magnitude =>
+        Int.ofNat (Nat.div magnitude divisor)
+    | Int.negSucc magnitude =>
+        Int.negSucc (Nat.div magnitude divisor)
+
+def psWasmIntEModNat
+    (value : Int)
+    (divisor : Nat) : Int :=
+  if Nat.beq divisor 0 then
+    value
+  else
+    match value with
+    | Int.ofNat magnitude =>
+        Int.ofNat (Nat.mod magnitude divisor)
+    | Int.negSucc magnitude =>
+        Int.ofNat
+          (Nat.sub
+            (Nat.sub divisor 1)
+            (Nat.mod magnitude divisor))
+
 def psWasmEncodeUlebWithFuel
     (remainingFuel : Nat) : Nat -> List UInt8 :=
   match remainingFuel with
@@ -37,13 +64,13 @@ def psWasmEncodeUlebWithFuel
       let smaller : Nat -> List UInt8 :=
         psWasmEncodeUlebWithFuel fuel;
       fun (value : Nat) =>
-        let low := value % 128;
-        let rest := value / 128;
+        let low := Nat.mod value 128;
+        let rest := Nat.div value 128;
         if Nat.beq rest 0 then
           [psWasmByte low]
         else
           List.cons
-            (psWasmByte (low + 128))
+            (psWasmByte (Nat.add low 128))
             (smaller rest)
 
 def psWasmEncodeUleb (value : Nat) : List UInt8 :=
@@ -58,10 +85,10 @@ def psWasmEncodeSlebWithFuel
       let smaller : Int -> List UInt8 :=
         psWasmEncodeSlebWithFuel fuel;
       fun (value : Int) =>
-        let lowInt := value % 128;
+        let lowInt := psWasmIntEModNat value 128;
         let low := psWasmIntToNat lowInt;
-        let rest := value / 128;
-        let signSet := 64 <= low;
+        let rest := psWasmIntEDivNat value 128;
+        let signSet := Nat.ble 64 low;
         let donePositive :=
           if psWasmIntIsZero rest then
             if signSet then false else true
@@ -75,23 +102,23 @@ def psWasmEncodeSlebWithFuel
           [psWasmByte low]
         else
           List.cons
-            (psWasmByte (low + 128))
+            (psWasmByte (Nat.add low 128))
             (smaller rest)
 
 def psWasmEncodeSleb (value : Int) : List UInt8 :=
   psWasmEncodeSlebWithFuel 16 value
 
 def psWasmNormalizeI32Immediate (value : Int) : Int :=
-  let reduced := value % 4294967296;
-  if reduced >= 2147483648 then
-    reduced - 4294967296
+  let reduced := psWasmIntEModNat value 4294967296;
+  if Nat.ble 2147483648 (psWasmIntToNat reduced) then
+    Int.sub reduced (Int.ofNat 4294967296)
   else
     reduced
 
 def psWasmNormalizeI64Immediate (value : Int) : Int :=
-  let reduced := value % 18446744073709551616;
-  if reduced >= 9223372036854775808 then
-    reduced - 18446744073709551616
+  let reduced := psWasmIntEModNat value 18446744073709551616;
+  if Nat.ble 9223372036854775808 (psWasmIntToNat reduced) then
+    Int.sub reduced (Int.ofNat 18446744073709551616)
   else
     reduced
 
@@ -143,25 +170,28 @@ def psWasmStringToList (source : String) : List Char :=
 
 def psWasmEncodeUtf8Char (char : Char) : List UInt8 :=
   let value := Char.toNat char;
-  if value <= 127 then
+  if Nat.ble value 127 then
     [psWasmByte value]
-  else if value <= 2047 then
+  else if Nat.ble value 2047 then
     [
-      psWasmByte (192 + value / 64),
-      psWasmByte (128 + value % 64)
+      psWasmByte (Nat.add 192 (Nat.div value 64)),
+      psWasmByte (Nat.add 128 (Nat.mod value 64))
     ]
-  else if value <= 65535 then
+  else if Nat.ble value 65535 then
     [
-      psWasmByte (224 + value / 4096),
-      psWasmByte (128 + (value / 64) % 64),
-      psWasmByte (128 + value % 64)
+      psWasmByte (Nat.add 224 (Nat.div value 4096)),
+      psWasmByte
+        (Nat.add 128 (Nat.mod (Nat.div value 64) 64)),
+      psWasmByte (Nat.add 128 (Nat.mod value 64))
     ]
   else
     [
-      psWasmByte (240 + value / 262144),
-      psWasmByte (128 + (value / 4096) % 64),
-      psWasmByte (128 + (value / 64) % 64),
-      psWasmByte (128 + value % 64)
+      psWasmByte (Nat.add 240 (Nat.div value 262144)),
+      psWasmByte
+        (Nat.add 128 (Nat.mod (Nat.div value 4096) 64)),
+      psWasmByte
+        (Nat.add 128 (Nat.mod (Nat.div value 64) 64)),
+      psWasmByte (Nat.add 128 (Nat.mod value 64))
     ]
 
 def psWasmEncodeUtf8Chars
@@ -194,7 +224,7 @@ def psWasmFindStructureIndexWorker
         if psStringEq structType.name name then
           Option.some index
         else
-          smaller (index + 1)
+          smaller (Nat.add index 1)
 
 def psWasmFindStructureIndexLoop
     (name : String)
@@ -221,7 +251,7 @@ def psWasmFindArrayIndexWorker
         if psStringEq arrayType.name name then
           Option.some index
         else
-          smaller (index + 1)
+          smaller (Nat.add index 1)
 
 def psWasmFindArrayIndexLoop
     (name : String)
@@ -244,7 +274,7 @@ def psWasmFindHeapTypeIndex
       match psWasmFindArrayIndex arrays name with
       | none => none
       | some index =>
-          some ((psListLength structures) + index)
+          some (Nat.add (psListLength structures) index)
 
 def psWasmEncodeValueType
     (structures : List PsWasmStructType)
@@ -303,7 +333,7 @@ def psWasmFindFunctionTypeIndexWorker
         if psStringEq functionType.name name then
           Option.some index
         else
-          smaller (index + 1)
+          smaller (Nat.add index 1)
 
 def psWasmFindFunctionTypeIndexLoop
     (name : String)
@@ -319,7 +349,12 @@ def psWasmFindFunctionTypeIndex
   match psWasmFindFunctionTypeIndexLoop name 0 functionTypes with
   | none => none
   | some index =>
-      some ((psListLength structures) + (psListLength arrays) + index)
+      some
+        (Nat.add
+          (Nat.add
+            (psListLength structures)
+            (psListLength arrays))
+          index)
 
 def psWasmEncodeNamedFunctionType
     (structures : List PsWasmStructType)
@@ -399,7 +434,7 @@ def psWasmFindFunctionIndexWorker
         if psStringEq function.name name then
           Option.some index
         else
-          smaller (index + 1)
+          smaller (Nat.add index 1)
 
 def psWasmFindFunctionIndexLoop
     (name : String)
@@ -917,10 +952,13 @@ def psWasmFunctionTypeIndex
   match function.typeName with
   | none =>
       Except.ok
-        ((psListLength structures)
-          + (psListLength arrays)
-          + (psListLength functionTypes)
-          + functionIndex)
+        (Nat.add
+          (Nat.add
+            (Nat.add
+              (psListLength structures)
+              (psListLength arrays))
+            (psListLength functionTypes))
+          functionIndex)
   | some typeName =>
       match
           psWasmFindFunctionTypeIndex
@@ -959,7 +997,7 @@ def psWasmEncodeFunctionTypeIndicesWorker
               function with
         | Except.error error => Except.error error
         | Except.ok typeIndex =>
-            match smaller (functionIndex + 1) with
+            match smaller (Nat.add functionIndex 1) with
             | Except.error error => Except.error error
             | Except.ok encodedRest =>
                 Except.ok
@@ -1116,10 +1154,13 @@ def psWasmEncodeModule
                               | Except.error error => Except.error error
                               | Except.ok encodedBodies =>
                                   let typeCount :=
-                                    (psListLength module.structures)
-                                      + (psListLength module.arrays)
-                                      + (psListLength module.functionTypes)
-                                      + (psListLength module.functions);
+                                    Nat.add
+                                      (Nat.add
+                                        (Nat.add
+                                          (psListLength module.structures)
+                                          (psListLength module.arrays))
+                                        (psListLength module.functionTypes))
+                                      (psListLength module.functions);
                                   let typePayload :=
                                     psWasmEncodeVector
                                       (psListAppend encodedStructTypes (psListAppend encodedArrayTypes (psListAppend encodedNamedFunctionTypes encodedFunctionTypes)))

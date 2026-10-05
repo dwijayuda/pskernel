@@ -237,3 +237,218 @@ theorem psKernelInferCoreWithFuel_fvar_cache_miss
         hDepth,
         hFind
       ]
+
+
+theorem psKernelInferCoreWithFuel_const_inferOnly_cache_miss
+    (remaining : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (levels : List PsKernelLevel)
+    (info : PsKernelConstantInfo)
+    (hCache :
+      psKernelExprMapGet
+          state.inferOnly
+          (PsKernelExpr.const name levels) =
+        Option.none)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hFind :
+      psKernelEnvironmentFind
+          nextContext.environment
+          name =
+        Option.some info)
+    (hLevels :
+      Nat.beq
+          (psKernelNameListLength
+            (psKernelConstantInfoLevelParams info))
+          (psKernelLevelListLength levels) =
+        true) :
+    psKernelInferCoreWithFuel
+        (Nat.succ remaining)
+        whnf
+        defeq
+        context
+        state
+        (PsKernelExpr.const name levels)
+        true =
+      Except.ok
+        (Prod.mk
+          (psKernelExprInstantiateLevelParams
+            (psKernelConstantInfoType info)
+            (psKernelConstantInfoLevelParams info)
+            levels)
+          (psKernelCacheInferResult
+            state
+            true
+            (PsKernelExpr.const name levels)
+            (psKernelExprInstantiateLevelParams
+              (psKernelConstantInfoType info)
+              (psKernelConstantInfoLevelParams info)
+              levels))) := by
+  simp [
+    psKernelInferCoreWithFuel,
+    psKernelInferCacheEligible,
+    hCache,
+    hDepth,
+    hFind,
+    hLevels
+  ]
+
+theorem psKernelInferCoreWithFuel_const_checked_safe
+    (remaining : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (levels : List PsKernelLevel)
+    (info : PsKernelConstantInfo)
+    (hCache :
+      psKernelExprMapGet
+          state.checkedInfer
+          (PsKernelExpr.const name levels) =
+        Option.none)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hFind :
+      psKernelEnvironmentFind
+          nextContext.environment
+          name =
+        Option.some info)
+    (hLevels :
+      Nat.beq
+          (psKernelNameListLength
+            (psKernelConstantInfoLevelParams info))
+          (psKernelLevelListLength levels) =
+        true)
+    (hUnsafe :
+      psKernelConstantInfoIsUnsafe info = false)
+    (hPartial :
+      psKernelConstantInfoIsPartial info = false) :
+    psKernelInferCoreWithFuel
+        (Nat.succ remaining)
+        whnf
+        defeq
+        context
+        state
+        (PsKernelExpr.const name levels)
+        false =
+      Except.ok
+        (Prod.mk
+          (psKernelExprInstantiateLevelParams
+            (psKernelConstantInfoType info)
+            (psKernelConstantInfoLevelParams info)
+            levels)
+          (psKernelCacheInferResult
+            state
+            false
+            (PsKernelExpr.const name levels)
+            (psKernelExprInstantiateLevelParams
+              (psKernelConstantInfoType info)
+              (psKernelConstantInfoLevelParams info)
+              levels))) := by
+  simp [
+    psKernelInferCoreWithFuel,
+    psKernelInferCacheEligible,
+    hCache,
+    hDepth,
+    hFind,
+    hLevels,
+    hUnsafe,
+    hPartial
+  ]
+
+theorem psKernelInferCoreWithFuel_app_checked_direct
+    (remaining : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state fnState forallState argState : PsKernelCheckerState)
+    (fn arg fnType argType : PsKernelExpr)
+    (view : PsKernelForallView)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hFn :
+      psKernelInferCoreWithFuel
+          remaining
+          whnf
+          defeq
+          nextContext
+          state
+          fn
+          false =
+        Except.ok (Prod.mk fnType fnState))
+    (hForall :
+      psKernelEnsureForallWith
+          whnf
+          nextContext
+          fnState
+          fnType =
+        Except.ok (Prod.mk view forallState))
+    (hArg :
+      psKernelInferCoreWithFuel
+          remaining
+          whnf
+          defeq
+          nextContext
+          forallState
+          arg
+          false =
+        Except.ok (Prod.mk argType argState))
+    (hEq :
+      psKernelExprEq argType view.domain = true) :
+    psKernelInferCoreWithFuel
+        (Nat.succ remaining)
+        whnf
+        defeq
+        context
+        state
+        (PsKernelExpr.app fn arg)
+        false =
+      Except.ok
+        (Prod.mk
+          (psKernelExprInstantiate1 view.body arg)
+          argState) := by
+  simp [
+    psKernelInferCoreWithFuel,
+    psKernelInferCacheEligible,
+    psKernelCacheInferResult,
+    hDepth,
+    hFn,
+    hForall,
+    hArg,
+    hEq
+  ]

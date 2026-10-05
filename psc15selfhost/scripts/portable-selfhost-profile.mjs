@@ -65,7 +65,7 @@ export async function collectPortableSelfhostPackages(profile, packageFilter) {
   return selected;
 }
 
-async function collectImportClosure(rootFiles, includeImportClosure) {
+export async function collectImportClosure(rootFiles, includeImportClosure) {
   const visited = new Map();
   const queue = [...rootFiles];
 
@@ -92,6 +92,60 @@ async function collectImportClosure(rootFiles, includeImportClosure) {
   }
 
   return visited;
+}
+
+export async function collectPortableSelfhostEntryRoots(
+  pkg,
+  includeImportClosure,
+) {
+  const packageRoots = new Set(pkg.roots.map(sourcePath => path.resolve(sourcePath)));
+  const importedPackageRoots = new Set();
+
+  for (const sourcePath of pkg.roots) {
+    const source = await readFile(sourcePath, 'utf8');
+    for (const moduleName of parseImports(source)) {
+      const imported = moduleSource(moduleName);
+      if (!imported) continue;
+      const resolved = path.resolve(imported);
+      if (packageRoots.has(resolved)) importedPackageRoots.add(resolved);
+    }
+  }
+
+  const entries = pkg.roots
+    .map(sourcePath => path.resolve(sourcePath))
+    .filter(sourcePath => !importedPackageRoots.has(sourcePath))
+    .sort();
+
+  if (entries.length === 0) {
+    throw new Error('PSC1_PORTABLE_SELFHOST_NO_ENTRY_ROOTS: ' + pkg.name);
+  }
+
+  const covered = new Set();
+  for (const entry of entries) {
+    const closure = await collectImportClosure(
+      [entry],
+      includeImportClosure === true,
+    );
+    for (const sourcePath of closure.keys()) {
+      const resolved = path.resolve(sourcePath);
+      if (packageRoots.has(resolved)) covered.add(resolved);
+    }
+  }
+
+  const missing = [...packageRoots]
+    .filter(sourcePath => !covered.has(sourcePath))
+    .sort();
+
+  if (missing.length > 0) {
+    throw new Error(
+      'PSC1_PORTABLE_SELFHOST_ENTRY_COVERAGE: ' +
+        pkg.name +
+        ': ' +
+        missing.map(sourcePath => path.relative(workspaceRoot, sourcePath)).join(','),
+    );
+  }
+
+  return entries;
 }
 
 function assertProfile(profile) {
@@ -123,6 +177,9 @@ function assertProfile(profile) {
   }
   if (profile.executableContract?.pscCheckSourceRoots !== true) {
     throw new Error('PSC1_PORTABLE_SELFHOST_EXECUTABLE_CONTRACT');
+  }
+  if (profile.executableContract?.pscTypeScriptEntryRoots !== true) {
+    throw new Error('PSC1_PORTABLE_SELFHOST_EMISSION_CONTRACT');
   }
 }
 

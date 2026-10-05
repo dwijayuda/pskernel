@@ -25,3 +25,30 @@ theorem psKernelSimpleNestedTypeDeclListAppend_eq_append
       rfl
   | cons head tail ih =>
       simp [psKernelSimpleNestedTypeDeclListAppend, ih]
+
+
+theorem psKernelSimpleNestedFindFamily_some_matches
+    (template : PsKernelExpr)
+    (families : List PsKernelSimpleNestedAuxFamily)
+    (family : PsKernelSimpleNestedAuxFamily)
+    (h :
+      psKernelSimpleNestedFindFamily
+          template
+          families =
+        Option.some family) :
+    psKernelExprEq family.nestedTemplate template = true := by
+  induction families with
+  | nil =>
+      simp [psKernelSimpleNestedFindFamily] at h
+  | cons head tail ih =>
+      cases hEq :
+          psKernelExprEq
+            head.nestedTemplate
+            template with
+      | false =>
+          simp [psKernelSimpleNestedFindFamily, hEq] at h
+          exact ih h
+      | true =>
+          simp [psKernelSimpleNestedFindFamily, hEq] at h
+          subst family
+          exact hEq

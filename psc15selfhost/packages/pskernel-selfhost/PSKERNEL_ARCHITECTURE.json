@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "reference": "PSKERNEL_REFERENCE.md",
+  "target": {
+    "product": "Lean",
+    "version": "4.34.0",
+    "gitCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "semanticRootModule": "Ps.KernelSelfHost.SelfHost",
+  "semanticRootPath": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
+  "semanticModulePrefix": "Ps.KernelSelfHost.",
+  "migration": {
+    "phase": "B1-foundation-suite-split",
+    "finalArchitectureAdopted": true,
+    "finalArchitectureImplemented": false,
+    "compatibilityShimsAllowedDuringMigration": true,
+    "compatibilityShimsAllowedInSemanticRoot": false
+  },
+  "semanticRoles": [
+    "logical-rule",
+    "semantic-preserving-acceleration",
+    "trusted-capability",
+    "adapter-protocol",
+    "assurance-only"
+  ],
+  "trustStatuses": [
+    "verified",
+    "consensus-checked",
+    "trusted",
+    "derived",
+    "untrusted"
+  ],
+  "currentRoleFiles": [
+    {
+      "path": "Runtime/Cache.lean",
+      "role": "semantic-preserving-acceleration"
+    },
+    {
+      "path": "Runtime/EnvironmentIndex.lean",
+      "role": "semantic-preserving-acceleration"
+    },
+    {
+      "path": "Runtime/NativeReduction.lean",
+      "role": "trusted-capability",
+      "targetOwner": "Runtime/Capability/Lean434NativeReduction.lean"
+    }
+  ],
+  "targetLayers": [
+    "Core",
+    "Runtime/Acceleration",
+    "Runtime/Capability",
+    "Environment",
+    "Checker",
+    "Admission",
+    "API",
+    "SelfHost"
+  ],
+  "invariants": {
+    "oneProductionSemanticSource": true,
+    "noReferenceKernelInSemanticRoot": true,
+    "noCompatInSemanticRoot": true,
+    "noTestOrBenchmarkInSemanticRoot": true,
+    "failClosed": true,
+    "generatedJavaScriptSemanticPatchingForbidden": true
+  },
+  "forbiddenSemanticImportPrefixes": [
+    "PSC1Kernel.",
+    "Ps.KernelSelfHost.Compat.",
+    "KernelSelfHost.Foundation.",
+    "KernelSelfHost.Bench."
+  ]
+}

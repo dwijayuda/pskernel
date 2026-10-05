@@ -14,6 +14,7 @@ on:
       - psc15selfhost/scripts/psc1kernel-port-pattern-audit.mjs
       - psc15selfhost/scripts/psc1kernel-compatibility-audit.mjs
       - psc15selfhost/scripts/psc1kernel-conformance-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-architecture-audit.mjs
       - psc15selfhost/scripts/psc1kernel-generate-rule-reference.mjs
       - psc15selfhost/check-psc1-source.mjs
       - psc15selfhost/lakefile.lean
@@ -63,6 +64,11 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/psc1kernel-port-pattern-audit.mjs
+
+      - name: Audit canonical PSKernel architecture
+        run: |
+          set -euo pipefail
+          node scripts/psc1kernel-architecture-audit.mjs
 
       - name: Audit Lean 4.34 compatibility matrix
         run: |

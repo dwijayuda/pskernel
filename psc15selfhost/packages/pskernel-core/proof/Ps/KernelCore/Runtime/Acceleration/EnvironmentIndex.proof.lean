@@ -112,6 +112,25 @@ theorem psKernelEnvironmentIndexRemoveName_find_none
       name
 
 
+theorem psKernelEnvironmentIndexSetWorker_succ_is_branch
+    (remaining : Nat)
+    (index : PsKernelEnvironmentIndex)
+    (hash : Nat)
+    (constants : List PsKernelConstantInfo) :
+    ∃ left right : PsKernelEnvironmentIndex,
+      psKernelEnvironmentIndexSetWorker
+          (Nat.succ remaining)
+          index
+          hash
+          constants =
+        PsKernelEnvironmentIndex.branch left right := by
+  cases index <;>
+    by_cases hParity : Nat.mod hash 2 = 0 <;>
+    simp [
+      psKernelEnvironmentIndexSetWorker,
+      hParity
+    ]
+
 theorem psKernelEnvironmentIndexFind_setWorker_same_name
     (index : PsKernelEnvironmentIndex)
     (name : PsKernelName)
@@ -124,16 +143,20 @@ theorem psKernelEnvironmentIndexFind_setWorker_same_name
           constants)
         name =
       constants := by
-  cases index <;>
-    by_cases hParity :
-        Nat.mod (psKernelEnvironmentNameHash name) 2 = 0 <;>
-    simp [
-      psKernelEnvironmentIndexFind,
-      psKernelEnvironmentIndexSetWorker,
-      psKernelEnvironmentIndexFindWorker,
-      hParity,
-      psKernelEnvironmentIndexFindWorker_setWorker_same
-    ]
+  obtain ⟨left, right, hSet⟩ :=
+    psKernelEnvironmentIndexSetWorker_succ_is_branch
+      15
+      index
+      (psKernelEnvironmentNameHash name)
+      constants
+  have hWorker :=
+    psKernelEnvironmentIndexFindWorker_setWorker_same
+      16
+      index
+      (psKernelEnvironmentNameHash name)
+      constants
+  rw [hSet] at hWorker ⊢
+  exact hWorker
 
 theorem psKernelEnvironmentIndexFind_build_cons
     (info : PsKernelConstantInfo)

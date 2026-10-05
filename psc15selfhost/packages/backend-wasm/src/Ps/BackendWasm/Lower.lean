@@ -3918,6 +3918,12 @@ def psWasmLowerIntrinsicWith
   | .arraySetIfInBounds =>
       psWasmLowerArraySetIfInBoundsWith
         profile lower state typeArguments arguments
+  | .arrayMap =>
+      psWasmLowerArrayMapWith
+        profile lower state typeArguments arguments
+  | .arrayFoldl =>
+      psWasmLowerArrayFoldlWith
+        profile lower state typeArguments arguments
   | _ => Except.error PsWasmLowerError.unsupportedIntrinsic
 
 def psWasmLowerTypedArgumentsWorker

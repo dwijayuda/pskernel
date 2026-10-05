@@ -147,7 +147,6 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.bvar left)
         (PsKernelExpr.bvar right)
   | fvar
-      {localContext : PsKernelLocalContext}
       (left right : PsKernelName)
       (h : psKernelNameEq left right = true) :
       PsKernelStructuralExprEq
@@ -166,7 +165,6 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.sort left)
         (PsKernelExpr.sort right)
   | const
-      {localContext : PsKernelLocalContext}
       (leftName rightName : PsKernelName)
       (leftLevels rightLevels : List PsKernelLevel)
       (hName : psKernelNameEq leftName rightName = true)
@@ -175,7 +173,6 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.const leftName leftLevels)
         (PsKernelExpr.const rightName rightLevels)
   | app
-      {localContext : PsKernelLocalContext}
       (leftFn leftArg rightFn rightArg : PsKernelExpr)
       (hFn : PsKernelStructuralExprEq leftFn rightFn)
       (hArg : PsKernelStructuralExprEq leftArg rightArg) :
@@ -183,7 +180,6 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.app leftFn leftArg)
         (PsKernelExpr.app rightFn rightArg)
   | lam
-      {localContext : PsKernelLocalContext}
       (leftName rightName : PsKernelName)
       (leftType leftBody rightType rightBody : PsKernelExpr)
       (leftInfo rightInfo : PsKernelBinderInfo)
@@ -193,7 +189,6 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.lam leftName leftType leftBody leftInfo)
         (PsKernelExpr.lam rightName rightType rightBody rightInfo)
   | forallE
-      {localContext : PsKernelLocalContext}
       (leftName rightName : PsKernelName)
       (leftType leftBody rightType rightBody : PsKernelExpr)
       (leftInfo rightInfo : PsKernelBinderInfo)
@@ -203,7 +198,6 @@ inductive PsKernelStructuralExprEq :
         (PsKernelExpr.forallE leftName leftType leftBody leftInfo)
         (PsKernelExpr.forallE rightName rightType rightBody rightInfo)
   | letE
-      {localContext : PsKernelLocalContext}
       (leftName rightName : PsKernelName)
       (leftType leftValue leftBody : PsKernelExpr)
       (rightType rightValue rightBody : PsKernelExpr)
@@ -404,6 +398,7 @@ inductive PsKernelTypingJudgment
         (PsKernelExpr.lit (PsKernelLiteral.str value))
         (PsKernelExpr.const psKernelStringName List.nil)
   | fvar
+      {localContext : PsKernelLocalContext}
       (name : PsKernelName)
       (declaration : PsKernelLocalDecl)
       (hFind :
@@ -415,6 +410,7 @@ inductive PsKernelTypingJudgment
         (PsKernelExpr.fvar name)
         (psKernelLocalDeclType declaration)
   | const
+      {localContext : PsKernelLocalContext}
       (name : PsKernelName)
       (levels : List PsKernelLevel)
       (info : PsKernelConstantInfo)
@@ -436,41 +432,30 @@ inductive PsKernelTypingJudgment
           (psKernelConstantInfoLevelParams info)
           levels)
   | app
+      {localContext : PsKernelLocalContext}
       (fn arg fnType argType domain body : PsKernelExpr)
       (name : PsKernelName)
       (binderInfo : PsKernelBinderInfo)
       (hFn :
         PsKernelTypingJudgment
-          environment
-          localContext
-          fn
-          fnType)
+          environment localContext fn fnType)
       (hFnType :
         PsKernelDefEqJudgment
-          environment
-          localContext
-          fnType
-          (PsKernelExpr.forallE
-            name domain body binderInfo))
+          environment localContext fnType
+          (PsKernelExpr.forallE name domain body binderInfo))
       (hArg :
         PsKernelTypingJudgment
-          environment
-          localContext
-          arg
-          argType)
+          environment localContext arg argType)
       (hArgType :
         PsKernelDefEqJudgment
-          environment
-          localContext
-          argType
-          domain) :
+          environment localContext argType domain) :
       PsKernelTypingJudgment
         environment
         localContext
         (PsKernelExpr.app fn arg)
         (psKernelExprInstantiate1 body arg)
-
   | lam
+      {localContext : PsKernelLocalContext}
       (name fresh : PsKernelName)
       (domain body bodyType : PsKernelExpr)
       (binderInfo : PsKernelBinderInfo)
@@ -509,6 +494,7 @@ inductive PsKernelTypingJudgment
             (List.cons fresh List.nil))
           binderInfo)
   | forallE
+      {localContext : PsKernelLocalContext}
       (name fresh : PsKernelName)
       (domain body : PsKernelExpr)
       (binderInfo : PsKernelBinderInfo)
@@ -544,6 +530,7 @@ inductive PsKernelTypingJudgment
             domainLevel
             bodyLevel))
   | letE
+      {localContext : PsKernelLocalContext}
       (name fresh : PsKernelName)
       (type value body valueType bodyType : PsKernelExpr)
       (nondep : Bool)

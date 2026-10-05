@@ -66,3 +66,48 @@ theorem psKernelExprInstantiate1_under_one_lambda
         (psKernelExprLift replacement 1)
         binderInfo := by
   rfl
+
+theorem psKernelExprInstantiateAt_bvar_before
+    (index start offset : Nat)
+    (replacement : PsKernelExpr)
+    (h :
+      psKernelNatLt
+          index
+          (Nat.add start offset) =
+        true) :
+    psKernelExprInstantiateAt
+        (PsKernelExpr.bvar index)
+        start
+        (List.cons replacement List.nil)
+        offset =
+      PsKernelExpr.bvar index := by
+  simp [
+    psKernelExprInstantiateAt,
+    psKernelExprListIsEmpty,
+    psKernelExprInstantiateAtChanged,
+    psKernelExprInstantiateAtChangedWithFuel,
+    psKernelExprNodeCount,
+    h
+  ]
+
+theorem psKernelExprInstantiateAt_bvar_hit
+    (start offset : Nat)
+    (replacement : PsKernelExpr) :
+    psKernelExprInstantiateAt
+        (PsKernelExpr.bvar (Nat.add start offset))
+        start
+        (List.cons replacement List.nil)
+        offset =
+      psKernelExprLiftLooseBVars
+        replacement
+        0
+        offset := by
+  simp [
+    psKernelExprInstantiateAt,
+    psKernelExprListIsEmpty,
+    psKernelExprInstantiateAtChanged,
+    psKernelExprInstantiateAtChangedWithFuel,
+    psKernelExprNodeCount,
+    psKernelNatLt,
+    psKernelExprListGet
+  ]

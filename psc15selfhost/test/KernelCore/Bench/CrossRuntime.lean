@@ -21,24 +21,28 @@ def psKernelCrossArrow (count : Nat) : PsKernelExpr :=
         (psKernelCrossArrow rest) PsKernelBinderInfo.default
 
 def psKernelCrossEnvironment : PsKernelEnvironment :=
-  let withNat := psKernelEnvironmentAddUnchecked psKernelEnvironmentEmpty
-    (PsKernelConstantInfo.axiomInfo {
-      base := {
-        name := psKernelNatName
-        levelParams := List.nil
-        type := PsKernelExpr.sort (PsKernelLevel.succ PsKernelLevel.zero)
-      }
-      isUnsafe := false
-    });
-  psKernelEnvironmentAddUnchecked withNat
-    (PsKernelConstantInfo.axiomInfo {
-      base := {
-        name := psKernelCrossName "CrossApply"
-        levelParams := List.nil
-        type := psKernelCrossArrow 8
-      }
-      isUnsafe := false
-    })
+  let natBase : PsKernelConstantBase := {
+    name := psKernelNatName
+    levelParams := List.nil
+    type := PsKernelExpr.sort (PsKernelLevel.succ PsKernelLevel.zero)
+  };
+  let natInfo : PsKernelAxiomInfo := {
+    base := natBase
+    isUnsafe := false
+  };
+  let withNat : PsKernelEnvironment :=
+    psKernelEnvironmentAddUnchecked psKernelEnvironmentEmpty
+      (PsKernelConstantInfo.axiomInfo natInfo);
+  let appBase : PsKernelConstantBase := {
+    name := psKernelCrossName "CrossApply"
+    levelParams := List.nil
+    type := psKernelCrossArrow 8
+  };
+  let appInfo : PsKernelAxiomInfo := {
+    base := appBase
+    isUnsafe := false
+  };
+  psKernelEnvironmentAddUnchecked withNat (PsKernelConstantInfo.axiomInfo appInfo)
 
 def psKernelCrossBeta (count : Nat) (value : PsKernelExpr) : PsKernelExpr :=
   match count with
@@ -56,7 +60,7 @@ def psKernelCrossApply (count : Nat) (fn value : PsKernelExpr) : PsKernelExpr :=
       psKernelCrossApply rest (PsKernelExpr.app fn value) value
 
 def psKernelCrossInput (kind seed : Nat) : PsKernelCrossInput :=
-  let value := PsKernelExpr.lit (PsKernelLiteral.nat (Nat.add seed 9007199254740993));
+  let value : PsKernelExpr := PsKernelExpr.lit (PsKernelLiteral.nat (Nat.add seed 9007199254740993));
   if Nat.beq kind 2 then
     {
       environment := psKernelCrossEnvironment
@@ -72,7 +76,7 @@ def psKernelCrossInput (kind seed : Nat) : PsKernelCrossInput :=
     }
 
 def psKernelCrossRun (kind : Nat) (input : PsKernelCrossInput) : Bool :=
-  let session := psKernelMkCheckerSession input.environment List.nil
+  let session : PsKernelCheckerSession := psKernelMkCheckerSession input.environment List.nil
     PsKernelDefinitionSafety.safe 0 psKernelLeanNatMaxSizeDefault;
   if Nat.beq kind 0 then
     match psKernelSessionWhnf 2048 session input.expression with
@@ -88,12 +92,13 @@ def psKernelCrossRun (kind : Nat) (input : PsKernelCrossInput) : Bool :=
     | Except.ok result => psKernelExprEq (Prod.fst result) input.expected
 
 def psKernelCrossAdmission (index : Nat) (bad : Bool) : PsKernelDefinitionInfo :=
+  let base : PsKernelConstantBase := {
+    name := PsKernelName.num (psKernelCrossName "CrossAdmission") index
+    levelParams := List.nil
+    type := psKernelCrossNat
+  };
   {
-    base := {
-      name := PsKernelName.num (psKernelCrossName "CrossAdmission") index
-      levelParams := List.nil
-      type := psKernelCrossNat
-    }
+    base := base
     value := if bad then PsKernelExpr.sort PsKernelLevel.zero
       else PsKernelExpr.lit (PsKernelLiteral.nat (Nat.add index 9007199254740993))
     hints := PsKernelReducibilityHints.regular 1
@@ -117,21 +122,21 @@ def psKernelCrossAdmit (count : Nat) (bad : Bool) : Bool :=
   | Except.ok _ => true
 
 def psKernelCrossGuards : Bool :=
-  let session := psKernelMkCheckerSession psKernelCrossEnvironment List.nil
+  let session : PsKernelCheckerSession := psKernelMkCheckerSession psKernelCrossEnvironment List.nil
     PsKernelDefinitionSafety.safe 0 psKernelLeanNatMaxSizeDefault;
-  let illTyped := PsKernelExpr.app
+  let illTyped : PsKernelExpr := PsKernelExpr.app
     (PsKernelExpr.const (psKernelCrossName "CrossApply") List.nil)
     (PsKernelExpr.sort PsKernelLevel.zero);
-  let rejects :=
+  let rejects : Bool :=
     match psKernelSessionCheck 2048 session illTyped with
     | Except.error _ => true
     | Except.ok _ => false;
-  let exhausted :=
+  let exhausted : Bool :=
     match psKernelSessionCheck 0 session illTyped with
     | Except.error _ => true
     | Except.ok _ => false;
-  let large := PsKernelExpr.lit (PsKernelLiteral.nat 9007199254740993);
-  let adjacent := PsKernelExpr.lit (PsKernelLiteral.nat 9007199254740992);
+  let large : PsKernelExpr := PsKernelExpr.lit (PsKernelLiteral.nat 9007199254740993);
+  let adjacent : PsKernelExpr := PsKernelExpr.lit (PsKernelLiteral.nat 9007199254740992);
   Bool.and rejects (Bool.and exhausted
     (Bool.and (Bool.not (psKernelExprEq large adjacent))
       (Bool.and (psKernelCrossAdmit 4 false) (Bool.not (psKernelCrossAdmit 4 true)))))

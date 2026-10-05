@@ -72,6 +72,8 @@ jobs:
           timeout 30s node --cpu-prof --cpu-prof-dir=/tmp/pskernel-cross-runtime \
             scripts/psc1kernel-cross-runtime-worker.mjs js dist/cross-runtime/kernel.js \
             > /tmp/pskernel-cross-runtime/profile-worker.json
+          node scripts/psc1kernel-cross-runtime-profile.mjs /tmp/pskernel-cross-runtime \
+            | tee /tmp/pskernel-cross-runtime/baseline.profile.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:

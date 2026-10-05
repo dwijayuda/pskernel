@@ -20,22 +20,29 @@ def psConstantKindText : ConstantInfo → String
 def psBoolText (value : Bool) : String :=
   if value then "true" else "false"
 
-unsafe def main : IO Unit := do
-  Lean.initSearchPath (← Lean.findSysroot)
-  let env ← Lean.importModules #[{ module := `Init }] {}
+unsafe def psPrintTypeSurface
+    (surface : String)
+    (moduleName : Name) : IO Unit := do
+  let env ← Lean.importModules #[{ module := moduleName }] {}
   let records :=
     env.constants.fold (init := #[]) fun records name info =>
       if psEndsInSort info.type then
-        let moduleName :=
+        let definingModule :=
           match env.getModuleIdxFor? name with
           | none => "<builtin>"
           | some moduleIdx => env.header.moduleNames[moduleIdx.toNat]!.toString
         records.push
-          (name.toString, psConstantKindText info, psBoolText name.isInternal, moduleName)
+          (name.toString, psConstantKindText info, psBoolText name.isInternal, definingModule)
       else
         records
-  IO.println s!"LEAN434_INIT_TYPE_COUNT\t{records.size}"
+  IO.println ("SURFACE\t" ++ surface ++ "\t" ++ toString records.size)
   for record in records do
     IO.println
-      ("TYPE\t" ++ record.1 ++ "\t" ++ record.2.1 ++ "\t" ++
+      ("TYPE\t" ++ surface ++ "\t" ++ record.1 ++ "\t" ++ record.2.1 ++ "\t" ++
         record.2.2.1 ++ "\t" ++ record.2.2.2)
+
+unsafe def main : IO Unit := do
+  Lean.initSearchPath (← Lean.findSysroot)
+  psPrintTypeSurface "Init" `Init
+  psPrintTypeSurface "Std" `Std
+  psPrintTypeSurface "Lean" `Lean

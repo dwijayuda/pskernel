@@ -111,6 +111,22 @@ test('known fragile term shorthand is rejected structurally', () => {
   ].join('\n');
   assert(!ids(typedLambdaLet).includes('untyped-lambda-let'));
 
+  const untypedNumericChoice = [
+    'def f (flag : Bool) : Int :=',
+    '  let encoded :=',
+    '    if flag then 1 else 0;',
+    '  encoded',
+  ].join('\n');
+  assert(ids(untypedNumericChoice).includes('untyped-numeric-choice-let'));
+
+  const typedNumericChoice = [
+    'def f (flag : Bool) : Int :=',
+    '  let encoded : Int :=',
+    '    if flag then 1 else 0;',
+    '  encoded',
+  ].join('\n');
+  assert(!ids(typedNumericChoice).includes('untyped-numeric-choice-let'));
+
   const multilinePattern = [
     'def f (value : T) :=',
     '  match value with',

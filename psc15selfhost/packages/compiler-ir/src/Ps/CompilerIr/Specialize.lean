@@ -137,7 +137,7 @@ def psIrSpecializeJoinKeys :
               if psStringEq tail "" then
                 some head
               else
-                some (head ++ "$" ++ tail)
+                some (String.Internal.append head (String.Internal.append "$" tail))
 
 def psIrSpecializeTypeKeyWithFuel :
     Nat -> PsVerifiedIrType -> Option String
@@ -178,15 +178,24 @@ def psIrSpecializeTypeKeyWithFuel :
               | none => none
               | some resultKey =>
                   some
-                    ("Fn$" ++ parameterKey ++ "$To$" ++ resultKey)
+                    (String.Internal.append
+        "Fn$"
+        (String.Internal.append
+          parameterKey
+          (String.Internal.append "$To$" resultKey)))
       | .named name arguments =>
           let argumentKeys :=
             arguments.map
               (psIrSpecializeTypeKeyWithFuel fuel)
           match psIrSpecializeJoinKeys argumentKeys with
           | none => none
-          | some "" => some ("N$" ++ name)
-          | some keys => some ("N$" ++ name ++ "$" ++ keys)
+          | some "" => some (String.Internal.append "N$" name)
+          | some keys => some
+              (String.Internal.append
+                "N$"
+                (String.Internal.append
+                  name
+                  (String.Internal.append "$" keys)))
 
 def psIrSpecializeTypeKey
     (type : PsVerifiedIrType) : Option String :=
@@ -203,7 +212,10 @@ def psIrSpecializedName
   match psIrSpecializeArgumentsKey arguments with
   | none => none
   | some "" => some name
-  | some key => some (name ++ "$spec$" ++ key)
+  | some key => some
+        (String.Internal.append
+          name
+          (String.Internal.append "$spec$" key))
 
 def psIrSpecializeKindPrefix :
     PsIrSpecializeKind -> String
@@ -220,7 +232,9 @@ def psIrSpecializeRequestKey
   | none => none
   | some name =>
       some
-        (psIrSpecializeKindPrefix request.kind ++ name)
+        (String.Internal.append
+          (psIrSpecializeKindPrefix request.kind)
+          name)
 
 def psIrSpecializeSeenContains :
     List String -> String -> Bool

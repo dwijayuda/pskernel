@@ -33,7 +33,13 @@ export function resolveProviderModules(sourceRoot,roots=['PsKernelLean.Main']){
   function visit(moduleName,required){
     const file=modulePath(sourceRoot,moduleName);
     if(!fs.existsSync(file)){
-      if(required) throw new Error(`provider root module missing: ${moduleName}`);
+      const localImport=
+        required ||
+        moduleName.startsWith('Ps.') ||
+        moduleName.startsWith('PsKernelLean.');
+      if(localImport){
+        throw new Error(`provider local module missing: ${moduleName}`);
+      }
       return;
     }
     const state=states.get(moduleName);

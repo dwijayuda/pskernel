@@ -9,6 +9,7 @@
     "recursive-equation-definition",
     "structural-recursion-call-shape",
     "term-arithmetic-operator",
+    "scalar-member-capability",
     "term-list-append",
     "term-list-cons",
     "numeric-tuple-projection",

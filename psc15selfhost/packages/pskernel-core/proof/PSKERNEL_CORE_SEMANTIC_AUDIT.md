@@ -68,7 +68,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Checker/DefEq/Shortcuts.lean` | **C** | Selected disabled shortcut behavior. |
 | `Checker/DefEq/Support.lean` | **D** | Single empty-list aggregation fact. |
 | `Checker/Inference.lean` | **C** | Wrapper/fuel facts. |
-| `Checker/Inference/Core.lean` | **A** | Rule-level implementation theorems plus independent Typing metatheory bridges for Sort/literals/fvar/const. |
+| `Checker/Inference/Core.lean` | **A** | Independent typing refinement now covers Sort/literals/fvar/const, both checked-application acceptance paths, and checked lambda/Π/let rules with explicit opened-body and freshness premises. |
 | `Checker/Inference/Helpers.lean` | **A** | Cache publication now preserves the named checker-state semantic soundness invariant under the isolated inference-cache insertion law; Sort/Pi views and noninterference laws remain. |
 | `Checker/Knot.lean` | **C** | Public wiring/fuel equations; end-to-end soundness pending. |
 | `Checker/Ops.lean` | **D** | Eta/wrapper fact only. |

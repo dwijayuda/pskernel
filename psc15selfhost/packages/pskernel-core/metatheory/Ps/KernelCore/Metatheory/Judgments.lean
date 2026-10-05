@@ -462,6 +462,141 @@ inductive PsKernelTypingJudgment
         (PsKernelExpr.app fn arg)
         (psKernelExprInstantiate1 body arg)
 
+  | lam
+      (name fresh : PsKernelName)
+      (domain body bodyType : PsKernelExpr)
+      (binderInfo : PsKernelBinderInfo)
+      (domainLevel : PsKernelLevel)
+      (hFresh :
+        psKernelLocalContextFind localContext fresh =
+          Option.none)
+      (hDomain :
+        PsKernelTypingJudgment
+          environment
+          localContext
+          domain
+          (PsKernelExpr.sort domainLevel))
+      (hBody :
+        PsKernelTypingJudgment
+          environment
+          (psKernelLocalContextAddLocal
+            localContext
+            fresh
+            name
+            domain
+            binderInfo)
+          (psKernelExprInstantiate1
+            body
+            (PsKernelExpr.fvar fresh))
+          bodyType) :
+      PsKernelTypingJudgment
+        environment
+        localContext
+        (PsKernelExpr.lam name domain body binderInfo)
+        (PsKernelExpr.forallE
+          name
+          domain
+          (psKernelExprAbstractFVars
+            (psKernelExprCheapBetaReduce bodyType)
+            (List.cons fresh List.nil))
+          binderInfo)
+  | forallE
+      (name fresh : PsKernelName)
+      (domain body : PsKernelExpr)
+      (binderInfo : PsKernelBinderInfo)
+      (domainLevel bodyLevel : PsKernelLevel)
+      (hFresh :
+        psKernelLocalContextFind localContext fresh =
+          Option.none)
+      (hDomain :
+        PsKernelTypingJudgment
+          environment
+          localContext
+          domain
+          (PsKernelExpr.sort domainLevel))
+      (hBody :
+        PsKernelTypingJudgment
+          environment
+          (psKernelLocalContextAddLocal
+            localContext
+            fresh
+            name
+            domain
+            binderInfo)
+          (psKernelExprInstantiate1
+            body
+            (PsKernelExpr.fvar fresh))
+          (PsKernelExpr.sort bodyLevel)) :
+      PsKernelTypingJudgment
+        environment
+        localContext
+        (PsKernelExpr.forallE name domain body binderInfo)
+        (PsKernelExpr.sort
+          (psKernelLevelMkIMax
+            domainLevel
+            bodyLevel))
+  | letE
+      (name fresh : PsKernelName)
+      (type value body valueType bodyType : PsKernelExpr)
+      (nondep : Bool)
+      (typeLevel : PsKernelLevel)
+      (hFresh :
+        psKernelLocalContextFind localContext fresh =
+          Option.none)
+      (hType :
+        PsKernelTypingJudgment
+          environment
+          localContext
+          type
+          (PsKernelExpr.sort typeLevel))
+      (hValue :
+        PsKernelTypingJudgment
+          environment
+          localContext
+          value
+          valueType)
+      (hValueType :
+        PsKernelDefEqJudgment
+          environment
+          localContext
+          valueType
+          type)
+      (hBody :
+        PsKernelTypingJudgment
+          environment
+          (psKernelLocalContextAddLet
+            localContext
+            fresh
+            name
+            type
+            value)
+          (psKernelExprInstantiate1
+            body
+            (PsKernelExpr.fvar fresh))
+          bodyType) :
+      PsKernelTypingJudgment
+        environment
+        localContext
+        (PsKernelExpr.letE name type value body nondep)
+        (let reducedBodyType :=
+          psKernelExprCheapBetaReduce bodyType
+         let closedBody :=
+          psKernelExprAbstractFVars
+            reducedBodyType
+            (List.cons fresh List.nil)
+         if
+             psKernelExprHasLooseBVarAt
+               closedBody
+               0 then
+           PsKernelExpr.letE
+             name
+             type
+             value
+             closedBody
+             nondep
+         else
+           reducedBodyType)
+
 def PsKernelInferenceCacheSound
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext)

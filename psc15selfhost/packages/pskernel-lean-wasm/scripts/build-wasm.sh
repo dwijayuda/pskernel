@@ -141,8 +141,12 @@ node "$script_dir/apply-wasm-abi.mjs" "$lean_source"
 node "$script_dir/apply-shell-exit-code.mjs" "$lean_source"
 
 # The vendored/study snapshots may not preserve executable bits on Lean helper
-# scripts. Repair the current helper sources before CMake stages them.
+# scripts. Lean's top-level build uses stage0/src for the runnable native stage0
+# and src for stage1, so normalize both exact pinned source copies before CMake
+# materializes their bin/ helpers.
 for helper_source in \
+  "$lean_source/stage0/src/bin/leanmake" \
+  "$lean_source/stage0/src/bin/leanc.in" \
   "$lean_source/src/bin/leanmake" \
   "$lean_source/src/bin/leanc.in"; do
   if [[ ! -f "$helper_source" ]]; then

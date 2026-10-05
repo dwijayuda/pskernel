@@ -4,6 +4,7 @@
 export const portableSelfhostStructuralRuleIds = Object.freeze([
   'recursive-equation-definition',
   'structural-recursion-call-shape',
+  'term-arithmetic-operator',
   'term-list-append',
   'term-list-cons',
   'numeric-tuple-projection',
@@ -528,6 +529,19 @@ export function findSelfhostStructuralViolations(
     }
     if (/&&|\|\||(^|[\s(=,:])!\s*[A-Za-z_(]/u.test(termSegment)) {
       add('boolean-convenience', index + 1, line);
+    }
+
+    const arithmeticSegment =
+      termSegment
+        .replace(/->/gu, '  ')
+        .replace(/=>/gu, '  ');
+    if (
+      /(?:%|\/|\*|\+|<=|>=|==|!=)/u.test(arithmeticSegment) ||
+      /(^|\s)-(\s|$)/u.test(arithmeticSegment) ||
+      /(^|[^<])<([^=]|$)/u.test(arithmeticSegment) ||
+      /(^|[^>])>([^=]|$)/u.test(arithmeticSegment)
+    ) {
+      add('term-arithmetic-operator', index + 1, line);
     }
     if (/\btoString\b/u.test(termSegment)) {
       add('to-string-convenience', index + 1, line);

@@ -2786,6 +2786,107 @@ def psWasmLowerBoolBinaryWith
             state := lowered.state
           }
 
+def psWasmLowerCharOfNatWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match arguments with
+  | List.nil =>
+      Except.error PsWasmLowerError.invalidIntrinsicArity
+  | List.cons value rest =>
+      match rest with
+      | List.cons _ _ =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | List.nil =>
+          match lower (Option.some psWasmNatRef) state value with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              let allocatedNat :=
+                psWasmAddLocal lowered.state psWasmNatRef;
+              let natLocal := Prod.fst allocatedNat;
+              let allocatedCodepoint :=
+                psWasmAddLocal
+                  (Prod.snd allocatedNat)
+                  PsWasmValueType.i32;
+              let codepointLocal := Prod.fst allocatedCodepoint;
+              Except.ok {
+                instructions :=
+                  psListAppend
+                    lowered.instructions
+                    [
+                      PsWasmInstruction.localSet natLocal,
+                      PsWasmInstruction.localGet natLocal,
+                      PsWasmInstruction.call psWasmNatFitsU32Fn,
+                      PsWasmInstruction.ifStart
+                        (Option.some PsWasmValueType.i32),
+                        PsWasmInstruction.localGet natLocal,
+                        PsWasmInstruction.call psWasmNatToU32Fn,
+                        PsWasmInstruction.localSet codepointLocal,
+                        PsWasmInstruction.localGet codepointLocal,
+                        PsWasmInstruction.i32Const 55296,
+                        PsWasmInstruction.i32LtU,
+                        PsWasmInstruction.ifStart
+                          (Option.some PsWasmValueType.i32),
+                          PsWasmInstruction.localGet codepointLocal,
+                        PsWasmInstruction.else_,
+                          PsWasmInstruction.localGet codepointLocal,
+                          PsWasmInstruction.i32Const 57343,
+                          PsWasmInstruction.i32GtU,
+                          PsWasmInstruction.localGet codepointLocal,
+                          PsWasmInstruction.i32Const 1114112,
+                          PsWasmInstruction.i32LtU,
+                          PsWasmInstruction.i32And,
+                          PsWasmInstruction.ifStart
+                            (Option.some PsWasmValueType.i32),
+                            PsWasmInstruction.localGet codepointLocal,
+                          PsWasmInstruction.else_,
+                            PsWasmInstruction.i32Const 0,
+                          PsWasmInstruction.end_,
+                        PsWasmInstruction.end_,
+                      PsWasmInstruction.else_,
+                        PsWasmInstruction.i32Const 0,
+                      PsWasmInstruction.end_
+                    ]
+                state := Prod.snd allocatedCodepoint
+              }
+
+def psWasmLowerCharToNatWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match arguments with
+  | List.nil =>
+      Except.error PsWasmLowerError.invalidIntrinsicArity
+  | List.cons value rest =>
+      match rest with
+      | List.cons _ _ =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | List.nil =>
+          match
+              lower
+                (Option.some PsWasmValueType.i32)
+                state
+                value with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok {
+                instructions :=
+                  psListAppend
+                    lowered.instructions
+                    [PsWasmInstruction.call psWasmNatOfU32Fn]
+                state := lowered.state
+              }
+
 def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)
     (lower :
@@ -2979,6 +3080,12 @@ def psWasmLowerIntrinsicWith
   | .boolNe =>
       psWasmLowerBoolBinaryWith
         lower state PsWasmInstruction.i32Ne arguments
+  | .charOfNat =>
+      psWasmLowerCharOfNatWith
+        lower state arguments
+  | .charToNat =>
+      psWasmLowerCharToNatWith
+        lower state arguments
   | .arrayEmptyWithCapacity =>
       psWasmLowerArrayEmptyWithCapacityWith
         profile lower state typeArguments arguments

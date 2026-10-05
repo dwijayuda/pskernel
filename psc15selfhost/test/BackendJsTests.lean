@@ -22,7 +22,7 @@ def psBackendJsExpected : String :=
   "export function u64Xor(left, right) { return BigInt.asUintN(64, ((left ^ right))); }\n" ++
   "export function u16Lt(left, right) { return (left < right); }\n" ++
   "export function u8FromNat(value) { return Number(BigInt.asUintN(8, value)); }\n" ++
-  "export const u8Literal300 = Number(BigInt.asUintN(8, 300n));\n" ++
+  "export const u8Literal44 = Number(BigInt.asUintN(8, 44n));\n" ++
   "export function float32Mul(left, right) { return Math.fround((left * right)); }\n" ++
   "export function floatDiv(left, right) { return (left / right); }\n" ++
   "export function letNatDemo(x) { return (() => { const y = (x + 1n); return (y * 2n); })(); }\n" ++

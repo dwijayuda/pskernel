@@ -1,0 +1,117 @@
+# PSKernel Core Semantic Proof Audit
+
+Status baseline: proof branch after the first independent typing metatheory and strengthened Quot/environment/cache work. This audit is deliberately conservative: compilation and proof-file presence do not imply semantic completeness.
+
+## Grade definitions
+
+- **A — semantic/refinement:** a nontrivial theorem relates implementation behavior to an independently stated kernel semantic/refinement property, or proves a semantic-history refinement invariant.
+- **B — reusable theory foundation:** substantive algebraic/structural/representation invariants that are prerequisites for A-level refinement, but do not yet establish the whole semantic rule.
+- **C — control/branch assurance:** fail-closed, fuel, error propagation, cache isolation, or selected branch equations.
+- **D — shallow/base:** wrapper identity, empty/base case, marker, or similarly weak evidence.
+
+## Current counts
+
+| Grade | Modules |
+|---|---:|
+| A | 2 |
+| B | 31 |
+| C | 38 |
+| D | 8 |
+| **Total canonical source/proof pairs** | **79** |
+
+The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and is used when grading `Checker/Inference/Core`; it is not one of the 79 canonical source/proof pairs.
+
+## Module audit
+
+| Module | Grade | Current evidence / missing step |
+|---|:---:|---|
+| `API/Kernel.lean` | **C** | Public fail-closed/control-flow theorems; no end-to-end semantic refinement yet. |
+| `API/KernelContractV1.lean` | **C** | Contract identity/version facts. |
+| `API/Outcome.lean` | **C** | Outcome classification/control facts. |
+| `API/Provider.lean` | **C** | Provider compatibility decision facts. |
+| `API/Session.lean` | **C** | Session/preflight control and propagation facts. |
+| `Admission/Declaration/Admission.lean` | **B** | Substantive declaration proof-gate sequencing; formal admit judgment still pending. |
+| `Admission/Declaration/Validation.lean` | **B** | Closedness, universes, body checking and defeq gating; formal validation relation pending. |
+| `Admission/Inductive/Common/Elimination.lean` | **C** | Fuel/base control facts only. |
+| `Admission/Inductive/Common/Occurrence.lean` | **C** | Selected occurrence/control cases; positivity semantics incomplete. |
+| `Admission/Inductive/Common/Parameters.lean` | **B** | Reusable binder/list structure plus opening base case. |
+| `Admission/Inductive/Common/RecursorValidation.lean` | **D** | Empty-worker base case only. |
+| `Admission/Inductive/Mutual/Admission.lean` | **C** | Selected rejection/empty transaction behavior. |
+| `Admission/Inductive/Mutual/AdmissionLoops.lean` | **D** | Empty-worker base case only. |
+| `Admission/Inductive/Mutual/Analysis.lean` | **B** | Reusable structural analysis lemmas; mutual positivity relation incomplete. |
+| `Admission/Inductive/Mutual/Header.lean` | **B** | Header/list structural invariants. |
+| `Admission/Inductive/Mutual/Recursor.lean` | **C** | Recursor worker base/control facts; semantic recursor construction incomplete. |
+| `Admission/Inductive/Nested/Admission.lean` | **C** | Reserved-name failure propagation. |
+| `Admission/Inductive/Nested/Commit.lean` | **C** | Commit helper base cases. |
+| `Admission/Inductive/Nested/Discover.lean` | **B** | Discovery soundness for returned family template plus list laws. |
+| `Admission/Inductive/Nested/Flatten.lean` | **C** | Fuel exhaustion/control only. |
+| `Admission/Inductive/Nested/Rebase.lean` | **C** | Lookup/fuel base cases; rebase correctness incomplete. |
+| `Admission/Inductive/Nested/ReservedNames.lean` | **C** | Reserved-name checks/base behavior. |
+| `Admission/Inductive/Nested/Restore.lean` | **C** | Restore worker base cases plus length law. |
+| `Admission/Inductive/Nested/RestoreExpr.lean` | **C** | Lookup/map/fuel base behavior; restoration relation incomplete. |
+| `Admission/Inductive/Nested/Types.lean` | **D** | Structure eta only. |
+| `Admission/Inductive/Nested/Validation.lean` | **C** | Length/fuel control; restored-type preservation incomplete. |
+| `Admission/Inductive/Ordinary/Admission.lean` | **C** | Fresh-name empty behavior only. |
+| `Admission/Inductive/Ordinary/Constructor.lean` | **B** | Binder/field structural laws; positivity theorem incomplete. |
+| `Admission/Inductive/Ordinary/ConstructorAdmission.lean` | **C** | Fuel exhaustion only. |
+| `Admission/Inductive/Ordinary/Recursor.lean` | **B** | Recursor helper/list laws; generated-rule semantic validity incomplete. |
+| `Admission/Inductive/Types.lean` | **B** | Basic list/name/binder helper laws. |
+| `Admission/Quot/Admission.lean` | **B** | Transaction propagation plus successful postconditions; independent Quot admission judgment pending. |
+| `Admission/Quot/Bootstrap.lean` | **C** | Reserved-name branch behavior and binder base case. |
+| `Checker/Context.lean` | **B** | Context construction/freshness/application helper invariants. |
+| `Checker/DefEq/BinderSpines.lean` | **C** | Finish/cache and fuel behavior; congruence relation incomplete. |
+| `Checker/DefEq/DeltaStep.lean` | **C** | Delta-step result/control cases. |
+| `Checker/DefEq/FinalRules.lean` | **C** | Fuel/control only for final rules. |
+| `Checker/DefEq/FullShape.lean` | **C** | Selected same-shape cases; formal defeq soundness pending. |
+| `Checker/DefEq/LazyDelta.lean` | **C** | Fuel exhaustion only. |
+| `Checker/DefEq/Quick.lean` | **B** | Expression/cache/sort-list quick-rule behavior; independent defeq relation pending. |
+| `Checker/DefEq/Shortcuts.lean` | **C** | Selected disabled shortcut behavior. |
+| `Checker/DefEq/Support.lean` | **D** | Single empty-list aggregation fact. |
+| `Checker/Inference.lean` | **C** | Wrapper/fuel facts. |
+| `Checker/Inference/Core.lean` | **A** | Rule-level implementation theorems plus independent Typing metatheory bridges for Sort/literals/fvar/const. |
+| `Checker/Inference/Helpers.lean` | **B** | Sort/Pi views plus cache noninterference invariants. |
+| `Checker/Knot.lean` | **C** | Public wiring/fuel equations; end-to-end soundness pending. |
+| `Checker/Ops.lean` | **D** | Eta/wrapper fact only. |
+| `Checker/Projection.lean` | **C** | Fuel/error control facts; dependent projection typing relation pending. |
+| `Checker/Recursor/Analysis.lean` | **B** | Reusable search/list/analysis foundations. |
+| `Checker/Recursor/Reduction.lean` | **C** | Selected no-reduction case only. |
+| `Checker/Reduction/KernelReductions.lean` | **C** | Quot gating/control facts; reduction relation bridge pending. |
+| `Checker/Reduction/PrimitiveData.lean` | **C** | Primitive base/control facts. |
+| `Checker/Reduction/PrimitiveNat.lean` | **C** | Primitive fuel/base facts. |
+| `Checker/Reduction/Primitives.lean` | **D** | Single aggregation/fuel fact. |
+| `Checker/Reduction/Whnf.lean` | **B** | Several observable WHNF rules; independent reduction relation added separately. |
+| `Checker/Reduction/WhnfCore.lean` | **B** | Zeta/fvar-let implementation rules; independent reduction relation added separately. |
+| `Checker/ResourcePolicy.lean` | **C** | Fail-closed/resource policy cases. |
+| `Checker/Session.lean` | **C** | Session forwarding/error propagation. |
+| `Checker/State.lean` | **B** | State/cache isolation and freshness invariants. |
+| `Core/Declaration.lean` | **B** | Declaration projection/safety/delta facts. |
+| `Core/Expr.lean` | **B** | Expression spine/fvar/list helper laws. |
+| `Core/Level.lean` | **B** | Offset/list normalization foundations; full universe semantic equivalence proof pending. |
+| `Core/LocalContext.lean` | **B** | Lookup/base/add/value structural laws. |
+| `Core/Name.lean` | **B** | Append/list algebra; equality correctness pending. |
+| `Core/Substitution/Abstract.lean` | **B** | Binder example and concrete roundtrip; general abstraction/instantiation theorem pending. |
+| `Core/Substitution/Beta.lean` | **B** | General closed-body cheap-beta class; full beta semantic relation pending. |
+| `Core/Substitution/Instantiate.lean` | **B** | Hit/miss/binder behavior; general capture-avoidance interaction pending. |
+| `Core/Substitution/Lift.lean` | **B** | Cutoff hit/miss/binder behavior; general composition theorem pending. |
+| `Core/Substitution/ListOps.lean` | **B** | Reusable take/drop/reverse algebra. |
+| `Environment/Environment.lean` | **B** | Semantic-view/native capability separation facts. |
+| `Environment/Lookup.lean` | **C** | Wrapper/contains cases; full authoritative lookup refinement pending. |
+| `Environment/Operations.lean` | **A** | Explicit semantic-history preservation for add/replace/Quot marking. |
+| `Environment/Semantic.lean` | **B** | Authoritative list helper algebra. |
+| `Runtime/Acceleration/Cache.lean` | **B** | Map/pair-cache set/get foundations; whole-cache refinement invariant pending. |
+| `Runtime/Acceleration/CachePolicy.lean` | **C** | Eligibility policy cases. |
+| `Runtime/Acceleration/EnvironmentIndex.lean` | **B** | Set/find/remove/insert candidate refinement foundations; full authoritative lookup equivalence pending. |
+| `Runtime/Capability/Lean434NativeReduction.lean` | **C** | Provider-none and Bool construction behavior; provider soundness is trusted boundary. |
+| `Runtime/Capability/Types.lean` | **D** | Empty capability structure fact only. |
+| `SelfHost.lean` | **D** | Semantic-root marker only. |
+
+## Upgrade order
+
+1. Core substitution: lift composition, instantiate/lift interaction, general abstraction/instantiation roundtrip, capture avoidance.
+2. Acceleration refinement: prove expression-map and environment-index lookup equivalent to authoritative semantic sources under explicit invariants.
+3. Typing: extend `PsKernelTypingJudgment` across application, lambda, Pi, let and projection, then prove cache-sound inference refinement.
+4. Reduction: formal beta/zeta/delta/projection/Nat/Quot/recursor reduction relation and WHNF reachability/preservation.
+5. Defeq: formal non-transitive algorithmic defeq judgment and soundness of quick/delta/eta/proof-irrelevance/final rules.
+6. Admission: formal environment-well-formedness/extension judgment for declarations and Quot.
+7. Inductives: positivity, constructor result shape, elimination, recursor generation, mutual and nested flatten/restore preservation.
+8. Public boundary: compose the above into KernelContract success => semantic judgment / well-formed extension theorems.

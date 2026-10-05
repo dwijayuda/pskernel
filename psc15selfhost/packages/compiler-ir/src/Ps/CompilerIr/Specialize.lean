@@ -146,69 +146,72 @@ def psIrSpecializeJoinKeys
                 Option.some (String.Internal.append head (String.Internal.append "$" tail))
 
 def psIrSpecializeTypeKeyWithFuel
-    (remainingFuel : Nat)
-    (type : PsVerifiedIrType) :
-    Option String :=
+    (remainingFuel : Nat) :
+    PsVerifiedIrType -> Option String :=
   match remainingFuel with
-  | 0 => Option.none
+  | 0 =>
+      fun (_type : PsVerifiedIrType) => Option.none
   | fuel + 1 =>
-      match type with
-      | .unknown => Option.none
-      | .typeParameter _ => Option.none
-      | .primitive primitive =>
-          match primitive with
-          | .nat => Option.some "Nat"
-          | .int => Option.some "Int"
-          | .uint8 => Option.some "U8"
-          | .uint16 => Option.some "U16"
-          | .uint32 => Option.some "U32"
-          | .uint64 => Option.some "U64"
-          | .usize => Option.some "USize"
-          | .int8 => Option.some "I8"
-          | .int16 => Option.some "I16"
-          | .int32 => Option.some "I32"
-          | .int64 => Option.some "I64"
-          | .isize => Option.some "ISize"
-          | .float => Option.some "F64"
-          | .float32 => Option.some "F32"
-          | .bool => Option.some "Bool"
-          | .char => Option.some "Char"
-          | .string => Option.some "String"
-          | .unit => Option.some "Unit"
-      | .function parameters result =>
-          let parameterKeys :=
-            psListMap
-              (psIrSpecializeTypeKeyWithFuel fuel)
-              parameters;
-          match psIrSpecializeJoinKeys parameterKeys with
-          | Option.none => Option.none
-          | Option.some parameterKey =>
-              match psIrSpecializeTypeKeyWithFuel fuel result with
-              | Option.none => Option.none
-              | Option.some resultKey =>
+      let smaller : PsVerifiedIrType -> Option String :=
+        psIrSpecializeTypeKeyWithFuel fuel;
+      fun (type : PsVerifiedIrType) =>
+        match type with
+        | .unknown => Option.none
+        | .typeParameter _ => Option.none
+        | .primitive primitive =>
+            match primitive with
+            | .nat => Option.some "Nat"
+            | .int => Option.some "Int"
+            | .uint8 => Option.some "U8"
+            | .uint16 => Option.some "U16"
+            | .uint32 => Option.some "U32"
+            | .uint64 => Option.some "U64"
+            | .usize => Option.some "USize"
+            | .int8 => Option.some "I8"
+            | .int16 => Option.some "I16"
+            | .int32 => Option.some "I32"
+            | .int64 => Option.some "I64"
+            | .isize => Option.some "ISize"
+            | .float => Option.some "F64"
+            | .float32 => Option.some "F32"
+            | .bool => Option.some "Bool"
+            | .char => Option.some "Char"
+            | .string => Option.some "String"
+            | .unit => Option.some "Unit"
+        | .function parameters result =>
+            let parameterKeys :=
+              psListMap
+                (smaller)
+                parameters;
+            match psIrSpecializeJoinKeys parameterKeys with
+            | Option.none => Option.none
+            | Option.some parameterKey =>
+                match smaller result with
+                | Option.none => Option.none
+                | Option.some resultKey =>
+                    Option.some
+                      (String.Internal.append
+          "Fn$"
+          (String.Internal.append
+            parameterKey
+            (String.Internal.append "$To$" resultKey)))
+        | .named name arguments =>
+            let argumentKeys :=
+              psListMap
+                (smaller)
+                arguments;
+            match psIrSpecializeJoinKeys argumentKeys with
+            | Option.none => Option.none
+            | Option.some keys =>
+                if psStringEq keys "" then
+                  Option.some (String.Internal.append "N$" name)
+                else
                   Option.some
                     (String.Internal.append
-        "Fn$"
-        (String.Internal.append
-          parameterKey
-          (String.Internal.append "$To$" resultKey)))
-      | .named name arguments =>
-          let argumentKeys :=
-            psListMap
-              (psIrSpecializeTypeKeyWithFuel fuel)
-              arguments;
-          match psIrSpecializeJoinKeys argumentKeys with
-          | Option.none => Option.none
-          | Option.some keys =>
-              if psStringEq keys "" then
-                Option.some (String.Internal.append "N$" name)
-              else
-                Option.some
-                  (String.Internal.append
-                    "N$"
-                    (String.Internal.append
-                      name
-                      (String.Internal.append "$" keys)))
+                      "N$"
+                      (String.Internal.append
+                        name
+                        (String.Internal.append "$" keys)))
 
 def psIrSpecializeTypeKey
     (type : PsVerifiedIrType) : Option String :=
@@ -362,102 +365,104 @@ def psIrSpecializeRewriteTypeListWith
 def psIrSpecializeRewriteTypeWithFuel
     (module : PsVerifiedIrModule)
     (substitution : List (String × PsVerifiedIrType))
-    (remainingFuel : Nat)
-    (type : PsVerifiedIrType) :
+    (remainingFuel : Nat) :
+    PsVerifiedIrType ->
     Except PsIrSpecializeError PsIrSpecializeTypeResult :=
   match remainingFuel with
   | 0 =>
-      Except.error PsIrSpecializeError.fuelExhausted
+      fun (_type : PsVerifiedIrType) =>
+        Except.error PsIrSpecializeError.fuelExhausted
   | fuel + 1 =>
-      let rewrite :=
+      let rewrite : PsVerifiedIrType -> Except PsIrSpecializeError PsIrSpecializeTypeResult :=
         psIrSpecializeRewriteTypeWithFuel
           module
           substitution
           fuel;
-      match type with
-      | .unknown =>
-          Except.error
-            (PsIrSpecializeError.nonGroundType "unknown")
-      | .typeParameter name =>
-          match
-              psIrSpecializeLookupType
-                substitution
-                name with
-          | Option.none =>
-              Except.error
-                (PsIrSpecializeError.unresolvedTypeParameter name)
-          | Option.some value =>
-              Except.ok {
-                type := value
-                requests := []
-              }
-      | .primitive primitive =>
-          Except.ok {
-            type := PsVerifiedIrType.primitive primitive
-            requests := []
-          }
-      | .function parameters result =>
-          match
-              psIrSpecializeRewriteTypeListWith
-                rewrite
-                parameters with
-          | Except.error error => Except.error error
-          | Except.ok loweredParameters =>
-              match rewrite result with
-              | Except.error error => Except.error error
-              | Except.ok loweredResult =>
-                  Except.ok {
-                    type :=
-                      PsVerifiedIrType.function
-                        loweredParameters.types
-                        loweredResult.type
-                    requests :=
-                      psListAppend loweredParameters.requests loweredResult.requests
-                  }
-      | .named name arguments =>
-          match
-              psIrSpecializeRewriteTypeListWith
-                rewrite
-                arguments with
-          | Except.error error => Except.error error
-          | Except.ok loweredArguments =>
-              match
-                  psIrSpecializeGenericTypeRequest
-                    module
-                    name
-                    loweredArguments.types with
-              | Option.none =>
-                  Except.ok {
-                    type :=
-                      PsVerifiedIrType.named
-                        name
-                        loweredArguments.types
-                    requests := loweredArguments.requests
-                  }
-              | Option.some request =>
-                  if
-                      psIrSpecializeBoolNot
-                        (psIrSpecializeAllGround loweredArguments.types)
-                  then
-                    Except.error
-                      (PsIrSpecializeError.nonGroundType name)
-                  else
-                    match
-                        psIrSpecializedName
+      fun (type : PsVerifiedIrType) =>
+        match type with
+        | .unknown =>
+            Except.error
+              (PsIrSpecializeError.nonGroundType "unknown")
+        | .typeParameter name =>
+            match
+                psIrSpecializeLookupType
+                  substitution
+                  name with
+            | Option.none =>
+                Except.error
+                  (PsIrSpecializeError.unresolvedTypeParameter name)
+            | Option.some value =>
+                Except.ok {
+                  type := value
+                  requests := []
+                }
+        | .primitive primitive =>
+            Except.ok {
+              type := PsVerifiedIrType.primitive primitive
+              requests := []
+            }
+        | .function parameters result =>
+            match
+                psIrSpecializeRewriteTypeListWith
+                  rewrite
+                  parameters with
+            | Except.error error => Except.error error
+            | Except.ok loweredParameters =>
+                match rewrite result with
+                | Except.error error => Except.error error
+                | Except.ok loweredResult =>
+                    Except.ok {
+                      type :=
+                        PsVerifiedIrType.function
+                          loweredParameters.types
+                          loweredResult.type
+                      requests :=
+                        psListAppend loweredParameters.requests loweredResult.requests
+                    }
+        | .named name arguments =>
+            match
+                psIrSpecializeRewriteTypeListWith
+                  rewrite
+                  arguments with
+            | Except.error error => Except.error error
+            | Except.ok loweredArguments =>
+                match
+                    psIrSpecializeGenericTypeRequest
+                      module
+                      name
+                      loweredArguments.types with
+                | Option.none =>
+                    Except.ok {
+                      type :=
+                        PsVerifiedIrType.named
                           name
-                          loweredArguments.types with
-                    | Option.none =>
-                        Except.error
-                          (PsIrSpecializeError.nonGroundType name)
-                    | Option.some specializedName =>
-                        Except.ok {
-                          type :=
-                            PsVerifiedIrType.named
-                              specializedName
-                              []
-                          requests :=
-                            psListAppend loweredArguments.requests [request]
-                        }
+                          loweredArguments.types
+                      requests := loweredArguments.requests
+                    }
+                | Option.some request =>
+                    if
+                        psIrSpecializeBoolNot
+                          (psIrSpecializeAllGround loweredArguments.types)
+                    then
+                      Except.error
+                        (PsIrSpecializeError.nonGroundType name)
+                    else
+                      match
+                          psIrSpecializedName
+                            name
+                            loweredArguments.types with
+                      | Option.none =>
+                          Except.error
+                            (PsIrSpecializeError.nonGroundType name)
+                      | Option.some specializedName =>
+                          Except.ok {
+                            type :=
+                              PsVerifiedIrType.named
+                                specializedName
+                                []
+                            requests :=
+                              psListAppend loweredArguments.requests [request]
+                          }
 
 def psIrSpecializeRewriteType
     (module : PsVerifiedIrModule)
@@ -652,14 +657,15 @@ def psIrSpecializeRewriteAlternativesWith
 def psIrSpecializeRewriteExprWithFuel
     (module : PsVerifiedIrModule)
     (substitution : List (String × PsVerifiedIrType))
-    (remainingFuel : Nat)
-    (expression : PsVerifiedIrExpr) :
+    (remainingFuel : Nat) :
+    PsVerifiedIrExpr ->
     Except PsIrSpecializeError PsIrSpecializeExprResult :=
   match remainingFuel with
   | 0 =>
-      Except.error PsIrSpecializeError.fuelExhausted
+      fun (_expression : PsVerifiedIrExpr) =>
+        Except.error PsIrSpecializeError.fuelExhausted
   | fuel + 1 =>
-      let rewrite :=
+      let rewrite : PsVerifiedIrExpr -> Except PsIrSpecializeError PsIrSpecializeExprResult :=
         psIrSpecializeRewriteExprWithFuel
           module
           substitution
@@ -668,464 +674,465 @@ def psIrSpecializeRewriteExprWithFuel
         psIrSpecializeRewriteType
           module
           substitution;
-      match expression with
-      | .literal literal =>
-          Except.ok {
-            expr := PsVerifiedIrExpr.literal literal
-            requests := []
-          }
-      | .var name =>
-          Except.ok {
-            expr := PsVerifiedIrExpr.var name
-            requests := []
-          }
-      | .intrinsic operation typeArguments arguments =>
-          match
-              psIrSpecializeRewriteTypeListWith
-                rewriteType
-                typeArguments with
-          | Except.error error => Except.error error
-          | Except.ok loweredTypes =>
-              match
-                  psIrSpecializeRewriteExprListWith
-                    rewrite
-                    arguments with
-              | Except.error error => Except.error error
-              | Except.ok lowered =>
-                  Except.ok {
-                    expr :=
-                      PsVerifiedIrExpr.intrinsic
-                        operation
-                        loweredTypes.types
-                        lowered.expressions
-                    requests :=
-                      psListAppend loweredTypes.requests lowered.requests
-                  }
-      | .lambda parameters resultType body =>
-          match
-              psIrSpecializeRewriteParameters
-                module
-                substitution
-                parameters with
-          | Except.error error => Except.error error
-          | Except.ok loweredParameters =>
-              match rewriteType resultType with
-              | Except.error error => Except.error error
-              | Except.ok loweredResult =>
-                  match rewrite body with
-                  | Except.error error => Except.error error
-                  | Except.ok loweredBody =>
-                      Except.ok {
-                        expr :=
-                          PsVerifiedIrExpr.lambda
-                            loweredParameters.parameters
-                            loweredResult.type
-                            loweredBody.expr
-                        requests :=
-                          psListAppend loweredParameters.requests (psListAppend loweredResult.requests loweredBody.requests)
-                      }
-      | .call fn typeArguments arguments =>
-          match rewrite fn with
-          | Except.error error => Except.error error
-          | Except.ok loweredFn =>
-              match
-                  psIrSpecializeRewriteTypeListWith
-                    rewriteType
-                    typeArguments with
-              | Except.error error => Except.error error
-              | Except.ok loweredTypes =>
-                  match
-                      psIrSpecializeRewriteExprListWith
-                        rewrite
-                        arguments with
-                  | Except.error error => Except.error error
-                  | Except.ok loweredArguments =>
-                      match fn with
-                      | .var name =>
-                          match
-                              psIrSpecializeFindDeclaration
-                                module.declarations
-                                name with
-                          | Option.some declaration =>
-                              match declaration.typeParameters with
-                              | [] =>
-                                  Except.ok {
-                                    expr :=
-                                      PsVerifiedIrExpr.call
-                                        loweredFn.expr
-                                        loweredTypes.types
-                                        loweredArguments.expressions
-                                    requests :=
-                                      psListAppend loweredFn.requests (psListAppend loweredTypes.requests loweredArguments.requests)
-                                  }
-                              | _ =>
-                                  if
-                                      psIrSpecializeNatNe (psListLength declaration.typeParameters)
-                                        (psListLength loweredTypes.types)
-                                  then
-                                    Except.error
-                                      (PsIrSpecializeError.typeArgumentArity
-                                        name)
-                                  else if
-                                      psIrSpecializeBoolNot
-                                        (psIrSpecializeAllGround loweredTypes.types)
-                                  then
-                                    Except.error
-                                      (PsIrSpecializeError.nonGroundType name)
-                                  else
-                                    match
-                                        psIrSpecializedName
-                                          name
-                                          loweredTypes.types with
-                                    | Option.none =>
-                                        Except.error
-                                          (PsIrSpecializeError.nonGroundType
-                                            name)
-                                    | Option.some specializedName =>
-                                        let request : PsIrSpecializeRequest := {
-                                          kind :=
-                                            PsIrSpecializeKind.declaration
-                                          name := name
-                                          arguments := loweredTypes.types
-                                        };
-                                        Except.ok {
-                                          expr :=
-                                            PsVerifiedIrExpr.call
-                                              (PsVerifiedIrExpr.var
-                                                specializedName)
-                                              []
-                                              loweredArguments.expressions
-                                          requests :=
-                                            psListAppend loweredFn.requests (psListAppend loweredTypes.requests (psListAppend loweredArguments.requests [request]))
-                                        }
-                          | Option.none =>
+      fun (expression : PsVerifiedIrExpr) =>
+        match expression with
+        | .literal literal =>
+            Except.ok {
+              expr := PsVerifiedIrExpr.literal literal
+              requests := []
+            }
+        | .var name =>
+            Except.ok {
+              expr := PsVerifiedIrExpr.var name
+              requests := []
+            }
+        | .intrinsic operation typeArguments arguments =>
+            match
+                psIrSpecializeRewriteTypeListWith
+                  rewriteType
+                  typeArguments with
+            | Except.error error => Except.error error
+            | Except.ok loweredTypes =>
+                match
+                    psIrSpecializeRewriteExprListWith
+                      rewrite
+                      arguments with
+                | Except.error error => Except.error error
+                | Except.ok lowered =>
+                    Except.ok {
+                      expr :=
+                        PsVerifiedIrExpr.intrinsic
+                          operation
+                          loweredTypes.types
+                          lowered.expressions
+                      requests :=
+                        psListAppend loweredTypes.requests lowered.requests
+                    }
+        | .lambda parameters resultType body =>
+            match
+                psIrSpecializeRewriteParameters
+                  module
+                  substitution
+                  parameters with
+            | Except.error error => Except.error error
+            | Except.ok loweredParameters =>
+                match rewriteType resultType with
+                | Except.error error => Except.error error
+                | Except.ok loweredResult =>
+                    match rewrite body with
+                    | Except.error error => Except.error error
+                    | Except.ok loweredBody =>
+                        Except.ok {
+                          expr :=
+                            PsVerifiedIrExpr.lambda
+                              loweredParameters.parameters
+                              loweredResult.type
+                              loweredBody.expr
+                          requests :=
+                            psListAppend loweredParameters.requests (psListAppend loweredResult.requests loweredBody.requests)
+                        }
+        | .call fn typeArguments arguments =>
+            match rewrite fn with
+            | Except.error error => Except.error error
+            | Except.ok loweredFn =>
+                match
+                    psIrSpecializeRewriteTypeListWith
+                      rewriteType
+                      typeArguments with
+                | Except.error error => Except.error error
+                | Except.ok loweredTypes =>
+                    match
+                        psIrSpecializeRewriteExprListWith
+                          rewrite
+                          arguments with
+                    | Except.error error => Except.error error
+                    | Except.ok loweredArguments =>
+                        match fn with
+                        | .var name =>
+                            match
+                                psIrSpecializeFindDeclaration
+                                  module.declarations
+                                  name with
+                            | Option.some declaration =>
+                                match declaration.typeParameters with
+                                | [] =>
+                                    Except.ok {
+                                      expr :=
+                                        PsVerifiedIrExpr.call
+                                          loweredFn.expr
+                                          loweredTypes.types
+                                          loweredArguments.expressions
+                                      requests :=
+                                        psListAppend loweredFn.requests (psListAppend loweredTypes.requests loweredArguments.requests)
+                                    }
+                                | _ =>
+                                    if
+                                        psIrSpecializeNatNe (psListLength declaration.typeParameters)
+                                          (psListLength loweredTypes.types)
+                                    then
+                                      Except.error
+                                        (PsIrSpecializeError.typeArgumentArity
+                                          name)
+                                    else if
+                                        psIrSpecializeBoolNot
+                                          (psIrSpecializeAllGround loweredTypes.types)
+                                    then
+                                      Except.error
+                                        (PsIrSpecializeError.nonGroundType name)
+                                    else
+                                      match
+                                          psIrSpecializedName
+                                            name
+                                            loweredTypes.types with
+                                      | Option.none =>
+                                          Except.error
+                                            (PsIrSpecializeError.nonGroundType
+                                              name)
+                                      | Option.some specializedName =>
+                                          let request : PsIrSpecializeRequest := {
+                                            kind :=
+                                              PsIrSpecializeKind.declaration
+                                            name := name
+                                            arguments := loweredTypes.types
+                                          };
+                                          Except.ok {
+                                            expr :=
+                                              PsVerifiedIrExpr.call
+                                                (PsVerifiedIrExpr.var
+                                                  specializedName)
+                                                []
+                                                loweredArguments.expressions
+                                            requests :=
+                                              psListAppend loweredFn.requests (psListAppend loweredTypes.requests (psListAppend loweredArguments.requests [request]))
+                                          }
+                            | Option.none =>
+                                Except.ok {
+                                  expr :=
+                                    PsVerifiedIrExpr.call
+                                      loweredFn.expr
+                                      loweredTypes.types
+                                      loweredArguments.expressions
+                                  requests :=
+                                    psListAppend loweredFn.requests (psListAppend loweredTypes.requests loweredArguments.requests)
+                                }
+                        | _ =>
+                            if Nat.beq (psListLength loweredTypes.types) 0 then
                               Except.ok {
                                 expr :=
                                   PsVerifiedIrExpr.call
                                     loweredFn.expr
-                                    loweredTypes.types
+                                    []
                                     loweredArguments.expressions
                                 requests :=
                                   psListAppend loweredFn.requests (psListAppend loweredTypes.requests loweredArguments.requests)
                               }
-                      | _ =>
-                          if Nat.beq (psListLength loweredTypes.types) 0 then
+                            else
+                              Except.error
+                                PsIrSpecializeError.unsupportedGenericCall
+        | .letE name type value body =>
+            match rewriteType type with
+            | Except.error error => Except.error error
+            | Except.ok loweredType =>
+                match rewrite value with
+                | Except.error error => Except.error error
+                | Except.ok loweredValue =>
+                    match rewrite body with
+                    | Except.error error => Except.error error
+                    | Except.ok loweredBody =>
+                        Except.ok {
+                          expr :=
+                            PsVerifiedIrExpr.letE
+                              name
+                              loweredType.type
+                              loweredValue.expr
+                              loweredBody.expr
+                          requests :=
+                            psListAppend loweredType.requests (psListAppend loweredValue.requests loweredBody.requests)
+                        }
+        | .ifE condition thenBranch elseBranch =>
+            match rewrite condition with
+            | Except.error error => Except.error error
+            | Except.ok loweredCondition =>
+                match rewrite thenBranch with
+                | Except.error error => Except.error error
+                | Except.ok loweredThen =>
+                    match rewrite elseBranch with
+                    | Except.error error => Except.error error
+                    | Except.ok loweredElse =>
+                        Except.ok {
+                          expr :=
+                            PsVerifiedIrExpr.ifE
+                              loweredCondition.expr
+                              loweredThen.expr
+                              loweredElse.expr
+                          requests :=
+                            psListAppend loweredCondition.requests (psListAppend loweredThen.requests loweredElse.requests)
+                        }
+        | .record structureName typeArguments fields =>
+            match
+                psIrSpecializeRewriteTypeListWith
+                  rewriteType
+                  typeArguments with
+            | Except.error error => Except.error error
+            | Except.ok loweredTypes =>
+                match
+                    psIrSpecializeRewriteFieldsWith
+                      rewrite
+                      fields with
+                | Except.error error => Except.error error
+                | Except.ok loweredFields =>
+                    match
+                        psIrSpecializeFindStructure
+                          module.structures
+                          structureName with
+                    | Option.some structureInfo =>
+                        match structureInfo.typeParameters with
+                        | [] =>
                             Except.ok {
                               expr :=
-                                PsVerifiedIrExpr.call
-                                  loweredFn.expr
+                                PsVerifiedIrExpr.record
+                                  structureName
                                   []
-                                  loweredArguments.expressions
+                                  loweredFields.fields
                               requests :=
-                                psListAppend loweredFn.requests (psListAppend loweredTypes.requests loweredArguments.requests)
+                                psListAppend loweredTypes.requests loweredFields.requests
                             }
-                          else
-                            Except.error
-                              PsIrSpecializeError.unsupportedGenericCall
-      | .letE name type value body =>
-          match rewriteType type with
-          | Except.error error => Except.error error
-          | Except.ok loweredType =>
-              match rewrite value with
-              | Except.error error => Except.error error
-              | Except.ok loweredValue =>
-                  match rewrite body with
-                  | Except.error error => Except.error error
-                  | Except.ok loweredBody =>
-                      Except.ok {
-                        expr :=
-                          PsVerifiedIrExpr.letE
-                            name
-                            loweredType.type
-                            loweredValue.expr
-                            loweredBody.expr
-                        requests :=
-                          psListAppend loweredType.requests (psListAppend loweredValue.requests loweredBody.requests)
-                      }
-      | .ifE condition thenBranch elseBranch =>
-          match rewrite condition with
-          | Except.error error => Except.error error
-          | Except.ok loweredCondition =>
-              match rewrite thenBranch with
-              | Except.error error => Except.error error
-              | Except.ok loweredThen =>
-                  match rewrite elseBranch with
-                  | Except.error error => Except.error error
-                  | Except.ok loweredElse =>
-                      Except.ok {
-                        expr :=
-                          PsVerifiedIrExpr.ifE
-                            loweredCondition.expr
-                            loweredThen.expr
-                            loweredElse.expr
-                        requests :=
-                          psListAppend loweredCondition.requests (psListAppend loweredThen.requests loweredElse.requests)
-                      }
-      | .record structureName typeArguments fields =>
-          match
-              psIrSpecializeRewriteTypeListWith
-                rewriteType
-                typeArguments with
-          | Except.error error => Except.error error
-          | Except.ok loweredTypes =>
-              match
-                  psIrSpecializeRewriteFieldsWith
-                    rewrite
-                    fields with
-              | Except.error error => Except.error error
-              | Except.ok loweredFields =>
-                  match
-                      psIrSpecializeFindStructure
-                        module.structures
-                        structureName with
-                  | Option.some structureInfo =>
-                      match structureInfo.typeParameters with
-                      | [] =>
-                          Except.ok {
-                            expr :=
-                              PsVerifiedIrExpr.record
-                                structureName
-                                []
-                                loweredFields.fields
-                            requests :=
-                              psListAppend loweredTypes.requests loweredFields.requests
-                          }
-                      | _ =>
-                          if
-                              psIrSpecializeNatNe (psListLength structureInfo.typeParameters)
-                                (psListLength loweredTypes.types)
-                          then
-                            Except.error
-                              (PsIrSpecializeError.typeArgumentArity
-                                structureName)
-                          else
-                            match
-                                psIrSpecializedName
+                        | _ =>
+                            if
+                                psIrSpecializeNatNe (psListLength structureInfo.typeParameters)
+                                  (psListLength loweredTypes.types)
+                            then
+                              Except.error
+                                (PsIrSpecializeError.typeArgumentArity
+                                  structureName)
+                            else
+                              match
+                                  psIrSpecializedName
+                                    structureName
+                                    loweredTypes.types with
+                              | Option.none =>
+                                  Except.error
+                                    (PsIrSpecializeError.nonGroundType
+                                      structureName)
+                              | Option.some specializedName =>
+                                  let request : PsIrSpecializeRequest := {
+                                    kind := PsIrSpecializeKind.structure
+                                    name := structureName
+                                    arguments := loweredTypes.types
+                                  };
+                                  Except.ok {
+                                    expr :=
+                                      PsVerifiedIrExpr.record
+                                        specializedName
+                                        []
+                                        loweredFields.fields
+                                    requests :=
+                                      psListAppend loweredTypes.requests (psListAppend loweredFields.requests [request])
+                                  }
+                    | Option.none =>
+                        Except.error
+                          (PsIrSpecializeError.unknownTarget structureName)
+        | .projection structureName typeArguments target field =>
+            match
+                psIrSpecializeRewriteTypeListWith
+                  rewriteType
+                  typeArguments with
+            | Except.error error => Except.error error
+            | Except.ok loweredTypes =>
+                match rewrite target with
+                | Except.error error => Except.error error
+                | Except.ok loweredTarget =>
+                    match
+                        psIrSpecializeFindStructure
+                          module.structures
+                          structureName with
+                    | Option.some structureInfo =>
+                        match structureInfo.typeParameters with
+                        | [] =>
+                            Except.ok {
+                              expr :=
+                                PsVerifiedIrExpr.projection
                                   structureName
-                                  loweredTypes.types with
-                            | Option.none =>
-                                Except.error
-                                  (PsIrSpecializeError.nonGroundType
-                                    structureName)
-                            | Option.some specializedName =>
-                                let request : PsIrSpecializeRequest := {
-                                  kind := PsIrSpecializeKind.structure
-                                  name := structureName
-                                  arguments := loweredTypes.types
-                                };
-                                Except.ok {
-                                  expr :=
-                                    PsVerifiedIrExpr.record
-                                      specializedName
-                                      []
-                                      loweredFields.fields
-                                  requests :=
-                                    psListAppend loweredTypes.requests (psListAppend loweredFields.requests [request])
-                                }
-                  | Option.none =>
-                      Except.error
-                        (PsIrSpecializeError.unknownTarget structureName)
-      | .projection structureName typeArguments target field =>
-          match
-              psIrSpecializeRewriteTypeListWith
-                rewriteType
-                typeArguments with
-          | Except.error error => Except.error error
-          | Except.ok loweredTypes =>
-              match rewrite target with
-              | Except.error error => Except.error error
-              | Except.ok loweredTarget =>
-                  match
-                      psIrSpecializeFindStructure
-                        module.structures
-                        structureName with
-                  | Option.some structureInfo =>
-                      match structureInfo.typeParameters with
-                      | [] =>
-                          Except.ok {
-                            expr :=
-                              PsVerifiedIrExpr.projection
-                                structureName
-                                []
-                                loweredTarget.expr
-                                field
-                            requests :=
-                              psListAppend loweredTypes.requests loweredTarget.requests
-                          }
-                      | _ =>
-                          if
-                              psIrSpecializeNatNe (psListLength structureInfo.typeParameters)
-                                (psListLength loweredTypes.types)
-                          then
-                            Except.error
-                              (PsIrSpecializeError.typeArgumentArity
-                                structureName)
-                          else
-                            match
-                                psIrSpecializedName
-                                  structureName
-                                  loweredTypes.types with
-                            | Option.none =>
-                                Except.error
-                                  (PsIrSpecializeError.nonGroundType
-                                    structureName)
-                            | Option.some specializedName =>
-                                let request : PsIrSpecializeRequest := {
-                                  kind := PsIrSpecializeKind.structure
-                                  name := structureName
-                                  arguments := loweredTypes.types
-                                };
-                                Except.ok {
-                                  expr :=
-                                    PsVerifiedIrExpr.projection
-                                      specializedName
-                                      []
-                                      loweredTarget.expr
-                                      field
-                                  requests :=
-                                    psListAppend loweredTypes.requests (psListAppend loweredTarget.requests [request])
-                                }
-                  | Option.none =>
-                      Except.error
-                        (PsIrSpecializeError.unknownTarget structureName)
-      | .constructor inductiveName constructorName typeArguments fields =>
-          match
-              psIrSpecializeRewriteTypeListWith
-                rewriteType
-                typeArguments with
-          | Except.error error => Except.error error
-          | Except.ok loweredTypes =>
-              match
-                  psIrSpecializeRewriteFieldsWith
-                    rewrite
-                    fields with
-              | Except.error error => Except.error error
-              | Except.ok loweredFields =>
-                  match
-                      psIrSpecializeFindInductive
-                        module.inductives
-                        inductiveName with
-                  | Option.some inductiveInfo =>
-                      match inductiveInfo.typeParameters with
-                      | [] =>
-                          Except.ok {
-                            expr :=
-                              PsVerifiedIrExpr.constructor
-                                inductiveName
-                                constructorName
-                                []
-                                loweredFields.fields
-                            requests :=
-                              psListAppend loweredTypes.requests loweredFields.requests
-                          }
-                      | _ =>
-                          if
-                              psIrSpecializeNatNe (psListLength inductiveInfo.typeParameters)
-                                (psListLength loweredTypes.types)
-                          then
-                            Except.error
-                              (PsIrSpecializeError.typeArgumentArity
-                                inductiveName)
-                          else
-                            match
-                                psIrSpecializedName
+                                  []
+                                  loweredTarget.expr
+                                  field
+                              requests :=
+                                psListAppend loweredTypes.requests loweredTarget.requests
+                            }
+                        | _ =>
+                            if
+                                psIrSpecializeNatNe (psListLength structureInfo.typeParameters)
+                                  (psListLength loweredTypes.types)
+                            then
+                              Except.error
+                                (PsIrSpecializeError.typeArgumentArity
+                                  structureName)
+                            else
+                              match
+                                  psIrSpecializedName
+                                    structureName
+                                    loweredTypes.types with
+                              | Option.none =>
+                                  Except.error
+                                    (PsIrSpecializeError.nonGroundType
+                                      structureName)
+                              | Option.some specializedName =>
+                                  let request : PsIrSpecializeRequest := {
+                                    kind := PsIrSpecializeKind.structure
+                                    name := structureName
+                                    arguments := loweredTypes.types
+                                  };
+                                  Except.ok {
+                                    expr :=
+                                      PsVerifiedIrExpr.projection
+                                        specializedName
+                                        []
+                                        loweredTarget.expr
+                                        field
+                                    requests :=
+                                      psListAppend loweredTypes.requests (psListAppend loweredTarget.requests [request])
+                                  }
+                    | Option.none =>
+                        Except.error
+                          (PsIrSpecializeError.unknownTarget structureName)
+        | .constructor inductiveName constructorName typeArguments fields =>
+            match
+                psIrSpecializeRewriteTypeListWith
+                  rewriteType
+                  typeArguments with
+            | Except.error error => Except.error error
+            | Except.ok loweredTypes =>
+                match
+                    psIrSpecializeRewriteFieldsWith
+                      rewrite
+                      fields with
+                | Except.error error => Except.error error
+                | Except.ok loweredFields =>
+                    match
+                        psIrSpecializeFindInductive
+                          module.inductives
+                          inductiveName with
+                    | Option.some inductiveInfo =>
+                        match inductiveInfo.typeParameters with
+                        | [] =>
+                            Except.ok {
+                              expr :=
+                                PsVerifiedIrExpr.constructor
                                   inductiveName
-                                  loweredTypes.types with
-                            | Option.none =>
-                                Except.error
-                                  (PsIrSpecializeError.nonGroundType
-                                    inductiveName)
-                            | Option.some specializedName =>
-                                let request : PsIrSpecializeRequest := {
-                                  kind := PsIrSpecializeKind.inductive
-                                  name := inductiveName
-                                  arguments := loweredTypes.types
-                                };
+                                  constructorName
+                                  []
+                                  loweredFields.fields
+                              requests :=
+                                psListAppend loweredTypes.requests loweredFields.requests
+                            }
+                        | _ =>
+                            if
+                                psIrSpecializeNatNe (psListLength inductiveInfo.typeParameters)
+                                  (psListLength loweredTypes.types)
+                            then
+                              Except.error
+                                (PsIrSpecializeError.typeArgumentArity
+                                  inductiveName)
+                            else
+                              match
+                                  psIrSpecializedName
+                                    inductiveName
+                                    loweredTypes.types with
+                              | Option.none =>
+                                  Except.error
+                                    (PsIrSpecializeError.nonGroundType
+                                      inductiveName)
+                              | Option.some specializedName =>
+                                  let request : PsIrSpecializeRequest := {
+                                    kind := PsIrSpecializeKind.inductive
+                                    name := inductiveName
+                                    arguments := loweredTypes.types
+                                  };
+                                  Except.ok {
+                                    expr :=
+                                      PsVerifiedIrExpr.constructor
+                                        specializedName
+                                        constructorName
+                                        []
+                                        loweredFields.fields
+                                    requests :=
+                                      psListAppend loweredTypes.requests (psListAppend loweredFields.requests [request])
+                                  }
+                    | Option.none =>
+                        Except.error
+                          (PsIrSpecializeError.unknownTarget inductiveName)
+        | .matchE inductiveName typeArguments scrutinee alternatives =>
+            match
+                psIrSpecializeRewriteTypeListWith
+                  rewriteType
+                  typeArguments with
+            | Except.error error => Except.error error
+            | Except.ok loweredTypes =>
+                match rewrite scrutinee with
+                | Except.error error => Except.error error
+                | Except.ok loweredScrutinee =>
+                    match
+                        psIrSpecializeRewriteAlternativesWith
+                          rewrite
+                          module
+                          substitution
+                          alternatives with
+                    | Except.error error => Except.error error
+                    | Except.ok loweredAlternatives =>
+                        match
+                            psIrSpecializeFindInductive
+                              module.inductives
+                              inductiveName with
+                        | Option.some inductiveInfo =>
+                            match inductiveInfo.typeParameters with
+                            | [] =>
                                 Except.ok {
                                   expr :=
-                                    PsVerifiedIrExpr.constructor
-                                      specializedName
-                                      constructorName
-                                      []
-                                      loweredFields.fields
-                                  requests :=
-                                    psListAppend loweredTypes.requests (psListAppend loweredFields.requests [request])
-                                }
-                  | Option.none =>
-                      Except.error
-                        (PsIrSpecializeError.unknownTarget inductiveName)
-      | .matchE inductiveName typeArguments scrutinee alternatives =>
-          match
-              psIrSpecializeRewriteTypeListWith
-                rewriteType
-                typeArguments with
-          | Except.error error => Except.error error
-          | Except.ok loweredTypes =>
-              match rewrite scrutinee with
-              | Except.error error => Except.error error
-              | Except.ok loweredScrutinee =>
-                  match
-                      psIrSpecializeRewriteAlternativesWith
-                        rewrite
-                        module
-                        substitution
-                        alternatives with
-                  | Except.error error => Except.error error
-                  | Except.ok loweredAlternatives =>
-                      match
-                          psIrSpecializeFindInductive
-                            module.inductives
-                            inductiveName with
-                      | Option.some inductiveInfo =>
-                          match inductiveInfo.typeParameters with
-                          | [] =>
-                              Except.ok {
-                                expr :=
-                                  PsVerifiedIrExpr.matchE
-                                    inductiveName
-                                    []
-                                    loweredScrutinee.expr
-                                    loweredAlternatives.alternatives
-                                requests :=
-                                  psListAppend loweredTypes.requests (psListAppend loweredScrutinee.requests loweredAlternatives.requests)
-                              }
-                          | _ =>
-                              if
-                                  psIrSpecializeNatNe (psListLength inductiveInfo.typeParameters)
-                                    (psListLength loweredTypes.types)
-                              then
-                                Except.error
-                                  (PsIrSpecializeError.typeArgumentArity
-                                    inductiveName)
-                              else
-                                match
-                                    psIrSpecializedName
+                                    PsVerifiedIrExpr.matchE
                                       inductiveName
-                                      loweredTypes.types with
-                                | Option.none =>
-                                    Except.error
-                                      (PsIrSpecializeError.nonGroundType
-                                        inductiveName)
-                                | Option.some specializedName =>
-                                    let request : PsIrSpecializeRequest := {
-                                      kind := PsIrSpecializeKind.inductive
-                                      name := inductiveName
-                                      arguments := loweredTypes.types
-                                    };
-                                    Except.ok {
-                                      expr :=
-                                        PsVerifiedIrExpr.matchE
-                                          specializedName
-                                          []
-                                          loweredScrutinee.expr
-                                          loweredAlternatives.alternatives
-                                      requests :=
-                                        psListAppend loweredTypes.requests (psListAppend loweredScrutinee.requests (psListAppend loweredAlternatives.requests [request]))
-                                    }
-                      | Option.none =>
-                          Except.error
-                            (PsIrSpecializeError.unknownTarget
-                              inductiveName)
+                                      []
+                                      loweredScrutinee.expr
+                                      loweredAlternatives.alternatives
+                                  requests :=
+                                    psListAppend loweredTypes.requests (psListAppend loweredScrutinee.requests loweredAlternatives.requests)
+                                }
+                            | _ =>
+                                if
+                                    psIrSpecializeNatNe (psListLength inductiveInfo.typeParameters)
+                                      (psListLength loweredTypes.types)
+                                then
+                                  Except.error
+                                    (PsIrSpecializeError.typeArgumentArity
+                                      inductiveName)
+                                else
+                                  match
+                                      psIrSpecializedName
+                                        inductiveName
+                                        loweredTypes.types with
+                                  | Option.none =>
+                                      Except.error
+                                        (PsIrSpecializeError.nonGroundType
+                                          inductiveName)
+                                  | Option.some specializedName =>
+                                      let request : PsIrSpecializeRequest := {
+                                        kind := PsIrSpecializeKind.inductive
+                                        name := inductiveName
+                                        arguments := loweredTypes.types
+                                      };
+                                      Except.ok {
+                                        expr :=
+                                          PsVerifiedIrExpr.matchE
+                                            specializedName
+                                            []
+                                            loweredScrutinee.expr
+                                            loweredAlternatives.alternatives
+                                        requests :=
+                                          psListAppend loweredTypes.requests (psListAppend loweredScrutinee.requests (psListAppend loweredAlternatives.requests [request]))
+                                      }
+                        | Option.none =>
+                            Except.error
+                              (PsIrSpecializeError.unknownTarget
+                                inductiveName)
 
 def psIrSpecializeRewriteExpr
     (module : PsVerifiedIrModule)
@@ -1658,42 +1665,46 @@ def psIrSpecializeProcessRequest
 
 def psIrSpecializeLoop
     (module : PsVerifiedIrModule)
-    (remainingFuel : Nat)
-    (state : PsIrSpecializeState) :
+    (remainingFuel : Nat) :
+    PsIrSpecializeState ->
     Except PsIrSpecializeError PsIrSpecializeState :=
   match remainingFuel with
   | 0 =>
-      Except.error PsIrSpecializeError.fuelExhausted
+      fun (_state : PsIrSpecializeState) =>
+        Except.error PsIrSpecializeError.fuelExhausted
   | fuel + 1 =>
-      match state.pending with
-      | [] => Except.ok state
-      | request :: rest =>
-          match psIrSpecializeRequestKey request with
-          | Option.none =>
-              Except.error
-                (PsIrSpecializeError.nonGroundType request.name)
-          | Option.some key =>
-              let withoutHead : PsIrSpecializeState := {
-                imports := state.imports
-                structures := state.structures
-                inductives := state.inductives
-                declarations := state.declarations
-                pending := rest
-                seen := state.seen
-              };
-              if psIrSpecializeSeenContains state.seen key then
-                psIrSpecializeLoop module fuel withoutHead
-              else
-                let marked :=
-                  psIrSpecializeMarkSeen withoutHead key;
-                match
-                    psIrSpecializeProcessRequest
-                      module
-                      marked
-                      request with
-                | Except.error error => Except.error error
-                | Except.ok next =>
-                    psIrSpecializeLoop module fuel next
+      let smaller : PsIrSpecializeState -> Except PsIrSpecializeError PsIrSpecializeState :=
+        psIrSpecializeLoop module fuel;
+      fun (state : PsIrSpecializeState) =>
+        match state.pending with
+        | [] => Except.ok state
+        | request :: rest =>
+            match psIrSpecializeRequestKey request with
+            | Option.none =>
+                Except.error
+                  (PsIrSpecializeError.nonGroundType request.name)
+            | Option.some key =>
+                let withoutHead : PsIrSpecializeState := {
+                  imports := state.imports
+                  structures := state.structures
+                  inductives := state.inductives
+                  declarations := state.declarations
+                  pending := rest
+                  seen := state.seen
+                };
+                if psIrSpecializeSeenContains state.seen key then
+                  smaller withoutHead
+                else
+                  let marked :=
+                    psIrSpecializeMarkSeen withoutHead key;
+                  match
+                      psIrSpecializeProcessRequest
+                        module
+                        marked
+                        request with
+                  | Except.error error => Except.error error
+                  | Except.ok next =>
+                      smaller next
 
 def psIrSpecializeModule
     (module : PsVerifiedIrModule) :

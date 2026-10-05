@@ -1968,23 +1968,25 @@ def psWasmLowerHigherOrderFunctionValueWith
             state
             fn with
       | Except.ok lowered => Except.ok lowered
-      | Except.error (PsWasmLowerError.unknownVariable name) =>
-          match fn with
-          | PsVerifiedIrExpr.var functionName =>
-              if psStringEq name functionName then
-                psWasmLowerTopLevelFunctionValue
-                  profile
-                  state
-                  functionName
-                  parameterTypes
-                  resultType
-              else
-                Except.error
-                  (PsWasmLowerError.unknownVariable name)
-          | _ =>
-              Except.error
-                (PsWasmLowerError.unknownVariable name)
-      | Except.error error => Except.error error
+      | Except.error error =>
+          match error with
+          | PsWasmLowerError.unknownVariable name =>
+              match fn with
+              | PsVerifiedIrExpr.var functionName =>
+                  if psStringEq name functionName then
+                    psWasmLowerTopLevelFunctionValue
+                      profile
+                      state
+                      functionName
+                      parameterTypes
+                      resultType
+                  else
+                    Except.error
+                      (PsWasmLowerError.unknownVariable name)
+              | _ =>
+                  Except.error
+                    (PsWasmLowerError.unknownVariable name)
+          | _ => Except.error error
 
 def psWasmLowerExprListWorker
     (lower :

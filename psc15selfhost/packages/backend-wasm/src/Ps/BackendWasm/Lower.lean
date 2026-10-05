@@ -548,19 +548,22 @@ def psWasmInsertArrayType
     (candidate : PsVerifiedIrType) :
     List PsVerifiedIrType :=
   match candidate with
-  | .named "Array" arguments =>
-      match arguments with
-      | List.nil => types
-      | List.cons _ rest =>
-          match rest with
-          | List.nil =>
-              if psWasmArrayTypeListContains types candidate then
-                types
-              else
-                psListAppend
+  | .named name arguments =>
+      if psStringEq name "Array" then
+        match arguments with
+        | List.nil => types
+        | List.cons _ rest =>
+            match rest with
+            | List.nil =>
+                if psWasmArrayTypeListContains types candidate then
                   types
-                  (List.cons candidate List.nil)
-          | List.cons _ _ => types
+                else
+                  psListAppend
+                    types
+                    (List.cons candidate List.nil)
+            | List.cons _ _ => types
+      else
+        types
   | _ => types
 
 def psWasmCollectArrayTypesFromTypeWithFuel :
@@ -592,52 +595,53 @@ def psWasmCollectArrayTypesFromTypeWithFuel :
             fuel
             result
             withParameters
-      | .named "Array" arguments =>
-          match arguments with
-          | List.nil => types
-          | List.cons elementType rest =>
-              match rest with
-              | List.nil =>
-                  let withSelf :=
-                    psWasmInsertArrayType
+      | .named name arguments =>
+          if psStringEq name "Array" then
+            match arguments with
+            | List.nil => types
+            | List.cons elementType rest =>
+                match rest with
+                | List.nil =>
+                    let withSelf :=
+                      psWasmInsertArrayType
+                        types
+                        type;
+                    psWasmCollectArrayTypesFromTypeWithFuel
+                      fuel
+                      elementType
+                      withSelf
+                | List.cons _ _ =>
+                    let collectArgument :
+                        List PsVerifiedIrType ->
+                        PsVerifiedIrType ->
+                        List PsVerifiedIrType :=
+                      fun
+                        (state : List PsVerifiedIrType)
+                        (argument : PsVerifiedIrType) =>
+                        psWasmCollectArrayTypesFromTypeWithFuel
+                          fuel
+                          argument
+                          state;
+                    psWasmListFoldl
+                      collectArgument
+                      arguments
                       types
-                      type;
-                  psWasmCollectArrayTypesFromTypeWithFuel
-                    fuel
-                    elementType
-                    withSelf
-              | List.cons _ _ =>
-                  let collectArgument :
-                      List PsVerifiedIrType ->
-                      PsVerifiedIrType ->
-                      List PsVerifiedIrType :=
-                    fun
-                      (state : List PsVerifiedIrType)
-                      (argument : PsVerifiedIrType) =>
-                      psWasmCollectArrayTypesFromTypeWithFuel
-                        fuel
-                        argument
-                        state;
-                  psWasmListFoldl
-                    collectArgument
-                    arguments
-                    types
-      | .named _ arguments =>
-          let collectArgument :
-              List PsVerifiedIrType ->
-              PsVerifiedIrType ->
-              List PsVerifiedIrType :=
-            fun
-              (state : List PsVerifiedIrType)
-              (argument : PsVerifiedIrType) =>
-              psWasmCollectArrayTypesFromTypeWithFuel
-                fuel
-                argument
-                state;
-          psWasmListFoldl
-            collectArgument
-            arguments
-            types
+          else
+            let collectArgument :
+                List PsVerifiedIrType ->
+                PsVerifiedIrType ->
+                List PsVerifiedIrType :=
+              fun
+                (state : List PsVerifiedIrType)
+                (argument : PsVerifiedIrType) =>
+                psWasmCollectArrayTypesFromTypeWithFuel
+                  fuel
+                  argument
+                  state;
+            psWasmListFoldl
+              collectArgument
+              arguments
+              types
       | _ => types
 
 def psWasmCollectArrayTypesFromType
@@ -1008,31 +1012,34 @@ def psWasmLowerArrayType
     (type : PsVerifiedIrType) :
     Except PsWasmLowerError PsWasmArrayType :=
   match type with
-  | .named "Array" arguments =>
-      match arguments with
-      | List.nil =>
-          Except.error PsWasmLowerError.unsupportedType
-      | List.cons elementType rest =>
-          match rest with
-          | List.cons _ _ =>
-              Except.error PsWasmLowerError.unsupportedType
-          | List.nil =>
-              match psWasmArrayTypeName elementType with
-              | none =>
-                  Except.error PsWasmLowerError.unsupportedType
-              | some name =>
-                  match
-                      psWasmStorageTypeOfIrType?
-                        profile
-                        elementType with
-                  | none =>
-                      Except.error PsWasmLowerError.unsupportedType
-                  | some storageType =>
-                      Except.ok {
-                        name := name
-                        elementType := storageType
-                        mutable := true
-                      }
+  | .named name arguments =>
+      if psStringEq name "Array" then
+        match arguments with
+        | List.nil =>
+            Except.error PsWasmLowerError.unsupportedType
+        | List.cons elementType rest =>
+            match rest with
+            | List.cons _ _ =>
+                Except.error PsWasmLowerError.unsupportedType
+            | List.nil =>
+                match psWasmArrayTypeName elementType with
+                | none =>
+                    Except.error PsWasmLowerError.unsupportedType
+                | some arrayName =>
+                    match
+                        psWasmStorageTypeOfIrType?
+                          profile
+                          elementType with
+                    | none =>
+                        Except.error PsWasmLowerError.unsupportedType
+                    | some storageType =>
+                        Except.ok {
+                          name := arrayName
+                          elementType := storageType
+                          mutable := true
+                        }
+      else
+        Except.error PsWasmLowerError.unsupportedType
   | _ =>
       Except.error PsWasmLowerError.unsupportedType
 

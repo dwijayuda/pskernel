@@ -669,6 +669,22 @@ def psWasmCollectArrayTypesFromParameters
     parameters
     types
 
+def psWasmAddSingleArrayTypeArgument
+    (typeArguments : List PsVerifiedIrType)
+    (types : List PsVerifiedIrType) :
+    List PsVerifiedIrType :=
+  match typeArguments with
+  | List.cons elementType rest =>
+      match rest with
+      | List.nil =>
+          psWasmInsertArrayType
+            types
+            (PsVerifiedIrType.named
+              "Array"
+              (List.cons elementType List.nil))
+      | List.cons _ _ => types
+  | List.nil => types
+
 def psWasmAddArrayTypesForIntrinsic
     (operation : PsVerifiedIrIntrinsic)
     (typeArguments : List PsVerifiedIrType)
@@ -709,24 +725,20 @@ def psWasmAddArrayTypesForIntrinsic
               | List.cons _ _ => types
           | List.nil => types
       | List.nil => types
-  | .arrayEmptyWithCapacity
-  | .arraySize
-  | .arrayPush
-  | .arrayGet
-  | .arrayGetD
-  | .arraySet
+  | .arrayEmptyWithCapacity =>
+      psWasmAddSingleArrayTypeArgument typeArguments types
+  | .arraySize =>
+      psWasmAddSingleArrayTypeArgument typeArguments types
+  | .arrayPush =>
+      psWasmAddSingleArrayTypeArgument typeArguments types
+  | .arrayGet =>
+      psWasmAddSingleArrayTypeArgument typeArguments types
+  | .arrayGetD =>
+      psWasmAddSingleArrayTypeArgument typeArguments types
+  | .arraySet =>
+      psWasmAddSingleArrayTypeArgument typeArguments types
   | .arraySetIfInBounds =>
-      match typeArguments with
-      | List.cons elementType rest =>
-          match rest with
-          | List.nil =>
-              psWasmInsertArrayType
-                types
-                (PsVerifiedIrType.named
-                  "Array"
-                  (List.cons elementType List.nil))
-          | List.cons _ _ => types
-      | List.nil => types
+      psWasmAddSingleArrayTypeArgument typeArguments types
   | _ => types
 
 def psWasmCollectArrayTypesFromExprWithFuel :

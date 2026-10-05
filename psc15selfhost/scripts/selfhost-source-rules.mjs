@@ -3,6 +3,7 @@
 
 export const portableSelfhostStructuralRuleIds = Object.freeze([
   'recursive-equation-definition',
+  'structural-recursion-call-shape',
   'term-list-append',
   'term-list-cons',
   'numeric-tuple-projection',
@@ -184,6 +185,208 @@ function recursiveEquationViolations(code) {
   return hits;
 }
 
+function topLevelDeclarationColon(header) {
+  let depth = 0;
+  for (let index = 0; index < header.length; index++) {
+    const ch = header[index];
+    if ('([{'.includes(ch)) depth++;
+    else if (')]}'.includes(ch)) depth--;
+    else if (ch === ':' && depth === 0) return index;
+  }
+  return -1;
+}
+
+function explicitBinderNames(header) {
+  const separator = topLevelDeclarationColon(header);
+  if (separator < 0) return [];
+  const prefix = header.slice(0, separator);
+  const names = [];
+  let index = 0;
+
+  while (index < prefix.length) {
+    if (prefix[index] !== '(') {
+      index++;
+      continue;
+    }
+
+    let depth = 1;
+    let cursor = index + 1;
+    while (cursor < prefix.length && depth > 0) {
+      if (prefix[cursor] === '(') depth++;
+      else if (prefix[cursor] === ')') depth--;
+      cursor++;
+    }
+    if (depth !== 0) break;
+
+    const group = prefix.slice(index + 1, cursor - 1);
+    let groupDepth = 0;
+    let colon = -1;
+    for (let position = 0; position < group.length; position++) {
+      const ch = group[position];
+      if ('([{'.includes(ch)) groupDepth++;
+      else if (')]}'.includes(ch)) groupDepth--;
+      else if (ch === ':' && groupDepth === 0) {
+        colon = position;
+        break;
+      }
+    }
+
+    if (colon >= 0) {
+      const binders = group.slice(0, colon).trim().split(/\s+/u);
+      for (const binder of binders) {
+        if (/^[A-Za-z_][A-Za-z0-9_']*$/u.test(binder) && binder !== '_') {
+          names.push(binder);
+        }
+      }
+    }
+    index = cursor;
+  }
+
+  return names;
+}
+
+function parseApplicationAtom(source, start) {
+  let index = start;
+  while (index < source.length && /\s/u.test(source[index])) index++;
+  if (index >= source.length) return undefined;
+  const atomStart = index;
+  const ch = source[index];
+
+  if ('([{'.includes(ch)) {
+    const close = ch === '(' ? ')' : (ch === '[' ? ']' : '}');
+    let depth = 0;
+    while (index < source.length) {
+      if (source[index] === ch) depth++;
+      else if (source[index] === close) {
+        depth--;
+        if (depth === 0) {
+          index++;
+          break;
+        }
+      }
+      index++;
+    }
+    return {
+      text: source.slice(atomStart, index).replace(/\s+/gu, ' ').trim(),
+      end: index,
+      bareIdentifier: false,
+    };
+  }
+
+  const identifier =
+    source.slice(index).match(/^([A-Za-z_][A-Za-z0-9_?']*)/u);
+  if (identifier) {
+    index += identifier[1].length;
+    let bareIdentifier = true;
+    while (
+      source[index] === '.' &&
+      /[A-Za-z0-9_]/u.test(source[index + 1] ?? '')
+    ) {
+      bareIdentifier = false;
+      index++;
+      const field = source.slice(index).match(/^([A-Za-z0-9_]+)/u);
+      if (!field) break;
+      index += field[1].length;
+    }
+    return {
+      text: source.slice(atomStart, index).trim(),
+      end: index,
+      bareIdentifier,
+    };
+  }
+
+  const number = source.slice(index).match(/^([0-9]+)/u);
+  if (number) {
+    return {
+      text: number[1],
+      end: index + number[1].length,
+      bareIdentifier: false,
+    };
+  }
+
+  return {
+    text: source[index],
+    end: index + 1,
+    bareIdentifier: false,
+  };
+}
+
+function structuralRecursionCallViolations(code) {
+  const lines = code.split('\n');
+  const lineOffsets = [];
+  let offset = 0;
+  for (const line of lines) {
+    lineOffsets.push(offset);
+    offset += line.length + 1;
+  }
+
+  const starts = [];
+  for (let index = 0; index < lines.length; index++) {
+    if (/^\s*(?:partial\s+)?def\s+/u.test(lines[index])) starts.push(index);
+  }
+  starts.push(lines.length);
+  const hits = [];
+
+  for (let blockIndex = 0; blockIndex + 1 < starts.length; blockIndex++) {
+    const start = starts[blockIndex];
+    const end = starts[blockIndex + 1];
+    const nameMatch =
+      lines[start].match(/^\s*(?:partial\s+)?def\s+([A-Za-z0-9_?']+)/u);
+    if (!nameMatch) continue;
+    const name = nameMatch[1];
+    const block = lines.slice(start, end).join('\n');
+    const assignment = block.indexOf(':=');
+    if (assignment < 0) continue;
+
+    const binders = explicitBinderNames(block.slice(0, assignment));
+    if (binders.length === 0) continue;
+
+    const body = block.slice(assignment + 2);
+    const calls = new RegExp('\\b' + escapeRegex(name) + '\\b', 'gu');
+    let call;
+    while ((call = calls.exec(body)) !== null) {
+      let cursor = call.index + name.length;
+      const arguments_ = [];
+      let complete = true;
+      for (let index = 0; index < binders.length; index++) {
+        const atom = parseApplicationAtom(body, cursor);
+        if (!atom) {
+          complete = false;
+          break;
+        }
+        arguments_.push(atom);
+        cursor = atom.end;
+      }
+      if (!complete) continue;
+
+      const changed = [];
+      for (let index = 0; index < binders.length; index++) {
+        const argument = arguments_[index];
+        if (!(argument.bareIdentifier && argument.text === binders[index])) {
+          changed.push({ binder: binders[index], argument });
+        }
+      }
+
+      const valid =
+        changed.length === 1 &&
+        changed[0].argument.bareIdentifier;
+      if (!valid) {
+        const bodyOffset = lineOffsets[start] + assignment + 2 + call.index;
+        hits.push({
+          id: 'structural-recursion-call-shape',
+          line: lineNumberAt(code, bodyOffset),
+          text:
+            name +
+            ' ' +
+            arguments_.map(argument => argument.text).join(' '),
+        });
+      }
+    }
+  }
+
+  return hits;
+}
+
 function tupleConstructionViolations(code) {
   const hits = [];
   const stack = [];
@@ -278,6 +481,9 @@ export function findSelfhostStructuralViolations(
 
   if (enabled.has('recursive-equation-definition')) {
     hits.push(...recursiveEquationViolations(code));
+  }
+  if (enabled.has('structural-recursion-call-shape')) {
+    hits.push(...structuralRecursionCallViolations(code));
   }
 
   for (let index = 0; index < lines.length; index++) {

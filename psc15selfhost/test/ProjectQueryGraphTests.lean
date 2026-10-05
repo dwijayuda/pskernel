@@ -3,7 +3,7 @@ import Ps.Foundation.Name
 
 def psQueryTestName
     (value : String) : PsName :=
-  psRootName value
+  PsName.str PsName.anonymous value
 
 def psQueryTestA : PsName :=
   psQueryTestName "A"

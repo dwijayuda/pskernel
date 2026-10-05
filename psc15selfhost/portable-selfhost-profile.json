@@ -16,6 +16,7 @@
     "string-literal-pattern",
     "boolean-convenience",
     "to-string-convenience",
+    "value-length-dot-notation",
     "leading-dot-term-constructor",
     "untyped-lambda-binder",
     "layout-let-sequencing"

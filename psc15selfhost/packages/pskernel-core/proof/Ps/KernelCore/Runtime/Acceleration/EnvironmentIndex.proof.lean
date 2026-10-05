@@ -68,3 +68,36 @@ theorem psKernelEnvironmentIndexFindWorker_setWorker_same
         psKernelEnvironmentIndexFindWorker,
         ih
       ]
+
+theorem psKernelEnvironmentIndexRemoveNameWorker_find_none
+    (constants : List PsKernelConstantInfo)
+    (name : PsKernelName) :
+    psKernelFindConstantInList
+        name
+        (psKernelEnvironmentIndexRemoveNameWorker
+          constants
+          name) =
+      Option.none := by
+  induction constants with
+  | nil =>
+      rfl
+  | cons info rest ih =>
+      simp [
+        psKernelEnvironmentIndexRemoveNameWorker,
+        psKernelFindConstantInList,
+        ih
+      ]
+
+theorem psKernelEnvironmentIndexRemoveName_find_none
+    (name : PsKernelName)
+    (constants : List PsKernelConstantInfo) :
+    psKernelFindConstantInList
+        name
+        (psKernelEnvironmentIndexRemoveName
+          name
+          constants) =
+      Option.none := by
+  simpa [psKernelEnvironmentIndexRemoveName] using
+    psKernelEnvironmentIndexRemoveNameWorker_find_none
+      constants
+      name

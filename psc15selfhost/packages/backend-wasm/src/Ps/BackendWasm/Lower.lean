@@ -2912,6 +2912,624 @@ def psWasmLowerArraySetIfInBoundsWith
                         state := (Prod.snd allocatedOutput)
                       }
 
+def psWasmLowerArrayMapWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (typeArguments : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match typeArguments with
+  | List.nil =>
+      Except.error PsWasmLowerError.invalidIntrinsicArity
+  | List.cons inputType typeRest =>
+      match typeRest with
+      | List.nil =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | List.cons outputType typeTail =>
+          match typeTail with
+          | List.cons _ _ =>
+              Except.error PsWasmLowerError.invalidIntrinsicArity
+          | List.nil =>
+              match
+                  psWasmResolveArrayLowerInfo
+                    profile
+                    (List.cons inputType List.nil) with
+              | Except.error error => Except.error error
+              | Except.ok inputInfo =>
+                  match
+                      psWasmResolveArrayLowerInfo
+                        profile
+                        (List.cons outputType List.nil) with
+                  | Except.error error => Except.error error
+                  | Except.ok outputInfo =>
+                      match psWasmListPair? arguments with
+                      | Option.none =>
+                          Except.error
+                            PsWasmLowerError.invalidIntrinsicArity
+                      | Option.some pair =>
+                          let fn : PsVerifiedIrExpr := Prod.fst pair;
+                          let array : PsVerifiedIrExpr := Prod.snd pair;
+                          let parameterTypes : List PsVerifiedIrType :=
+                            List.cons inputType List.nil;
+                          let functionType : PsVerifiedIrType :=
+                            PsVerifiedIrType.function
+                              parameterTypes
+                              outputType;
+                          match psWasmClosureBaseName functionType with
+                          | Option.none =>
+                              Except.error PsWasmLowerError.unsupportedType
+                          | Option.some baseName =>
+                              match
+                                  psWasmClosureCodeTypeName
+                                    functionType with
+                              | Option.none =>
+                                  Except.error
+                                    PsWasmLowerError.unsupportedType
+                              | Option.some codeTypeName =>
+                                  match
+                                      psWasmLowerHigherOrderFunctionValueWith
+                                        profile
+                                        lower
+                                        state
+                                        fn
+                                        parameterTypes
+                                        outputType with
+                                  | Except.error error =>
+                                      Except.error error
+                                  | Except.ok loweredFunction =>
+                                      let allocatedFunction :=
+                                        psWasmAddLocal
+                                          loweredFunction.state
+                                          (PsWasmValueType.refT
+                                            baseName);
+                                      let functionLocal : Nat :=
+                                        Prod.fst allocatedFunction;
+                                      match
+                                          lower
+                                            (Option.some
+                                              inputInfo.refType)
+                                            (Prod.snd
+                                              allocatedFunction)
+                                            array with
+                                      | Except.error error =>
+                                          Except.error error
+                                      | Except.ok loweredArray =>
+                                          let allocatedArray :=
+                                            psWasmAddLocal
+                                              loweredArray.state
+                                              inputInfo.refType;
+                                          let arrayLocal : Nat :=
+                                            Prod.fst allocatedArray;
+                                          let allocatedOutput :=
+                                            psWasmAddLocal
+                                              (Prod.snd
+                                                allocatedArray)
+                                              outputInfo.refType;
+                                          let outputLocal : Nat :=
+                                            Prod.fst allocatedOutput;
+                                          let helperState : PsWasmLowerState :=
+                                            Prod.snd allocatedOutput;
+                                          let helperId : Nat :=
+                                            helperState.nextLambdaId;
+                                          let helperName : String :=
+                                            String.Internal.append
+                                              helperState.currentDefinition
+                                              (String.Internal.append
+                                                "$arrayMap$"
+                                                (psNatToString helperId));
+                                          let advancedState : PsWasmLowerState :=
+                                            psWasmAdvanceGeneratedId
+                                              helperState;
+                                          let helperFunction : PsWasmFunction := {
+                                            name := helperName
+                                            typeName := Option.none
+                                            parameters := [
+                                              PsWasmValueType.refT
+                                                baseName,
+                                              inputInfo.refType,
+                                              PsWasmValueType.i32,
+                                              outputInfo.refType
+                                            ]
+                                            results := [
+                                              outputInfo.refType
+                                            ]
+                                            locals := [
+                                              outputInfo.elementValueType
+                                            ]
+                                            body := [
+                                              PsWasmInstruction.localGet 2,
+                                              PsWasmInstruction.localGet 1,
+                                              PsWasmInstruction.arrayLen,
+                                              PsWasmInstruction.i32LtU,
+                                              PsWasmInstruction.ifStart
+                                                (Option.some
+                                                  outputInfo.refType),
+                                                PsWasmInstruction.localGet 0,
+                                                PsWasmInstruction.localGet 1,
+                                                PsWasmInstruction.localGet 2,
+                                                psWasmArrayGetInstruction
+                                                  inputInfo.typeName
+                                                  inputInfo.elementType,
+                                                PsWasmInstruction.localGet 0,
+                                                PsWasmInstruction.structGet
+                                                  baseName
+                                                  0,
+                                                PsWasmInstruction.refCastFunction
+                                                  codeTypeName,
+                                                PsWasmInstruction.callRef
+                                                  codeTypeName,
+                                                PsWasmInstruction.localSet 4,
+                                                PsWasmInstruction.localGet 3,
+                                                PsWasmInstruction.localGet 2,
+                                                PsWasmInstruction.localGet 4,
+                                                PsWasmInstruction.arraySet
+                                                  outputInfo.typeName,
+                                                PsWasmInstruction.localGet 0,
+                                                PsWasmInstruction.localGet 1,
+                                                PsWasmInstruction.localGet 2,
+                                                PsWasmInstruction.i32Const 1,
+                                                PsWasmInstruction.i32Add,
+                                                PsWasmInstruction.localGet 3,
+                                                PsWasmInstruction.call helperName,
+                                              PsWasmInstruction.else_,
+                                                PsWasmInstruction.localGet 3,
+                                              PsWasmInstruction.end_
+                                            ]
+                                          };
+                                          let finalState : PsWasmLowerState :=
+                                            psWasmAppendGeneratedFunction
+                                              advancedState
+                                              helperFunction
+                                              false;
+                                          Except.ok {
+                                            instructions :=
+                                              psListAppend
+                                                loweredFunction.instructions
+                                                (psListAppend
+                                                  [
+                                                    PsWasmInstruction.localSet
+                                                      functionLocal
+                                                  ]
+                                                  (psListAppend
+                                                    loweredArray.instructions
+                                                    [
+                                                      PsWasmInstruction.localSet
+                                                        arrayLocal,
+                                                      PsWasmInstruction.localGet
+                                                        arrayLocal,
+                                                      PsWasmInstruction.arrayLen,
+                                                      PsWasmInstruction.i32Const 0,
+                                                      PsWasmInstruction.i32Eq,
+                                                      PsWasmInstruction.ifStart
+                                                        (Option.some
+                                                          outputInfo.refType),
+                                                        PsWasmInstruction.arrayNewFixed
+                                                          outputInfo.typeName
+                                                          0,
+                                                      PsWasmInstruction.else_,
+                                                        PsWasmInstruction.localGet
+                                                          functionLocal,
+                                                        PsWasmInstruction.localGet
+                                                          arrayLocal,
+                                                        PsWasmInstruction.i32Const
+                                                          0,
+                                                        psWasmArrayGetInstruction
+                                                          inputInfo.typeName
+                                                          inputInfo.elementType,
+                                                        PsWasmInstruction.localGet
+                                                          functionLocal,
+                                                        PsWasmInstruction.structGet
+                                                          baseName
+                                                          0,
+                                                        PsWasmInstruction.refCastFunction
+                                                          codeTypeName,
+                                                        PsWasmInstruction.callRef
+                                                          codeTypeName,
+                                                        PsWasmInstruction.localGet
+                                                          arrayLocal,
+                                                        PsWasmInstruction.arrayLen,
+                                                        PsWasmInstruction.arrayNew
+                                                          outputInfo.typeName,
+                                                        PsWasmInstruction.localSet
+                                                          outputLocal,
+                                                        PsWasmInstruction.localGet
+                                                          functionLocal,
+                                                        PsWasmInstruction.localGet
+                                                          arrayLocal,
+                                                        PsWasmInstruction.i32Const
+                                                          1,
+                                                        PsWasmInstruction.localGet
+                                                          outputLocal,
+                                                        PsWasmInstruction.call
+                                                          helperName,
+                                                      PsWasmInstruction.end_
+                                                    ]))
+                                            state := finalState
+                                          }
+
+def psWasmLowerArrayFoldlWith
+    (profile : PsWasmTargetProfile)
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (typeArguments : List PsVerifiedIrType)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match typeArguments with
+  | List.nil =>
+      Except.error PsWasmLowerError.invalidIntrinsicArity
+  | List.cons elementType typeRest =>
+      match typeRest with
+      | List.nil =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | List.cons accumulatorType typeTail =>
+          match typeTail with
+          | List.cons _ _ =>
+              Except.error PsWasmLowerError.invalidIntrinsicArity
+          | List.nil =>
+              match
+                  psWasmResolveArrayLowerInfo
+                    profile
+                    (List.cons elementType List.nil) with
+              | Except.error error => Except.error error
+              | Except.ok arrayInfo =>
+                  match
+                      psWasmValueTypeOfIrType?
+                        profile
+                        accumulatorType with
+                  | Option.none =>
+                      Except.error PsWasmLowerError.unsupportedType
+                  | Option.some accumulatorValueType =>
+                      match arguments with
+                      | List.nil =>
+                          Except.error
+                            PsWasmLowerError.invalidIntrinsicArity
+                      | List.cons fn argumentRest =>
+                          match argumentRest with
+                          | List.nil =>
+                              Except.error
+                                PsWasmLowerError.invalidIntrinsicArity
+                          | List.cons init afterInit =>
+                              match afterInit with
+                              | List.nil =>
+                                  Except.error
+                                    PsWasmLowerError.invalidIntrinsicArity
+                              | List.cons array afterArray =>
+                                  match afterArray with
+                                  | List.nil =>
+                                      Except.error
+                                        PsWasmLowerError.invalidIntrinsicArity
+                                  | List.cons start afterStart =>
+                                      match afterStart with
+                                      | List.nil =>
+                                          Except.error
+                                            PsWasmLowerError.invalidIntrinsicArity
+                                      | List.cons stop finalArguments =>
+                                          match finalArguments with
+                                          | List.cons _ _ =>
+                                              Except.error
+                                                PsWasmLowerError.invalidIntrinsicArity
+                                          | List.nil =>
+                                              let parameterTypes :
+                                                  List PsVerifiedIrType :=
+                                                List.cons
+                                                  accumulatorType
+                                                  (List.cons
+                                                    elementType
+                                                    List.nil);
+                                              let functionType :
+                                                  PsVerifiedIrType :=
+                                                PsVerifiedIrType.function
+                                                  parameterTypes
+                                                  accumulatorType;
+                                              match
+                                                  psWasmClosureBaseName
+                                                    functionType with
+                                              | Option.none =>
+                                                  Except.error
+                                                    PsWasmLowerError.unsupportedType
+                                              | Option.some baseName =>
+                                                  match
+                                                      psWasmClosureCodeTypeName
+                                                        functionType with
+                                                  | Option.none =>
+                                                      Except.error
+                                                        PsWasmLowerError.unsupportedType
+                                                  | Option.some codeTypeName =>
+                                                      match
+                                                          psWasmLowerHigherOrderFunctionValueWith
+                                                            profile
+                                                            lower
+                                                            state
+                                                            fn
+                                                            parameterTypes
+                                                            accumulatorType with
+                                                      | Except.error error =>
+                                                          Except.error error
+                                                      | Except.ok loweredFunction =>
+                                                          let allocatedFunction :=
+                                                            psWasmAddLocal
+                                                              loweredFunction.state
+                                                              (PsWasmValueType.refT
+                                                                baseName);
+                                                          let functionLocal : Nat :=
+                                                            Prod.fst
+                                                              allocatedFunction;
+                                                          match
+                                                              lower
+                                                                (Option.some
+                                                                  accumulatorValueType)
+                                                                (Prod.snd
+                                                                  allocatedFunction)
+                                                                init with
+                                                          | Except.error error =>
+                                                              Except.error error
+                                                          | Except.ok loweredInit =>
+                                                              let allocatedInit :=
+                                                                psWasmAddLocal
+                                                                  loweredInit.state
+                                                                  accumulatorValueType;
+                                                              let initLocal : Nat :=
+                                                                Prod.fst
+                                                                  allocatedInit;
+                                                              match
+                                                                  lower
+                                                                    (Option.some
+                                                                      arrayInfo.refType)
+                                                                    (Prod.snd
+                                                                      allocatedInit)
+                                                                    array with
+                                                              | Except.error error =>
+                                                                  Except.error error
+                                                              | Except.ok loweredArray =>
+                                                                  let allocatedArray :=
+                                                                    psWasmAddLocal
+                                                                      loweredArray.state
+                                                                      arrayInfo.refType;
+                                                                  let arrayLocal : Nat :=
+                                                                    Prod.fst
+                                                                      allocatedArray;
+                                                                  match
+                                                                      lower
+                                                                        (Option.some
+                                                                          psWasmNatRef)
+                                                                        (Prod.snd
+                                                                          allocatedArray)
+                                                                        start with
+                                                                  | Except.error error =>
+                                                                      Except.error error
+                                                                  | Except.ok loweredStart =>
+                                                                      let allocatedStart :=
+                                                                        psWasmAddLocal
+                                                                          loweredStart.state
+                                                                          psWasmNatRef;
+                                                                      let startLocal : Nat :=
+                                                                        Prod.fst
+                                                                          allocatedStart;
+                                                                      match
+                                                                          lower
+                                                                            (Option.some
+                                                                              psWasmNatRef)
+                                                                            (Prod.snd
+                                                                              allocatedStart)
+                                                                            stop with
+                                                                      | Except.error error =>
+                                                                          Except.error error
+                                                                      | Except.ok loweredStop =>
+                                                                          let allocatedStop :=
+                                                                            psWasmAddLocal
+                                                                              loweredStop.state
+                                                                              psWasmNatRef;
+                                                                          let stopLocal : Nat :=
+                                                                            Prod.fst
+                                                                              allocatedStop;
+                                                                          let allocatedEnd :=
+                                                                            psWasmAddLocal
+                                                                              (Prod.snd
+                                                                                allocatedStop)
+                                                                              PsWasmValueType.i32;
+                                                                          let endLocal : Nat :=
+                                                                            Prod.fst
+                                                                              allocatedEnd;
+                                                                          let helperState :
+                                                                              PsWasmLowerState :=
+                                                                            Prod.snd
+                                                                              allocatedEnd;
+                                                                          let helperId : Nat :=
+                                                                            helperState.nextLambdaId;
+                                                                          let helperName : String :=
+                                                                            String.Internal.append
+                                                                              helperState.currentDefinition
+                                                                              (String.Internal.append
+                                                                                "$arrayFoldl$"
+                                                                                (psNatToString
+                                                                                  helperId));
+                                                                          let advancedState :
+                                                                              PsWasmLowerState :=
+                                                                            psWasmAdvanceGeneratedId
+                                                                              helperState;
+                                                                          let helperFunction :
+                                                                              PsWasmFunction := {
+                                                                            name := helperName
+                                                                            typeName := Option.none
+                                                                            parameters := [
+                                                                              PsWasmValueType.refT
+                                                                                baseName,
+                                                                              arrayInfo.refType,
+                                                                              PsWasmValueType.i32,
+                                                                              PsWasmValueType.i32,
+                                                                              accumulatorValueType
+                                                                            ]
+                                                                            results := [
+                                                                              accumulatorValueType
+                                                                            ]
+                                                                            locals := [
+                                                                              accumulatorValueType
+                                                                            ]
+                                                                            body := [
+                                                                              PsWasmInstruction.localGet
+                                                                                2,
+                                                                              PsWasmInstruction.localGet
+                                                                                3,
+                                                                              PsWasmInstruction.i32LtU,
+                                                                              PsWasmInstruction.ifStart
+                                                                                (Option.some
+                                                                                  accumulatorValueType),
+                                                                                PsWasmInstruction.localGet
+                                                                                  0,
+                                                                                PsWasmInstruction.localGet
+                                                                                  4,
+                                                                                PsWasmInstruction.localGet
+                                                                                  1,
+                                                                                PsWasmInstruction.localGet
+                                                                                  2,
+                                                                                psWasmArrayGetInstruction
+                                                                                  arrayInfo.typeName
+                                                                                  arrayInfo.elementType,
+                                                                                PsWasmInstruction.localGet
+                                                                                  0,
+                                                                                PsWasmInstruction.structGet
+                                                                                  baseName
+                                                                                  0,
+                                                                                PsWasmInstruction.refCastFunction
+                                                                                  codeTypeName,
+                                                                                PsWasmInstruction.callRef
+                                                                                  codeTypeName,
+                                                                                PsWasmInstruction.localSet
+                                                                                  5,
+                                                                                PsWasmInstruction.localGet
+                                                                                  0,
+                                                                                PsWasmInstruction.localGet
+                                                                                  1,
+                                                                                PsWasmInstruction.localGet
+                                                                                  2,
+                                                                                PsWasmInstruction.i32Const
+                                                                                  1,
+                                                                                PsWasmInstruction.i32Add,
+                                                                                PsWasmInstruction.localGet
+                                                                                  3,
+                                                                                PsWasmInstruction.localGet
+                                                                                  5,
+                                                                                PsWasmInstruction.call
+                                                                                  helperName,
+                                                                              PsWasmInstruction.else_,
+                                                                                PsWasmInstruction.localGet
+                                                                                  4,
+                                                                              PsWasmInstruction.end_
+                                                                            ]
+                                                                          };
+                                                                          let finalState :
+                                                                              PsWasmLowerState :=
+                                                                            psWasmAppendGeneratedFunction
+                                                                              advancedState
+                                                                              helperFunction
+                                                                              false;
+                                                                          Except.ok {
+                                                                            instructions :=
+                                                                              psListAppend
+                                                                                loweredFunction.instructions
+                                                                                (psListAppend
+                                                                                  [
+                                                                                    PsWasmInstruction.localSet
+                                                                                      functionLocal
+                                                                                  ]
+                                                                                  (psListAppend
+                                                                                    loweredInit.instructions
+                                                                                    (psListAppend
+                                                                                      [
+                                                                                        PsWasmInstruction.localSet
+                                                                                          initLocal
+                                                                                      ]
+                                                                                      (psListAppend
+                                                                                        loweredArray.instructions
+                                                                                        (psListAppend
+                                                                                          [
+                                                                                            PsWasmInstruction.localSet
+                                                                                              arrayLocal
+                                                                                          ]
+                                                                                          (psListAppend
+                                                                                            loweredStart.instructions
+                                                                                            (psListAppend
+                                                                                              [
+                                                                                                PsWasmInstruction.localSet
+                                                                                                  startLocal
+                                                                                              ]
+                                                                                              (psListAppend
+                                                                                                loweredStop.instructions
+                                                                                                [
+                                                                                                  PsWasmInstruction.localSet
+                                                                                                    stopLocal,
+                                                                                                  PsWasmInstruction.localGet
+                                                                                                    startLocal,
+                                                                                                  PsWasmInstruction.call
+                                                                                                    psWasmNatFitsU32Fn,
+                                                                                                  PsWasmInstruction.ifStart
+                                                                                                    (Option.some
+                                                                                                      accumulatorValueType),
+                                                                                                    PsWasmInstruction.localGet
+                                                                                                      stopLocal,
+                                                                                                    PsWasmInstruction.call
+                                                                                                      psWasmNatFitsU32Fn,
+                                                                                                    PsWasmInstruction.ifStart
+                                                                                                      (Option.some
+                                                                                                        PsWasmValueType.i32),
+                                                                                                      PsWasmInstruction.localGet
+                                                                                                        stopLocal,
+                                                                                                      PsWasmInstruction.call
+                                                                                                        psWasmNatToU32Fn,
+                                                                                                      PsWasmInstruction.localGet
+                                                                                                        arrayLocal,
+                                                                                                      PsWasmInstruction.arrayLen,
+                                                                                                      PsWasmInstruction.i32LeU,
+                                                                                                      PsWasmInstruction.ifStart
+                                                                                                        (Option.some
+                                                                                                          PsWasmValueType.i32),
+                                                                                                        PsWasmInstruction.localGet
+                                                                                                          stopLocal,
+                                                                                                        PsWasmInstruction.call
+                                                                                                          psWasmNatToU32Fn,
+                                                                                                      PsWasmInstruction.else_,
+                                                                                                        PsWasmInstruction.localGet
+                                                                                                          arrayLocal,
+                                                                                                        PsWasmInstruction.arrayLen,
+                                                                                                      PsWasmInstruction.end_,
+                                                                                                    PsWasmInstruction.else_,
+                                                                                                      PsWasmInstruction.localGet
+                                                                                                        arrayLocal,
+                                                                                                      PsWasmInstruction.arrayLen,
+                                                                                                    PsWasmInstruction.end_,
+                                                                                                    PsWasmInstruction.localSet
+                                                                                                      endLocal,
+                                                                                                    PsWasmInstruction.localGet
+                                                                                                      functionLocal,
+                                                                                                    PsWasmInstruction.localGet
+                                                                                                      arrayLocal,
+                                                                                                    PsWasmInstruction.localGet
+                                                                                                      startLocal,
+                                                                                                    PsWasmInstruction.call
+                                                                                                      psWasmNatToU32Fn,
+                                                                                                    PsWasmInstruction.localGet
+                                                                                                      endLocal,
+                                                                                                    PsWasmInstruction.localGet
+                                                                                                      initLocal,
+                                                                                                    PsWasmInstruction.call
+                                                                                                      helperName,
+                                                                                                  PsWasmInstruction.else_,
+                                                                                                    PsWasmInstruction.localGet
+                                                                                                      initLocal,
+                                                                                                  PsWasmInstruction.end_
+                                                                                                ])))))))
+                                                                            state := finalState
+                                                                          }
+
 def psWasmLowerBoolUnaryWith
     (lower :
       Option PsWasmValueType ->

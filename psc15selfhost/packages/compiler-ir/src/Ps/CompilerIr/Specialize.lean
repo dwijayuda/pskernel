@@ -290,8 +290,7 @@ def psIrSpecializeTypeParameterNames
 def psIrSpecializeMakeSubstitution
     (parameters : List PsVerifiedIrTypeParameter)
     (arguments : List PsVerifiedIrType) :
-    Except PsIrSpecializeError
-      (List (String × PsVerifiedIrType)) :=
+    Except PsIrSpecializeError (List (String × PsVerifiedIrType)) :=
   if psIrSpecializeNatNe parameters.length arguments.length then
     Except.error
       (PsIrSpecializeError.typeArgumentArity "")
@@ -564,8 +563,7 @@ def psIrSpecializeRewriteMatchBindings
     (module : PsVerifiedIrModule)
     (substitution : List (String × PsVerifiedIrType))
     (bindings : List PsVerifiedIrMatchBinding) :
-    Except PsIrSpecializeError
-      PsIrSpecializeMatchBindingsResult :=
+    Except PsIrSpecializeError PsIrSpecializeMatchBindingsResult :=
   match bindings with
   | List.nil =>
       Except.ok {
@@ -610,8 +608,7 @@ def psIrSpecializeRewriteAlternativesWith
         (String ×
           List PsVerifiedIrMatchBinding ×
           PsVerifiedIrExpr)) :
-    Except PsIrSpecializeError
-      PsIrSpecializeAlternativesResult :=
+    Except PsIrSpecializeError PsIrSpecializeAlternativesResult :=
   match alternatives with
   | List.nil =>
       Except.ok {
@@ -1143,8 +1140,7 @@ def psIrSpecializeRewriteStructureFields
     (module : PsVerifiedIrModule)
     (substitution : List (String × PsVerifiedIrType))
     (fields : List PsVerifiedIrStructureField) :
-    Except PsIrSpecializeError
-      PsIrSpecializeStructureFieldsResult :=
+    Except PsIrSpecializeError PsIrSpecializeStructureFieldsResult :=
   match fields with
   | List.nil =>
       Except.ok {
@@ -1181,8 +1177,7 @@ def psIrSpecializeRewriteConstructorFields
     (module : PsVerifiedIrModule)
     (substitution : List (String × PsVerifiedIrType))
     (fields : List PsVerifiedIrConstructorField) :
-    Except PsIrSpecializeError
-      PsIrSpecializeConstructorFieldsResult :=
+    Except PsIrSpecializeError PsIrSpecializeConstructorFieldsResult :=
   match fields with
   | List.nil =>
       Except.ok {
@@ -1219,8 +1214,7 @@ def psIrSpecializeRewriteConstructors
     (module : PsVerifiedIrModule)
     (substitution : List (String × PsVerifiedIrType))
     (constructors : List PsVerifiedIrConstructor) :
-    Except PsIrSpecializeError
-      PsIrSpecializeConstructorsResult :=
+    Except PsIrSpecializeError PsIrSpecializeConstructorsResult :=
   match constructors with
   | List.nil =>
       Except.ok {
@@ -1290,8 +1284,7 @@ def psIrSpecializeRewriteImports
 def psIrSpecializeSeedStructures
     (module : PsVerifiedIrModule)
     (structures : List PsVerifiedIrStructure) :
-    Except PsIrSpecializeError
-      (List PsVerifiedIrStructure × List PsIrSpecializeRequest) :=
+    Except PsIrSpecializeError (List PsVerifiedIrStructure × List PsIrSpecializeRequest) :=
   match structures with
   | List.nil => Except.ok (Prod.mk List.nil List.nil)
   | List.cons structureInfo rest =>
@@ -1323,8 +1316,7 @@ def psIrSpecializeSeedStructures
 def psIrSpecializeSeedInductives
     (module : PsVerifiedIrModule)
     (inductives : List PsVerifiedIrInductive) :
-    Except PsIrSpecializeError
-      (List PsVerifiedIrInductive × List PsIrSpecializeRequest) :=
+    Except PsIrSpecializeError (List PsVerifiedIrInductive × List PsIrSpecializeRequest) :=
   match inductives with
   | List.nil => Except.ok (Prod.mk List.nil List.nil)
   | List.cons inductiveInfo rest =>
@@ -1356,8 +1348,7 @@ def psIrSpecializeSeedInductives
 def psIrSpecializeSeedDeclarations
     (module : PsVerifiedIrModule)
     (declarations : List PsVerifiedIrDeclaration) :
-    Except PsIrSpecializeError
-      (List PsVerifiedIrDeclaration × List PsIrSpecializeRequest) :=
+    Except PsIrSpecializeError (List PsVerifiedIrDeclaration × List PsIrSpecializeRequest) :=
   match declarations with
   | List.nil => Except.ok (Prod.mk List.nil List.nil)
   | List.cons declaration rest =>

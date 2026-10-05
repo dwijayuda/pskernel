@@ -3791,10 +3791,12 @@ def psWasmLowerDeclarations
 
 
 
-def psWasmTypeUsesNatWithFuel :
-    Nat -> PsVerifiedIrType -> Bool
-  | 0, _ => false
-  | fuel + 1, type =>
+def psWasmTypeUsesNatWithFuel
+    (remainingFuel : Nat)
+    (type : PsVerifiedIrType) : Bool :=
+  match remainingFuel with
+  | 0 => false
+  | fuel + 1 =>
       let usesType :
           PsVerifiedIrType -> Bool :=
         fun (value : PsVerifiedIrType) =>
@@ -3845,10 +3847,12 @@ def psWasmIntrinsicUsesNat
   | .arrayFoldl => true
   | _ => false
 
-def psWasmExprUsesNatWithFuel :
-    Nat -> PsVerifiedIrExpr -> Bool
-  | 0, _ => false
-  | fuel + 1, expr =>
+def psWasmExprUsesNatWithFuel
+    (remainingFuel : Nat)
+    (expr : PsVerifiedIrExpr) : Bool :=
+  match remainingFuel with
+  | 0 => false
+  | fuel + 1 =>
       let uses :
           PsVerifiedIrExpr -> Bool :=
         fun (nested : PsVerifiedIrExpr) =>
@@ -3949,10 +3953,12 @@ def psWasmExprUsesNat
     (expr : PsVerifiedIrExpr) : Bool :=
   psWasmExprUsesNatWithFuel 4096 expr
 
-def psWasmTypeUsesIntWithFuel :
-    Nat -> PsVerifiedIrType -> Bool
-  | 0, _ => false
-  | fuel + 1, type =>
+def psWasmTypeUsesIntWithFuel
+    (remainingFuel : Nat)
+    (type : PsVerifiedIrType) : Bool :=
+  match remainingFuel with
+  | 0 => false
+  | fuel + 1 =>
       let usesType :
           PsVerifiedIrType -> Bool :=
         fun (value : PsVerifiedIrType) =>
@@ -3986,10 +3992,12 @@ def psWasmIntrinsicUsesInt
   | .intLt => true
   | _ => false
 
-def psWasmExprUsesIntWithFuel :
-    Nat -> PsVerifiedIrExpr -> Bool
-  | 0, _ => false
-  | fuel + 1, expr =>
+def psWasmExprUsesIntWithFuel
+    (remainingFuel : Nat)
+    (expr : PsVerifiedIrExpr) : Bool :=
+  match remainingFuel with
+  | 0 => false
+  | fuel + 1 =>
       let uses :
           PsVerifiedIrExpr -> Bool :=
         fun (nested : PsVerifiedIrExpr) =>

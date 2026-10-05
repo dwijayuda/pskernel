@@ -109,3 +109,67 @@ theorem psKernelDefEqQuick_literal_true_refines
         hLiteral
       ]
   · exact PsKernelDefEqJudgment.literal left right hLiteral
+
+
+theorem psKernelDefEqQuick_expr_equal_refines
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (hSound :
+      PsKernelExprEqSound
+        context.environment
+        context.localContext)
+    (hEq : psKernelExprEq left right = true) :
+    psKernelDefEqQuick
+        defeq context state left right =
+      Except.ok
+        (Prod.mk (Option.some true) state) ∧
+    PsKernelDefEqJudgment
+      context.environment
+      context.localContext
+      left
+      right := by
+  constructor
+  · simp [psKernelDefEqQuick, hEq]
+  · exact hSound left right hEq
+
+theorem psKernelDefEqQuick_success_cache_refines
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (hSound :
+      PsKernelDefEqCacheSound
+        context.environment
+        context.localContext
+        state.success)
+    (hEq : psKernelExprEq left right = false)
+    (hCache :
+      psKernelExprPairSetContains
+        state.success left right =
+      true) :
+    psKernelDefEqQuick
+        defeq context state left right =
+      Except.ok
+        (Prod.mk (Option.some true) state) ∧
+    PsKernelDefEqJudgment
+      context.environment
+      context.localContext
+      left
+      right := by
+  constructor
+  · simp [psKernelDefEqQuick, hEq, hCache]
+  · exact hSound left right hCache

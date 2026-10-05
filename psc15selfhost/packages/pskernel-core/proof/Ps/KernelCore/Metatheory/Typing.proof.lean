@@ -449,3 +449,59 @@ theorem psKernelInferCore_app_checked_refines_typing
         hFnType
         hArgTyping
         hArgType
+
+
+theorem psKernelInferCore_cache_hit_refines_typing
+    (remaining : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (inferOnly : Bool)
+    (hEligible :
+      psKernelInferCacheEligible inferOnly expr = true)
+    (hCache :
+      psKernelExprMapGet
+          (if inferOnly then state.inferOnly else state.checkedInfer)
+          expr =
+        Option.some result)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hSound :
+      PsKernelInferenceCacheSound
+        context.environment
+        context.localContext
+        (if inferOnly then state.inferOnly else state.checkedInfer)) :
+    psKernelInferCoreWithFuel
+        (Nat.succ remaining)
+        whnf
+        defeq
+        context
+        state
+        expr
+        inferOnly =
+      Except.ok (Prod.mk result state) ∧
+    PsKernelTypingJudgment
+      context.environment
+      context.localContext
+      expr
+      result := by
+  constructor
+  · simp [
+      psKernelInferCoreWithFuel,
+      hEligible,
+      hCache,
+      hDepth
+    ]
+  · exact hSound expr result hCache

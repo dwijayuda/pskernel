@@ -241,6 +241,29 @@ inductive PsKernelDefEqJudgment
         left
         (PsKernelExpr.mdata metadata right)
 
+def PsKernelExprEqSound
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) : Prop :=
+  ∀ (left right : PsKernelExpr),
+    psKernelExprEq left right = true ->
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
+
+def PsKernelDefEqCacheSound
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (cache : PsKernelExprPairSet) : Prop :=
+  ∀ (left right : PsKernelExpr),
+    psKernelExprPairSetContains cache left right = true ->
+      PsKernelDefEqJudgment
+        environment
+        localContext
+        left
+        right
+
 inductive PsKernelTypingJudgment
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext) :

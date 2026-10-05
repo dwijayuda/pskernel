@@ -13,8 +13,8 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 4 |
-| B | 29 |
+| A | 5 |
+| B | 28 |
 | C | 38 |
 | D | 8 |
 | **Total canonical source/proof pairs** | **79** |
@@ -64,7 +64,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Checker/DefEq/FinalRules.lean` | **C** | Fuel/control only for final rules. |
 | `Checker/DefEq/FullShape.lean` | **C** | Selected same-shape cases; formal defeq soundness pending. |
 | `Checker/DefEq/LazyDelta.lean` | **C** | Fuel exhaustion only. |
-| `Checker/DefEq/Quick.lean` | **B** | Expression/cache/sort-list quick-rule behavior; independent defeq relation pending. |
+| `Checker/DefEq/Quick.lean` | **A** | Expression-equality and successful-cache quick paths now refine the independent defeq judgment under explicit `ExprEqSound` / `DefEqCacheSound` invariants; Sort/literal rules are directly bridged. |
 | `Checker/DefEq/Shortcuts.lean` | **C** | Selected disabled shortcut behavior. |
 | `Checker/DefEq/Support.lean` | **D** | Single empty-list aggregation fact. |
 | `Checker/Inference.lean` | **C** | Wrapper/fuel facts. |

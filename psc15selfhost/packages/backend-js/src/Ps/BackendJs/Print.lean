@@ -50,7 +50,7 @@ def psJsConcat7
 def psJsPrintMachineIntegerLiteral
     (type : PsJsIrMachineIntegerType)
     (value : Int) : String :=
-  let printed :=
+  let printed : String :=
     String.Internal.append (Int.repr value) "n";
   match type with
   | PsJsIrMachineIntegerType.uint8 =>

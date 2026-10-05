@@ -16,12 +16,12 @@ assert(['lean434', 'lean434-wasm'].includes(reference));
 const seedPath = process.env.PSC2_CHECKED_SEED_BIN ?? defaultCheckedSeed;
 assert(existsSync(seedPath), 'Build psc2_lean_checked_seed before the M4 integration gate');
 
-test('dual-checked compiler output executes and its receipt binds the checked admissions', { timeout: 60000 }, async () => {
+test('dual-checked compiler output exercising UInt8.ofNat executes and binds checked admissions', { timeout: 60000 }, async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'm4-checked-build-'));
   try {
     await writeFile(path.join(dir, 'package.json'), '{"type":"module"}');
     const entryPath = path.join(dir, 'Main.lean'), outputPath = path.join(dir, 'out.js');
-    await writeFile(entryPath, 'inductive M4Flag where\n  | off\n  | on\ndef flag : M4Flag := M4Flag.on\ndef answer : Nat := 42\n');
+    await writeFile(entryPath, 'inductive M4Flag where\n  | off\n  | on\ndef byte : UInt8 := UInt8.ofNat 42\ndef flag : M4Flag := M4Flag.on\ndef answer : Nat := 42\n');
     const receipt = await buildChecked({ entryPath, outputPath, seedPath, kernel: reference, dualCheck: 'pskernel-core' });
     const module = await import(pathToFileURL(outputPath).href);
     assert.equal(module.answer, 42n);

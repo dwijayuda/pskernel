@@ -29,6 +29,27 @@ test('recursive equation definitions are rejected but explicit structural recurs
   assert(!ids(good).includes('recursive-equation-definition'));
 });
 
+test('structural recursion may change only the decreasing explicit argument', () => {
+  const bad = [
+    'def fold (step : Nat -> Nat -> Nat) (values : List Nat) (state : Nat) : Nat :=',
+    '  match values with',
+    '  | List.nil => state',
+    '  | List.cons value rest =>',
+    '      fold step rest (step state value)',
+  ].join('\n');
+  assert(ids(bad).includes('structural-recursion-call-shape'));
+
+  const good = [
+    'def foldWorker (step : Nat -> Nat -> Nat) (values : List Nat) : Nat -> Nat :=',
+    '  match values with',
+    '  | List.nil => fun (state : Nat) => state',
+    '  | List.cons value rest =>',
+    '      let smaller : Nat -> Nat := foldWorker step rest;',
+    '      fun (state : Nat) => smaller (step state value)',
+  ].join('\n');
+  assert(!ids(good).includes('structural-recursion-call-shape'));
+});
+
 test('term list conveniences are rejected without rejecting supported list patterns', () => {
   assert(ids('def append := xs ++ ys').includes('term-list-append'));
   assert(ids('def prepend := x :: xs').includes('term-list-cons'));

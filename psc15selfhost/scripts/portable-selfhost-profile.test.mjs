@@ -275,6 +275,20 @@ test('portable entry roots minimally cover the backend-wasm package graph', asyn
   );
 });
 
+test('portable entry roots minimally cover the backend-js package graph', async () => {
+  const profile = await readPortableSelfhostProfile();
+  const packages = await collectPortableSelfhostPackages(profile, 'backend-js');
+  assert.equal(packages.length, 1);
+  const entries = await collectPortableSelfhostEntryRoots(
+    packages[0],
+    profile.includeImportClosure === true,
+  );
+  assert.deepEqual(
+    entries.map(sourcePath => path.basename(sourcePath)).sort(),
+    ['Print.lean'],
+  );
+});
+
 test('layout-only lets are rejected while explicit sequencing remains valid', () => {
   const bad = [
     'def f : Nat :=',

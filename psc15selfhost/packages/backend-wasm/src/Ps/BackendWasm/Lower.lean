@@ -3742,7 +3742,7 @@ def psWasmLowerExprWorker
                         state := state
                       }
                   | .bool value =>
-                      let encodedValue :=
+                      let encodedValue : Int :=
                         if value then 1 else 0;
                       Except.ok {
                         instructions :=

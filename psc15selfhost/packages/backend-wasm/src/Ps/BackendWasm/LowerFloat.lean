@@ -4,30 +4,38 @@ def psWasmLowerFloatBinary
     (type : PsVerifiedIrFloatingType)
     (operation : PsVerifiedIrFloatBinaryOp) :
     List PsWasmInstruction :=
-  match type, operation with
-  | .float32, .add => [.f32Add]
-  | .float32, .sub => [.f32Sub]
-  | .float32, .mul => [.f32Mul]
-  | .float32, .div => [.f32Div]
-  | .float, .add => [.f64Add]
-  | .float, .sub => [.f64Sub]
-  | .float, .mul => [.f64Mul]
-  | .float, .div => [.f64Div]
+  match type with
+  | .float32 =>
+      match operation with
+      | .add => [.f32Add]
+      | .sub => [.f32Sub]
+      | .mul => [.f32Mul]
+      | .div => [.f32Div]
+  | .float =>
+      match operation with
+      | .add => [.f64Add]
+      | .sub => [.f64Sub]
+      | .mul => [.f64Mul]
+      | .div => [.f64Div]
 
 def psWasmLowerFloatCompare
     (type : PsVerifiedIrFloatingType)
     (operation : PsVerifiedIrFloatCompareOp) :
     List PsWasmInstruction :=
-  match type, operation with
-  | .float32, .eq => [.f32Eq]
-  | .float32, .ne => [.f32Ne]
-  | .float32, .lt => [.f32Lt]
-  | .float32, .le => [.f32Le]
-  | .float32, .gt => [.f32Gt]
-  | .float32, .ge => [.f32Ge]
-  | .float, .eq => [.f64Eq]
-  | .float, .ne => [.f64Ne]
-  | .float, .lt => [.f64Lt]
-  | .float, .le => [.f64Le]
-  | .float, .gt => [.f64Gt]
-  | .float, .ge => [.f64Ge]
+  match type with
+  | .float32 =>
+      match operation with
+      | .eq => [.f32Eq]
+      | .ne => [.f32Ne]
+      | .lt => [.f32Lt]
+      | .le => [.f32Le]
+      | .gt => [.f32Gt]
+      | .ge => [.f32Ge]
+  | .float =>
+      match operation with
+      | .eq => [.f64Eq]
+      | .ne => [.f64Ne]
+      | .lt => [.f64Lt]
+      | .le => [.f64Le]
+      | .gt => [.f64Gt]
+      | .ge => [.f64Ge]

@@ -25,3 +25,27 @@ theorem psKernelExprLift_zero
     (expr : PsKernelExpr) :
     psKernelExprLift expr 0 = expr := by
   simp [psKernelExprLift, psKernelExprLiftLooseBVars_zero_amount]
+
+theorem psKernelExprLift_bvar
+    (index amount : Nat) :
+    psKernelExprLift (PsKernelExpr.bvar index) amount =
+      PsKernelExpr.bvar (Nat.add index amount) := by
+  cases amount <;> rfl
+
+theorem psKernelExprLift_under_one_lambda
+    (name : PsKernelName)
+    (level : PsKernelLevel)
+    (binderInfo : PsKernelBinderInfo) :
+    psKernelExprLift
+        (PsKernelExpr.lam
+          name
+          (PsKernelExpr.sort level)
+          (PsKernelExpr.bvar 1)
+          binderInfo)
+        1 =
+      PsKernelExpr.lam
+        name
+        (PsKernelExpr.sort level)
+        (PsKernelExpr.bvar 2)
+        binderInfo := by
+  rfl

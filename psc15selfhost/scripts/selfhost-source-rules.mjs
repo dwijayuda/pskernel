@@ -305,10 +305,12 @@ export function findSelfhostStructuralViolations(
       add('grouped-dot-application', index + 1, line);
     }
 
-    const termSegment =
-      trimmed.startsWith('|') && line.includes('=>')
+    let termSegment = line;
+    if (trimmed.startsWith('|')) {
+      termSegment = line.includes('=>')
         ? line.slice(line.indexOf('=>') + 2)
-        : line;
+        : '';
+    }
 
     if (/(^|[\s(=,:])\.[A-Za-z_][A-Za-z0-9_]*/u.test(termSegment)) {
       add('leading-dot-term-constructor', index + 1, line);

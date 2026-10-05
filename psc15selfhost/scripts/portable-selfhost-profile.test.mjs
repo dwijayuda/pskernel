@@ -177,6 +177,25 @@ test('general infix arithmetic is rejected but structural successor patterns rem
   assert(!ids(explicit).includes('term-arithmetic-operator'));
 });
 
+test('portable scalar member capabilities are allowlisted explicitly', () => {
+  for (const source of [
+    'def a (x : Nat) := Nat.add x 1',
+    'def a (x : Nat) := Int.ofNat x',
+    'def a (c : Char) := Char.toNat c',
+    'def a (x : Nat) : UInt8 := UInt8.ofNat x',
+  ]) {
+    assert(!ids(source).includes('scalar-member-capability'), source);
+  }
+
+  for (const source of [
+    'def a (x : Nat) : UInt16 := UInt16.ofNat x',
+    'def a (x : UInt8) := UInt8.toNat x',
+    'def a (x : Nat) := Nat.toUInt8 x',
+  ]) {
+    assert(ids(source).includes('scalar-member-capability'), source);
+  }
+});
+
 test('layout-only lets are rejected while explicit sequencing remains valid', () => {
   const bad = [
     'def f : Nat :=',

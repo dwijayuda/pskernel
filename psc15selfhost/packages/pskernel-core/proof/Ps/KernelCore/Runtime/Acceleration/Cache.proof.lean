@@ -223,7 +223,7 @@ theorem psKernelExprMapGet_build_cons_self
         }
         expr =
       Option.some value := by
-  unfold psKernelExprMapGet
+  simp only [psKernelExprMapGet]
   rw [psKernelExprMapIndexBucket_build_cons]
   exact
     psKernelExprMapGetIn_insertIn_self

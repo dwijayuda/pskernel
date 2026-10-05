@@ -65,6 +65,16 @@ test('known fragile term shorthand is rejected structurally', () => {
     ids('def value := .some x').includes('leading-dot-term-constructor'),
   );
   assert(ids('def mapper := fun x => x').includes('untyped-lambda-binder'));
+
+  const multilinePattern = [
+    'def f (value : T) :=',
+    '  match value with',
+    '  | .constructor',
+    '      first',
+    '      second => first',
+    '  | _ => second',
+  ].join('\n');
+  assert(!ids(multilinePattern).includes('leading-dot-term-constructor'));
 });
 
 test('layout-only lets are rejected while explicit sequencing remains valid', () => {

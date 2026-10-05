@@ -40,6 +40,10 @@ def psSnapshotFieldEq
       match right with
       | PsProjectSnapshotIdentityField.sourceKeyCodec => true
       | _ => false
+  | PsProjectSnapshotIdentityField.artifactAuthority =>
+      match right with
+      | PsProjectSnapshotIdentityField.artifactAuthority => true
+      | _ => false
   | PsProjectSnapshotIdentityField.artifactCodec =>
       match right with
       | PsProjectSnapshotIdentityField.artifactCodec => true
@@ -145,6 +149,13 @@ def psTestSnapshotSourceKeyCodecMismatch : Bool :=
     { psSnapshotExpectedIdentity with sourceKeyCodec := "source-key-next" }
     PsProjectSnapshotIdentityField.sourceKeyCodec
 
+def psTestSnapshotArtifactAuthorityMismatch : Bool :=
+  psSnapshotMismatchIs
+    psSnapshotExpectedIdentity
+    { psSnapshotExpectedIdentity with
+        artifactAuthority := "checked-declarations/1" }
+    PsProjectSnapshotIdentityField.artifactAuthority
+
 def psTestSnapshotArtifactCodecMismatch : Bool :=
   psSnapshotMismatchIs
     psSnapshotExpectedIdentity
@@ -186,6 +197,7 @@ def psProjectSnapshotTests :
     { name := "kernel mismatch rejected", passed := psTestSnapshotKernelMismatch },
     { name := "interface codec mismatch rejected", passed := psTestSnapshotInterfaceCodecMismatch },
     { name := "source-key codec mismatch rejected", passed := psTestSnapshotSourceKeyCodecMismatch },
+    { name := "artifact authority mismatch rejected", passed := psTestSnapshotArtifactAuthorityMismatch },
     { name := "artifact codec mismatch rejected", passed := psTestSnapshotArtifactCodecMismatch },
     { name := "envelope accepts exact identity", passed := psTestSnapshotEnvelopeValidation }
   ]

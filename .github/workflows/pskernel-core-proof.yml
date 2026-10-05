@@ -1,0 +1,51 @@
+name: PSKernel Core proof
+
+on:
+  push:
+    branches:
+      - pscv/prove-pskernel-core-v1
+    paths:
+      - "psc15selfhost/packages/pskernel-core/**"
+      - "psc15selfhost/package.json"
+      - ".github/workflows/pskernel-core-proof.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pskernel-core-proof-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  kernel-proofs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install current kernel Lean baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Verify current kernel Lean identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+
+      - name: Check PSKernel Core proof slice
+        working-directory: psc15selfhost
+        shell: bash
+        run: |
+          set -euo pipefail
+          started=$(date +%s)
+          npm run test:pskernel-core-proofs
+          finished=$(date +%s)
+          echo "PSKERNEL_CORE_PROOF_CHECK_SECONDS=$((finished-started))"

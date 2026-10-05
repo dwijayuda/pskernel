@@ -39,6 +39,11 @@ jobs:
           test "$(lean --githash)" = 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
           npm install --prefix /tmp/m4-tools --no-audit --no-fund typescript@7.0.2
           echo /tmp/m4-tools/node_modules/.bin >> "$GITHUB_PATH"
+      - name: Verify current WASM bytes and semantic source snapshot
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean-wasm/host/verify-prebuilt.mjs
+          npm --prefix packages/pskernel-lean-wasm run check:source-current
       - name: Build current native core provider and bounded API tests
         run: lake build psc_kernel_core_provider psc_kernel_core_provider_tests
       - name: Build official reference provider and checked compiler seed

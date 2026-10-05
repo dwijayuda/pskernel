@@ -232,6 +232,28 @@ test('portable source uses explicit Option constructors', () => {
   assert(!ids(good).includes('explicit-option-constructors'));
 });
 
+test('local match bindings require explicit result types', () => {
+  const bad = [
+    'def f (value : Option Nat) : Nat :=',
+    '  let selected :=',
+    '    match value with',
+    '    | Option.none => 0',
+    '    | Option.some current => current;',
+    '  selected',
+  ].join('\n');
+  assert(ids(bad).includes('untyped-match-let'));
+
+  const good = [
+    'def f (value : Option Nat) : Nat :=',
+    '  let selected : Nat :=',
+    '    match value with',
+    '    | Option.none => 0',
+    '    | Option.some current => current;',
+    '  selected',
+  ].join('\n');
+  assert(!ids(good).includes('untyped-match-let'));
+});
+
 test('layout-only lets are rejected while explicit sequencing remains valid', () => {
   const bad = [
     'def f : Nat :=',

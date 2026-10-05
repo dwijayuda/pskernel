@@ -57,3 +57,68 @@ theorem psKernelInferAppOnlyLoopWithFuel_zero
         0 whnf context state args index instantiated current =
       Except.error "kernel inference budget exhausted" := by
   rfl
+
+
+theorem psKernelCacheInferResult_preserves_nextFresh
+    (state : PsKernelCheckerState)
+    (inferOnly : Bool)
+    (expr result : PsKernelExpr) :
+    (psKernelCacheInferResult
+      state inferOnly expr result).nextFresh =
+      state.nextFresh := by
+  simp [
+    psKernelCacheInferResult,
+    psKernelCheckerStateWithInferOnly,
+    psKernelCheckerStateWithCheckedInfer
+  ]
+
+theorem psKernelCacheInferResult_inferOnly_preserves_checked
+    (state : PsKernelCheckerState)
+    (expr result : PsKernelExpr) :
+    (psKernelCacheInferResult
+      state true expr result).checkedInfer =
+      state.checkedInfer := by
+  simp [
+    psKernelCacheInferResult,
+    psKernelCheckerStateWithInferOnly
+  ]
+
+theorem psKernelCacheInferResult_checked_preserves_inferOnly
+    (state : PsKernelCheckerState)
+    (expr result : PsKernelExpr) :
+    (psKernelCacheInferResult
+      state false expr result).inferOnly =
+      state.inferOnly := by
+  simp [
+    psKernelCacheInferResult,
+    psKernelCheckerStateWithCheckedInfer
+  ]
+
+theorem psKernelCacheInferResult_preserves_whnf
+    (state : PsKernelCheckerState)
+    (inferOnly : Bool)
+    (expr result : PsKernelExpr) :
+    (psKernelCacheInferResult
+      state inferOnly expr result).whnf =
+      state.whnf := by
+  simp [
+    psKernelCacheInferResult,
+    psKernelCheckerStateWithInferOnly,
+    psKernelCheckerStateWithCheckedInfer
+  ]
+
+theorem psKernelCacheInferResult_preserves_defeq_caches
+    (state : PsKernelCheckerState)
+    (inferOnly : Bool)
+    (expr result : PsKernelExpr) :
+    (psKernelCacheInferResult
+      state inferOnly expr result).success =
+        state.success ∧
+    (psKernelCacheInferResult
+      state inferOnly expr result).failure =
+        state.failure := by
+  simp [
+    psKernelCacheInferResult,
+    psKernelCheckerStateWithInferOnly,
+    psKernelCheckerStateWithCheckedInfer
+  ]

@@ -64,8 +64,8 @@ theorem psKernelEnvironmentIndexFindWorker_setWorker_same
   | zero =>
       rfl
   | succ remaining ih =>
-      cases hParity :
-          Nat.beq (Nat.mod hash 2) 0 <;>
+      cases index <;>
+        by_cases hParity : Nat.mod hash 2 = 0 <;>
         simp [
           psKernelEnvironmentIndexSetWorker,
           psKernelEnvironmentIndexFindWorker,
@@ -124,12 +124,9 @@ theorem psKernelEnvironmentIndexFind_setWorker_same_name
           constants)
         name =
       constants := by
-  cases hParity :
-      Nat.beq
-        (Nat.mod
-          (psKernelEnvironmentNameHash name)
-          2)
-        0 <;>
+  cases index <;>
+    by_cases hParity :
+        Nat.mod (psKernelEnvironmentNameHash name) 2 = 0 <;>
     simp [
       psKernelEnvironmentIndexFind,
       psKernelEnvironmentIndexSetWorker,

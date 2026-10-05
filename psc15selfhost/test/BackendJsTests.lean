@@ -10,7 +10,15 @@ def psBackendJsExpected : String :=
   "export function callPlusOne(x) { return plusOne(x); }\n" ++
   "export const greeting = \"hello\";\n" ++
   "export const truth = true;\n" ++
-  "export const unitValue = (void 0);\n"
+  "export const unitValue = (void 0);\n" ++
+  "export function natSubDemo(left, right) { return ((__ps_a, __ps_b) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(left, right); }\n" ++
+  "export function natDivDemo(left, right) { return ((__ps_a, __ps_b) => (__ps_b === 0n ? 0n : __ps_a / __ps_b))(left, right); }\n" ++
+  "export function natModDemo(left, right) { return ((__ps_a, __ps_b) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(left, right); }\n" ++
+  "export function intNegDemo(value) { return (-(value)); }\n" ++
+  "export function boolAndDemo(left, right) { return (left && right); }\n" ++
+  "export function stringLengthDemo(value) { return ((__ps_s) => BigInt(Array.from(__ps_s).length))(value); }\n" ++
+  "export function letNatDemo(x) { return (() => { const y = (x + 1n); return (y * 2n); })(); }\n" ++
+  "export function applyLambda(x) { return ((y) => (y + 2n))(x); }\n"
 
 def psTestBackendJsFixtureEmission : Bool :=
   match psBackendJsFixtureValidated with
@@ -97,20 +105,14 @@ def psBackendJsUnsupportedIntrinsicModule : PsVerifiedIrModule :=
     inductives := []
     declarations := [
       {
-        name := "mul"
+        name := "utf8Size"
         typeParameters := []
         parameters := [
           {
-            name := "left"
+            name := "value"
             type :=
               PsVerifiedIrType.primitive
-                PsVerifiedIrPrimitiveType.nat
-          },
-          {
-            name := "right"
-            type :=
-              PsVerifiedIrType.primitive
-                PsVerifiedIrPrimitiveType.nat
+                PsVerifiedIrPrimitiveType.string
           }
         ]
         resultType :=
@@ -118,12 +120,9 @@ def psBackendJsUnsupportedIntrinsicModule : PsVerifiedIrModule :=
             PsVerifiedIrPrimitiveType.nat
         body :=
           PsVerifiedIrExpr.intrinsic
-            PsVerifiedIrIntrinsic.natMul
+            PsVerifiedIrIntrinsic.stringUtf8ByteSize
             []
-            [
-              PsVerifiedIrExpr.var "left",
-              PsVerifiedIrExpr.var "right"
-            ]
+            [PsVerifiedIrExpr.var "value"]
       }
     ]
   }

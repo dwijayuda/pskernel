@@ -1,0 +1,51 @@
+import Ps.KernelCore.Core.Name
+
+theorem psKernelNameComponentAppend_eq_append
+    (left right : List PsKernelNameComponent) :
+    psKernelNameComponentAppend left right = List.append left right := by
+  induction left with
+  | nil =>
+      rfl
+  | cons head tail ih =>
+      simp [psKernelNameComponentAppend, ih]
+
+theorem psKernelNameAppend_right_anonymous
+    (base : PsKernelName) :
+    psKernelNameAppend base PsKernelName.anonymous = base := by
+  rfl
+
+theorem psKernelNameAppend_left_anonymous
+    (suffix : PsKernelName) :
+    psKernelNameAppend PsKernelName.anonymous suffix = suffix := by
+  induction suffix with
+  | anonymous =>
+      rfl
+  | str parent value ih =>
+      simp [psKernelNameAppend, ih]
+  | num parent value ih =>
+      simp [psKernelNameAppend, ih]
+
+theorem psKernelNameAppend_assoc
+    (a b c : PsKernelName) :
+    psKernelNameAppend (psKernelNameAppend a b) c =
+      psKernelNameAppend a (psKernelNameAppend b c) := by
+  induction c with
+  | anonymous =>
+      rfl
+  | str parent value ih =>
+      simp [psKernelNameAppend, ih]
+  | num parent value ih =>
+      simp [psKernelNameAppend, ih]
+
+theorem psKernelNameComponents_anonymous :
+    psKernelNameComponents PsKernelName.anonymous = List.nil := by
+  rfl
+
+theorem psKernelNameListLength_eq_length
+    (values : List PsKernelName) :
+    psKernelNameListLength values = List.length values := by
+  induction values with
+  | nil =>
+      rfl
+  | cons head tail ih =>
+      simp [psKernelNameListLength, ih]

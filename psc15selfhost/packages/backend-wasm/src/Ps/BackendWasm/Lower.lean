@@ -1135,7 +1135,7 @@ def psWasmLowerClosureSignatures
     List PsVerifiedIrType ->
     Except PsWasmLowerError
       (List PsWasmStructType × List PsWasmFunctionType)
-  | [] => Except.ok ([], [])
+  | [] => Except.ok (Prod.mk List.nil List.nil)
   | type :: rest =>
       match psWasmLowerClosureSignature profile type with
       | Except.error error => Except.error error
@@ -1144,14 +1144,13 @@ def psWasmLowerClosureSignatures
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
               Except.ok
-                (
-                  List.cons
+                (Prod.mk
+                  (List.cons
                     signature.baseStructure
-                    (Prod.fst loweredRest),
-                  List.cons
+                    (Prod.fst loweredRest))
+                  (List.cons
                     signature.codeType
-                    (Prod.snd loweredRest)
-                )
+                    (Prod.snd loweredRest)))
 
 def psWasmFindStructure :
     List PsVerifiedIrStructure -> String -> Option PsVerifiedIrStructure
@@ -1170,7 +1169,7 @@ def psWasmFindStructureFieldLoop
   | _, [] => none
   | index, field :: rest =>
       if psStringEq field.name fieldName then
-        some (index, field)
+        some (Prod.mk index field)
       else
         psWasmFindStructureFieldLoop
           fieldName (Nat.add index 1) rest
@@ -1294,7 +1293,7 @@ def psWasmFindConstructorFieldLoop
   | _, [] => none
   | index, field :: rest =>
       if psStringEq field.name fieldName then
-        some (index, field)
+        some (Prod.mk index field)
       else
         psWasmFindConstructorFieldLoop
           fieldName (Nat.add index 1) rest
@@ -1635,8 +1634,8 @@ def psWasmAddLocal
     (type : PsWasmValueType) :
     Nat × PsWasmLowerState :=
   let index := state.nextLocalIndex
-  (
-    index,
+  Prod.mk
+    index
     {
       nextLocalIndex := Nat.add index 1
       localTypes := psListAppend state.localTypes (List.cons type List.nil)
@@ -1647,7 +1646,6 @@ def psWasmAddLocal
       generatedFunctions := state.generatedFunctions
       generatedFunctionRefs := state.generatedFunctionRefs
     }
-  )
 
 def psWasmStateForNestedFunction
     (state : PsWasmLowerState)
@@ -4106,7 +4104,7 @@ def psWasmExportsOfDeclarations :
   | [] => []
   | declaration :: rest =>
       List.cons
-        (declaration.name, declaration.name)
+        (Prod.mk declaration.name declaration.name)
         (psWasmExportsOfDeclarations rest)
 
 def psWasmModuleHasUnsupportedData

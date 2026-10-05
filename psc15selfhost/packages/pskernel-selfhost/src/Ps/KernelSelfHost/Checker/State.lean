@@ -1,4 +1,4 @@
-import Ps.KernelSelfHost.Runtime.Cache
+import Ps.KernelSelfHost.Runtime.Acceleration.Cache
 
 structure PsKernelCheckerState where
   nextFresh : Nat

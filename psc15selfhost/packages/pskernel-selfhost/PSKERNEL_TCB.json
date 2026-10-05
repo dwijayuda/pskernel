@@ -25,7 +25,7 @@
   "accelerationTCB": [
     {
       "component": "Expression and defeq caches",
-      "path": "src/Ps/KernelSelfHost/Runtime/Cache.lean",
+      "path": "src/Ps/KernelSelfHost/Runtime/Acceleration/Cache.lean",
       "semanticRole": "semantic-preserving-acceleration",
       "trustStatus": "trusted",
       "canAffectAcceptanceIfBuggy": true,
@@ -33,7 +33,7 @@
     },
     {
       "component": "Environment lookup index",
-      "path": "src/Ps/KernelSelfHost/Runtime/EnvironmentIndex.lean",
+      "path": "src/Ps/KernelSelfHost/Runtime/Acceleration/EnvironmentIndex.lean",
       "semanticRole": "semantic-preserving-acceleration",
       "trustStatus": "trusted",
       "canAffectAcceptanceIfBuggy": true,

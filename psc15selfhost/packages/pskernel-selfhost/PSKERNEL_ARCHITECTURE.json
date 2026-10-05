@@ -10,7 +10,7 @@
   "semanticRootPath": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
   "semanticModulePrefix": "Ps.KernelSelfHost.",
   "migration": {
-    "phase": "B3-checker-session-owner",
+    "phase": "B5-acceleration-owners",
     "finalArchitectureAdopted": true,
     "finalArchitectureImplemented": false,
     "compatibilityShimsAllowedDuringMigration": true,
@@ -18,7 +18,9 @@
     "migrationShims": [
       "Ps.KernelSelfHost.CheckerState",
       "Ps.KernelSelfHost.Runtime.NativeReduction",
-      "Ps.KernelSelfHost.CheckerSession"
+      "Ps.KernelSelfHost.CheckerSession",
+      "Ps.KernelSelfHost.Runtime.Cache",
+      "Ps.KernelSelfHost.Runtime.EnvironmentIndex"
     ]
   },
   "semanticRoles": [
@@ -37,11 +39,11 @@
   ],
   "currentRoleFiles": [
     {
-      "path": "Runtime/Cache.lean",
+      "path": "Runtime/Acceleration/Cache.lean",
       "role": "semantic-preserving-acceleration"
     },
     {
-      "path": "Runtime/EnvironmentIndex.lean",
+      "path": "Runtime/Acceleration/EnvironmentIndex.lean",
       "role": "semantic-preserving-acceleration"
     },
     {
@@ -89,6 +91,16 @@
       "area": "checker-session",
       "module": "Ps.KernelSelfHost.Checker.Session",
       "legacyShim": "Ps.KernelSelfHost.CheckerSession"
+    },
+    {
+      "area": "cache",
+      "module": "Ps.KernelSelfHost.Runtime.Acceleration.Cache",
+      "legacyShim": "Ps.KernelSelfHost.Runtime.Cache"
+    },
+    {
+      "area": "environment-index",
+      "module": "Ps.KernelSelfHost.Runtime.Acceleration.EnvironmentIndex",
+      "legacyShim": "Ps.KernelSelfHost.Runtime.EnvironmentIndex"
     }
   ]
 }

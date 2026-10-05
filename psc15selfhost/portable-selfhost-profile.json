@@ -30,6 +30,7 @@
     "layout-let-sequencing"
   ],
   "executableContract": {
-    "pscCheckSourceRoots": true
+    "pscCheckSourceRoots": true,
+    "pscTypeScriptEntryRoots": true
   }
 }

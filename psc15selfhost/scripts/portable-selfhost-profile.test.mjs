@@ -95,6 +95,21 @@ test('known fragile term shorthand is rejected structurally', () => {
     ids('def value := .some x').includes('leading-dot-term-constructor'),
   );
   assert(ids('def mapper := fun x => x').includes('untyped-lambda-binder'));
+  const untypedLambdaLet = [
+    'def f : Nat -> Nat :=',
+    '  let mapper :=',
+    '    fun (x : Nat) => x;',
+    '  mapper',
+  ].join('\n');
+  assert(ids(untypedLambdaLet).includes('untyped-lambda-let'));
+
+  const typedLambdaLet = [
+    'def f : Nat -> Nat :=',
+    '  let mapper : Nat -> Nat :=',
+    '    fun (x : Nat) => x;',
+    '  mapper',
+  ].join('\n');
+  assert(!ids(typedLambdaLet).includes('untyped-lambda-let'));
 
   const multilinePattern = [
     'def f (value : T) :=',

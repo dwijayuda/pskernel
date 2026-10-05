@@ -27,9 +27,14 @@ try{
     ()=>resolveProviderModules(temp,['Cycle.A']),
     /local import cycle/u,
   );
+  await write('Missing.Main','import Ps.Missing.Local\n');
   assert.throws(
-    ()=>resolveProviderModules(temp,['Missing.Root']),
-    /root module missing/u,
+    ()=>resolveProviderModules(temp,['Missing.Main']),
+    /provider local module missing: Ps\.Missing\.Local/u,
+  );
+  assert.throws(
+    ()=>resolveProviderModules(temp,['PsKernelLean.MissingRoot']),
+    /provider local module missing: PsKernelLean\.MissingRoot/u,
   );
 }finally{
   await rm(temp,{recursive:true,force:true});

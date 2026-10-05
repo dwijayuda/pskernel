@@ -3608,7 +3608,7 @@ def psWasmLowerLambdaWith
                           let nestedState :=
                             psWasmStateForNestedFunction
                               advancedState
-                              (Nat.add parameters.length 1);
+                              (Nat.add (psListLength parameters) 1);
                           match
                               psWasmPrepareCaptureBindings
                                 profile
@@ -4027,7 +4027,7 @@ def psWasmLowerDeclaration
               let bindings :=
                 psWasmParameterBindings declaration.parameters;
               let initialState : PsWasmLowerState := {
-                nextLocalIndex := declaration.parameters.length
+                nextLocalIndex := (psListLength declaration.parameters)
                 localTypes := []
                 currentDefinition := declaration.name
                 nextLambdaId := 0

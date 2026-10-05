@@ -234,7 +234,26 @@ theorem psKernelExprMapGet_build_cons_self
               rest))
           (psKernelExprHash expr)) =
       Option.some value
-  rw [psKernelExprMapIndexBucket_build_cons]
+  have hBucket :
+      psKernelExprMapIndexBucket
+          16
+          (psKernelExprMapBuildIndex
+            (List.cons
+              (Prod.mk expr value)
+              rest))
+          (psKernelExprHash expr) =
+        psKernelExprMapInsertIn
+          expr
+          value
+          (psKernelExprMapIndexBucket
+            16
+            (psKernelExprMapBuildIndex rest)
+            (psKernelExprHash expr)) := by
+    simpa using
+      psKernelExprMapIndexBucket_build_cons
+        (Prod.mk expr value)
+        rest
+  rw [hBucket]
   exact
     psKernelExprMapGetIn_insertIn_self
       expr

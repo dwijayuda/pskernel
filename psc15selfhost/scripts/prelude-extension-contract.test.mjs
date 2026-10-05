@@ -32,9 +32,9 @@ test('exact declared extension is removed before frozen-core parity comparison',
 
 test('unknown extra declarations are not hidden by the extension contract', () => {
   const unknown = { name: 'UInt8.other', kind: 'axiom' };
-  const actual = [core[0], extensionDeclaration, unknown, core[1], core[2]];
+  const actual = [unknown, core[0], extensionDeclaration, core[1], core[2]];
   const reduced = validatePreludeExtensions(actual, contract);
-  assert.deepEqual(reduced, [core[0], unknown, core[1], core[2]]);
+  assert.deepEqual(reduced, [unknown, core[0], core[1], core[2]]);
 });
 
 test('missing declared extension rejects', () => {

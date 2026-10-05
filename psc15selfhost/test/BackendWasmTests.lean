@@ -1014,6 +1014,64 @@ def psTestWasmUInt8OfNatIntrinsic : Bool :=
       psStringEq functionName psWasmNatToU32Fn
   | _ => false
 
+def psTestWasmBoolBinaryIntrinsic
+    (operation : PsVerifiedIrIntrinsic)
+    (instruction : PsWasmInstruction) : Bool :=
+  match
+      psWasmLowerIntrinsicWith
+        psWasmProfile32
+        psWasmUInt8OfNatTestLower
+        psWasmUInt8OfNatTestState
+        operation
+        []
+        [
+          PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool true),
+          PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool false)
+        ] with
+  | Except.ok {
+      instructions := [
+        PsWasmInstruction.localGet 0,
+        PsWasmInstruction.localGet 0,
+        actual
+      ],
+      state := _
+    } =>
+      actual == instruction
+  | _ => false
+
+def psTestWasmBoolIntrinsics : Bool :=
+  let notOk :=
+    match
+        psWasmLowerIntrinsicWith
+          psWasmProfile32
+          psWasmUInt8OfNatTestLower
+          psWasmUInt8OfNatTestState
+          PsVerifiedIrIntrinsic.boolNot
+          []
+          [PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.bool true)] with
+    | Except.ok {
+        instructions := [
+          PsWasmInstruction.localGet 0,
+          PsWasmInstruction.i32Const 0,
+          PsWasmInstruction.i32Eq
+        ],
+        state := _
+      } => true
+    | _ => false;
+  notOk
+    && psTestWasmBoolBinaryIntrinsic
+      PsVerifiedIrIntrinsic.boolAnd
+      PsWasmInstruction.i32And
+    && psTestWasmBoolBinaryIntrinsic
+      PsVerifiedIrIntrinsic.boolOr
+      PsWasmInstruction.i32Or
+    && psTestWasmBoolBinaryIntrinsic
+      PsVerifiedIrIntrinsic.boolEq
+      PsWasmInstruction.i32Eq
+    && psTestWasmBoolBinaryIntrinsic
+      PsVerifiedIrIntrinsic.boolNe
+      PsWasmInstruction.i32Ne
+
 def psWasmAnswerModule : PsWasmModule :=
   {
     structures := []
@@ -1107,6 +1165,7 @@ def psTestWasmNatConstructorIdentityInvariant : Bool :=
       && psTestWasmMachineIntegerOps
       && psTestWasmMachineIntegerLiterals
       && psTestWasmUInt8OfNatIntrinsic
+      && psTestWasmBoolIntrinsics
       && psTestWasmFloatOps
       && psTestWasmVerifiedIrLowering
       && psTestWasmLetLowering

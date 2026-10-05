@@ -88,6 +88,23 @@ jobs:
             node packages/pskernel-lean-wasm/scripts/refresh-proofscript-source.mjs
           node packages/pskernel-lean-wasm/scripts/refresh-proofscript-source.mjs --check
           npm --prefix packages/pskernel-lean-wasm run verify:source
+          node --test packages/pskernel-lean-wasm/host/provider-closure.test.mjs
+
+          closure_root="$(mktemp -d)"
+          trap 'rm -rf "$closure_root"' EXIT
+          mkdir -p "$closure_root/Ps" "$closure_root/PsKernelLean"
+          for component in foundation core environment bridge; do
+            cp -a "packages/pskernel-lean-wasm/source/proofscript/$component/Ps/." "$closure_root/Ps/"
+          done
+          cp -a packages/pskernel-lean-wasm/source/proofscript/provider/PsKernelLean/. \
+            "$closure_root/PsKernelLean/"
+          node packages/pskernel-lean-wasm/scripts/resolve-provider-modules.mjs \
+            "$closure_root" PsKernelLean.Main \
+            | tee .lake/lean-wasm-refresh/provider-modules.txt
+          grep -Fx 'Ps/Core/Abstract' .lake/lean-wasm-refresh/provider-modules.txt
+          grep -Fx 'PsKernelLean/Main' .lake/lean-wasm-refresh/provider-modules.txt
+          rm -rf "$closure_root"
+          trap - EXIT
 
       - name: Rebuild pinned Lean 4.34 WASM provider
         timeout-minutes: 72

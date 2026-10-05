@@ -39,7 +39,7 @@ function walkLeanFiles(directory, files) {
   }
 }
 
-async function selectedPackages(profile, packageFilter) {
+export async function collectPortableSelfhostPackages(profile, packageFilter) {
   const packagesRoot = path.join(workspaceRoot, 'packages');
   const selected = [];
   for (const entry of readdirSync(packagesRoot, { withFileTypes: true })) {
@@ -121,6 +121,9 @@ function assertProfile(profile) {
   if (new Set(profile.structuralRules).size !== profile.structuralRules.length) {
     throw new Error('PSC1_PORTABLE_SELFHOST_DUPLICATE_STRUCTURAL_RULES');
   }
+  if (profile.executableContract?.pscCheckSourceRoots !== true) {
+    throw new Error('PSC1_PORTABLE_SELFHOST_EXECUTABLE_CONTRACT');
+  }
 }
 
 export async function checkPortableSelfhostProfile(packageFilter) {
@@ -128,7 +131,7 @@ export async function checkPortableSelfhostProfile(packageFilter) {
   const stableProfile = await readSelfhostProfile();
   assertProfile(profile);
 
-  const packages = await selectedPackages(profile, packageFilter);
+  const packages = await collectPortableSelfhostPackages(profile, packageFilter);
   if (packages.length === 0) {
     throw new Error(
       'PSC1_PORTABLE_SELFHOST_NO_PACKAGES' +

@@ -17,6 +17,7 @@ on:
       - psc15selfhost/packages/foundation/**
       - psc15selfhost/packages/meta/**
       - psc15selfhost/packages/syntax/**
+      - psc15selfhost/packages/pskernel-core.old2/**
       - psc15selfhost/packages/pskernel-core/**
       - psc15selfhost/test/KernelCore*.lean
       - psc15selfhost/lakefile.lean

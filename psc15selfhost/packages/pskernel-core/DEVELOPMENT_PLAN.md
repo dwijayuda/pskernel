@@ -399,6 +399,8 @@ new deployment profiles and larger workloads need their own explicit budgets.
 
 ### M4 — Provider-ready
 
+Implemented by the native adapter and bounded provider gate described in
+`M4_ACCEPTANCE.md`. Acceptance is tied to the reviewed revision's green checks.
 Not required for M1–M3, but needed before replacing the current authority:
 
 - canonical declaration adapter exists;
@@ -407,7 +409,8 @@ Not required for M1–M3, but needed before replacing the current authority:
 - generated self-host kernel can be manually reproduced when a release
   checkpoint requires it.
 
-Until M4 is explicitly accepted, `lean434-wasm` remains the default authority.
+Completing M4 does not change the default authority: `lean434-wasm` remains the
+default until a separate explicit provider-promotion decision.
 
 ## Work-selection rule
 

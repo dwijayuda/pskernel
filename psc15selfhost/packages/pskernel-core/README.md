@@ -10,7 +10,9 @@ M3 is complete for the explicit small-workload Linux x64 profile. See
 [`M3_ACCEPTANCE.md`](M3_ACCEPTANCE.md) for latency/memory budgets, corrected
 benchmark evidence and scope. Native is the preferred CLI/server deployment
 target; the JS artifact retains its portable source and bounded Node checks.
-M4 remains open, and `lean434-wasm` remains the trusted default.
+M4 adds an explicit native core provider and bounded dual checking; see
+[`M4_ACCEPTANCE.md`](M4_ACCEPTANCE.md) for the contract, commands and CI gate.
+`lean434-wasm` remains the trusted default; promotion is a separate decision.
 
 ## Project documentation hierarchy
 

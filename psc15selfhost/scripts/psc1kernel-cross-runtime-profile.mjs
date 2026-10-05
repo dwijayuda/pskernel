@@ -12,7 +12,7 @@ for (const id of profile.samples) {
   const name = `${frame.functionName || '(anonymous)'} ${frame.url.split('/').at(-1)}:${frame.lineNumber + 1}`;
   counts.set(name, (counts.get(name) ?? 0) + 1);
 }
-console.log('CPU sample attribution for the entire worker (includes loading, guards, warmup, measured calls and admission fixtures):');
+console.log('CPU sample attribution for the shared-workload worker (loading, guards, warmup and measured calls; admission cases are measured in separate workers):');
 for (const [name, count] of [...counts].sort((a, b) => b[1] - a[1]).slice(0, 25)) {
   console.log(`${(100 * count / profile.samples.length).toFixed(2)}% ${name}`);
 }

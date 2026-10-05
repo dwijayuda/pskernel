@@ -7,6 +7,7 @@ on:
       - psc2/selfhost-lean-kernel
     paths:
       - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/packages/pskernel-lean-wasm/**
       - psc15selfhost/test/PsKernelCoreBench.lean
       - psc15selfhost/test/KernelCore/Bench/**
       - psc15selfhost/scripts/psc1kernel-benchmark-report*
@@ -20,6 +21,7 @@ on:
       - psc2/selfhost-lean-kernel
     paths:
       - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/packages/pskernel-lean-wasm/**
       - psc15selfhost/test/PsKernelCoreBench.lean
       - psc15selfhost/test/KernelCore/Bench/**
       - psc15selfhost/scripts/psc1kernel-benchmark-report*

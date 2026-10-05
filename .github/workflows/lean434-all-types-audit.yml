@@ -7,6 +7,9 @@ on:
     paths:
       - .github/workflows/lean434-all-types-audit.yml
       - psc15selfhost/scripts/lean434-type-inventory.lean
+      - psc15selfhost/scripts/check-lean434-type-coverage.mjs
+      - psc15selfhost/LEAN434_TYPE_COVERAGE_POLICY.json
+      - psc15selfhost/docs/architecture/LEAN434_TYPE_SURFACE.md
       - psc15selfhost/packages/**/src/**
       - psc15selfhost/stdlib/**
       - psc15selfhost/prelude-extension-contract.json

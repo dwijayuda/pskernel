@@ -1,0 +1,209 @@
+name: Lean WASM current-prelude rebuild
+
+on:
+  push:
+    branches:
+      - fix/lean434-wasm-prelude-compat
+    paths:
+      - .github/workflows/lean-wasm-current-prelude-rebuild.yml
+      - psc15selfhost/packages/foundation/src/**
+      - psc15selfhost/packages/core/src/**
+      - psc15selfhost/packages/environment/src/**
+      - psc15selfhost/packages/bridge/src/**
+      - psc15selfhost/packages/pskernel-lean/provider/**
+      - psc15selfhost/packages/pskernel-lean-wasm/scripts/**
+      - psc15selfhost/packages/pskernel-lean-wasm/host/**
+      - psc15selfhost/packages/pskernel-lean-wasm/package.json
+      - psc15selfhost/scripts/pskernel-core-provider-*.mjs
+      - psc15selfhost/scripts/pskernel-core-checked-build.test.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lean-wasm-current-prelude-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  rebuild-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: psc15selfhost
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install bounded pinned build environment
+        run: |
+          set -euo pipefail
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            binutils cmake clang gcc-multilib g++-multilib git make \
+            libuv1-dev:i386 libssl-dev:i386 pkgconf:i386
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          test "$(lean --githash)" = 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git /tmp/emsdk
+          /tmp/emsdk/emsdk install 6.0.9
+          /tmp/emsdk/emsdk activate 6.0.9
+          echo /tmp/emsdk >> "$GITHUB_PATH"
+          echo /tmp/emsdk/upstream/emscripten >> "$GITHUB_PATH"
+          echo EMSDK=/tmp/emsdk >> "$GITHUB_ENV"
+          echo EM_CONFIG=/tmp/emsdk/.emscripten >> "$GITHUB_ENV"
+          export PATH="/tmp/emsdk:/tmp/emsdk/upstream/emscripten:$PATH"
+          export EM_CONFIG=/tmp/emsdk/.emscripten
+          emcc --version | head -n 1 | grep -F '6.0.9'
+
+          npm install --prefix /tmp/m4-tools --no-audit --no-fund typescript@7.0.2
+          echo /tmp/m4-tools/node_modules/.bin >> "$GITHUB_PATH"
+
+      - name: Record old bundle and refresh canonical source snapshot
+        run: |
+          set -euo pipefail
+          mkdir -p .lake/lean-wasm-refresh
+          cp packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json \
+            .lake/lean-wasm-refresh/old-prebuilt-manifest.json
+          node --input-type=module <<'NODE' > .lake/lean-wasm-refresh/old-startup.json
+          import { performance } from 'node:perf_hooks';
+          import { createKernel } from './packages/pskernel-lean-wasm/index.mjs';
+          const start=performance.now();
+          const kernel=await createKernel({timeoutMs:60000});
+          console.log(JSON.stringify({startupMs:performance.now()-start,metadata:kernel.metadata}));
+          NODE
+          PSC_LEAN_WASM_SOURCE_REVISION="$GITHUB_SHA" \
+            node packages/pskernel-lean-wasm/scripts/refresh-proofscript-source.mjs
+          node packages/pskernel-lean-wasm/scripts/refresh-proofscript-source.mjs --check
+          npm --prefix packages/pskernel-lean-wasm run verify:source
+
+      - name: Rebuild pinned Lean 4.34 WASM provider
+        timeout-minutes: 72
+        run: |
+          set -euo pipefail
+          start="$(date +%s)"
+          set +e
+          timeout --signal=TERM --kill-after=60s 70m \
+            env PSC_LEAN_WASM_SOURCE_COMMIT="$GITHUB_SHA" \
+            npm --prefix packages/pskernel-lean-wasm run build:kernel
+          status=$?
+          set -e
+          end="$(date +%s)"
+          printf '{"durationSeconds":%s,"status":%s,"parallelBuildJobs":2}\n' \
+            "$((end-start))" "$status" \
+            > .lake/lean-wasm-refresh/build.json
+          cat .lake/lean-wasm-refresh/build.json
+          test "$status" -eq 0
+
+      - name: Verify rebuilt package integrity and runtime contracts
+        run: |
+          set -euo pipefail
+          npm --prefix packages/pskernel-lean-wasm run verify:prebuilt
+          npm --prefix packages/pskernel-lean-wasm run verify:source
+          node packages/pskernel-lean-wasm/scripts/refresh-proofscript-source.mjs --check
+          node --test packages/pskernel-lean-wasm/host/*.test.mjs
+
+      - name: Build current native providers and verify M4 parity
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:/tmp/m4-tools/node_modules/.bin:$PATH"
+          test "$(lean --githash)" = 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+          lake build psc_kernel_core_provider psc_kernel_core_provider_tests
+          (
+            cd lean-checked
+            lake build psc2_lean_kernel_provider psc2_lean_checked_seed
+          )
+          lake exe psc_kernel_core_provider_tests
+          node --test \
+            scripts/checked-kernel-dual.test.mjs \
+            scripts/checked-kernel-core.test.mjs \
+            scripts/psc1kernel-package-layout.test.mjs
+          node scripts/pskernel-core-provider-parity.mjs \
+            --output .lake/lean-wasm-refresh/m4-provider-parity.json
+          node --test scripts/pskernel-core-checked-build.test.mjs
+
+      - name: Verify fresh packed consumer
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean-wasm/host/npm-package.test.mjs
+
+      - name: Record focused size and startup delta
+        run: |
+          set -euo pipefail
+          cp packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json \
+            .lake/lean-wasm-refresh/new-prebuilt-manifest.json
+          node --input-type=module <<'NODE' > .lake/lean-wasm-refresh/new-startup.json
+          import { performance } from 'node:perf_hooks';
+          import { createKernel } from './packages/pskernel-lean-wasm/index.mjs';
+          const start=performance.now();
+          const kernel=await createKernel({timeoutMs:60000});
+          console.log(JSON.stringify({startupMs:performance.now()-start,metadata:kernel.metadata}));
+          NODE
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const root='.lake/lean-wasm-refresh';
+          const oldManifest=JSON.parse(fs.readFileSync(root+'/old-prebuilt-manifest.json','utf8'));
+          const newManifest=JSON.parse(fs.readFileSync(root+'/new-prebuilt-manifest.json','utf8'));
+          const oldStartup=JSON.parse(fs.readFileSync(root+'/old-startup.json','utf8'));
+          const newStartup=JSON.parse(fs.readFileSync(root+'/new-startup.json','utf8'));
+          const build=JSON.parse(fs.readFileSync(root+'/build.json','utf8'));
+          const receipt={
+            schemaVersion:1,
+            sourceCommit:process.env.GITHUB_SHA,
+            leanCommit:newManifest.leanCommit,
+            emscriptenVersion:newManifest.emscriptenVersion,
+            oldManifest,newManifest,oldStartup,newStartup,build,
+          };
+          fs.writeFileSync(root+'/receipt.json',JSON.stringify(receipt,null,2)+'\n');
+          console.log(JSON.stringify(receipt,null,2));
+          NODE
+
+      - name: Commit verified generated bundle checkpoint
+        id: promote
+        run: |
+          set -euo pipefail
+          git add \
+            packages/pskernel-lean-wasm/source \
+            packages/pskernel-lean-wasm/PROOFSCRIPT_SOURCE_MANIFEST.json \
+            packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json \
+            packages/pskernel-lean-wasm/wasm
+          if git diff --cached --quiet; then
+            echo "expected rebuilt bundle changes but index is clean" >&2
+            exit 1
+          fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git commit -m "build(wasm): rebuild provider with current compiler prelude"
+          generated_commit="$(git rev-parse HEAD)"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+          echo "generated_commit=$generated_commit" >> "$GITHUB_OUTPUT"
+          node --input-type=module <<NODE
+          import fs from 'node:fs';
+          const p='.lake/lean-wasm-refresh/receipt.json';
+          const value=JSON.parse(fs.readFileSync(p,'utf8'));
+          value.generatedCommit='${generated_commit}';
+          fs.writeFileSync(p,JSON.stringify(value,null,2)+'\n');
+          NODE
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lean-wasm-current-prelude-${{ github.sha }}
+          path: |
+            psc15selfhost/.lake/lean-wasm-refresh/
+            psc15selfhost/packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json
+            psc15selfhost/packages/pskernel-lean-wasm/PROOFSCRIPT_SOURCE_MANIFEST.json
+          retention-days: 14
+          if-no-files-found: warn

@@ -8,7 +8,7 @@ const sourceRoot = path.join(packageRoot, "src", "Ps", "KernelSelfHost");
 const manifestPath = path.join(packageRoot, "PSKERNEL_ARCHITECTURE.json");
 const compatibilityPath = path.join(packageRoot, "LEAN_4_34_COMPATIBILITY.json");
 const conformancePath = path.join(packageRoot, "LEAN_4_34_CONFORMANCE.json");
-const tcbPath = path.join(packageRoot, manifestPath.endsWith("PSKERNEL_ARCHITECTURE.json") ? "PSKERNEL_TCB.json" : "PSKERNEL_TCB.json");
+const tcbPath = path.join(packageRoot, "PSKERNEL_TCB.json");
 
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 const compatibility = JSON.parse(fs.readFileSync(compatibilityPath, "utf8"));

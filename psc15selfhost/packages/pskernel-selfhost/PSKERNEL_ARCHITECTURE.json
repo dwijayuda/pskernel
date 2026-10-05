@@ -10,13 +10,14 @@
   "semanticRootPath": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
   "semanticModulePrefix": "Ps.KernelSelfHost.",
   "migration": {
-    "phase": "B3-checker-state-owner",
+    "phase": "B5-native-capability-owner",
     "finalArchitectureAdopted": true,
     "finalArchitectureImplemented": false,
     "compatibilityShimsAllowedDuringMigration": true,
     "compatibilityShimsAllowedInSemanticRoot": false,
     "migrationShims": [
-      "Ps.KernelSelfHost.CheckerState"
+      "Ps.KernelSelfHost.CheckerState",
+      "Ps.KernelSelfHost.Runtime.NativeReduction"
     ]
   },
   "semanticRoles": [
@@ -43,9 +44,8 @@
       "role": "semantic-preserving-acceleration"
     },
     {
-      "path": "Runtime/NativeReduction.lean",
-      "role": "trusted-capability",
-      "targetOwner": "Runtime/Capability/Lean434NativeReduction.lean"
+      "path": "Runtime/Capability/Lean434NativeReduction.lean",
+      "role": "trusted-capability"
     }
   ],
   "targetLayers": [
@@ -78,6 +78,11 @@
       "area": "checker-state",
       "module": "Ps.KernelSelfHost.Checker.State",
       "legacyShim": "Ps.KernelSelfHost.CheckerState"
+    },
+    {
+      "area": "lean434-native-reduction",
+      "module": "Ps.KernelSelfHost.Runtime.Capability.Lean434NativeReduction",
+      "legacyShim": "Ps.KernelSelfHost.Runtime.NativeReduction"
     }
   ]
 }

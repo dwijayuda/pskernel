@@ -1,5 +1,5 @@
 import Ps.KernelSelfHost.Runtime.EnvironmentIndex
-import Ps.KernelSelfHost.Runtime.NativeReduction
+import Ps.KernelSelfHost.Runtime.Capability.Lean434NativeReduction
 
 def psKernelNameListContains
     (needle : PsKernelName)

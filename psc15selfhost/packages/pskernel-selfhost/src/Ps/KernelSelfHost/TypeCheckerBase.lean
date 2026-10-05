@@ -1,5 +1,5 @@
 import Ps.KernelSelfHost.Environment
-import Ps.KernelSelfHost.Runtime.NativeReduction
+import Ps.KernelSelfHost.Runtime.Capability.Lean434NativeReduction
 import Ps.KernelSelfHost.LocalContext
 import Ps.KernelSelfHost.Instantiate
 import Ps.KernelSelfHost.Checker.State

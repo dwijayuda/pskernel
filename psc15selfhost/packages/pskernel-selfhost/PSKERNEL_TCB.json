@@ -43,13 +43,12 @@
   "capabilityTCB": [
     {
       "component": "Lean 4.34 native reduction capability",
-      "path": "src/Ps/KernelSelfHost/Runtime/NativeReduction.lean",
+      "path": "src/Ps/KernelSelfHost/Runtime/Capability/Lean434NativeReduction.lean",
       "semanticRole": "trusted-capability",
       "trustStatus": "trusted",
       "canAffectAcceptance": true,
       "optional": true,
-      "targetSpecific": "Lean 4.34",
-      "finalOwner": "Runtime/Capability/Lean434NativeReduction.lean"
+      "targetSpecific": "Lean 4.34"
     }
   ],
   "executionTCB": [

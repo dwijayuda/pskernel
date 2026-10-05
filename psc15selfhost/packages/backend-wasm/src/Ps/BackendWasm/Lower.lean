@@ -2719,6 +2719,73 @@ def psWasmLowerArraySetIfInBoundsWith
                         state := (Prod.snd allocatedOutput)
                       }
 
+def psWasmLowerBoolUnaryWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match arguments with
+  | List.nil =>
+      Except.error PsWasmLowerError.invalidIntrinsicArity
+  | List.cons value rest =>
+      match rest with
+      | List.cons _ _ =>
+          Except.error PsWasmLowerError.invalidIntrinsicArity
+      | List.nil =>
+          match
+              lower
+                (Option.some PsWasmValueType.i32)
+                state
+                value with
+          | Except.error error => Except.error error
+          | Except.ok lowered =>
+              Except.ok {
+                instructions :=
+                  psListAppend
+                    lowered.instructions
+                    [
+                      PsWasmInstruction.i32Const 0,
+                      PsWasmInstruction.i32Eq
+                    ]
+                state := lowered.state
+              }
+
+def psWasmLowerBoolBinaryWith
+    (lower :
+      Option PsWasmValueType ->
+      PsWasmLowerState ->
+      PsVerifiedIrExpr ->
+        Except PsWasmLowerError PsWasmLoweredExpr)
+    (state : PsWasmLowerState)
+    (instruction : PsWasmInstruction)
+    (arguments : List PsVerifiedIrExpr) :
+    Except PsWasmLowerError PsWasmLoweredExpr :=
+  match psWasmListPair? arguments with
+  | Option.none =>
+      Except.error PsWasmLowerError.invalidIntrinsicArity
+  | Option.some pair =>
+      let left := Prod.fst pair;
+      let right := Prod.snd pair;
+      match
+          psWasmLowerExprListWith
+            lower
+            (Option.some PsWasmValueType.i32)
+            state
+            [left, right] with
+      | Except.error error => Except.error error
+      | Except.ok lowered =>
+          Except.ok {
+            instructions :=
+              psListAppend
+                lowered.instructions
+                [instruction]
+            state := lowered.state
+          }
+
 def psWasmLowerIntrinsicWith
     (profile : PsWasmTargetProfile)
     (lower :
@@ -2897,6 +2964,21 @@ def psWasmLowerIntrinsicWith
   | .intLt =>
       psWasmLowerIntCompareWith
         lower state PsWasmInstruction.i32LtS arguments
+  | .boolNot =>
+      psWasmLowerBoolUnaryWith
+        lower state arguments
+  | .boolAnd =>
+      psWasmLowerBoolBinaryWith
+        lower state PsWasmInstruction.i32And arguments
+  | .boolOr =>
+      psWasmLowerBoolBinaryWith
+        lower state PsWasmInstruction.i32Or arguments
+  | .boolEq =>
+      psWasmLowerBoolBinaryWith
+        lower state PsWasmInstruction.i32Eq arguments
+  | .boolNe =>
+      psWasmLowerBoolBinaryWith
+        lower state PsWasmInstruction.i32Ne arguments
   | .arrayEmptyWithCapacity =>
       psWasmLowerArrayEmptyWithCapacityWith
         profile lower state typeArguments arguments

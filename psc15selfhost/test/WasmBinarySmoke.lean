@@ -29,6 +29,94 @@ def psWasmSmokeArrayType
 def psWasmSmokeNatLiteral (value : Nat) : PsVerifiedIrExpr :=
   PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural value)
 
+def psWasmSmokeStringType : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+
+def psWasmSmokeCharType : PsVerifiedIrType :=
+  PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.char
+
+def psWasmSmokeStringLiteral
+    (value : String) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.literal
+    (PsVerifiedIrLiteral.string value)
+
+def psWasmSmokeCharOfNat
+    (value : Nat) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.charOfNat
+    []
+    [psWasmSmokeNatLiteral value]
+
+def psWasmSmokeStringPush
+    (value char : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.stringPush
+    []
+    [value, char]
+
+def psWasmSmokeStringSingleton
+    (char : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.stringSingleton
+    []
+    [char]
+
+def psWasmSmokeStringLength
+    (value : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.stringLength
+    []
+    [value]
+
+def psWasmSmokeStringAppend
+    (left right : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.stringAppend
+    []
+    [left, right]
+
+def psWasmSmokeStringUtf8ByteSize
+    (value : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.stringUtf8ByteSize
+    []
+    [value]
+
+def psWasmSmokeStringNext
+    (value position : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.stringNext
+    []
+    [value, position]
+
+def psWasmSmokeStringGet
+    (value position : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.stringGet
+    []
+    [value, position]
+
+def psWasmSmokeStringAtEnd
+    (value position : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.stringAtEnd
+    []
+    [value, position]
+
+def psWasmSmokeStringExtract
+    (value begin endPos : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.stringExtract
+    []
+    [value, begin, endPos]
+
+def psWasmSmokeStringEq
+    (left right : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.intrinsic
+    PsVerifiedIrIntrinsic.stringEq
+    []
+    [left, right]
+
 def psWasmSmokeU32Literal (value : Int) : PsVerifiedIrExpr :=
   PsVerifiedIrExpr.literal
     (PsVerifiedIrLiteral.machineInteger
@@ -1501,6 +1589,181 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
                 PsVerifiedIrExpr.literal
                 (PsVerifiedIrLiteral.integer (42))
               ]
+      },
+
+      {
+        name := "stringLiteralLengthExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              psWasmSmokeStringLength
+                (psWasmSmokeStringLiteral "Aé😀"),
+              psWasmSmokeNatLiteral 3
+            ]
+      },
+      {
+        name := "stringUtf8ByteSizeExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              psWasmSmokeStringUtf8ByteSize
+                (psWasmSmokeStringLiteral "Aé😀"),
+              psWasmSmokeNatLiteral 7
+            ]
+      },
+      {
+        name := "stringNextUnicodeExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              psWasmSmokeStringNext
+                (psWasmSmokeStringLiteral "Aé😀")
+                (psWasmSmokeNatLiteral 1),
+              psWasmSmokeNatLiteral 3
+            ]
+      },
+      {
+        name := "stringNextMisalignedExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          PsVerifiedIrExpr.intrinsic
+            PsVerifiedIrIntrinsic.natEq
+            []
+            [
+              psWasmSmokeStringNext
+                (psWasmSmokeStringLiteral "Aé😀")
+                (psWasmSmokeNatLiteral 2),
+              psWasmSmokeNatLiteral 3
+            ]
+      },
+      {
+        name := "stringGetUnicode"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeCharType
+        body :=
+          psWasmSmokeStringGet
+            (psWasmSmokeStringLiteral "Aé😀")
+            (psWasmSmokeNatLiteral 3)
+      },
+      {
+        name := "stringGetMisaligned"
+        typeParameters := []
+        parameters := []
+        resultType := psWasmSmokeCharType
+        body :=
+          psWasmSmokeStringGet
+            (psWasmSmokeStringLiteral "Aé😀")
+            (psWasmSmokeNatLiteral 2)
+      },
+      {
+        name := "stringAtEndExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          psWasmSmokeStringAtEnd
+            (psWasmSmokeStringLiteral "Aé😀")
+            (psWasmSmokeNatLiteral 7)
+      },
+      {
+        name := "stringAppendExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          psWasmSmokeStringEq
+            (psWasmSmokeStringAppend
+              (psWasmSmokeStringLiteral "Aé")
+              (psWasmSmokeStringLiteral "😀"))
+            (psWasmSmokeStringLiteral "Aé😀")
+      },
+      {
+        name := "stringPushExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          psWasmSmokeStringEq
+            (psWasmSmokeStringPush
+              (psWasmSmokeStringLiteral "Aé")
+              (psWasmSmokeCharOfNat 128512))
+            (psWasmSmokeStringLiteral "Aé😀")
+      },
+      {
+        name := "stringSingletonExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          psWasmSmokeStringEq
+            (psWasmSmokeStringSingleton
+              (psWasmSmokeCharOfNat 233))
+            (psWasmSmokeStringLiteral "é")
+      },
+      {
+        name := "stringExtractExact"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          psWasmSmokeStringEq
+            (psWasmSmokeStringExtract
+              (psWasmSmokeStringLiteral "Aé😀")
+              (psWasmSmokeNatLiteral 1)
+              (psWasmSmokeNatLiteral 7))
+            (psWasmSmokeStringLiteral "é😀")
+      },
+      {
+        name := "stringExtractMisalignedEmpty"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          psWasmSmokeStringEq
+            (psWasmSmokeStringExtract
+              (psWasmSmokeStringLiteral "Aé😀")
+              (psWasmSmokeNatLiteral 2)
+              (psWasmSmokeNatLiteral 7))
+            (psWasmSmokeStringLiteral "")
+      },
+      {
+        name := "stringEqMismatch"
+        typeParameters := []
+        parameters := []
+        resultType :=
+          PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          psWasmSmokeStringEq
+            (psWasmSmokeStringLiteral "Aé😀")
+            (psWasmSmokeStringLiteral "Aé😁")
       },
 
       {

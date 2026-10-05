@@ -133,6 +133,23 @@ if (layerSet.size !== manifest.targetLayers.length) {
 if (!manifest.migration.finalArchitectureAdopted) {
   throw new Error("PSC1KERNEL_ARCH_REFERENCE_NOT_ADOPTED");
 }
+for (const shim of manifest.migration.migrationShims ?? []) {
+  if (seen.has(shim)) {
+    throw new Error("PSC1KERNEL_ARCH_SHIM_IN_SEMANTIC_ROOT: " + shim);
+  }
+}
+
+for (const owner of manifest.canonicalOwners ?? []) {
+  if (!seen.has(owner.module)) {
+    throw new Error(
+      "PSC1KERNEL_ARCH_CANONICAL_OWNER_NOT_IN_CLOSURE: " +
+        owner.area +
+        ": " +
+        owner.module
+    );
+  }
+}
+
 if (manifest.migration.finalArchitectureImplemented) {
   throw new Error(
     "PSC1KERNEL_ARCH_MIGRATION_STATUS: final architecture is not yet fully migrated"

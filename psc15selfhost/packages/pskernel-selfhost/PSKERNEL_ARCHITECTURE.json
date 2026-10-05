@@ -10,11 +10,14 @@
   "semanticRootPath": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
   "semanticModulePrefix": "Ps.KernelSelfHost.",
   "migration": {
-    "phase": "B1-foundation-suite-split",
+    "phase": "B3-checker-state-owner",
     "finalArchitectureAdopted": true,
     "finalArchitectureImplemented": false,
     "compatibilityShimsAllowedDuringMigration": true,
-    "compatibilityShimsAllowedInSemanticRoot": false
+    "compatibilityShimsAllowedInSemanticRoot": false,
+    "migrationShims": [
+      "Ps.KernelSelfHost.CheckerState"
+    ]
   },
   "semanticRoles": [
     "logical-rule",
@@ -69,5 +72,12 @@
     "KernelSelfHost.Foundation.",
     "KernelSelfHost.Bench."
   ],
-  "tcbManifest": "PSKERNEL_TCB.json"
+  "tcbManifest": "PSKERNEL_TCB.json",
+  "canonicalOwners": [
+    {
+      "area": "checker-state",
+      "module": "Ps.KernelSelfHost.Checker.State",
+      "legacyShim": "Ps.KernelSelfHost.CheckerState"
+    }
+  ]
 }

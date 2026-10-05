@@ -65,7 +65,13 @@ def psWasmLowerResultType
     (type : PsVerifiedIrType) :
     Except PsWasmLowerError (List PsWasmValueType) :=
   match type with
-  | .primitive .unit => Except.ok []
+  | .primitive primitive =>
+      match primitive with
+      | .unit => Except.ok []
+      | _ =>
+          match psWasmValueTypeOfIrType? profile type with
+          | Option.none => Except.error PsWasmLowerError.unsupportedType
+          | Option.some valueType => Except.ok [valueType]
   | _ =>
       match psWasmValueTypeOfIrType? profile type with
       | Option.none => Except.error PsWasmLowerError.unsupportedType
@@ -1205,14 +1211,17 @@ def psWasmStructGetInstruction
     (fieldIndex : Nat)
     (type : PsVerifiedIrType) : PsWasmInstruction :=
   match type with
-  | .primitive .uint8 =>
-      PsWasmInstruction.structGetU structureName fieldIndex
-  | .primitive .uint16 =>
-      PsWasmInstruction.structGetU structureName fieldIndex
-  | .primitive .int8 =>
-      PsWasmInstruction.structGetS structureName fieldIndex
-  | .primitive .int16 =>
-      PsWasmInstruction.structGetS structureName fieldIndex
+  | .primitive primitive =>
+      match primitive with
+      | .uint8 =>
+          PsWasmInstruction.structGetU structureName fieldIndex
+      | .uint16 =>
+          PsWasmInstruction.structGetU structureName fieldIndex
+      | .int8 =>
+          PsWasmInstruction.structGetS structureName fieldIndex
+      | .int16 =>
+          PsWasmInstruction.structGetS structureName fieldIndex
+      | _ => PsWasmInstruction.structGet structureName fieldIndex
   | _ => PsWasmInstruction.structGet structureName fieldIndex
 
 def psWasmLowerStructureField
@@ -2062,10 +2071,13 @@ def psWasmArrayGetInstruction
     (typeName : String)
     (elementType : PsVerifiedIrType) : PsWasmInstruction :=
   match elementType with
-  | .primitive .uint8 => PsWasmInstruction.arrayGetU typeName
-  | .primitive .uint16 => PsWasmInstruction.arrayGetU typeName
-  | .primitive .int8 => PsWasmInstruction.arrayGetS typeName
-  | .primitive .int16 => PsWasmInstruction.arrayGetS typeName
+  | .primitive primitive =>
+      match primitive with
+      | .uint8 => PsWasmInstruction.arrayGetU typeName
+      | .uint16 => PsWasmInstruction.arrayGetU typeName
+      | .int8 => PsWasmInstruction.arrayGetS typeName
+      | .int16 => PsWasmInstruction.arrayGetS typeName
+      | _ => PsWasmInstruction.arrayGet typeName
   | _ => PsWasmInstruction.arrayGet typeName
 
 def psWasmLowerArrayEmptyWithCapacityWith
@@ -3808,7 +3820,10 @@ def psWasmTypeUsesNatWithFuel
         fun (value : PsVerifiedIrType) =>
           psWasmTypeUsesNatWithFuel fuel value;
       match type with
-      | .primitive .nat => true
+      | .primitive primitive =>
+          match primitive with
+          | .nat => true
+          | _ => false
       | .function parameters result =>
           if psListAny usesType parameters then
             true
@@ -3970,7 +3985,10 @@ def psWasmTypeUsesIntWithFuel
         fun (value : PsVerifiedIrType) =>
           psWasmTypeUsesIntWithFuel fuel value;
       match type with
-      | .primitive .int => true
+      | .primitive primitive =>
+          match primitive with
+          | .int => true
+          | _ => false
       | .function parameters result =>
           if psListAny usesType parameters then
             true

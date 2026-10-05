@@ -215,7 +215,7 @@ def psWasmNatRuntimeFunctions : List PsWasmFunction :=
           PsWasmInstruction.ifStart (some PsWasmValueType.i32),
             PsWasmInstruction.i32Const 0,
           PsWasmInstruction.else_,
-            PsWasmInstruction.i32Const (-1),
+            PsWasmInstruction.i32Const (Int.negSucc 0),
           PsWasmInstruction.end_,
         PsWasmInstruction.else_,
           PsWasmInstruction.localGet 1,

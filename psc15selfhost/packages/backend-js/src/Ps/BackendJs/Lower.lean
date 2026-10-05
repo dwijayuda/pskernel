@@ -26,17 +26,23 @@ def psJsNatInRange
 
 def psJsIdentifierFirstCharAllowed
     (char : Char) : Bool :=
-  let value := Char.toNat char;
-  psJsNatInRange value 65 90
-    || psJsNatInRange value 97 122
-    || Nat.beq value 95
-    || Nat.beq value 36
+  let value : Nat := Char.toNat char;
+  if psJsNatInRange value 65 90 then
+    true
+  else if psJsNatInRange value 97 122 then
+    true
+  else if Nat.beq value 95 then
+    true
+  else
+    Nat.beq value 36
 
 def psJsIdentifierRestCharAllowed
     (char : Char) : Bool :=
-  let value := Char.toNat char;
-  psJsIdentifierFirstCharAllowed char
-    || psJsNatInRange value 48 57
+  let value : Nat := Char.toNat char;
+  if psJsIdentifierFirstCharAllowed char then
+    true
+  else
+    psJsNatInRange value 48 57
 
 def psJsIdentifierRestSupported
     (chars : List Char) : Bool :=
@@ -50,54 +56,55 @@ def psJsIdentifierRestSupported
 
 def psJsIdentifierKeyword
     (value : String) : Bool :=
-  psStringEq value "arguments"
-    || psStringEq value "await"
-    || psStringEq value "break"
-    || psStringEq value "case"
-    || psStringEq value "catch"
-    || psStringEq value "class"
-    || psStringEq value "const"
-    || psStringEq value "continue"
-    || psStringEq value "debugger"
-    || psStringEq value "default"
-    || psStringEq value "delete"
-    || psStringEq value "do"
-    || psStringEq value "else"
-    || psStringEq value "enum"
-    || psStringEq value "export"
-    || psStringEq value "eval"
-    || psStringEq value "extends"
-    || psStringEq value "false"
-    || psStringEq value "finally"
-    || psStringEq value "for"
-    || psStringEq value "function"
-    || psStringEq value "if"
-    || psStringEq value "implements"
-    || psStringEq value "import"
-    || psStringEq value "in"
-    || psStringEq value "interface"
-    || psStringEq value "instanceof"
-    || psStringEq value "let"
-    || psStringEq value "new"
-    || psStringEq value "null"
-    || psStringEq value "package"
-    || psStringEq value "private"
-    || psStringEq value "protected"
-    || psStringEq value "public"
-    || psStringEq value "return"
-    || psStringEq value "static"
-    || psStringEq value "super"
-    || psStringEq value "switch"
-    || psStringEq value "this"
-    || psStringEq value "throw"
-    || psStringEq value "true"
-    || psStringEq value "try"
-    || psStringEq value "typeof"
-    || psStringEq value "var"
-    || psStringEq value "void"
-    || psStringEq value "while"
-    || psStringEq value "with"
-    || psStringEq value "yield"
+  if psStringEq value "arguments" then true
+  else if psStringEq value "await" then true
+  else if psStringEq value "break" then true
+  else if psStringEq value "case" then true
+  else if psStringEq value "catch" then true
+  else if psStringEq value "class" then true
+  else if psStringEq value "const" then true
+  else if psStringEq value "continue" then true
+  else if psStringEq value "debugger" then true
+  else if psStringEq value "default" then true
+  else if psStringEq value "delete" then true
+  else if psStringEq value "do" then true
+  else if psStringEq value "else" then true
+  else if psStringEq value "enum" then true
+  else if psStringEq value "export" then true
+  else if psStringEq value "eval" then true
+  else if psStringEq value "extends" then true
+  else if psStringEq value "false" then true
+  else if psStringEq value "finally" then true
+  else if psStringEq value "for" then true
+  else if psStringEq value "function" then true
+  else if psStringEq value "if" then true
+  else if psStringEq value "implements" then true
+  else if psStringEq value "import" then true
+  else if psStringEq value "in" then true
+  else if psStringEq value "interface" then true
+  else if psStringEq value "instanceof" then true
+  else if psStringEq value "let" then true
+  else if psStringEq value "new" then true
+  else if psStringEq value "null" then true
+  else if psStringEq value "package" then true
+  else if psStringEq value "private" then true
+  else if psStringEq value "protected" then true
+  else if psStringEq value "public" then true
+  else if psStringEq value "return" then true
+  else if psStringEq value "static" then true
+  else if psStringEq value "super" then true
+  else if psStringEq value "switch" then true
+  else if psStringEq value "this" then true
+  else if psStringEq value "throw" then true
+  else if psStringEq value "true" then true
+  else if psStringEq value "try" then true
+  else if psStringEq value "typeof" then true
+  else if psStringEq value "var" then true
+  else if psStringEq value "void" then true
+  else if psStringEq value "while" then true
+  else if psStringEq value "with" then true
+  else
+    psStringEq value "yield"
 
 def psJsIdentifierSupported
     (value : String) : Bool :=

@@ -1154,7 +1154,7 @@ def psWasmFindStructureFieldLoop
         some (index, field)
       else
         psWasmFindStructureFieldLoop
-          fieldName (index + 1) rest
+          fieldName (Nat.add index 1) rest
 
 def psWasmFindStructureField
     (structInfo : PsVerifiedIrStructure)
@@ -1278,7 +1278,7 @@ def psWasmFindConstructorFieldLoop
         some (index, field)
       else
         psWasmFindConstructorFieldLoop
-          fieldName (index + 1) rest
+          fieldName (Nat.add index 1) rest
 
 def psWasmFindConstructorField
     (constructorInfo : PsVerifiedIrConstructor)
@@ -1393,7 +1393,7 @@ def psWasmParameterBindingsLoop :
           type := parameter.type
         }
         (psWasmParameterBindingsLoop
-          (index + 1)
+          (Nat.add index 1)
           rest)
 
 def psWasmParameterBindings
@@ -1608,7 +1608,7 @@ def psWasmParameterBindingsFrom
           type := parameter.type
         }
         (psWasmParameterBindingsFrom
-          (firstIndex + 1)
+          (Nat.add firstIndex 1)
           rest)
 
 def psWasmAddLocal
@@ -1619,7 +1619,7 @@ def psWasmAddLocal
   (
     index,
     {
-      nextLocalIndex := index + 1
+      nextLocalIndex := Nat.add index 1
       localTypes := state.localTypes ++ [type]
       currentDefinition := state.currentDefinition
       nextLambdaId := state.nextLambdaId
@@ -3077,7 +3077,7 @@ def psWasmPrepareCaptureBindings
               psWasmPrepareCaptureBindings
                 profile
                 subtypeName
-                (fieldIndex + 1)
+                (Nat.add fieldIndex 1)
                 nextState
                 rest with
           | Except.error error => Except.error error
@@ -3119,7 +3119,7 @@ def psWasmAdvanceLambdaId
     nextLocalIndex := state.nextLocalIndex
     localTypes := state.localTypes
     currentDefinition := state.currentDefinition
-    nextLambdaId := state.nextLambdaId + 1
+    nextLambdaId := Nat.add state.nextLambdaId 1
     generatedStructures := state.generatedStructures
     generatedFunctionTypes := state.generatedFunctionTypes
     generatedFunctions := state.generatedFunctions
@@ -3216,7 +3216,7 @@ def psWasmLowerLambdaWith
                           let nestedState :=
                             psWasmStateForNestedFunction
                               advancedState
-                              (parameters.length + 1)
+                              (Nat.add parameters.length 1)
                           match
                               psWasmPrepareCaptureBindings
                                 profile

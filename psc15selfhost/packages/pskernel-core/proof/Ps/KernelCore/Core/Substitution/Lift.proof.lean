@@ -61,11 +61,13 @@ theorem psKernelExprLiftLooseBVars_bvar
       else
         PsKernelExpr.bvar index := by
   cases amount <;>
+    cases h : psKernelNatGe index start <;>
     simp [
       psKernelExprLiftLooseBVars,
       psKernelExprLiftLooseBVarsChanged,
       psKernelExprLiftLooseBVarsChangedWithFuel,
-      psKernelExprNodeCount
+      psKernelExprNodeCount,
+      h
     ]
 
 theorem psKernelExprLiftLooseBVars_bvar_hit

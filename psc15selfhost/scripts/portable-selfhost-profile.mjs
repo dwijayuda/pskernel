@@ -3,7 +3,10 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { findForbiddenForms, readSelfhostProfile } from './selfhost-profile.mjs';
-import { findSelfhostStructuralViolations } from './selfhost-source-rules.mjs';
+import {
+  findSelfhostStructuralViolations,
+  portableSelfhostStructuralRuleIds,
+} from './selfhost-source-rules.mjs';
 import { packageBySection, parseImports } from './workspace-layout.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -47,6 +50,12 @@ async function selectedPackages(profile, packageFilter) {
     if (!existsSync(manifestPath)) continue;
     const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
     if (manifest.proofscript?.implementationProfile !== profile.profile) continue;
+    if (manifest.proofscript?.portable !== true) {
+      throw new Error('PSC1_PORTABLE_SELFHOST_PACKAGE_NOT_PORTABLE: ' + entry.name);
+    }
+    if (manifest.proofscript?.bootstrap === true) {
+      throw new Error('PSC1_PORTABLE_SELFHOST_BOOTSTRAP_PROFILE_MISMATCH: ' + entry.name);
+    }
     const roots = [];
     for (const sourceRoot of manifest.proofscript?.sourceRoots ?? []) {
       walkLeanFiles(path.resolve(packageRoot, sourceRoot), roots);
@@ -101,6 +110,16 @@ function assertProfile(profile) {
   }
   if (!Array.isArray(profile.structuralRules) || profile.structuralRules.length === 0) {
     throw new Error('PSC1_PORTABLE_SELFHOST_STRUCTURAL_RULES');
+  }
+  const implemented = new Set(portableSelfhostStructuralRuleIds);
+  const unknown = profile.structuralRules.filter(rule => !implemented.has(rule));
+  if (unknown.length > 0) {
+    throw new Error(
+      'PSC1_PORTABLE_SELFHOST_UNKNOWN_STRUCTURAL_RULES: ' + unknown.join(','),
+    );
+  }
+  if (new Set(profile.structuralRules).size !== profile.structuralRules.length) {
+    throw new Error('PSC1_PORTABLE_SELFHOST_DUPLICATE_STRUCTURAL_RULES');
   }
 }
 

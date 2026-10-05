@@ -1052,6 +1052,18 @@ def psWasmEncodeSection
       (psWasmEncodeUleb (psListLength payload))
       payload)
 
+def psWasmEncodeTypeSectionPayload
+    (encodedTypes : List UInt8)
+    (typeCount : Nat) : List UInt8 :=
+  if Nat.beq typeCount 0 then
+    psWasmEncodeVector List.nil 0
+  else
+    let recursiveGroup : List UInt8 :=
+      psListAppend
+        [psWasmByte 78]
+        (psWasmEncodeVector encodedTypes typeCount);
+    psWasmEncodeVector recursiveGroup 1
+
 def psWasmEncodeModule
     (module : PsWasmModule) :
     Except PsWasmEncodeError (List UInt8) :=
@@ -1112,7 +1124,7 @@ def psWasmEncodeModule
                                     module.functions with
                               | Except.error error => Except.error error
                               | Except.ok encodedBodies =>
-                                  let typeCount :=
+                                  let typeCount : Nat :=
                                     Nat.add
                                       (Nat.add
                                         (Nat.add
@@ -1120,9 +1132,17 @@ def psWasmEncodeModule
                                           (psListLength module.arrays))
                                         (psListLength module.functionTypes))
                                       (psListLength module.functions);
-                                  let typePayload :=
-                                    psWasmEncodeVector
-                                      (psListAppend encodedStructTypes (psListAppend encodedArrayTypes (psListAppend encodedNamedFunctionTypes encodedFunctionTypes)))
+                                  let encodedTypes : List UInt8 :=
+                                    psListAppend
+                                      encodedStructTypes
+                                      (psListAppend
+                                        encodedArrayTypes
+                                        (psListAppend
+                                          encodedNamedFunctionTypes
+                                          encodedFunctionTypes));
+                                  let typePayload : List UInt8 :=
+                                    psWasmEncodeTypeSectionPayload
+                                      encodedTypes
                                       typeCount;
                                   let functionPayload :=
                                     psWasmEncodeVector

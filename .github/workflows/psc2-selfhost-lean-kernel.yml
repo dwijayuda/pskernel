@@ -1,7 +1,6 @@
-name: PSC2 selfhost with Lean kernel
+name: PSC2 full selfhost with Lean kernel (manual)
 on:
-  push:
-    branches: [psc2/selfhost-lean-kernel]
+  # Full fixed-point checks are opt-in; bounded integration runs in psc15selfhost-cloud.yml.
   workflow_dispatch:
 permissions:
   contents: read

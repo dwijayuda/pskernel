@@ -22,15 +22,15 @@ Purpose:
 
 This is the main branch for self-host architecture and compiler/bootstrap work. Future work on this branch must prioritize fixed-point correctness, bootstrap closure, portable source discipline, frontend/elaboration, admission-ready boundary, erasure, VerifiedIR, TS bootstrap composition, source generation, and self-host gates.
 
-### `psc2/pskernel-core`
+### `psc2/pskernel-core.old3`
 
 Authoritative owner: the **minimal trusted kernel-core workstream**.
 
 Purpose:
-- develop `psc15selfhost/packages/pskernel-core` only as the new small portable kernel implementation;
+- develop `psc15selfhost/packages/pskernel-core.old3` only as the new small portable kernel implementation;
 - use the mature `psc15selfhost/packages/pskernel` implementation as reference/oracle where appropriate;
 - implement and test foundational semantics such as Name, Level, Expr, substitution/instantiation, declarations, environments, reduction, definitional equality, type checking, and later kernel admission;
-- keep `pskernel-core` outside the active self-host bootstrap closure until its integration milestone is explicitly accepted;
+- keep `pskernel-core.old3` outside the active self-host bootstrap closure until its integration milestone is explicitly accepted;
 - avoid changing compiler/bootstrap architecture merely to make kernel development convenient.
 
 The branch was created from shared head `72f32ac718ae75725ca3d63aa28477bccf897927` so no kernel-core work already committed on the previously shared branch is lost.
@@ -105,21 +105,21 @@ The self-host workstream established these design decisions:
 - `psc15selfhost/lakefile.lean`
 - self-host architecture, bootstrap and acceptance documentation
 
-The main chat may read kernel packages but should not develop `pskernel-core` internals in parallel with the kernel chat.
+The main chat may read kernel packages but should not develop `pskernel-core.old3` internals in parallel with the kernel chat.
 
 ### Kernel-core branch normally owns
 
-- `psc15selfhost/packages/pskernel-core/**`
+- `psc15selfhost/packages/pskernel-core.old3/**`
 - kernel-core differential/parity tests
 - kernel-core-specific source-profile checks
 - kernel-core-specific plans/docs/gates
 
-If kernel-core work requires a change to shared files such as `lakefile.lean`, `package.json` or bootstrap-closure scripts, keep that change as narrowly scoped as possible and do not make `pskernel-core` part of the bootstrap closure unless an explicit integration milestone has been approved.
+If kernel-core work requires a change to shared files such as `lakefile.lean`, `package.json` or bootstrap-closure scripts, keep that change as narrowly scoped as possible and do not make `pskernel-core.old3` part of the bootstrap closure unless an explicit integration milestone has been approved.
 
 ## Integration rules
 
 1. Do not push new kernel-core feature work directly to `psc2/minimal-selfhost-psc15`.
-2. Do not push self-host/compiler refactors directly to `psc2/pskernel-core` except when synchronizing from the minimal branch.
+2. Do not push self-host/compiler refactors directly to `psc2/pskernel-core.old3` except when synchronizing from the minimal branch.
 3. Kernel work may periodically merge/rebase the latest minimal-selfhost architecture so it stays compatible.
 4. Minimal-selfhost must not automatically absorb kernel-core changes just because they exist. Integration happens only when the kernel has a concrete provider boundary and the self-host branch is ready to consume it.
 5. Before integration, require both workstreams' gates to pass independently.
@@ -130,11 +130,11 @@ If kernel-core work requires a change to shared files such as `lakefile.lean`, `
 
 ### Minimal-selfhost workstream
 
-Continue reducing and verifying the bootstrap closure, run/fix the real Lean/bootstrap/self-host/fixed-point gates, keep `pskernel-core` excluded, and close the smallest stable PSC2 compiler fixed point before adding broad PSC2 features.
+Continue reducing and verifying the bootstrap closure, run/fix the real Lean/bootstrap/self-host/fixed-point gates, keep `pskernel-core.old3` excluded, and close the smallest stable PSC2 compiler fixed point before adding broad PSC2 features.
 
 ### Kernel-core workstream
 
-Continue only on `psc2/pskernel-core`, complete the minimal portable kernel in independently testable slices, and treat the mature PSC1 kernel / Lean 4.34 behavior as reference evidence. Do not modify the active bootstrap path until a deliberate kernel-provider integration milestone.
+Continue only on `psc2/pskernel-core.old3`, complete the minimal portable kernel in independently testable slices, and treat the mature PSC1 kernel / Lean 4.34 behavior as reference evidence. Do not modify the active bootstrap path until a deliberate kernel-provider integration milestone.
 
 ## Source of truth
 

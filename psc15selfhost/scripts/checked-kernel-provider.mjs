@@ -12,11 +12,11 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const nativeSuffix = process.platform === 'win32' ? '.exe' : '';
 
 export const defaultCheckedKernel = 'lean434-wasm';
-export const checkedKernelSelectors = Object.freeze(['lean434-wasm', 'lean434', 'pskernel-core.old2']);
+export const checkedKernelSelectors = Object.freeze(['lean434-wasm', 'lean434', 'pskernel-core.old3']);
 
 const descriptors = Object.freeze({
-  'pskernel-core.old2': Object.freeze({
-    selector: 'pskernel-core.old2', package: '@proofscript/pskernel-core.old2',
+  'pskernel-core.old3': Object.freeze({
+    selector: 'pskernel-core.old3', package: '@proofscript/pskernel-core.old3',
     execution: 'psc-generated-js', version: ownedCheckedIdentity.version,
     generatedKernelSha256: ownedCheckedIdentity.generatedKernelSha256,
     sourceManifestSha256: ownedCheckedIdentity.sourceManifestSha256,
@@ -69,7 +69,7 @@ export async function checkAdmissionsWithKernel(
   const timeoutMs = options.timeoutMs ?? 60000;
   let result;
 
-  if (selector === 'pskernel-core.old2') {
+  if (selector === 'pskernel-core.old3') {
     const provider = await import('./checked-owned-kernel.mjs');
     result = await provider.checkOwnedAdmissions(admissions, {
       timeoutMs,

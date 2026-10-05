@@ -47,6 +47,7 @@ const expectedForbidden = [
   "backend-wasm",
   "pskernel",
   "pskernel-core",
+  "pskernel-core.old3",
   "pskernel-lean",
   "pskernel-lean-wasm",
 ];

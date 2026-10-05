@@ -179,7 +179,7 @@ lean_lib PsElab where
   ]
 
 lean_lib PsKernelOwned where
-  srcDir := "packages/pskernel-core/src"
+  srcDir := "packages/pskernel-core.old3/src"
   roots := #[
     `Ps.Kernel.Data, `Ps.Kernel.Structural, `Ps.Kernel.Natural,
     `Ps.Kernel.Expr, `Ps.Kernel.Binding, `Ps.Kernel.Order,
@@ -194,7 +194,126 @@ lean_lib PSC1KernelReferenceFoundations where
   roots := #[
     `PSC1Kernel.Name,
     `PSC1Kernel.Level,
-    `PSC1Kernel.Expr
+    `PSC1Kernel.Expr,
+    `PSC1Kernel.Instantiate,
+    `PSC1Kernel.Declaration,
+    `PSC1Kernel.Environment,
+    `PSC1Kernel.LocalContext,
+    `PSC1Kernel.TypeChecker,
+    `PSC1Kernel.CheckerState,
+    `PSC1Kernel.CheckerStateful,
+    `PSC1Kernel.CheckerReductionStateful,
+    `PSC1Kernel.CheckerLazyDeltaStateful,
+    `PSC1Kernel.CheckerDefEqStateful,
+    `PSC1Kernel.CheckerDefEqStatefulClosed,
+    `PSC1Kernel.CheckerDefEqStatefulReduced,
+    `PSC1Kernel.CheckerRecursorStateful,
+    `PSC1Kernel.CheckerSession,
+    `PSC1Kernel.Quot,
+    `PSC1Kernel.Kernel,
+    `PSC1Kernel.Inductive,
+    `PSC1Kernel.MutualInductive,
+    `PSC1Kernel.NestedInductive
+  ]
+
+lean_lib PsKernelCore where
+  srcDir := "packages/pskernel-core/src"
+  roots := #[
+    `Ps.KernelCore.Core.Name,
+    `Ps.KernelCore.Core.Level,
+    `Ps.KernelCore.Core.Expr,
+    `Ps.KernelCore.Core.Substitution.ListOps,
+    `Ps.KernelCore.Core.Substitution.Lift,
+    `Ps.KernelCore.Core.Substitution.Instantiate,
+    `Ps.KernelCore.Core.Substitution.Beta,
+    `Ps.KernelCore.Core.Substitution.Abstract,
+    `Ps.KernelCore.Core.Declaration,
+    `Ps.KernelCore.Core.LocalContext,
+    `Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex,
+    `Ps.KernelCore.Environment.Operations,
+    `Ps.KernelCore.Runtime.Acceleration.Cache,
+    `Ps.KernelCore.Runtime.Acceleration.CachePolicy,
+    `Ps.KernelCore.Runtime.Capability.Lean434NativeReduction,
+    `Ps.KernelCore.Checker.State,
+    `Ps.KernelCore.Checker.Context,
+    `Ps.KernelCore.Checker.Ops,
+    `Ps.KernelCore.Checker.Knot,
+    `Ps.KernelCore.Checker.Reduction.PrimitiveData,
+    `Ps.KernelCore.Checker.Reduction.PrimitiveNat,
+    `Ps.KernelCore.Checker.Reduction.Primitives,
+    `Ps.KernelCore.Checker.Reduction.KernelReductions,
+    `Ps.KernelCore.Checker.Reduction.WhnfCore,
+    `Ps.KernelCore.Checker.Reduction.Whnf,
+    `Ps.KernelCore.Checker.Projection,
+    `Ps.KernelCore.Checker.Inference.Helpers,
+    `Ps.KernelCore.Checker.Inference.Core,
+    `Ps.KernelCore.Checker.Inference,
+    `Ps.KernelCore.Checker.Recursor.Analysis,
+    `Ps.KernelCore.Checker.Recursor.Reduction,
+    `Ps.KernelCore.Checker.DefEq.BinderSpines,
+    `Ps.KernelCore.Checker.DefEq.Quick,
+    `Ps.KernelCore.Checker.DefEq.Support,
+    `Ps.KernelCore.Checker.DefEq.DeltaStep,
+    `Ps.KernelCore.Checker.DefEq.LazyDelta,
+    `Ps.KernelCore.Checker.DefEq.FinalRules,
+    `Ps.KernelCore.Checker.DefEq.Shortcuts,
+    `Ps.KernelCore.Checker.DefEq.FullShape,
+    `Ps.KernelCore.Checker.Session,
+    `Ps.KernelCore.Admission.Declaration.Validation,
+    `Ps.KernelCore.Admission.Declaration.Admission,
+    `Ps.KernelCore.Admission.Quot.Bootstrap,
+    `Ps.KernelCore.Admission.Quot.Admission,
+    `Ps.KernelCore.Admission.Inductive.Common.Parameters,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Constructor,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.ConstructorAdmission,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Recursor,
+    `Ps.KernelCore.Admission.Inductive.Common.Elimination,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Admission,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Analysis,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Recursor,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Header,
+    `Ps.KernelCore.Admission.Inductive.Mutual.AdmissionLoops,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Admission,
+    `Ps.KernelCore.Admission.Inductive.Nested.Types,
+    `Ps.KernelCore.Admission.Inductive.Nested.ReservedNames,
+    `Ps.KernelCore.Admission.Inductive.Nested.Rebase,
+    `Ps.KernelCore.Admission.Inductive.Nested.Discover,
+    `Ps.KernelCore.Admission.Inductive.Nested.Flatten,
+    `Ps.KernelCore.Admission.Inductive.Nested.RestoreExpr,
+    `Ps.KernelCore.Admission.Inductive.Nested.Restore,
+    `Ps.KernelCore.Admission.Inductive.Nested.Validation,
+    `Ps.KernelCore.Admission.Inductive.Nested.Commit,
+    `Ps.KernelCore.Admission.Inductive.Nested.Admission,
+    `Ps.KernelCore.Admission.Inductive.Types,
+    `Ps.KernelCore.Admission.Inductive.Common.Occurrence,
+    `Ps.KernelCore.Admission.Inductive.Common.RecursorValidation,
+    `Ps.KernelCore.Environment.Semantic,
+    `Ps.KernelCore.Environment.Environment,
+    `Ps.KernelCore.Environment.Lookup,
+    `Ps.KernelCore.Runtime.Capability.Types,
+    `Ps.KernelCore.Checker.ResourcePolicy,
+    `Ps.KernelCore.API.Outcome,
+    `Ps.KernelCore.API.KernelContractV1,
+    `Ps.KernelCore.API.Provider,
+    `Ps.KernelCore.API.Session,
+    `Ps.KernelCore.API.Kernel,
+    `Ps.KernelCore.SelfHost
+  ]
+
+lean_lib PsKernelCoreTestSupport where
+  srcDir := "test"
+  roots := #[
+    `KernelCore.Foundation.KernelContract,
+    `KernelCore.Foundation.CheckerOps,
+    `KernelCore.Foundation.Core,
+    `KernelCore.Foundation.Checking,
+    `KernelCore.Foundation.DefEqNested,
+    `KernelCore.Foundation.AdmissionRuntime,
+    `KernelCore.Bench.Foundation,
+    `KernelCore.Bench.Inference,
+    `KernelCore.Bench.Inductive,
+    `KernelCore.Bench.Nested,
+    `KernelCore.Bench.CrossRuntime
   ]
 
 lean_lib PsCli where
@@ -295,6 +414,18 @@ lean_exe psc2_minimal_selfhost_tests where
 lean_exe psc2_prod_match_selfhost_tests where
   srcDir := "test"
   root := `ProdMatchSelfHostTests
+
+lean_exe psc1_kernel_core_foundation_tests where
+  srcDir := "test"
+  root := `PsKernelCoreFoundationTests
+
+lean_exe psc1_kernel_core_bench where
+  srcDir := "test"
+  root := `PsKernelCoreBench
+
+lean_exe psc1_kernel_cross_runtime_bench where
+  srcDir := "test"
+  root := `PsKernelCrossRuntimeBench
 
 -- Host-only diagnostics; this executable is not a portable bootstrap module.
 lean_exe psc2_joint_closure_inventory where

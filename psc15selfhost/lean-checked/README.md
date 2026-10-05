@@ -8,7 +8,7 @@ closure. The default checked provider is now `lean434-wasm`, provided by the bun
 | --- | --- | --- |
 | lean434-wasm | Lean 4.34.0 kernel in WebAssembly | Default checked provider |
 | lean434 | Native Lean 4.34.0 kernel | Explicit native reference alternative |
-| pskernel-core | PSC-generated owned JavaScript | Explicit experimental alternative; off-bootstrap |
+| pskernel-core.old3 | PSC-generated owned JavaScript | Explicit experimental alternative; off-bootstrap |
 
 No rejection, timeout, exhaustion or provider error selects another checker. The
 selected provider is recorded in every checked-build receipt.
@@ -40,7 +40,7 @@ Use the native reference alternative explicitly with:
 
 Use the experimental owned checker explicitly with:
 
-    node lean-checked/psc.mjs fixed-point --kernel pskernel-core
+    node lean-checked/psc.mjs fixed-point --kernel pskernel-core.old3
 
 Outputs are isolated under `dist/checked/<selector>/`. A successful checked fixed
 point means the generated compiler is repeatedly checked by the selected external

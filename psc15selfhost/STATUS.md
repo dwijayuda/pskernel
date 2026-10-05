@@ -10,11 +10,11 @@ contract freezes the historical set of 75 one-off self-host repair guards: it ma
 shrink, but new repair-guard names are rejected. Future self-host failures must become
 profile/contract invariants rather than new per-file repair tests. See `docs/SELFHOST_SOURCE_STANDARD.md`.
 
-The active toolchain policy is now native-first:
+The compiler toolchain is native-first; the checked-provider default remains WASM:
 
-- **default checked kernel:** `lean434` / `@proofscript/pskernel-lean`;
-- portable alternative: `lean434-wasm`;
-- experimental owned alternative: `pskernel-core`;
+- **default checked kernel:** `lean434-wasm` / `@proofscript/pskernel-lean-wasm`;
+- explicit native reference alternative: `lean434`;
+- experimental owned alternative: `pskernel-core.old3`;
 - TypeScript backend compiler: **TypeScript 7.0.2**;
 - native PSC executable: Lean 4.34-built `psc`.
 
@@ -40,11 +40,11 @@ The bundle works with Node removed from PATH: native `psc build` auto-detects th
 sibling native TypeScript compiler and reports `PSC2_TYPESCRIPT: 7.0.2`.
 
 The current-semantic slim native kernel accepts the preserved 55-module /
-1,916-declaration compiler admissions. WASM remains available only when explicitly
-selected; no failure causes automatic provider fallback.
+1,916-declaration compiler admissions. The native provider is selected explicitly; the WASM provider remains the default.
+No failure causes automatic provider fallback.
 
 The committed five-platform `pskernel-lean` npm prebuilts have not yet all been
-regenerated from the refreshed provider snapshot. Therefore the default checked source
+regenerated from the refreshed provider snapshot. Therefore the explicit native checked source
 path deliberately requires a freshly built native provider or
 `PSC_LEAN_KERNEL_PROVIDER_BIN` rather than silently using those older package
 prebuilts.
@@ -52,6 +52,10 @@ prebuilts.
 Remaining release evidence:
 
 1. rerun the complete compiler fixed point under TypeScript 7.0.2;
-2. rerun bootstrap/selfhost/repeat with the new native default kernel;
+2. rerun bootstrap/selfhost/repeat with the default WASM provider under TypeScript 7.0.2;
 3. regenerate and verify all five slim native kernel prebuilts;
 4. produce platform-native PSC toolchain bundles for the supported target matrix.
+
+The canonical portable kernel is now `packages/pskernel-core`. M3 is accepted
+against bounded workload budgets; M4 provider readiness remains open. The earlier
+owned checker remains archived as `pskernel-core.old3` and is explicit-only.

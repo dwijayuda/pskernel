@@ -23,7 +23,7 @@
     "test:kernel-contract": "node --test scripts/kernel-contract.test.mjs scripts/kernel-checked-session.test.mjs scripts/checked-kernel-provider.test.mjs",
     "check:checked-contract": "npm run test:kernel-contract && node scripts/check-owned-kernel-default-source.mjs",
     "check:kernel-owned": "node scripts/check-owned-kernel-receipt.mjs",
-    "test:kernel-owned": "node --test packages/pskernel-core.old2/test/*.test.mjs",
+    "test:kernel-owned": "node --test packages/pskernel-core.old3/test/*.test.mjs",
     "check:layout": "node scripts/check-layout-drift.mjs",
     "check:selfhost-project-prelude": "node scripts/check-selfhost-project-prelude.mjs",
     "check:selfhost-foundation": "node scripts/check-selfhost-foundation.mjs",

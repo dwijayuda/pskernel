@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "scope": "Monomorphic zero/successor strictly positive unary recursive family in Type, derived dependent recursor and owned checked Nat initialization; not general inductive completeness",
+  "sourceManifestSha256": "fe74eb30a78c2ff6b7295862c4988139b717cf7e2fe4e5ece7d131a6a1314513",
+  "harnessSha256": "0623e2155d2285a4f8dd3d528f26a63e40d377e4fa3d232fd868de3a89a9e4ac",
+  "provider": {
+    "protocol": "pskernel-lean/1",
+    "provider": "lean4-cpp",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "profile": "lean4.34-core",
+    "status": "version"
+  },
+  "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+  "cases": 201,
+  "matched": 201,
+  "accepted": 123,
+  "rejected": 78,
+  "deliberatelyUnsupported": [
+    "Prop or higher-sort families",
+    "term parameters and indices",
+    "additional/nonrecursive/higher-order fields",
+    "mutual and nested recursion"
+  ],
+  "recordsPath": "dist/evidence/nat-differential-records.json",
+  "recordsSha256": "5c51d7b299788400dc63cc4d10ee91f6a980ef8c77ba438f8e8ae3da9df7ff6d"
+}

@@ -4,10 +4,10 @@ import { defaultCheckedKernel, checkedKernelSelectors, checkedKernelDescriptor }
 import { bootstrapPackageViolation } from './bootstrap-closure-contract.mjs';
 
 assert.equal(defaultCheckedKernel, 'lean434-wasm');
-assert.deepEqual(checkedKernelSelectors, ['lean434-wasm', 'lean434', 'pskernel-core.old2']);
+assert.deepEqual(checkedKernelSelectors, ['lean434-wasm', 'lean434', 'pskernel-core.old3']);
 assert.equal(checkedKernelDescriptor().package, '@proofscript/pskernel-lean-wasm');
 assert.equal(checkedKernelDescriptor().execution, 'wasm-node');
-for (const name of ['pskernel-core.old2','pskernel-core','pskernel-lean','pskernel-lean-wasm','pskernel-core.old']) {
+for (const name of ['pskernel-core','pskernel-core.old2','pskernel-core.old3','pskernel-lean','pskernel-lean-wasm','pskernel-core.old']) {
   assert(bootstrapPackageViolation(name));
 }
 for (const file of ['checked-owned-kernel.mjs', 'checked-owned-kernel-worker.mjs']) {

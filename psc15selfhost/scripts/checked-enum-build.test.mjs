@@ -6,7 +6,7 @@ const ps='inductive OwnedMode where {\n  | read\n  | write\n  | idle\n}\nfunctio
 for(const kind of ['lean','ps'])test('real '+kind+' enumeration is owned-checked, emitted, and executed',{skip:!existsSync(seed)},async()=>{
  const dir=await mkdtemp(path.join(tmpdir(),'psc2-owned-enum-'));try{
   await writeFile(path.join(dir,'package.json'),'{"type":"module"}');const entryPath=path.join(dir,'Main.'+kind),outputPath=path.join(dir,'out.js');await writeFile(entryPath,kind==='lean'?lean:ps);
-  const receipt=await buildChecked({entryPath,outputPath,seedPath:seed,kernel:'pskernel-core.old2'});assert.equal(receipt.kernel.selector,'pskernel-core.old2');assert.equal(receipt.provider.profile,'owned-uniform-algebraic/11');
+  const receipt=await buildChecked({entryPath,outputPath,seedPath:seed,kernel:'pskernel-core.old3'});assert.equal(receipt.kernel.selector,'pskernel-core.old3');assert.equal(receipt.provider.profile,'owned-uniform-algebraic/11');
   const out=await import(pathToFileURL(outputPath).href);assert.equal(out.answer,11n);
   const admissions=JSON.parse(await readFile(path.join(dir,'out.admissions.json'),'utf8'));assert(admissions.admissions.some(a=>a.kind==='inductive'&&a.declaration.ts[0].cs.length===3));
  }finally{await rm(dir,{recursive:true,force:true});}
@@ -14,6 +14,6 @@ for(const kind of ['lean','ps'])test('real '+kind+' enumeration is owned-checked
 test('ill-typed enum branch cannot cause fallback or emit output',{skip:!existsSync(seed)},async()=>{
  const dir=await mkdtemp(path.join(tmpdir(),'psc2-owned-enum-reject-'));try{
   const entryPath=path.join(dir,'Main.lean'),outputPath=path.join(dir,'out.js');await writeFile(entryPath,lean.replace('OwnedMode.idle => 13','OwnedMode.idle => OwnedMode.read'));
-  await assert.rejects(buildChecked({entryPath,outputPath,seedPath:seed,kernel:'pskernel-core.old2'}));assert.equal(existsSync(outputPath),false);
+  await assert.rejects(buildChecked({entryPath,outputPath,seedPath:seed,kernel:'pskernel-core.old3'}));assert.equal(existsSync(outputPath),false);
  }finally{await rm(dir,{recursive:true,force:true});}
 });

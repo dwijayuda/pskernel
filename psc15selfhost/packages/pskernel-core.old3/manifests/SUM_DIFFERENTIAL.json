@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "scope": "Closed monomorphic Type-valued payload sums, constructor checks, derived dependent recursor typing and computed iota witnesses; not parameterized/recursive completeness",
+  "sourceManifestSha256": "fe74eb30a78c2ff6b7295862c4988139b717cf7e2fe4e5ece7d131a6a1314513",
+  "harnessSha256": "eb9d35e953f0b34302911a08377bdb7e1043b81b62b874855ff62b44f33e1e63",
+  "fixtureSha256": "c5360b182dd78179c2c98de7cbb531fc8044fb91b41cc5eb178b30291037712f",
+  "provider": {
+    "protocol": "pskernel-lean/1",
+    "provider": "lean4-cpp",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "profile": "lean4.34-core",
+    "status": "version"
+  },
+  "providerSha256": "e49329c3e80cce24f32c844122b5b8cd73585af42ec8c5246443164cb6dd51fe",
+  "cases": 110,
+  "matched": 110,
+  "accepted": 42,
+  "rejected": 68,
+  "deliberatelyUnsupported": [
+    "dependent fields",
+    "term and universe parameters",
+    "indices",
+    "general recursive families",
+    "Prop and higher-universe families",
+    "empty family"
+  ],
+  "recordsPath": "dist/evidence/sum-differential-records.json",
+  "recordsSha256": "9b2dcfcede53e9ea6b836affba835fbf501cb8f6b6700d879a4028c0931d37b9"
+}

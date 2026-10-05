@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { readdirSync } from 'node:fs';
 import path from 'node:path';
 
-const root = fileURLToPath(new URL('../packages/pskernel-core.old2/', import.meta.url));
+const root = fileURLToPath(new URL('../packages/pskernel-core.old3/', import.meta.url));
 test('regenerated owned kernel has matching build/evidence identities and owns bootstrap routing', () => {
   execFileSync(process.execPath, [fileURLToPath(new URL('./check-owned-kernel-receipt.mjs', import.meta.url))]);
 });

@@ -1,0 +1,987 @@
+{
+  "schemaVersion": 1,
+  "target": {
+    "product": "Lean",
+    "version": "4.34.0",
+    "gitCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "scope": "Production rule ownership and executable regression evidence; not formal proof coverage",
+  "rules": [
+    {
+      "id": "PSK-LEVEL",
+      "parentId": "PSK-LEVEL",
+      "scope": "universe equality/normalization",
+      "ownerModule": "Ps.KernelCore.Core.Level",
+      "implementationSymbols": [
+        "psKernelLevelEquivalent"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Core.lean",
+          "testSymbol": "psKernelCoreLevelTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-TC-SORT",
+      "parentId": "PSK-TC-SORT",
+      "scope": "sort inference",
+      "ownerModule": "Ps.KernelCore.Checker.Inference.Core",
+      "implementationSymbols": [
+        "psKernelInferCoreWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreInferTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-TC-CONST",
+      "parentId": "PSK-TC-CONST",
+      "scope": "constant inference/universe instantiation",
+      "ownerModule": "Ps.KernelCore.Checker.Inference.Core",
+      "implementationSymbols": [
+        "psKernelInferCoreWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreInferTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-TC-APP",
+      "parentId": "PSK-TC-APP",
+      "scope": "application checking",
+      "ownerModule": "Ps.KernelCore.Checker.Inference.Core",
+      "implementationSymbols": [
+        "psKernelInferCoreWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreInferTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-TC-LAM",
+      "parentId": "PSK-TC-LAM",
+      "scope": "lambda inference",
+      "ownerModule": "Ps.KernelCore.Checker.Inference.Core",
+      "implementationSymbols": [
+        "psKernelInferCoreWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreInferTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-TC-PI",
+      "parentId": "PSK-TC-PI",
+      "scope": "Pi inference",
+      "ownerModule": "Ps.KernelCore.Checker.Inference.Core",
+      "implementationSymbols": [
+        "psKernelInferCoreWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreInferTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-TC-LET",
+      "parentId": "PSK-TC-LET",
+      "scope": "let inference",
+      "ownerModule": "Ps.KernelCore.Checker.Inference.Core",
+      "implementationSymbols": [
+        "psKernelInferCoreWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreInferTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-TC-LIT",
+      "parentId": "PSK-TC-LIT",
+      "scope": "Nat/String literal inference",
+      "ownerModule": "Ps.KernelCore.Checker.Inference.Core",
+      "implementationSymbols": [
+        "psKernelInferCoreWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreInferTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-TC-PROJ",
+      "parentId": "PSK-TC-PROJ",
+      "scope": "primitive projection inference",
+      "ownerModule": "Ps.KernelCore.Checker.Projection",
+      "implementationSymbols": [
+        "psKernelInferProjectionWith"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreProjectionTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-RED-BETA",
+      "parentId": "PSK-RED-BETA",
+      "scope": "beta reduction",
+      "ownerModule": "Ps.KernelCore.Checker.Reduction.WhnfCore",
+      "implementationSymbols": [
+        "psKernelWhnfCoreWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreWhnfTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-RED-ZETA",
+      "parentId": "PSK-RED-ZETA",
+      "scope": "let/zeta reduction",
+      "ownerModule": "Ps.KernelCore.Checker.Reduction.WhnfCore",
+      "implementationSymbols": [
+        "psKernelWhnfCoreWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreWhnfTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-RED-DELTA",
+      "parentId": "PSK-RED-DELTA",
+      "scope": "definition unfolding",
+      "ownerModule": "Ps.KernelCore.Checker.Context",
+      "implementationSymbols": [
+        "psKernelUnfoldDefinition"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreWhnfTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-RED-PROJ",
+      "parentId": "PSK-RED-PROJ",
+      "scope": "projection reduction",
+      "ownerModule": "Ps.KernelCore.Checker.Context",
+      "implementationSymbols": [
+        "psKernelReduceProjCore"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreProjectionTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-RED-NAT",
+      "parentId": "PSK-RED-NAT",
+      "scope": "optimized Nat reductions",
+      "ownerModule": "Ps.KernelCore.Checker.Reduction.KernelReductions",
+      "implementationSymbols": [
+        "psKernelReduceNatWith"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCorePrimitiveTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-RED-QUOT",
+      "parentId": "PSK-RED-QUOT",
+      "scope": "Quot lift/ind computation",
+      "ownerModule": "Ps.KernelCore.Checker.Reduction.KernelReductions",
+      "implementationSymbols": [
+        "psKernelReduceQuotWith"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/AdmissionRuntime.lean",
+          "testSymbol": "psKernelCoreQuotTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-RED-REC",
+      "parentId": "PSK-RED-REC",
+      "scope": "inductive recursor computation",
+      "ownerModule": "Ps.KernelCore.Checker.Recursor.Reduction",
+      "implementationSymbols": [
+        "psKernelReduceRecursorWith"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreRecursorTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-DEFEQ-CACHE",
+      "parentId": "PSK-DEFEQ-CACHE",
+      "scope": "non-transitive pair caches",
+      "ownerModule": "Ps.KernelCore.Runtime.Acceleration.Cache",
+      "implementationSymbols": [
+        "psKernelExprPairSetInsert"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/AdmissionRuntime.lean",
+          "testSymbol": "psKernelRuntimeCacheInvariantTests",
+          "coverage": "direct-invariant"
+        }
+      ]
+    },
+    {
+      "id": "PSK-DEFEQ-PROOF",
+      "parentId": "PSK-DEFEQ-PROOF",
+      "scope": "proof irrelevance",
+      "ownerModule": "Ps.KernelCore.Checker.DefEq.FinalRules",
+      "implementationSymbols": [
+        "psKernelDefEqIsPropWith"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreDefEqTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-DEFEQ-DELTA",
+      "parentId": "PSK-DEFEQ-DELTA",
+      "scope": "lazy delta ordering",
+      "ownerModule": "Ps.KernelCore.Checker.DefEq.LazyDelta",
+      "implementationSymbols": [
+        "psKernelDefEqLazyReductionWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreDefEqTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-DEFEQ-FUNETA",
+      "parentId": "PSK-DEFEQ-FUNETA",
+      "scope": "function eta",
+      "ownerModule": "Ps.KernelCore.Checker.DefEq.Shortcuts",
+      "implementationSymbols": [
+        "psKernelDefEqLambdaEtaLeftWith"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreDefEqTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-DEFEQ-STRUCTETA",
+      "parentId": "PSK-DEFEQ-STRUCTETA",
+      "scope": "structure eta",
+      "ownerModule": "Ps.KernelCore.Checker.DefEq.FinalRules",
+      "implementationSymbols": [
+        "psKernelDefEqEtaStructWith"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreDefEqTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-DEFEQ-STRING",
+      "parentId": "PSK-DEFEQ-STRING",
+      "scope": "string literal expansion",
+      "ownerModule": "Ps.KernelCore.Checker.DefEq.FinalRules",
+      "implementationSymbols": [
+        "psKernelDefEqStringLitExpansionWith"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelDefEqSpecialRuleTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-DEFEQ-UNIT",
+      "parentId": "PSK-DEFEQ-UNIT",
+      "scope": "fieldless structure equality",
+      "ownerModule": "Ps.KernelCore.Checker.DefEq.FinalRules",
+      "implementationSymbols": [
+        "psKernelDefEqUnitLikeWith"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelDefEqSpecialRuleTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-ADMIT-AXIOM",
+      "parentId": "PSK-ADMIT-AXIOM",
+      "scope": "axiom admission",
+      "ownerModule": "Ps.KernelCore.Admission.Declaration.Admission",
+      "implementationSymbols": [
+        "psKernelAddAxiom"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/AdmissionRuntime.lean",
+          "testSymbol": "psKernelAdmissionConformanceTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-ADMIT-DEF",
+      "parentId": "PSK-ADMIT-DEF",
+      "scope": "definition admission",
+      "ownerModule": "Ps.KernelCore.Admission.Declaration.Admission",
+      "implementationSymbols": [
+        "psKernelAddDefinition"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/AdmissionRuntime.lean",
+          "testSymbol": "psKernelAdmissionConformanceTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-ADMIT-THM",
+      "parentId": "PSK-ADMIT-THM",
+      "scope": "theorem admission",
+      "ownerModule": "Ps.KernelCore.Admission.Declaration.Admission",
+      "implementationSymbols": [
+        "psKernelAddTheorem"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/AdmissionRuntime.lean",
+          "testSymbol": "psKernelAdmissionConformanceTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-ADMIT-OPAQUE",
+      "parentId": "PSK-ADMIT-OPAQUE",
+      "scope": "opaque admission",
+      "ownerModule": "Ps.KernelCore.Admission.Declaration.Admission",
+      "implementationSymbols": [
+        "psKernelAddOpaque"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/AdmissionRuntime.lean",
+          "testSymbol": "psKernelAdmissionConformanceTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-ADMIT-MUTDEF",
+      "parentId": "PSK-ADMIT-MUTDEF",
+      "scope": "unsafe/partial mutual definitions",
+      "ownerModule": "Ps.KernelCore.Admission.Declaration.Admission",
+      "implementationSymbols": [
+        "psKernelAddMutualDefinitions"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/AdmissionRuntime.lean",
+          "testSymbol": "psKernelAdmissionConformanceTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-ADMIT-QUOT",
+      "parentId": "PSK-ADMIT-QUOT",
+      "scope": "Quot initialization",
+      "ownerModule": "Ps.KernelCore.Admission.Quot.Admission",
+      "implementationSymbols": [
+        "psKernelAddQuot"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/AdmissionRuntime.lean",
+          "testSymbol": "psKernelCoreQuotTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-ADMIT-IND",
+      "parentId": "PSK-ADMIT-IND",
+      "scope": "ordinary/indexed inductives",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Ordinary.Admission",
+      "implementationSymbols": [
+        "psKernelAddSimpleInductive"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-ADMIT-MUTIND",
+      "parentId": "PSK-ADMIT-MUTIND",
+      "scope": "mutual inductives",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Mutual.Admission",
+      "implementationSymbols": [
+        "psKernelAddSimpleMutualInductive"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-ADMIT-NESTED",
+      "parentId": "PSK-ADMIT-NESTED",
+      "scope": "nested inductive flatten/restore",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Nested.Admission",
+      "implementationSymbols": [
+        "psKernelAddSimpleNestedInductive"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-NATIVE-BOOL",
+      "parentId": "PSK-NATIVE-BOOL",
+      "scope": "Lean.reduceBool native reduction",
+      "ownerModule": "Ps.KernelCore.Checker.Context",
+      "implementationSymbols": [
+        "psKernelReduceNative"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelNativeReductionDifferential",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-NATIVE-NAT",
+      "parentId": "PSK-NATIVE-NAT",
+      "scope": "Lean.reduceNat native reduction",
+      "ownerModule": "Ps.KernelCore.Checker.Context",
+      "implementationSymbols": [
+        "psKernelReduceNative"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelNativeReductionDifferential",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-DEFEQ-ORDER",
+      "parentId": "PSK-DEFEQ-DELTA",
+      "scope": "Ordered recursive equality dispatch",
+      "ownerModule": "Ps.KernelCore.Checker.Knot",
+      "implementationSymbols": [
+        "psKernelIsDefEqWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreDefEqTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-DEFEQ-LAMBDA-SPINE",
+      "parentId": "PSK-DEFEQ-FUNETA",
+      "scope": "Lambda spine comparison",
+      "ownerModule": "Ps.KernelCore.Checker.DefEq.BinderSpines",
+      "implementationSymbols": [
+        "psKernelDefEqLambdaSpineWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreDefEqTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-DEFEQ-FORALL-SPINE",
+      "parentId": "PSK-DEFEQ-PROOF",
+      "scope": "Forall spine comparison",
+      "ownerModule": "Ps.KernelCore.Checker.DefEq.BinderSpines",
+      "implementationSymbols": [
+        "psKernelDefEqForallSpineWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreDefEqTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-DEFEQ-APP-ARGS",
+      "parentId": "PSK-TC-APP",
+      "scope": "Application argument congruence",
+      "ownerModule": "Ps.KernelCore.Checker.DefEq.BinderSpines",
+      "implementationSymbols": [
+        "psKernelDefEqArgsWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreDefEqTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-DEFEQ-QUICK",
+      "parentId": "PSK-DEFEQ-CACHE",
+      "scope": "Quick equality and cache selection",
+      "ownerModule": "Ps.KernelCore.Checker.DefEq.Quick",
+      "implementationSymbols": [
+        "psKernelDefEqQuick"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreDefEqTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-REC-K",
+      "parentId": "PSK-RED-REC",
+      "scope": "K reduction side conditions",
+      "ownerModule": "Ps.KernelCore.Checker.Recursor.Analysis",
+      "implementationSymbols": [
+        "psKernelToConstructorWhenK"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreRecursorTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-REC-STRUCTURE",
+      "parentId": "PSK-RED-REC",
+      "scope": "Structure major-premise expansion",
+      "ownerModule": "Ps.KernelCore.Checker.Recursor.Analysis",
+      "implementationSymbols": [
+        "psKernelToConstructorWhenStructure"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCoreRecursorTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-IND-UNIFORM",
+      "parentId": "PSK-ADMIT-IND",
+      "scope": "Uniform parameters and universe levels",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Common.Occurrence",
+      "implementationSymbols": [
+        "psKernelSimpleCheckUniformOccurrenceWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-IND-POSITIVITY",
+      "parentId": "PSK-ADMIT-IND",
+      "scope": "Ordinary positivity and recursive argument analysis",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Ordinary.Constructor",
+      "implementationSymbols": [
+        "psKernelAnalyzeSimpleRecursiveArgumentWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-IND-ELIMINATION",
+      "parentId": "PSK-ADMIT-IND",
+      "scope": "Large elimination restrictions",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Common.Elimination",
+      "implementationSymbols": [
+        "psKernelSimpleElimOnlyAtZero"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-IND-RULE-VALIDATION",
+      "parentId": "PSK-ADMIT-IND",
+      "scope": "Generated ordinary recursor rule checking",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Common.RecursorValidation",
+      "implementationSymbols": [
+        "psKernelValidateSimpleRecursorRulesWorker"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-MUTIND-POSITIVITY",
+      "parentId": "PSK-ADMIT-MUTIND",
+      "scope": "Mutual recursive occurrence analysis",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Mutual.Analysis",
+      "implementationSymbols": [
+        "psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-MUTIND-RULE-VALIDATION",
+      "parentId": "PSK-ADMIT-MUTIND",
+      "scope": "Generated mutual recursor rule checking",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Mutual.Recursor",
+      "implementationSymbols": [
+        "psKernelValidateSimpleMutualRulesWorker"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-NESTED-REGISTRY",
+      "parentId": "PSK-ADMIT-NESTED",
+      "scope": "Distinct auxiliary families",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Nested.Discover",
+      "implementationSymbols": [
+        "psKernelSimpleNestedEnsureFamily"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedMultiFamilyTests",
+          "coverage": "direct-invariant"
+        }
+      ]
+    },
+    {
+      "id": "PSK-NESTED-RESERVED",
+      "parentId": "PSK-ADMIT-NESTED",
+      "scope": "Reserved-name rejection",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Nested.ReservedNames",
+      "implementationSymbols": [
+        "psKernelSimpleNestedCheckReserved"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedRejectionTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-NESTED-TEMPLATES",
+      "parentId": "PSK-ADMIT-NESTED",
+      "scope": "Dropped parameter and template validation",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Nested.Validation",
+      "implementationSymbols": [
+        "psKernelSimpleNestedValidateTemplates"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-NESTED-CONSTRUCTORS",
+      "parentId": "PSK-ADMIT-NESTED",
+      "scope": "Restored constructor type checking",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Nested.Validation",
+      "implementationSymbols": [
+        "psKernelSimpleNestedValidateConstructorTypes"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-NESTED-RECURSORS",
+      "parentId": "PSK-ADMIT-NESTED",
+      "scope": "Restored recursor type preservation",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Nested.Validation",
+      "implementationSymbols": [
+        "psKernelSimpleNestedCompareValidatedRuleTypesWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedMultiFamilyTests",
+          "coverage": "direct-invariant"
+        }
+      ]
+    },
+    {
+      "id": "PSK-NESTED-NO-LEAK",
+      "parentId": "PSK-ADMIT-NESTED",
+      "scope": "Commit excludes auxiliary families",
+      "ownerModule": "Ps.KernelCore.Admission.Inductive.Nested.Commit",
+      "implementationSymbols": [
+        "psKernelSimpleNestedAddWithoutAux"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/DefEqNested.lean",
+          "testSymbol": "psKernelCoreNestedMultiFamilyTests",
+          "coverage": "direct-invariant"
+        }
+      ]
+    },
+    {
+      "id": "PSK-NAT-BOUNDARY",
+      "parentId": "PSK-RED-NAT",
+      "scope": "Numeral size boundary behavior",
+      "ownerModule": "Ps.KernelCore.Checker.Reduction.KernelReductions",
+      "implementationSymbols": [
+        "psKernelReduceNatWith"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/Checking.lean",
+          "testSymbol": "psKernelCorePrimitiveBoundaryTests",
+          "coverage": "direct-differential"
+        }
+      ]
+    },
+    {
+      "id": "PSK-SESSION-CACHE-SAFETY",
+      "parentId": "PSK-TC-APP",
+      "scope": "Full checking cannot reuse infer-only acceptance",
+      "ownerModule": "Ps.KernelCore.Checker.Session",
+      "implementationSymbols": [
+        "psKernelSessionCheck"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/CheckerOps.lean",
+          "testSymbol": "psKernelCheckerSessionCheckedPathTests",
+          "coverage": "direct-invariant"
+        }
+      ]
+    },
+    {
+      "id": "PSK-KNOT-EXHAUSTION",
+      "parentId": "PSK-RED-REC",
+      "scope": "All callback operations fail closed at zero fuel",
+      "ownerModule": "Ps.KernelCore.Checker.Knot",
+      "implementationSymbols": [
+        "psKernelCheckerOpsWithFuel"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/CheckerOps.lean",
+          "testSymbol": "psKernelCheckerOpsExhaustionTests",
+          "coverage": "direct-invariant"
+        }
+      ]
+    },
+    {
+      "id": "PSK-API-ADMISSION",
+      "parentId": "PSK-ADMIT-DEF",
+      "scope": "Stale and forged receipts are rechecked",
+      "ownerModule": "Ps.KernelCore.API.Kernel",
+      "implementationSymbols": [
+        "psKernelV1AdmitChecked"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/KernelContract.lean",
+          "testSymbol": "psKernelContractAdmissionTests",
+          "coverage": "direct-invariant"
+        }
+      ]
+    },
+    {
+      "id": "PSK-API-CHECKING",
+      "parentId": "PSK-TC-APP",
+      "scope": "Checked expression API rejects invalid application",
+      "ownerModule": "Ps.KernelCore.API.Kernel",
+      "implementationSymbols": [
+        "psKernelV1CheckExpression"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/KernelContract.lean",
+          "testSymbol": "psKernelContractExpressionTests",
+          "coverage": "direct-invariant"
+        }
+      ]
+    },
+    {
+      "id": "PSK-API-RESOURCES",
+      "parentId": "PSK-RED-NAT",
+      "scope": "Cancellation, fuel, atomic declaration limit",
+      "ownerModule": "Ps.KernelCore.API.Kernel",
+      "implementationSymbols": [
+        "psKernelV1CheckedEnvironment"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/KernelContract.lean",
+          "testSymbol": "psKernelContractResourceTests",
+          "coverage": "direct-invariant"
+        }
+      ]
+    },
+    {
+      "id": "PSK-API-PROVIDER",
+      "parentId": "PSK-NATIVE-NAT",
+      "scope": "Pinned target and unknown provider failure",
+      "ownerModule": "Ps.KernelCore.API.Provider",
+      "implementationSymbols": [
+        "psKernelProviderCompatible"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/KernelContract.lean",
+          "testSymbol": "psKernelContractProviderTests",
+          "coverage": "direct-invariant"
+        }
+      ]
+    },
+    {
+      "id": "PSK-API-DIAGNOSTICS",
+      "parentId": "PSK-TC-APP",
+      "scope": "Exact legacy diagnostic classification",
+      "ownerModule": "Ps.KernelCore.API.Outcome",
+      "implementationSymbols": [
+        "psKernelErrorFromMessage"
+      ],
+      "evidence": [
+        {
+          "testFile": "test/KernelCore/Foundation/KernelContract.lean",
+          "testSymbol": "psKernelContractDiagnosticTests",
+          "coverage": "direct-invariant"
+        }
+      ]
+    }
+  ]
+}

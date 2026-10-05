@@ -1,0 +1,150 @@
+name: PSKernel Core portable gates
+
+on:
+  push:
+    branches:
+      - psc2/psc1kernel-selfhost-portable
+      - psc2/selfhost-lean-kernel
+    paths:
+      - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/packages/pskernel-core.old3/package.json
+      - psc15selfhost/scripts/psc1kernel-package-layout.test.mjs
+      - psc15selfhost/scripts/workspace-layout.mjs
+      - psc15selfhost/scripts/checked-kernel-provider.mjs
+      - psc15selfhost/packages/pskernel/PSC1Kernel/**
+      - psc15selfhost/scripts/psc1-source-profile.mjs
+      - psc15selfhost/scripts/psc1kernel-reference-inventory.mjs
+      - psc15selfhost/scripts/psc1kernel-port-batch-check.mjs
+      - psc15selfhost/scripts/psc1kernel-port-translate-check.mjs
+      - psc15selfhost/scripts/psc1kernel-port-pattern-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-compatibility-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-conformance-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-architecture-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-architecture-audit.test.mjs
+      - psc15selfhost/scripts/psc1kernel-generate-rule-reference.mjs
+      - psc15selfhost/check-psc1-source.mjs
+      - psc15selfhost/lakefile.lean
+      - psc15selfhost/test/PsKernelCoreFoundationTests.lean
+      - psc15selfhost/test/KernelCore/**
+      - psc15selfhost/test/PsKernelCoreBench.lean
+      - .github/workflows/psc1kernel-core-portable.yml
+  pull_request:
+    branches:
+      - psc2/selfhost-lean-kernel
+    paths:
+      - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/packages/pskernel-core.old3/package.json
+      - psc15selfhost/scripts/psc1kernel-package-layout.test.mjs
+      - psc15selfhost/scripts/workspace-layout.mjs
+      - psc15selfhost/scripts/checked-kernel-provider.mjs
+      - psc15selfhost/packages/pskernel/PSC1Kernel/**
+      - psc15selfhost/scripts/psc1-source-profile.mjs
+      - psc15selfhost/scripts/psc1kernel-reference-inventory.mjs
+      - psc15selfhost/scripts/psc1kernel-port-batch-check.mjs
+      - psc15selfhost/scripts/psc1kernel-port-translate-check.mjs
+      - psc15selfhost/scripts/psc1kernel-port-pattern-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-compatibility-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-conformance-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-architecture-audit.mjs
+      - psc15selfhost/scripts/psc1kernel-architecture-audit.test.mjs
+      - psc15selfhost/scripts/psc1kernel-generate-rule-reference.mjs
+      - psc15selfhost/check-psc1-source.mjs
+      - psc15selfhost/lakefile.lean
+      - psc15selfhost/test/PsKernelCoreFoundationTests.lean
+      - psc15selfhost/test/KernelCore/**
+      - psc15selfhost/test/PsKernelCoreBench.lean
+      - .github/workflows/psc1kernel-core-portable.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: psc15selfhost
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Audit canonical and archived package identities
+        run: |
+          set -euo pipefail
+          node --test scripts/psc1kernel-package-layout.test.mjs
+          node scripts/check-owned-kernel-receipt.mjs
+
+      - name: Install pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh             | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lean --version
+          test "$(lean --githash)" = 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+
+      - name: Inventory reference incompatibilities in one pass
+        run: |
+          set -euo pipefail
+          node scripts/psc1kernel-reference-inventory.mjs
+          node scripts/psc1kernel-reference-inventory.mjs --json > /tmp/psc1kernel-reference-inventory.json
+          cat /tmp/psc1kernel-reference-inventory.json
+
+      - name: Enforce the proven PSC1 profile on all portable packages
+        run: |
+          set -euo pipefail
+          node check-psc1-source.mjs --all-portable
+
+      - name: Audit learned portable-kernel source patterns
+        run: |
+          set -euo pipefail
+          node scripts/psc1kernel-port-pattern-audit.mjs
+
+      - name: Audit canonical PSKernel architecture
+        run: |
+          set -euo pipefail
+          node --test scripts/psc1kernel-architecture-audit.test.mjs
+          node scripts/psc1kernel-architecture-audit.mjs
+
+      - name: Audit Lean 4.34 compatibility matrix
+        run: |
+          set -euo pipefail
+          node scripts/psc1kernel-compatibility-audit.mjs --require-complete
+
+      - name: Audit Lean 4.34 conformance coverage
+        run: |
+          set -euo pipefail
+          node scripts/psc1kernel-conformance-audit.mjs --require-complete
+
+      - name: Verify generated kernel rule reference
+        run: |
+          set -euo pipefail
+          node scripts/psc1kernel-generate-rule-reference.mjs --check
+
+      - name: Build proven PSC1 compiler
+        run: |
+          set -euo pipefail
+          lake build psc1
+
+      - name: PSC1-check all portable kernel modules
+        run: |
+          set -euo pipefail
+          node scripts/psc1kernel-port-batch-check.mjs
+
+      - name: Build portable kernel and differential tests
+        run: |
+          set -euo pipefail
+          lake build PsKernelCore psc1_kernel_core_foundation_tests
+
+      - name: Differential-test portable foundation against reference
+        run: |
+          set -euo pipefail
+          lake exe psc1_kernel_core_foundation_tests
+
+      - name: Require canonical ProofScript translation
+        run: |
+          set -euo pipefail
+          node scripts/psc1kernel-port-translate-check.mjs

@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "target": {
+    "product": "Lean",
+    "version": "4.34.0",
+    "gitCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  },
+  "testFile": "test/PsKernelCoreFoundationTests.lean",
+  "testRoots": [
+    "test/PsKernelCoreFoundationTests.lean",
+    "test/KernelCore/Foundation"
+  ],
+  "coverageValues": [
+    "direct-differential",
+    "direct-invariant",
+    "pending"
+  ],
+  "rules": [
+    {
+      "id": "PSK-LEVEL",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreLevelTests"
+    },
+    {
+      "id": "PSK-TC-SORT",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreInferTests"
+    },
+    {
+      "id": "PSK-TC-CONST",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreInferTests"
+    },
+    {
+      "id": "PSK-TC-APP",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreInferTests"
+    },
+    {
+      "id": "PSK-TC-LAM",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreInferTests"
+    },
+    {
+      "id": "PSK-TC-PI",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreInferTests"
+    },
+    {
+      "id": "PSK-TC-LET",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreInferTests"
+    },
+    {
+      "id": "PSK-TC-LIT",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreInferTests"
+    },
+    {
+      "id": "PSK-TC-PROJ",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreProjectionTests"
+    },
+    {
+      "id": "PSK-RED-BETA",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreWhnfTests"
+    },
+    {
+      "id": "PSK-RED-ZETA",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreWhnfTests"
+    },
+    {
+      "id": "PSK-RED-DELTA",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreWhnfTests"
+    },
+    {
+      "id": "PSK-RED-PROJ",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreProjectionTests"
+    },
+    {
+      "id": "PSK-RED-NAT",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCorePrimitiveTests"
+    },
+    {
+      "id": "PSK-RED-QUOT",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreQuotTests"
+    },
+    {
+      "id": "PSK-RED-REC",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreRecursorTests"
+    },
+    {
+      "id": "PSK-DEFEQ-CACHE",
+      "coverage": "direct-invariant",
+      "testSymbol": "psKernelRuntimeCacheInvariantTests"
+    },
+    {
+      "id": "PSK-DEFEQ-PROOF",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreDefEqTests"
+    },
+    {
+      "id": "PSK-DEFEQ-DELTA",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreDefEqTests"
+    },
+    {
+      "id": "PSK-DEFEQ-FUNETA",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreDefEqTests"
+    },
+    {
+      "id": "PSK-DEFEQ-STRUCTETA",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreDefEqTests"
+    },
+    {
+      "id": "PSK-DEFEQ-STRING",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelDefEqSpecialRuleTests"
+    },
+    {
+      "id": "PSK-DEFEQ-UNIT",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelDefEqSpecialRuleTests"
+    },
+    {
+      "id": "PSK-ADMIT-AXIOM",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelAdmissionConformanceTests"
+    },
+    {
+      "id": "PSK-ADMIT-DEF",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelAdmissionConformanceTests"
+    },
+    {
+      "id": "PSK-ADMIT-THM",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelAdmissionConformanceTests"
+    },
+    {
+      "id": "PSK-ADMIT-OPAQUE",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelAdmissionConformanceTests"
+    },
+    {
+      "id": "PSK-ADMIT-MUTDEF",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelAdmissionConformanceTests"
+    },
+    {
+      "id": "PSK-ADMIT-QUOT",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreQuotTests"
+    },
+    {
+      "id": "PSK-ADMIT-IND",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreNestedTests"
+    },
+    {
+      "id": "PSK-ADMIT-MUTIND",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreNestedTests"
+    },
+    {
+      "id": "PSK-ADMIT-NESTED",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelCoreNestedConformanceTests"
+    },
+    {
+      "id": "PSK-NATIVE-BOOL",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelNativeReductionDifferential"
+    },
+    {
+      "id": "PSK-NATIVE-NAT",
+      "coverage": "direct-differential",
+      "testSymbol": "psKernelNativeReductionDifferential"
+    }
+  ]
+}

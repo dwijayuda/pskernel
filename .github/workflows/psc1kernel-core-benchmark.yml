@@ -1,0 +1,85 @@
+name: PSKernel Core native benchmark
+
+on:
+  push:
+    branches:
+      - psc2/psc1kernel-selfhost-portable
+      - psc2/selfhost-lean-kernel
+    paths:
+      - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/test/PsKernelCoreBench.lean
+      - psc15selfhost/test/KernelCore/Bench/**
+      - psc15selfhost/scripts/psc1kernel-benchmark-report*
+      - psc15selfhost/scripts/psc1kernel-m3-*
+      - psc15selfhost/scripts/psc1kernel-measure.mjs
+      - psc15selfhost/scripts/fixtures/pskernel-native-benchmark.log
+      - psc15selfhost/lakefile.lean
+      - .github/workflows/psc1kernel-core-benchmark.yml
+  pull_request:
+    branches:
+      - psc2/selfhost-lean-kernel
+    paths:
+      - psc15selfhost/packages/pskernel-core/**
+      - psc15selfhost/test/PsKernelCoreBench.lean
+      - psc15selfhost/test/KernelCore/Bench/**
+      - psc15selfhost/scripts/psc1kernel-benchmark-report*
+      - psc15selfhost/scripts/psc1kernel-m3-*
+      - psc15selfhost/scripts/psc1kernel-measure.mjs
+      - psc15selfhost/scripts/fixtures/pskernel-native-benchmark.log
+      - psc15selfhost/lakefile.lean
+      - .github/workflows/psc1kernel-core-benchmark.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: psc15selfhost
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Test bounded benchmark reporter
+        run: node --test scripts/psc1kernel-benchmark-report.test.mjs scripts/psc1kernel-m3-budgets.test.mjs
+
+      - name: Install pinned Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.elan/bin:$PATH"
+          lean --version
+          test "$(lean --githash)" = 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b
+
+      - name: Build benchmark
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          lake build psc1_kernel_core_bench
+
+      - name: Run three bounded benchmark samples
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          node scripts/psc1kernel-benchmark-report.mjs \
+            .lake/build/bin/psc1_kernel_core_bench 3 /tmp/pskernel-core-bench
+          cat /tmp/pskernel-core-bench.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload benchmark log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-core-benchmark
+          path: /tmp/pskernel-core-bench.*
+          if-no-files-found: warn

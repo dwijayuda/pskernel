@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "status": "self-hosted-fixed-point",
+  "semanticRoot": "packages/pskernel-selfhost/src/Ps/KernelSelfHost/SelfHost.lean",
+  "sourceCount": 24,
+  "compilerSha256": "74dcebb7b296d81924d92987e99146b5d1c5ff9fbe3d8076ca591952d2ef7f76",
+  "closureSha256": "0d5869197a5d306ff3418b09339ac2fdde60bc0f9eef090132dd6a97b0a0f14f",
+  "typescriptSha256": "e68c3c090be9199a3f913d19b1ad6f5d00088f3d0f9acee85d0a96da1075f82b",
+  "javascriptSha256": "afbc47c5bad92fe76e9e1fae35066b4cd6928749594ffb1effddc4adae302f4c",
+  "sourceFixedPoint": true,
+  "generatedArtifactFixedPoint": true,
+  "generatedRuntimeSmoke": true,
+  "semanticCommit": "5cf6aa165f020e2e9ce1bdea1b481d79ade7519a",
+  "smokeCommit": "63c77de8323b76fef7d4df008029927aad07dfc6",
+  "smokeChecks": [
+    "name",
+    "level",
+    "expr",
+    "subst",
+    "nat",
+    "whnf",
+    "defeq",
+    "axiom",
+    "inductive",
+    "recursor",
+    "mutual",
+    "nested",
+    "duplicate-rejection"
+  ],
+  "notes": [
+    "The fixed-point receipt key is compilerSha256:closureSha256.",
+    "The smokeCommit changes only the generated-runtime smoke harness; the semantic closure hash is unchanged.",
+    "Mutual and nested inductives are included in the 24-source SelfHost closure."
+  ],
+  "evidenceKind": "historical-checkpoint",
+  "updatePolicy": "Refresh hashes at promoted semantic/layout milestones; normal development heads use the fast portable/PSC1/Lean/differential/canonical gates, while generated fixed-point reproduction is a manual release/bootstrap checkpoint."
+}

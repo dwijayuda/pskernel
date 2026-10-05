@@ -20,8 +20,8 @@ const identity = binder('lam', 'P', U(0), binder('lam', 'p', B(0), B(0)));
 
 test('explicit owned kernel runs generated semantics for empty, dependent and sequential modules', async () => {
   for (const ds of [[], [alias()], [definition('Id', identityType, identity), definition('Use', identityType, C('Id'))]]) {
-    const { result, descriptor } = await checkAdmissionsWithKernel(wire(ds), 'pskernel-core.old2');
-    assert.equal(descriptor.selector, 'pskernel-core.old2');
+    const { result, descriptor } = await checkAdmissionsWithKernel(wire(ds), 'pskernel-core.old3');
+    assert.equal(descriptor.selector, 'pskernel-core.old3');
     assert.equal(result.provider, 'psc-generated-owned');
     assert.equal(result.accepted, true, JSON.stringify(result));
     assert.equal(result.admissionCount, ds.length);
@@ -59,9 +59,9 @@ for (const [label, change] of [
   ['prototype binder', a => { a.declaration.v = { ...identity, bi: '__proto__' }; }],
 ]) test(`unsupported or malformed ${label} cannot be accepted or fall back`, async () => {
   const a = alias(); change(a);
-  const { result, descriptor } = await checkAdmissionsWithKernel(wire([a]), 'pskernel-core.old2');
+  const { result, descriptor } = await checkAdmissionsWithKernel(wire([a]), 'pskernel-core.old3');
   assert.equal(result.accepted, false, JSON.stringify(result));
-  assert.equal(descriptor.selector, 'pskernel-core.old2');
+  assert.equal(descriptor.selector, 'pskernel-core.old3');
   assert.equal(result.admissionIndex, 0);
 });
 test('structured names do not collide with dotted root names', async () => {
@@ -82,10 +82,10 @@ const poly = () => {
 test('explicit owned kernel admits a polymorphic identity and checks distinct universe instantiations', async () => {
   for (const l of [Z, { k: 's', o: Z }, { k: 'max', l: Z, r: { k: 's', o: Z } }]) {
     const use = definition('Use', polyType(l), { ...C('Poly'), ls: [l] });
-    const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]), 'pskernel-core.old2');
+    const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]), 'pskernel-core.old3');
     assert.equal(result.accepted, true, JSON.stringify(result));
     assert.equal(result.profile, 'owned-uniform-algebraic/11');
-    assert.equal(descriptor.selector, 'pskernel-core.old2');
+    assert.equal(descriptor.selector, 'pskernel-core.old3');
   }
 });
 for (const [label, levels, typeLevel, errorKind] of [
@@ -95,8 +95,8 @@ for (const [label, levels, typeLevel, errorKind] of [
   ['wrong type', [Z], { k: 's', o: Z }, 'typeMismatch'],
 ]) test(`explicit owned kernel rejects ${label} polymorphic instantiation without fallback`, async () => {
   const use = definition('Use', polyType(typeLevel), { ...C('Poly'), ls: levels });
-  const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]), 'pskernel-core.old2');
-  assert.equal(descriptor.selector, 'pskernel-core.old2');
+  const { result, descriptor } = await checkAdmissionsWithKernel(wire([poly(), use]), 'pskernel-core.old3');
+  assert.equal(descriptor.selector, 'pskernel-core.old3');
   assert.equal(result.accepted, false);
   assert.equal(result.errorKind, errorKind);
   assert.equal(result.admissionIndex, 1);

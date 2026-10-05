@@ -1,6 +1,13 @@
 name: PSC15 self-host cloud CI
 
 on:
+  push:
+    branches:
+      - psc2/selfhost-lean-kernel
+      - psc2/psc1kernel-selfhost-portable
+    paths:
+      - "psc15selfhost/**"
+      - ".github/workflows/psc15selfhost-cloud.yml"
   pull_request:
     branches:
       - psc2/selfhost-lean-kernel

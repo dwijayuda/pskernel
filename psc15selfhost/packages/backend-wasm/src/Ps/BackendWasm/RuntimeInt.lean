@@ -297,5 +297,5 @@ def psWasmIntLiteralInstructions
       psListAppend
         [PsWasmInstruction.i32Const (-1)]
         (psListAppend
-          (psWasmNatLiteralInstructions (magnitude + 1))
+          (psWasmNatLiteralInstructions (Nat.add magnitude 1))
           [PsWasmInstruction.structNew psWasmIntName])

@@ -1247,7 +1247,7 @@ def psWasmLowerStructures
 
 def psWasmConstructorTypeName
     (inductiveName constructorName : String) : String :=
-  inductiveName ++ "$" ++ constructorName
+  String.Internal.append inductiveName (String.Internal.append "$" constructorName)
 
 def psWasmFindInductive :
     List PsVerifiedIrInductive -> String -> Option PsVerifiedIrInductive
@@ -1380,7 +1380,7 @@ def psWasmLowerInductives
           match psWasmLowerInductives profile rest with
           | Except.error error => Except.error error
           | Except.ok loweredRest =>
-              Except.ok (lowered ++ loweredRest)
+              Except.ok (psListAppend lowered loweredRest)
 
 def psWasmParameterBindingsLoop :
     Nat -> List PsVerifiedIrParameter -> List PsWasmBinding
@@ -1447,7 +1447,7 @@ def psWasmAppendCaptureForName
   else
     match psWasmFindBinding outerBindings name with
     | none => captures
-    | some binding => captures ++ [binding]
+    | some binding => psListAppend captures (List.cons binding List.nil)
 
 def psWasmParameterNames :
     List PsVerifiedIrParameter -> List String
@@ -1620,7 +1620,7 @@ def psWasmAddLocal
     index,
     {
       nextLocalIndex := Nat.add index 1
-      localTypes := state.localTypes ++ [type]
+      localTypes := psListAppend state.localTypes (List.cons type List.nil)
       currentDefinition := state.currentDefinition
       nextLambdaId := state.nextLambdaId
       generatedStructures := state.generatedStructures
@@ -1684,7 +1684,7 @@ def psWasmLowerExprListWith
           | Except.ok loweredRest =>
               Except.ok {
                 instructions :=
-                  lowered.instructions ++ loweredRest.instructions
+                  psListAppend lowered.instructions loweredRest.instructions
                 state := loweredRest.state
               }
 
@@ -1730,7 +1730,8 @@ def psWasmLowerRecordFieldsWith
                   | Except.ok loweredRest =>
                       Except.ok {
                         instructions :=
-                          lowered.instructions ++
+                          psListAppend
+                            lowered.instructions
                             loweredRest.instructions
                         state := loweredRest.state
                       }
@@ -1781,7 +1782,8 @@ def psWasmLowerConstructorValuesWith
                   | Except.ok loweredRest =>
                       Except.ok {
                         instructions :=
-                          lowered.instructions ++
+                          psListAppend
+                            lowered.instructions
                             loweredRest.instructions
                         state := loweredRest.state
                       }
@@ -1818,7 +1820,8 @@ def psWasmLowerNatBinaryCallWith
       | Except.ok lowered =>
           Except.ok {
             instructions :=
-              lowered.instructions ++
+              psListAppend
+                lowered.instructions
                 [PsWasmInstruction.call functionName]
             state := lowered.state
           }
@@ -1841,7 +1844,7 @@ def psWasmLowerNatCompareWith
       | Except.ok lowered =>
           Except.ok {
             instructions :=
-              lowered.instructions ++ [
+              psListAppend lowered.instructions [
                 PsWasmInstruction.call psWasmNatCmpFn,
                 PsWasmInstruction.i32Const 0,
                 comparison
@@ -1882,7 +1885,8 @@ def psWasmLowerIntBinaryCallWith
       | Except.ok lowered =>
           Except.ok {
             instructions :=
-              lowered.instructions ++
+              psListAppend
+                lowered.instructions
                 [PsWasmInstruction.call functionName]
             state := lowered.state
           }
@@ -1967,7 +1971,7 @@ def psWasmLowerIntCompareWith
       | Except.ok lowered =>
           Except.ok {
             instructions :=
-              lowered.instructions ++ [
+              psListAppend lowered.instructions [
                 PsWasmInstruction.call psWasmIntCmpFn,
                 PsWasmInstruction.i32Const 0,
                 comparison
@@ -2043,7 +2047,7 @@ def psWasmLowerArrayEmptyWithCapacityWith
               | Except.ok lowered =>
                   Except.ok {
                     instructions :=
-                      lowered.instructions ++ [
+                      psListAppend lowered.instructions [
                         PsWasmInstruction.drop,
                         PsWasmInstruction.arrayNewFixed info.typeName 0
                       ]
@@ -2076,7 +2080,7 @@ def psWasmLowerArraySizeWith
               | Except.ok lowered =>
                   Except.ok {
                     instructions :=
-                      lowered.instructions ++ [
+                      psListAppend lowered.instructions [
                         PsWasmInstruction.arrayLen,
                         PsWasmInstruction.call psWasmNatOfU32Fn
                       ]

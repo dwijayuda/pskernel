@@ -83,6 +83,9 @@ test('tuple, projection, grouped-dot and string-pattern hazards are rejected gen
 test('known fragile term shorthand is rejected structurally', () => {
   assert(ids('def both := left && right').includes('boolean-convenience'));
   assert(
+    ids('def text := toString value').includes('to-string-convenience'),
+  );
+  assert(
     ids('def value := .some x').includes('leading-dot-term-constructor'),
   );
   assert(ids('def mapper := fun x => x').includes('untyped-lambda-binder'));

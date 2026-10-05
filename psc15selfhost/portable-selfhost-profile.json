@@ -19,6 +19,7 @@
     "value-length-dot-notation",
     "leading-dot-term-constructor",
     "untyped-lambda-binder",
+    "untyped-lambda-let",
     "layout-let-sequencing"
   ]
 }

@@ -84,5 +84,8 @@
     "reproducibility-is-not-ddc",
     "different-backend-is-not-automatically-diverse",
     "verified-source-is-not-verified-executable"
+  ],
+  "observedEvidence": [
+    "contracts/bootstrap/RUST_FIXED_POINT_V1.json"
   ]
 }

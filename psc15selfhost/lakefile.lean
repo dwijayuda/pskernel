@@ -67,6 +67,7 @@ lean_lib PsCompilerIr where
   srcDir := "packages/compiler-ir/src"
   roots := #[
     `Ps.CompilerIr.Model,
+    `Ps.CompilerIr.Encode,
     `Ps.CompilerIr.Validate,
     `Ps.CompilerIr.Interface,
     `Ps.CompilerIr.JsAbi,
@@ -111,7 +112,7 @@ lean_lib PsBackendJs where
 
 lean_lib PsDriverTs where
   srcDir := "packages/driver-ts/src"
-  roots := #[`Ps.DriverTs.Compiler, `Ps.DriverTs.Bootstrap]
+  roots := #[`Ps.DriverTs.Compiler, `Ps.DriverTs.Bootstrap, `Ps.DriverTs.Stages]
 
 lean_lib PsDriverJs where
   srcDir := "packages/driver-js/src"
@@ -450,6 +451,10 @@ lean_exe pscv_interface_ir_tests where
 lean_exe pscv_js_abi_tests where
   srcDir := "test"
   root := `JsAbiTests
+
+lean_exe pscv_ir_encoding_tests where
+  srcDir := "test"
+  root := `IrEncodingTests
 
 lean_exe psc2_minimal_selfhost_tests where
   srcDir := "test"

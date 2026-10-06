@@ -23,7 +23,8 @@ function graphValue(bytes, bound) {
   const graph = decodeComparatorJson(bytes, { maxBytes: bound.maxGraphBytes });
   exact(graph, ['schemaVersion', 'contract', 'authority', 'entries', 'executions', 'coverage', 'remaining']);
   if (graph.schemaVersion !== 1 || graph.contract !== 'psc-observed-build-graph/1' ||
-      graph.authority !== 'audit-record-only' || graph.coverage !== 'observed-composite-edges' ||
+      graph.authority !== 'audit-record-only' ||
+      !['observed-composite-edges', 'observed-erasure-validation-and-composite-backend-edges'].includes(graph.coverage) ||
       !Array.isArray(graph.entries) ||
       !Array.isArray(graph.executions) || !graph.executions.length || graph.executions.length > graph.entries.length ||
       !Array.isArray(graph.remaining) || !graph.remaining.every(value => typeof value === 'string')) fail('GRAPH_SCHEMA');

@@ -52,6 +52,7 @@ export async function buildChecked({
   let typeScript;
   let compilerIdentity;
   let compilerBytes;
+  let irStages;
   let parity;
   const checkAdmissions = async text => {
     const checked = dualCheck
@@ -75,6 +76,7 @@ export async function buildChecked({
     });
     admissions = result.admissions;
     typeScript = result.typeScript;
+    irStages = result.stages;
   } else {
     const file = path.resolve(compilerPath ?? checkedCompilerPath(kernel));
     compilerBytes = await readFile(file);
@@ -89,7 +91,11 @@ export async function buildChecked({
       return checkAdmissions(text);
     }, identity: checkedKernelIdentity(kernel), kernelContract: kernelContractV1, providerSecurity: selectedProviderSecurity });
     const handle = await session.checkSources(kind, snapshot.sources);
-    if (!checkOnly) typeScript = session.emit(handle);
+    if (!checkOnly) {
+      const emitted = session.emitArtifact(handle);
+      typeScript = emitted.payload;
+      irStages = emitted.stages;
+    }
   }
 
   const receipt = {
@@ -140,7 +146,7 @@ export async function buildChecked({
     receipt.javaScriptSha256 = digest(javaScript);
     const evidence = createCheckedBuildGraph({ sourceKind: snapshot.kind, sources: snapshot.sources,
       admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes,
-      compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, outputStem: stem,
+      compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, outputStem: stem, irStages,
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1,
       hostSources, runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     receipt.buildGraph = evidence.identity;

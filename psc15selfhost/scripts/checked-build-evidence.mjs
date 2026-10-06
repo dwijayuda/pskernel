@@ -2,6 +2,7 @@ import { artifactId, artifactKey, canonicalArtifact, canonicalBytes, passDefinit
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkedIrStageArtifacts } from './ir-artifact.mjs';
 
 export async function readCheckedBuildHostSources() {
   const root = path.dirname(fileURLToPath(import.meta.url));
@@ -30,7 +31,7 @@ export async function readCheckedBuildHostSources() {
  */
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
-  provider, providerSecurity, kernelContract, hostSources, runtime, outputStem }) {
+  provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages }) {
   const artifacts = new Map(), entries = [], executions = [];
   function add(item, source, inline = false) {
     const key = artifactKey(item.identity);
@@ -84,10 +85,25 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     ['trusted-frontend-source-interpretation']);
   if (typeScript !== undefined) {
     const ts = bytes(typeScript, 'typescript-source', 'psc-typescript-source/es2022', { kind: 'output-file', suffix: '.ts' });
-    execute('psc-checked-core-to-typescript/1', core, [ts], implementation, 'psc-core-runtime-refinement/1',
-      { target: 'typescript', observedStages: ['checked-emission'],
-        unobservedInteriorStages: ['erase', 'validate-ir', 'typescript-lower', 'typescript-print'] }, baseDependencies,
-      ['trusted-erasure-and-typescript-emission']);
+    const stages = checkedIrStageArtifacts(irStages);
+    if (stages) {
+      const runtimeIr = add(stages.runtimeIr, { kind: 'archive-required', role: 'actual-erasure-output' });
+      const verifiedIr = add(stages.verifiedIr, { kind: 'archive-required', role: 'actual-validation-output' });
+      if (!runtimeIr.bytes.equals(verifiedIr.bytes)) throw new Error('PSC_BUILD_GRAPH_VALIDATION_CHANGED_IR');
+      execute('psc-erase-checked-core/1', core, [runtimeIr], implementation, 'psc-core-runtime-refinement/1',
+        { observedStages: ['erase'] }, baseDependencies, ['trusted-erasure-implementation']);
+      execute('psc-validate-runtime-ir/1', runtimeIr, [verifiedIr], implementation, 'psc-runtime-ir-invariants/1',
+        { observedStages: ['validate-ir'], bytesPreserved: true }, baseDependencies, ['trusted-strict-ir-validator']);
+      execute('psc-verified-ir-to-typescript/1', verifiedIr, [ts], implementation, 'psc-ir-typescript-refinement/1',
+        { target: 'typescript', observedStages: ['typescript-emission'],
+          unobservedInteriorStages: ['typescript-lower', 'typescript-print'] }, baseDependencies,
+        ['trusted-typescript-emission']);
+    } else {
+      execute('psc-checked-core-to-typescript/1', core, [ts], implementation, 'psc-core-runtime-refinement/1',
+        { target: 'typescript', observedStages: ['checked-emission'],
+          unobservedInteriorStages: ['erase', 'validate-ir', 'typescript-lower', 'typescript-print'] }, baseDependencies,
+        ['trusted-erasure-and-typescript-emission']);
+    }
     if (javaScript !== undefined) {
       if (typeof outputStem !== 'string' || !outputStem) throw new Error('PSC_BUILD_GRAPH_OUTPUT_STEM');
       const tool = bytes(typeScriptCompilerBytes, 'typescript-compiler-entry', 'typescript-compiler-entry/1',
@@ -105,8 +121,9 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     }
   }
   const graph = { schemaVersion: 1, contract: 'psc-observed-build-graph/1', authority: 'audit-record-only',
-    entries, executions, coverage: 'observed-composite-edges',
-    remaining: ['per-IR-stage artifacts', 'complete toolchain closure', 'independent preservation evidence'] };
+    entries, executions, coverage: irStages ? 'observed-erasure-validation-and-composite-backend-edges' : 'observed-composite-edges',
+    remaining: [irStages ? 'specialization and backend-interior artifacts' : 'per-IR-stage artifacts',
+      'complete toolchain closure', 'independent preservation evidence'] };
   const encoded = canonicalBytes(graph);
   return { graph, artifacts, bytes: encoded,
     identity: artifactId(encoded, 'build-graph', 'psc-observed-build-graph/1') };

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-runtime-ir-json/1",
+  "encoder": "packages/compiler-ir/src/Ps/CompilerIr/Encode.lean",
+  "decoder": "scripts/ir-artifact.mjs",
+  "representation": "Canonical JSON tagged arrays, preserving every constructor tag, ordered binder/field/constructor/alternative list, type argument and body; arbitrary-precision integers use canonical decimal strings. Primitive/intrinsic tags are explicit and exhaustive.",
+  "moduleTuple": [
+    "psc-runtime-ir-json/1",
+    "ordered imports",
+    "ordered structures",
+    "ordered inductives",
+    "ordered declarations"
+  ],
+  "roles": "RuntimeIR, VerifiedIR and later SpecializedIR use distinct artifact domains. The encoding carries no checked flag or transferable authority; even invalid construction IR is encodable.",
+  "bounds": "Portable type/expression encoding uses decreasing depth fuel; exhaustion is an error. Host decoding enforces byte/depth/node bounds and iteratively validates the complete schema. The current pure encoder does not claim a global allocation/CPU budget.",
+  "pipeline": {
+    "implementation": "packages/driver-ts/src/Ps/DriverTs/Stages.lean",
+    "meaning": "A single actual erasure, validation and TypeScript-emission execution returns snapshots of its stage values plus the target. The host requires the original live checked handle and re-derives admissions before invoking it. The native seed emits stage fields only after the explicit checked-host emit response.",
+    "production": "checked-build records separate source-check, Core-to-RuntimeIR, RuntimeIR-validation, and VerifiedIR-to-TypeScript edges, then the existing tsc edge. All listed stage bytes are retained in the archive.",
+    "compatibility": "Older compiler/seed APIs with no stage fields retain explicitly composite coverage. A present but malformed/failing staged API cannot fall back to a legacy emitter. Validation snapshots must preserve exact IR bytes; backend interior lowering/printing remain composite."
+  },
+  "assurance": "Encoding/schema integrity and observed stage provenance only. The strict validator, erasure and emitter remain explicitly trusted unless independent evidence is attached.",
+  "globalPreservation": "unproved",
+  "remaining": [
+    "independent erasure/specialization/backend preservation evidence",
+    "SpecializedIR and target-interior snapshots for other backends",
+    "complete generated compiler/provider/runtime/tsc input closure",
+    "portable total resource policy"
+  ]
+}

@@ -26,7 +26,7 @@ function fixture(options = {}) {
   const service = createCheckedCompilerService({ compiler,
     checkAdmissions: () => ({ ...leanCheckedIdentity, accepted: true }),
     identity: leanCheckedIdentity, targets: ['typescript', 'javascript', 'rust', 'wasm'], ...options });
-  return { service, emitted };
+  return { service, emitted, compiler };
 }
 
 test('all permitted backends emit from the same accepted object and bind byte digests', async () => {
@@ -82,4 +82,27 @@ test('byte budgets reject both text and Wasm output', async () => {
   const handle = await service.check('lean', 'accepted');
   assert.throws(() => service.emitArtifact(handle, 'javascript'), /OUTPUT_RESOURCE_EXHAUSTED/);
   assert.throws(() => service.emitArtifact(handle, 'wasm'), /OUTPUT_RESOURCE_EXHAUSTED/);
+});
+
+test('stage emission uses the exact live checked object without legacy fallback', async () => {
+  const { service, compiler, emitted } = fixture();
+  let observed;
+  compiler.psCompilerTypeScriptStagesFromPrepared = prepared => {
+    observed = prepared;
+    return ok({ typeScript: 'export const answer = 42n;', runtimeIr: 'runtime bytes', verifiedIr: 'verified bytes' });
+  };
+  const handle = await service.check('lean', 'checked source');
+  const result = service.emitArtifact(handle);
+  assert.equal(observed.source, 'checked source');
+  assert.equal(Object.isFrozen(observed), true);
+  assert.deepEqual(result.stages, { runtimeIr: 'runtime bytes', verifiedIr: 'verified bytes' });
+  assert.equal(Object.isFrozen(result.stages), true);
+  assert.equal(emitted.length, 0);
+  compiler.psCompilerTypeScriptStagesFromPrepared = () => ({ $ps$tag: 'error' });
+  assert.throws(() => service.emitArtifact(handle), /EMIT_STAGES_FAILED/);
+  assert.equal(emitted.length, 0);
+  compiler.psCompilerTypeScriptStagesFromPrepared = () => ok({ typeScript: 'output', runtimeIr: 'missing verified' });
+  assert.throws(() => service.emitArtifact(handle), /STAGES_SHAPE/);
+  service.revoke(handle);
+  assert.throws(() => service.emitArtifact(handle), /UNCHECKED_MODULE/);
 });

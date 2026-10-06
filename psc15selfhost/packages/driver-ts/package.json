@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@proofscript/compiler-next": "0.0.0-dev",
-    "@proofscript/backend-ts-next": "0.0.0-dev"
+    "@proofscript/backend-ts-next": "0.0.0-dev",
+    "@proofscript/compiler-ir-next": "0.0.0-dev"
   }
 }

@@ -97,7 +97,10 @@
         "scripts/artifact-evidence.mjs",
         "scripts/checked-build-evidence.mjs",
         "scripts/observed-build-archive.mjs",
-        "contracts/ir/PASS_EVIDENCE_V1.json"
+        "contracts/ir/PASS_EVIDENCE_V1.json",
+        "packages/compiler-ir/src/Ps/CompilerIr/Encode.lean",
+        "packages/driver-ts/src/Ps/DriverTs/Stages.lean",
+        "scripts/ir-artifact.mjs"
       ],
       "completion": "Every transformation records canonical action/input/output IDs, semantic relation, assumptions, resources and evidence requirements.",
       "assurance": "pending"

@@ -127,11 +127,20 @@ export function createKernelCheckedSession(
       modules.set(handle, { prepared, admissions });
       return handle;
   }
-  function emitTarget(handle, target) {
+  function emitTargetWithStages(handle, target) {
       const item = checkedItem(handle);
       if (!targets.includes(target)) throw new Error('PSC2_CHECKED_TARGET_FORBIDDEN');
       if (admissionsFrom(compiler, item.prepared) !== item.admissions) {
         throw new Error('PSC2_CHECKED_PAYLOAD_CHANGED');
+      }
+      if (target === 'typescript' && typeof compiler.psCompilerTypeScriptStagesFromPrepared === 'function') {
+        const staged = unwrapCompilerResult(compiler.psCompilerTypeScriptStagesFromPrepared(item.prepared), 'EMIT_STAGES');
+        freezeGraph(staged);
+        if (typeof staged?.typeScript !== 'string' || typeof staged.runtimeIr !== 'string' || typeof staged.verifiedIr !== 'string') {
+          throw new Error('PSC2_CHECKED_EMIT_STAGES_SHAPE');
+        }
+        return Object.freeze({ output: staged.typeScript,
+          stages: Object.freeze({ runtimeIr: staged.runtimeIr, verifiedIr: staged.verifiedIr }) });
       }
       const names = { typescript: 'psCompilerTypeScriptFromPrepared', javascript: 'psCompilerJavaScriptFromPrepared',
         rust: 'psCompilerRustFromPrepared', wasm: 'psCompilerWasmFromPrepared' };
@@ -145,8 +154,9 @@ export function createKernelCheckedSession(
       } else result = compiler[name](item.prepared);
       const output = unwrapCompilerResult(result, 'EMIT');
       if (target !== 'wasm' && typeof output !== 'string') throw new Error('PSC2_CHECKED_EMIT_RESULT_SHAPE');
-      return output;
+      return Object.freeze({ output });
   }
+  function emitTarget(handle, target) { return emitTargetWithStages(handle, target).output; }
   return Object.freeze({
     async check(sourceKind, source) {
       requireOpen();
@@ -173,6 +183,7 @@ export function createKernelCheckedSession(
       return emitTarget(handle, 'typescript');
     },
     emitTarget,
+    emitTargetWithStages,
     describe(handle) { checkedItem(handle); return handle; },
     revoke(handle) { checkedItem(handle); modules.delete(handle); },
     close() { closed = true; },

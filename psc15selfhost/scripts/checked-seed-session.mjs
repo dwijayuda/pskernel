@@ -78,6 +78,10 @@ export async function runCheckedSeedSession({
       if (completed?.phase !== 'emitted' || typeof completed.typescript !== 'string') {
         throw new Error('PSC2_CHECKED_SEED_SESSION_EMIT_RESULT');
       }
+      if ((completed.runtimeIr !== undefined || completed.verifiedIr !== undefined) &&
+          (typeof completed.runtimeIr !== 'string' || typeof completed.verifiedIr !== 'string')) {
+        throw new Error('PSC2_CHECKED_SEED_SESSION_STAGES_RESULT');
+      }
     } else if (completed?.phase !== 'checked') {
       throw new Error('PSC2_CHECKED_SEED_SESSION_CHECK_RESULT');
     }
@@ -90,6 +94,8 @@ export async function runCheckedSeedSession({
     return Object.freeze({
       admissions: prepared.admissions,
       ...(emit ? { typeScript: completed.typescript } : {}),
+      ...(emit && completed.runtimeIr !== undefined
+        ? { stages: Object.freeze({ runtimeIr: completed.runtimeIr, verifiedIr: completed.verifiedIr }) } : {}),
     });
   } catch (error) {
     if (child && child.exitCode === null) child.kill('SIGKILL');

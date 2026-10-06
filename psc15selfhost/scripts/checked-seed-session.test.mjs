@@ -26,6 +26,8 @@ for (const sourceKind of ['lean', 'ps']) {
     });
     assert.equal(calls, 1);
     assert.match(result.typeScript, /export const second/);
+    assert.equal(typeof result.stages.runtimeIr, 'string');
+    assert.equal(result.stages.runtimeIr, result.stages.verifiedIr);
   });
   test(`real ${sourceKind} module session blocks emission on rejection`, { skip: !available }, async () => {
     await assert.rejects(runCheckedSeedSession({

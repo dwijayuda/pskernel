@@ -101,10 +101,12 @@ def psCheckedSeedPreparedSession
       | throw (IO.userError "PSC2_CHECKED_PREPARED_INTEGRITY_FAILED")
     if currentAdmissions != admissions then
       throw (IO.userError "PSC2_CHECKED_PAYLOAD_CHANGED")
-    match psCompilerTypeScriptFromPrepared prepared with
+    match psCompilerTypeScriptStagesFromPrepared prepared with
     | .error _ => throw (IO.userError "PSC2_CHECKED_EMISSION_FAILED")
     | .ok output =>
-        stdout.putStrLn (psCheckedSeedMessage "emitted" "typescript" output)
+        stdout.putStrLn (Lean.Json.mkObj [
+          ("phase", Lean.Json.str "emitted"), ("typescript", Lean.Json.str output.typeScript),
+          ("runtimeIr", Lean.Json.str output.runtimeIr), ("verifiedIr", Lean.Json.str output.verifiedIr)]).compress
         stdout.flush
   else
     throw (IO.userError "PSC2_CHECKED_SEED_SESSION_COMMAND")

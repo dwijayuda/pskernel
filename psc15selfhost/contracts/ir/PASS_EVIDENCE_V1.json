@@ -24,15 +24,18 @@
   ],
   "currentBuildCoverage": [
     "source preparation and kernel checking as an observed composite edge",
-    "checked admissions to TypeScript as an observed composite edge",
-    "TypeScript to JavaScript, declarations and source map with the actual flags and output basename"
+    "actual checked Core to canonical RuntimeIR erasure artifact when the staged API is present",
+    "actual RuntimeIR validation with distinct domain-bound VerifiedIR artifact and equal bytes",
+    "actual validated IR to TypeScript as a composite lowering/printing edge",
+    "TypeScript to JavaScript/declarations/source map with actual flags and output basename"
   ],
   "remaining": [
-    "canonical artifacts for individual internal IR stages",
+    "SpecializedIR and backend-interior stage artifacts for other targets",
     "complete generated compiler/runtime and TypeScript package closure",
     "independent complete preservation evidence",
     "full resource budget coverage",
     "archive release semantic lock, licenses and provenance beyond the observed build records"
   ],
-  "portableDigestRule": "A portable record supplied with artifact labels remains requiresByteVerification. Legacy specialization records remain unbound. Neither implies byte verification or a proof."
+  "portableDigestRule": "A portable record supplied with artifact labels remains requiresByteVerification. Legacy specialization records remain unbound. Neither implies byte verification or a proof.",
+  "stageEncoding": "contracts/ir/IR_ARTIFACT_ENCODING_V1.json"
 }

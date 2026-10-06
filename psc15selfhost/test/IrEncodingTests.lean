@@ -1,0 +1,32 @@
+import Ps.DriverTs.Stages
+
+def psIrEncodingFixture : PsVerifiedIrModule :=
+  PsVerifiedIrModule.mk [] [] [] [
+    PsVerifiedIrDeclaration.mk "huge" [] [] (.primitive .nat)
+      (.literal (.natural 123456789012345678901234567890)),
+    PsVerifiedIrDeclaration.mk "negative" [] [] (.primitive .int) (.literal (.integer (-123))),
+    PsVerifiedIrDeclaration.mk "unicode" [] [] (.primitive .string) (.literal (.string "a\n\"😀")),
+    PsVerifiedIrDeclaration.mk "unknown" [] [] .unknown (.var "unresolved")]
+
+def main (args : List String) : IO Unit := do
+  if args == ["--raw"] then
+    match psIrEncodeModule psIrEncodingFixture with
+    | .error _ => throw (IO.userError "IR_ENCODE_FAILED")
+    | .ok encoded => IO.println encoded
+  else if args == ["--stages"] then
+    let .ok prepared := psCompilerPrepareSource .lean "def answer : Nat := 42\n"
+      | throw (IO.userError "PREPARE_FAILED")
+    let .ok staged := psCompilerTypeScriptStagesFromPrepared prepared
+      | throw (IO.userError "STAGES_FAILED")
+    let .ok legacy := psCompilerTypeScriptFromPrepared prepared
+      | throw (IO.userError "LEGACY_FAILED")
+    if legacy != staged.typeScript || staged.runtimeIr != staged.verifiedIr then
+      throw (IO.userError "STAGES_CHANGED_OUTPUT")
+    IO.println (psJsonObject [
+      ("runtimeIr", psJsonQuote staged.runtimeIr),
+      ("typeScript", psJsonQuote staged.typeScript),
+      ("verifiedIr", psJsonQuote staged.verifiedIr)])
+  else
+    match psIrJsonExprWithFuel 0 (.literal .unit), psIrJsonTypeWithFuel 0 .unknown with
+    | .error .depthExhausted, .error .depthExhausted => IO.println "PSCV_IR_ENCODING_DEPTH: PASS"
+    | _, _ => throw (IO.userError "IR_DEPTH_NOT_ENFORCED")

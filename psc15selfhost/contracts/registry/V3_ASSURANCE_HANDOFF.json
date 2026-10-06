@@ -32,8 +32,8 @@
     },
     {
       "id": "selfhost-fixed-points",
-      "status": "failing",
-      "required": "Re-run full JS, Wasm and Rust fixed points after implementation repairs. Rust run 37542286791/job 112537895712 at 60ffecc passed native shared-value/direct-tail fixtures, whole-compiler generation and generation-1 native build, then generation-2 still overflowed the stack. Direct and PSC1 eta-worker tail loops at unchanged generic arguments are now implemented; this checkpoint requires native cloud replay. Bounded debugger replay records overflow frames without satisfying the gate. General non-tail/mutual recursion and final-owner destruction remain separate obligations. Generation/instantiation alone is insufficient."
+      "status": "partial",
+      "required": "Rust whole-compiler fixed point passed at 9c61a5e in cloud run 37543432920/job 112541632056: 66 modules, generation 1=2=3 generated Rust source, 2810845 bytes. See contracts/bootstrap/RUST_FIXED_POINT_V1.json. Recheck changed Rust closures, complete JS/Wasm fixed points and diagnose their failures. This does not establish native binary reproducibility, global compiler correctness or DDC."
     },
     {
       "id": "bootstrap-diversity",

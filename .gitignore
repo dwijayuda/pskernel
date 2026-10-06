@@ -6,4 +6,7 @@ full-std.local.log
 selfhost/out/
 psc15selfhost/.lake/
 psc15selfhost/lake-manifest.json
+psc15selfhost/lean-checked/.lake/
+psc15selfhost/lean-checked/lake-manifest.json
+psc15selfhost/lean-checked/lean-toolchain
 psc15selfhost/.continuation/

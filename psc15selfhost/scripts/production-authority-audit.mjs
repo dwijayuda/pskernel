@@ -43,7 +43,7 @@ while (pending.length) {
   const source = await read(file);
   if (file === 'scripts/compile-with-generated.mjs') throw new Error('PSC_PRODUCTION_IMPORTS_UNCHECKED_DRIVER');
   if (file === 'scripts/cache-utils.mjs' || file === 'scripts/compile-typescript-cached.mjs') throw new Error('PSC_PRODUCTION_IMPORTS_BOOTSTRAP_LOCAL_CACHE');
-  const rawCalls = /\bpsCompiler(?:ErasedIr|VerifiedIr|TypeScript|JavaScript|Rust|Wasm)FromPrepared\b/u;
+  const rawCalls = /\bpsCompiler(?:ErasedIr|VerifiedIr|TypeScript(?:Stages)?|JavaScript|Rust|Wasm)FromPrepared\b/u;
   if (rawCalls.test(source) && file !== 'scripts/kernel-checked-session.mjs') throw new Error('PSC_RAW_EMITTER_OUTSIDE_AUTHORITY: ' + file);
   for (const match of source.matchAll(/(?:from\s*|import\s*)['"](\.[^'"]+\.mjs)['"]/gu)) {
     const dependency = path.posix.normalize(path.posix.join(path.posix.dirname(file), match[1]));

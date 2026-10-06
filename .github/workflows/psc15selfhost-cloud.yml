@@ -104,6 +104,7 @@ jobs:
             psc1_verified_ir_strict_tests \
             pscv_interface_ir_tests \
             pscv_js_abi_tests \
+            pscv_ir_encoding_tests \
             psc1_project_query_graph_tests \
             psc1_host_project_query_tests \
             psc2_joint_closure_inventory \
@@ -137,6 +138,10 @@ jobs:
           lake exe pscv_js_abi_tests
           lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/JsAbi.lean
           node --experimental-vm-modules --test scripts/js-scalar-abi.test.mjs
+          lake exe pscv_ir_encoding_tests
+          lake exe psc1 check packages/compiler-ir/src/Ps/CompilerIr/Encode.lean
+          lake exe psc1 check packages/driver-ts/src/Ps/DriverTs/Stages.lean
+          node --test scripts/ir-artifact.test.mjs
 
       - name: Check generalized erasure source equality guard
         working-directory: psc15selfhost

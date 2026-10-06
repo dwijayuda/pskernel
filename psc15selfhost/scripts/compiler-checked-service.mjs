@@ -30,15 +30,19 @@ export function createCheckedCompilerService({
     { targets, assumptionPolicy, resourcePolicy });
   function emitArtifact(handle, target = 'typescript') {
     const capability = session.describe(handle);
-    const raw = session.emitTarget(handle, target);
+    const emission = session.emitTargetWithStages(handle, target);
+    const raw = emission.output;
     const payload = target === 'wasm' ? byteList(raw, maxOutputBytes) : raw;
     const bytes = typeof payload === 'string' ? Buffer.from(payload, 'utf8') : payload;
     if (bytes.byteLength > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
+    if (emission.stages && bytes.byteLength + Buffer.byteLength(emission.stages.runtimeIr) +
+        Buffer.byteLength(emission.stages.verifiedIr) > maxOutputBytes) throw new Error('PSC_CHECKED_OUTPUT_RESOURCE_EXHAUSTED');
     return Object.freeze({
       contract: 'psc-checked-emission/1', target, payload,
       artifact: Object.freeze({ algorithm: 'sha256', domain: 'target-bytes', schemaVersion: 1,
         digest: createHash('sha256').update(bytes).digest('hex'), byteLength: bytes.byteLength }),
       checkedCore: capability,
+      ...(emission.stages ? { stages: emission.stages } : {}),
       transformationAssurance: 'trusted-implementation-global-preservation-unproved',
     });
   }
@@ -48,4 +52,3 @@ export function createCheckedCompilerService({
     emitArtifact, describe: session.describe, revoke: session.revoke, close: session.close,
   });
 }
-

@@ -32,9 +32,10 @@ test('explicit owned kernel checks dependent source before emission and executio
     const archived = await verifyObservedBuildArchive(archiveBytes, { expectedGraphId: receipt.buildGraph,
       allowedAssumptions: ['trusted-host-composition', 'selected-compiler-module-closure', 'selected-host-runtime',
         'selected-kernel-invocation', 'trusted-frontend-source-interpretation', 'trusted-erasure-and-typescript-emission',
-        'selected-typescript-package-closure'] });
+        'selected-typescript-package-closure', 'trusted-erasure-implementation', 'trusted-strict-ir-validator',
+        'trusted-typescript-emission'] });
     assert.equal(archived.kind, 'accepted', archived.reason);
-    assert.equal(archived.executions.length, 3);
+    assert.equal(archived.executions.length, 5);
     assert.equal(archived.semanticClaimsVerified, false);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
@@ -137,6 +138,11 @@ for (const [kind, source] of [
       assert.deepEqual(saved, receipt);
       assert.equal(saved.compiler.engine, 'native-seed');
       assert.ok(existsSync(path.join(dir, 'out.admissions.json')));
+      const graph = JSON.parse(await readFile(path.join(dir, 'out.build-graph.json'), 'utf8'));
+      assert.equal(graph.coverage, 'observed-erasure-validation-and-composite-backend-edges');
+      assert.equal(graph.executions.length, 5);
+      assert.equal(graph.entries.filter(entry => entry.identity.domain === 'runtime-ir').length, 1);
+      assert.equal(graph.entries.filter(entry => entry.identity.domain === 'verified-ir').length, 1);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

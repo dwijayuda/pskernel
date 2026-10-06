@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-theory-bridge/1",
+  "purpose": "explicit logical interoperability between theory identities",
+  "fields": [
+    "sourceTheoryId",
+    "destinationTheoryId",
+    "symbolMap",
+    "axiomMap",
+    "unsupportedFeatures",
+    "preservationClaim",
+    "preservationEvidence"
+  ],
+  "identityBridge": {
+    "status": "implemented",
+    "preservation": "definitionally identical theory id"
+  },
+  "crossFoundationPreservation": {
+    "status": "target-unproved-per-bridge"
+  },
+  "implementation": "packages/theory-bridge/src/Ps/TheoryBridge/Model.lean"
+}

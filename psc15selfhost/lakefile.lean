@@ -477,3 +477,14 @@ lean_lib PsPscvTheory where
 lean_exe pscv_theory_seed_tests where
   srcDir := "packages/pscv-theory/test"
   root := `TheorySeedTests
+
+
+lean_lib PsTheoryBridge where
+  srcDir := "packages/theory-bridge/src"
+  roots := #[
+    `Ps.TheoryBridge.Model
+  ]
+
+lean_exe pscv_theory_bridge_tests where
+  srcDir := "packages/theory-bridge/test"
+  root := `TheoryBridgeTests

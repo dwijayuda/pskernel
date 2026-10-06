@@ -5,6 +5,49 @@ inductive PsCompilerJavaScriptError where
   | compiler (error : PsCompilerError)
   | emit (error : PsJsEmitError)
 
+
+def psCompilerJavaScriptCompilerErrorCode
+    (error : PsCompilerError) : String :=
+  match error with
+  | PsCompilerError.translation _ => "compiler.translation"
+  | PsCompilerError.leanFrontend _ => "compiler.lean-frontend"
+  | PsCompilerError.proofScriptFrontend _ => "compiler.proofscript-frontend"
+  | PsCompilerError.elaboration _ => "compiler.elaboration"
+  | PsCompilerError.admission _ => "compiler.admission"
+  | PsCompilerError.erasure _ => "compiler.erasure"
+  | PsCompilerError.irValidation _ => "compiler.ir-validation"
+
+def psCompilerJavaScriptLowerErrorCode
+    (error : PsJsLowerError) : String :=
+  match error with
+  | PsJsLowerError.fuelExhausted => "lower.fuel-exhausted"
+  | PsJsLowerError.importsUnsupported => "lower.imports-unsupported"
+  | PsJsLowerError.structuresUnsupported => "lower.structures-unsupported"
+  | PsJsLowerError.inductivesUnsupported => "lower.inductives-unsupported"
+  | PsJsLowerError.specializationFailed => "lower.specialization-failed"
+  | PsJsLowerError.genericDeclarationUnsupported name =>
+      String.Internal.append "lower.generic-declaration:" name
+  | PsJsLowerError.unsupportedType => "lower.unsupported-type"
+  | PsJsLowerError.unsupportedLiteral => "lower.unsupported-literal"
+  | PsJsLowerError.unsupportedExpression => "lower.unsupported-expression"
+  | PsJsLowerError.unsupportedIntrinsic => "lower.unsupported-intrinsic"
+  | PsJsLowerError.intrinsicArity => "lower.intrinsic-arity"
+  | PsJsLowerError.typeArgumentsUnsupported => "lower.type-arguments"
+  | PsJsLowerError.unsupportedName name =>
+      String.Internal.append "lower.unsupported-name:" name
+
+def psCompilerJavaScriptErrorCode
+    (error : PsCompilerJavaScriptError) : String :=
+  match error with
+  | PsCompilerJavaScriptError.compiler compilerError =>
+      psCompilerJavaScriptCompilerErrorCode compilerError
+  | PsCompilerJavaScriptError.emit emitError =>
+      match emitError with
+      | PsJsEmitError.lower lowerError =>
+          psCompilerJavaScriptLowerErrorCode lowerError
+      | PsJsEmitError.fuelExhausted => "emit.fuel-exhausted"
+      | PsJsEmitError.malformedIr => "emit.malformed-ir"
+
 def psCompilerJavaScriptTarget64 : PsJsTargetProfile :=
   { wordSize := PsJsWordSize.bits64 }
 

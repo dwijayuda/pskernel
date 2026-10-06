@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.Judgments
 import Ps.KernelCore.Admission.Inductive.Common.Occurrence
 import Ps.KernelCore.Admission.Inductive.Ordinary.Constructor
 import Ps.KernelCore.Admission.Inductive.Common.RecursorValidation

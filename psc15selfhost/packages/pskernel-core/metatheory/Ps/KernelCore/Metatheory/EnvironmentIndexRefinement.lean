@@ -10,9 +10,24 @@ theorem psKernelNat_eq_of_div_two_eq_and_mod_two_eq
     (hDiv : Nat.div left 2 = Nat.div right 2)
     (hMod : Nat.mod left 2 = Nat.mod right 2) :
     left = right := by
-  have hLeft := Nat.mod_add_div left 2
-  have hRight := Nat.mod_add_div right 2
-  omega
+  calc
+    left =
+        Nat.mod left 2 +
+          2 * Nat.div left 2 := (Nat.mod_add_div left 2).symm
+    _ =
+        Nat.mod right 2 +
+          2 * Nat.div right 2 := by
+            rw [hMod, hDiv]
+    _ = right := Nat.mod_add_div right 2
+
+theorem psKernelEnvironmentIndexFindWorker_empty
+    (fuel hash : Nat) :
+    psKernelEnvironmentIndexFindWorker
+        fuel
+        PsKernelEnvironmentIndex.empty
+        hash =
+      List.nil := by
+  cases fuel <;> rfl
 
 theorem psKernelEnvironmentIndexFindWorker_setWorker_other_bounded
     (fuel : Nat)
@@ -58,28 +73,77 @@ theorem psKernelEnvironmentIndexFindWorker_setWorker_other_bounded
             exact
               psKernelNat_eq_of_div_two_eq_and_mod_two_eq
                 setHash findHash hDiv hMod
-          have hRec :=
-            ih
-              index
-              (Nat.div setHash 2)
-              (Nat.div findHash 2)
-              hSetDiv
-              hFindDiv
-              hDivDifferent
-          cases index <;>
-            simp [
-              psKernelEnvironmentIndexSetWorker,
-              psKernelEnvironmentIndexFindWorker,
-              hSetEven,
-              hFindEven,
-              hRec
-            ]
+          cases index with
+          | empty =>
+              have hRec :=
+                ih
+                  PsKernelEnvironmentIndex.empty
+                  (Nat.div setHash 2)
+                  (Nat.div findHash 2)
+                  hSetDiv
+                  hFindDiv
+                  hDivDifferent
+              simpa [
+                psKernelEnvironmentIndexSetWorker,
+                psKernelEnvironmentIndexFindWorker,
+                hSetEven,
+                hFindEven,
+                psKernelEnvironmentIndexFindWorker_empty
+              ] using hRec
+          | small values =>
+              have hRec :=
+                ih
+                  PsKernelEnvironmentIndex.empty
+                  (Nat.div setHash 2)
+                  (Nat.div findHash 2)
+                  hSetDiv
+                  hFindDiv
+                  hDivDifferent
+              simpa [
+                psKernelEnvironmentIndexSetWorker,
+                psKernelEnvironmentIndexFindWorker,
+                hSetEven,
+                hFindEven,
+                psKernelEnvironmentIndexFindWorker_empty
+              ] using hRec
+          | bucket values =>
+              have hRec :=
+                ih
+                  PsKernelEnvironmentIndex.empty
+                  (Nat.div setHash 2)
+                  (Nat.div findHash 2)
+                  hSetDiv
+                  hFindDiv
+                  hDivDifferent
+              simpa [
+                psKernelEnvironmentIndexSetWorker,
+                psKernelEnvironmentIndexFindWorker,
+                hSetEven,
+                hFindEven,
+                psKernelEnvironmentIndexFindWorker_empty
+              ] using hRec
+          | branch left right =>
+              have hRec :=
+                ih
+                  left
+                  (Nat.div setHash 2)
+                  (Nat.div findHash 2)
+                  hSetDiv
+                  hFindDiv
+                  hDivDifferent
+              simpa [
+                psKernelEnvironmentIndexSetWorker,
+                psKernelEnvironmentIndexFindWorker,
+                hSetEven,
+                hFindEven
+              ] using hRec
         · cases index <;>
             simp [
               psKernelEnvironmentIndexSetWorker,
               psKernelEnvironmentIndexFindWorker,
               hSetEven,
-              hFindEven
+              hFindEven,
+              psKernelEnvironmentIndexFindWorker_empty
             ]
       · by_cases hFindEven : Nat.mod findHash 2 = 0
         · cases index <;>
@@ -87,7 +151,8 @@ theorem psKernelEnvironmentIndexFindWorker_setWorker_other_bounded
               psKernelEnvironmentIndexSetWorker,
               psKernelEnvironmentIndexFindWorker,
               hSetEven,
-              hFindEven
+              hFindEven,
+              psKernelEnvironmentIndexFindWorker_empty
             ]
         · have hSetDiv :
               Nat.div setHash 2 < Nat.pow 2 remaining :=
@@ -113,22 +178,70 @@ theorem psKernelEnvironmentIndexFindWorker_setWorker_other_bounded
             exact
               psKernelNat_eq_of_div_two_eq_and_mod_two_eq
                 setHash findHash hDiv hMod
-          have hRec :=
-            ih
-              index
-              (Nat.div setHash 2)
-              (Nat.div findHash 2)
-              hSetDiv
-              hFindDiv
-              hDivDifferent
-          cases index <;>
-            simp [
-              psKernelEnvironmentIndexSetWorker,
-              psKernelEnvironmentIndexFindWorker,
-              hSetEven,
-              hFindEven,
-              hRec
-            ]
+          cases index with
+          | empty =>
+              have hRec :=
+                ih
+                  PsKernelEnvironmentIndex.empty
+                  (Nat.div setHash 2)
+                  (Nat.div findHash 2)
+                  hSetDiv
+                  hFindDiv
+                  hDivDifferent
+              simpa [
+                psKernelEnvironmentIndexSetWorker,
+                psKernelEnvironmentIndexFindWorker,
+                hSetEven,
+                hFindEven,
+                psKernelEnvironmentIndexFindWorker_empty
+              ] using hRec
+          | small values =>
+              have hRec :=
+                ih
+                  PsKernelEnvironmentIndex.empty
+                  (Nat.div setHash 2)
+                  (Nat.div findHash 2)
+                  hSetDiv
+                  hFindDiv
+                  hDivDifferent
+              simpa [
+                psKernelEnvironmentIndexSetWorker,
+                psKernelEnvironmentIndexFindWorker,
+                hSetEven,
+                hFindEven,
+                psKernelEnvironmentIndexFindWorker_empty
+              ] using hRec
+          | bucket values =>
+              have hRec :=
+                ih
+                  PsKernelEnvironmentIndex.empty
+                  (Nat.div setHash 2)
+                  (Nat.div findHash 2)
+                  hSetDiv
+                  hFindDiv
+                  hDivDifferent
+              simpa [
+                psKernelEnvironmentIndexSetWorker,
+                psKernelEnvironmentIndexFindWorker,
+                hSetEven,
+                hFindEven,
+                psKernelEnvironmentIndexFindWorker_empty
+              ] using hRec
+          | branch left right =>
+              have hRec :=
+                ih
+                  right
+                  (Nat.div setHash 2)
+                  (Nat.div findHash 2)
+                  hSetDiv
+                  hFindDiv
+                  hDivDifferent
+              simpa [
+                psKernelEnvironmentIndexSetWorker,
+                psKernelEnvironmentIndexFindWorker,
+                hSetEven,
+                hFindEven
+              ] using hRec
 
 theorem psKernelEnvironmentIndexFindWorker_setWorker_other_name_hash
     (index : PsKernelEnvironmentIndex)

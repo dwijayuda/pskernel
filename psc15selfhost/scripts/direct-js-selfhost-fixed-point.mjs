@@ -124,9 +124,14 @@ async function compileWith(compiler, sources, stage) {
   return output;
 }
 
+function phase(name) {
+  process.stdout.write("PSC2_DIRECT_JS_SELFHOST_PHASE: " + name + "\n");
+}
+
 await rm(outRoot, { recursive: true, force: true });
 await mkdir(outRoot, { recursive: true });
 
+phase("bootstrap-workspace");
 run(process.execPath, [
   "scripts/bootstrap-project.mjs",
   path.relative(root, entryLean),
@@ -143,19 +148,23 @@ const nativeCommand = existsSync(nativeCompiler) ? nativeCompiler : "lake";
 const nativeArgs = existsSync(nativeCompiler)
   ? ["javascript", path.relative(root, entryPs)]
   : ["exe", "psc1", "javascript", path.relative(root, entryPs)];
+phase("native-generation-1");
 const generation1Source = run(nativeCommand, nativeArgs);
 if (generation1Source.length === 0) {
   throw new Error("PSC2_DIRECT_JS_SELFHOST_NATIVE_EMPTY");
 }
 await writeFile(generation1, generation1Source, "utf8");
 
+phase("load-source-closure");
 const closure = await readGeneratedSourceClosure(entryPs, workspace);
 if (!closure || closure.ordered.length === 0) {
   throw new Error("PSC2_DIRECT_JS_SELFHOST_CLOSURE_EMPTY");
 }
 const sources = closure.ordered.map((item) => item.source);
 
+phase("import-generation-1");
 const compiler1 = await loadCompiler(generation1, 1);
+phase("compile-generation-2");
 const generation2Source = await compileWith(
   compiler1,
   sources,
@@ -167,7 +176,9 @@ if (generation1Source !== generation2Source) {
   throw new Error("PSC2_DIRECT_JS_SELFHOST_BOOTSTRAP_FIXED_POINT_MISMATCH");
 }
 
+phase("import-generation-2");
 const compiler2 = await loadCompiler(generation2, 2);
+phase("compile-generation-3");
 const generation3Source = await compileWith(
   compiler2,
   sources,
@@ -179,6 +190,7 @@ if (generation2Source !== generation3Source) {
   throw new Error("PSC2_DIRECT_JS_SELFHOST_SELF_FIXED_POINT_MISMATCH");
 }
 
+phase("fixed-point-complete");
 process.stdout.write(
   [
     "PSC2_DIRECT_JS_SELFHOST_FIXED_POINT: PASS",

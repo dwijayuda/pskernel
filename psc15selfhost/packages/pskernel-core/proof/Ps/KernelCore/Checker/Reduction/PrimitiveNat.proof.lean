@@ -54,8 +54,19 @@ theorem psKernelReduceNatBinary_add_refines
       (PsKernelExpr.lit
         (PsKernelLiteral.nat (Nat.add left right))) := by
   constructor
-  · simp [psKernelReduceNatBinary, hAdd]
-    rw [hSize]
+  · cases hCheck :
+        psKernelCheckNatSize
+          maxNatSize
+          (Nat.add left right) with
+    | error error =>
+        simp [hCheck] at hSize
+    | ok checked =>
+        cases checked
+        simp [
+          psKernelReduceNatBinary,
+          hAdd,
+          hCheck
+        ]
   · exact PsKernelReductionStep.natAdd op left right hAdd
 
 theorem psKernelReduceNatBinary_sub_refines
@@ -90,12 +101,20 @@ theorem psKernelReduceNatBinary_sub_refines
       (PsKernelExpr.lit
         (PsKernelLiteral.nat (Nat.sub left right))) := by
   constructor
-  · simp [
-      psKernelReduceNatBinary,
-      hNotAdd,
-      hSub
-    ]
-    rw [hSize]
+  · cases hCheck :
+        psKernelCheckNatSize
+          maxNatSize
+          (Nat.sub left right) with
+    | error error =>
+        simp [hCheck] at hSize
+    | ok checked =>
+        cases checked
+        simp [
+          psKernelReduceNatBinary,
+          hNotAdd,
+          hSub,
+          hCheck
+        ]
   · exact PsKernelReductionStep.natSub op left right hSub
 
 theorem psKernelReduceNatBinary_mul_refines
@@ -132,11 +151,19 @@ theorem psKernelReduceNatBinary_mul_refines
       (PsKernelExpr.lit
         (PsKernelLiteral.nat (Nat.mul left right))) := by
   constructor
-  · simp [
-      psKernelReduceNatBinary,
-      hNotAdd,
-      hNotSub,
-      hMul
-    ]
-    rw [hSize]
+  · cases hCheck :
+        psKernelCheckNatSize
+          maxNatSize
+          (Nat.mul left right) with
+    | error error =>
+        simp [hCheck] at hSize
+    | ok checked =>
+        cases checked
+        simp [
+          psKernelReduceNatBinary,
+          hNotAdd,
+          hNotSub,
+          hMul,
+          hCheck
+        ]
   · exact PsKernelReductionStep.natMul op left right hMul

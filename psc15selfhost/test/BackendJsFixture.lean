@@ -16,11 +16,90 @@ def psBackendJsNatBinaryFunctionType : PsVerifiedIrType :=
     [psBackendJsNatType, psBackendJsNatType]
     psBackendJsNatType
 
+def psBackendJsTypeA : PsVerifiedIrType :=
+  PsVerifiedIrType.typeParameter "A"
+
+def psBackendJsPointType : PsVerifiedIrType :=
+  PsVerifiedIrType.named "Point" []
+
+def psBackendJsBoxNatType : PsVerifiedIrType :=
+  PsVerifiedIrType.named "Box" [psBackendJsNatType]
+
+def psBackendJsMaybeNatType : PsVerifiedIrType :=
+  PsVerifiedIrType.named "MaybeNat" []
+
+def psBackendJsOptionNatType : PsVerifiedIrType :=
+  PsVerifiedIrType.named "Option" [psBackendJsNatType]
+
 def psBackendJsFixtureModule : PsVerifiedIrModule :=
   {
     imports := []
-    structures := []
-    inductives := []
+    structures := [
+      {
+        name := "Point"
+        typeParameters := []
+        fields := [
+          {
+            name := "x"
+            type := psBackendJsNatType
+          },
+          {
+            name := "y"
+            type := psBackendJsNatType
+          }
+        ]
+      },
+      {
+        name := "Box"
+        typeParameters := [{ name := "A" }]
+        fields := [
+          {
+            name := "value"
+            type := psBackendJsTypeA
+          }
+        ]
+      }
+    ]
+    inductives := [
+      {
+        name := "MaybeNat"
+        typeParameters := []
+        constructors := [
+          {
+            name := "none"
+            fields := []
+          },
+          {
+            name := "some"
+            fields := [
+              {
+                name := "value"
+                type := psBackendJsNatType
+              }
+            ]
+          }
+        ]
+      },
+      {
+        name := "Option"
+        typeParameters := [{ name := "A" }]
+        constructors := [
+          {
+            name := "none"
+            fields := []
+          },
+          {
+            name := "some"
+            fields := [
+              {
+                name := "value"
+                type := psBackendJsTypeA
+              }
+            ]
+          }
+        ]
+      }
+    ]
     declarations := [
       {
         name := "answer"
@@ -604,6 +683,219 @@ def psBackendJsFixtureModule : PsVerifiedIrModule :=
               PsVerifiedIrExpr.var "array",
               PsVerifiedIrExpr.var "start",
               PsVerifiedIrExpr.var "stop"
+            ]
+      },
+      {
+        name := "pointSum"
+        typeParameters := []
+        parameters := [
+          {
+            name := "left"
+            type := psBackendJsNatType
+          },
+          {
+            name := "right"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.letE
+            "point"
+            psBackendJsPointType
+            (PsVerifiedIrExpr.record
+              "Point"
+              []
+              [
+                ("x", PsVerifiedIrExpr.var "left"),
+                ("y", PsVerifiedIrExpr.var "right")
+              ])
+            (PsVerifiedIrExpr.intrinsic
+              PsVerifiedIrIntrinsic.natAdd
+              []
+              [
+                PsVerifiedIrExpr.projection
+                  "Point"
+                  []
+                  (PsVerifiedIrExpr.var "point")
+                  "x",
+                PsVerifiedIrExpr.projection
+                  "Point"
+                  []
+                  (PsVerifiedIrExpr.var "point")
+                  "y"
+              ])
+      },
+      {
+        name := "boxNatGet"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.letE
+            "box"
+            psBackendJsBoxNatType
+            (PsVerifiedIrExpr.record
+              "Box"
+              [psBackendJsNatType]
+              [
+                ("value", PsVerifiedIrExpr.var "value")
+              ])
+            (PsVerifiedIrExpr.projection
+              "Box"
+              [psBackendJsNatType]
+              (PsVerifiedIrExpr.var "box")
+              "value")
+      },
+      {
+        name := "maybeSomeOrZero"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.matchE
+            "MaybeNat"
+            []
+            (PsVerifiedIrExpr.constructor
+              "MaybeNat"
+              "some"
+              []
+              [
+                ("value", PsVerifiedIrExpr.var "value")
+              ])
+            [
+              ("none", [], PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.natural 0)),
+              ("some",
+                [
+                  {
+                    field := "value"
+                    name := "payload"
+                    type := psBackendJsNatType
+                  }
+                ],
+                PsVerifiedIrExpr.var "payload")
+            ]
+      },
+      {
+        name := "maybeNoneOr"
+        typeParameters := []
+        parameters := [
+          {
+            name := "fallback"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.matchE
+            "MaybeNat"
+            []
+            (PsVerifiedIrExpr.constructor
+              "MaybeNat"
+              "none"
+              []
+              [])
+            [
+              ("none", [], PsVerifiedIrExpr.var "fallback"),
+              ("some",
+                [
+                  {
+                    field := "value"
+                    name := "payload"
+                    type := psBackendJsNatType
+                  }
+                ],
+                PsVerifiedIrExpr.var "payload")
+            ]
+      },
+      {
+        name := "optionNatSome"
+        typeParameters := []
+        parameters := [
+          {
+            name := "value"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.matchE
+            "Option"
+            [psBackendJsNatType]
+            (PsVerifiedIrExpr.constructor
+              "Option"
+              "some"
+              [psBackendJsNatType]
+              [
+                ("value", PsVerifiedIrExpr.var "value")
+              ])
+            [
+              ("none", [], PsVerifiedIrExpr.literal
+                (PsVerifiedIrLiteral.natural 0)),
+              ("some",
+                [
+                  {
+                    field := "value"
+                    name := "payload"
+                    type := psBackendJsNatType
+                  }
+                ],
+                PsVerifiedIrExpr.var "payload")
+            ]
+      },
+      {
+        name := "matchTempCollision"
+        typeParameters := []
+        parameters := [
+          {
+            name := "__ps$match$0"
+            type := psBackendJsNatType
+          },
+          {
+            name := "value"
+            type := psBackendJsNatType
+          }
+        ]
+        resultType := psBackendJsNatType
+        body :=
+          PsVerifiedIrExpr.matchE
+            "MaybeNat"
+            []
+            (PsVerifiedIrExpr.constructor
+              "MaybeNat"
+              "some"
+              []
+              [
+                ("value", PsVerifiedIrExpr.var "value")
+              ])
+            [
+              ("none", [], PsVerifiedIrExpr.var "__ps$match$0"),
+              ("some",
+                [
+                  {
+                    field := "value"
+                    name := "payload"
+                    type := psBackendJsNatType
+                  }
+                ],
+                PsVerifiedIrExpr.intrinsic
+                  PsVerifiedIrIntrinsic.natAdd
+                  []
+                  [
+                    PsVerifiedIrExpr.var "__ps$match$0",
+                    PsVerifiedIrExpr.var "payload"
+                  ])
             ]
       },
       {

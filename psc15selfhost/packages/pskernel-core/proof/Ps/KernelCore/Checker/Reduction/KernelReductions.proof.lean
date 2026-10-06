@@ -269,20 +269,12 @@ theorem psKernelReduceNatWith_sub_literals_refines
               (PsKernelExpr.lit
                 (PsKernelLiteral.nat
                   (Nat.sub left right)))) := by
-      cases hCheck :
-          psKernelCheckNatSize
-            context.maxNatSize
-            (Nat.sub left right) with
-      | error error =>
-          simp [hCheck] at hSize
-      | ok checked =>
-          cases checked
-          simp [
-            psKernelReduceNatBinary,
-            hNotAdd,
-            hSub,
-            hCheck
-          ]
+      simpa [
+        psKernelReduceNatBinary,
+        hNotAdd,
+        hSub,
+        hSize
+      ]
     simp [
       psKernelReduceNatWith,
       hLeft,
@@ -380,21 +372,13 @@ theorem psKernelReduceNatWith_mul_literals_refines
               (PsKernelExpr.lit
                 (PsKernelLiteral.nat
                   (Nat.mul left right)))) := by
-      cases hCheck :
-          psKernelCheckNatSize
-            context.maxNatSize
-            (Nat.mul left right) with
-      | error error =>
-          simp [hCheck] at hSize
-      | ok checked =>
-          cases checked
-          simp [
-            psKernelReduceNatBinary,
-            hNotAdd,
-            hNotSub,
-            hMul,
-            hCheck
-          ]
+      simpa [
+        psKernelReduceNatBinary,
+        hNotAdd,
+        hNotSub,
+        hMul,
+        hSize
+      ]
     simp [
       psKernelReduceNatWith,
       hLeft,

@@ -154,9 +154,21 @@ theorem psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
+          have hTotal :
+              Nat.succ
+                  (Nat.add
+                    (psKernelExprNodeCount fn)
+                    (psKernelExprNodeCount arg)) <
+                Nat.succ remaining := by
+            simpa only [psKernelExprNodeCount] using hFuel
+          have hSum :
+              Nat.add
+                  (psKernelExprNodeCount fn)
+                  (psKernelExprNodeCount arg) <
+                remaining :=
+            Nat.lt_of_succ_lt_succ hTotal
           have hFnFuel :
               psKernelExprNodeCount fn < remaining := by
-            simp [psKernelExprNodeCount] at hFuel
             omega
           have hArgFuel :
               psKernelExprNodeCount arg < remaining := by
@@ -176,9 +188,21 @@ theorem psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
+          have hTotal :
+              Nat.succ
+                  (Nat.add
+                    (psKernelExprNodeCount type)
+                    (psKernelExprNodeCount body)) <
+                Nat.succ remaining := by
+            simpa only [psKernelExprNodeCount] using hFuel
+          have hSum :
+              Nat.add
+                  (psKernelExprNodeCount type)
+                  (psKernelExprNodeCount body) <
+                remaining :=
+            Nat.lt_of_succ_lt_succ hTotal
           have hTypeFuel :
               psKernelExprNodeCount type < remaining := by
-            simp [psKernelExprNodeCount] at hFuel
             omega
           have hBodyFuel :
               psKernelExprNodeCount body < remaining := by
@@ -198,9 +222,21 @@ theorem psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
+          have hTotal :
+              Nat.succ
+                  (Nat.add
+                    (psKernelExprNodeCount type)
+                    (psKernelExprNodeCount body)) <
+                Nat.succ remaining := by
+            simpa only [psKernelExprNodeCount] using hFuel
+          have hSum :
+              Nat.add
+                  (psKernelExprNodeCount type)
+                  (psKernelExprNodeCount body) <
+                remaining :=
+            Nat.lt_of_succ_lt_succ hTotal
           have hTypeFuel :
               psKernelExprNodeCount type < remaining := by
-            simp [psKernelExprNodeCount] at hFuel
             omega
           have hBodyFuel :
               psKernelExprNodeCount body < remaining := by
@@ -220,9 +256,25 @@ theorem psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
+          have hTotal :
+              Nat.succ
+                  (Nat.add
+                    (psKernelExprNodeCount type)
+                    (Nat.add
+                      (psKernelExprNodeCount value)
+                      (psKernelExprNodeCount body))) <
+                Nat.succ remaining := by
+            simpa only [psKernelExprNodeCount] using hFuel
+          have hSum :
+              Nat.add
+                  (psKernelExprNodeCount type)
+                  (Nat.add
+                    (psKernelExprNodeCount value)
+                    (psKernelExprNodeCount body)) <
+                remaining :=
+            Nat.lt_of_succ_lt_succ hTotal
           have hTypeFuel :
               psKernelExprNodeCount type < remaining := by
-            simp [psKernelExprNodeCount] at hFuel
             omega
           have hValueFuel :
               psKernelExprNodeCount value < remaining := by
@@ -257,10 +309,13 @@ theorem psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
+          have hTotal :
+              Nat.succ (psKernelExprNodeCount body) <
+                Nat.succ remaining := by
+            simpa only [psKernelExprNodeCount] using hFuel
           have hBodyFuel :
-              psKernelExprNodeCount body < remaining := by
-            simp [psKernelExprNodeCount] at hFuel
-            omega
+              psKernelExprNodeCount body < remaining :=
+            Nat.lt_of_succ_lt_succ hTotal
           have hBody :=
             ihBody remaining start amount hBodyFuel
           simp [
@@ -273,10 +328,13 @@ theorem psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
       | zero =>
           simp [psKernelExprNodeCount] at hFuel
       | succ remaining =>
+          have hTotal :
+              Nat.succ (psKernelExprNodeCount body) <
+                Nat.succ remaining := by
+            simpa only [psKernelExprNodeCount] using hFuel
           have hBodyFuel :
-              psKernelExprNodeCount body < remaining := by
-            simp [psKernelExprNodeCount] at hFuel
-            omega
+              psKernelExprNodeCount body < remaining :=
+            Nat.lt_of_succ_lt_succ hTotal
           have hBody :=
             ihBody remaining start amount hBodyFuel
           simp [
@@ -291,23 +349,16 @@ theorem psKernelExprLiftLooseBVarsChanged_refines_reference
     psKernelExprLiftLooseBVarsChanged expr start amount =
       psKernelExprLiftLooseBVarsReferenceChanged
         expr start amount := by
-  cases hZero : Nat.beq amount 0 with
-  | true =>
-      simp [
-        psKernelExprLiftLooseBVarsChanged,
-        psKernelExprLiftLooseBVarsReferenceChanged,
-        hZero
-      ]
-  | false =>
-      simpa [
-        psKernelExprLiftLooseBVarsChanged,
-        hZero
-      ] using
+  cases amount with
+  | zero =>
+      rfl
+  | succ amount =>
+      simpa [psKernelExprLiftLooseBVarsChanged] using
         psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
           expr
           (Nat.succ (psKernelExprNodeCount expr))
           start
-          amount
+          (Nat.succ amount)
           (Nat.lt_succ_self
             (psKernelExprNodeCount expr))
 

@@ -133,53 +133,59 @@ theorem psKernelExprCheapBetaReduce_single_refines_beta
         psKernelExprCheapBetaReduce_closed_body
           name type body arg binderInfo hLoose
       have hInst :
-          psKernelExprInstantiate1 body arg = body :=
-        psKernelExprInstantiate1_closed
-          body arg hLoose
-      rw [hCheap]
-      rw [← hInst]
-      exact
+          psKernelExprInstantiate1 body arg = body := by
+        simp [psKernelExprInstantiate1, hLoose]
+      have hBeta :
+          PsKernelReductionStep
+            environment
+            localContext
+            (PsKernelExpr.app
+              (PsKernelExpr.lam name type body binderInfo)
+              arg)
+            (psKernelExprInstantiate1 body arg) :=
         PsKernelReductionStep.beta
           name type body arg binderInfo
+      simpa [hCheap, hInst] using hBeta
   | true =>
       cases body with
       | bvar index =>
           cases index with
           | zero =>
               right
-              change
-                PsKernelReductionStep
-                  environment
-                  localContext
-                  (PsKernelExpr.app
-                    (PsKernelExpr.lam
-                      name type
+              have hCheap :
+                  psKernelExprCheapBetaReduce
+                      (PsKernelExpr.app
+                        (PsKernelExpr.lam
+                          name type
+                          (PsKernelExpr.bvar 0)
+                          binderInfo)
+                        arg) =
+                    arg := by
+                rfl
+              have hInst :
+                  psKernelExprInstantiate1
                       (PsKernelExpr.bvar 0)
-                      binderInfo)
-                    arg)
-                  (psKernelExprCheapBetaReduce
+                      arg =
+                    arg := by
+                rfl
+              have hBeta :
+                  PsKernelReductionStep
+                    environment
+                    localContext
                     (PsKernelExpr.app
                       (PsKernelExpr.lam
                         name type
                         (PsKernelExpr.bvar 0)
                         binderInfo)
-                      arg))
-              rw [
-                psKernelExprCheapBetaReduce_identity_lambda
-                  name
-                  (match type with
-                   | PsKernelExpr.sort level => level
-                   | _ => PsKernelLevel.zero)
-                  binderInfo
-                  arg
-              ] <;>
-                first
-                | exact
-                    PsKernelReductionStep.beta
-                      name type
+                      arg)
+                    (psKernelExprInstantiate1
                       (PsKernelExpr.bvar 0)
-                      arg binderInfo
-                | skip
+                      arg) :=
+                PsKernelReductionStep.beta
+                  name type
+                  (PsKernelExpr.bvar 0)
+                  arg binderInfo
+              simpa [hCheap, hInst] using hBeta
           | succ index =>
               left
               simp [

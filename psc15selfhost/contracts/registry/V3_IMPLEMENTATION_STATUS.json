@@ -280,6 +280,8 @@
         "scripts/pscv-verify.mjs",
         "scripts/offline-capsule.mjs",
         "scripts/offline-verifier-cli.mjs",
+        "scripts/build-verifier-distribution.mjs",
+        "contracts/archive/VERIFIER_DISTRIBUTION_V1.json",
         "contracts/archive/OFFLINE_CAPSULE_V1.json"
       ],
       "completion": "Standalone bounded verification replays supported evidence and validates archives, provenance and algorithm/domain/schema-qualified hashes offline.",

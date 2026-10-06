@@ -16,7 +16,7 @@
   "checkedLocally": "Focused real integer-equality validator replay, actual Ed25519 verification, context/assumption/evidence/subject/tamper/budget/typed-edge rejection, and metadata-only CLI path. No new Lean theorem or global preservation claim.",
   "remaining": [
     "Replay committed actual Lean proof slices and target validators through complete shipped checker assets",
-    "Create a standalone verifier distribution and optional Wasm Component capsule",
+    "Extend the shipped wasm-literal-offline/1 standalone distribution with pinned Core provider assets and an optional Wasm Component capsule",
     "Bind all high-value release archive roles to actual release sources, toolchains, targets and provenance",
     "Implement and check explicit cross-context KnowledgeMigration relations and typed negative/reuse records",
     "Independent parser/resource/signature/hostile-input assurance and archive longevity exercises"

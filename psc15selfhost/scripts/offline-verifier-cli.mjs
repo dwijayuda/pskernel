@@ -17,7 +17,8 @@ export async function compareSemanticLockFiles(leftPath, rightPath) {
  * supplies it. Only built-in checker adapters are selectable, never module URLs.
  * Kernel providers require their pinned local assets; no compiler is loaded.
  */
-export async function verifyCapsuleCommand(capsulePath, policyPath) {
+export async function verifyCapsuleCommand(capsulePath, policyPath, { allowedCheckerKinds = ['core-proof', 'wasm-literal'] } = {}) {
+  const supported = new Set(allowedCheckerKinds);
   // A policy is trusted configuration, but a mistyped large file still gets a cap.
   const policyBytes = await readOfflineCapsule(policyPath, { maxCapsuleBytes: 4 * 1024 * 1024 });
   const policy = JSON.parse(policyBytes);
@@ -29,6 +30,7 @@ export async function verifyCapsuleCommand(capsulePath, policyPath) {
   const checkers = new Map();
   for (const entry of policy.checkers) {
     if (typeof entry.checkerId !== 'string' || !entry.checkerId || checkers.has(entry.checkerId)) throw new Error('PSC_OFFLINE_CHECKER_POLICY');
+    if (!supported.has(entry.kind)) throw new Error('PSC_OFFLINE_DISTRIBUTION_CHECKER_UNAVAILABLE: ' + entry.kind);
     let selected;
     if (entry.kind === 'core-proof') {
       capsule.resolveArtifact(entry.theoryBaseId);

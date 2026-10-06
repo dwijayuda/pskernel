@@ -299,7 +299,7 @@ test('portable entry roots minimally cover the backend-wasm package graph', asyn
   );
   assert.deepEqual(
     entries.map(sourcePath => path.basename(sourcePath)).sort(),
-    ['Binary.lean', 'Lower.lean', 'SelfHostAbi.lean', 'Validate.lean'],
+    ['Binary.lean', 'LiteralEvidence.lean', 'Lower.lean', 'SelfHostAbi.lean'],
   );
 });
 

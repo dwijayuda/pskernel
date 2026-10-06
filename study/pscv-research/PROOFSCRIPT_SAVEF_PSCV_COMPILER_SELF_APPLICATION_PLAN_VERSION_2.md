@@ -2281,3 +2281,565 @@ At least one SAVEF-assisted compiler change must create accepted knowledge used 
 
 Only then claim compiler self-amplification.
 
+---
+
+# 71. Lean-to-PSCV architecture comparison
+
+| Lean architecture | PSCV current analogue | Version 2 target |
+| --- | --- | --- |
+| parser + macro expansion | syntax package | closed/canonical syntax profile plus explicit translation contracts |
+| elaborator | meta + elab | frontend semantic service with checked contracts |
+| core declarations | Ps.Core / PsDeclaration | CandidateCore / CheckedCore |
+| kernel | Lean kernel / current provider boundary | provider-neutral KernelContract with owned PSKernel target |
+| LCNF pure/base phases | raw post-erasure compiler IR | RuntimeIR / VerifiedIR with explicit phase invariants |
+| monomorphization/specialization | CompilerIr.Specialize | explicit shared SpecializedIR pass |
+| LCNF pass manager | backend/driver composition | CompilerPassContract + certified pass registry |
+| IR checks after passes | PsValidatedIrModule validator | validator per phase plus preservation evidence |
+| .olean | canonical declarations/admissions | CheckedCore + CertifiedModuleInterface |
+| .ilean | no direct equivalent | EditorIndex, explicitly non-authoritative |
+| .ir/.ir.sig/.c | compiler-ir/backend outputs | CompilerPhaseArtifact + target IR + executable |
+| Lake build trace/cache | QueryGraph/content caches | semantic QueryGraph + CAS + BuildAction |
+| stage0/stage1/stage2 | Lean seed/self-host compiler | Lean reference lane + owned lane + fixed-point lane |
+| lean4checker/comparator | providers/PSKernel proof work | checker-diverse replay policy |
+| native C codegen | TS/JS/Wasm/Rust lanes | Lean-native bootstrap + direct JS/Wasm + future native |
+
+The purpose is not to clone Lean's compiler.
+
+It is to reuse architectural lessons that have already proven useful in a large bootstrapped dependently typed implementation.
+
+---
+
+# 72. What PSCV should not copy from Lean
+
+## Do not make Lean implementation details PSCV semantics
+
+LCNF, C layout, reference counting, object representation, and native ABI belong below PSCV's portable semantic boundary.
+
+## Do not copy open-ended pass authority into the certified lane
+
+Lean allows compiler-pass extension as an implementation feature.
+
+PSCV may support plugins, but a pass entering the certified pipeline must have a known CompilerPassContract and evidence policy.
+
+Unknown passes may run only in lower-assurance/tooling lanes.
+
+## Do not use Lean compilation success as compiler-correctness proof
+
+Lean is a strong reference/bootstrap compiler.
+
+Its successful compilation of PSCV source does not prove that the owned PSCV compiler is correct.
+
+## Do not inherit unsafe/partial semantics into pscv-closed
+
+The reference host may support more constructs than the PSCV verified profile.
+
+Profile checking must reject constructs outside the selected PSCV assurance policy.
+
+---
+
+# 73. External verified-compiler lessons
+
+## CompCert
+
+CompCert demonstrates the leverage of semantic-preservation theorems between compiler stages.
+
+Applied PSCV lesson:
+
+~~~text
+one pass theorem
+    reused for
+every program compiled through that pass
+~~~
+
+This is precisely the kind of high-fanout SAVEF knowledge the compiler should prioritize.
+
+Research:
+https://compcert.org/
+
+## CakeML
+
+CakeML demonstrates that compiler verification, compiler execution, and self-bootstrap evidence are related but distinct.
+
+Applied lesson:
+
+~~~text
+self-host fixed point
+    is not
+compiler semantic preservation
+~~~
+
+Both should be retained and eventually composed.
+
+Research:
+https://cakeml.org/
+
+## Lean4Lean
+
+Lean4Lean's abstract metatheory versus executable implementation separation is relevant to both PSKernel and compiler semantic functions.
+
+Applied lesson:
+
+> Prove implementation behavior against an independent relation instead of proving only equations about wrappers.
+
+Research:
+https://github.com/digama0/lean4lean
+
+## VeriSoftBench
+
+Repository-scale Lean verification evidence indicates that large dependency closure hurts proof-generation success and relevant dependency selection helps.
+
+Applied lesson:
+
+> Semantic context slicing is not optional AI polish; it is part of SAVEF's economic architecture.
+
+Research:
+https://arxiv.org/abs/2602.18307
+
+## P3
+
+Joint implementation-and-proof planning improves verified synthesis in current agent research.
+
+Applied lesson:
+
+> Every new compiler feature after the baseline should be designed together with its specification, proof obligations, interface impact, and reuse plan.
+
+Research:
+https://arxiv.org/abs/2608.09277
+
+---
+
+# 74. Implementation strategy: build SAVEF before owned compiler completion
+
+Because Lean is the reference compilation lane, implementation order becomes:
+
+~~~text
+SAVEF semantic infrastructure
+    first
+
+owned compiler feature parity
+    in parallel
+
+self-host replacement
+    later
+~~~
+
+This is an important change.
+
+The SAVEF system itself should be usable to close the owned compiler backlog.
+
+---
+
+# 75. Phase A0 — freeze semantic and experimental identities
+
+Create machine-readable manifests for:
+
+~~~text
+SemanticProfileIdentity
+LeanReferenceToolchainIdentity
+CompilerImplementationIdentity
+CompilerPassContractRegistry
+FactoryBenchPolicy
+PscvFeatureRequirementSet
+~~~
+
+Gate:
+
+- all objects canonicalized;
+- content identities frozen;
+- changing meaning-relevant input changes identity.
+
+No compiler architecture change is required yet.
+
+---
+
+# 76. Phase A1 — Lean reference compiler service
+
+Implement a host package/service that:
+
+- accepts PSCV-compatible Lean source roots;
+- checks the selected PSCV source profile;
+- invokes pinned Lean;
+- exports canonical elaborated declarations;
+- compiles native executables;
+- records exact toolchain identity;
+- records module dependency information;
+- exposes results through compiler-service APIs.
+
+Gate:
+
+~~~text
+same source + same semantic/toolchain inputs
+    ->
+same semantic artifact identities
+~~~
+
+Native object bytes may vary where the toolchain policy does not promise bit reproducibility.
+
+---
+
+# 77. Phase A2 — compiler-contract package
+
+Implement:
+
+~~~text
+CompilerPhaseId
+CompilerPassId
+CompilerPassContract
+PassExecution
+PassEvidenceClass
+CompilerInvariantId
+~~~
+
+Initial phase identities:
+
+~~~text
+certified-source
+runtime-ir
+verified-ir
+specialized-ir
+js-ir
+wasm-ir
+~~~
+
+Gate:
+
+- invalid phase transition rejects;
+- unknown certified pass rejects;
+- resource exhaustion cannot produce success.
+
+---
+
+# 78. Phase A3 — split compiler-ir semantically
+
+Do this incrementally.
+
+First add wrappers without moving implementation:
+
+~~~text
+PsRuntimeIrModule
+PsValidatedIrModule
+PsSpecializedIrModule
+~~~
+
+Then route APIs:
+
+~~~text
+eraseCertifiedSource
+    -> RuntimeIR
+
+validateRuntimeIr
+    -> VerifiedIR
+
+specializeVerifiedIr
+    -> SpecializedIR
+~~~
+
+Backends change to accept SpecializedIR.
+
+Gate:
+
+- JavaScript and Wasm no longer independently invoke target-neutral specialization in the certified path.
+
+---
+
+# 79. Phase A4 — shared specialization pass
+
+Move specialization ownership into a target-neutral pass package.
+
+Create:
+
+~~~text
+CompilerPassContract:
+    specialize/1
+~~~
+
+Required invariant examples:
+
+- no unresolved type parameters in reachable executable declarations;
+- generated specialization names deterministic;
+- all specialization requests resolved or rejected;
+- references remain closed;
+- generated types are ground.
+
+Evidence ladder:
+
+~~~text
+validator invariants
+    ->
+local rewrite theorems
+    ->
+whole-pass translation validation
+    ->
+full semantic preservation theorem
+~~~
+
+Do not block initial architecture on the final theorem.
+
+---
+
+# 80. Phase A5 — first CertifiedModuleInterface
+
+Begin with Foundation.List or Core.Subst.
+
+Implement canonical interface extraction:
+
+~~~text
+module identity
+exports
+transparency
+specifications
+theorem IDs
+assumption closure
+dependency interfaces
+semantic profile
+~~~
+
+Gate:
+
+1. re-extraction deterministic;
+2. private implementation refactor preserving interface keeps a synthetic dependent green;
+3. transparent-body change turns dependent red.
+
+---
+
+# 81. Phase A6 — proof sidecar seed
+
+Prove the highest-leverage base laws using Lean immediately.
+
+First theorem groups:
+
+~~~text
+List algebra
+Name equality
+Level/substitution
+Expr substitution/lifting
+abstraction/instantiation
+~~~
+
+Emit:
+
+- checked theorem IDs;
+- theorem interface;
+- SPKF TheoryExtensions;
+- proof dependency graph;
+- optional proof recipes.
+
+Gate:
+
+- at least one downstream compiler proof consumes an earlier theorem interface.
+
+---
+
+# 82. Phase A7 — environment and meta knowledge
+
+Build:
+
+~~~text
+EnvironmentIndexRefines
+EnvironmentLookupSound
+EnvironmentAddPreserves
+
+ReductionSound
+InferenceSound
+UnificationSound
+InstanceSynthesisSound
+~~~
+
+Reuse earlier theorem interfaces rather than importing private implementation wherever possible.
+
+Gate:
+
+- proof dependency report demonstrates cross-layer knowledge reuse.
+
+---
+
+# 83. Phase A8 — RuntimeIR validator theorem
+
+Define:
+
+~~~text
+VerifiedIrWellFormed
+~~~
+
+Target theorem:
+
+~~~text
+validateRuntimeIr(runtime) = success verified
+    ->
+VerifiedIrWellFormed(verified)
+~~~
+
+This is a hard gate for certified backend work.
+
+Start with separate invariant theorems if one monolithic theorem is expensive.
+
+---
+
+# 84. Phase A9 — erasure evidence
+
+Define an executable observational relation.
+
+Target:
+
+~~~text
+CertifiedSource
+    ->
+RuntimeIR
+~~~
+
+Required properties:
+
+- proof/ghost noninterference;
+- runtime binder/reference consistency;
+- structure/constructor mapping;
+- deterministic generated names;
+- runtime type representation compatibility.
+
+Gate:
+
+- adversarial program attempting ghost-dependent runtime branching rejects before certified emission.
+
+---
+
+# 85. Phase A10 — frontend proof expansion
+
+Only after lower-layer knowledge is available, attack syntax and elaboration.
+
+Syntax targets:
+
+- lexer progress/bounds;
+- parser cursor invariants;
+- canonical printer determinism;
+- canonical parse/print roundtrip;
+- translation stability.
+
+Elaboration targets:
+
+- successful term elaboration refines a typing relation;
+- declaration elaboration produces candidate declarations satisfying explicit static-semantic conditions.
+
+Gate:
+
+- semantic retrieval context is measurably smaller than raw dependency-source context for representative obligations.
+
+---
+
+# 86. Phase A11 — real CheckedCore and PSCV-CERT
+
+Even though Lean provides a working reference lane, the owned semantic pipeline must eventually enforce:
+
+~~~text
+AdmissionReady
+    ->
+KernelContract
+    ->
+CheckedCore
+    ->
+PSCV-CERT
+    ->
+CertifiedSource
+~~~
+
+This is the point where the owned PSCV compiler can independently produce strong source-level assurance.
+
+The Lean lane remains a reference/oracle.
+
+---
+
+# 87. Phase A12 — backend preservation
+
+Wasm first:
+
+~~~text
+SpecializedIR
+    ->
+WasmIR
+    ->
+validated Wasm artifact
+~~~
+
+Then JavaScript:
+
+~~~text
+SpecializedIR
+    ->
+JsIR
+    ->
+restricted canonical JS
+~~~
+
+Use a mix of:
+
+- proof;
+- translation validation;
+- differential testing;
+- target validators.
+
+Only proof or accepted translation-validation lanes qualify for PreservedTargetArtifact.
+
+---
+
+# 88. Phase A13 — WIT/Component universal lane
+
+CertifiedModuleInterface maps through:
+
+~~~text
+InterfaceIR
+    ->
+WIT
+    ->
+Wasm Component
+~~~
+
+SPKF carries behavioral semantics.
+
+WIT carries cross-language API shape.
+
+This provides cross-ecosystem deployment without requiring native backend formalization for every language.
+
+---
+
+# 89. Phase A14 — self-host convergence
+
+Once the owned compiler supports the required implementation profile:
+
+~~~text
+Lean reference compiler
+    compiles SAVEF-aware compiler
+
+owned compiler
+    compiles same compiler source
+~~~
+
+Compare semantic artifacts.
+
+Then require owned compiler fixed point.
+
+The Lean lane can then move from bootstrap requirement to independent reference/oracle.
+
+---
+
+# 90. Phase A15 — SAVEF closed-loop compiler evolution
+
+Take a real new compiler feature.
+
+Process:
+
+~~~text
+specification
+    ->
+SAVEF retrieval
+    ->
+joint implementation/proof plan
+    ->
+compiler change
+    ->
+accepted proofs/interfaces
+    ->
+new SPKF knowledge
+    ->
+next compiler feature consumes that knowledge
+~~~
+
+This is the decisive self-application experiment.
+

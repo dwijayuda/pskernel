@@ -1,6 +1,5 @@
 import Ps.Compiler.Api
 import Ps.BackendRust.Module
-import Ps.BackendRust.Coverage
 
 inductive PsCompilerRustError where
   | compiler (error : PsCompilerError)
@@ -72,26 +71,6 @@ def psCompilerRustSource
       Except.error (PsCompilerRustError.compiler error)
   | Except.ok prepared =>
       psCompilerRustFromPrepared prepared
-
-def psCompilerRustCoverageFromPrepared
-    (prepared : PsCompilerAdmissionReadyModule) :
-    Except PsCompilerRustError String :=
-  match psCompilerVerifiedIrFromPrepared prepared with
-  | Except.error error =>
-      Except.error (PsCompilerRustError.compiler error)
-  | Except.ok validated =>
-      Except.ok
-        (psRustCoverageReport
-          (psRustCoverageModule validated.raw))
-
-def psCompilerRustCoverageFromElaborated
-    (elaborated : PsElabModuleResult) :
-    Except PsCompilerRustError String :=
-  match psCompilerPrepareElaborated elaborated with
-  | Except.error error =>
-      Except.error (PsCompilerRustError.compiler error)
-  | Except.ok prepared =>
-      psCompilerRustCoverageFromPrepared prepared
 
 def psCompilerRustProofScriptSources
     (sources : List String) :

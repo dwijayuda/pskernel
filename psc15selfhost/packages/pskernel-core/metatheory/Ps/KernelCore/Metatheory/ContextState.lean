@@ -49,6 +49,23 @@ theorem psKernelReductionClosure_contextWeaken
             hExt
             hStep)
           ih
+  | trans first middle last hLeft hRight ihLeft ihRight =>
+      exact
+        PsKernelReductionClosure.trans
+          first middle last
+          ihLeft ihRight
+  | appFn leftFn rightFn arg hFn ih =>
+      exact
+        PsKernelReductionClosure.appFn
+          leftFn rightFn arg ih
+  | appArg fn leftArg rightArg hArg ih =>
+      exact
+        PsKernelReductionClosure.appArg
+          fn leftArg rightArg ih
+  | projectionMajor typeName index left right hMajor ih =>
+      exact
+        PsKernelReductionClosure.projectionMajor
+          typeName index left right ih
 
 theorem psKernelDefEqJudgment_contextWeaken
     (environment : PsKernelEnvironment)

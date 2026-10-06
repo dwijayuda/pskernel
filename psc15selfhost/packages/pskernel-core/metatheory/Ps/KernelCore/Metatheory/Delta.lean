@@ -12,26 +12,9 @@ theorem psKernelReductionClosure_trans
       PsKernelReductionClosure
         environment localContext middle right) :
     PsKernelReductionClosure
-      environment localContext left right := by
-  induction hLeft with
-  | refl expr =>
-      exact hRight
-  | presentationSource source query middle hPresentation hReduction ih =>
-      exact
-        PsKernelReductionClosure.presentationSource
-          source
-          query
-          right
-          hPresentation
-          (ih hRight)
-  | cons first next last hStep hRest ih =>
-      exact
-        PsKernelReductionClosure.cons
-          first
-          next
-          right
-          hStep
-          (ih hRight)
+      environment localContext left right :=
+  PsKernelReductionClosure.trans
+    left middle right hLeft hRight
 
 theorem psKernelUnfoldDefinition_some_refines_reduction
     (context : PsKernelCheckerContext)

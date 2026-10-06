@@ -435,6 +435,48 @@ inductive PsKernelReductionClosure
         localContext
         left
         right
+  | trans
+      (left middle right : PsKernelExpr)
+      (hLeft :
+        PsKernelReductionClosure
+          environment localContext left middle)
+      (hRight :
+        PsKernelReductionClosure
+          environment localContext middle right) :
+      PsKernelReductionClosure
+        environment localContext left right
+  | appFn
+      (leftFn rightFn arg : PsKernelExpr)
+      (hFn :
+        PsKernelReductionClosure
+          environment localContext leftFn rightFn) :
+      PsKernelReductionClosure
+        environment
+        localContext
+        (PsKernelExpr.app leftFn arg)
+        (PsKernelExpr.app rightFn arg)
+  | appArg
+      (fn leftArg rightArg : PsKernelExpr)
+      (hArg :
+        PsKernelReductionClosure
+          environment localContext leftArg rightArg) :
+      PsKernelReductionClosure
+        environment
+        localContext
+        (PsKernelExpr.app fn leftArg)
+        (PsKernelExpr.app fn rightArg)
+  | projectionMajor
+      (typeName : PsKernelName)
+      (index : Nat)
+      (left right : PsKernelExpr)
+      (hMajor :
+        PsKernelReductionClosure
+          environment localContext left right) :
+      PsKernelReductionClosure
+        environment
+        localContext
+        (PsKernelExpr.proj typeName index left)
+        (PsKernelExpr.proj typeName index right)
 
 inductive PsKernelDefEqJudgment
     (environment : PsKernelEnvironment)

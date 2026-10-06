@@ -1113,3 +1113,279 @@ theorem psKernelExprPairSetBuildIndex_contains_sound_core
                   psKernelExprPairSetContainsIn,
                   hHead
                 ] using hRest
+
+
+theorem psKernelExprPairSetContains_insert_sound_core
+    (set : PsKernelExprPairSet)
+    (left right queryLeft queryRight : PsKernelExpr)
+    (hContains :
+      psKernelExprPairSetContains
+          (psKernelExprPairSetInsert set left right)
+          queryLeft
+          queryRight =
+        true) :
+    psKernelExprPairEq
+        queryLeft
+        queryRight
+        (Prod.mk left right) =
+      true ∨
+    psKernelExprPairSetContains
+        set
+        queryLeft
+        queryRight =
+      true := by
+  cases set with
+  | mk small index =>
+      cases index with
+      | none =>
+          cases hExisting :
+              psKernelExprPairSetContainsIn
+                left
+                right
+                small with
+          | true =>
+              right
+              simpa [
+                psKernelExprPairSetInsert,
+                hExisting,
+                psKernelExprPairSetContains
+              ] using hContains
+          | false =>
+              let next :=
+                List.cons
+                  (Prod.mk left right)
+                  small
+              cases hFits :
+                  Nat.ble
+                    (psKernelCacheEntryListLength next)
+                    psKernelCacheSmallLimit with
+              | true =>
+                  have hNext :
+                      psKernelExprPairSetContainsIn
+                          queryLeft
+                          queryRight
+                          next =
+                        true := by
+                    simpa [
+                      psKernelExprPairSetInsert,
+                      hExisting,
+                      next,
+                      hFits,
+                      psKernelExprPairSetContains
+                    ] using hContains
+                  exact
+                    psKernelExprPairSetContainsIn_cons_true_cases_core
+                      queryLeft
+                      queryRight
+                      (Prod.mk left right)
+                      small
+                      hNext
+              | false =>
+                  have hIndexed :
+                      psKernelExprPairSetContainsIn
+                          queryLeft
+                          queryRight
+                          (psKernelExprPairSetIndexBucket
+                            16
+                            (psKernelExprPairSetBuildIndex next)
+                            (psKernelExprPairHash
+                              queryLeft
+                              queryRight)) =
+                        true := by
+                    simpa [
+                      psKernelExprPairSetInsert,
+                      hExisting,
+                      next,
+                      hFits,
+                      psKernelExprPairSetContains
+                    ] using hContains
+                  have hList :
+                      psKernelExprPairSetContainsIn
+                          queryLeft
+                          queryRight
+                          next =
+                        true :=
+                    psKernelExprPairSetBuildIndex_contains_sound_core
+                      next
+                      queryLeft
+                      queryRight
+                      hIndexed
+                  exact
+                    psKernelExprPairSetContainsIn_cons_true_cases_core
+                      queryLeft
+                      queryRight
+                      (Prod.mk left right)
+                      small
+                      hList
+      | some index =>
+          let hash :=
+            psKernelExprPairHash left right
+          let bucket :=
+            psKernelExprPairSetIndexBucket
+              16
+              index
+              hash
+          cases hExisting :
+              psKernelExprPairSetContainsIn
+                left
+                right
+                bucket with
+          | true =>
+              right
+              simpa [
+                psKernelExprPairSetInsert,
+                hash,
+                bucket,
+                hExisting,
+                psKernelExprPairSetContains
+              ] using hContains
+          | false =>
+              by_cases hHash :
+                  hash =
+                    psKernelExprPairHash queryLeft queryRight
+              · have hBucket :
+                    psKernelExprPairSetIndexBucket
+                        16
+                        (psKernelExprPairSetIndexSet
+                          16
+                          index
+                          hash
+                          (List.cons
+                            (Prod.mk left right)
+                            bucket))
+                        (psKernelExprPairHash queryLeft queryRight) =
+                      List.cons
+                        (Prod.mk left right)
+                        bucket := by
+                  rw [← hHash]
+                  exact
+                    psKernelExprPairSetIndexBucket_set_same_core
+                      16
+                      index
+                      hash
+                      (List.cons
+                        (Prod.mk left right)
+                        bucket)
+                have hNew :
+                    psKernelExprPairSetContainsIn
+                        queryLeft
+                        queryRight
+                        (List.cons
+                          (Prod.mk left right)
+                          bucket) =
+                      true := by
+                  simpa [
+                    psKernelExprPairSetInsert,
+                    hash,
+                    bucket,
+                    hExisting,
+                    psKernelExprPairSetContains,
+                    hBucket
+                  ] using hContains
+                rcases
+                    psKernelExprPairSetContainsIn_cons_true_cases_core
+                      queryLeft
+                      queryRight
+                      (Prod.mk left right)
+                      bucket
+                      hNew with
+                  hHead | hRest
+                · exact Or.inl hHead
+                · right
+                  change
+                    psKernelExprPairSetContainsIn
+                        queryLeft
+                        queryRight
+                        (psKernelExprPairSetIndexBucket
+                          16
+                          index
+                          (psKernelExprPairHash
+                            queryLeft
+                            queryRight)) =
+                      true
+                  rw [← hHash]
+                  exact hRest
+              · right
+                have hRouted :
+                    psKernelExprPairSetIndexBucket
+                        16
+                        (psKernelExprPairSetIndexSet
+                          16
+                          index
+                          hash
+                          (List.cons
+                            (Prod.mk left right)
+                            bucket))
+                        (psKernelExprPairHash queryLeft queryRight) =
+                      psKernelExprPairSetIndexBucket
+                        16
+                        index
+                        (psKernelExprPairHash queryLeft queryRight) :=
+                  psKernelExprPairSetIndexBucket_set_other_hash_core
+                    index
+                    hash
+                    (psKernelExprPairHash queryLeft queryRight)
+                    (List.cons
+                      (Prod.mk left right)
+                      bucket)
+                    (psKernelExprPairHash_lt_two_pow_16_core
+                      left right)
+                    (psKernelExprPairHash_lt_two_pow_16_core
+                      queryLeft queryRight)
+                    hHash
+                simpa [
+                  psKernelExprPairSetInsert,
+                  hash,
+                  bucket,
+                  hExisting,
+                  psKernelExprPairSetContains,
+                  hRouted
+                ] using hContains
+
+theorem psKernelDefEqCacheInsertLaw_all :
+    PsKernelDefEqCacheInsertLaw := by
+  intro environment localContext cache left right hCache hDefEq
+  intro queryLeft queryRight hContains
+  rcases
+      psKernelExprPairSetContains_insert_sound_core
+        cache
+        left
+        right
+        queryLeft
+        queryRight
+        hContains with
+    hInserted | hOld
+  · rcases
+        psKernelExprPairEq_true_refines_presentation_core
+          queryLeft
+          queryRight
+          left
+          right
+          hInserted with
+      hDirect | hSwapped
+    · exact
+        PsKernelDefEqJudgment.presentation
+          left
+          right
+          queryLeft
+          queryRight
+          hDirect.1
+          hDefEq
+          hDirect.2
+    · exact
+        PsKernelDefEqJudgment.presentation
+          right
+          left
+          queryLeft
+          queryRight
+          hSwapped.2
+          (PsKernelDefEqJudgment.symm
+            left
+            right
+            hDefEq)
+          hSwapped.1
+  · exact
+      hCache
+        queryLeft
+        queryRight
+        hOld

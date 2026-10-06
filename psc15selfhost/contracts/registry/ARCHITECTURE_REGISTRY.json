@@ -153,6 +153,24 @@
       "kind": "formal-proof-slice",
       "status": "current",
       "canonicalPath": "packages/pscv-theory/src/Ps/Theory/Core.lean"
+    },
+    {
+      "id": "psc-erasure-preservation/0",
+      "kind": "formal-preservation-contract",
+      "status": "experimental",
+      "canonicalPath": "contracts/ir/ERASURE_PRESERVATION_V0.json"
+    },
+    {
+      "id": "psc-erasure-proof-declaration-omission/1",
+      "kind": "formal-proof-slice",
+      "status": "current",
+      "canonicalPath": "packages/pscv-theory/src/Ps/Theory/Core.lean"
+    },
+    {
+      "id": "psc-specialization-literal-preservation/1",
+      "kind": "formal-proof-slice",
+      "status": "current",
+      "canonicalPath": "packages/pscv-theory/src/Ps/Theory/Core.lean"
     }
   ]
 }

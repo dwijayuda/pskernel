@@ -9,6 +9,9 @@ Configuration-aware semantic refinement for the projection branch of WHNF core.
 This is separated from the main fuel induction because the branch combines
 major normalization, String-literal constructor expansion, projection
 computation, recursive normalization, and cache publication.
+
+This module is a registered PsKernelCoreMetatheory root; CI therefore validates
+the theorem itself rather than only its eventual import site.
 -/
 
 theorem psKernelWhnfCoreProjection_configuration_refines

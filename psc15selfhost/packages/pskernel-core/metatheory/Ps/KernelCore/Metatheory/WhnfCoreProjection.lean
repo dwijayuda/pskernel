@@ -276,16 +276,57 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                          (Prod.fst reduced)
                          (Prod.snd reduced)) =
             Except.ok (Prod.mk result nextState) := by
-        simpa [
+        have hMain := hSuccess
+        simp only [
           psKernelWhnfCoreWithFuel,
           hDepth,
           hMiss,
-          original,
           structResult,
-          hStruct,
-          expandedResult,
-          psKernelWhnfProjectionExpandWith
-        ] using hSuccess
+          hStruct
+        ] at hMain
+        change
+          (match
+              psKernelWhnfProjectionExpandWith
+                publicWhnf
+                nextContext
+                state1
+                structReduced with
+           | Except.error error =>
+               Except.error error
+           | Except.ok secondResult =>
+               match
+                   psKernelReduceProjCore
+                     nextContext
+                     typeName
+                     index
+                     (Prod.fst secondResult) with
+               | Option.none =>
+                   psKernelWhnfCoreFinish
+                     original
+                     cheapProj
+                     original
+                     (Prod.snd secondResult)
+               | Option.some value =>
+                   match
+                       psKernelWhnfCoreWithFuel
+                         remaining
+                         publicWhnf
+                         reduceRecursor
+                         nextContext
+                         (Prod.snd secondResult)
+                         value
+                         cheapRec
+                         cheapProj with
+                   | Except.error error =>
+                       Except.error error
+                   | Except.ok reduced =>
+                       psKernelWhnfCoreFinish
+                         original
+                         cheapProj
+                         (Prod.fst reduced)
+                         (Prod.snd reduced)) =
+            Except.ok (Prod.mk result nextState) at hMain
+        simpa [expandedResult] using hMain
       cases hExpanded : expandedResult with
       | error error =>
           simp [hExpanded] at hSuccessExpanded

@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.Level
+import Ps.KernelCore.Metatheory.Comparator
 
 theorem psKernelLevelAddOffset_zero
     (level : PsKernelLevel) :
@@ -55,3 +56,16 @@ theorem psKernelLevelListReverse_eq_reverse
     (values : List PsKernelLevel) :
     psKernelLevelListReverse values = List.reverse values := by
   simp [psKernelLevelListReverse, psKernelLevelListReverseWorker_eq]
+
+
+theorem psKernelLevelEq_symm
+    (left right : PsKernelLevel) :
+    psKernelLevelEq left right =
+      psKernelLevelEq right left :=
+  psKernelLevelEq_symm_core left right
+
+theorem psKernelLevelListEq_symm
+    (left right : List PsKernelLevel) :
+    psKernelLevelListEq left right =
+      psKernelLevelListEq right left :=
+  psKernelLevelListEq_symm_core left right

@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.Expr
+import Ps.KernelCore.Metatheory.Comparator
 
 theorem psKernelExprGetAppFn_app
     (fn arg : PsKernelExpr) :
@@ -48,3 +49,22 @@ theorem psKernelExprGetAppNumArgs_def
     psKernelExprGetAppNumArgs expr =
       psKernelExprListLength (psKernelExprGetAppArgs expr) := by
   rfl
+
+
+theorem psKernelBoolEq_symm
+    (left right : Bool) :
+    psKernelBoolEq left right =
+      psKernelBoolEq right left :=
+  psKernelBoolEq_symm_core left right
+
+theorem psKernelLiteralEq_symm
+    (left right : PsKernelLiteral) :
+    psKernelLiteralEq left right =
+      psKernelLiteralEq right left :=
+  psKernelLiteralEq_symm_core left right
+
+theorem psKernelExprEq_symm
+    (left right : PsKernelExpr) :
+    psKernelExprEq left right =
+      psKernelExprEq right left :=
+  psKernelExprEq_symm_core left right

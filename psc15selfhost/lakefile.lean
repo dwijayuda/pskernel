@@ -305,6 +305,7 @@ lean_lib PsKernelCoreMetatheory where
   roots := #[
     `Ps.KernelCore.Metatheory.Judgments,
     `Ps.KernelCore.Metatheory.ExprEq,
+    `Ps.KernelCore.Metatheory.Comparator,
     `Ps.KernelCore.Metatheory.Substitution,
     `Ps.KernelCore.Metatheory.SubstitutionRefinement,
     `Ps.KernelCore.Metatheory.Admission,

@@ -400,6 +400,31 @@ def psKernelExprInstantiateRevReference
     (psKernelExprListReverse subst)
 
 
+def psKernelNameLastIndexReferenceWorker
+    (values : List PsKernelName)
+    (needle : PsKernelName)
+    (index : Nat)
+    (answer : Option Nat) :
+    Option Nat :=
+  match values with
+  | List.nil =>
+      answer
+  | List.cons head tail =>
+      let nextAnswer :=
+        if psKernelNameEq needle head then
+          Option.some index
+        else
+          answer
+      psKernelNameLastIndexReferenceWorker
+        tail needle (Nat.succ index) nextAnswer
+
+def psKernelNameLastIndexReference
+    (needle : PsKernelName)
+    (values : List PsKernelName) :
+    Option Nat :=
+  psKernelNameLastIndexReferenceWorker
+    values needle 0 Option.none
+
 /-
 Total reference semantics for free-variable abstraction.
 -/
@@ -411,7 +436,7 @@ def psKernelExprAbstractFVarsAtReferenceChanged
     Prod PsKernelExpr Bool :=
   match expr with
   | PsKernelExpr.fvar name =>
-      match psKernelNameLastIndex name fvars with
+      match psKernelNameLastIndexReference name fvars with
       | Option.none =>
           Prod.mk expr false
       | Option.some index =>

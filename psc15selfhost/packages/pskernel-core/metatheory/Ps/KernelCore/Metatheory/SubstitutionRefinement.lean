@@ -757,6 +757,35 @@ theorem psKernelExprInstantiateRev_refines_reference_core
   rw [psKernelExprInstantiate_refines_reference_core]
 
 
+theorem psKernelNameLastIndexWorker_refines_reference_core
+    (values : List PsKernelName)
+    (needle : PsKernelName)
+    (index : Nat)
+    (answer : Option Nat) :
+    psKernelNameLastIndexWorker values needle index answer =
+      psKernelNameLastIndexReferenceWorker
+        values needle index answer := by
+  induction values generalizing index answer with
+  | nil =>
+      rfl
+  | cons head tail ih =>
+      simp [
+        psKernelNameLastIndexWorker,
+        psKernelNameLastIndexReferenceWorker,
+        ih
+      ]
+
+theorem psKernelNameLastIndex_refines_reference_core
+    (needle : PsKernelName)
+    (values : List PsKernelName) :
+    psKernelNameLastIndex needle values =
+      psKernelNameLastIndexReference needle values := by
+  unfold psKernelNameLastIndex
+  unfold psKernelNameLastIndexReference
+  exact
+    psKernelNameLastIndexWorker_refines_reference_core
+      values needle 0 Option.none
+
 theorem psKernelExprAbstractFVarsAtChangedWithFuel_refines_reference_core
     (expr : PsKernelExpr)
     (fuel offset : Nat)
@@ -783,7 +812,8 @@ theorem psKernelExprAbstractFVarsAtChangedWithFuel_refines_reference_core
       | succ remaining =>
           simp [
             psKernelExprAbstractFVarsAtChangedWithFuel,
-            psKernelExprAbstractFVarsAtReferenceChanged
+            psKernelExprAbstractFVarsAtReferenceChanged,
+            psKernelNameLastIndex_refines_reference_core
           ]
   | mvar name =>
       cases fuel with

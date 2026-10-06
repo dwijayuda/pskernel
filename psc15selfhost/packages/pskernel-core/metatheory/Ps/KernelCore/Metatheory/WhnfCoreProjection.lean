@@ -1,0 +1,538 @@
+import Ps.KernelCore.Metatheory.CheckerContracts
+import Ps.KernelCore.Metatheory.ContextState
+import Ps.KernelCore.Metatheory.ProjectionReduction
+import Ps.KernelCore.Metatheory.ReductionCongruence
+
+/-
+Configuration-aware semantic refinement for the projection branch of WHNF core.
+
+This is separated from the main fuel induction because the branch combines
+major normalization, String-literal constructor expansion, projection
+computation, recursive normalization, and cache publication.
+-/
+
+theorem psKernelWhnfCoreProjection_configuration_refines
+    (remaining : Nat)
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (reduceRecursor :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod (Option PsKernelExpr) PsKernelCheckerState))
+    (hPublic :
+      PsKernelWhnfConfigurationSound publicWhnf)
+    (hSmaller :
+      PsKernelWhnfCoreConfigurationSound
+        (psKernelWhnfCoreWithFuel
+          remaining
+          publicWhnf
+          reduceRecursor))
+    (context nextContext : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (typeName : PsKernelName)
+    (index : Nat)
+    (structValue result : PsKernelExpr)
+    (cheapRec cheapProj : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hMiss :
+      (if
+          psKernelSemanticCacheEligible
+            (PsKernelExpr.proj typeName index structValue) then
+        psKernelExprMapGet
+          state.whnfCore
+          (PsKernelExpr.proj typeName index structValue)
+      else
+        Option.none) =
+        Option.none)
+    (hSuccess :
+      psKernelWhnfCoreWithFuel
+          (Nat.succ remaining)
+          publicWhnf
+          reduceRecursor
+          context
+          state
+          (PsKernelExpr.proj typeName index structValue)
+          cheapRec
+          cheapProj =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelReductionClosure
+        context.environment
+        context.localContext
+        (PsKernelExpr.proj typeName index structValue)
+        result ∧
+      PsKernelCheckerConfigurationSound
+        context
+        nextState := by
+  have hNextConfig :
+      PsKernelCheckerConfigurationSound
+        nextContext
+        state :=
+    psKernelCheckerContextEnterRecDepth_preserves_configuration
+      context
+      nextContext
+      state
+      hConfig
+      hDepth
+  have hBackReduction :
+      ∀ (left right : PsKernelExpr),
+        PsKernelReductionClosure
+            nextContext.environment
+            nextContext.localContext
+            left
+            right ->
+          PsKernelReductionClosure
+            context.environment
+            context.localContext
+            left
+            right := by
+    intro left right hReduction
+    exact
+      psKernelReductionClosure_enterRecDepth_back
+        context
+        nextContext
+        left
+        right
+        hDepth
+        hReduction
+  have hBackConfig :
+      ∀ candidate : PsKernelCheckerState,
+        PsKernelCheckerConfigurationSound
+            nextContext
+            candidate ->
+          PsKernelCheckerConfigurationSound
+            context
+            candidate := by
+    intro candidate hCandidate
+    exact
+      psKernelCheckerConfigurationSound_enterRecDepth_back
+        context
+        nextContext
+        candidate
+        hDepth
+        hCandidate
+  let original :=
+    PsKernelExpr.proj typeName index structValue
+  let structResult :=
+    if cheapProj then
+      psKernelWhnfCoreWithFuel
+        remaining
+        publicWhnf
+        reduceRecursor
+        nextContext
+        state
+        structValue
+        cheapRec
+        cheapProj
+    else
+      publicWhnf
+        nextContext
+        state
+        structValue
+  cases hStruct : structResult with
+  | error error =>
+      simp [
+        psKernelWhnfCoreWithFuel,
+        hDepth,
+        hMiss,
+        original,
+        structResult,
+        hStruct
+      ] at hSuccess
+  | ok firstRun =>
+      rcases firstRun with ⟨structReduced, state1⟩
+      have hStructSemantic :
+          PsKernelReductionClosure
+              nextContext.environment
+              nextContext.localContext
+              structValue
+              structReduced ∧
+            PsKernelCheckerConfigurationSound
+              nextContext
+              state1 := by
+        cases cheapProj with
+        | false =>
+            have hRun :
+                publicWhnf
+                    nextContext
+                    state
+                    structValue =
+                  Except.ok
+                    (Prod.mk structReduced state1) := by
+              simpa [structResult] using hStruct
+            exact
+              hPublic
+                nextContext
+                state
+                state1
+                structValue
+                structReduced
+                hNextConfig
+                hRun
+        | true =>
+            have hRun :
+                psKernelWhnfCoreWithFuel
+                    remaining
+                    publicWhnf
+                    reduceRecursor
+                    nextContext
+                    state
+                    structValue
+                    cheapRec
+                    true =
+                  Except.ok
+                    (Prod.mk structReduced state1) := by
+              simpa [structResult] using hStruct
+            exact
+              hSmaller
+                nextContext
+                state
+                state1
+                structValue
+                structReduced
+                cheapRec
+                true
+                hNextConfig
+                hRun
+      let expandedResult :
+          Except String
+            (Prod PsKernelExpr PsKernelCheckerState) :=
+        match structReduced with
+        | PsKernelExpr.lit literal =>
+            match literal with
+            | PsKernelLiteral.str value =>
+                publicWhnf
+                  nextContext
+                  state1
+                  (psKernelStringLitToConstructor value)
+            | PsKernelLiteral.nat _ =>
+                Except.ok
+                  (Prod.mk structReduced state1)
+        | _ =>
+            Except.ok
+              (Prod.mk structReduced state1)
+      cases hExpanded : expandedResult with
+      | error error =>
+          simp [
+            psKernelWhnfCoreWithFuel,
+            hDepth,
+            hMiss,
+            original,
+            structResult,
+            hStruct,
+            expandedResult,
+            hExpanded
+          ] at hSuccess
+      | ok secondRun =>
+          rcases secondRun with ⟨expanded, state2⟩
+          have hExpandedSemantic :
+              PsKernelReductionClosure
+                  nextContext.environment
+                  nextContext.localContext
+                  structValue
+                  expanded ∧
+                PsKernelCheckerConfigurationSound
+                  nextContext
+                  state2 := by
+            unfold expandedResult at hExpanded
+            cases structReduced with
+            | bvar value =>
+                simp at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
+                exact hStructSemantic
+            | fvar value =>
+                simp at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
+                exact hStructSemantic
+            | mvar value =>
+                simp at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
+                exact hStructSemantic
+            | sort value =>
+                simp at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
+                exact hStructSemantic
+            | const name levels =>
+                simp at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
+                exact hStructSemantic
+            | app fn arg =>
+                simp at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
+                exact hStructSemantic
+            | lam name type body binderInfo =>
+                simp at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
+                exact hStructSemantic
+            | forallE name type body binderInfo =>
+                simp at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
+                exact hStructSemantic
+            | letE name type value body nondep =>
+                simp at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
+                exact hStructSemantic
+            | lit literal =>
+                cases literal with
+                | nat value =>
+                    simp at hExpanded
+                    rcases hExpanded with ⟨rfl, rfl⟩
+                    exact hStructSemantic
+                | str value =>
+                    have hStringRun :
+                        publicWhnf
+                            nextContext
+                            state1
+                            (psKernelStringLitToConstructor value) =
+                          Except.ok
+                            (Prod.mk expanded state2) := by
+                      simpa using hExpanded
+                    have hStringSemantic :=
+                      hPublic
+                        nextContext
+                        state1
+                        state2
+                        (psKernelStringLitToConstructor value)
+                        expanded
+                        hStructSemantic.2
+                        hStringRun
+                    have hLiteralStep :
+                        PsKernelReductionClosure
+                          nextContext.environment
+                          nextContext.localContext
+                          (PsKernelExpr.lit
+                            (PsKernelLiteral.str value))
+                          (psKernelStringLitToConstructor value) :=
+                      PsKernelReductionClosure.cons
+                        (PsKernelExpr.lit
+                          (PsKernelLiteral.str value))
+                        (psKernelStringLitToConstructor value)
+                        (psKernelStringLitToConstructor value)
+                        (PsKernelReductionStep.stringLiteral value)
+                        (PsKernelReductionClosure.refl
+                          (psKernelStringLitToConstructor value))
+                    exact
+                      ⟨
+                        psKernelReductionClosure_transitive
+                          nextContext.environment
+                          nextContext.localContext
+                          structValue
+                          (PsKernelExpr.lit
+                            (PsKernelLiteral.str value))
+                          expanded
+                          hStructSemantic.1
+                          (psKernelReductionClosure_transitive
+                            nextContext.environment
+                            nextContext.localContext
+                            (PsKernelExpr.lit
+                              (PsKernelLiteral.str value))
+                            (psKernelStringLitToConstructor value)
+                            expanded
+                            hLiteralStep
+                            hStringSemantic.1),
+                        hStringSemantic.2
+                      ⟩
+            | mdata metadata body =>
+                simp at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
+                exact hStructSemantic
+            | proj projectionName projectionIndex body =>
+                simp at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
+                exact hStructSemantic
+          cases hProjection :
+              psKernelReduceProjCore
+                nextContext
+                typeName
+                index
+                expanded with
+          | none =>
+              have hFinish :
+                  psKernelWhnfCoreFinish
+                      original
+                      cheapProj
+                      original
+                      state2 =
+                    Except.ok
+                      (Prod.mk result nextState) := by
+                simpa [
+                  psKernelWhnfCoreWithFuel,
+                  hDepth,
+                  hMiss,
+                  original,
+                  structResult,
+                  hStruct,
+                  expandedResult,
+                  hExpanded,
+                  hProjection
+                ] using hSuccess
+              have hFinishSemantic :=
+                psKernelWhnfCoreFinish_success_refines
+                  nextContext
+                  state2
+                  nextState
+                  original
+                  original
+                  result
+                  cheapProj
+                  hExpandedSemantic.2
+                  (PsKernelReductionClosure.refl original)
+                  hFinish
+              have hResult : result = original :=
+                hFinishSemantic.1
+              subst result
+              exact
+                ⟨
+                  PsKernelReductionClosure.refl original,
+                  hBackConfig
+                    nextState
+                    hFinishSemantic.2
+                ⟩
+          | some value =>
+              have hProjectionSemantic :=
+                psKernelReduceProjCore_some_refines_closure
+                  nextContext
+                  typeName
+                  index
+                  expanded
+                  value
+                  hExpandedSemantic.2.1
+                  hProjection
+              have hMajorSemantic :
+                  PsKernelReductionClosure
+                    nextContext.environment
+                    nextContext.localContext
+                    original
+                    (PsKernelExpr.proj
+                      typeName
+                      index
+                      expanded) := by
+                simpa [original] using
+                  PsKernelReductionClosure.projectionMajor
+                    typeName
+                    index
+                    structValue
+                    expanded
+                    hExpandedSemantic.1
+              have hToValue :
+                  PsKernelReductionClosure
+                    nextContext.environment
+                    nextContext.localContext
+                    original
+                    value :=
+                psKernelReductionClosure_transitive
+                  nextContext.environment
+                  nextContext.localContext
+                  original
+                  (PsKernelExpr.proj
+                    typeName
+                    index
+                    expanded)
+                  value
+                  hMajorSemantic
+                  hProjectionSemantic
+              cases hReduce :
+                  psKernelWhnfCoreWithFuel
+                    remaining
+                    publicWhnf
+                    reduceRecursor
+                    nextContext
+                    state2
+                    value
+                    cheapRec
+                    cheapProj with
+              | error error =>
+                  simp [
+                    psKernelWhnfCoreWithFuel,
+                    hDepth,
+                    hMiss,
+                    original,
+                    structResult,
+                    hStruct,
+                    expandedResult,
+                    hExpanded,
+                    hProjection,
+                    hReduce
+                  ] at hSuccess
+              | ok reduceRun =>
+                  rcases reduceRun with ⟨reduced, state3⟩
+                  have hReduceSemantic :=
+                    hSmaller
+                      nextContext
+                      state2
+                      state3
+                      value
+                      reduced
+                      cheapRec
+                      cheapProj
+                      hExpandedSemantic.2
+                      hReduce
+                  have hCombined :
+                      PsKernelReductionClosure
+                        nextContext.environment
+                        nextContext.localContext
+                        original
+                        reduced :=
+                    psKernelReductionClosure_transitive
+                      nextContext.environment
+                      nextContext.localContext
+                      original
+                      value
+                      reduced
+                      hToValue
+                      hReduceSemantic.1
+                  have hFinish :
+                      psKernelWhnfCoreFinish
+                          original
+                          cheapProj
+                          reduced
+                          state3 =
+                        Except.ok
+                          (Prod.mk result nextState) := by
+                    simpa [
+                      psKernelWhnfCoreWithFuel,
+                      hDepth,
+                      hMiss,
+                      original,
+                      structResult,
+                      hStruct,
+                      expandedResult,
+                      hExpanded,
+                      hProjection,
+                      hReduce
+                    ] using hSuccess
+                  have hFinishSemantic :=
+                    psKernelWhnfCoreFinish_success_refines
+                      nextContext
+                      state3
+                      nextState
+                      original
+                      reduced
+                      result
+                      cheapProj
+                      hReduceSemantic.2
+                      hCombined
+                      hFinish
+                  have hResult : result = reduced :=
+                    hFinishSemantic.1
+                  subst result
+                  exact
+                    ⟨
+                      hBackReduction
+                        original
+                        reduced
+                        hCombined,
+                      hBackConfig
+                        nextState
+                        hFinishSemantic.2
+                    ⟩

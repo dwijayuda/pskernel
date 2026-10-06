@@ -327,6 +327,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.ProjectionSemantics,
     `Ps.KernelCore.Metatheory.InferenceConfiguration,
     `Ps.KernelCore.Metatheory.CheckedInferenceConfiguration,
+    `Ps.KernelCore.Metatheory.CheckerComposition,
     `Ps.KernelCore.Metatheory.InferenceTyping
   ]
 

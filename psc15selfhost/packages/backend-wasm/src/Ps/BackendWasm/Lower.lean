@@ -2036,13 +2036,7 @@ def psWasmLowerExprListWorker
         psWasmLowerExprListWorker lower expected rest;
       fun (state : PsWasmLowerState) =>
         match lower expected state expr with
-        | Except.error error =>
-            Except.error
-              (psWasmContextualizeUnsupportedType
-                (String.Internal.append
-                  "declaration:"
-                  declaration.name)
-                error)
+        | Except.error error => Except.error error
         | Except.ok lowered =>
             match smaller lowered.state with
             | Except.error error => Except.error error
@@ -5454,7 +5448,13 @@ def psWasmLowerDeclarationsWorker
               inductives
               state
               declaration with
-        | Except.error error => Except.error error
+        | Except.error error =>
+            Except.error
+              (psWasmContextualizeUnsupportedType
+                (String.Internal.append
+                  "declaration:"
+                  declaration.name)
+                error)
         | Except.ok lowered =>
             match smaller lowered.state with
             | Except.error error => Except.error error

@@ -2148,11 +2148,15 @@ theorem psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
                                                     hArgsLengthBool
                                                 rw [hBeqFalse] at hBeqTrue
                                                 cases hBeqTrue
-                                              simp [
+                                              simp only [
                                                 hCtors,
-                                                hCtorRest,
-                                                hArgsLengthNeRaw
+                                                hCtorRest
                                               ] at hSuccess
+                                              split at hSuccess
+                                              next hEq =>
+                                                exact (hArgsLengthNeRaw hEq).elim
+                                              next hNe =>
+                                                simp at hSuccess
                                           | true =>
                                               have hArgsLength :
                                                   psKernelExprListLength args =

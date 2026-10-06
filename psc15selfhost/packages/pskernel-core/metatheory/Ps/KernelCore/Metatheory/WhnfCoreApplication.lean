@@ -773,7 +773,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
           ⟩
       cases hFnShape : fn with
       | lam name type body binderInfo =>
-          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppLambdaTail_configuration_refines
@@ -809,7 +808,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   hFn
                 ] using hSuccess)
       | bvar index =>
-          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -832,7 +830,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   hFn
                 ] using hSuccess)
       | fvar name =>
-          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -855,7 +852,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   hFn
                 ] using hSuccess)
       | mvar name =>
-          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -878,7 +874,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   hFn
                 ] using hSuccess)
       | sort level =>
-          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -901,7 +896,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   hFn
                 ] using hSuccess)
       | const name levels =>
-          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -924,7 +918,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   hFn
                 ] using hSuccess)
       | app nestedFn nestedArg =>
-          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -947,7 +940,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   hFn
                 ] using hSuccess)
       | forallE name domain codomain binderInfo =>
-          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -971,7 +963,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   hFn
                 ] using hSuccess)
       | letE name type value body nondep =>
-          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -995,7 +986,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   hFn
                 ] using hSuccess)
       | lit literal =>
-          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -1018,7 +1008,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   hFn
                 ] using hSuccess)
       | mdata metadata body =>
-          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines
@@ -1041,7 +1030,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   hFn
                 ] using hSuccess)
       | proj typeName index body =>
-          rw [hFnShape] at hHead hSuccess
           apply hBackPair
           exact
             psKernelWhnfCoreAppNonLambdaTail_configuration_refines

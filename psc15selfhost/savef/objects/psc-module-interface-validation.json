@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "ModuleInterfaceContract",
+  "semanticProfile": "ps-0.9-r3",
+  "authorityClass": "validation-authority",
+  "scope": {
+    "interface": "psc-structural-module-interface/1"
+  },
+  "dependsOn": [
+    "psc-structural-module-interface/1"
+  ],
+  "assumes": [],
+  "claims": [
+    {
+      "id": "psc-query-interface-equality-reuse/1",
+      "status": "validated"
+    }
+  ],
+  "evidenceRefs": [
+    "test:psc1_project_query_graph_tests",
+    "test:psc1_host_project_query_tests"
+  ],
+  "payload": {
+    "currentExtraction": "canonical-admissions-conservative",
+    "behavioralLayer": "psc-behavioral-module-interface/1"
+  },
+  "objectId": "sha256:0083facb6dcfb444f1573c15aab2305169eac26f2ca2a5ae4ecc8f95141c91df"
+}

@@ -1450,16 +1450,26 @@ def psIrSpecializeAppendOneRequest
           seen := state.seen
         }
 
+def psIrSpecializeAppendRequestWorker
+    (requests : List PsIrSpecializeRequest) :
+    PsIrSpecializeState -> PsIrSpecializeState :=
+  match requests with
+  | List.nil =>
+      fun (state : PsIrSpecializeState) => state
+  | List.cons request rest =>
+      let smaller :
+          PsIrSpecializeState -> PsIrSpecializeState :=
+        psIrSpecializeAppendRequestWorker rest;
+      fun (state : PsIrSpecializeState) =>
+        let nextState : PsIrSpecializeState :=
+          psIrSpecializeAppendOneRequest state request;
+        smaller nextState
+
 def psIrSpecializeAppendRequest
     (state : PsIrSpecializeState)
     (requests : List PsIrSpecializeRequest) :
     PsIrSpecializeState :=
-  match requests with
-  | List.nil => state
-  | List.cons request rest =>
-      let nextState : PsIrSpecializeState :=
-        psIrSpecializeAppendOneRequest state request;
-      psIrSpecializeAppendRequest nextState rest
+  psIrSpecializeAppendRequestWorker requests state
 
 def psIrSpecializeMarkSeen
     (state : PsIrSpecializeState)

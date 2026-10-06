@@ -1128,3 +1128,668 @@ theorem psKernelLevelListEq_sound_of_string_law
                   leftTail = rightTail :=
                 ih rightTail hTail
               rw [hHeadEq, hTailEq]
+
+
+theorem psKernelLevelEq_trans_core
+    (left middle right : PsKernelLevel)
+    (hLeft : psKernelLevelEq left middle = true)
+    (hRight : psKernelLevelEq middle right = true) :
+    psKernelLevelEq left right = true := by
+  induction left generalizing middle right with
+  | zero =>
+      cases middle with
+      | zero =>
+          cases right <;>
+            simp [psKernelLevelEq] at hRight ⊢
+      | _ =>
+          simp [psKernelLevelEq] at hLeft
+  | succ leftValue ih =>
+      cases middle with
+      | succ middleValue =>
+          cases right with
+          | succ rightValue =>
+              exact
+                ih middleValue rightValue hLeft hRight
+          | _ =>
+              simp [psKernelLevelEq] at hRight
+      | _ =>
+          simp [psKernelLevelEq] at hLeft
+  | max leftA leftB ihA ihB =>
+      cases middle with
+      | max middleA middleB =>
+          cases right with
+          | max rightA rightB =>
+              cases hLA :
+                  psKernelLevelEq leftA middleA with
+              | false =>
+                  simp [psKernelLevelEq, hLA] at hLeft
+              | true =>
+                  have hLB :
+                      psKernelLevelEq leftB middleB = true := by
+                    simpa [psKernelLevelEq, hLA] using hLeft
+                  cases hRA :
+                      psKernelLevelEq middleA rightA with
+                  | false =>
+                      simp [psKernelLevelEq, hRA] at hRight
+                  | true =>
+                      have hRB :
+                          psKernelLevelEq middleB rightB = true := by
+                        simpa [psKernelLevelEq, hRA] using hRight
+                      have hA :=
+                        ihA middleA rightA hLA hRA
+                      have hB :=
+                        ihB middleB rightB hLB hRB
+                      simp [psKernelLevelEq, hA, hB]
+          | _ =>
+              simp [psKernelLevelEq] at hRight
+      | _ =>
+          simp [psKernelLevelEq] at hLeft
+  | imax leftA leftB ihA ihB =>
+      cases middle with
+      | imax middleA middleB =>
+          cases right with
+          | imax rightA rightB =>
+              cases hLA :
+                  psKernelLevelEq leftA middleA with
+              | false =>
+                  simp [psKernelLevelEq, hLA] at hLeft
+              | true =>
+                  have hLB :
+                      psKernelLevelEq leftB middleB = true := by
+                    simpa [psKernelLevelEq, hLA] using hLeft
+                  cases hRA :
+                      psKernelLevelEq middleA rightA with
+                  | false =>
+                      simp [psKernelLevelEq, hRA] at hRight
+                  | true =>
+                      have hRB :
+                          psKernelLevelEq middleB rightB = true := by
+                        simpa [psKernelLevelEq, hRA] using hRight
+                      have hA :=
+                        ihA middleA rightA hLA hRA
+                      have hB :=
+                        ihB middleB rightB hLB hRB
+                      simp [psKernelLevelEq, hA, hB]
+          | _ =>
+              simp [psKernelLevelEq] at hRight
+      | _ =>
+          simp [psKernelLevelEq] at hLeft
+  | param leftName =>
+      cases middle with
+      | param middleName =>
+          cases right with
+          | param rightName =>
+              exact
+                psKernelNameEq_trans_core
+                  leftName
+                  middleName
+                  rightName
+                  hLeft
+                  hRight
+          | _ =>
+              simp [psKernelLevelEq] at hRight
+      | _ =>
+          simp [psKernelLevelEq] at hLeft
+  | mvar leftName =>
+      cases middle with
+      | mvar middleName =>
+          cases right with
+          | mvar rightName =>
+              exact
+                psKernelNameEq_trans_core
+                  leftName
+                  middleName
+                  rightName
+                  hLeft
+                  hRight
+          | _ =>
+              simp [psKernelLevelEq] at hRight
+      | _ =>
+          simp [psKernelLevelEq] at hLeft
+
+theorem psKernelLevelListEq_trans_core
+    (left middle right : List PsKernelLevel)
+    (hLeft : psKernelLevelListEq left middle = true)
+    (hRight : psKernelLevelListEq middle right = true) :
+    psKernelLevelListEq left right = true := by
+  induction left generalizing middle right with
+  | nil =>
+      cases middle with
+      | nil =>
+          cases right <;>
+            simp [psKernelLevelListEq] at hRight ⊢
+      | cons head tail =>
+          simp [psKernelLevelListEq] at hLeft
+  | cons leftHead leftTail ih =>
+      cases middle with
+      | nil =>
+          simp [psKernelLevelListEq] at hLeft
+      | cons middleHead middleTail =>
+          cases right with
+          | nil =>
+              simp [psKernelLevelListEq] at hRight
+          | cons rightHead rightTail =>
+              cases hLH :
+                  psKernelLevelEq leftHead middleHead with
+              | false =>
+                  simp [
+                    psKernelLevelListEq,
+                    hLH
+                  ] at hLeft
+              | true =>
+                  have hLT :
+                      psKernelLevelListEq
+                          leftTail
+                          middleTail =
+                        true := by
+                    simpa [
+                      psKernelLevelListEq,
+                      hLH
+                    ] using hLeft
+                  cases hRH :
+                      psKernelLevelEq middleHead rightHead with
+                  | false =>
+                      simp [
+                        psKernelLevelListEq,
+                        hRH
+                      ] at hRight
+                  | true =>
+                      have hRT :
+                          psKernelLevelListEq
+                              middleTail
+                              rightTail =
+                            true := by
+                        simpa [
+                          psKernelLevelListEq,
+                          hRH
+                        ] using hRight
+                      have hHead :=
+                        psKernelLevelEq_trans_core
+                          leftHead
+                          middleHead
+                          rightHead
+                          hLH
+                          hRH
+                      have hTail :=
+                        ih middleTail rightTail hLT hRT
+                      simp [
+                        psKernelLevelListEq,
+                        hHead,
+                        hTail
+                      ]
+
+theorem psKernelBoolEq_trans_core
+    (left middle right : Bool)
+    (hLeft : psKernelBoolEq left middle = true)
+    (hRight : psKernelBoolEq middle right = true) :
+    psKernelBoolEq left right = true := by
+  cases left <;>
+    cases middle <;>
+    cases right <;>
+    simp [psKernelBoolEq] at hLeft hRight ⊢
+
+theorem psKernelLiteralEq_trans_core
+    (left middle right : PsKernelLiteral)
+    (hLeft : psKernelLiteralEq left middle = true)
+    (hRight : psKernelLiteralEq middle right = true) :
+    psKernelLiteralEq left right = true := by
+  cases left with
+  | nat leftValue =>
+      cases middle with
+      | nat middleValue =>
+          cases right with
+          | nat rightValue =>
+              exact
+                psKernelNatBeq_trans_core
+                  leftValue
+                  middleValue
+                  rightValue
+                  hLeft
+                  hRight
+          | str rightValue =>
+              simp [psKernelLiteralEq] at hRight
+      | str middleValue =>
+          simp [psKernelLiteralEq] at hLeft
+  | str leftValue =>
+      cases middle with
+      | nat middleValue =>
+          simp [psKernelLiteralEq] at hLeft
+      | str middleValue =>
+          cases right with
+          | nat rightValue =>
+              simp [psKernelLiteralEq] at hRight
+          | str rightValue =>
+              exact
+                psKernelStringEq_trans_core
+                  leftValue
+                  middleValue
+                  rightValue
+                  hLeft
+                  hRight
+
+theorem psKernelExprEq_trans_core
+    (left middle right : PsKernelExpr)
+    (hLeft : psKernelExprEq left middle = true)
+    (hRight : psKernelExprEq middle right = true) :
+    psKernelExprEq left right = true := by
+  induction left generalizing middle right with
+  | bvar leftIndex =>
+      cases middle with
+      | bvar middleIndex =>
+          cases right with
+          | bvar rightIndex =>
+              exact
+                psKernelNatBeq_trans_core
+                  leftIndex
+                  middleIndex
+                  rightIndex
+                  hLeft
+                  hRight
+          | _ =>
+              simp [psKernelExprEq] at hRight
+      | _ =>
+          simp [psKernelExprEq] at hLeft
+  | fvar leftName =>
+      cases middle with
+      | fvar middleName =>
+          cases right with
+          | fvar rightName =>
+              exact
+                psKernelNameEq_trans_core
+                  leftName middleName rightName
+                  hLeft hRight
+          | _ =>
+              simp [psKernelExprEq] at hRight
+      | _ =>
+          simp [psKernelExprEq] at hLeft
+  | mvar leftName =>
+      cases middle with
+      | mvar middleName =>
+          cases right with
+          | mvar rightName =>
+              exact
+                psKernelNameEq_trans_core
+                  leftName middleName rightName
+                  hLeft hRight
+          | _ =>
+              simp [psKernelExprEq] at hRight
+      | _ =>
+          simp [psKernelExprEq] at hLeft
+  | sort leftLevel =>
+      cases middle with
+      | sort middleLevel =>
+          cases right with
+          | sort rightLevel =>
+              exact
+                psKernelLevelEq_trans_core
+                  leftLevel middleLevel rightLevel
+                  hLeft hRight
+          | _ =>
+              simp [psKernelExprEq] at hRight
+      | _ =>
+          simp [psKernelExprEq] at hLeft
+  | const leftName leftLevels =>
+      cases middle with
+      | const middleName middleLevels =>
+          cases right with
+          | const rightName rightLevels =>
+              cases hLN :
+                  psKernelNameEq leftName middleName with
+              | false =>
+                  simp [psKernelExprEq, hLN] at hLeft
+              | true =>
+                  have hLL :
+                      psKernelLevelListEq
+                          leftLevels
+                          middleLevels =
+                        true := by
+                    simpa [psKernelExprEq, hLN] using hLeft
+                  cases hRN :
+                      psKernelNameEq middleName rightName with
+                  | false =>
+                      simp [psKernelExprEq, hRN] at hRight
+                  | true =>
+                      have hRL :
+                          psKernelLevelListEq
+                              middleLevels
+                              rightLevels =
+                            true := by
+                        simpa [psKernelExprEq, hRN] using hRight
+                      have hName :=
+                        psKernelNameEq_trans_core
+                          leftName middleName rightName
+                          hLN hRN
+                      have hLevels :=
+                        psKernelLevelListEq_trans_core
+                          leftLevels middleLevels rightLevels
+                          hLL hRL
+                      simp [psKernelExprEq, hName, hLevels]
+          | _ =>
+              simp [psKernelExprEq] at hRight
+      | _ =>
+          simp [psKernelExprEq] at hLeft
+  | app leftFn leftArg ihFn ihArg =>
+      cases middle with
+      | app middleFn middleArg =>
+          cases right with
+          | app rightFn rightArg =>
+              cases hLF :
+                  psKernelExprEq leftFn middleFn with
+              | false =>
+                  simp [psKernelExprEq, hLF] at hLeft
+              | true =>
+                  have hLA :
+                      psKernelExprEq leftArg middleArg = true := by
+                    simpa [psKernelExprEq, hLF] using hLeft
+                  cases hRF :
+                      psKernelExprEq middleFn rightFn with
+                  | false =>
+                      simp [psKernelExprEq, hRF] at hRight
+                  | true =>
+                      have hRA :
+                          psKernelExprEq middleArg rightArg = true := by
+                        simpa [psKernelExprEq, hRF] using hRight
+                      have hFn :=
+                        ihFn middleFn rightFn hLF hRF
+                      have hArg :=
+                        ihArg middleArg rightArg hLA hRA
+                      simp [psKernelExprEq, hFn, hArg]
+          | _ =>
+              simp [psKernelExprEq] at hRight
+      | _ =>
+          simp [psKernelExprEq] at hLeft
+  | lam leftName leftType leftBody leftInfo ihType ihBody =>
+      cases middle with
+      | lam middleName middleType middleBody middleInfo =>
+          cases right with
+          | lam rightName rightType rightBody rightInfo =>
+              cases hLT :
+                  psKernelExprEq leftType middleType with
+              | false =>
+                  simp [psKernelExprEq, hLT] at hLeft
+              | true =>
+                  have hLB :
+                      psKernelExprEq leftBody middleBody = true := by
+                    simpa [psKernelExprEq, hLT] using hLeft
+                  cases hRT :
+                      psKernelExprEq middleType rightType with
+                  | false =>
+                      simp [psKernelExprEq, hRT] at hRight
+                  | true =>
+                      have hRB :
+                          psKernelExprEq middleBody rightBody = true := by
+                        simpa [psKernelExprEq, hRT] using hRight
+                      have hType :=
+                        ihType middleType rightType hLT hRT
+                      have hBody :=
+                        ihBody middleBody rightBody hLB hRB
+                      simp [psKernelExprEq, hType, hBody]
+          | _ =>
+              simp [psKernelExprEq] at hRight
+      | _ =>
+          simp [psKernelExprEq] at hLeft
+  | forallE leftName leftType leftBody leftInfo ihType ihBody =>
+      cases middle with
+      | forallE middleName middleType middleBody middleInfo =>
+          cases right with
+          | forallE rightName rightType rightBody rightInfo =>
+              cases hLT :
+                  psKernelExprEq leftType middleType with
+              | false =>
+                  simp [psKernelExprEq, hLT] at hLeft
+              | true =>
+                  have hLB :
+                      psKernelExprEq leftBody middleBody = true := by
+                    simpa [psKernelExprEq, hLT] using hLeft
+                  cases hRT :
+                      psKernelExprEq middleType rightType with
+                  | false =>
+                      simp [psKernelExprEq, hRT] at hRight
+                  | true =>
+                      have hRB :
+                          psKernelExprEq middleBody rightBody = true := by
+                        simpa [psKernelExprEq, hRT] using hRight
+                      have hType :=
+                        ihType middleType rightType hLT hRT
+                      have hBody :=
+                        ihBody middleBody rightBody hLB hRB
+                      simp [psKernelExprEq, hType, hBody]
+          | _ =>
+              simp [psKernelExprEq] at hRight
+      | _ =>
+          simp [psKernelExprEq] at hLeft
+  | letE leftName leftType leftValue leftBody leftNondep ihType ihValue ihBody =>
+      cases middle with
+      | letE middleName middleType middleValue middleBody middleNondep =>
+          cases right with
+          | letE rightName rightType rightValue rightBody rightNondep =>
+              cases hLT :
+                  psKernelExprEq leftType middleType with
+              | false =>
+                  simp [psKernelExprEq, hLT] at hLeft
+              | true =>
+                  cases hLV :
+                      psKernelExprEq leftValue middleValue with
+                  | false =>
+                      simp [psKernelExprEq, hLT, hLV] at hLeft
+                  | true =>
+                      cases hLB :
+                          psKernelExprEq leftBody middleBody with
+                      | false =>
+                          simp [
+                            psKernelExprEq,
+                            hLT,
+                            hLV,
+                            hLB
+                          ] at hLeft
+                      | true =>
+                          have hLN :
+                              psKernelBoolEq
+                                  leftNondep
+                                  middleNondep =
+                                true := by
+                            simpa [
+                              psKernelExprEq,
+                              hLT,
+                              hLV,
+                              hLB
+                            ] using hLeft
+                          cases hRT :
+                              psKernelExprEq middleType rightType with
+                          | false =>
+                              simp [psKernelExprEq, hRT] at hRight
+                          | true =>
+                              cases hRV :
+                                  psKernelExprEq middleValue rightValue with
+                              | false =>
+                                  simp [
+                                    psKernelExprEq,
+                                    hRT,
+                                    hRV
+                                  ] at hRight
+                              | true =>
+                                  cases hRB :
+                                      psKernelExprEq middleBody rightBody with
+                                  | false =>
+                                      simp [
+                                        psKernelExprEq,
+                                        hRT,
+                                        hRV,
+                                        hRB
+                                      ] at hRight
+                                  | true =>
+                                      have hRN :
+                                          psKernelBoolEq
+                                              middleNondep
+                                              rightNondep =
+                                            true := by
+                                        simpa [
+                                          psKernelExprEq,
+                                          hRT,
+                                          hRV,
+                                          hRB
+                                        ] using hRight
+                                      have hType :=
+                                        ihType
+                                          middleType
+                                          rightType
+                                          hLT
+                                          hRT
+                                      have hValue :=
+                                        ihValue
+                                          middleValue
+                                          rightValue
+                                          hLV
+                                          hRV
+                                      have hBody :=
+                                        ihBody
+                                          middleBody
+                                          rightBody
+                                          hLB
+                                          hRB
+                                      have hNondep :=
+                                        psKernelBoolEq_trans_core
+                                          leftNondep
+                                          middleNondep
+                                          rightNondep
+                                          hLN
+                                          hRN
+                                      simp [
+                                        psKernelExprEq,
+                                        hType,
+                                        hValue,
+                                        hBody,
+                                        hNondep
+                                      ]
+          | _ =>
+              simp [psKernelExprEq] at hRight
+      | _ =>
+          simp [psKernelExprEq] at hLeft
+  | lit leftLiteral =>
+      cases middle with
+      | lit middleLiteral =>
+          cases right with
+          | lit rightLiteral =>
+              exact
+                psKernelLiteralEq_trans_core
+                  leftLiteral
+                  middleLiteral
+                  rightLiteral
+                  hLeft
+                  hRight
+          | _ =>
+              simp [psKernelExprEq] at hRight
+      | _ =>
+          simp [psKernelExprEq] at hLeft
+  | mdata leftMetadata leftBody ihBody =>
+      cases middle with
+      | mdata middleMetadata middleBody =>
+          cases right with
+          | mdata rightMetadata rightBody =>
+              cases hLM :
+                  Nat.beq leftMetadata middleMetadata with
+              | false =>
+                  simp [psKernelExprEq, hLM] at hLeft
+              | true =>
+                  have hLB :
+                      psKernelExprEq leftBody middleBody = true := by
+                    simpa [psKernelExprEq, hLM] using hLeft
+                  cases hRM :
+                      Nat.beq middleMetadata rightMetadata with
+                  | false =>
+                      simp [psKernelExprEq, hRM] at hRight
+                  | true =>
+                      have hRB :
+                          psKernelExprEq middleBody rightBody = true := by
+                        simpa [psKernelExprEq, hRM] using hRight
+                      have hMeta :=
+                        psKernelNatBeq_trans_core
+                          leftMetadata
+                          middleMetadata
+                          rightMetadata
+                          hLM
+                          hRM
+                      have hBody :=
+                        ihBody middleBody rightBody hLB hRB
+                      simp [psKernelExprEq, hMeta, hBody]
+          | _ =>
+              simp [psKernelExprEq] at hRight
+      | _ =>
+          simp [psKernelExprEq] at hLeft
+  | proj leftName leftIndex leftBody ihBody =>
+      cases middle with
+      | proj middleName middleIndex middleBody =>
+          cases right with
+          | proj rightName rightIndex rightBody =>
+              cases hLN :
+                  psKernelNameEq leftName middleName with
+              | false =>
+                  simp [psKernelExprEq, hLN] at hLeft
+              | true =>
+                  cases hLI :
+                      Nat.beq leftIndex middleIndex with
+                  | false =>
+                      simp [
+                        psKernelExprEq,
+                        hLN,
+                        hLI
+                      ] at hLeft
+                  | true =>
+                      have hLB :
+                          psKernelExprEq leftBody middleBody = true := by
+                        simpa [
+                          psKernelExprEq,
+                          hLN,
+                          hLI
+                        ] using hLeft
+                      cases hRN :
+                          psKernelNameEq middleName rightName with
+                      | false =>
+                          simp [psKernelExprEq, hRN] at hRight
+                      | true =>
+                          cases hRI :
+                              Nat.beq middleIndex rightIndex with
+                          | false =>
+                              simp [
+                                psKernelExprEq,
+                                hRN,
+                                hRI
+                              ] at hRight
+                          | true =>
+                              have hRB :
+                                  psKernelExprEq middleBody rightBody = true := by
+                                simpa [
+                                  psKernelExprEq,
+                                  hRN,
+                                  hRI
+                                ] using hRight
+                              have hName :=
+                                psKernelNameEq_trans_core
+                                  leftName
+                                  middleName
+                                  rightName
+                                  hLN
+                                  hRN
+                              have hIndex :=
+                                psKernelNatBeq_trans_core
+                                  leftIndex
+                                  middleIndex
+                                  rightIndex
+                                  hLI
+                                  hRI
+                              have hBody :=
+                                ihBody
+                                  middleBody
+                                  rightBody
+                                  hLB
+                                  hRB
+                              simp [
+                                psKernelExprEq,
+                                hName,
+                                hIndex,
+                                hBody
+                              ]
+          | _ =>
+              simp [psKernelExprEq] at hRight
+      | _ =>
+          simp [psKernelExprEq] at hLeft

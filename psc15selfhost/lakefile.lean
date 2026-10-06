@@ -321,6 +321,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.ReductionCongruence,
     `Ps.KernelCore.Metatheory.ProjectionReduction,
     `Ps.KernelCore.Metatheory.WhnfCoreProjection,
+    `Ps.KernelCore.Metatheory.WhnfCoreApplication,
     `Ps.KernelCore.Metatheory.Inductive,
     `Ps.KernelCore.Metatheory.Context,
     `Ps.KernelCore.Metatheory.ContextState,

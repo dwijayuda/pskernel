@@ -365,6 +365,39 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
     ]
     declarations := [
       {
+        name := "longUtf8ByteSizeExact"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body := PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natEq []
+          [psWasmSmokeStringUtf8ByteSize
+             (let part := psWasmSmokeStringLiteral (String.ofList (List.replicate 5000 '😀'));
+              let half := psWasmSmokeStringAppend part part;
+              psWasmSmokeStringAppend half half),
+           psWasmSmokeNatLiteral 80000]
+      },
+      {
+        name := "tailCountdown"
+        typeParameters := []
+        parameters := [{ name := "remaining", type := psWasmSmokeU32Type },
+                       { name := "total", type := psWasmSmokeU32Type }]
+        resultType := psWasmSmokeU32Type
+        body := PsVerifiedIrExpr.ifE
+          (PsVerifiedIrExpr.intrinsic
+            (PsVerifiedIrIntrinsic.machineIntCompare PsVerifiedIrMachineIntegerType.uint32 PsVerifiedIrIntegerCompareOp.eq) []
+            [PsVerifiedIrExpr.var "remaining",
+             PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.machineInteger PsVerifiedIrMachineIntegerType.uint32 0)])
+          (PsVerifiedIrExpr.var "total")
+          (PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "tailCountdown") []
+            [PsVerifiedIrExpr.intrinsic
+               (PsVerifiedIrIntrinsic.machineIntBinary PsVerifiedIrMachineIntegerType.uint32 PsVerifiedIrIntegerBinaryOp.sub) []
+               [PsVerifiedIrExpr.var "remaining", PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.machineInteger PsVerifiedIrMachineIntegerType.uint32 1)],
+             PsVerifiedIrExpr.intrinsic
+               (PsVerifiedIrIntrinsic.machineIntBinary PsVerifiedIrMachineIntegerType.uint32 PsVerifiedIrIntegerBinaryOp.add) []
+               [PsVerifiedIrExpr.var "total", PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.machineInteger PsVerifiedIrMachineIntegerType.uint32 1)]])
+      },
+
+      {
         name := "applySelectedFunction"
         typeParameters := []
         parameters := [

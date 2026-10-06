@@ -1346,8 +1346,28 @@ def psTestWasmNatConstructorIdentityInvariant : Bool :=
             && bit1.fields.length == 2
       | _ => false
 
-    def main : IO Unit := do
-  if psTestWasmScalarLowering
+def psTestWasmTailPositions : Bool :=
+  let body := [PsWasmInstruction.localGet 0,
+    PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
+      PsWasmInstruction.call "nonTail", PsWasmInstruction.i32Const 1, PsWasmInstruction.i32Add,
+    PsWasmInstruction.else_,
+      PsWasmInstruction.localGet 1,
+      PsWasmInstruction.ifStart (Option.some PsWasmValueType.i32),
+        PsWasmInstruction.call "direct",
+      PsWasmInstruction.else_,
+        PsWasmInstruction.callRef "indirect",
+      PsWasmInstruction.end_,
+    PsWasmInstruction.end_];
+  match psWasmTailCalls body with
+  | [.localGet 0, .ifStart _, .call nonTail, .i32Const 1, .i32Add,
+     .else_, .localGet 1, .ifStart _, .returnCall direct, .else_,
+     .returnCallRef indirect, .end_, .end_] =>
+      nonTail == "nonTail" && direct == "direct" && indirect == "indirect"
+  | _ => false
+
+def main : IO Unit := do
+  if psTestWasmTailPositions
+      && psTestWasmScalarLowering
       && psTestWasmNatConstructorIdentityInvariant
       && psTestWasmWordProfiles
       && psTestWasmMachineIntegerOps

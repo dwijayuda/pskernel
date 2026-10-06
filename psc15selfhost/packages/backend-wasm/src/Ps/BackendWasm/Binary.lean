@@ -434,6 +434,14 @@ def psWasmEncodeInstruction
             (List.cons
               (psWasmByte 16)
               (psWasmEncodeUleb index))
+  | .returnCall name =>
+      match psWasmFindFunctionIndex functions name with
+      | Option.none => Except.error (PsWasmEncodeError.unknownFunction name)
+      | Option.some index =>
+          Except.ok
+            (List.cons
+              (psWasmByte 18)
+              (psWasmEncodeUleb index))
   | .return_ => Except.ok [psWasmByte 15]
   | .ifStart result =>
       match result with
@@ -657,6 +665,18 @@ def psWasmEncodeInstruction
       | Option.some typeIndex =>
           Except.ok
             (psListAppend [psWasmByte 20] (psWasmEncodeUleb typeIndex))
+  | .returnCallRef typeName =>
+      match
+          psWasmFindFunctionTypeIndex
+            structures
+            arrays
+            functionTypes
+            typeName with
+      | Option.none =>
+          Except.error (PsWasmEncodeError.unknownFunctionType typeName)
+      | Option.some typeIndex =>
+          Except.ok
+            (psListAppend [psWasmByte 21] (psWasmEncodeUleb typeIndex))
   | .f32ConstBits _ =>
       Except.error PsWasmEncodeError.unsupportedInstruction
   | .f64ConstBits _ =>

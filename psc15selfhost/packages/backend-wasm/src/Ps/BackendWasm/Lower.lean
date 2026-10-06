@@ -1,3 +1,4 @@
+import Ps.BackendWasm.TailCalls
 import Ps.CompilerIr.Specialize
 import Ps.CompilerIr.Validate
 import Ps.Foundation.List
@@ -6386,11 +6387,12 @@ def psWasmLowerSpecializedModule
                           (Prod.snd closureSignatures)
                           (lowered.state.generatedFunctionTypes)
                       functions :=
-                        psListAppend
-                          runtimeFunctions
+                        psWasmTailCallFunctions
                           (psListAppend
-                            lowered.functions
-                            (lowered.state.generatedFunctions))
+                            runtimeFunctions
+                            (psListAppend
+                              lowered.functions
+                              lowered.state.generatedFunctions))
                       functionRefs :=
                         lowered.state.generatedFunctionRefs
                       exports :=

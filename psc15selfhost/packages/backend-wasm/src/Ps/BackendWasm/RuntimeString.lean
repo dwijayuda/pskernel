@@ -184,7 +184,8 @@ def psWasmStringRuntimeFunctions : List PsWasmFunction :=
       typeName := Option.none
       parameters := [
         psWasmStringRef,
-        PsWasmValueType.i32
+        PsWasmValueType.i32,
+        psWasmNatRef
       ]
       results := [psWasmNatRef]
       locals := []
@@ -195,20 +196,21 @@ def psWasmStringRuntimeFunctions : List PsWasmFunction :=
         PsWasmInstruction.i32GeU,
         PsWasmInstruction.ifStart
           (Option.some psWasmNatRef),
-          PsWasmInstruction.call psWasmNatZeroFn,
+          PsWasmInstruction.localGet 2,
         PsWasmInstruction.else_,
+          PsWasmInstruction.localGet 0,
+          PsWasmInstruction.localGet 1,
+          PsWasmInstruction.i32Const 1,
+          PsWasmInstruction.i32Add,
+          PsWasmInstruction.localGet 2,
           PsWasmInstruction.localGet 0,
           PsWasmInstruction.structGet psWasmStringName 0,
           PsWasmInstruction.localGet 1,
           PsWasmInstruction.arrayGet psWasmStringCharsName,
           PsWasmInstruction.call psWasmCharUtf8WidthFn,
           PsWasmInstruction.call psWasmNatOfU32Fn,
-          PsWasmInstruction.localGet 0,
-          PsWasmInstruction.localGet 1,
-          PsWasmInstruction.i32Const 1,
-          PsWasmInstruction.i32Add,
-          PsWasmInstruction.call psWasmStringUtf8ByteSizeFromFn,
           PsWasmInstruction.call psWasmNatAddFn,
+          PsWasmInstruction.call psWasmStringUtf8ByteSizeFromFn,
         PsWasmInstruction.end_
       ]
     },
@@ -221,6 +223,7 @@ def psWasmStringRuntimeFunctions : List PsWasmFunction :=
       body := [
         PsWasmInstruction.localGet 0,
         PsWasmInstruction.i32Const 0,
+        PsWasmInstruction.call psWasmNatZeroFn,
         PsWasmInstruction.call psWasmStringUtf8ByteSizeFromFn
       ]
     },

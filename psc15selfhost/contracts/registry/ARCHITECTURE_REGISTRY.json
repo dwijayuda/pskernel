@@ -129,6 +129,12 @@
       "kind": "factory-bench",
       "status": "experimental",
       "canonicalPath": "factory/bench/FACTORYBENCH_V4_HOLDOUT.json"
+    },
+    {
+      "id": "psc-wasm-translation-validator/0",
+      "kind": "translation-validator",
+      "status": "experimental",
+      "canonicalPath": "contracts/target/WASM_TRANSLATION_VALIDATOR_V0.json"
     }
   ]
 }

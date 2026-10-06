@@ -1,5 +1,6 @@
 import Ps.BackendWasm.Lower
 import Ps.BackendWasm.Binary
+import Ps.BackendWasm.Validate
 
 def psWasmProfile32 : PsWasmTargetProfile :=
   { wordSize := PsWasmWordSize.wasm32 }
@@ -1187,6 +1188,75 @@ def psTestWasmCharToNatIntrinsic : Bool :=
       psStringEq functionName psWasmNatOfU32Fn
   | _ => false
 
+def psWasmValidationSource : PsSpecializedIrModule :=
+  PsSpecializedIrModule.mk
+    {
+      imports := []
+      structures := []
+      inductives := []
+      declarations := [
+        {
+          name := "answer"
+          typeParameters := []
+          parameters := []
+          resultType :=
+            PsVerifiedIrType.primitive
+              PsVerifiedIrPrimitiveType.uint32
+          body :=
+            PsVerifiedIrExpr.literal
+              (PsVerifiedIrLiteral.machineInteger
+                PsVerifiedIrMachineIntegerType.uint32
+                42)
+        }
+      ]
+    }
+
+def psTestWasmTranslationValidator : Bool :=
+  match
+      psWasmLowerSpecializedValidatedModule
+        psWasmProfile32
+        psWasmValidationSource with
+  | Except.error _ =>
+      false
+  | Except.ok lowered =>
+      match
+          psWasmValidateSpecializedLiteralModule
+            psWasmValidationSource
+            lowered with
+      | Except.error _ =>
+          false
+      | Except.ok _ =>
+          true
+
+def psTestWasmTranslationValidatorRejectsDrift : Bool :=
+  let drifted : PsWasmModule := {
+    structures := []
+    arrays := []
+    functionTypes := []
+    functions := [
+      {
+        name := "answer"
+        typeName := none
+        parameters := []
+        results := [PsWasmValueType.i32]
+        locals := []
+        body := [PsWasmInstruction.i32Const 43]
+      }
+    ]
+    functionRefs := []
+    exports := [("answer", "answer")]
+  };
+  match
+      psWasmValidateSpecializedLiteralModule
+        psWasmValidationSource
+        drifted with
+  | Except.error
+      (PsWasmTranslationValidationError.functionMismatch
+        name) =>
+      psStringEq name "answer"
+  | _ =>
+      false
+
 def psWasmAnswerModule : PsWasmModule :=
   {
     structures := []
@@ -1293,6 +1363,8 @@ def psTestWasmNatConstructorIdentityInvariant : Bool :=
       && psTestWasmInductiveMatchLowering
       && psTestWasmRecursiveListLowering
       && psTestWasmClosureLowering
+      && psTestWasmTranslationValidator
+      && psTestWasmTranslationValidatorRejectsDrift
       && psTestWasmUleb
       && psTestWasmSignedLeb
       && psTestWasmBinaryModule then

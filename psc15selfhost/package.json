@@ -186,7 +186,8 @@
     "test:comparator-v1": "node --test scripts/comparator-v1.test.mjs",
     "check:theory-seed": "node scripts/theory-contract-audit.mjs",
     "test:savef": "node --test scripts/savef-object.test.mjs scripts/pscv-verify.test.mjs",
-    "verify:offline-prototype": "node scripts/pscv-verify.mjs"
+    "verify:offline-prototype": "node scripts/pscv-verify.mjs",
+    "check:wasm-translation-validator": "lake exe psc1_backend_wasm_tests"
   },
   "devDependencies": {
     "typescript": "7.0.2"

@@ -150,6 +150,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.RuntimeIntRepr,
     `Ps.BackendWasm.Binary,
     `Ps.BackendWasm.Lower,
+    `Ps.BackendWasm.Validate,
     `Ps.BackendWasm.SelfHostAbi
   ]
 

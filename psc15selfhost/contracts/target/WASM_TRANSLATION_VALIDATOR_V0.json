@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-wasm-translation-validator/0",
+  "inputContract": "psc-specialized-ir/1",
+  "outputContract": "psc-wasm-ir/current",
+  "slice": [
+    "zero-argument UInt32 literal declaration",
+    "zero-argument Int32 literal declaration",
+    "zero-argument Bool literal declaration"
+  ],
+  "validates": [
+    "export identity",
+    "function identity",
+    "zero parameter signature",
+    "single i32 result",
+    "no local variables",
+    "exact i32 constant body"
+  ],
+  "unsupportedPolicy": "fail-closed",
+  "assurance": "translation-validation-closed-slice",
+  "implementation": "packages/backend-wasm/src/Ps/BackendWasm/Validate.lean",
+  "test": "test/BackendWasmTests.lean"
+}

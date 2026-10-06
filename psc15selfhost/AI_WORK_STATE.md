@@ -1,7 +1,7 @@
 # AI Work State
 
 Master plan: THE_PSCV_COMPILER_REFERENCE_VERSION_3.md
-Branch: psc2/selfhost-lean-kernel
+Branch: pscv/v3-execution
 
 ## Active execution
 
@@ -50,3 +50,9 @@ Checkpoint P0/P2/P3:
 
 - direct Rust semantic and source corpora passed; exact let-function-result rendering assertion was stale after canonical Rc/move function-result emission
 - updated the regression to lock semantic ownership/ABI substrings without requiring the obsolete redundant local type annotation
+
+## Checkpoint P15
+
+- added PSC1-portable Wasm translation validator for a closed literal-declaration slice
+- validator independently checks source SpecializedIR against WasmIR export/signature/body and fails closed on unsupported shapes
+- negative drift test changes 42 -> 43 and must be rejected

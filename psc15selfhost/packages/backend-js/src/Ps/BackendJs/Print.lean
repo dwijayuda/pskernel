@@ -1459,66 +1459,66 @@ def psJsPrintDeclarationStackSafe
   | Option.some printed =>
       Except.ok printed
   | Option.none =>
-    if
-      psJsExprUsesNameWithFuel
-        4096
-        declaration.body
-        declaration.name then
-    match
-        psJsPrintExprStackSafe
-          declaration.name
-          declaration.body with
-    | Except.error error => Except.error error
-    | Except.ok body =>
-        match declaration.parameters with
-        | List.nil =>
-            Except.ok
-              (psJsJoin
-                ""
-                [
-                  "export const ",
-                  declaration.name,
-                  " = __ps$run((function*() { return ",
-                  body,
-                  "; })());\n"
-                ])
-        | List.cons _ _ =>
-            let parameters :=
-              psListMap
-                psJsParameterName
-                declaration.parameters;
-            let joinedParameters : String :=
-              psJsJoin ", " parameters;
-            let implementation : String :=
-              psJsImplementationName declaration.name;
-            Except.ok
-              (psJsJoin
-                ""
-                [
-                  "export function ",
-                  declaration.name,
-                  "(",
-                  joinedParameters,
-                  ") { return __ps$run(",
-                  implementation,
-                  "(",
-                  joinedParameters,
-                  ")); }\n",
-                  "function* ",
-                  implementation,
-                  "(",
-                  joinedParameters,
-                  ") { return ",
-                  body,
-                  "; }\n",
-                  "__ps$implementations.set(",
-                  declaration.name,
-                  ", ",
-                  implementation,
-                  ");\n"
-                ])
-    else
-      psJsPrintDeclaration declaration
+      if
+          psJsExprUsesNameWithFuel
+            4096
+            declaration.body
+            declaration.name then
+        match
+            psJsPrintExprStackSafe
+              declaration.name
+              declaration.body with
+        | Except.error error => Except.error error
+        | Except.ok body =>
+            match declaration.parameters with
+            | List.nil =>
+                Except.ok
+                  (psJsJoin
+                    ""
+                    [
+                      "export const ",
+                      declaration.name,
+                      " = __ps$run((function*() { return ",
+                      body,
+                      "; })());\n"
+                    ])
+            | List.cons _ _ =>
+                let parameters :=
+                  psListMap
+                    psJsParameterName
+                    declaration.parameters;
+                let joinedParameters : String :=
+                  psJsJoin ", " parameters;
+                let implementation : String :=
+                  psJsImplementationName declaration.name;
+                Except.ok
+                  (psJsJoin
+                    ""
+                    [
+                      "export function ",
+                      declaration.name,
+                      "(",
+                      joinedParameters,
+                      ") { return __ps$run(",
+                      implementation,
+                      "(",
+                      joinedParameters,
+                      ")); }\n",
+                      "function* ",
+                      implementation,
+                      "(",
+                      joinedParameters,
+                      ") { return ",
+                      body,
+                      "; }\n",
+                      "__ps$implementations.set(",
+                      declaration.name,
+                      ", ",
+                      implementation,
+                      ");\n"
+                    ])
+      else
+        psJsPrintDeclaration declaration
 
 def psJsPrintDeclarationsStackSafe
     (declarations : List PsJsIrDeclaration) :

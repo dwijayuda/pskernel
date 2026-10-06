@@ -261,52 +261,6 @@ inductive PsKernelReductionStep
           (PsKernelExpr.lit (PsKernelLiteral.nat right)))
         (psKernelBoolExpr (Nat.ble left right))
 
-inductive PsKernelReductionClosure
-    (environment : PsKernelEnvironment)
-    (localContext : PsKernelLocalContext) :
-    PsKernelExpr -> PsKernelExpr -> Prop
-  | refl
-      (expr : PsKernelExpr) :
-      PsKernelReductionClosure
-        environment
-        localContext
-        expr
-        expr
-  | presentationSource
-      (source query result : PsKernelExpr)
-      (hPresentation :
-        PsKernelStructuralExprEq source query)
-      (hReduction :
-        PsKernelReductionClosure
-          environment
-          localContext
-          source
-          result) :
-      PsKernelReductionClosure
-        environment
-        localContext
-        query
-        result
-  | cons
-      (left middle right : PsKernelExpr)
-      (hStep :
-        PsKernelReductionStep
-          environment
-          localContext
-          left
-          middle)
-      (hRest :
-        PsKernelReductionClosure
-          environment
-          localContext
-          middle
-          right) :
-      PsKernelReductionClosure
-        environment
-        localContext
-        left
-        right
-
 inductive PsKernelStructuralExprEq :
     PsKernelExpr -> PsKernelExpr -> Prop
   | bvar
@@ -404,6 +358,53 @@ inductive PsKernelStructuralExprEq :
       PsKernelStructuralExprEq
         (PsKernelExpr.proj leftName leftIndex left)
         (PsKernelExpr.proj rightName rightIndex right)
+
+
+inductive PsKernelReductionClosure
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) :
+    PsKernelExpr -> PsKernelExpr -> Prop
+  | refl
+      (expr : PsKernelExpr) :
+      PsKernelReductionClosure
+        environment
+        localContext
+        expr
+        expr
+  | presentationSource
+      (source query result : PsKernelExpr)
+      (hPresentation :
+        PsKernelStructuralExprEq source query)
+      (hReduction :
+        PsKernelReductionClosure
+          environment
+          localContext
+          source
+          result) :
+      PsKernelReductionClosure
+        environment
+        localContext
+        query
+        result
+  | cons
+      (left middle right : PsKernelExpr)
+      (hStep :
+        PsKernelReductionStep
+          environment
+          localContext
+          left
+          middle)
+      (hRest :
+        PsKernelReductionClosure
+          environment
+          localContext
+          middle
+          right) :
+      PsKernelReductionClosure
+        environment
+        localContext
+        left
+        right
 
 inductive PsKernelDefEqJudgment
     (environment : PsKernelEnvironment)

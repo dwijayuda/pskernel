@@ -124,3 +124,65 @@ theorem psKernelReduceNatWith_add_literals_refines
         left
         right
         hAdd
+
+
+theorem psKernelReduceNatWith_succ_literal_refines
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (op : PsKernelName)
+    (value : Nat)
+    (hSucc :
+      psKernelNameEq op psKernelNatSuccName = true)
+    (hWhnf :
+      publicWhnf
+          context
+          state
+          (PsKernelExpr.lit (PsKernelLiteral.nat value)) =
+        Except.ok
+          (Prod.mk
+            (PsKernelExpr.lit (PsKernelLiteral.nat value))
+            nextState))
+    (hSize :
+      psKernelCheckNatSize
+          context.maxNatSize
+          (Nat.succ value) =
+        Except.ok Unit.unit) :
+    let original :=
+      PsKernelExpr.app
+        (PsKernelExpr.const op List.nil)
+        (PsKernelExpr.lit (PsKernelLiteral.nat value))
+    let result :=
+      PsKernelExpr.lit (PsKernelLiteral.nat (Nat.succ value))
+    psKernelReduceNatWith publicWhnf context state original =
+      Except.ok (Prod.mk (Option.some result) nextState) ∧
+    PsKernelReductionStep
+      context.environment
+      context.localContext
+      original
+      result := by
+  dsimp
+  constructor
+  · cases hCheck :
+        psKernelCheckNatSize
+          context.maxNatSize
+          (Nat.succ value) with
+    | error error =>
+        simp [hCheck] at hSize
+    | ok checked =>
+        cases checked
+        simp [
+          psKernelReduceNatWith,
+          hSucc,
+          hWhnf,
+          psKernelExprNatLiteralValue,
+          hCheck
+        ]
+  · exact
+      PsKernelReductionStep.natSucc
+        op value hSucc

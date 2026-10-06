@@ -167,3 +167,136 @@ theorem psKernelReduceNatBinary_mul_refines
           hCheck
         ]
   · exact PsKernelReductionStep.natMul op left right hMul
+
+
+theorem psKernelReduceNatBinary_mod_refines
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (maxNatSize left right : Nat)
+    (op : PsKernelName)
+    (hNotAdd : psKernelNameEq op psKernelNatAddName = false)
+    (hNotSub : psKernelNameEq op psKernelNatSubName = false)
+    (hNotMul : psKernelNameEq op psKernelNatMulName = false)
+    (hNotPow : psKernelNameEq op psKernelNatPowName = false)
+    (hNotGcd : psKernelNameEq op psKernelNatGcdName = false)
+    (hMod : psKernelNameEq op psKernelNatModName = true) :
+    let result :=
+      if Nat.beq right 0 then left else Nat.mod left right
+    psKernelReduceNatBinary maxNatSize op left right =
+      Except.ok
+        (Option.some
+          (PsKernelExpr.lit (PsKernelLiteral.nat result))) ∧
+    PsKernelReductionStep
+      environment localContext
+      (PsKernelExpr.app
+        (PsKernelExpr.app
+          (PsKernelExpr.const op List.nil)
+          (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+        (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+      (PsKernelExpr.lit (PsKernelLiteral.nat result)) := by
+  dsimp
+  constructor
+  · simp [
+      psKernelReduceNatBinary,
+      hNotAdd, hNotSub, hNotMul, hNotPow, hNotGcd, hMod
+    ]
+  · exact PsKernelReductionStep.natMod op left right hMod
+
+theorem psKernelReduceNatBinary_div_refines
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (maxNatSize left right : Nat)
+    (op : PsKernelName)
+    (hNotAdd : psKernelNameEq op psKernelNatAddName = false)
+    (hNotSub : psKernelNameEq op psKernelNatSubName = false)
+    (hNotMul : psKernelNameEq op psKernelNatMulName = false)
+    (hNotPow : psKernelNameEq op psKernelNatPowName = false)
+    (hNotGcd : psKernelNameEq op psKernelNatGcdName = false)
+    (hNotMod : psKernelNameEq op psKernelNatModName = false)
+    (hDiv : psKernelNameEq op psKernelNatDivName = true) :
+    let result :=
+      if Nat.beq right 0 then 0 else Nat.div left right
+    psKernelReduceNatBinary maxNatSize op left right =
+      Except.ok
+        (Option.some
+          (PsKernelExpr.lit (PsKernelLiteral.nat result))) ∧
+    PsKernelReductionStep
+      environment localContext
+      (PsKernelExpr.app
+        (PsKernelExpr.app
+          (PsKernelExpr.const op List.nil)
+          (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+        (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+      (PsKernelExpr.lit (PsKernelLiteral.nat result)) := by
+  dsimp
+  constructor
+  · simp [
+      psKernelReduceNatBinary,
+      hNotAdd, hNotSub, hNotMul, hNotPow, hNotGcd, hNotMod, hDiv
+    ]
+  · exact PsKernelReductionStep.natDiv op left right hDiv
+
+theorem psKernelReduceNatBinary_beq_refines
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (maxNatSize left right : Nat)
+    (op : PsKernelName)
+    (hNotAdd : psKernelNameEq op psKernelNatAddName = false)
+    (hNotSub : psKernelNameEq op psKernelNatSubName = false)
+    (hNotMul : psKernelNameEq op psKernelNatMulName = false)
+    (hNotPow : psKernelNameEq op psKernelNatPowName = false)
+    (hNotGcd : psKernelNameEq op psKernelNatGcdName = false)
+    (hNotMod : psKernelNameEq op psKernelNatModName = false)
+    (hNotDiv : psKernelNameEq op psKernelNatDivName = false)
+    (hBeq : psKernelNameEq op psKernelNatBeqName = true) :
+    psKernelReduceNatBinary maxNatSize op left right =
+      Except.ok
+        (Option.some (psKernelBoolExpr (Nat.beq left right))) ∧
+    PsKernelReductionStep
+      environment localContext
+      (PsKernelExpr.app
+        (PsKernelExpr.app
+          (PsKernelExpr.const op List.nil)
+          (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+        (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+      (psKernelBoolExpr (Nat.beq left right)) := by
+  constructor
+  · simp [
+      psKernelReduceNatBinary,
+      hNotAdd, hNotSub, hNotMul, hNotPow, hNotGcd,
+      hNotMod, hNotDiv, hBeq
+    ]
+  · exact PsKernelReductionStep.natBeq op left right hBeq
+
+theorem psKernelReduceNatBinary_ble_refines
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (maxNatSize left right : Nat)
+    (op : PsKernelName)
+    (hNotAdd : psKernelNameEq op psKernelNatAddName = false)
+    (hNotSub : psKernelNameEq op psKernelNatSubName = false)
+    (hNotMul : psKernelNameEq op psKernelNatMulName = false)
+    (hNotPow : psKernelNameEq op psKernelNatPowName = false)
+    (hNotGcd : psKernelNameEq op psKernelNatGcdName = false)
+    (hNotMod : psKernelNameEq op psKernelNatModName = false)
+    (hNotDiv : psKernelNameEq op psKernelNatDivName = false)
+    (hNotBeq : psKernelNameEq op psKernelNatBeqName = false)
+    (hBle : psKernelNameEq op psKernelNatBleName = true) :
+    psKernelReduceNatBinary maxNatSize op left right =
+      Except.ok
+        (Option.some (psKernelBoolExpr (Nat.ble left right))) ∧
+    PsKernelReductionStep
+      environment localContext
+      (PsKernelExpr.app
+        (PsKernelExpr.app
+          (PsKernelExpr.const op List.nil)
+          (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+        (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+      (psKernelBoolExpr (Nat.ble left right)) := by
+  constructor
+  · simp [
+      psKernelReduceNatBinary,
+      hNotAdd, hNotSub, hNotMul, hNotPow, hNotGcd,
+      hNotMod, hNotDiv, hNotBeq, hBle
+    ]
+  · exact PsKernelReductionStep.natBle op left right hBle

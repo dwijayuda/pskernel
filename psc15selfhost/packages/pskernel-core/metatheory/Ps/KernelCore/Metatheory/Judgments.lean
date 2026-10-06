@@ -154,6 +154,81 @@ inductive PsKernelReductionStep
         (PsKernelExpr.lit
           (PsKernelLiteral.nat (Nat.mul left right)))
 
+
+  | natSucc
+      (op : PsKernelName)
+      (value : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatSuccName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.const op List.nil)
+          (PsKernelExpr.lit (PsKernelLiteral.nat value)))
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat (Nat.succ value)))
+  | natMod
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatModName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat
+            (if Nat.beq right 0 then left else Nat.mod left right)))
+  | natDiv
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatDivName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (PsKernelExpr.lit
+          (PsKernelLiteral.nat
+            (if Nat.beq right 0 then 0 else Nat.div left right)))
+  | natBeq
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatBeqName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (psKernelBoolExpr (Nat.beq left right))
+  | natBle
+      (op : PsKernelName)
+      (left right : Nat)
+      (hOp :
+        psKernelNameEq op psKernelNatBleName = true) :
+      PsKernelReductionStep
+        environment
+        localContext
+        (PsKernelExpr.app
+          (PsKernelExpr.app
+            (PsKernelExpr.const op List.nil)
+            (PsKernelExpr.lit (PsKernelLiteral.nat left)))
+          (PsKernelExpr.lit (PsKernelLiteral.nat right)))
+        (psKernelBoolExpr (Nat.ble left right))
+
 inductive PsKernelReductionClosure
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext) :

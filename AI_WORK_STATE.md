@@ -4,9 +4,9 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof HEAD when this state was written: `8d50f7cd8ef34a453623d569228f367801975b18`
-- Last known green proof checkpoint: `e94787d6557f38ee20f1680806f0392b8ca3bca9` (run #281)
-- Current integration HEAD last observed: `304706da6d3775a716561870110b7e7f5b46ac03`
+- Current proof HEAD when this state was written: `0e3df267de9d880b861acfab3bb46f0747066357`
+- Last known green proof checkpoint: `c521adc59916a7fed2384365db222876c2677e2b` (run #285)
+- Current integration HEAD last observed: `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
 ## Acceptance criteria
@@ -54,34 +54,28 @@ Last checked-in audit:
 The audit is conservative relative to newer cross-module checker-contract/context work. Do not inflate module grades without applying the written A/B/C/D criteria.
 
 ## Current checkpoint
-- Run #281 is fully green at `e94787d6557f38ee20f1680806f0392b8ca3bca9`.
-- Current head `8d50f7cd8ef34a453623d569228f367801975b18` fixes the only run #282 failure: a declaration-order dependency in `Metatheory/ContextState.lean` for rec-depth configuration transport.
-- Run #283 is pending/in progress on that fix; the GitHub runner was last observed stuck in checkout, so this is infrastructure waiting rather than a known Lean failure.
-
-## Established architecture
-The branch now includes:
-- shared independent judgments for typing, reduction closure, structural/presentation equality, non-transitive algorithmic DefEq, projection semantics, environment-index refinement, cache/state soundness, declaration admission and inductive foundations;
-- total/reference substitution semantics and implementation-refinement proofs;
-- semantic environment-index and cache promotion/refinement;
-- semantic cache publication laws and presentation transport;
-- context freshness/canonicality, extension/weakening, generated-name absence, and configuration transport;
-- checker configuration soundness tracking environment-index refinement, fresh-name bounds, inference caches, WHNF/WHNF-core/unfold caches, and DefEq success cache;
-- configuration preservation across inference publication, WHNF/WHNF-core finish, successful DefEq finish, rec-depth entry, eager-reduction/native-evaluator flag changes, and semantic-equivalent contexts;
-- checked/infer-only contract split matching executable behavior;
-- EnsureSort and EnsureForall refinement through WHNF semantics;
-- projection typing/refinement plus configuration contract scaffolding;
-- lower-level occurrence/elimination/recursor-validation/constructor-result inductive semantics;
-- public API/session composition theorems parameterized by checker soundness contracts.
+- Run #285 is fully green at `c521adc59916a7fed2384365db222876c2677e2b`.
+- Current proof HEAD is `0e3df267de9d880b861acfab3bb46f0747066357`, adding the last projection configuration-rejection branch repair.
+- Run #287 is in progress on that exact head; there is no newer known Lean failure yet.
+- Projection configuration preservation, EnsureSort/EnsureForall semantic transport, context freshness/canonicality, rec-depth semantic transport, and cache/state soundness infrastructure are now present on the live branch.
+- The semantic audit file remains conservative at A=44/B=9/C=19/D=7; newer cross-module checker/configuration work is not yet fully reflected in those module grades.
+- Integration has advanced to `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`; proof/integration reconciliation remains a final acceptance criterion, but GitHub remains the source of truth and no proof work should be discarded.
 
 ## Current blocker
 No known production-kernel semantic defect.
 
-Immediate mechanical blocker from run #282 was fixed at current HEAD:
-- `psKernelCheckerConfigurationSound_enterRecDepth_back` referenced `psKernelCheckerConfigurationSound_transport` before declaration;
-- the theorem now proves the transport directly by unfolding configuration soundness and rewriting the preserved semantic view.
+Immediate blocker:
+- validate run #287 at the live proof head;
+- if green, continue concrete mutually recursive checker configuration soundness rather than adding wrapper-only proofs;
+- if red, repair only the first real Lean obligation and continue.
 
-The remaining blocker is architectural:
-- prove the concrete mutually recursive checker functions satisfy the final configuration contracts, then close remaining DefEq/reduction/inductive transaction semantics and final public composition.
+Architectural blockers still remaining:
+- concrete inference/WHNF/DefEq configuration contracts for the checker knot;
+- remaining DefEq final/lazy-delta/eta/proof-irrelevance soundness;
+- recursor/iota reduction;
+- ordinary/mutual/nested inductive transaction refinement;
+- final public implementation-refinement composition;
+- final integration reconciliation and full rerun.
 
 ## Immediate plan
 1. Validate current HEAD with the full proof gate; if CI remains runner-blocked, continue only dependency-safe proof work and preserve checkpoints.

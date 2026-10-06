@@ -117,3 +117,113 @@ theorem psKernelAddQuot_success_postconditions
             psKernelConstantListLength,
             hInit
           ]
+
+
+def psKernelQuotUniverseNameForProof : PsKernelName :=
+  PsKernelName.str PsKernelName.anonymous "u"
+
+def psKernelQuotResultUniverseNameForProof : PsKernelName :=
+  PsKernelName.str PsKernelName.anonymous "v"
+
+def psKernelQuotTypeInfoForProof : PsKernelConstantInfo :=
+  PsKernelConstantInfo.quotInfo
+    (PsKernelQuotInfo.mk
+      (PsKernelConstantBase.mk
+        psKernelQuotName
+        (List.cons psKernelQuotUniverseNameForProof List.nil)
+        (psKernelMakeQuotType psKernelQuotUniverseNameForProof))
+      PsKernelQuotKind.typeQ)
+
+def psKernelQuotMkInfoForProof : PsKernelConstantInfo :=
+  PsKernelConstantInfo.quotInfo
+    (PsKernelQuotInfo.mk
+      (PsKernelConstantBase.mk
+        psKernelQuotMkName
+        (List.cons psKernelQuotUniverseNameForProof List.nil)
+        (psKernelMakeQuotMkType psKernelQuotUniverseNameForProof))
+      PsKernelQuotKind.ctorQ)
+
+def psKernelQuotLiftInfoForProof : PsKernelConstantInfo :=
+  PsKernelConstantInfo.quotInfo
+    (PsKernelQuotInfo.mk
+      (PsKernelConstantBase.mk
+        psKernelQuotLiftName
+        (List.cons
+          psKernelQuotUniverseNameForProof
+          (List.cons
+            psKernelQuotResultUniverseNameForProof
+            List.nil))
+        (psKernelMakeQuotLiftType
+          psKernelQuotUniverseNameForProof
+          psKernelQuotResultUniverseNameForProof))
+      PsKernelQuotKind.liftQ)
+
+def psKernelQuotIndInfoForProof : PsKernelConstantInfo :=
+  PsKernelConstantInfo.quotInfo
+    (PsKernelQuotInfo.mk
+      (PsKernelConstantBase.mk
+        psKernelQuotIndName
+        (List.cons psKernelQuotUniverseNameForProof List.nil)
+        (psKernelMakeQuotIndType psKernelQuotUniverseNameForProof))
+      PsKernelQuotKind.indQ)
+
+theorem psKernelAddQuot_success_semantic_history
+    (environment result : PsKernelEnvironment)
+    (hInit : environment.quotInitialized = false)
+    (hSuccess :
+      psKernelAddQuot environment =
+        Except.ok result) :
+    result.constants =
+      List.cons
+        psKernelQuotIndInfoForProof
+        (List.cons
+          psKernelQuotLiftInfoForProof
+          (List.cons
+            psKernelQuotMkInfoForProof
+            (List.cons
+              psKernelQuotTypeInfoForProof
+              environment.constants))) := by
+  cases hEq : psKernelCheckEqForQuot environment with
+  | error error =>
+      simp [psKernelAddQuot, hInit, hEq] at hSuccess
+  | ok eqResult =>
+      cases eqResult
+      cases hReserved :
+          psKernelCheckQuotReservedNames
+            environment
+            (List.cons
+              psKernelQuotName
+              (List.cons
+                psKernelQuotMkName
+                (List.cons
+                  psKernelQuotLiftName
+                  (List.cons
+                    psKernelQuotIndName
+                    List.nil)))) with
+      | error error =>
+          simp [
+            psKernelAddQuot,
+            hInit,
+            hEq,
+            hReserved
+          ] at hSuccess
+      | ok reservedResult =>
+          cases reservedResult
+          simp [
+            psKernelAddQuot,
+            hInit,
+            hEq,
+            hReserved
+          ] at hSuccess
+          subst result
+          simp [
+            psKernelEnvironmentAddUnchecked,
+            psKernelEnvironmentMarkQuotInitialized,
+            psKernelQuotUniverseNameForProof,
+            psKernelQuotResultUniverseNameForProof,
+            psKernelQuotTypeInfoForProof,
+            psKernelQuotMkInfoForProof,
+            psKernelQuotLiftInfoForProof,
+            psKernelQuotIndInfoForProof,
+            hInit
+          ]

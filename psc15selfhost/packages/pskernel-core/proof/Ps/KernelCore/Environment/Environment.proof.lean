@@ -1,4 +1,5 @@
 import Ps.KernelCore.Environment.Environment
+import Ps.KernelCore.Environment.Lookup
 
 theorem psKernelEnvironmentEmpty_semantic :
     psKernelEnvironmentSemantic psKernelEnvironmentEmpty =
@@ -28,4 +29,17 @@ theorem psKernelEnvironmentWithNativeEvaluator_semantic
         (psKernelEnvironmentWithNativeEvaluator
           environment nativeEvaluator) =
       psKernelEnvironmentSemantic environment := by
+  rfl
+
+
+theorem psKernelEnvironmentWithNativeEvaluator_find
+    (environment : PsKernelEnvironment)
+    (nativeEvaluator : Option PsKernelNativeEvaluator)
+    (name : PsKernelName) :
+    psKernelEnvironmentFind
+        (psKernelEnvironmentWithNativeEvaluator
+          environment
+          nativeEvaluator)
+        name =
+      psKernelEnvironmentFind environment name := by
   rfl

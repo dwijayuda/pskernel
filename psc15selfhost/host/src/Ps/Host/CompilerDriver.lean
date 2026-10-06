@@ -1,6 +1,7 @@
 import Ps.Compiler.Api
 import Ps.DriverTs.Compiler
 import Ps.DriverJs.Compiler
+import Ps.DriverWasm.Compiler
 import Ps.Host.ProjectCompiler
 import Ps.Host.TypeScriptCompiler
 
@@ -124,6 +125,27 @@ def psHostCompilerJavaScriptSource
 def psHostCompilerJavaScript
     (inputPath : String) : IO Unit := do
   IO.print (← psHostCompilerJavaScriptSource inputPath)
+
+def psHostCompilerWasm32Bytes
+    (inputPath : String) : IO (List UInt8) := do
+  let elaborated ← psHostCompilerElaborateProject inputPath
+  match
+      psCompilerWasmFromElaborated
+        psCompilerWasm32Target
+        elaborated with
+  | Except.error _ =>
+      throw
+        (IO.userError
+          "PSC2_CLI_DIRECT_WASM_EMIT_FAILED: source is outside the executable Direct Wasm backend subset")
+  | Except.ok bytes =>
+      pure bytes
+
+def psHostCompilerWasm32ToFile
+    (inputPath outputPath : String) : IO Unit := do
+  let bytes ← psHostCompilerWasm32Bytes inputPath
+  IO.FS.writeBinFile outputPath (ByteArray.mk bytes.toArray)
+  IO.println
+    ("PSC2_DIRECT_WASM: " ++ inputPath ++ " -> " ++ outputPath)
 
 def psHostCompilerBuild
     (inputPath outputPath : String) : IO Unit := do

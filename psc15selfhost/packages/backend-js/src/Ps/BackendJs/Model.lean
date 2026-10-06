@@ -98,6 +98,15 @@ inductive PsJsIrRuntimeOp where
   | stringGet
   | stringAtEnd
   | stringExtract
+  | arrayEmptyWithCapacity
+  | arraySize
+  | arrayPush
+  | arrayGet
+  | arrayGetD
+  | arraySet
+  | arraySetIfInBounds
+  | arrayMap
+  | arrayFoldl
 
 inductive PsJsIrExpr where
   | literal (value : PsJsIrLiteral)

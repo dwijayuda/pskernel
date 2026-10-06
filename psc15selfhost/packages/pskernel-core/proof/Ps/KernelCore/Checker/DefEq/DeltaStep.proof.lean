@@ -292,7 +292,8 @@ theorem psKernelDefEqUnfold_preserves_semantic_sound
             psKernelDefEqUnfold,
             hCache,
             hDirect,
-            psKernelCheckerStateWithUnfold
+            psKernelCheckerStateWithUnfold,
+            PsKernelCheckerStateSemanticSound
           ] using
             (show
               PsKernelInferenceCacheSound

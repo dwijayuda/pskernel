@@ -100,8 +100,8 @@ def psSelfHostReplacePreludeAxiom
     (environment : PsEnvironment)
     (declaration : PsDeclaration) : PsEnvironment :=
   match psEnvironmentAddReplacingAxiom environment declaration with
-  | none => environment
-  | some next => next
+  | Option.none => environment
+  | Option.some next => next
 
 def psSelfHostPreludeEnvironment : PsEnvironment :=
   let uName := psRootName "u";
@@ -520,74 +520,74 @@ def psSelfHostRuntimePreludeDeclarations : List PsDeclaration :=
       psEnvironmentFind
         psSelfHostPreludeEnvironment
         psListName with
-  | none => List.nil
-  | some listDeclaration =>
+  | Option.none => List.nil
+  | Option.some listDeclaration =>
       match
           psEnvironmentFind
             psSelfHostPreludeEnvironment
             psSelfHostListNilName with
-      | none => List.nil
-      | some nilDeclaration =>
+      | Option.none => List.nil
+      | Option.some nilDeclaration =>
           match
               psEnvironmentFind
                 psSelfHostPreludeEnvironment
                 psSelfHostListConsName with
-          | none => List.nil
-          | some consDeclaration =>
+          | Option.none => List.nil
+          | Option.some consDeclaration =>
               match
                   psEnvironmentFind
                     psSelfHostPreludeEnvironment
                     psSelfHostListRecName with
-              | none => List.nil
-              | some listRecDeclaration =>
+              | Option.none => List.nil
+              | Option.some listRecDeclaration =>
                   match
                       psEnvironmentFind
                         psSelfHostPreludeEnvironment
                         psOptionName with
-                  | none => List.nil
-                  | some optionDeclaration =>
+                  | Option.none => List.nil
+                  | Option.some optionDeclaration =>
                       match
                           psEnvironmentFind
                             psSelfHostPreludeEnvironment
                             psSelfHostOptionNoneName with
-                      | none => List.nil
-                      | some noneDeclaration =>
+                      | Option.none => List.nil
+                      | Option.some noneDeclaration =>
                           match
                               psEnvironmentFind
                                 psSelfHostPreludeEnvironment
                                 psSelfHostOptionSomeName with
-                          | none => List.nil
-                          | some someDeclaration =>
+                          | Option.none => List.nil
+                          | Option.some someDeclaration =>
                               match
                                   psEnvironmentFind
                                     psSelfHostPreludeEnvironment
                                     psSelfHostOptionRecName with
-                              | none => List.nil
-                              | some optionRecDeclaration =>
+                              | Option.none => List.nil
+                              | Option.some optionRecDeclaration =>
                                   match
                                       psEnvironmentFind
                                         psSelfHostPreludeEnvironment
                                         psSelfHostExceptName with
-                                  | none => List.nil
-                                  | some exceptDeclaration =>
+                                  | Option.none => List.nil
+                                  | Option.some exceptDeclaration =>
                                       match
                                           psEnvironmentFind
                                             psSelfHostPreludeEnvironment
                                             psSelfHostExceptErrorName with
-                                      | none => List.nil
-                                      | some exceptErrorDeclaration =>
+                                      | Option.none => List.nil
+                                      | Option.some exceptErrorDeclaration =>
                                           match
                                               psEnvironmentFind
                                                 psSelfHostPreludeEnvironment
                                                 psSelfHostExceptOkName with
-                                          | none => List.nil
-                                          | some exceptOkDeclaration =>
+                                          | Option.none => List.nil
+                                          | Option.some exceptOkDeclaration =>
                                               match
                                                   psEnvironmentFind
                                                     psSelfHostPreludeEnvironment
                                                     psSelfHostExceptRecName with
-                                              | none => List.nil
-                                              | some exceptRecDeclaration =>
+                                              | Option.none => List.nil
+                                              | Option.some exceptRecDeclaration =>
                                                   [
                                                     listDeclaration,
                                                     nilDeclaration,

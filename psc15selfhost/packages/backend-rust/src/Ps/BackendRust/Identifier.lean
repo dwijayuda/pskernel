@@ -16,16 +16,32 @@ def psRustIdentifierSingleChar
   psJsonStringOfChars
     (List.cons char List.nil)
 
+def psRustIdentifierNatBetween
+    (lower value upper : Nat) : Bool :=
+  if Nat.ble lower value then
+    Nat.ble value upper
+  else
+    false
+
 def psRustIdentifierCharAllowed
     (char : Char) : Bool :=
-  char.isAlphanum || char == '_'
+  let code : Nat := Char.toNat char;
+  if psRustIdentifierNatBetween 48 code 57 then
+    true
+  else if psRustIdentifierNatBetween 65 code 90 then
+    true
+  else if psRustIdentifierNatBetween 97 code 122 then
+    true
+  else
+    Nat.beq code 95
 
-def psRustIdentifierEncodeChars :
-    List Char -> Prod String Bool
+def psRustIdentifierEncodeChars
+    (chars : List Char) : Prod String Bool :=
+  match chars with
   | List.nil =>
       Prod.mk "" false
   | List.cons char rest =>
-      let encodedRest :=
+      let encodedRest : Prod String Bool :=
         psRustIdentifierEncodeChars rest;
       if psRustIdentifierCharAllowed char then
         Prod.mk
@@ -38,25 +54,29 @@ def psRustIdentifierEncodeChars :
           (psRustIdentifierConcat2
             (psRustIdentifierConcat3
               "_u"
-              (toString (Char.toNat char))
+              (psNatToString (Char.toNat char))
               "_")
             (Prod.fst encodedRest))
           true
 
-def psRustIdentifierCharsStartWith :
-    List Char -> List Char -> Bool
-  | _, List.nil =>
+def psRustIdentifierCharsStartWith
+    (value expected : List Char) : Bool :=
+  match expected with
+  | List.nil =>
       true
-  | List.nil, List.cons _ _ =>
-      false
-  | List.cons value valueRest,
-      List.cons expected expectedRest =>
-      if value == expected then
-        psRustIdentifierCharsStartWith
-          valueRest
-          expectedRest
-      else
-        false
+  | List.cons expectedHead expectedRest =>
+      match value with
+      | List.nil =>
+          false
+      | List.cons valueHead valueRest =>
+          if Nat.beq
+              (Char.toNat valueHead)
+              (Char.toNat expectedHead) then
+            psRustIdentifierCharsStartWith
+              valueRest
+              expectedRest
+          else
+            false
 
 def psRustIdentifierStartsWith
     (value expected : String) : Bool :=
@@ -70,87 +90,72 @@ def psRustIdentifierFirstAllowed
   | List.nil =>
       false
   | List.cons first _ =>
-      first.isAlpha || first == '_'
+      let code : Nat := Char.toNat first;
+      if psRustIdentifierNatBetween 65 code 90 then
+        true
+      else if psRustIdentifierNatBetween 97 code 122 then
+        true
+      else
+        Nat.beq code 95
 
 def psRustIdentifierReservedPrefix
     (value : String) : Bool :=
-  psRustIdentifierStartsWith value "__psr_"
-    || psRustIdentifierStartsWith value "__ps_kw_"
+  if psRustIdentifierStartsWith value "__psr_" then
+    true
+  else
+    psRustIdentifierStartsWith value "__ps_kw_"
+
+def psRustIdentifierStringIn
+    (value : String)
+    (options : List String) : Bool :=
+  match options with
+  | List.nil =>
+      false
+  | List.cons option rest =>
+      if psStringEq value option then
+        true
+      else
+        psRustIdentifierStringIn value rest
 
 def psRustIdentifierSpecialKeyword
     (value : String) : Bool :=
-  psStringEq value "self"
-    || psStringEq value "Self"
-    || psStringEq value "super"
-    || psStringEq value "crate"
+  psRustIdentifierStringIn
+    value
+    ["self", "Self", "super", "crate"]
 
 def psRustIdentifierKeyword
     (value : String) : Bool :=
-  psStringEq value "as"
-    || psStringEq value "async"
-    || psStringEq value "await"
-    || psStringEq value "become"
-    || psStringEq value "box"
-    || psStringEq value "break"
-    || psStringEq value "const"
-    || psStringEq value "continue"
-    || psStringEq value "crate"
-    || psStringEq value "do"
-    || psStringEq value "dyn"
-    || psStringEq value "else"
-    || psStringEq value "enum"
-    || psStringEq value "extern"
-    || psStringEq value "false"
-    || psStringEq value "final"
-    || psStringEq value "fn"
-    || psStringEq value "for"
-    || psStringEq value "gen"
-    || psStringEq value "if"
-    || psStringEq value "impl"
-    || psStringEq value "in"
-    || psStringEq value "let"
-    || psStringEq value "loop"
-    || psStringEq value "macro"
-    || psStringEq value "match"
-    || psStringEq value "mod"
-    || psStringEq value "move"
-    || psStringEq value "mut"
-    || psStringEq value "override"
-    || psStringEq value "priv"
-    || psStringEq value "pub"
-    || psStringEq value "ref"
-    || psStringEq value "return"
-    || psStringEq value "self"
-    || psStringEq value "Self"
-    || psStringEq value "static"
-    || psStringEq value "struct"
-    || psStringEq value "super"
-    || psStringEq value "trait"
-    || psStringEq value "true"
-    || psStringEq value "try"
-    || psStringEq value "type"
-    || psStringEq value "typeof"
-    || psStringEq value "unsafe"
-    || psStringEq value "unsized"
-    || psStringEq value "use"
-    || psStringEq value "virtual"
-    || psStringEq value "where"
-    || psStringEq value "while"
-    || psStringEq value "yield"
+  psRustIdentifierStringIn
+    value
+    [
+      "as", "async", "await", "become", "box", "break", "const",
+      "continue", "crate", "do", "dyn", "else", "enum", "extern",
+      "false", "final", "fn", "for", "gen", "if", "impl", "in",
+      "let", "loop", "macro", "match", "mod", "move", "mut",
+      "override", "priv", "pub", "ref", "return", "self", "Self",
+      "static", "struct", "super", "trait", "true", "try", "type",
+      "typeof", "unsafe", "unsized", "use", "virtual", "where",
+      "while", "yield"
+    ]
 
 def psRustIdentifier
     (value : String) : String :=
-  let chars :=
+  let chars : List Char :=
     psJsonStringToChars value;
-  let encoded :=
+  let encoded : Prod String Bool :=
     psRustIdentifierEncodeChars chars;
-  let encodedText :=
+  let encodedText : String :=
     Prod.fst encoded;
-  let changed :=
+  let changed : Bool :=
     Prod.snd encoded;
-  if changed
-      || !psRustIdentifierFirstAllowed chars
-      || psRustIdentifierReservedPrefix value then
+  let mustEncode : Bool :=
+    if changed then
+      true
+    else if psRustIdentifierFirstAllowed chars then
+      psRustIdentifierReservedPrefix value
+    else
+      true;
+  if mustEncode then
     psRustIdentifierConcat2
       "__psr_"
       encodedText

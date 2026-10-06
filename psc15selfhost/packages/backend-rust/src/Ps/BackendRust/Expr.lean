@@ -78,6 +78,17 @@ def psRustEmitParameterList
           | Except.ok printedRest =>
               Except.ok (List.cons rendered printedRest)
 
+def psRustParameterTypes
+    (parameters : List PsVerifiedIrParameter) :
+    List PsVerifiedIrType :=
+  match parameters with
+  | List.nil =>
+      List.nil
+  | List.cons parameter rest =>
+      List.cons
+        parameter.type
+        (psRustParameterTypes rest)
+
 def psRustEmitMachineIntegerBinary
     (operation : PsVerifiedIrIntegerBinaryOp)
     (left right : String) : String :=
@@ -1030,23 +1041,32 @@ def psRustEmitExprWithFuel
                 operation
                 printedArguments
         | PsVerifiedIrExpr.lambda parameters resultType body =>
-          if psRustTypeContainsFunction resultType then
-            Except.error PsRustEmitError.lambdaFunctionResultUnsupported
-          else
-            match psRustEmitParameterList parameters with
-            | Except.error error =>
-                Except.error error
-            | Except.ok printedParameters =>
-                match emitNested body with
-                | Except.error error =>
-                    Except.error error
-                | Except.ok printedBody =>
-                    Except.ok
-                      (psRustConcat4
-                        "|"
-                        (psRustJoin ", " printedParameters)
-                        "| "
-                        printedBody)
+          match psRustEmitParameterList parameters with
+          | Except.error error =>
+              Except.error error
+          | Except.ok printedParameters =>
+              match
+                  psRustEmitClosureValueType
+                    (PsVerifiedIrType.function
+                      (psRustParameterTypes parameters)
+                      resultType) with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok closureType =>
+                  match emitNested body with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok printedBody =>
+                      Except.ok
+                        (psRustConcat4
+                          "{ let __ps_internal_lambda: "
+                          closureType
+                          " = std::rc::Rc::new(move |"
+                          (psRustConcat4
+                            (psRustJoin ", " printedParameters)
+                            "| "
+                            printedBody
+                            "); __ps_internal_lambda }"))
         | PsVerifiedIrExpr.call fn _ arguments =>
           match emitNested fn with
           | Except.error error =>
@@ -1079,35 +1099,19 @@ def psRustEmitExprWithFuel
                       | Except.error error =>
                           Except.error error
                       | Except.ok closureType =>
-                          match value with
-                          | PsVerifiedIrExpr.var _ =>
-                              Except.ok
+                          Except.ok
+                            (psRustConcat4
+                              "{ let "
+                              (psRustIdentifier name)
+                              ": "
+                              (psRustConcat3
+                                closureType
+                                " = "
                                 (psRustConcat4
-                                  "{ let "
-                                  (psRustIdentifier name)
-                                  ": "
-                                  (psRustConcat3
-                                    closureType
-                                    " = "
-                                    (psRustConcat4
-                                      (psRustClonePrinted printedValue)
-                                      "; "
-                                      printedBody
-                                      " }")))
-                          | _ =>
-                              Except.ok
-                                (psRustConcat4
-                                  "{ let "
-                                  (psRustIdentifier name)
-                                  ": "
-                                  (psRustConcat4
-                                    closureType
-                                    " = std::rc::Rc::new(move "
-                                    printedValue
-                                    (psRustConcat3
-                                      "); "
-                                      printedBody
-                                      " }")))
+                                  (psRustClonePrinted printedValue)
+                                  "; "
+                                  printedBody
+                                  " }")))
                   | _ =>
                     Except.ok
                       (psRustConcat4

@@ -806,8 +806,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               cheapProj
               hArgsNonempty
               hFnSemantic.2
-              (by exact hHead)
-              (by exact hTailSuccess)
+              (by simpa [hFnShape] using hHead)
+              (by simpa [hFnShape] using hTailSuccess)
       | bvar index =>
           apply hBackPair
           exact
@@ -818,8 +818,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.bvar index) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by exact hHead)
-              (by exact hTailSuccess)
+              (by simpa [hFnShape] using hHead)
+              (by simpa [hFnShape] using hTailSuccess)
       | fvar name =>
           apply hBackPair
           exact
@@ -830,8 +830,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.fvar name) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by exact hHead)
-              (by exact hTailSuccess)
+              (by simpa [hFnShape] using hHead)
+              (by simpa [hFnShape] using hTailSuccess)
       | mvar name =>
           apply hBackPair
           exact
@@ -842,8 +842,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.mvar name) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by exact hHead)
-              (by exact hTailSuccess)
+              (by simpa [hFnShape] using hHead)
+              (by simpa [hFnShape] using hTailSuccess)
       | sort level =>
           apply hBackPair
           exact
@@ -854,8 +854,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.sort level) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by exact hHead)
-              (by exact hTailSuccess)
+              (by simpa [hFnShape] using hHead)
+              (by simpa [hFnShape] using hTailSuccess)
       | const name levels =>
           apply hBackPair
           exact
@@ -866,8 +866,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.const name levels) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by exact hHead)
-              (by exact hTailSuccess)
+              (by simpa [hFnShape] using hHead)
+              (by simpa [hFnShape] using hTailSuccess)
       | app nestedFn nestedArg =>
           apply hBackPair
           exact
@@ -878,8 +878,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.app nestedFn nestedArg) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by exact hHead)
-              (by exact hTailSuccess)
+              (by simpa [hFnShape] using hHead)
+              (by simpa [hFnShape] using hTailSuccess)
       | forallE name domain codomain binderInfo =>
           apply hBackPair
           exact
@@ -891,8 +891,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               (PsKernelExpr.forallE name domain codomain binderInfo)
               result args cheapRec cheapProj
               hFnSemantic.2
-              (by exact hHead)
-              (by exact hTailSuccess)
+              (by simpa [hFnShape] using hHead)
+              (by simpa [hFnShape] using hTailSuccess)
       | letE name type value body nondep =>
           apply hBackPair
           exact
@@ -904,8 +904,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               (PsKernelExpr.letE name type value body nondep)
               result args cheapRec cheapProj
               hFnSemantic.2
-              (by exact hHead)
-              (by exact hTailSuccess)
+              (by simpa [hFnShape] using hHead)
+              (by simpa [hFnShape] using hTailSuccess)
       | lit literal =>
           apply hBackPair
           exact
@@ -916,8 +916,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.lit literal) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by exact hHead)
-              (by exact hTailSuccess)
+              (by simpa [hFnShape] using hHead)
+              (by simpa [hFnShape] using hTailSuccess)
       | mdata metadata body =>
           apply hBackPair
           exact
@@ -928,8 +928,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.mdata metadata body) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by exact hHead)
-              (by exact hTailSuccess)
+              (by simpa [hFnShape] using hHead)
+              (by simpa [hFnShape] using hTailSuccess)
       | proj typeName index body =>
           apply hBackPair
           exact
@@ -940,5 +940,5 @@ theorem psKernelWhnfCoreApplication_configuration_refines
               original fn0 (PsKernelExpr.proj typeName index body) result
               args cheapRec cheapProj
               hFnSemantic.2
-              (by exact hHead)
-              (by exact hTailSuccess)
+              (by simpa [hFnShape] using hHead)
+              (by simpa [hFnShape] using hTailSuccess)

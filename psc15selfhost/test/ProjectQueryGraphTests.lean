@@ -198,6 +198,33 @@ def psTestQueryInterfaceChangeDetection : Bool :=
   else
     false
 
+def psTestBehavioralModuleInterfaceIdentity : Bool :=
+  let first :=
+    psBehavioralModuleInterfaceV1
+      "spec-v1"
+      "effects-v1"
+      "resources-v1"
+      "assumptions-v1";
+  let same :=
+    psBehavioralModuleInterfaceV1
+      "spec-v1"
+      "effects-v1"
+      "resources-v1"
+      "assumptions-v1";
+  let changed :=
+    psBehavioralModuleInterfaceV1
+      "spec-v2"
+      "effects-v1"
+      "resources-v1"
+      "assumptions-v1";
+  if psBehavioralModuleInterfaceEq first same then
+    if psBehavioralModuleInterfaceEq first changed then
+      false
+    else
+      true
+  else
+    false
+
 structure PsProjectQueryNamedTest where
   name : String
   passed : Bool
@@ -240,6 +267,10 @@ def psProjectQueryTests :
     {
       name := "interface change detection"
       passed := psTestQueryInterfaceChangeDetection
+    },
+    {
+      name := "behavioral interface identity"
+      passed := psTestBehavioralModuleInterfaceIdentity
     }
   ]
 

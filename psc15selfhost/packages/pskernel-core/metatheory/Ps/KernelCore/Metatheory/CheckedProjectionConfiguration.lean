@@ -589,7 +589,8 @@ theorem psKernelInferProjectionWith_configuration_sound
                                                 hArgsLengthBool
                                             rw [hFalse] at hTrue
                                             cases hTrue
-                                          simp [hArgsLengthNeRaw] at hSuccess
+                                          rw [if_neg hArgsLengthNeRaw] at hSuccess
+                                          cases hSuccess
                                       | true =>
                                           have hArgsLength :
                                               psKernelExprListLength args =

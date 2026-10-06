@@ -147,6 +147,53 @@ try {
   assert.equal(direct.stringLengthDemo("a😀"), reference.stringLengthDemo("a😀"));
   assert.equal(direct.stringLengthDemo("a😀"), 2n);
 
+  const unicodeText = "Aé😀";
+  assert.equal(
+    direct.stringUtf8ByteSizeDemo(unicodeText),
+    reference.stringUtf8ByteSizeDemo(unicodeText),
+  );
+  assert.equal(direct.stringUtf8ByteSizeDemo(unicodeText), 7n);
+
+  assert.equal(
+    direct.stringNextDemo(unicodeText, 1n),
+    reference.stringNextDemo(unicodeText, 1n),
+  );
+  assert.equal(direct.stringNextDemo(unicodeText, 1n), 3n);
+  assert.equal(
+    direct.stringNextDemo(unicodeText, 2n),
+    reference.stringNextDemo(unicodeText, 2n),
+  );
+  assert.equal(direct.stringNextDemo(unicodeText, 2n), 3n);
+
+  assert.equal(
+    direct.stringGetDemo(unicodeText, 3n),
+    reference.stringGetDemo(unicodeText, 3n),
+  );
+  assert.equal(direct.stringGetDemo(unicodeText, 3n), "😀");
+  assert.equal(
+    direct.stringGetDemo(unicodeText, 2n),
+    reference.stringGetDemo(unicodeText, 2n),
+  );
+  assert.equal(direct.stringGetDemo(unicodeText, 2n), "A");
+
+  assert.equal(
+    direct.stringAtEndDemo(unicodeText, 7n),
+    reference.stringAtEndDemo(unicodeText, 7n),
+  );
+  assert.equal(direct.stringAtEndDemo(unicodeText, 7n), true);
+  assert.equal(direct.stringAtEndDemo(unicodeText, 6n), false);
+
+  assert.equal(
+    direct.stringExtractDemo(unicodeText, 1n, 7n),
+    reference.stringExtractDemo(unicodeText, 1n, 7n),
+  );
+  assert.equal(direct.stringExtractDemo(unicodeText, 1n, 7n), "é😀");
+  assert.equal(
+    direct.stringExtractDemo(unicodeText, 2n, 7n),
+    reference.stringExtractDemo(unicodeText, 2n, 7n),
+  );
+  assert.equal(direct.stringExtractDemo(unicodeText, 2n, 7n), "");
+
   assert.equal(
     direct.u8AddWrap(250, 10),
     reference.u8AddWrap(250, 10),

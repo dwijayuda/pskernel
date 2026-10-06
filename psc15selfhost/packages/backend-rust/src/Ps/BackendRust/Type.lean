@@ -107,9 +107,10 @@ def psRustEmitPrimitiveType
 def psRustEmitTypeListWith
     (emitType :
       PsVerifiedIrType ->
-      Except PsRustEmitError String) :
-    List PsVerifiedIrType ->
-    Except PsRustEmitError (List String)
+      Except PsRustEmitError String)
+    (types : List PsVerifiedIrType) :
+    Except PsRustEmitError (List String) :=
+  match types with
   | List.nil =>
       Except.ok List.nil
   | List.cons type rest =>
@@ -123,13 +124,14 @@ def psRustEmitTypeListWith
           | Except.ok printedRest =>
               Except.ok (List.cons printed printedRest)
 
-def psRustEmitTypeWithFuel :
-    Nat ->
-    PsVerifiedIrType ->
-    Except PsRustEmitError String
-  | 0, _ =>
+def psRustEmitTypeWithFuel
+    (fuel : Nat)
+    (type : PsVerifiedIrType) :
+    Except PsRustEmitError String :=
+  match fuel with
+  | Nat.zero =>
       Except.error PsRustEmitError.fuelExhausted
-  | fuel + 1, type =>
+  | Nat.succ remaining =>
       match type with
       | PsVerifiedIrType.unknown =>
           Except.error PsRustEmitError.unknownRuntimeType
@@ -138,14 +140,16 @@ def psRustEmitTypeWithFuel :
       | PsVerifiedIrType.primitive primitive =>
           Except.ok (psRustEmitPrimitiveType primitive)
       | PsVerifiedIrType.function parameters result =>
-          let emitNested :=
+          let emitNested :
+              PsVerifiedIrType ->
+              Except PsRustEmitError String :=
             fun (nestedType : PsVerifiedIrType) =>
-              psRustEmitTypeWithFuel fuel nestedType;
+              psRustEmitTypeWithFuel remaining nestedType;
           match psRustEmitTypeListWith emitNested parameters with
           | Except.error error =>
               Except.error error
           | Except.ok printedParameters =>
-              match psRustEmitTypeWithFuel fuel result with
+              match psRustEmitTypeWithFuel remaining result with
               | Except.error error =>
                   Except.error error
               | Except.ok printedResult =>
@@ -156,9 +160,11 @@ def psRustEmitTypeWithFuel :
                       ") -> "
                       printedResult)
       | PsVerifiedIrType.named name arguments =>
-          let emitNested :=
+          let emitNested :
+              PsVerifiedIrType ->
+              Except PsRustEmitError String :=
             fun (nestedType : PsVerifiedIrType) =>
-              psRustEmitTypeWithFuel fuel nestedType;
+              psRustEmitTypeWithFuel remaining nestedType;
           match psRustEmitTypeListWith emitNested arguments with
           | Except.error error =>
               Except.error error
@@ -208,21 +214,24 @@ def psRustEmitTypeArguments
               ">"
               "")
 
-def psRustTypeContainsFunctionWithFuel :
-    Nat ->
-    PsVerifiedIrType ->
-    Bool
-  | 0, _ =>
+def psRustTypeContainsFunctionWithFuel
+    (fuel : Nat)
+    (type : PsVerifiedIrType) : Bool :=
+  match fuel with
+  | Nat.zero =>
       true
-  | fuel + 1, type =>
+  | Nat.succ remaining =>
       match type with
       | PsVerifiedIrType.function _ _ =>
           true
       | PsVerifiedIrType.named _ arguments =>
-          List.any
-            arguments
-            (fun (argument : PsVerifiedIrType) =>
-              psRustTypeContainsFunctionWithFuel fuel argument)
+          let containsFunction :
+              PsVerifiedIrType -> Bool :=
+            fun (argument : PsVerifiedIrType) =>
+              psRustTypeContainsFunctionWithFuel
+                remaining
+                argument;
+          psListAny containsFunction arguments
       | _ =>
           false
 
@@ -234,8 +243,8 @@ def psRustFunctionTypeIsFirstOrder
     (type : PsVerifiedIrType) : Bool :=
   match type with
   | PsVerifiedIrType.function parameters result =>
-      let nestedParameter :=
-        List.any parameters psRustTypeContainsFunction;
+      let nestedParameter : Bool :=
+        psListAny psRustTypeContainsFunction parameters;
       if nestedParameter then
         false
       else
@@ -264,7 +273,7 @@ def psRustEmitMachineIntegerLiteral
     (type : PsVerifiedIrMachineIntegerType)
     (value : Int) : String :=
   psRustConcat2
-    (toString value)
+    (Int.repr value)
     (psRustMachineIntegerSuffix type)
 
 def psRustEmitLiteral
@@ -273,12 +282,12 @@ def psRustEmitLiteral
   | PsVerifiedIrLiteral.natural value =>
       psRustConcat3
         "__ps_nat_lit("
-        (psRustQuote (toString value))
+        (psRustQuote (psNatToString value))
         ")"
   | PsVerifiedIrLiteral.integer value =>
       psRustConcat3
         "__ps_int_lit("
-        (psRustQuote (toString value))
+        (psRustQuote (Int.repr value))
         ")"
   | PsVerifiedIrLiteral.machineInteger type value =>
       psRustEmitMachineIntegerLiteral type value

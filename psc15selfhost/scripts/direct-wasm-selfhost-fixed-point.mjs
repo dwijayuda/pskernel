@@ -31,7 +31,9 @@ const generation1 = path.join(outRoot, "compiler.gen1.wasm");
 const generation2 = path.join(outRoot, "compiler.gen2.wasm");
 const generation3 = path.join(outRoot, "compiler.gen3.wasm");
 
-const compilerExport = "psCompilerWasm32ProofScriptBytesOrEmpty";
+const compilerExport = "psCompilerWasm32ProofScriptSourcesBytesOrEmpty";
+const sourceListEmptyExport = "psCompilerSelfHostSourceListEmpty";
+const sourceListConsExport = "psCompilerSelfHostSourceListCons";
 const stringNewExport = "__ps_selfhost_string_new";
 const stringSetExport = "__ps_selfhost_string_set";
 const bytesIsNilExport = "__ps_selfhost_bytes_is_nil";
@@ -57,14 +59,6 @@ function run(command, args) {
   }
 }
 
-function stripImports(source) {
-  return source
-    .split(/\r?\n/u)
-    .filter((line) => !/^\s*import\s+[A-Za-z0-9_.]+\s*;?\s*$/u.test(line))
-    .join("\n")
-    .trim();
-}
-
 function requiredFunction(exports, name) {
   const value = exports[name];
   if (typeof value !== "function") {
@@ -79,6 +73,8 @@ async function loadCompiler(bytes) {
   const exports = instance.exports;
   return {
     compile: requiredFunction(exports, compilerExport),
+    sourceListEmpty: requiredFunction(exports, sourceListEmptyExport),
+    sourceListCons: requiredFunction(exports, sourceListConsExport),
     stringNew: requiredFunction(exports, stringNewExport),
     stringSet: requiredFunction(exports, stringSetExport),
     bytesIsNil: requiredFunction(exports, bytesIsNilExport),
@@ -120,9 +116,16 @@ function byteList(api, value) {
   return Uint8Array.from(bytes);
 }
 
-function compileWith(api, source) {
-  const sourceValue = wasmString(api, source);
-  const output = byteList(api, api.compile(sourceValue));
+function sourceList(api, sources) {
+  let result = api.sourceListEmpty();
+  for (let index = sources.length - 1; index >= 0; index -= 1) {
+    result = api.sourceListCons(wasmString(api, sources[index]), result);
+  }
+  return result;
+}
+
+function compileWith(api, sources) {
+  const output = byteList(api, api.compile(sourceList(api, sources)));
   if (output.length === 0) {
     throw new Error("PSC2_DIRECT_WASM_SELFHOST_COMPILE_FAILED_OR_EMPTY");
   }
@@ -169,15 +172,11 @@ const closure = await readGeneratedSourceClosure(entryPs, workspace);
 if (!closure || closure.ordered.length === 0) {
   throw new Error("PSC2_DIRECT_WASM_SELFHOST_CLOSURE_EMPTY");
 }
-const flattenedSource =
-  closure.ordered
-    .map((item) => stripImports(item.source))
-    .filter((source) => source.length > 0)
-    .join("\n\n") + "\n";
+const sources = closure.ordered.map((item) => item.source);
 
 const generation1Bytes = new Uint8Array(await readFile(generation1));
 const compiler1 = await loadCompiler(generation1Bytes);
-const generation2Bytes = compileWith(compiler1, flattenedSource);
+const generation2Bytes = compileWith(compiler1, sources);
 await writeFile(generation2, generation2Bytes);
 
 if (!bytesEqual(generation1Bytes, generation2Bytes)) {
@@ -185,7 +184,7 @@ if (!bytesEqual(generation1Bytes, generation2Bytes)) {
 }
 
 const compiler2 = await loadCompiler(generation2Bytes);
-const generation3Bytes = compileWith(compiler2, flattenedSource);
+const generation3Bytes = compileWith(compiler2, sources);
 await writeFile(generation3, generation3Bytes);
 
 if (!bytesEqual(generation2Bytes, generation3Bytes)) {

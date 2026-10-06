@@ -159,6 +159,10 @@ jobs:
         working-directory: psc15selfhost
         run: npm run test:direct-wasm-whole-compiler
 
+      - name: Prove direct Wasm whole-compiler self-host fixed point
+        working-directory: psc15selfhost
+        run: npm run test:direct-wasm-selfhost
+
       - name: Self-check portable implementation profiles
         working-directory: psc15selfhost
         run: npm run check:portable-selfhost-contract

@@ -1,4 +1,5 @@
 import Ps.CompilerIr.Model
+import Ps.CompilerIr.Pass
 import Ps.Foundation.List
 
 inductive PsIrSpecializeKind where
@@ -1834,3 +1835,35 @@ def psIrSpecializeValidatedModule
       Except.error error
   | Except.ok specialized =>
       Except.ok (PsSpecializedIrModule.mk specialized)
+
+
+def psSpecializationPassDefinition : PsPassDefinition :=
+  PsPassDefinition.mk
+    "psc-pass-specialize/1"
+    1
+    "psc-verified-ir/1"
+    "psc-specialized-ir/1"
+    "psc-specialization-runtime-refinement/1"
+    "psc-resource-specialization/1"
+    "contract-regression-unproved"
+
+structure PsSpecializedIrExecutionResult where
+  specialized : PsSpecializedIrModule
+  execution : PsPassExecution
+
+def psIrSpecializeValidatedModuleWithExecution
+    (inputIdentity outputIdentity : String)
+    (validated : PsValidatedIrModule) :
+    Except PsIrSpecializeError PsSpecializedIrExecutionResult :=
+  match psIrSpecializeValidatedModule validated with
+  | Except.error error =>
+      Except.error error
+  | Except.ok specialized =>
+      Except.ok
+        (PsSpecializedIrExecutionResult.mk
+          specialized
+          (psPassExecution
+            psSpecializationPassDefinition
+            inputIdentity
+            outputIdentity
+            List.nil))

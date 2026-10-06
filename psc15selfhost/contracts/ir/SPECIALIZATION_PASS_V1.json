@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "passId": "psc-pass-specialize/1",
+  "inputContract": "psc-verified-ir/1",
+  "outputContract": "psc-specialized-ir/1",
+  "semanticRelation": "psc-specialization-runtime-refinement/1",
+  "resourceContract": "psc-resource-specialization/1",
+  "currentAssurance": "contract-regression-unproved",
+  "targetAssurance": "formal-proof-or-translation-validation",
+  "implementation": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean"
+}

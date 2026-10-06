@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-structural-module-interface/1",
+  "currentExtraction": "canonical-admissions-conservative",
+  "currentAssumptionKey": "",
+  "reuseRule": "dependency remains green only when contract, semanticKey, and assumptionKey are unchanged",
+  "target": "psc-module-interface/2 with structural and behavioral layers",
+  "implementation": "packages/project/src/Ps/Project/ModuleInterface.lean"
+}

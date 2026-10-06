@@ -91,10 +91,10 @@ def psHostApplyModuleDeclarations
   | Except.ok nextEnvironment =>
       pure nextEnvironment
 
-def psHostModuleInterfaceKey
+def psHostModuleInterfaceFingerprint
     (path : String)
     (declarations : List PsDeclaration) :
-    IO String := do
+    IO PsModuleInterfaceFingerprint := do
   match
       psEncodeCheckedAdmissionsCanonical
         declarations with
@@ -104,7 +104,7 @@ def psHostModuleInterfaceKey
           ("PSC1_PROJECT_INTERFACE_ENCODING_FAILED: " ++
             path))
   | Except.ok encoded =>
-      pure encoded
+      pure (psModuleInterfaceFingerprintV1 encoded)
 
 def psHostIncrementalStateCommitArtifact
     (state : PsHostIncrementalState)
@@ -151,15 +151,15 @@ def psHostIncrementalRebuild
       state.environment
       sourceModule.declarations
       List.nil
-  let interfaceKey ←
-    psHostModuleInterfaceKey
+  let interfaceFingerprint ←
+    psHostModuleInterfaceFingerprint
       path
       elaborated.declarations
   match
       psQueryCommitRebuilt
         state.snapshot.query
         input
-        interfaceKey with
+        interfaceFingerprint with
   | Except.error _ =>
       throw
         (IO.userError

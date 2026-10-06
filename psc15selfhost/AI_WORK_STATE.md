@@ -27,3 +27,12 @@ Checkpoint P0/P2/P3:
 - PsSpecializedIrModule added in PSC1-selfhost-compatible Lean source
 - validated JS/Wasm specialization paths now construct the explicit SpecializedIR capability
 - next: open PR/cloud CI, then pass/build evidence + ModuleInterface semantic fingerprint prototype
+
+## Checkpoint P7/P8/P12/P13
+
+- generic PSC1-compatible PassDefinition/PassExecution model added
+- specialization now has explicit current assurance metadata and can emit PassExecution
+- typed structural ModuleInterface fingerprint replaces untyped QueryGraph interfaceKey
+- current host extraction remains conservative canonical-admissions semantics, now versioned by contract
+- Comparator-v1 challenge/replay scaffold added; current status is process-isolated prototype, not yet a production sandbox
+- next: cloud validation, then declarative theory seed, defeq/cache source enforcement, SAVEF object format and verifier capsule

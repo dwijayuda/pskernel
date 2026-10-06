@@ -363,9 +363,37 @@ def psTestSpecializationWorklistDeduplicates : Bool :=
   else
     false
 
+def psTestSpecializationPassEvidence : Bool :=
+  let validated : PsValidatedIrModule :=
+    PsValidatedIrModule.mk psIrSpecModule;
+  match
+      psIrSpecializeValidatedModuleWithExecution
+        "fixture-input"
+        "fixture-output"
+        validated with
+  | Except.error _ =>
+      false
+  | Except.ok result =>
+      psStringEq
+        result.execution.passDefinitionId
+        "psc-pass-specialize/1"
+        && psStringEq
+          result.execution.inputIdentity
+          "fixture-input"
+        && psStringEq
+          result.execution.outputIdentity
+          "fixture-output"
+        && psIrSpecNoGenericStructure
+          result.specialized.raw.structures
+        && psIrSpecNoGenericInductive
+          result.specialized.raw.inductives
+        && psIrSpecNoGenericDeclaration
+          result.specialized.raw.declarations
+
 def main : IO Unit := do
   if psTestGenericSpecialization
-      && psTestSpecializationWorklistDeduplicates then
+      && psTestSpecializationWorklistDeduplicates
+      && psTestSpecializationPassEvidence then
     IO.println "PSC1_IR_SPECIALIZE_TESTS: PASS"
   else
     throw (IO.userError "PSC1_IR_SPECIALIZE_TESTS: FAIL")

@@ -93,6 +93,18 @@
       "kind": "verified-ir-gap-registry",
       "status": "current",
       "canonicalPath": "contracts/ir/VERIFIED_IR_GAPS_V1.json"
+    },
+    {
+      "id": "psc-pass-specialize/1",
+      "kind": "compiler-pass",
+      "status": "current",
+      "canonicalPath": "contracts/ir/SPECIALIZATION_PASS_V1.json"
+    },
+    {
+      "id": "psc-structural-module-interface/1",
+      "kind": "module-interface",
+      "status": "current",
+      "canonicalPath": "contracts/module-interface/STRUCTURAL_MODULE_INTERFACE_V1.json"
     }
   ]
 }

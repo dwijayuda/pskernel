@@ -67,6 +67,7 @@ lean_lib PsCompilerIr where
   srcDir := "packages/compiler-ir/src"
   roots := #[
     `Ps.CompilerIr.Model,
+    `Ps.CompilerIr.Pass,
     `Ps.CompilerIr.Specialize
   ]
 
@@ -166,6 +167,7 @@ lean_lib PsProject where
   srcDir := "packages/project/src"
   roots := #[
     `Ps.Project.ModuleGraph,
+    `Ps.Project.ModuleInterface,
     `Ps.Project.QueryGraph
   ]
 

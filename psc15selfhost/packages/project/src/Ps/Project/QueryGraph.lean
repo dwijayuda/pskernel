@@ -1,14 +1,15 @@
 import Ps.Project.ModuleGraph
+import Ps.Project.ModuleInterface
 import Ps.Foundation.List
 
 structure PsModuleDependencyInterface where
   name : PsName
-  interfaceKey : String
+  interfaceFingerprint : PsModuleInterfaceFingerprint
 
 structure PsModuleQueryRecord where
   name : PsName
   sourceKey : String
-  interfaceKey : String
+  interfaceFingerprint : PsModuleInterfaceFingerprint
   dependencyInterfaces : List PsModuleDependencyInterface
 
 structure PsModuleQueryInput where
@@ -102,9 +103,9 @@ def psQueryDependencyInvalidation
                     dependency)
             | Option.some currentDependency =>
                 if
-                    psStringEq
-                      currentDependency.interfaceKey
-                      previous.interfaceKey then
+                    psModuleInterfaceFingerprintEq
+                      currentDependency.interfaceFingerprint
+                      previous.interfaceFingerprint then
                   psQueryDependencyInvalidation
                     current
                     restImports
@@ -173,15 +174,15 @@ def psQueryCaptureDependencyInterfaces
                 (List.cons
                   {
                     name := dependency
-                    interfaceKey :=
-                      dependencyRecord.interfaceKey
+                    interfaceFingerprint :=
+                      dependencyRecord.interfaceFingerprint
                   }
                   dependencyInterfaces)
 
 def psQueryCommitRebuilt
     (current : PsQuerySnapshot)
     (input : PsModuleQueryInput)
-    (interfaceKey : String) :
+    (interfaceFingerprint : PsModuleInterfaceFingerprint) :
     Except PsQueryGraphError PsQuerySnapshot :=
   match
       psQueryCaptureDependencyInterfaces
@@ -196,7 +197,7 @@ def psQueryCommitRebuilt
         {
           name := input.name
           sourceKey := input.sourceKey
-          interfaceKey := interfaceKey
+          interfaceFingerprint := interfaceFingerprint
           dependencyInterfaces := dependencyInterfaces
         }
 
@@ -209,16 +210,16 @@ def psQueryCommitReused
 def psQueryInterfaceChanged
     (previous : PsQuerySnapshot)
     (name : PsName)
-    (interfaceKey : String) :
+    (interfaceFingerprint : PsModuleInterfaceFingerprint) :
     Bool :=
   match psQuerySnapshotFind previous name with
   | Option.none =>
       true
   | Option.some previousRecord =>
       if
-          psStringEq
-            previousRecord.interfaceKey
-            interfaceKey then
+          psModuleInterfaceFingerprintEq
+            previousRecord.interfaceFingerprint
+            interfaceFingerprint then
         false
       else
         true

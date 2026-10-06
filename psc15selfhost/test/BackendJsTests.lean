@@ -415,7 +415,8 @@ def psTestBackendJsSelectiveStackSafety : Bool :=
       output.contains "export function helper(x) { return x; }"
         && output.contains "function* __ps$impl$recur(n)"
         && output.contains "yield* __ps$invoke(recur, n)"
-        && output.contains "helper((yield* __ps$invoke(recur, n)))"
+        && output.contains "yield* __ps$invoke(helper, (yield* __ps$invoke(recur, n)))"
+        && output.contains "const implementation = __ps$implementations.get(fn)"
 
 def main : IO Unit := do
   if psTestBackendJsFixtureEmission

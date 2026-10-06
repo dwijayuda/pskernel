@@ -401,6 +401,7 @@ theorem psKernelInferAppOnlyLoopWithFuel_configuration_preserves
                   pending,
                   fallbackExpr
                 ]
+              all_goals rfl
             rw [hStep] at hSuccess
             cases hEnsure :
                 psKernelEnsureForallWith

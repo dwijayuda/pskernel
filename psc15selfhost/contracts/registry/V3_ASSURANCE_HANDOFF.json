@@ -48,7 +48,7 @@
     {
       "id": "savef-offline-replay",
       "status": "pending",
-      "required": "Replay real proof/validator certificates, trust closure and pinned archives offline; metadata/hash closure is insufficient."
+      "required": "Replay actual compiler-preservation proof/validator certificates, trust closure and pinned release archives offline; metadata/hash closure is insufficient. A standalone pinned Lean Wasm profile now checks a real closed implication-identity proof and rejects an invalid proof of the same statement outside the checkout. That focused fixture does not discharge compiler preservation, diverse checking, paranoid runtime hardening, signed release or global assurance obligations."
     },
     {
       "id": "factorybench-holdout",

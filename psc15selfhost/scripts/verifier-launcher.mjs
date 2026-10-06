@@ -36,7 +36,7 @@ async function main() {
   const bytes = await boundedFile(path.join(root, 'manifest.json'), 4 * 1024 * 1024);
   if (digest(bytes) !== args[1]) fail('MANIFEST_HASH');
   const manifest = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
-  if (manifest.contract !== 'psc-verifier-distribution/1' || manifest.profile !== 'wasm-literal-offline/1' ||
+  if (manifest.contract !== 'psc-verifier-distribution/1' || !['wasm-literal-offline/1', 'lean434-wasm-offline/1'].includes(manifest.profile) ||
       !Array.isArray(manifest.files) || manifest.files.length > 128) fail('MANIFEST_SCHEMA');
   let previous = '', total = 0;
   for (const file of manifest.files) {
@@ -59,9 +59,11 @@ async function main() {
   // Filesystem/Node execution is a trusted host assumption. Hashing does not
   // sandbox a hostile host or prevent mutation between this check and import.
   const api = await import(pathToFileURL(path.join(root, 'scripts/offline-verifier-cli.mjs')).href);
+  const withLean = manifest.profile === 'lean434-wasm-offline/1';
   const result = args[2] === '--diff-locks' ? await api.compareSemanticLockFiles(args[3], args[4]) :
     args[2] === '--build-archive' ? await api.verifyBuildArchiveCommand(args[3], args[5]) :
-    await api.verifyCapsuleCommand(args[3], args[5], { allowedCheckerKinds: ['wasm-literal'] });
+    await api.verifyCapsuleCommand(args[3], args[5], { allowedCheckerKinds: withLean ? ['core-proof', 'wasm-literal'] : ['wasm-literal'],
+      allowedCoreProviders: withLean ? ['lean434-wasm'] : [] });
   process.stdout.write(JSON.stringify(result) + '\n');
   if (result.kind && result.kind !== 'accepted') process.exitCode = 1;
 }

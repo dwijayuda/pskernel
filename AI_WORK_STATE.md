@@ -4,14 +4,14 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `770223730c05f45c783a1084339bb8de37ea9180`
-- Last fully registered green proof checkpoint: `7191b91df2521cfdf1c64ed464a1341fb33b052a` (run #325)
-- Run #326 (`dbdbc591...`) succeeded, but it predated Lake-root registration of `CheckedInferenceConfiguration.lean` and therefore did not validate that module.
-- Run #327 (`8a51ffc...`) failed after registration exposed two eager-reduce context transport errors in checked inference.
-- Commit `5f46df27...` fixes those transports explicitly; run #328 is green.
-- Commit `4248828...` closes projection recursion with the configuration-aware projection theorem.
-- Run #329 failed because registering `CheckedProjectionConfiguration.lean` exposed proof-construction errors in that new module: WHNF-source arguments were misbound, constant-info cases were non-exhaustive, and the final projection judgment used the wrong type-WHNF expression.
-- Commit `614dd4de...` repairs those projection proof skeleton issues. Commit `77022373...` simplifies the remaining impossible arity branch directly from the executable guard. Run #333 is the current intended full validation.
+- Current proof implementation HEAD reconciled in this state: `fed08b14711f49e6bcd0d1eceac4fce1d0b5f6e6`
+- Last fully registered green proof checkpoint: `fed08b14711f49e6bcd0d1eceac4fce1d0b5f6e6` (run #346)
+- Run #328 validated the eager-reduce context transport fix.
+- The checked-inference fuel proof now closes projection recursion through the smaller-fuel induction hypothesis and configuration-aware projection semantics.
+- Checked projection is fully registered and green as of run #346.
+- `Metatheory/ProjectionReduction.lean` is registered and proves successful `psKernelReduceProjCore` computation refines an independent projection reduction rule under environment-index refinement.
+- `Metatheory/CheckerComposition.lean` exposes importable public checked/infer-only wrapper contracts.
+- Optional-reduction and recursor-reduction configuration contracts plus the explicit native-reduction TCB law are available for the WHNF checker-knot phase.
 - Current integration HEAD last observed: `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
@@ -60,24 +60,19 @@ Last checked-in audit:
 The audit is conservative relative to newer cross-module checker-contract/context work. Do not inflate module grades without applying the written A/B/C/D criteria.
 
 ## Current checkpoint
-- Fully registered green checkpoint remains `7191b91df2521cfdf1c64ed464a1341fb33b052a` (run #325) until run #329 finishes.
-- Configuration-aware projection semantics were added in `8a51ffc99f3a40f0847ea2121e93a9eab7100507` and registered as a Lake root in `48c5195caa9600990dd9b40537d2b8e2553bac9b`.
-- Checked inference projection recursion is closed in `4248828b28f106f8cb4fbd633bce3c46aa753fbe` by deriving fixed-fuel checked-inference soundness from the induction hypothesis and feeding it to the projection configuration theorem.
-- `Metatheory/CheckerComposition.lean` now exposes importable public-wrapper contracts: checked inference composes from the checked core plus WHNF/DefEq contracts, and infer-only composes from the infer-only core plus WHNF.
-- Full registered PSKernel Core metatheory/proof tree is green with the concrete infer-only core configuration-preservation theorem enabled as a Lake root.
-- Projection configuration and Projection semantic/refinement layers are now importable Assurance Plane modules and green.
-- The 13 per-constructor inference typing refinement theorems are promoted into importable `Metatheory/InferenceTyping.lean` and green.
-- `PsKernelInferOnlyCoreConfigurationPreserves whnf defeq` is now genuinely validated by the registered proof gate (the earlier run #321 was not sufficient because the module was not yet a Lake root).
-- Context/configuration infrastructure is green: local-context weakening, fresh-bound monotonicity, fresh local/let configuration preservation, rec-depth transport, scope-exit cache isolation, and app-only inference configuration preservation.
-- The checked-in semantic audit remains conservative at A=44/B=9/C=19/D=7 pending criteria-based refresh after concrete checker closure.
+- **Run #346 is green on `fed08b14711f49e6bcd0d1eceac4fce1d0b5f6e6`.**
+- The registered Assurance Plane now includes checked inference, checked projection, checker composition, projection reduction, inference typing/configuration, context/state/cache contracts, and the earlier semantic modules.
+- Concrete checked inference is no longer blocked on projection: its fuel induction obtains the projection contract recursively from the strictly smaller checked-inference fuel.
+- Public checked/infer-only wrapper composition is importable and no longer requires duplicate proof-only theorems.
+- The semantic audit remains conservatively A=44/B=9/C=19/D=7 until the next criteria-based refresh.
 
 ## Current blocker
 Confirmed production-kernel semantic defect:
 - Local-scope fvar escape through semantic caches, fixed by `0263c550ec65f558575afd3396ee95a1de168237` and now covered by the green run #312 migration.
 
 Immediate blocker:
-- validate run #333 after the checked-projection proof corrections (`614dd4de...`, `77022373...`);
-- the public checked/infer-only wrapper composition is now present under `Metatheory/CheckerComposition.lean`; once the registered checked-inference/projection stack is green, proceed directly to concrete WHNF-core/public-WHNF and DefEq configuration soundness.
+- prove concrete WHNF-core/public-WHNF configuration soundness using optional-reduction/recursor contracts, projection reduction, cache publication, delta semantics, primitive Nat semantics, and the explicit native-reduction TCB law;
+- then prove concrete DefEq configuration/stateful soundness and compose the mutually recursive checker knot.
 
 Architectural blockers still remaining:
 - close concrete checked/infer-only inference configuration contracts across all branches;
@@ -88,14 +83,13 @@ Architectural blockers still remaining:
 - reconcile against current integration, rerun final proof/conformance gates, and refresh the semantic audit.
 
 ## Immediate plan
-1. Prove `PsKernelCheckedInferenceCoreConfigurationSound whnf defeq`.
-2. Lift checked/infer-only core theorems through the public inference wrapper.
-3. Prove concrete WHNF-core/public-WHNF configuration/stateful contracts.
-4. Prove concrete DefEq configuration/stateful soundness, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success-cache paths.
-5. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.
-6. Complete ordinary/mutual/nested inductive admission transaction semantics and environment-extension refinement.
-7. Add the final explicit implementation-refinement theorem/family and refresh the semantic audit.
-8. Reconcile against current integration, rerun the full proof/conformance gates, and commit the final `AI_WORK_STATE.md`.
+1. Prove concrete WHNF-core configuration/stateful soundness.
+2. Lift to public WHNF including native/Nat/delta post-core semantics and cache publication.
+3. Prove concrete DefEq configuration/stateful soundness, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success-cache paths.
+4. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.
+5. Complete ordinary/mutual/nested inductive admission transaction semantics and environment-extension refinement.
+6. Add the final explicit implementation-refinement theorem/family and refresh the semantic audit.
+7. Reconcile against current integration, rerun the full proof/conformance gates, and commit the final `AI_WORK_STATE.md`.
 
 ## Work discipline
 - Preserve GitHub history and concurrent proof work.

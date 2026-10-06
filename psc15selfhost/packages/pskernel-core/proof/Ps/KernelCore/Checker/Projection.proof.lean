@@ -1563,6 +1563,7 @@ theorem psKernelInferIsPropWith_preserves_configuration
   | ok inferResult =>
       rcases inferResult with ⟨inferredType, inferState⟩
       rw [hInferRun] at hSuccess
+      simp only at hSuccess
       have hInferConfig :
           PsKernelCheckerConfigurationSound
             context

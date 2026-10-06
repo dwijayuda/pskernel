@@ -404,3 +404,433 @@ theorem psKernelExprEq_symm_core
             ihBody rightBody
           ]
       | _ => rfl
+
+
+theorem psKernelNatBeq_trans_core
+    (left middle right : Nat)
+    (hLeft :
+      Nat.beq left middle = true)
+    (hRight :
+      Nat.beq middle right = true) :
+    Nat.beq left right = true := by
+  have hLM : left = middle := by
+    simpa using hLeft
+  have hMR : middle = right := by
+    simpa using hRight
+  subst middle
+  subst right
+  simp
+
+theorem psKernelStringEqFromWithFuel_trans_core
+    (fuel : Nat)
+    (left middle right : String)
+    (leftPos middlePos rightPos : Nat)
+    (hLeft :
+      psKernelStringEqFromWithFuel
+          fuel
+          left
+          middle
+          leftPos
+          middlePos =
+        true)
+    (hRight :
+      psKernelStringEqFromWithFuel
+          fuel
+          middle
+          right
+          middlePos
+          rightPos =
+        true) :
+    psKernelStringEqFromWithFuel
+        fuel
+        left
+        right
+        leftPos
+        rightPos =
+      true := by
+  induction fuel generalizing
+      leftPos middlePos rightPos with
+  | zero =>
+      simp [psKernelStringEqFromWithFuel] at hLeft
+  | succ remaining ih =>
+      dsimp only [psKernelStringEqFromWithFuel] at hLeft hRight ⊢
+      cases hLeftEnd :
+          String.Internal.atEnd
+            left
+            (String.Pos.Raw.mk leftPos) with
+      | true =>
+          cases hMiddleEnd :
+              String.Internal.atEnd
+                middle
+                (String.Pos.Raw.mk middlePos) with
+          | false =>
+              simp [hLeftEnd, hMiddleEnd] at hLeft
+          | true =>
+              cases hRightEnd :
+                  String.Internal.atEnd
+                    right
+                    (String.Pos.Raw.mk rightPos) with
+              | false =>
+                  simp [hMiddleEnd, hRightEnd] at hRight
+              | true =>
+                  simp [
+                    hLeftEnd,
+                    hMiddleEnd,
+                    hRightEnd
+                  ]
+      | false =>
+          cases hMiddleEnd :
+              String.Internal.atEnd
+                middle
+                (String.Pos.Raw.mk middlePos) with
+          | true =>
+              simp [hLeftEnd, hMiddleEnd] at hLeft
+          | false =>
+              cases hRightEnd :
+                  String.Internal.atEnd
+                    right
+                    (String.Pos.Raw.mk rightPos) with
+              | true =>
+                  simp [hMiddleEnd, hRightEnd] at hRight
+              | false =>
+                  let leftChar :=
+                    Char.toNat
+                      (String.Internal.get
+                        left
+                        (String.Pos.Raw.mk leftPos))
+                  let middleChar :=
+                    Char.toNat
+                      (String.Internal.get
+                        middle
+                        (String.Pos.Raw.mk middlePos))
+                  let rightChar :=
+                    Char.toNat
+                      (String.Internal.get
+                        right
+                        (String.Pos.Raw.mk rightPos))
+                  cases hLM :
+                      Nat.beq leftChar middleChar with
+                  | false =>
+                      simp [
+                        hLeftEnd,
+                        hMiddleEnd,
+                        leftChar,
+                        middleChar,
+                        hLM
+                      ] at hLeft
+                  | true =>
+                      cases hMR :
+                          Nat.beq middleChar rightChar with
+                      | false =>
+                          simp [
+                            hMiddleEnd,
+                            hRightEnd,
+                            middleChar,
+                            rightChar,
+                            hMR
+                          ] at hRight
+                      | true =>
+                          have hLR :
+                              Nat.beq leftChar rightChar = true :=
+                            psKernelNatBeq_trans_core
+                              leftChar
+                              middleChar
+                              rightChar
+                              hLM
+                              hMR
+                          have hLeftRest :
+                              psKernelStringEqFromWithFuel
+                                  remaining
+                                  left
+                                  middle
+                                  (String.Pos.Raw.byteIdx
+                                    (String.Internal.next
+                                      left
+                                      (String.Pos.Raw.mk leftPos)))
+                                  (String.Pos.Raw.byteIdx
+                                    (String.Internal.next
+                                      middle
+                                      (String.Pos.Raw.mk middlePos))) =
+                                true := by
+                            simpa [
+                              hLeftEnd,
+                              hMiddleEnd,
+                              leftChar,
+                              middleChar,
+                              hLM
+                            ] using hLeft
+                          have hRightRest :
+                              psKernelStringEqFromWithFuel
+                                  remaining
+                                  middle
+                                  right
+                                  (String.Pos.Raw.byteIdx
+                                    (String.Internal.next
+                                      middle
+                                      (String.Pos.Raw.mk middlePos)))
+                                  (String.Pos.Raw.byteIdx
+                                    (String.Internal.next
+                                      right
+                                      (String.Pos.Raw.mk rightPos))) =
+                                true := by
+                            simpa [
+                              hMiddleEnd,
+                              hRightEnd,
+                              middleChar,
+                              rightChar,
+                              hMR
+                            ] using hRight
+                          have hRest :=
+                            ih
+                              (String.Pos.Raw.byteIdx
+                                (String.Internal.next
+                                  left
+                                  (String.Pos.Raw.mk leftPos)))
+                              (String.Pos.Raw.byteIdx
+                                (String.Internal.next
+                                  middle
+                                  (String.Pos.Raw.mk middlePos)))
+                              (String.Pos.Raw.byteIdx
+                                (String.Internal.next
+                                  right
+                                  (String.Pos.Raw.mk rightPos)))
+                              hLeftRest
+                              hRightRest
+                          simpa [
+                            hLeftEnd,
+                            hRightEnd,
+                            leftChar,
+                            rightChar,
+                            hLR
+                          ] using hRest
+
+theorem psKernelStringEq_trans_core
+    (left middle right : String)
+    (hLeft :
+      psKernelStringEq left middle = true)
+    (hRight :
+      psKernelStringEq middle right = true) :
+    psKernelStringEq left right = true := by
+  unfold psKernelStringEq at hLeft hRight ⊢
+  cases hLMSize :
+      Nat.beq
+        (String.utf8ByteSize left)
+        (String.utf8ByteSize middle) with
+  | false =>
+      simp [hLMSize] at hLeft
+  | true =>
+      cases hMRSize :
+          Nat.beq
+            (String.utf8ByteSize middle)
+            (String.utf8ByteSize right) with
+      | false =>
+          simp [hMRSize] at hRight
+      | true =>
+          have hLMSizeEq :
+              String.utf8ByteSize left =
+                String.utf8ByteSize middle := by
+            simpa using hLMSize
+          have hMRSizeEq :
+              String.utf8ByteSize middle =
+                String.utf8ByteSize right := by
+            simpa using hMRSize
+          have hLRSizeEq :
+              String.utf8ByteSize left =
+                String.utf8ByteSize right :=
+            Eq.trans hLMSizeEq hMRSizeEq
+          have hLRSize :
+              Nat.beq
+                  (String.utf8ByteSize left)
+                  (String.utf8ByteSize right) =
+                true := by
+            simpa [hLRSizeEq]
+          have hLeftWorker :
+              psKernelStringEqFromWithFuel
+                  (Nat.succ
+                    (String.utf8ByteSize left))
+                  left
+                  middle
+                  0
+                  0 =
+                true := by
+            simpa [hLMSize] using hLeft
+          have hRightWorker :
+              psKernelStringEqFromWithFuel
+                  (Nat.succ
+                    (String.utf8ByteSize left))
+                  middle
+                  right
+                  0
+                  0 =
+                true := by
+            simpa [hMRSize, hLMSizeEq] using hRight
+          simp [hLRSize]
+          exact
+            psKernelStringEqFromWithFuel_trans_core
+              (Nat.succ
+                (String.utf8ByteSize left))
+              left
+              middle
+              right
+              0
+              0
+              0
+              hLeftWorker
+              hRightWorker
+
+theorem psKernelNameEq_trans_core
+    (left middle right : PsKernelName)
+    (hLeft :
+      psKernelNameEq left middle = true)
+    (hRight :
+      psKernelNameEq middle right = true) :
+    psKernelNameEq left right = true := by
+  induction left generalizing middle right with
+  | anonymous =>
+      cases middle with
+      | anonymous =>
+          cases right with
+          | anonymous =>
+              rfl
+          | str parent value =>
+              simp [psKernelNameEq] at hRight
+          | num parent value =>
+              simp [psKernelNameEq] at hRight
+      | str parent value =>
+          simp [psKernelNameEq] at hLeft
+      | num parent value =>
+          simp [psKernelNameEq] at hLeft
+  | str leftParent leftValue ih =>
+      cases middle with
+      | anonymous =>
+          simp [psKernelNameEq] at hLeft
+      | num middleParent middleValue =>
+          simp [psKernelNameEq] at hLeft
+      | str middleParent middleValue =>
+          cases right with
+          | anonymous =>
+              simp [psKernelNameEq] at hRight
+          | num rightParent rightValue =>
+              simp [psKernelNameEq] at hRight
+          | str rightParent rightValue =>
+              cases hLMString :
+                  psKernelStringEq
+                    leftValue
+                    middleValue with
+              | false =>
+                  simp [
+                    psKernelNameEq,
+                    hLMString
+                  ] at hLeft
+              | true =>
+                  have hLMParent :
+                      psKernelNameEq
+                          leftParent
+                          middleParent =
+                        true := by
+                    simpa [
+                      psKernelNameEq,
+                      hLMString
+                    ] using hLeft
+                  cases hMRString :
+                      psKernelStringEq
+                        middleValue
+                        rightValue with
+                  | false =>
+                      simp [
+                        psKernelNameEq,
+                        hMRString
+                      ] at hRight
+                  | true =>
+                      have hMRParent :
+                          psKernelNameEq
+                              middleParent
+                              rightParent =
+                            true := by
+                        simpa [
+                          psKernelNameEq,
+                          hMRString
+                        ] using hRight
+                      have hLRString :=
+                        psKernelStringEq_trans_core
+                          leftValue
+                          middleValue
+                          rightValue
+                          hLMString
+                          hMRString
+                      have hLRParent :=
+                        ih
+                          middleParent
+                          rightParent
+                          hLMParent
+                          hMRParent
+                      simp [
+                        psKernelNameEq,
+                        hLRString,
+                        hLRParent
+                      ]
+  | num leftParent leftValue ih =>
+      cases middle with
+      | anonymous =>
+          simp [psKernelNameEq] at hLeft
+      | str middleParent middleValue =>
+          simp [psKernelNameEq] at hLeft
+      | num middleParent middleValue =>
+          cases right with
+          | anonymous =>
+              simp [psKernelNameEq] at hRight
+          | str rightParent rightValue =>
+              simp [psKernelNameEq] at hRight
+          | num rightParent rightValue =>
+              cases hLMNat :
+                  Nat.beq leftValue middleValue with
+              | false =>
+                  simp [
+                    psKernelNameEq,
+                    hLMNat
+                  ] at hLeft
+              | true =>
+                  have hLMParent :
+                      psKernelNameEq
+                          leftParent
+                          middleParent =
+                        true := by
+                    simpa [
+                      psKernelNameEq,
+                      hLMNat
+                    ] using hLeft
+                  cases hMRNat :
+                      Nat.beq middleValue rightValue with
+                  | false =>
+                      simp [
+                        psKernelNameEq,
+                        hMRNat
+                      ] at hRight
+                  | true =>
+                      have hMRParent :
+                          psKernelNameEq
+                              middleParent
+                              rightParent =
+                            true := by
+                        simpa [
+                          psKernelNameEq,
+                          hMRNat
+                        ] using hRight
+                      have hLRNat :=
+                        psKernelNatBeq_trans_core
+                          leftValue
+                          middleValue
+                          rightValue
+                          hLMNat
+                          hMRNat
+                      have hLRParent :=
+                        ih
+                          middleParent
+                          rightParent
+                          hLMParent
+                          hMRParent
+                      simp [
+                        psKernelNameEq,
+                        hLRNat,
+                        hLRParent
+                      ]

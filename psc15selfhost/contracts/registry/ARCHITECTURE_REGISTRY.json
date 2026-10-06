@@ -135,6 +135,24 @@
       "kind": "translation-validator",
       "status": "experimental",
       "canonicalPath": "contracts/target/WASM_TRANSLATION_VALIDATOR_V0.json"
+    },
+    {
+      "id": "psc-behavioral-module-interface/1",
+      "kind": "module-interface",
+      "status": "current",
+      "canonicalPath": "contracts/module-interface/BEHAVIORAL_MODULE_INTERFACE_V1.json"
+    },
+    {
+      "id": "psc-compilation-resource/1",
+      "kind": "resource-contract",
+      "status": "current",
+      "canonicalPath": "contracts/resource/COMPILATION_RESOURCE_V1.json"
+    },
+    {
+      "id": "psc-kernel-exact-defeq-sound/1",
+      "kind": "formal-proof-slice",
+      "status": "current",
+      "canonicalPath": "packages/pscv-theory/src/Ps/Theory/Core.lean"
     }
   ]
 }

@@ -19,7 +19,7 @@ concurrency:
 jobs:
   direct-rust:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
 
     steps:
       - uses: actions/checkout@v4
@@ -36,15 +36,17 @@ jobs:
         with:
           node-version: 22
 
-      - name: Verify toolchains
+      - name: Install and verify pinned toolchains
         shell: bash
         run: |
           set -euo pipefail
+          rustup toolchain install 1.98.1 --profile minimal
+          rustup default 1.98.1
           lean --version
           test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
           node --version
-          rustc --version
-          cargo --version
+          test "$(rustc --version)" = "rustc 1.98.1 (48a229cea 2026-09-01)"
+          test "$(cargo --version)" = "cargo 1.98.1 (797e8a9bc 2026-08-05)"
 
       - name: Enforce Rust portable self-host source profile
         working-directory: psc15selfhost
@@ -77,6 +79,11 @@ jobs:
         run: npm run test:backend-rust-cargo
 
       - name: Analyze and compile direct Rust whole compiler
-        timeout-minutes: 25
+        timeout-minutes: 20
         working-directory: psc15selfhost
         run: npm run test:direct-rust-whole-compiler
+
+      - name: Prove native Rust whole-compiler fixed point
+        timeout-minutes: 40
+        working-directory: psc15selfhost
+        run: npm run test:direct-rust-selfhost

@@ -4,7 +4,7 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof HEAD when this state was written: `0263c550ec65f558575afd3396ee95a1de168237`
+- Current proof HEAD when this state was written: `55967918db2f1ade76731ac6f245e10ac576089e`
 - Last known green proof checkpoint: `c521adc59916a7fed2384365db222876c2677e2b` (run #285)
 - Current integration HEAD last observed: `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
@@ -55,8 +55,8 @@ The audit is conservative relative to newer cross-module checker-contract/contex
 
 ## Current checkpoint
 - Last explicitly recorded fully green checkpoint remains `c521adc59916a7fed2384365db222876c2677e2b` (run #285).
-- Live proof HEAD is `0263c550ec65f558575afd3396ee95a1de168237`, `fix(pskernel-core): prevent local fvars from escaping semantic caches`.
-- GitHub run #304 is validating that exact head.
+- Live proof HEAD is `55967918db2f1ade76731ac6f245e10ac576089e`, `proof(pskernel-core): migrate cache proofs to fvar-free policy`.
+- GitHub run #306 is validating that exact head.
 - Projection configuration-preservation work remains on branch; the latest proof-only Projection attempts preceding the source fix were still red.
 - Concrete-checker infrastructure includes checker configuration contracts, context-state metatheory, cache/state soundness transport, Projection configuration preservation, EnsureSort/EnsureForall transport, and infer-only app-loop configuration-preservation work.
 - The checked-in semantic audit remains conservative at A=44/B=9/C=19/D=7 and has not yet been refreshed for the latest checker-contract/cache-scope work.
@@ -66,8 +66,8 @@ The audit is conservative relative to newer cross-module checker-contract/contex
 No known production-kernel semantic defect.
 
 Immediate blocker:
-- validate the full proof gate for source-fix head `0263c550ec65f558575afd3396ee95a1de168237` (run #304);
-- repair proof obligations invalidated by the new shared semantic-cache eligibility policy;
+- validate run #306 at `55967918db2f1ade76731ac6f245e10ac576089e`;
+- repair only proof obligations genuinely invalidated by the fvar-free semantic-cache policy;
 - restore the full recursive proof gate before continuing checker-knot discharge.
 
 Architectural blockers still remaining:

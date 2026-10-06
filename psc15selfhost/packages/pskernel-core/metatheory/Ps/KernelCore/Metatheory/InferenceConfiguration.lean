@@ -184,14 +184,33 @@ theorem psKernelInferOnlyCoreConfigurationPreserves_contract
                             (psKernelConstantInfoLevelParams info))
                           (psKernelLevelListLength levels) with
                     | false =>
+                        have hArityNe :
+                            psKernelNameListLength
+                                (psKernelConstantInfoLevelParams info) ≠
+                              psKernelLevelListLength levels := by
+                          intro hEq
+                          have hTrue :
+                              Nat.beq
+                                  (psKernelNameListLength
+                                    (psKernelConstantInfoLevelParams info))
+                                  (psKernelLevelListLength levels) =
+                                true := by
+                            simpa [hEq]
+                          rw [hArity] at hTrue
+                          cases hTrue
                         simp [
                           psKernelInferCoreWithFuel,
                           hMiss,
                           hDepth,
                           hFind,
-                          hArity
+                          hArityNe
                         ] at hSuccess
                     | true =>
+                        have hArityEq :
+                            psKernelNameListLength
+                                (psKernelConstantInfoLevelParams info) =
+                              psKernelLevelListLength levels := by
+                          simpa using hArity
                         let inferred :=
                           psKernelExprInstantiateLevelParams
                             (psKernelConstantInfoType info)
@@ -202,7 +221,7 @@ theorem psKernelInferOnlyCoreConfigurationPreserves_contract
                           hMiss,
                           hDepth,
                           hFind,
-                          hArity,
+                          hArityEq,
                           inferred
                         ] at hSuccess
                         rcases hSuccess with ⟨rfl, rfl⟩

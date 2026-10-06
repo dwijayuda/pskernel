@@ -2,6 +2,7 @@ import Ps.Compiler.Api
 import Ps.DriverTs.Compiler
 import Ps.DriverJs.Compiler
 import Ps.DriverWasm.Compiler
+import Ps.DriverRust.Compiler
 import Ps.Host.ProjectCompiler
 import Ps.Host.TypeScriptCompiler
 
@@ -150,6 +151,43 @@ def psHostCompilerWasm32ToFile
   IO.FS.writeBinFile outputPath (ByteArray.mk bytes.toArray)
   IO.println
     ("PSC2_DIRECT_WASM: " ++ inputPath ++ " -> " ++ outputPath)
+
+def psHostCompilerRustSource
+    (inputPath : String) : IO String := do
+  let elaborated ← psHostCompilerElaborateProject inputPath
+  match psCompilerRustFromElaborated elaborated with
+  | Except.error error =>
+      throw
+        (IO.userError
+          (String.Internal.append
+            "PSC2_CLI_DIRECT_RUST_EMIT_FAILED: "
+            (psCompilerRustErrorCode error)))
+  | Except.ok output =>
+      pure output
+
+def psHostCompilerRust
+    (inputPath : String) : IO Unit := do
+  IO.print (← psHostCompilerRustSource inputPath)
+
+def psHostCompilerRustToFile
+    (inputPath outputPath : String) : IO Unit := do
+  let output ← psHostCompilerRustSource inputPath
+  IO.FS.writeFile outputPath output
+  IO.println
+    ("PSC2_DIRECT_RUST: " ++ inputPath ++ " -> " ++ outputPath)
+
+def psHostCompilerRustCoverage
+    (inputPath : String) : IO Unit := do
+  let elaborated ← psHostCompilerElaborateProject inputPath
+  match psCompilerRustCoverageFromElaborated elaborated with
+  | Except.error error =>
+      throw
+        (IO.userError
+          (String.Internal.append
+            "PSC2_CLI_DIRECT_RUST_COVERAGE_FAILED: "
+            (psCompilerRustErrorCode error)))
+  | Except.ok report =>
+      IO.print report
 
 def psHostCompilerBuild
     (inputPath outputPath : String) : IO Unit := do

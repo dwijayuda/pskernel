@@ -163,6 +163,68 @@ def psRustExactOneArgument
       | List.cons _ _ =>
           Option.none
 
+def psRustExactThreeArguments
+    (arguments : List String) :
+    Option (Prod String (Prod String String)) :=
+  match arguments with
+  | List.nil =>
+      Option.none
+  | List.cons first rest =>
+      match rest with
+      | List.nil =>
+          Option.none
+      | List.cons second afterSecond =>
+          match afterSecond with
+          | List.nil =>
+              Option.none
+          | List.cons third tail =>
+              match tail with
+              | List.nil =>
+                  Option.some
+                    (Prod.mk first (Prod.mk second third))
+              | List.cons _ _ =>
+                  Option.none
+
+def psRustExactFiveArguments
+    (arguments : List String) :
+    Option
+      (Prod String
+        (Prod String
+          (Prod String
+            (Prod String String)))) :=
+  match arguments with
+  | List.nil =>
+      Option.none
+  | List.cons first rest =>
+      match rest with
+      | List.nil =>
+          Option.none
+      | List.cons second afterSecond =>
+          match afterSecond with
+          | List.nil =>
+              Option.none
+          | List.cons third afterThird =>
+              match afterThird with
+              | List.nil =>
+                  Option.none
+              | List.cons fourth afterFourth =>
+                  match afterFourth with
+                  | List.nil =>
+                      Option.none
+                  | List.cons fifth tail =>
+                      match tail with
+                      | List.nil =>
+                          Option.some
+                            (Prod.mk
+                              first
+                              (Prod.mk
+                                second
+                                (Prod.mk
+                                  third
+                                  (Prod.mk fourth fifth))))
+                      | List.cons _ _ =>
+                          Option.none
+
 def psRustExactTwoArguments
     (arguments : List String) :
     Option (Prod String String) :=
@@ -649,10 +711,12 @@ def psRustEmitIntrinsicFromPrinted
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringExtract =>
-      match arguments with
-      | List.cons value
-          (List.cons begin
-            (List.cons endPos List.nil)) =>
+      match psRustExactThreeArguments arguments with
+      | Option.some triple =>
+          let value : String := Prod.fst triple;
+          let pair : Prod String String := Prod.snd triple;
+          let begin : String := Prod.fst pair;
+          let endPos : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_string_extract(&("
@@ -663,7 +727,7 @@ def psRustEmitIntrinsicFromPrinted
                 "), &("
                 endPos
                 "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringEq =>
       match psRustExactTwoArguments arguments with
@@ -725,10 +789,12 @@ def psRustEmitIntrinsicFromPrinted
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arrayGetD =>
-      match arguments with
-      | List.cons array
-          (List.cons index
-            (List.cons fallback List.nil)) =>
+      match psRustExactThreeArguments arguments with
+      | Option.some triple =>
+          let array : String := Prod.fst triple;
+          let pair : Prod String String := Prod.snd triple;
+          let index : String := Prod.fst pair;
+          let fallback : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_array_get_d(&("
@@ -739,13 +805,15 @@ def psRustEmitIntrinsicFromPrinted
                 "), &("
                 fallback
                 "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arraySet =>
-      match arguments with
-      | List.cons array
-          (List.cons index
-            (List.cons value List.nil)) =>
+      match psRustExactThreeArguments arguments with
+      | Option.some triple =>
+          let array : String := Prod.fst triple;
+          let pair : Prod String String := Prod.snd triple;
+          let index : String := Prod.fst pair;
+          let value : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_array_set(&("
@@ -756,13 +824,15 @@ def psRustEmitIntrinsicFromPrinted
                 "), &("
                 value
                 "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arraySetIfInBounds =>
-      match arguments with
-      | List.cons array
-          (List.cons index
-            (List.cons value List.nil)) =>
+      match psRustExactThreeArguments arguments with
+      | Option.some triple =>
+          let array : String := Prod.fst triple;
+          let pair : Prod String String := Prod.snd triple;
+          let index : String := Prod.fst pair;
+          let value : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_array_set_if_in_bounds(&("
@@ -773,7 +843,7 @@ def psRustEmitIntrinsicFromPrinted
                 "), &("
                 value
                 "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arrayMap =>
       match psRustExactTwoArguments arguments with
@@ -789,12 +859,17 @@ def psRustEmitIntrinsicFromPrinted
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arrayFoldl =>
-      match arguments with
-      | List.cons fnValue
-          (List.cons init
-            (List.cons array
-              (List.cons start
-                (List.cons stop List.nil)))) =>
+      match psRustExactFiveArguments arguments with
+      | Option.some quintuple =>
+          let fnValue : String := Prod.fst quintuple;
+          let tail1 : Prod String (Prod String (Prod String String)) :=
+            Prod.snd quintuple;
+          let init : String := Prod.fst tail1;
+          let tail2 : Prod String (Prod String String) := Prod.snd tail1;
+          let array : String := Prod.fst tail2;
+          let tail3 : Prod String String := Prod.snd tail2;
+          let start : String := Prod.fst tail3;
+          let stop : String := Prod.snd tail3;
           Except.ok
             (psRustConcat4
               "__ps_array_foldl("
@@ -809,7 +884,7 @@ def psRustEmitIntrinsicFromPrinted
                   start
                   "), &("
                   (psRustConcat2 stop "))"))))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
 
 def psRustEmitMatchBindings

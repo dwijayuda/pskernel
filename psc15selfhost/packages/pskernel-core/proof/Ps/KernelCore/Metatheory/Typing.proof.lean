@@ -1120,3 +1120,122 @@ theorem psKernelInferCore_mdata_refines_typing
         hDepth,
         hBody
       ]
+
+
+theorem psKernelInferCore_projection_refines_typing
+    (remaining : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context nextContext : PsKernelCheckerContext)
+    (state projectionState : PsKernelCheckerState)
+    (typeName : PsKernelName)
+    (index : Nat)
+    (structValue result : PsKernelExpr)
+    (inferOnly : Bool)
+    (hCache :
+      psKernelExprMapGet
+          (if inferOnly then state.inferOnly else state.checkedInfer)
+          (PsKernelExpr.proj typeName index structValue) =
+        Option.none)
+    (hDepth :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hProjectionSound :
+      PsKernelProjectionSound
+        whnf
+        (fun
+          projectionContext
+          projectionState
+          projectionExpr =>
+            psKernelInferCoreWithFuel
+              remaining
+              whnf
+              defeq
+              projectionContext
+              projectionState
+              projectionExpr
+              inferOnly))
+    (hIndex :
+      PsKernelEnvironmentIndexRefines nextContext.environment)
+    (hProjection :
+      psKernelInferProjectionWith
+          whnf
+          (fun
+            projectionContext
+            projectionState
+            projectionExpr =>
+              psKernelInferCoreWithFuel
+                remaining
+                whnf
+                defeq
+                projectionContext
+                projectionState
+                projectionExpr
+                inferOnly)
+          nextContext
+          state
+          typeName
+          index
+          structValue =
+        Except.ok (Prod.mk result projectionState)) :
+    psKernelInferCoreWithFuel
+        (Nat.succ remaining)
+        whnf
+        defeq
+        context
+        state
+        (PsKernelExpr.proj typeName index structValue)
+        inferOnly =
+      Except.ok
+        (Prod.mk
+          result
+          (psKernelCacheInferResult
+            projectionState
+            inferOnly
+            (PsKernelExpr.proj typeName index structValue)
+            result)) ∧
+    PsKernelTypingJudgment
+      nextContext.environment
+      nextContext.localContext
+      (PsKernelExpr.proj typeName index structValue)
+      result := by
+  constructor
+  · cases inferOnly with
+    | false =>
+        simp at hCache
+        simp [
+          psKernelInferCoreWithFuel,
+          psKernelInferCacheEligible,
+          hCache,
+          hDepth,
+          hProjection
+        ]
+    | true =>
+        simp at hCache
+        simp [
+          psKernelInferCoreWithFuel,
+          psKernelInferCacheEligible,
+          hCache,
+          hDepth,
+          hProjection
+        ]
+  · exact
+      hProjectionSound
+        nextContext
+        state
+        projectionState
+        typeName
+        index
+        structValue
+        result
+        hIndex
+        hProjection

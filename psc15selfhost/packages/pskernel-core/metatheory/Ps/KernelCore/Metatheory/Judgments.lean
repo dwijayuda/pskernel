@@ -1161,3 +1161,32 @@ def PsKernelInferenceSound
       context.localContext
       expr
       result
+
+
+def PsKernelProjectionSound
+    (whnf inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (typeName : PsKernelName)
+    (index : Nat)
+    (structValue result : PsKernelExpr),
+    PsKernelEnvironmentIndexRefines context.environment ->
+    psKernelInferProjectionWith
+        whnf
+        inferType
+        context
+        state
+        typeName
+        index
+        structValue =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelTypingJudgment
+      context.environment
+      context.localContext
+      (PsKernelExpr.proj typeName index structValue)
+      result

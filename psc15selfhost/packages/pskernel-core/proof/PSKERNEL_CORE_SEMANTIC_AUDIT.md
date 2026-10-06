@@ -13,9 +13,9 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 31 |
-| B | 15 |
-| C | 25 |
+| A | 33 |
+| B | 14 |
+| C | 24 |
 | D | 8 |
 | **Total canonical source/proof pairs** | **79** |
 
@@ -31,7 +31,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `API/Provider.lean` | **C** | Provider compatibility decision facts. |
 | `API/Session.lean` | **A** | Session environment construction is proved semantically transparent to native-evaluator installation and preserves `EnvironmentIndexRefines`, alongside fail-closed preflight facts. |
 | `Admission/Declaration/Admission.lean` | **A** | Successful checked safe-definition/theorem admission now refines the shared `PsKernelDeclarationExtension`; remaining declaration variants are being closed on the same relation. |
-| `Admission/Declaration/Validation.lean` | **B** | Closedness, universes, body checking and defeq gating; formal validation relation pending. |
+| `Admission/Declaration/Validation.lean` | **A** | Successful definition-body validation refines `PsKernelDefinitionBodyValid`, including closedness, universe-parameter discipline, typing, and declared-type defeq under explicit checker soundness contracts. |
 | `Admission/Inductive/Common/Elimination.lean` | **C** | Fuel/base control facts only. |
 | `Admission/Inductive/Common/Occurrence.lean` | **C** | Selected occurrence/control cases; positivity semantics incomplete. |
 | `Admission/Inductive/Common/Parameters.lean` | **B** | Reusable binder/list structure plus opening base case. |
@@ -72,7 +72,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Checker/Inference/Helpers.lean` | **A** | Cache publication now preserves the named checker-state semantic soundness invariant under the isolated inference-cache insertion law; Sort/Pi views and noninterference laws remain. |
 | `Checker/Knot.lean` | **A** | Concrete checker infer/check/WHNF/defeq entry points now compose to independent typing/reduction/defeq judgments under explicit lower-layer soundness contracts; full discharge of those contracts remains pending. |
 | `Checker/Ops.lean` | **D** | Eta/wrapper fact only. |
-| `Checker/Projection.lean` | **C** | Fuel/error control facts; dependent projection typing relation pending. |
+| `Checker/Projection.lean` | **A** | Successful dependent projection inference refines `PsKernelTypingJudgment` and `PsKernelProjectionResultJudgment`; parameter application and dependent-field traversal refine dedicated semantic judgments under WHNF/inference/index soundness. |
 | `Checker/Recursor/Analysis.lean` | **A** | Successful recursor-rule lookup proves constructor-name agreement and list membership, and constructor-app recognition refines authoritative semantic-environment constructor metadata under index refinement. |
 | `Checker/Recursor/Reduction.lean` | **C** | Selected no-reduction case only. |
 | `Checker/Reduction/KernelReductions.lean` | **A** | WHNF-facing Nat succ/add/sub/mul hooks now refine independent primitive reduction steps when normalized literal premises and resource gates succeed; Quot/recursor hooks remain to be bridged. |

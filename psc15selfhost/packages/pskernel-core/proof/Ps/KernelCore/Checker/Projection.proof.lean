@@ -1459,3 +1459,33 @@ theorem psKernelInferProjectionWith_refines_typing
     PsKernelTypingJudgment.proj
       typeName index structValue structType result
       hStruct hProjection
+
+
+theorem psKernelInferProjectionWith_sound
+    (whnf inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnfSound : PsKernelWhnfSound whnf)
+    (hInferSound : PsKernelInferenceSound inferType) :
+    PsKernelProjectionSound whnf inferType := by
+  intro
+    context state nextState
+    typeName index structValue result
+    hIndex hSuccess
+  exact
+    psKernelInferProjectionWith_refines_typing
+      whnf
+      inferType
+      context
+      state
+      nextState
+      typeName
+      index
+      structValue
+      result
+      hWhnfSound
+      hInferSound
+      hIndex
+      hSuccess

@@ -121,7 +121,10 @@ async function writeCargoProject(rustSource) {
 
 function buildNative() {
   requireSuccess(
-    execute("cargo", ["build", "--quiet"], { cwd: cargoRoot }),
+    execute("cargo", ["build", "--quiet"], {
+      cwd: cargoRoot,
+      env: { ...process.env, RUSTFLAGS: "-Awarnings" },
+    }),
     "PSC2_DIRECT_RUST_SELFHOST_CARGO_BUILD_FAILED",
     "cargo",
     ["build", "--quiet"],

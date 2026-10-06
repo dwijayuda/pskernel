@@ -17,7 +17,55 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  direct-selfhost:
+  direct-js:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned Lean 4.34.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean --version
+          test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+          node --version
+
+      - name: Build direct JS self-host closure
+        working-directory: psc15selfhost
+        run: |
+          lake build \
+            psc1 \
+            psc1_ir_specialize_tests \
+            psc1_erasure_tests \
+            psc1_backend_js_tests
+
+      - name: Run shared and direct JS regressions
+        working-directory: psc15selfhost
+        run: |
+          lake exe psc1_ir_specialize_tests
+          lake exe psc1_erasure_tests
+          lake exe psc1_backend_js_tests
+
+      - name: Prove direct JavaScript whole-compiler fixed point
+        timeout-minutes: 20
+        working-directory: psc15selfhost
+        run: npm run test:direct-js-selfhost
+
+  direct-wasm:
     runs-on: ubuntu-latest
     timeout-minutes: 45
 
@@ -44,29 +92,30 @@ jobs:
           test "$(lean --githash)" = "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
           node --version
 
-      - name: Build direct self-host closure
+      - name: Build direct Wasm self-host closure
         working-directory: psc15selfhost
         run: |
           lake build \
             psc1 \
             psc1_ir_specialize_tests \
-            psc1_erasure_tests
+            psc1_erasure_tests \
+            psc1_backend_wasm_tests \
+            psc1_backend_wasm_binary_smoke
 
-      - name: Run shared specialization and erasure regressions
+      - name: Run shared and direct Wasm regressions
         working-directory: psc15selfhost
         run: |
           lake exe psc1_ir_specialize_tests
           lake exe psc1_erasure_tests
-
-      - name: Prove direct JavaScript whole-compiler fixed point
-        timeout-minutes: 15
-        working-directory: psc15selfhost
-        run: npm run test:direct-js-selfhost
+          lake exe psc1_backend_wasm_tests
+          lake exe psc1_backend_wasm_binary_smoke > /tmp/psc15-wasm-bytes.txt
+          node scripts/backend-wasm-runtime.test.mjs /tmp/psc15-wasm-bytes.txt
 
       - name: Build and instantiate direct Wasm whole compiler
         working-directory: psc15selfhost
         run: npm run test:direct-wasm-whole-compiler
 
       - name: Prove direct Wasm whole-compiler fixed point
+        timeout-minutes: 30
         working-directory: psc15selfhost
         run: npm run test:direct-wasm-selfhost

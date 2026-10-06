@@ -830,3 +830,755 @@ Native speed is useful for:
 
 Direct JS/Wasm remain strategic portability/self-host lanes.
 
+---
+
+# 26. Four-plane compiler architecture
+
+Version 2 organizes the compiler into four planes.
+
+## Semantic plane
+
+Owns language meaning and checked semantic artifacts.
+
+~~~text
+syntax
+core
+environment
+meta
+elab
+kernel-contract
+CheckedCore
+PSCV-CERT
+CertifiedSource
+~~~
+
+## Compiler plane
+
+Owns executable semantic transformations.
+
+~~~text
+RuntimeIR
+validateRuntimeIr
+VerifiedIR
+specialization
+SpecializedIR
+JsIR/WasmIR/native adapter IR
+~~~
+
+## Build plane
+
+Owns impure orchestration and performance.
+
+~~~text
+filesystem
+module graph
+QueryGraph
+CAS
+remote cache
+toolchain invocation
+parallel scheduling
+package resolution
+publishing
+~~~
+
+## Knowledge plane
+
+Owns reusable SAVEF knowledge.
+
+~~~text
+CertifiedModuleInterface
+specification sets
+theorem interfaces
+assumption closures
+pass theorems
+proof recipes
+failure knowledge
+SPKF roots
+FactoryBench metrics
+~~~
+
+The knowledge plane is derived from semantic authority.
+
+It does not become a second semantic authority.
+
+---
+
+# 27. Why this four-plane split matters
+
+Without this split, SAVEF risks mixing:
+
+~~~text
+compiler cache hit
+with
+proof truth
+
+AI retrieval metadata
+with
+semantic specification
+
+package manifest
+with
+compiler authority
+
+target artifact
+with
+source correctness
+~~~
+
+The four-plane architecture allows aggressive optimization and AI tooling without enlarging the logical trusted base.
+
+---
+
+# 28. Current package-to-target mapping
+
+Current package:
+
+~~~text
+foundation/
+~~~
+
+Target role:
+
+~~~text
+semantic primitives + reusable base theorems
+~~~
+
+Current:
+
+~~~text
+syntax/
+~~~
+
+Target role:
+
+~~~text
+owned source grammar, AST, canonical parser/printer/translation
+~~~
+
+Current:
+
+~~~text
+core/
+~~~
+
+Target role:
+
+~~~text
+kernel-facing language/core structures and compiler semantic algebra
+~~~
+
+Current:
+
+~~~text
+environment/
+meta/
+elab/
+~~~
+
+Target role:
+
+~~~text
+frontend semantic machinery
+~~~
+
+Current:
+
+~~~text
+bridge/
+~~~
+
+Target role should be narrowed to:
+
+~~~text
+canonical protocol/codec boundaries
+~~~
+
+It should not become the long-term owner of semantic authority.
+
+Current:
+
+~~~text
+compiler-ir/
+~~~
+
+Target role should be split into:
+
+~~~text
+runtime-ir/
+verified-ir/
+specialized-ir/
+compiler-pass-specialize/
+~~~
+
+Current:
+
+~~~text
+erasure/
+~~~
+
+Target role:
+
+~~~text
+CertifiedSource -> RuntimeIR semantic transform
+~~~
+
+Current:
+
+~~~text
+compiler/
+~~~
+
+Target role:
+
+~~~text
+pipeline composition/service façade
+~~~
+
+It should not itself own the semantic implementation of every stage.
+
+---
+
+# 29. Proposed source tree evolution
+
+Target structure:
+
+~~~text
+psc15selfhost/packages/
+
+foundation/
+syntax/
+core/
+environment/
+meta/
+elab/
+
+kernel-contract/
+checked-core/
+pscv-spec/
+pscv-obligation/
+pscv-cert/
+
+compiler-contract/
+runtime-ir/
+verified-ir/
+specialized-ir/
+
+compiler-pass-specialize/
+erasure/
+
+module-interface/
+interface-ir/
+evidence-core/
+
+compiler/
+compiler-service/
+project/
+build-graph/
+artifact-codec/
+artifact-store/
+
+lean-reference/
+
+backend-js/
+backend-wasm/
+backend-ts/
+backend-rust/
+
+driver-js/
+driver-wasm/
+driver-ts/
+driver-rust/
+
+savef-format/
+savef-index/
+factory-bench/
+
+bootstrap/
+cli/
+~~~
+
+This is a target shape, not an instruction to create all packages immediately.
+
+Every new package must correspond to an independent semantic or operational contract.
+
+---
+
+# 30. Proof/specification sidecar structure
+
+The current self-host compiler source should not be rewritten merely to insert proof syntax.
+
+Use sidecar directories first:
+
+~~~text
+packages/core/
+    src/
+    spec/
+    proof/
+
+packages/environment/
+    src/
+    spec/
+    proof/
+
+packages/meta/
+    src/
+    spec/
+    proof/
+
+packages/compiler-pass-specialize/
+    src/
+    spec/
+    proof/
+~~~
+
+Sidecars are keyed to semantic artifact identities rather than source path alone.
+
+This permits:
+
+- Lean-based proof authoring now;
+- PSCV-source self-host implementation stability;
+- later migration of selected contracts into PSCV surface syntax;
+- stable theorem identity across source refactors.
+
+---
+
+# 31. CompilerModuleKnowledge
+
+Each public compiler module should eventually produce a knowledge bundle.
+
+Conceptually:
+
+~~~text
+CompilerModuleKnowledge {
+    semanticProfile
+
+    sourceArtifactId
+    checkedCoreId
+    certifiedSourceId
+
+    certifiedModuleInterfaceId
+
+    approvedSpecSetId
+    theoremInterfaceId
+    assumptionClosureId
+
+    proofDependencyIds
+    implementationDependencyIds
+
+    passEvidenceIds
+
+    advisoryRecipeIds
+    failureKnowledgeIds
+
+    provenanceReferences
+}
+~~~
+
+This is not one giant authority object.
+
+It is a typed graph of independently hashable artifacts.
+
+---
+
+# 32. CertifiedModuleInterface becomes the compiler's declaration file
+
+TypeScript scales through compact public declaration interfaces.
+
+Lean scales imports through compiled module semantic artifacts.
+
+SAVEF needs the stronger compiler equivalent:
+
+~~~text
+CertifiedModuleInterface
+~~~
+
+It should include all downstream-observable semantic information:
+
+- exported declarations and types;
+- transparent bodies required for downstream reduction;
+- opaque declarations represented through public specification;
+- instances and ordering metadata where relevant;
+- public theorems/specifications;
+- effects/capabilities;
+- public assumption closure;
+- imported interface identities;
+- compiler/pass contract requirements.
+
+Private implementation should be absent unless semantic transparency requires it.
+
+---
+
+# 33. Transparent versus opaque compiler exports
+
+This distinction is crucial in dependent languages.
+
+## Opaque-to-clients
+
+Clients reason using:
+
+- declared type;
+- specification;
+- exported theorems.
+
+The implementation is not downstream semantic input.
+
+A body rewrite preserving the specification can keep dependent modules green.
+
+## Transparent-to-clients
+
+Clients rely on definitional reduction of the body.
+
+Its canonical body is part of the CertifiedModuleInterface identity.
+
+Changing it invalidates downstream proof caches as required.
+
+This gives QueryGraph the information needed to distinguish semantic from private changes.
+
+---
+
+# 34. QueryGraph v2
+
+Current QueryGraph already tracks sourceKey, interfaceKey, and dependency interfaces.
+
+SAVEF extension:
+
+~~~text
+SemanticQueryRecord {
+    moduleId
+
+    sourceKey
+    parsedKey
+    elaboratedKey
+
+    checkedCoreKey
+    certifiedSourceKey
+
+    moduleInterfaceKey
+    specSetKey
+    theoremInterfaceKey
+    assumptionClosureKey
+
+    runtimeIrKey
+    verifiedIrKey
+    specializedIrKey
+
+    targetEvidenceKeys
+
+    dependencyInterfaceKeys
+}
+~~~
+
+Not every module needs every field.
+
+The graph remains incremental and stage-specific.
+
+---
+
+# 35. Semantic red/green rule
+
+Current source-only invalidation is not enough for SAVEF.
+
+Target behavior:
+
+~~~text
+private implementation change
+    + same CertifiedModuleInterface
+    =>
+downstream proof/build may stay green
+~~~
+
+but:
+
+~~~text
+public specification change
+or
+transparent body change
+or
+public theorem change
+or
+assumption closure change
+    =>
+affected downstream nodes become red
+~~~
+
+This rule is central to proof-maintenance scalability.
+
+---
+
+# 36. QueryGraph must remain fail-closed
+
+A green decision is an optimization.
+
+It is never proof authority.
+
+Long-term validation target:
+
+~~~text
+GreenReuse(query, cache)
+    ->
+Equivalent(
+    cachedResult,
+    recompute(authoritativeInputs)
+    )
+~~~
+
+Missing, corrupt, or mismatched artifacts cause:
+
+~~~text
+red
+recompute
+~~~
+
+never semantic fallback.
+
+---
+
+# 37. Compiler service is the only semantic API
+
+Create one compiler service used by:
+
+- CLI;
+- IDE/LSP;
+- docs;
+- build planner;
+- SAVEF indexer;
+- AI agents;
+- package tooling.
+
+Candidate operations:
+
+~~~text
+parse
+resolve
+elaborate
+typeOf
+
+goalState
+obligations
+specificationCoverage
+
+candidateCore
+admissionPayload
+checkedCore
+certifiedSource
+
+moduleInterface
+theoremInterface
+assumptionClosure
+
+runtimeIr
+verifiedIr
+specializedIr
+
+semanticDiff
+affectedModules
+affectedProofs
+
+capabilitySearch
+passEvidence
+buildPlan
+~~~
+
+No AI integration gets an independently implemented type checker.
+
+---
+
+# 38. Lean reference service interface
+
+The Lean reference lane should expose a matching subset of compiler-service operations.
+
+Conceptually:
+
+~~~text
+LeanReferenceService {
+    elaborate
+    kernelCheck
+    exportCore
+    compileNative
+    moduleInterfaceOracle
+    runReference
+}
+~~~
+
+This enables differential comparison between the Lean reference lane and owned PSCV compiler lane without coupling the owned compiler to Lean internals.
+
+---
+
+# 39. Differential oracle policy
+
+Lean reference output can provide evidence for:
+
+- source acceptance agreement;
+- elaborated declaration agreement;
+- public semantic interface agreement;
+- runtime behavior comparison on bounded examples;
+- compiler artifact comparison where meaningful.
+
+Differential agreement is not a proof of correctness.
+
+It is independent evidence.
+
+A PSCV artifact must not gain kernel-verified status merely because Lean and PSCV agree.
+
+---
+
+# 40. Real CheckedCore remains necessary
+
+Even under the assumption that Lean can compile all PSCV language features, the owned PSCV semantic pipeline still needs an honest authority boundary.
+
+Current:
+
+~~~text
+AdmissionReady
+    ->
+erasure
+~~~
+
+Target:
+
+~~~text
+AdmissionReady
+    |
+    | KernelContract
+    v
+CheckedCore
+    |
+    | PSCV-CERT
+    v
+CertifiedSource
+    |
+    v
+erasure
+~~~
+
+Lean can be one provider/reference implementation.
+
+PSKernel remains the intended owned authority when its readiness gates close.
+
+---
+
+# 41. Compiler pass manifest
+
+Every pass in the certified lane should emit a deterministic pass manifest.
+
+Concept:
+
+~~~text
+PassExecution {
+    passContractId
+
+    inputArtifactId
+    outputArtifactId
+
+    semanticProfileId
+    implementationId
+
+    options
+    resourceBudget
+
+    validationEvidenceId
+    preservationEvidenceId
+
+    timing/resourceMetrics
+}
+~~~
+
+The manifest is evidence binding.
+
+It does not substitute for the preservation theorem or validator.
+
+---
+
+# 42. Pass-level SAVEF is more powerful than module-only SAVEF
+
+Module theorems help prove source/compiler algorithms.
+
+Pass theorems help every compiled program.
+
+Example:
+
+~~~text
+SpecializationPreservesSemantics
+~~~
+
+may be reused for:
+
+- compiler self-host build;
+- JSON package;
+- HTTP package;
+- future user applications;
+- JS backend;
+- Wasm backend;
+- future native backend.
+
+That is much greater knowledge leverage than a theorem specific to one compiler call site.
+
+SAVEF should prioritize high-fanout pass theorems.
+
+---
+
+# 43. Knowledge leverage scoring
+
+Every candidate theorem/pass proof should receive an engineering leverage estimate.
+
+Possible factors:
+
+~~~text
+number of downstream modules
+number of compiler passes using it
+number of backends benefiting
+number of package domains benefiting
+proof invalidation reduction
+frequency of matching obligations
+~~~
+
+This estimate affects work prioritization.
+
+It does not affect theorem truth.
+
+---
+
+# 44. Priority theorem classes
+
+Highest SAVEF leverage for the compiler likely comes from:
+
+1. substitution/lifting/abstraction laws;
+2. environment lookup/index refinement;
+3. typing/inference soundness;
+4. unification solution soundness;
+5. instance synthesis correctness/order;
+6. RuntimeIR validator soundness;
+7. specialization preservation;
+8. erasure noninterference/preservation;
+9. parser/printer canonical roundtrip;
+10. elaboration soundness;
+11. target lowering preservation.
+
+This is the recommended proof-investment order.
+
+---
+
+# 45. Why not start with the parser
+
+Syntax is approximately 8.2k lines and elaboration approximately 4.8k lines.
+
+Foundation/Core is only about 1.1k lines.
+
+Starting at the parser maximizes proof context before reusable theory exists.
+
+SAVEF should intentionally do the opposite:
+
+~~~text
+small high-leverage semantic base
+    ->
+reusable theorem graph
+    ->
+state/meta invariants
+    ->
+erasure/IR
+    ->
+large frontend
+~~~
+
+The large frontend then becomes the experiment that tests whether accumulated knowledge pays off.
+

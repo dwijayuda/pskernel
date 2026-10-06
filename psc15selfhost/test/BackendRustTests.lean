@@ -451,13 +451,13 @@ def psBackendRustLambdaFunctionParameterModule : PsVerifiedIrModule :=
     ]
   }
 
-def psTestBackendRustRejectsLambdaFunctionParameter : Bool :=
+def psTestBackendRustLambdaFunctionParameter : Bool :=
   match psRustEmitExpr psBackendRustLambdaFunctionParameterExpr with
-  | Except.error
-      (PsRustEmitError.lambdaFunctionParameterUnsupported name) =>
-      psStringEq name "f"
-  | _ =>
+  | Except.error _ =>
       false
+  | Except.ok output =>
+      output.contains
+        "f: std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
 
 def psBackendRustFirstOrderCallbackModule : PsVerifiedIrModule :=
   {
@@ -1253,9 +1253,9 @@ def psTestBackendRustCoverageLambdaFunctionResult : Bool :=
 def psTestBackendRustCoverageLambdaFunctionParameter : Bool :=
   let coverage :=
     psRustCoverageModule psBackendRustLambdaFunctionParameterModule;
-  psRustCoverageContains
-    coverage.unsupported
-    "expr:lambdaFunctionParameter"
+  Nat.beq
+    (psRustCoverageLength coverage.unsupported)
+    0
 
 def psTestBackendRustCoverageStaticFunctionStorage : Bool :=
   let coverage :=
@@ -1313,7 +1313,7 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "reject generic top-level values", passed := psTestBackendRustRejectsGenericValue },
   { name := "accept first-order callback parameters", passed := psTestBackendRustFirstOrderCallback },
   { name := "reject function-valued lambda results", passed := psTestBackendRustRejectsLambdaFunctionResult },
-  { name := "reject function-typed lambda parameters", passed := psTestBackendRustRejectsLambdaFunctionParameter },
+  { name := "accept first-order function-typed lambda parameters", passed := psTestBackendRustLambdaFunctionParameter },
   { name := "accept direct function-valued results", passed := psTestBackendRustDirectFunctionResult },
   { name := "accept forwarded function-valued results", passed := psTestBackendRustForwardedFunctionResult },
   { name := "reject nested function-valued results", passed := psTestBackendRustRejectsNestedFunctionResult },
@@ -1333,7 +1333,7 @@ def psBackendRustTests : List PsBackendRustNamedTest := [
   { name := "coverage accepts forwarded function results", passed := psTestBackendRustCoverageForwardedFunctionResult },
   { name := "coverage rejects nested function results", passed := psTestBackendRustCoverageNestedFunctionResult },
   { name := "coverage rejects lambda function results", passed := psTestBackendRustCoverageLambdaFunctionResult },
-  { name := "coverage rejects lambda function parameters", passed := psTestBackendRustCoverageLambdaFunctionParameter },
+  { name := "coverage accepts first-order lambda function parameters", passed := psTestBackendRustCoverageLambdaFunctionParameter },
   { name := "coverage accepts static function storage", passed := psTestBackendRustCoverageStaticFunctionStorage },
   { name := "coverage rejects captured function storage", passed := psTestBackendRustCoverageCapturedFunctionStorage },
   { name := "coverage accepts static constructor storage", passed := psTestBackendRustCoverageStaticConstructorStorage },

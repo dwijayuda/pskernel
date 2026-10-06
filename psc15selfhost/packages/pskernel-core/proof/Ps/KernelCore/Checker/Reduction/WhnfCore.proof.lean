@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Reduction.WhnfCore
+import Ps.KernelCore.Metatheory.Judgments
 
 theorem psKernelWhnfCountLambdasWithFuel_zero
     (expr : PsKernelExpr)
@@ -170,3 +171,125 @@ theorem psKernelWhnfCoreWithFuel_fvar_let
     hValue,
     hReduce
   ]
+
+
+theorem psKernelWhnfCoreFinish_preserves_semantic_sound
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (original result : PsKernelExpr)
+    (cheapProj : Bool)
+    (state : PsKernelCheckerState)
+    (hInsert : PsKernelReductionCacheInsertLaw)
+    (hState :
+      PsKernelCheckerStateSemanticSound
+        environment
+        localContext
+        state)
+    (hReduction :
+      PsKernelReductionClosure
+        environment
+        localContext
+        original
+        result) :
+    ∃ nextState : PsKernelCheckerState,
+      psKernelWhnfCoreFinish
+          original
+          cheapProj
+          result
+          state =
+        Except.ok (Prod.mk result nextState) ∧
+      PsKernelCheckerStateSemanticSound
+        environment
+        localContext
+        nextState := by
+  unfold PsKernelCheckerStateSemanticSound at hState
+  rcases hState with
+    ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
+  cases cheapProj with
+  | true =>
+      refine ⟨state, ?_, ?_⟩
+      · rfl
+      · exact
+          ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
+  | false =>
+      let nextCache :=
+        psKernelExprMapInsert
+          state.whnfCore
+          original
+          result
+      let nextState :=
+        psKernelCheckerStateWithWhnfCore
+          state
+          nextCache
+      refine ⟨nextState, ?_, ?_⟩
+      · rfl
+      · unfold PsKernelCheckerStateSemanticSound
+        simp [
+          nextState,
+          psKernelCheckerStateWithWhnfCore
+        ]
+        exact
+          hInsert
+            environment
+            localContext
+            state.whnfCore
+            original
+            result
+            hWhnfCore
+            hReduction
+
+theorem psKernelWhnfFinish_preserves_semantic_sound
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (original result : PsKernelExpr)
+    (state : PsKernelCheckerState)
+    (hInsert : PsKernelReductionCacheInsertLaw)
+    (hState :
+      PsKernelCheckerStateSemanticSound
+        environment
+        localContext
+        state)
+    (hReduction :
+      PsKernelReductionClosure
+        environment
+        localContext
+        original
+        result) :
+    ∃ nextState : PsKernelCheckerState,
+      psKernelWhnfFinish
+          original
+          result
+          state =
+        Except.ok (Prod.mk result nextState) ∧
+      PsKernelCheckerStateSemanticSound
+        environment
+        localContext
+        nextState := by
+  unfold PsKernelCheckerStateSemanticSound at hState
+  rcases hState with
+    ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
+  let nextCache :=
+    psKernelExprMapInsert
+      state.whnf
+      original
+      result
+  let nextState :=
+    psKernelCheckerStateWithWhnf
+      state
+      nextCache
+  refine ⟨nextState, ?_, ?_⟩
+  · rfl
+  · unfold PsKernelCheckerStateSemanticSound
+    simp [
+      nextState,
+      psKernelCheckerStateWithWhnf
+    ]
+    exact
+      hInsert
+        environment
+        localContext
+        state.whnf
+        original
+        result
+        hWhnf
+        hReduction

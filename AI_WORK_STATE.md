@@ -4,8 +4,8 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof HEAD when this state was written: `5d0e02799c789831b62ccc7d92c5af088526e1a3`
-- Last known green proof checkpoint: `91d03bca250c4e1b97a2967b403a0aced211d3eb` (run #260)
+- Current proof HEAD when this state was written: `3152c42abfafa7f13cd6b6f804c01f2fa9f6f99e`
+- Last known green proof checkpoint: `3152c42abfafa7f13cd6b6f804c01f2fa9f6f99e` (run #262)
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
 ## Acceptance criteria
@@ -50,19 +50,12 @@ Last checked-in audit before this state file:
 - Total canonical source/proof pairs: 79
 
 ## Current blocker
-Configuration-level checker contracts are the active frontier. Run #261 fails only in `Ps.KernelCore.Metatheory.CheckerContracts`, at the false branch of `psKernelDefEqFinish_preserves_configuration`: the implementation returns the original state unchanged, but the proof reconstructs the underlying conjunction instead of returning the already-typed `PsKernelCheckerConfigurationSound` hypothesis. The current checkpoint fixes that proof shape without weakening the contract.
+None at the current checkpoint. Run #262 is fully green:
+- configuration-level checker contracts compile;
+- metatheory build is green;
+- recursive proof tree is green.
 
-Last known green proof checkpoint remains `91d03bca250c4e1b97a2967b403a0aced211d3eb` (run #260):
-- metatheory build: 100 jobs successful;
-- recursive proof tree: 84/84 PASS;
-- proof check: 110 seconds.
-
-Recently discharged prerequisites:
-- semantic expression-map cache publication;
-- semantic DefEq pair-cache insertion;
-- canonical local-context freshness and extension;
-- semantic checker-state transport under context extension;
-- reduction/DefEq weakening proved externally rather than as illegal recursive constructors.
+The configuration layer now tracks authoritative environment-index refinement, generated-name freshness, and all semantic caches together.
 
 ## Immediate plan
 1. Prove the concrete stateful checker-knot contracts by fuel/mutual induction, using the now-green cache publication and context weakening/freshness layers.

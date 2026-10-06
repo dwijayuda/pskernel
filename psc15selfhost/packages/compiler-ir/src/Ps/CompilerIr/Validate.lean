@@ -24,60 +24,65 @@ def psStrictStringListUnique
 
 def psStrictTypeListPairAll
     (check : PsVerifiedIrType -> PsVerifiedIrType -> Bool)
-    (left right : List PsVerifiedIrType) : Bool :=
+    (left : List PsVerifiedIrType) :
+    List PsVerifiedIrType -> Bool :=
   match left with
   | List.nil =>
-      match right with
-      | List.nil => true
-      | List.cons _ _ => false
+      fun (right : List PsVerifiedIrType) =>
+        match right with
+        | List.nil => true
+        | List.cons _ _ => false
   | List.cons leftHead leftRest =>
-      match right with
-      | List.nil => false
-      | List.cons rightHead rightRest =>
-          if check leftHead rightHead then
-            psStrictTypeListPairAll check leftRest rightRest
-          else
-            false
+      let smaller : List PsVerifiedIrType -> Bool :=
+        psStrictTypeListPairAll check leftRest;
+      fun (right : List PsVerifiedIrType) =>
+        match right with
+        | List.nil => false
+        | List.cons rightHead rightRest =>
+            if check leftHead rightHead then
+              smaller rightRest
+            else
+              false
 
 def psStrictPrimitiveTypeEq
     (left right : PsVerifiedIrPrimitiveType) : Bool :=
   match left with
   | .nat =>
-      match right with | .nat => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.nat => true | _ => false
   | .int =>
-      match right with | .int => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.int => true | _ => false
   | .uint8 =>
-      match right with | .uint8 => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.uint8 => true | _ => false
   | .uint16 =>
-      match right with | .uint16 => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.uint16 => true | _ => false
   | .uint32 =>
-      match right with | .uint32 => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.uint32 => true | _ => false
   | .uint64 =>
-      match right with | .uint64 => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.uint64 => true | _ => false
   | .usize =>
-      match right with | .usize => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.usize => true | _ => false
   | .int8 =>
-      match right with | .int8 => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.int8 => true | _ => false
   | .int16 =>
-      match right with | .int16 => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.int16 => true | _ => false
   | .int32 =>
-      match right with | .int32 => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.int32 => true | _ => false
   | .int64 =>
-      match right with | .int64 => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.int64 => true | _ => false
   | .isize =>
-      match right with | .isize => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.isize => true | _ => false
   | .float =>
-      match right with | .float => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.float => true | _ => false
   | .float32 =>
-      match right with | .float32 => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.float32 => true | _ => false
   | .bool =>
-      match right with | .bool => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.bool => true | _ => false
   | .char =>
-      match right with | .char => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.char => true | _ => false
   | .string =>
-      match right with | .string => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.string => true | _ => false
   | .unit =>
-      match right with | .unit => true | _ => false
+      match right with | PsVerifiedIrPrimitiveType.unit => true | _ => false
 
 def psStrictTypeEqWithFuel
     (fuel : Nat) :
@@ -335,21 +340,21 @@ def psStrictSubstituteTypeWithFuel
           remaining;
       fun (type : PsVerifiedIrType) =>
         match type with
-        | .unknown => .unknown
+        | .unknown => PsVerifiedIrType.unknown
         | .typeParameter name =>
             match
                 psStrictTypeSubstitutionLookup
                   substitution
                   name with
-            | Option.none => .typeParameter name
+            | Option.none => PsVerifiedIrType.typeParameter name
             | Option.some value => value
-        | .primitive primitive => .primitive primitive
+        | .primitive primitive => PsVerifiedIrType.primitive primitive
         | .function parameters result =>
-            .function
+            PsVerifiedIrType.function
               (psListMap smaller parameters)
               (smaller result)
         | .named name arguments =>
-            .named name (psListMap smaller arguments)
+            PsVerifiedIrType.named name (psListMap smaller arguments)
 
 def psStrictSubstituteType
     (substitution : List (String × PsVerifiedIrType))
@@ -361,33 +366,37 @@ def psStrictSubstituteType
     type
 
 def psStrictBuildSubstitution
-    (parameters : List PsVerifiedIrTypeParameter)
-    (arguments : List PsVerifiedIrType) :
+    (parameters : List PsVerifiedIrTypeParameter) :
+    List PsVerifiedIrType ->
     Except PsVerifiedIrValidationError
       (List (String × PsVerifiedIrType)) :=
   match parameters with
   | List.nil =>
-      match arguments with
-      | List.nil => Except.ok List.nil
-      | List.cons _ _ =>
-          Except.error
-            PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+      fun (arguments : List PsVerifiedIrType) =>
+        match arguments with
+        | List.nil => Except.ok List.nil
+        | List.cons _ _ =>
+            Except.error
+              PsVerifiedIrValidationError.intrinsicTypeArgumentArity
   | List.cons parameter parameterRest =>
-      match arguments with
-      | List.nil =>
-          Except.error
-            PsVerifiedIrValidationError.intrinsicTypeArgumentArity
-      | List.cons argument argumentRest =>
-          match
-              psStrictBuildSubstitution
-                parameterRest
-                argumentRest with
-          | Except.error error => Except.error error
-          | Except.ok rest =>
-              Except.ok
-                (List.cons
-                  (Prod.mk parameter.name argument)
-                  rest)
+      let smaller :
+          List PsVerifiedIrType ->
+          Except PsVerifiedIrValidationError
+            (List (String × PsVerifiedIrType)) :=
+        psStrictBuildSubstitution parameterRest;
+      fun (arguments : List PsVerifiedIrType) =>
+        match arguments with
+        | List.nil =>
+            Except.error
+              PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+        | List.cons argument argumentRest =>
+            match smaller argumentRest with
+            | Except.error error => Except.error error
+            | Except.ok rest =>
+                Except.ok
+                  (List.cons
+                    (Prod.mk parameter.name argument)
+                    rest)
 
 def psStrictValidateTypeListWith
     (validate :
@@ -534,30 +543,42 @@ def psStrictLocalLookup
         psStrictLocalLookup rest target
 
 def psStrictAddParameters
-    (parameters : List PsVerifiedIrParameter)
-    (locals : List (String × PsVerifiedIrType)) :
+    (parameters : List PsVerifiedIrParameter) :
+    List (String × PsVerifiedIrType) ->
     List (String × PsVerifiedIrType) :=
   match parameters with
-  | List.nil => locals
+  | List.nil =>
+      fun (locals : List (String × PsVerifiedIrType)) =>
+        locals
   | List.cons parameter rest =>
-      psStrictAddParameters
-        rest
-        (List.cons
-          (Prod.mk parameter.name parameter.type)
-          locals)
+      let smaller :
+          List (String × PsVerifiedIrType) ->
+          List (String × PsVerifiedIrType) :=
+        psStrictAddParameters rest;
+      fun (locals : List (String × PsVerifiedIrType)) =>
+        smaller
+          (List.cons
+            (Prod.mk parameter.name parameter.type)
+            locals)
 
 def psStrictAddBindings
-    (bindings : List PsVerifiedIrMatchBinding)
-    (locals : List (String × PsVerifiedIrType)) :
+    (bindings : List PsVerifiedIrMatchBinding) :
+    List (String × PsVerifiedIrType) ->
     List (String × PsVerifiedIrType) :=
   match bindings with
-  | List.nil => locals
+  | List.nil =>
+      fun (locals : List (String × PsVerifiedIrType)) =>
+        locals
   | List.cons binding rest =>
-      psStrictAddBindings
-        rest
-        (List.cons
-          (Prod.mk binding.name binding.type)
-          locals)
+      let smaller :
+          List (String × PsVerifiedIrType) ->
+          List (String × PsVerifiedIrType) :=
+        psStrictAddBindings rest;
+      fun (locals : List (String × PsVerifiedIrType)) =>
+        smaller
+          (List.cons
+            (Prod.mk binding.name binding.type)
+            locals)
 
 def psStrictParameterTypes
     (parameters : List PsVerifiedIrParameter) :
@@ -583,23 +604,23 @@ def psStrictMachinePrimitive
     (type : PsVerifiedIrMachineIntegerType) :
     PsVerifiedIrType :=
   match type with
-  | .uint8 => .primitive .uint8
-  | .uint16 => .primitive .uint16
-  | .uint32 => .primitive .uint32
-  | .uint64 => .primitive .uint64
-  | .usize => .primitive .usize
-  | .int8 => .primitive .int8
-  | .int16 => .primitive .int16
-  | .int32 => .primitive .int32
-  | .int64 => .primitive .int64
-  | .isize => .primitive .isize
+  | .uint8 => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8
+  | .uint16 => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint16
+  | .uint32 => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
+  | .uint64 => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint64
+  | .usize => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.usize
+  | .int8 => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int8
+  | .int16 => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int16
+  | .int32 => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int32
+  | .int64 => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int64
+  | .isize => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.isize
 
 def psStrictFloatPrimitive
     (type : PsVerifiedIrFloatingType) :
     PsVerifiedIrType :=
   match type with
-  | .float => .primitive .float
-  | .float32 => .primitive .float32
+  | .float => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float
+  | .float32 => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.float32
 
 def psStrictArrayType
     (element : PsVerifiedIrType) :
@@ -643,11 +664,11 @@ def psStrictIntrinsicSignature
     (typeArguments : List PsVerifiedIrType) :
     Except PsVerifiedIrValidationError
       (List PsVerifiedIrType × PsVerifiedIrType) :=
-  let natType : PsVerifiedIrType := .primitive .nat;
-  let intType : PsVerifiedIrType := .primitive .int;
-  let boolType : PsVerifiedIrType := .primitive .bool;
-  let charType : PsVerifiedIrType := .primitive .char;
-  let stringType : PsVerifiedIrType := .primitive .string;
+  let natType : PsVerifiedIrType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat;
+  let intType : PsVerifiedIrType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int;
+  let boolType : PsVerifiedIrType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool;
+  let charType : PsVerifiedIrType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.char;
+  let stringType : PsVerifiedIrType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string;
   match operation with
   | .machineIntBinary type _ =>
       if psStrictNoTypeArguments typeArguments then
@@ -678,7 +699,7 @@ def psStrictIntrinsicSignature
         Except.ok
           (Prod.mk
             (List.cons natType List.nil)
-            (.primitive .uint8))
+            (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint8))
       else
         Except.error
           PsVerifiedIrValidationError.intrinsicTypeArgumentArity
@@ -1188,48 +1209,53 @@ def psStrictLiteralType
     (literal : PsVerifiedIrLiteral) :
     PsVerifiedIrType :=
   match literal with
-  | .natural _ => .primitive .nat
-  | .integer _ => .primitive .int
+  | .natural _ => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+  | .integer _ => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int
   | .machineInteger type _ =>
       psStrictMachinePrimitive type
-  | .string _ => .primitive .string
-  | .bool _ => .primitive .bool
-  | .unit => .primitive .unit
+  | .string _ => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string
+  | .bool _ => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+  | .unit => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.unit
 
 def psStrictCheckArgumentsWith
     (infer :
       PsVerifiedIrExpr ->
         Except PsVerifiedIrValidationError PsVerifiedIrType)
-    (expected : List PsVerifiedIrType)
-    (arguments : List PsVerifiedIrExpr) :
+    (expected : List PsVerifiedIrType) :
+    List PsVerifiedIrExpr ->
     Except PsVerifiedIrValidationError Unit :=
   match expected with
   | List.nil =>
-      match arguments with
-      | List.nil => Except.ok Unit.unit
-      | List.cons _ _ =>
-          Except.error
-            PsVerifiedIrValidationError.callArity
+      fun (arguments : List PsVerifiedIrExpr) =>
+        match arguments with
+        | List.nil => Except.ok Unit.unit
+        | List.cons _ _ =>
+            Except.error
+              PsVerifiedIrValidationError.callArity
   | List.cons expectedHead expectedRest =>
-      match arguments with
-      | List.nil =>
-          Except.error
-            PsVerifiedIrValidationError.callArity
-      | List.cons argument argumentRest =>
-          match infer argument with
-          | Except.error error => Except.error error
-          | Except.ok actualType =>
-              if
-                  psStrictTypeEq
-                    expectedHead
-                    actualType then
-                psStrictCheckArgumentsWith
-                  infer
-                  expectedRest
-                  argumentRest
-              else
-                Except.error
-                  PsVerifiedIrValidationError.expressionTypeMismatch
+      let smaller :
+          List PsVerifiedIrExpr ->
+          Except PsVerifiedIrValidationError Unit :=
+        psStrictCheckArgumentsWith
+          infer
+          expectedRest;
+      fun (arguments : List PsVerifiedIrExpr) =>
+        match arguments with
+        | List.nil =>
+            Except.error
+              PsVerifiedIrValidationError.callArity
+        | List.cons argument argumentRest =>
+            match infer argument with
+            | Except.error error => Except.error error
+            | Except.ok actualType =>
+                if
+                    psStrictTypeEq
+                      expectedHead
+                      actualType then
+                  smaller argumentRest
+                else
+                  Except.error
+                    PsVerifiedIrValidationError.expressionTypeMismatch
 
 def psStrictFindGlobalValueType
     (module : PsVerifiedIrModule)
@@ -1771,7 +1797,7 @@ def psStrictInferExprWithFuel
                 if
                     psStrictTypeEq
                       conditionType
-                      (.primitive .bool) then
+                      (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool) then
                   match inferCurrent thenBranch with
                   | Except.error error => Except.error error
                   | Except.ok thenType =>

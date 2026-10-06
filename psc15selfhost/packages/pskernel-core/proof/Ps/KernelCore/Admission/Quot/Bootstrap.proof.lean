@@ -85,13 +85,17 @@ theorem psKernelCheckQuotReservedNames_success_authoritative_absent
                     environment
                     head with
               | none =>
-                  have hRefine :=
-                    psKernelEnvironmentFind_refines_authoritative
-                      environment
-                      head
-                      hIndex
-                  rw [hFind] at hRefine
-                  exact hRefine.symm
+                  unfold psKernelEnvironmentFind at hFind
+                  calc
+                    psKernelFindConstantInList
+                        head
+                        environment.constants =
+                      psKernelFindConstantInList
+                        head
+                        (psKernelEnvironmentIndexFind
+                          environment.index
+                          head) := (hIndex head).symm
+                    _ = Option.none := hFind
               | some info =>
                   have hTaken :
                       psKernelEnvironmentContains

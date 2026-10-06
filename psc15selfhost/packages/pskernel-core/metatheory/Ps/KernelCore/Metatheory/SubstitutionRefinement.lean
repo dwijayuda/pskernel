@@ -366,8 +366,8 @@ theorem psKernelExprInstantiateAtChangedWithFuel_refines_reference_core
           unfold psKernelExprInstantiateAtReferenceChanged
           by_cases hBefore :
               psKernelNatLt index (Nat.add start offset) = true
-          · rw [if_pos hBefore, if_pos hBefore]
-          · rw [if_neg hBefore, if_neg hBefore]
+          · rw [if_pos hBefore]
+          · rw [if_neg hBefore]
             cases hGet :
                 psKernelExprListGet
                   subst

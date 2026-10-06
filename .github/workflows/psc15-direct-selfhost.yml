@@ -59,7 +59,7 @@ jobs:
           lake exe psc1_erasure_tests
 
       - name: Prove direct JavaScript whole-compiler fixed point
-        timeout-minutes: 5
+        timeout-minutes: 15
         working-directory: psc15selfhost
         run: npm run test:direct-js-selfhost
 

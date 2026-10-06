@@ -362,10 +362,10 @@ inductive PsKernelStructuralExprEq :
 
 
 inductive PsKernelReductionClosure
-    (environment : PsKernelEnvironment) :
-    PsKernelLocalContext -> PsKernelExpr -> PsKernelExpr -> Prop
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) :
+    PsKernelExpr -> PsKernelExpr -> Prop
   | refl
-      {localContext : PsKernelLocalContext}
       (expr : PsKernelExpr) :
       PsKernelReductionClosure
         environment
@@ -373,7 +373,6 @@ inductive PsKernelReductionClosure
         expr
         expr
   | presentationSource
-      {localContext : PsKernelLocalContext}
       (source query result : PsKernelExpr)
       (hPresentation :
         PsKernelStructuralExprEq source query)
@@ -388,27 +387,7 @@ inductive PsKernelReductionClosure
         localContext
         query
         result
-  | contextWeaken
-      {localContext : PsKernelLocalContext}
-      (older : PsKernelLocalContext)
-      (left right : PsKernelExpr)
-      (hExt :
-        PsKernelLocalContextExtends
-          older
-          localContext)
-      (hReduction :
-        PsKernelReductionClosure
-          environment
-          older
-          left
-          right) :
-      PsKernelReductionClosure
-        environment
-        localContext
-        left
-        right
   | cons
-      {localContext : PsKernelLocalContext}
       (left middle right : PsKernelExpr)
       (hStep :
         PsKernelReductionStep
@@ -429,10 +408,10 @@ inductive PsKernelReductionClosure
         right
 
 inductive PsKernelDefEqJudgment
-    (environment : PsKernelEnvironment) :
-    PsKernelLocalContext -> PsKernelExpr -> PsKernelExpr -> Prop
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) :
+    PsKernelExpr -> PsKernelExpr -> Prop
   | refl
-      {localContext : PsKernelLocalContext}
       (expr : PsKernelExpr) :
       PsKernelDefEqJudgment
         environment
@@ -440,7 +419,6 @@ inductive PsKernelDefEqJudgment
         expr
         expr
   | symm
-      {localContext : PsKernelLocalContext}
       (left right : PsKernelExpr)
       (h :
         PsKernelDefEqJudgment
@@ -454,7 +432,6 @@ inductive PsKernelDefEqJudgment
         right
         left
   | presentation
-      {localContext : PsKernelLocalContext}
       (storedLeft storedRight queryLeft queryRight : PsKernelExpr)
       (hLeft :
         PsKernelStructuralExprEq
@@ -475,27 +452,7 @@ inductive PsKernelDefEqJudgment
         localContext
         queryLeft
         queryRight
-  | contextWeaken
-      {localContext : PsKernelLocalContext}
-      (older : PsKernelLocalContext)
-      (left right : PsKernelExpr)
-      (hExt :
-        PsKernelLocalContextExtends
-          older
-          localContext)
-      (hDefEq :
-        PsKernelDefEqJudgment
-          environment
-          older
-          left
-          right) :
-      PsKernelDefEqJudgment
-        environment
-        localContext
-        left
-        right
   | structural
-      {localContext : PsKernelLocalContext}
       (left right : PsKernelExpr)
       (h : PsKernelStructuralExprEq left right) :
       PsKernelDefEqJudgment
@@ -504,7 +461,6 @@ inductive PsKernelDefEqJudgment
         left
         right
   | reduction
-      {localContext : PsKernelLocalContext}
       (left right : PsKernelExpr)
       (h :
         PsKernelReductionStep
@@ -518,7 +474,6 @@ inductive PsKernelDefEqJudgment
         left
         right
   | sort
-      {localContext : PsKernelLocalContext}
       (left right : PsKernelLevel)
       (h :
         psKernelLevelEquivalent left right = true) :
@@ -528,7 +483,6 @@ inductive PsKernelDefEqJudgment
         (PsKernelExpr.sort left)
         (PsKernelExpr.sort right)
   | literal
-      {localContext : PsKernelLocalContext}
       (left right : PsKernelLiteral)
       (h :
         psKernelLiteralEq left right = true) :
@@ -538,7 +492,6 @@ inductive PsKernelDefEqJudgment
         (PsKernelExpr.lit left)
         (PsKernelExpr.lit right)
   | app
-      {localContext : PsKernelLocalContext}
       (leftFn leftArg rightFn rightArg : PsKernelExpr)
       (hFn :
         PsKernelDefEqJudgment
@@ -558,7 +511,6 @@ inductive PsKernelDefEqJudgment
         (PsKernelExpr.app leftFn leftArg)
         (PsKernelExpr.app rightFn rightArg)
   | metadataLeft
-      {localContext : PsKernelLocalContext}
       (metadata : Nat)
       (left right : PsKernelExpr)
       (h :
@@ -573,7 +525,6 @@ inductive PsKernelDefEqJudgment
         (PsKernelExpr.mdata metadata left)
         right
   | metadataRight
-      {localContext : PsKernelLocalContext}
       (metadata : Nat)
       (left right : PsKernelExpr)
       (h :

@@ -1,0 +1,22 @@
+{
+  "name": "@proofscript/driver-js-next",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": true,
+    "portable": true,
+    "sourceRoots": [
+      "src"
+    ],
+    "outDir": "dist",
+    "role": "javascript-compiler-driver",
+    "testRoots": [
+      "test"
+    ]
+  },
+  "dependencies": {
+    "@proofscript/compiler-next": "0.0.0-dev",
+    "@proofscript/backend-js-next": "0.0.0-dev"
+  }
+}

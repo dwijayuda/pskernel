@@ -1084,6 +1084,19 @@ def psJsPrintModule
             declarations
           ])
 
+def psJsEmitValidatedModuleWithTargetProfile
+    (profile : PsJsTargetProfile)
+    (module : PsValidatedIrModule) :
+    Except PsJsEmitError String :=
+  match
+      psJsLowerValidatedModuleWithTargetProfile
+        profile
+        module with
+  | Except.error error =>
+      Except.error (PsJsEmitError.lower error)
+  | Except.ok jsIr =>
+      psJsPrintModule jsIr
+
 def psJsEmitValidatedModule
     (module : PsValidatedIrModule) :
     Except PsJsEmitError String :=

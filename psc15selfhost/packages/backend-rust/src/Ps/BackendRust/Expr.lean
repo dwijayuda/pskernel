@@ -898,54 +898,58 @@ def psRustMatchBindingTemp
     (psNatToString index)
 
 def psRustEmitMatchBindingsPatternWorker
-    (index : Nat)
-    (bindings : List PsVerifiedIrMatchBinding) : String :=
+    (bindings : List PsVerifiedIrMatchBinding) :
+    Nat -> String :=
   match bindings with
   | List.nil =>
-      ""
+      fun (_index : Nat) =>
+        ""
   | List.cons binding rest =>
-      let current : String :=
-        psRustConcat3
-          (psRustIdentifier binding.field)
-          ": "
-          (psRustMatchBindingTemp index);
-      match rest with
-      | List.nil =>
-          current
-      | List.cons _ _ =>
+      let smaller : Nat -> String :=
+        psRustEmitMatchBindingsPatternWorker rest;
+      fun (index : Nat) =>
+        let current : String :=
           psRustConcat3
+            (psRustIdentifier binding.field)
+            ": "
+            (psRustMatchBindingTemp index);
+        match rest with
+        | List.nil =>
             current
-            ", "
-            (psRustEmitMatchBindingsPatternWorker
-              (Nat.succ index)
-              rest)
+        | List.cons _ _ =>
+            psRustConcat3
+              current
+              ", "
+              (smaller (Nat.succ index))
 
 def psRustEmitMatchBindingsPattern
     (bindings : List PsVerifiedIrMatchBinding) : String :=
-  psRustEmitMatchBindingsPatternWorker 0 bindings
+  psRustEmitMatchBindingsPatternWorker bindings 0
 
 def psRustEmitMatchBindingLetsWorker
-    (index : Nat)
-    (bindings : List PsVerifiedIrMatchBinding) : String :=
+    (bindings : List PsVerifiedIrMatchBinding) :
+    Nat -> String :=
   match bindings with
   | List.nil =>
-      ""
+      fun (_index : Nat) =>
+        ""
   | List.cons binding rest =>
-      psRustConcat4
-        "let "
-        (psRustIdentifier binding.name)
-        " = (*"
-        (psRustConcat4
-          (psRustMatchBindingTemp index)
-          ").clone(); "
-          (psRustEmitMatchBindingLetsWorker
-            (Nat.succ index)
-            rest)
-          "")
+      let smaller : Nat -> String :=
+        psRustEmitMatchBindingLetsWorker rest;
+      fun (index : Nat) =>
+        psRustConcat4
+          "let "
+          (psRustIdentifier binding.name)
+          " = (*"
+          (psRustConcat4
+            (psRustMatchBindingTemp index)
+            ").clone(); "
+            (smaller (Nat.succ index))
+            "")
 
 def psRustEmitMatchBindingLets
     (bindings : List PsVerifiedIrMatchBinding) : String :=
-  psRustEmitMatchBindingLetsWorker 0 bindings
+  psRustEmitMatchBindingLetsWorker bindings 0
 
 def psRustEmitAlternativeListWith
     (emitExpr :

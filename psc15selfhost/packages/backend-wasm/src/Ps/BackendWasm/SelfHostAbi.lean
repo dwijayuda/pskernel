@@ -8,14 +8,26 @@ def psWasmSelfHostAbiStringNewName : String :=
 def psWasmSelfHostAbiStringSetName : String :=
   "__ps_selfhost_string_set"
 
-def psWasmSelfHostAbiBytesSizeName : String :=
-  "__ps_selfhost_bytes_size"
+def psWasmSelfHostAbiBytesIsNilName : String :=
+  "__ps_selfhost_bytes_is_nil"
 
-def psWasmSelfHostAbiBytesGetName : String :=
-  "__ps_selfhost_bytes_get"
+def psWasmSelfHostAbiBytesHeadName : String :=
+  "__ps_selfhost_bytes_head"
 
-def psWasmSelfHostAbiByteArrayName : String :=
-  "ProofScript.Array$U8"
+def psWasmSelfHostAbiBytesTailName : String :=
+  "__ps_selfhost_bytes_tail"
+
+def psWasmSelfHostAbiByteListName : String :=
+  "List$spec$U8"
+
+def psWasmSelfHostAbiByteListNilName : String :=
+  "List$spec$U8$nil"
+
+def psWasmSelfHostAbiByteListConsName : String :=
+  "List$spec$U8$cons"
+
+def psWasmSelfHostAbiByteListRef : PsWasmValueType :=
+  PsWasmValueType.refT psWasmSelfHostAbiByteListName
 
 def psWasmSelfHostAbiFunctions : List PsWasmFunction :=
   [
@@ -51,31 +63,42 @@ def psWasmSelfHostAbiFunctions : List PsWasmFunction :=
       ]
     },
     {
-      name := psWasmSelfHostAbiBytesSizeName
+      name := psWasmSelfHostAbiBytesIsNilName
       typeName := Option.none
-      parameters := [
-        PsWasmValueType.refT psWasmSelfHostAbiByteArrayName
-      ]
+      parameters := [psWasmSelfHostAbiByteListRef]
       results := [PsWasmValueType.i32]
       locals := []
       body := [
         PsWasmInstruction.localGet 0,
-        PsWasmInstruction.arrayLen
+        PsWasmInstruction.refTest psWasmSelfHostAbiByteListNilName
       ]
     },
     {
-      name := psWasmSelfHostAbiBytesGetName
+      name := psWasmSelfHostAbiBytesHeadName
       typeName := Option.none
-      parameters := [
-        PsWasmValueType.refT psWasmSelfHostAbiByteArrayName,
-        PsWasmValueType.i32
-      ]
+      parameters := [psWasmSelfHostAbiByteListRef]
       results := [PsWasmValueType.i32]
       locals := []
       body := [
         PsWasmInstruction.localGet 0,
-        PsWasmInstruction.localGet 1,
-        PsWasmInstruction.arrayGetU psWasmSelfHostAbiByteArrayName
+        PsWasmInstruction.refCast psWasmSelfHostAbiByteListConsName,
+        PsWasmInstruction.structGetU
+          psWasmSelfHostAbiByteListConsName
+          0
+      ]
+    },
+    {
+      name := psWasmSelfHostAbiBytesTailName
+      typeName := Option.none
+      parameters := [psWasmSelfHostAbiByteListRef]
+      results := [psWasmSelfHostAbiByteListRef]
+      locals := []
+      body := [
+        PsWasmInstruction.localGet 0,
+        PsWasmInstruction.refCast psWasmSelfHostAbiByteListConsName,
+        PsWasmInstruction.structGet
+          psWasmSelfHostAbiByteListConsName
+          1
       ]
     }
   ]
@@ -89,11 +112,14 @@ def psWasmSelfHostAbiExports : List (String × String) :=
       psWasmSelfHostAbiStringSetName
       psWasmSelfHostAbiStringSetName,
     Prod.mk
-      psWasmSelfHostAbiBytesSizeName
-      psWasmSelfHostAbiBytesSizeName,
+      psWasmSelfHostAbiBytesIsNilName
+      psWasmSelfHostAbiBytesIsNilName,
     Prod.mk
-      psWasmSelfHostAbiBytesGetName
-      psWasmSelfHostAbiBytesGetName
+      psWasmSelfHostAbiBytesHeadName
+      psWasmSelfHostAbiBytesHeadName,
+    Prod.mk
+      psWasmSelfHostAbiBytesTailName
+      psWasmSelfHostAbiBytesTailName
   ]
 
 def psWasmAddSelfHostGcAbi

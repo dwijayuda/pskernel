@@ -39,6 +39,39 @@ def psWasmValidationHasExport
       else
         psWasmValidationHasExport name rest
 
+def psWasmValidationMachineKindMatches
+    (primitive : PsVerifiedIrPrimitiveType)
+    (kind : PsVerifiedIrMachineIntegerType) : Bool :=
+  match primitive with
+  | .uint32 =>
+      match kind with
+      | .uint32 => true
+      | _ => false
+  | .int32 =>
+      match kind with
+      | .int32 => true
+      | _ => false
+  | _ => false
+
+def psWasmValidationLiteralBody
+    (primitive : PsVerifiedIrPrimitiveType)
+    (body : PsVerifiedIrExpr) : Option PsWasmLiteralExpectation :=
+  match body with
+  | .literal literal =>
+      match literal with
+      | .machineInteger kind value =>
+          if psWasmValidationMachineKindMatches primitive kind then
+            Option.some (PsWasmLiteralExpectation.i32 value)
+          else Option.none
+      | .bool value =>
+          match primitive with
+          | .bool =>
+              if value then Option.some (PsWasmLiteralExpectation.i32 1)
+              else Option.some (PsWasmLiteralExpectation.i32 0)
+          | _ => Option.none
+      | _ => Option.none
+  | _ => Option.none
+
 def psWasmValidationLiteralExpectation
     (declaration : PsVerifiedIrDeclaration) :
     Option PsWasmLiteralExpectation :=
@@ -51,38 +84,30 @@ def psWasmValidationLiteralExpectation
           Option.none
       | List.nil =>
           match declaration.resultType with
-          | PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32 =>
-              match declaration.body with
-              | PsVerifiedIrExpr.literal
-                  (PsVerifiedIrLiteral.machineInteger
-                    PsVerifiedIrMachineIntegerType.uint32
-                    value) =>
-                  Option.some (PsWasmLiteralExpectation.i32 value)
-              | _ =>
-                  Option.none
-          | PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int32 =>
-              match declaration.body with
-              | PsVerifiedIrExpr.literal
-                  (PsVerifiedIrLiteral.machineInteger
-                    PsVerifiedIrMachineIntegerType.int32
-                    value) =>
-                  Option.some (PsWasmLiteralExpectation.i32 value)
-              | _ =>
-                  Option.none
-          | PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool =>
-              match declaration.body with
-              | PsVerifiedIrExpr.literal
-                  (PsVerifiedIrLiteral.bool value) =>
-                  if value then
-                    Option.some
-                      (PsWasmLiteralExpectation.i32 1)
-                  else
-                    Option.some
-                      (PsWasmLiteralExpectation.i32 0)
-              | _ =>
-                  Option.none
+          | .primitive primitive =>
+              psWasmValidationLiteralBody primitive declaration.body
           | _ =>
               Option.none
+
+def psWasmValidationI32Result (results : List PsWasmValueType) : Bool :=
+  match results with
+  | List.nil => false
+  | List.cons result rest =>
+      if psListIsEmpty rest then
+        match result with
+        | .i32 => true
+        | _ => false
+      else false
+
+def psWasmValidationI32Body (expected : Int) (body : List PsWasmInstruction) : Bool :=
+  match body with
+  | List.nil => false
+  | List.cons instruction rest =>
+      if psListIsEmpty rest then
+        match instruction with
+        | .i32Const actual => psStringEq (Int.repr expected) (Int.repr actual)
+        | _ => false
+      else false
 
 def psWasmValidationFunctionMatches
     (expectation : PsWasmLiteralExpectation)
@@ -90,18 +115,16 @@ def psWasmValidationFunctionMatches
     Bool :=
   match expectation with
   | PsWasmLiteralExpectation.i32 expected =>
-      match function with
-      | {
-          name := _
-          typeName := Option.none
-          parameters := List.nil
-          results := [PsWasmValueType.i32]
-          locals := List.nil
-          body := [PsWasmInstruction.i32Const actual]
-        } =>
-          psStringEq (Int.repr expected) (Int.repr actual)
-      | _ =>
-          false
+      match function.typeName with
+      | Option.some _ => false
+      | Option.none =>
+          if psListIsEmpty function.parameters then
+            if psListIsEmpty function.locals then
+              if psWasmValidationI32Result function.results then
+                psWasmValidationI32Body expected function.body
+              else false
+            else false
+          else false
 
 def psWasmValidateLiteralDeclaration
     (target : PsWasmModule)

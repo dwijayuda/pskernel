@@ -141,6 +141,10 @@ jobs:
         working-directory: psc15selfhost
         run: lake exe psc1_project_query_graph_tests
 
+      - name: Check portable logical theory translation
+        working-directory: psc15selfhost
+        run: npm run check:theory-bridge
+
       - name: Run host project query reuse corpus
         working-directory: psc15selfhost
         run: lake exe psc1_host_project_query_tests

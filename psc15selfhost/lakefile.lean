@@ -502,7 +502,8 @@ lean_exe pscv_theory_seed_tests where
 lean_lib PsTheoryBridge where
   srcDir := "packages/theory-bridge/src"
   roots := #[
-    `Ps.TheoryBridge.Model
+    `Ps.TheoryBridge.Model,
+    `Ps.TheoryBridge.Translate
   ]
 
 lean_exe pscv_theory_bridge_tests where

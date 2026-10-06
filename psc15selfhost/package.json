@@ -192,7 +192,7 @@
     "check:resource-contract": "node scripts/resource-contract-audit.mjs",
     "check:v3-acceptance": "node scripts/v3-acceptance-audit.mjs",
     "check:independence": "node scripts/independence-vector-audit.mjs",
-    "check:theory-bridge": "lake build PsTheoryBridge pscv_theory_bridge_tests && lake exe pscv_theory_bridge_tests && lake exe psc1 check packages/theory-bridge/src/Ps/TheoryBridge/Model.lean",
+    "check:theory-bridge": "lake build PsTheoryBridge pscv_theory_bridge_tests && lake exe pscv_theory_bridge_tests && lake exe psc1 check packages/theory-bridge/src/Ps/TheoryBridge/Translate.lean",
     "test:architecture-delta": "node --test scripts/architecture-delta.test.mjs",
     "check:semantic-lock": "node scripts/semantic-lock-audit.mjs",
     "check:archive-profile": "node scripts/archive-profile-audit.mjs && node scripts/pscv-verify.mjs",

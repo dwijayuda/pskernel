@@ -85,7 +85,10 @@ export async function collectImportClosure(rootFiles, includeImportClosure) {
 
     for (const moduleName of parseImports(source)) {
       const imported = moduleSource(moduleName);
-      if (imported && existsSync(imported) && !visited.has(path.resolve(imported))) {
+      if (!imported || !existsSync(imported)) {
+        throw new Error('PSC1_PORTABLE_SELFHOST_IMPORT_UNRESOLVED: ' + moduleName + ' from ' + path.relative(workspaceRoot, current));
+      }
+      if (!visited.has(path.resolve(imported))) {
         queue.push(imported);
       }
     }

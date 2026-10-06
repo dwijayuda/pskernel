@@ -13,6 +13,7 @@
     "role": "logical-interoperability-theory-bridge"
   },
   "dependencies": {
-    "@proofscript/foundation": "0.0.0-dev"
+    "@proofscript/foundation": "0.0.0-dev",
+    "@proofscript/core": "0.0.0-dev"
   }
 }

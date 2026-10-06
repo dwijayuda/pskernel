@@ -5,16 +5,65 @@
   "releaseAccepted": false,
   "policy": "Run focused compilation and boundary checks during implementation. Independent testing and checked global proofs remain required for final acceptance.",
   "obligations": [
-    { "id": "comparator-isolation-and-checkers", "status": "pending", "required": "Run the new comparator session against a real digest-pinned Linux producer and pinned actual kernel providers, exercise hostile exports and runtime escape/cleanup cases, and supply provider/runtime hardening evidence. Current decoder/session tests use mock kernels and container orchestration; no formal theorem or real sandbox assurance follows." },
-    { "id": "authority-adversarial", "status": "pending", "required": "Exercise the actual generated compiler and pinned provider through production checked service, cross-session replay, policy mutation, rejection, target routing, revocation and closure; audit every production import path." },
-    { "id": "global-core-soundness", "status": "unproved", "required": "Lean-check the semantic environment model, full algorithmic-defeq soundness, cache refinement and checker soundness, with explicit theory and assumption closure." },
-    { "id": "global-erasure-specialization", "status": "unproved", "required": "Lean-check global erasure/specialization preservation, or independently validate every actual transformation under a precisely declared supported contract. Existing local slices do not discharge this obligation." },
-    { "id": "backend-preservation", "status": "pending", "required": "Check complete supported backend semantics, differential/adversarial corpora, artifact validators and ABI adapters; unsupported slices must fail closed." },
-    { "id": "selfhost-fixed-points", "status": "failing", "required": "Re-run full JS, Wasm and Rust fixed points after implementation repairs. Rust run 37516533780 at 0849ae7 passed generation and fixture execution, then generation-2 native compilation overflowed the stack. Generation/instantiation alone is insufficient." },
-    { "id": "bootstrap-diversity", "status": "pending", "required": "Produce B9 diverse bootstrap and B10 verified bootstrap evidence with actual toolchain independence vectors and artifact identities." },
-    { "id": "resource-adversarial", "status": "pending", "required": "Exercise all declared resource limits, cancellation, malformed inputs, cycles, large/deep certificates, cache poisoning and small-to-larger budget behavior; prove monotonicity only if Lean checks it." },
-    { "id": "savef-offline-replay", "status": "pending", "required": "Replay real proof/validator certificates, trust closure and pinned archives offline; metadata/hash closure is insufficient." },
-    { "id": "factorybench-holdout", "status": "pending", "required": "Freeze and seal actual tasks independently, run all ablations and resource accounting, and publish reproducible evidence without making holdout searchable to the factory." },
-    { "id": "final-v3-acceptance", "status": "pending", "required": "Assess every V3 acceptance criterion using actual artifacts, independent validators or Lean-checked theorems as required; milestone source scans are not final evidence." }
+    {
+      "id": "comparator-isolation-and-checkers",
+      "status": "pending",
+      "required": "Run the new comparator session against a real digest-pinned Linux producer and pinned actual kernel providers, exercise hostile exports and runtime escape/cleanup cases, and supply provider/runtime hardening evidence. Current decoder/session tests use mock kernels and container orchestration; no formal theorem or real sandbox assurance follows."
+    },
+    {
+      "id": "authority-adversarial",
+      "status": "pending",
+      "required": "Exercise the actual generated compiler and pinned provider through production checked service, cross-session replay, policy mutation, rejection, target routing, revocation and closure; audit every production import path."
+    },
+    {
+      "id": "global-core-soundness",
+      "status": "unproved",
+      "required": "Lean-check the semantic environment model, full algorithmic-defeq soundness, cache refinement and checker soundness, with explicit theory and assumption closure."
+    },
+    {
+      "id": "global-erasure-specialization",
+      "status": "unproved",
+      "required": "Lean-check global erasure/specialization preservation, or independently validate every actual transformation under a precisely declared supported contract. Existing local slices do not discharge this obligation."
+    },
+    {
+      "id": "backend-preservation",
+      "status": "pending",
+      "required": "Check complete supported backend semantics, differential/adversarial corpora, artifact validators and ABI adapters; unsupported slices must fail closed."
+    },
+    {
+      "id": "selfhost-fixed-points",
+      "status": "failing",
+      "required": "Re-run full JS, Wasm and Rust fixed points after implementation repairs. Rust run 37516533780 at 0849ae7 passed generation and fixture execution, then generation-2 native compilation overflowed the stack. Generation/instantiation alone is insufficient."
+    },
+    {
+      "id": "bootstrap-diversity",
+      "status": "pending",
+      "required": "Produce B9 diverse bootstrap and B10 verified bootstrap evidence with actual toolchain independence vectors and artifact identities."
+    },
+    {
+      "id": "resource-adversarial",
+      "status": "pending",
+      "required": "Exercise all declared resource limits, cancellation, malformed inputs, cycles, large/deep certificates, cache poisoning and small-to-larger budget behavior; prove monotonicity only if Lean checks it."
+    },
+    {
+      "id": "savef-offline-replay",
+      "status": "pending",
+      "required": "Replay real proof/validator certificates, trust closure and pinned archives offline; metadata/hash closure is insufficient."
+    },
+    {
+      "id": "factorybench-holdout",
+      "status": "pending",
+      "required": "Freeze and seal actual tasks independently, run all ablations and resource accounting, and publish reproducible evidence without making holdout searchable to the factory."
+    },
+    {
+      "id": "final-v3-acceptance",
+      "status": "pending",
+      "required": "Assess every V3 acceptance criterion using actual artifacts, independent validators or Lean-checked theorems as required; milestone source scans are not final evidence."
+    },
+    {
+      "id": "logical-translation-preservation",
+      "status": "unproved",
+      "required": "Bind actual source/destination checked admissions and canonical artifacts to the portable closed-renaming validator, replay its relation through a registered independent checker, and Lean-check preservation. Current 19 executable cases and PSC1 source/emission parity establish no global theorem; cross-foundation morphisms and general inductive/proof translations remain unsupported."
+    }
   ]
 }

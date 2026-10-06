@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import path from 'node:path';
+import { mkdtemp, writeFile, rm, rmdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import {
   findSelfhostStructuralViolations,
   portableSelfhostStructuralRuleIds,
@@ -8,6 +10,7 @@ import {
 
 import {
   collectPortableSelfhostEntryRoots,
+  collectImportClosure,
   collectPortableSelfhostPackages,
   readPortableSelfhostProfile,
 } from './portable-selfhost-profile.mjs';
@@ -18,6 +21,20 @@ function ids(source) {
     portableSelfhostStructuralRuleIds,
   ).map(hit => hit.id);
 }
+
+test('portable import closure resolves theory packages and rejects unknown or missing imports', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'psc-import-closure-'));
+  const file = path.join(directory, 'Root.lean');
+  try {
+    await writeFile(file, 'import Ps.TheoryBridge.Model\n');
+    const closure = await collectImportClosure([file], true);
+    assert([...closure.keys()].some(name => name.endsWith(path.join('TheoryBridge', 'Model.lean'))));
+    for (const name of ['Ps.Unknown.Module', 'Ps.TheoryBridge.Missing']) {
+      await writeFile(file, 'import ' + name + '\n');
+      await assert.rejects(collectImportClosure([file], true), /IMPORT_UNRESOLVED/);
+    }
+  } finally { await rm(file, { force: true }); await rmdir(directory); }
+});
 
 test('recursive equation definitions are rejected but explicit structural recursion is accepted', () => {
   const bad = [

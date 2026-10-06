@@ -231,9 +231,11 @@
       "sections": [
         25
       ],
-      "status": "prototype",
+      "status": "partial",
       "owners": [
-        "packages/theory-bridge/src/Ps/TheoryBridge/Model.lean"
+        "packages/theory-bridge/src/Ps/TheoryBridge/Model.lean",
+        "packages/theory-bridge/src/Ps/TheoryBridge/Translate.lean",
+        "contracts/ir/THEORY_TRANSLATION_V1.json"
       ],
       "completion": "Theory translations bind symbol/axiom maps, assumptions, unsupported features and preservation evidence.",
       "assurance": "pending"
@@ -245,7 +247,7 @@
         36,
         37
       ],
-      "status": "prototype",
+      "status": "partial",
       "owners": [
         "scripts/savef-object.mjs",
         "scripts/savef-graph.mjs"
@@ -260,7 +262,7 @@
         34,
         40
       ],
-      "status": "prototype",
+      "status": "partial",
       "owners": [
         "scripts/pscv-verify.mjs",
         "scripts/offline-capsule.mjs",

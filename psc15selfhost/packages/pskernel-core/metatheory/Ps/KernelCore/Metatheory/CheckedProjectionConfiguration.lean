@@ -1037,16 +1037,6 @@ theorem psKernelInferProjectionWith_configuration_sound
                                                                         hFields,
                                                                         hFinal
                                                                       ] at hSuccess
-                          | _ =>
-                              simp [
-                                psKernelInferProjectionWith,
-                                hInferRun,
-                                hTypeWhnf,
-                                hIndexBound,
-                                hFn,
-                                hTypeName,
-                                hInductFind
-                              ] at hSuccess
               | _ =>
                   simp [
                     psKernelInferProjectionWith,

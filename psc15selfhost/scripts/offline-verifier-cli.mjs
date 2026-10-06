@@ -3,6 +3,15 @@ import { compareSemanticLocks } from './semantic-lock.mjs';
 import { wasmLiteralCertificateChecker } from './wasm-literal-certificate.mjs';
 import { createCertificateBoundary, coreProofCertificateChecker } from './certificate-boundary.mjs';
 import { readOfflineCapsule, unpackOfflineCapsule, verifyOfflineCapsule } from './offline-capsule.mjs';
+import { verifyObservedBuildArchive } from './observed-build-archive.mjs';
+
+export async function verifyBuildArchiveCommand(archivePath, policyPath) {
+  const policyBytes = await readOfflineCapsule(policyPath, { maxCapsuleBytes: 4 * 1024 * 1024 });
+  const policy = JSON.parse(policyBytes);
+  if (policy.contract !== 'psc-observed-build-consumer-policy/1') throw new Error('PSC_BUILD_ARCHIVE_POLICY');
+  const bytes = await readOfflineCapsule(archivePath, { maxCapsuleBytes: policy.resourceLimits?.maxArchiveBytes ?? 256 * 1024 * 1024 });
+  return verifyObservedBuildArchive(bytes, policy);
+}
 
 export async function compareSemanticLockFiles(leftPath, rightPath) {
   const locks = [];

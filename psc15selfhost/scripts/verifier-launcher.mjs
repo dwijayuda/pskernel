@@ -27,9 +27,9 @@ async function boundedFile(file, maximum) {
 async function main() {
   const args = process.argv.slice(2);
   if (args[0] !== '--manifest-sha256' || !/^[a-f0-9]{64}$/u.test(args[1] ?? '') ||
-      !(args.length === 6 && args[2] === '--capsule' && args[4] === '--policy') &&
+      !(args.length === 6 && ['--capsule', '--build-archive'].includes(args[2]) && args[4] === '--policy') &&
       !(args.length === 5 && args[2] === '--diff-locks')) {
-    throw new Error('Usage: pscv-verify.mjs --manifest-sha256 PINNED_HASH --capsule FILE --policy LOCAL_POLICY | --diff-locks LEFT RIGHT');
+    throw new Error('Usage: pscv-verify.mjs --manifest-sha256 PINNED_HASH --capsule FILE --policy LOCAL_POLICY | --build-archive FILE --policy LOCAL_POLICY | --diff-locks LEFT RIGHT');
   }
   if (Number(process.versions.node.split('.')[0]) < 22) fail('NODE_VERSION');
   const root = path.dirname(fileURLToPath(import.meta.url));
@@ -60,6 +60,7 @@ async function main() {
   // sandbox a hostile host or prevent mutation between this check and import.
   const api = await import(pathToFileURL(path.join(root, 'scripts/offline-verifier-cli.mjs')).href);
   const result = args[2] === '--diff-locks' ? await api.compareSemanticLockFiles(args[3], args[4]) :
+    args[2] === '--build-archive' ? await api.verifyBuildArchiveCommand(args[3], args[5]) :
     await api.verifyCapsuleCommand(args[3], args[5], { allowedCheckerKinds: ['wasm-literal'] });
   process.stdout.write(JSON.stringify(result) + '\n');
   if (result.kind && result.kind !== 'accepted') process.exitCode = 1;

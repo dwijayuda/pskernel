@@ -4,6 +4,7 @@
   "portableModel": "packages/compiler-ir/src/Ps/CompilerIr/Pass.lean",
   "hostImplementation": "scripts/artifact-evidence.mjs",
   "productionIntegration": "scripts/checked-build-evidence.mjs",
+  "archiveIntegration": "scripts/observed-build-archive.mjs; checked-build publishes all graph-listed byte snapshots before the receipt; standalone verifier checks observed byte closure and pass integrity with an independently selected graph and assumption policy",
   "canonicalEncoding": {
     "id": "psc-canonical-json/1",
     "objects": "Plain data only; keys sorted by UTF-16 code units; no getters, symbols or toJSON hooks.",
@@ -31,7 +32,7 @@
     "complete generated compiler/runtime and TypeScript package closure",
     "independent complete preservation evidence",
     "full resource budget coverage",
-    "archive resolution of all referenced source and implementation bytes"
+    "archive release semantic lock, licenses and provenance beyond the observed build records"
   ],
   "portableDigestRule": "A portable record supplied with artifact labels remains requiresByteVerification. Legacy specialization records remain unbound. Neither implies byte verification or a proof."
 }

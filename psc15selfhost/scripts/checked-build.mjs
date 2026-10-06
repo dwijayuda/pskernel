@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { readCheckedSourceSnapshot } from './checked-source-snapshot.mjs';
 import { createCheckedCompilerService } from './compiler-checked-service.mjs';
 import { createCheckedBuildGraph, readCheckedBuildHostSources } from './checked-build-evidence.mjs';
+import { packObservedBuildArchive } from './observed-build-archive.mjs';
 import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 import { checkAdmissionsWithDual } from './checked-kernel-dual.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
@@ -143,9 +144,12 @@ export async function buildChecked({
       provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1,
       hostSources, runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     receipt.buildGraph = evidence.identity;
+    const archive = packObservedBuildArchive(evidence);
+    receipt.buildArchive = archive.identity;
+    await writeFile(path.join(staging, stem + '.build-archive.json'), archive.bytes);
     await writeFile(path.join(staging, stem + '.build-graph.json'), evidence.bytes);
     await writeFile(path.join(staging, stem + '.admissions.json'), admissions);
-    for (const suffix of ['.ts', '.js', '.d.ts', '.js.map', '.admissions.json', '.build-graph.json']) {
+    for (const suffix of ['.ts', '.js', '.d.ts', '.js.map', '.admissions.json', '.build-graph.json', '.build-archive.json']) {
       await rename(path.join(staging, stem + suffix), path.join(path.dirname(output), stem + suffix));
     }
     // This receipt is an audit record, not a transferable proof/capability.

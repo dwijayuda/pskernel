@@ -26,7 +26,7 @@ export async function readCheckedBuildHostSources() {
 
 /** Actual observed build edges. Composite edges remain named as such: hidden IR
  * stages are not replaced by invented fingerprints or preservation evidence.
- * Archive builders must supply referenced source/compiler bytes for replay.
+ * The checked builder packages every listed byte snapshot in its build archive.
  */
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
@@ -106,7 +106,7 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   }
   const graph = { schemaVersion: 1, contract: 'psc-observed-build-graph/1', authority: 'audit-record-only',
     entries, executions, coverage: 'observed-composite-edges',
-    remaining: ['per-IR-stage artifacts', 'complete toolchain closure', 'independent preservation evidence', 'archive byte closure'] };
+    remaining: ['per-IR-stage artifacts', 'complete toolchain closure', 'independent preservation evidence'] };
   const encoded = canonicalBytes(graph);
   return { graph, artifacts, bytes: encoded,
     identity: artifactId(encoded, 'build-graph', 'psc-observed-build-graph/1') };

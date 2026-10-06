@@ -54,11 +54,11 @@ if(process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url){
       const { compareSemanticLockFiles } = await import('./offline-verifier-cli.mjs');
       return compareSemanticLockFiles(args[1], args[2]);
     }
-    if (args.length !== 4 || args[0] !== '--capsule' || args[2] !== '--policy') {
-      throw new Error('Usage: pscv-verify --capsule FILE --policy TRUSTED_LOCAL_POLICY | --diff-locks LEFT RIGHT');
+    if (args.length !== 4 || !['--capsule', '--build-archive'].includes(args[0]) || args[2] !== '--policy') {
+      throw new Error('Usage: pscv-verify --capsule FILE --policy TRUSTED_LOCAL_POLICY | --build-archive FILE --policy TRUSTED_LOCAL_POLICY | --diff-locks LEFT RIGHT');
     }
-    const { verifyCapsuleCommand } = await import('./offline-verifier-cli.mjs');
-    return verifyCapsuleCommand(args[1], args[3]);
+    const api = await import('./offline-verifier-cli.mjs');
+    return args[0] === '--build-archive' ? api.verifyBuildArchiveCommand(args[1], args[3]) : api.verifyCapsuleCommand(args[1], args[3]);
   };
   run().then(result => {
     process.stdout.write(JSON.stringify(result) + '\n');

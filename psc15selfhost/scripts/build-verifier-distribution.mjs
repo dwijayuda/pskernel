@@ -54,8 +54,10 @@ export async function buildVerifierDistribution(destination) {
     'No npm install, compiler, network service, or live registry is required.\n' +
     'Pin the manifest SHA-256 independently before use; also authenticate the launcher and runtime through your trusted distribution channel.\n' +
     'node pscv-verify.mjs --manifest-sha256 PINNED_HASH --capsule CAPSULE --policy LOCAL_POLICY\n' +
+    'node pscv-verify.mjs --manifest-sha256 PINNED_HASH --build-archive ARCHIVE --policy LOCAL_POLICY\n' +
     'node pscv-verify.mjs --manifest-sha256 PINNED_HASH --diff-locks LEFT RIGHT\n\n' +
     'Supports V1 semantic locks, SAVEF graph integrity, configured Ed25519 provenance and closed i32 literal Wasm certificates.\n' +
+    'Build archive mode verifies observed byte closure and pass integrity, not kernel acceptance, complete tool inputs or preservation.\n' +
     'Core proof providers and their binaries are not included; their checker policies fail closed.\n' +
     'Validation of a supported claim is not global compiler preservation or release acceptance.\n';
   files.set('README.txt', Buffer.from(readme));

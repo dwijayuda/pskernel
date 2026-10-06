@@ -7,6 +7,8 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { buildChecked, defaultCheckedSeed } from './checked-build.mjs';
 import { kernelContractV1 } from './kernel-contract.mjs';
+import { verifyArtifact } from './artifact-evidence.mjs';
+import { verifyObservedBuildArchive } from './observed-build-archive.mjs';
 
 const seed = process.env.PSC2_CHECKED_SEED_BIN ?? defaultCheckedSeed;
 const native = existsSync(seed);
@@ -25,6 +27,15 @@ test('explicit owned kernel checks dependent source before emission and executio
     assert.equal(receipt.schemaVersion, 4);
     assert.equal(receipt.kernelContract.id, kernelContractV1.id);
     assert.equal(receipt.kernelContract.sha256, kernelContractV1.sha256);
+    const archiveBytes = await readFile(path.join(dir, 'out.build-archive.json'));
+    verifyArtifact(archiveBytes, receipt.buildArchive);
+    const archived = await verifyObservedBuildArchive(archiveBytes, { expectedGraphId: receipt.buildGraph,
+      allowedAssumptions: ['trusted-host-composition', 'selected-compiler-module-closure', 'selected-host-runtime',
+        'selected-kernel-invocation', 'trusted-frontend-source-interpretation', 'trusted-erasure-and-typescript-emission',
+        'selected-typescript-package-closure'] });
+    assert.equal(archived.kind, 'accepted', archived.reason);
+    assert.equal(archived.executions.length, 3);
+    assert.equal(archived.semanticClaimsVerified, false);
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
 

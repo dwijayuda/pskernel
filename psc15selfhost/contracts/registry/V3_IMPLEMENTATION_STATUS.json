@@ -94,6 +94,7 @@
         "packages/compiler-ir/src/Ps/CompilerIr/Pass.lean",
         "scripts/artifact-evidence.mjs",
         "scripts/checked-build-evidence.mjs",
+        "scripts/observed-build-archive.mjs",
         "contracts/ir/PASS_EVIDENCE_V1.json"
       ],
       "completion": "Every transformation records canonical action/input/output IDs, semantic relation, assumptions, resources and evidence requirements.",

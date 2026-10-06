@@ -10,6 +10,8 @@ import { artifactId, canonicalArtifact } from './artifact-evidence.mjs';
 import { wasmLiteralCertificateChecker } from './wasm-literal-certificate.mjs';
 import { knowledgeObject } from './savef-graph.mjs';
 import { packOfflineCapsule } from './offline-capsule.mjs';
+import { createCheckedBuildGraph } from './checked-build-evidence.mjs';
+import { packObservedBuildArchive } from './observed-build-archive.mjs';
 
 function capsuleFixture() {
   const f = semanticLockFixture(), bytes = Buffer.from([0,97,115,109,1,0,0,0,1,5,1,96,0,1,127,3,2,1,0,
@@ -57,6 +59,18 @@ test('standalone verifier replays real supported evidence outside checkout and r
     const manifest = JSON.parse(await readFile(path.join(distribution.directory, 'manifest.json')));
     assert.equal(manifest.fullCompilerIncluded, false); assert.equal(manifest.coreProvidersIncluded, false);
     assert.ok(manifest.files.every(file => !file.path.includes('/dist/') && !file.path.endsWith('.lean')));
+    const build = createCheckedBuildGraph({ sourceKind: 'lean', sources: ['fictional source'], admissions: 'fictional admissions',
+      compilerBytes: Buffer.from('fictional compiler'), compilerKind: 'fixture', provider: { profile: 'fixture' },
+      providerSecurity: { profile: 'fixture' }, kernelContract: { id: 'fixture' }, hostSources: [], runtime: { version: 'fixture' } });
+    const buildArchive = packObservedBuildArchive(build), buildPath = path.join(directory, 'build.json'), buildPolicyPath = path.join(directory, 'build-policy.json');
+    await writeFile(buildPath, buildArchive.bytes);
+    await writeFile(buildPolicyPath, JSON.stringify({ contract: 'psc-observed-build-consumer-policy/1', expectedGraphId: build.identity,
+      allowedAssumptions: build.graph.entries.find(entry => entry.identity.contract === 'psc-pass-definition/1').canonicalValue.assumptionIds }));
+    const buildResult = spawnSync(process.execPath, [path.join(distribution.directory, 'pscv-verify.mjs'),
+      '--manifest-sha256', distribution.manifestSha256, '--build-archive', buildPath, '--policy', buildPolicyPath],
+    { cwd: directory, encoding: 'utf8', maxBuffer: 1024 * 1024, timeout: 30000, env: { ...process.env, NODE_PATH: '', NODE_OPTIONS: '' } });
+    assert.equal(buildResult.status, 0, buildResult.stderr);
+    assert.equal(JSON.parse(buildResult.stdout).acceptanceScope, 'observed-artifact-integrity-only');
     assert.match(invoke('0'.repeat(64)).stderr, /MANIFEST_HASH/);
     f.policy.checkers[0].kind = 'core-proof'; await writeFile(policyPath, JSON.stringify(f.policy));
     assert.match(invoke().stderr, /DISTRIBUTION_CHECKER_UNAVAILABLE/);

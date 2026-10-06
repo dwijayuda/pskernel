@@ -816,6 +816,7 @@ theorem psKernelExprAbstractFVarsAtChangedWithFuel_refines_reference_core
             psKernelExprAbstractFVarsAtReferenceChanged
           ]
           rw [psKernelNameLastIndex_refines_reference_core]
+          rfl
   | mvar name =>
       cases fuel with
       | zero =>

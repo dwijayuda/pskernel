@@ -798,25 +798,37 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_of_projection
                                             true
                                             hEqConfig
                                             hDefEqRun
+                                        have hEqEnvironment :
+                                            eqContext.environment =
+                                              nextContext.environment := by
+                                          unfold eqContext
+                                          split <;> rfl
+                                        have hEqLocal :
+                                            eqContext.localContext =
+                                              nextContext.localContext := by
+                                          unfold eqContext
+                                          split <;> rfl
                                         have hEqStateConfig :
                                             PsKernelCheckerConfigurationSound
                                               nextContext
-                                              eqState := by
-                                          simpa [
-                                            eqContext,
-                                            psKernelCheckerContextWithEagerReduce
-                                          ] using hEqSemantic.1
+                                              eqState :=
+                                          psKernelCheckerConfigurationSound_transport
+                                            eqContext
+                                            nextContext
+                                            eqState
+                                            hEqEnvironment
+                                            hEqLocal
+                                            hEqSemantic.1
                                         have hArgType :
                                             PsKernelDefEqJudgment
                                               nextContext.environment
                                               nextContext.localContext
                                               argType
                                               view.domain := by
-                                          simpa [
-                                            eqContext,
-                                            psKernelCheckerContextWithEagerReduce
-                                          ] using
+                                          have hEqJudgment :=
                                             hEqSemantic.2 rfl
+                                          rw [hEqEnvironment, hEqLocal] at hEqJudgment
+                                          exact hEqJudgment
                                         let inferred :=
                                           psKernelExprInstantiate1
                                             view.body

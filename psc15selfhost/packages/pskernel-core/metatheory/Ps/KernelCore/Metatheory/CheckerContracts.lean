@@ -413,19 +413,12 @@ theorem psKernelDefEqFinish_preserves_configuration
       (Prod.snd
         (psKernelDefEqFinish
           state left right value)) := by
-  rcases hConfig with
-    ⟨hIndex, hBound, hState⟩
   cases value with
   | false =>
-      simpa [psKernelDefEqFinish] using
-        (show
-          PsKernelEnvironmentIndexRefines context.environment ∧
-            PsKernelLocalContextFreshBound
-              context.localContext state.nextFresh ∧
-            PsKernelCheckerStateSemanticSound
-              context.environment context.localContext state
-          from ⟨hIndex, hBound, hState⟩)
+      simpa [psKernelDefEqFinish] using hConfig
   | true =>
+      rcases hConfig with
+        ⟨hIndex, hBound, hState⟩
       have hEq :
           PsKernelDefEqJudgment
             context.environment

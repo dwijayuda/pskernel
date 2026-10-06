@@ -4,7 +4,7 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof HEAD when this state was written: `91d03bca250c4e1b97a2967b403a0aced211d3eb`
+- Current proof HEAD when this state was written: `5d0e02799c789831b62ccc7d92c5af088526e1a3`
 - Last known green proof checkpoint: `91d03bca250c4e1b97a2967b403a0aced211d3eb` (run #260)
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
@@ -50,7 +50,9 @@ Last checked-in audit before this state file:
 - Total canonical source/proof pairs: 79
 
 ## Current blocker
-None at the current checkpoint. Run #260 is fully green:
+Configuration-level checker contracts are the active frontier. Run #261 fails only in `Ps.KernelCore.Metatheory.CheckerContracts`, at the false branch of `psKernelDefEqFinish_preserves_configuration`: the implementation returns the original state unchanged, but the proof reconstructs the underlying conjunction instead of returning the already-typed `PsKernelCheckerConfigurationSound` hypothesis. The current checkpoint fixes that proof shape without weakening the contract.
+
+Last known green proof checkpoint remains `91d03bca250c4e1b97a2967b403a0aced211d3eb` (run #260):
 - metatheory build: 100 jobs successful;
 - recursive proof tree: 84/84 PASS;
 - proof check: 110 seconds.

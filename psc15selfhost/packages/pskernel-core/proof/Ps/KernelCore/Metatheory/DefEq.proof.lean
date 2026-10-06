@@ -207,3 +207,24 @@ theorem psKernelDefEqQuick_expr_equal_refines_unconditional
         context.environment
         context.localContext)
       hEq
+
+
+theorem psKernelReductionClosure_implies_defeq
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext)
+    (left right : PsKernelExpr)
+    (h :
+      PsKernelReductionClosure
+        environment
+        localContext
+        left
+        right) :
+    PsKernelDefEqJudgment
+      environment
+      localContext
+      left
+      right :=
+  PsKernelDefEqJudgment.reductionClosure
+    left
+    right
+    h

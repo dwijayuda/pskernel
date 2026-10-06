@@ -79,6 +79,19 @@ theorem psKernelDefEqJudgment_contextWeaken
           (psKernelReductionStep_contextWeaken
             environment older newer
             left right hExt h)
+  | reductionClosure left right h =>
+      exact
+        PsKernelDefEqJudgment.reductionClosure
+          left
+          right
+          (psKernelReductionClosure_contextWeaken
+            environment
+            older
+            newer
+            left
+            right
+            hExt
+            h)
   | sort left right h =>
       exact PsKernelDefEqJudgment.sort left right h
   | literal left right h =>

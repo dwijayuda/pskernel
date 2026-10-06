@@ -263,8 +263,8 @@ def psInferProjectionType
         Except.error PsInferError.projectionUnsupported
       else
         match psEnvironmentFindInductive environment typeName with
-        | none => Except.error PsInferError.projectionUnsupported
-        | some info =>
+        | Option.none => Except.error PsInferError.projectionUnsupported
+        | Option.some info =>
             if
                 psInferBoolOr
                   (psInferBoolNot info.isStructure)
@@ -283,9 +283,9 @@ def psInferProjectionType
                           psEnvironmentFindConstructor
                             environment
                             constructorName with
-                      | none =>
+                      | Option.none =>
                           Except.error PsInferError.projectionUnsupported
-                      | some constructorInfo =>
+                      | Option.some constructorInfo =>
                           if
                               psInferBoolOr
                                 (psInferNatNe constructorInfo.numParams info.numParams)
@@ -346,20 +346,20 @@ def psInferTypeWithFuelWorker
                   Except.error (PsInferError.looseBoundVariable index)
               | .fvar id =>
                   match psLocalFindById localContext id with
-                  | none => Except.error (PsInferError.unknownFreeVariable id)
-                  | some declaration =>
+                  | Option.none => Except.error (PsInferError.unknownFreeVariable id)
+                  | Option.some declaration =>
                       Except.ok (psMetaInstantiate metaContext (psLocalDeclType declaration))
               | .mvar id =>
                   match psMetaFindDecl metaContext id with
-                  | none => Except.error (PsInferError.unknownMetavariable id)
-                  | some declaration =>
+                  | Option.none => Except.error (PsInferError.unknownMetavariable id)
+                  | Option.some declaration =>
                       Except.ok (psMetaInstantiate metaContext declaration.type)
               | .sortE level =>
                   Except.ok (PsExpr.sortE (PsLevel.succ level))
               | .constE name levels =>
                   match psEnvironmentFind environment name with
-                  | none => Except.error (PsInferError.unknownConstant name)
-                  | some declaration =>
+                  | Option.none => Except.error (PsInferError.unknownConstant name)
+                  | Option.some declaration =>
                       let parameters := psDeclarationLevelParams declaration;
                       if
                           Nat.beq

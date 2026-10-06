@@ -1,6 +1,7 @@
 import Ps.Compiler.Api
 import Ps.BackendWasm.Lower
 import Ps.BackendWasm.Binary
+import Ps.BackendWasm.SelfHostAbi
 
 inductive PsCompilerWasmError where
   | compiler (error : PsCompilerError)
@@ -22,7 +23,7 @@ def psCompilerWasmFromPrepared
       | Except.error error =>
           Except.error (PsCompilerWasmError.lower error)
       | Except.ok module =>
-          match psWasmEncodeModule module with
+          match psWasmEncodeModule (psWasmAddSelfHostGcAbi module) with
           | Except.error error =>
               Except.error (PsCompilerWasmError.encode error)
           | Except.ok bytes =>
@@ -56,3 +57,9 @@ def psCompilerWasm32ProofScriptSource
     psCompilerWasm32Target
     PsCompilerSourceKind.proofScript
     source
+
+def psCompilerWasm32ProofScriptBytesOrEmpty
+    (source : String) : List UInt8 :=
+  match psCompilerWasm32ProofScriptSource source with
+  | Except.error _ => List.nil
+  | Except.ok bytes => bytes

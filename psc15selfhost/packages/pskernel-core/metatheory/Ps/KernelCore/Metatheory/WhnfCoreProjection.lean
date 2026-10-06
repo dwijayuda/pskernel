@@ -302,46 +302,46 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                   state2 := by
             cases structReduced with
             | bvar value =>
-                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpandedRun
-                rcases hExpandedRun with ⟨rfl, rfl⟩
+                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | fvar value =>
-                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpandedRun
-                rcases hExpandedRun with ⟨rfl, rfl⟩
+                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | mvar value =>
-                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpandedRun
-                rcases hExpandedRun with ⟨rfl, rfl⟩
+                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | sort value =>
-                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpandedRun
-                rcases hExpandedRun with ⟨rfl, rfl⟩
+                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | const name levels =>
-                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpandedRun
-                rcases hExpandedRun with ⟨rfl, rfl⟩
+                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | app fn arg =>
-                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpandedRun
-                rcases hExpandedRun with ⟨rfl, rfl⟩
+                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | lam name type body binderInfo =>
-                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpandedRun
-                rcases hExpandedRun with ⟨rfl, rfl⟩
+                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | forallE name type body binderInfo =>
-                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpandedRun
-                rcases hExpandedRun with ⟨rfl, rfl⟩
+                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | letE name type value body nondep =>
-                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpandedRun
-                rcases hExpandedRun with ⟨rfl, rfl⟩
+                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | lit literal =>
                 cases literal with
                 | nat value =>
-                    simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpandedRun
-                    rcases hExpandedRun with ⟨rfl, rfl⟩
+                    simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpanded
+                    rcases hExpanded with ⟨rfl, rfl⟩
                     exact hStructSemantic
                 | str value =>
                     have hStringRun :
@@ -351,7 +351,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                             (psKernelStringLitToConstructor value) =
                           Except.ok
                             (Prod.mk expanded state2) := by
-                      simpa [psKernelWhnfProjectionExpandWith, expandedResult] using hExpandedRun
+                      simpa [psKernelWhnfProjectionExpandWith, expandedResult] using hExpanded
                     have hStringSemantic :=
                       hPublic
                         nextContext
@@ -398,12 +398,12 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                         hStringSemantic.2
                       ⟩
             | mdata metadata body =>
-                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpandedRun
-                rcases hExpandedRun with ⟨rfl, rfl⟩
+                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
                 exact hStructSemantic
             | proj projectionName projectionIndex body =>
-                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpandedRun
-                rcases hExpandedRun with ⟨rfl, rfl⟩
+                simp [psKernelWhnfProjectionExpandWith, expandedResult] at hExpanded
+                rcases hExpanded with ⟨rfl, rfl⟩
                 exact hStructSemantic
           cases hProjection :
               psKernelReduceProjCore
@@ -420,16 +420,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                       state2 =
                     Except.ok
                       (Prod.mk result nextState) := by
-                simpa [
-                  psKernelWhnfCoreWithFuel,
-                  hDepth,
-                  hMiss,
-                  original,
-                  structResult,
-                  hStruct,
-                  hExpandedRun,
-                  hProjection
-                ] using hSuccess
+                simpa [hExpanded, hProjection] using hSuccessExpanded
               have hFinishSemantic :=
                 psKernelWhnfCoreFinish_success_refines
                   nextContext
@@ -506,17 +497,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                     cheapRec
                     cheapProj with
               | error error =>
-                  simp [
-                    psKernelWhnfCoreWithFuel,
-                    hDepth,
-                    hMiss,
-                    original,
-                    structResult,
-                    hStruct,
-                                    hExpandedRun,
-                    hProjection,
-                    hReduce
-                  ] at hSuccess
+                  simp [hExpanded, hProjection, hReduce] at hSuccessExpanded
               | ok reduceRun =>
                   rcases reduceRun with ⟨reduced, state3⟩
                   have hReduceSemantic :=
@@ -552,17 +533,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                           state3 =
                         Except.ok
                           (Prod.mk result nextState) := by
-                    simpa [
-                      psKernelWhnfCoreWithFuel,
-                      hDepth,
-                      hMiss,
-                      original,
-                      structResult,
-                      hStruct,
-                                hExpandedRun,
-                      hProjection,
-                      hReduce
-                    ] using hSuccess
+                    simpa [hExpanded, hProjection, hReduce] using hSuccessExpanded
                   have hFinishSemantic :=
                     psKernelWhnfCoreFinish_success_refines
                       nextContext

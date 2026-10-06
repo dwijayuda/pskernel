@@ -755,3 +755,355 @@ theorem psKernelExprInstantiateRev_refines_reference_core
   unfold psKernelExprInstantiateRev
   unfold psKernelExprInstantiateRevReference
   rw [psKernelExprInstantiate_refines_reference_core]
+
+
+theorem psKernelExprAbstractFVarsAtChangedWithFuel_refines_reference_core
+    (expr : PsKernelExpr)
+    (fuel offset : Nat)
+    (fvars : List PsKernelName)
+    (hFuel : psKernelExprNodeCount expr < fuel) :
+    psKernelExprAbstractFVarsAtChangedWithFuel
+        fuel expr fvars offset =
+      psKernelExprAbstractFVarsAtReferenceChanged
+        expr fvars offset := by
+  induction expr generalizing fuel offset fvars with
+  | bvar index =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          simp [
+            psKernelExprAbstractFVarsAtChangedWithFuel,
+            psKernelExprAbstractFVarsAtReferenceChanged
+          ]
+  | fvar name =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          simp [
+            psKernelExprAbstractFVarsAtChangedWithFuel,
+            psKernelExprAbstractFVarsAtReferenceChanged
+          ]
+  | mvar name =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          simp [
+            psKernelExprAbstractFVarsAtChangedWithFuel,
+            psKernelExprAbstractFVarsAtReferenceChanged
+          ]
+  | sort level =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          simp [
+            psKernelExprAbstractFVarsAtChangedWithFuel,
+            psKernelExprAbstractFVarsAtReferenceChanged
+          ]
+  | const name levels =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          simp [
+            psKernelExprAbstractFVarsAtChangedWithFuel,
+            psKernelExprAbstractFVarsAtReferenceChanged
+          ]
+  | app fn arg ihFn ihArg =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          have hTotal :
+              Nat.succ
+                  (Nat.add
+                    (psKernelExprNodeCount fn)
+                    (psKernelExprNodeCount arg)) <
+                Nat.succ remaining := by
+            simpa only [psKernelExprNodeCount] using hFuel
+          have hSum :
+              Nat.add
+                  (psKernelExprNodeCount fn)
+                  (psKernelExprNodeCount arg) <
+                remaining :=
+            Nat.lt_of_succ_lt_succ hTotal
+          have hFnFuel :
+              psKernelExprNodeCount fn < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_right
+                (psKernelExprNodeCount fn)
+                (psKernelExprNodeCount arg))
+              hSum
+          have hArgFuel :
+              psKernelExprNodeCount arg < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_left
+                (psKernelExprNodeCount arg)
+                (psKernelExprNodeCount fn))
+              hSum
+          have hFn :=
+            ihFn remaining offset fvars hFnFuel
+          have hArg :=
+            ihArg remaining offset fvars hArgFuel
+          simp [
+            psKernelExprAbstractFVarsAtChangedWithFuel,
+            psKernelExprAbstractFVarsAtReferenceChanged,
+            hFn,
+            hArg
+          ]
+  | lam name type body binderInfo ihType ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          have hTotal :
+              Nat.succ
+                  (Nat.add
+                    (psKernelExprNodeCount type)
+                    (psKernelExprNodeCount body)) <
+                Nat.succ remaining := by
+            simpa only [psKernelExprNodeCount] using hFuel
+          have hSum :
+              Nat.add
+                  (psKernelExprNodeCount type)
+                  (psKernelExprNodeCount body) <
+                remaining :=
+            Nat.lt_of_succ_lt_succ hTotal
+          have hTypeFuel :
+              psKernelExprNodeCount type < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_right
+                (psKernelExprNodeCount type)
+                (psKernelExprNodeCount body))
+              hSum
+          have hBodyFuel :
+              psKernelExprNodeCount body < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_left
+                (psKernelExprNodeCount body)
+                (psKernelExprNodeCount type))
+              hSum
+          have hType :=
+            ihType remaining offset fvars hTypeFuel
+          have hBody :=
+            ihBody remaining (Nat.succ offset) fvars hBodyFuel
+          simp [
+            psKernelExprAbstractFVarsAtChangedWithFuel,
+            psKernelExprAbstractFVarsAtReferenceChanged,
+            hType,
+            hBody
+          ]
+  | forallE name type body binderInfo ihType ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          have hTotal :
+              Nat.succ
+                  (Nat.add
+                    (psKernelExprNodeCount type)
+                    (psKernelExprNodeCount body)) <
+                Nat.succ remaining := by
+            simpa only [psKernelExprNodeCount] using hFuel
+          have hSum :
+              Nat.add
+                  (psKernelExprNodeCount type)
+                  (psKernelExprNodeCount body) <
+                remaining :=
+            Nat.lt_of_succ_lt_succ hTotal
+          have hTypeFuel :
+              psKernelExprNodeCount type < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_right
+                (psKernelExprNodeCount type)
+                (psKernelExprNodeCount body))
+              hSum
+          have hBodyFuel :
+              psKernelExprNodeCount body < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_left
+                (psKernelExprNodeCount body)
+                (psKernelExprNodeCount type))
+              hSum
+          have hType :=
+            ihType remaining offset fvars hTypeFuel
+          have hBody :=
+            ihBody remaining (Nat.succ offset) fvars hBodyFuel
+          simp [
+            psKernelExprAbstractFVarsAtChangedWithFuel,
+            psKernelExprAbstractFVarsAtReferenceChanged,
+            hType,
+            hBody
+          ]
+  | letE name type value body nondep ihType ihValue ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          have hTotal :
+              Nat.succ
+                  (Nat.add
+                    (psKernelExprNodeCount type)
+                    (Nat.add
+                      (psKernelExprNodeCount value)
+                      (psKernelExprNodeCount body))) <
+                Nat.succ remaining := by
+            simpa only [psKernelExprNodeCount] using hFuel
+          have hSum :
+              Nat.add
+                  (psKernelExprNodeCount type)
+                  (Nat.add
+                    (psKernelExprNodeCount value)
+                    (psKernelExprNodeCount body)) <
+                remaining :=
+            Nat.lt_of_succ_lt_succ hTotal
+          have hTypeFuel :
+              psKernelExprNodeCount type < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_right
+                (psKernelExprNodeCount type)
+                (Nat.add
+                  (psKernelExprNodeCount value)
+                  (psKernelExprNodeCount body)))
+              hSum
+          have hTailLe :
+              Nat.add
+                  (psKernelExprNodeCount value)
+                  (psKernelExprNodeCount body) ≤
+                Nat.add
+                  (psKernelExprNodeCount type)
+                  (Nat.add
+                    (psKernelExprNodeCount value)
+                    (psKernelExprNodeCount body)) :=
+            Nat.le_add_left
+              (Nat.add
+                (psKernelExprNodeCount value)
+                (psKernelExprNodeCount body))
+              (psKernelExprNodeCount type)
+          have hValueFuel :
+              psKernelExprNodeCount value < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_trans
+                (Nat.le_add_right
+                  (psKernelExprNodeCount value)
+                  (psKernelExprNodeCount body))
+                hTailLe)
+              hSum
+          have hBodyFuel :
+              psKernelExprNodeCount body < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_trans
+                (Nat.le_add_left
+                  (psKernelExprNodeCount body)
+                  (psKernelExprNodeCount value))
+                hTailLe)
+              hSum
+          have hType :=
+            ihType remaining offset fvars hTypeFuel
+          have hValue :=
+            ihValue remaining offset fvars hValueFuel
+          have hBody :=
+            ihBody remaining (Nat.succ offset) fvars hBodyFuel
+          simp [
+            psKernelExprAbstractFVarsAtChangedWithFuel,
+            psKernelExprAbstractFVarsAtReferenceChanged,
+            hType,
+            hValue,
+            hBody
+          ]
+  | lit literal =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          simp [
+            psKernelExprAbstractFVarsAtChangedWithFuel,
+            psKernelExprAbstractFVarsAtReferenceChanged
+          ]
+  | mdata metadata body ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          have hTotal :
+              Nat.succ (psKernelExprNodeCount body) <
+                Nat.succ remaining := by
+            simpa only [psKernelExprNodeCount] using hFuel
+          have hBodyFuel :
+              psKernelExprNodeCount body < remaining :=
+            Nat.lt_of_succ_lt_succ hTotal
+          have hBody :=
+            ihBody remaining offset fvars hBodyFuel
+          simp [
+            psKernelExprAbstractFVarsAtChangedWithFuel,
+            psKernelExprAbstractFVarsAtReferenceChanged,
+            hBody
+          ]
+  | proj typeName index body ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          have hTotal :
+              Nat.succ (psKernelExprNodeCount body) <
+                Nat.succ remaining := by
+            simpa only [psKernelExprNodeCount] using hFuel
+          have hBodyFuel :
+              psKernelExprNodeCount body < remaining :=
+            Nat.lt_of_succ_lt_succ hTotal
+          have hBody :=
+            ihBody remaining offset fvars hBodyFuel
+          simp [
+            psKernelExprAbstractFVarsAtChangedWithFuel,
+            psKernelExprAbstractFVarsAtReferenceChanged,
+            hBody
+          ]
+
+theorem psKernelExprAbstractFVarsAtChanged_refines_reference_core
+    (expr : PsKernelExpr)
+    (fvars : List PsKernelName)
+    (offset : Nat) :
+    psKernelExprAbstractFVarsAtChanged
+        expr fvars offset =
+      psKernelExprAbstractFVarsAtReferenceChanged
+        expr fvars offset := by
+  unfold psKernelExprAbstractFVarsAtChanged
+  exact
+    psKernelExprAbstractFVarsAtChangedWithFuel_refines_reference_core
+      expr
+      (Nat.succ (psKernelExprNodeCount expr))
+      offset
+      fvars
+      (Nat.lt_succ_self
+        (psKernelExprNodeCount expr))
+
+theorem psKernelExprAbstractFVarsAt_refines_reference_core
+    (expr : PsKernelExpr)
+    (fvars : List PsKernelName)
+    (offset : Nat) :
+    psKernelExprAbstractFVarsAt
+        expr fvars offset =
+      psKernelExprAbstractFVarsAtReference
+        expr fvars offset := by
+  cases fvars with
+  | nil =>
+      rfl
+  | cons head tail =>
+      unfold psKernelExprAbstractFVarsAt
+      unfold psKernelExprAbstractFVarsAtReference
+      rw [psKernelExprAbstractFVarsAtChanged_refines_reference_core]
+
+theorem psKernelExprAbstractFVars_refines_reference_core
+    (expr : PsKernelExpr)
+    (fvars : List PsKernelName) :
+    psKernelExprAbstractFVars expr fvars =
+      psKernelExprAbstractFVarsReference
+        expr fvars := by
+  unfold psKernelExprAbstractFVars
+  unfold psKernelExprAbstractFVarsReference
+  exact
+    psKernelExprAbstractFVarsAt_refines_reference_core
+      expr fvars 0

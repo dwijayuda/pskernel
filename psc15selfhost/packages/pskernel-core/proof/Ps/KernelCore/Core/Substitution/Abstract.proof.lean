@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.Substitution.Abstract
+import Ps.KernelCore.Metatheory.SubstitutionRefinement
 
 theorem psKernelNameLastIndexWorker_nil
     (needle : PsKernelName)
@@ -76,3 +77,23 @@ theorem psKernelExprAbstractInstantiate_roundtrip_under_one_lambda_anonymous
         (PsKernelExpr.fvar PsKernelName.anonymous)
         binderInfo := by
   rfl
+
+
+theorem psKernelExprAbstractFVarsAt_refines_reference
+    (expr : PsKernelExpr)
+    (fvars : List PsKernelName)
+    (offset : Nat) :
+    psKernelExprAbstractFVarsAt expr fvars offset =
+      psKernelExprAbstractFVarsAtReference expr fvars offset := by
+  exact
+    psKernelExprAbstractFVarsAt_refines_reference_core
+      expr fvars offset
+
+theorem psKernelExprAbstractFVars_refines_reference
+    (expr : PsKernelExpr)
+    (fvars : List PsKernelName) :
+    psKernelExprAbstractFVars expr fvars =
+      psKernelExprAbstractFVarsReference expr fvars := by
+  exact
+    psKernelExprAbstractFVars_refines_reference_core
+      expr fvars

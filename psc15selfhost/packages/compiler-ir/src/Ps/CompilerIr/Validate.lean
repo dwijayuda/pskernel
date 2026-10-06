@@ -389,25 +389,20 @@ def psStrictBuildSubstitution
                   (Prod.mk parameter.name argument)
                   rest)
 
-def psStrictValidateTypeListInScope
-    (module : PsVerifiedIrModule)
-    (typeParameters : List String)
+def psStrictValidateTypeListWith
+    (validate :
+      PsVerifiedIrType ->
+        Except PsVerifiedIrValidationError Unit)
     (types : List PsVerifiedIrType) :
     Except PsVerifiedIrValidationError Unit :=
   match types with
   | List.nil => Except.ok Unit.unit
   | List.cons type rest =>
-      match
-          psStrictValidateTypeInScopeWithFuel
-            module
-            typeParameters
-            4096
-            type with
+      match validate type with
       | Except.error error => Except.error error
       | Except.ok _ =>
-          psStrictValidateTypeListInScope
-            module
-            typeParameters
+          psStrictValidateTypeListWith
+            validate
             rest
 
 def psStrictValidateTypeInScopeWithFuel
@@ -445,17 +440,15 @@ def psStrictValidateTypeInScopeWithFuel
             Except.ok Unit.unit
         | .function parameters result =>
             match
-                psStrictValidateTypeListInScope
-                  module
-                  typeParameters
+                psStrictValidateTypeListWith
+                  smaller
                   parameters with
             | Except.error error => Except.error error
             | Except.ok _ => smaller result
         | .named name arguments =>
             match
-                psStrictValidateTypeListInScope
-                  module
-                  typeParameters
+                psStrictValidateTypeListWith
+                  smaller
                   arguments with
             | Except.error error => Except.error error
             | Except.ok _ =>
@@ -514,6 +507,19 @@ def psStrictValidateTypeInScope
     typeParameters
     4096
     type
+
+def psStrictValidateTypeListInScope
+    (module : PsVerifiedIrModule)
+    (typeParameters : List String)
+    (types : List PsVerifiedIrType) :
+    Except PsVerifiedIrValidationError Unit :=
+  psStrictValidateTypeListWith
+    (fun (type : PsVerifiedIrType) =>
+      psStrictValidateTypeInScope
+        module
+        typeParameters
+        type)
+    types
 
 def psStrictLocalLookup
     (locals : List (String × PsVerifiedIrType))
@@ -1077,6 +1083,249 @@ def psStrictFindGlobalValueType
                 (psStrictDeclarationType declaration)
           | List.cons _ _ =>
               Option.none
+
+def psStrictCheckStructureFieldsWith
+    (infer :
+      PsVerifiedIrExpr ->
+        Except PsVerifiedIrValidationError PsVerifiedIrType)
+    (structureName : String)
+    (substitution : List (String × PsVerifiedIrType))
+    (expected : List PsVerifiedIrStructureField)
+    (actual : List (String × PsVerifiedIrExpr)) :
+    Except PsVerifiedIrValidationError Unit :=
+  match expected with
+  | List.nil => Except.ok Unit.unit
+  | List.cons field rest =>
+      match psStrictFindExprField actual field.name with
+      | Option.none =>
+          Except.error
+            (PsVerifiedIrValidationError.fieldCompleteness
+              structureName)
+      | Option.some value =>
+          match infer value with
+          | Except.error error => Except.error error
+          | Except.ok actualType =>
+              let expectedType : PsVerifiedIrType :=
+                psStrictSubstituteType
+                  substitution
+                  field.type;
+              if psStrictTypeEq expectedType actualType then
+                psStrictCheckStructureFieldsWith
+                  infer
+                  structureName
+                  substitution
+                  rest
+                  actual
+              else
+                Except.error
+                  PsVerifiedIrValidationError.expressionTypeMismatch
+
+def psStrictCheckConstructorFieldsWith
+    (infer :
+      PsVerifiedIrExpr ->
+        Except PsVerifiedIrValidationError PsVerifiedIrType)
+    (inductiveName constructorName : String)
+    (substitution : List (String × PsVerifiedIrType))
+    (expected : List PsVerifiedIrConstructorField)
+    (actual : List (String × PsVerifiedIrExpr)) :
+    Except PsVerifiedIrValidationError Unit :=
+  match expected with
+  | List.nil => Except.ok Unit.unit
+  | List.cons field rest =>
+      match psStrictFindExprField actual field.name with
+      | Option.none =>
+          Except.error
+            (PsVerifiedIrValidationError.fieldCompleteness
+              constructorName)
+      | Option.some value =>
+          match infer value with
+          | Except.error error => Except.error error
+          | Except.ok actualType =>
+              let expectedType : PsVerifiedIrType :=
+                psStrictSubstituteType
+                  substitution
+                  field.type;
+              if psStrictTypeEq expectedType actualType then
+                psStrictCheckConstructorFieldsWith
+                  infer
+                  inductiveName
+                  constructorName
+                  substitution
+                  rest
+                  actual
+              else
+                Except.error
+                  PsVerifiedIrValidationError.expressionTypeMismatch
+
+def psStrictValidateBindingFieldTypes
+    (constructorName : String)
+    (substitution : List (String × PsVerifiedIrType))
+    (fields : List PsVerifiedIrConstructorField)
+    (bindings : List PsVerifiedIrMatchBinding) :
+    Except PsVerifiedIrValidationError Unit :=
+  match fields with
+  | List.nil => Except.ok Unit.unit
+  | List.cons field rest =>
+      match psStrictFindBinding bindings field.name with
+      | Option.none =>
+          Except.error
+            (PsVerifiedIrValidationError.fieldCompleteness
+              constructorName)
+      | Option.some binding =>
+          let expectedType : PsVerifiedIrType :=
+            psStrictSubstituteType
+              substitution
+              field.type;
+          if psStrictTypeEq expectedType binding.type then
+            psStrictValidateBindingFieldTypes
+              constructorName
+              substitution
+              rest
+              bindings
+          else
+            Except.error
+              PsVerifiedIrValidationError.expressionTypeMismatch
+
+def psStrictValidateBindingsAgainstFields
+    (constructorName : String)
+    (substitution : List (String × PsVerifiedIrType))
+    (fields : List PsVerifiedIrConstructorField)
+    (bindings : List PsVerifiedIrMatchBinding) :
+    Except PsVerifiedIrValidationError Unit :=
+  if
+      psStrictStringListUnique
+        (psStrictBindingFieldNames bindings) then
+    if
+        psStrictStringListUnique
+          (psStrictBindingNames bindings) then
+      if
+          Nat.beq
+            (psVerifiedIrListLength fields)
+            (psVerifiedIrListLength bindings) then
+        psStrictValidateBindingFieldTypes
+          constructorName
+          substitution
+          fields
+          bindings
+      else
+        Except.error
+          (PsVerifiedIrValidationError.fieldCompleteness
+            constructorName)
+    else
+      Except.error
+        (PsVerifiedIrValidationError.duplicateParameter
+          constructorName)
+  else
+    Except.error
+      (PsVerifiedIrValidationError.duplicateField
+        constructorName
+        "")
+
+def psStrictInferMatchAlternativeWith
+    (infer :
+      List (String × PsVerifiedIrType) ->
+      PsVerifiedIrExpr ->
+        Except PsVerifiedIrValidationError PsVerifiedIrType)
+    (locals : List (String × PsVerifiedIrType))
+    (inductiveName : String)
+    (substitution : List (String × PsVerifiedIrType))
+    (constructors : List PsVerifiedIrConstructor)
+    (alternative :
+      String ×
+        List PsVerifiedIrMatchBinding ×
+        PsVerifiedIrExpr) :
+    Except PsVerifiedIrValidationError PsVerifiedIrType :=
+  let constructorName : String := Prod.fst alternative;
+  let payload :
+      List PsVerifiedIrMatchBinding × PsVerifiedIrExpr :=
+    Prod.snd alternative;
+  let bindings : List PsVerifiedIrMatchBinding :=
+    Prod.fst payload;
+  let body : PsVerifiedIrExpr := Prod.snd payload;
+  match
+      psVerifiedIrFindConstructor
+        constructors
+        constructorName with
+  | Option.none =>
+      Except.error
+        (PsVerifiedIrValidationError.unknownConstructor
+          inductiveName
+          constructorName)
+  | Option.some constructorInfo =>
+      match
+          psStrictValidateBindingsAgainstFields
+            constructorName
+            substitution
+            constructorInfo.fields
+            bindings with
+      | Except.error error => Except.error error
+      | Except.ok _ =>
+          infer
+            (psStrictAddBindings bindings locals)
+            body
+
+def psStrictCheckRemainingAlternativesWith
+    (infer :
+      List (String × PsVerifiedIrType) ->
+      PsVerifiedIrExpr ->
+        Except PsVerifiedIrValidationError PsVerifiedIrType)
+    (locals : List (String × PsVerifiedIrType))
+    (inductiveName : String)
+    (substitution : List (String × PsVerifiedIrType))
+    (constructors : List PsVerifiedIrConstructor)
+    (expectedType : PsVerifiedIrType)
+    (alternatives :
+      List
+        (String ×
+          List PsVerifiedIrMatchBinding ×
+          PsVerifiedIrExpr)) :
+    Except PsVerifiedIrValidationError Unit :=
+  match alternatives with
+  | List.nil => Except.ok Unit.unit
+  | List.cons alternative rest =>
+      match
+          psStrictInferMatchAlternativeWith
+            infer
+            locals
+            inductiveName
+            substitution
+            constructors
+            alternative with
+      | Except.error error => Except.error error
+      | Except.ok actualType =>
+          if psStrictTypeEq expectedType actualType then
+            psStrictCheckRemainingAlternativesWith
+              infer
+              locals
+              inductiveName
+              substitution
+              constructors
+              expectedType
+              rest
+          else
+            Except.error
+              PsVerifiedIrValidationError.expressionTypeMismatch
+
+def psStrictAllConstructorsCovered
+    (constructors : List PsVerifiedIrConstructor)
+    (alternatives :
+      List
+        (String ×
+          List PsVerifiedIrMatchBinding ×
+          PsVerifiedIrExpr)) :
+    Bool :=
+  match constructors with
+  | List.nil => true
+  | List.cons constructorInfo rest =>
+      match
+          psStrictFindAlternative
+            alternatives
+            constructorInfo.name with
+      | Option.none => false
+      | Option.some _ =>
+          psStrictAllConstructorsCovered
+            rest
+            alternatives
 
 def psStrictInferExprWithFuel
     (module : PsVerifiedIrModule)
@@ -1652,249 +1901,6 @@ def psStrictInferExprWithFuel
                     (PsVerifiedIrValidationError.typeArgumentArity
                       inductiveName)
 
-def psStrictCheckStructureFieldsWith
-    (infer :
-      PsVerifiedIrExpr ->
-        Except PsVerifiedIrValidationError PsVerifiedIrType)
-    (structureName : String)
-    (substitution : List (String × PsVerifiedIrType))
-    (expected : List PsVerifiedIrStructureField)
-    (actual : List (String × PsVerifiedIrExpr)) :
-    Except PsVerifiedIrValidationError Unit :=
-  match expected with
-  | List.nil => Except.ok Unit.unit
-  | List.cons field rest =>
-      match psStrictFindExprField actual field.name with
-      | Option.none =>
-          Except.error
-            (PsVerifiedIrValidationError.fieldCompleteness
-              structureName)
-      | Option.some value =>
-          match infer value with
-          | Except.error error => Except.error error
-          | Except.ok actualType =>
-              let expectedType : PsVerifiedIrType :=
-                psStrictSubstituteType
-                  substitution
-                  field.type;
-              if psStrictTypeEq expectedType actualType then
-                psStrictCheckStructureFieldsWith
-                  infer
-                  structureName
-                  substitution
-                  rest
-                  actual
-              else
-                Except.error
-                  PsVerifiedIrValidationError.expressionTypeMismatch
-
-def psStrictCheckConstructorFieldsWith
-    (infer :
-      PsVerifiedIrExpr ->
-        Except PsVerifiedIrValidationError PsVerifiedIrType)
-    (inductiveName constructorName : String)
-    (substitution : List (String × PsVerifiedIrType))
-    (expected : List PsVerifiedIrConstructorField)
-    (actual : List (String × PsVerifiedIrExpr)) :
-    Except PsVerifiedIrValidationError Unit :=
-  match expected with
-  | List.nil => Except.ok Unit.unit
-  | List.cons field rest =>
-      match psStrictFindExprField actual field.name with
-      | Option.none =>
-          Except.error
-            (PsVerifiedIrValidationError.fieldCompleteness
-              constructorName)
-      | Option.some value =>
-          match infer value with
-          | Except.error error => Except.error error
-          | Except.ok actualType =>
-              let expectedType : PsVerifiedIrType :=
-                psStrictSubstituteType
-                  substitution
-                  field.type;
-              if psStrictTypeEq expectedType actualType then
-                psStrictCheckConstructorFieldsWith
-                  infer
-                  inductiveName
-                  constructorName
-                  substitution
-                  rest
-                  actual
-              else
-                Except.error
-                  PsVerifiedIrValidationError.expressionTypeMismatch
-
-def psStrictValidateBindingsAgainstFields
-    (constructorName : String)
-    (substitution : List (String × PsVerifiedIrType))
-    (fields : List PsVerifiedIrConstructorField)
-    (bindings : List PsVerifiedIrMatchBinding) :
-    Except PsVerifiedIrValidationError Unit :=
-  if
-      psStrictStringListUnique
-        (psStrictBindingFieldNames bindings) then
-    if
-        psStrictStringListUnique
-          (psStrictBindingNames bindings) then
-      if
-          Nat.beq
-            (psVerifiedIrListLength fields)
-            (psVerifiedIrListLength bindings) then
-        psStrictValidateBindingFieldTypes
-          constructorName
-          substitution
-          fields
-          bindings
-      else
-        Except.error
-          (PsVerifiedIrValidationError.fieldCompleteness
-            constructorName)
-    else
-      Except.error
-        (PsVerifiedIrValidationError.duplicateParameter
-          constructorName)
-  else
-    Except.error
-      (PsVerifiedIrValidationError.duplicateField
-        constructorName
-        "")
-
-def psStrictValidateBindingFieldTypes
-    (constructorName : String)
-    (substitution : List (String × PsVerifiedIrType))
-    (fields : List PsVerifiedIrConstructorField)
-    (bindings : List PsVerifiedIrMatchBinding) :
-    Except PsVerifiedIrValidationError Unit :=
-  match fields with
-  | List.nil => Except.ok Unit.unit
-  | List.cons field rest =>
-      match psStrictFindBinding bindings field.name with
-      | Option.none =>
-          Except.error
-            (PsVerifiedIrValidationError.fieldCompleteness
-              constructorName)
-      | Option.some binding =>
-          let expectedType : PsVerifiedIrType :=
-            psStrictSubstituteType
-              substitution
-              field.type;
-          if psStrictTypeEq expectedType binding.type then
-            psStrictValidateBindingFieldTypes
-              constructorName
-              substitution
-              rest
-              bindings
-          else
-            Except.error
-              PsVerifiedIrValidationError.expressionTypeMismatch
-
-def psStrictInferMatchAlternativeWith
-    (infer :
-      List (String × PsVerifiedIrType) ->
-      PsVerifiedIrExpr ->
-        Except PsVerifiedIrValidationError PsVerifiedIrType)
-    (locals : List (String × PsVerifiedIrType))
-    (inductiveName : String)
-    (substitution : List (String × PsVerifiedIrType))
-    (constructors : List PsVerifiedIrConstructor)
-    (alternative :
-      String ×
-        List PsVerifiedIrMatchBinding ×
-        PsVerifiedIrExpr) :
-    Except PsVerifiedIrValidationError PsVerifiedIrType :=
-  let constructorName : String := Prod.fst alternative;
-  let payload :
-      List PsVerifiedIrMatchBinding × PsVerifiedIrExpr :=
-    Prod.snd alternative;
-  let bindings : List PsVerifiedIrMatchBinding :=
-    Prod.fst payload;
-  let body : PsVerifiedIrExpr := Prod.snd payload;
-  match
-      psVerifiedIrFindConstructor
-        constructors
-        constructorName with
-  | Option.none =>
-      Except.error
-        (PsVerifiedIrValidationError.unknownConstructor
-          inductiveName
-          constructorName)
-  | Option.some constructorInfo =>
-      match
-          psStrictValidateBindingsAgainstFields
-            constructorName
-            substitution
-            constructorInfo.fields
-            bindings with
-      | Except.error error => Except.error error
-      | Except.ok _ =>
-          infer
-            (psStrictAddBindings bindings locals)
-            body
-
-def psStrictCheckRemainingAlternativesWith
-    (infer :
-      List (String × PsVerifiedIrType) ->
-      PsVerifiedIrExpr ->
-        Except PsVerifiedIrValidationError PsVerifiedIrType)
-    (locals : List (String × PsVerifiedIrType))
-    (inductiveName : String)
-    (substitution : List (String × PsVerifiedIrType))
-    (constructors : List PsVerifiedIrConstructor)
-    (expectedType : PsVerifiedIrType)
-    (alternatives :
-      List
-        (String ×
-          List PsVerifiedIrMatchBinding ×
-          PsVerifiedIrExpr)) :
-    Except PsVerifiedIrValidationError Unit :=
-  match alternatives with
-  | List.nil => Except.ok Unit.unit
-  | List.cons alternative rest =>
-      match
-          psStrictInferMatchAlternativeWith
-            infer
-            locals
-            inductiveName
-            substitution
-            constructors
-            alternative with
-      | Except.error error => Except.error error
-      | Except.ok actualType =>
-          if psStrictTypeEq expectedType actualType then
-            psStrictCheckRemainingAlternativesWith
-              infer
-              locals
-              inductiveName
-              substitution
-              constructors
-              expectedType
-              rest
-          else
-            Except.error
-              PsVerifiedIrValidationError.expressionTypeMismatch
-
-def psStrictAllConstructorsCovered
-    (constructors : List PsVerifiedIrConstructor)
-    (alternatives :
-      List
-        (String ×
-          List PsVerifiedIrMatchBinding ×
-          PsVerifiedIrExpr)) :
-    Bool :=
-  match constructors with
-  | List.nil => true
-  | List.cons constructorInfo rest =>
-      match
-          psStrictFindAlternative
-            alternatives
-            constructorInfo.name with
-      | Option.none => false
-      | Option.some _ =>
-          psStrictAllConstructorsCovered
-            rest
-            alternatives
-
 def psStrictValidateTypeParameters
     (parameters : List PsVerifiedIrTypeParameter) :
     Except PsVerifiedIrValidationError (List String) :=
@@ -1906,6 +1912,26 @@ def psStrictValidateTypeParameters
     Except.error
       (PsVerifiedIrValidationError.duplicateTypeParameter
         "")
+
+def psStrictValidateStructureFieldTypes
+    (module : PsVerifiedIrModule)
+    (typeParameters : List String)
+    (fields : List PsVerifiedIrStructureField) :
+    Except PsVerifiedIrValidationError Unit :=
+  match fields with
+  | List.nil => Except.ok Unit.unit
+  | List.cons field rest =>
+      match
+          psStrictValidateTypeInScope
+            module
+            typeParameters
+            field.type with
+      | Except.error error => Except.error error
+      | Except.ok _ =>
+          psStrictValidateStructureFieldTypes
+            module
+            typeParameters
+            rest
 
 def psStrictValidateStructure
     (module : PsVerifiedIrModule)
@@ -1930,10 +1956,10 @@ def psStrictValidateStructure
             structureInfo.name
             "")
 
-def psStrictValidateStructureFieldTypes
+def psStrictValidateConstructorFieldTypes
     (module : PsVerifiedIrModule)
     (typeParameters : List String)
-    (fields : List PsVerifiedIrStructureField) :
+    (fields : List PsVerifiedIrConstructorField) :
     Except PsVerifiedIrValidationError Unit :=
   match fields with
   | List.nil => Except.ok Unit.unit
@@ -1945,7 +1971,7 @@ def psStrictValidateStructureFieldTypes
             field.type with
       | Except.error error => Except.error error
       | Except.ok _ =>
-          psStrictValidateStructureFieldTypes
+          psStrictValidateConstructorFieldTypes
             module
             typeParameters
             rest
@@ -1969,26 +1995,6 @@ def psStrictValidateConstructor
       (PsVerifiedIrValidationError.duplicateField
         inductiveName
         "")
-
-def psStrictValidateConstructorFieldTypes
-    (module : PsVerifiedIrModule)
-    (typeParameters : List String)
-    (fields : List PsVerifiedIrConstructorField) :
-    Except PsVerifiedIrValidationError Unit :=
-  match fields with
-  | List.nil => Except.ok Unit.unit
-  | List.cons field rest =>
-      match
-          psStrictValidateTypeInScope
-            module
-            typeParameters
-            field.type with
-      | Except.error error => Except.error error
-      | Except.ok _ =>
-          psStrictValidateConstructorFieldTypes
-            module
-            typeParameters
-            rest
 
 def psStrictValidateConstructors
     (module : PsVerifiedIrModule)
@@ -2249,3 +2255,4 @@ def psValidateErasedIrModule
       | Except.error error => Except.error error
       | Except.ok _ =>
           Except.ok (PsValidatedIrModule.mk erased.raw)
+

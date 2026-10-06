@@ -78,3 +78,22 @@ theorem psKernelNameEq_symm
     psKernelNameEq left right =
       psKernelNameEq right left :=
   psKernelNameEq_symm_core left right
+
+
+theorem psKernelNameEq_true_iff_of_string_laws
+    (hRefl : PsKernelStringEqReflexiveLaw)
+    (hSound : PsKernelStringEqSoundLaw)
+    (left right : PsKernelName) :
+    psKernelNameEq left right = true ↔
+      left = right := by
+  constructor
+  · intro h
+    exact
+      psKernelNameEq_sound_of_string_law
+        hSound left right h
+  · intro h
+    subst right
+    exact
+      psKernelNameEq_refl_of_string_law
+        hRefl
+        left

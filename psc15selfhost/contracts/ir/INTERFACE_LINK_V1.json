@@ -30,5 +30,8 @@
     "artifact/evidence binding of each dependency interface and resulting linked artifacts",
     "global semantic link preservation and validator soundness"
   ],
-  "assurance": "implementation-available-global-preservation-unproved"
+  "assurance": "implementation-available-global-preservation-unproved",
+  "targetAdapterProfiles": [
+    "contracts/ir/JS_SCALAR_ABI_V1.json"
+  ]
 }

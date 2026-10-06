@@ -78,7 +78,9 @@
         "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
         "packages/compiler-ir/src/Ps/CompilerIr/Interface.lean",
         "packages/compiler-ir/src/Ps/CompilerIr/Link.lean",
-        "contracts/ir/INTERFACE_LINK_V1.json"
+        "contracts/ir/INTERFACE_LINK_V1.json",
+        "packages/compiler-ir/src/Ps/CompilerIr/JsAbi.lean",
+        "scripts/js-scalar-abi.mjs"
       ],
       "completion": "All declared executable invariants including capabilities, interfaces, ABI and links are checked.",
       "assurance": "pending"
@@ -187,7 +189,9 @@
       "owners": [
         "packages/backend-wasm/src/Ps/BackendWasm/Validate.lean",
         "scripts/wasm-literal-binary-validator.mjs",
-        "scripts/wasm-literal-certificate.mjs"
+        "scripts/wasm-literal-certificate.mjs",
+        "packages/backend-rust/src/Ps/BackendRust/Tail.lean",
+        "packages/backend-rust/src/Ps/BackendRust/TailAlias.lean"
       ],
       "completion": "Supported JS/Wasm/TS/Rust paths compile, validate and report unsupported cases deterministically.",
       "assurance": "pending"

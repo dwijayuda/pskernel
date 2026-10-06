@@ -49,7 +49,8 @@
     "previousExternalGap": "external-import-interface-and-abi-compatibility",
     "closedPart": "Declared interface, signature, nominal recursive layout, runtime-values profile, target and capability compatibility.",
     "remainingPart": "Actual target-specific ABI adapters and independent evidence of their behavior. Host implementation behavior remains an explicit assumption.",
-    "moduleLinkProfile": "Complete acyclic graph with monomorphic exports derived from actual validated module bodies; unsupported generic exports and cycles reject."
+    "moduleLinkProfile": "Complete acyclic graph with monomorphic exports derived from actual validated module bodies; unsupported generic exports and cycles reject.",
+    "scalarAdapter": "contracts/ir/JS_SCALAR_ABI_V1.json: actual synchronous JavaScript primitive adapter, exact plan pinning, per-call representation checks and emitted-client integration. Aggregate/ownership/async/other-target adapters, production binding and whole-adapter evidence remain open."
   },
   "policy": {
     "unknownMeaningMustNotBeAddedSilently": true,

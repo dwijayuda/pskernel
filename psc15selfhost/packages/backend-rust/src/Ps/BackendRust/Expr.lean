@@ -3,9 +3,10 @@ import Ps.BackendRust.Type
 def psRustEmitExprListWith
     (emitExpr :
       PsVerifiedIrExpr ->
-      Except PsRustEmitError String) :
-    List PsVerifiedIrExpr ->
-    Except PsRustEmitError (List String)
+      Except PsRustEmitError String)
+    (expressions : List PsVerifiedIrExpr) :
+    Except PsRustEmitError (List String) :=
+  match expressions with
   | List.nil =>
       Except.ok List.nil
   | List.cons expr rest =>
@@ -25,9 +26,10 @@ def psRustEmitExprListWith
 def psRustEmitFieldListWith
     (emitExpr :
       PsVerifiedIrExpr ->
-      Except PsRustEmitError String) :
-    List (Prod String PsVerifiedIrExpr) ->
-    Except PsRustEmitError (List String)
+      Except PsRustEmitError String)
+    (fields : List (Prod String PsVerifiedIrExpr)) :
+    Except PsRustEmitError (List String) :=
+  match fields with
   | List.nil =>
       Except.ok List.nil
   | List.cons field rest =>
@@ -35,7 +37,7 @@ def psRustEmitFieldListWith
       | Except.error error =>
           Except.error error
       | Except.ok printed =>
-          let rendered :=
+          let rendered : String :=
             psRustConcat3
               (psRustIdentifier (Prod.fst field))
               ": "
@@ -739,25 +741,33 @@ def psRustEmitAlternativeListWith
     (emitExpr :
       PsVerifiedIrExpr ->
       Except PsRustEmitError String)
-    (inductiveName : String) :
-    List
-      (Prod String
-        (Prod
-          (List PsVerifiedIrMatchBinding)
-          PsVerifiedIrExpr)) ->
-    Except PsRustEmitError (List String)
+    (inductiveName : String)
+    (alternatives :
+      List
+        (Prod String
+          (Prod
+            (List PsVerifiedIrMatchBinding)
+            PsVerifiedIrExpr))) :
+    Except PsRustEmitError (List String) :=
+  match alternatives with
   | List.nil =>
       Except.ok List.nil
   | List.cons alternative rest =>
-      let constructorName := Prod.fst alternative;
-      let payload := Prod.snd alternative;
-      let bindings := Prod.fst payload;
-      let body := Prod.snd payload;
+      let constructorName : String := Prod.fst alternative;
+      let payload :
+          Prod
+            (List PsVerifiedIrMatchBinding)
+            PsVerifiedIrExpr :=
+        Prod.snd alternative;
+      let bindings : List PsVerifiedIrMatchBinding :=
+        Prod.fst payload;
+      let body : PsVerifiedIrExpr :=
+        Prod.snd payload;
       match emitExpr body with
       | Except.error error =>
           Except.error error
       | Except.ok printedBody =>
-          let pattern :=
+          let pattern : String :=
             psRustConcat4
               (psRustIdentifier inductiveName)
               "::"
@@ -766,7 +776,7 @@ def psRustEmitAlternativeListWith
                 " { "
                 (psRustEmitMatchBindings bindings)
                 " }");
-          let rendered :=
+          let rendered : String :=
             psRustConcat3
               pattern
               " => "
@@ -780,16 +790,19 @@ def psRustEmitAlternativeListWith
           | Except.ok printedRest =>
               Except.ok (List.cons rendered printedRest)
 
-def psRustEmitExprWithFuel :
-    Nat ->
-    PsVerifiedIrExpr ->
-    Except PsRustEmitError String
-  | 0, _ =>
+def psRustEmitExprWithFuel
+    (fuel : Nat)
+    (expr : PsVerifiedIrExpr) :
+    Except PsRustEmitError String :=
+  match fuel with
+  | Nat.zero =>
       Except.error PsRustEmitError.fuelExhausted
-  | fuel + 1, expr =>
-      let emitNested :=
+  | Nat.succ remaining =>
+      let emitNested :
+          PsVerifiedIrExpr ->
+          Except PsRustEmitError String :=
         fun (nested : PsVerifiedIrExpr) =>
-          psRustEmitExprWithFuel fuel nested;
+          psRustEmitExprWithFuel remaining nested;
       match expr with
       | PsVerifiedIrExpr.literal literal =>
           Except.ok (psRustEmitLiteral literal)

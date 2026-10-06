@@ -806,3 +806,34 @@ def PsKernelDefEqCacheInsertLaw : Prop :=
         cache
         left
         right)
+
+
+def PsKernelInferenceCoreSound
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState)) : Prop :=
+  ∀
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (inferOnly : Bool),
+    psKernelInferCoreWithFuel
+        fuel whnf defeq
+        context state expr inferOnly =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelTypingJudgment
+      context.environment
+      context.localContext
+      expr
+      result

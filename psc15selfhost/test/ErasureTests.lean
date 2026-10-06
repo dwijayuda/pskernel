@@ -434,11 +434,25 @@ def psTestVerifiedIrValidationAcceptsStructuralReferences : Bool :=
           "value"
           (PsVerifiedIrExpr.literal
             (PsVerifiedIrLiteral.natural 42)))
-        List.nil)
+        List.nil);
+  let module : PsVerifiedIrModule :=
+    PsVerifiedIrModule.mk
+      List.nil
+      (List.cons psVerifiedIrValidationBox List.nil)
+      (List.cons psVerifiedIrValidationMaybe List.nil)
+      (List.cons
+        (PsVerifiedIrDeclaration.mk
+          "probe"
+          List.nil
+          List.nil
+          (PsVerifiedIrType.named
+            "Box"
+            (List.cons psVerifiedIrValidationNatType List.nil))
+          body)
+        List.nil);
   match
       psValidateErasedIrModule
-        (PsErasedIrModule.mk
-          (psVerifiedIrValidationModule body)) with
+        (PsErasedIrModule.mk module) with
   | Except.error _ => false
   | Except.ok _ => true
 

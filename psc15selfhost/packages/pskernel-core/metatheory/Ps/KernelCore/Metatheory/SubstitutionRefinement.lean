@@ -1407,3 +1407,424 @@ theorem psKernelExprAbstractInstantiateReferenceChanged_fvar_core
         psKernelExprListLength,
         psKernelNameListLength
       ]
+
+
+theorem psKernelExprAbstractInstantiateReferenceChanged_roundtrip_singleton_core
+    (expr : PsKernelExpr)
+    (target : PsKernelName)
+    (offset : Nat)
+    (hClosed :
+      psKernelExprHasLooseAt expr offset = false)
+    (hNameSound :
+      PsKernelNameEqSoundAgainst target) :
+    psKernelExprInstantiateAtReferenceChanged
+        (Prod.fst
+          (psKernelExprAbstractFVarsAtReferenceChanged
+            expr
+            (List.cons target List.nil)
+            offset))
+        0
+        (List.cons (PsKernelExpr.fvar target) List.nil)
+        offset =
+      Prod.mk
+        expr
+        (Prod.snd
+          (psKernelExprAbstractFVarsAtReferenceChanged
+            expr
+            (List.cons target List.nil)
+            offset)) := by
+  induction expr generalizing offset with
+  | bvar index =>
+      have hInst :=
+        psKernelExprInstantiateAtReferenceChanged_closed_core
+          (PsKernelExpr.bvar index)
+          (List.cons (PsKernelExpr.fvar target) List.nil)
+          offset
+          hClosed
+      simpa [
+        psKernelExprAbstractFVarsAtReferenceChanged
+      ] using hInst
+  | fvar name =>
+      exact
+        psKernelExprAbstractInstantiateReferenceChanged_fvar_core
+          name target offset hNameSound
+  | mvar name =>
+      have hInst :=
+        psKernelExprInstantiateAtReferenceChanged_closed_core
+          (PsKernelExpr.mvar name)
+          (List.cons (PsKernelExpr.fvar target) List.nil)
+          offset
+          hClosed
+      simpa [
+        psKernelExprAbstractFVarsAtReferenceChanged
+      ] using hInst
+  | sort level =>
+      have hInst :=
+        psKernelExprInstantiateAtReferenceChanged_closed_core
+          (PsKernelExpr.sort level)
+          (List.cons (PsKernelExpr.fvar target) List.nil)
+          offset
+          hClosed
+      simpa [
+        psKernelExprAbstractFVarsAtReferenceChanged
+      ] using hInst
+  | const name levels =>
+      have hInst :=
+        psKernelExprInstantiateAtReferenceChanged_closed_core
+          (PsKernelExpr.const name levels)
+          (List.cons (PsKernelExpr.fvar target) List.nil)
+          offset
+          hClosed
+      simpa [
+        psKernelExprAbstractFVarsAtReferenceChanged
+      ] using hInst
+  | app fn arg ihFn ihArg =>
+      cases hFnLoose :
+          psKernelExprHasLooseAt fn offset with
+      | true =>
+          simp [
+            psKernelExprHasLooseAt,
+            hFnLoose
+          ] at hClosed
+      | false =>
+          have hArgLoose :
+              psKernelExprHasLooseAt arg offset = false := by
+            simpa [
+              psKernelExprHasLooseAt,
+              hFnLoose
+            ] using hClosed
+          have ihFnResult :=
+            ihFn offset hFnLoose hNameSound
+          have ihArgResult :=
+            ihArg offset hArgLoose hNameSound
+          have hWholeClosed :=
+            psKernelExprInstantiateAtReferenceChanged_closed_core
+              (PsKernelExpr.app fn arg)
+              (List.cons (PsKernelExpr.fvar target) List.nil)
+              offset
+              hClosed
+          cases hAFn :
+              psKernelExprAbstractFVarsAtReferenceChanged
+                fn
+                (List.cons target List.nil)
+                offset with
+          | mk fnResult fnChanged =>
+              cases hAArg :
+                  psKernelExprAbstractFVarsAtReferenceChanged
+                    arg
+                    (List.cons target List.nil)
+                    offset with
+              | mk argResult argChanged =>
+                  rw [hAFn] at ihFnResult
+                  rw [hAArg] at ihArgResult
+                  cases fnChanged <;>
+                    cases argChanged <;>
+                    simp [
+                      psKernelExprAbstractFVarsAtReferenceChanged,
+                      hAFn,
+                      hAArg,
+                      psKernelExprInstantiateAtReferenceChanged,
+                      ihFnResult,
+                      ihArgResult,
+                      hWholeClosed
+                    ]
+  | lam name type body binderInfo ihType ihBody =>
+      cases hTypeLoose :
+          psKernelExprHasLooseAt type offset with
+      | true =>
+          simp [
+            psKernelExprHasLooseAt,
+            hTypeLoose
+          ] at hClosed
+      | false =>
+          have hBodyLoose :
+              psKernelExprHasLooseAt
+                  body
+                  (Nat.succ offset) =
+                false := by
+            simpa [
+              psKernelExprHasLooseAt,
+              hTypeLoose
+            ] using hClosed
+          have ihTypeResult :=
+            ihType offset hTypeLoose hNameSound
+          have ihBodyResult :=
+            ihBody (Nat.succ offset) hBodyLoose hNameSound
+          have hWholeClosed :=
+            psKernelExprInstantiateAtReferenceChanged_closed_core
+              (PsKernelExpr.lam name type body binderInfo)
+              (List.cons (PsKernelExpr.fvar target) List.nil)
+              offset
+              hClosed
+          cases hAType :
+              psKernelExprAbstractFVarsAtReferenceChanged
+                type
+                (List.cons target List.nil)
+                offset with
+          | mk typeResult typeChanged =>
+              cases hABody :
+                  psKernelExprAbstractFVarsAtReferenceChanged
+                    body
+                    (List.cons target List.nil)
+                    (Nat.succ offset) with
+              | mk bodyResult bodyChanged =>
+                  rw [hAType] at ihTypeResult
+                  rw [hABody] at ihBodyResult
+                  cases typeChanged <;>
+                    cases bodyChanged <;>
+                    simp [
+                      psKernelExprAbstractFVarsAtReferenceChanged,
+                      hAType,
+                      hABody,
+                      psKernelExprInstantiateAtReferenceChanged,
+                      ihTypeResult,
+                      ihBodyResult,
+                      hWholeClosed
+                    ]
+  | forallE name type body binderInfo ihType ihBody =>
+      cases hTypeLoose :
+          psKernelExprHasLooseAt type offset with
+      | true =>
+          simp [
+            psKernelExprHasLooseAt,
+            hTypeLoose
+          ] at hClosed
+      | false =>
+          have hBodyLoose :
+              psKernelExprHasLooseAt
+                  body
+                  (Nat.succ offset) =
+                false := by
+            simpa [
+              psKernelExprHasLooseAt,
+              hTypeLoose
+            ] using hClosed
+          have ihTypeResult :=
+            ihType offset hTypeLoose hNameSound
+          have ihBodyResult :=
+            ihBody (Nat.succ offset) hBodyLoose hNameSound
+          have hWholeClosed :=
+            psKernelExprInstantiateAtReferenceChanged_closed_core
+              (PsKernelExpr.forallE name type body binderInfo)
+              (List.cons (PsKernelExpr.fvar target) List.nil)
+              offset
+              hClosed
+          cases hAType :
+              psKernelExprAbstractFVarsAtReferenceChanged
+                type
+                (List.cons target List.nil)
+                offset with
+          | mk typeResult typeChanged =>
+              cases hABody :
+                  psKernelExprAbstractFVarsAtReferenceChanged
+                    body
+                    (List.cons target List.nil)
+                    (Nat.succ offset) with
+              | mk bodyResult bodyChanged =>
+                  rw [hAType] at ihTypeResult
+                  rw [hABody] at ihBodyResult
+                  cases typeChanged <;>
+                    cases bodyChanged <;>
+                    simp [
+                      psKernelExprAbstractFVarsAtReferenceChanged,
+                      hAType,
+                      hABody,
+                      psKernelExprInstantiateAtReferenceChanged,
+                      ihTypeResult,
+                      ihBodyResult,
+                      hWholeClosed
+                    ]
+  | letE name type value body nondep ihType ihValue ihBody =>
+      cases hTypeLoose :
+          psKernelExprHasLooseAt type offset with
+      | true =>
+          simp [
+            psKernelExprHasLooseAt,
+            hTypeLoose
+          ] at hClosed
+      | false =>
+          cases hValueLoose :
+              psKernelExprHasLooseAt value offset with
+          | true =>
+              simp [
+                psKernelExprHasLooseAt,
+                hTypeLoose,
+                hValueLoose
+              ] at hClosed
+          | false =>
+              have hBodyLoose :
+                  psKernelExprHasLooseAt
+                      body
+                      (Nat.succ offset) =
+                    false := by
+                simpa [
+                  psKernelExprHasLooseAt,
+                  hTypeLoose,
+                  hValueLoose
+                ] using hClosed
+              have ihTypeResult :=
+                ihType offset hTypeLoose hNameSound
+              have ihValueResult :=
+                ihValue offset hValueLoose hNameSound
+              have ihBodyResult :=
+                ihBody (Nat.succ offset) hBodyLoose hNameSound
+              have hWholeClosed :=
+                psKernelExprInstantiateAtReferenceChanged_closed_core
+                  (PsKernelExpr.letE
+                    name type value body nondep)
+                  (List.cons (PsKernelExpr.fvar target) List.nil)
+                  offset
+                  hClosed
+              cases hAType :
+                  psKernelExprAbstractFVarsAtReferenceChanged
+                    type
+                    (List.cons target List.nil)
+                    offset with
+              | mk typeResult typeChanged =>
+                  cases hAValue :
+                      psKernelExprAbstractFVarsAtReferenceChanged
+                        value
+                        (List.cons target List.nil)
+                        offset with
+                  | mk valueResult valueChanged =>
+                      cases hABody :
+                          psKernelExprAbstractFVarsAtReferenceChanged
+                            body
+                            (List.cons target List.nil)
+                            (Nat.succ offset) with
+                      | mk bodyResult bodyChanged =>
+                          rw [hAType] at ihTypeResult
+                          rw [hAValue] at ihValueResult
+                          rw [hABody] at ihBodyResult
+                          cases typeChanged <;>
+                            cases valueChanged <;>
+                            cases bodyChanged <;>
+                            simp [
+                              psKernelExprAbstractFVarsAtReferenceChanged,
+                              hAType,
+                              hAValue,
+                              hABody,
+                              psKernelExprInstantiateAtReferenceChanged,
+                              ihTypeResult,
+                              ihValueResult,
+                              ihBodyResult,
+                              hWholeClosed
+                            ]
+  | lit literal =>
+      have hInst :=
+        psKernelExprInstantiateAtReferenceChanged_closed_core
+          (PsKernelExpr.lit literal)
+          (List.cons (PsKernelExpr.fvar target) List.nil)
+          offset
+          hClosed
+      simpa [
+        psKernelExprAbstractFVarsAtReferenceChanged
+      ] using hInst
+  | mdata metadata body ihBody =>
+      have hBodyLoose :
+          psKernelExprHasLooseAt body offset = false := by
+        simpa [psKernelExprHasLooseAt] using hClosed
+      have ihBodyResult :=
+        ihBody offset hBodyLoose hNameSound
+      have hWholeClosed :=
+        psKernelExprInstantiateAtReferenceChanged_closed_core
+          (PsKernelExpr.mdata metadata body)
+          (List.cons (PsKernelExpr.fvar target) List.nil)
+          offset
+          hClosed
+      cases hABody :
+          psKernelExprAbstractFVarsAtReferenceChanged
+            body
+            (List.cons target List.nil)
+            offset with
+      | mk bodyResult bodyChanged =>
+          rw [hABody] at ihBodyResult
+          cases bodyChanged <;>
+            simp [
+              psKernelExprAbstractFVarsAtReferenceChanged,
+              hABody,
+              psKernelExprInstantiateAtReferenceChanged,
+              ihBodyResult,
+              hWholeClosed
+            ]
+  | proj typeName index body ihBody =>
+      have hBodyLoose :
+          psKernelExprHasLooseAt body offset = false := by
+        simpa [psKernelExprHasLooseAt] using hClosed
+      have ihBodyResult :=
+        ihBody offset hBodyLoose hNameSound
+      have hWholeClosed :=
+        psKernelExprInstantiateAtReferenceChanged_closed_core
+          (PsKernelExpr.proj typeName index body)
+          (List.cons (PsKernelExpr.fvar target) List.nil)
+          offset
+          hClosed
+      cases hABody :
+          psKernelExprAbstractFVarsAtReferenceChanged
+            body
+            (List.cons target List.nil)
+            offset with
+      | mk bodyResult bodyChanged =>
+          rw [hABody] at ihBodyResult
+          cases bodyChanged <;>
+            simp [
+              psKernelExprAbstractFVarsAtReferenceChanged,
+              hABody,
+              psKernelExprInstantiateAtReferenceChanged,
+              ihBodyResult,
+              hWholeClosed
+            ]
+
+theorem psKernelExprAbstractInstantiateReference_roundtrip_singleton_core
+    (expr : PsKernelExpr)
+    (target : PsKernelName)
+    (offset : Nat)
+    (hClosed :
+      psKernelExprHasLooseAt expr offset = false)
+    (hNameSound :
+      PsKernelNameEqSoundAgainst target) :
+    psKernelExprInstantiateAtReference
+        (psKernelExprAbstractFVarsAtReference
+          expr
+          (List.cons target List.nil)
+          offset)
+        0
+        (List.cons (PsKernelExpr.fvar target) List.nil)
+        offset =
+      expr := by
+  have h :=
+    psKernelExprAbstractInstantiateReferenceChanged_roundtrip_singleton_core
+      expr target offset hClosed hNameSound
+  have hFst := congrArg Prod.fst h
+  simpa [
+    psKernelExprAbstractFVarsAtReference,
+    psKernelExprInstantiateAtReference,
+    psKernelExprListIsEmpty
+  ] using hFst
+
+theorem psKernelExprAbstractInstantiate_roundtrip_singleton_core
+    (expr : PsKernelExpr)
+    (target : PsKernelName)
+    (offset : Nat)
+    (hClosed :
+      psKernelExprHasLooseAt expr offset = false)
+    (hNameSound :
+      PsKernelNameEqSoundAgainst target) :
+    psKernelExprInstantiateAt
+        (psKernelExprAbstractFVarsAt
+          expr
+          (List.cons target List.nil)
+          offset)
+        0
+        (List.cons (PsKernelExpr.fvar target) List.nil)
+        offset =
+      expr := by
+  rw [
+    psKernelExprAbstractFVarsAt_refines_reference_core
+  ]
+  rw [
+    psKernelExprInstantiateAt_refines_reference_core
+  ]
+  exact
+    psKernelExprAbstractInstantiateReference_roundtrip_singleton_core
+      expr target offset hClosed hNameSound

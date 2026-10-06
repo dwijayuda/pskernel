@@ -1,6 +1,5 @@
 import Ps.KernelCore.Core.Substitution.Lift
 import Ps.KernelCore.Metatheory.Substitution
-import Lean.Elab.Tactic.Omega
 
 theorem psKernelExprLiftLooseBVarsChangedWithFuel_zero
     (expr : PsKernelExpr)

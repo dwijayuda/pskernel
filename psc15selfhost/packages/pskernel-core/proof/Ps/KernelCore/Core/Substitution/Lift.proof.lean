@@ -1,4 +1,6 @@
 import Ps.KernelCore.Core.Substitution.Lift
+import Ps.KernelCore.Metatheory.Substitution
+import Lean.Elab.Tactic.Omega
 
 theorem psKernelExprLiftLooseBVarsChangedWithFuel_zero
     (expr : PsKernelExpr)
@@ -91,3 +93,230 @@ theorem psKernelExprLiftLooseBVars_bvar_miss
       PsKernelExpr.bvar index := by
   rw [psKernelExprLiftLooseBVars_bvar]
   simp [h]
+
+
+theorem psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
+    (expr : PsKernelExpr)
+    (fuel start amount : Nat)
+    (hFuel : psKernelExprNodeCount expr < fuel) :
+    psKernelExprLiftLooseBVarsChangedWithFuel
+        fuel expr start amount =
+      psKernelExprLiftLooseBVarsReferenceChanged
+        expr start amount := by
+  induction expr generalizing fuel start amount with
+  | bvar index =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          simp [
+            psKernelExprLiftLooseBVarsChangedWithFuel,
+            psKernelExprLiftLooseBVarsReferenceChanged
+          ]
+  | fvar name =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          simp [
+            psKernelExprLiftLooseBVarsChangedWithFuel,
+            psKernelExprLiftLooseBVarsReferenceChanged
+          ]
+  | mvar name =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          simp [
+            psKernelExprLiftLooseBVarsChangedWithFuel,
+            psKernelExprLiftLooseBVarsReferenceChanged
+          ]
+  | sort level =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          simp [
+            psKernelExprLiftLooseBVarsChangedWithFuel,
+            psKernelExprLiftLooseBVarsReferenceChanged
+          ]
+  | const name levels =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          simp [
+            psKernelExprLiftLooseBVarsChangedWithFuel,
+            psKernelExprLiftLooseBVarsReferenceChanged
+          ]
+  | app fn arg ihFn ihArg =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          have hFnFuel :
+              psKernelExprNodeCount fn < remaining := by
+            simp [psKernelExprNodeCount] at hFuel
+            omega
+          have hArgFuel :
+              psKernelExprNodeCount arg < remaining := by
+            omega
+          have hFn :=
+            ihFn remaining start amount hFnFuel
+          have hArg :=
+            ihArg remaining start amount hArgFuel
+          simp [
+            psKernelExprLiftLooseBVarsChangedWithFuel,
+            psKernelExprLiftLooseBVarsReferenceChanged,
+            hFn,
+            hArg
+          ]
+  | lam name type body binderInfo ihType ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          have hTypeFuel :
+              psKernelExprNodeCount type < remaining := by
+            simp [psKernelExprNodeCount] at hFuel
+            omega
+          have hBodyFuel :
+              psKernelExprNodeCount body < remaining := by
+            omega
+          have hType :=
+            ihType remaining start amount hTypeFuel
+          have hBody :=
+            ihBody remaining (Nat.succ start) amount hBodyFuel
+          simp [
+            psKernelExprLiftLooseBVarsChangedWithFuel,
+            psKernelExprLiftLooseBVarsReferenceChanged,
+            hType,
+            hBody
+          ]
+  | forallE name type body binderInfo ihType ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          have hTypeFuel :
+              psKernelExprNodeCount type < remaining := by
+            simp [psKernelExprNodeCount] at hFuel
+            omega
+          have hBodyFuel :
+              psKernelExprNodeCount body < remaining := by
+            omega
+          have hType :=
+            ihType remaining start amount hTypeFuel
+          have hBody :=
+            ihBody remaining (Nat.succ start) amount hBodyFuel
+          simp [
+            psKernelExprLiftLooseBVarsChangedWithFuel,
+            psKernelExprLiftLooseBVarsReferenceChanged,
+            hType,
+            hBody
+          ]
+  | letE name type value body nondep ihType ihValue ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          have hTypeFuel :
+              psKernelExprNodeCount type < remaining := by
+            simp [psKernelExprNodeCount] at hFuel
+            omega
+          have hValueFuel :
+              psKernelExprNodeCount value < remaining := by
+            omega
+          have hBodyFuel :
+              psKernelExprNodeCount body < remaining := by
+            omega
+          have hType :=
+            ihType remaining start amount hTypeFuel
+          have hValue :=
+            ihValue remaining start amount hValueFuel
+          have hBody :=
+            ihBody remaining (Nat.succ start) amount hBodyFuel
+          simp [
+            psKernelExprLiftLooseBVarsChangedWithFuel,
+            psKernelExprLiftLooseBVarsReferenceChanged,
+            hType,
+            hValue,
+            hBody
+          ]
+  | lit literal =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          simp [
+            psKernelExprLiftLooseBVarsChangedWithFuel,
+            psKernelExprLiftLooseBVarsReferenceChanged
+          ]
+  | mdata metadata body ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          have hBodyFuel :
+              psKernelExprNodeCount body < remaining := by
+            simp [psKernelExprNodeCount] at hFuel
+            omega
+          have hBody :=
+            ihBody remaining start amount hBodyFuel
+          simp [
+            psKernelExprLiftLooseBVarsChangedWithFuel,
+            psKernelExprLiftLooseBVarsReferenceChanged,
+            hBody
+          ]
+  | proj typeName index body ihBody =>
+      cases fuel with
+      | zero =>
+          simp [psKernelExprNodeCount] at hFuel
+      | succ remaining =>
+          have hBodyFuel :
+              psKernelExprNodeCount body < remaining := by
+            simp [psKernelExprNodeCount] at hFuel
+            omega
+          have hBody :=
+            ihBody remaining start amount hBodyFuel
+          simp [
+            psKernelExprLiftLooseBVarsChangedWithFuel,
+            psKernelExprLiftLooseBVarsReferenceChanged,
+            hBody
+          ]
+
+theorem psKernelExprLiftLooseBVarsChanged_refines_reference
+    (expr : PsKernelExpr)
+    (start amount : Nat) :
+    psKernelExprLiftLooseBVarsChanged expr start amount =
+      psKernelExprLiftLooseBVarsReferenceChanged
+        expr start amount := by
+  cases hZero : Nat.beq amount 0 with
+  | true =>
+      simp [
+        psKernelExprLiftLooseBVarsChanged,
+        psKernelExprLiftLooseBVarsReferenceChanged,
+        hZero
+      ]
+  | false =>
+      simpa [
+        psKernelExprLiftLooseBVarsChanged,
+        hZero
+      ] using
+        psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
+          expr
+          (Nat.succ (psKernelExprNodeCount expr))
+          start
+          amount
+          (Nat.lt_succ_self
+            (psKernelExprNodeCount expr))
+
+theorem psKernelExprLiftLooseBVars_refines_reference
+    (expr : PsKernelExpr)
+    (start amount : Nat) :
+    psKernelExprLiftLooseBVars expr start amount =
+      psKernelExprLiftLooseBVarsReference
+        expr start amount := by
+  unfold psKernelExprLiftLooseBVars
+  unfold psKernelExprLiftLooseBVarsReference
+  rw [psKernelExprLiftLooseBVarsChanged_refines_reference]

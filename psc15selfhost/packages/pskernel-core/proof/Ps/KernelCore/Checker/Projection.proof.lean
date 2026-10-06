@@ -535,7 +535,7 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                           inductInfo.numParams
                                                           inductInfo.numIndices := by
                                                     simpa [args] using hArgsLengthNe
-                                                  simp [
+                                                  simp only [
                                                     psKernelInferProjectionWith,
                                                     hInfer,
                                                     hTypeWhnf,
@@ -544,9 +544,9 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                     hTypeName,
                                                     hInductFind,
                                                     hCtors,
-                                                    hCtorRest,
-                                                    hArgsLengthNeRaw
+                                                    hCtorRest
                                                   ] at hSuccess
+                                                  simp [hArgsLengthNeRaw] at hSuccess
                                               | true =>
                                                   have hArgsLength :
                                                       psKernelExprListLength args =

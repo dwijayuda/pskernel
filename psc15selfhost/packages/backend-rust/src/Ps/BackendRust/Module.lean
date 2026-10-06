@@ -13,7 +13,7 @@ def psRustTypeParameterNames
         (psRustConcat3
           (psRustIdentifier parameter.name)
           ": "
-          "Clone")
+          "Clone + 'static")
         (psRustTypeParameterNames rest)
 
 def psRustGenericNames
@@ -397,6 +397,7 @@ def psRustEmitFunctionResultExpr
     expr
 
 def psRustEmitDeclaration
+    (allDeclarations : List PsVerifiedIrDeclaration)
     (valueNames : List String)
     (declaration : PsVerifiedIrDeclaration) :
     Except PsRustEmitError String :=
@@ -425,12 +426,7 @@ def psRustEmitDeclaration
                 Except.error error
             | Except.ok rewrittenBody =>
                 let emittedBody :=
-                  if psRustTypeContainsFunction declaration.resultType then
-                    psRustEmitFunctionResultExpr
-                      declaration.name
-                      rewrittenBody
-                  else
-                    psRustEmitExpr rewrittenBody;
+                  psRustEmitExprWorker allDeclarations 4096 locals rewrittenBody;
                 match emittedBody with
                 | Except.error error =>
                     Except.error error
@@ -502,6 +498,7 @@ def psRustValueDeclarationNames
           psRustValueDeclarationNames rest
 
 def psRustEmitDeclarationList
+    (allDeclarations : List PsVerifiedIrDeclaration)
     (valueNames : List String)
     (declarations : List PsVerifiedIrDeclaration) :
     Except PsRustEmitError (List String) :=
@@ -509,11 +506,11 @@ def psRustEmitDeclarationList
   | List.nil =>
       Except.ok List.nil
   | List.cons declaration rest =>
-      match psRustEmitDeclaration valueNames declaration with
+      match psRustEmitDeclaration allDeclarations valueNames declaration with
       | Except.error error =>
           Except.error error
       | Except.ok printed =>
-          match psRustEmitDeclarationList valueNames rest with
+          match psRustEmitDeclarationList allDeclarations valueNames rest with
           | Except.error error =>
               Except.error error
           | Except.ok printedRest =>
@@ -1252,7 +1249,7 @@ def psRustEmitModule
                 | Except.error error =>
                     Except.error error
                 | Except.ok inductives =>
-                    match psRustEmitDeclarationList valueNames module.declarations with
+                    match psRustEmitDeclarationList module.declarations valueNames module.declarations with
                     | Except.error error =>
                         Except.error error
                     | Except.ok declarations =>

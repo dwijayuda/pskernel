@@ -129,6 +129,7 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.Type,
     `Ps.BackendRust.Expr,
     `Ps.BackendRust.ValueRefs,
+    `Ps.BackendRust.Captures,
     `Ps.BackendRust.Runtime,
     `Ps.BackendRust.Module
   ]

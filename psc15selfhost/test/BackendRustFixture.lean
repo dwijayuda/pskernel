@@ -10,6 +10,40 @@ def psBackendRustLetClosureFixture : PsVerifiedIrDeclaration :=
         (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natAdd []
           [PsVerifiedIrExpr.var "value", PsVerifiedIrExpr.var "captured"])))
 
+def psBackendRustSharedCaptureFixture : PsVerifiedIrDeclaration :=
+  let natType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat;
+  let fnType := PsVerifiedIrType.function [natType] natType;
+  let closure := PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "value" natType] natType
+    (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natAdd []
+      [PsVerifiedIrExpr.var "value", PsVerifiedIrExpr.var "offset"]);
+  PsVerifiedIrDeclaration.mk "sharedCapture" []
+    [PsVerifiedIrParameter.mk "offset" natType, PsVerifiedIrParameter.mk "value" natType]
+    natType
+    (PsVerifiedIrExpr.letE "first" fnType closure
+      (PsVerifiedIrExpr.letE "second" fnType closure
+        (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natAdd []
+          [PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "first") [] [PsVerifiedIrExpr.var "value"],
+           PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "second") [] [PsVerifiedIrExpr.var "offset"]])))
+
+def psBackendRustGlobalCallbackFixture : PsVerifiedIrDeclaration :=
+  let natType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat;
+  let fnType := PsVerifiedIrType.function [natType] natType;
+  PsVerifiedIrDeclaration.mk "globalCallback" [] [PsVerifiedIrParameter.mk "value" natType] natType
+    (PsVerifiedIrExpr.letE "arrayIdOnly" fnType
+      (PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "returnCallback") []
+        [PsVerifiedIrExpr.var "arrayIdOnly"])
+      (PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "arrayIdOnly") [] [PsVerifiedIrExpr.var "value"]))
+
+def psBackendRustConditionalCallbackFixture : PsVerifiedIrDeclaration :=
+  let natType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat;
+  PsVerifiedIrDeclaration.mk "conditionalCallback" []
+    [PsVerifiedIrParameter.mk "choose" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool),
+     PsVerifiedIrParameter.mk "value" natType] natType
+    (PsVerifiedIrExpr.call
+      (PsVerifiedIrExpr.ifE (PsVerifiedIrExpr.var "choose")
+        (PsVerifiedIrExpr.var "arrayIdOnly") (PsVerifiedIrExpr.var "countDown")) []
+      [PsVerifiedIrExpr.var "value"])
+
 def psBackendRustCompileFixture : PsVerifiedIrModule :=
   {
     imports := []
@@ -83,6 +117,9 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
     ]
     declarations := [
       psBackendRustLetClosureFixture,
+      psBackendRustSharedCaptureFixture,
+      psBackendRustGlobalCallbackFixture,
+      psBackendRustConditionalCallbackFixture,
       {
         name := "idUInt8"
         typeParameters := []

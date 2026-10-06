@@ -45,6 +45,10 @@ const closureTests = '\n#[cfg(test)] mod closure_regressions {\n' +
   '    assert_eq!(via_let(PsNat::from(40u8)), PsNat::from(42u8));\n' +
   '    let forwarded = returnCallback(direct.clone());\n' +
   '    assert_eq!(forwarded(PsNat::from(5u8)), PsNat::from(7u8));\n' +
+  '    assert_eq!(sharedCapture(PsNat::from(2u8), PsNat::from(40u8)), PsNat::from(46u8));\n' +
+  '    assert_eq!(globalCallback(PsNat::from(42u8)), PsNat::from(42u8));\n' +
+  '    assert_eq!(conditionalCallback(true, PsNat::from(42u8)), PsNat::from(42u8));\n' +
+  '    assert_eq!(conditionalCallback(false, PsNat::from(4u8)), PsNat::from(0u8));\n' +
   '  }\n}\n';
 await writeFile(path.join(srcDir, "lib.rs"), rustSource + closureTests, "utf8");
 await writeFile(

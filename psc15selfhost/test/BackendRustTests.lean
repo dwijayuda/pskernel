@@ -27,7 +27,7 @@ def psTestBackendRustIdentity : Bool :=
   | Except.error _ => false
   | Except.ok output =>
       output.contains "#![forbid(unsafe_code)]"
-        && output.contains "pub fn idNat(x: PsNat) -> PsNat { x }"
+        && output.contains "pub fn idNat(x: PsNat) -> PsNat { (x).clone() }"
 
 def psBackendRustIntrinsicModule : PsVerifiedIrModule :=
   {
@@ -160,7 +160,7 @@ def psTestBackendRustAdt : Bool :=
   | Except.error _ => false
   | Except.ok output =>
       output.contains "pub struct Pair { pub left: Box<PsNat>, pub right: Box<PsNat> }"
-        && output.contains "pub enum Maybe<A: Clone> { none {}, some { value: Box<A> } }"
+        && output.contains "pub enum Maybe<A: Clone + 'static> { none {}, some { value: Box<A> } }"
         && output.contains "Maybe::<PsNat>::some { value: Box::new((x).clone()) }"
         && output.contains "pub fn leftOfPair(pair: Pair) -> PsNat { (*((pair).clone()).left).clone() }"
 
@@ -293,7 +293,7 @@ def psTestBackendRustArrayIntrinsics : Bool :=
   | Except.ok output =>
       output.contains "pub fn arraySizeDemo(xs: Vec<PsNat>) -> PsNat"
         && output.contains "__ps_array_size(&((xs).clone()))"
-        && output.contains "__ps_array_map((arrayIdOnly).clone(), &((xs).clone()))"
+        && output.contains "__ps_array_map((std::rc::Rc::new(arrayIdOnly) as std::rc::Rc<dyn Fn(_) -> _>), &((xs).clone()))"
 
 def psBackendRustValueModule : PsVerifiedIrModule :=
   {
@@ -351,7 +351,7 @@ def psTestBackendRustValues : Bool :=
         && output.contains
           "__ps_nat_add(&((x).clone()), &(((one)()).clone()))"
         && output.contains
-          "pub fn shadowOne(one: PsNat) -> PsNat { one }"
+          "pub fn shadowOne(one: PsNat) -> PsNat { (one).clone() }"
 
 def psTestBackendRustScalarTypes : Bool :=
   psRustEmitPrimitiveType PsVerifiedIrPrimitiveType.uint8 == "u8"
@@ -938,7 +938,7 @@ def psTestBackendRustDirectFunctionResult : Bool :=
   | Except.ok output =>
       output.contains
         "pub fn makeAdder(offset: PsNat) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
-        && output.contains "{ let __ps_internal_lambda: std::rc::Rc<dyn Fn(PsNat) -> PsNat> = std::rc::Rc::new(move |value: PsNat| "
+        && output.contains "{ let offset = (offset).clone(); let __ps_internal_lambda: std::rc::Rc<dyn Fn(PsNat) -> PsNat> = std::rc::Rc::new(move |value: PsNat| "
 
 def psBackendRustForwardedFunctionResultModule : PsVerifiedIrModule :=
   {
@@ -974,7 +974,7 @@ def psTestBackendRustForwardedFunctionResult : Bool :=
   | Except.ok output =>
       output.contains
         "pub fn returnCallback(callback: std::rc::Rc<dyn Fn(PsNat) -> PsNat>) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
-        && output.contains "{ callback }"
+        && output.contains "{ (callback).clone() }"
 
 def psBackendRustNestedFunctionResultModule : PsVerifiedIrModule :=
   {

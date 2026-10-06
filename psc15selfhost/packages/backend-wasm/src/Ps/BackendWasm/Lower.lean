@@ -4211,7 +4211,6 @@ def psWasmLowerIntrinsicWith
   | .arrayFoldl =>
       psWasmLowerArrayFoldlWith
         profile lower state typeArguments arguments
-  | _ => Except.error PsWasmLowerError.unsupportedIntrinsic
 
 def psWasmLowerTypedArgumentsWorker
     (profile : PsWasmTargetProfile)

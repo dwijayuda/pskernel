@@ -539,8 +539,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                       original,
                       structResult,
                       hStruct,
-                      expandedResult,
-                      hExpanded,
+                      hExpandedRun,
                       hProjection,
                       hReduce
                     ] using hSuccess

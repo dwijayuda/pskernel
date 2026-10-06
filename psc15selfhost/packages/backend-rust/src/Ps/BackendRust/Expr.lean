@@ -1041,32 +1041,35 @@ def psRustEmitExprWithFuel
                 operation
                 printedArguments
         | PsVerifiedIrExpr.lambda parameters resultType body =>
-          match psRustEmitParameterList parameters with
-          | Except.error error =>
-              Except.error error
-          | Except.ok printedParameters =>
-              match
-                  psRustEmitClosureValueType
-                    (PsVerifiedIrType.function
-                      (psRustParameterTypes parameters)
-                      resultType) with
-              | Except.error error =>
-                  Except.error error
-              | Except.ok closureType =>
-                  match emitNested body with
-                  | Except.error error =>
-                      Except.error error
-                  | Except.ok printedBody =>
-                      Except.ok
-                        (psRustConcat4
-                          "{ let __ps_internal_lambda: "
-                          closureType
-                          " = std::rc::Rc::new(move |"
+          if psRustTypeContainsFunction resultType then
+            Except.error PsRustEmitError.lambdaFunctionResultUnsupported
+          else
+            match psRustEmitParameterList parameters with
+            | Except.error error =>
+                Except.error error
+            | Except.ok printedParameters =>
+                match
+                    psRustEmitClosureValueType
+                      (PsVerifiedIrType.function
+                        (psRustParameterTypes parameters)
+                        resultType) with
+                | Except.error error =>
+                    Except.error error
+                | Except.ok closureType =>
+                    match emitNested body with
+                    | Except.error error =>
+                        Except.error error
+                    | Except.ok printedBody =>
+                        Except.ok
                           (psRustConcat4
-                            (psRustJoin ", " printedParameters)
-                            "| "
-                            printedBody
-                            "); __ps_internal_lambda }"))
+                            "{ let __ps_internal_lambda: "
+                            closureType
+                            " = std::rc::Rc::new(move |"
+                            (psRustConcat4
+                              (psRustJoin ", " printedParameters)
+                              "| "
+                              printedBody
+                              "); __ps_internal_lambda }"))
         | PsVerifiedIrExpr.call fn _ arguments =>
           match emitNested fn with
           | Except.error error =>

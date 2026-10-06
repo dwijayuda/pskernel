@@ -800,7 +800,8 @@ def psJsPrintMatchAlternativesWith
                   printedAlternative
                   printedRest)
 
-def psJsPrintExprWithFuel
+def psJsPrintExprWithModeAndFuel
+    (stackSafe : Bool)
     (fuel : Nat) :
     PsJsIrExpr -> Except PsJsEmitError String :=
   match fuel with
@@ -810,7 +811,7 @@ def psJsPrintExprWithFuel
   | Nat.succ remaining =>
       let smaller :
           PsJsIrExpr -> Except PsJsEmitError String :=
-        psJsPrintExprWithFuel remaining;
+        psJsPrintExprWithModeAndFuel stackSafe remaining;
       fun (expr : PsJsIrExpr) =>
         match expr with
         | PsJsIrExpr.literal literal =>
@@ -843,16 +844,28 @@ def psJsPrintExprWithFuel
             match smaller body with
             | Except.error error => Except.error error
             | Except.ok printedBody =>
-                Except.ok
-                  (psJsJoin
-                    ""
-                    [
-                      "((",
-                      psJsJoin ", " parameters,
-                      ") => ",
-                      printedBody,
-                      ")"
-                    ])
+                if stackSafe then
+                  Except.ok
+                    (psJsJoin
+                      ""
+                      [
+                        "__ps$wrap(function*(",
+                        psJsJoin ", " parameters,
+                        ") { return ",
+                        printedBody,
+                        "; })"
+                      ])
+                else
+                  Except.ok
+                    (psJsJoin
+                      ""
+                      [
+                        "((",
+                        psJsJoin ", " parameters,
+                        ") => ",
+                        printedBody,
+                        ")"
+                      ])
         | PsJsIrExpr.call fn arguments =>
             match smaller fn with
             | Except.error error => Except.error error
@@ -860,12 +873,30 @@ def psJsPrintExprWithFuel
                 match psListMapExcept smaller arguments with
                 | Except.error error => Except.error error
                 | Except.ok printedArguments =>
-                    Except.ok
-                      (psJsConcat4
-                        printedFn
-                        "("
-                        (psJsJoin ", " printedArguments)
-                        ")")
+                    if stackSafe then
+                      let suffix : String :=
+                        if psListIsEmpty printedArguments then
+                          ""
+                        else
+                          psJsConcat2
+                            ", "
+                            (psJsJoin ", " printedArguments);
+                      Except.ok
+                        (psJsJoin
+                          ""
+                          [
+                            "(yield* __ps$invoke(",
+                            printedFn,
+                            suffix,
+                            "))"
+                          ])
+                    else
+                      Except.ok
+                        (psJsConcat4
+                          printedFn
+                          "("
+                          (psJsJoin ", " printedArguments)
+                          ")")
         | PsJsIrExpr.letE name value body =>
             match smaller value with
             | Except.error error => Except.error error
@@ -873,18 +904,32 @@ def psJsPrintExprWithFuel
                 match smaller body with
                 | Except.error error => Except.error error
                 | Except.ok printedBody =>
-                    Except.ok
-                      (psJsJoin
-                        ""
-                        [
-                          "(() => { const ",
-                          name,
-                          " = ",
-                          printedValue,
-                          "; return ",
-                          printedBody,
-                          "; })()"
-                        ])
+                    if stackSafe then
+                      Except.ok
+                        (psJsJoin
+                          ""
+                          [
+                            "(yield* (function*() { const ",
+                            name,
+                            " = ",
+                            printedValue,
+                            "; return ",
+                            printedBody,
+                            "; })())"
+                          ])
+                    else
+                      Except.ok
+                        (psJsJoin
+                          ""
+                          [
+                            "(() => { const ",
+                            name,
+                            " = ",
+                            printedValue,
+                            "; return ",
+                            printedBody,
+                            "; })()"
+                          ])
         | PsJsIrExpr.ifE
             condition
             thenBranch
@@ -968,25 +1013,46 @@ def psJsPrintExprWithFuel
                       alternatives with
                 | Except.error error => Except.error error
                 | Except.ok printedAlternatives =>
-                    Except.ok
-                      (psJsJoin
-                        ""
-                        [
-                          "((",
-                          temp,
-                          ") => { switch (",
-                          temp,
-                          "[\"$ps$tag\"]) { ",
-                          psJsJoin " " printedAlternatives,
-                          " } throw new Error(\"invalid ProofScript constructor tag\"); })(",
-                          printedScrutinee,
-                          ")"
-                        ])
+                    if stackSafe then
+                      Except.ok
+                        (psJsJoin
+                          ""
+                          [
+                            "(yield* (function*() { const ",
+                            temp,
+                            " = ",
+                            printedScrutinee,
+                            "; switch (",
+                            temp,
+                            "[\"$ps$tag\"]) { ",
+                            psJsJoin " " printedAlternatives,
+                            " } throw new Error(\"invalid ProofScript constructor tag\"); })())"
+                          ])
+                    else
+                      Except.ok
+                        (psJsJoin
+                          ""
+                          [
+                            "((",
+                            temp,
+                            ") => { switch (",
+                            temp,
+                            "[\"$ps$tag\"]) { ",
+                            psJsJoin " " printedAlternatives,
+                            " } throw new Error(\"invalid ProofScript constructor tag\"); })(",
+                            printedScrutinee,
+                            ")"
+                          ])
 
 def psJsPrintExpr
     (expr : PsJsIrExpr) :
     Except PsJsEmitError String :=
-  psJsPrintExprWithFuel 4096 expr
+  psJsPrintExprWithModeAndFuel false 4096 expr
+
+def psJsPrintExprStackSafe
+    (expr : PsJsIrExpr) :
+    Except PsJsEmitError String :=
+  psJsPrintExprWithModeAndFuel true 4096 expr
 
 def psJsPrintImport
     (importInfo : PsJsIrImport) : String :=
@@ -1067,6 +1133,106 @@ def psJsPrintDeclarations
                   printed
                   printedRest)
 
+def psJsStackRuntimeSupport : String :=
+  "const __ps$implementations = new WeakMap();\n" ++
+  "function __ps$run(root) { const pending = [root]; let value = undefined; while (pending.length !== 0) { const next = pending[pending.length - 1].next(value); if (next.done) { pending.pop(); value = next.value; } else { const { fn, args } = next.value; const implementation = __ps$implementations.get(fn); if (implementation) { pending.push(Reflect.apply(implementation, undefined, args)); value = undefined; } else { value = Reflect.apply(fn, undefined, args); } } } return value; }\n" ++
+  "function __ps$wrap(implementation) { const fn = (...args) => __ps$run(implementation(...args)); __ps$implementations.set(fn, implementation); return fn; }\n" ++
+  "function* __ps$invoke(fn, ...args) { return (yield { fn, args }); }\n"
+
+def psJsImplementationName
+    (name : String) : String :=
+  psJsConcat2 "__ps$impl$" name
+
+def psJsPrintDeclarationStackSafe
+    (declaration : PsJsIrDeclaration) :
+    Except PsJsEmitError String :=
+  match psJsPrintExprStackSafe declaration.body with
+  | Except.error error => Except.error error
+  | Except.ok body =>
+      match declaration.parameters with
+      | List.nil =>
+          Except.ok
+            (psJsJoin
+              ""
+              [
+                "export const ",
+                declaration.name,
+                " = __ps$run((function*() { return ",
+                body,
+                "; })());\n"
+              ])
+      | List.cons _ _ =>
+          let parameters :=
+            psListMap
+              psJsParameterName
+              declaration.parameters;
+          let joinedParameters : String :=
+            psJsJoin ", " parameters;
+          let implementation : String :=
+            psJsImplementationName declaration.name;
+          Except.ok
+            (psJsJoin
+              ""
+              [
+                "export function ",
+                declaration.name,
+                "(",
+                joinedParameters,
+                ") { return __ps$run(",
+                implementation,
+                "(",
+                joinedParameters,
+                ")); }\n",
+                "function* ",
+                implementation,
+                "(",
+                joinedParameters,
+                ") { return ",
+                body,
+                "; }\n",
+                "__ps$implementations.set(",
+                declaration.name,
+                ", ",
+                implementation,
+                ");\n"
+              ])
+
+def psJsPrintDeclarationsStackSafe
+    (declarations : List PsJsIrDeclaration) :
+    Except PsJsEmitError String :=
+  match declarations with
+  | List.nil =>
+      Except.ok ""
+  | List.cons declaration rest =>
+      match psJsPrintDeclarationStackSafe declaration with
+      | Except.error error => Except.error error
+      | Except.ok printed =>
+          match psJsPrintDeclarationsStackSafe rest with
+          | Except.error error => Except.error error
+          | Except.ok printedRest =>
+              Except.ok
+                (psJsConcat2
+                  printed
+                  printedRest)
+
+def psJsPrintModuleStackSafe
+    (module : PsJsIrModule) :
+    Except PsJsEmitError String :=
+  match psJsPrintDeclarationsStackSafe module.declarations with
+  | Except.error error => Except.error error
+  | Except.ok declarations =>
+      let imports : String :=
+        psJsPrintImports module.imports;
+      Except.ok
+        (psJsJoin
+          ""
+          [
+            "// generated by ProofScript direct JsIR v1 stack-safe\n",
+            imports,
+            psJsStackRuntimeSupport,
+            declarations
+          ])
+
 def psJsPrintModule
     (module : PsJsIrModule) :
     Except PsJsEmitError String :=
@@ -1083,6 +1249,19 @@ def psJsPrintModule
             imports,
             declarations
           ])
+
+def psJsEmitValidatedModuleStackSafeWithTargetProfile
+    (profile : PsJsTargetProfile)
+    (module : PsValidatedIrModule) :
+    Except PsJsEmitError String :=
+  match
+      psJsLowerValidatedModuleWithTargetProfile
+        profile
+        module with
+  | Except.error error =>
+      Except.error (PsJsEmitError.lower error)
+  | Except.ok jsIr =>
+      psJsPrintModuleStackSafe jsIr
 
 def psJsEmitValidatedModuleWithTargetProfile
     (profile : PsJsTargetProfile)

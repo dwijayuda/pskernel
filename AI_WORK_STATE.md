@@ -4,7 +4,7 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof HEAD when this state was written: `f3ab5575b8b085e83b9d61d23f8fc1127dbdfcbf`
+- Current proof HEAD when this state was written: `5a803def3bc6e4d9f0d424d5a7d96e69dec8988c`
 - Last known green proof checkpoint: `c521adc59916a7fed2384365db222876c2677e2b` (run #285)
 - Current integration HEAD last observed: `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
@@ -94,3 +94,12 @@ Architectural blockers still remaining:
 - Prefer dependency-guided reusable lemmas and structural/fuel induction over test/fix hunting.
 - Do not change production `pskernel-core/src/**` merely to make proofs easier. If a proof exposes a real implementation defect, document it and make the smallest semantically justified source fix.
 - Commit meaningful checkpoints and keep this file updated as milestones/blockers change.
+
+## Confirmed implementation defect: local-scope cache escape
+- Proof analysis of the concrete checker knot exposed a PSKernel-specific mismatch with pinned Lean 4.34 cache assumptions.
+- Lean 4.34 shares checker caches across local-context scopes because kernel free-variable IDs are globally unique internal identities and `infer_type_core` has a closed-input precondition.
+- PSKernel represents `.fvar` IDs as structurally forgeable `PsKernelName` values and its raw checked-expression/session surface can receive such expressions.
+- Current semantic caches can contain expressions mentioning fresh child-scope fvars and can be queried before local-context validation after scope exit. A forged/out-of-scope fvar can therefore alias a stale cache key.
+- This blocks a correct parent-context configuration-preservation theorem and is treated as a real source-level soundness defect, not an Assurance Plane relaxation opportunity.
+- Planned minimal fix: introduce one shared semantic-cache eligibility predicate rejecting every key containing an fvar, apply it consistently to inference, WHNF-core, WHNF, unfold, and DefEq success/failure cache lookup/publication, and add a regression proving out-of-scope fvars cannot be resurrected by cache hits.
+- Do not weaken `PsKernelCheckerStateSemanticSound` to hide this issue.

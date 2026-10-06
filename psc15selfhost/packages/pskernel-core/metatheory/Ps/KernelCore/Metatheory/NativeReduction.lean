@@ -1,4 +1,5 @@
 import Ps.KernelCore.Runtime.Capability.Lean434NativeReduction
+import Ps.KernelCore.Metatheory.Judgments
 
 /-
 Explicit Assurance Plane model of the trusted native-reduction boundary.

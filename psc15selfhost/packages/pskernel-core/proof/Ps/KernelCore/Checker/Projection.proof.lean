@@ -2127,16 +2127,14 @@ theorem psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
                                                       inductInfo.numIndices := by
                                                 intro hEq
                                                 simpa [hEq] using hArgsLengthBool
-                                              have hArgsLengthBoolRaw :
-                                                  Nat.beq
-                                                      (psKernelExprListLength
-                                                        (psKernelExprGetAppArgs typeWhnf))
-                                                      (Nat.add
-                                                        inductInfo.numParams
-                                                        inductInfo.numIndices) =
-                                                    false := by
+                                              have hArgsLengthNeRaw :
+                                                  psKernelExprListLength
+                                                      (psKernelExprGetAppArgs typeWhnf) ≠
+                                                    Nat.add
+                                                      inductInfo.numParams
+                                                      inductInfo.numIndices := by
                                                 simpa [args] using
-                                                  hArgsLengthBool
+                                                  hArgsLengthNe
                                               simp only [
                                                 psKernelInferProjectionWith,
                                                 hInferRun,
@@ -2148,7 +2146,7 @@ theorem psKernelInferProjectionWith_preserves_configuration_of_infer_preserves
                                                 hCtors,
                                                 hCtorRest
                                               ] at hSuccess
-                                              rw [hArgsLengthBoolRaw] at hSuccess
+                                              rw [if_neg hArgsLengthNeRaw] at hSuccess
                                               simp at hSuccess
                                           | true =>
                                               have hArgsLength :

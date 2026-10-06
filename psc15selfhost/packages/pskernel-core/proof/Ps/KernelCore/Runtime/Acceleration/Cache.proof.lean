@@ -1,4 +1,5 @@
 import Ps.KernelCore.Runtime.Acceleration.Cache
+import Ps.KernelCore.Metatheory.CacheIndexRefinement
 
 theorem psKernelExprMapGetIn_nil
     (expr : PsKernelExpr) :
@@ -314,3 +315,342 @@ theorem psKernelExprMapGet_insert_indexed_self
     psKernelExprMapGetIn_insertIn_self,
     hRefl
   ]
+
+
+theorem psKernelExprMapGetIn_insertIn_other
+    (key value query : PsKernelExpr)
+    (entries : List (Prod PsKernelExpr PsKernelExpr))
+    (hDifferent : psKernelExprEq key query = false) :
+    psKernelExprMapGetIn
+        query
+        (psKernelExprMapInsertIn
+          key
+          value
+          entries) =
+      psKernelExprMapGetIn query entries := by
+  induction entries with
+  | nil =>
+      simp [
+        psKernelExprMapInsertIn,
+        psKernelExprMapGetIn,
+        hDifferent
+      ]
+  | cons entry rest ih =>
+      cases hExisting :
+          psKernelExprEq
+            (Prod.fst entry)
+            key with
+      | false =>
+          simp [
+            psKernelExprMapInsertIn,
+            psKernelExprMapGetIn,
+            hExisting,
+            ih
+          ]
+      | true =>
+          have hEntryQuery :
+              psKernelExprEq
+                  (Prod.fst entry)
+                  query =
+                false := by
+            cases hQuery :
+                psKernelExprEq
+                  (Prod.fst entry)
+                  query with
+            | false =>
+                rfl
+            | true =>
+                have hKeyEntry :
+                    psKernelExprEq
+                        key
+                        (Prod.fst entry) =
+                      true := by
+                  rw [
+                    ← psKernelExprEq_symm_core
+                      (Prod.fst entry)
+                      key
+                  ]
+                  exact hExisting
+                have hTrans :
+                    psKernelExprEq key query = true :=
+                  psKernelExprEq_trans_core
+                    key
+                    (Prod.fst entry)
+                    query
+                    hKeyEntry
+                    hQuery
+                rw [hDifferent] at hTrans
+                cases hTrans
+          simp [
+            psKernelExprMapInsertIn,
+            psKernelExprMapGetIn,
+            hExisting,
+            hDifferent,
+            hEntryQuery
+          ]
+
+theorem psKernelExprMapGetIn_insertIn_match
+    (key value query : PsKernelExpr)
+    (entries : List (Prod PsKernelExpr PsKernelExpr))
+    (hMatch : psKernelExprEq key query = true) :
+    psKernelExprMapGetIn
+        query
+        (psKernelExprMapInsertIn
+          key
+          value
+          entries) =
+      Option.some value := by
+  induction entries with
+  | nil =>
+      simp [
+        psKernelExprMapInsertIn,
+        psKernelExprMapGetIn,
+        hMatch
+      ]
+  | cons entry rest ih =>
+      cases hExisting :
+          psKernelExprEq
+            (Prod.fst entry)
+            key with
+      | true =>
+          simp [
+            psKernelExprMapInsertIn,
+            psKernelExprMapGetIn,
+            hExisting,
+            hMatch
+          ]
+      | false =>
+          have hEntryQuery :
+              psKernelExprEq
+                  (Prod.fst entry)
+                  query =
+                false := by
+            cases hQuery :
+                psKernelExprEq
+                  (Prod.fst entry)
+                  query with
+            | false =>
+                rfl
+            | true =>
+                have hQueryKey :
+                    psKernelExprEq query key = true := by
+                  rw [
+                    ← psKernelExprEq_symm_core
+                      key
+                      query
+                  ]
+                  exact hMatch
+                have hTrans :
+                    psKernelExprEq
+                        (Prod.fst entry)
+                        key =
+                      true :=
+                  psKernelExprEq_trans_core
+                    (Prod.fst entry)
+                    query
+                    key
+                    hQuery
+                    hQueryKey
+                rw [hExisting] at hTrans
+                cases hTrans
+          simp [
+            psKernelExprMapInsertIn,
+            psKernelExprMapGetIn,
+            hExisting,
+            hEntryQuery,
+            ih
+          ]
+
+theorem psKernelExprMapBuildIndex_refines_get
+    (entries : List (Prod PsKernelExpr PsKernelExpr))
+    (query : PsKernelExpr) :
+    psKernelExprMapGetIn
+        query
+        (psKernelExprMapIndexBucket
+          16
+          (psKernelExprMapBuildIndex entries)
+          (psKernelExprHash query)) =
+      psKernelExprMapGetIn query entries := by
+  induction entries generalizing query with
+  | nil =>
+      rfl
+  | cons entry rest ih =>
+      let key := Prod.fst entry
+      let value := Prod.snd entry
+      let oldIndex :=
+        psKernelExprMapBuildIndex rest
+      let oldBucket :=
+        psKernelExprMapIndexBucket
+          16
+          oldIndex
+          (psKernelExprHash key)
+      let newBucket :=
+        psKernelExprMapInsertIn
+          key
+          value
+          oldBucket
+      change
+        psKernelExprMapGetIn
+            query
+            (psKernelExprMapIndexBucket
+              16
+              (psKernelExprMapIndexSet
+                16
+                oldIndex
+                (psKernelExprHash key)
+                newBucket)
+              (psKernelExprHash query)) =
+          psKernelExprMapGetIn
+            query
+            (List.cons entry rest)
+      cases hSame :
+          psKernelExprEq key query with
+      | true =>
+          have hHash :
+              psKernelExprHash key =
+                psKernelExprHash query :=
+            psKernelExprHash_of_exprEq_true
+              key query hSame
+          have hBucket :
+              psKernelExprMapIndexBucket
+                  16
+                  (psKernelExprMapIndexSet
+                    16
+                    oldIndex
+                    (psKernelExprHash key)
+                    newBucket)
+                  (psKernelExprHash query) =
+                newBucket := by
+            rw [← hHash]
+            exact
+              psKernelExprMapIndexBucket_set_same
+                16
+                oldIndex
+                (psKernelExprHash key)
+                newBucket
+          rw [hBucket]
+          have hLeft :
+              psKernelExprMapGetIn query newBucket =
+                Option.some value := by
+            exact
+              psKernelExprMapGetIn_insertIn_match
+                key value query oldBucket hSame
+          rw [hLeft]
+          have hSameRaw :
+              psKernelExprEq
+                  (Prod.fst entry)
+                  query =
+                true := by
+            simpa [key] using hSame
+          simp [
+            psKernelExprMapGetIn,
+            value,
+            hSameRaw
+          ]
+      | false =>
+          have hRight :
+              psKernelExprMapGetIn
+                  query
+                  (List.cons entry rest) =
+                psKernelExprMapGetIn query rest := by
+            have hSameRaw :
+                psKernelExprEq
+                    (Prod.fst entry)
+                    query =
+                  false := by
+              simpa [key] using hSame
+            simp [
+              psKernelExprMapGetIn,
+              hSameRaw
+            ]
+          rw [hRight]
+          by_cases hHash :
+              psKernelExprHash key =
+                psKernelExprHash query
+          · have hBucket :
+                psKernelExprMapIndexBucket
+                    16
+                    (psKernelExprMapIndexSet
+                      16
+                      oldIndex
+                      (psKernelExprHash key)
+                      newBucket)
+                    (psKernelExprHash query) =
+                  newBucket := by
+              rw [← hHash]
+              exact
+                psKernelExprMapIndexBucket_set_same
+                  16
+                  oldIndex
+                  (psKernelExprHash key)
+                  newBucket
+            rw [hBucket]
+            rw [
+              psKernelExprMapGetIn_insertIn_other
+                key value query oldBucket hSame
+            ]
+            unfold oldBucket
+            rw [hHash]
+            exact ih query
+          · rw [
+              psKernelExprMapIndexBucket_set_other_expr_hash
+                oldIndex
+                key
+                query
+                newBucket
+                hHash
+            ]
+            exact ih query
+
+theorem psKernelExprMapGet_insert_self
+    (cache : PsKernelExprMap)
+    (expr value : PsKernelExpr)
+    (hRefl : psKernelExprEq expr expr = true) :
+    psKernelExprMapGet
+        (psKernelExprMapInsert cache expr value)
+        expr =
+      Option.some value := by
+  cases cache with
+  | mk small index =>
+      cases index with
+      | none =>
+          cases hFits :
+              Nat.ble
+                (psKernelCacheEntryListLength
+                  (psKernelExprMapInsertIn
+                    expr
+                    value
+                    small))
+                psKernelCacheSmallLimit with
+          | true =>
+              exact
+                psKernelExprMapGet_insert_small_self
+                  small expr value hRefl hFits
+          | false =>
+              change
+                psKernelExprMapGetIn
+                    expr
+                    (psKernelExprMapIndexBucket
+                      16
+                      (psKernelExprMapBuildIndex
+                        (psKernelExprMapInsertIn
+                          expr
+                          value
+                          small))
+                      (psKernelExprHash expr)) =
+                  Option.some value
+              rw [
+                psKernelExprMapBuildIndex_refines_get
+                  (psKernelExprMapInsertIn
+                    expr
+                    value
+                    small)
+                  expr
+              ]
+              exact
+                psKernelExprMapGetIn_insertIn_match
+                  expr value expr small hRefl
+      | some index =>
+          exact
+            psKernelExprMapGet_insert_indexed_self
+              small index expr value hRefl

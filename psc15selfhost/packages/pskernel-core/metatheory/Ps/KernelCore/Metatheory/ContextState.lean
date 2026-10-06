@@ -648,3 +648,22 @@ theorem psKernelCheckerContextEnterRecDepth_preserves_configuration
           subst nextContext
           unfold PsKernelCheckerConfigurationSound at hConfig ⊢
           simpa using hConfig
+
+
+theorem psKernelCheckerConfigurationSound_transport
+    (source target : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (hEnvironment :
+      source.environment = target.environment)
+    (hLocal :
+      source.localContext = target.localContext)
+    (hSound :
+      PsKernelCheckerConfigurationSound
+        source
+        state) :
+    PsKernelCheckerConfigurationSound
+      target
+      state := by
+  unfold PsKernelCheckerConfigurationSound at hSound ⊢
+  rw [← hEnvironment, ← hLocal]
+  exact hSound

@@ -117,13 +117,25 @@ theorem psKernelExprGetAppFnArgsWorker_reconstruct
         (Prod.fst spine)
         (Prod.snd spine) =
       psKernelExprApplyArgsCheap expr suffix := by
-  induction expr generalizing suffix <;>
-    simp [
-      psKernelExprGetAppFnArgsWorker,
-      psKernelExprApplyArgsCheap,
-      psKernelExprApplyArgsCheapWorker,
-      *
-    ]
+  induction expr generalizing suffix with
+  | app fn arg fnIH _ =>
+      simpa [
+        psKernelExprGetAppFnArgsWorker,
+        psKernelExprApplyArgsCheap,
+        psKernelExprApplyArgsCheapWorker
+      ] using
+        (fnIH (List.cons arg suffix))
+  | bvar index => rfl
+  | fvar name => rfl
+  | mvar name => rfl
+  | sort level => rfl
+  | const name levels => rfl
+  | lam name type body binderInfo typeIH bodyIH => rfl
+  | forallE name type body binderInfo typeIH bodyIH => rfl
+  | letE name type value body nondep typeIH valueIH bodyIH => rfl
+  | lit literal => rfl
+  | mdata metadata body bodyIH => rfl
+  | proj typeName index body bodyIH => rfl
 
 
 theorem psKernelExprGetAppFnArgs_reconstruct

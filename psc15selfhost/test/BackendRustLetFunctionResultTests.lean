@@ -77,11 +77,11 @@ def psTestBackendRustLetFunctionResult : Bool :=
       output.contains
           "pub fn makeAdderViaLet(offset: PsNat) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
         && output.contains
-          "{ let delta = (offset).clone(); { let __ps_internal_lambda: std::rc::Rc<dyn Fn(PsNat) -> PsNat> = std::rc::Rc::new(move |value: PsNat| "
+          "{ let delta = (offset).clone(); move { let __ps_internal_lambda: std::rc::Rc<dyn Fn(PsNat) -> PsNat> = std::rc::Rc::new(move |value: PsNat| "
         && output.contains
           "pub fn forwardCallbackViaLet(callback: std::rc::Rc<dyn Fn(PsNat) -> PsNat>) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
         && output.contains
-          "{ let forwarded: std::rc::Rc<dyn Fn(PsNat) -> PsNat> = (callback).clone(); forwarded }"
+          "{ let forwarded = (callback).clone(); forwarded }"
 
 def psTestBackendRustCoverageLetFunctionResult : Bool :=
   let coverage :=

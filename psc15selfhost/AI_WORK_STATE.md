@@ -45,3 +45,8 @@ Checkpoint P0/P2/P3:
 - offline pscv-verify prototype validates architecture/trust/provider-security/SAVEF closure without the full compiler
 - FactoryBench-v4 holdout policy scaffold frozen with searchableByFactory=false; task corpus remains intentionally pending/sealed
 - next: strengthen defeq cache source audit, add theory definitions/proof skeletons where self-host-compatible, then Wasm validation evidence
+
+## CI repair checkpoint
+
+- direct Rust semantic and source corpora passed; exact let-function-result rendering assertion was stale after canonical Rc/move function-result emission
+- updated the regression to lock semantic ownership/ABI substrings without requiring the obsolete redundant local type annotation

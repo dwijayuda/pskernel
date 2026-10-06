@@ -87,6 +87,7 @@ jobs:
             PsBackendJs \
             PsDriverTs \
             PsDriverJs \
+            PsDriverWasm \
             PsBackendRust \
             PsDriverRust \
             PsBackendWasm \

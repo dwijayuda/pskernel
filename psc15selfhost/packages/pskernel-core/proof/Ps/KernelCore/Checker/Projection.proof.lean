@@ -528,13 +528,15 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                           inductInfo.numIndices := by
                                                     intro hEq
                                                     simpa [hEq] using hArgsLengthBool
-                                                  have hArgsLengthNeRaw :
-                                                      psKernelExprListLength
-                                                          (psKernelExprGetAppArgs typeWhnf) ≠
-                                                        Nat.add
-                                                          inductInfo.numParams
-                                                          inductInfo.numIndices := by
-                                                    simpa [args] using hArgsLengthNe
+                                                  have hArgsLengthBoolRaw :
+                                                      Nat.beq
+                                                          (psKernelExprListLength
+                                                            (psKernelExprGetAppArgs typeWhnf))
+                                                          (Nat.add
+                                                            inductInfo.numParams
+                                                            inductInfo.numIndices) =
+                                                        false := by
+                                                    simpa [args] using hArgsLengthBool
                                                   simp only [
                                                     psKernelInferProjectionWith,
                                                     hInfer,
@@ -546,7 +548,8 @@ theorem psKernelInferProjectionWith_refines_semantics
                                                     hCtors,
                                                     hCtorRest
                                                   ] at hSuccess
-                                                  simp [hArgsLengthBool] at hSuccess
+                                                  rw [hArgsLengthBoolRaw] at hSuccess
+                                                  simp at hSuccess
                                               | true =>
                                                   have hArgsLength :
                                                       psKernelExprListLength args =

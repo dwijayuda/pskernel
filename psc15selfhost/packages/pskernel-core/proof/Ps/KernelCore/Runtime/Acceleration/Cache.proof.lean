@@ -627,18 +627,11 @@ theorem psKernelExprMapGet_insert_self
                 psKernelExprMapGet_insert_small_self
                   small expr value hRefl hFits
           | false =>
-              change
-                psKernelExprMapGetIn
-                    expr
-                    (psKernelExprMapIndexBucket
-                      16
-                      (psKernelExprMapBuildIndex
-                        (psKernelExprMapInsertIn
-                          expr
-                          value
-                          small))
-                      (psKernelExprHash expr)) =
-                  Option.some value
+              simp only [
+                psKernelExprMapInsert,
+                hFits,
+                psKernelExprMapGet
+              ]
               rw [
                 psKernelExprMapBuildIndex_refines_get
                   (psKernelExprMapInsertIn

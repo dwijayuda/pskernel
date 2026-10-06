@@ -82,6 +82,12 @@ process.stdout.write(
   "PSC2_DIRECT_RUST_WHOLE_COMPILER_UNSUPPORTED_COUNT: " + match[1] + "\n",
 );
 
+if (match[1] !== "0") {
+  throw new Error(
+    "PSC2_DIRECT_RUST_WHOLE_COMPILER_UNSUPPORTED: " + match[1],
+  );
+}
+
 const emitArgs = [
   ...prefix,
   "rust",

@@ -119,6 +119,33 @@ def psCompilerJavaScriptProofScriptSources
       psCompilerJavaScriptFromPrepared prepared
 
 
+def psCompilerJavaScriptPreparationInitial :
+    PsCompilerSourcePreparationState :=
+  psCompilerSourcePreparationInitial
+
+def psCompilerJavaScriptPrepareProofScriptSourceStep
+    (state : PsCompilerSourcePreparationState)
+    (source : String) :
+    Except PsCompilerJavaScriptError PsCompilerSourcePreparationState :=
+  match
+      psCompilerPrepareSourceStep
+        PsCompilerSourceKind.proofScript
+        state
+        source with
+  | Except.error error =>
+      Except.error (PsCompilerJavaScriptError.compiler error)
+  | Except.ok next =>
+      Except.ok next
+
+def psCompilerJavaScriptFinishProofScriptPreparation
+    (state : PsCompilerSourcePreparationState) :
+    Except PsCompilerJavaScriptError PsCompilerAdmissionReadyModule :=
+  match psCompilerFinishSourcePreparation state with
+  | Except.error error =>
+      Except.error (PsCompilerJavaScriptError.compiler error)
+  | Except.ok prepared =>
+      Except.ok prepared
+
 def psCompilerJavaScriptPrepareProofScriptSources
     (sources : List String) :
     Except PsCompilerJavaScriptError PsCompilerAdmissionReadyModule :=

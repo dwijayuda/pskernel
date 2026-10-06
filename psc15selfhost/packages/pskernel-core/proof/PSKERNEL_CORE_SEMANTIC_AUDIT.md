@@ -13,9 +13,9 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 9 |
-| B | 25 |
-| C | 37 |
+| A | 17 |
+| B | 19 |
+| C | 35 |
 | D | 8 |
 | **Total canonical source/proof pairs** | **79** |
 
@@ -30,7 +30,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `API/Outcome.lean` | **C** | Outcome classification/control facts. |
 | `API/Provider.lean` | **C** | Provider compatibility decision facts. |
 | `API/Session.lean` | **C** | Session/preflight control and propagation facts. |
-| `Admission/Declaration/Admission.lean` | **B** | Substantive declaration proof-gate sequencing; formal admit judgment still pending. |
+| `Admission/Declaration/Admission.lean` | **A** | Successful checked safe-definition/theorem admission now refines the shared `PsKernelDeclarationExtension`; remaining declaration variants are being closed on the same relation. |
 | `Admission/Declaration/Validation.lean` | **B** | Closedness, universes, body checking and defeq gating; formal validation relation pending. |
 | `Admission/Inductive/Common/Elimination.lean` | **C** | Fuel/base control facts only. |
 | `Admission/Inductive/Common/Occurrence.lean` | **C** | Selected occurrence/control cases; positivity semantics incomplete. |
@@ -56,13 +56,13 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Admission/Inductive/Ordinary/ConstructorAdmission.lean` | **C** | Fuel exhaustion only. |
 | `Admission/Inductive/Ordinary/Recursor.lean` | **B** | Recursor helper/list laws; generated-rule semantic validity incomplete. |
 | `Admission/Inductive/Types.lean` | **B** | Basic list/name/binder helper laws. |
-| `Admission/Quot/Admission.lean` | **B** | Transaction propagation plus successful postconditions; independent Quot admission judgment pending. |
+| `Admission/Quot/Admission.lean` | **A** | Successful Quot initialization refines the shared `PsKernelQuotExtension`, with exact four-declaration semantic history and runtime preservation. |
 | `Admission/Quot/Bootstrap.lean` | **C** | Reserved-name branch behavior and binder base case. |
 | `Checker/Context.lean` | **B** | Context construction/freshness/application helper invariants. |
 | `Checker/DefEq/BinderSpines.lean` | **A** | `psKernelDefEqFinish` now preserves checker-state semantic soundness under the isolated successful-pair cache insertion law; binder-spine congruence itself still needs deeper semantic coverage. |
 | `Checker/DefEq/DeltaStep.lean` | **C** | Delta-step result/control cases. |
 | `Checker/DefEq/FinalRules.lean` | **C** | Fuel/control only for final rules. |
-| `Checker/DefEq/FullShape.lean` | **C** | Selected same-shape cases; formal defeq soundness pending. |
+| `Checker/DefEq/FullShape.lean` | **A** | Full-shape Sort and literal success paths now refine the independent algorithmic defeq judgment; app/binder/eta terminal cases remain to be connected. |
 | `Checker/DefEq/LazyDelta.lean` | **C** | Fuel exhaustion only. |
 | `Checker/DefEq/Quick.lean` | **A** | Expression-equality and successful-cache quick paths now refine the independent defeq judgment under explicit `ExprEqSound` / `DefEqCacheSound` invariants; Sort/literal rules are directly bridged. |
 | `Checker/DefEq/Shortcuts.lean` | **C** | Selected disabled shortcut behavior. |
@@ -89,13 +89,13 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Core/Level.lean` | **B** | Offset/list normalization foundations; full universe semantic equivalence proof pending. |
 | `Core/LocalContext.lean` | **B** | Lookup/base/add/value structural laws. |
 | `Core/Name.lean` | **B** | Append/list algebra; equality correctness pending. |
-| `Core/Substitution/Abstract.lean` | **B** | Binder example and concrete roundtrip; general abstraction/instantiation theorem pending. |
-| `Core/Substitution/Beta.lean` | **B** | General closed-body cheap-beta class; full beta semantic relation pending. |
-| `Core/Substitution/Instantiate.lean` | **B** | Hit/miss/binder behavior; general capture-avoidance interaction pending. |
-| `Core/Substitution/Lift.lean` | **B** | Cutoff hit/miss/binder behavior; general composition theorem pending. |
+| `Core/Substitution/Abstract.lean` | **A** | Production free-variable abstraction now refines a total fuel-free reference semantics; singleton abstraction/instantiation roundtrip is being generalized over the full tree. |
+| `Core/Substitution/Beta.lean` | **A** | Single-lambda cheap beta is proved to either preserve the original term or realize the formal `PsKernelReductionStep.beta`; closed-body and identity cases remain as concrete corollaries. |
+| `Core/Substitution/Instantiate.lean` | **A** | `InstantiateAt`/`Instantiate`/`Instantiate1`/`InstantiateRev` now refine total fuel-free reference semantics; arbitrary-depth closed instantiation is proved identity. |
+| `Core/Substitution/Lift.lean` | **A** | The fuel-bounded production lift worker now refines total structural lifting semantics for every expression under its node-count budget. |
 | `Core/Substitution/ListOps.lean` | **B** | Reusable take/drop/reverse algebra. |
 | `Environment/Environment.lean` | **B** | Semantic-view/native capability separation facts. |
-| `Environment/Lookup.lean` | **C** | Wrapper/contains cases; full authoritative lookup refinement pending. |
+| `Environment/Lookup.lean` | **A** | Under `PsKernelEnvironmentIndexRefines`, indexed lookup is proved equal to authoritative `environment.constants` lookup. |
 | `Environment/Operations.lean` | **A** | Explicit semantic-history preservation for add/replace/Quot marking. |
 | `Environment/Semantic.lean` | **B** | Authoritative list helper algebra. |
 | `Runtime/Acceleration/Cache.lean` | **B** | Map/pair-cache set/get foundations; whole-cache refinement invariant pending. |

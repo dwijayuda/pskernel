@@ -97,3 +97,25 @@ theorem psKernelExprAbstractFVars_refines_reference
   exact
     psKernelExprAbstractFVars_refines_reference_core
       expr fvars
+
+
+theorem psKernelExprAbstractInstantiate_roundtrip_singleton
+    (expr : PsKernelExpr)
+    (target : PsKernelName)
+    (offset : Nat)
+    (hClosed :
+      psKernelExprHasLooseAt expr offset = false)
+    (hNameSound :
+      PsKernelNameEqSoundAgainst target) :
+    psKernelExprInstantiateAt
+        (psKernelExprAbstractFVarsAt
+          expr
+          (List.cons target List.nil)
+          offset)
+        0
+        (List.cons (PsKernelExpr.fvar target) List.nil)
+        offset =
+      expr := by
+  exact
+    psKernelExprAbstractInstantiate_roundtrip_singleton_core
+      expr target offset hClosed hNameSound

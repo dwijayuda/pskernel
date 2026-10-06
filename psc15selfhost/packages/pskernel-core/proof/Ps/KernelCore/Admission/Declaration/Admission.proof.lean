@@ -418,3 +418,327 @@ theorem psKernelAddTheorem_success_refines_extension
       result
       (PsKernelConstantInfo.thmInfo value)
       hSuccess
+
+
+theorem psKernelAddAxiom_adds_only_after_check
+    (fuel : Nat)
+    (environment : PsKernelEnvironment)
+    (value : PsKernelAxiomInfo)
+    (maxRecDepth maxNatSize : Nat)
+    (afterHeader : PsKernelCheckerSession)
+    (hHeader :
+      psKernelCheckConstantBaseWithSession
+          fuel
+          (psKernelMkCheckerSession
+            environment
+            value.base.levelParams
+            (if value.isUnsafe then
+              PsKernelDefinitionSafety.unsafeDef
+             else
+              PsKernelDefinitionSafety.safe)
+            maxRecDepth
+            maxNatSize)
+          value.base =
+        Except.ok afterHeader) :
+    psKernelAddAxiom
+        fuel environment value maxRecDepth maxNatSize =
+      psKernelEnvironmentAdd
+        environment
+        (PsKernelConstantInfo.axiomInfo value) := by
+  simp [
+    psKernelAddAxiom,
+    hHeader
+  ]
+
+theorem psKernelAddAxiom_success_refines_extension
+    (fuel : Nat)
+    (environment result : PsKernelEnvironment)
+    (value : PsKernelAxiomInfo)
+    (maxRecDepth maxNatSize : Nat)
+    (afterHeader : PsKernelCheckerSession)
+    (hHeader :
+      psKernelCheckConstantBaseWithSession
+          fuel
+          (psKernelMkCheckerSession
+            environment
+            value.base.levelParams
+            (if value.isUnsafe then
+              PsKernelDefinitionSafety.unsafeDef
+             else
+              PsKernelDefinitionSafety.safe)
+            maxRecDepth
+            maxNatSize)
+          value.base =
+        Except.ok afterHeader)
+    (hSuccess :
+      psKernelAddAxiom
+          fuel environment value maxRecDepth maxNatSize =
+        Except.ok result) :
+    PsKernelDeclarationExtension
+      environment
+      result
+      (PsKernelConstantInfo.axiomInfo value) := by
+  have hGate :=
+    psKernelAddAxiom_adds_only_after_check
+      fuel environment value maxRecDepth maxNatSize
+      afterHeader hHeader
+  rw [hGate] at hSuccess
+  exact
+    psKernelEnvironmentAdd_success_refines_extension
+      environment
+      result
+      (PsKernelConstantInfo.axiomInfo value)
+      hSuccess
+
+theorem psKernelAddDefinition_partial_adds_only_after_checks
+    (fuel : Nat)
+    (environment : PsKernelEnvironment)
+    (value : PsKernelDefinitionInfo)
+    (maxRecDepth maxNatSize : Nat)
+    (afterHeader afterBody : PsKernelCheckerSession)
+    (hSafety :
+      value.safety = PsKernelDefinitionSafety.partialDef)
+    (hHeader :
+      psKernelCheckConstantBaseWithSession
+          fuel
+          (psKernelMkCheckerSession
+            environment
+            value.base.levelParams
+            PsKernelDefinitionSafety.safe
+            maxRecDepth
+            maxNatSize)
+          value.base =
+        Except.ok afterHeader)
+    (hBody :
+      psKernelCheckDefinitionBodyWithSession
+          fuel
+          afterHeader
+          value =
+        Except.ok afterBody) :
+    psKernelAddDefinition
+        fuel environment value maxRecDepth maxNatSize =
+      psKernelEnvironmentAdd
+        environment
+        (PsKernelConstantInfo.defnInfo value) := by
+  simp [
+    psKernelAddDefinition,
+    hSafety,
+    hHeader,
+    hBody
+  ]
+
+theorem psKernelAddDefinition_partial_success_refines_extension
+    (fuel : Nat)
+    (environment result : PsKernelEnvironment)
+    (value : PsKernelDefinitionInfo)
+    (maxRecDepth maxNatSize : Nat)
+    (afterHeader afterBody : PsKernelCheckerSession)
+    (hSafety :
+      value.safety = PsKernelDefinitionSafety.partialDef)
+    (hHeader :
+      psKernelCheckConstantBaseWithSession
+          fuel
+          (psKernelMkCheckerSession
+            environment
+            value.base.levelParams
+            PsKernelDefinitionSafety.safe
+            maxRecDepth
+            maxNatSize)
+          value.base =
+        Except.ok afterHeader)
+    (hBody :
+      psKernelCheckDefinitionBodyWithSession
+          fuel
+          afterHeader
+          value =
+        Except.ok afterBody)
+    (hSuccess :
+      psKernelAddDefinition
+          fuel environment value maxRecDepth maxNatSize =
+        Except.ok result) :
+    PsKernelDeclarationExtension
+      environment
+      result
+      (PsKernelConstantInfo.defnInfo value) := by
+  have hGate :=
+    psKernelAddDefinition_partial_adds_only_after_checks
+      fuel environment value maxRecDepth maxNatSize
+      afterHeader afterBody hSafety hHeader hBody
+  rw [hGate] at hSuccess
+  exact
+    psKernelEnvironmentAdd_success_refines_extension
+      environment result
+      (PsKernelConstantInfo.defnInfo value)
+      hSuccess
+
+theorem psKernelAddDefinition_unsafe_success_refines_extension
+    (fuel : Nat)
+    (environment work : PsKernelEnvironment)
+    (value : PsKernelDefinitionInfo)
+    (maxRecDepth maxNatSize : Nat)
+    (afterHeader afterBody : PsKernelCheckerSession)
+    (hSafety :
+      value.safety = PsKernelDefinitionSafety.unsafeDef)
+    (hHeader :
+      psKernelCheckConstantBaseWithSession
+          fuel
+          (psKernelMkCheckerSession
+            environment
+            value.base.levelParams
+            PsKernelDefinitionSafety.unsafeDef
+            maxRecDepth
+            maxNatSize)
+          value.base =
+        Except.ok afterHeader)
+    (hAdd :
+      psKernelEnvironmentAdd
+          environment
+          (PsKernelConstantInfo.defnInfo value) =
+        Except.ok work)
+    (hBody :
+      psKernelCheckDefinitionBodyWithSession
+          fuel
+          (psKernelMkCheckerSession
+            work
+            value.base.levelParams
+            PsKernelDefinitionSafety.unsafeDef
+            maxRecDepth
+            maxNatSize)
+          value =
+        Except.ok afterBody) :
+    psKernelAddDefinition
+        fuel environment value maxRecDepth maxNatSize =
+      Except.ok work ∧
+    PsKernelDeclarationExtension
+      environment
+      work
+      (PsKernelConstantInfo.defnInfo value) := by
+  constructor
+  · simp [
+      psKernelAddDefinition,
+      hSafety,
+      hHeader,
+      hAdd,
+      hBody
+    ]
+  · exact
+      psKernelEnvironmentAdd_success_refines_extension
+        environment work
+        (PsKernelConstantInfo.defnInfo value)
+        hAdd
+
+theorem psKernelAddOpaque_adds_only_after_checks
+    (fuel : Nat)
+    (environment : PsKernelEnvironment)
+    (value : PsKernelOpaqueInfo)
+    (maxRecDepth maxNatSize : Nat)
+    (afterHeader checkedSession finalSession :
+      PsKernelCheckerSession)
+    (inferredType : PsKernelExpr)
+    (hHeader :
+      psKernelCheckConstantBaseWithSession
+          fuel
+          (psKernelMkCheckerSession
+            environment
+            value.base.levelParams
+            PsKernelDefinitionSafety.safe
+            maxRecDepth
+            maxNatSize)
+          value.base =
+        Except.ok afterHeader)
+    (hClosed :
+      psKernelCheckNoMVarNoFVar value.value =
+        Except.ok Unit.unit)
+    (hLevels :
+      psKernelCheckLevelParams
+          value.value
+          value.base.levelParams =
+        Except.ok Unit.unit)
+    (hCheck :
+      psKernelSessionCheck
+          fuel
+          afterHeader
+          value.value =
+        Except.ok
+          (Prod.mk inferredType checkedSession))
+    (hDefEq :
+      psKernelSessionIsDefEq
+          fuel
+          checkedSession
+          inferredType
+          value.base.type =
+        Except.ok (Prod.mk true finalSession)) :
+    psKernelAddOpaque
+        fuel environment value maxRecDepth maxNatSize =
+      psKernelEnvironmentAdd
+        environment
+        (PsKernelConstantInfo.opaqueInfo value) := by
+  simp [
+    psKernelAddOpaque,
+    hHeader,
+    hClosed,
+    hLevels,
+    hCheck,
+    hDefEq
+  ]
+
+theorem psKernelAddOpaque_success_refines_extension
+    (fuel : Nat)
+    (environment result : PsKernelEnvironment)
+    (value : PsKernelOpaqueInfo)
+    (maxRecDepth maxNatSize : Nat)
+    (afterHeader checkedSession finalSession :
+      PsKernelCheckerSession)
+    (inferredType : PsKernelExpr)
+    (hHeader :
+      psKernelCheckConstantBaseWithSession
+          fuel
+          (psKernelMkCheckerSession
+            environment
+            value.base.levelParams
+            PsKernelDefinitionSafety.safe
+            maxRecDepth
+            maxNatSize)
+          value.base =
+        Except.ok afterHeader)
+    (hClosed :
+      psKernelCheckNoMVarNoFVar value.value =
+        Except.ok Unit.unit)
+    (hLevels :
+      psKernelCheckLevelParams
+          value.value
+          value.base.levelParams =
+        Except.ok Unit.unit)
+    (hCheck :
+      psKernelSessionCheck
+          fuel
+          afterHeader
+          value.value =
+        Except.ok
+          (Prod.mk inferredType checkedSession))
+    (hDefEq :
+      psKernelSessionIsDefEq
+          fuel
+          checkedSession
+          inferredType
+          value.base.type =
+        Except.ok (Prod.mk true finalSession))
+    (hSuccess :
+      psKernelAddOpaque
+          fuel environment value maxRecDepth maxNatSize =
+        Except.ok result) :
+    PsKernelDeclarationExtension
+      environment
+      result
+      (PsKernelConstantInfo.opaqueInfo value) := by
+  have hGate :=
+    psKernelAddOpaque_adds_only_after_checks
+      fuel environment value maxRecDepth maxNatSize
+      afterHeader checkedSession finalSession inferredType
+      hHeader hClosed hLevels hCheck hDefEq
+  rw [hGate] at hSuccess
+  exact
+    psKernelEnvironmentAdd_success_refines_extension
+      environment result
+      (PsKernelConstantInfo.opaqueInfo value)
+      hSuccess

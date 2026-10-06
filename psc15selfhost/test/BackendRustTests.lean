@@ -159,10 +159,10 @@ def psTestBackendRustAdt : Bool :=
   match psRustEmitModule psBackendRustAdtModule with
   | Except.error _ => false
   | Except.ok output =>
-      output.contains "pub struct Pair { pub left: PsNat, pub right: PsNat }"
-        && output.contains "pub enum Maybe<A: Clone> { none {}, some { value: A } }"
-        && output.contains "Maybe::<PsNat>::some { value: (x).clone() }"
-        && output.contains "pub fn leftOfPair(pair: Pair) -> PsNat { ((pair).clone()).left }"
+      output.contains "pub struct Pair { pub left: Box<PsNat>, pub right: Box<PsNat> }"
+        && output.contains "pub enum Maybe<A: Clone> { none {}, some { value: Box<A> } }"
+        && output.contains "Maybe::<PsNat>::some { value: Box::new((x).clone()) }"
+        && output.contains "pub fn leftOfPair(pair: Pair) -> PsNat { (*((pair).clone()).left).clone() }"
 
 def psBackendRustStringModule : PsVerifiedIrModule :=
   {
@@ -381,6 +381,9 @@ def psTestBackendRustIdentifiers : Bool :=
     && psStringEq
       (psRustIdentifier "__psr_value")
       "__psr___psr_value"
+    && psStringEq
+      (psRustIdentifier "__ps_internal_match_0")
+      "__psr___ps_internal_match_0"
 
 def psBackendRustLambdaFunctionResultExpr : PsVerifiedIrExpr :=
   PsVerifiedIrExpr.lambda
@@ -584,7 +587,7 @@ def psTestBackendRustStaticFunctionStorage : Bool :=
       false
   | Except.ok output =>
       output.contains
-        "pub struct CallbackHolder { pub callback: fn(PsNat) -> PsNat }"
+        "pub struct CallbackHolder { pub callback: Box<fn(PsNat) -> PsNat> }"
         && output.contains
           "pub fn makeCallbackHolder() -> CallbackHolder"
 
@@ -761,7 +764,7 @@ def psTestBackendRustStaticConstructorFunctionStorage : Bool :=
       false
   | Except.ok output =>
       output.contains
-        "stored { callback: fn(PsNat) -> PsNat }"
+        "stored { callback: Box<fn(PsNat) -> PsNat> }"
         && output.contains
           "pub fn makeCallbackBox() -> CallbackBox"
 

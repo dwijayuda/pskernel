@@ -828,7 +828,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn
+                  hFn,
+                  hFnShape
                 ] using hSuccess)
       | fvar name =>
           apply hBackPair
@@ -850,7 +851,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn
+                  hFn,
+                  hFnShape
                 ] using hSuccess)
       | mvar name =>
           apply hBackPair
@@ -872,7 +874,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn
+                  hFn,
+                  hFnShape
                 ] using hSuccess)
       | sort level =>
           apply hBackPair
@@ -894,7 +897,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn
+                  hFn,
+                  hFnShape
                 ] using hSuccess)
       | const name levels =>
           apply hBackPair
@@ -916,7 +920,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn
+                  hFn,
+                  hFnShape
                 ] using hSuccess)
       | app nestedFn nestedArg =>
           apply hBackPair
@@ -938,7 +943,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn
+                  hFn,
+                  hFnShape
                 ] using hSuccess)
       | forallE name domain codomain binderInfo =>
           apply hBackPair
@@ -961,7 +967,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn
+                  hFn,
+                  hFnShape
                 ] using hSuccess)
       | letE name type value body nondep =>
           apply hBackPair
@@ -984,7 +991,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn
+                  hFn,
+                  hFnShape
                 ] using hSuccess)
       | lit literal =>
           apply hBackPair
@@ -1006,7 +1014,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn
+                  hFn,
+                  hFnShape
                 ] using hSuccess)
       | mdata metadata body =>
           apply hBackPair
@@ -1028,7 +1037,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn
+                  hFn,
+                  hFnShape
                 ] using hSuccess)
       | proj typeName index body =>
           apply hBackPair
@@ -1050,5 +1060,6 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn
+                  hFn,
+                  hFnShape
                 ] using hSuccess)

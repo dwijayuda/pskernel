@@ -5103,15 +5103,17 @@ def psWasmLowerExprWorker
                             instructions := []
                             state := state
                           }
-                      | Option.some PsWasmValueType.i32 =>
-                          Except.ok {
-                            instructions :=
-                              [PsWasmInstruction.i32Const 0]
-                            state := state
-                          }
-                      | Option.some _ =>
-                          Except.error
-                            PsWasmLowerError.unsupportedType
+                      | Option.some valueType =>
+                          match valueType with
+                          | PsWasmValueType.i32 =>
+                              Except.ok {
+                                instructions :=
+                                  [PsWasmInstruction.i32Const 0]
+                                state := state
+                              }
+                          | _ =>
+                              Except.error
+                                PsWasmLowerError.unsupportedType
               | .var name =>
                   match psWasmFindBindingIndex bindings name with
                   | Option.none =>

@@ -3,6 +3,30 @@ import Ps.KernelCore.Metatheory.ContextState
 import Ps.KernelCore.Metatheory.ProjectionReduction
 import Ps.KernelCore.Metatheory.ReductionCongruence
 
+
+def psKernelWhnfProjectionExpandWith
+    (publicWhnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr) :
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  match expr with
+  | PsKernelExpr.lit literal =>
+      match literal with
+      | PsKernelLiteral.str value =>
+          publicWhnf
+            context
+            state
+            (psKernelStringLitToConstructor value)
+      | PsKernelLiteral.nat _ =>
+          Except.ok (Prod.mk expr state)
+  | _ =>
+      Except.ok (Prod.mk expr state)
+
 /-
 Configuration-aware semantic refinement for the projection branch of WHNF core.
 
@@ -210,37 +234,19 @@ theorem psKernelWhnfCoreProjection_configuration_refines
       let expandedResult :
           Except String
             (Prod PsKernelExpr PsKernelCheckerState) :=
-        match structReduced with
-        | PsKernelExpr.lit literal =>
-            match literal with
-            | PsKernelLiteral.str value =>
-                publicWhnf
-                  nextContext
-                  state1
-                  (psKernelStringLitToConstructor value)
-            | PsKernelLiteral.nat _ =>
-                Except.ok
-                  (Prod.mk structReduced state1)
-        | _ =>
-            Except.ok
-              (Prod.mk structReduced state1)
+        psKernelWhnfProjectionExpandWith
+          publicWhnf
+          nextContext
+          state1
+          structReduced
       cases hExpanded : expandedResult with
       | error error =>
           have hExpandedRun :
-              (match structReduced with
-             | PsKernelExpr.lit literal =>
-                 match literal with
-                 | PsKernelLiteral.str value =>
-                     publicWhnf
-                       nextContext
-                       state1
-                       (psKernelStringLitToConstructor value)
-                 | PsKernelLiteral.nat _ =>
-                     Except.ok
-                       (Prod.mk structReduced state1)
-             | _ =>
-                 Except.ok
-                   (Prod.mk structReduced state1)) =
+              psKernelWhnfProjectionExpandWith
+                  publicWhnf
+                  nextContext
+                  state1
+                  structReduced =
                 Except.error error := by
             simpa [expandedResult] using hExpanded
           simp [
@@ -249,25 +255,17 @@ theorem psKernelWhnfCoreProjection_configuration_refines
             hMiss,
             structResult,
             hStruct,
+            psKernelWhnfProjectionExpandWith,
             hExpandedRun
           ] at hSuccess
       | ok secondRun =>
           rcases secondRun with ⟨expanded, state2⟩
           have hExpandedRun :
-              (match structReduced with
-             | PsKernelExpr.lit literal =>
-                 match literal with
-                 | PsKernelLiteral.str value =>
-                     publicWhnf
-                       nextContext
-                       state1
-                       (psKernelStringLitToConstructor value)
-                 | PsKernelLiteral.nat _ =>
-                     Except.ok
-                       (Prod.mk structReduced state1)
-             | _ =>
-                 Except.ok
-                   (Prod.mk structReduced state1)) =
+              psKernelWhnfProjectionExpandWith
+                  publicWhnf
+                  nextContext
+                  state1
+                  structReduced =
                 Except.ok (Prod.mk expanded state2) := by
             simpa [expandedResult] using hExpanded
           have hExpandedSemantic :
@@ -493,6 +491,8 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                     original,
                     structResult,
                     hStruct,
+                    psKernelWhnfProjectionExpandWith,
+                    psKernelWhnfProjectionExpandWith,
                     hExpandedRun,
                     hProjection,
                     hReduce
@@ -539,6 +539,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                       original,
                       structResult,
                       hStruct,
+                      psKernelWhnfProjectionExpandWith,
                       hExpandedRun,
                       hProjection,
                       hReduce

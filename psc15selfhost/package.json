@@ -201,7 +201,7 @@
     "test:verified-ir-strict": "lake exe psc1_verified_ir_strict_tests",
     "test:erasure-eta": "node scripts/erasure-eta-runtime.test.mjs",
     "test:interface-ir": "lake exe pscv_interface_ir_tests",
-    "test:pass-evidence": "node --test scripts/artifact-evidence.test.mjs scripts/checked-build-evidence.test.mjs scripts/compiler-checked-service.test.mjs scripts/evidence-cache.test.mjs"
+    "test:pass-evidence": "node --test scripts/artifact-evidence.test.mjs scripts/checked-build-evidence.test.mjs scripts/compiler-checked-service.test.mjs scripts/evidence-cache.test.mjs scripts/bounded-process.test.mjs scripts/isolated-producer.test.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

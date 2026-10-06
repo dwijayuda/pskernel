@@ -136,7 +136,10 @@
       ],
       "status": "partial",
       "owners": [
-        "contracts/resource/COMPILATION_RESOURCE_V1.json"
+        "contracts/resource/COMPILATION_RESOURCE_V1.json",
+        "scripts/bounded-process.mjs",
+        "scripts/isolated-producer.mjs",
+        "contracts/resource/BOUNDED_HOST_EXECUTION_V1.json"
       ],
       "completion": "Budgets and bounded decoders return classified failures; measurements distinguish host-observed resources.",
       "assurance": "pending"

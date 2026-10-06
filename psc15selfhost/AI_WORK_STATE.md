@@ -9,12 +9,12 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 
 - Complete 57-section map and workstream ledger: `contracts/registry/V3_IMPLEMENTATION_STATUS.json`.
 - Deferred evidence and proof obligations: `contracts/registry/V3_ASSURANCE_HANDOFF.json`.
-- Current checkpoint: evidence-checked cache and explicit bootstrap-cache trust. Authority is committed at fc7bc7b; interfaces/links at 63e2402; pass artifacts/build graph at 2525ede.
+- Current checkpoint: bounded host execution and isolated-producer mechanism. Authority is committed at fc7bc7b; interfaces/links at 63e2402; pass artifacts/build graph at 2525ede; evidence cache at b7a8b22.
 - Portable compiler code must continue to satisfy PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1. No profile weakening, unchecked promotion, fabricated proof, or history rewrite.
 
 ## Next
 
-1. Complete typed resource outcomes, bounded host execution and incremental interface integration; bind missing internal artifacts and implementation closure as those paths are connected.
+1. Connect isolated production to a bounded comparator protocol with trusted challenges, actual statement/interface extraction, assumption policy and independent checkers. Keep runtime security and full resource coverage explicit.
 2. Complete target-specific interface adapters, backend validation, incremental interfaces/cache/resources, and comparator security mechanisms.
 3. Complete executable/logical interop, SAVEF/offline archive tooling and FactoryBench implementation; leave missing independent evidence and global theorems explicit.
 4. Maintain the ledger and handoff after each meaningful checkpoint. Do not call scaffold presence or implementation availability final acceptance.
@@ -213,3 +213,10 @@ Mode: implementation first, as requested on 2026-10-07. Continue research and im
 - The legacy hashes-only cache now requires explicit bootstrap-local trust; default untrusted text calls recompute and file-set restores refuse reuse. Existing bootstrap-only callers declare that assumption. Production topology rejects imports of that cache. Canonical contract keys avoid object insertion-order dependence, path components are constrained, and restore writes the validated snapshot instead of rereading a mutable cache file.
 - Focused tests pass for valid evidence, a forged output with internally consistent recomputed hashes, unavailable checkers, wrong action, incomplete closure, corruption, resource limits and legacy trusted/default-untrusted behavior. Production topology passes. Production semantic hits remain disabled until pass-specific independent checkers and full input/implementation closure are available.
 - GitHub 63e2402 passed the interface/link corpus and PSC1 gate, semantic build, strict IR and JS differential checks. Long fixed-point gates remained in progress when inspected; no new fixed-point claim is made.
+
+## 2026-10-07 bounded host execution checkpoint
+
+- Added a host process runner with explicit executable, directory and environment; immutable input snapshots; bounded input/stdout/stderr/wall time; cancellation and termination handling; and separate resource, infrastructure and process-failure outcomes. Successful exit returns untrusted data with no semantic authority. Unobserved CPU, memory and host stack remain null.
+- Added a Linux-container producer adapter based on the documented Docker runtime interface. It requires an already-present digest-pinned image, validates architecture and absence of declared volumes, forbids network and host mounts, uses read-only/non-root/restricted-capability execution, bounds scratch/memory/processes/CPU allocation, and confirms cleanup of the invocation's unique name.
+- Focused checks exercise actual bounded Node child processes and mock container policy/orchestration, including output/time limits, cancellation, image volume rejection and cleanup. All four cases pass. No real container run, sandbox hardening assurance or paranoid-profile promotion is claimed.
+- Next: connect this mechanism to a complete fail-closed comparator export decoder, trusted statement/interface challenge, assumption policy, provider diversity and accepted-only live handles. Existing Comparator-v1 remains the earlier prototype until that integration is implemented.

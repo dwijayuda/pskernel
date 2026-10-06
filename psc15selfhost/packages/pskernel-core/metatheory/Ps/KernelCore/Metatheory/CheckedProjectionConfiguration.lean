@@ -558,28 +558,38 @@ theorem psKernelInferProjectionWith_configuration_sound
                                               inductInfo.numParams
                                               inductInfo.numIndices) with
                                       | false =>
-                                          have hArgsLengthGuard :
-                                              Nat.beq
-                                                  (psKernelExprListLength
-                                                    (psKernelExprGetAppArgs
-                                                      typeWhnf))
-                                                  (Nat.add
-                                                    inductInfo.numParams
-                                                    inductInfo.numIndices) =
-                                                false := by
-                                            simpa [args] using hArgsLengthBool
-                                          simp [
-                                            psKernelInferProjectionWith,
-                                            hInferRun,
-                                            hTypeWhnf,
-                                            hIndexBound,
-                                            hFn,
-                                            hTypeName,
-                                            hInductFind,
-                                            hCtors,
-                                            hCtorRest,
-                                            hArgsLengthGuard
-                                          ] at hSuccess
+                                          have hArgsLengthNeRaw :
+                                              psKernelExprListLength
+                                                  (psKernelExprGetAppArgs
+                                                    typeWhnf) ≠
+                                                Nat.add
+                                                  inductInfo.numParams
+                                                  inductInfo.numIndices := by
+                                            intro hEq
+                                            have hTrue :
+                                                Nat.beq
+                                                    (psKernelExprListLength
+                                                      (psKernelExprGetAppArgs
+                                                        typeWhnf))
+                                                    (Nat.add
+                                                      inductInfo.numParams
+                                                      inductInfo.numIndices) =
+                                                  true := by
+                                              simpa [hEq]
+                                            have hFalse :
+                                                Nat.beq
+                                                    (psKernelExprListLength
+                                                      (psKernelExprGetAppArgs
+                                                        typeWhnf))
+                                                    (Nat.add
+                                                      inductInfo.numParams
+                                                      inductInfo.numIndices) =
+                                                  false := by
+                                              simpa [args] using
+                                                hArgsLengthBool
+                                            rw [hFalse] at hTrue
+                                            cases hTrue
+                                          simp [hArgsLengthNeRaw] at hSuccess
                                       | true =>
                                           have hArgsLength :
                                               psKernelExprListLength args =

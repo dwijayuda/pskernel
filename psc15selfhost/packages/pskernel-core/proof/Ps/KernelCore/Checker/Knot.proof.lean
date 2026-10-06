@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.Knot
 import Ps.KernelCore.Metatheory.Judgments
+import Ps.KernelCore.Metatheory.CheckerContracts
 
 theorem psKernelIsDefEqWithFuel_zero
     (context : PsKernelCheckerContext)
@@ -218,3 +219,96 @@ theorem psKernelCheckerWhnf_semantic_sound
     psKernelCheckerWhnf_refines_reduction
       fuel context state nextState expr result
       hWhnf hSuccess
+
+
+theorem psKernelCheckerInfer_configuration_sound
+    (fuel : Nat)
+    (hCore :
+      PsKernelInferenceCoreConfigurationSound
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          (psKernelIsDefEqWithFuel fuel))
+        (psKernelIsDefEqWithFuel fuel)) :
+    PsKernelInferenceConfigurationSound
+      (psKernelCheckerInfer fuel) := by
+  intro context state nextState expr result hConfig hSuccess
+  unfold psKernelCheckerInfer at hSuccess
+  unfold psKernelInferWithRecursorFuel at hSuccess
+  unfold psKernelInferWithFuel at hSuccess
+  exact
+    hCore
+      fuel
+      context
+      state
+      nextState
+      expr
+      result
+      true
+      hConfig
+      hSuccess
+
+theorem psKernelCheckerCheck_configuration_sound
+    (fuel : Nat)
+    (hCore :
+      PsKernelInferenceCoreConfigurationSound
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          (psKernelIsDefEqWithFuel fuel))
+        (psKernelIsDefEqWithFuel fuel)) :
+    PsKernelInferenceConfigurationSound
+      (psKernelCheckerCheck fuel) := by
+  intro context state nextState expr result hConfig hSuccess
+  unfold psKernelCheckerCheck at hSuccess
+  unfold psKernelCheckWithFuel at hSuccess
+  exact
+    hCore
+      fuel
+      context
+      state
+      nextState
+      expr
+      result
+      false
+      hConfig
+      hSuccess
+
+theorem psKernelCheckerWhnf_configuration_sound
+    (fuel : Nat)
+    (hWhnf :
+      PsKernelWhnfConfigurationSound
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          (psKernelIsDefEqWithFuel fuel))) :
+    PsKernelWhnfConfigurationSound
+      (psKernelCheckerWhnf fuel) := by
+  intro context state nextState expr result hConfig hSuccess
+  unfold psKernelCheckerWhnf at hSuccess
+  exact
+    hWhnf
+      context
+      state
+      nextState
+      expr
+      result
+      hConfig
+      hSuccess
+
+theorem psKernelIsDefEq_configuration_sound
+    (fuel : Nat)
+    (hDefEq :
+      PsKernelDefEqConfigurationSound
+        (psKernelIsDefEqWithFuel fuel)) :
+    PsKernelDefEqConfigurationSound
+      (psKernelIsDefEq fuel) := by
+  intro context state nextState left right value hConfig hSuccess
+  unfold psKernelIsDefEq at hSuccess
+  exact
+    hDefEq
+      context
+      state
+      nextState
+      left
+      right
+      value
+      hConfig
+      hSuccess

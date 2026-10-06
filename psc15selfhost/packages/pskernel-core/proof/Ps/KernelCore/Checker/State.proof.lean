@@ -181,3 +181,52 @@ theorem psKernelCheckerStateEmpty_semantic_sound
     psKernelCheckerStateEmpty_semantic_caches_sound
       environment
       localContext
+
+
+theorem psKernelCheckerStateExitLocalScope_nextFresh
+    (parent child : PsKernelCheckerState) :
+    (psKernelCheckerStateExitLocalScope parent child).nextFresh =
+      child.nextFresh := by
+  rfl
+
+theorem psKernelCheckerStateExitLocalScope_inferOnly
+    (parent child : PsKernelCheckerState) :
+    (psKernelCheckerStateExitLocalScope parent child).inferOnly =
+      parent.inferOnly := by
+  rfl
+
+theorem psKernelCheckerStateExitLocalScope_checkedInfer
+    (parent child : PsKernelCheckerState) :
+    (psKernelCheckerStateExitLocalScope parent child).checkedInfer =
+      parent.checkedInfer := by
+  rfl
+
+theorem psKernelCheckerStateExitLocalScope_whnfCore
+    (parent child : PsKernelCheckerState) :
+    (psKernelCheckerStateExitLocalScope parent child).whnfCore =
+      parent.whnfCore := by
+  rfl
+
+theorem psKernelCheckerStateExitLocalScope_whnf
+    (parent child : PsKernelCheckerState) :
+    (psKernelCheckerStateExitLocalScope parent child).whnf =
+      parent.whnf := by
+  rfl
+
+theorem psKernelCheckerStateExitLocalScope_unfold
+    (parent child : PsKernelCheckerState) :
+    (psKernelCheckerStateExitLocalScope parent child).unfold =
+      parent.unfold := by
+  rfl
+
+theorem psKernelCheckerStateExitLocalScope_success
+    (parent child : PsKernelCheckerState) :
+    (psKernelCheckerStateExitLocalScope parent child).success =
+      parent.success := by
+  rfl
+
+theorem psKernelCheckerStateExitLocalScope_failure
+    (parent child : PsKernelCheckerState) :
+    (psKernelCheckerStateExitLocalScope parent child).failure =
+      parent.failure := by
+  rfl

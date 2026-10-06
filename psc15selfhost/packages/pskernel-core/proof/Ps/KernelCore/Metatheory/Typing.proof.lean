@@ -719,7 +719,12 @@ theorem psKernelInferCore_lam_checked_refines_typing
         whnf defeq context state
         (PsKernelExpr.lam name domain body binderInfo)
         false =
-      Except.ok (Prod.mk result bodyState) ∧
+      Except.ok
+        (Prod.mk
+          result
+          (psKernelCheckerStateExitLocalScope
+            state1
+            bodyState)) ∧
     PsKernelTypingJudgment
       nextContext.environment
       nextContext.localContext
@@ -844,7 +849,9 @@ theorem psKernelInferCore_forall_checked_refines_typing
             (psKernelLevelMkIMax
               domainLevel
               bodyLevel))
-          bodySortState) ∧
+          (psKernelCheckerStateExitLocalScope
+            state1
+            bodySortState)) ∧
     PsKernelTypingJudgment
       nextContext.environment
       nextContext.localContext
@@ -1000,7 +1007,9 @@ theorem psKernelInferCore_let_checked_refines_typing
         (Prod.mk
           result
           (psKernelCacheInferResult
-            bodyState
+            (psKernelCheckerStateExitLocalScope
+              state1
+              bodyState)
             false
             (PsKernelExpr.letE name type value body nondep)
             result)) ∧

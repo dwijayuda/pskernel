@@ -766,7 +766,8 @@ def psJsLowerIdentityWith
   | List.nil =>
       Except.error PsJsLowerError.intrinsicArity
 
-def psJsLowerExprWithFuel
+def psJsLowerExprWithProfileAndFuel
+    (profile : Option PsJsTargetProfile)
     (fuel : Nat) :
     PsVerifiedIrExpr ->
       Except PsJsLowerError PsJsIrExpr :=
@@ -778,11 +779,16 @@ def psJsLowerExprWithFuel
       let smaller :
           PsVerifiedIrExpr ->
             Except PsJsLowerError PsJsIrExpr :=
-        psJsLowerExprWithFuel remaining;
+        psJsLowerExprWithProfileAndFuel
+          profile
+          remaining;
       fun (expr : PsVerifiedIrExpr) =>
         match expr with
         | PsVerifiedIrExpr.literal literal =>
-            match psJsLowerLiteral literal with
+            match
+                psJsLowerLiteralWithProfile
+                  profile
+                  literal with
             | Except.error error => Except.error error
             | Except.ok value =>
                 Except.ok (PsJsIrExpr.literal value)
@@ -798,7 +804,10 @@ def psJsLowerExprWithFuel
             if psListIsEmpty typeArguments then
               match operation with
               | PsVerifiedIrIntrinsic.machineIntBinary type integerOperation =>
-                  match psJsLowerMachineIntegerType type with
+                  match
+                      psJsLowerMachineIntegerTypeWithProfile
+                        profile
+                        type with
                   | Except.error error => Except.error error
                   | Except.ok loweredType =>
                       psJsLowerBinaryWith
@@ -808,7 +817,10 @@ def psJsLowerExprWithFuel
                           (psJsLowerIntegerBinaryOp integerOperation))
                         arguments
               | PsVerifiedIrIntrinsic.machineIntCompare type integerOperation =>
-                  match psJsLowerMachineIntegerType type with
+                  match
+                      psJsLowerMachineIntegerTypeWithProfile
+                        profile
+                        type with
                   | Except.error error => Except.error error
                   | Except.ok _ =>
                       psJsLowerBinaryWith
@@ -943,7 +955,10 @@ def psJsLowerExprWithFuel
             else
               match operation with
               | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity =>
-                  if psJsOneTypeArgumentSupported typeArguments then
+                  if
+                      psJsOneTypeArgumentSupportedWithProfile
+                        profile
+                        typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
                       PsJsIrRuntimeOp.arrayEmptyWithCapacity
@@ -952,7 +967,10 @@ def psJsLowerExprWithFuel
                   else
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arraySize =>
-                  if psJsOneTypeArgumentSupported typeArguments then
+                  if
+                      psJsOneTypeArgumentSupportedWithProfile
+                        profile
+                        typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
                       PsJsIrRuntimeOp.arraySize
@@ -961,7 +979,10 @@ def psJsLowerExprWithFuel
                   else
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arrayPush =>
-                  if psJsOneTypeArgumentSupported typeArguments then
+                  if
+                      psJsOneTypeArgumentSupportedWithProfile
+                        profile
+                        typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
                       PsJsIrRuntimeOp.arrayPush
@@ -970,7 +991,10 @@ def psJsLowerExprWithFuel
                   else
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arrayGet =>
-                  if psJsOneTypeArgumentSupported typeArguments then
+                  if
+                      psJsOneTypeArgumentSupportedWithProfile
+                        profile
+                        typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
                       PsJsIrRuntimeOp.arrayGet
@@ -979,7 +1003,10 @@ def psJsLowerExprWithFuel
                   else
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arrayGetD =>
-                  if psJsOneTypeArgumentSupported typeArguments then
+                  if
+                      psJsOneTypeArgumentSupportedWithProfile
+                        profile
+                        typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
                       PsJsIrRuntimeOp.arrayGetD
@@ -988,7 +1015,10 @@ def psJsLowerExprWithFuel
                   else
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arraySet =>
-                  if psJsOneTypeArgumentSupported typeArguments then
+                  if
+                      psJsOneTypeArgumentSupportedWithProfile
+                        profile
+                        typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
                       PsJsIrRuntimeOp.arraySet
@@ -997,7 +1027,10 @@ def psJsLowerExprWithFuel
                   else
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arraySetIfInBounds =>
-                  if psJsOneTypeArgumentSupported typeArguments then
+                  if
+                      psJsOneTypeArgumentSupportedWithProfile
+                        profile
+                        typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
                       PsJsIrRuntimeOp.arraySetIfInBounds
@@ -1006,7 +1039,10 @@ def psJsLowerExprWithFuel
                   else
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arrayMap =>
-                  if psJsTwoTypeArgumentsSupported typeArguments then
+                  if
+                      psJsTwoTypeArgumentsSupportedWithProfile
+                        profile
+                        typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
                       PsJsIrRuntimeOp.arrayMap
@@ -1015,7 +1051,10 @@ def psJsLowerExprWithFuel
                   else
                     Except.error PsJsLowerError.typeArgumentsUnsupported
               | PsVerifiedIrIntrinsic.arrayFoldl =>
-                  if psJsTwoTypeArgumentsSupported typeArguments then
+                  if
+                      psJsTwoTypeArgumentsSupportedWithProfile
+                        profile
+                        typeArguments then
                     psJsLowerRuntimeExactArityWith
                       smaller
                       PsJsIrRuntimeOp.arrayFoldl
@@ -1029,8 +1068,14 @@ def psJsLowerExprWithFuel
             parameters
             resultType
             body =>
-            if psJsTypeSupported resultType then
-              match psJsLowerParameterNames parameters with
+            if
+                psJsTypeSupportedWithProfile
+                  profile
+                  resultType then
+              match
+                  psJsLowerParameterNamesWithProfile
+                    profile
+                    parameters with
               | Except.error error => Except.error error
               | Except.ok names =>
                   match smaller body with
@@ -1062,7 +1107,10 @@ def psJsLowerExprWithFuel
             value
             body =>
             if psJsIdentifierSupported name then
-              if psJsTypeSupported type then
+              if
+                  psJsTypeSupportedWithProfile
+                    profile
+                    type then
                 match smaller value with
                 | Except.error error => Except.error error
                 | Except.ok loweredValue =>
@@ -1149,7 +1197,8 @@ def psJsLowerExprWithFuel
               | Except.error error => Except.error error
               | Except.ok loweredScrutinee =>
                   match
-                      psJsLowerMatchAlternativesWith
+                      psJsLowerMatchAlternativesWithProfile
+                        profile
                         smaller
                         alternatives with
                   | Except.error error => Except.error error
@@ -1160,6 +1209,24 @@ def psJsLowerExprWithFuel
                           loweredAlternatives)
             else
               Except.error PsJsLowerError.typeArgumentsUnsupported
+
+def psJsLowerExprWithFuel
+    (fuel : Nat)
+    (expr : PsVerifiedIrExpr) :
+    Except PsJsLowerError PsJsIrExpr :=
+  psJsLowerExprWithProfileAndFuel
+    Option.none
+    fuel
+    expr
+
+def psJsLowerExprWithTargetProfile
+    (profile : PsJsTargetProfile)
+    (expr : PsVerifiedIrExpr) :
+    Except PsJsLowerError PsJsIrExpr :=
+  psJsLowerExprWithProfileAndFuel
+    (Option.some profile)
+    4096
+    expr
 
 def psJsLowerExpr
     (expr : PsVerifiedIrExpr) :

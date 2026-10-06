@@ -500,7 +500,7 @@ def psTestBackendRustFirstOrderCallback : Bool :=
       false
   | Except.ok output =>
       output.contains
-        "pub fn applyNatCallback(f: impl Fn(PsNat) -> PsNat + Clone, x: PsNat) -> PsNat"
+        "pub fn applyNatCallback(f: std::rc::Rc<dyn Fn(PsNat) -> PsNat>, x: PsNat) -> PsNat"
 
 def psBackendRustFunctionStorageModule : PsVerifiedIrModule :=
   {
@@ -937,8 +937,8 @@ def psTestBackendRustDirectFunctionResult : Bool :=
       false
   | Except.ok output =>
       output.contains
-        "pub fn makeAdder(offset: PsNat) -> impl Fn(PsNat) -> PsNat + Clone"
-        && output.contains "{ move |value: PsNat| "
+        "pub fn makeAdder(offset: PsNat) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
+        && output.contains "{ let __ps_internal_lambda: std::rc::Rc<dyn Fn(PsNat) -> PsNat> = std::rc::Rc::new(move |value: PsNat| "
 
 def psBackendRustForwardedFunctionResultModule : PsVerifiedIrModule :=
   {
@@ -973,7 +973,7 @@ def psTestBackendRustForwardedFunctionResult : Bool :=
       false
   | Except.ok output =>
       output.contains
-        "pub fn returnCallback(callback: impl Fn(PsNat) -> PsNat + Clone) -> impl Fn(PsNat) -> PsNat + Clone"
+        "pub fn returnCallback(callback: std::rc::Rc<dyn Fn(PsNat) -> PsNat>) -> std::rc::Rc<dyn Fn(PsNat) -> PsNat>"
         && output.contains "{ callback }"
 
 def psBackendRustNestedFunctionResultModule : PsVerifiedIrModule :=

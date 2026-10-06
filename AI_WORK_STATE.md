@@ -4,8 +4,9 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `04df1f148c723e690ea1e315d8130e772a12fb7a`
-- Last fully registered green proof checkpoint: `2e825608bcf38ed82eb97ce5bacdc6a4a287f9bd` (run #355)
+- Current proof implementation HEAD reconciled in this state: `60138932a8b7671c6db9c0c0e1f689a05445f938`
+- Last green package proof checkpoint: `5433913920539cb4e1a6f651bf756aedfcceb151` (run #380).
+- `WhnfCoreConfiguration.lean` is newly registered at `8fb37a95...`; run #381 on `60138932...` is the first gate that compiles the composed WHNF-core fuel induction.
 - Run #328 validated the eager-reduce context transport fix.
 - The checked-inference fuel proof now closes projection recursion through the smaller-fuel induction hypothesis and configuration-aware projection semantics.
 - Checked projection is fully registered and green as of run #346.
@@ -69,9 +70,10 @@ The audit is conservative relative to newer cross-module checker-contract/contex
 - Subsequent WHNF work introduced and registered factored application/projection refinement modules plus WHNF-core composition scaffolding.
 - Run #369 failed on two localized proof-alignment classes: projection expansion/canonical-result equations and application reduced-head specialization.
 - Commits `df33416c...`, `06e70249...`, and `04df1f14...` canonicalize projection expansion consumption and specialize both executable-success and semantic-head handoffs across every WHNF head shape.
-- Runs #371/#372 are validating those corrections; use the newest completed run as the next obligation rather than older #365/#366 failures.
+- Runs #371-#379 progressively isolated WHNF branch equation alignment; no production semantic defect was found.
+- Run #380 is green: `WhnfCoreApplication.lean` and `WhnfCoreProjection.lean` compile together after naming the application-tail operational runs and mirroring production control flow.
 - WHNF core is now split into independent Assurance Plane modules for application and projection refinement instead of one monolithic proof.
-- Current live WHNF work includes `WhnfCoreApplication.lean`, `WhnfCoreProjection.lean`, and composed WHNF-core configuration soundness scaffolding.
+- `WhnfCoreConfiguration.lean` is registered as a metatheory root and owns the composed fuel induction. It also exposes the `false/false` core specialization consumed by public WHNF. Run #381 is validating this layer.
 - The semantic audit remains conservatively A=44/B=9/C=19/D=7 until a criteria-based refresh after concrete checker closure.
 
 ## Current blocker
@@ -79,22 +81,21 @@ Confirmed production-kernel semantic defect:
 - Local-scope fvar escape through semantic caches, fixed by `0263c550ec65f558575afd3396ee95a1de168237` and now covered by the green run #312 migration.
 
 Immediate blocker:
-- finish compiling the factored WHNF projection/application refinement modules;
-- current failures remain proof-composition/type-alignment obligations in `WhnfCoreApplication.lean` and `WhnfCoreProjection.lean`, not a confirmed new production semantic defect;
-- run #369 exposed stale projection-expansion equations and missing reduced-head specialization; the live branch has explicit fixes through `04df1f14...`;
-- validate runs #371/#372 (or any newer live run), repair only the remaining exact obligations, and compose concrete WHNF-core configuration soundness;
-- once WHNF core is green, lift to public WHNF, then concrete DefEq, checker-knot composition, admission refinement, final implementation refinement, and integration reconciliation.
+- validate run #381 for the newly registered `WhnfCoreConfiguration.lean` fuel-induction root;
+- if #381 is green, proceed directly to public WHNF composition: post-core native/Nat/delta semantics, cache publication, and the public fuel theorem;
+- native reduction must remain an explicit `PsKernelNativeReductionSoundLaw` TCB assumption; primitive Nat reduction must be discharged through the ordinary optional-reduction configuration contract;
+- after public WHNF, continue to concrete DefEq, checker-knot composition, admission refinement, final implementation refinement, and integration reconciliation.
 
 Architectural blockers still remaining:
-- close concrete checked/infer-only inference configuration contracts across all branches;
-- close concrete WHNF/WHNF-core and DefEq configuration/stateful contracts for the mutually recursive checker knot;
+- compose the already-proved checked/infer-only core and public-wrapper contracts with concrete WHNF/DefEq components in the checker knot;
+- close public WHNF and concrete DefEq configuration/stateful contracts for the mutually recursive checker knot;
 - finish remaining DefEq final/lazy-delta/eta/proof-irrelevance and recursor/iota semantics;
 - complete ordinary/mutual/nested inductive transaction refinement;
 - compose the concrete checker/admission theorems into the final public implementation-refinement theorem/family;
 - reconcile against current integration, rerun final proof/conformance gates, and refresh the semantic audit.
 
 ## Immediate plan
-1. Finish `WhnfCoreApplication` and `WhnfCoreProjection` refinement modules and compose concrete WHNF-core configuration soundness.
+1. Validate the registered `WhnfCoreConfiguration` composition root (run #381) and fix only exact fuel-induction obligations if any.
 2. Lift to public WHNF including native/Nat/delta post-core semantics and cache publication.
 3. Prove concrete DefEq configuration/stateful soundness, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success-cache paths.
 4. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.

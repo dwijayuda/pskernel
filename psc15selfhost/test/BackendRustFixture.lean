@@ -298,6 +298,67 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
         body := PsVerifiedIrExpr.var "callback"
       },
       {
+        name := "applyViaCapturedLambda"
+        typeParameters := []
+        parameters := [
+          {
+            name := "offset"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          },
+          {
+            name := "x"
+            type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+          }
+        ]
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+        body :=
+          PsVerifiedIrExpr.letE
+            "callback"
+            (PsVerifiedIrType.function
+              [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+              (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat))
+            (PsVerifiedIrExpr.lambda
+              [
+                {
+                  name := "value"
+                  type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+                }
+              ]
+              (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+              (PsVerifiedIrExpr.intrinsic
+                PsVerifiedIrIntrinsic.natAdd
+                []
+                [
+                  PsVerifiedIrExpr.var "value",
+                  PsVerifiedIrExpr.var "offset"
+                ]))
+            (PsVerifiedIrExpr.call
+              (PsVerifiedIrExpr.lambda
+                [
+                  {
+                    name := "f"
+                    type :=
+                      PsVerifiedIrType.function
+                        [PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat]
+                        (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+                  },
+                  {
+                    name := "value"
+                    type := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat
+                  }
+                ]
+                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+                (PsVerifiedIrExpr.call
+                  (PsVerifiedIrExpr.var "f")
+                  []
+                  [PsVerifiedIrExpr.var "value"]))
+              []
+              [
+                PsVerifiedIrExpr.var "callback",
+                PsVerifiedIrExpr.var "x"
+              ])
+      },
+      {
         name := "storePlusOne"
         typeParameters := []
         parameters := []

@@ -7,6 +7,34 @@ import Ps.Host.ProjectCompiler
 import Ps.Host.TypeScriptCompiler
 import Ps.Host.RustCoverage
 
+def psHostCompilerTranslationErrorCode
+    (error : PsCompilerError) : String :=
+  match error with
+  | PsCompilerError.translation translationError =>
+      match translationError with
+      | PsTranslationError.leanFrontend frontendError =>
+          match frontendError with
+          | PsLeanFrontendError.lex _ =>
+              "translation.lean.lex"
+          | PsLeanFrontendError.parse _ =>
+              "translation.lean.parse"
+      | PsTranslationError.proofScriptFrontend _ =>
+          "translation.proofscript-frontend"
+      | PsTranslationError.print printError =>
+          match printError with
+          | PsSourcePrintError.fuelExhausted =>
+              "translation.print.fuel-exhausted"
+          | PsSourcePrintError.unsupportedApplication =>
+              "translation.print.unsupported-application"
+          | PsSourcePrintError.emptyName =>
+              "translation.print.empty-name"
+  | PsCompilerError.leanFrontend _ => "lean-frontend"
+  | PsCompilerError.proofScriptFrontend _ => "proofscript-frontend"
+  | PsCompilerError.elaboration _ => "elaboration"
+  | PsCompilerError.admission _ => "admission"
+  | PsCompilerError.erasure _ => "erasure"
+  | PsCompilerError.irValidation _ => "ir-validation"
+
 def psHostCompilerSourceKindFromPath
     (path : String) : Option PsCompilerSourceKind :=
   if path.endsWith ".lean" then
@@ -46,10 +74,12 @@ def psHostCompilerTranslatedSource
     | some kind => pure kind
   let source ← IO.FS.readFile inputPath
   match psCompilerTranslateSource sourceKind targetKind source with
-  | Except.error _ =>
+  | Except.error error =>
       throw
         (IO.userError
-          "PSC2_CLI_TRANSLATION_FAILED: source is outside the supported bootstrap subset")
+          (String.Internal.append
+            "PSC2_CLI_TRANSLATION_FAILED: "
+            (psHostCompilerTranslationErrorCode error)))
   | Except.ok output =>
       pure output
 

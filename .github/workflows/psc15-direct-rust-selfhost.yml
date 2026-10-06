@@ -46,13 +46,6 @@ jobs:
           rustc --version
           cargo --version
 
-      - name: Enforce Rust portable self-host source profile
-        working-directory: psc15selfhost
-        run: |
-          npm run check:portable-selfhost-profile
-          node scripts/portable-selfhost-contract.mjs --package backend-rust
-          node scripts/portable-selfhost-contract.mjs --package driver-rust
-
       - name: Build Rust backend and compiler evidence
         working-directory: psc15selfhost
         run: |
@@ -80,3 +73,10 @@ jobs:
         timeout-minutes: 25
         working-directory: psc15selfhost
         run: npm run test:direct-rust-whole-compiler
+
+      - name: Enforce Rust portable self-host source profile
+        working-directory: psc15selfhost
+        run: |
+          npm run check:portable-selfhost-profile
+          node scripts/portable-selfhost-contract.mjs --package backend-rust
+          node scripts/portable-selfhost-contract.mjs --package driver-rust

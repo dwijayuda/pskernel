@@ -706,7 +706,7 @@ def psStrictIntrinsicSignature
       else
         Except.error
           PsVerifiedIrValidationError.intrinsicTypeArgumentArity
-  | .natAdd | .natSub | .natMul | .natDiv | .natMod =>
+  | .natAdd =>
       if psStrictNoTypeArguments typeArguments then
         Except.ok
           (Prod.mk
@@ -716,7 +716,77 @@ def psStrictIntrinsicSignature
       else
         Except.error
           PsVerifiedIrValidationError.intrinsicTypeArgumentArity
-  | .natEq | .natNe | .natLe | .natLt =>
+  | .natSub =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons natType
+              (List.cons natType List.nil))
+            natType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .natMul =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons natType
+              (List.cons natType List.nil))
+            natType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .natDiv =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons natType
+              (List.cons natType List.nil))
+            natType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .natMod =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons natType
+              (List.cons natType List.nil))
+            natType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .natEq =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons natType
+              (List.cons natType List.nil))
+            boolType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .natNe =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons natType
+              (List.cons natType List.nil))
+            boolType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .natLe =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons natType
+              (List.cons natType List.nil))
+            boolType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .natLt =>
       if psStrictNoTypeArguments typeArguments then
         Except.ok
           (Prod.mk
@@ -762,7 +832,7 @@ def psStrictIntrinsicSignature
       else
         Except.error
           PsVerifiedIrValidationError.intrinsicTypeArgumentArity
-  | .intAdd | .intSub | .intMul =>
+  | .intAdd =>
       if psStrictNoTypeArguments typeArguments then
         Except.ok
           (Prod.mk
@@ -772,7 +842,47 @@ def psStrictIntrinsicSignature
       else
         Except.error
           PsVerifiedIrValidationError.intrinsicTypeArgumentArity
-  | .intEq | .intLe | .intLt =>
+  | .intSub =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons intType
+              (List.cons intType List.nil))
+            intType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .intMul =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons intType
+              (List.cons intType List.nil))
+            intType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .intEq =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons intType
+              (List.cons intType List.nil))
+            boolType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .intLe =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons intType
+              (List.cons intType List.nil))
+            boolType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .intLt =>
       if psStrictNoTypeArguments typeArguments then
         Except.ok
           (Prod.mk
@@ -791,7 +901,37 @@ def psStrictIntrinsicSignature
       else
         Except.error
           PsVerifiedIrValidationError.intrinsicTypeArgumentArity
-  | .boolAnd | .boolOr | .boolEq | .boolNe =>
+  | .boolAnd =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons boolType
+              (List.cons boolType List.nil))
+            boolType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .boolOr =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons boolType
+              (List.cons boolType List.nil))
+            boolType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .boolEq =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons boolType
+              (List.cons boolType List.nil))
+            boolType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .boolNe =>
       if psStrictNoTypeArguments typeArguments then
         Except.ok
           (Prod.mk
@@ -838,7 +978,7 @@ def psStrictIntrinsicSignature
       else
         Except.error
           PsVerifiedIrValidationError.intrinsicTypeArgumentArity
-  | .stringLength | .stringUtf8ByteSize =>
+  | .stringLength =>
       if psStrictNoTypeArguments typeArguments then
         Except.ok
           (Prod.mk
@@ -847,17 +987,32 @@ def psStrictIntrinsicSignature
       else
         Except.error
           PsVerifiedIrValidationError.intrinsicTypeArgumentArity
-  | .stringAppend | .stringEq =>
+  | .stringUtf8ByteSize =>
       if psStrictNoTypeArguments typeArguments then
-        let resultType : PsVerifiedIrType :=
-          match operation with
-          | .stringEq => boolType
-          | _ => stringType;
+        Except.ok
+          (Prod.mk
+            (List.cons stringType List.nil)
+            natType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .stringAppend =>
+      if psStrictNoTypeArguments typeArguments then
         Except.ok
           (Prod.mk
             (List.cons stringType
               (List.cons stringType List.nil))
-            resultType)
+            stringType)
+      else
+        Except.error
+          PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+  | .stringEq =>
+      if psStrictNoTypeArguments typeArguments then
+        Except.ok
+          (Prod.mk
+            (List.cons stringType
+              (List.cons stringType List.nil))
+            boolType)
       else
         Except.error
           PsVerifiedIrValidationError.intrinsicTypeArgumentArity
@@ -961,7 +1116,20 @@ def psStrictIntrinsicSignature
                 (List.cons natType
                   (List.cons elementType List.nil)))
               elementType)
-  | .arraySet | .arraySetIfInBounds =>
+  | .arraySet =>
+      match psStrictExactOneTypeArgument typeArguments with
+      | Option.none =>
+          Except.error
+            PsVerifiedIrValidationError.intrinsicTypeArgumentArity
+      | Option.some elementType =>
+          Except.ok
+            (Prod.mk
+              (List.cons
+                (psStrictArrayType elementType)
+                (List.cons natType
+                  (List.cons elementType List.nil)))
+              (psStrictArrayType elementType))
+  | .arraySetIfInBounds =>
       match psStrictExactOneTypeArgument typeArguments with
       | Option.none =>
           Except.error

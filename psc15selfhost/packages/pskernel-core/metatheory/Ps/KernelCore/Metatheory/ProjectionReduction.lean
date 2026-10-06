@@ -61,18 +61,30 @@ theorem psKernelReduceProjCore_some_refines_reduction
                         hInduct
                       ] at hSuccess
                   | true =>
+                      have hLookupSuccess :
+                          psKernelExprListGet
+                              (psKernelExprGetAppArgs structValue)
+                              (Nat.add ctorInfo.numParams index) =
+                            Option.some result := by
+                        simpa [
+                          psKernelReduceProjCore,
+                          hBound,
+                          hFn,
+                          hFind,
+                          hInduct
+                        ] using hSuccess
                       cases hArg :
                           psKernelExprListGet
                             (psKernelExprGetAppArgs structValue)
                             (Nat.add ctorInfo.numParams index) with
                       | none =>
-                          rw [hArg] at hSuccess
-                          cases hSuccess
+                          rw [hArg] at hLookupSuccess
+                          cases hLookupSuccess
                       | some argument =>
                           have hResult :
                               argument = result := by
-                            rw [hArg] at hSuccess
-                            simpa using hSuccess
+                            rw [hArg] at hLookupSuccess
+                            simpa using hLookupSuccess
                           have hIndexed :
                               psKernelFindConstantInList
                                   ctorName

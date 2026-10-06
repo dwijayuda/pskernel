@@ -128,8 +128,7 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.Expr,
     `Ps.BackendRust.ValueRefs,
     `Ps.BackendRust.Runtime,
-    `Ps.BackendRust.Module,
-    `Ps.BackendRust.Coverage
+    `Ps.BackendRust.Module
   ]
 
 lean_lib PsDriverRust where
@@ -159,6 +158,7 @@ lean_lib PsHost where
     `Ps.Host.TypeScriptCompiler,
     `Ps.Host.ProjectCompiler,
     `Ps.Host.ProjectQuery,
+    `Ps.Host.RustCoverage,
     `Ps.Host.CompilerDriver
   ]
 

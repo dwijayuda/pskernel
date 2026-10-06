@@ -422,6 +422,10 @@ lean_exe psc1_erasure_tests where
   srcDir := "test"
   root := `ErasureTests
 
+lean_exe psc1_verified_ir_strict_tests where
+  srcDir := "test"
+  root := `VerifiedIrStrictTests
+
 lean_exe psc2_minimal_selfhost_tests where
   srcDir := "test"
   root := `MinimalSelfHostTests

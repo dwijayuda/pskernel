@@ -4,8 +4,8 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `fed08b14711f49e6bcd0d1eceac4fce1d0b5f6e6`
-- Last fully registered green proof checkpoint: `fed08b14711f49e6bcd0d1eceac4fce1d0b5f6e6` (run #346)
+- Current proof implementation HEAD reconciled in this state: `e2cedd4bb8cae1ea3267c94cccf35cb676bca606`
+- Last fully registered green proof checkpoint: `2e825608bcf38ed82eb97ce5bacdc6a4a287f9bd` (run #355)
 - Run #328 validated the eager-reduce context transport fix.
 - The checked-inference fuel proof now closes projection recursion through the smaller-fuel induction hypothesis and configuration-aware projection semantics.
 - Checked projection is fully registered and green as of run #346.
@@ -60,19 +60,25 @@ Last checked-in audit:
 The audit is conservative relative to newer cross-module checker-contract/context work. Do not inflate module grades without applying the written A/B/C/D criteria.
 
 ## Current checkpoint
-- **Run #346 is green on `fed08b14711f49e6bcd0d1eceac4fce1d0b5f6e6`.**
-- The registered Assurance Plane now includes checked inference, checked projection, checker composition, projection reduction, inference typing/configuration, context/state/cache contracts, and the earlier semantic modules.
-- Concrete checked inference is no longer blocked on projection: its fuel induction obtains the projection contract recursively from the strictly smaller checked-inference fuel.
-- Public checked/infer-only wrapper composition is importable and no longer requires duplicate proof-only theorems.
-- The semantic audit remains conservatively A=44/B=9/C=19/D=7 until the next criteria-based refresh.
+- Checked inference + checked projection remain fully registered and green.
+- Run #348 green: contextual reduction closure and reduction-congruence metatheory registered.
+- Run #350 green: application-spine reconstruction induction validated.
+- Run #352 green: string-literal representation reduction plus the optimized beta-spine contract validated.
+- Run #354 green: generalized WHNF finish success/refinement helpers validated.
+- Run #355 green: optimized beta-spine contract strengthened with the required nonempty application-spine premise.
+- WHNF core is now split into independent Assurance Plane modules for application and projection refinement instead of one monolithic proof.
+- Current live WHNF work includes `WhnfCoreApplication.lean`, `WhnfCoreProjection.lean`, and composed WHNF-core configuration soundness scaffolding.
+- The semantic audit remains conservatively A=44/B=9/C=19/D=7 until a criteria-based refresh after concrete checker closure.
 
 ## Current blocker
 Confirmed production-kernel semantic defect:
 - Local-scope fvar escape through semantic caches, fixed by `0263c550ec65f558575afd3396ee95a1de168237` and now covered by the green run #312 migration.
 
 Immediate blocker:
-- prove concrete WHNF-core/public-WHNF configuration soundness using optional-reduction/recursor contracts, projection reduction, cache publication, delta semantics, primitive Nat semantics, and the explicit native-reduction TCB law;
-- then prove concrete DefEq configuration/stateful soundness and compose the mutually recursive checker knot.
+- finish compiling the factored WHNF projection/application refinement modules;
+- current failures are proof-composition/type-alignment obligations in `WhnfCoreApplication.lean` and `WhnfCoreProjection.lean`, not a confirmed new production semantic defect;
+- run #365 on `e2cedd4b...` is validating the latest projection-expansion factoring;
+- once WHNF core is green, lift to public WHNF, then concrete DefEq, checker-knot composition, admission refinement, final implementation refinement, and integration reconciliation.
 
 Architectural blockers still remaining:
 - close concrete checked/infer-only inference configuration contracts across all branches;
@@ -83,7 +89,7 @@ Architectural blockers still remaining:
 - reconcile against current integration, rerun final proof/conformance gates, and refresh the semantic audit.
 
 ## Immediate plan
-1. Prove concrete WHNF-core configuration/stateful soundness.
+1. Finish `WhnfCoreApplication` and `WhnfCoreProjection` refinement modules and compose concrete WHNF-core configuration soundness.
 2. Lift to public WHNF including native/Nat/delta post-core semantics and cache publication.
 3. Prove concrete DefEq configuration/stateful soundness, prioritizing LazyDelta, FinalRules, eta/proof-irrelevance, recursor computation, and success-cache paths.
 4. Compose the mutually recursive checker knot and discharge the abstract assumptions already consumed by API/session refinement theorems.

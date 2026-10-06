@@ -280,6 +280,97 @@ def PsKernelDefEqCheckedConfigurationSound
           left
           right)
 
+
+theorem psKernelEnsureSortWith_configuration_refines
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (type : PsKernelExpr)
+    (level : PsKernelLevel)
+    (hConfig :
+      PsKernelCheckerConfigurationSound
+        context
+        state)
+    (hSuccess :
+      psKernelEnsureSortWith
+          whnf
+          context
+          state
+          type =
+        Except.ok (Prod.mk level nextState)) :
+    PsKernelDefEqJudgment
+        context.environment
+        context.localContext
+        type
+        (PsKernelExpr.sort level) ∧
+      PsKernelCheckerConfigurationSound
+        context
+        nextState := by
+  by_cases hDirect :
+      ∃ directLevel : PsKernelLevel,
+        type = PsKernelExpr.sort directLevel
+  · rcases hDirect with ⟨directLevel, rfl⟩
+    simp [psKernelEnsureSortWith] at hSuccess
+    rcases hSuccess with ⟨rfl, rfl⟩
+    exact
+      ⟨
+        PsKernelDefEqJudgment.refl
+          (PsKernelExpr.sort directLevel),
+        hConfig
+      ⟩
+  · have hFallback :
+        psKernelEnsureSortWith
+            whnf
+            context
+            state
+            type =
+          match whnf context state type with
+          | Except.error error =>
+              Except.error error
+          | Except.ok result =>
+              match Prod.fst result with
+              | PsKernelExpr.sort found =>
+                  Except.ok
+                    (Prod.mk found (Prod.snd result))
+              | _ =>
+                  Except.error "expected sort" := by
+      cases type <;>
+        simp_all [psKernelEnsureSortWith]
+    rw [hFallback] at hSuccess
+    cases hRun : whnf context state type with
+    | error error =>
+        simp [hRun] at hSuccess
+    | ok result =>
+        cases result with
+        | mk reduced reducedState =>
+            rw [hRun] at hSuccess
+            cases reduced <;> simp at hSuccess
+            case sort found =>
+              rcases hSuccess with ⟨rfl, rfl⟩
+              have hSemantic :=
+                hWhnf
+                  context
+                  state
+                  reducedState
+                  type
+                  (PsKernelExpr.sort found)
+                  hConfig
+                  hRun
+              exact
+                ⟨
+                  PsKernelDefEqJudgment.reductionClosure
+                    type
+                    (PsKernelExpr.sort found)
+                    hSemantic.1,
+                  hSemantic.2
+                ⟩
+
 theorem psKernelCacheInferResult_preserves_configuration
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)

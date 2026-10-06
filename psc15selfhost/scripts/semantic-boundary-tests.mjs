@@ -114,4 +114,15 @@ assertSemanticBoundary(
   "def psEraseCoreModule env declarations := declarations\n",
 );
 
+for (const emitter of ['psJsEmitValidatedModuleWithTargetProfile', 'psJsEmitValidatedModuleStackSafeWithTargetProfile', 'psWasmLowerValidatedModule']) {
+  assertSemanticBoundary('packages/driver-js/src/Ps/DriverJs/Bootstrap.lean',
+    'def emit prepared := match psCompilerVerifiedIrFromPrepared prepared with\n' +
+    '  | Except.ok ir => ' + emitter + ' profile ir\n');
+}
+for (const emitter of ['psJsEmitValidatedModuleUnchecked', 'psJsEmitModule', 'psWasmLowerModule']) {
+  assertHas('packages/driver-js/src/Ps/DriverJs/Bootstrap.lean',
+    'def emit prepared := match psCompilerVerifiedIrFromPrepared prepared with\n' +
+    '  | Except.ok ir => ' + emitter + ' profile ir.raw\n',
+    'PSC2_SEMANTIC_BOUNDARY_BACKEND_BYPASSES_VALIDATED_IR', 'raw or forged-prefix emitter rejected');
+}
 process.stdout.write("PSC2_SEMANTIC_BOUNDARY_CONTRACT: PASS\n");

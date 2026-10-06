@@ -185,7 +185,7 @@
     "check:production-authority": "node scripts/production-authority-audit.mjs",
     "test:comparator-v1": "node --test scripts/comparator-v1.test.mjs scripts/comparator-export.test.mjs scripts/comparator-session.test.mjs scripts/certificate-boundary.test.mjs",
     "check:theory-seed": "node scripts/theory-contract-audit.mjs && lake build PsPscvTheory PsPscvTheoryProof pscv_theory_seed_tests && lake exe pscv_theory_seed_tests && lake exe psc1 check packages/pscv-theory/src/Ps/Theory/Core.lean",
-    "test:savef": "node --test scripts/savef-object.test.mjs scripts/pscv-verify.test.mjs scripts/offline-capsule.test.mjs",
+    "test:savef": "node --test scripts/savef-object.test.mjs scripts/pscv-verify.test.mjs scripts/offline-capsule.test.mjs scripts/savef-lifecycle.test.mjs",
     "verify:offline-prototype": "node scripts/pscv-verify.mjs",
     "check:wasm-translation-validator": "lake exe psc1_backend_wasm_tests",
     "check:defeq-cache-source": "node scripts/defeq-cache-source-audit.mjs",
@@ -201,7 +201,8 @@
     "test:verified-ir-strict": "lake exe psc1_verified_ir_strict_tests",
     "test:erasure-eta": "node scripts/erasure-eta-runtime.test.mjs",
     "test:interface-ir": "lake exe pscv_interface_ir_tests",
-    "test:pass-evidence": "node --test scripts/artifact-evidence.test.mjs scripts/checked-build-evidence.test.mjs scripts/compiler-checked-service.test.mjs scripts/evidence-cache.test.mjs scripts/bounded-process.test.mjs scripts/isolated-producer.test.mjs"
+    "test:pass-evidence": "node --test scripts/artifact-evidence.test.mjs scripts/checked-build-evidence.test.mjs scripts/compiler-checked-service.test.mjs scripts/evidence-cache.test.mjs scripts/bounded-process.test.mjs scripts/isolated-producer.test.mjs",
+    "test:factorybench": "node --test scripts/factory-bench.test.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

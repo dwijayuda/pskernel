@@ -250,7 +250,9 @@
       "status": "partial",
       "owners": [
         "scripts/savef-object.mjs",
-        "scripts/savef-graph.mjs"
+        "scripts/savef-graph.mjs",
+        "scripts/savef-lifecycle.mjs",
+        "contracts/archive/SAVEF_LIFECYCLE_V1.json"
       ],
       "completion": "Typed graphs, ValidUnder checks, migrations, supersession, failure knowledge and accepted reuse events operate end to end.",
       "assurance": "pending"
@@ -277,9 +279,11 @@
       "sections": [
         38
       ],
-      "status": "policy-only",
+      "status": "partial",
       "owners": [
-        "factory/bench/FACTORYBENCH_V4_HOLDOUT.json"
+        "factory/bench/FACTORYBENCH_V4_HOLDOUT.json",
+        "scripts/factory-bench.mjs",
+        "factory/bench/FACTORYBENCH_V4_EXECUTION.json"
       ],
       "completion": "A sealed holdout and executable B0-B4 harness produce comparable measurements without retrieval leakage.",
       "assurance": "pending"

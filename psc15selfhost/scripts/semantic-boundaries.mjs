@@ -53,7 +53,9 @@ export function semanticBoundaryViolations(relativePath, source) {
   }
 
   if ((isBackend || isDriver) && /\bpsCompilerVerifiedIrFromPrepared\b/u.test(source)) {
-    if (!/\bps(?:Ts|Rust|Wasm|Js)EmitValidatedModule\b/u.test(source)) {
+    // Exact capability-consuming APIs: JS has target-profile/stack-safe
+    // variants; Wasm separates validated lowering from byte encoding.
+    if (!/\b(?:psTsEmitValidatedModule|psRustEmitValidatedModule|psJsEmitValidatedModule|psJsEmitValidatedModuleWithTargetProfile|psJsEmitValidatedModuleStackSafeWithTargetProfile|psWasmLowerValidatedModule)\b/u.test(source)) {
       violations.push("PSC2_SEMANTIC_BOUNDARY_BACKEND_BYPASSES_VALIDATED_IR");
     }
   }

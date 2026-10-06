@@ -647,3 +647,178 @@ theorem psKernelExprMapGet_insert_self
           exact
             psKernelExprMapGet_insert_indexed_self
               small index expr value hRefl
+
+
+theorem psKernelExprPairSetBuildIndex_contains_cons_self
+    (left right : PsKernelExpr)
+    (rest : List (Prod PsKernelExpr PsKernelExpr))
+    (hLeft : psKernelExprEq left left = true)
+    (hRight : psKernelExprEq right right = true) :
+    psKernelExprPairSetContainsIn
+        left
+        right
+        (psKernelExprPairSetIndexBucket
+          16
+          (psKernelExprPairSetBuildIndex
+            (List.cons
+              (Prod.mk left right)
+              rest))
+          (psKernelExprPairHash left right)) =
+      true := by
+  let oldIndex :=
+    psKernelExprPairSetBuildIndex rest
+  let oldBucket :=
+    psKernelExprPairSetIndexBucket
+      16
+      oldIndex
+      (psKernelExprPairHash left right)
+  cases hExisting :
+      psKernelExprPairSetContainsIn
+        left
+        right
+        oldBucket with
+  | true =>
+      simpa [
+        psKernelExprPairSetBuildIndex,
+        oldIndex,
+        oldBucket,
+        hExisting
+      ] using hExisting
+  | false =>
+      change
+        psKernelExprPairSetContainsIn
+            left
+            right
+            (psKernelExprPairSetIndexBucket
+              16
+              (psKernelExprPairSetIndexSet
+                16
+                oldIndex
+                (psKernelExprPairHash left right)
+                (List.cons
+                  (Prod.mk left right)
+                  oldBucket))
+              (psKernelExprPairHash left right)) =
+          true
+      rw [
+        psKernelExprPairSetIndexBucket_set_same
+          16
+          oldIndex
+          (psKernelExprPairHash left right)
+          (List.cons
+            (Prod.mk left right)
+            oldBucket)
+      ]
+      exact
+        psKernelExprPairSetContainsIn_cons_self
+          left
+          right
+          oldBucket
+          hLeft
+          hRight
+
+theorem psKernelExprPairSetContains_insert_self
+    (set : PsKernelExprPairSet)
+    (left right : PsKernelExpr)
+    (hLeft : psKernelExprEq left left = true)
+    (hRight : psKernelExprEq right right = true) :
+    psKernelExprPairSetContains
+        (psKernelExprPairSetInsert set left right)
+        left
+        right =
+      true := by
+  cases set with
+  | mk small index =>
+      cases index with
+      | none =>
+          cases hExisting :
+              psKernelExprPairSetContainsIn
+                left
+                right
+                small with
+          | true =>
+              simp [
+                psKernelExprPairSetInsert,
+                hExisting,
+                psKernelExprPairSetContains
+              ]
+          | false =>
+              let next :=
+                List.cons
+                  (Prod.mk left right)
+                  small
+              cases hFits :
+                  Nat.ble
+                    (psKernelCacheEntryListLength next)
+                    psKernelCacheSmallLimit with
+              | true =>
+                  simp [
+                    psKernelExprPairSetInsert,
+                    hExisting,
+                    next,
+                    hFits,
+                    psKernelExprPairSetContains,
+                    psKernelExprPairSetContainsIn_cons_self,
+                    hLeft,
+                    hRight
+                  ]
+              | false =>
+                  simp [
+                    psKernelExprPairSetInsert,
+                    hExisting,
+                    next,
+                    hFits,
+                    psKernelExprPairSetContains
+                  ]
+                  exact
+                    psKernelExprPairSetBuildIndex_contains_cons_self
+                      left
+                      right
+                      small
+                      hLeft
+                      hRight
+      | some index =>
+          let hash :=
+            psKernelExprPairHash left right
+          let bucket :=
+            psKernelExprPairSetIndexBucket
+              16
+              index
+              hash
+          cases hExisting :
+              psKernelExprPairSetContainsIn
+                left
+                right
+                bucket with
+          | true =>
+              simp [
+                psKernelExprPairSetInsert,
+                hash,
+                bucket,
+                hExisting,
+                psKernelExprPairSetContains
+              ]
+          | false =>
+              simp [
+                psKernelExprPairSetInsert,
+                hash,
+                bucket,
+                hExisting,
+                psKernelExprPairSetContains
+              ]
+              rw [
+                psKernelExprPairSetIndexBucket_set_same
+                  16
+                  index
+                  hash
+                  (List.cons
+                    (Prod.mk left right)
+                    bucket)
+              ]
+              exact
+                psKernelExprPairSetContainsIn_cons_self
+                  left
+                  right
+                  bucket
+                  hLeft
+                  hRight

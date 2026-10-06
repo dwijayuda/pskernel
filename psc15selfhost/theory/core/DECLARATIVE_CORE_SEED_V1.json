@@ -54,6 +54,18 @@
       "status": "proved-lean",
       "statement": "exact syntactic identity produces declarative conversion evidence",
       "symbol": "psKernelExactDefEqSound"
+    },
+    {
+      "id": "psc-erasure-proof-declaration-omission/1",
+      "status": "proved-lean",
+      "statement": "if the current erasure classifier proves a top-level definition type is Prop, psEraseDefinition omits the declaration",
+      "symbol": "psErasureProofDeclarationOmitted"
+    },
+    {
+      "id": "psc-specialization-literal-preservation/1",
+      "status": "proved-lean",
+      "statement": "specialization preserves the closed monomorphic UInt32 literal module exactly",
+      "symbol": "psSpecializationLiteralModulePreserves"
     }
   ]
 }

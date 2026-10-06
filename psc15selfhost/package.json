@@ -198,7 +198,8 @@
     "check:archive-profile": "node scripts/archive-profile-audit.mjs && node scripts/pscv-verify.mjs",
     "check:direct-js-promotion": "node scripts/direct-js-promotion-audit.mjs",
     "check:bootstrap-assurance": "node scripts/bootstrap-assurance-audit.mjs",
-    "test:verified-ir-strict": "lake exe psc1_verified_ir_strict_tests"
+    "test:verified-ir-strict": "lake exe psc1_verified_ir_strict_tests",
+    "test:erasure-eta": "node scripts/erasure-eta-runtime.test.mjs"
   },
   "devDependencies": {
     "typescript": "7.0.2"

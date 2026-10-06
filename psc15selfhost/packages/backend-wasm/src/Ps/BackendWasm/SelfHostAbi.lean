@@ -122,9 +122,24 @@ def psWasmSelfHostAbiExports : List (String × String) :=
       psWasmSelfHostAbiBytesTailName
   ]
 
+def psWasmHasSelfHostByteListType
+    (structures : List PsWasmStructType) (name : String) : Bool :=
+  match structures with
+  | List.nil => false
+  | List.cons type rest =>
+      if psStringEq type.name name then true
+      else psWasmHasSelfHostByteListType rest name
+
+def psWasmNeedsSelfHostGcAbi (module : PsWasmModule) : Bool :=
+  if psWasmHasSelfHostByteListType module.structures psWasmSelfHostAbiByteListName then
+    if psWasmHasSelfHostByteListType module.structures psWasmSelfHostAbiByteListNilName then
+      psWasmHasSelfHostByteListType module.structures psWasmSelfHostAbiByteListConsName
+    else false
+  else false
+
 def psWasmAddSelfHostGcAbi
     (module : PsWasmModule) : PsWasmModule :=
-  {
+  if psWasmNeedsSelfHostGcAbi module then {
     structures := module.structures
     arrays := module.arrays
     functionTypes := module.functionTypes
@@ -137,4 +152,4 @@ def psWasmAddSelfHostGcAbi
       psListAppend
         module.exports
         psWasmSelfHostAbiExports
-  }
+  } else module

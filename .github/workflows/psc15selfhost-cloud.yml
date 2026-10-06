@@ -111,7 +111,9 @@ jobs:
 
       - name: Run VerifiedIR and erasure corpus
         working-directory: psc15selfhost
-        run: lake exe psc1_erasure_tests
+        run: |
+          lake exe psc1_erasure_tests
+          npm run test:erasure-eta
 
       - name: Run strict VerifiedIR invariant corpus
         working-directory: psc15selfhost

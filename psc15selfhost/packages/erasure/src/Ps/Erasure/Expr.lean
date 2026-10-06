@@ -1391,6 +1391,69 @@ def psErasureEtaParameters
             | Except.error error => Except.error error
             | Except.ok parameters => Except.ok (List.cons parameter parameters)
 
+def psErasureEtaBindParameters
+    (parameters : List PsVerifiedIrParameter) :
+    List PsVerifiedIrExpr -> PsVerifiedIrExpr -> Except PsErasureError PsVerifiedIrExpr :=
+  match parameters with
+  | List.nil =>
+      fun (arguments : List PsVerifiedIrExpr) (body : PsVerifiedIrExpr) =>
+        if psListIsEmpty arguments then Except.ok body
+        else Except.error PsErasureError.unsupportedApplication
+  | List.cons parameter rest =>
+      let smaller : List PsVerifiedIrExpr -> PsVerifiedIrExpr -> Except PsErasureError PsVerifiedIrExpr :=
+        psErasureEtaBindParameters rest;
+      fun (arguments : List PsVerifiedIrExpr) (body : PsVerifiedIrExpr) =>
+        match arguments with
+        | List.nil => Except.error PsErasureError.unsupportedApplication
+        | List.cons argument tail =>
+            match smaller tail body with
+            | Except.error error => Except.error error
+            | Except.ok result =>
+                Except.ok (PsVerifiedIrExpr.letE parameter.name parameter.type argument result)
+
+-- The arguments here are only the fresh variables produced by
+-- psErasureEtaParameters. They cannot be captured by any binder in body, and
+-- evaluating them has no effects. Do not use this worker for general arguments.
+def psErasureApplyFreshEtaWithFuel
+    (arguments : List PsVerifiedIrExpr) (fuel : Nat) :
+    PsVerifiedIrExpr -> Except PsErasureError PsVerifiedIrExpr :=
+  match fuel with
+  | Nat.zero => fun (_body : PsVerifiedIrExpr) => Except.error PsErasureError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller : PsVerifiedIrExpr -> Except PsErasureError PsVerifiedIrExpr :=
+        psErasureApplyFreshEtaWithFuel arguments remaining;
+      fun (body : PsVerifiedIrExpr) =>
+        match body with
+        | PsVerifiedIrExpr.lambda parameters _ result =>
+            psErasureEtaBindParameters parameters arguments result
+        | PsVerifiedIrExpr.letE name type value result =>
+            match smaller result with
+            | Except.error error => Except.error error
+            | Except.ok applied => Except.ok (PsVerifiedIrExpr.letE name type value applied)
+        | PsVerifiedIrExpr.ifE condition yes no =>
+            match smaller yes with
+            | Except.error error => Except.error error
+            | Except.ok appliedYes =>
+                match smaller no with
+                | Except.error error => Except.error error
+                | Except.ok appliedNo =>
+                    Except.ok (PsVerifiedIrExpr.ifE condition appliedYes appliedNo)
+        | PsVerifiedIrExpr.matchE name types scrutinee alternatives =>
+            let applyAlternative :
+                (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) ->
+                Except PsErasureError (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) :=
+              fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
+                match smaller (Prod.snd (Prod.snd alternative)) with
+                | Except.error error => Except.error error
+                | Except.ok applied =>
+                    Except.ok (Prod.mk (Prod.fst alternative)
+                      (Prod.mk (Prod.fst (Prod.snd alternative)) applied));
+            match psListMapExcept applyAlternative alternatives with
+            | Except.error error => Except.error error
+            | Except.ok applied =>
+                Except.ok (PsVerifiedIrExpr.matchE name types scrutinee applied)
+        | _ => Except.ok (PsVerifiedIrExpr.call body List.nil arguments)
+
 def psErasureEtaFunction
     (parameters : List PsVerifiedIrParameter) (resultType : PsVerifiedIrType) (body : PsVerifiedIrExpr) :
     Except PsErasureError PsVerifiedIrExpr :=
@@ -1403,9 +1466,11 @@ def psErasureEtaFunction
         | Except.ok extraParameters =>
             let asVariable : PsVerifiedIrParameter -> PsVerifiedIrExpr :=
               fun (parameter : PsVerifiedIrParameter) => PsVerifiedIrExpr.var parameter.name;
-            Except.ok
-              (PsVerifiedIrExpr.lambda (psListAppend parameters extraParameters) finalResult
-                (PsVerifiedIrExpr.call body List.nil (psListMap asVariable extraParameters)))
+            match psErasureApplyFreshEtaWithFuel (psListMap asVariable extraParameters) 4096 body with
+            | Except.error error => Except.error error
+            | Except.ok applied =>
+                Except.ok
+                  (PsVerifiedIrExpr.lambda (psListAppend parameters extraParameters) finalResult applied)
     | _ => Except.ok (PsVerifiedIrExpr.lambda parameters resultType body)
 
 def psEraseRuntimeExprWithFuelWorker

@@ -109,8 +109,7 @@ theorem psKernelProjectionApplyParamsWithFuel_configuration_refines_semantics
                           PsKernelProjectionApplyParamsJudgment.step
                             index
                             numParams
-                            (PsKernelExpr.forallE
-                              name domain body binderInfo)
+                            current
                             domain
                             body
                             result
@@ -245,8 +244,7 @@ theorem psKernelProjectionSkipFieldsWithFuel_configuration_refines_semantics
                         ⟨
                           PsKernelProjectionSkipFieldsJudgment.stepClosed
                             index
-                            (PsKernelExpr.forallE
-                              name domain body binderInfo)
+                            current
                             domain
                             body
                             result
@@ -300,8 +298,7 @@ theorem psKernelProjectionSkipFieldsWithFuel_configuration_refines_semantics
                             ⟨
                               PsKernelProjectionSkipFieldsJudgment.stepDependent
                                 index
-                                (PsKernelExpr.forallE
-                                  name domain body binderInfo)
+                                current
                                 domain
                                 body
                                 result
@@ -395,8 +392,7 @@ theorem psKernelProjectionSkipFieldsWithFuel_configuration_refines_semantics
                                     ⟨
                                       PsKernelProjectionSkipFieldsJudgment.stepDependent
                                         index
-                                        (PsKernelExpr.forallE
-                                          name domain body binderInfo)
+                                        current
                                         domain
                                         body
                                         result
@@ -514,8 +510,18 @@ theorem psKernelInferProjectionWith_configuration_sound
                             hInductFind
                           ] at hSuccess
                       | some inductEntry =>
-                          cases inductEntry with
-                          | inductInfo inductInfo =>
+                          cases inductEntry <;>
+                            try
+                              simp [
+                                psKernelInferProjectionWith,
+                                hInferRun,
+                                hTypeWhnf,
+                                hIndexBound,
+                                hFn,
+                                hTypeName,
+                                hInductFind
+                              ] at hSuccess
+                          case inductInfo inductInfo =>
                               cases hCtors : inductInfo.ctors with
                               | nil =>
                                   simp [
@@ -620,8 +626,23 @@ theorem psKernelInferProjectionWith_configuration_sound
                                                 hCtorFind
                                               ] at hSuccess
                                           | some ctorEntry =>
-                                              cases ctorEntry with
-                                              | ctorInfo ctorInfo =>
+                                              cases ctorEntry <;>
+                                                try
+                                                  simp [
+                                                    psKernelInferProjectionWith,
+                                                    hInferRun,
+                                                    hTypeWhnf,
+                                                    hIndexBound,
+                                                    hFn,
+                                                    hTypeName,
+                                                    hInductFind,
+                                                    hCtors,
+                                                    hCtorRest,
+                                                    args,
+                                                    hArgsLength,
+                                                    hCtorFind
+                                                  ] at hSuccess
+                                              case ctorInfo ctorInfo =>
                                                   let initial :=
                                                     psKernelExprInstantiateLevelParams
                                                       ctorInfo.base.type
@@ -854,11 +875,7 @@ theorem psKernelInferProjectionWith_configuration_sound
                                                                             index
                                                                             structValue
                                                                             structType
-                                                                            (PsKernelExpr.forallE
-                                                                              fieldName
-                                                                              domain
-                                                                              fieldBody
-                                                                              fieldBinderInfo)
+                                                                            typeWhnf
                                                                             inductLevels
                                                                             args
                                                                             inductInfo

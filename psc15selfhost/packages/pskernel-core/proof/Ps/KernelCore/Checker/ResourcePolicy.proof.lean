@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.ResourcePolicy
+import Lean.Elab.Tactic.Omega
 
 theorem psKernelResourcePreflight_cancelled
     (policy : PsKernelResourcePolicy)
@@ -21,3 +22,79 @@ theorem psKernelResourceAllowsSize_unbounded
     (h : policy.maxDeclarations = 0) :
     psKernelResourceAllowsSize policy declarations = true := by
   simp [psKernelResourceAllowsSize, h]
+
+
+theorem psKernelResourcePreflight_none_refines_ready
+    (policy : PsKernelResourcePolicy)
+    (hReady :
+      psKernelResourcePreflight policy =
+        Option.none) :
+    policy.cancelled = false ∧
+    policy.fuel ≠ 0 := by
+  cases hCancelled : policy.cancelled with
+  | true =>
+      simp [
+        psKernelResourcePreflight,
+        hCancelled
+      ] at hReady
+  | false =>
+      constructor
+      · exact hCancelled
+      · intro hFuel
+        simp [
+          psKernelResourcePreflight,
+          hCancelled,
+          hFuel
+        ] at hReady
+
+theorem psKernelResourceAllowsSize_true_refines_bound
+    (policy : PsKernelResourcePolicy)
+    (declarations : Nat)
+    (hAllowed :
+      psKernelResourceAllowsSize
+          policy
+          declarations =
+        true) :
+    policy.maxDeclarations = 0 ∨
+      declarations ≤ policy.maxDeclarations := by
+  cases hUnlimited :
+      Nat.beq policy.maxDeclarations 0 with
+  | true =>
+      left
+      simpa using hUnlimited
+  | false =>
+      right
+      simpa [
+        psKernelResourceAllowsSize,
+        hUnlimited
+      ] using hAllowed
+
+theorem psKernelResourceAllowsSize_false_refines_overflow
+    (policy : PsKernelResourcePolicy)
+    (declarations : Nat)
+    (hDenied :
+      psKernelResourceAllowsSize
+          policy
+          declarations =
+        false) :
+    policy.maxDeclarations ≠ 0 ∧
+      policy.maxDeclarations < declarations := by
+  cases hUnlimited :
+      Nat.beq policy.maxDeclarations 0 with
+  | true =>
+      simp [
+        psKernelResourceAllowsSize,
+        hUnlimited
+      ] at hDenied
+  | false =>
+      constructor
+      · intro hZero
+        subst policy.maxDeclarations
+        simp at hUnlimited
+      · have hNotLe :
+            ¬ declarations ≤ policy.maxDeclarations := by
+          simpa [
+            psKernelResourceAllowsSize,
+            hUnlimited
+          ] using hDenied
+        omega

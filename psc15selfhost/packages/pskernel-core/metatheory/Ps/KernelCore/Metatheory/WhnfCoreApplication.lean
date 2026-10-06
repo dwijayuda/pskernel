@@ -771,7 +771,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
             hBackReduction original result hPair.1,
             hBackConfig nextState hPair.2
           ⟩
-      cases fn with
+      cases hFnShape : fn with
       | lam name type body binderInfo =>
           apply hBackPair
           exact
@@ -805,7 +805,8 @@ theorem psKernelWhnfCoreApplication_configuration_refines
                   spine,
                   fn0,
                   args,
-                  hFn
+                  hFn,
+                  hFnShape
                 ] using hSuccess)
       | bvar index =>
           apply hBackPair

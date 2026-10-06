@@ -258,24 +258,38 @@ theorem psKernelReduceNatWith_sub_literals_refines
       result := by
   dsimp
   constructor
-  · cases hCheck :
-        psKernelCheckNatSize
-          context.maxNatSize
-          (Nat.sub left right) with
-    | error error =>
-        simp [hCheck] at hSize
-    | ok checked =>
-        cases checked
-        simp [
-          psKernelReduceNatWith,
-          hLeft,
-          hRight,
-          psKernelExprNatLiteralValue,
-          psKernelReduceNatBinary,
-          hNotAdd,
-          hSub,
-          hCheck
-        ]
+  · have hBinary :
+        psKernelReduceNatBinary
+            context.maxNatSize
+            op
+            left
+            right =
+          Except.ok
+            (Option.some
+              (PsKernelExpr.lit
+                (PsKernelLiteral.nat
+                  (Nat.sub left right)))) := by
+      cases hCheck :
+          psKernelCheckNatSize
+            context.maxNatSize
+            (Nat.sub left right) with
+      | error error =>
+          simp [hCheck] at hSize
+      | ok checked =>
+          cases checked
+          simp [
+            psKernelReduceNatBinary,
+            hNotAdd,
+            hSub,
+            hCheck
+          ]
+    simp [
+      psKernelReduceNatWith,
+      hLeft,
+      hRight,
+      psKernelExprNatLiteralValue,
+      hBinary
+    ]
   · exact
       PsKernelReductionStep.natSub
         op
@@ -355,25 +369,39 @@ theorem psKernelReduceNatWith_mul_literals_refines
       result := by
   dsimp
   constructor
-  · cases hCheck :
-        psKernelCheckNatSize
-          context.maxNatSize
-          (Nat.mul left right) with
-    | error error =>
-        simp [hCheck] at hSize
-    | ok checked =>
-        cases checked
-        simp [
-          psKernelReduceNatWith,
-          hLeft,
-          hRight,
-          psKernelExprNatLiteralValue,
-          psKernelReduceNatBinary,
-          hNotAdd,
-          hNotSub,
-          hMul,
-          hCheck
-        ]
+  · have hBinary :
+        psKernelReduceNatBinary
+            context.maxNatSize
+            op
+            left
+            right =
+          Except.ok
+            (Option.some
+              (PsKernelExpr.lit
+                (PsKernelLiteral.nat
+                  (Nat.mul left right)))) := by
+      cases hCheck :
+          psKernelCheckNatSize
+            context.maxNatSize
+            (Nat.mul left right) with
+      | error error =>
+          simp [hCheck] at hSize
+      | ok checked =>
+          cases checked
+          simp [
+            psKernelReduceNatBinary,
+            hNotAdd,
+            hNotSub,
+            hMul,
+            hCheck
+          ]
+    simp [
+      psKernelReduceNatWith,
+      hLeft,
+      hRight,
+      psKernelExprNatLiteralValue,
+      hBinary
+    ]
   · exact
       PsKernelReductionStep.natMul
         op

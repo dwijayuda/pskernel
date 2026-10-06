@@ -1163,13 +1163,11 @@ def psRustEmitExprWithFuel
               Except.ok
                 (psRustConcat4
                   "(*("
-                  (psRustConcat4
-                    (psRustClonePrinted printedTarget)
-                    ")."
+                  (psRustClonePrinted printedTarget)
+                  ")."
+                  (psRustConcat2
                     (psRustIdentifier field)
-                    ")")
-                  ").clone()"
-                  "")
+                    ").clone()"))
         | PsVerifiedIrExpr.constructor
           inductiveName
           constructorName

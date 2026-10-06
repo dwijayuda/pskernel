@@ -924,10 +924,7 @@ def psRustEmitAlternativeListWith
       Except.ok List.nil
   | List.cons alternative rest =>
       let constructorName : String := Prod.fst alternative;
-      let payload :
-          Prod
-            (List PsVerifiedIrMatchBinding)
-            PsVerifiedIrExpr :=
+      let payload : Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr :=
         Prod.snd alternative;
       let bindings : List PsVerifiedIrMatchBinding :=
         Prod.fst payload;

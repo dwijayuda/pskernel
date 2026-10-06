@@ -83,6 +83,21 @@ theorem psKernelInferenceCacheSound_empty
     psKernelExprMapGetIn
   ] at h
 
+
+theorem psKernelReductionCacheSound_empty
+    (environment : PsKernelEnvironment)
+    (localContext : PsKernelLocalContext) :
+    PsKernelReductionCacheSound
+      environment
+      localContext
+      psKernelExprMapEmpty := by
+  intro expr result h
+  simp [
+    psKernelExprMapEmpty,
+    psKernelExprMapGet,
+    psKernelExprMapGetIn
+  ] at h
+
 theorem psKernelDefEqCacheSound_empty
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext) :
@@ -108,6 +123,18 @@ theorem psKernelCheckerStateEmpty_semantic_caches_sound
         environment
         localContext
         psKernelCheckerStateEmpty.checkedInfer ∧
+    PsKernelReductionCacheSound
+        environment
+        localContext
+        psKernelCheckerStateEmpty.whnfCore ∧
+    PsKernelReductionCacheSound
+        environment
+        localContext
+        psKernelCheckerStateEmpty.whnf ∧
+    PsKernelReductionCacheSound
+        environment
+        localContext
+        psKernelCheckerStateEmpty.unfold ∧
     PsKernelDefEqCacheSound
         environment
         localContext
@@ -122,10 +149,25 @@ theorem psKernelCheckerStateEmpty_semantic_caches_sound
         psKernelInferenceCacheSound_empty
           environment
           localContext
-    · simpa [psKernelCheckerStateEmpty] using
-        psKernelDefEqCacheSound_empty
-          environment
-          localContext
+    · constructor
+      · simpa [psKernelCheckerStateEmpty] using
+          psKernelReductionCacheSound_empty
+            environment
+            localContext
+      · constructor
+        · simpa [psKernelCheckerStateEmpty] using
+            psKernelReductionCacheSound_empty
+              environment
+              localContext
+        · constructor
+          · simpa [psKernelCheckerStateEmpty] using
+              psKernelReductionCacheSound_empty
+                environment
+                localContext
+          · simpa [psKernelCheckerStateEmpty] using
+              psKernelDefEqCacheSound_empty
+                environment
+                localContext
 
 
 theorem psKernelCheckerStateEmpty_semantic_sound

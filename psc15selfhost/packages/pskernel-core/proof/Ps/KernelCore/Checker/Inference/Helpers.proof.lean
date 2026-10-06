@@ -170,7 +170,8 @@ theorem psKernelCacheInferResult_preserves_semantic_sound
         expr
         result) := by
   unfold PsKernelCheckerStateSemanticSound at hState ⊢
-  rcases hState with ⟨hInferOnly, hChecked, hSuccess⟩
+  rcases hState with
+    ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
   cases hEligible :
       psKernelInferCacheEligible inferOnly expr with
   | false =>
@@ -180,9 +181,16 @@ theorem psKernelCacheInferResult_preserves_semantic_sound
               environment localContext state.inferOnly ∧
             PsKernelInferenceCacheSound
               environment localContext state.checkedInfer ∧
+            PsKernelReductionCacheSound
+              environment localContext state.whnfCore ∧
+            PsKernelReductionCacheSound
+              environment localContext state.whnf ∧
+            PsKernelReductionCacheSound
+              environment localContext state.unfold ∧
             PsKernelDefEqCacheSound
               environment localContext state.success
-          from ⟨hInferOnly, hChecked, hSuccess⟩)
+          from
+            ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩)
   | true =>
       cases inferOnly with
       | false =>
@@ -198,6 +206,12 @@ theorem psKernelCacheInferResult_preserves_semantic_sound
                   environment localContext
                   (psKernelExprMapInsert
                     state.checkedInfer expr result) ∧
+                PsKernelReductionCacheSound
+                  environment localContext state.whnfCore ∧
+                PsKernelReductionCacheSound
+                  environment localContext state.whnf ∧
+                PsKernelReductionCacheSound
+                  environment localContext state.unfold ∧
                 PsKernelDefEqCacheSound
                   environment localContext state.success
               from
@@ -211,6 +225,9 @@ theorem psKernelCacheInferResult_preserves_semantic_sound
                     result
                     hChecked
                     hTyping,
+                  hWhnfCore,
+                  hWhnf,
+                  hUnfold,
                   hSuccess
                 ⟩)
       | true =>
@@ -226,6 +243,12 @@ theorem psKernelCacheInferResult_preserves_semantic_sound
                     state.inferOnly expr result) ∧
                 PsKernelInferenceCacheSound
                   environment localContext state.checkedInfer ∧
+                PsKernelReductionCacheSound
+                  environment localContext state.whnfCore ∧
+                PsKernelReductionCacheSound
+                  environment localContext state.whnf ∧
+                PsKernelReductionCacheSound
+                  environment localContext state.unfold ∧
                 PsKernelDefEqCacheSound
                   environment localContext state.success
               from
@@ -239,5 +262,8 @@ theorem psKernelCacheInferResult_preserves_semantic_sound
                     hInferOnly
                     hTyping,
                   hChecked,
+                  hWhnfCore,
+                  hWhnf,
+                  hUnfold,
                   hSuccess
                 ⟩)

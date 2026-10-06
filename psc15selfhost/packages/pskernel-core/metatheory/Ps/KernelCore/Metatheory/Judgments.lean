@@ -1065,6 +1065,18 @@ def PsKernelCheckerStateSemanticSound
       environment
       localContext
       state.checkedInfer ∧
+  PsKernelReductionCacheSound
+      environment
+      localContext
+      state.whnfCore ∧
+  PsKernelReductionCacheSound
+      environment
+      localContext
+      state.whnf ∧
+  PsKernelReductionCacheSound
+      environment
+      localContext
+      state.unfold ∧
   PsKernelDefEqCacheSound
       environment
       localContext

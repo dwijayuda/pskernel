@@ -69,7 +69,8 @@ theorem psKernelDefEqFinish_preserves_semantic_sound
           right
           value)) := by
   unfold PsKernelCheckerStateSemanticSound at hState ⊢
-  rcases hState with ⟨hInferOnly, hChecked, hSuccess⟩
+  rcases hState with
+    ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
   cases value with
   | false =>
       simpa [psKernelDefEqFinish] using
@@ -78,9 +79,16 @@ theorem psKernelDefEqFinish_preserves_semantic_sound
               environment localContext state.inferOnly ∧
             PsKernelInferenceCacheSound
               environment localContext state.checkedInfer ∧
+            PsKernelReductionCacheSound
+              environment localContext state.whnfCore ∧
+            PsKernelReductionCacheSound
+              environment localContext state.whnf ∧
+            PsKernelReductionCacheSound
+              environment localContext state.unfold ∧
             PsKernelDefEqCacheSound
               environment localContext state.success
-          from ⟨hInferOnly, hChecked, hSuccess⟩)
+          from
+            ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩)
   | true =>
       simpa [
         psKernelDefEqFinish,
@@ -91,6 +99,12 @@ theorem psKernelDefEqFinish_preserves_semantic_sound
               environment localContext state.inferOnly ∧
             PsKernelInferenceCacheSound
               environment localContext state.checkedInfer ∧
+            PsKernelReductionCacheSound
+              environment localContext state.whnfCore ∧
+            PsKernelReductionCacheSound
+              environment localContext state.whnf ∧
+            PsKernelReductionCacheSound
+              environment localContext state.unfold ∧
             PsKernelDefEqCacheSound
               environment localContext
               (psKernelExprPairSetInsert
@@ -99,6 +113,9 @@ theorem psKernelDefEqFinish_preserves_semantic_sound
             ⟨
               hInferOnly,
               hChecked,
+              hWhnfCore,
+              hWhnf,
+              hUnfold,
               hInsert
                 environment
                 localContext

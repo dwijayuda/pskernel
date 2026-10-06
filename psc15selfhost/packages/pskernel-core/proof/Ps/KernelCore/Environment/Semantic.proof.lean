@@ -30,3 +30,43 @@ theorem psKernelConstantListLength_eq_length
       rfl
   | cons head tail ih =>
       simp [psKernelConstantListLength, ih]
+
+
+theorem psKernelFindConstantInList_some_mem_and_matches
+    (name : PsKernelName)
+    (values : List PsKernelConstantInfo)
+    (info : PsKernelConstantInfo)
+    (hFind :
+      psKernelFindConstantInList name values =
+        Option.some info) :
+    List.Mem info values ∧
+    psKernelNameEq
+        (psKernelConstantInfoName info)
+        name =
+      true := by
+  induction values with
+  | nil =>
+      simp [psKernelFindConstantInList] at hFind
+  | cons head tail ih =>
+      cases hMatch :
+          psKernelNameEq
+            (psKernelConstantInfoName head)
+            name with
+      | true =>
+          simp [
+            psKernelFindConstantInList,
+            hMatch
+          ] at hFind
+          subst info
+          constructor
+          · simp
+          · exact hMatch
+      | false =>
+          simp [
+            psKernelFindConstantInList,
+            hMatch
+          ] at hFind
+          have hTail := ih hFind
+          constructor
+          · exact List.mem_cons_of_mem head hTail.1
+          · exact hTail.2

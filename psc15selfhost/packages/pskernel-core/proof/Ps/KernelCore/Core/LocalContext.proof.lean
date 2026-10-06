@@ -50,3 +50,62 @@ theorem psKernelLocalDeclValue_let_some
         index name userName type value) =
       Option.some value := by
   rfl
+
+
+theorem psKernelLocalContextFindIn_some_mem_and_matches
+    (name : PsKernelName)
+    (decls : List PsKernelLocalDecl)
+    (decl : PsKernelLocalDecl)
+    (hFind :
+      psKernelLocalContextFindIn name decls =
+        Option.some decl) :
+    List.Mem decl decls ∧
+    psKernelNameEq
+        (psKernelLocalDeclName decl)
+        name =
+      true := by
+  induction decls with
+  | nil =>
+      simp [psKernelLocalContextFindIn] at hFind
+  | cons head tail ih =>
+      cases hMatch :
+          psKernelNameEq
+            (psKernelLocalDeclName head)
+            name with
+      | true =>
+          simp [
+            psKernelLocalContextFindIn,
+            hMatch
+          ] at hFind
+          subst decl
+          constructor
+          · simp
+          · exact hMatch
+      | false =>
+          simp [
+            psKernelLocalContextFindIn,
+            hMatch
+          ] at hFind
+          have hTail := ih hFind
+          constructor
+          · exact List.mem_cons_of_mem head hTail.1
+          · exact hTail.2
+
+theorem psKernelLocalContextFind_some_mem_and_matches
+    (context : PsKernelLocalContext)
+    (name : PsKernelName)
+    (decl : PsKernelLocalDecl)
+    (hFind :
+      psKernelLocalContextFind context name =
+        Option.some decl) :
+    List.Mem decl context.decls ∧
+    psKernelNameEq
+        (psKernelLocalDeclName decl)
+        name =
+      true := by
+  exact
+    psKernelLocalContextFindIn_some_mem_and_matches
+      name
+      context.decls
+      decl
+      hFind

@@ -13,8 +13,8 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 19 |
-| B | 18 |
+| A | 21 |
+| B | 16 |
 | C | 34 |
 | D | 8 |
 | **Total canonical source/proof pairs** | **79** |
@@ -87,7 +87,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Core/Declaration.lean` | **B** | Declaration projection/safety/delta facts. |
 | `Core/Expr.lean` | **A** | `psKernelExprEq = true` now refines an independent structural-expression equality relation and therefore the formal non-transitive defeq judgment; spine/fvar/list helper laws remain available. |
 | `Core/Level.lean` | **B** | Offset/list normalization foundations; full universe semantic equivalence proof pending. |
-| `Core/LocalContext.lean` | **B** | Lookup/base/add/value structural laws. |
+| `Core/LocalContext.lean` | **A** | Successful authoritative local-context lookup is proved to return a declaration present in `context.decls` whose kernel name matches the queried name; add/value structural laws remain as supporting invariants. |
 | `Core/Name.lean` | **B** | Append/list algebra; equality correctness pending. |
 | `Core/Substitution/Abstract.lean` | **A** | Production free-variable abstraction now refines a total fuel-free reference semantics; singleton abstraction/instantiation roundtrip is being generalized over the full tree. |
 | `Core/Substitution/Beta.lean` | **A** | Single-lambda cheap beta is proved to either preserve the original term or realize the formal `PsKernelReductionStep.beta`; closed-body and identity cases remain as concrete corollaries. |
@@ -97,7 +97,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Environment/Environment.lean` | **A** | Native-evaluator installation is proved to preserve both the authoritative semantic environment view and `EnvironmentIndexRefines`, making runtime capability changes semantically transparent. |
 | `Environment/Lookup.lean` | **A** | Under `PsKernelEnvironmentIndexRefines`, indexed lookup is proved equal to authoritative `environment.constants` lookup. |
 | `Environment/Operations.lean` | **A** | Explicit semantic-history preservation for add/replace/Quot marking. |
-| `Environment/Semantic.lean` | **B** | Authoritative list helper algebra. |
+| `Environment/Semantic.lean` | **A** | Successful authoritative declaration-list lookup is proved to return an element of semantic history with a matching kernel name; list-length and replacement algebra remain supporting invariants. |
 | `Runtime/Acceleration/Cache.lean` | **B** | Map/pair-cache set/get foundations; whole-cache refinement invariant pending. |
 | `Runtime/Acceleration/CachePolicy.lean` | **C** | Eligibility policy cases. |
 | `Runtime/Acceleration/EnvironmentIndex.lean` | **B** | Set/find/remove/insert candidate refinement foundations; full authoritative lookup equivalence pending. |

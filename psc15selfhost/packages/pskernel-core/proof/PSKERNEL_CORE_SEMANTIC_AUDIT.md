@@ -13,9 +13,9 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 17 |
-| B | 19 |
-| C | 35 |
+| A | 19 |
+| B | 18 |
+| C | 34 |
 | D | 8 |
 | **Total canonical source/proof pairs** | **79** |
 
@@ -94,7 +94,7 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Core/Substitution/Instantiate.lean` | **A** | `InstantiateAt`/`Instantiate`/`Instantiate1`/`InstantiateRev` now refine total fuel-free reference semantics; arbitrary-depth closed instantiation is proved identity. |
 | `Core/Substitution/Lift.lean` | **A** | The fuel-bounded production lift worker now refines total structural lifting semantics for every expression under its node-count budget. |
 | `Core/Substitution/ListOps.lean` | **B** | Reusable take/drop/reverse algebra. |
-| `Environment/Environment.lean` | **B** | Semantic-view/native capability separation facts. |
+| `Environment/Environment.lean` | **A** | Native-evaluator installation is proved to preserve both the authoritative semantic environment view and `EnvironmentIndexRefines`, making runtime capability changes semantically transparent. |
 | `Environment/Lookup.lean` | **A** | Under `PsKernelEnvironmentIndexRefines`, indexed lookup is proved equal to authoritative `environment.constants` lookup. |
 | `Environment/Operations.lean` | **A** | Explicit semantic-history preservation for add/replace/Quot marking. |
 | `Environment/Semantic.lean` | **B** | Authoritative list helper algebra. |

@@ -1,4 +1,5 @@
 import Ps.KernelCore.Environment.Environment
+import Ps.KernelCore.Metatheory.Judgments
 import Ps.KernelCore.Environment.Lookup
 
 theorem psKernelEnvironmentEmpty_semantic :
@@ -43,3 +44,25 @@ theorem psKernelEnvironmentWithNativeEvaluator_find
         name =
       psKernelEnvironmentFind environment name := by
   rfl
+
+
+theorem psKernelEnvironmentWithNativeEvaluator_preserves_semantic_contract
+    (environment : PsKernelEnvironment)
+    (nativeEvaluator : Option PsKernelNativeEvaluator)
+    (hIndex :
+      PsKernelEnvironmentIndexRefines environment) :
+    psKernelEnvironmentSemantic
+        (psKernelEnvironmentWithNativeEvaluator
+          environment
+          nativeEvaluator) =
+      psKernelEnvironmentSemantic environment ∧
+    PsKernelEnvironmentIndexRefines
+      (psKernelEnvironmentWithNativeEvaluator
+        environment
+        nativeEvaluator) := by
+  constructor
+  · rfl
+  · unfold PsKernelEnvironmentIndexRefines at hIndex ⊢
+    intro name
+    simpa [psKernelEnvironmentWithNativeEvaluator] using
+      hIndex name

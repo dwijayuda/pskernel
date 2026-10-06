@@ -168,11 +168,19 @@ theorem psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
                 remaining :=
             Nat.lt_of_succ_lt_succ hTotal
           have hFnFuel :
-              psKernelExprNodeCount fn < remaining := by
-            omega
+              psKernelExprNodeCount fn < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_right
+                (psKernelExprNodeCount fn)
+                (psKernelExprNodeCount arg))
+              hSum
           have hArgFuel :
-              psKernelExprNodeCount arg < remaining := by
-            omega
+              psKernelExprNodeCount arg < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_left
+                (psKernelExprNodeCount arg)
+                (psKernelExprNodeCount fn))
+              hSum
           have hFn :=
             ihFn remaining start amount hFnFuel
           have hArg :=
@@ -202,11 +210,19 @@ theorem psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
                 remaining :=
             Nat.lt_of_succ_lt_succ hTotal
           have hTypeFuel :
-              psKernelExprNodeCount type < remaining := by
-            omega
+              psKernelExprNodeCount type < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_right
+                (psKernelExprNodeCount type)
+                (psKernelExprNodeCount body))
+              hSum
           have hBodyFuel :
-              psKernelExprNodeCount body < remaining := by
-            omega
+              psKernelExprNodeCount body < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_left
+                (psKernelExprNodeCount body)
+                (psKernelExprNodeCount type))
+              hSum
           have hType :=
             ihType remaining start amount hTypeFuel
           have hBody :=
@@ -236,11 +252,19 @@ theorem psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
                 remaining :=
             Nat.lt_of_succ_lt_succ hTotal
           have hTypeFuel :
-              psKernelExprNodeCount type < remaining := by
-            omega
+              psKernelExprNodeCount type < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_right
+                (psKernelExprNodeCount type)
+                (psKernelExprNodeCount body))
+              hSum
           have hBodyFuel :
-              psKernelExprNodeCount body < remaining := by
-            omega
+              psKernelExprNodeCount body < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_left
+                (psKernelExprNodeCount body)
+                (psKernelExprNodeCount type))
+              hSum
           have hType :=
             ihType remaining start amount hTypeFuel
           have hBody :=
@@ -274,14 +298,46 @@ theorem psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference
                 remaining :=
             Nat.lt_of_succ_lt_succ hTotal
           have hTypeFuel :
-              psKernelExprNodeCount type < remaining := by
-            omega
+              psKernelExprNodeCount type < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_add_right
+                (psKernelExprNodeCount type)
+                (Nat.add
+                  (psKernelExprNodeCount value)
+                  (psKernelExprNodeCount body)))
+              hSum
+          have hTailLe :
+              Nat.add
+                  (psKernelExprNodeCount value)
+                  (psKernelExprNodeCount body) ≤
+                Nat.add
+                  (psKernelExprNodeCount type)
+                  (Nat.add
+                    (psKernelExprNodeCount value)
+                    (psKernelExprNodeCount body)) :=
+            Nat.le_add_left
+              (Nat.add
+                (psKernelExprNodeCount value)
+                (psKernelExprNodeCount body))
+              (psKernelExprNodeCount type)
           have hValueFuel :
-              psKernelExprNodeCount value < remaining := by
-            omega
+              psKernelExprNodeCount value < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_trans
+                (Nat.le_add_right
+                  (psKernelExprNodeCount value)
+                  (psKernelExprNodeCount body))
+                hTailLe)
+              hSum
           have hBodyFuel :
-              psKernelExprNodeCount body < remaining := by
-            omega
+              psKernelExprNodeCount body < remaining :=
+            Nat.lt_of_le_of_lt
+              (Nat.le_trans
+                (Nat.le_add_left
+                  (psKernelExprNodeCount body)
+                  (psKernelExprNodeCount value))
+                hTailLe)
+              hSum
           have hType :=
             ihType remaining start amount hTypeFuel
           have hValue :=
@@ -351,7 +407,10 @@ theorem psKernelExprLiftLooseBVarsChanged_refines_reference
         expr start amount := by
   cases amount with
   | zero =>
-      rfl
+      simp [
+        psKernelExprLiftLooseBVarsChanged,
+        psKernelExprLiftLooseBVarsReferenceChanged
+      ]
   | succ amount =>
       simpa [psKernelExprLiftLooseBVarsChanged] using
         psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference

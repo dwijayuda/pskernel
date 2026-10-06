@@ -223,20 +223,44 @@ theorem psKernelWhnfCoreFinish_preserves_semantic_sound
           nextCache
       refine ⟨nextState, ?_, ?_⟩
       · rfl
-      · unfold PsKernelCheckerStateSemanticSound
-        simp [
+      · simpa [
           nextState,
-          psKernelCheckerStateWithWhnfCore
-        ]
-        exact
-          hInsert
-            environment
-            localContext
-            state.whnfCore
-            original
-            result
-            hWhnfCore
-            hReduction
+          psKernelCheckerStateWithWhnfCore,
+          PsKernelCheckerStateSemanticSound
+        ] using
+          (show
+            PsKernelInferenceCacheSound
+                  environment localContext state.inferOnly ∧
+              PsKernelInferenceCacheSound
+                  environment localContext state.checkedInfer ∧
+              PsKernelReductionCacheSound
+                  environment localContext
+                  (psKernelExprMapInsert
+                    state.whnfCore
+                    original
+                    result) ∧
+              PsKernelReductionCacheSound
+                  environment localContext state.whnf ∧
+              PsKernelReductionCacheSound
+                  environment localContext state.unfold ∧
+              PsKernelDefEqCacheSound
+                  environment localContext state.success
+            from
+              ⟨
+                hInferOnly,
+                hChecked,
+                hInsert
+                  environment
+                  localContext
+                  state.whnfCore
+                  original
+                  result
+                  hWhnfCore
+                  hReduction,
+                hWhnf,
+                hUnfold,
+                hSuccess
+              ⟩)
 
 theorem psKernelWhnfFinish_preserves_semantic_sound
     (environment : PsKernelEnvironment)
@@ -279,17 +303,41 @@ theorem psKernelWhnfFinish_preserves_semantic_sound
       nextCache
   refine ⟨nextState, ?_, ?_⟩
   · rfl
-  · unfold PsKernelCheckerStateSemanticSound
-    simp [
+  · simpa [
       nextState,
-      psKernelCheckerStateWithWhnf
-    ]
-    exact
-      hInsert
-        environment
-        localContext
-        state.whnf
-        original
-        result
-        hWhnf
-        hReduction
+      psKernelCheckerStateWithWhnf,
+      PsKernelCheckerStateSemanticSound
+    ] using
+      (show
+        PsKernelInferenceCacheSound
+              environment localContext state.inferOnly ∧
+          PsKernelInferenceCacheSound
+              environment localContext state.checkedInfer ∧
+          PsKernelReductionCacheSound
+              environment localContext state.whnfCore ∧
+          PsKernelReductionCacheSound
+              environment localContext
+              (psKernelExprMapInsert
+                state.whnf
+                original
+                result) ∧
+          PsKernelReductionCacheSound
+              environment localContext state.unfold ∧
+          PsKernelDefEqCacheSound
+              environment localContext state.success
+        from
+          ⟨
+            hInferOnly,
+            hChecked,
+            hWhnfCore,
+            hInsert
+              environment
+              localContext
+              state.whnf
+              original
+              result
+              hWhnf
+              hReduction,
+            hUnfold,
+            hSuccess
+          ⟩)

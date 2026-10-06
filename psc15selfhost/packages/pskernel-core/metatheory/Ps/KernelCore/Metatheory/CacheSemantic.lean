@@ -28,12 +28,7 @@ theorem psKernelExprMapIndexBucket_set_same_core
       entries := by
   induction fuel generalizing index hash with
   | zero =>
-      cases index <;>
-        simp [
-          psKernelExprPairSetIndexAsMapIndex,
-          psKernelExprPairSetIndexSet,
-          psKernelExprMapIndexSet
-        ]
+      rfl
   | succ remaining ih =>
       cases index <;>
         by_cases hEven : Nat.mod hash 2 = 0 <;>
@@ -629,7 +624,12 @@ theorem psKernelExprPairSetIndexSet_as_map_core
         entries := by
   induction fuel generalizing index hash with
   | zero =>
-      rfl
+      cases index <;>
+        simp [
+          psKernelExprPairSetIndexAsMapIndex,
+          psKernelExprPairSetIndexSet,
+          psKernelExprMapIndexSet
+        ]
   | succ remaining ih =>
       cases index <;>
         by_cases hEven : Nat.mod hash 2 = 0 <;>

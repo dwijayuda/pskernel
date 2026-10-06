@@ -2150,3 +2150,312 @@ expand coverage
 increase assurance
 repeat
 ~~~
+
+
+---
+
+# 56. What complete compiler self-application eventually means
+
+Strong final state:
+
+~~~text
+55-module compiler closure
+    |
+    +--> specification coverage
+    +--> checked theorem interfaces
+    +--> assumption closure
+    +--> CertifiedModuleInterfaces
+    |
+    v
+real CheckedCore
+    |
+    v
+PSCV CertifiedSource
+    |
+    v
+VerifiedIR
+    |
+    +--> preserved direct JS compiler
+    |
+    +--> preserved direct Wasm compiler
+    |
+    v
+compiler self-host fixed point
+    |
+    v
+deterministic compiler knowledge graph
+    |
+    v
+SAVEF-assisted next compiler generation
+~~~
+
+This would combine:
+
+- compiler correctness evidence;
+- bootstrap evidence;
+- artifact preservation;
+- incremental proof reuse;
+- measured self-amplification.
+
+---
+
+# 57. First six implementation PRs
+
+The implementation should begin with small, high-information PRs.
+
+## PR 1 — experiment baseline
+
+Add:
+
+- compiler-selfapp-profile;
+- exact baseline commit/closure identity;
+- FactoryBench schema;
+- metrics schema;
+- no semantic compiler changes.
+
+## PR 2 — Foundation.List knowledge seed
+
+Add:
+
+- module specification;
+- list theorem sidecar;
+- checked proof results;
+- theorem interface;
+- SPKF knowledge objects.
+
+Goal: establish the end-to-end knowledge publication path.
+
+## PR 3 — Foundation.Name + Core substitution seed
+
+Add high-reuse equality/substitution theorems.
+
+Begin proof-recipe extraction.
+
+## PR 4 — first CertifiedModuleInterface + QueryGraph key
+
+Generate a canonical interface for one small module.
+
+Prove/test that a stable-interface implementation change keeps a dependent green.
+
+## PR 5 — environment proof uses L0 knowledge
+
+Require at least one accepted environment theorem to import/reuse earlier L0 theorem knowledge.
+
+This demonstrates real modular reuse.
+
+## PR 6 — first controlled A/B proof task
+
+Run the same held-out environment/meta proof task:
+
+~~~text
+without SAVEF retrieval
+versus
+with SAVEF retrieval
+~~~
+
+Record all metrics.
+
+This produces the first actual evidence about the self-amplification hypothesis.
+
+---
+
+# 58. Next milestone sequence
+
+After the six initial PRs:
+
+~~~text
+M1
+L0 theorem library accepted
+
+M2
+L1 environment/IR knowledge accepted
+
+M3
+semantic QueryGraph + CertifiedModuleInterface operational
+
+M4
+meta/specialization assisted by prior knowledge
+
+M5
+erasure assisted by accumulated knowledge
+
+M6
+syntax/elaboration benchmark demonstrates reuse benefit
+
+M7
+real CheckedCore compiler path
+
+M8
+PSCV-CERT compiler modules
+
+M9
+direct Wasm preservation lane
+
+M10
+direct JS preservation lane
+
+M11
+whole compiler SAVEF self-application generation
+
+M12
+FactoryBench publication
+~~~
+
+---
+
+# 59. Practicality controls
+
+The experiment must remain usable by compiler developers.
+
+Set budgets for:
+
+~~~text
+fast edit-time checks
+module proof replay
+knowledge extraction
+knowledge lookup
+full release replay
+~~~
+
+Principles:
+
+- fast developer checks should remain seconds-scale where currently possible;
+- module-scoped proof checks should avoid whole-repository replay;
+- expensive full-closure checks belong at checkpoint/release boundaries;
+- cache corruption causes recomputation, never acceptance;
+- AI retrieval must cap context by semantic dependency budget;
+- proofs that are not downstream-visible should not force global invalidation.
+
+Do not allow SAVEF to turn every edit into a whole-compiler theorem replay.
+
+---
+
+# 60. What not to change during the first experiment
+
+Avoid simultaneous large changes to:
+
+- language grammar;
+- self-host source profile;
+- compiler package decomposition;
+- kernel-provider policy;
+- backend architecture;
+- package manager;
+- SPKF core format.
+
+Otherwise it becomes difficult to attribute measured improvements to SAVEF.
+
+The experiment should add knowledge and measurement around the existing compiler first.
+
+---
+
+# 61. What would falsify SAVEF on the compiler?
+
+The hypothesis should be revised if repeated controlled experiments show any of these.
+
+1. Accepted semantic knowledge does not improve solve rate, tokens, wall time, or human effort.
+2. Proof-maintenance invalidation cost grows faster than theorem reuse benefit.
+3. CertifiedModuleInterfaces cannot hide enough implementation detail to stabilize downstream proofs.
+4. Semantic context slicing omits critical facts so often that full-repository context performs better.
+5. Proof/specification authoring cost dominates all later reuse.
+6. AI proof recipes cause more misleading search than useful acceleration.
+7. QueryGraph semantic invalidation becomes too complex or unsafe.
+8. Kernel/proof replay latency prevents practical compiler iteration.
+9. The 55-module source discipline is so restrictive that proving against it costs substantially more than maintaining an alternative implementation.
+10. Repeated later compiler tasks do not consume knowledge produced by earlier ones.
+
+Publishing negative results is part of the experiment.
+
+---
+
+# 62. What would count as strong success?
+
+A strong but realistic first publication claim would be:
+
+> Under a pinned compiler commit family, fixed model/version, fixed tool protocol, and identical assurance gates, SAVEF semantic retrieval over previously accepted compiler theorem/interfaces increased accepted task success or reduced median production cost on a held-out CompilerFactoryBench task set; at least 30 percent of accepted tasks reused earlier knowledge; and at least one accepted SAVEF-assisted compiler change produced a knowledge object reused by a later accepted compiler change.
+
+That is a much stronger statement than:
+
+> AI helped us prove the compiler.
+
+---
+
+# 63. Canonical recommendation
+
+Apply SAVEF to the PSCV compiler through **progressive semantic sidecars and measured knowledge reuse**, not through a disruptive whole-compiler rewrite.
+
+The core loop should be:
+
+~~~text
+current compiler module
+    |
+    v
+approved specification
+    |
+    v
+checked theorem/interface
+    |
+    v
+SPKF knowledge
+    |
+    v
+QueryGraph semantic slice
+    |
+    v
+AI/human next compiler task
+    |
+    v
+independent checker
+    |
+    v
+accepted compiler change
+    |
+    v
+new SPKF knowledge
+    |
+    +------------------------> repeat
+~~~
+
+Existing self-host and fixed-point gates stay in place throughout.
+
+---
+
+# 64. Final decision
+
+The PSCV compiler is a strong first SAVEF self-application target.
+
+The plan is feasible because it can begin with:
+
+- the existing 55-module bounded compiler;
+- PSC1-selfhost-stable/1;
+- current Lean proof tooling;
+- current PSKernel proof work;
+- current QueryGraph;
+- current fixed-point infrastructure;
+- current SPKF architecture.
+
+It does not require:
+
+- complete PSCV implementation;
+- complete PSKernel proof;
+- complete JS/Wasm backend proof;
+- a new package manager;
+- a new central registry;
+- rewriting the compiler before measuring value.
+
+The architectural plan scores:
+
+**9.39 / 10**
+
+Current readiness is:
+
+**approximately 5.60 / 10**
+
+The most valuable immediate action is not to attack the 8,207-line syntax package or the 4,792-line elaborator.
+
+It is to create the experimental baseline and turn the approximately 1,113-line Foundation/Core layer into the first reusable compiler mathematics library.
+
+Then test whether that library measurably makes Environment, Meta, Erasure, Syntax, and Elaborator work cheaper.
+
+If it does, the PSCV compiler will not merely be built with SAVEF.
+
+It will become the first serious evidence that SAVEF's core compounding hypothesis works on a real self-hosting software system.

@@ -249,6 +249,10 @@ theorem psKernelEnvironmentHashStringWorker_lt_modulus
             hEnd
           ] using hHash
       | false =>
+          simp only [
+            psKernelEnvironmentHashStringWorker,
+            hEnd
+          ]
           apply ih
           exact
             Nat.mod_lt

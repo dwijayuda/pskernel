@@ -19,9 +19,9 @@ def psRustAddParameterNames
   | List.nil =>
       locals
   | List.cons parameter rest =>
-      psRustAddParameterNames
-        rest
-        (List.cons parameter.name locals)
+      List.cons
+        parameter.name
+        (psRustAddParameterNames rest locals)
 
 def psRustAddBindingNames
     (bindings : List PsVerifiedIrMatchBinding)
@@ -30,16 +30,17 @@ def psRustAddBindingNames
   | List.nil =>
       locals
   | List.cons binding rest =>
-      psRustAddBindingNames
-        rest
-        (List.cons binding.name locals)
+      List.cons
+        binding.name
+        (psRustAddBindingNames rest locals)
 
 def psRustRewriteExprListWith
     (rewrite :
       PsVerifiedIrExpr ->
-      Except PsRustEmitError PsVerifiedIrExpr) :
-    List PsVerifiedIrExpr ->
-    Except PsRustEmitError (List PsVerifiedIrExpr)
+      Except PsRustEmitError PsVerifiedIrExpr)
+    (expressions : List PsVerifiedIrExpr) :
+    Except PsRustEmitError (List PsVerifiedIrExpr) :=
+  match expressions with
   | List.nil =>
       Except.ok List.nil
   | List.cons expr rest =>
@@ -56,10 +57,11 @@ def psRustRewriteExprListWith
 def psRustRewriteFieldListWith
     (rewrite :
       PsVerifiedIrExpr ->
-      Except PsRustEmitError PsVerifiedIrExpr) :
-    List (Prod String PsVerifiedIrExpr) ->
+      Except PsRustEmitError PsVerifiedIrExpr)
+    (fields : List (Prod String PsVerifiedIrExpr)) :
     Except PsRustEmitError
-      (List (Prod String PsVerifiedIrExpr))
+      (List (Prod String PsVerifiedIrExpr)) :=
+  match fields with
   | List.nil =>
       Except.ok List.nil
   | List.cons field rest =>
@@ -80,25 +82,34 @@ def psRustRewriteAlternativeListWith
     (rewriteBody :
       List PsVerifiedIrMatchBinding ->
       PsVerifiedIrExpr ->
-      Except PsRustEmitError PsVerifiedIrExpr) :
-    List
-      (Prod String
-        (Prod
-          (List PsVerifiedIrMatchBinding)
-          PsVerifiedIrExpr)) ->
+      Except PsRustEmitError PsVerifiedIrExpr)
+    (alternatives :
+      List
+        (Prod String
+          (Prod
+            (List PsVerifiedIrMatchBinding)
+            PsVerifiedIrExpr))) :
     Except PsRustEmitError
       (List
         (Prod String
           (Prod
             (List PsVerifiedIrMatchBinding)
-            PsVerifiedIrExpr)))
+            PsVerifiedIrExpr))) :=
+  match alternatives with
   | List.nil =>
       Except.ok List.nil
   | List.cons alternative rest =>
-      let constructorName := Prod.fst alternative;
-      let payload := Prod.snd alternative;
-      let bindings := Prod.fst payload;
-      let body := Prod.snd payload;
+      let constructorName : String :=
+        Prod.fst alternative;
+      let payload :
+          Prod
+            (List PsVerifiedIrMatchBinding)
+            PsVerifiedIrExpr :=
+        Prod.snd alternative;
+      let bindings : List PsVerifiedIrMatchBinding :=
+        Prod.fst payload;
+      let body : PsVerifiedIrExpr :=
+        Prod.snd payload;
       match rewriteBody bindings body with
       | Except.error error =>
           Except.error error
@@ -118,21 +129,33 @@ def psRustRewriteAlternativeListWith
 
 def psRustRewriteValueRefsWithFuel
     (valueNames : List String)
-    (locals : List String) :
-    Nat ->
+    (fuel : Nat) :
+    List String ->
     PsVerifiedIrExpr ->
-    Except PsRustEmitError PsVerifiedIrExpr
-  | 0, _ =>
-      Except.error PsRustEmitError.fuelExhausted
-  | fuel + 1, expr =>
-      let rewriteNested :=
-        fun (nested : PsVerifiedIrExpr) =>
-          psRustRewriteValueRefsWithFuel
-            valueNames
-            locals
-            fuel
-            nested;
-      match expr with
+    Except PsRustEmitError PsVerifiedIrExpr :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_locals : List String)
+        (_expr : PsVerifiedIrExpr) =>
+          Except.error PsRustEmitError.fuelExhausted
+  | Nat.succ remaining =>
+      let smaller :
+          List String ->
+          PsVerifiedIrExpr ->
+          Except PsRustEmitError PsVerifiedIrExpr :=
+        psRustRewriteValueRefsWithFuel
+          valueNames
+          remaining;
+      fun
+        (locals : List String)
+        (expr : PsVerifiedIrExpr) =>
+        let rewriteNested :
+            PsVerifiedIrExpr ->
+            Except PsRustEmitError PsVerifiedIrExpr :=
+          fun (nested : PsVerifiedIrExpr) =>
+            smaller locals nested;
+        match expr with
       | PsVerifiedIrExpr.literal _ =>
           Except.ok expr
       | PsVerifiedIrExpr.var name =>
@@ -162,10 +185,8 @@ def psRustRewriteValueRefsWithFuel
           let bodyLocals :=
             psRustAddParameterNames parameters locals;
           match
-              psRustRewriteValueRefsWithFuel
-                valueNames
+              smaller
                 bodyLocals
-                fuel
                 body with
           | Except.error error =>
               Except.error error
@@ -197,10 +218,8 @@ def psRustRewriteValueRefsWithFuel
               Except.error error
           | Except.ok rewrittenValue =>
               match
-                  psRustRewriteValueRefsWithFuel
-                    valueNames
+                  smaller
                     (List.cons name locals)
-                    fuel
                     body with
               | Except.error error =>
                   Except.error error
@@ -282,14 +301,15 @@ def psRustRewriteValueRefsWithFuel
           | Except.error error =>
               Except.error error
           | Except.ok rewrittenScrutinee =>
-              let rewriteBody :=
+              let rewriteBody :
+                  List PsVerifiedIrMatchBinding ->
+                  PsVerifiedIrExpr ->
+                  Except PsRustEmitError PsVerifiedIrExpr :=
                 fun
                   (bindings : List PsVerifiedIrMatchBinding)
                   (body : PsVerifiedIrExpr) =>
-                    psRustRewriteValueRefsWithFuel
-                      valueNames
+                    smaller
                       (psRustAddBindingNames bindings locals)
-                      fuel
                       body;
               match
                   psRustRewriteAlternativeListWith
@@ -312,6 +332,6 @@ def psRustRewriteValueRefs
     Except PsRustEmitError PsVerifiedIrExpr :=
   psRustRewriteValueRefsWithFuel
     valueNames
-    locals
     4096
+    locals
     expr

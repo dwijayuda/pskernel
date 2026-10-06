@@ -1,5 +1,6 @@
 import Ps.Compiler.Api
 import Ps.DriverTs.Compiler
+import Ps.DriverJs.Compiler
 import Ps.Host.ProjectCompiler
 import Ps.Host.TypeScriptCompiler
 
@@ -108,6 +109,21 @@ def psHostCompilerTypeScriptSource
 def psHostCompilerTypeScript
     (inputPath : String) : IO Unit := do
   IO.print (← psHostCompilerTypeScriptSource inputPath)
+
+def psHostCompilerJavaScriptSource
+    (inputPath : String) : IO String := do
+  let elaborated ← psHostCompilerElaborateProject inputPath
+  match psCompilerJavaScriptFromElaborated elaborated with
+  | Except.error _ =>
+      throw
+        (IO.userError
+          "PSC2_CLI_DIRECT_JS_EMIT_FAILED: source is outside the executable Direct JS backend subset")
+  | Except.ok output =>
+      pure output
+
+def psHostCompilerJavaScript
+    (inputPath : String) : IO Unit := do
+  IO.print (← psHostCompilerJavaScriptSource inputPath)
 
 def psHostCompilerBuild
     (inputPath outputPath : String) : IO Unit := do

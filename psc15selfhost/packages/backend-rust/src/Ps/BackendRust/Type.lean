@@ -229,11 +229,11 @@ def psRustTypeContainsFunctionWithFuel
       fun (type : PsVerifiedIrType) =>
         match type with
         | PsVerifiedIrType.function _ _ =>
-          true
-          | PsVerifiedIrType.named _ arguments =>
-          psListAny containsFunction arguments
-      | _ =>
-          false
+            true
+        | PsVerifiedIrType.named _ arguments =>
+            psListAny containsFunction arguments
+        | _ =>
+            false
 
 def psRustTypeContainsFunction
     (type : PsVerifiedIrType) : Bool :=

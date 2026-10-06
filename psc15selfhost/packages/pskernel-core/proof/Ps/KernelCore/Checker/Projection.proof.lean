@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.Projection
 import Ps.KernelCore.Metatheory.Judgments
+import Ps.KernelCore.Metatheory.CheckerContracts
 
 theorem psKernelProjectionApplyParamsWithFuel_zero
     (whnf :
@@ -1489,3 +1490,474 @@ theorem psKernelInferProjectionWith_sound
       hInferSound
       hIndex
       hSuccess
+
+
+theorem psKernelProjectionEnsureSortWith_preserves_configuration
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (type : PsKernelExpr)
+    (level : PsKernelLevel)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelProjectionEnsureSortWith
+          whnf context state type =
+        Except.ok (Prod.mk level nextState)) :
+    PsKernelCheckerConfigurationSound
+      context
+      nextState := by
+  unfold psKernelProjectionEnsureSortWith at hSuccess
+  cases hRun : whnf context state type with
+  | error error =>
+      simp [hRun] at hSuccess
+  | ok result =>
+      rcases result with ⟨reduced, reducedState⟩
+      rw [hRun] at hSuccess
+      cases reduced <;> simp at hSuccess
+      case sort found =>
+        rcases hSuccess with ⟨rfl, rfl⟩
+        exact
+          (hWhnf
+            context
+            state
+            reducedState
+            type
+            (PsKernelExpr.sort found)
+            hConfig
+            hRun).2
+
+theorem psKernelInferIsPropWith_preserves_configuration
+    (whnf inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound whnf)
+    (hInfer :
+      PsKernelInferenceConfigurationSound inferType)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (value : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelInferIsPropWith
+          whnf inferType context state expr =
+        Except.ok (Prod.mk value nextState)) :
+    PsKernelCheckerConfigurationSound
+      context
+      nextState := by
+  unfold psKernelInferIsPropWith at hSuccess
+  cases hInferRun : inferType context state expr with
+  | error error =>
+      simp [hInferRun] at hSuccess
+  | ok inferResult =>
+      rcases inferResult with ⟨inferredType, inferState⟩
+      rw [hInferRun] at hSuccess
+      have hInferConfig :
+          PsKernelCheckerConfigurationSound
+            context
+            inferState :=
+        (hInfer
+          context
+          state
+          inferState
+          expr
+          inferredType
+          hConfig
+          hInferRun).2
+      cases hSort :
+          psKernelProjectionEnsureSortWith
+            whnf
+            context
+            inferState
+            inferredType with
+      | error error =>
+          simp [hSort] at hSuccess
+      | ok sortResult =>
+          rcases sortResult with ⟨level, sortState⟩
+          rw [hSort] at hSuccess
+          simp at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact
+            psKernelProjectionEnsureSortWith_preserves_configuration
+              whnf
+              hWhnf
+              context
+              inferState
+              sortState
+              inferredType
+              level
+              hInferConfig
+              hSort
+
+theorem psKernelProjectionApplyParamsWithFuel_preserves_configuration
+    (fuel : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound whnf)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (args : List PsKernelExpr)
+    (index numParams : Nat)
+    (current result : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelProjectionApplyParamsWithFuel
+          fuel
+          whnf
+          context
+          state
+          args
+          index
+          numParams
+          current =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelCheckerConfigurationSound
+      context
+      nextState := by
+  induction fuel generalizing
+      state nextState index current result with
+  | zero =>
+      simp [psKernelProjectionApplyParamsWithFuel] at hSuccess
+  | succ remaining ih =>
+      cases hMore : psKernelNatLt index numParams with
+      | false =>
+          simp [
+            psKernelProjectionApplyParamsWithFuel,
+            hMore
+          ] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact hConfig
+      | true =>
+          cases hRun : whnf context state current with
+          | error error =>
+              simp [
+                psKernelProjectionApplyParamsWithFuel,
+                hMore,
+                hRun
+              ] at hSuccess
+          | ok reducedResult =>
+              rcases reducedResult with
+                ⟨reduced, reducedState⟩
+              have hReducedConfig :
+                  PsKernelCheckerConfigurationSound
+                    context
+                    reducedState :=
+                (hWhnf
+                  context
+                  state
+                  reducedState
+                  current
+                  reduced
+                  hConfig
+                  hRun).2
+              cases reduced with
+              | forallE name domain body binderInfo =>
+                  cases hArg :
+                      psKernelExprListGet
+                        args
+                        index with
+                  | none =>
+                      simp [
+                        psKernelProjectionApplyParamsWithFuel,
+                        hMore,
+                        hRun,
+                        hArg
+                      ] at hSuccess
+                  | some argument =>
+                      have hRec :
+                          psKernelProjectionApplyParamsWithFuel
+                              remaining
+                              whnf
+                              context
+                              reducedState
+                              args
+                              (Nat.succ index)
+                              numParams
+                              (psKernelExprInstantiate1
+                                body
+                                argument) =
+                            Except.ok
+                              (Prod.mk result nextState) := by
+                        simpa [
+                          psKernelProjectionApplyParamsWithFuel,
+                          hMore,
+                          hRun,
+                          hArg
+                        ] using hSuccess
+                      exact
+                        ih
+                          reducedState
+                          nextState
+                          (Nat.succ index)
+                          (psKernelExprInstantiate1
+                            body
+                            argument)
+                          result
+                          hReducedConfig
+                          hRec
+              | _ =>
+                  simp [
+                    psKernelProjectionApplyParamsWithFuel,
+                    hMore,
+                    hRun
+                  ] at hSuccess
+
+theorem psKernelProjectionSkipFieldsWithFuel_preserves_configuration
+    (fuel : Nat)
+    (whnf inferType :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (hWhnf :
+      PsKernelWhnfConfigurationSound whnf)
+    (hInfer :
+      PsKernelInferenceConfigurationSound inferType)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (inductName : PsKernelName)
+    (structValue : PsKernelExpr)
+    (propType : Bool)
+    (targetIndex index : Nat)
+    (current result : PsKernelExpr)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state)
+    (hSuccess :
+      psKernelProjectionSkipFieldsWithFuel
+          fuel
+          whnf
+          inferType
+          context
+          state
+          inductName
+          structValue
+          propType
+          targetIndex
+          index
+          current =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelCheckerConfigurationSound
+      context
+      nextState := by
+  induction fuel generalizing
+      state nextState index current result with
+  | zero =>
+      simp [psKernelProjectionSkipFieldsWithFuel] at hSuccess
+  | succ remaining ih =>
+      cases hMore : psKernelNatLt index targetIndex with
+      | false =>
+          simp [
+            psKernelProjectionSkipFieldsWithFuel,
+            hMore
+          ] at hSuccess
+          rcases hSuccess with ⟨rfl, rfl⟩
+          exact hConfig
+      | true =>
+          cases hRun : whnf context state current with
+          | error error =>
+              simp [
+                psKernelProjectionSkipFieldsWithFuel,
+                hMore,
+                hRun
+              ] at hSuccess
+          | ok reducedResult =>
+              rcases reducedResult with
+                ⟨reduced, reducedState⟩
+              have hReducedConfig :
+                  PsKernelCheckerConfigurationSound
+                    context
+                    reducedState :=
+                (hWhnf
+                  context
+                  state
+                  reducedState
+                  current
+                  reduced
+                  hConfig
+                  hRun).2
+              cases reduced with
+              | forallE name domain body binderInfo =>
+                  cases hLoose :
+                      psKernelExprHasLooseBVar body with
+                  | false =>
+                      have hRec :
+                          psKernelProjectionSkipFieldsWithFuel
+                              remaining
+                              whnf
+                              inferType
+                              context
+                              reducedState
+                              inductName
+                              structValue
+                              propType
+                              targetIndex
+                              (Nat.succ index)
+                              body =
+                            Except.ok
+                              (Prod.mk result nextState) := by
+                        simpa [
+                          psKernelProjectionSkipFieldsWithFuel,
+                          hMore,
+                          hRun,
+                          hLoose
+                        ] using hSuccess
+                      exact
+                        ih
+                          reducedState
+                          nextState
+                          (Nat.succ index)
+                          body
+                          result
+                          hReducedConfig
+                          hRec
+                  | true =>
+                      cases propType with
+                      | false =>
+                          have hRec :
+                              psKernelProjectionSkipFieldsWithFuel
+                                  remaining
+                                  whnf
+                                  inferType
+                                  context
+                                  reducedState
+                                  inductName
+                                  structValue
+                                  false
+                                  targetIndex
+                                  (Nat.succ index)
+                                  (psKernelExprInstantiate1
+                                    body
+                                    (PsKernelExpr.proj
+                                      inductName
+                                      index
+                                      structValue)) =
+                                Except.ok
+                                  (Prod.mk result nextState) := by
+                            simpa [
+                              psKernelProjectionSkipFieldsWithFuel,
+                              hMore,
+                              hRun,
+                              hLoose
+                            ] using hSuccess
+                          exact
+                            ih
+                              reducedState
+                              nextState
+                              (Nat.succ index)
+                              (psKernelExprInstantiate1
+                                body
+                                (PsKernelExpr.proj
+                                  inductName
+                                  index
+                                  structValue))
+                              result
+                              hReducedConfig
+                              hRec
+                      | true =>
+                          cases hProp :
+                              psKernelInferIsPropWith
+                                whnf
+                                inferType
+                                context
+                                reducedState
+                                domain with
+                          | error error =>
+                              simp [
+                                psKernelProjectionSkipFieldsWithFuel,
+                                hMore,
+                                hRun,
+                                hLoose,
+                                hProp
+                              ] at hSuccess
+                          | ok propResult =>
+                              rcases propResult with
+                                ⟨isProp, propState⟩
+                              have hPropConfig :
+                                  PsKernelCheckerConfigurationSound
+                                    context
+                                    propState :=
+                                psKernelInferIsPropWith_preserves_configuration
+                                  whnf
+                                  inferType
+                                  hWhnf
+                                  hInfer
+                                  context
+                                  reducedState
+                                  propState
+                                  domain
+                                  isProp
+                                  hReducedConfig
+                                  hProp
+                              cases isProp with
+                              | false =>
+                                  simp [
+                                    psKernelProjectionSkipFieldsWithFuel,
+                                    hMore,
+                                    hRun,
+                                    hLoose,
+                                    hProp
+                                  ] at hSuccess
+                              | true =>
+                                  have hRec :
+                                      psKernelProjectionSkipFieldsWithFuel
+                                          remaining
+                                          whnf
+                                          inferType
+                                          context
+                                          propState
+                                          inductName
+                                          structValue
+                                          true
+                                          targetIndex
+                                          (Nat.succ index)
+                                          (psKernelExprInstantiate1
+                                            body
+                                            (PsKernelExpr.proj
+                                              inductName
+                                              index
+                                              structValue)) =
+                                        Except.ok
+                                          (Prod.mk result nextState) := by
+                                    simpa [
+                                      psKernelProjectionSkipFieldsWithFuel,
+                                      hMore,
+                                      hRun,
+                                      hLoose,
+                                      hProp
+                                    ] using hSuccess
+                                  exact
+                                    ih
+                                      propState
+                                      nextState
+                                      (Nat.succ index)
+                                      (psKernelExprInstantiate1
+                                        body
+                                        (PsKernelExpr.proj
+                                          inductName
+                                          index
+                                          structValue))
+                                      result
+                                      hPropConfig
+                                      hRec
+              | _ =>
+                  simp [
+                    psKernelProjectionSkipFieldsWithFuel,
+                    hMore,
+                    hRun
+                  ] at hSuccess

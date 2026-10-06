@@ -79,3 +79,12 @@ Checkpoint P0/P2/P3:
 - cloud CI correctly detected that the new portable Validate.lean root expanded backend-wasm's minimal portable entry closure
 - portable profile expectation now includes Validate.lean explicitly
 - no profile weakening or new repair guard was added
+
+## Checkpoint assurance/interoperability/archive
+
+- provider IndependenceVector records shared and diverse checker axes; boolean independence is forbidden
+- TrustDelta and SemanticDelta contracts distinguish trust expansion, semantic change, representation change, and security-only hardening
+- portable TheoryBridge model and identity bridge added for logical interoperability; cross-foundation preservation remains per-bridge target-unproved
+- semantic lock prototype binds source/Core/kernel/runtime/IR/provider-security/trust identities
+- archive profile requires offline-verifiable contracts, trust, SAVEF objects, and verifier capsule
+- offline verifier now binds semantic lock, archive profile, independence vectors, and all current SAVEF evidence

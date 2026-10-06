@@ -56,14 +56,11 @@ def psRustEmitParameterList
       Except.ok List.nil
   | List.cons parameter rest =>
       let printedTypeResult : Except PsRustEmitError String :=
-        if psRustTypeContainsFunction parameter.type then
-          if psRustFunctionTypeIsFirstOrder parameter.type then
-            psRustEmitFirstOrderClosureType parameter.type
-          else
-            Except.error
-              (PsRustEmitError.lambdaFunctionParameterUnsupported parameter.name)
-        else
-          psRustEmitType parameter.type;
+        match parameter.type with
+        | PsVerifiedIrType.function _ _ =>
+            psRustEmitClosureValueType parameter.type
+        | _ =>
+            psRustEmitType parameter.type;
       match printedTypeResult with
       | Except.error error =>
           Except.error error
@@ -1033,14 +1030,28 @@ def psRustEmitExprWithFuel
               | Except.error error =>
                   Except.error error
               | Except.ok printedBody =>
-                  if psRustTypeContainsFunction type then
-                    if psRustFunctionTypeIsFirstOrder type then
-                      match value with
-                      | PsVerifiedIrExpr.lambda _ _ _ =>
-                          match psRustEmitFirstOrderClosureType type with
-                          | Except.error error =>
-                              Except.error error
-                          | Except.ok closureType =>
+                  match type with
+                  | PsVerifiedIrType.function _ _ =>
+                      match psRustEmitClosureValueType type with
+                      | Except.error error =>
+                          Except.error error
+                      | Except.ok closureType =>
+                          match value with
+                          | PsVerifiedIrExpr.var _ =>
+                              Except.ok
+                                (psRustConcat4
+                                  "{ let "
+                                  (psRustIdentifier name)
+                                  ": "
+                                  (psRustConcat4
+                                    closureType
+                                    " = "
+                                    (psRustConcat4
+                                      (psRustClonePrinted printedValue)
+                                      "; "
+                                      printedBody
+                                      " }")))
+                          | _ =>
                               Except.ok
                                 (psRustConcat4
                                   "{ let "
@@ -1054,21 +1065,7 @@ def psRustEmitExprWithFuel
                                       "); "
                                       printedBody
                                       " }")))
-                      | _ =>
-                          Except.ok
-                            (psRustConcat4
-                              "{ let "
-                              (psRustIdentifier name)
-                              " = "
-                              (psRustConcat4
-                                (psRustClonePrinted printedValue)
-                                "; "
-                                printedBody
-                                " }"))
-                    else
-                      Except.error
-                        (PsRustEmitError.lambdaFunctionParameterUnsupported name)
-                  else
+                  | _ =>
                     Except.ok
                       (psRustConcat4
                         "{ let "

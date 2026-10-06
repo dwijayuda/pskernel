@@ -155,6 +155,66 @@ theorem psKernelExprGetAppFnArgs_reconstruct
       List.nil
 
 
+theorem psKernelExprGetAppFnArgsWorker_nonempty
+    (expr head : PsKernelExpr)
+    (tail : List PsKernelExpr) :
+    psKernelNatLt
+        0
+        (psKernelExprListLength
+          (Prod.snd
+            (psKernelExprGetAppFnArgsWorker
+              expr
+              (List.cons head tail)))) =
+      true := by
+  induction expr generalizing head tail with
+  | app fn arg fnIH _ =>
+      simpa [
+        psKernelExprGetAppFnArgsWorker
+      ] using
+        (fnIH arg (List.cons head tail))
+  | bvar index =>
+      rfl
+  | fvar name =>
+      rfl
+  | mvar name =>
+      rfl
+  | sort level =>
+      rfl
+  | const name levels =>
+      rfl
+  | lam name type body binderInfo typeIH bodyIH =>
+      rfl
+  | forallE name type body binderInfo typeIH bodyIH =>
+      rfl
+  | letE name type value body nondep typeIH valueIH bodyIH =>
+      rfl
+  | lit literal =>
+      rfl
+  | mdata metadata body bodyIH =>
+      rfl
+  | proj typeName index body bodyIH =>
+      rfl
+
+
+theorem psKernelExprGetAppFnArgs_app_nonempty
+    (fn arg : PsKernelExpr) :
+    psKernelNatLt
+        0
+        (psKernelExprListLength
+          (Prod.snd
+            (psKernelExprGetAppFnArgs
+              (PsKernelExpr.app fn arg)))) =
+      true := by
+  simpa [
+    psKernelExprGetAppFnArgs,
+    psKernelExprGetAppFnArgsWorker
+  ] using
+    psKernelExprGetAppFnArgsWorker_nonempty
+      fn
+      arg
+      List.nil
+
+
 theorem psKernelReductionClosure_appSpineHead
     (environment : PsKernelEnvironment)
     (localContext : PsKernelLocalContext)

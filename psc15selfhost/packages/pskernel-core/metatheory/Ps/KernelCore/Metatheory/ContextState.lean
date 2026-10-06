@@ -584,7 +584,7 @@ theorem psKernelCheckerContextEnterRecDepth_preserves_configuration
     exact hConfig
   · by_cases hTooDeep :
         psKernelNatGt
-            (Nat.succ context.recDepth)
+            (Nat.add context.recDepth 1)
             (Nat.mul
               context.maxRecDepth
               psKernelRecDepthFactor) =

@@ -558,6 +558,46 @@ theorem psKernelCheckerFreshLet_preserves_configuration
       from ⟨hIndex, hBoundNew, hStateNew⟩)
 
 
+theorem psKernelCheckerContextWithEagerReduce_preserves_configuration
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (eagerReduce : Bool)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state) :
+    PsKernelCheckerConfigurationSound
+      (psKernelCheckerContextWithEagerReduce
+        context
+        eagerReduce)
+      state := by
+  rcases hConfig with
+    ⟨hIndex, hBound, hState⟩
+  exact
+    ⟨
+      hIndex,
+      hBound,
+      hState
+    ⟩
+
+theorem psKernelCheckerContextWithNativeEvaluator_preserves_configuration
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (nativeEvaluator : Option PsKernelNativeEvaluator)
+    (hConfig :
+      PsKernelCheckerConfigurationSound context state) :
+    PsKernelCheckerConfigurationSound
+      (psKernelCheckerContextWithNativeEvaluator
+        context
+        nativeEvaluator)
+      state := by
+  rcases hConfig with
+    ⟨hIndex, hBound, hState⟩
+  exact
+    ⟨
+      hIndex,
+      hBound,
+      hState
+    ⟩
+
 theorem psKernelCheckerContextEnterRecDepth_preserves_configuration
     (context nextContext : PsKernelCheckerContext)
     (state : PsKernelCheckerState)

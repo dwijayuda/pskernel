@@ -172,12 +172,17 @@ def psRustEmitTypeWithFuel
           | Except.ok printedArguments =>
               if psStringEq name "Array" then
                 match printedArguments with
-                | List.cons elementType List.nil =>
-                    Except.ok
-                      (psRustConcat3 "Vec<" elementType ">")
-                | _ =>
+                | List.nil =>
                     Except.error
                       (PsRustEmitError.namedTypeArity name)
+                | List.cons elementType rest =>
+                    match rest with
+                    | List.nil =>
+                        Except.ok
+                          (psRustConcat3 "Vec<" elementType ">")
+                    | List.cons _ _ =>
+                        Except.error
+                          (PsRustEmitError.namedTypeArity name)
               else
                 let rustName :=
                   psRustIdentifier name;

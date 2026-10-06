@@ -837,3 +837,43 @@ def PsKernelInferenceCoreSound
       context.localContext
       expr
       result
+
+
+def PsKernelWhnfSound
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr),
+    whnf context state expr =
+      Except.ok (Prod.mk result nextState) ->
+    PsKernelReductionClosure
+      context.environment
+      context.localContext
+      expr
+      result
+
+def PsKernelDefEqSound
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState)) : Prop :=
+  ∀
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr),
+    defeq context state left right =
+      Except.ok (Prod.mk true nextState) ->
+    PsKernelDefEqJudgment
+      context.environment
+      context.localContext
+      left
+      right

@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Knot
+import Ps.KernelCore.Metatheory.Judgments
 
 theorem psKernelIsDefEqWithFuel_zero
     (context : PsKernelCheckerContext)
@@ -45,3 +46,127 @@ theorem psKernelCheckerWhnf_def
         state
         expr := by
   rfl
+
+
+theorem psKernelCheckerInfer_refines_typing
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (hCore :
+      PsKernelInferenceCoreSound
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          (psKernelIsDefEqWithFuel fuel))
+        (psKernelIsDefEqWithFuel fuel))
+    (hSuccess :
+      psKernelCheckerInfer
+          fuel context state expr =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelTypingJudgment
+      context.environment
+      context.localContext
+      expr
+      result := by
+  unfold psKernelCheckerInfer at hSuccess
+  unfold psKernelInferWithRecursorFuel at hSuccess
+  unfold psKernelInferWithFuel at hSuccess
+  exact
+    hCore
+      fuel
+      context
+      state
+      nextState
+      expr
+      result
+      true
+      hSuccess
+
+theorem psKernelCheckerCheck_refines_typing
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (hCore :
+      PsKernelInferenceCoreSound
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          (psKernelIsDefEqWithFuel fuel))
+        (psKernelIsDefEqWithFuel fuel))
+    (hSuccess :
+      psKernelCheckerCheck
+          fuel context state expr =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelTypingJudgment
+      context.environment
+      context.localContext
+      expr
+      result := by
+  unfold psKernelCheckerCheck at hSuccess
+  unfold psKernelCheckWithFuel at hSuccess
+  exact
+    hCore
+      fuel
+      context
+      state
+      nextState
+      expr
+      result
+      false
+      hSuccess
+
+theorem psKernelCheckerWhnf_refines_reduction
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (hWhnf :
+      PsKernelWhnfSound
+        (psKernelWhnfWithRecursorFuel
+          fuel
+          (psKernelIsDefEqWithFuel fuel)))
+    (hSuccess :
+      psKernelCheckerWhnf
+          fuel context state expr =
+        Except.ok (Prod.mk result nextState)) :
+    PsKernelReductionClosure
+      context.environment
+      context.localContext
+      expr
+      result := by
+  unfold psKernelCheckerWhnf at hSuccess
+  exact
+    hWhnf
+      context
+      state
+      nextState
+      expr
+      result
+      hSuccess
+
+theorem psKernelIsDefEq_refines_defeq
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state nextState : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (hDefEq :
+      PsKernelDefEqSound
+        (psKernelIsDefEqWithFuel fuel))
+    (hSuccess :
+      psKernelIsDefEq
+          fuel context state left right =
+        Except.ok (Prod.mk true nextState)) :
+    PsKernelDefEqJudgment
+      context.environment
+      context.localContext
+      left
+      right := by
+  unfold psKernelIsDefEq at hSuccess
+  exact
+    hDefEq
+      context
+      state
+      nextState
+      left
+      right
+      hSuccess

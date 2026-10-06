@@ -150,149 +150,192 @@ def psRustEmitFloatCompare
   | PsVerifiedIrFloatCompareOp.ge =>
       psRustConcat4 "((" left ") >= (" (psRustConcat2 right "))")
 
+def psRustExactTwoArguments
+    (arguments : List String) :
+    Option (Prod String String) :=
+  match arguments with
+  | List.nil =>
+      Option.none
+  | List.cons first rest =>
+      match rest with
+      | List.nil =>
+          Option.none
+      | List.cons second tail =>
+          match tail with
+          | List.nil =>
+              Option.some (Prod.mk first second)
+          | List.cons _ _ =>
+              Option.none
+
 def psRustEmitIntrinsicFromPrinted
     (operation : PsVerifiedIrIntrinsic)
     (arguments : List String) :
     Except PsRustEmitError String :=
   match operation with
   | PsVerifiedIrIntrinsic.machineIntBinary _ integerOperation =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustEmitMachineIntegerBinary
               integerOperation
               left
               right)
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.machineIntCompare _ integerOperation =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustEmitMachineIntegerCompare
               integerOperation
               left
               right)
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.floatBinary _ floatOperation =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustEmitFloatBinary
               floatOperation
               left
               right)
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.floatCompare _ floatOperation =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustEmitFloatCompare
               floatOperation
               left
               right)
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.natAdd =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_nat_add(&("
               left
               "), &("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.natSub =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_nat_sub(&("
               left
               "), &("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.natMul =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_nat_mul(&("
               left
               "), &("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.natDiv =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_nat_div(&("
               left
               "), &("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.natMod =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_nat_mod(&("
               left
               "), &("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.natEq =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "(("
               left
               ") == ("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.natNe =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "(("
               left
               ") != ("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.natLe =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "(("
               left
               ") <= ("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.natLt =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "(("
               left
               ") < ("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intOfNat =>
       match arguments with
@@ -340,70 +383,82 @@ def psRustEmitIntrinsicFromPrinted
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intAdd =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_int_add(&("
               left
               "), &("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intSub =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_int_sub(&("
               left
               "), &("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intMul =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_int_mul(&("
               left
               "), &("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intEq =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "(("
               left
               ") == ("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intLe =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "(("
               left
               ") <= ("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.intLt =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "(("
               left
               ") < ("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.boolNot =>
       match arguments with
@@ -413,48 +468,56 @@ def psRustEmitIntrinsicFromPrinted
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.boolAnd =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "(("
               left
               ") && ("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.boolOr =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "(("
               left
               ") || ("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.boolEq =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "(("
               left
               ") == ("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.boolNe =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "(("
               left
               ") != ("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.charOfNat =>
       match arguments with
@@ -477,15 +540,17 @@ def psRustEmitIntrinsicFromPrinted
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringPush =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_string_push(&("
               left
               "), "
               (psRustConcat2 right ")"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringSingleton =>
       match arguments with
@@ -508,15 +573,17 @@ def psRustEmitIntrinsicFromPrinted
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringAppend =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_string_append(&("
               left
               "), &("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringUtf8ByteSize =>
       match arguments with
@@ -529,37 +596,43 @@ def psRustEmitIntrinsicFromPrinted
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringNext =>
-      match arguments with
-      | List.cons value (List.cons position List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let value : String := Prod.fst pair;
+          let position : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_string_next(&("
               value
               "), &("
               (psRustConcat2 position "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringGet =>
-      match arguments with
-      | List.cons value (List.cons position List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let value : String := Prod.fst pair;
+          let position : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_string_get(&("
               value
               "), &("
               (psRustConcat2 position "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringAtEnd =>
-      match arguments with
-      | List.cons value (List.cons position List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let value : String := Prod.fst pair;
+          let position : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_string_at_end(&("
               value
               "), &("
               (psRustConcat2 position "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringExtract =>
       match arguments with
@@ -579,15 +652,17 @@ def psRustEmitIntrinsicFromPrinted
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.stringEq =>
-      match arguments with
-      | List.cons left (List.cons right List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let left : String := Prod.fst pair;
+          let right : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_string_eq(&("
               left
               "), &("
               (psRustConcat2 right "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity =>
       match arguments with
@@ -610,26 +685,30 @@ def psRustEmitIntrinsicFromPrinted
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arrayPush =>
-      match arguments with
-      | List.cons array (List.cons value List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let array : String := Prod.fst pair;
+          let value : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_array_push(&("
               array
               "), &("
               (psRustConcat2 value "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arrayGet =>
-      match arguments with
-      | List.cons array (List.cons index List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let array : String := Prod.fst pair;
+          let index : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_array_get(&("
               array
               "), &("
               (psRustConcat2 index "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arrayGetD =>
       match arguments with
@@ -683,15 +762,17 @@ def psRustEmitIntrinsicFromPrinted
       | _ =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arrayMap =>
-      match arguments with
-      | List.cons fnValue (List.cons array List.nil) =>
+      match psRustExactTwoArguments arguments with
+      | Option.some pair =>
+          let fnValue : String := Prod.fst pair;
+          let array : String := Prod.snd pair;
           Except.ok
             (psRustConcat4
               "__ps_array_map("
               fnValue
               ", &("
               (psRustConcat2 array "))"))
-      | _ =>
+      | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
   | PsVerifiedIrIntrinsic.arrayFoldl =>
       match arguments with

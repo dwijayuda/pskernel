@@ -543,3 +543,374 @@ theorem psKernelReductionCacheInsertLaw_all :
           cache expr result query hMatch
       rw [hLookup] at hGet
       exact hCache query cached hGet
+
+
+/- Unordered DefEq pair-cache routing. -/
+
+def psKernelExprPairSetIndexAsMapIndex
+    (index : PsKernelExprPairSetIndex) :
+    PsKernelExprMapIndex :=
+  match index with
+  | PsKernelExprPairSetIndex.empty =>
+      PsKernelExprMapIndex.empty
+  | PsKernelExprPairSetIndex.bucket entries =>
+      PsKernelExprMapIndex.bucket entries
+  | PsKernelExprPairSetIndex.branch left right =>
+      PsKernelExprMapIndex.branch
+        (psKernelExprPairSetIndexAsMapIndex left)
+        (psKernelExprPairSetIndexAsMapIndex right)
+termination_by index
+
+theorem psKernelExprPairSetIndexBucket_as_map_core
+    (fuel : Nat)
+    (index : PsKernelExprPairSetIndex)
+    (hash : Nat) :
+    psKernelExprMapIndexBucket
+        fuel
+        (psKernelExprPairSetIndexAsMapIndex index)
+        hash =
+      psKernelExprPairSetIndexBucket
+        fuel
+        index
+        hash := by
+  induction fuel generalizing index hash with
+  | zero =>
+      cases index <;> rfl
+  | succ remaining ih =>
+      cases index with
+      | empty =>
+          rfl
+      | bucket entries =>
+          rfl
+      | branch left right =>
+          by_cases hEven :
+              Nat.mod hash 2 = 0 <;>
+            simp [
+              psKernelExprPairSetIndexAsMapIndex,
+              psKernelExprMapIndexBucket,
+              psKernelExprPairSetIndexBucket,
+              hEven,
+              ih
+            ]
+
+theorem psKernelExprPairSetIndexSet_as_map_core
+    (fuel : Nat)
+    (index : PsKernelExprPairSetIndex)
+    (hash : Nat)
+    (entries : List (Prod PsKernelExpr PsKernelExpr)) :
+    psKernelExprPairSetIndexAsMapIndex
+        (psKernelExprPairSetIndexSet
+          fuel
+          index
+          hash
+          entries) =
+      psKernelExprMapIndexSet
+        fuel
+        (psKernelExprPairSetIndexAsMapIndex index)
+        hash
+        entries := by
+  induction fuel generalizing index hash with
+  | zero =>
+      rfl
+  | succ remaining ih =>
+      cases index <;>
+        by_cases hEven : Nat.mod hash 2 = 0 <;>
+        simp [
+          psKernelExprPairSetIndexAsMapIndex,
+          psKernelExprPairSetIndexSet,
+          psKernelExprMapIndexSet,
+          hEven,
+          ih
+        ]
+
+theorem psKernelExprPairSetIndexBucket_set_same_core
+    (fuel : Nat)
+    (index : PsKernelExprPairSetIndex)
+    (hash : Nat)
+    (entries : List (Prod PsKernelExpr PsKernelExpr)) :
+    psKernelExprPairSetIndexBucket
+        fuel
+        (psKernelExprPairSetIndexSet
+          fuel
+          index
+          hash
+          entries)
+        hash =
+      entries := by
+  calc
+    psKernelExprPairSetIndexBucket
+        fuel
+        (psKernelExprPairSetIndexSet
+          fuel
+          index
+          hash
+          entries)
+        hash =
+      psKernelExprMapIndexBucket
+        fuel
+        (psKernelExprPairSetIndexAsMapIndex
+          (psKernelExprPairSetIndexSet
+            fuel
+            index
+            hash
+            entries))
+        hash := by
+          symm
+          exact
+            psKernelExprPairSetIndexBucket_as_map_core
+              fuel
+              (psKernelExprPairSetIndexSet
+                fuel index hash entries)
+              hash
+    _ =
+      psKernelExprMapIndexBucket
+        fuel
+        (psKernelExprMapIndexSet
+          fuel
+          (psKernelExprPairSetIndexAsMapIndex index)
+          hash
+          entries)
+        hash := by
+          rw [
+            psKernelExprPairSetIndexSet_as_map_core
+              fuel index hash entries
+          ]
+    _ = entries :=
+      psKernelExprMapIndexBucket_set_same_core
+        fuel
+        (psKernelExprPairSetIndexAsMapIndex index)
+        hash
+        entries
+
+theorem psKernelExprPairHash_lt_modulus_core
+    (left right : PsKernelExpr) :
+    psKernelExprPairHash left right <
+      psKernelCacheHashModulus := by
+  unfold psKernelExprPairHash
+  exact Nat.mod_lt _ (by decide)
+
+theorem psKernelExprPairHash_lt_two_pow_16_core
+    (left right : PsKernelExpr) :
+    psKernelExprPairHash left right <
+      Nat.pow 2 16 := by
+  exact
+    Nat.lt_trans
+      (psKernelExprPairHash_lt_modulus_core left right)
+      (by decide)
+
+theorem psKernelExprPairSetIndexBucket_set_other_hash_core
+    (index : PsKernelExprPairSetIndex)
+    (setHash findHash : Nat)
+    (entries : List (Prod PsKernelExpr PsKernelExpr))
+    (hSetBound : setHash < Nat.pow 2 16)
+    (hFindBound : findHash < Nat.pow 2 16)
+    (hDifferent : setHash ≠ findHash) :
+    psKernelExprPairSetIndexBucket
+        16
+        (psKernelExprPairSetIndexSet
+          16
+          index
+          setHash
+          entries)
+        findHash =
+      psKernelExprPairSetIndexBucket
+        16
+        index
+        findHash := by
+  calc
+    psKernelExprPairSetIndexBucket
+        16
+        (psKernelExprPairSetIndexSet
+          16
+          index
+          setHash
+          entries)
+        findHash =
+      psKernelExprMapIndexBucket
+        16
+        (psKernelExprPairSetIndexAsMapIndex
+          (psKernelExprPairSetIndexSet
+            16 index setHash entries))
+        findHash := by
+          symm
+          exact
+            psKernelExprPairSetIndexBucket_as_map_core
+              16
+              (psKernelExprPairSetIndexSet
+                16 index setHash entries)
+              findHash
+    _ =
+      psKernelExprMapIndexBucket
+        16
+        (psKernelExprMapIndexSet
+          16
+          (psKernelExprPairSetIndexAsMapIndex index)
+          setHash
+          entries)
+        findHash := by
+          rw [
+            psKernelExprPairSetIndexSet_as_map_core
+              16 index setHash entries
+          ]
+    _ =
+      psKernelExprMapIndexBucket
+        16
+        (psKernelExprPairSetIndexAsMapIndex index)
+        findHash :=
+      psKernelExprMapIndexBucket_set_other_bounded
+        16
+        (psKernelExprPairSetIndexAsMapIndex index)
+        setHash
+        findHash
+        entries
+        hSetBound
+        hFindBound
+        hDifferent
+    _ =
+      psKernelExprPairSetIndexBucket
+        16
+        index
+        findHash :=
+      psKernelExprPairSetIndexBucket_as_map_core
+        16 index findHash
+
+theorem psKernelExprPairEq_true_cases_core
+    (queryLeft queryRight storedLeft storedRight : PsKernelExpr)
+    (h :
+      psKernelExprPairEq
+          queryLeft
+          queryRight
+          (Prod.mk storedLeft storedRight) =
+        true) :
+    (psKernelExprEq storedLeft queryLeft = true ∧
+      psKernelExprEq storedRight queryRight = true) ∨
+    (psKernelExprEq storedLeft queryRight = true ∧
+      psKernelExprEq storedRight queryLeft = true) := by
+  cases hFirst :
+      psKernelExprEq storedLeft queryLeft with
+  | true =>
+      left
+      have hSecond :
+          psKernelExprEq storedRight queryRight = true := by
+        simpa [
+          psKernelExprPairEq,
+          hFirst
+        ] using h
+      exact ⟨hFirst, hSecond⟩
+  | false =>
+      cases hSwap :
+          psKernelExprEq storedLeft queryRight with
+      | false =>
+          simp [
+            psKernelExprPairEq,
+            hFirst,
+            hSwap
+          ] at h
+      | true =>
+          right
+          have hSecond :
+              psKernelExprEq storedRight queryLeft = true := by
+            simpa [
+              psKernelExprPairEq,
+              hFirst,
+              hSwap
+            ] using h
+          exact ⟨hSwap, hSecond⟩
+
+theorem psKernelExprPairEq_true_refines_presentation_core
+    (queryLeft queryRight storedLeft storedRight : PsKernelExpr)
+    (h :
+      psKernelExprPairEq
+          queryLeft
+          queryRight
+          (Prod.mk storedLeft storedRight) =
+        true) :
+    (PsKernelStructuralExprEq storedLeft queryLeft ∧
+      PsKernelStructuralExprEq storedRight queryRight) ∨
+    (PsKernelStructuralExprEq storedLeft queryRight ∧
+      PsKernelStructuralExprEq storedRight queryLeft) := by
+  rcases
+      psKernelExprPairEq_true_cases_core
+        queryLeft queryRight storedLeft storedRight h with
+    hDirect | hSwapped
+  · left
+    exact
+      ⟨
+        psKernelExprEq_true_refines_structural
+          storedLeft queryLeft hDirect.1,
+        psKernelExprEq_true_refines_structural
+          storedRight queryRight hDirect.2
+      ⟩
+  · right
+    exact
+      ⟨
+        psKernelExprEq_true_refines_structural
+          storedLeft queryRight hSwapped.1,
+        psKernelExprEq_true_refines_structural
+          storedRight queryLeft hSwapped.2
+      ⟩
+
+theorem psKernelExprPairHash_of_pairEq_true_core
+    (queryLeft queryRight storedLeft storedRight : PsKernelExpr)
+    (h :
+      psKernelExprPairEq
+          queryLeft
+          queryRight
+          (Prod.mk storedLeft storedRight) =
+        true) :
+    psKernelExprPairHash storedLeft storedRight =
+      psKernelExprPairHash queryLeft queryRight := by
+  rcases
+      psKernelExprPairEq_true_cases_core
+        queryLeft queryRight storedLeft storedRight h with
+    hDirect | hSwapped
+  · have hLeft :=
+      psKernelExprHash_of_exprEq_true
+        storedLeft queryLeft hDirect.1
+    have hRight :=
+      psKernelExprHash_of_exprEq_true
+        storedRight queryRight hDirect.2
+    simp [
+      psKernelExprPairHash,
+      hLeft,
+      hRight
+    ]
+  · have hLeft :=
+      psKernelExprHash_of_exprEq_true
+        storedLeft queryRight hSwapped.1
+    have hRight :=
+      psKernelExprHash_of_exprEq_true
+        storedRight queryLeft hSwapped.2
+    simp [
+      psKernelExprPairHash,
+      hLeft,
+      hRight,
+      Nat.add_comm
+    ]
+
+theorem psKernelExprPairSetContainsIn_cons_true_cases_core
+    (queryLeft queryRight : PsKernelExpr)
+    (entry : Prod PsKernelExpr PsKernelExpr)
+    (rest : List (Prod PsKernelExpr PsKernelExpr))
+    (h :
+      psKernelExprPairSetContainsIn
+          queryLeft
+          queryRight
+          (List.cons entry rest) =
+        true) :
+    psKernelExprPairEq queryLeft queryRight entry = true ∨
+      psKernelExprPairSetContainsIn
+          queryLeft
+          queryRight
+          rest =
+        true := by
+  cases hHead :
+      psKernelExprPairEq queryLeft queryRight entry with
+  | true =>
+      exact Or.inl hHead
+  | false =>
+      right
+      simpa [
+        psKernelExprPairSetContainsIn,
+        hHead
+      ] using h

@@ -558,47 +558,19 @@ theorem psKernelInferProjectionWith_configuration_sound
                                               inductInfo.numParams
                                               inductInfo.numIndices) with
                                       | false =>
-                                          have hArgsLengthNeRaw :
-                                              psKernelExprListLength
-                                                  (psKernelExprGetAppArgs
-                                                    typeWhnf) ≠
-                                                Nat.add
-                                                  inductInfo.numParams
-                                                  inductInfo.numIndices := by
-                                            intro hEq
-                                            have hTrue :
-                                                Nat.beq
-                                                    (psKernelExprListLength
-                                                      (psKernelExprGetAppArgs
-                                                        typeWhnf))
-                                                    (Nat.add
-                                                      inductInfo.numParams
-                                                      inductInfo.numIndices) =
-                                                  true := by
-                                              simpa [hEq]
-                                            have hFalse :
-                                                Nat.beq
-                                                    (psKernelExprListLength
-                                                      (psKernelExprGetAppArgs
-                                                        typeWhnf))
-                                                    (Nat.add
-                                                      inductInfo.numParams
-                                                      inductInfo.numIndices) =
-                                                  false := by
-                                              simpa [args] using
-                                                hArgsLengthBool
-                                            rw [hFalse] at hTrue
-                                            cases hTrue
-                                          simp only [
+                                          simp [
+                                            psKernelInferProjectionWith,
+                                            hInferRun,
+                                            hTypeWhnf,
+                                            hIndexBound,
+                                            hFn,
+                                            hTypeName,
+                                            hInductFind,
                                             hCtors,
-                                            hCtorRest
+                                            hCtorRest,
+                                            args,
+                                            hArgsLengthBool
                                           ] at hSuccess
-                                          split at hSuccess
-                                          next hEq =>
-                                            exact
-                                              (hArgsLengthNeRaw hEq).elim
-                                          next hNe =>
-                                            simp at hSuccess
                                       | true =>
                                           have hArgsLength :
                                               psKernelExprListLength args =

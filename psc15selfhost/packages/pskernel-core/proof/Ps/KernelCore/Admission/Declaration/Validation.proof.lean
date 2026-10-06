@@ -1,5 +1,6 @@
 import Ps.KernelCore.Admission.Declaration.Validation
 import Ps.KernelCore.Metatheory.Admission
+import Ps.KernelCore.Metatheory.SessionRefinement
 
 theorem psKernelNameListsEq_nil :
     psKernelNameListsEq List.nil List.nil = true := by
@@ -213,7 +214,7 @@ theorem psKernelCheckNoMVarNoFVar_success_flags
             hFVar
           ] at hSuccess
       | false =>
-          exact ⟨hMVar, hFVar⟩
+          constructor <;> rfl
 
 theorem psKernelCheckLevelParams_success_none
     (expr : PsKernelExpr)
@@ -226,14 +227,14 @@ theorem psKernelCheckLevelParams_success_none
   cases hFind :
       psKernelFindUndefExprLevelParam expr allowed with
   | none =>
-      exact hFind
+      rfl
   | some name =>
       simp [
         psKernelCheckLevelParams,
         hFind
       ] at hSuccess
 
-theorem psKernelSessionCheck_success_preserves_context_for_validation
+theorem psKernelSessionCheck_success_preserves_context_core
     (fuel : Nat)
     (session nextSession : PsKernelCheckerSession)
     (expr result : PsKernelExpr)
@@ -349,7 +350,7 @@ theorem psKernelCheckDefinitionBody_success_refines_semantics
                                     session.context.localContext
                                     value.value
                                     inferredType :=
-                                psKernelSessionCheck_refines_typing
+                                psKernelSessionCheck_refines_typing_core
                                   fuel
                                   session
                                   checkedSession
@@ -360,7 +361,7 @@ theorem psKernelCheckDefinitionBody_success_refines_semantics
                               have hCheckedContext :
                                   checkedSession.context =
                                     session.context :=
-                                psKernelSessionCheck_success_preserves_context_for_validation
+                                psKernelSessionCheck_success_preserves_context_core
                                   fuel
                                   session
                                   checkedSession
@@ -373,7 +374,7 @@ theorem psKernelCheckDefinitionBody_success_refines_semantics
                                     checkedSession.context.localContext
                                     inferredType
                                     value.base.type :=
-                                psKernelSessionIsDefEq_refines_defeq
+                                psKernelSessionIsDefEq_refines_defeq_core
                                   fuel
                                   checkedSession
                                   finalSession

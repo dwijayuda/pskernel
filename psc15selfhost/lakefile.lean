@@ -311,7 +311,8 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.Substitution,
     `Ps.KernelCore.Metatheory.SubstitutionRefinement,
     `Ps.KernelCore.Metatheory.Admission,
-    `Ps.KernelCore.Metatheory.AdmissionRefinement
+    `Ps.KernelCore.Metatheory.AdmissionRefinement,
+    `Ps.KernelCore.Metatheory.SessionRefinement
   ]
 
 lean_lib PsKernelCoreTestSupport where

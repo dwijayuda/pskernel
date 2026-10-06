@@ -1,9 +1,9 @@
-import { lstat, open, readdir, realpath } from 'node:fs/promises';
-import { constants } from 'node:fs';
+import { lstat, readdir, realpath } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { pinnedTypeScriptVersion } from './typescript-cli.mjs';
+import { readObservedFileBytes as readBounded } from './observed-file-bytes.mjs';
 
 const defaults = Object.freeze({ maxFiles: 2048, maxFileBytes: 64 * 1024 * 1024,
   maxTotalBytes: 80 * 1024 * 1024, maxDepth: 24, maxMetadataBytes: 1024 * 1024 });
@@ -16,25 +16,6 @@ function budgets(overrides = {}) {
   const result = { ...defaults, ...overrides };
   if (Object.values(result).some(value => !Number.isSafeInteger(value) || value < 0)) fail('BUDGET');
   return result;
-}
-async function readBounded(file, limit) {
-  const before = await lstat(file);
-  if (!before.isFile() || before.isSymbolicLink()) fail('FILE_SHAPE');
-  if (before.size > limit) fail('RESOURCE_EXHAUSTED');
-  const handle = await open(file, constants.O_RDONLY | (process.platform === 'win32' ? 0 : constants.O_NOFOLLOW));
-  try {
-    const info = await handle.stat();
-    if (!info.isFile() || info.size > limit) fail('RESOURCE_EXHAUSTED');
-    const bytes = Buffer.alloc(info.size);
-    let offset = 0;
-    while (offset < bytes.length) {
-      const result = await handle.read(bytes, offset, bytes.length - offset, offset);
-      if (!result.bytesRead) fail('CHANGED_DURING_READ');
-      offset += result.bytesRead;
-    }
-    if ((await handle.read(Buffer.alloc(1), 0, 1, offset)).bytesRead) fail('CHANGED_DURING_READ');
-    return bytes;
-  } finally { await handle.close(); }
 }
 async function manifest(file, bound) {
   try {

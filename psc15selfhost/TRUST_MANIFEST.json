@@ -40,6 +40,7 @@
       "scripts/checked-kernel-dual.mjs",
       "scripts/checked-kernel-identity.mjs",
       "scripts/checked-kernel-provider.mjs",
+      "scripts/checked-provider-inputs.mjs",
       "scripts/checked-seed-session.mjs",
       "scripts/checked-source-snapshot.mjs",
       "scripts/comparator-export.mjs",
@@ -48,6 +49,7 @@
       "scripts/kernel-checked-session.mjs",
       "scripts/kernel-contract.mjs",
       "scripts/observed-build-archive.mjs",
+      "scripts/observed-file-bytes.mjs",
       "scripts/provider-security.mjs",
       "scripts/selfhost-source-workspace.mjs",
       "scripts/typescript-cli.mjs",
@@ -58,7 +60,7 @@
       "scripts/checked-build.mjs",
       "scripts/checked-kernel-provider.mjs"
     ],
-    "remaining": "Installed TypeScript and selected native platform package bytes are now captured separately by checked builds. Generated compiler/provider/runtime execution closure, ambient inputs and authenticated supply-chain evidence remain incomplete; static closure is not the entire TCB."
+    "remaining": "Installed TypeScript/native platform trees and selected provider runtime-file profiles are captured separately by checked builds. Complete generated compiler/runtime execution closure, unlisted dynamic/ambient inputs and authenticated supply-chain evidence remain incomplete; static closure is not the entire TCB."
   },
   "trustClasses": {
     "logicalAcceptance": [

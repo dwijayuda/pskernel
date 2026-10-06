@@ -18,6 +18,7 @@ import {
 import { runCheckedSeedSession } from './checked-seed-session.mjs';
 import { pinnedTypeScriptVersionText, resolveTypeScriptCli } from './typescript-cli.mjs';
 import { captureTypeScriptToolInputs, verifyTypeScriptToolInputs } from './typescript-tool-inputs.mjs';
+import { captureCheckedProviderInputs, verifyCheckedProviderInputs } from './checked-provider-inputs.mjs';
 import { assertProviderSecurity, defaultProviderSecurityProfile } from './provider-security.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -55,10 +56,14 @@ export async function buildChecked({
   let compilerBytes;
   let irStages;
   let parity;
+  let providerToolInputs = [];
   const checkAdmissions = async text => {
+    const captures = await Promise.all([kernel, ...(dualCheck ? [dualCheck] : [])].map(selector => captureCheckedProviderInputs(selector)));
+    const pinnedOptions = Object.assign({}, ...captures.map(captured => captured.invocationOptions));
     const checked = dualCheck
-      ? await checkAdmissionsWithDual(text, kernel, dualCheck, { securityProfile })
-      : await checkAdmissionsWithKernel(text, kernel, { securityProfile });
+      ? await checkAdmissionsWithDual(text, kernel, dualCheck, { securityProfile, ...pinnedOptions })
+      : await checkAdmissionsWithKernel(text, kernel, { securityProfile, ...pinnedOptions });
+    providerToolInputs = await Promise.all(captures.map(captured => verifyCheckedProviderInputs(captured)));
     parity = checked.parity;
     return checked.result;
   };
@@ -112,6 +117,7 @@ export async function buildChecked({
     flattenedSourceSha256: digest(snapshot.source),
     sourceCount: snapshot.ordered.length,
     canonicalAdmissionsSha256: digest(admissions),
+    providerInputObservations: providerToolInputs.map(item => item.details),
     ...(parity ? { dualCheck: parity } : {}),
   };
   if (checkOnly) return receipt;
@@ -152,10 +158,11 @@ export async function buildChecked({
     const evidence = createCheckedBuildGraph({ sourceKind: snapshot.kind, sources: snapshot.sources,
       admissions, typeScript, javaScript, declarations, sourceMap, compilerBytes,
       compilerKind: compilerIdentity.engine, typeScriptCompilerBytes, typeScriptToolInputs, outputStem: stem, irStages,
-      provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1,
+      provider: receipt.provider, providerSecurity: selectedProviderSecurity, kernelContract: kernelContractV1, providerToolInputs,
       hostSources, runtime: { implementation: 'node', version: process.version, platform: process.platform, arch: process.arch } });
     receipt.buildGraph = evidence.identity;
     receipt.typeScriptToolInputs = evidence.typeScriptToolInputs;
+    receipt.providerInputs = evidence.providerInputs;
     const archive = packObservedBuildArchive(evidence);
     receipt.buildArchive = archive.identity;
     await writeFile(path.join(staging, stem + '.build-archive.json'), archive.bytes);

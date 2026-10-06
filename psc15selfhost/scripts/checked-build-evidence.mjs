@@ -32,7 +32,7 @@ export async function readCheckedBuildHostSources() {
  */
 export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeScript,
   javaScript, declarations, sourceMap, compilerBytes, compilerKind, typeScriptCompilerBytes,
-  provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs }) {
+  provider, providerSecurity, kernelContract, hostSources, runtime, outputStem, irStages, typeScriptToolInputs, providerToolInputs = [] }) {
   const artifacts = new Map(), entries = [], executions = [];
   let toolInputs;
   function add(item, source, inline = false) {
@@ -51,6 +51,25 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   function json(value, domain, contract, source, inline = true) {
     return add(canonicalArtifact(value, domain, contract), source, inline);
   }
+  function bindToolInputs(snapshot, contract, domain, role) {
+    const { details, files } = snapshot;
+    if (details.contract !== contract || details.fullInputClosureEstablished !== false ||
+        !Array.isArray(files) || !Array.isArray(details.files) || files.length !== details.files.length || !files.length)
+      throw new Error('PSC_BUILD_GRAPH_TOOL_INPUTS_SCHEMA');
+    const capturedFiles = files.map((item, index) => {
+      const expected = details.files[index];
+      if (item.path !== expected.path || !(item.bytes instanceof Uint8Array) ||
+          item.bytes.byteLength !== expected.byteLength || createHash('sha256').update(item.bytes).digest('hex') !== expected.sha256 ||
+          (index > 0 && files[index - 1].path >= item.path)) throw new Error('PSC_BUILD_GRAPH_TOOL_INPUTS_BYTES');
+      return { path: item.path, artifact: bytes(item.bytes, domain, 'psc-tool-file-bytes/1',
+        { kind: 'archive-required', role, path: item.path }).identity };
+    });
+    return json({ ...details, files: capturedFiles,
+      stabilityObservation: contract === 'psc-typescript-tool-inputs/1' ? 'same-inventory-and-bytes-before-and-after-execution' :
+        'same-explicit-file-bytes-before-and-after-checking' }, 'tool-inputs', contract, { kind: 'inline' });
+  }
+  const providerInputs = providerToolInputs.map(snapshot =>
+    bindToolInputs(snapshot, 'psc-checked-provider-inputs/1', 'provider-tool-file', 'selected-provider-file'));
   const compiler = bytes(compilerBytes, 'compiler', 'psc-compiler-module/1', { kind: 'archive-required', role: compilerKind });
   const hosts = hostSources.map(item => bytes(item.bytes, 'host-source', 'psc-host-source/1',
     { kind: 'repository-file', path: item.path }));
@@ -60,10 +79,12 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
     { kind: 'archive-required', role: 'ordered-preparation-inputs' }, false);
   const core = bytes(admissions, 'canonical-admissions', 'proofscript-checked-admissions/2',
     { kind: 'output-file', suffix: '.admissions.json' });
-  const security = json({ provider, providerSecurity, kernelContract }, 'acceptance-context',
+  const security = json({ provider, providerSecurity, kernelContract,
+    ...(providerInputs.length ? { providerInputs: providerInputs.map(item => item.identity) } : {}) }, 'acceptance-context',
     'psc-acceptance-context/1', { kind: 'inline' });
   const semanticIdentity = { providerProfile: provider.profile, kernelContract, runtimeSemantics: 'psc-runtime-semantics/1' };
-  const baseDependencies = [compiler.identity, ...hosts.map(item => item.identity), security.identity];
+  const baseDependencies = [compiler.identity, ...hosts.map(item => item.identity), security.identity,
+    ...providerInputs.map(item => item.identity)];
   const assumptions = ['trusted-host-composition', 'selected-compiler-module-closure', 'selected-host-runtime',
     'selected-kernel-invocation'];
   function execute(id, input, outputs, impl, relation, parameters, dependencies, extraAssumptions = []) {
@@ -112,22 +133,9 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
         { kind: 'archive-required', role: 'typescript-compiler-entry' });
       if (typeScriptToolInputs) {
         const { details, files } = typeScriptToolInputs;
-        if (details.contract !== 'psc-typescript-tool-inputs/1' || details.fullInputClosureEstablished !== false ||
-            !Array.isArray(files) || !Array.isArray(details.files) || files.length !== details.files.length || !files.length)
-          throw new Error('PSC_BUILD_GRAPH_TOOL_INPUTS_SCHEMA');
-        const capturedFiles = files.map((item, index) => {
-          const expected = details.files[index];
-          if (item.path !== expected.path || !(item.bytes instanceof Uint8Array) ||
-              item.bytes.byteLength !== expected.byteLength ||
-              createHash('sha256').update(item.bytes).digest('hex') !== expected.sha256 ||
-              (index > 0 && files[index - 1].path >= item.path)) throw new Error('PSC_BUILD_GRAPH_TOOL_INPUTS_BYTES');
-          return { path: item.path, artifact: bytes(item.bytes, 'typescript-tool-file', 'psc-tool-file-bytes/1',
-            { kind: 'archive-required', role: 'typescript-package-file', path: item.path }).identity };
-        });
+        toolInputs = bindToolInputs(typeScriptToolInputs, 'psc-typescript-tool-inputs/1', 'typescript-tool-file', 'typescript-package-file');
         const entry = files.find(item => item.path === details.entryPath);
         if (!entry || !Buffer.from(entry.bytes).equals(Buffer.from(typeScriptCompilerBytes))) throw new Error('PSC_BUILD_GRAPH_TOOL_ENTRY');
-        toolInputs = json({ ...details, files: capturedFiles, stabilityObservation: 'same-inventory-and-bytes-before-and-after-execution' },
-          'tool-inputs', 'psc-typescript-tool-inputs/1', { kind: 'inline' });
       }
       const outputs = [
         bytes(javaScript, 'javascript-output', 'typescript-emitted-file/1', { kind: 'output-file', suffix: '.js' }),
@@ -148,5 +156,6 @@ export function createCheckedBuildGraph({ sourceKind, sources, admissions, typeS
   const encoded = canonicalBytes(graph);
   return { graph, artifacts, bytes: encoded,
     identity: artifactId(encoded, 'build-graph', 'psc-observed-build-graph/1'),
+    ...(providerInputs.length ? { providerInputs: providerInputs.map(item => item.identity) } : {}),
     ...(toolInputs ? { typeScriptToolInputs: toolInputs.identity } : {}) };
 }

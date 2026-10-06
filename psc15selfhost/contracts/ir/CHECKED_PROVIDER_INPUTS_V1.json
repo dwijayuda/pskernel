@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "contract": "psc-checked-provider-inputs/1",
+  "implementation": "scripts/checked-provider-inputs.mjs",
+  "integration": "scripts/checked-build.mjs; scripts/checked-build-evidence.mjs",
+  "status": "observed-selected-runtime-files",
+  "profiles": {
+    "lean434-wasm": "Existing bundled wrapper, prebuilt verifier, pinned launcher/Wasm, package metadata, source/toolchain manifests and Lean license. Existing provider integrity and security checks remain mandatory.",
+    "pskernel-core.old3": "Existing host/worker adapters, generated foundation.js, package metadata and BUILD.json. The observed generated file must match the currently selected owned-provider identity.",
+    "pskernel-core": "Host adapter and the exact selected native executable. The selected path is passed explicitly to the checker invocation.",
+    "lean434": "Existing package/host/prebuilt adapters, package metadata and the exact selected native executable. The existing preference for current development/source binaries over stale prebuilts is retained."
+  },
+  "rules": [
+    "Capture selected regular-file bytes before checking; compare the same explicit file set after checking, before a live checked handle can be returned.",
+    "Resolve native executable selection once; ambient executable overrides cannot silently select a different path for that invocation.",
+    "Dual-check builds capture and bind both selected providers; this does not assert independent implementations.",
+    "Bind each provider manifest to the acceptance context and checking action. Retain every referenced file byte in the observed build archive.",
+    "Check-only receipts retain explicit file-digest observations; they do not contain a byte archive or mint transferable authority.",
+    "The existing archive budgets still apply to combined compiler/tool/provider artifacts; oversized combinations fail before final publication."
+  ],
+  "budgets": { "filesPerProvider": 64, "fileBytes": 134217728, "totalBytesPerProvider": 167772160 },
+  "fullInputClosureEstablished": false,
+  "remaining": [
+    "host runtime, OS libraries and ambient environment",
+    "unlisted dynamic inputs and complete generated-compiler execution closure",
+    "source-binary correspondence and authenticated release provenance",
+    "hostile-filesystem protection beyond before/after observations",
+    "actual independent/diverse checking and global checker soundness"
+  ],
+  "authority": "Byte observations bind the recorded invocation under trusted host/filesystem assumptions. Offline archive integrity replay does not execute the checker, replay kernel acceptance, establish semantic preservation or promote security/bootstrap assurance."
+}

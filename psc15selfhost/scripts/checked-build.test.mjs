@@ -149,6 +149,11 @@ for (const [kind, source] of [
       assert.equal(tool.canonicalValue.fullInputClosureEstablished, false);
       assert.ok(tool.canonicalValue.files.some(item => item.path === tool.canonicalValue.nativePath));
       assert.ok(tool.canonicalValue.files.some(item => item.path.endsWith('/lib.es2022.d.ts')));
+      const provider = graph.entries.find(entry => entry.identity.contract === 'psc-checked-provider-inputs/1');
+      assert.deepEqual(receipt.providerInputs, [provider.identity]);
+      assert.equal(provider.canonicalValue.selector, 'lean434-wasm');
+      assert.ok(provider.canonicalValue.files.some(item => item.path.endsWith('/pskernel-lean.wasm')));
+      assert.equal(receipt.providerInputObservations[0].fullInputClosureEstablished, false);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

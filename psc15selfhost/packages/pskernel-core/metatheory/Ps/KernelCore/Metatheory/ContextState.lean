@@ -677,6 +677,101 @@ theorem psKernelCheckerContextEnterRecDepth_preserves_semantic_view
           exact ⟨rfl, rfl⟩
 
 
+theorem psKernelTypingJudgment_enterRecDepth_back
+    (context nextContext : PsKernelCheckerContext)
+    (expr type : PsKernelExpr)
+    (hEnter :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hTyping :
+      PsKernelTypingJudgment
+        nextContext.environment
+        nextContext.localContext
+        expr
+        type) :
+    PsKernelTypingJudgment
+      context.environment
+      context.localContext
+      expr
+      type := by
+  have hView :=
+    psKernelCheckerContextEnterRecDepth_preserves_semantic_view
+      context nextContext hEnter
+  rw [hView.1, hView.2] at hTyping
+  exact hTyping
+
+theorem psKernelDefEqJudgment_enterRecDepth_back
+    (context nextContext : PsKernelCheckerContext)
+    (left right : PsKernelExpr)
+    (hEnter :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hDefEq :
+      PsKernelDefEqJudgment
+        nextContext.environment
+        nextContext.localContext
+        left
+        right) :
+    PsKernelDefEqJudgment
+      context.environment
+      context.localContext
+      left
+      right := by
+  have hView :=
+    psKernelCheckerContextEnterRecDepth_preserves_semantic_view
+      context nextContext hEnter
+  rw [hView.1, hView.2] at hDefEq
+  exact hDefEq
+
+theorem psKernelReductionClosure_enterRecDepth_back
+    (context nextContext : PsKernelCheckerContext)
+    (expr result : PsKernelExpr)
+    (hEnter :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hReduction :
+      PsKernelReductionClosure
+        nextContext.environment
+        nextContext.localContext
+        expr
+        result) :
+    PsKernelReductionClosure
+      context.environment
+      context.localContext
+      expr
+      result := by
+  have hView :=
+    psKernelCheckerContextEnterRecDepth_preserves_semantic_view
+      context nextContext hEnter
+  rw [hView.1, hView.2] at hReduction
+  exact hReduction
+
+theorem psKernelCheckerConfigurationSound_enterRecDepth_back
+    (context nextContext : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (hEnter :
+      psKernelCheckerContextEnterRecDepth context =
+        Except.ok nextContext)
+    (hSound :
+      PsKernelCheckerConfigurationSound
+        nextContext
+        state) :
+    PsKernelCheckerConfigurationSound
+      context
+      state := by
+  have hView :=
+    psKernelCheckerContextEnterRecDepth_preserves_semantic_view
+      context nextContext hEnter
+  exact
+    psKernelCheckerConfigurationSound_transport
+      nextContext
+      context
+      state
+      hView.1
+      hView.2
+      hSound
+
+
 theorem psKernelCheckerContextEnterRecDepth_preserves_configuration
     (context nextContext : PsKernelCheckerContext)
     (state : PsKernelCheckerState)

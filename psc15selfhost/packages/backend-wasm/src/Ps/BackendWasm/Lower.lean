@@ -1,4 +1,5 @@
 import Ps.CompilerIr.Specialize
+import Ps.CompilerIr.Validate
 import Ps.Foundation.List
 import Ps.Foundation.Name
 import Ps.BackendWasm.LowerInt
@@ -4366,8 +4367,19 @@ def psWasmLowerFunctionValueCall
                 state := loweredArguments.state
               }
 
+def psWasmBindingTypes
+    (bindings : List PsWasmBinding) :
+    List (String × PsVerifiedIrType) :=
+  match bindings with
+  | List.nil => List.nil
+  | List.cons binding rest =>
+      List.cons
+        (Prod.mk binding.name binding.type)
+        (psWasmBindingTypes rest)
+
 def psWasmLowerCallWith
     (profile : PsWasmTargetProfile)
+    (module : PsVerifiedIrModule)
     (bindings : List PsWasmBinding)
     (lower :
       Option PsWasmValueType ->
@@ -4413,10 +4425,44 @@ def psWasmLowerCallWith
                 state := lowered.state
               }
   | _ =>
-      Except.error
-        (PsWasmLowerError.unsupportedExpressionContext
-          state.currentDefinition
-          "call-target")
+      match
+          psStrictInferExprWithFuel
+            module List.nil 4096 (psWasmBindingTypes bindings) fn with
+      | Except.error _ =>
+          Except.error
+            (PsWasmLowerError.unsupportedExpressionContext
+              state.currentDefinition "call-target-type")
+      | Except.ok functionType =>
+          match functionType with
+          | .function parameterTypes resultType =>
+              match psWasmLowerParameterType profile functionType with
+              | Except.error error => Except.error error
+              | Except.ok valueType =>
+                  match lower (Option.some valueType) state fn with
+                  | Except.error error => Except.error error
+                  | Except.ok loweredFunction =>
+                      let allocated : Nat × PsWasmLowerState :=
+                        psWasmAddLocal loweredFunction.state valueType;
+                      let index : Nat := Prod.fst allocated;
+                      let binding : PsWasmBinding :=
+                        PsWasmBinding.mk "" index functionType;
+                      match
+                          psWasmLowerFunctionValueCall
+                            profile lower (Prod.snd allocated) binding
+                            parameterTypes resultType arguments with
+                      | Except.error error => Except.error error
+                      | Except.ok loweredCall =>
+                          Except.ok {
+                            instructions :=
+                              psListAppend loweredFunction.instructions
+                                (List.cons (PsWasmInstruction.localSet index)
+                                  loweredCall.instructions)
+                            state := loweredCall.state
+                          }
+          | _ =>
+              Except.error
+                (PsWasmLowerError.unsupportedExpressionContext
+                  state.currentDefinition "call-target-not-function")
 
 def psWasmLowerIfWith
     (lower :
@@ -5023,8 +5069,34 @@ def psWasmLowerLambdaWith
                                     state := finalState
                                   }
 
+def psWasmGlobalFunctionParameters
+    (name : String)
+    (parameters : List PsVerifiedIrParameter) :
+    Nat -> List PsVerifiedIrParameter :=
+  match parameters with
+  | List.nil => fun (_index : Nat) => List.nil
+  | List.cons parameter rest =>
+      let smaller : Nat -> List PsVerifiedIrParameter :=
+        psWasmGlobalFunctionParameters name rest;
+      fun (index : Nat) =>
+        List.cons
+          (PsVerifiedIrParameter.mk
+            (String.Internal.append name
+              (String.Internal.append "$arg$" (psNatToString index)))
+            parameter.type)
+          (smaller (Nat.succ index))
+
+def psWasmGlobalFunctionArguments
+    (parameters : List PsVerifiedIrParameter) : List PsVerifiedIrExpr :=
+  match parameters with
+  | List.nil => List.nil
+  | List.cons parameter rest =>
+      List.cons (PsVerifiedIrExpr.var parameter.name)
+        (psWasmGlobalFunctionArguments rest)
+
 def psWasmLowerExprWorker
     (profile : PsWasmTargetProfile)
+    (allDeclarations : List PsVerifiedIrDeclaration)
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive)
     (remainingFuel : Nat) :
@@ -5052,6 +5124,7 @@ def psWasmLowerExprWorker
           Except PsWasmLowerError PsWasmLoweredExpr :=
         psWasmLowerExprWorker
           profile
+          allDeclarations
           structures
           inductives
           fuel;
@@ -5135,7 +5208,26 @@ def psWasmLowerExprWorker
               | .var name =>
                   match psWasmFindBindingIndex bindings name with
                   | Option.none =>
-                      Except.error (PsWasmLowerError.unknownVariable name)
+                      match psStrictFindDeclaration allDeclarations name with
+                      | Option.none =>
+                          Except.error (PsWasmLowerError.unknownVariable name)
+                      | Option.some declaration =>
+                          match declaration.parameters with
+                          | List.nil =>
+                              Except.ok {
+                                instructions := [PsWasmInstruction.call name]
+                                state := state
+                              }
+                          | List.cons _ _ =>
+                              let parameters : List PsVerifiedIrParameter :=
+                                psWasmGlobalFunctionParameters
+                                  name declaration.parameters 0;
+                              let body : PsVerifiedIrExpr :=
+                                PsVerifiedIrExpr.call (PsVerifiedIrExpr.var name)
+                                  List.nil (psWasmGlobalFunctionArguments parameters);
+                              psWasmLowerLambdaWith
+                                profile bindings lowerWithBindings state
+                                parameters declaration.resultType body
                   | Option.some index =>
                       Except.ok {
                         instructions := [PsWasmInstruction.localGet index]
@@ -5155,7 +5247,9 @@ def psWasmLowerExprWorker
                     profile lower state operation typeArguments arguments
               | .call fn _ arguments =>
                   psWasmLowerCallWith
-                    profile bindings lower state fn arguments
+                    profile
+                    (PsVerifiedIrModule.mk List.nil structures inductives allDeclarations)
+                    bindings lower state fn arguments
               | .letE name type value body =>
                   match psWasmLowerParameterType profile type with
                   | Except.error error => Except.error error
@@ -5355,6 +5449,7 @@ def psWasmLowerExprWorker
 
 def psWasmLowerExprWithFuel
     (profile : PsWasmTargetProfile)
+    (allDeclarations : List PsVerifiedIrDeclaration)
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive)
     (bindings : List PsWasmBinding)
@@ -5365,6 +5460,7 @@ def psWasmLowerExprWithFuel
     Except PsWasmLowerError PsWasmLoweredExpr :=
   psWasmLowerExprWorker
     profile
+    allDeclarations
     structures
     inductives
     remainingFuel
@@ -5375,6 +5471,7 @@ def psWasmLowerExprWithFuel
 
 def psWasmLowerExpr
     (profile : PsWasmTargetProfile)
+    (allDeclarations : List PsVerifiedIrDeclaration)
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive)
     (bindings : List PsWasmBinding)
@@ -5383,7 +5480,7 @@ def psWasmLowerExpr
     (expr : PsVerifiedIrExpr) :
     Except PsWasmLowerError PsWasmLoweredExpr :=
   psWasmLowerExprWithFuel
-    profile structures inductives bindings expected 4096 state expr
+    profile allDeclarations structures inductives bindings expected 4096 state expr
 
 structure PsWasmLoweredFunction where
   function : PsWasmFunction
@@ -5395,6 +5492,7 @@ structure PsWasmLoweredFunctions where
 
 def psWasmLowerDeclaration
     (profile : PsWasmTargetProfile)
+    (allDeclarations : List PsVerifiedIrDeclaration)
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive)
     (generationState : PsWasmLowerState)
@@ -5428,6 +5526,7 @@ def psWasmLowerDeclaration
               match
                   psWasmLowerExpr
                     profile
+                    allDeclarations
                     structures
                     inductives
                     bindings
@@ -5450,6 +5549,7 @@ def psWasmLowerDeclaration
 
 def psWasmLowerDeclarationsWorker
     (profile : PsWasmTargetProfile)
+    (allDeclarations : List PsVerifiedIrDeclaration)
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive)
     (declarations : List PsVerifiedIrDeclaration) :
@@ -5468,6 +5568,7 @@ def psWasmLowerDeclarationsWorker
           Except PsWasmLowerError PsWasmLoweredFunctions :=
         psWasmLowerDeclarationsWorker
           profile
+          allDeclarations
           structures
           inductives
           rest;
@@ -5475,6 +5576,7 @@ def psWasmLowerDeclarationsWorker
         match
             psWasmLowerDeclaration
               profile
+              allDeclarations
               structures
               inductives
               state
@@ -5506,7 +5608,7 @@ def psWasmLowerDeclarations
     (declarations : List PsVerifiedIrDeclaration) :
     Except PsWasmLowerError PsWasmLoweredFunctions :=
   psWasmLowerDeclarationsWorker
-    profile structures inductives declarations state
+    profile declarations structures inductives declarations state
 
 def psWasmTypeUsesNatWithFuel
     (remainingFuel : Nat) :

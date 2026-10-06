@@ -35,7 +35,18 @@ if (rustSource.length === 0) {
   throw new Error("PSC2_RUST_BACKEND_COMPILE_EMPTY");
 }
 
-await writeFile(path.join(srcDir, "lib.rs"), rustSource, "utf8");
+const closureTests = '\n#[cfg(test)] mod closure_regressions {\n' +
+  '  use super::*;\n' +
+  '  #[test] fn captured_closures_are_owned_and_reusable() {\n' +
+  '    let direct = makeAdder(PsNat::from(2u8));\n' +
+  '    assert_eq!(direct(PsNat::from(40u8)), PsNat::from(42u8));\n' +
+  '    assert_eq!(direct(PsNat::from(1u8)), PsNat::from(3u8));\n' +
+  '    let via_let = makeAdderViaLet(PsNat::from(2u8));\n' +
+  '    assert_eq!(via_let(PsNat::from(40u8)), PsNat::from(42u8));\n' +
+  '    let forwarded = returnCallback(direct.clone());\n' +
+  '    assert_eq!(forwarded(PsNat::from(5u8)), PsNat::from(7u8));\n' +
+  '  }\n}\n';
+await writeFile(path.join(srcDir, "lib.rs"), rustSource + closureTests, "utf8");
 await writeFile(
   path.join(outRoot, "Cargo.toml"),
   [
@@ -56,6 +67,7 @@ await writeFile(
 );
 
 run("cargo", ["check", "--quiet"], { cwd: outRoot });
+run("cargo", ["test", "--quiet"], { cwd: outRoot });
 process.stdout.write(
   "PSC2_RUST_BACKEND_CARGO_CHECK: PASS\n" +
   "bytes=" + String(Buffer.byteLength(rustSource, "utf8")) + "\n",

@@ -1,5 +1,15 @@
 import Ps.BackendRust.Module
 
+def psBackendRustLetClosureFixture : PsVerifiedIrDeclaration :=
+  let natType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat;
+  PsVerifiedIrDeclaration.mk "makeAdderViaLet" []
+    [PsVerifiedIrParameter.mk "offset" natType]
+    (PsVerifiedIrType.function [natType] natType)
+    (PsVerifiedIrExpr.letE "captured" natType (PsVerifiedIrExpr.var "offset")
+      (PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "value" natType] natType
+        (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natAdd []
+          [PsVerifiedIrExpr.var "value", PsVerifiedIrExpr.var "captured"])))
+
 def psBackendRustCompileFixture : PsVerifiedIrModule :=
   {
     imports := []
@@ -72,6 +82,7 @@ def psBackendRustCompileFixture : PsVerifiedIrModule :=
       }
     ]
     declarations := [
+      psBackendRustLetClosureFixture,
       {
         name := "idUInt8"
         typeParameters := []

@@ -51,4 +51,9 @@ assert.equal(exportedFunction("arrayFoldRange")(), 53);
 assert.equal(exportedFunction("arrayFoldStopBeyond")(), 42);
 assert.equal(exportedFunction("arrayFoldStartBeyond")(), 7);
 
+assert.equal(exportedFunction("applySelectedFunction")(1, 2, 40), 42);
+assert.equal(exportedFunction("applySelectedFunction")(0, 2, 40), 38);
+assert.equal(exportedFunction("applyComputedFunction")(2, 40), 42);
+assert.equal(exportedFunction("applyGlobalFunctionValue")(41), 42);
+
 console.log("PSC1_BACKEND_WASM_RUNTIME: PASS");

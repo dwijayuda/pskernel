@@ -218,6 +218,19 @@ def psWasmSmokeU32ArrayThree : PsVerifiedIrExpr :=
     (psWasmSmokeU32ArrayTwo)
     (psWasmSmokeU32Literal 30)
 
+def psWasmSmokeSelectedFunction : PsVerifiedIrExpr :=
+  PsVerifiedIrExpr.ifE (PsVerifiedIrExpr.var "choose")
+    (PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "x" psWasmSmokeU32Type]
+      psWasmSmokeU32Type
+      (PsVerifiedIrExpr.intrinsic
+        (PsVerifiedIrIntrinsic.machineIntBinary PsVerifiedIrMachineIntegerType.uint32 PsVerifiedIrIntegerBinaryOp.add)
+        [] [PsVerifiedIrExpr.var "x", PsVerifiedIrExpr.var "offset"]))
+    (PsVerifiedIrExpr.lambda [PsVerifiedIrParameter.mk "x" psWasmSmokeU32Type]
+      psWasmSmokeU32Type
+      (PsVerifiedIrExpr.intrinsic
+        (PsVerifiedIrIntrinsic.machineIntBinary PsVerifiedIrMachineIntegerType.uint32 PsVerifiedIrIntegerBinaryOp.sub)
+        [] [PsVerifiedIrExpr.var "x", PsVerifiedIrExpr.var "offset"]))
+
 def psWasmSmokeIrModule : PsVerifiedIrModule :=
   {
     imports := []
@@ -351,6 +364,35 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
       }
     ]
     declarations := [
+      {
+        name := "applySelectedFunction"
+        typeParameters := []
+        parameters := [
+          PsVerifiedIrParameter.mk "choose" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool),
+          PsVerifiedIrParameter.mk "offset" psWasmSmokeU32Type,
+          PsVerifiedIrParameter.mk "value" psWasmSmokeU32Type]
+        resultType := psWasmSmokeU32Type
+        body := PsVerifiedIrExpr.call psWasmSmokeSelectedFunction [] [PsVerifiedIrExpr.var "value"]
+      },
+      {
+        name := "applyComputedFunction"
+        typeParameters := []
+        parameters := [PsVerifiedIrParameter.mk "offset" psWasmSmokeU32Type,
+          PsVerifiedIrParameter.mk "value" psWasmSmokeU32Type]
+        resultType := psWasmSmokeU32Type
+        body := PsVerifiedIrExpr.call
+          (PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "makeAdder") [] [PsVerifiedIrExpr.var "offset"])
+          [] [PsVerifiedIrExpr.var "value"]
+      },
+      {
+        name := "applyGlobalFunctionValue"
+        typeParameters := []
+        parameters := [PsVerifiedIrParameter.mk "value" psWasmSmokeU32Type]
+        resultType := psWasmSmokeU32Type
+        body := PsVerifiedIrExpr.letE "fn" psWasmSmokeU32FunctionType
+          (PsVerifiedIrExpr.var "incrementU32")
+          (PsVerifiedIrExpr.call (PsVerifiedIrExpr.var "fn") [] [PsVerifiedIrExpr.var "value"])
+      },
       {
         name := "addU32"
         typeParameters := []

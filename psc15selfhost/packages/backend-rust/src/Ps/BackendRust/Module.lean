@@ -311,16 +311,9 @@ def psRustEmitDeclarationResultType
       psRustEmitType declaration.resultType
 
 def psRustPrepareDeclarationBody
-    (declaration : PsVerifiedIrDeclaration)
+    (_declaration : PsVerifiedIrDeclaration)
     (printedBody : String) : String :=
-  if psRustTypeContainsFunction declaration.resultType then
-    match declaration.body with
-    | PsVerifiedIrExpr.lambda _ _ _ =>
-        psRustConcat2 "move " printedBody
-    | _ =>
-        printedBody
-  else
-    printedBody
+  printedBody
 
 def psRustEmitFunctionResultExprWorker
     (fuel : Nat) :
@@ -348,7 +341,7 @@ def psRustEmitFunctionResultExprWorker
             | Except.error error =>
                 Except.error error
             | Except.ok printed =>
-                Except.ok (psRustConcat2 "move " printed)
+                Except.ok printed
         | PsVerifiedIrExpr.var _ =>
             psRustEmitExprWithFuel remaining expr
         | PsVerifiedIrExpr.call fn typeArguments arguments =>

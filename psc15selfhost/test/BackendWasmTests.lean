@@ -1034,6 +1034,7 @@ def psTestWasmRuntimeUnitRepresentation : Bool :=
           []
           []
           []
+          []
           (Option.some PsWasmValueType.i32)
           psWasmUInt8OfNatTestState
           (PsVerifiedIrExpr.literal

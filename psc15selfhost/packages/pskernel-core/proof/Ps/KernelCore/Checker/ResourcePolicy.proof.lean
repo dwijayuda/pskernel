@@ -1,5 +1,4 @@
 import Ps.KernelCore.Checker.ResourcePolicy
-import Lean.Elab.Tactic.Omega
 
 theorem psKernelResourcePreflight_cancelled
     (policy : PsKernelResourcePolicy)
@@ -39,7 +38,7 @@ theorem psKernelResourcePreflight_none_refines_ready
       ] at hReady
   | false =>
       constructor
-      · exact hCancelled
+      · rfl
       · intro hFuel
         simp [
           psKernelResourcePreflight,
@@ -87,14 +86,30 @@ theorem psKernelResourceAllowsSize_false_refines_overflow
         hUnlimited
       ] at hDenied
   | false =>
-      constructor
-      · intro hZero
-        subst policy.maxDeclarations
-        simp at hUnlimited
-      · have hNotLe :
-            ¬ declarations ≤ policy.maxDeclarations := by
+      have hNonzero :
+          policy.maxDeclarations ≠ 0 := by
+        intro hZero
+        have hEqTrue :
+            Nat.beq policy.maxDeclarations 0 = true := by
+          simpa [hZero]
+        rw [hUnlimited] at hEqTrue
+        cases hEqTrue
+      have hNotLe :
+          ¬ declarations ≤ policy.maxDeclarations := by
+        intro hLe
+        have hBleTrue :
+            Nat.ble declarations policy.maxDeclarations = true :=
+          Nat.ble_eq_true_of_le hLe
+        have hBleFalse :
+            Nat.ble declarations policy.maxDeclarations = false := by
           simpa [
             psKernelResourceAllowsSize,
             hUnlimited
           ] using hDenied
-        omega
+        rw [hBleFalse] at hBleTrue
+        cases hBleTrue
+      exact
+        ⟨
+          hNonzero,
+          Nat.lt_of_not_ge hNotLe
+        ⟩

@@ -327,19 +327,20 @@ def psRustCoverageLambdaParameterList :
       coverage
   | coverage, List.cons parameter rest =>
       let withParameter :=
-        if psRustTypeContainsFunction parameter.type then
-          if psRustFunctionTypeIsFirstOrder parameter.type then
+        match parameter.type with
+        | PsVerifiedIrType.function _ _ =>
             psRustCoverageAddFeature
               coverage
-              "expr:lambdaFirstOrderFunctionParameter"
-          else
-            psRustCoverageAddUnsupported
-              (psRustCoverageAddFeature
-                coverage
-                "expr:lambdaFunctionParameter")
               "expr:lambdaFunctionParameter"
-        else
-          coverage;
+        | _ =>
+            if psRustTypeContainsFunction parameter.type then
+              psRustCoverageAddUnsupported
+                (psRustCoverageAddFeature
+                  coverage
+                  "expr:lambdaNestedFunctionStorage")
+                "expr:lambdaNestedFunctionStorage"
+            else
+              coverage;
       psRustCoverageLambdaParameterList
         (psRustCoverageType withParameter parameter.type)
         rest
@@ -499,9 +500,24 @@ def psRustCoverageExprWithFuel :
             psRustCoverageAddFeature
               coverage
               "expr:let";
+          let withStorage :=
+            match type with
+            | PsVerifiedIrType.function _ _ =>
+                psRustCoverageAddFeature
+                  withLet
+                  "expr:localFunctionValue"
+            | _ =>
+                if psRustTypeContainsFunction type then
+                  psRustCoverageAddUnsupported
+                    (psRustCoverageAddFeature
+                      withLet
+                      "expr:localNestedFunctionStorage")
+                    "expr:localNestedFunctionStorage"
+                else
+                  withLet;
           let withType :=
             psRustCoverageType
-              withLet
+              withStorage
               type;
           let withValue :=
             psRustCoverageExprWithFuel

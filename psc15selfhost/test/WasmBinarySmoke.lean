@@ -365,6 +365,22 @@ def psWasmSmokeIrModule : PsVerifiedIrModule :=
     ]
     declarations := [
       {
+        name := "largeLiteralContentExact"
+        typeParameters := []
+        parameters := []
+        resultType := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.bool
+        body :=
+          let head := String.ofList (List.replicate 4095 'A');
+          let tail := String.ofList (List.replicate 5000 'B');
+          psWasmSmokeStringEq
+            (psWasmSmokeStringLiteral (head ++ "😀é" ++ tail ++ tail))
+            (psWasmSmokeStringAppend
+              (psWasmSmokeStringAppend (psWasmSmokeStringLiteral head)
+                (psWasmSmokeStringLiteral "😀é"))
+              (psWasmSmokeStringAppend (psWasmSmokeStringLiteral tail)
+                (psWasmSmokeStringLiteral tail)))
+      },
+      {
         name := "longUtf8ByteSizeExact"
         typeParameters := []
         parameters := []

@@ -104,19 +104,55 @@ def psWasmStringLiteralChars
     value
     0
 
+def psWasmStringLiteralFinishChunk
+    (count : Nat)
+    (hasPrevious : Bool)
+    (instructionsRev : List PsWasmInstruction) : List PsWasmInstruction :=
+  let finished : List PsWasmInstruction :=
+    List.cons (PsWasmInstruction.structNew psWasmStringName)
+      (List.cons (PsWasmInstruction.i32Const (Int.ofNat count))
+        (List.cons
+          (PsWasmInstruction.arrayNewFixed psWasmStringCharsName count)
+          instructionsRev));
+  if hasPrevious then
+    List.cons (PsWasmInstruction.call psWasmStringAppendFn) finished
+  else
+    finished
+
+def psWasmStringLiteralChunksWithFuel
+    (fuel : Nat) :
+    String -> Nat -> Nat -> Bool -> List PsWasmInstruction -> List PsWasmInstruction :=
+  match fuel with
+  | Nat.zero =>
+      fun (_value : String) (_position : Nat) (count : Nat)
+          (hasPrevious : Bool) (instructionsRev : List PsWasmInstruction) =>
+        psListReverse (psWasmStringLiteralFinishChunk count hasPrevious instructionsRev)
+  | Nat.succ remaining =>
+      let smaller :
+          String -> Nat -> Nat -> Bool -> List PsWasmInstruction -> List PsWasmInstruction :=
+        psWasmStringLiteralChunksWithFuel remaining;
+      fun (value : String) (position : Nat) (count : Nat)
+          (hasPrevious : Bool) (instructionsRev : List PsWasmInstruction) =>
+        if String.Internal.atEnd value (String.Pos.Raw.mk position) then
+          psListReverse (psWasmStringLiteralFinishChunk count hasPrevious instructionsRev)
+        else
+          let char : Char := String.Internal.get value (String.Pos.Raw.mk position);
+          let nextPosition : Nat := String.Pos.Raw.byteIdx
+            (String.Internal.next value (String.Pos.Raw.mk position));
+          let instruction : PsWasmInstruction :=
+            PsWasmInstruction.i32Const (Int.ofNat (Char.toNat char));
+          if Nat.beq count 4096 then
+            smaller value nextPosition 1 true
+              (List.cons instruction
+                (psWasmStringLiteralFinishChunk count hasPrevious instructionsRev))
+          else
+            smaller value nextPosition (Nat.succ count) hasPrevious
+              (List.cons instruction instructionsRev)
+
 def psWasmStringLiteralInstructions
     (value : String) : List PsWasmInstruction :=
-  let charCount : Nat := String.Internal.length value;
-  psListAppend
-    (psWasmStringLiteralChars value)
-    [
-      PsWasmInstruction.arrayNewFixed
-        psWasmStringCharsName
-        charCount,
-      PsWasmInstruction.i32Const
-        (Int.ofNat charCount),
-      PsWasmInstruction.structNew psWasmStringName
-    ]
+  psWasmStringLiteralChunksWithFuel (Nat.succ (String.utf8ByteSize value))
+    value 0 0 false List.nil
 
 def psWasmStringRuntimeFunctions : List PsWasmFunction :=
   [

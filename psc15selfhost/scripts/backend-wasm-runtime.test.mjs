@@ -58,5 +58,6 @@ assert.equal(exportedFunction("applyGlobalFunctionValue")(41), 42);
 
 assert.equal(exportedFunction("tailCountdown")(200000, 0), 200000);
 assert.equal(exportedFunction("longUtf8ByteSizeExact")(), 1);
+assert.equal(exportedFunction("largeLiteralContentExact")(), 1);
 
 console.log("PSC1_BACKEND_WASM_RUNTIME: PASS");

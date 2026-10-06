@@ -160,3 +160,9 @@ Checkpoint P0/P2/P3:
 - Lean 4.34.0 checks a separate proof sidecar for accumulator/list-length equality and cursor count preservation under construction, advancement, and prefix removal. These are local invariant theorems, not a proof of the whole parser or global compiler preservation.
 - Bootstrap tests pass, including a dotted-name cursor regression; PSC1 parses/checks ParseProofScript (258 declarations), and stable all-portable and portable-selfhost source audits pass unchanged. The latest full generated-JS run is still pending, so the optimization is not recorded as a successful fixed point.
 - GitHub e9778df has green native benchmark, provider parity, bounded JS/Wasm baseline, and portable kernel gates. The full Rust/JS/Wasm self-host gates remain in progress and must be followed before acceptance claims.
+
+## 2026-10-07 Wasm large-literal checkpoint
+
+- Replaced unbounded string-literal array.new_fixed emission with structural, at-most-4096-character chunks joined by the existing string append runtime. The worker accumulates emitted instructions, preserves code-point order, and emits the existing empty-string representation. This removes the previously observed engine rejection above 10,000 array.new_fixed operands.
+- The runtime corpus now compiles and executes one 20,000-character emoji literal (80,000 UTF-8 bytes), plus a mixed-Unicode content-equality check crossing the chunk boundary and spanning over 14,000 characters. Wasm unit/runtime tests pass. PSC1 checks RuntimeString (470 declarations), and the portable profile remains unchanged and passing.
+- No whole-compiler fixed-point or general translation-preservation theorem is inferred from these bounded runtime checks.

@@ -94,3 +94,11 @@ Checkpoint P0/P2/P3:
 - direct-JS canonical promotion is now machine-gated and remains intentionally NOT promoted while global erasure/specialization/JsIR preservation is incomplete
 - bootstrap assurance B0-B10 is machine-classified; fixed point, reproducibility, DDC, and verified bootstrap cannot be conflated
 - B7/B8 direct JS/Wasm bootstrap have existing fixed-point gates; B9 diverse bootstrap and B10 verified bootstrap remain explicitly incomplete
+
+## Strict VerifiedIR implementation checkpoint
+
+- legacy PsValidateErasedIrModule behavior split into psValidateErasedIrModuleReferences as the reference/shape first stage
+- new portable Ps.CompilerIr.Validate module is now the production psValidateErasedIrModule entry point
+- strict stage checks global uniqueness, type names/parameters, lexical variables, declaration calls, all current intrinsic signatures, exact aggregate fields, field typing, projection target typing, if typing, match binding typing, duplicate alternatives, branch result equality, and match exhaustiveness
+- dedicated psc1_verified_ir_strict_tests corpus added and cloud CI gate wired
+- external cross-module ABI/link compatibility remains intentionally deferred to InterfaceIR/link validation; gap registry will not be marked closed until the strict corpus and self-host fixed points are green

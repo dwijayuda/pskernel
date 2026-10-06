@@ -4,12 +4,14 @@
 - Canonical repository: `dwijayuda/pskernel`
 - Proof branch: `pscv/prove-pskernel-core-v1`
 - Integration branch: `psc2/selfhost-lean-kernel`
-- Current proof implementation HEAD reconciled in this state: `4248828b28f106f8cb4fbd633bce3c46aa753fbe`
+- Current proof implementation HEAD reconciled in this state: `770223730c05f45c783a1084339bb8de37ea9180`
 - Last fully registered green proof checkpoint: `7191b91df2521cfdf1c64ed464a1341fb33b052a` (run #325)
 - Run #326 (`dbdbc591...`) succeeded, but it predated Lake-root registration of `CheckedInferenceConfiguration.lean` and therefore did not validate that module.
 - Run #327 (`8a51ffc...`) failed after registration exposed two eager-reduce context transport errors in checked inference.
-- Commit `5f46df27...` fixes those transports explicitly; run #328 is/was validating that fix.
-- Commit `4248828...` closes projection recursion with the configuration-aware projection theorem; run #329 is the first intended full validation of the concrete checked-inference contract.
+- Commit `5f46df27...` fixes those transports explicitly; run #328 is green.
+- Commit `4248828...` closes projection recursion with the configuration-aware projection theorem.
+- Run #329 failed because registering `CheckedProjectionConfiguration.lean` exposed proof-construction errors in that new module: WHNF-source arguments were misbound, constant-info cases were non-exhaustive, and the final projection judgment used the wrong type-WHNF expression.
+- Commit `614dd4de...` repairs those projection proof skeleton issues. Commit `77022373...` simplifies the remaining impossible arity branch directly from the executable guard. Run #333 is the current intended full validation.
 - Current integration HEAD last observed: `cae6b6d5fb3d50138889e1aeb74436e7b5ea5316`
 - Workflow: GitHub-first only. Do not depend on local/Desktop Commander state.
 
@@ -61,6 +63,7 @@ The audit is conservative relative to newer cross-module checker-contract/contex
 - Fully registered green checkpoint remains `7191b91df2521cfdf1c64ed464a1341fb33b052a` (run #325) until run #329 finishes.
 - Configuration-aware projection semantics were added in `8a51ffc99f3a40f0847ea2121e93a9eab7100507` and registered as a Lake root in `48c5195caa9600990dd9b40537d2b8e2553bac9b`.
 - Checked inference projection recursion is closed in `4248828b28f106f8cb4fbd633bce3c46aa753fbe` by deriving fixed-fuel checked-inference soundness from the induction hypothesis and feeding it to the projection configuration theorem.
+- `Metatheory/CheckerComposition.lean` now exposes importable public-wrapper contracts: checked inference composes from the checked core plus WHNF/DefEq contracts, and infer-only composes from the infer-only core plus WHNF.
 - Full registered PSKernel Core metatheory/proof tree is green with the concrete infer-only core configuration-preservation theorem enabled as a Lake root.
 - Projection configuration and Projection semantic/refinement layers are now importable Assurance Plane modules and green.
 - The 13 per-constructor inference typing refinement theorems are promoted into importable `Metatheory/InferenceTyping.lean` and green.
@@ -73,8 +76,8 @@ Confirmed production-kernel semantic defect:
 - Local-scope fvar escape through semantic caches, fixed by `0263c550ec65f558575afd3396ee95a1de168237` and now covered by the green run #312 migration.
 
 Immediate blocker:
-- validate run #329 for `psKernelCheckedInferenceCoreConfigurationSound_contract`, which now closes projection recursion from the smaller-fuel induction hypothesis through `CheckedProjectionConfiguration`;
-- if #329 is green, lift the checked and infer-only core contracts through the public inference wrappers; if it fails, fix the exact theorem obligation without weakening the contract.
+- validate run #333 after the checked-projection proof corrections (`614dd4de...`, `77022373...`);
+- the public checked/infer-only wrapper composition is now present under `Metatheory/CheckerComposition.lean`; once the registered checked-inference/projection stack is green, proceed directly to concrete WHNF-core/public-WHNF and DefEq configuration soundness.
 
 Architectural blockers still remaining:
 - close concrete checked/infer-only inference configuration contracts across all branches;
